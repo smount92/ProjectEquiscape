@@ -402,7 +402,7 @@ export default function ManageEventPage() {
  <div
  className="bg-card border-input rounded-lg border p-12 text-center shadow-md transition-all"
  >
- <p className="text-red-700">{error}</p>
+ <p className="text-destructive">{error}</p>
  <Button asChild variant="outline" size="wide"><Link
  href="/community/events"
  >
@@ -462,7 +462,7 @@ export default function ManageEventPage() {
  </div>
 
  {error && (
- <div className="text-red-700 mt-2 mb-6 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm">
+ <div className="text-destructive mt-2 mb-6 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm">
  ⚠️ {error}
  <button
  onClick={() => setError(null)}
@@ -668,7 +668,7 @@ export default function ManageEventPage() {
  >
  {isSaving ?"Saving…" :"💾 Save Details"}
  </Button>
- {detailsSaved && <span className="text-sm text-[#22c55e]">✅ Saved!</span>}
+ {detailsSaved && <span className="text-sm text-success">✅ Saved!</span>}
  </div>
  </div>
  </div>
@@ -690,7 +690,7 @@ export default function ManageEventPage() {
  <div className="bg-muted border-input flex flex-wrap items-center gap-2 border-b px-6 py-4">
  <div className="division-reorder max-sm:hidden">
  <button
- className="border-input text-muted-foreground hover:border-emerald-700 hover:text-forest flex h-[18px] w-[24px] cursor-pointer items-center justify-center rounded-sm border bg-transparent p-0 font-sans text-[0.6rem] transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-[0.3]"
+ className="border-input text-muted-foreground hover:border-success hover:text-forest flex h-[18px] w-[24px] cursor-pointer items-center justify-center rounded-sm border bg-transparent p-0 font-sans text-[0.6rem] transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-[0.3]"
  onClick={() => handleMoveDivision(divIndex, -1)}
  disabled={divIndex === 0}
  title="Move up"
@@ -698,7 +698,7 @@ export default function ManageEventPage() {
  ▲
  </button>
  <button
- className="border-input text-muted-foreground hover:border-emerald-700 hover:text-forest flex h-[18px] w-[24px] cursor-pointer items-center justify-center rounded-sm border bg-transparent p-0 font-sans text-[0.6rem] transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-[0.3]"
+ className="border-input text-muted-foreground hover:border-success hover:text-forest flex h-[18px] w-[24px] cursor-pointer items-center justify-center rounded-sm border bg-transparent p-0 font-sans text-[0.6rem] transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-[0.3]"
  onClick={() => handleMoveDivision(divIndex, 1)}
  disabled={divIndex === divisions.length - 1}
  title="Move down"
@@ -749,7 +749,7 @@ export default function ManageEventPage() {
  ✏️
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-red-300 bg-transparent px-6 py-2 text-sm font-semibold text-red-600 no-underline transition-all hover:bg-red-50"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-destructive/30 bg-transparent px-6 py-2 text-sm font-semibold text-destructive no-underline transition-all hover:bg-destructive/10"
  onClick={() => handleDeleteDivision(div.id, div.name)}
  title="Delete"
  >
@@ -775,14 +775,14 @@ export default function ManageEventPage() {
  <div key={cls.id} className="border-b-0">
  <div className="flex flex-col gap-[2px]">
  <button
- className="border-input text-muted-foreground hover:border-emerald-700 hover:text-forest flex h-[14px] h-[18px] w-[20px] w-[24px] cursor-pointer items-center justify-center rounded-sm border bg-transparent p-0 font-sans text-[0.5rem] text-[0.6rem] transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-[0.3]"
+ className="border-input text-muted-foreground hover:border-success hover:text-forest flex h-[14px] h-[18px] w-[20px] w-[24px] cursor-pointer items-center justify-center rounded-sm border bg-transparent p-0 font-sans text-[0.5rem] text-[0.6rem] transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-[0.3]"
  onClick={() => handleMoveClass(div.id, clsIndex, -1)}
  disabled={clsIndex === 0}
  >
  ▲
  </button>
  <button
- className="border-input text-muted-foreground hover:border-emerald-700 hover:text-forest flex h-[14px] h-[18px] w-[20px] w-[24px] cursor-pointer items-center justify-center rounded-sm border bg-transparent p-0 font-sans text-[0.5rem] text-[0.6rem] transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-[0.3]"
+ className="border-input text-muted-foreground hover:border-success hover:text-forest flex h-[14px] h-[18px] w-[20px] w-[24px] cursor-pointer items-center justify-center rounded-sm border bg-transparent p-0 font-sans text-[0.5rem] text-[0.6rem] transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-[0.3]"
  onClick={() => handleMoveClass(div.id, clsIndex, 1)}
  disabled={clsIndex === div.classes.length - 1}
  >
@@ -830,7 +830,7 @@ export default function ManageEventPage() {
  </span>
  {cls.isNanQualifying && (
  <span
- className="bg-amber-100/60 inline-flex items-center gap-[2px] rounded-full px-[6px] py-[1px] text-xs font-semibold whitespace-nowrap text-[#f59e0b]"
+ className="bg-warning/15 inline-flex items-center gap-[2px] rounded-full px-[6px] py-[1px] text-xs font-semibold whitespace-nowrap text-warning"
  title="NAN Qualifying"
  >
  ⭐ NAN
@@ -864,7 +864,7 @@ export default function ManageEventPage() {
  ✏️
  </button>
  <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-red-300 bg-transparent px-6 py-2 text-sm font-semibold text-red-600 no-underline transition-all hover:bg-red-50"
+ className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-destructive/30 bg-transparent px-6 py-2 text-sm font-semibold text-destructive no-underline transition-all hover:bg-destructive/10"
  onClick={() => handleDeleteClass(cls.id, cls.name)}
  title="Delete"
  >
@@ -989,7 +989,7 @@ export default function ManageEventPage() {
  setNewJudgeAlias(u.aliasName);
  setUserSuggestions([]);
  }}
- className="flex w-full cursor-pointer items-center gap-[var(--space-sm)] border-0 border-b border-input bg-transparent px-[var(--space-md)] py-[var(--space-sm)] text-left text-sm text-foreground hover:bg-[rgb(250 250 249)]"
+ className="flex w-full cursor-pointer items-center gap-[var(--space-sm)] border-0 border-b border-input bg-transparent px-[var(--space-md)] py-[var(--space-sm)] text-left text-sm text-foreground hover:bg-muted"
  >
  <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--color-forest-glow)] text-xs">
  {u.avatarUrl ? (
@@ -1028,16 +1028,16 @@ export default function ManageEventPage() {
  </p>
  </div>
 
- {judgeError && <div className="mt-2 text-sm text-red-700 mb-4">{judgeError}</div>}
- {judgeSuccess && <div className="mb-4 text-sm text-[#22c55e]">✅ {judgeSuccess}</div>}
+ {judgeError && <div className="mt-2 text-sm text-destructive mb-4">{judgeError}</div>}
+ {judgeSuccess && <div className="mb-4 text-sm text-success">✅ {judgeSuccess}</div>}
 
  {coiWarnings.length > 0 && (
- <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+ <div className="mb-4 rounded-lg border border-warning/30 bg-warning/10 p-4 text-sm text-warning">
  <strong>⚠️ Potential Conflict of Interest:</strong>
  <ul className="mt-1 mb-0 list-disc pl-5">
  {coiWarnings.map((c, i) => <li key={i}>{c}</li>)}
  </ul>
- <p className="mt-2 mb-0 text-xs text-amber-600">
+ <p className="mt-2 mb-0 text-xs text-warning">
  This is a warning only — the host can still proceed. Helping maintain show fairness per NAMHSA guidelines.
  </p>
  </div>
@@ -1053,7 +1053,7 @@ export default function ManageEventPage() {
  {judges.map((judge) => (
  <div
  key={judge.id}
- className="flex items-center gap-[var(--space-md)] rounded-sm bg-[rgb(250 250 249)] px-[var(--space-md)] py-[var(--space-sm)]"
+ className="flex items-center gap-[var(--space-md)] rounded-sm bg-muted px-[var(--space-md)] py-[var(--space-sm)]"
  >
  <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--color-forest-glow)] text-base">
  {judge.avatarUrl ? (

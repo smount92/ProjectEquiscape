@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
+import PageMasthead from "@/components/layouts/PageMasthead";
 import AiDataPolicySection from "@/components/AiDataPolicySection";
 import { Button } from "@/components/ui/button";
 import { Lock, Sparkles, PawPrint, Gavel, Users, Palette, Package, Smartphone, Handshake } from "lucide-react";
@@ -13,24 +14,13 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
     return (
-        <ExplorerLayout
-            title={
-                <>
-                    About <span className="text-forest">Model Horse Hub</span>
-                </>
-            }
-            description="Built by a collector who was tired of the status quo."
-        >
+        <ExplorerLayout noHeader>
             <div className="animate-fade-in-up">
-                {/* Page Header */}
-                <div className="mb-8">
-                    <h1>
-                        About <span className="text-forest">Model Horse Hub</span>
-                    </h1>
-                    <p className="text-secondary-foreground mt-2 text-lg">
-                        Built by a collector who was tired of the status quo.
-                    </p>
-                </div>
+                <PageMasthead
+                    icon="🐎"
+                    title="About Model Horse Hub"
+                    subtitle="Built by a collector who was tired of the status quo"
+                />
 
                 {/* Founders */}
                 <section className="mb-12">

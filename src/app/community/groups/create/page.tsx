@@ -8,6 +8,7 @@ import { GROUP_TYPE_LABELS } from"@/lib/constants/groups";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import FocusLayout from"@/components/layouts/FocusLayout";
+import PageMasthead from"@/components/layouts/PageMasthead";
 import { Button } from "@/components/ui/button";
 
 export default function CreateGroupPage() {
@@ -55,9 +56,8 @@ export default function CreateGroupPage() {
  }
 
  return (
- <FocusLayout
-  title="🏛️ Create Group"
- >
+ <FocusLayout noHeader>
+  <PageMasthead compact icon="🏛️" title="Create Group" backHref="/community/groups" backLabel="Groups" />
   <form onSubmit={handleSubmit}>
   <div className="mb-6">
    <label className="text-foreground mb-1 block text-sm font-semibold">Group Name *</label>
@@ -133,7 +133,7 @@ export default function CreateGroupPage() {
   </div>
 
   {error && (
-   <p className="text-red-700 mt-2 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm">
+   <p className="text-destructive mt-2 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm">
    {error}
    </p>
   )}

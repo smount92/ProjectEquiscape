@@ -14,6 +14,7 @@ import ShowEntryForm from"@/components/ShowEntryForm";
 import VoteButton from"@/components/VoteButton";
 import WithdrawButton from"@/components/WithdrawButton";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import PageMasthead from"@/components/layouts/PageMasthead";
 
 import { EVENT_TYPE_LABELS } from"@/lib/constants/events";
 import { getPublicImageUrl } from"@/lib/utils/storage";
@@ -112,13 +113,15 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  const endDate = event.endsAt ? new Date(event.endsAt) : null;
 
  return (
- <ExplorerLayout title={event.name} description={<>{EVENT_TYPE_LABELS[event.eventType] || event.eventType} · 👥 {event.rsvpCount} attending</>}>
+ <ExplorerLayout noHeader>
+ <PageMasthead
+  icon="📅"
+  title={event.name}
+  subtitle={<>{EVENT_TYPE_LABELS[event.eventType] || event.eventType} · 👥 {event.rsvpCount} attending</>}
+  backHref="/community/events"
+  backLabel="Events"
+ />
  <div className="mx-auto max-w-6xl px-6 max-w-[720]">
- <Button asChild variant="outline" size="wide"><Link
- href="/community/events"
- >
- ← All Events
- </Link></Button>
 
  <div className="mb-6 flex items-start gap-6">
  <div className="flex h-[56px] min-w-[56px] shrink-0 flex-col items-center justify-center rounded-md border border-forest/30 bg-gradient-to-br from-forest/15 to-violet-500/10">
@@ -130,7 +133,6 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  </span>
  </div>
  <div>
- <h1>{event.name}</h1>
  <div className="text-muted-foreground mt-2 flex flex-wrap gap-4">
  <span>{EVENT_TYPE_LABELS[event.eventType] || event.eventType}</span>
  <span>👥 {event.rsvpCount} attending</span>
@@ -260,7 +262,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  <span className="text-muted-foreground min-w-[40px]">{cls.classNumber ||"—"}</span>
  <span>{cls.name}</span>
  {cls.isNanQualifying && (
- <span title="NAN Qualifying" className="text-[#f59e0b]">
+ <span title="NAN Qualifying" className="text-warning">
  ⭐
  </span>
  )}

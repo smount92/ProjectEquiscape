@@ -6,6 +6,7 @@ import { useRef, useEffect } from"react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import FocusLayout from"@/components/layouts/FocusLayout";
+import PageMasthead from"@/components/layouts/PageMasthead";
 import { Button } from "@/components/ui/button";
 
 const initialState: ContactFormState = {
@@ -25,10 +26,13 @@ export default function ContactPage() {
  }, [state.success]);
 
  return (
- <FocusLayout
-  title={<><span className="text-forest">Contact</span> Us</>}
-  description="Have a question, suggestion, or just want to say hello? We'd love to hear from you."
- >
+ <FocusLayout noHeader>
+  <PageMasthead
+   compact
+   icon="✉️"
+   title="Contact Us"
+   subtitle="Questions, suggestions, or just to say hello"
+  />
   <section>
   {state.success ? (
    <div className="px-8 py-16 text-center" id="contact-success">
@@ -48,7 +52,7 @@ export default function ContactPage() {
    >
    {state.error && (
     <div
-    className="text-red-700 mt-2 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm"
+    className="text-destructive mt-2 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm"
     role="alert"
     id="contact-error"
     >

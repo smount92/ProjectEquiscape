@@ -3,6 +3,7 @@ import { getAdminClient } from"@/lib/supabase/admin";
 import Link from"next/link";
 import type { Metadata } from"next";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import CatalogSubMasthead from"@/components/catalog/CatalogSubMasthead";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
@@ -56,7 +57,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
  // Get comment counts per suggestion
  const suggestionIds = (suggestions ?? []).map((s) => s.id);
 
- let commentCounts: Record<string, number> = {};
+ const commentCounts: Record<string, number> = {};
  if (suggestionIds.length > 0) {
  const { data: comments } = await supabase
  .from("catalog_suggestion_comments")
@@ -77,21 +78,17 @@ export default async function SuggestionsPage({ searchParams }: Props) {
  ];
 
  return (
-  <ExplorerLayout title="Catalog Suggestions" description="Community proposals to improve the reference catalog.">
- <nav className="text-muted-foreground mb-6 flex items-center gap-1 text-sm">
- <Link href="/catalog">📚 Reference Catalog</Link>
- <span className="text-muted-foreground mb-6-sep flex items-center gap-1 text-sm">
- ›
- </span>
- <span>Suggestions</span>
- </nav>
-
- <h1 className="mb-1 font-sans text-2xl">
- 📝 <span className="text-forest">Catalog Suggestions</span>
- </h1>
- <p className="text-secondary-foreground mb-6">
- Community proposals to improve the reference catalog. Vote and discuss to help admins review.
- </p>
+  <ExplorerLayout noHeader>
+ <CatalogSubMasthead
+  icon="💡"
+  title="Catalog Suggestions"
+  subtitle="Community proposals to the reference catalog"
+  actions={
+  <Link href="/catalog/suggestions/new" className="btn-brass inline-flex items-center gap-1.5 no-underline hover:no-underline">
+   📗 Suggest Entry
+  </Link>
+  }
+ />
 
  {/* Filter Tabs */}
  <div className="ref-filter-tabs">
@@ -162,7 +159,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
  <Link
  key={s.id}
  href={`/catalog/suggestions/${s.id}`}
- className="bg-white border-input block rounded-lg border p-4 text-foreground no-underline shadow-md transition-all transition-transform"
+ className="bg-card border-input block rounded-lg border p-4 text-foreground no-underline shadow-md transition-all transition-transform"
  >
  <div className="mb-1 flex items-center justify-between">
  <span className="text-[1.2rem]">{typeIcon}</span>
@@ -198,7 +195,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
  })}
 
  {(suggestions ?? []).length === 0 && (
- <div className="bg-white border-input text-muted-foreground rounded-lg border p-8 text-center shadow-md transition-all">
+ <div className="bg-card border-input text-muted-foreground rounded-lg border p-8 text-center shadow-md transition-all">
  <p>No suggestions yet. Be the first to contribute!</p>
  <Button asChild><Link
  href="/catalog"

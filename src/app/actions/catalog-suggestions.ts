@@ -17,7 +17,14 @@ interface CatalogFilters {
     search?: string;
     maker?: string;
     scale?: string;
+    type?: string;
     category?: string;
+    // Advanced (attributes JSONB) filters
+    yearFrom?: number;
+    yearTo?: number;
+    color?: string;
+    model?: string;
+    medium?: string;
     page?: number;
     pageSize?: number;
     sortBy?: string;
@@ -91,14 +98,34 @@ export async function getCatalogItems(filters: CatalogFilters) {
     const pageSize = filters.pageSize ?? 50;
     const from = (page - 1) * pageSize;
 
+    // Explicit columns + estimated count: this runs on every catalog
+    // search keystroke, and an exact COUNT over the filtered set each time
+    // is the expensive part. "estimated" reads the planner stats instead.
     let query = supabase
         .from("catalog_items")
-        .select("*", { count: "exact" })
+        .select("id, item_type, parent_id, title, maker, scale, attributes, created_at", {
+            count: "estimated",
+        })
         .range(from, from + pageSize - 1);
 
     if (filters.maker) query = query.eq("maker", filters.maker);
     if (filters.scale) query = query.eq("scale", filters.scale);
+    if (filters.type) query = query.eq("item_type", filters.type);
     if (filters.search) query = query.ilike("title", `%${filters.search}%`);
+
+    // Advanced filters live in the attributes JSONB. Year is stored as a
+    // 4-digit value, so lexical text comparison on ->> matches numeric order
+    // for the realistic range; rows lacking the key are naturally excluded.
+    if (filters.yearFrom !== undefined)
+        query = query.gte("attributes->>release_year_start", String(filters.yearFrom));
+    if (filters.yearTo !== undefined)
+        query = query.lte("attributes->>release_year_start", String(filters.yearTo));
+    if (filters.color)
+        query = query.ilike("attributes->>color_description", `%${filters.color}%`);
+    if (filters.model)
+        query = query.ilike("attributes->>model_number", `%${filters.model}%`);
+    if (filters.medium)
+        query = query.ilike("attributes->>cast_medium", `%${filters.medium}%`);
     if (filters.sortBy)
         query = query.order(filters.sortBy, {
             ascending: filters.sortDir === "asc",

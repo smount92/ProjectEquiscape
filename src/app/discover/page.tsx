@@ -2,6 +2,7 @@ import { createClient } from"@/lib/supabase/server";
 import { redirect } from"next/navigation";
 import DiscoverGrid from"@/components/DiscoverGrid";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import PageMasthead from"@/components/layouts/PageMasthead";
 import { resolveAvatarUrls } from"@/lib/utils/avatars.server";
 
 export const metadata = {
@@ -58,10 +59,12 @@ export default async function DiscoverPage() {
  const followedIds = new Set((followRows ?? []).map((r: { following_id: string }) => r.following_id));
 
  return (
- <ExplorerLayout
-  title={<>👥 <span className="text-forest">Discover Collectors</span></>}
-  description="Find fellow collectors, browse their stables, and connect with the community."
- >
+ <ExplorerLayout noHeader>
+  <PageMasthead
+   icon="👥"
+   title="Discover Collectors"
+   subtitle="Find fellow collectors and browse their stables"
+  />
   <div className="mb-6 flex items-baseline gap-2">
   <span className="text-2xl font-bold text-forest">{activeUsers.length}</span>
   <span className="text-sm font-medium text-secondary-foreground">Active Collectors</span>

@@ -3,6 +3,7 @@ import { redirect } from"next/navigation";
 import { browseArtists } from"@/app/actions/art-studio";
 import ArtistBrowser from"@/components/ArtistBrowser";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import PageMasthead from"@/components/layouts/PageMasthead";
 
 
 export const metadata = {
@@ -20,10 +21,12 @@ export default async function StudiosPage() {
  const artists = await browseArtists();
 
  return (
- <ExplorerLayout
-  title={<>🎨 <span className="text-forest">Art Studios</span></>}
-  description="Find custom painters, sculptors, and tack makers."
- >
+ <ExplorerLayout noHeader>
+  <PageMasthead
+   icon="🎨"
+   title="Art Studios"
+   subtitle="Find custom painters, sculptors, and tack makers"
+  />
   <ArtistBrowser artists={artists} />
  </ExplorerLayout>
  );

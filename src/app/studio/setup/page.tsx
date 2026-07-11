@@ -7,6 +7,7 @@ import type { ArtistProfile } from"@/app/actions/art-studio";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import FocusLayout from"@/components/layouts/FocusLayout";
+import PageMasthead from"@/components/layouts/PageMasthead";
 import { Button } from "@/components/ui/button";
 
 // ── Option Lists ──
@@ -175,7 +176,7 @@ export default function StudioSetupPage() {
  if (loading) {
  return (
   <FocusLayout title={<><span className="text-forest">Art Studio</span></>}>
-  <div className="bg-white border-input mx-auto max-w-[700px] rounded-lg border p-12 text-center shadow-md transition-all">
+  <div className="bg-card border-input mx-auto max-w-[700px] rounded-lg border p-12 text-center shadow-md transition-all">
    <p className="text-muted-foreground">Loading studio settings…</p>
   </div>
   </FocusLayout>
@@ -183,11 +184,16 @@ export default function StudioSetupPage() {
  }
 
  return (
- <FocusLayout
-  title={<><span className="text-forest">{existing ?"Edit Your Studio" :"Set Up Your Art Studio"}</span></>}
-  description={existing ?"Update your studio profile and commission settings." :"Create your artist profile to start accepting commissions."}
- >
-  <div className="bg-white border-input animate-fade-in-up mx-auto max-w-[700px] rounded-lg border shadow-md transition-all">
+ <FocusLayout noHeader>
+  <PageMasthead
+   compact
+   icon="🎨"
+   title={existing ? "Edit Your Studio" : "Set Up Your Art Studio"}
+   subtitle={existing ? "Update your studio profile and commission settings" : "Create your artist profile to start accepting commissions"}
+   backHref="/studio/dashboard"
+   backLabel="Studio"
+  />
+  <div className="bg-card border-input animate-fade-in-up mx-auto max-w-[700px] rounded-lg border shadow-md transition-all">
   <form onSubmit={handleSubmit}>
    {/* Studio Identity */}
    <fieldset className="border-input mb-6 rounded-lg border p-6">

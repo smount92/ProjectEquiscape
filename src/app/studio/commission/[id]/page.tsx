@@ -14,7 +14,7 @@ const STATUS_STYLES: Record<string, string> = {
  requested: "bg-stone-500/20 text-secondary-foreground border-stone-500/40",
  accepted: "bg-blue-500/20 text-blue-600 border-blue-500/40",
  in_progress: "bg-amber-500/20 text-amber-600 border-amber-500/40",
- review: "bg-violet-500/20 text-violet-600 border-violet-500/40",
+ review: "bg-studio/20 text-studio border-studio/40",
  revision: "bg-orange-500/20 text-orange-600 border-orange-500/40",
  completed: "bg-green-500/20 text-green-600 border-green-500/40",
  shipping: "bg-sky-500/20 text-sky-600 border-sky-500/40",

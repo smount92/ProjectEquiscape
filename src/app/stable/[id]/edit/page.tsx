@@ -19,6 +19,7 @@ import { getPublicImageUrl } from"@/lib/utils/storage";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import FocusLayout from"@/components/layouts/FocusLayout";
+import PageMasthead from"@/components/layouts/PageMasthead";
 import { getGallerySlots, getAssetConfig, isFieldVisible, getFieldLabel, validateAttributes } from "@/lib/config/assetFields";
 import TackFormFields from "@/components/forms/TackFormFields";
 import PropFormFields from "@/components/forms/PropFormFields";
@@ -736,27 +737,20 @@ export default function EditHorsePage() {
  }
 
  return (
- <FocusLayout title="Edit Horse" description="Update your horse details.">
- <nav className="text-secondary-foreground animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
- <Link href="/dashboard">Digital Stable</Link>
- <span className="separator" aria-hidden="true">
- /
- </span>
- <Link href={`/stable/${horseId}`}>{customName}</Link>
- <span className="separator" aria-hidden="true">
- /
- </span>
- <span>Edit</span>
- </nav>
+ <FocusLayout noHeader>
+ <PageMasthead
+  compact
+  icon="✏️"
+  title="Edit Horse"
+  subtitle="Update your horse details"
+  backHref={`/stable/${horseId}`}
+  backLabel={customName || "Back"}
+ />
 
  <div className="animate-fade-in-up mx-auto max-w-[680px] px-0 py-12">
- <h1 className="mb-8">
- Edit <span className="text-forest">{customName}</span>
- </h1>
-
  {saveError && (
  <div
- className="text-red-700 mt-2 mb-8 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm"
+ className="text-destructive mt-2 mb-8 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm"
  role="alert"
  >
  <svg
@@ -797,7 +791,7 @@ export default function EditHorsePage() {
  <div className="text-foreground mb-1 flex items-center gap-1 text-sm font-semibold">
  {slot.label}
  {slot.primary && (
- <span className="bg-emerald-50 rounded-full px-[8px] py-[2px] text-xs font-bold text-forest">
+ <span className="bg-success/10 rounded-full px-[8px] py-[2px] text-xs font-bold text-forest">
  Required
  </span>
  )}
@@ -873,7 +867,7 @@ export default function EditHorsePage() {
  {hasNew && (
  <button
  type="button"
- className="hover:0.2)] hover:0.5)] mt-2 inline-flex cursor-pointer items-center gap-[4px] rounded-full border border-orange-200 bg-orange-50 px-[14px] py-[6px] font-[inherit] text-xs font-semibold text-[#fb923c] transition-all"
+ className="hover:0.2)] hover:0.5)] mt-2 inline-flex cursor-pointer items-center gap-[4px] rounded-full border border-warning/30 bg-warning/10 px-[14px] py-[6px] font-[inherit] text-xs font-semibold text-warning transition-all"
  onClick={(e) => {
  e.stopPropagation();
  handleSlotRevert(angle);
@@ -885,7 +879,7 @@ export default function EditHorsePage() {
  {!hasNew && preview && !slot.primary && (
  <button
  type="button"
- className="mt-2 inline-flex cursor-pointer items-center gap-[4px] rounded-full border border-red-200 bg-red-50 px-[14px] py-[6px] font-[inherit] text-xs font-semibold text-[#ef4444] transition-all"
+ className="mt-2 inline-flex cursor-pointer items-center gap-[4px] rounded-full border border-destructive/30 bg-destructive/10 px-[14px] py-[6px] font-[inherit] text-xs font-semibold text-destructive transition-all"
  onClick={(e) => {
  e.stopPropagation();
  handleSlotRemove(angle);
@@ -1359,7 +1353,7 @@ export default function EditHorsePage() {
 
  {/* Conditional marketplace fields */}
  {(tradeStatus ==="For Sale" || tradeStatus ==="Open to Offers") && (
- <div className="bg-emerald-50/50 border-emerald-200 animate-fade-in-up mt-4 rounded-md border p-4">
+ <div className="bg-success/10 border-success/30 animate-fade-in-up mt-4 rounded-md border p-4">
  <div className="mb-6">
  <label
  htmlFor="edit-listing-price"
@@ -1403,7 +1397,7 @@ export default function EditHorsePage() {
  </div>
 
  {/* Community visibility selector */}
- <div className="bg-emerald-50/50 border-emerald-200 mt-6 rounded-lg border px-6 py-4">
+ <div className="bg-success/10 border-success/30 mt-6 rounded-lg border px-6 py-4">
  <div className="flex flex-col items-center justify-between gap-6">
  <span className="text-foreground text-base font-semibold">
  👁️ Visibility
@@ -1432,7 +1426,7 @@ export default function EditHorsePage() {
  <button
  key={opt.value}
  type="button"
- className={`bg-surface-primary font-inherit text-foreground hover:border-emerald-700 hover:bg-surface-secondary flex min-w-[120px] flex-1 cursor-pointer flex-col items-center gap-1 rounded-lg border-2 px-2 py-3 transition-all ${visibility === opt.value ?"border-forest bg-emerald-50" :"border-input"}`}
+ className={`bg-surface-primary font-inherit text-foreground hover:border-success hover:bg-surface-secondary flex min-w-[120px] flex-1 cursor-pointer flex-col items-center gap-1 rounded-lg border-2 px-2 py-3 transition-all ${visibility === opt.value ?"border-forest bg-success/10" :"border-input"}`}
  onClick={() => setVisibility(opt.value)}
  id={`edit-visibility-${opt.value}`}
  >
@@ -1474,7 +1468,7 @@ export default function EditHorsePage() {
 
  {/* ===== Section 3: Financial Vault ===== */}
  <div className="bg-card border-input relative mb-8 overflow-hidden rounded-lg border shadow-md transition-all">
- <div className="border-orange-200 mb-8 flex items-center gap-4 border-b pb-6">
+ <div className="border-warning/30 mb-8 flex items-center gap-4 border-b pb-6">
  <div className="vault-icon">🔒</div>
  <div>
  <h2>Financial Vault</h2>
@@ -1483,7 +1477,7 @@ export default function EditHorsePage() {
  </div>
 
  <div
- className="bg-orange-50 border-orange-200 mb-8 flex items-start gap-2 rounded-md border p-4"
+ className="bg-warning/10 border-warning/30 mb-8 flex items-start gap-2 rounded-md border p-4"
  role="note"
  >
  <span className="mt-[2px] shrink-0 text-[1.3em]">🛡️</span>
@@ -1497,7 +1491,7 @@ export default function EditHorsePage() {
     <input
       id="is-trade"
       type="checkbox"
-      className="h-4 w-4 rounded border-gray-300 text-forest focus:ring-forest accent-forest"
+      className="h-4 w-4 rounded border-input text-forest focus:ring-forest accent-forest"
       checked={isTrade}
       onChange={(e) => setIsTrade(e.target.checked)}
     />

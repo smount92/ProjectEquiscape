@@ -14,7 +14,7 @@ const STATUS_STYLES: Record<string, string> = {
  requested: "bg-stone-500/20 text-secondary-foreground border-stone-500/40",
  accepted: "bg-blue-500/20 text-blue-600 border-blue-500/40",
  in_progress: "bg-amber-500/20 text-amber-600 border-amber-500/40",
- review: "bg-violet-500/20 text-violet-600 border-violet-500/40",
+ review: "bg-studio/20 text-studio border-studio/40",
  revision: "bg-orange-500/20 text-orange-600 border-orange-500/40",
  completed: "bg-green-500/20 text-green-600 border-green-500/40",
  delivered: "bg-teal-500/20 text-teal-600 border-teal-500/40",
@@ -50,7 +50,7 @@ export default async function MyCommissionsPage() {
    <Link
     key={c.id}
     href={`/studio/commission/${c.id}`}
-    className="border-input flex flex-col rounded-lg border bg-muted p-6 text-inherit no-underline transition-all hover:-translate-y-[1px] hover:border-purple-300"
+    className="border-input flex flex-col rounded-lg border bg-muted p-6 text-inherit no-underline transition-all hover:-translate-y-[1px] hover:border-studio/50"
    >
     <div className="mb-2 flex items-center justify-between gap-2">
     <span className="text-base font-bold">

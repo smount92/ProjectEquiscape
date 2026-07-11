@@ -208,10 +208,10 @@ export default async function InboxPage() {
    <Link
     key={item.id}
     href={`/inbox/${item.id}`}
-    className={`text-foreground border-input flex items-center gap-4 border-b px-6 py-4 no-underline transition-all last:border-b-0 max-md:gap-2 max-md:px-4 max-md:py-2 ${item.unreadCount > 0 ?"bg-emerald-50/50 hover:bg-emerald-50" :"hover:bg-black/[0.03]"}`}
+    className={`text-foreground border-input flex items-center gap-4 border-b px-6 py-4 no-underline transition-all last:border-b-0 max-md:gap-2 max-md:px-4 max-md:py-2 ${item.unreadCount > 0 ?"bg-success/10 hover:bg-success/15" :"hover:bg-black/[0.03]"}`}
     id={`inbox-item-${item.id}`}
    >
-    <div className="text-forest flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-emerald-100/50 max-md:h-9 max-md:w-9">
+    <div className="text-forest flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-success/15 max-md:h-9 max-md:w-9">
     <svg
      width="24"
      height="24"
@@ -235,7 +235,7 @@ export default async function InboxPage() {
      @{item.otherAlias}
      </span>
      {item.isRated && (
-     <span className="ml-1 text-xs text-amber-500">
+     <span className="ml-1 text-xs text-warning">
       ⭐ Rated
      </span>
      )}
@@ -248,8 +248,8 @@ export default async function InboxPage() {
       <span
       className={
        item.horseTradeStatus ==="For Sale"
-       ?"rounded-full bg-emerald-100 px-1.5 py-[1px] text-[0.65rem] font-bold text-[#22c55e]"
-       :"rounded-full bg-blue-50 px-1.5 py-[1px] text-[0.65rem] font-bold text-info"
+       ?"rounded-full bg-success/15 px-1.5 py-[1px] text-[0.65rem] font-bold text-success"
+       :"rounded-full bg-info/10 px-1.5 py-[1px] text-[0.65rem] font-bold text-info"
       }
       >
       {item.horseTradeStatus ==="For Sale" ?"💲 For Sale" :"🤝 Offers"}

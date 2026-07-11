@@ -4,6 +4,7 @@ import { getPhotoShows } from"@/app/actions/shows";
 import { getPublicShows } from"@/app/actions/shows-v2";
 import Link from"next/link";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import PageMasthead from"@/components/layouts/PageMasthead";
 import { showsV2Enabled } from"@/lib/shows/flags";
 import type { PublicShowSummary } from"@/lib/shows/public";
 import { formatStatus } from"@/lib/shows/stateMachine";
@@ -111,17 +112,19 @@ export default async function ShowsPage() {
  }
 
  return (
- <ExplorerLayout
-  title={<>📸 <span className="text-forest">Virtual Photo Shows</span></>}
-  description="Enter your models, vote for your favorites, and compete for community glory!"
-  headerActions={
-   showsV2Enabled() ? (
-    <Button asChild variant="outline">
-     <Link href="/shows/host">Host a show</Link>
-    </Button>
-   ) : undefined
-  }
- >
+ <ExplorerLayout noHeader>
+  <PageMasthead
+   icon="🏆"
+   title="Shows"
+   subtitle="Enter your models, vote for your favorites, and compete for community glory!"
+   actions={
+    showsV2Enabled() ? (
+     <Button asChild variant="outline">
+      <Link href="/shows/host">Host a show</Link>
+     </Button>
+    ) : undefined
+   }
+  />
   <V2ShowsSection shows={v2Shows} />
 
   <div className="mb-6 flex items-baseline gap-2">
@@ -155,12 +158,12 @@ export default async function ShowsPage() {
     </h3>
     <div className="flex items-center gap-1">
     {isUserJudge && (
-    <span className="whitespace-nowrap rounded-sm border border-purple-200 bg-purple-100/50 px-2 py-0.5 text-[0.7rem] font-semibold text-[#a78bfa]">
+    <span className="whitespace-nowrap rounded-sm border border-studio/30 bg-studio/10 px-2 py-0.5 text-[0.7rem] font-semibold text-studio">
      🏅 Judge
     </span>
     )}
     {show.sanctioningBody === "namhsa" && (
-    <span className="whitespace-nowrap rounded-sm border border-amber-200 bg-amber-50 px-2 py-0.5 text-[0.7rem] font-semibold text-amber-700">
+    <span className="whitespace-nowrap rounded-sm border border-warning/30 bg-warning/10 px-2 py-0.5 text-[0.7rem] font-semibold text-warning">
      🏛️ NAMHSA
     </span>
     )}

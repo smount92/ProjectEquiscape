@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import FocusLayout from"@/components/layouts/FocusLayout";
+import PageMasthead from"@/components/layouts/PageMasthead";
 import { Button } from "@/components/ui/button";
 
 export default function CreateEventPage() {
@@ -73,9 +74,8 @@ export default function CreateEventPage() {
  }
 
  return (
- <FocusLayout
-  title="📅 Create Event"
- >
+ <FocusLayout noHeader>
+  <PageMasthead compact icon="📅" title="Create Event" backHref="/community/events" backLabel="Events" />
   <form onSubmit={handleSubmit}>
   <div className="mb-6">
    <label className="text-foreground mb-1 block text-sm font-semibold">Event Name *</label>
@@ -241,7 +241,7 @@ export default function CreateEventPage() {
   </div>
 
   {error && (
-   <p className="text-red-700 mt-2 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm">
+   <p className="text-destructive mt-2 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm">
    {error}
    </p>
   )}

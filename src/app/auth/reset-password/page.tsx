@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from"next/navigation";
 import { createClient } from"@/lib/supabase/client";
 import { Input } from "@/components/ui/input";
 import FocusLayout from"@/components/layouts/FocusLayout";
+import PageMasthead from"@/components/layouts/PageMasthead";
 import { Button } from "@/components/ui/button";
 
 export default function ResetPasswordPage() {
@@ -80,7 +81,7 @@ export default function ResetPasswordPage() {
  if (success) {
  return (
   <FocusLayout title="Password Updated!">
-  <div className="bg-white border-input animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border shadow-md transition-all">
+  <div className="bg-card border-input animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border shadow-md transition-all">
    <div className="px-6 py-6">
    <div aria-hidden="true" className="mb-4 text-[3rem]">
     ✅
@@ -96,7 +97,7 @@ export default function ResetPasswordPage() {
  if (!ready) {
  return (
   <FocusLayout title={<>Verifying <span className="text-forest">Reset Link</span></>}>
-  <div className="bg-white border-input animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border shadow-md transition-all">
+  <div className="bg-card border-input animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border shadow-md transition-all">
    <div className="px-6 py-6">
    <div aria-hidden="true" className="mb-4 text-[3rem]">
     🔐
@@ -116,14 +117,12 @@ export default function ResetPasswordPage() {
  }
 
  return (
- <FocusLayout
-  title={<>New <span className="text-forest">Password</span></>}
-  description="Choose a new password for your account"
- >
-  <div className="bg-white border-input animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border shadow-md transition-all">
+ <FocusLayout noHeader>
+  <PageMasthead compact icon="🔑" title="New Password" subtitle="Choose a new password for your account" />
+  <div className="bg-card border-input animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border shadow-md transition-all">
   {error && (
    <div
-   className="text-red-700 mt-2 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm"
+   className="text-destructive mt-2 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm"
    role="alert"
    >
    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">

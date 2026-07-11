@@ -4,6 +4,7 @@ import Link from"next/link";
 import { getArtistProfileBySlug } from"@/app/actions/art-studio";
 import ShareButton from"@/components/ShareButton";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import PageMasthead from"@/components/layouts/PageMasthead";
 import { Button } from "@/components/ui/button";
 
 
@@ -76,12 +77,11 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  };
 
  return (
- <ExplorerLayout
-  title={<><span className="text-forest">{profile.studioName}</span></>}
-  description={<>by <Link href={`/profile/${encodeURIComponent(profile.ownerAlias)}`} className="text-forest">@{profile.ownerAlias}</Link> · {STATUS_EMOJI[profile.status]} {STATUS_LABEL[profile.status]}</>}
- >
+ <ExplorerLayout noHeader>
+ <PageMasthead compact icon="🎨" title="Art Studio" subtitle="Commission studio" backHref="/studio" backLabel="Studios" />
+
  {/* Hero */}
- <div className="animate-fade-in-up rounded-lg border border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 px-6 py-8">
+ <div className="animate-fade-in-up rounded-lg border border-studio/40 bg-studio/10 px-6 py-8">
  <div className="max-w-[800px]">
  <div className="flex flex-wrap items-center gap-4">
  <h1 className="m-0 text-2xl">
@@ -107,7 +107,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  {profile.specialties.map((s) => (
  <span
  key={s}
- className="inline-block rounded-full border border-purple-300 bg-purple-100 px-[10px] py-[3px] text-xs font-semibold text-purple-500"
+ className="inline-block rounded-full border border-studio/40 bg-studio/15 px-[10px] py-[3px] text-xs font-semibold text-studio"
  >
  {s}
  </span>
@@ -202,7 +202,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  {profile.mediums.map((m) => (
  <span
  key={m}
- className="inline-block rounded-full border border-emerald-200 bg-emerald-50 px-[10px] py-[3px] text-xs font-semibold text-emerald-800"
+ className="inline-block rounded-full border border-success/30 bg-success/10 px-[10px] py-[3px] text-xs font-semibold text-success"
  >
  {m}
  </span>
@@ -222,7 +222,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  {profile.scalesOffered.map((s) => (
  <span
  key={s}
- className="inline-block rounded-full border border-emerald-200 bg-emerald-50 px-[10px] py-[3px] text-xs font-semibold text-emerald-800"
+ className="inline-block rounded-full border border-success/30 bg-success/10 px-[10px] py-[3px] text-xs font-semibold text-success"
  >
  {s}
  </span>
@@ -291,7 +291,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  key={t}
  className="flex items-center gap-2 py-1"
  >
- <span className="text-[#22c55e]">✓</span>
+ <span className="text-success">✓</span>
  <span className="text-sm">{t}</span>
  </div>
  ))}

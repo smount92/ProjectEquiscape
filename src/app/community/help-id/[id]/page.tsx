@@ -114,7 +114,7 @@ export default async function HelpIdDetailPage({ params }: PageProps) {
    <h1>
     <span className="text-forest">Mystery Model</span>
     {isResolved && (
-    <span className="ml-4 rounded-full bg-emerald-50 text-emerald-600 px-3 py-1 text-sm font-semibold text-emerald-600">
+    <span className="ml-4 rounded-full bg-success/10 px-3 py-1 text-sm font-semibold text-success">
      ✅ Resolved
     </span>
     )}

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
+import PageMasthead from "@/components/layouts/PageMasthead";
 import { Button } from "@/components/ui/button";
 import {
     Camera,
@@ -27,24 +28,13 @@ export const metadata: Metadata = {
 
 export default function GettingStartedPage() {
     return (
-        <ExplorerLayout
-            title={
-                <>
-                    Getting Started with <span className="text-forest">Model Horse Hub</span>
-                </>
-            }
-            description="Your digital stable is ready. Here's how to make the most of it."
-        >
+        <ExplorerLayout noHeader>
             <div className="animate-fade-in-up">
-                {/* Page Header */}
-                <div className="mb-8">
-                    <h1>
-                        Getting Started with <span className="text-forest">Model Horse Hub</span>
-                    </h1>
-                    <p className="text-secondary-foreground mt-2 text-lg">
-                        Your digital stable is ready. Here&apos;s how to make the most of it.
-                    </p>
-                </div>
+                <PageMasthead
+                    icon="🚀"
+                    title="Getting Started"
+                    subtitle="Your digital stable is ready — here's how to make the most of it"
+                />
 
                 {/* Step 1 */}
                 <section className="mb-12">

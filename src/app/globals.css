@@ -18,6 +18,9 @@
   --color-saddle: #8B5A2B;
   --color-success: #356845;
   --color-warning: #B8860B;
+  /* Art Studio accent — the hobby's "artist" identity (violet), tokenized
+     so it flips night-safe like the other brand colors. */
+  --color-studio: #6D4AA0;
 
   /* Domain tokens (status + collection-tier colors) */
   --color-info: #3b82f6;
@@ -2443,9 +2446,10 @@ p {
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  opacity: 0.85;
-  mask-image: var(--noise);
-  mask-size: 220px;
+  /* Legibility: the old opacity 0.85 + noise mask carved the small serif
+     ink into faded blotches (hard to read on show-status stamps). The
+     rotation + serif smallcaps + border keep the rubber-stamp character
+     without eating the text. */
 }
 .stamp-red {
   border-color: #9B3028;
@@ -2959,6 +2963,7 @@ html[data-theme="night"] {
   --color-success: #7FB893;
   --color-warning: #D9A93F;
   --color-info: #6FA3E8;
+  --color-studio: #B79BE0;
   --color-forest: #3A6B55;
   --color-forest-dark: #2C5545;
 }

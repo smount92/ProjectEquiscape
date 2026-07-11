@@ -16,6 +16,7 @@ import ReportButton from"@/components/ReportButton";
 import MessageSellerButton from"@/components/MessageSellerButton";
 import TrustedBadge from"@/components/TrustedBadge";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import PageMasthead from"@/components/layouts/PageMasthead";
 import AssetDetailRenderer from"@/components/AssetDetailRenderer";
 import { getAssetConfig } from"@/lib/config/assetFields";
 import type { AssetCategory } from"@/lib/types/database";
@@ -293,15 +294,8 @@ editionSize: rawPedigree.edition_size,
  const isTrustedSeller = !!trustedData;
 
  return (
- <ExplorerLayout title={horse.custom_name} description="View this model in the community showcase.">
- {/* Breadcrumb */}
- <nav className="text-secondary-foreground animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
- <Link href="/community">Show Ring</Link>
- <span className="separator" aria-hidden="true">
- /
- </span>
- <span>{horse.custom_name}</span>
- </nav>
+ <ExplorerLayout noHeader>
+ <PageMasthead compact icon="🏆" title="Show Ring" subtitle="Public passport" backHref="/community" backLabel="Show Ring" />
 
  {/* Two-column layout: Gallery | Ledger Card */}
  <div className="animate-fade-in-up grid grid-cols-1 gap-8 lg:grid-cols-[1.5fr_1fr] lg:gap-12">
@@ -315,11 +309,11 @@ editionSize: rawPedigree.edition_size,
  {/* Stolen/Missing Banner */}
  {horse.trade_status ==="Stolen/Missing" && (
  <div
- className="flex items-center gap-2 rounded-md border border-red-600/30 bg-gradient-to-br from-red-600/15 to-red-600/10 p-4"
+ className="flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 p-4"
  >
  <span className="text-[1.3em]">🚨</span>
  <div>
- <strong className="text-[rgb(220,38,38)]">Stolen / Missing</strong>
+ <strong className="text-destructive">Stolen / Missing</strong>
  <p className="m-[4px 0 0] text-muted-foreground text-sm">
  This model has been flagged by its owner. Transfers and offers are blocked.
  </p>
@@ -427,7 +421,7 @@ editionSize: rawPedigree.edition_size,
  <span className="text-secondary-foreground text-sm font-medium">
  Condition
  </span>
- <span className="text-emerald-700 inline-flex items-center gap-[4px] rounded-full border border-emerald-200/50 bg-emerald-50/20 px-[10px] py-[2px] text-sm font-semibold">
+ <span className="text-success inline-flex items-center gap-[4px] rounded-full border border-success/30 bg-success/10 px-[10px] py-[2px] text-sm font-semibold">
  {horse.condition_grade}
  </span>
  </div>
@@ -544,7 +538,7 @@ editionSize: rawPedigree.edition_size,
  {horse.finishing_artist}
  {horse.finishing_artist_verified && (
  <span
- className="ml-1.5 inline-flex items-center gap-1 rounded-full bg-forest/10 px-2 py-0.5 text-xs font-semibold text-[var(--color-success)]"
+ className="ml-1.5 inline-flex items-center gap-1 rounded-full bg-forest/10 px-2 py-0.5 text-xs font-semibold text-success"
  title="Verified via commission delivery"
  >
  ✅ Verified

@@ -138,7 +138,17 @@ export async function updateProfile(data: {
     }
 
     if (data.exhibitorNumber !== undefined) {
-        updates.exhibitor_number = data.exhibitorNumber.trim().slice(0, 10) || null;
+        // Baked verbatim into printed show tags (XXX-YYY) by
+        // api/export/show-tags — constrain to a sane alphanumeric token so
+        // e.g. "MyStable!" can't end up on a physical tag. Empty clears it.
+        const exhibitor = data.exhibitorNumber.trim();
+        if (exhibitor && !/^[A-Za-z0-9]{1,10}$/.test(exhibitor)) {
+            return {
+                success: false,
+                error: "Exhibitor number must be 1-10 letters or numbers (no spaces or symbols).",
+            };
+        }
+        updates.exhibitor_number = exhibitor || null;
     }
 
     if (Object.keys(updates).length === 0) return { success: true };

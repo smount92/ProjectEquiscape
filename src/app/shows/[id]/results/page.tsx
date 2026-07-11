@@ -1,6 +1,7 @@
 import { getPublicShowResults } from "@/app/actions/shows";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import PageMasthead from "@/components/layouts/PageMasthead";
 import type { Metadata } from "next";
 
 const MEDAL_MAP: Record<string, string> = {
@@ -11,17 +12,17 @@ const MEDAL_MAP: Record<string, string> = {
 };
 
 const RIBBON_COLOR_MAP: Record<string, string> = {
-    "1st": "border-l-blue-500 bg-blue-50/50",
-    "2nd": "border-l-red-500 bg-red-50/50",
-    "3rd": "border-l-yellow-500 bg-yellow-50/50",
-    "4th": "border-l-stone-300",
-    "5th": "border-l-pink-500 bg-pink-50/50",
-    "6th": "border-l-green-500",
-    HM: "border-l-green-400",
-    Champion: "border-l-blue-600 bg-blue-50",
-    "Reserve Champion": "border-l-red-600 bg-red-50",
-    "Grand Champion": "border-l-amber-500 bg-amber-50",
-    "Reserve Grand Champion": "border-l-amber-400 bg-amber-50/50",
+    "1st": "border-l-info bg-info/10",
+    "2nd": "border-l-destructive bg-destructive/10",
+    "3rd": "border-l-warning bg-warning/10",
+    "4th": "border-l-input",
+    "5th": "border-l-studio bg-studio/10",
+    "6th": "border-l-success",
+    HM: "border-l-success",
+    Champion: "border-l-info bg-info/10",
+    "Reserve Champion": "border-l-destructive bg-destructive/10",
+    "Grand Champion": "border-l-warning bg-warning/10",
+    "Reserve Grand Champion": "border-l-warning bg-warning/10",
 };
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
@@ -57,12 +58,14 @@ export default async function PublicShowResultsPage({ params }: { params: Promis
 
     return (
         <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+            <PageMasthead compact icon="🏆" title="Show Results" subtitle="Public results" backHref={`/shows/${event.id}`} backLabel="Show" />
+
             {/* Header */}
             <div className="mb-8 text-center animate-fade-in-up">
                 <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-input bg-card px-4 py-1.5 text-sm font-medium text-secondary-foreground shadow-sm">
                     📸 Show Results
                     {event.isSanctioned && (
-                        <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800">
+                        <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-warning/15 px-2.5 py-0.5 text-xs font-semibold text-warning">
                             🏛️ NAMHSA Sanctioned
                         </span>
                     )}
@@ -114,7 +117,7 @@ export default async function PublicShowResultsPage({ params }: { params: Promis
                         </div>
 
                         {/* Classes */}
-                        <div className="divide-y divide-stone-100">
+                        <div className="divide-y divide-input">
                             {division.classes.map((cls) => (
                                 <div key={`${division.name}-${cls.name}`} className="px-6 py-4">
                                     <h3 className="mb-3 text-sm font-bold text-secondary-foreground">
@@ -133,7 +136,7 @@ export default async function PublicShowResultsPage({ params }: { params: Promis
                                             {cls.results.map((result, idx) => (
                                                 <div
                                                     key={`${cls.name}-${idx}`}
-                                                    className={`flex items-center gap-3 rounded-lg border-l-[3px] px-4 py-2.5 transition-colors ${RIBBON_COLOR_MAP[result.placement] || "border-l-stone-200"}`}
+                                                    className={`flex items-center gap-3 rounded-lg border-l-[3px] px-4 py-2.5 transition-colors ${RIBBON_COLOR_MAP[result.placement] || "border-l-input"}`}
                                                 >
                                                     {/* Medal */}
                                                     <span className="text-lg">

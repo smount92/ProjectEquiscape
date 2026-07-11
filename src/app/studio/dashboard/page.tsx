@@ -62,7 +62,7 @@ export default async function StudioDashboardPage() {
     </div>
     <div className="flex flex-col items-center gap-[2px]">
     <span
-     className={`text-xl font-extrabold ${pendingRequests.length > 0 ? "text-amber-500" : "text-forest"}`}
+     className={`text-xl font-extrabold ${pendingRequests.length > 0 ? "text-warning" : "text-forest"}`}
     >
      {pendingRequests.length}
     </span>

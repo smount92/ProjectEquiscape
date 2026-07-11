@@ -1,11 +1,10 @@
 import { createClient } from"@/lib/supabase/server";
 import { notFound } from"next/navigation";
-import Link from"next/link";
 import { getHoofprint } from"@/app/actions/hoofprint";
 import HoofprintTimeline from"@/components/HoofprintTimeline";
 import ShareButton from"@/components/ShareButton";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
-import { Button } from "@/components/ui/button";
+import PageMasthead from"@/components/layouts/PageMasthead";
 
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
@@ -54,25 +53,35 @@ export default async function HoofprintReportPage({ params }: { params: Promise<
  const refName = h.catalog_items ? `${h.catalog_items.maker} ${h.catalog_items.title}` : null;
 
  return (
- <ExplorerLayout
-  title={<>🐾 <span className="text-forest">Hoofprint Report</span></>}
-  description={<>Full provenance record for <strong>{h.custom_name}</strong>{refName && <> · {refName} · {h.finish_type} · {h.condition_grade}</>}</>}
-  headerActions={
-  <>
-   <Button asChild variant="outline" size="wide"><Link
-   href={`/community/${horseId}`}
-   >
-   ← Back to Passport
-   </Link></Button>
+ <ExplorerLayout noHeader>
+  <PageMasthead
+  compact
+  icon="🐾"
+  title="Hoofprint"
+  subtitle="Provenance report"
+  backHref={`/community/${horseId}`}
+  backLabel="Passport"
+  actions={
    <ShareButton
    title={`🐾 Hoofprint — ${h.custom_name}`}
    text={`Check out the full provenance record for ${h.custom_name} on Model Horse Hub!`}
    variant="full"
    label="Share Report"
    />
-  </>
   }
- >
+  />
+
+  {/* Report hero — kept below the band */}
+  <div className="animate-fade-in-up mb-8">
+  <h1 className="font-serif text-2xl font-bold tracking-tight text-foreground md:text-3xl">
+   🐾 <span className="text-forest">Hoofprint Report</span>
+  </h1>
+  <p className="mt-2 max-w-2xl text-lg leading-relaxed text-muted-foreground">
+   Full provenance record for <strong>{h.custom_name}</strong>
+   {refName && <> · {refName} · {h.finish_type} · {h.condition_grade}</>}
+  </p>
+  </div>
+
   <HoofprintTimeline
   horseId={horseId}
   timeline={timeline}

@@ -26,6 +26,7 @@ import ImageCropModal from"@/components/ImageCropModal";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import FocusLayout from"@/components/layouts/FocusLayout";
+import PageMasthead from"@/components/layouts/PageMasthead";
 import { getGallerySlots, getSteps, isFieldVisible, getFieldLabel, getAssetConfig, validateAttributes } from "@/lib/config/assetFields";
 import TackFormFields from "@/components/forms/TackFormFields";
 import PropFormFields from "@/components/forms/PropFormFields";
@@ -610,12 +611,10 @@ export default function AddHorsePage() {
  }
 
  return (
- <FocusLayout title="Add Horse" description="Add a new model to your digital stable.">
+ <FocusLayout noHeader>
+ <PageMasthead compact icon="🐴" title="Add a Horse" subtitle="Add a new model to your digital stable" />
  {/* Page Header */}
  <div className="animate-fade-in-up">
-          <h1 className="text-2xl font-bold tracking-tight">
-            Add to <span className="text-forest">Stable</span>
-          </h1>
           <p className="mt-2 text-sm text-secondary-foreground">
  {activeConfig.label === "Model Horse"
  ?"Catalog a new model horse in your digital collection"
@@ -679,7 +678,7 @@ export default function AddHorsePage() {
  {/* Connecting line (before the dot) */}
  {i > 0 && (
  <div
- className={`absolute top-4 right-1/2 h-0.5 w-full ${i <= currentStep ? "bg-forest" : "bg-gray-300"}`}
+ className={`absolute top-4 right-1/2 h-0.5 w-full ${i <= currentStep ? "bg-forest" : "bg-muted"}`}
  />
  )}
  {/* Dot */}
@@ -689,7 +688,7 @@ export default function AddHorsePage() {
  ? "border-forest bg-forest text-white"
  : i < currentStep
  ? "border-forest bg-forest text-white"
- : "border-gray-300 bg-card text-muted-foreground"
+ : "border-input bg-card text-muted-foreground"
  }`}
  aria-current={i === currentStep ?"step" : undefined}
  >
@@ -710,7 +709,7 @@ export default function AddHorsePage() {
  {/* Error banner */}
  {submitError && (
  <div
- className="text-red-700 mt-2 mb-8 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm"
+ className="text-destructive mt-2 mb-8 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm"
  role="alert"
  >
  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -752,7 +751,7 @@ export default function AddHorsePage() {
  className={`relative flex aspect-square cursor-pointer flex-col items-center justify-center overflow-hidden rounded-xl border-2 transition-all hover:bg-forest/5 ${
  existing
  ? "border-solid border-forest bg-forest/5 shadow-sm"
- : "border-dashed border-stone-300 bg-card"
+ : "border-dashed border-input bg-card"
  }`}
  >
  {existing ? (
@@ -773,7 +772,7 @@ export default function AddHorsePage() {
  >
  ✕
  </button>
- <div className="bg-emerald-500 text-white absolute bottom-[6px] left-[6px] z-[2] flex h-[24px] w-[24px] items-center justify-center rounded-full text-[0.7rem] font-extrabold">
+ <div className="bg-success text-white absolute bottom-[6px] left-[6px] z-[2] flex h-[24px] w-[24px] items-center justify-center rounded-full text-[0.7rem] font-extrabold">
  ✓
  </div>
 
@@ -1103,7 +1102,7 @@ export default function AddHorsePage() {
  <Input
  id="custom-name"
  type="text"
- className={`${validationErrors.includes("Custom Name") ? "ring-2 ring-red-400 border-red-400" : ""} ${shakeFields && validationErrors.includes("Custom Name") ? "animate-shake" : ""}`}
+ className={`${validationErrors.includes("Custom Name") ? "ring-2 ring-destructive/50 border-destructive" : ""} ${shakeFields && validationErrors.includes("Custom Name") ? "animate-shake" : ""}`}
  placeholder="e.g. Midnight Star, Patches, Stormy…"
  value={customName}
  onChange={(e) => {
@@ -1114,7 +1113,7 @@ export default function AddHorsePage() {
  maxLength={100}
  />
  {validationErrors.includes("Custom Name") && (
- <span className="mt-1 block text-xs font-medium text-red-500">⚠ Required — give your model a name</span>
+ <span className="mt-1 block text-xs font-medium text-destructive">⚠ Required — give your model a name</span>
  )}
  <span className="text-muted-foreground mt-1 block text-xs">
  What do you call this model? This can be a show name, pet name, or whatever you like.
@@ -1175,7 +1174,7 @@ export default function AddHorsePage() {
  id="finish-type"
  className={`flex h-10 w-full rounded-md border px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${
  validationErrors.includes("Finish Type")
- ? "border-red-400 ring-2 ring-red-400 bg-red-50/30"
+ ? "border-destructive ring-2 ring-destructive/50 bg-destructive/10"
  : "border-input bg-card"
  } ${shakeFields && validationErrors.includes("Finish Type") ? "animate-shake" : ""}`}
  value={finishType}
@@ -1190,7 +1189,7 @@ export default function AddHorsePage() {
  <option value="Artist Resin">Artist Resin</option>
  </select>
  {validationErrors.includes("Finish Type") && (
- <span className="mt-1 block text-xs font-medium text-red-500">⚠ Required — select a finish type</span>
+ <span className="mt-1 block text-xs font-medium text-destructive">⚠ Required — select a finish type</span>
  )}
  </div>
  )}
@@ -1321,7 +1320,7 @@ export default function AddHorsePage() {
  id="condition-grade"
  className={`flex h-9 w-full rounded-md border px-3 py-1.5 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${
  validationErrors.includes("Condition Grade")
- ? "border-red-400 ring-2 ring-red-400 bg-red-50/30"
+ ? "border-destructive ring-2 ring-destructive/50 bg-destructive/10"
  : "border-input bg-card"
  } ${shakeFields && validationErrors.includes("Condition Grade") ? "animate-shake" : ""}`}
  value={conditionGrade}
@@ -1395,7 +1394,7 @@ export default function AddHorsePage() {
 
  {/* Conditional marketplace fields */}
  {(tradeStatus ==="For Sale" || tradeStatus ==="Open to Offers") && (
- <div className="bg-emerald-50/50 border-emerald-200 animate-fade-in-up mt-4 rounded-md border p-4">
+ <div className="bg-success/10 border-success/30 animate-fade-in-up mt-4 rounded-md border p-4">
  <div className="mb-6">
  <label
  htmlFor="listing-price"
@@ -1486,7 +1485,7 @@ export default function AddHorsePage() {
  <button
  key={opt.value}
  type="button"
- className={`bg-card font-inherit text-foreground hover:border-emerald-700 hover:bg-muted flex min-w-[120px] flex-1 cursor-pointer flex-col items-center gap-1 rounded-lg border-2 px-2 py-3 transition-all ${visibility === opt.value ?"border-forest bg-forest/10" :"border-input"}`}
+ className={`bg-card font-inherit text-foreground hover:border-success hover:bg-muted flex min-w-[120px] flex-1 cursor-pointer flex-col items-center gap-1 rounded-lg border-2 px-2 py-3 transition-all ${visibility === opt.value ?"border-forest bg-forest/10" :"border-input"}`}
  onClick={() => setVisibility(opt.value)}
  id={`visibility-${opt.value}`}
  >
@@ -1515,7 +1514,7 @@ export default function AddHorsePage() {
 
  <div className="relative overflow-visible rounded-xl border border-input bg-card p-6 shadow-sm">
  {/* Vault Header */}
- <div className="border-orange-200 mb-8 flex items-center gap-4 border-b pb-6">
+ <div className="border-warning/30 mb-8 flex items-center gap-4 border-b pb-6">
  <div className="vault-icon">🔒</div>
  <div>
  <h2>The Financial Vault</h2>
@@ -1525,7 +1524,7 @@ export default function AddHorsePage() {
 
  {/* Privacy reassurance */}
  <div
- className="bg-orange-50 border-orange-200 mb-8 flex items-start gap-2 rounded-md border p-4"
+ className="bg-warning/10 border-warning/30 mb-8 flex items-start gap-2 rounded-md border p-4"
  role="note"
  aria-label="Financial privacy notice"
  >
@@ -1542,7 +1541,7 @@ export default function AddHorsePage() {
    <input
      id="is-trade"
      type="checkbox"
-     className="h-4 w-4 rounded border-gray-300 text-forest focus:ring-forest accent-forest"
+     className="h-4 w-4 rounded border-input text-forest focus:ring-forest accent-forest"
      checked={isTrade}
      onChange={(e) => setIsTrade(e.target.checked)}
    />
@@ -1678,7 +1677,7 @@ export default function AddHorsePage() {
  aria-live="polite"
  >
  {aiToasts.map((toast) => (
- <div key={toast.id} className={`flex items-center gap-2 rounded-lg border px-4 py-3 text-sm shadow-lg ${toast.type === "success" ? "border-green-200 bg-green-50 text-green-800" : toast.type === "error" ? "border-red-200 bg-red-50 text-red-800" : "border-blue-200 bg-blue-50 text-blue-800"}`} role="status">
+ <div key={toast.id} className={`flex items-center gap-2 rounded-lg border px-4 py-3 text-sm shadow-lg ${toast.type === "success" ? "border-success/30 bg-success/10 text-success" : toast.type === "error" ? "border-destructive/30 bg-destructive/10 text-destructive" : "border-info/30 bg-info/10 text-info"}`} role="status">
  <span className="shrink-0 text-lg">
  {toast.type ==="success" ?"✨" : toast.type ==="error" ?"⚠️" :"ℹ️"}
  </span>

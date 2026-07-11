@@ -5,6 +5,7 @@ import Link from "next/link";
 import { resendConfirmationAction, signupAction, type AuthFormState } from "@/app/auth/actions";
 import { Input } from "@/components/ui/input";
 import FocusLayout from "@/components/layouts/FocusLayout";
+import PageMasthead from "@/components/layouts/PageMasthead";
 
 export default function SignupPage() {
     const [error, setError] = useState<string | null>(null);
@@ -100,20 +101,14 @@ export default function SignupPage() {
     }
 
     return (
-        <FocusLayout
-            title={
-                <>
-                    Join the <span className="text-forest">Stable</span>
-                </>
-            }
-            description="Create your account and start cataloging your collection"
-        >
+        <FocusLayout noHeader>
+            <PageMasthead compact icon="🐴" title="Join the Stable" subtitle="Create your account and start cataloging your collection" />
             <div className="animate-fade-in-up border-input bg-card relative w-full max-w-[440px] overflow-hidden rounded-xl border shadow-lg">
                 {/* Body */}
                 <div className="px-8 pt-6 pb-8">
                     {error && (
                         <div
-                            className="mb-6 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+                            className="mb-6 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive"
                             role="alert"
                             id="signup-error"
                         >

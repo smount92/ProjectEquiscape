@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import FocusLayout from"@/components/layouts/FocusLayout";
+import PageMasthead from"@/components/layouts/PageMasthead";
 import { Button } from "@/components/ui/button";
 
 const NOTIF_LABELS: { key: string; emoji: string; label: string }[] = [
@@ -157,26 +158,17 @@ export default function SettingsPage() {
  }
 
  return (
- <FocusLayout title="Settings" description="Manage your profile, notifications, and account.">
- <nav className="text-secondary-foreground animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
- <Link href="/dashboard">Digital Stable</Link>
- <span className="separator" aria-hidden="true">
- /
- </span>
- <span>Settings</span>
- </nav>
+ <FocusLayout noHeader>
+ <PageMasthead compact icon="⚙️" title="Settings" subtitle="Manage your profile, notifications, and account" backHref="/dashboard" backLabel="Digital Stable" />
 
         <div className="animate-fade-in-up max-w-[680px]">
-          <h1 className="mb-12 text-2xl font-bold tracking-tight">
-            ⚙️ <span className="text-forest">Settings</span>
-          </h1>
 
  {/* ═══ Profile ═══ */}
  <div className="mb-12 max-sm:mb-8">
  <h2 className="text-foreground mb-4 flex items-center gap-2 text-lg font-bold tracking-tight">
  👤 Profile
  </h2>
- <div className="bg-card border-input rounded-xl border p-8 shadow-[0_1px_3px_rgb(245 245 244)] transition-shadow hover:shadow-[0_2px_8px_rgb(245 245 244)] max-sm:p-6">
+ <div className="ledger-card">
  {/* Avatar */}
             <div className="mb-8 flex items-center gap-6 border-b border-input pb-6 max-sm:gap-4">
               <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-[2.5px] border-stone-300 bg-gradient-to-br from-forest/5 to-amber-800/5 text-[2rem] transition-colors hover:border-emerald-700 [&_img]:h-full [&_img]:w-full [&_img]:object-cover">
@@ -369,7 +361,7 @@ export default function SettingsPage() {
  <h2 className="text-foreground mb-4 flex items-center gap-2 text-lg font-bold tracking-tight">
  🔒 Security
  </h2>
- <div className="bg-card border-input rounded-xl border p-8 shadow-[0_1px_3px_rgb(245 245 244)] transition-shadow hover:shadow-[0_2px_8px_rgb(245 245 244)] max-sm:p-6">
+ <div className="ledger-card">
  <div className="mb-6">
  <label className="text-foreground mb-1 block text-sm font-semibold">Email</label>
  <Input
@@ -441,7 +433,7 @@ export default function SettingsPage() {
  <h2 className="text-foreground mb-4 flex items-center gap-2 text-lg font-bold tracking-tight">
  🔔 Notifications
  </h2>
- <div className="bg-card border-input rounded-xl border p-8 shadow-[0_1px_3px_rgb(245 245 244)] transition-shadow hover:shadow-[0_2px_8px_rgb(245 245 244)] max-sm:p-6">
+ <div className="ledger-card">
  {NOTIF_LABELS.map((n) => (
  <div
  key={n.key}
@@ -468,7 +460,7 @@ export default function SettingsPage() {
  <h2 className="text-foreground mb-4 flex items-center gap-2 text-lg font-bold tracking-tight">
  📊 Data & Reports
  </h2>
- <div className="bg-card border-input rounded-xl border p-8 shadow-[0_1px_3px_rgb(245 245 244)] transition-shadow hover:shadow-[0_2px_8px_rgb(245 245 244)] max-sm:p-6">
+ <div className="ledger-card">
  <div className="flex flex-col gap-6">
  {/* CSV Export */}
  <div>
@@ -504,7 +496,7 @@ export default function SettingsPage() {
  <h2 className="text-foreground mb-4 flex items-center gap-2 text-lg font-bold tracking-tight">
  💎 Subscription
  </h2>
- <div className="bg-card border-input rounded-xl border p-8 shadow-[0_1px_3px_rgb(245 245 244)] transition-shadow hover:shadow-[0_2px_8px_rgb(245 245 244)] max-sm:p-6">
+ <div className="ledger-card">
  <p className="mb-4 text-sm leading-[1.6]">
  Upgrade to <strong>MHH Pro</strong> for advanced analytics, expanded photo storage,
  AI-powered collection reports, and more.
@@ -520,12 +512,10 @@ export default function SettingsPage() {
 
  {/* ═══ Danger Zone ═══ */}
  <div className="mb-12 max-sm:mb-8">
- <h2 className="text-foreground mb-4 flex items-center gap-2 text-lg font-bold tracking-tight text-[#ef4444]">
+ <h2 className="mb-4 flex items-center gap-2 text-lg font-bold tracking-tight text-destructive">
  ⚠️ Danger Zone
  </h2>
- <div
- className="bg-card rounded-xl border border-[#ef4444] p-8 shadow-[0_1px_3px_rgb(245 245 244)] transition-shadow hover:shadow-[0_2px_8px_rgb(245 245 244)] max-sm:p-6"
- >
+ <div className="ledger-card ring-1 ring-destructive/50">
  <p className="mb-4 leading-[1.6]">
  Permanently delete your account. This action <strong>cannot be undone</strong>.
  </p>
@@ -549,12 +539,9 @@ export default function SettingsPage() {
  autoComplete="off"
  />
  </div>
- <button
- className={`inline-flex min-h-[36px] items-center justify-center gap-2 rounded-md border border-input px-6 py-2 text-sm font-semibold no-underline transition-all ${
- deleteConfirm ==="DELETE"
- ? "cursor-pointer bg-[#ef4444] text-white"
- : "cursor-not-allowed bg-muted text-muted-foreground"
- }`}
+ <Button
+ variant="destructive"
+ size="wide"
  disabled={deleteConfirm !=="DELETE" || isDeleting}
  onClick={async () => {
  if (deleteConfirm !=="DELETE") return;
@@ -570,9 +557,9 @@ export default function SettingsPage() {
  }}
  >
  {isDeleting ?"Deleting…" :"🗑️ Permanently Delete Account"}
- </button>
+ </Button>
  {deleteError && (
- <p className="text-red-700 mt-2 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm">
+ <p className="text-destructive mt-2 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm">
  {deleteError}
  </p>
  )}

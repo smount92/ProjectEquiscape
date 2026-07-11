@@ -60,22 +60,15 @@ export default function AdminSuggestionsPanel({ suggestions }: { suggestions: Su
  {items.map((s) => (
  <div
  key={s.id}
- className="bg-muted border-input admin-message hover:opacity-[1]-unread rounded-lg border px-6 py-4 transition-all"
+ className="bg-card border-input rounded-lg border px-6 py-4 transition-all"
  >
- <div className="bg-muted border-input sticky top-[var(--header-height)] z-40 border-b border-input bg-muted">
- <div className="rounded-lg border border-input bg-muted px-6 py-4 transition-all">
- <span className="rounded-lg border border-input bg-muted px-6 py-4 transition-all">
- {typeEmoji[s.suggestion_type] ||"📝"}{""}
+ <div className="mb-2 flex items-center justify-between gap-2">
+ <span className="text-sm font-semibold text-foreground">
+ {typeEmoji[s.suggestion_type] ||"📝"}{" "}
  {typeLabel[s.suggestion_type] || s.suggestion_type}
+ {s.name ? ` — ${s.name}` :""}
  </span>
- <span
- className="cursor-default rounded-lg border border-input bg-muted px-6 py-4 transition-all"
- >
- {s.name}
- </span>
- </div>
- <div className="rounded-lg border border-input bg-muted px-6 py-4 transition-all">
- <span className="rounded-lg border border-input bg-muted px-6 py-4 transition-all">
+ <span className="text-muted-foreground text-xs whitespace-nowrap">
  {new Date(s.created_at).toLocaleDateString("en-US", {
  month:"short",
  day:"numeric",
@@ -85,13 +78,12 @@ export default function AdminSuggestionsPanel({ suggestions }: { suggestions: Su
  })}
  </span>
  </div>
- </div>
  {s.details && (
- <div className="rounded-lg border border-input bg-muted px-6 py-4 transition-all">
+ <div className="mb-3 text-sm leading-relaxed text-secondary-foreground whitespace-pre-wrap">
  {s.details}
  </div>
  )}
- <div className="flex gap-2 rounded-lg border border-input bg-muted px-6 py-4 transition-all">
+ <div className="flex gap-2">
  <Button
  onClick={() => handleReview(s.id,"approved")}
  disabled={isPending && processingId === s.id}
