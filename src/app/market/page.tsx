@@ -3,6 +3,7 @@ import { Suspense } from"react";
 import { searchMarketPrices } from"@/app/actions/market";
 import MarketFilters from"@/components/MarketFilters";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import PageMasthead from"@/components/layouts/PageMasthead";
 import { Button } from "@/components/ui/button";
 
 const formatCurrency = (value: number) =>
@@ -83,16 +84,12 @@ export default async function MarketPricePage({
  };
 
  return (
- <ExplorerLayout
-  title={<>📈 Model Horse <span className="text-forest">Price Guide</span></>}
-  description="The Blue Book — Real sale data from real collectors"
-  controls={
+ <ExplorerLayout noHeader>
+  <PageMasthead icon="📈" title="Model Horse Price Guide" subtitle="The Blue Book — real sale data from real collectors" />
+  <div className="mx-auto max-w-[900px]">
   <Suspense fallback={null}>
    <MarketFilters />
   </Suspense>
-  }
- >
-  <div className="mx-auto max-w-[900px]">
   {/* Results (Server-rendered) */}
   {items.length === 0 ? (
    <div
@@ -157,7 +154,7 @@ export default async function MarketPricePage({
      </div>
 
      <div className="bg-card border-input transition-colors-footer rounded-lg border p-6 shadow-md transition-all">
-     <span className="text-forest inline-flex items-center rounded-full bg-emerald-50 px-[8px] py-[2px] font-semibold">
+     <span className="text-forest inline-flex items-center rounded-full bg-success/10 px-[8px] py-[2px] font-semibold">
       {item.transactionVolume} sale{item.transactionVolume !== 1 ?"s" :""}
      </span>
      {item.lastSoldAt && (
