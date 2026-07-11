@@ -7,6 +7,7 @@ import { groupsForumEnabled } from"@/lib/groups/flags";
 import { GROUP_TYPE_LABELS } from"@/lib/constants/groups";
 import { getPosts } from"@/app/actions/posts";
 import GroupDetailClient from"@/components/GroupDetailClient";
+import GroupMasthead from"@/components/groups/GroupMasthead";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import { Button } from "@/components/ui/button";
 
@@ -46,7 +47,17 @@ export default async function GroupDetailPage({ params }: { params: Promise<{ sl
  return (
  <ExplorerLayout title={group.name} description={<>{GROUP_TYPE_LABELS[group.groupType] || group.groupType}{group.region && <> · 📍 {group.region}</>} · 👥 {group.memberCount} member{group.memberCount !== 1 ?"s" :""}</>}>
  <div className="mx-auto max-w-6xl px-6">
- {/* Group Header */}
+ {/* Group Header — leather landmark when the Notice Board is on */}
+ {forumOn ? (
+ <GroupMasthead
+ name={group.name}
+ typeLabel={GROUP_TYPE_LABELS[group.groupType] || group.groupType}
+ region={group.region ?? null}
+ memberCount={group.memberCount}
+ creatorAlias={group.creatorAlias}
+ description={group.description ?? null}
+ />
+ ) : (
  <div className="border-input mb-6 border-b pb-6">
  <Button asChild variant="outline" size="wide"><Link
  href="/community/groups"
@@ -66,6 +77,7 @@ export default async function GroupDetailPage({ params }: { params: Promise<{ sl
  </div>
  {group.description && <p className="mt-4 leading-[1.6]">{group.description}</p>}
  </div>
+ )}
 
  {/* Content */}
  {group.isMember ? (
