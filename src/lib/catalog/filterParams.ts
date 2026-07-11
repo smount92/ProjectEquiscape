@@ -47,6 +47,7 @@ export interface CatalogFilters {
     color?: string;
     model?: string;
     medium?: string;
+    material?: string;
     sort: CatalogSort;
     page: number;
 }
@@ -109,6 +110,9 @@ export function parseCatalogSearchParams(
     const medium = nonEmpty(params.medium, 60);
     if (medium) filters.medium = medium;
 
+    const material = nonEmpty(params.material, 40);
+    if (material) filters.material = material;
+
     const sort = nonEmpty(params.sort, 20);
     if (sort && (CATALOG_SORTS as readonly string[]).includes(sort)) {
         filters.sort = sort as CatalogSort;
@@ -136,6 +140,7 @@ export function buildCatalogSearchParams(filters: Partial<CatalogFilters>): URLS
     if (filters.color) params.set("color", filters.color);
     if (filters.model) params.set("model", filters.model);
     if (filters.medium) params.set("medium", filters.medium);
+    if (filters.material) params.set("material", filters.material);
     if (filters.sort && filters.sort !== "name-az") params.set("sort", filters.sort);
     if (filters.page && filters.page > 1) params.set("page", String(filters.page));
     return params;
@@ -166,14 +171,15 @@ export function hasAdvancedCatalogFilters(filters: CatalogFilters): boolean {
         filters.yearTo !== undefined ||
         Boolean(filters.color) ||
         Boolean(filters.model) ||
-        Boolean(filters.medium)
+        Boolean(filters.medium) ||
+        Boolean(filters.material)
     );
 }
 
 /** A rubber-stamp chip describing one active filter. */
 export interface CatalogFilterChip {
     /** Which filter removing this chip clears (`year` clears both bounds). */
-    key: "q" | "maker" | "scale" | "type" | "year" | "color" | "model" | "medium";
+    key: "q" | "maker" | "scale" | "type" | "year" | "color" | "model" | "medium" | "material";
     label: string;
 }
 
@@ -199,6 +205,7 @@ export function activeCatalogChips(filters: CatalogFilters): CatalogFilterChip[]
     if (filters.color) chips.push({ key: "color", label: `🎨 ${filters.color}` });
     if (filters.model) chips.push({ key: "model", label: `#${filters.model}` });
     if (filters.medium) chips.push({ key: "medium", label: filters.medium });
+    if (filters.material) chips.push({ key: "material", label: filters.material });
     return chips;
 }
 

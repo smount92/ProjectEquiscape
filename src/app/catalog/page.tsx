@@ -68,6 +68,7 @@ export default async function ReferencePage({
             color: filters.color,
             model: filters.model,
             medium: filters.medium,
+            material: filters.material,
             sortBy,
             sortDir,
             page: filters.page,
@@ -78,7 +79,7 @@ export default async function ReferencePage({
 
     const items = (result.success ? result.items : []) as CatalogItemRow[];
     const total = result.success ? result.total : 0;
-    const facets = (facetRes.data ?? {}) as { makers?: string[]; scales?: string[] };
+    const facets = (facetRes.data ?? {}) as { makers?: string[]; scales?: string[]; materials?: string[] };
     const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
     const activeCount = countActiveCatalogFilters(filters);
 
@@ -113,6 +114,7 @@ export default async function ReferencePage({
                         filters={filters}
                         makers={facets.makers ?? []}
                         scales={facets.scales ?? []}
+                        materials={facets.materials ?? []}
                     />
 
                     <p className="mt-3 mb-3 pl-1 text-sm text-muted-foreground italic" id="catalog-result-line">
