@@ -17,6 +17,7 @@ interface CatalogFilters {
     search?: string;
     maker?: string;
     scale?: string;
+    type?: string;
     category?: string;
     page?: number;
     pageSize?: number;
@@ -103,6 +104,7 @@ export async function getCatalogItems(filters: CatalogFilters) {
 
     if (filters.maker) query = query.eq("maker", filters.maker);
     if (filters.scale) query = query.eq("scale", filters.scale);
+    if (filters.type) query = query.eq("item_type", filters.type);
     if (filters.search) query = query.ilike("title", `%${filters.search}%`);
     if (filters.sortBy)
         query = query.order(filters.sortBy, {
