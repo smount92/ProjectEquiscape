@@ -195,11 +195,13 @@ export default async function ReferencePage({
                     )}
                 </div>
 
-                {/* Sidebar */}
+                {/* Sidebar — a LEATHER rail (activity-rail precedent): frames the
+                    parchment work area with the masthead, celebrates contributors,
+                    and gives the ghostleather/brass buttons their proper ground. */}
                 <aside className="flex flex-col gap-4">
-                    <div className="workcard-stitched flex flex-col gap-3">
-                        <h3 className="brass-heading text-sm font-bold tracking-wider text-secondary-foreground uppercase">
-                            <span className="brass-heading-bar" aria-hidden="true" /> Community
+                    <div className="leather-panel stitched flex flex-col gap-3 rounded-xl p-5">
+                        <h3 className="text-engraved-light font-serif text-xs font-bold tracking-[0.14em] uppercase">
+                            Community
                         </h3>
                         <div className="flex flex-col gap-2">
                             <Link href="/catalog/suggestions" className="btn-ghostleather !justify-start !px-4 !py-2 !text-xs">
@@ -216,7 +218,7 @@ export default async function ReferencePage({
                             <Link href="/catalog/changelog" className="btn-ghostleather !justify-start !px-4 !py-2 !text-xs">
                                 📋 Changelog
                                 {(recentChanges ?? 0) > 0 && (
-                                    <span className="ml-auto text-[0.7rem] text-muted-foreground">
+                                    <span className="ml-auto text-[0.7rem]" style={{ color: "var(--leather-text-muted)" }}>
                                         {recentChanges} this week
                                     </span>
                                 )}
@@ -225,9 +227,9 @@ export default async function ReferencePage({
                     </div>
 
                     {(curators ?? []).length > 0 && (
-                        <div className="workcard-stitched flex flex-col gap-3">
-                            <h3 className="brass-heading text-sm font-bold tracking-wider text-secondary-foreground uppercase">
-                                <span className="brass-heading-bar" aria-hidden="true" /> Top Curators
+                        <div className="leather-panel stitched flex flex-col gap-3 rounded-xl p-5">
+                            <h3 className="text-engraved-light font-serif text-xs font-bold tracking-[0.14em] uppercase">
+                                Top Curators
                             </h3>
                             <ul className="m-0 flex list-none flex-col p-0">
                                 {(
@@ -240,15 +242,28 @@ export default async function ReferencePage({
                                 ).map((curator, i) => (
                                     <li
                                         key={curator.id}
-                                        className="flex items-center gap-2 border-b border-input py-2.5 last:border-b-0"
+                                        className="flex items-center gap-2 py-2.5"
+                                        style={
+                                            i > 0
+                                                ? { borderTop: "1px dashed rgba(217,185,120,0.22)" }
+                                                : undefined
+                                        }
                                     >
                                         <span className="min-w-[24px] text-center">
                                             {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `#${i + 1}`}
                                         </span>
-                                        <Link href={`/profile/${curator.alias_name}`} className="text-sm font-semibold text-forest">
+                                        <Link
+                                            href={`/profile/${curator.alias_name}`}
+                                            className="text-sm font-semibold no-underline hover:underline"
+                                            style={{ color: "var(--leather-text)" }}
+                                        >
                                             @{curator.alias_name}
                                         </Link>
-                                        <span className="ml-auto text-xs text-muted-foreground">
+                                        <span
+                                            className="ml-auto font-serif text-xs tabular-nums"
+                                            style={{ color: "var(--leather-text-muted)" }}
+                                            title="approved contributions"
+                                        >
                                             {curator.approved_suggestions_count}
                                         </span>
                                     </li>
