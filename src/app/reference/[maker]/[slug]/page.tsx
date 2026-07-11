@@ -6,6 +6,7 @@ import FocusLayout from "@/components/layouts/FocusLayout";
 import CatalogSubMasthead from "@/components/catalog/CatalogSubMasthead";
 import { Button } from "@/components/ui/button";
 import WantButton from "@/components/reference/WantButton";
+import ReferencePhotoGallery from "@/components/reference/ReferencePhotoGallery";
 import { referencePagesEnabled } from "@/lib/catalog/referenceUrl";
 import {
     getActiveListingsForCatalog,
@@ -136,8 +137,6 @@ export default async function ReferencePage({ params }: Props) {
             .map(([k, v]) => [fmtLabel(k), String(v)] as [string, string]),
     ];
 
-    const heroPhoto = photos[0] ?? null;
-
     return (
         <FocusLayout noHeader>
             <CatalogSubMasthead
@@ -151,25 +150,7 @@ export default async function ReferencePage({ params }: Props) {
             <div className="flex flex-col gap-8">
                 {/* HERO */}
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-[minmax(0,360px)_1fr]">
-                    <div className="overflow-hidden rounded-xl border border-input bg-card shadow-md">
-                        <div className="flex aspect-[4/3] items-center justify-center bg-muted">
-                            {heroPhoto ? (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img
-                                    src={heroPhoto}
-                                    alt={item.title}
-                                    className="h-full w-full object-contain"
-                                />
-                            ) : (
-                                <span className="text-5xl opacity-40">🐴</span>
-                            )}
-                        </div>
-                        {photos.length > 0 && (
-                            <p className="px-3 py-2 text-xs text-muted-foreground italic">
-                                Photo contributed by a collector who owns this model.
-                            </p>
-                        )}
-                    </div>
+                    <ReferencePhotoGallery photos={photos} alt={item.title} />
 
                     <div className="flex flex-col gap-4">
                         <div className="text-sm font-bold tracking-widest text-forest uppercase">
@@ -359,7 +340,7 @@ export default async function ReferencePage({ params }: Props) {
                         </table>
                     </div>
                     <div className="mt-3 flex flex-wrap gap-4 text-sm">
-                        <Link href={`/catalog/${item.id}`} className="text-secondary-foreground hover:text-foreground">
+                        <Link href={`/catalog/${item.id}?suggest=true`} className="text-secondary-foreground hover:text-foreground">
                             ✎ Suggest an edit
                         </Link>
                         <Link href="/catalog/changelog" className="text-secondary-foreground hover:text-foreground">
