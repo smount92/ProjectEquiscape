@@ -2446,9 +2446,10 @@ p {
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  opacity: 0.85;
-  mask-image: var(--noise);
-  mask-size: 220px;
+  /* Legibility: the old opacity 0.85 + noise mask carved the small serif
+     ink into faded blotches (hard to read on show-status stamps). The
+     rotation + serif smallcaps + border keep the rubber-stamp character
+     without eating the text. */
 }
 .stamp-red {
   border-color: #9B3028;
