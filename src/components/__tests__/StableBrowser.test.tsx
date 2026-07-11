@@ -88,6 +88,38 @@ beforeEach(() => {
 });
 
 describe("StableBrowser", () => {
+    it("renders the onboarding welcome instead of the filter bar when the stable is truly empty", () => {
+        renderBrowser({
+            initialCards: [],
+            totalCount: 0,
+            initialHasMore: false,
+            herdTotal: 0,
+            filters: { sort: "newest" },
+        });
+        expect(screen.getByTestId("stable-welcome")).toBeInTheDocument();
+        expect(screen.getByRole("heading", { name: "Welcome to Model Horse Hub!" })).toBeInTheDocument();
+        // No filter bar, result line, or "No Results" state for a 0-horse stable
+        expect(screen.queryByText(/no results/i)).not.toBeInTheDocument();
+        expect(document.getElementById("stable-result-line")).toBeNull();
+        expect(screen.queryByRole("button", { name: /select/i })).not.toBeInTheDocument();
+    });
+
+    it("keeps the filter bar and shows 'No Results' when filters match nothing (not the welcome)", () => {
+        renderBrowser({
+            initialCards: [],
+            totalCount: 0,
+            initialHasMore: false,
+            herdTotal: 214,
+            filters: { finish: "CM", sort: "newest" },
+        });
+        expect(screen.queryByTestId("stable-welcome")).not.toBeInTheDocument();
+        expect(screen.getByText("No Results")).toBeInTheDocument();
+        expect(screen.getByText(/loosen one, or clear all/i)).toBeInTheDocument();
+        // The filter bar survives so the dead-end filter can be cleared
+        expect(document.getElementById("stable-result-line")).not.toBeNull();
+        expect(screen.getByText("0 of 214")).toBeInTheDocument();
+    });
+
     it("shows the 'N of TOTAL match' result line when filters are active", () => {
         renderBrowser();
         expect(screen.getByText("12 of 214")).toBeInTheDocument();
