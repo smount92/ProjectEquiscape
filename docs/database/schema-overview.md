@@ -65,7 +65,7 @@ erDiagram
 | `user_collections` | Named collections for organizing horses | `user_id`, `name`, `is_public` |
 | `horse_collections` | Many-to-many junction: horses ↔ collections | `horse_id`, `collection_id` |
 
-### Provenance (Hoofprint™)
+### Provenance (Hoofprint)
 
 | Table | Purpose | Key Columns |
 |-------|---------|-------------|
@@ -163,7 +163,7 @@ erDiagram
 ## Key Patterns
 
 - **Polymorphic catalog:** `catalog_items.item_type` distinguishes molds, releases, resins, tack, etc. `parent_id` links releases to molds.
-- **Event-sourced provenance:** The Hoofprint™ timeline is never written directly — it's assembled from immutable source tables via `v_horse_hoofprint`.
+- **Event-sourced provenance:** The Hoofprint timeline is never written directly — it's assembled from immutable source tables via `v_horse_hoofprint`.
 - **Soft delete:** Records referenced by other tables use tombstone deletion (set `is_tombstone = true`) rather than hard DELETE.
 - **RLS everywhere:** Every table has Row Level Security policies. See [RLS Policies](rls-policies.md) for the full inventory.
 - **Security invoker views:** All views use `security_invoker = true` so they respect the calling user's RLS policies.

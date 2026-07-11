@@ -126,7 +126,7 @@ graph TD
 | Path | Page | Auth | Notes |
 |------|------|------|-------|
 | `/community/[id]` | Public horse passport | Public | Public view of a horse |
-| `/community/[id]/hoofprint` | Hoofprint™ timeline | Public | Provenance history from view |
+| `/community/[id]/hoofprint` | Hoofprint timeline | Public | Provenance history from view |
 | `/feed` | Activity feed | Auth | Posts from followed users |
 | `/feed/[id]` | Single post + thread | Auth | Post detail with replies |
 | `/inbox` | DM conversations | Auth | List of conversations |

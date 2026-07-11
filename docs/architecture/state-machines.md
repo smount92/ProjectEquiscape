@@ -97,13 +97,13 @@ stateDiagram-v2
 ### Key Behaviors
 
 - **Client exception:** Only the artist can change status, *except* the client can move `review → completed` (client approval)
-- **On delivery:** Creates a completed transaction (enables reviews), stamps `finishing_artist` on the horse, injects WIP photos into the Hoofprint™ timeline via `customization_logs`
+- **On delivery:** Creates a completed transaction (enables reviews), stamps `finishing_artist` on the horse, injects WIP photos into the Hoofprint timeline via `customization_logs`
 - **Revision loop:** `in_progress → review → revision → in_progress` can repeat indefinitely
 - **Shipping:** Bidirectional — used when physical models must travel between client and artist
 
 ---
 
-## 3. Transfer Flow (Hoofprint™)
+## 3. Transfer Flow (Hoofprint)
 
 The ownership transfer flow uses a claim code mechanism. This is not a traditional state machine but a 3-state lifecycle.
 

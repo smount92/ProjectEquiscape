@@ -35,7 +35,7 @@ Before making ANY architectural decisions, you must understand the model horse c
 | **Photo Show** | Online competitions using photographs. LSQ photo standards matter here. |
 | **Show String** | A collector's set of models they bring to shows. Like a "roster" in sports. |
 | **Provenance** | The documented history of a model — who owned it, where it placed, its lineage (for resins). Provenance increases value dramatically. |
-| **Hoofprint™** | Model Horse Hub's provenance feature — a living digital identity that follows a model through its lifecycle across owners. |
+| **Hoofprint** | Model Horse Hub's provenance feature — a living digital identity that follows a model through its lifecycle across owners. |
 | **Catalog Item** | A unified reference entry in the `catalog_items` table — covers plastic molds, plastic releases, and artist resins in a single polymorphic schema. |
 
 ### Community Mindset

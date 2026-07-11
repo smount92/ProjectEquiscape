@@ -13,7 +13,7 @@ for any operator — human or AI assistant — picking up a task cold.
 Model Horse Hub (modelhorsehub.com, repo `model-horse-hub`, Vercel +
 Supabase). ~100 users, ~1,800 cataloged horses. Owner: smount92 (+ wife
 as design lead). Features ALREADY BUILT AND LIVE: digital stable with
-faceted filtering + saved views; Hoofprint™ provenance (permanent
+faceted filtering + saved views; Hoofprint provenance (permanent
 per-horse history); Safe-Trade escrow marketplace (hardened, state-machine
 guarded); Blue Book price data; photo AND live show hosting (unique in the
 hobby: classlist builder w/ NAMHSA template, entry flow with proxy

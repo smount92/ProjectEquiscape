@@ -531,7 +531,7 @@ For expert-judged shows, the host/admin clicks "Close Show" **after** judges hav
 
 ## Show Records & Provenance
 
-Every placed entry automatically generates a `show_records` row, which flows into the horse's **Hoofprint™ timeline** and provenance:
+Every placed entry automatically generates a `show_records` row, which flows into the horse's **Hoofprint timeline** and provenance:
 
 ```mermaid
 graph LR

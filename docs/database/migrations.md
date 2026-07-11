@@ -20,7 +20,7 @@ All SQL migrations are located in `supabase/migrations/` and are applied sequent
 | 012 | `012_user_ratings.sql` | User ratings/reviews system |
 | 013–016 | `013–016_social_expansion_p[1-4].sql` | Social features expansion (follows, activity feed, notifications) |
 | 017 | `017_user_bio.sql` | User profile bio field |
-| 018 | `018_hoofprint.sql` | Hoofprint™ provenance view and ownership history |
+| 018 | `018_hoofprint.sql` | Hoofprint provenance view and ownership history |
 | 019 | `019_settings.sql` | User settings/preferences table |
 | 020 | `020_beta_feedback.sql` | Beta user feedback collection |
 | 021 | `021_indexes_and_constraints.sql` | Performance indexes and FK constraints |

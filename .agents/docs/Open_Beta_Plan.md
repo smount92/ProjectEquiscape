@@ -19,7 +19,7 @@
 
 ### Task 1.1: The "Tombstone" Fix (Data Integrity)
 *   **Target File:** `src/app/actions/horse.ts` (Function: `deleteHorse`)
-*   **Action:** The current function executes a hard delete (`await supabase.from("user_horses").delete()`). Because of `ON DELETE CASCADE`, this wipes out Hoofprint™ provenance for previous owners. Rewrite `deleteHorse` to execute a true soft-delete.
+*   **Action:** The current function executes a hard delete (`await supabase.from("user_horses").delete()`). Because of `ON DELETE CASCADE`, this wipes out Hoofprint provenance for previous owners. Rewrite `deleteHorse` to execute a true soft-delete.
 *   **Logic:** 
     *   Retain the Supabase Storage image deletion logic to save costs.
     *   Delete rows from `horse_images`.

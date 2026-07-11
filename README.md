@@ -11,7 +11,7 @@ Model Horse Hub is a privacy-first platform purpose-built for the model horse co
 | Feature | Description |
 |---------|-------------|
 | **Digital Stable** | Catalog your herd with 10,500+ reference database entries (Breyer, Stone, Artist Resins) |
-| **Hoofprint™ Provenance** | Permanent digital identity for every model — transfers, show records, and customization history follow the horse |
+| **Hoofprint Provenance** | Permanent digital identity for every model — transfers, show records, and customization history follow the horse |
 | **LSQ Photo Suite** | 5 standardized photo angles (Near-Side, Off-Side, Front, Hind, Belly) + unlimited extras |
 | **Financial Vault** | Private purchase prices and estimated values — never exposed on public pages |
 | **Safe-Trade Commerce** | Formal offer → accept → pay → verify → transfer state machine |

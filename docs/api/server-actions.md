@@ -23,7 +23,7 @@ For the full request lifecycle, see [Data Flow](../architecture/data-flow.md).
 | [`reference.ts`](actions/inventory.md#reference) | `searchCatalogAction`, `getCatalogItem`, `getReleasesForMold` | Reference catalog search |
 | [`suggestions.ts`](actions/inventory.md#suggestions) | `submitSuggestion`, `getPendingSuggestions`, `reviewSuggestion` | Catalog suggestions |
 
-### 🔐 Provenance (Hoofprint™)
+### 🔐 Provenance (Hoofprint)
 
 | File | Functions | Purpose |
 |------|-----------|---------|

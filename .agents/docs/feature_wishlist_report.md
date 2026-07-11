@@ -2,7 +2,7 @@
 
 > **Date:** March 8, 2026
 > **Research Based On:** Community forums (Model Horse Blab, Reddit r/BreyerHorses), NAMHSA/MEPSA organizations, artist community pain points, existing competitor tools, and collector behavior analysis.
-> **Already Shipped:** Collection management, 10,500+ reference DB, social layer, photo shows, user ratings, Hoofprint™ provenance, collections, LSQ photos, marketplace, landing page.
+> **Already Shipped:** Collection management, 10,500+ reference DB, social layer, photo shows, user ratings, Hoofprint provenance, collections, LSQ photos, marketplace, landing page.
 
 ---
 
@@ -96,7 +96,7 @@ CREATE TABLE artist_studio_settings (
 **Impact:** 🔴 High | **Effort:** 🟡 Medium | **Uniqueness:** 🔴 Novel
 
 **The Problem:**
-Artists send WIP photos via DM, email, or text. These are often lost. When the model eventually gets its Hoofprint™ passport, none of the "making of" story is captured.
+Artists send WIP photos via DM, email, or text. These are often lost. When the model eventually gets its Hoofprint passport, none of the "making of" story is captured.
 
 **The Solution:**
 Artists upload WIP photos to a private portal tied to the commission. The client sees a timeline:
@@ -114,12 +114,12 @@ Artists upload WIP photos to a private portal tied to the commission. The client
 [💬 Leave feedback for artist]
 ```
 
-**The Magic:** When the commission is marked complete and the horse is transferred via Hoofprint™, the WIP photos **automatically become part of that horse's provenance timeline** — "Created by @AmandaMount, March 2026" with the build photos as a gallery.
+**The Magic:** When the commission is marked complete and the horse is transferred via Hoofprint, the WIP photos **automatically become part of that horse's provenance timeline** — "Created by @AmandaMount, March 2026" with the build photos as a gallery.
 
 **Why This Wins:**
 - Solves the "where did my WIP photos go?" problem
 - Creates the most premium provenance story in the hobby
-- Connects the Art Studio to Hoofprint™ seamlessly
+- Connects the Art Studio to Hoofprint seamlessly
 - No competitor does this
 
 ---
@@ -130,7 +130,7 @@ Artists upload WIP photos to a private portal tied to the commission. The client
 
 **The Solution:**
 Artists who enable "Art Studio" get an enhanced profile tab showing:
-- Gallery of completed commissions (pulled from Hoofprint™ transfers where they're the creator)
+- Gallery of completed commissions (pulled from Hoofprint transfers where they're the creator)
 - Commission status bar
 - Reviews from commission clients
 - Specialties & mediums
@@ -259,13 +259,13 @@ Collectors track NAN (North American Nationals) qualification cards with **paper
 **The Solution:**
 Link show results to the Digital Passport:
 - Each horse's passport shows: "🏆 NAN Qualified — Breed Class (Green Card), Color Class (Yellow Card)"
-- When a model is transferred via Hoofprint™, NAN cards transfer automatically
+- When a model is transferred via Hoofprint, NAN cards transfer automatically
 - Dashboard widget: "You have 7 NAN-qualified models. NAN 2026 entry opens June 1."
 
 **Why This Wins:**
 - NAN qualification is the #1 competitive goal in the hobby
 - Paper cards are archaic and easily lost
-- Ties directly to Hoofprint™ provenance
+- Ties directly to Hoofprint provenance
 - NAMHSA doesn't offer a digital solution
 
 ---
@@ -510,7 +510,7 @@ A dedicated "ID Request" flow:
 - 📦 "Collector" — 10+ models
 - 🏰 "Hoarder" — 50+ models (tongue in cheek)
 - 🎨 "Patron of the Arts" — Commissioned 3+ customs
-- 🐾 "Provenance Pro" — Complete Hoofprint™ on 5+ models
+- 🐾 "Provenance Pro" — Complete Hoofprint on 5+ models
 - 🌟 "Founding Member" — Joined during beta
 
 ---
@@ -580,7 +580,7 @@ Weekly email digest:
 | # | Feature | Impact | Effort | Why Now |
 |---|---|---|---|---|
 | A1 | Commission Tracker | 🔴 High | 🔴 High | **Platform-defining** — nothing else does this |
-| A2 | WIP Photo Portal | 🔴 High | 🟡 Med | Ties into Hoofprint™ naturally |
+| A2 | WIP Photo Portal | 🔴 High | 🟡 Med | Ties into Hoofprint naturally |
 | D3 | Batch Import (CSV) | 🔴 High | 🟡 Med | Removes #1 onboarding barrier |
 | G1 | Regional Tags | 🟡 Med | 🟢 Low | Single column + filter UI |
 | D2 | Insurance PDF | 🔴 High | 🟡 Med | Use data already in vault |
@@ -628,7 +628,7 @@ The model horse community currently uses:
 The Art Studio feature (A1 + A2) is the **strongest differentiator** because:
 1. It brings **artists** to the platform (not just collectors)
 2. Artists are influencers in the community — where they go, their followers follow
-3. The WIP → Hoofprint™ pipeline is genuinely magical and unprecedented
+3. The WIP → Hoofprint pipeline is genuinely magical and unprecedented
 4. It creates a new revenue stream (potential commission fee in far future)
 
 ### Recommended Build Order

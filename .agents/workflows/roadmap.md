@@ -22,7 +22,7 @@ description: Long-term product roadmap for Model Horse Hub. Features that requir
 | Photo Shows (create, enter, vote, deadlines, winners, admin) | ✅ Shipped | 2026-03 |
 | User-to-User Ratings | ✅ Shipped | 2026-03 |
 | Provenance Tracking (show records, pedigree cards) | ✅ Shipped | 2026-03 |
-| Hoofprint™ (timeline, ownership chain, transfer codes, claim) | ✅ Shipped | 2026-03 |
+| Hoofprint (timeline, ownership chain, transfer codes, claim) | ✅ Shipped | 2026-03 |
 | Personal Collections | ✅ Shipped | 2026-03 |
 | LSQ Multi-Angle Photo Suite | ✅ Shipped | 2026-03 |
 | Marketplace (for-sale listings, contact seller, wishlist matching) | ✅ Shipped | 2026-03 |

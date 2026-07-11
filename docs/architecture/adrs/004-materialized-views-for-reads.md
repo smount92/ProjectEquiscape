@@ -7,7 +7,7 @@
 ## Context
 
 Two key features require aggregating data across many rows:
-1. **Hoofprint™ Timeline** — Provenance events from 6 different source tables
+1. **Hoofprint Timeline** — Provenance events from 6 different source tables
 2. **Blue Book Price Guide** — Market prices aggregated from completed transactions
 
 Joining 6 tables in real-time for the timeline, or scanning all transactions for price aggregation, would be too slow for page loads.

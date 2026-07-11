@@ -632,7 +632,7 @@ CREATE INDEX idx_show_records_owner
 
 ### Design Decision: Show Records Belong to the Horse
 
-When a horse is transferred via Hoofprint™:
+When a horse is transferred via Hoofprint:
 - **Show records stay with the horse** (they're linked by `horse_id`)
 - The `owner_id` field records WHO showed the horse, preserving history
 - NAN cards digitally transfer with the horse — no physical mailing needed
@@ -998,6 +998,6 @@ Eventually, if NAMHSA adopts MHH, #3 becomes the standard. But start with #1 —
 
 In 18 months, a collector's experience looks like this:
 
-> Sarah joins MHH and imports her 200-model collection via CSV in 10 minutes. She joins the NW Breyer Club group. The group is hosting a Spring Show — she uses the show string planner to enter 8 models across 15 classes. She earns 3 NAN green cards, which auto-appear on her horses' passports. She commissions a custom from @AmandaMount (whose studio shows "2/5 slots open"). Over 6 weeks, she watches Amanda's WIP photos appear in her private portal. When the custom is complete, it transfers via Hoofprint™ — and the entire creation timeline (11 photos, 4 milestones) flows into the horse's permanent passport. She lists her new custom in the group's Virtual Swap Meet event. Another collector in the Midwest sees it, checks the Hoofprint™ (verified provenance, WIP history, artist rating 4.9 stars), and buys with confidence. The model transfers to the new owner — taking its show records, NAN qualifications, and creation story with it.
+> Sarah joins MHH and imports her 200-model collection via CSV in 10 minutes. She joins the NW Breyer Club group. The group is hosting a Spring Show — she uses the show string planner to enter 8 models across 15 classes. She earns 3 NAN green cards, which auto-appear on her horses' passports. She commissions a custom from @AmandaMount (whose studio shows "2/5 slots open"). Over 6 weeks, she watches Amanda's WIP photos appear in her private portal. When the custom is complete, it transfers via Hoofprint — and the entire creation timeline (11 photos, 4 milestones) flows into the horse's permanent passport. She lists her new custom in the group's Virtual Swap Meet event. Another collector in the Midwest sees it, checks the Hoofprint (verified provenance, WIP history, artist rating 4.9 stars), and buys with confidence. The model transfers to the new owner — taking its show records, NAN qualifications, and creation story with it.
 
 **That's not a collection manager. That's the operating system for the hobby.**

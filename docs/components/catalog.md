@@ -28,7 +28,7 @@ All 121+ client components live in `src/components/`. Every component is a `"use
 | `ImageCropModal` | `ImageCropModal.tsx` | Crop and resize images on upload |
 | `EventPhotoGallery` | `EventPhotoGallery.tsx` | Photo gallery for events |
 
-### 🔐 Provenance (Hoofprint™)
+### 🔐 Provenance (Hoofprint)
 
 | Component | File | Purpose |
 |-----------|------|---------|
