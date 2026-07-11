@@ -14,11 +14,9 @@
  *   2. requireAuth(),
  *   3. returns { success, error? } — never throws for domain errors.
  *
- * NOTE: getStableSummary / facet options prefer the migration-123
- * RPCs (get_stable_summary / get_stable_facets). Until the owner
- * applies 123 they fall back to bounded client-merged queries, so the
- * flag can be turned on locally against the real DB. The fallbacks
- * are deletable after 123 + gen-types.
+ * getStableSummary / facet options run on the migration-123 RPCs
+ * (get_stable_summary / get_stable_facets) — canonical since 123 was
+ * applied 2026-07-10; the pre-migration fallbacks were removed.
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -54,8 +52,6 @@ const CATALOG_MATCH_CAP = 100;
 const ID_CONSTRAINT_CAP = 1000;
 /** "Select all N matching" hard cap. */
 const SELECT_ALL_CAP = 500;
-/** Facet fallback scan bound (only until migration 123 is applied). */
-const FACET_FALLBACK_CAP = 1000;
 
 type StablePageInput = z.infer<typeof getStablePageSchema>;
 type StableFilterInput = z.infer<typeof getMatchingHorseIdsSchema>;
@@ -290,32 +286,10 @@ async function fetchFacetOptions(
         };
     }
 
-    // Fallback (pre-123): bounded scan + JS distinct.
-    const { data: rows } = await supabase
-        .from("user_horses")
-        .select("finish_type, asset_category, catalog_items:catalog_id(maker, scale)")
-        .eq("owner_id", userId)
-        .is("deleted_at", null)
-        .limit(FACET_FALLBACK_CAP);
-
-    const makers = new Set<string>();
-    const scales = new Set<string>();
-    const finishes = new Set<string>();
-    const categories = new Set<string>();
-    for (const row of (rows ?? []) as Record<string, unknown>[]) {
-        const catalog = row.catalog_items as { maker: string | null; scale: string | null } | null;
-        if (catalog?.maker) makers.add(catalog.maker);
-        if (catalog?.scale) scales.add(catalog.scale);
-        if (row.finish_type) finishes.add(row.finish_type as string);
-        if (row.asset_category) categories.add(row.asset_category as string);
-    }
-    const sorted = (s: Set<string>) => [...s].sort((a, b) => a.localeCompare(b));
-    return {
-        makers: sorted(makers),
-        scales: sorted(scales),
-        finishes: sorted(finishes),
-        categories: sorted(categories),
-    };
+    // Migration 123 is applied — the RPC is canonical. An error here is
+    // a real fault; degrade to empty facet lists (filters still work,
+    // the dropdowns are just unpopulated) rather than an unbounded scan.
+    return { makers: [], scales: [], finishes: [], categories: [] };
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -436,80 +410,11 @@ export async function getStableSummary(): Promise<ActionResult<{ summary: Stable
         }
     }
 
-    // Fallback (pre-123): the legacy three-fetch merge, kept only so the
-    // flag can run before the migration is applied. Delete after 123.
-    try {
-        const [horsesResult, collectionsResult] = await Promise.all([
-            supabase
-                .from("user_horses")
-                .select("id, collection_id, trade_status", { count: "exact" })
-                .eq("owner_id", user.id)
-                .is("deleted_at", null),
-            supabase.from("user_collections").select("id, name").eq("user_id", user.id).order("name"),
-        ]);
-        const horses = (horsesResult.data ?? []) as {
-            id: string;
-            collection_id: string | null;
-            trade_status: string;
-        }[];
-        const allIds = horses.map((h) => h.id);
-
-        const [vaultResult, junctionResult] = await Promise.all([
-            allIds.length > 0
-                ? supabase
-                      .from("financial_vault")
-                      .select("horse_id, purchase_price, estimated_current_value")
-                      .in("horse_id", allIds)
-                : Promise.resolve({ data: [] }),
-            allIds.length > 0
-                ? supabase.from("horse_collections").select("horse_id, collection_id").in("horse_id", allIds)
-                : Promise.resolve({ data: [] }),
-        ]);
-
-        const valueByHorse = new Map<string, number>();
-        let vaultTotal = 0;
-        for (const v of (vaultResult.data ?? []) as {
-            horse_id: string;
-            purchase_price: number | null;
-            estimated_current_value: number | null;
-        }[]) {
-            const val = v.estimated_current_value ?? v.purchase_price ?? 0;
-            vaultTotal += val;
-            valueByHorse.set(v.horse_id, val);
-        }
-
-        // Dual-source membership merge (legacy FK ∪ junction).
-        const members = new Map<string, Set<string>>();
-        const add = (collectionId: string, horseId: string) => {
-            if (!members.has(collectionId)) members.set(collectionId, new Set());
-            members.get(collectionId)!.add(horseId);
-        };
-        for (const h of horses) if (h.collection_id) add(h.collection_id, h.id);
-        for (const j of (junctionResult.data ?? []) as { horse_id: string; collection_id: string }[]) {
-            add(j.collection_id, j.horse_id);
-        }
-
-        const collections = ((collectionsResult.data ?? []) as { id: string; name: string }[]).map(
-            (c) => {
-                const ids = members.get(c.id) ?? new Set<string>();
-                let value = 0;
-                for (const id of ids) value += valueByHorse.get(id) ?? 0;
-                return { id: c.id, name: c.name, count: ids.size, value };
-            },
-        );
-
-        return {
-            success: true,
-            summary: {
-                totalHorses: horsesResult.count ?? horses.length,
-                vaultTotal,
-                forSaleCount: horses.filter((h) => h.trade_status === "For Sale").length,
-                collections,
-            },
-        };
-    } catch (err) {
-        return { success: false, error: err instanceof Error ? err.message : "Summary failed." };
-    }
+    // Migration 123 is applied — the RPC is canonical; surface failures.
+    return {
+        success: false,
+        error: error?.message ?? "Stable summary unavailable.",
+    };
 }
 
 // ══════════════════════════════════════════════════════════════

@@ -1,34 +1,26 @@
 /**
- * Digital Stable v2 — interim hand-written types (Phase-B style).
- *
- * Migration 123 adds the stable_saved_views table plus the
- * get_stable_summary / get_stable_facets functions, but it is
- * FILE-ONLY until the owner applies it, so database.generated.ts
- * does not know them yet.
- *
- * TODO(after migration 123 is applied + `npm run gen-types`):
- * replace the row shapes below with derivations from
- * Database["public"]["Tables"] like src/lib/shows/types.ts does.
+ * Digital Stable v2 — row types derived from the generated schema
+ * (migration 123 applied 2026-07-10; table/RPC shapes flow in via
+ * gen-types). `params`/`collections` are JSONB in Postgres, so the
+ * generator types them as Json — narrowed here to the domain shapes.
  */
 
-// ── Row / RPC shapes (replace after gen-types) ──
+import type { Database } from "@/lib/types/database.generated";
 
-/** stable_saved_views row (new table in 123). */
-export interface StableSavedViewRow {
-    id: string;
-    user_id: string;
-    name: string;
+type Tables = Database["public"]["Tables"];
+
+/** stable_saved_views row (params JSONB narrowed to the filter map). */
+export type StableSavedViewRow = Omit<Tables["stable_saved_views"]["Row"], "params"> & {
     params: Record<string, string>;
-    created_at: string;
-}
+};
 
-/** One row from get_stable_summary(p_owner). */
-export interface StableSummaryRow {
-    total_horses: number;
-    vault_total: number;
-    for_sale_count: number;
+/** One row from get_stable_summary(p_owner) (collections JSONB narrowed). */
+export type StableSummaryRow = Omit<
+    Database["public"]["Functions"]["get_stable_summary"]["Returns"][number],
+    "collections"
+> & {
     collections: { id: string; name: string; count: number; value: number }[];
-}
+};
 
 // ── Action view models ──
 

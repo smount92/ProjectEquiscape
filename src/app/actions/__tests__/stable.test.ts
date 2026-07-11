@@ -177,17 +177,12 @@ describe("getStableSummary", () => {
         expect(mockClient.rpc).toHaveBeenCalledWith("get_stable_summary", { p_owner: "user-1" });
     });
 
-    it("falls back to the legacy merge when the RPC is missing (pre-123)", async () => {
+    it("surfaces an RPC failure instead of silently degrading (123 is canonical)", async () => {
         mockClient.rpc.mockResolvedValueOnce({ data: null, error: { message: "function not found" } });
         const result = await getStableSummary();
-        expect(result.success).toBe(true);
-        if (result.success) {
-            expect(result.summary).toEqual({
-                totalHorses: 0,
-                vaultTotal: 0,
-                forSaleCount: 0,
-                collections: [],
-            });
+        expect(result.success).toBe(false);
+        if (!result.success) {
+            expect(result.error).toMatch(/function not found/);
         }
     });
 

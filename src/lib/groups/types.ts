@@ -1,39 +1,31 @@
 /**
- * Groups forum — interim hand-written types (Phase-B style).
- *
- * Migration 122 adds posts.title / posts.bumped_at and the
- * group_last_read table, but it is FILE-ONLY until the owner applies
- * it, so database.generated.ts does not know these columns yet.
- *
- * TODO(after migration 122 is applied + `npm run gen-types`):
- * replace the row shapes below with derivations from
- * Database["public"]["Tables"] like src/lib/shows/types.ts does.
+ * Groups forum — row types derived from the generated schema
+ * (migration 122 applied 2026-07-10; columns flow in via gen-types).
  */
 
-// ── Row shapes (replace after gen-types) ──
+import type { Database } from "@/lib/types/database.generated";
+
+type Tables = Database["public"]["Tables"];
 
 /** posts row fields the forum reads. */
-export interface ForumPostRow {
-    id: string;
-    author_id: string;
-    content: string;
-    title: string | null; // added in 122
-    parent_id: string | null;
-    group_id: string | null;
-    channel_id: string | null;
-    likes_count: number;
-    replies_count: number;
-    is_pinned: boolean;
-    created_at: string;
-    bumped_at: string; // added in 122
-}
+export type ForumPostRow = Pick<
+    Tables["posts"]["Row"],
+    | "id"
+    | "author_id"
+    | "content"
+    | "title"
+    | "parent_id"
+    | "group_id"
+    | "channel_id"
+    | "likes_count"
+    | "replies_count"
+    | "is_pinned"
+    | "created_at"
+    | "bumped_at"
+>;
 
-/** group_last_read row (new table in 122). */
-export interface GroupLastReadRow {
-    group_id: string;
-    user_id: string;
-    last_read_at: string;
-}
+/** group_last_read row (table added in 122). */
+export type GroupLastReadRow = Tables["group_last_read"]["Row"];
 
 // ── Action view models ──
 

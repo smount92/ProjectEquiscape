@@ -1572,6 +1572,53 @@ export type Database = {
           },
         ]
       }
+      group_last_read: {
+        Row: {
+          group_id: string
+          last_read_at: string
+          user_id: string
+        }
+        Insert: {
+          group_id: string
+          last_read_at?: string
+          user_id: string
+        }
+        Update: {
+          group_id?: string
+          last_read_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_last_read_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_last_read_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "group_last_read_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "group_last_read_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       group_memberships: {
         Row: {
           group_id: string
@@ -2505,6 +2552,7 @@ export type Database = {
       posts: {
         Row: {
           author_id: string
+          bumped_at: string
           channel_id: string | null
           content: string
           created_at: string
@@ -2519,10 +2567,12 @@ export type Database = {
           replies_count: number
           show_id: string | null
           studio_id: string | null
+          title: string | null
           updated_at: string
         }
         Insert: {
           author_id: string
+          bumped_at?: string
           channel_id?: string | null
           content: string
           created_at?: string
@@ -2537,10 +2587,12 @@ export type Database = {
           replies_count?: number
           show_id?: string | null
           studio_id?: string | null
+          title?: string | null
           updated_at?: string
         }
         Update: {
           author_id?: string
+          bumped_at?: string
           channel_id?: string | null
           content?: string
           created_at?: string
@@ -2555,6 +2607,7 @@ export type Database = {
           replies_count?: number
           show_id?: string | null
           studio_id?: string | null
+          title?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -3765,6 +3818,52 @@ export type Database = {
           },
         ]
       }
+      stable_saved_views: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          params: Json
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          params: Json
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          params?: Json
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stable_saved_views_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stable_saved_views_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "stable_saved_views_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transactions: {
         Row: {
           accepted_at: string | null
@@ -4478,6 +4577,16 @@ export type Database = {
           role: string
           show_id: string
           user_id: string
+        }[]
+      }
+      get_stable_facets: { Args: { p_owner: string }; Returns: Json }
+      get_stable_summary: {
+        Args: { p_owner: string }
+        Returns: {
+          collections: Json
+          for_sale_count: number
+          total_horses: number
+          vault_total: number
         }[]
       }
       get_user_tier: { Args: never; Returns: string }
