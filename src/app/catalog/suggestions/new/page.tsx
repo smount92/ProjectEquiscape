@@ -1,8 +1,8 @@
 import { createClient } from"@/lib/supabase/server";
 import { redirect } from"next/navigation";
-import Link from"next/link";
 import SuggestNewEntryForm from"@/components/SuggestNewEntryForm";
 import FocusLayout from"@/components/layouts/FocusLayout";
+import CatalogSubMasthead from"@/components/catalog/CatalogSubMasthead";
 
 export const metadata = {
  title:"Suggest New Catalog Entry — Model Horse Hub",
@@ -17,17 +17,12 @@ export default async function SuggestNewEntryPage() {
  if (!user) redirect("/login");
 
  return (
- <FocusLayout
-  title="📗 Suggest a New Catalog Entry"
-  description="Can't find a model in the catalog? Submit the details below and the community will review your suggestion."
-  backLink={
-  <nav className="text-muted-foreground flex items-center gap-1 text-sm">
-   <Link href="/catalog">📚 Catalog</Link>
-   <span className="text-muted-foreground">›</span>
-   <span>Suggest New Entry</span>
-  </nav>
-  }
- >
+ <FocusLayout noHeader>
+  <CatalogSubMasthead
+   icon="📗"
+   title="Suggest a New Entry"
+   subtitle="Community-reviewed additions to the catalog"
+  />
   <div className="bg-card border-input rounded-lg border p-8 shadow-md transition-all">
   <SuggestNewEntryForm />
   </div>

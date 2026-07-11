@@ -6,6 +6,7 @@ import SuggestionVoteButtons from"@/components/SuggestionVoteButtons";
 import SuggestionCommentThread from"@/components/SuggestionCommentThread";
 import SuggestionAdminActions from"@/components/SuggestionAdminActions";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import CatalogSubMasthead from"@/components/catalog/CatalogSubMasthead";
 
 interface Props {
  params: Promise<{ id: string }>;
@@ -129,18 +130,14 @@ export default async function SuggestionDetailPage({ params }: Props) {
  :"";
 
  return (
-  <ExplorerLayout title="Suggestion Detail" description="View, vote on, and discuss a catalog suggestion.">
- <nav className="text-muted-foreground mb-6 flex items-center gap-1 text-sm">
- <Link href="/catalog">📚 Reference Catalog</Link>
- <span className="text-muted-foreground mb-6-sep flex items-center gap-1 text-sm">
- ›
- </span>
- <Link href="/catalog/suggestions">Suggestions</Link>
- <span className="text-muted-foreground mb-6-sep flex items-center gap-1 text-sm">
- ›
- </span>
- <span>Detail</span>
- </nav>
+  <ExplorerLayout noHeader>
+ <CatalogSubMasthead
+  icon="💡"
+  title="Suggestion Detail"
+  subtitle="Vote and discuss this proposal"
+  backHref="/catalog/suggestions"
+  backLabel="Suggestions"
+ />
 
  <div className="space-y-4">
  {/* Vote Panel + Main Content */}

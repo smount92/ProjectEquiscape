@@ -3,6 +3,7 @@ import { getAdminClient } from"@/lib/supabase/admin";
 import Link from"next/link";
 import type { Metadata } from"next";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import CatalogSubMasthead from"@/components/catalog/CatalogSubMasthead";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
@@ -56,7 +57,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
  // Get comment counts per suggestion
  const suggestionIds = (suggestions ?? []).map((s) => s.id);
 
- let commentCounts: Record<string, number> = {};
+ const commentCounts: Record<string, number> = {};
  if (suggestionIds.length > 0) {
  const { data: comments } = await supabase
  .from("catalog_suggestion_comments")
@@ -77,21 +78,17 @@ export default async function SuggestionsPage({ searchParams }: Props) {
  ];
 
  return (
-  <ExplorerLayout title="Catalog Suggestions" description="Community proposals to improve the reference catalog.">
- <nav className="text-muted-foreground mb-6 flex items-center gap-1 text-sm">
- <Link href="/catalog">📚 Reference Catalog</Link>
- <span className="text-muted-foreground mb-6-sep flex items-center gap-1 text-sm">
- ›
- </span>
- <span>Suggestions</span>
- </nav>
-
- <h1 className="mb-1 font-sans text-2xl">
- 📝 <span className="text-forest">Catalog Suggestions</span>
- </h1>
- <p className="text-secondary-foreground mb-6">
- Community proposals to improve the reference catalog. Vote and discuss to help admins review.
- </p>
+  <ExplorerLayout noHeader>
+ <CatalogSubMasthead
+  icon="💡"
+  title="Catalog Suggestions"
+  subtitle="Community proposals to the reference catalog"
+  actions={
+  <Link href="/catalog/suggestions/new" className="btn-brass inline-flex items-center gap-1.5 no-underline hover:no-underline">
+   📗 Suggest Entry
+  </Link>
+  }
+ />
 
  {/* Filter Tabs */}
  <div className="ref-filter-tabs">

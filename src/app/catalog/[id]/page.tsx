@@ -4,6 +4,7 @@ import type { Metadata } from"next";
 import SuggestEditModal from"@/components/SuggestEditModal";
 import Link from"next/link";
 import FocusLayout from"@/components/layouts/FocusLayout";
+import CatalogSubMasthead from"@/components/catalog/CatalogSubMasthead";
 import { buildEbaySearchUrl } from"@/lib/utils/ebayAffiliate";
 import { Button } from "@/components/ui/button";
 
@@ -77,17 +78,12 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
  ];
 
  return (
- <FocusLayout
-  title={catalogItem.title}
-  description={<>by {catalogItem.maker}</>}
-  backLink={
-  <nav className="text-muted-foreground flex items-center gap-1 text-sm">
-   <Link href="/catalog">📚 Reference Catalog</Link>
-   <span className="text-muted-foreground">›</span>
-   <span>{catalogItem.title}</span>
-  </nav>
-  }
- >
+ <FocusLayout noHeader>
+  <CatalogSubMasthead
+   icon="🐴"
+   title={catalogItem.title}
+   subtitle={<>by {catalogItem.maker}</>}
+  />
   <div className="flex flex-col gap-6">
   {/* Main Card */}
   <div className="bg-card border-input rounded-lg border p-6 shadow-md transition-all">

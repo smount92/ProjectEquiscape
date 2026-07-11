@@ -2,6 +2,7 @@ import { createClient } from"@/lib/supabase/server";
 import Link from"next/link";
 import type { Metadata } from"next";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import CatalogSubMasthead from"@/components/catalog/CatalogSubMasthead";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
@@ -21,15 +22,12 @@ export default async function ChangelogPage() {
  .limit(50);
 
  return (
- <ExplorerLayout
-  title={<>📋 <span className="text-forest">Catalog Changelog</span></>}
-  description={`Community-approved updates to the reference catalog. ${count ?? 0} total changes.`}
- >
-  <nav className="text-muted-foreground mb-6 flex items-center gap-1 text-sm">
-  <Link href="/catalog">📚 Reference Catalog</Link>
-  <span className="text-muted-foreground">›</span>
-  <span>Changelog</span>
-  </nav>
+ <ExplorerLayout noHeader>
+  <CatalogSubMasthead
+   icon="📋"
+   title="Catalog Changelog"
+   subtitle={`${count ?? 0} community-approved change${count === 1 ? "" : "s"}`}
+  />
 
   <div className="flex flex-col gap-0">
   {(entries ?? [])?.map((entry) => {
