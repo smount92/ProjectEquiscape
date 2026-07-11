@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
+import PageMasthead from "@/components/layouts/PageMasthead";
 import AiDataPolicySection from "@/components/AiDataPolicySection";
 import { Button } from "@/components/ui/button";
 
@@ -183,26 +184,14 @@ export default function FaqPage() {
     };
 
     return (
-        <ExplorerLayout
-            title={
-                <>
-                    Frequently Asked <span className="text-forest">Questions</span>
-                </>
-            }
-            description="Everything you need to know about Model Horse Hub."
-        >
+        <ExplorerLayout noHeader>
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
             <div className="animate-fade-in-up mx-auto max-w-[860px]">
-                {/* Page Header */}
-                <div className="mb-8">
-                    <h1>
-                        Frequently Asked <span className="text-forest">Questions</span>
-                    </h1>
-                    <p className="text-secondary-foreground mt-2 text-lg">
-                        Everything you need to know about Model Horse Hub. Can&apos;t find your answer?{" "}
-                        <Link href="/contact">Contact us</Link>.
-                    </p>
-                </div>
+                <PageMasthead
+                    icon="❓"
+                    title="Frequently Asked Questions"
+                    subtitle="Everything you need to know about Model Horse Hub"
+                />
 
                 {/* Category Filter */}
                 <div className="mb-12 flex flex-wrap justify-center gap-2">
