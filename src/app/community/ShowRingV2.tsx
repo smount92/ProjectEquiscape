@@ -10,10 +10,10 @@
  */
 
 import { createClient } from "@/lib/supabase/server";
-import Link from "next/link";
 
 import FeaturedHorseCard from "@/components/FeaturedHorseCard";
 import ShowRingBrowser from "@/components/showring/ShowRingBrowser";
+import ShowRingMasthead from "@/components/showring/ShowRingMasthead";
 import { getPublicImageUrls } from "@/lib/utils/storage";
 import { getShowRingPage } from "@/app/actions/showring";
 import { parseShowRingSearchParams } from "@/lib/showring/filterParams";
@@ -106,20 +106,8 @@ export default async function ShowRingV2({
                 </div>
             )}
 
-            {/* Stats + Help ID link */}
-            <div className="mt-6 flex items-center gap-6">
-                <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-bold text-forest">{totalCount}</span>
-                    <span className="text-sm font-medium text-secondary-foreground">Models Showcased</span>
-                </div>
-                <Link
-                    href="/community/help-id"
-                    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-stone-300 bg-card px-5 py-2 text-sm font-semibold text-foreground no-underline shadow-sm transition-all hover:border-stone-400 hover:bg-muted"
-                    id="help-id-link"
-                >
-                    🔍 Help Me ID
-                </Link>
-            </div>
+            {/* Leather landmark: count + Help-Me-ID live on the band */}
+            <ShowRingMasthead totalCount={totalCount} />
 
             {/* Featured Horse */}
             {featuredHorse && <FeaturedHorseCard {...featuredHorse} />}

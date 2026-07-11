@@ -60,8 +60,11 @@ function SelectTrigger({
 function SelectContent({
   className,
   children,
-  position = "item-aligned",
-  align = "center",
+  // popper anchors the menu to its trigger; the old item-aligned
+  // default overlay mode mispositioned (menus jumping to the screen
+  // edge) in filter bars.
+  position = "popper",
+  align = "start",
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Content>) {
   return (
