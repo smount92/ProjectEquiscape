@@ -102,6 +102,13 @@ const SCALE_MAP = {
 };
 const mapScale = (raw) => SCALE_MAP[norm(raw)] || (raw || null);
 
+// Title-case material so the facet stays consistent (Pewter, Resin, Plastic,
+// China) regardless of how a dataset spells it — .eq filtering is case-sensitive.
+const mapMaterial = (raw) => {
+  const s = String(raw || "").trim();
+  return s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : null;
+};
+
 // ── read all rows of a table, paginated ──
 async function readAll(table, columns) {
   const PAGE = 1000;
@@ -331,7 +338,7 @@ async function main() {
         release_year_start: rec.year ?? year,
         release_year_end: rec.year ?? year,
         finish: rec.finish || null,
-        material: rec.material || null,
+        material: mapMaterial(rec.material),
         mold_name: info.mold || null,
         run_count: rec.number_produced ?? null,
         retail_price: rec.sold_for || null,
