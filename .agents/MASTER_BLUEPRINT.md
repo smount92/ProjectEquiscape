@@ -2,7 +2,8 @@
 
 > **This is the Single Source of Truth for all architectural rules.**
 > Every workflow and every agent session MUST read this file first.
-> Last updated: 2026-04-07 (V43.5 + Friendly Photo URLs deployed — Migration 112)
+> Last updated: 2026-07-11 (Shows v2, Groups Forum, Stable v2, Show Ring v2 all shipped and
+> flag-live in prod — Migrations 113–123)
 
 **Reading order for new sessions:**
 1. Read THIS file (Iron Laws + guardrails)
@@ -14,7 +15,7 @@
 
 ## 🏛️ Project Iron Laws
 
-These are the **non-negotiable architectural principles** that govern every database migration, server action, and UI component. They were forged during the Grand Unification (V6–V10) and hardened through 112 production migrations.
+These are the **non-negotiable architectural principles** that govern every database migration, server action, and UI component. They were forged during the Grand Unification (V6–V10) and hardened through 123 production migrations.
 
 1. **Zero Data Loss Migrations** — Every schema change MUST include a robust PL/pgSQL data migration script. We move existing production data *before* we drop old tables.
 
@@ -28,9 +29,15 @@ These are the **non-negotiable architectural principles** that govern every data
 
 6. **RLS InitPlan Pattern** — All RLS policies MUST use `(SELECT auth.uid())` instead of bare `auth.uid()` to prevent per-row function evaluation. Every `SECURITY DEFINER` function must include `SET search_path = ''` with fully qualified `public.table_name` references. The `pg_trgm` extension lives in the `extensions` schema (not `public`).
 
+7. **Zod at Every Action Boundary** — Every new Server Action validates its input with a `zod` schema BEFORE touching `requireAuth()` or the database. The order is fixed: **zod parse → `requireAuth()` → explicit ownership/role check → RLS-first write** (admin client only with a code comment justifying why RLS can't do the job). This standard is fully live in the 5 rebuilt domains (`shows-v2`, `shows-v2-ring`, `groups-forum`, `stable`, `showring` — see `src/lib/{shows,groups,stable,showring}/schemas.ts`) and is the required pattern for all new action files; it has not yet been retrofitted onto the pre-rebuild actions (`horse.ts`, `market.ts`, `posts.ts`, etc. — don't assume it's there).
+
+8. **Flag-Gated Dark-Ship Ritual** — User-visible rebuilds of live surfaces ship dark behind a `NEXT_PUBLIC_<DOMAIN>_V2`-style env flag, never as a direct cutover. Ritual: build behind the flag → preview locally via `.env.local` → owner approves the look → flip the flag in Vercel + redeploy → old code path stays in the tree (not deleted) until the owner is confident, then a follow-up PR removes the dead branch. All four flags shipped this way (`SHOWS_V2`, `GROUPS_FORUM`, `STABLE_V2`, `SHOWRING_V2`) are now live in prod — "flag exists" and "flag is flipped on in prod" are different states; check `docs/getting-started/setup.md` for current status, don't assume from the code alone.
+
+9. **`src/lib/<domain>/` Pure, Tested Domain Libraries** — Business logic for a rebuilt domain (state machines, eligibility/entry rules, card issuance, results export, filter-param parsing, callback-ladder math) lives in a pure, framework-free `src/lib/<domain>/` module with real unit test coverage — NOT inline in the Server Action or the component. Actions stay thin: validate → call the lib → write. Established for `shows`, `groups`, `stable`, `showring`, `commerce`; new domains should follow the same split rather than growing 1,000-line action files (the way `horse.ts`/`market.ts` did pre-rebuild).
+
 ---
 
-## ⚙️ Tech Decisions (Current as of V41)
+## ⚙️ Tech Decisions (Current as of July 2026 — Shows v2/Groups Forum/Stable v2/Show Ring v2)
 
 | Decision | Status | Notes |
 |----------|--------|-------|
@@ -40,13 +47,54 @@ These are the **non-negotiable architectural principles** that govern every data
 | Supabase (PostgreSQL + RLS) | ✅ Official | Pro plan, Realtime via global `NotificationProvider` |
 | Next.js App Router (RSC) | ✅ Official | v16.1, Turbopack, `after()` for deferred tasks |
 | Stripe Checkout Sessions | ✅ Official | Subscription + a-la-carte, webhook at `/api/webhooks/stripe` |
-| "Cozy Scrapbook" Warm Parchment | ✅ Official | `bg-[#F4EFE6]` bg, `bg-[#FEFCF8]` cards, Hunter Green `#2C5545` accent |
-| Cold palette (`bg-white`, `bg-stone-50`) | ❌ Banned | Use warm semantic tokens — see `docs/guides/design-system.md` |
+| "Leather at the landmarks, parchment for the work" | ✅ Official | Leather/brass/ledger materials on chrome & landmark surfaces, warm parchment on work surfaces, Lamplight dark mode. Supersedes the earlier "Cozy Scrapbook" framing — see `docs/guides/design-system.md`. Token system, not literal hex: use the semantic leather/ledger/brass tokens, never hardcode the old palette values |
+| zod at every action boundary | ✅ Official | See Iron Law 7. Live in the 5 rebuilt domains; retrofit opportunistically elsewhere |
+| Flag-gated dark-ship rebuilds | ✅ Official | See Iron Law 8. `NEXT_PUBLIC_SHOWS_V2` / `GROUPS_FORUM` / `STABLE_V2` / `SHOWRING_V2` all live in prod |
+| `src/lib/<domain>/` pure tested libs | ✅ Official | See Iron Law 9. `shows`, `groups`, `stable`, `showring`, `commerce` |
+| Cold palette (`bg-white`, `bg-stone-50`) | ❌ Banned | Use warm semantic tokens — see `docs/guides/design-system.md`. Known violations remain on some public marketing pages (About/FAQ) pending a design-pass cleanup — don't copy them as precedent |
 | Inline `style={{...}}` for layout | ❌ Banned | Use Tailwind classes exclusively |
 | `createPortal` for modals | ❌ Banned | Use `<Dialog>` from shadcn/ui (exception: `PhotoLightbox.tsx`) |
 | CSS Modules (`.module.css`) | ❌ Banned | Migrated to Tailwind v4 — do not reintroduce |
 | Silent `catch {}` blocks | ❌ Banned | Use `logger.error()` from `@/lib/logger` |
 | `Math.random()` for security | ❌ Banned | Use `crypto.randomInt()` for PINs and tokens |
+
+---
+
+## 🏗️ Shows v2 / Groups Forum / Stable v2 / Show Ring v2 — Architecture
+
+Four flag-gated rebuilds (all `NEXT_PUBLIC_*` flags LIVE in prod as of July 2026). Each follows
+the same shape: a first-class schema domain (migrations 113–123, see `MASTER_SUPABASE.md`), a
+pure tested `src/lib/<domain>/` library, zod-at-boundary Server Actions, and components gated
+behind the flag.
+
+- **Shows v2** (`NEXT_PUBLIC_SHOWS_V2`, actions `shows-v2.ts` + ring console `shows-v2-ring.ts`,
+  lib `src/lib/shows/`) — the new first-class competition domain: `shows` →
+  `show_divisions` → `show_sections` → `show_classes` → `show_class_entries`, with
+  `show_placings`/`show_callbacks` for results and `qualification_cards` for the
+  earn-and-verify loop (`/cards/[code]`). One system, two modes (`live` venue/table/leg-tag
+  showing and `online` photo judging), community-vote or expert judging, a documented
+  state machine (`src/lib/shows/stateMachine.ts`), NAMHSA-format results export
+  (`src/lib/shows/resultsExport.ts`), and an offline-tolerant ring console with a retry queue
+  (`src/lib/shows/retryQueue.ts`) for fairground connectivity.
+  **This does NOT replace the legacy photo-show engine** (`events`/`event_divisions`/
+  `event_classes`/`event_entries`/`event_votes`, driven by `src/app/actions/competition.ts`
+  and the Show Packer `show_strings`/`show_string_entries`). That cluster is **NOT dead code**
+  — it actively serves real-world show entrants today. It becomes deletable only AFTER a data
+  migration moves its historical shows into the v2 tables; until that migration ships and is
+  verified, treat `competition.ts` and the packer as KEEP, not legacy cruft to clean up.
+- **Groups Forum ("Notice Board")** (`NEXT_PUBLIC_GROUPS_FORUM`, actions
+  `groups-forum.ts`, lib `src/lib/groups/`) — reframes `groups` + `posts` (with `group_id`
+  context) as threads/channels/pinned posts. Adds `posts.title`/`posts.bumped_at` and the
+  `group_last_read` table for per-user unread state. `add_post_reply()` was reworked (not
+  replaced) to bump `bumped_at` on reply.
+- **Stable v2** (`NEXT_PUBLIC_STABLE_V2`, actions `stable.ts`, lib `src/lib/stable/`) — faceted
+  filtering + saved views over the existing `user_horses` inventory. New `stable_saved_views`
+  table; new `get_stable_summary()`/`get_stable_facets()` RPCs for one-round-trip sidebar
+  aggregates and dropdown facet values.
+- **Show Ring v2** (`NEXT_PUBLIC_SHOWRING_V2`, actions `showring.ts`, lib `src/lib/showring/`)
+  — the live judging/spectator surface consuming the Shows v2 domain (filter params, flags,
+  schemas only in `src/lib/showring/` — no new tables of its own; it reads/writes the Shows v2
+  tables above).
 
 ---
 
@@ -60,7 +108,8 @@ These are the **non-negotiable architectural principles** that govern every data
 - `show_records` — competition history, provenance
 - `transactions` — commerce state machine (offers, payments)
 - `horse_images` — Supabase Storage — public `horse-images` bucket (CDN-cacheable, no signed URLs), private `chat-attachments` bucket (signed URLs for DM photos). `short_slug` column (Migration 112) for friendly `/photo/[slug]` share URLs
-- `events` / `event_entries` — competition engine
+- `events` / `event_entries` — legacy photo-show engine (KEEP — still serves real entrants; see the Shows v2 architecture section above)
+- `shows` / `show_class_entries` / `show_placings` / `qualification_cards` — Shows v2 domain: live competition results and bearer-token cards that transfer with the horse on sale
 - `users` — profiles, auth, tier metadata
 - `horse_ownership_history` — transfer provenance chain
 

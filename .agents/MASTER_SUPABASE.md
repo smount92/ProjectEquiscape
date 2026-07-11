@@ -2,8 +2,10 @@
 
 > **Single Source of Truth for all database schema, RLS policies, and RPCs.**
 > Update this file whenever a new migration is deployed.
-> Last updated: 2026-04-07 | Migration count: 112 (001–112) | SQL files: 108
-> Source: Live production data via `npx supabase inspect db table-sizes --linked`
+> Last updated: 2026-07-11 | Migration count: 123 (001–123) | SQL files: 119 (045/047/049/051 skipped)
+> Source: Live production data via `npx supabase inspect db table-sizes --linked` (row-count
+> snapshot below predates migrations 117–123 — the 13 new tables from the Shows v2/Groups
+> Forum/Stable v2 rebuild aren't in it yet; re-run the inspect command for current sizes)
 
 **Environment:** Supabase Pro (PostgreSQL 15, East US / North Virginia) | Project ref: `bdmwubihwinsxfykjqfe` | Extensions: `pg_trgm` (in `extensions` schema), `uuid-ossp`
 
@@ -56,8 +58,10 @@
 | `commissions` | 2 | 96 kB | Art commissions |
 | `id_requests` | 2 | 64 kB | Help ID |
 
-**Total active tables:** 61 (including legacy retained for FK integrity)
-**Total database size:** ~16 MB (compact — Supabase Pro well within limits)
+**Total active tables:** 61 in the last live snapshot **+ 13 added by migrations 117–123**
+(see "Shows v2 / Groups Forum / Stable v2 Domain" below) = 74, including legacy retained for
+FK integrity
+**Total database size:** ~16 MB as of the last snapshot (compact — Supabase Pro well within limits; re-check after the new domain accumulates data)
 
 ---
 
@@ -79,6 +83,8 @@
 
 - **`customization_logs`** — Modification history tracked per horse. FK `horse_id → user_horses(id)`. Records custom work (repaints, repairs, customizations) with `description`, `date`, and `artist`.
 
+- **`stable_saved_views`** *(migration 123, Stable v2, flag `NEXT_PUBLIC_STABLE_V2` — LIVE in prod)* — Collector's saved faceted-filter slices for the digital stable. FK `user_id → users(id)`. `name` (1–60 chars, unique per user), `params` JSONB (the serialized filter state). Full CRUD RLS, all scoped to the owning user.
+
 ### 📖 Universal Catalog
 
 - **`catalog_items`** *(10,964 rows, 12 MB — largest table)* — Polymorphic via `item_type` enum: `plastic_mold`, `plastic_release`, `artist_resin`, `tack`. Self-referencing `parent_id` links releases to their parent mold. `attributes` JSONB stores type-specific data (`model_number`, `color_description`, `cast_medium`, `year_started`, `year_ended`). GIN index on `title || maker` for `pg_trgm` fuzzy search via `search_catalog_fuzzy()` RPC. Key columns: `title`, `maker`, `scale`, `status` (current/discontinued).
@@ -95,7 +101,7 @@
 
 ### 💬 Social & Content
 
-- **`posts`** — Universal text content replacing legacy comment/post tables. Exclusive arc FKs: `horse_id`, `group_id`, `event_id`, `studio_id`, `help_request_id` with `CHECK (num_nonnulls(...) <= 1)`. `parent_id` for 1-level threading. Atomic counters: `likes_count`, `replies_count`. `content` supports `@mentions`. `is_pinned` for group pinned posts.
+- **`posts`** — Universal text content replacing legacy comment/post tables. Exclusive arc FKs: `horse_id`, `group_id`, `event_id`, `studio_id`, `help_request_id` with `CHECK (num_nonnulls(...) <= 1)`. `parent_id` for 1-level threading. Atomic counters: `likes_count`, `replies_count`. `content` supports `@mentions`. `is_pinned` for group pinned posts. Migration 122 (Notice Board / Groups Forum) added `title` (thread subject) and `bumped_at` (bumps on new reply via the reworked `add_post_reply()` RPC — powers "recently active thread" sort).
 
 - **`media_attachments`** — File references for casual uploads (feed photos, event photos, **DM chat photos**). Exclusive arc FKs: `post_id`, `event_id`, `message_id`. Storage paths to `horse-images` bucket (public) or `chat-attachments` bucket (private, signed URLs). FK `uploader_id → users(id)`. DM attachments added via Migration 111.
 
@@ -159,15 +165,82 @@
 
 - **`event_photos`** — Legacy event photo uploads. Being migrated to `media_attachments`.
 
+### 🏇 Shows v2 Domain (migrations 117–119, flag `NEXT_PUBLIC_SHOWS_V2` — LIVE in prod)
+
+> First-class competition domain, NOT bolted onto `events`. A show may link to a community
+> `events` row for discovery, but competition data lives entirely in these tables. The legacy
+> `events`/`event_divisions`/`event_classes`/`event_entries`/`event_votes` cluster (Competition
+> Engine, above) is **not** superseded yet — it still serves real-world/live-show entrants via
+> `competition.ts` and the Show Packer (`show_strings`/`show_string_entries`); it becomes
+> deletable only after a data migration moves its historical shows into v2. Pure domain logic
+> (state machines, card issuance, callback ladders, results export) lives in
+> `src/lib/shows/`, not in the actions layer.
+
+- **`shows`** — Root aggregate. FK `host_id → users(id)`. `mode` (`live`/`online`), `judging`
+  (`judged`/`community_vote`), `status` state machine (`draft → published → entries_open →
+  entries_closed → running|judging → results_review → completed → archived`), venue/date
+  fields, `entries_open_at`/`entries_close_at`/`judging_ends_at`, `fee_info` (manual checklist
+  v1 — Stripe checkout is a later phase), `capacity`, `is_mhh_qualifying` (host opt-in, default
+  on), `show_year` (hobby-native May 1 → Apr 30 year, trigger-maintained). `host_id` is
+  immutable by trigger — reassignment requires a dedicated future transfer flow.
+- **`show_staff`** — Delegated roles. FK `show_id`, `user_id → users(id)`. `role`
+  (`host`/`co_host`/`steward`/`judge`), `coi_flag`/`coi_note` for conflict-of-interest
+  (advisory).
+- **`show_divisions`** — Finish×axis groupings ("OF Plastic Halter"). FK `show_id`. `axis`
+  (`halter`/`performance`/`workmanship`/`collectibility`/`other`) powers the server-side
+  one-breed-halter-class-per-horse rule.
+- **`show_sections`** — Breed groups within a division ("Stock", "Light"). FK `division_id`.
+- **`show_classes`** — The judged unit. FK `section_id`. `status` state machine (`scheduled →
+  called → judging → placed`, plus terminal `combined`/`cancelled`). `split_from_class_id` /
+  `combined_into_class_id` preserve split/combine lineage — the published classlist is never
+  destructively edited, entries are moved to new linked rows. `allowed_scales`/
+  `allowed_finishes` entry filters, `is_qualifying` flag.
+- **`show_class_entries`** — One horse in one class (design-doc name `show_entries` was a
+  dropped migration-016/052 legacy table; renamed for clarity, no collision). FK `show_id`
+  (denormalized, integrity-trigger-checked against `class_id`'s real show), `class_id`,
+  `horse_id → user_horses(id)`, `owner_id`, `handler_id` (proxy showing — nullable, differs
+  from owner), `entry_number` (leg tag), `photo_id` (online mode). `status`
+  (`entered`/`scratched`/`placed`) — scratched rows are permanent history; re-entry inserts a
+  new row (partial-unique index enforces at most one *live* entry per horse per class).
+- **`show_placings`** — One result vocabulary, integer `place` 1–6 or NULL (participation);
+  labels/ribbon colors derive from `src/lib/shows/placings.ts`, replacing the old system's six
+  duplicated lookup tables. FK `class_id`, `entry_id`, `judge_id`. Integrity trigger confirms
+  the entry actually belongs to the class being placed.
+- **`show_callbacks`** — Champion/reserve ladder. FK `show_id`, `scope`
+  (`section`/`division`/`show`) + `scope_id`, `champion_entry_id`/`reserve_entry_id`,
+  `judge_id`. Integrity trigger confirms champion/reserve entries and the scoped
+  section/division all belong to the callback's own show.
+- **`qualification_cards`** — Bearer tokens on the horse's Hoofprint. `id` **is** the short
+  code (8-char URL-safe, collision-checked at insert) — powers public `/cards/[code]`
+  verification. FK `show_id`/`class_id` (`ON DELETE RESTRICT` — a completed show's earned
+  cards must never silently vaporize), `horse_id`, `earned_by_owner_id`, `current_owner_id`.
+  `earned_place` (1 or 2 only), `status` (`issued`/`transferred`/`redeemed`/`void`),
+  `show_year`. `current_owner_id` auto-follows the horse on sale via the
+  `trg_qualification_cards_follow_horse()` trigger (migration 120) — issued/transferred cards
+  re-point on ownership change; redeemed/void cards are untouched.
+- **`show_results_docs`** — Archival NAMHSA-format results export (their 30-day results
+  requirement). FK `show_id`. `format`, `storage_path`.
+- **`show_entry_votes`** *(migration 119, online judging)* — Community voting, one row per
+  `(entry_id, voter_id)`. FK `entry_id → show_class_entries(id)`, `voter_id → users(id)`. Vote
+  **counts are world-readable** on visible shows by design ("the live tally is the spectator
+  sport"); insert requires the show to be actively `judging` with `judging='community_vote'`
+  and blocks self-votes on your own entry.
+
+Also in this domain: migration 120 adds `show_string_entries.v2_class_id` (nullable FK →
+`show_classes`, packer→v2 classlist link — schema-only so far, no UI writes yet) and
+`shows.blind_browsing` (migration 119, default true).
+
 ### 👥 Community
 
 - **`groups`** — User-created communities. FK `created_by → users(id)`. `group_type` enum, `region`, `slug` (unique URL path). `is_private` boolean.
 
 - **`group_memberships`** — Join tracking. FK `group_id → groups(id)`, `user_id → users(id)`. `role` enum: `member`, `admin`, `moderator`.
 
-- **`group_files`** — Shared documents/files per group. FK `group_id → groups(id)`, `uploaded_by → users(id)`. Migration 058.
+- **`group_files`** — Shared documents/files per group. FK `group_id → groups(id)`, `uploaded_by → users(id)`. Migration 058. Backing storage is the private `group-files` bucket (migration 121, 10MB limit, PDF/Word/image MIME allowlist) — user uploads are RLS-scoped to their own folder; other group members read via server-generated signed URLs (service role, gated by this table's own RLS), not directly via storage policy.
 
 - **`group_channels`** — Sub-channels within groups for topic organization. FK `group_id → groups(id)`. Migration 058.
+
+- **`group_last_read`** *(migration 122, Notice Board / Groups Forum, flag `NEXT_PUBLIC_GROUPS_FORUM` — LIVE in prod)* — Per-user, per-group read-state powering the brass unread dots. Composite PK `(group_id, user_id)`, `last_read_at`. No DELETE policy — a read marker is never removed, only advanced.
 
 - **`user_follows`** — Social graph. `follower_id → users(id)`, `following_id → users(id)`. `UNIQUE(follower_id, following_id)`.
 
@@ -283,6 +356,32 @@
 | `toggle_show_vote(entry_id, user_id)` | Toggle vote on/off (photo shows) | SECURITY INVOKER |
 | `close_virtual_show(event_id, user_id)` | End show + assign placings from vote counts | SECURITY INVOKER |
 
+### Shows v2 (migrations 118–120 — app-facing RPCs called via `supabase.rpc(...)`)
+| Function | Purpose | Security |
+|----------|---------|----------|
+| `get_show_staff_public(show_id)` | Public-safe roster subset (role, no COI columns) | SECURITY DEFINER, STABLE |
+| `verify_qualification_card(code)` | Public `/cards/[code]` verification lookup; migration 120 added `horse_name` to the return shape | SECURITY DEFINER, STABLE |
+| `reorder_show_nodes(kind, ids[], sort_orders[])` | Batch reorder divisions/sections/classes in one call | SECURITY INVOKER |
+| `split_show_class(...)` | Transactional class split; refuses to split scratched entries | SECURITY INVOKER |
+| `combine_show_classes(...)` | Transactional class combine; auto-scratches duplicate horse entries, single-show only | SECURITY INVOKER |
+
+**Internal RLS-support helpers** (SECURITY DEFINER STABLE, called only from inside policy
+`USING`/`WITH CHECK` clauses, not from the app): `show_role_check`, `show_is_public`,
+`show_id_of_section`, `show_id_of_class` (migration 118); `show_id_of_entry`,
+`entry_vote_open`, `entry_owner_of` (migration 119).
+
+**Trigger functions** (migration 117, integrity — reject cross-show data injection): the
+`shows`/`show_class_entries`/`show_placings`/`show_callbacks` guard triggers described in the
+Shows v2 domain section above; plus `trg_qualification_cards_follow_horse()` (migration 120 —
+fires on `user_horses` owner change, re-points card `current_owner_id`).
+
+### Stable v2 & Groups Forum (migrations 122–123)
+| Function | Purpose | Security |
+|----------|---------|----------|
+| `add_post_reply(parent_id, author_id, content)` | Reworked in migration 122 to also bump the parent post's `bumped_at` — powers Notice Board "recently active" thread sort | SECURITY INVOKER |
+| `get_stable_summary(p_owner)` | One-round-trip sidebar aggregate: horse count, vault total, for-sale count, per-collection breakdown | SECURITY INVOKER |
+| `get_stable_facets(p_owner)` | Distinct maker/scale/finish/category values across an owner's collection, as one JSONB blob — powers Stable v2 facet filters | SECURITY INVOKER |
+
 ### Catalog & Search
 | Function | Purpose | Security |
 |----------|---------|----------|
@@ -391,7 +490,7 @@ erDiagram
 ## Migration Policy
 
 1. **CLI-only** — Migrations are created via `supabase migration new <name>` or manually in `supabase/migrations/`
-2. **Sequential numbering** — Files named `NNN_description.sql` (currently at 112, 108 files — some numbers skipped during Grand Unification)
+2. **Sequential numbering** — Files named `NNN_description.sql` (currently at 123, 119 files — 045/047/049/051 skipped during Grand Unification, plus earlier gaps)
 3. **Dry-run required** — Review SQL output before pushing
 4. **Human approval** — AI must NEVER run `supabase db push` or `supabase migration up` directly
 5. **Rollback plan** — Destructive changes (`DROP`, `ALTER ... DROP COLUMN`) must include a rollback script or `IF EXISTS` guards

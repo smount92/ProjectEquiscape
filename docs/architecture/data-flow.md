@@ -77,6 +77,7 @@ if (!result.success) {
 |----------|----------|--------|
 | Daily 6 AM UTC | `/api/cron/refresh-market` | Refreshes `mv_market_prices` materialized view |
 | Monthly 1st 8 AM UTC | `/api/cron/stablemaster-agent` | AI collection analysis via Gemini |
+| Every 6 hours | `/api/cron/transition-shows` | Auto-transitions Shows v2 shows whose entry/judging windows have elapsed (e.g. `entries_open` → `entries_closed`) |
 
 Configured in `vercel.json`. The cron endpoints validate the `CRON_SECRET` header before executing.
 

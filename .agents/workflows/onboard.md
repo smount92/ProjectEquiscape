@@ -48,10 +48,12 @@ This project runs on **Windows** using **PowerShell** as the shell. Key gotchas:
 
 ## Step 2 — Read the Current State Report
 
-The most up-to-date overview of the entire project (every route, component, server action, migration, and feature):
+The most up-to-date overview of the entire project (every route, component, server action, migration, and feature) is `.agents/MASTER_BLUEPRINT.md` + `.agents/MASTER_SUPABASE.md` (both kept current) plus `docs/README.md` for the full documentation index. The old point-in-time snapshot,
+`Model Horse Hub Complete Report.md` (April 2026), is now archived and stale — do not treat it
+as current:
 
 ```
-View file: Model Horse Hub Complete Report.md
+View file: .agents/archive/2026-Q2/Model Horse Hub Complete Report.md
 ```
 
 For deep architecture understanding:

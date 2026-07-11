@@ -1,7 +1,7 @@
 # Model Horse Hub — Documentation Index
 
-> **Last Updated:** April 1, 2026
-> **For AI Agents:** This file is the navigation hub. Use it to find the right document for any topic. Each section links to the canonical reference.
+> **Last Updated:** July 11, 2026
+> **For AI Agents:** This file is the navigation hub. Use it to find the right document for any topic. Each section links to the canonical reference. For architecture rules and Iron Laws, start at `.agents/MASTER_BLUEPRINT.md` instead — this index covers `docs/`.
 
 ---
 
@@ -28,6 +28,11 @@
 | **Find a page route** | [Routes → Route Map](routes/route-map.md) |
 | **Understand catalog curation** | [Guides → Catalog Curation](guides/catalog-curation.md) |
 | **Understand an architecture decision** | [Architecture → ADRs](architecture/adrs/) |
+| **Manually verify a Shows v2 flow** | [SHOWS_V2_TESTING.md](SHOWS_V2_TESTING.md) |
+| **See what's next after the rebuild program** | [NEXT_SYSTEMS_ROADMAP.md](NEXT_SYSTEMS_ROADMAP.md) |
+| **Understand the growth strategy / house rules** | [OPERATOR_PLAYBOOK.md](OPERATOR_PLAYBOOK.md) |
+| **Read the July 2026 growth-moves strategy** | [STRATEGY_2026-07.md](STRATEGY_2026-07.md) |
+| **Pick up the current public-pages/docs work order** | [WORK_ORDERS_2026-07-11.md](WORK_ORDERS_2026-07-11.md) |
 
 ---
 
@@ -36,6 +41,11 @@
 ```
 docs/
 ├── README.md                          ← YOU ARE HERE (navigation index)
+├── OPERATOR_PLAYBOOK.md               # Self-contained strategy + house rules
+├── STRATEGY_2026-07.md                # July 2026 growth-moves strategy
+├── NEXT_SYSTEMS_ROADMAP.md            # Post-rebuild priority order
+├── SHOWS_V2_TESTING.md                # Manual testing checklist for Shows v2
+├── WORK_ORDERS_2026-07-11.md          # Current batch work orders (public pages + docs)
 ├── getting-started/
 │   ├── setup.md                       # Local dev environment setup
 │   ├── project-structure.md           # Annotated directory tree
@@ -58,25 +68,25 @@ docs/
 │   ├── schema-overview.md             # Visual ERD + table groups
 │   ├── rls-policies.md                # Row Level Security inventory
 │   ├── materialized-views.md          # Computed views and refresh schedules
-│   ├── migrations.md                   # Migration index (001—105)
+│   ├── migrations.md                   # Migration index (001—123)
 │   └── seed-data.md                   # Reference catalog seeding
 ├── api/
-│   ├── server-actions.md              # Index of all 37 server action files
-│   └── routes.md                      # API route reference (15 routes)
+│   ├── server-actions.md              # Index of all 42 server action files
+│   └── routes.md                      # API route reference (18 routes + /auth/callback)
 ├── components/
-│   ├── catalog.md                     # 121-component index by domain
+│   ├── catalog.md                     # ~175-component index by domain
 │   ├── patterns.md                    # 8 common component patterns
 │   └── design-system.md              # Tokens, colors, typography, primitives
 ├── guides/
 │   ├── adding-a-feature.md            # End-to-end feature workflow
 │   ├── adding-a-migration.md          # SQL migration guide
 │   ├── css-conventions.md             # CSS architecture rules (Tailwind stone palette, banned tokens)
-│   ├── design-system.md               # "Cozy Scrapbook" design system + 4 page archetypes
+│   ├── design-system.md               # Leather/ledger design system + 4 page archetypes
 │   ├── testing.md                     # Test strategy and commands
 │   ├── catalog-curation.md            # Catalog curation guide (V32)
 │   └── deployment.md                  # Vercel + Supabase deployment
 └── routes/
-    └── route-map.md                   # Complete URL → page mapping (61 routes)
+    └── route-map.md                   # Complete URL → page mapping (73 routes)
 ```
 
 
@@ -87,10 +97,12 @@ docs/
 | Document | Location | Purpose |
 |---|---|---|
 | `CONTRIBUTING.md` | Project root | Code style, commit conventions, PR process |
-| `Model Horse Hub Complete Report.md` | Project root | Comprehensive project report (updated April 1, 2026) |
+| `.agents/MASTER_BLUEPRINT.md` | `.agents/` | Iron Laws, tech decisions, architecture — read FIRST |
+| `.agents/MASTER_SUPABASE.md` | `.agents/` | Schema/RLS/RPC reference — read SECOND |
 | `.agents/workflows/onboard.md` | `.agents/` | AI agent onboarding workflow |
 | `.agents/workflows/dev-nextsteps.md` | `.agents/` | Living development task queue |
 | `.agents/docs/` | `.agents/` | Strategic planning documents and research briefs |
+| `Model Horse Hub Complete Report.md` | `.agents/archive/2026-Q2/` | Archived point-in-time project report (April 1, 2026) — superseded by the MASTER files above; kept for historical reference only |
 
 ---
 

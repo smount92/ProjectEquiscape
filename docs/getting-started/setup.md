@@ -45,6 +45,19 @@ cp .env.local.example .env.local
 | `CRON_SECRET` | Generate a random string | Authenticates Vercel cron job requests |
 | `GEMINI_API_KEY` | [aistudio.google.com](https://aistudio.google.com) → API Keys | Stablemaster AI collection analysis |
 
+### Feature Flags
+
+Four flag-gated rebuilds — set `=1` to enable locally. **All four are LIVE in prod** (flipped
+on in Vercel); set them in `.env.local` too so your local environment matches what real users
+see, rather than accidentally developing against the old code paths.
+
+| Variable | Purpose |
+|----------|---------|
+| `NEXT_PUBLIC_SHOWS_V2` | Shows v2 — new competition domain (live + online show hosting, ring console, qualification cards) |
+| `NEXT_PUBLIC_GROUPS_FORUM` | Groups Forum ("Notice Board") — threads, channels, pinned posts |
+| `NEXT_PUBLIC_STABLE_V2` | Stable v2 — faceted filters + saved views |
+| `NEXT_PUBLIC_SHOWRING_V2` | Show Ring v2 — live judging/spectator surface |
+
 ### Optional Variables (E2E Testing)
 
 | Variable | Purpose |
@@ -99,7 +112,7 @@ See [Testing Guide](../guides/testing.md) for detailed test strategy.
 
 ### Applying Migrations
 
-Migrations live in `supabase/migrations/` and are numbered sequentially (001–104, 100 files). To apply migrations to your Supabase project:
+Migrations live in `supabase/migrations/` and are numbered sequentially (001–123, 119 files — a handful of numbers skipped). To apply migrations to your Supabase project:
 
 **Option A: Supabase CLI**
 ```bash

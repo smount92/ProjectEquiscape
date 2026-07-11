@@ -7,10 +7,10 @@ graph TD
     subgraph Vercel["Vercel (Hosting)"]
         subgraph Next["Next.js 16 (App Router)"]
             SC["Server Components (pages)"]
-            CC["Client Components (121)"]
-            SA["Server Actions (37 files)"]
+            CC["Client Components (~175)"]
+            SA["Server Actions (42 files)"]
         end
-        Cron["Vercel Cron (daily 6AM + monthly 1st)"]
+        Cron["Vercel Cron (daily 6AM + monthly 1st + 6h show transitions)"]
         Stripe["Stripe (Payments)"]
     end
 
@@ -67,15 +67,15 @@ graph TD
 
 ### 1. Server Actions as the Backend
 
-There is **no separate API layer**. All backend logic lives in 37 `"use server"` files under `src/app/actions/`. Client components import server action functions directly — Next.js handles serialization.
+There is **no separate API layer**. All backend logic lives in 42 `"use server"` files under `src/app/actions/`. Client components import server action functions directly — Next.js handles serialization. New action files follow the **zod → `requireAuth()` → ownership/role check → RLS-first write** order (see below), with business logic factored into a pure, tested `src/lib/<domain>/` module rather than inlined in the action.
 
 This means:
 - No REST controllers, no API route boilerplate
 - Backend and frontend are co-located
 - Type safety is end-to-end (TypeScript on both sides)
 
-**Exception:** 15 API routes exist for concerns that can't be server actions:
-- `/api/auth/callback` — PKCE code exchange (must be a GET endpoint)
+**Exception:** 18 API routes (plus `/auth/callback`, which lives outside `/api`) exist for concerns that can't be server actions:
+- `/auth/callback` — PKCE code exchange (must be a GET endpoint)
 - `/api/auth/me` — Session check (GET endpoint)
 - `/api/checkout` — Stripe Checkout Session creation (Pro subscription)
 - `/api/checkout/promote` — Stripe: Promoted listing purchase
@@ -88,11 +88,31 @@ This means:
 - `/api/cron/transition-shows` — Auto-transition expired shows (6h)
 - `/api/export` — PDF generation (CoA/parked export)
 - `/api/export/show-tags` — Show tag PDF generation (Pro tier)
+- `/api/export/nan-cards` — NAN card CSV export for collectors
+- `/api/export/show-results/[eventId]` — Legacy photo-show results export
+- `/api/export/show-results-v2/[showId]` — Shows v2 NAMHSA-format results export
 - `/api/insurance-report` — Insurance PDF (streaming response)
 - `/api/identify-mold` — AI image analysis
 - `/api/reference-dictionary` — Reference data for search
 
-### 2. Row Level Security (RLS) Everywhere
+### 2. Zod at Every Action Boundary
+
+New Server Actions validate their input with a `zod` schema BEFORE calling `requireAuth()` or
+touching the database — reject malformed input before any side effect can happen. This is fully
+live in the 5 rebuilt domains (`shows-v2`, `shows-v2-ring`, `groups-forum`, `stable`,
+`showring` — schemas in `src/lib/{shows,groups,stable,showring}/schemas.ts`) and is the
+required pattern for new action files; it has not yet been retrofitted onto every pre-rebuild
+action. See `CONTRIBUTING.md` for the full order (zod → auth → ownership → RLS-first).
+
+### 3. Flag-Gated Dark-Ship Rebuilds
+
+User-visible rebuilds of a live surface ship behind a `NEXT_PUBLIC_<DOMAIN>_V2` env flag rather
+than a direct cutover: build dark → preview locally → owner approves → flip the flag in Vercel.
+The old code path stays in the tree until the owner is confident, then a follow-up PR removes
+it. All four flags shipped this way — `SHOWS_V2`, `GROUPS_FORUM`, `STABLE_V2`, `SHOWRING_V2` —
+are live in prod as of July 2026.
+
+### 4. Row Level Security (RLS) Everywhere
 
 Every database table has RLS policies. Users can only read/write their own data through the `supabase` client. The security model is:
 
@@ -102,13 +122,13 @@ Every database table has RLS policies. Users can only read/write their own data 
 | `createClient()` (client) | ✅ Yes | Direct storage uploads |
 | `getAdminClient()` (admin) | ❌ Bypassed | Cross-user writes (notifications, transfers, admin) |
 
-### 3. Privacy by Architecture
+### 5. Privacy by Architecture
 
 - `financial_vault` table is **never** queried on public routes — only the owner sees it via RLS
 - Horse images are in a **private** Supabase bucket — rendered via signed URLs with TTL
 - Block system filters blocked users at the **query level** (not UI-level)
 
-### 4. Serverless-Safe Background Tasks
+### 6. Serverless-Safe Background Tasks
 
 Serverless functions have cold start budgets. The `after()` API from Next.js wraps deferred tasks (notifications, activity events, achievement evaluation) so they don't block the user-facing response.
 
@@ -119,7 +139,7 @@ after(async () => {
 });
 ```
 
-### 5. Event-Sourced Provenance
+### 7. Event-Sourced Provenance
 
 Horse provenance is assembled from **immutable source tables** via a regular view (`v_horse_hoofprint`), not a mutable timeline table. Both views (`v_horse_hoofprint`, `discover_users_view`) use `security_invoker = true` so they respect the querying user's RLS policies. Each source of truth maintains its own data:
 
@@ -133,19 +153,21 @@ Horse provenance is assembled from **immutable source tables** via a regular vie
 
 The materialized view UNION ALLs these into a single chronological timeline.
 
-## Scale (as of April 1, 2026)
+## Scale (as of July 11, 2026)
 
 | Metric | Count |
 |--------|-------|
-| Page routes | 61 across 35 route groups |
-| Client components | 121 (incl. 11 shadcn/ui + 4 layouts + 3 PDF components) |
-| Server action files | 37 |
-| API routes | 15 |
-| Database migrations | 101 files (001–105, some numbers skipped) |
+| Page routes | 73 |
+| Client components | ~175 (incl. 11 shadcn/ui + 4 layouts + 3 PDF components) |
+| Server action files | 42 |
+| API routes | 18 (+ `/auth/callback` outside `/api`) |
+| Database migrations | 119 files (001–123, some numbers skipped) |
+| New domain libs | `src/lib/{shows,groups,stable,showring,commerce}/` |
+| Feature flags (all live in prod) | `SHOWS_V2`, `GROUPS_FORUM`, `STABLE_V2`, `SHOWRING_V2` |
 | CSS architecture | Tailwind CSS v4 + shadcn/ui + Framer Motion |
 | Reference catalog entries | 10,500+ |
-| Unit/component tests | 245 (across 23 test files) |
-| E2E test specs | 7 |
+| Unit/integration/component tests | 1,031 (across 71 test files) |
+| E2E test specs | 9 |
 | CI | GitHub Actions (build + test on every push) |
 
 ---

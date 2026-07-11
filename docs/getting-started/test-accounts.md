@@ -62,6 +62,8 @@ E2E tests use Playwright with headless Chromium. See [Testing Guide](../guides/t
 | `hoofprint-transfer.spec.ts` | Ownership transfer (generate PIN → claim) |
 | `show-entry.spec.ts` | Show entry submission |
 | `accessibility.spec.ts` | axe-core WCAG 2.1 AA audits |
+| `device-layout.spec.ts` | Device matrix — 60 viewport tests (Desktop Chrome, Mobile Safari, Mobile Chrome, iPad) |
+| `visual-qa-mobile.spec.ts` | Mobile visual QA sweep |
 
 ---
 

@@ -16,8 +16,11 @@ Model Horse Hub is a privacy-first platform purpose-built for the model horse co
 | **Financial Vault** | Private purchase prices and estimated values — never exposed on public pages |
 | **Safe-Trade Commerce** | Formal offer → accept → pay → verify → transfer state machine |
 | **Art Studio** | Artist profiles, commission management, WIP photo portal |
-| **Competition Engine** | Photo shows, expert judging, NAMHSA-style division/class hierarchy |
-| **Groups & Events** | Community clubs, event calendars, RSVP, shared files |
+| **Show Hosting (live + online)** | One-click NAMHSA classlist builder, entry + proxy handling, phone-based live ring console with leg-tag placing and champion callbacks, expert or community-vote judging, results that file to permanent Hoofprint records |
+| **Qualification Cards** | Auto-issued on 1st/2nd, transfer with the horse on sale, public `/cards/[code]` verification page |
+| **Notice Board (Groups)** | Forum-style threads, channels, pinned posts, shared files |
+| **Stable Filters & Saved Views** | Faceted search across your herd with reusable saved filter sets |
+| **Events** | Community clubs, event calendars, RSVP, shared files |
 | **Social Feed** | Posts, comments, likes, follows, @mentions, DMs, notifications |
 | **Blue Book** | Market price guide aggregated from completed transactions |
 
@@ -79,11 +82,12 @@ npm run test:e2e           # Playwright E2E (requires dev server running)
 npm run test:devices       # Device matrix (Desktop, iPhone, Pixel, iPad)
 ```
 
-**268 tests across 24 test files:**
+**1,031 tests across 71 test files:**
 - Utility functions at 100% coverage (mentions, validation, storage, rateLimit)
-- Server action integration tests (transactions, horse, provenance, collections, hoofprint, shows, catalog-suggestions)
+- Server action integration tests (transactions, horse, provenance, collections, hoofprint, shows-v2, shows-v2-ring, groups-forum, stable, showring, catalog-suggestions)
+- Domain-lib unit tests for the pure, tested `src/lib/{shows,groups,stable,showring,commerce}/` modules (state machines, card issuance, callback ladders, filter params, schemas)
 - API route tests (auth, export, cron, reference-dictionary, identify-mold)
-- Component tests (PhotoLightbox, TrophyCase, MarketFilters, MakeOfferModal, HoofprintTimeline, SuggestionVoteButtons) — 64 React Testing Library tests
+- Component tests (PhotoLightbox, TrophyCase, MarketFilters, MakeOfferModal, HoofprintTimeline, SuggestionVoteButtons, CallbackLadder) — React Testing Library
 - 9 E2E specs: smoke, auth, inventory, safe-trade, hoofprint-transfer, show-entry, accessibility (axe-core WCAG 2.0 AA), device-layout (60 viewport tests), visual-qa-mobile
 
 **Test Accounts (E2E):** Two test accounts configured in `.env.local` (TestBotA/TestBotB).
@@ -96,13 +100,13 @@ npm run test:devices       # Device matrix (Desktop, iPhone, Pixel, iPad)
 
 | Metric | Count |
 |--------|-------|
-| Page routes | 63 pages |
-| Client components | 151 |
-| Server action files | 38 |
-| Database migrations | 111 files (numbered 001–115) |
+| Page routes | 73 pages |
+| Client components | ~175 |
+| Server action files | 42 |
+| Database migrations | 119 files (numbered 001–123; a handful of numbers skipped) |
 | Reference catalog entries | 10,500+ |
 | CSS files | 1 (`globals.css` — Tailwind v4 design tokens) |
-| Unit/integration/component tests | 268 (24 test files) |
+| Unit/integration/component tests | 1,031 (71 test files) |
 | E2E specs | 9 (Playwright + axe-core) |
 | CI | GitHub Actions + Husky pre-commit |
 

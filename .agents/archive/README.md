@@ -15,7 +15,11 @@ archive/
 ├── 2026-Q1/
 │   ├── workflows/    # Completed sprint workflows
 │   └── docs/         # Superseded planning docs
+├── 2026-Q2/
+│   ├── styling_architecture_report.md         # Point-in-time styling audit, superseded by docs/guides/design-system.md
+│   ├── Model Horse Hub Complete Report.md      # Point-in-time project report (April 2026), superseded by MASTER_BLUEPRINT.md/MASTER_SUPABASE.md
+│   └── visual_qa_test_plan.md                  # V44 Visual QA audit plan — audit complete, see dev-nextsteps.md
 └── README.md         # This file
 ```
 
-**Safe to delete after NAMHSA pitch (June 2026).**
+**2026-Q1 batch: safe to delete after NAMHSA pitch (June 2026). 2026-Q2 batch archived 2026-07-11 as part of the documentation refresh (see `docs/WORK_ORDERS_2026-07-11.md`).**

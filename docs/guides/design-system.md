@@ -1,8 +1,33 @@
 # Model Horse Hub — Design System Guide
 
-## Core Philosophy: "The Cozy Scrapbook"
+## Core Philosophy: "Leather at the Landmarks, Parchment for the Work"
 
-MHH should feel warm, tactile, physical, and hobby-focused. Think of a beautifully maintained scrapbook or ledger — not a sterile SaaS dashboard. Every page should feel like it belongs in a collector's den.
+> **July 2026 update:** The design language moved on from the earlier "Cozy Scrapbook" warm
+> parchment framing (below, still accurate for work surfaces) to a richer materials system:
+> **leather, brass, and ledger** on chrome/landmark surfaces (masthead, strap nav, trophy
+> cabinets, brass plaques), **warm parchment/ledger paper** on working surfaces (dashboard,
+> forms, tables), and a **Lamplight** dark mode (`html[data-theme="night"]`) that re-themes
+> both systems rather than inverting them. MHH should feel warm, tactile, physical, and
+> hobby-focused — never a sterile SaaS dashboard. Every page should feel like it belongs in a
+> collector's den, but the landmark surfaces (masthead, header/footer bands, trophy cases) now
+> go further and feel like a tack room: real leather, stitched borders, brass hardware.
+
+### Leather / Brass / Ledger Materials
+
+Defined in `src/app/globals.css` ("MATERIALS — Leather Edition" section, `--leather*`/
+`--brass*` custom properties + `.leather-panel`/`.leather-band`/`.leather-frame`/
+`.brass-plaque`/`.brass-heading` classes) for landmark chrome, and `.ledger-paper`/
+`.ledger-card`/`.ledger-tile`/`.ledger-tab` for working surfaces (a warm-parchment "ledger
+paper" look — ruled lines, kraft tabs, forest-green stat tiles). Both systems have Lamplight
+night-mode variants (`html[data-theme="night"] .ledger-paper`, etc.) and a flattened Simple
+Mode variant (`[data-simple-mode="true"] .ledger-paper`, etc. — plain card, no texture, for
+users who want maximum legibility over atmosphere).
+
+**Critical rule:** any text sitting on a leather surface MUST come from the `--leather-text` /
+`--leather-text-soft` / `--leather-text-muted` ramp (cream/tan tones), never `text-ink` or
+other dark-on-light tokens — dark text on leather is invisible in day mode, and the reverse
+(light-on-light) breaks Lamplight dark mode. Pick from the ramp deliberately per surface;
+don't guess.
 
 ## Typography
 
@@ -91,9 +116,14 @@ Two pages intentionally bypass the layout archetype system:
 - **`page.tsx` (Landing page):** Full-bleed marketing page with per-section `max-w-*` constraints
 - **`inbox/[id]/page.tsx` (Chat):** Full-viewport chat shell using `h-[calc(100vh-var(--header-height))]`
 
-### Migration Status: ✅ COMPLETE (2026-03-28)
+### Migration Status: ✅ Layout Archetypes COMPLETE (2026-03-28); token migration MOSTLY complete
 
-All 55+ `page.tsx` files and 90+ components have been migrated. Zero legacy tokens remain in TSX/TS files.
+All 55+ `page.tsx` files and 90+ components have been migrated to the Layout Archetype system.
+The cold-palette token migration is **not** at zero, though — a July 2026 marketing-pages audit
+found `bg-white` (banned cold-palette) violations remaining on public pages (About, FAQ, Getting
+Started), tracked for cleanup in `docs/WORK_ORDERS_2026-07-11.md` Batch B. Don't repeat the
+"zero legacy tokens remain" claim until that batch lands — treat any specific violation you spot
+in review as real, not as a stale-doc false positive.
 
 **When creating a new page:** Import the appropriate layout component from `@/components/layouts/` and wrap your page content. Never create custom `mx-auto max-w-[...]` container divs.
 

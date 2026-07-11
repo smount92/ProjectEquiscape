@@ -1,10 +1,15 @@
 # Shows v2 — Manual Testing Checklist
 
+> **Update (2026-07-11):** `NEXT_PUBLIC_SHOWS_V2` is now LIVE in production — the flag has
+> flipped in Vercel. This checklist's items should now be verified against **production**, not
+> just a local dev build; a dev-only pass is no longer sufficient sign-off for anything still
+> unchecked below.
+
 Everything built through Phase E2 that still needs a **human** pass (all
-automated: 629 unit/RTL tests green; these are the flows only real
+automated tests green — see `README.md` for the current count; these are the flows only real
 clicking can validate). Requires two accounts (host + entrant) and
-`NEXT_PUBLIC_SHOWS_V2=1` in `.env.local` (already set on the dev machine).
-Everything is dev-only until the Vercel env flag flips.
+`NEXT_PUBLIC_SHOWS_V2=1` in `.env.local` (already set on the dev machine) for local checks, or
+a production account for the production pass.
 
 ## A. Live show — end to end (NEVER tested against real data)
 

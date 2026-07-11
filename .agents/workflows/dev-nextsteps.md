@@ -5,7 +5,7 @@ description: Living task queue of dev cleanup, polish, and next-steps items. Run
 # Dev Next-Steps — Living Task Queue
 
 > **Purpose:** A persistent, prioritized list of cleanup, polish, and improvement tasks. Run `/dev-nextsteps` to pick up the next batch of work.
-> **Last Updated:** 2026-04-27 (V44 Visual QA audit complete)
+> **Last Updated:** 2026-07-11 (Shows v2/Groups Forum/Stable v2/Show Ring v2 rebuild program complete, all flags live)
 > **Convention:** Mark items ✅ when done. Add new items at the bottom of the appropriate priority section. Commit this file alongside the code changes.
 >
 > ## ✅ V44 Visual QA Audit — DONE (2026-04-27)
@@ -98,6 +98,64 @@ cd c:\Project Equispace\model-horse-hub && git log --oneline -10
 # ═══════════════════════════════════════
 # CURRENT QUEUE
 # ═══════════════════════════════════════
+
+## ✅ July 2026: Shows v2 / Groups Forum / Stable v2 / Show Ring v2 Rebuild Program — DONE, ALL FLAGS LIVE
+
+**Scope:** The entire show-domain rebuild plus three companion rebuilds, tracked across the
+July 2026 work order cycle. All merged to `main`, all four flags flipped ON in Vercel prod.
+
+- ✅ **Shows v2, Phases B–F** — new first-class competition domain (migrations 117–120):
+  schema + RLS (117–118), online/community-vote judging (119), qualification-card
+  Safe-Trade ownership hook (120). Pure lib `src/lib/shows/` (state machine, entry rules,
+  card issuance/verification, callback ladders, NAMHSA results export, offline-tolerant
+  ring retry queue). Actions `shows-v2.ts` + `shows-v2-ring.ts`. Flag `NEXT_PUBLIC_SHOWS_V2`
+  — **LIVE**.
+- ✅ **Groups Forum ("Notice Board")** — threads/channels/pinned posts on top of
+  `groups`/`posts`, `group_last_read` unread tracking, reworked `add_post_reply()`
+  (migration 121–122). Lib `src/lib/groups/`, actions `groups-forum.ts`. Flag
+  `NEXT_PUBLIC_GROUPS_FORUM` — **LIVE**.
+- ✅ **Stable v2** — faceted filters + saved views (`stable_saved_views`, migration 123),
+  `get_stable_summary()`/`get_stable_facets()` RPCs. Lib `src/lib/stable/`, actions
+  `stable.ts`. Flag `NEXT_PUBLIC_STABLE_V2` — **LIVE**.
+- ✅ **Show Ring v2** — live judging/spectator surface over the Shows v2 domain. Lib
+  `src/lib/showring/`, actions `showring.ts`. Flag `NEXT_PUBLIC_SHOWRING_V2` — **LIVE**.
+- ✅ **Safe-Trade hardening** — review-item S1 fixed (surfaced errors on the three
+  RLS-guarded writes); qualification cards follow the horse through Safe-Trade transfers.
+- ✅ **Leather Edition** — design language moved from "Cozy Scrapbook" warm parchment to
+  "leather at the landmarks, parchment for the work" (leather/brass/ledger materials,
+  Lamplight dark mode). Merged.
+- ✅ **shadcn `<Button>` codemod** — raw `<button>` sweep against the new primitive (partial
+  — see current queue below, ~208 raw buttons remained at last count; check before assuming
+  complete on any given surface).
+
+**Convention change:** this program ran as ad hoc feature branches
+(`refactor/shows-v2-*`, `refactor/groups-forum`, `refactor/stable-v2`,
+`refactor/safe-trade-hardening`, etc.), not as `.agents/workflows/*.md` files like the
+V-numbered sprints above. Don't expect to find a workflow file for this work — the
+authoritative record is `docs/OPERATOR_PLAYBOOK.md`, `docs/STRATEGY_2026-07.md`, and
+`docs/WORK_ORDERS_2026-07-11.md`, plus the architecture section in
+`.agents/MASTER_BLUEPRINT.md`.
+
+**Current queue (post-rebuild), in priority order:**
+1. **Commerce follow-ups** — 5 documented atomicity holes needing cancel/verify atomic RPCs
+   (migration owed), review-item S2 (stale competing offers after an ownership change), and
+   a manual two-account buy-flow test still owed before calling Safe-Trade fully hardened.
+2. **Strategy Moves 1–8** from `docs/OPERATOR_PLAYBOOK.md` Part 2 — public reference database
+   + Blue Book SEO pages, showholder white-glove recruitment, NAN-card companion + NAMHSA
+   pitch, trust story content, Facebook-native distribution, portable reputation/escrow
+   marketing, presence & liveness (PWA wrapper, weekly virtual show), Pro monetization spine.
+3. **Batches A–D of `docs/WORK_ORDERS_2026-07-11.md`** — public marketing pages content +
+   design pass (About founders section, FAQ Q&As, Getting Started show-hosting step, Signup
+   continuity line), plus this documentation refresh.
+4. **Known site-wide follow-ups** (see `docs/OPERATOR_PLAYBOOK.md` "Known follow-ups"): anon
+   users see "Unknown" aliases on public pages (RLS on `users` reads), partially-consolidated
+   bespoke toasts, remaining raw `<button>`s from the codemod sweep, add-horse/edit mega-form
+   duplication (~1,700 lines each, shared `HorseForm` wanted), zod missing outside the 5
+   rebuilt domains, zero tests in events/art-studio/messaging/competition/posts/market, and
+   the legacy photo-show engine → v2 data migration (blocks deleting `competition.ts`/the
+   packer — do not delete either until that migration ships and is verified).
+
+---
 
 # 🔴 Priority: Critical
 

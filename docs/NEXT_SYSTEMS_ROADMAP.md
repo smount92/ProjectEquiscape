@@ -5,15 +5,26 @@ standard: zod-validated inputs, RLS-first, pure tested domain libs,
 Button/token-only UI). Full findings live in the session analysis; this
 is the actionable order.
 
+> **Update (2026-07-11):** Show Ring v2 (item covered by the shows-v2 rebuild's ring/console
+> work) and the Safe-Trade / Commerce hardening pass below (#1) both shipped and merged —
+> ✅ DONE. Safe-Trade hardening landed review-item S1 (surfaced errors on the three
+> RLS-guarded writes) and the `src/lib/commerce/` state machine + schemas. It is **not** the
+> end of commerce work: 5 documented atomicity holes (cancel/verify need atomic RPCs —
+> migration still owed), review-item S2 (stale competing offers after an ownership change),
+> and a manual two-account buy-flow test are still open — see
+> `.agents/workflows/dev-nextsteps.md` "Current queue" for the live punch list.
+
 ## Priority order
 
-### 1. 🥇 Safe-Trade / Commerce hardening ("Phase 3")
+### 1. ✅ Safe-Trade / Commerce hardening ("Phase 3") — DONE, follow-ups remain
 `src/app/actions/transactions.ts` (810 lines) moves **money** through
 9 service-role (RLS-bypassing) writes with zero input validation —
 not even offer amounts — and a single test. Apply the shows-v2
 treatment end to end: pure escrow state machine in `src/lib/commerce/`,
 zod on every action, RLS-first with each remaining admin call justified,
 tests, adversarial review before merge. Highest risk in the codebase.
+**Status:** the hardening pass shipped (`src/lib/commerce/` state machine + schemas, S1 fixed).
+Remaining: atomicity RPCs (cancel/verify), review-item S2, manual 2-account buy-flow test.
 
 ### 2. Quick-wins bundle (one small pass, do alongside/before #1)
 - Bound `searchMarketPrices` (`market.ts:93`) — currently loads the
@@ -66,10 +77,13 @@ Notifications/realtime (modern postgres_changes), art-studio structure
 (RLS-first, cleanest big subsystem), chat realtime.
 
 ## Shows v2 launch checklist (separate from the above)
-1. Work through docs/SHOWS_V2_TESTING.md (esp. the live/ring path)
+1. Work through docs/SHOWS_V2_TESTING.md (esp. the live/ring path) — now verify against
+   **production**, not just dev (the flag is live)
 2. Fix whatever that shakes out
 3. Recruit 2–3 friendly showholders for a hosted beta
-4. Flip NEXT_PUBLIC_SHOWS_V2=1 in Vercel
-5. Later: photo-show → v2 data migration, then legacy deletion (#6)
+4. ✅ **DONE** — Flip NEXT_PUBLIC_SHOWS_V2=1 in Vercel (July 2026; all four rebuild flags —
+   `SHOWS_V2`, `GROUPS_FORUM`, `STABLE_V2`, `SHOWRING_V2` — are live in prod)
+5. **Next action:** photo-show → v2 data migration, then legacy deletion (#6). This is now
+   the top of this checklist — nothing above it is blocking.
 6. Pro tier build-out: multi-ring, packet PDF, Stripe fees, card
    redemption ("MHH Nationals") — the monetization layer
