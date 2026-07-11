@@ -4569,6 +4569,7 @@ export type Database = {
       count_user_horses_total: { Args: { p_user_id: string }; Returns: number }
       entry_owner_of: { Args: { p_entry_id: string }; Returns: string }
       entry_vote_open: { Args: { p_entry_id: string }; Returns: boolean }
+      get_catalog_facets: { Args: never; Returns: Json }
       get_extra_photo_count: { Args: { p_horse_id: string }; Returns: number }
       get_photo_limit: { Args: never; Returns: number }
       get_show_staff_public: {
@@ -4579,7 +4580,6 @@ export type Database = {
           user_id: string
         }[]
       }
-      get_catalog_facets: { Args: never; Returns: Json }
       get_stable_facets: { Args: { p_owner: string }; Returns: Json }
       get_stable_summary: {
         Args: { p_owner: string }
