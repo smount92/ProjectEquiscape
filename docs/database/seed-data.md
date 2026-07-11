@@ -23,6 +23,8 @@ node scripts/seed_releases.mjs     # Import into catalog_items
 
 Seeds ~10,000+ Breyer and Stone releases as `catalog_items` with `item_type = 'plastic_release'`. Each release links to its parent mold via `parent_id`.
 
+> **Note:** These bulk seed scripts populate the initial catalog. Ongoing catalog additions now use the source-agnostic **delta importer** at [`scripts/catalog-delta/`](../../scripts/catalog-delta/README.md), which adds new molds/releases without re-importing corrected or removed data. It imported BreyerFest 2026 and Maggie Bennett micro-minis.
+
 ### 3. Artist Resins (ERD)
 
 ```bash
@@ -65,6 +67,8 @@ Both seed scripts **clear existing data** by default before inserting. To reseed
 node scripts/seed_releases.mjs
 node scripts/seed_erd_resins.mjs
 ```
+
+> For incremental additions (not a full reseed), use the delta importer at [`scripts/catalog-delta/`](../../scripts/catalog-delta/README.md) instead — it preserves existing corrections and removals.
 
 ## Data Counts (as of March 2026)
 

@@ -105,6 +105,9 @@ For the full request lifecycle, see [Data Flow](../architecture/data-flow.md).
 |------|-----------|---------|
 | [`catalog-suggestions.ts`](actions/catalog-suggestions.md) | `getCatalogItems`, `getCatalogItem`, `createSuggestion`, `getSuggestions`, `getSuggestion`, `voteSuggestion`, `removeVote`, `getUserVote`, `addSuggestionComment`, `deleteSuggestionComment`, `reviewSuggestion`, `getChangelog`, `getTopCurators` | Community catalog curation — browsing, suggestions, voting, discussion, admin review, trusted curator auto-approve, changelog |
 
+> **Approved corrections** merge attribute changes into the `catalog_items.attributes` JSONB via [`src/lib/catalog/corrections.ts`](../../src/lib/catalog/corrections.ts) — not top-level columns.
+> **Filter dropdowns** (makers / scales / materials) are powered by the `get_catalog_facets()` RPC.
+
 ## Auth Patterns
 
 Every mutating server action begins with one of:

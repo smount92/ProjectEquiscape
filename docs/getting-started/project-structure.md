@@ -45,10 +45,11 @@ model-horse-hub/
 │   ├── scrape_erd.mjs                # Scrapes Equine Resin Directory
 │   ├── seed_releases.mjs             # Seeds releases into catalog_items
 │   ├── seed_erd_resins.mjs           # Seeds ERD resins into catalog_items
+│   ├── catalog-delta/                # Source-agnostic catalog delta importer (see its README)
 │   └── *.mjs                         # Other data processing scripts
 │
 ├── supabase/
-│   └── migrations/                   # 119 sequential SQL migration files (001–123; some numbers skipped)
+│   └── migrations/                   # 124 sequential SQL migration files (001–128; some numbers skipped)
 │       ├── 001_initial_schema.sql    # Core tables (users, user_horses, etc.)
 │       ├── ...                       # Feature additions, schema changes
 │       ├── 116_platform_generated_verification_tier.sql
@@ -58,7 +59,8 @@ model-horse-hub/
 │       ├── 120_cards_safe_trade_hook.sql # Qualification cards follow the horse on sale
 │       ├── 121_group_files_bucket.sql # Notice Board file-sharing storage bucket
 │       ├── 122_groups_forum.sql      # Notice Board threads (group_last_read, posts.title/bumped_at)
-│       └── 123_stable_filters.sql    # Stable v2 (stable_saved_views, facet/summary RPCs)
+│       ├── 123_stable_filters.sql    # Stable v2 (stable_saved_views, facet/summary RPCs)
+│       └── 128_catalog_material_facet.sql # Catalog material facet (attributes->>'material', get_catalog_facets)
 │
 ├── src/                              # Application source code
 │   ├── app/                          # Next.js App Router

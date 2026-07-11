@@ -67,7 +67,7 @@ Lamplight dark mode).
 3. **Migrations are FILES ONLY** (`supabase/migrations/NNN_*.sql`,
    additive, RLS in the house `(SELECT auth.uid())` idiom, SET search_path
    on functions). THE OWNER pastes them into the Supabase SQL editor
-   personally. Next number: check the folder (124+ as of this writing).
+   personally. Next number: check the folder (129+ as of this writing).
    After apply: `npm run gen-types`, replace any interim types.
 4. **New code standard:** zod at every action boundary → requireAuth →
    explicit ownership/role checks → RLS-first (admin client only with a

@@ -103,13 +103,36 @@ All SQL migrations are located in `supabase/migrations/` and are applied sequent
 | 103 | `103_core_monetization.sql` | Core monetization: promoted listings, ISO bounties, purchased reports, Studio Pro tables |
 | 104 | `104_exhibitor_number.sql` | Exhibitor number on users, show tag numbering system |
 | 105 | `105_multi_class_entry.sql` | Multi-class entry support for shows, per-class entry caps |
+| 106 | `106_discover_group_fixes.sql` | Discover + group member-count fixes |
+| 107 | `107_discover_visibility_fix.sql` | Fix `discover_users_view` to use the `visibility` column |
+| 108 | `108_rls_safe_horse_counting.sql` | RLS-safe horse counting |
+| 109 | `109_fix_visibility_drift.sql` | Fix `is_public` / `visibility` drift |
+| 110 | `110_fix_catalog_fuzzy_rpc.sql` | Update `search_catalog_fuzzy` RPC |
+| 111 | `111_chat_attachments_bucket.sql` | `chat-attachments` storage bucket + RLS |
+| 112 | `112_photo_short_slugs.sql` | Friendly photo URLs (short slugs) |
+| 113 | `113_asset_category_other_model.sql` | Asset category expansion (other model) |
+| 114 | `114_fix_savanna_dial_scale.sql` | Fix scale for Indian Pony mold |
+| 115 | `115_vault_is_trade.sql` | Add `is_trade` flag to `financial_vault` |
+| 116 | `116_platform_generated_verification_tier.sql` | Allow `platform_generated` verification tier |
+| 117 | `117_shows_domain.sql` | Shows Domain — schema (Phase B of show rebuild) |
+| 118 | `118_shows_domain_rls.sql` | Shows Domain — RLS + helper functions |
+| 119 | `119_shows_online_judging.sql` | Shows Domain — online judging (Phase E1) |
+| 120 | `120_cards_safe_trade_hook.sql` | Shows Domain — safe-trade card transfer hook |
+| 121 | `121_group_files_bucket.sql` | `group-files` storage bucket + RLS |
+| 122 | `122_groups_forum.sql` | Groups Forum ("Notice Board") |
+| 123 | `123_stable_filters.sql` | Digital Stable filter rebuild |
+| 124 | `124_catalog_anon_read.sql` | Catalog reference data readable by `anon` (SELECT policy) |
+| 125 | `125_catalog_facets.sql` | `get_catalog_facets()` RPC — distinct makers/scales in one round-trip |
+| 126 | `126_market_prices_public_rpc.sql` | Public anon-safe read path for `mv_market_prices` (`get_market_rows`) |
+| 127 | `127_watermark_custom_text.sql` | Watermark: `users.watermark_text` column + `watermark_photos` default → `true` (on by default) |
+| 128 | `128_catalog_material_facet.sql` | Catalog `material` facet: backfill `attributes.material` (Plastic/Resin), `get_catalog_facets()` now returns `materials` |
 
 > **Note:** Migration numbers 045, 047, 049, 051, 090 are intentionally skipped (consolidated into adjacent migrations during development).
 
 ## Adding New Migrations
 
 1. Create a new file: `supabase/migrations/NNN_description.sql`
-2. Use the next sequential number (currently: **106**)
+2. Use the next sequential number (currently: **129**)
 3. Always include RLS policies for new tables
 4. Add foreign key indexes for new FK columns
 5. Test by running the SQL in Supabase Dashboard → SQL Editor

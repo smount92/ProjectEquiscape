@@ -13,6 +13,7 @@ Visit **[/catalog](/catalog)** to browse the full catalog. Features include:
 - **Search** — Search by name, mold, color, maker
 - **Filter chips** — Quick filter by maker (Breyer, Stone, etc.)
 - **Scale dropdown** — Filter by Traditional, Classic, Stablemate, etc.
+- **Advanced → Material** — Filter by material (Plastic, Resin, Pewter, China)
 - **Sortable columns** — Click column headers to sort
 - **Click-through** — Click any row to view full details
 
@@ -26,7 +27,7 @@ Click **✏️ Suggest Edit** on any catalog item to propose corrections. The mo
 - "Production run was 5000 per the Breyer Collector's Guide"
 
 ### New Entries
-If a model is missing from the catalog entirely, use the **📗 Suggest New Entry** option.
+If a model is missing from the catalog entirely, use the **📗 Suggest New Entry** option. The form includes a **Material** field (Plastic, Resin, Pewter, China) alongside title, type, maker, scale, mold, and year.
 
 ### Photo Submissions
 Submit reference photos for catalog entries. Photos are limited to **500KB each** to manage storage costs.

@@ -3,7 +3,8 @@
 > **This is the Single Source of Truth for all architectural rules.**
 > Every workflow and every agent session MUST read this file first.
 > Last updated: 2026-07-11 (Shows v2, Groups Forum, Stable v2, Show Ring v2 all shipped and
-> flag-live in prod — Migrations 113–123)
+> flag-live in prod — Migrations 113–123; plus catalog anon-read + facets, watermark custom
+> text, and the catalog material facet — Migrations 124–128)
 
 **Reading order for new sessions:**
 1. Read THIS file (Iron Laws + guardrails)
@@ -15,7 +16,7 @@
 
 ## 🏛️ Project Iron Laws
 
-These are the **non-negotiable architectural principles** that govern every database migration, server action, and UI component. They were forged during the Grand Unification (V6–V10) and hardened through 123 production migrations.
+These are the **non-negotiable architectural principles** that govern every database migration, server action, and UI component. They were forged during the Grand Unification (V6–V10) and hardened through 128 production migrations.
 
 1. **Zero Data Loss Migrations** — Every schema change MUST include a robust PL/pgSQL data migration script. We move existing production data *before* we drop old tables.
 
@@ -129,7 +130,7 @@ behind the flag.
 
 4. `financial_vault` is NEVER queried on public routes — owner-only via RLS
 
-5. Watermark opt-in: respect `watermark_photos` boolean on users table
+5. Watermarking is **on by default (opt-out)**: respect the `watermark_photos` boolean on the users table, and apply the user's `watermark_text` when set (blank ⇒ default `© @alias — ModelHorseHub`)
 
 ---
 

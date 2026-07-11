@@ -2,10 +2,11 @@
 
 > **Single Source of Truth for all database schema, RLS policies, and RPCs.**
 > Update this file whenever a new migration is deployed.
-> Last updated: 2026-07-11 | Migration count: 123 (001–123) | SQL files: 119 (045/047/049/051 skipped)
+> Last updated: 2026-07-11 | Migration count: 128 (001–128) | SQL files: 124 (045/047/049/051/090 skipped)
 > Source: Live production data via `npx supabase inspect db table-sizes --linked` (row-count
-> snapshot below predates migrations 117–123 — the 13 new tables from the Shows v2/Groups
-> Forum/Stable v2 rebuild aren't in it yet; re-run the inspect command for current sizes)
+> snapshot below predates migrations 117–128 — the Shows v2/Groups Forum/Stable v2 tables plus
+> catalog anon-read (124), facets RPC (125/128), market read path (126), and watermark custom
+> text (127) aren't reflected in row counts; re-run the inspect command for current sizes)
 
 **Environment:** Supabase Pro (PostgreSQL 15, East US / North Virginia) | Project ref: `bdmwubihwinsxfykjqfe` | Extensions: `pg_trgm` (in `extensions` schema), `uuid-ossp`
 
@@ -69,7 +70,7 @@ FK integrity
 
 ### 🐴 Core Inventory
 
-- **`users`** *(84 rows, 128 kB)* — User profiles linked to Supabase Auth via `id` (UUID matches `auth.users.id`). Key columns: `alias_name` (unique slug for public URLs), `display_name`, `avatar_url`, `bio`, `tier` (free/pro), `show_badges` (toggle badge display), `watermark_photos` (opt-in watermarking), `currency_preference`, `is_test_account` (hidden from Discover). Updated via profile settings.
+- **`users`** *(84 rows, 128 kB)* — User profiles linked to Supabase Auth via `id` (UUID matches `auth.users.id`). Key columns: `alias_name` (unique slug for public URLs), `display_name`, `avatar_url`, `bio`, `tier` (free/pro), `show_badges` (toggle badge display), `watermark_photos` (photo watermarking — **on by default / opt-out** since migration 127), `watermark_text` (optional custom watermark string; blank ⇒ default `© @alias — ModelHorseHub`, migration 127), `currency_preference`, `is_test_account` (hidden from Discover). Updated via profile settings.
 
 - **`user_horses`** *(903 rows, 584 kB)* — Model horse inventory. FK `owner_id → users(id)`, FK `catalog_id → catalog_items(id)`. Soft delete via `deleted_at` timestamp (never hard-deleted — preserves provenance). `visibility` column (`public`/`private`/`unlisted`) is authoritative; `is_public` boolean is kept in sync via `trg_sync_visibility` trigger (migration 109). Key columns: `custom_name`, `life_stage`, `horse_condition`, `trade_status`, `scale`, `medium`, `body_quality_grade`, `is_promoted_until`, `purchase_date_fuzzy`.
 
@@ -87,7 +88,7 @@ FK integrity
 
 ### 📖 Universal Catalog
 
-- **`catalog_items`** *(10,964 rows, 12 MB — largest table)* — Polymorphic via `item_type` enum: `plastic_mold`, `plastic_release`, `artist_resin`, `tack`. Self-referencing `parent_id` links releases to their parent mold. `attributes` JSONB stores type-specific data (`model_number`, `color_description`, `cast_medium`, `year_started`, `year_ended`). GIN index on `title || maker` for `pg_trgm` fuzzy search via `search_catalog_fuzzy()` RPC. Key columns: `title`, `maker`, `scale`, `status` (current/discontinued).
+- **`catalog_items`** *(10,964 rows, 12 MB — largest table)* — Polymorphic via `item_type` enum: `plastic_mold`, `plastic_release`, `artist_resin`, `tack`. Self-referencing `parent_id` links releases to their parent mold. `attributes` JSONB stores type-specific data (`model_number`, `color_description`, `cast_medium`, `release_year_start`, `release_year_end`, and `material` — Plastic/Resin/Pewter/China, backfilled + faceted in migration 128; delta imports also stamp `source`/`source_id` for idempotency). GIN index on `title || maker` for `pg_trgm` fuzzy search via `search_catalog_fuzzy()` RPC. Key columns: `title`, `maker`, `scale`, `status` (current/discontinued). Also includes `micro_mini`, `medallion`, `prop`, `diorama` item types (migration 053). Approved attribute *corrections* merge into `attributes` JSONB via `src/lib/catalog/corrections.ts` (never top-level columns).
 
 - **`database_suggestions`** — Community-submitted catalog additions. FK `user_id → users(id)`. Includes `status` (pending/approved/rejected) and `votes` counter.
 
@@ -386,6 +387,8 @@ fires on `user_horses` owner change, re-points card `current_owner_id`).
 | Function | Purpose | Security |
 |----------|---------|----------|
 | `search_catalog_fuzzy(term, max_results)` | `pg_trgm` trigram search on `catalog_items(title \|\| maker)` | SECURITY INVOKER |
+| `get_catalog_facets()` | Distinct `makers`, `scales`, and `materials` across `catalog_items` as one JSONB blob — powers the catalog filter dropdowns (migration 125; `materials` added 128) | SECURITY INVOKER |
+| `get_market_rows(p_catalog_id, p_finish_type, p_life_stage)` | Anon-safe aggregate read over `mv_market_prices` for the public /market price panel (migration 126) | SECURITY DEFINER |
 | `batch_import_horses(...)` | Bulk insert from CSV with FK resolution against catalog | SECURITY INVOKER |
 | `increment_approved_suggestions(target_user_id)` | Increment approved suggestion count for trusted curator tracking | SECURITY DEFINER |
 | `upvote_suggestion(suggestion_id)` | Atomic upvote on catalog suggestions | SECURITY DEFINER |

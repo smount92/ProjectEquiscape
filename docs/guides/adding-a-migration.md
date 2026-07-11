@@ -6,14 +6,14 @@ All database changes go through SQL migration files in `supabase/migrations/`.
 
 ### 1. Choose the Next Number
 
-Check the latest migration file in `supabase/migrations/`. As of March 2026, the latest is `102_pro_rls.sql`, so the next number is **103**.
+Check the latest migration file in `supabase/migrations/`. As of July 2026, the latest is `128_catalog_material_facet.sql`, so the next number is **129**.
 
 > **Note:** Numbers 045, 047, 049, and 051 are intentionally skipped (consolidated into adjacent migrations during early development).
 
 ### 2. Create the File
 
 ```
-supabase/migrations/103_your_feature_name.sql
+supabase/migrations/129_your_feature_name.sql
 ```
 
 **Naming conventions:**

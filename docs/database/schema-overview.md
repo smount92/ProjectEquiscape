@@ -57,11 +57,11 @@ erDiagram
 
 | Table | Purpose | Key Columns |
 |-------|---------|-------------|
-| `users` | User accounts (synced from Supabase Auth) | `alias_name`, `bio`, `avatar_url`, `pref_simple_mode`, `currency_symbol`, `show_badges` |
+| `users` | User accounts (synced from Supabase Auth) | `alias_name`, `bio`, `avatar_url`, `pref_simple_mode`, `currency_symbol`, `show_badges`, `watermark_photos` (on by default), `watermark_text` (custom watermark string) |
 | `user_horses` | The central model — every horse in every stable | `owner_id`, `catalog_id`, `custom_name`, `finish_type`, `condition_grade`, `trade_status`, `life_stage`, `is_public` |
 | `horse_images` | Photos attached to horses (5 LSQ angles + extras) | `horse_id`, `image_url`, `angle_profile` |
 | `financial_vault` | Private financial data (purchase price, value) | `horse_id`, `purchase_price`, `estimated_current_value` — **never queried on public routes** |
-| `catalog_items` | Universal reference catalog (10,500+ entries) | `item_type` (polymorphic: mold, release, resin, tack), `parent_id`, `maker`, `scale`, `attributes` (JSONB) |
+| `catalog_items` | Universal reference catalog (~10,900+ entries) | `item_type` (polymorphic: mold, release, resin, tack, micro_mini, medallion, prop, diorama), `parent_id`, `maker`, `scale`, `attributes` (JSONB: `model_number`, `color_description`, `cast_medium`, `release_year_start`, `material`) |
 | `user_collections` | Named collections for organizing horses | `user_id`, `name`, `is_public` |
 | `horse_collections` | Many-to-many junction: horses ↔ collections | `horse_id`, `collection_id` |
 
@@ -152,17 +152,19 @@ erDiagram
 - **Gold (200+ approved):** Auto-approves all correction suggestions
 - Additions and removals always require admin review
 
+**Applying corrections:** approved attribute corrections merge into the `catalog_items.attributes` JSONB (never top-level columns) via `src/lib/catalog/corrections.ts`. Recognized attribute keys: `color_description`, `model_number`, `cast_medium`, `release_year_start`, `production_run`, `release_date`, `material`. Real columns handled separately: `title`, `maker`, `scale`, `item_type`, `parent_id`.
+
 ## Views
 
 | View | Type | Purpose | Refresh | Security |
 |------|------|---------|---------|---------|
 | `v_horse_hoofprint` | Regular VIEW | Union of 6 provenance source tables into chronological timeline | Real-time | `security_invoker = true` |
-| `mv_market_prices` | MATERIALIZED VIEW | Aggregated sale prices by catalog item, finish type, and life stage | Daily cron (6 AM UTC) | `authenticated` only (no `anon`) |
+| `mv_market_prices` | MATERIALIZED VIEW | Aggregated sale prices by catalog item, finish type, and life stage | Daily cron (6 AM UTC) | `authenticated` only; anon reads via `get_market_rows()` RPC (migration 126) |
 | `discover_users_view` | Regular VIEW | User profiles with horse counts, badges — excludes test accounts | Real-time | `security_invoker = true` |
 
 ## Key Patterns
 
-- **Polymorphic catalog:** `catalog_items.item_type` distinguishes molds, releases, resins, tack, etc. `parent_id` links releases to molds.
+- **Polymorphic catalog:** `catalog_items.item_type` distinguishes molds, releases, resins, tack, etc. `parent_id` links releases to molds. Filter dropdowns (maker / scale / material) are served in one round-trip by the `get_catalog_facets()` RPC (migration 125; `materials` added 128).
 - **Event-sourced provenance:** The Hoofprint timeline is never written directly — it's assembled from immutable source tables via `v_horse_hoofprint`.
 - **Soft delete:** Records referenced by other tables use tombstone deletion (set `is_tombstone = true`) rather than hard DELETE.
 - **RLS everywhere:** Every table has Row Level Security policies. See [RLS Policies](rls-policies.md) for the full inventory.

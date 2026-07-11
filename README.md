@@ -10,9 +10,9 @@ Model Horse Hub is a privacy-first platform purpose-built for the model horse co
 
 | Feature | Description |
 |---------|-------------|
-| **Digital Stable** | Catalog your herd with 10,500+ reference database entries (Breyer, Stone, Artist Resins) |
+| **Digital Stable** | Catalog your herd with 10,900+ reference database entries (Breyer, Stone, Artist Resins, pewter micro-minis) filterable by maker, scale, and material |
 | **Hoofprint Provenance** | Permanent digital identity for every model — transfers, show records, and customization history follow the horse |
-| **LSQ Photo Suite** | 5 standardized photo angles (Near-Side, Off-Side, Front, Hind, Belly) + unlimited extras |
+| **LSQ Photo Suite** | 5 standardized photo angles (Near-Side, Off-Side, Front, Hind, Belly) + unlimited extras, with automatic (opt-out) photo watermarking and optional custom watermark text |
 | **Financial Vault** | Private purchase prices and estimated values — never exposed on public pages |
 | **Safe-Trade Commerce** | Formal offer → accept → pay → verify → transfer state machine |
 | **Art Studio** | Artist profiles, commission management, WIP photo portal |
@@ -103,10 +103,10 @@ npm run test:devices       # Device matrix (Desktop, iPhone, Pixel, iPad)
 | Page routes | 73 pages |
 | Client components | ~175 |
 | Server action files | 42 |
-| Database migrations | 119 files (numbered 001–123; a handful of numbers skipped) |
-| Reference catalog entries | 10,500+ |
+| Database migrations | 124 files (numbered 001–128; a handful of numbers skipped) |
+| Reference catalog entries | 10,900+ |
 | CSS files | 1 (`globals.css` — Tailwind v4 design tokens) |
-| Unit/integration/component tests | 1,031 (71 test files) |
+| Unit/integration/component tests | 1,063 (73 test files) |
 | E2E specs | 9 (Playwright + axe-core) |
 | CI | GitHub Actions + Husky pre-commit |
 

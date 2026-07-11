@@ -177,12 +177,12 @@ All 121+ client components live in `src/components/`. Every component is a `"use
 
 | Component | File | Purpose |
 |-----------|------|---------|
-| `CatalogBrowser` | `CatalogBrowser.tsx` | Debounced search, maker chips, scale filter, sortable table, pagination |
+| `CatalogBrowser` | `CatalogBrowser.tsx` | Debounced search, maker chips, scale filter, Advanced → material filter, sortable table, pagination |
 | `SuggestEditModal` | `SuggestEditModal.tsx` | Pre-filled edit form with amber change highlighting and diff summary |
 | `SuggestionVoteButtons` | `SuggestionVoteButtons.tsx` | Optimistic ▲/▼ voting with toggle, switch, and net score |
 | `SuggestionCommentThread` | `SuggestionCommentThread.tsx` | Discussion threads with add/delete and relative timestamps |
 | `SuggestionAdminActions` | `SuggestionAdminActions.tsx` | Admin approve/reject with required reason for rejections |
-| `SuggestNewEntryForm` | `SuggestNewEntryForm.tsx` | Propose a new catalog model with title, type, maker, scale, mold, year (V33) |
+| `SuggestNewEntryForm` | `SuggestNewEntryForm.tsx` | Propose a new catalog model with title, type, maker, scale, material, mold, year (V33) |
 
 ### 🔧 Admin
 

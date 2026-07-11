@@ -68,7 +68,7 @@ docs/
 │   ├── schema-overview.md             # Visual ERD + table groups
 │   ├── rls-policies.md                # Row Level Security inventory
 │   ├── materialized-views.md          # Computed views and refresh schedules
-│   ├── migrations.md                   # Migration index (001—123)
+│   ├── migrations.md                   # Migration index (001—128)
 │   └── seed-data.md                   # Reference catalog seeding
 ├── api/
 │   ├── server-actions.md              # Index of all 42 server action files
