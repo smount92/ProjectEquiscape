@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getPhotoBySlug } from "@/app/actions/photos";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
+import PageMasthead from "@/components/layouts/PageMasthead";
 import PhotoShareView from "@/components/PhotoShareView";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -47,7 +48,8 @@ export default async function PhotoPage({ params }: Props) {
   }
 
   return (
-    <ExplorerLayout title={photo.horseName} description="Shared photo">
+    <ExplorerLayout noHeader>
+      <PageMasthead icon="📷" title={photo.horseName} subtitle="Shared photo" />
       <PhotoShareView photo={photo} />
     </ExplorerLayout>
   );

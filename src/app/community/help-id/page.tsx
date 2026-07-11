@@ -5,7 +5,7 @@ import type { Metadata } from"next";
 import { getPublicImageUrl } from"@/lib/utils/storage";
 import HelpIdRequestForm from"@/components/HelpIdRequestForm";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
-import { Button } from "@/components/ui/button";
+import PageMasthead from"@/components/layouts/PageMasthead";
 
 export const metadata: Metadata = {
  title:"Help Me ID This Model — Model Horse Hub",
@@ -88,17 +88,14 @@ export default async function HelpIdPage() {
  const resolvedRequests = requests.filter((r) => r.status ==="resolved");
 
  return (
- <ExplorerLayout
-  title={<><span className="text-forest">Help Me ID This Model</span></>}
-  description="Upload a mystery model and let the community help identify it"
-  headerActions={
-  <Button asChild variant="outline" size="wide"><Link
-   href="/community"
-  >
-   ← Back to Show Ring
-  </Link></Button>
-  }
- >
+ <ExplorerLayout noHeader>
+  <PageMasthead
+   icon="🔍"
+   title="Help Me ID This Model"
+   subtitle="Upload a mystery model and let the community help identify it"
+   backHref="/community"
+   backLabel="Show Ring"
+  />
   {/* Submit New Request Form */}
   <HelpIdRequestForm />
 
@@ -111,7 +108,7 @@ export default async function HelpIdPage() {
    <Link
     key={req.id}
     href={`/community/help-id/${req.id}`}
-    className="bg-white border-input flex flex-col overflow-hidden rounded-lg border no-underline shadow-md transition-all hover:shadow-lg"
+    className="bg-card border-input flex flex-col overflow-hidden rounded-lg border no-underline shadow-md transition-all hover:shadow-lg"
     id={`help-id-${req.id}`}
    >
     <div className="relative aspect-square overflow-hidden bg-[var(--muted)]">
@@ -126,7 +123,7 @@ export default async function HelpIdPage() {
      🐴
     </div>
     )}
-    <span className="absolute top-2 right-2 rounded-full bg-amber-400 px-2.5 py-0.5 text-xs font-bold text-white shadow-sm">
+    <span className="absolute top-2 right-2 rounded-full bg-warning px-2.5 py-0.5 text-xs font-bold text-white shadow-sm">
      Open
     </span>
     </div>
@@ -163,7 +160,7 @@ export default async function HelpIdPage() {
    <Link
     key={req.id}
     href={`/community/help-id/${req.id}`}
-    className="bg-white border-input flex flex-col overflow-hidden rounded-lg border opacity-80 no-underline shadow-md transition-all hover:opacity-100 hover:shadow-lg"
+    className="bg-card border-input flex flex-col overflow-hidden rounded-lg border opacity-80 no-underline shadow-md transition-all hover:opacity-100 hover:shadow-lg"
     id={`help-id-${req.id}`}
    >
     <div className="relative aspect-square overflow-hidden bg-[var(--muted)]">
@@ -178,7 +175,7 @@ export default async function HelpIdPage() {
      🐴
     </div>
     )}
-    <span className="absolute top-2 right-2 rounded-full bg-emerald-500/80 px-2.5 py-0.5 text-xs font-bold text-white shadow-sm">
+    <span className="absolute top-2 right-2 rounded-full bg-success px-2.5 py-0.5 text-xs font-bold text-white shadow-sm">
      Resolved
     </span>
     </div>
@@ -203,7 +200,7 @@ export default async function HelpIdPage() {
 
   {openRequests.length === 0 && resolvedRequests.length === 0 && (
   <div
-   className="bg-white border-input mt-12 rounded-lg border p-12 text-center shadow-md transition-all"
+   className="bg-card border-input mt-12 rounded-lg border p-12 text-center shadow-md transition-all"
   >
    <p className="mb-4 text-[2rem]">🔍</p>
    <p className="text-secondary-foreground">No ID requests yet. Be the first to submit one!</p>
