@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { createClient } from "@/lib/supabase/server";
+import { referencePagesEnabled } from "@/lib/catalog/referenceUrl";
 
 /**
  * sitemap.xml — Tells search engines about all discoverable pages.
@@ -133,9 +134,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ];
 
     // ── Dynamic catalog reference pages (~10,900 rows, within the 50k limit) ──
-    // Guarded so any DB failure degrades gracefully to the static entries.
+    // Only listed once the reference pages are live (NEXT_PUBLIC_REFERENCE_PAGES),
+    // so we never advertise URLs that 404. Guarded so any DB failure degrades
+    // gracefully to the static entries.
     let referenceEntries: MetadataRoute.Sitemap = [];
-    try {
+    if (referencePagesEnabled()) try {
         const supabase = await createClient();
         const { data, error } = await supabase
             .from("catalog_items")

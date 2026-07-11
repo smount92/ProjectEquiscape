@@ -7,6 +7,15 @@
  * falls back to slugifying maker/title (or the id) when they're absent.
  */
 
+/**
+ * Kill-switch for the public reference pages (MOVE 1). Ships dark: the route,
+ * its sitemap entries, and internal links all stay off until
+ * NEXT_PUBLIC_REFERENCE_PAGES=1 (set locally to preview, then in Vercel to go live).
+ */
+export function referencePagesEnabled(): boolean {
+    return process.env.NEXT_PUBLIC_REFERENCE_PAGES === "1";
+}
+
 // Same accent map as the SQL translate() in migration 129 (lowercase source).
 const ACCENTS_FROM = "àáâãäåāăąçćèéêëēĕėęěìíîïĩīñòóôõöøōðšśßùúûüũūýÿžźżþ";
 const ACCENTS_TO = "aaaaaaaaaccceeeeeeeeeiiiiiinoooooooodsssuuuuuuyyzzzt";

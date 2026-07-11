@@ -5,7 +5,7 @@ import MarketFilters from"@/components/MarketFilters";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import PageMasthead from"@/components/layouts/PageMasthead";
 import { Button } from "@/components/ui/button";
-import { referenceHref } from "@/lib/catalog/referenceUrl";
+import { referenceHref, referencePagesEnabled } from "@/lib/catalog/referenceUrl";
 
 const formatCurrency = (value: number) =>
  new Intl.NumberFormat("en-US", { style:"currency", currency:"USD", maximumFractionDigits: 0 }).format(value);
@@ -117,12 +117,9 @@ export default async function MarketPricePage({
    </div>
 
    <div className="bg-muted sticky top-0 font-semibold">
-    {items.map((item) => (
-    <Link
-     key={`${item.catalogId}::${item.finishType}::${item.lifeStage}`}
-     href={referenceHref({ id: item.catalogId, maker: item.maker, title: item.title })}
-     className="block no-underline"
-    >
+    {items.map((item) => {
+    const key = `${item.catalogId}::${item.finishType}::${item.lifeStage}`;
+    const card = (
     <div
      className="bg-card border-input rounded-lg border p-6 shadow-md transition-all transition-colors"
     >
@@ -169,8 +166,20 @@ export default async function MarketPricePage({
      )}
      </div>
     </div>
-    </Link>
-    ))}
+    );
+    // Link to the reference page only when it's live (ships dark otherwise).
+    return referencePagesEnabled() ? (
+     <Link
+      key={key}
+      href={referenceHref({ id: item.catalogId, maker: item.maker, title: item.title })}
+      className="block no-underline"
+     >
+      {card}
+     </Link>
+    ) : (
+     <div key={key}>{card}</div>
+    );
+    })}
    </div>
 
    {/* Pagination */}

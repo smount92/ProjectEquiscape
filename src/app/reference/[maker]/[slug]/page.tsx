@@ -6,6 +6,7 @@ import FocusLayout from "@/components/layouts/FocusLayout";
 import CatalogSubMasthead from "@/components/catalog/CatalogSubMasthead";
 import { Button } from "@/components/ui/button";
 import WantButton from "@/components/reference/WantButton";
+import { referencePagesEnabled } from "@/lib/catalog/referenceUrl";
 import {
     getActiveListingsForCatalog,
     getCatalogPhotos,
@@ -91,6 +92,9 @@ function medianTag(price: number | null, median: number): { text: string; over: 
 }
 
 export default async function ReferencePage({ params }: Props) {
+    // Ships dark: 404 until NEXT_PUBLIC_REFERENCE_PAGES=1 flips it on.
+    if (!referencePagesEnabled()) notFound();
+
     const { maker, slug } = await params;
     const item = await resolveItem(maker, slug);
     if (!item) notFound();
