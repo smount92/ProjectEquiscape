@@ -5,6 +5,7 @@ import MarketFilters from"@/components/MarketFilters";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import PageMasthead from"@/components/layouts/PageMasthead";
 import { Button } from "@/components/ui/button";
+import { referenceHref } from "@/lib/catalog/referenceUrl";
 
 const formatCurrency = (value: number) =>
  new Intl.NumberFormat("en-US", { style:"currency", currency:"USD", maximumFractionDigits: 0 }).format(value);
@@ -117,8 +118,12 @@ export default async function MarketPricePage({
 
    <div className="bg-muted sticky top-0 font-semibold">
     {items.map((item) => (
-    <div
+    <Link
      key={`${item.catalogId}::${item.finishType}::${item.lifeStage}`}
+     href={referenceHref({ id: item.catalogId, maker: item.maker, title: item.title })}
+     className="block no-underline"
+    >
+    <div
      className="bg-card border-input rounded-lg border p-6 shadow-md transition-all transition-colors"
     >
      <div className="px-6 py-6">
@@ -164,6 +169,7 @@ export default async function MarketPricePage({
      )}
      </div>
     </div>
+    </Link>
     ))}
    </div>
 

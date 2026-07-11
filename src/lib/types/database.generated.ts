@@ -305,8 +305,10 @@ export type Database = {
           id: string
           item_type: string
           maker: string
+          maker_slug: string | null
           parent_id: string | null
           scale: string | null
+          slug: string | null
           title: string
         }
         Insert: {
@@ -315,8 +317,10 @@ export type Database = {
           id?: string
           item_type: string
           maker: string
+          maker_slug?: string | null
           parent_id?: string | null
           scale?: string | null
+          slug?: string | null
           title: string
         }
         Update: {
@@ -325,8 +329,10 @@ export type Database = {
           id?: string
           item_type?: string
           maker?: string
+          maker_slug?: string | null
           parent_id?: string | null
           scale?: string | null
+          slug?: string | null
           title?: string
         }
         Relationships: [
@@ -4568,9 +4574,15 @@ export type Database = {
         }
         Returns: string
       }
+      count_catalog_collectors: { Args: { p_catalog_id: string }; Returns: number }
+      count_catalog_wanters: { Args: { p_catalog_id: string }; Returns: number }
       count_user_horses_public: { Args: { p_user_id: string }; Returns: number }
       count_user_horses_total: { Args: { p_user_id: string }; Returns: number }
       entry_owner_of: { Args: { p_entry_id: string }; Returns: string }
+      notify_catalog_owners_of_demand: {
+        Args: { p_catalog_id: string; p_wanter_id: string }
+        Returns: number
+      }
       entry_vote_open: { Args: { p_entry_id: string }; Returns: boolean }
       get_catalog_facets: { Args: never; Returns: Json }
       get_extra_photo_count: { Args: { p_horse_id: string }; Returns: number }

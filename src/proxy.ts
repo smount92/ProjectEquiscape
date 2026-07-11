@@ -58,6 +58,7 @@ export async function proxy(request: NextRequest) {
         "/_next",
         "/favicon.ico",
         "/catalog",
+        "/reference",
         "/market",
         "/show-ring",
         "/faq",

@@ -25,6 +25,7 @@ const NOTIF_LABELS: { key: string; emoji: string; label: string }[] = [
  { key:"messages", emoji:"✉️", label:"Messages" },
  { key:"show_results", emoji:"🏆", label:"Show results" },
  { key:"transfers", emoji:"📦", label:"Transfer notifications" },
+ { key:"demand_alerts", emoji:"🎯", label:"Someone wants a model you own" },
 ];
 
 export default function SettingsPage() {

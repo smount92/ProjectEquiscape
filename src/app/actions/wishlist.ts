@@ -41,6 +41,19 @@ export async function addToWishlist(
         return { error: "Failed to add to wishlist.", success: false };
     }
 
+    // Wanted engine (MOVE 1): nudge owners of this model that someone wants it.
+    // Gated behind NEXT_PUBLIC_WANTED_NUDGE so we can ship the passive counts
+    // first and switch on active nudging deliberately. The RPC is aggregate,
+    // anonymous, throttled, and opt-out-aware (migration 130); errors here must
+    // never fail the wishlist add.
+    if (catalogId && process.env.NEXT_PUBLIC_WANTED_NUDGE === "1") {
+        const { error: nudgeError } = await supabase.rpc("notify_catalog_owners_of_demand", {
+            p_catalog_id: catalogId,
+            p_wanter_id: user.id,
+        });
+        if (nudgeError) logger.error("Wishlist", "Demand nudge failed", nudgeError);
+    }
+
     return { error: null, success: true };
 }
 

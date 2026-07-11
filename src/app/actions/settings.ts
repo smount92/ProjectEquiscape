@@ -73,6 +73,7 @@ export async function getProfile(): Promise<{
             messages: true,
             show_results: true,
             transfers: true,
+            demand_alerts: true,
         },
         defaultHorsePublic: d.default_horse_public ?? true,
         watermarkPhotos: d.watermark_photos ?? true,
