@@ -790,10 +790,13 @@ export async function markPaymentSent(
     if (!gate.ok) return { success: false, error: gate.reason };
 
     // USER client (downgraded): the buyer is a party, so txn_update RLS
-    // permits stamping paid_at on their own transaction.
-    await supabase.from("transactions").update({
+    // permits stamping paid_at on their own transaction. Surface write
+    // failures — a silent RLS no-op here would notify the seller of a
+    // payment the row never recorded (adversarial-review S1).
+    const { error: paidError } = await supabase.from("transactions").update({
         paid_at: new Date().toISOString(),
     }).eq("id", parsedId.data);
+    if (paidError) return { success: false, error: paidError.message };
 
     // Notify seller
     const { data: buyerProfile } = await supabase.from("users").select("alias_name").eq("id", user.id).single();
@@ -858,12 +861,22 @@ export async function verifyFundsAndRelease(
 
     // Update transaction.
     // USER client (downgraded): the seller is a party, so txn_update RLS
-    // permits the status write.
-    await supabase.from("transactions").update({
+    // permits the status write. Surface failures — the horse is already
+    // parked at this point, and a silent no-op would hand out a PIN while
+    // the transaction stays pending_payment (adversarial-review S1; the
+    // park-then-update ordering itself is the documented atomicity
+    // follow-up requiring a cancel/verify RPC).
+    const { error: verifyError } = await supabase.from("transactions").update({
         status: "funds_verified",
         verified_at: new Date().toISOString(),
         metadata: { pin: parkResult.pin },
     }).eq("id", parsedId.data);
+    if (verifyError) {
+        return {
+            success: false,
+            error: `Funds verification did not complete (${verifyError.message}). The horse was parked for transfer — cancel the transaction to unpark it, then retry.`,
+        };
+    }
 
     // Notify buyer with PIN
     const { data: horse } = await supabase.from("user_horses").select("custom_name").eq("id", t.horse_id).single();
@@ -989,7 +1002,13 @@ export async function retractOffer(
 
     // Cancel the transaction.
     // USER client (downgraded): the buyer is a party → txn_update RLS.
-    await supabase.from("transactions").update({ status: "cancelled" }).eq("id", parsedId.data);
+    // Surface write failures — a silent no-op would tell the seller the
+    // offer was retracted while it stays live (adversarial-review S1).
+    const { error: retractError } = await supabase
+        .from("transactions")
+        .update({ status: "cancelled" })
+        .eq("id", parsedId.data);
+    if (retractError) return { success: false, error: retractError.message };
 
     // Notify seller
     const { data: buyerProfile } = await supabase.from("users").select("alias_name").eq("id", user.id).single();
