@@ -11,7 +11,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { motion } from "framer-motion";
 import {
     Dialog,
@@ -19,6 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import StableFilterBar from "@/components/stable/StableFilterBar";
+import StableWelcome from "@/components/stable/StableWelcome";
 import StableHorseCard from "@/components/stable/StableHorseCard";
 import StableLedgerTable from "@/components/stable/StableLedgerTable";
 import {
@@ -194,6 +194,14 @@ export default function StableBrowser({
     const bulkSelectClass =
         "flex h-9 cursor-pointer rounded-full border border-[rgba(237,228,204,.4)] bg-transparent px-3 py-1.5 font-serif text-xs tracking-wide text-[#EDE4CC] focus:outline-none";
 
+    // True-empty stable (no horses at all, no filters active): the shared
+    // onboarding welcome replaces the filter bar — there is nothing to
+    // filter yet. With filters active, the "No Results" state below keeps
+    // the bar so the filters can be loosened or cleared.
+    if (totalCount === 0 && activeCount === 0) {
+        return <StableWelcome />;
+    }
+
     return (
         <>
             <StableFilterBar
@@ -236,21 +244,8 @@ export default function StableBrowser({
                 </button>
             </div>
 
-            {/* Empty states */}
-            {cards.length === 0 && activeCount === 0 ? (
-                <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-input bg-muted/50 p-16">
-                    <span className="mb-4 text-6xl">🏠</span>
-                    <h2 className="mb-2 font-serif text-xl font-semibold text-foreground">Your Stable is Empty</h2>
-                    <p className="mb-6 max-w-sm text-center text-muted-foreground">
-                        You haven&apos;t added any models yet. Click the button above to catalog your first horse!
-                    </p>
-                    <Button asChild>
-                        <Link href="/add-horse" id="add-first-horse">
-                            🐴 Add Your First Horse
-                        </Link>
-                    </Button>
-                </div>
-            ) : cards.length === 0 ? (
+            {/* Filtered-empty state (true-empty is handled above, pre-bar) */}
+            {cards.length === 0 ? (
                 <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-input bg-muted/50 p-16">
                     <span className="mb-4 text-6xl">🔍</span>
                     <h2 className="mb-2 font-serif text-xl font-semibold text-foreground">No Results</h2>

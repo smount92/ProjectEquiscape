@@ -6,9 +6,6 @@ import Link from"next/link";
 import { Suspense } from"react";
 import { getPublicImageUrls } from"@/lib/utils/storage";
 import {
- Camera,
- Trophy,
- Users,
  FileText,
  Zap,
  Plus,
@@ -18,6 +15,7 @@ import {
  Award,
  Mail,
 } from"lucide-react";
+import StableWelcome from"@/components/stable/StableWelcome";
 import DashboardToast from"@/components/DashboardToast";
 import DashboardShell from"@/components/DashboardShell";
 import DashboardV2 from"./DashboardV2";
@@ -271,43 +269,7 @@ async function DashboardContent({ userId, page }: { userId: string; page: number
  return (
  <>
   {/* Welcome Card for new users — FULL WIDTH */}
-  {horseCards.length === 0 && (
-  <div className="bg-card border-input animate-fade-in-up mb-8 rounded-lg border border-emerald-200 bg-gradient-to-br from-emerald-50 to-indigo-50 px-8 py-16 text-center shadow-md transition-all">
-  <h2>Welcome to Model Horse Hub!</h2>
-  <p>Let&apos;s get started by adding your first model to your digital stable.</p>
-  <div className="mx-auto mb-8 flex max-w-[360px] flex-col gap-4 text-left">
-  <div className="flex items-center gap-4 text-base">
-  <span className="text-forest flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold">
-  1
-  </span>
-  <span>
-  <Camera size={16} strokeWidth={1.5} /> Add your first horse with photos
-  </span>
-  </div>
-  <div className="flex items-center gap-4 text-base">
-  <span className="text-forest flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold">
-  2
-  </span>
-  <span>
-  <Trophy size={16} strokeWidth={1.5} /> Make it public for the Show Ring
-  </span>
-  </div>
-  <div className="flex items-center gap-4 text-base">
-  <span className="text-forest flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold">
-  3
-  </span>
-  <span>
-  <Users size={16} strokeWidth={1.5} /> Discover and follow other collectors
-  </span>
-  </div>
-  </div>
-  <Button asChild variant="outline"><Link
-  href="/add-horse"
-  >
-  <Plus size={18} strokeWidth={1.5} /> Add Your First Horse
-  </Link></Button>
-  </div>
-  )}
+  {horseCards.length === 0 && <StableWelcome className="mb-8" />}
 
   {/* Shelf Header — model count + action buttons */}
   <div className="flex flex-wrap items-center gap-4">
