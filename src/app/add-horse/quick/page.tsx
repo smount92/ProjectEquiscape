@@ -9,6 +9,7 @@ import type { CatalogItem } from"@/app/actions/reference";
 import { createClient } from"@/lib/supabase/client";
 import { Input } from "@/components/ui/input";
 import FocusLayout from"@/components/layouts/FocusLayout";
+import PageMasthead from"@/components/layouts/PageMasthead";
 import { Button } from "@/components/ui/button";
 
 const FINISH_TYPES = ["OF","Custom","Artist Resin"];
@@ -116,19 +117,16 @@ export default function QuickAddPage() {
  };
 
  return (
-  <FocusLayout title="Quick Add" description="Rapidly add horses to your stable.">
+  <FocusLayout noHeader>
+  <PageMasthead
+   compact
+   icon="⚡"
+   title="Quick Add"
+   subtitle="Rapidly add horses to your stable"
+   backHref="/dashboard"
+   backLabel="Dashboard"
+  />
  <div className="animate-fade-in-up mx-auto max-w-[640]">
- <div className="mb-6 flex items-center justify-between">
- <h1>
- ⚡ <span className="text-forest">Quick Add</span>
- </h1>
- <Button asChild variant="outline" size="wide"><Link
- href="/dashboard"
- >
- ← Back
- </Link></Button>
- </div>
-
  <div className="bg-card border-input rounded-lg border p-8 shadow-md transition-all">
  {/* Catalog Search */}
  <div className="mb-6">
@@ -224,7 +222,7 @@ export default function QuickAddPage() {
 
  {/* Error */}
  {error && (
- <div className="text-red-700 mt-2 mt-4 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm">
+ <div className="text-destructive mt-2 mt-4 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm">
  ⚠️ {error}
  </div>
  )}
