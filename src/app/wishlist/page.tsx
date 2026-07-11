@@ -6,6 +6,7 @@ import MatchmakerMatches from"@/components/MatchmakerMatches";
 import WishlistSearch from"@/components/WishlistSearch";
 import { getPublicImageUrls } from"@/lib/utils/storage";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import { Button } from"@/components/ui/button";
 
 export const metadata = {
  title:"My Wishlist — Model Horse Hub",
@@ -122,13 +123,12 @@ export default async function WishlistPage() {
   title={<>❤️ <span className="text-forest">My Wishlist</span></>}
   description={`Models you're hunting for — ${items.length} item${items.length !== 1 ?"s" :""}${totalMatches > 0 ? ` 🔥 ${totalMatches} marketplace match${totalMatches !== 1 ?"es" :""} found!` :""}`}
   headerActions={
-  <Link
+  <Button asChild><Link
    href="/community"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-stone-50orest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
    id="browse-showring"
   >
    🏆 Browse Show Ring
-  </Link>
+  </Link></Button>
   }
  >
   {/* Search to Add */}
@@ -140,12 +140,11 @@ export default async function WishlistPage() {
    <div className="mb-4 text-5xl">❤️</div>
    <h2>Your Wishlist is Empty</h2>
    <p>Browse the Show Ring and tap the heart icon on models you love to start your hunt!</p>
-   <Link
+   <Button asChild><Link
    href="/community"
-   className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border-0 bg-stone-50orest px-6 py-1 text-sm font-semibold text-white no-underline shadow-sm transition-all"
    >
    🏆 Browse the Show Ring
-   </Link>
+   </Link></Button>
   </div>
   ) : (
   <div className="animate-fade-in-up grid grid-cols-[repeat(auto-fill,minmax(340px,1fr))] gap-6 max-[600px]:grid-cols-1">
