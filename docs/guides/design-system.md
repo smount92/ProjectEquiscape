@@ -119,11 +119,11 @@ Two pages intentionally bypass the layout archetype system:
 ### Migration Status: ✅ Layout Archetypes COMPLETE (2026-03-28); token migration MOSTLY complete
 
 All 55+ `page.tsx` files and 90+ components have been migrated to the Layout Archetype system.
-The cold-palette token migration is **not** at zero, though — a July 2026 marketing-pages audit
-found `bg-white` (banned cold-palette) violations remaining on public pages (About, FAQ, Getting
-Started), tracked for cleanup in `docs/WORK_ORDERS_2026-07-11.md` Batch B. Don't repeat the
-"zero legacy tokens remain" claim until that batch lands — treat any specific violation you spot
-in review as real, not as a stale-doc false positive.
+The cold-palette token migration is essentially complete: a July 2026 marketing-pages audit
+found `bg-white` violations on the public pages (About, FAQ, Getting Started), and Batch B of
+`docs/WORK_ORDERS_2026-07-11.md` converted them to `.ledger-paper`/`bg-card` tokens (shipped
+2026-07-11). Treat any remaining `bg-white`/`bg-stone-*` you spot as a real violation to fix,
+not a documented exception.
 
 **When creating a new page:** Import the appropriate layout component from `@/components/layouts/` and wrap your page content. Never create custom `mx-auto max-w-[...]` container divs.
 
