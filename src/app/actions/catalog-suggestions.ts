@@ -25,6 +25,7 @@ interface CatalogFilters {
     color?: string;
     model?: string;
     medium?: string;
+    material?: string;
     page?: number;
     pageSize?: number;
     sortBy?: string;
@@ -126,6 +127,8 @@ export async function getCatalogItems(filters: CatalogFilters) {
         query = query.ilike("attributes->>model_number", `%${filters.model}%`);
     if (filters.medium)
         query = query.ilike("attributes->>cast_medium", `%${filters.medium}%`);
+    if (filters.material)
+        query = query.eq("attributes->>material", filters.material);
     if (filters.sortBy)
         query = query.order(filters.sortBy, {
             ascending: filters.sortDir === "asc",
@@ -649,6 +652,7 @@ async function applyApprovedSuggestion(
                 ...(fc.year ? { release_year_start: fc.year } : {}),
                 ...(fc.color ? { color_description: fc.color } : {}),
                 ...(fc.model_number ? { model_number: fc.model_number } : {}),
+                ...(fc.material ? { material: fc.material } : {}),
             })),
         };
         const { data: newItem, error: insertError } = await admin

@@ -92,10 +92,12 @@ export default function CatalogFilterBar({
     filters,
     makers,
     scales,
+    materials = [],
 }: {
     filters: CatalogFilters;
     makers: string[];
     scales: string[];
+    materials?: string[];
 }) {
     const router = useRouter();
     const [searchInput, setSearchInput] = useState(filters.q ?? "");
@@ -107,6 +109,7 @@ export default function CatalogFilterBar({
     const [color, setColor] = useState(filters.color ?? "");
     const [model, setModel] = useState(filters.model ?? "");
     const [medium, setMedium] = useState(filters.medium ?? "");
+    const [material, setMaterial] = useState(filters.material ?? "");
 
     // Keep local inputs in sync when the URL changes underneath us (back
     // button, chip ✕, clear-all) — adjust-state-during-render, not an effect.
@@ -115,7 +118,7 @@ export default function CatalogFilterBar({
         setLastQ(filters.q);
         setSearchInput(filters.q ?? "");
     }
-    const advKey = [filters.yearFrom, filters.yearTo, filters.color, filters.model, filters.medium].join("|");
+    const advKey = [filters.yearFrom, filters.yearTo, filters.color, filters.model, filters.medium, filters.material].join("|");
     const [lastAdvKey, setLastAdvKey] = useState(advKey);
     if (lastAdvKey !== advKey) {
         setLastAdvKey(advKey);
@@ -124,6 +127,7 @@ export default function CatalogFilterBar({
         setColor(filters.color ?? "");
         setModel(filters.model ?? "");
         setMedium(filters.medium ?? "");
+        setMaterial(filters.material ?? "");
         if (hasAdvancedCatalogFilters(filters)) setAdvOpen(true);
     }
 
@@ -168,6 +172,9 @@ export default function CatalogFilterBar({
         const md = medium.trim();
         if (md) next.medium = md;
         else delete next.medium;
+        const mat = material.trim();
+        if (mat) next.material = mat;
+        else delete next.material;
         push(next);
     };
 
@@ -336,6 +343,34 @@ export default function CatalogFilterBar({
                             className="w-40"
                         />
                     </div>
+                    {(materials.length > 0 || material) && (
+                        <div className="flex flex-col gap-1">
+                            <label htmlFor="catalog-material" className="font-serif text-[0.65rem] tracking-widest text-muted-foreground uppercase">
+                                Material
+                            </label>
+                            <Select
+                                value={material || ALL}
+                                onValueChange={(v) => setMaterial(v === ALL ? "" : v)}
+                            >
+                                <SelectTrigger
+                                    id="catalog-material"
+                                    size="sm"
+                                    className="w-36 font-serif text-xs tracking-wide"
+                                    aria-label="Filter by material"
+                                >
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value={ALL}>All materials</SelectItem>
+                                    {materials.map((mat) => (
+                                        <SelectItem key={mat} value={mat}>
+                                            {mat}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    )}
                     <Button size="sm" onClick={applyAdvanced} id="catalog-advanced-apply">
                         Apply
                     </Button>

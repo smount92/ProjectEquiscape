@@ -140,7 +140,7 @@ describe("chips + remove/clear", () => {
 });
 
 describe("advanced (attributes) filters", () => {
-    it("parses year range, color, model, and medium", () => {
+    it("parses year range, color, model, medium, and material", () => {
         expect(
             parseCatalogSearchParams({
                 year_from: "1990",
@@ -148,6 +148,7 @@ describe("advanced (attributes) filters", () => {
                 color: "dark bay",
                 model: "1490",
                 medium: "resin",
+                material: "Pewter",
             }),
         ).toEqual({
             sort: "name-az",
@@ -157,6 +158,7 @@ describe("advanced (attributes) filters", () => {
             color: "dark bay",
             model: "1490",
             medium: "resin",
+            material: "Pewter",
         });
     });
 
@@ -174,6 +176,7 @@ describe("advanced (attributes) filters", () => {
             color: "chestnut",
             model: "700",
             medium: "resin",
+            material: "Pewter",
             sort: "newest",
         });
         const back = parseCatalogSearchParams(
@@ -186,6 +189,15 @@ describe("advanced (attributes) filters", () => {
         expect(hasAdvancedCatalogFilters({ sort: "name-az", page: 1, maker: "Breyer" })).toBe(false);
         expect(hasAdvancedCatalogFilters({ sort: "name-az", page: 1, yearFrom: 1990 })).toBe(true);
         expect(hasAdvancedCatalogFilters({ sort: "name-az", page: 1, color: "bay" })).toBe(true);
+        expect(hasAdvancedCatalogFilters({ sort: "name-az", page: 1, material: "Pewter" })).toBe(true);
+    });
+
+    it("round-trips a material chip and removes it cleanly", () => {
+        const filters = parseCatalogSearchParams({ material: "Pewter" });
+        expect(filters.material).toBe("Pewter");
+        const chip = activeCatalogChips(filters).find((c) => c.key === "material");
+        expect(chip?.label).toBe("Pewter");
+        expect(removeCatalogFilter(filters, "material").material).toBeUndefined();
     });
 
     it("renders one year chip and removing it clears both bounds", () => {

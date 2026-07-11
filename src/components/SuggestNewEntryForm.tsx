@@ -26,6 +26,7 @@ export default function SuggestNewEntryForm() {
  const [itemType, setItemType] = useState("release");
  const [scale, setScale] = useState("");
  const [color, setColor] = useState("");
+ const [material, setMaterial] = useState("");
  const [year, setYear] = useState("");
  const [moldName, setMoldName] = useState("");
  const [reason, setReason] = useState("");
@@ -53,6 +54,7 @@ export default function SuggestNewEntryForm() {
  item_type: itemType,
  scale: scale || undefined,
  color: color || undefined,
+ material: material || undefined,
  year: year ? parseInt(year, 10) : undefined,
  mold_name: moldName || undefined,
  },
@@ -228,6 +230,27 @@ export default function SuggestNewEntryForm() {
  max={2030}
  />
  </div>
+ </div>
+
+ {/* Material */}
+ <div className="mb-6 sm:w-1/2 sm:pr-2">
+ <label className="text-foreground mb-1 block text-sm font-semibold" htmlFor="new-entry-material">
+ Material
+ </label>
+ <select
+ id="new-entry-material"
+ className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ value={material}
+ onChange={(e) => setMaterial(e.target.value)}
+ >
+ <option value="">— Select —</option>
+ <option value="Plastic">Plastic</option>
+ <option value="Resin">Resin</option>
+ <option value="Pewter">Pewter</option>
+ <option value="China">China</option>
+ <option value="Metal">Metal</option>
+ <option value="Other">Other</option>
+ </select>
  </div>
 
  {/* Reason */}
