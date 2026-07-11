@@ -167,7 +167,8 @@ export async function generateThumbnail(file: File): Promise<File> {
 export async function compressImageWithWatermark(
   file: File,
   aliasName: string,
-  tier: UserTier = "free"
+  tier: UserTier = "free",
+  customText?: string
 ): Promise<File> {
   const config = TIER_CONFIG[tier];
 
@@ -201,7 +202,7 @@ export async function compressImageWithWatermark(
 
         // ── WATERMARK ──
         const cleanAlias = aliasName.replace(/^@+/, "");
-        const text = `© @${cleanAlias} — ModelHorseHub`;
+        const text = customText?.trim() || `© @${cleanAlias} — ModelHorseHub`;
         const fontSize = Math.max(12, Math.floor(width * 0.02));
         ctx.font = `${fontSize}px Inter, sans-serif`;
         ctx.textAlign = "right";

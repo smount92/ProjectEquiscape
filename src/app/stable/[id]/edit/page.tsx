@@ -169,6 +169,7 @@ export default function EditHorsePage() {
  // Watermark preference
  const [watermarkEnabled, setWatermarkEnabled] = useState(false);
  const [userAlias, setUserAlias] = useState("");
+ const [userWatermarkText, setUserWatermarkText] = useState("");
 
  // User tier for compression quality
  const [userTier, setUserTier] = useState<UserTier>("free");
@@ -361,6 +362,7 @@ export default function EditHorsePage() {
     if (profile) {
       setWatermarkEnabled(profile.watermarkPhotos);
       setUserAlias(profile.aliasName);
+      setUserWatermarkText(profile.watermarkText);
     }
   });
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -588,7 +590,7 @@ export default function EditHorsePage() {
  if (newFiles[angle]) {
  const compressed =
  watermarkEnabled && userAlias
- ? await compressImageWithWatermark(newFiles[angle], userAlias, userTier)
+ ? await compressImageWithWatermark(newFiles[angle], userAlias, userTier, userWatermarkText)
  : await compressImage(newFiles[angle], userTier);
 
  // Delete old image from storage + DB if it exists
@@ -629,7 +631,7 @@ export default function EditHorsePage() {
  for (let i = 0; i < newExtraFiles.length; i++) {
  const compressed =
  watermarkEnabled && userAlias
- ? await compressImageWithWatermark(newExtraFiles[i].file, userAlias, userTier)
+ ? await compressImageWithWatermark(newExtraFiles[i].file, userAlias, userTier, userWatermarkText)
  : await compressImage(newExtraFiles[i].file, userTier);
  const filePath = `horses/${horseId}/extra_detail_${Date.now()}_${i}.webp`;
  const { error: uploadError } = await supabase.storage

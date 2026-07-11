@@ -41,6 +41,7 @@ export default function SettingsPage() {
  const [email, setEmail] = useState("");
  const [defaultHorsePublic, setDefaultHorsePublic] = useState(true);
  const [watermarkPhotos, setWatermarkPhotos] = useState(false);
+ const [watermarkText, setWatermarkText] = useState("");
  const [showBadges, setShowBadges] = useState(true);
  const [currencySymbol, setCurrencySymbol] = useState("$");
  const [exhibitorNumber, setExhibitorNumber] = useState("");
@@ -78,6 +79,7 @@ export default function SettingsPage() {
  setNotifPrefs(profile.notificationPrefs);
  setDefaultHorsePublic(profile.defaultHorsePublic);
  setWatermarkPhotos(profile.watermarkPhotos);
+ setWatermarkText(profile.watermarkText);
  setShowBadges(profile.showBadges);
  setCurrencySymbol(profile.currencySymbol);
  setExhibitorNumber(profile.exhibitorNumber || "");
@@ -95,6 +97,7 @@ export default function SettingsPage() {
  bio,
  defaultHorsePublic,
  watermarkPhotos,
+ watermarkText,
  showBadges,
  currencySymbol,
  exhibitorNumber,
@@ -257,7 +260,7 @@ export default function SettingsPage() {
  📸 Watermark uploaded photos
  </span>
  <span className="text-muted-foreground mt-1 mt-[2] block text-xs">
- Adds &ldquo;© @{aliasName} — ModelHorseHub&rdquo; to new uploads
+ On by default — adds your credit line to new uploads. Customize the text below.
  </span>
  </div>
  <button
@@ -269,6 +272,25 @@ export default function SettingsPage() {
  title="Toggle photo watermarking"
  />
  </div>
+
+ {watermarkPhotos && (
+ <div className="mt-4 mb-6">
+ <label htmlFor="settings-watermark-text" className="text-foreground mb-1 block text-sm font-semibold">
+ ✍️ Custom Watermark Text
+ </label>
+ <Input
+ id="settings-watermark-text"
+ type="text"
+ value={watermarkText}
+ onChange={(e) => setWatermarkText(e.target.value)}
+ maxLength={60}
+ placeholder={`© @${aliasName} — ModelHorseHub`}
+ />
+ <span className="text-muted-foreground mt-1 block text-xs">
+ Leave blank to use the default. Stamped on new photo uploads (max 60 characters).
+ </span>
+ </div>
+ )}
 
  {/* Show trophies on profile */}
  <div className="border-input flex items-center justify-between gap-4 border-b py-4 first:pt-0 last:border-b-0 last:pb-0 max-sm:gap-2">

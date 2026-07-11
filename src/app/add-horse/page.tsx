@@ -146,6 +146,7 @@ export default function AddHorsePage() {
  // Watermark preference
  const [watermarkEnabled, setWatermarkEnabled] = useState(false);
  const [userAlias, setUserAlias] = useState("");
+ const [userWatermarkText, setUserWatermarkText] = useState("");
 
  // User tier for compression quality
  const [userTier, setUserTier] = useState<UserTier>("free");
@@ -194,6 +195,7 @@ export default function AddHorsePage() {
  if (profile) {
  setWatermarkEnabled(profile.watermarkPhotos);
  setUserAlias(profile.aliasName);
+ setUserWatermarkText(profile.watermarkText);
  }
  });
  // Read tier from JWT app_metadata
@@ -501,7 +503,7 @@ export default function AddHorsePage() {
  for (const [angle, slot] of imageEntries) {
  const compressed =
  watermarkEnabled && userAlias
- ? await compressImageWithWatermark(slot.file, userAlias, userTier)
+ ? await compressImageWithWatermark(slot.file, userAlias, userTier, userWatermarkText)
  : await compressImage(slot.file, userTier);
  const filePath = `horses/${horseId}/${angle}_${Date.now()}.webp`;
  const { error: uploadError } = await supabase.storage
@@ -528,7 +530,7 @@ export default function AddHorsePage() {
  for (let i = 0; i < extraFiles.length; i++) {
  const compressed =
  watermarkEnabled && userAlias
- ? await compressImageWithWatermark(extraFiles[i].file, userAlias, userTier)
+ ? await compressImageWithWatermark(extraFiles[i].file, userAlias, userTier, userWatermarkText)
  : await compressImage(extraFiles[i].file, userTier);
  const filePath = `horses/${horseId}/extra_detail_${Date.now()}_${i}.webp`;
  const { error: uploadError } = await supabase.storage
