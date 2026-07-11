@@ -164,7 +164,7 @@ export default async function WishlistPage() {
    return (
     <div
     key={item.id}
-    className="group/bg-card border-input hover:border-emerald-700 relative flex gap-4 rounded-lg border bg-muted/80 backdrop-blur-sm p-6 shadow-md transition-all duration-250 hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(44,85,69,0.15)]"
+    className="group/bg-card border-input hover:border-success relative flex gap-4 rounded-lg border bg-muted/80 backdrop-blur-sm p-6 shadow-md transition-all duration-250 hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(44,85,69,0.15)]"
     id={`wishlist-${item.id}`}
     >
     <div className="mt-[2px] shrink-0 text-[2rem] leading-none">🐴</div>

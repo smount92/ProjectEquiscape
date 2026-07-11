@@ -358,12 +358,12 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
      {horse.finishType}
     </span>
     {horse.tradeStatus ==="For Sale" && (
-     <span className="trade-badge border border-emerald-500/50 bg-emerald-500/85 text-white">
+     <span className="trade-badge border border-success/50 bg-success text-white">
      💲 For Sale
      </span>
     )}
     {horse.tradeStatus ==="Open to Offers" && (
-     <span className="trade-badge border border-blue-500/50 bg-blue-500/85 text-white">
+     <span className="trade-badge border border-info/50 bg-info text-white">
      🤝 Open to Offers
      </span>
     )}
