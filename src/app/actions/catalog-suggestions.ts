@@ -6,6 +6,11 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { sanitizeText } from "@/lib/utils/validation";
+import {
+    SILVER_AUTO_FIELDS,
+    buildCorrectionUpdate,
+    correctionTouchesAttributes,
+} from "@/lib/catalog/corrections";
 import type { Database } from "@/lib/types/database.generated";
 
 type CatalogItemInsert = Database["public"]["Tables"]["catalog_items"]["Insert"];
@@ -81,14 +86,6 @@ export interface SuggestionComment {
     body: string;
     created_at: string;
 }
-
-// Fields Silver curators can auto-approve
-const SILVER_AUTO_FIELDS = new Set([
-    "color",
-    "year",
-    "production_run",
-    "release_date",
-]);
 
 // ── BROWSING (public — no auth required) ──
 
@@ -608,18 +605,37 @@ async function applyApprovedSuggestion(
     let catalogItemId = s.catalog_item_id;
 
     if (s.suggestion_type === "correction" && s.catalog_item_id) {
-        // Apply field changes to catalog_items
-        const updates: CatalogItemUpdate = {};
-        for (const [key, value] of Object.entries(
-            s.field_changes as Record<string, unknown>
-        )) {
-            if (
-                typeof value === "object" &&
-                value !== null &&
-                "to" in value
-            ) {
-                (updates as Record<string, unknown>)[key] = (value as { to: unknown }).to;
-            }
+        const fieldChanges = s.field_changes as Record<string, unknown>;
+
+        // catalog_items is polymorphic: attribute fields (color_description,
+        // model_number, cast_medium, release_year_start, material, …) live in
+        // the `attributes` JSONB, not as top-level columns. Read the current
+        // attributes first (only when needed) so we merge rather than clobber.
+        let existingAttributes: Record<string, unknown> | null = null;
+        if (correctionTouchesAttributes(fieldChanges)) {
+            const { data: current } = await admin
+                .from("catalog_items")
+                .select("attributes")
+                .eq("id", s.catalog_item_id)
+                .single();
+            existingAttributes =
+                (
+                    current as {
+                        attributes: Record<string, unknown> | null;
+                    } | null
+                )?.attributes ?? null;
+        }
+
+        const { columnUpdates, attributes } = buildCorrectionUpdate(
+            fieldChanges,
+            existingAttributes
+        );
+
+        const updates: CatalogItemUpdate = { ...columnUpdates };
+        if (attributes) {
+            (updates as Record<string, unknown>).attributes = JSON.parse(
+                JSON.stringify(attributes)
+            );
         }
         if (Object.keys(updates).length > 0) {
             await admin
