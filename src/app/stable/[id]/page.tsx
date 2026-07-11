@@ -16,6 +16,7 @@ import QualificationCardsSection, { type PassportQualificationCard } from"@/comp
 import { showsV2Enabled } from"@/lib/shows/flags";
 import type { CardStatus } from"@/lib/shows/types";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import PageMasthead from"@/components/layouts/PageMasthead";
 import AssetDetailRenderer from"@/components/AssetDetailRenderer";
 import { getAssetConfig } from"@/lib/config/assetFields";
 import type { AssetCategory } from"@/lib/types/database";
@@ -285,19 +286,12 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  : null;
 
  return (
- <ExplorerLayout title={horse.custom_name} description="Horse passport and provenance.">
- {/* Breadcrumb */}
- <nav className="text-secondary-foreground animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
- <Link href="/dashboard">Digital Stable</Link>
- <span className="separator" aria-hidden="true">
- /
- </span>
- <span>{horse.custom_name}</span>
- </nav>
+ <ExplorerLayout noHeader>
+ <PageMasthead compact icon="🐴" title="Digital Stable" subtitle="Horse passport & provenance" backHref="/dashboard" backLabel="Stable" />
 
  {/* Wishlist demand banner */}
  {wishlistDemand > 0 && (
- <div className="animate-fade-in-up mt-4 mb-6 rounded-lg border border-emerald-200 border-red-200 bg-emerald-50/80 bg-red-50 px-6 py-4 text-sm leading-relaxed">
+ <div className="animate-fade-in-up mt-4 mb-6 rounded-lg border border-warning/30 bg-warning/10 px-6 py-4 text-sm leading-relaxed">
  🔥{" "}
  <strong>
  {wishlistDemand} collector{wishlistDemand > 1 ?"s" :""}
@@ -375,7 +369,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  <span className="text-sm font-medium text-secondary-foreground">
  Condition
  </span>
- <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
+ <span className="inline-flex items-center gap-1 rounded-full border border-success/30 bg-success/10 px-2.5 py-0.5 text-xs font-semibold text-success">
  {horse.condition_grade}
  </span>
  </div>
@@ -521,7 +515,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  {horse.finishing_artist}
  {horse.finishing_artist_verified && (
  <span
- className="ml-1.5 inline-flex items-center gap-1 rounded-full bg-forest/10 px-2 py-0.5 text-xs font-semibold text-emerald-600"
+ className="ml-1.5 inline-flex items-center gap-1 rounded-full bg-forest/10 px-2 py-0.5 text-xs font-semibold text-success"
  title="Verified via commission delivery"
  >
  ✅ Verified
