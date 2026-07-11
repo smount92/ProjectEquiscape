@@ -45,6 +45,30 @@ export async function optionalAuth(): Promise<{
 }
 
 /**
+ * Require the platform admin (ADMIN_EMAIL). Returns Supabase client + user.
+ * Throws AuthError if not authenticated OR not the admin — callers catch and
+ * return their error format. Use on every admin-only server action: a hidden
+ * UI is not authorization; the action itself must gate.
+ *
+ * Usage:
+ *   const { supabase, user } = await requireAdmin();
+ */
+export async function requireAdmin(): Promise<{
+    supabase: SupabaseClient;
+    user: { id: string; email?: string };
+}> {
+    const supabase = await createClient();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+    const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase();
+    if (!user || !adminEmail || user.email?.toLowerCase() !== adminEmail) {
+        throw new AuthError("Admin access required.");
+    }
+    return { supabase, user };
+}
+
+/**
  * Get the current user's subscription tier from app_metadata.
  * Uses getUser() (server-validated) instead of getSession() (cached JWT)
  * to ensure tier changes are reflected immediately.

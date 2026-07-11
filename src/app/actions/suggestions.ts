@@ -1,6 +1,6 @@
 "use server";
 
-import { requireAuth } from "@/lib/auth";
+import { requireAuth, requireAdmin } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
@@ -34,6 +34,7 @@ export async function submitSuggestion(data: {
  * @returns Array of unreviewed suggestions
  */
 export async function getPendingSuggestions() {
+    await requireAdmin(); // admin-only queue — a hidden UI is not a gate
     const supabase = await createClient();
     const { data } = await supabase
         .from("database_suggestions")
@@ -54,6 +55,13 @@ export async function reviewSuggestion(
     status: "approved" | "rejected",
     adminNotes?: string
 ): Promise<{ success: boolean; error?: string }> {
+    // SECURITY: approving inserts into the public catalog via the service-role
+    // client — must be admin-only. Previously ungated (unauthenticated write).
+    try {
+        await requireAdmin();
+    } catch {
+        return { success: false, error: "Admin access required." };
+    }
     const admin = getAdminClient();
 
     // Fetch the suggestion

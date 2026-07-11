@@ -1,6 +1,6 @@
 "use server";
 
-import { requireAuth } from "@/lib/auth";
+import { requireAuth, requireAdmin } from "@/lib/auth";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 import { checkRateLimit } from "@/lib/utils/rateLimit";
@@ -59,6 +59,7 @@ export async function submitReport(data: {
 
 /** Admin: get open reports */
 export async function getOpenReports() {
+    await requireAdmin(); // moderation queue leaks reporter identities — admin only
     const admin = getAdminClient();
 
     const { data } = await admin
@@ -101,7 +102,7 @@ export async function dismissReport(
     reportId: string,
     notes?: string
 ): Promise<{ success: boolean; error?: string }> {
-    const { supabase, user } = await requireAuth();
+    const { user } = await requireAdmin(); // was requireAuth — any user could resolve reports
 
     const admin = getAdminClient();
     const { error } = await admin
@@ -124,7 +125,7 @@ export async function actionReport(
     reportId: string,
     notes: string
 ): Promise<{ success: boolean; error?: string }> {
-    const { supabase, user } = await requireAuth();
+    const { user } = await requireAdmin(); // was requireAuth — any user could action reports
 
     const admin = getAdminClient();
     const { error } = await admin
