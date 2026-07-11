@@ -1,16 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { SILVER_AUTO_FIELDS } from "@/lib/catalog/corrections";
 
 /* ──────────────────────────────────────────────────────
    catalog-suggestions.ts — Server Action Unit Tests
-   
+
    Tests focus on input validation and auto-approve logic,
    which are the most critical business rules.
    ────────────────────────────────────────────────────── */
 
-// ── Auto-Approve constants (mirror the source of truth) ──
+// ── Auto-Approve thresholds (mirror the source of truth) ──
+// SILVER_AUTO_FIELDS is imported from the shared module so this test can never
+// drift from the real allowlist. Note it holds `attributes` JSONB keys (e.g.
+// color_description), the exact keys SuggestEditModal emits — not labels.
 const SILVER_THRESHOLD = 50;
 const GOLD_THRESHOLD = 200;
-const SILVER_AUTO_FIELDS = new Set(["color", "year", "production_run", "release_date"]);
 
 describe("Auto-approve rules (pure logic)", () => {
     function shouldAutoApprove(
@@ -27,21 +30,26 @@ describe("Auto-approve rules (pure logic)", () => {
     }
 
     it("returns false for regular users regardless of fields", () => {
-        expect(shouldAutoApprove(0, "correction", ["color"])).toBe(false);
-        expect(shouldAutoApprove(10, "correction", ["color"])).toBe(false);
-        expect(shouldAutoApprove(49, "correction", ["color"])).toBe(false);
+        expect(shouldAutoApprove(0, "correction", ["color_description"])).toBe(false);
+        expect(shouldAutoApprove(10, "correction", ["color_description"])).toBe(false);
+        expect(shouldAutoApprove(49, "correction", ["color_description"])).toBe(false);
     });
 
     it("Silver auto-approves color-only corrections", () => {
-        expect(shouldAutoApprove(50, "correction", ["color"])).toBe(true);
+        expect(shouldAutoApprove(50, "correction", ["color_description"])).toBe(true);
     });
 
     it("Silver auto-approves year-only corrections", () => {
-        expect(shouldAutoApprove(50, "correction", ["year"])).toBe(true);
+        expect(shouldAutoApprove(50, "correction", ["release_year_start"])).toBe(true);
     });
 
     it("Silver auto-approves color + year combined", () => {
-        expect(shouldAutoApprove(50, "correction", ["color", "year"])).toBe(true);
+        expect(
+            shouldAutoApprove(50, "correction", [
+                "color_description",
+                "release_year_start",
+            ])
+        ).toBe(true);
     });
 
     it("Silver auto-approves production_run corrections", () => {
@@ -61,13 +69,29 @@ describe("Auto-approve rules (pure logic)", () => {
     });
 
     it("Silver does NOT auto-approve mix of allowed + disallowed fields", () => {
-        expect(shouldAutoApprove(50, "correction", ["color", "maker"])).toBe(false);
+        expect(
+            shouldAutoApprove(50, "correction", ["color_description", "maker"])
+        ).toBe(false);
+    });
+
+    it("Silver does NOT auto-approve human-label keys (must be attribute keys)", () => {
+        // Guards the pre-existing bug: SuggestEditModal emits attribute keys
+        // like `color_description`, never `color`, so a "color" allowlist
+        // would silently never fire.
+        expect(shouldAutoApprove(50, "correction", ["color"])).toBe(false);
+        expect(shouldAutoApprove(50, "correction", ["year"])).toBe(false);
     });
 
     it("Gold auto-approves ALL correction fields", () => {
         expect(shouldAutoApprove(200, "correction", ["maker"])).toBe(true);
         expect(shouldAutoApprove(200, "correction", ["mold"])).toBe(true);
-        expect(shouldAutoApprove(200, "correction", ["color", "maker", "mold"])).toBe(true);
+        expect(
+            shouldAutoApprove(200, "correction", [
+                "color_description",
+                "maker",
+                "mold",
+            ])
+        ).toBe(true);
     });
 
     it("Gold with very high count auto-approves", () => {

@@ -148,7 +148,7 @@ erDiagram
 **Curator columns on `users`:** `approved_suggestions_count` (int), `is_trusted_curator` (bool, set at 50+ approvals).
 
 **Auto-approve tiers:**
-- **Silver (50+ approved):** Auto-approves corrections to `color`, `year`, `production_run`, `release_date`
+- **Silver (50+ approved):** Auto-approves corrections to the `attributes` keys `color_description`, `release_year_start`, `production_run`, `release_date` (these are the raw attribute keys `SuggestEditModal` emits — see `src/lib/catalog/corrections.ts`)
 - **Gold (200+ approved):** Auto-approves all correction suggestions
 - Additions and removals always require admin review
 
