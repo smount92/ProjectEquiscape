@@ -5,6 +5,7 @@ import {
     catalogSortToQuery,
     clearAllCatalogFilters,
     countActiveCatalogFilters,
+    hasAdvancedCatalogFilters,
     parseCatalogSearchParams,
     removeCatalogFilter,
     CATALOG_SORTS,
@@ -135,5 +136,72 @@ describe("chips + remove/clear", () => {
         expect(
             clearAllCatalogFilters({ q: "x", maker: "Breyer", type: "plastic_mold", sort: "newest", page: 9 }),
         ).toEqual({ sort: "newest", page: 1 });
+    });
+});
+
+describe("advanced (attributes) filters", () => {
+    it("parses year range, color, model, and medium", () => {
+        expect(
+            parseCatalogSearchParams({
+                year_from: "1990",
+                year_to: "2005",
+                color: "dark bay",
+                model: "1490",
+                medium: "resin",
+            }),
+        ).toEqual({
+            sort: "name-az",
+            page: 1,
+            yearFrom: 1990,
+            yearTo: 2005,
+            color: "dark bay",
+            model: "1490",
+            medium: "resin",
+        });
+    });
+
+    it("drops out-of-range years and swaps an inverted range", () => {
+        expect(parseCatalogSearchParams({ year_from: "1200" }).yearFrom).toBeUndefined();
+        expect(parseCatalogSearchParams({ year_to: "abc" }).yearTo).toBeUndefined();
+        const swapped = parseCatalogSearchParams({ year_from: "2010", year_to: "1990" });
+        expect([swapped.yearFrom, swapped.yearTo]).toEqual([1990, 2010]);
+    });
+
+    it("round-trips the advanced filters through build", () => {
+        const filters = parseCatalogSearchParams({
+            year_from: "1995",
+            year_to: "2001",
+            color: "chestnut",
+            model: "700",
+            medium: "resin",
+            sort: "newest",
+        });
+        const back = parseCatalogSearchParams(
+            Object.fromEntries(buildCatalogSearchParams(filters).entries()),
+        );
+        expect(back).toEqual(filters);
+    });
+
+    it("hasAdvancedCatalogFilters reflects only the advanced keys", () => {
+        expect(hasAdvancedCatalogFilters({ sort: "name-az", page: 1, maker: "Breyer" })).toBe(false);
+        expect(hasAdvancedCatalogFilters({ sort: "name-az", page: 1, yearFrom: 1990 })).toBe(true);
+        expect(hasAdvancedCatalogFilters({ sort: "name-az", page: 1, color: "bay" })).toBe(true);
+    });
+
+    it("renders one year chip and removing it clears both bounds", () => {
+        const filters = { sort: "name-az" as const, page: 3, yearFrom: 1995, yearTo: 2001, color: "bay" };
+        const chips = activeCatalogChips(filters);
+        expect(chips.find((c) => c.key === "year")?.label).toBe("1995–2001");
+        expect(chips.find((c) => c.key === "color")?.label).toBe("🎨 bay");
+        const next = removeCatalogFilter(filters, "year");
+        expect(next.yearFrom).toBeUndefined();
+        expect(next.yearTo).toBeUndefined();
+        expect(next).toEqual({ sort: "name-az", page: 1, color: "bay" });
+    });
+
+    it("labels open-ended and equal year ranges sensibly", () => {
+        expect(activeCatalogChips({ sort: "name-az", page: 1, yearFrom: 1999 })[0].label).toBe("1999+");
+        expect(activeCatalogChips({ sort: "name-az", page: 1, yearTo: 1999 })[0].label).toBe("≤1999");
+        expect(activeCatalogChips({ sort: "name-az", page: 1, yearFrom: 2000, yearTo: 2000 })[0].label).toBe("2000");
     });
 });

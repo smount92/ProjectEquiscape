@@ -1,15 +1,16 @@
 "use client";
 
 /**
- * The LEDGER filter bar for the Reference Catalog. Whole-catalog search,
- * facet dropdowns (server-driven maker/scale options across ALL rows, plus
- * the static item-type vocabulary), honest sorts, and active filters as
- * rubber-stamp chips with ✕ + clear-all.
+ * The LEDGER filter bar for the Reference Catalog. Row 1 holds the common
+ * case — whole-catalog search, Maker/Scale/Type facets, honest sorts — and
+ * an "Advanced ▾" toggle reveals the attributes-JSONB filters (release-year
+ * range, color, model #, resin medium) so the primary row never crowds.
+ * Active filters show as rubber-stamp chips with ✕ + clear-all.
  *
  * The URL is the single source of truth: every change router.push()es a new
  * /catalog?… so the server page re-renders the filtered table (shareable,
- * back-button-friendly, SEO-canonical). Only the search input keeps local
- * state until submit. Mirrors src/components/showring/ShowRingFilterBar.tsx.
+ * back-button-friendly, SEO-canonical). Text/number inputs keep local state
+ * until submit. Mirrors src/components/showring/ShowRingFilterBar.tsx.
  */
 
 import { useState } from "react";
@@ -22,10 +23,12 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
     activeCatalogChips,
     buildCatalogSearchParams,
     clearAllCatalogFilters,
+    hasAdvancedCatalogFilters,
     removeCatalogFilter,
     CATALOG_SORTS,
     CATALOG_TYPE_OPTIONS,
@@ -96,13 +99,32 @@ export default function CatalogFilterBar({
 }) {
     const router = useRouter();
     const [searchInput, setSearchInput] = useState(filters.q ?? "");
+    const [advOpen, setAdvOpen] = useState(hasAdvancedCatalogFilters(filters));
 
-    // Keep the search box in sync when the URL changes underneath us (back
-    // button, chip ✕) — adjust-state-during-render, not an effect.
+    // Advanced-panel local inputs (applied together on Apply / Enter).
+    const [yearFrom, setYearFrom] = useState(filters.yearFrom?.toString() ?? "");
+    const [yearTo, setYearTo] = useState(filters.yearTo?.toString() ?? "");
+    const [color, setColor] = useState(filters.color ?? "");
+    const [model, setModel] = useState(filters.model ?? "");
+    const [medium, setMedium] = useState(filters.medium ?? "");
+
+    // Keep local inputs in sync when the URL changes underneath us (back
+    // button, chip ✕, clear-all) — adjust-state-during-render, not an effect.
     const [lastQ, setLastQ] = useState(filters.q);
     if (lastQ !== filters.q) {
         setLastQ(filters.q);
         setSearchInput(filters.q ?? "");
+    }
+    const advKey = [filters.yearFrom, filters.yearTo, filters.color, filters.model, filters.medium].join("|");
+    const [lastAdvKey, setLastAdvKey] = useState(advKey);
+    if (lastAdvKey !== advKey) {
+        setLastAdvKey(advKey);
+        setYearFrom(filters.yearFrom?.toString() ?? "");
+        setYearTo(filters.yearTo?.toString() ?? "");
+        setColor(filters.color ?? "");
+        setModel(filters.model ?? "");
+        setMedium(filters.medium ?? "");
+        if (hasAdvancedCatalogFilters(filters)) setAdvOpen(true);
     }
 
     const chips = activeCatalogChips(filters);
@@ -128,9 +150,34 @@ export default function CatalogFilterBar({
         push(next);
     };
 
+    /** Apply every Advanced input at once (one navigation, no partial state). */
+    const applyAdvanced = () => {
+        const next: CatalogFilters = { ...filters, page: 1 };
+        const yf = Number.parseInt(yearFrom, 10);
+        const yt = Number.parseInt(yearTo, 10);
+        if (Number.isFinite(yf)) next.yearFrom = yf;
+        else delete next.yearFrom;
+        if (Number.isFinite(yt)) next.yearTo = yt;
+        else delete next.yearTo;
+        const c = color.trim();
+        if (c) next.color = c;
+        else delete next.color;
+        const m = model.trim();
+        if (m) next.model = m;
+        else delete next.model;
+        const md = medium.trim();
+        if (md) next.medium = md;
+        else delete next.medium;
+        push(next);
+    };
+
+    const onAdvKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === "Enter") applyAdvanced();
+    };
+
     return (
         <div className="ledger-card !py-3" id="catalog-filter-bar">
-            {/* Row 1: search + facets */}
+            {/* Row 1: search + facets + sort + advanced toggle */}
             <div className="flex flex-wrap items-center gap-2">
                 <div className="min-w-[200px] flex-1">
                     <Input
@@ -191,9 +238,111 @@ export default function CatalogFilterBar({
                         ))}
                     </SelectContent>
                 </Select>
+
+                <button
+                    type="button"
+                    onClick={() => setAdvOpen((o) => !o)}
+                    aria-expanded={advOpen}
+                    aria-controls="catalog-advanced"
+                    className="cursor-pointer rounded-full border border-input bg-transparent px-3 py-1.5 font-serif text-xs tracking-wide text-secondary-foreground transition-colors hover:bg-muted hover:text-foreground"
+                    id="catalog-advanced-toggle"
+                >
+                    Advanced {advOpen ? "▴" : "▾"}
+                </button>
             </div>
 
-            {/* Row 2: stamp chips + clear-all (only when filters are active) */}
+            {/* Advanced sub-row: attributes-JSONB filters (collapsed by default) */}
+            {advOpen && (
+                <div
+                    id="catalog-advanced"
+                    className="mt-3 flex flex-wrap items-end gap-3 border-t border-dashed border-[color:var(--color-border-tan,#CBC3A4)] pt-3"
+                >
+                    <div className="flex flex-col gap-1">
+                        <label htmlFor="catalog-year-from" className="font-serif text-[0.65rem] tracking-widest text-muted-foreground uppercase">
+                            Release year
+                        </label>
+                        <div className="flex items-center gap-1.5">
+                            <Input
+                                id="catalog-year-from"
+                                type="number"
+                                inputMode="numeric"
+                                min={1900}
+                                max={2100}
+                                value={yearFrom}
+                                onChange={(e) => setYearFrom(e.target.value)}
+                                onKeyDown={onAdvKeyDown}
+                                placeholder="From"
+                                aria-label="Release year from"
+                                className="w-[5.5rem]"
+                            />
+                            <span className="text-muted-foreground">–</span>
+                            <Input
+                                id="catalog-year-to"
+                                type="number"
+                                inputMode="numeric"
+                                min={1900}
+                                max={2100}
+                                value={yearTo}
+                                onChange={(e) => setYearTo(e.target.value)}
+                                onKeyDown={onAdvKeyDown}
+                                placeholder="To"
+                                aria-label="Release year to"
+                                className="w-[5.5rem]"
+                            />
+                        </div>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label htmlFor="catalog-color" className="font-serif text-[0.65rem] tracking-widest text-muted-foreground uppercase">
+                            Color
+                        </label>
+                        <Input
+                            id="catalog-color"
+                            type="text"
+                            value={color}
+                            onChange={(e) => setColor(e.target.value)}
+                            onKeyDown={onAdvKeyDown}
+                            placeholder="contains…"
+                            aria-label="Color contains"
+                            className="w-40"
+                        />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label htmlFor="catalog-model" className="font-serif text-[0.65rem] tracking-widest text-muted-foreground uppercase">
+                            Model #
+                        </label>
+                        <Input
+                            id="catalog-model"
+                            type="text"
+                            value={model}
+                            onChange={(e) => setModel(e.target.value)}
+                            onKeyDown={onAdvKeyDown}
+                            placeholder="e.g. 1490"
+                            aria-label="Model number"
+                            className="w-32"
+                        />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                        <label htmlFor="catalog-medium" className="font-serif text-[0.65rem] tracking-widest text-muted-foreground uppercase">
+                            Resin medium
+                        </label>
+                        <Input
+                            id="catalog-medium"
+                            type="text"
+                            value={medium}
+                            onChange={(e) => setMedium(e.target.value)}
+                            onKeyDown={onAdvKeyDown}
+                            placeholder="contains…"
+                            aria-label="Resin medium contains"
+                            className="w-40"
+                        />
+                    </div>
+                    <Button size="sm" onClick={applyAdvanced} id="catalog-advanced-apply">
+                        Apply
+                    </Button>
+                </div>
+            )}
+
+            {/* Chips row: stamp chips + clear-all (only when filters are active) */}
             {chips.length > 0 && (
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                     {chips.map((chip, i) => (
