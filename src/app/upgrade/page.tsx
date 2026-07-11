@@ -5,6 +5,7 @@ import Link from "next/link";
 import UpgradeButton from "@/components/UpgradeButton";
 import StudioProButton from "@/components/StudioProButton";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
+import PageMasthead from "@/components/layouts/PageMasthead";
 
 export const metadata = {
     title: "Upgrade to MHH Pro — Model Horse Hub",
@@ -97,18 +98,16 @@ export default async function UpgradePage({
     const tierLabel = tier === "pro" ? "💎 Pro" : "Free";
 
     return (
-        <ExplorerLayout
-            title={
-                tier === "pro"
-                    ? <>💎 You&apos;re on <span className="text-forest">MHH Pro</span></>
-                    : <>Upgrade to <span className="text-forest">MHH Pro</span></>
-            }
-            description={
-                tier === "pro"
-                    ? "Thank you for supporting Model Horse Hub!"
-                    : "Take your collection management to the next level."
-            }
-        >
+        <ExplorerLayout noHeader>
+            <PageMasthead
+                icon="💎"
+                title={tier === "pro" ? "You're on MHH Pro" : "Upgrade to MHH Pro"}
+                subtitle={
+                    tier === "pro"
+                        ? "Thank you for supporting Model Horse Hub"
+                        : "Take your collection management to the next level"
+                }
+            />
             {/* Success / Cancel banners */}
             {status === "success" && (
                 <div className="animate-fade-in-up mb-8 rounded-xl border border-emerald-300 bg-gradient-to-r from-emerald-50 to-teal-50 p-6 text-center shadow-lg">
