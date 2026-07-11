@@ -7,6 +7,7 @@ import SuggestionCommentThread from"@/components/SuggestionCommentThread";
 import SuggestionAdminActions from"@/components/SuggestionAdminActions";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import CatalogSubMasthead from"@/components/catalog/CatalogSubMasthead";
+import { referenceHref, referencePagesEnabled } from"@/lib/catalog/referenceUrl";
 
 interface Props {
  params: Promise<{ id: string }>;
@@ -63,6 +64,8 @@ export default async function SuggestionDetailPage({ params }: Props) {
  id: string;
  title: string;
  maker: string;
+ maker_slug: string | null;
+ slug: string | null;
  scale: string | null;
  attributes: Record<string, unknown>;
  } | null;
@@ -213,7 +216,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
  {catalogItem && (
  <div className="text-forest">
  <span>For: </span>
- <Link href={`/catalog/${catalogItem.id}`}>
+ <Link href={referencePagesEnabled() ? referenceHref(catalogItem) : `/catalog/${catalogItem.id}`}>
  {catalogItem.title} by {catalogItem.maker}
  </Link>
  </div>
