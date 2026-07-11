@@ -2,28 +2,38 @@
 
 import { useState } from "react";
 
+export interface GalleryPhoto {
+    url: string;
+    name: string;
+}
+
 /**
  * Reference-page photo gallery. Shows one collector photo at a time with
- * prev/next arrows + dots when multiple owners have contributed photos.
+ * prev/next arrows + dots when multiple owners have contributed photos. Each
+ * photo is captioned with the owner's horse name — important on a mold page,
+ * where the photos are different finishes on the same sculpture.
  */
 export default function ReferencePhotoGallery({
     photos,
     alt,
+    contextLabel = "contributed by a collector who owns this model",
 }: {
-    photos: string[];
+    photos: GalleryPhoto[];
     alt: string;
+    contextLabel?: string;
 }) {
     const [idx, setIdx] = useState(0);
     const has = photos.length > 0;
     const multi = photos.length > 1;
+    const current = has ? photos[Math.min(idx, photos.length - 1)] : null;
     const go = (d: number) => setIdx((i) => (i + d + photos.length) % photos.length);
 
     return (
         <div className="overflow-hidden rounded-xl border border-input bg-card shadow-md">
             <div className="relative flex aspect-[4/3] items-center justify-center bg-muted">
-                {has ? (
+                {current ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={photos[idx]} alt={alt} className="h-full w-full object-contain" />
+                    <img src={current.url} alt={current.name || alt} className="h-full w-full object-contain" />
                 ) : (
                     <span className="text-5xl opacity-40">🐴</span>
                 )}
@@ -63,11 +73,12 @@ export default function ReferencePhotoGallery({
                 )}
             </div>
 
-            {has && (
+            {current && (
                 <p className="px-3 py-2 text-xs text-muted-foreground italic">
-                    {multi
-                        ? `Photo ${idx + 1} of ${photos.length} — contributed by collectors who own this model.`
-                        : "Photo contributed by a collector who owns this model."}
+                    {current.name && <span className="text-foreground not-italic">“{current.name}”</span>}
+                    {current.name ? " — " : ""}
+                    {multi ? `${idx + 1} of ${photos.length}, ` : ""}
+                    {contextLabel}.
                 </p>
             )}
         </div>

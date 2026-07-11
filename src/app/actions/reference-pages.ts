@@ -85,25 +85,75 @@ export async function getActiveListingsForCatalog(
     });
 }
 
+export interface ReferencePhoto {
+    url: string;
+    /** The owning collector's name for their horse — distinguishes finishes on a mold. */
+    name: string;
+}
+
 /**
  * Representative photos of a catalog model from any public owner (not just
- * for-sale) — the catalog table itself stores no images. Powers the hero +
- * thumbnails on the reference page.
+ * for-sale) — the catalog table itself stores no images. Each photo carries the
+ * owner's horse name so a mold page can label its varied finishes. Powers the
+ * hero + thumbnails on the reference page.
  */
-export async function getCatalogPhotos(catalogId: string, limit = 6): Promise<string[]> {
+export async function getCatalogPhotos(catalogId: string, limit = 8): Promise<ReferencePhoto[]> {
     const supabase = await createClient();
     const { data } = await supabase
         .from("user_horses")
-        .select(`id, horse_images(image_url, angle_profile)`)
+        .select(`id, custom_name, horse_images(image_url, angle_profile)`)
         .eq("is_public", true)
         .eq("catalog_id", catalogId)
         .is("deleted_at", null)
         .limit(limit);
 
-    const rows = (data ?? []) as unknown as { horse_images: RawHorseRow["horse_images"] }[];
-    const rawUrls = rows.map((r) => pickThumb(r.horse_images)).filter(Boolean) as string[];
-    const urlMap = getPublicImageUrls(rawUrls);
-    return rawUrls.map((u) => urlMap.get(u) ?? u);
+    const rows = (data ?? []) as unknown as {
+        custom_name: string | null;
+        horse_images: RawHorseRow["horse_images"];
+    }[];
+    const withPhoto = rows
+        .map((r) => ({ raw: pickThumb(r.horse_images), name: r.custom_name ?? "" }))
+        .filter((x) => x.raw) as { raw: string; name: string }[];
+    const urlMap = getPublicImageUrls(withPhoto.map((x) => x.raw));
+    return withPhoto.map((x) => ({ url: urlMap.get(x.raw) ?? x.raw, name: x.name }));
+}
+
+export interface ChildRelease {
+    id: string;
+    title: string;
+    makerSlug: string | null;
+    slug: string | null;
+    color: string | null;
+}
+
+/**
+ * Releases catalogued on a given mold (the mold→versions relationship). Empty
+ * for molds with no discrete releases (e.g. Peter Stone one-of-a-kinds).
+ */
+export async function getChildReleases(moldId: string, limit = 60): Promise<ChildRelease[]> {
+    const supabase = await createClient();
+    const { data } = await supabase
+        .from("catalog_items")
+        .select("id, title, maker_slug, slug, attributes")
+        .eq("parent_id", moldId)
+        .eq("item_type", "plastic_release")
+        .order("title")
+        .limit(limit);
+
+    const rows = (data ?? []) as unknown as {
+        id: string;
+        title: string;
+        maker_slug: string | null;
+        slug: string | null;
+        attributes: Record<string, unknown> | null;
+    }[];
+    return rows.map((r) => ({
+        id: r.id,
+        title: r.title,
+        makerSlug: r.maker_slug,
+        slug: r.slug,
+        color: (r.attributes?.color_description as string) ?? null,
+    }));
 }
 
 /**

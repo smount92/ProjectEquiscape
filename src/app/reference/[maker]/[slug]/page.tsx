@@ -7,11 +7,12 @@ import CatalogSubMasthead from "@/components/catalog/CatalogSubMasthead";
 import { Button } from "@/components/ui/button";
 import WantButton from "@/components/reference/WantButton";
 import ReferencePhotoGallery from "@/components/reference/ReferencePhotoGallery";
-import { referencePagesEnabled } from "@/lib/catalog/referenceUrl";
+import { referenceHref, referencePagesEnabled } from "@/lib/catalog/referenceUrl";
 import {
     getActiveListingsForCatalog,
     getCatalogPhotos,
     getCatalogCounts,
+    getChildReleases,
 } from "@/app/actions/reference-pages";
 import { getMarketPrice } from "@/app/actions/market";
 import { buildEbaySearchUrl } from "@/lib/utils/ebayAffiliate";
@@ -67,14 +68,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             type: "article",
             siteName: "Model Horse Hub",
             ...(photos[0]
-                ? { images: [{ url: photos[0], width: 800, height: 600, alt: item.title }] }
+                ? { images: [{ url: photos[0].url, width: 800, height: 600, alt: item.title }] }
                 : {}),
         },
         twitter: {
             card: photos[0] ? "summary_large_image" : "summary",
             title,
             description,
-            ...(photos[0] ? { images: [photos[0]] } : {}),
+            ...(photos[0] ? { images: [photos[0].url] } : {}),
         },
     };
 }
@@ -100,17 +101,19 @@ export default async function ReferencePage({ params }: Props) {
     const item = await resolveItem(maker, slug);
     if (!item) notFound();
 
+    const isMold = item.item_type === "plastic_mold";
+
     const supabase = await createClient();
     const {
         data: { user },
     } = await supabase.auth.getUser();
 
     // Everything else in parallel — all anon-safe / aggregate-only.
-    const [counts, market, listings, photos, wishRow] = await Promise.all([
+    const [counts, market, listings, photos, wishRow, childReleases] = await Promise.all([
         getCatalogCounts(item.id),
         getMarketPrice(item.id),
         getActiveListingsForCatalog(item.id),
-        getCatalogPhotos(item.id, 6),
+        getCatalogPhotos(item.id, 8),
         user
             ? supabase
                   .from("user_wishlists")
@@ -119,6 +122,7 @@ export default async function ReferencePage({ params }: Props) {
                   .eq("catalog_id", item.id)
                   .maybeSingle()
             : Promise.resolve({ data: null }),
+        isMold ? getChildReleases(item.id) : Promise.resolve([]),
     ]);
 
     const attrs = item.attributes ?? {};
@@ -140,9 +144,9 @@ export default async function ReferencePage({ params }: Props) {
     return (
         <FocusLayout noHeader>
             <CatalogSubMasthead
-                icon="🐴"
+                icon={isMold ? "🗿" : "🐴"}
                 title={item.title}
-                subtitle={<>by {item.maker}</>}
+                subtitle={<>by {item.maker}{isMold ? " · Mold" : ""}</>}
                 backHref="/catalog"
                 backLabel="Reference Catalog"
             />
@@ -150,13 +154,29 @@ export default async function ReferencePage({ params }: Props) {
             <div className="flex flex-col gap-8">
                 {/* HERO */}
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-[minmax(0,360px)_1fr]">
-                    <ReferencePhotoGallery photos={photos} alt={item.title} />
+                    <ReferencePhotoGallery
+                        photos={photos}
+                        alt={item.title}
+                        contextLabel={
+                            isMold
+                                ? "a collector’s finish on this mold"
+                                : "contributed by a collector who owns this model"
+                        }
+                    />
 
                     <div className="flex flex-col gap-4">
                         <div className="text-sm font-bold tracking-widest text-forest uppercase">
                             {item.maker}
                             {item.scale ? ` · ${item.scale}` : ""}
+                            {isMold ? " · Mold" : ""}
                         </div>
+                        {isMold && (
+                            <p className="rounded-lg border border-input bg-muted/50 px-3 py-2 text-sm text-secondary-foreground">
+                                This is a <b className="text-foreground">mold</b> (the sculpture). Collectors
+                                finish it in many different colors, so the photos below are a range of finishes —
+                                not a single model.
+                            </p>
+                        )}
                         <div className="flex flex-wrap gap-2">
                             {chip("Year", attrs.release_year_start)}
                             {chip("Finish", attrs.finish)}
@@ -167,7 +187,8 @@ export default async function ReferencePage({ params }: Props) {
 
                         <p className="text-secondary-foreground">
                             <b className="text-foreground tabular-nums">{counts.collectors.toLocaleString()}</b>{" "}
-                            collector{counts.collectors === 1 ? "" : "s"} have this in their stable.
+                            collector{counts.collectors === 1 ? "" : "s"}{" "}
+                            {isMold ? "have a horse on this mold" : "have this in their stable"}.
                         </p>
 
                         <div className="flex flex-wrap items-center gap-3">
@@ -199,20 +220,26 @@ export default async function ReferencePage({ params }: Props) {
                                 <div className="grid grid-cols-1 sm:grid-cols-[220px_1fr]">
                                     <div className="border-b border-input p-5 sm:border-r sm:border-b-0">
                                         <div className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
-                                            Median sale
+                                            {isMold ? "Sale range" : "Median sale"}
                                         </div>
                                         <div className="mt-1 text-4xl font-extrabold tabular-nums text-foreground">
-                                            ${Math.round(market.medianPrice).toLocaleString()}
+                                            {isMold
+                                                ? `$${Math.round(market.lowestPrice)}–$${Math.round(market.highestPrice)}`
+                                                : `$${Math.round(market.medianPrice).toLocaleString()}`}
                                         </div>
-                                        <div className="text-sm text-muted-foreground">from completed sales</div>
+                                        <div className="text-sm text-muted-foreground">
+                                            {isMold ? "varies by finish" : "from completed sales"}
+                                        </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4 p-5">
                                         <div>
                                             <div className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
-                                                Recent range
+                                                {isMold ? "Typical" : "Recent range"}
                                             </div>
                                             <div className="text-lg font-bold tabular-nums text-foreground">
-                                                ${Math.round(market.lowestPrice)}–${Math.round(market.highestPrice)}
+                                                {isMold
+                                                    ? `$${Math.round(market.medianPrice).toLocaleString()}`
+                                                    : `$${Math.round(market.lowestPrice)}–$${Math.round(market.highestPrice)}`}
                                             </div>
                                         </div>
                                         <div>
@@ -301,11 +328,43 @@ export default async function ReferencePage({ params }: Props) {
                     </section>
                 )}
 
+                {/* RELEASES ON THIS MOLD (mold → versions, Discogs-style) */}
+                {isMold && childReleases.length > 0 && (
+                    <section>
+                        <h2 className="mb-3 font-serif text-xl font-bold text-foreground">
+                            Releases on this mold{" "}
+                            <span className="text-sm font-normal text-muted-foreground">
+                                ({childReleases.length})
+                            </span>
+                        </h2>
+                        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                            {childReleases.map((r) => (
+                                <Link
+                                    key={r.id}
+                                    href={referenceHref({
+                                        id: r.id,
+                                        maker: item.maker,
+                                        title: r.title,
+                                        maker_slug: r.makerSlug,
+                                        slug: r.slug,
+                                    })}
+                                    className="flex flex-col rounded-lg border border-input bg-card px-4 py-3 no-underline transition-colors hover:border-forest"
+                                >
+                                    <span className="font-semibold text-foreground">{r.title}</span>
+                                    {r.color && <span className="text-sm text-muted-foreground">{r.color}</span>}
+                                </Link>
+                            ))}
+                        </div>
+                    </section>
+                )}
+
                 {/* WANTED BAR */}
                 <div className="flex flex-wrap items-center gap-4 rounded-xl border border-dashed border-[color:var(--color-warning)] bg-[color:var(--color-warning)]/5 px-5 py-4">
                     <span className="text-2xl">🎯</span>
                     <div className="min-w-[220px] flex-1">
-                        <div className="font-bold text-foreground">Want this model? Add it to your want list.</div>
+                        <div className="font-bold text-foreground">
+                            {isMold ? "Want one on this mold?" : "Want this model?"} Add it to your want list.
+                        </div>
                         <div className="text-sm text-secondary-foreground">
                             Owners get a private nudge that you’re looking — even if it isn’t listed.
                         </div>
