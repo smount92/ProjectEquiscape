@@ -531,7 +531,7 @@ export default function SettingsPage() {
  </p>
  <ul className="text-muted-foreground mb-4 pl-6 text-sm leading-[1.8]">
  <li>Your profile will be anonymized as &ldquo;[Deleted Collector]&rdquo;</li>
- <li>Your horses will be orphaned (Hoofprint™ history preserved)</li>
+ <li>Your horses will be orphaned (Hoofprint history preserved)</li>
  <li>Pending transfers and commissions will be cancelled</li>
  <li>You will be signed out and cannot log in again</li>
  </ul>

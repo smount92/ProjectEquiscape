@@ -120,7 +120,7 @@ export default function ClaimPage() {
  <h1 className="font-serif text-3xl font-bold text-foreground">Welcome to your stable!</h1>
  <p className="text-secondary-foreground mt-4 mb-8">
  <strong>{success.horseName}</strong> has been successfully transferred to your account. The full
- Hoofprint™ history has been preserved.
+ Hoofprint history has been preserved.
  </p>
  <div className="flex flex-wrap justify-center gap-4">
  <Link
@@ -253,7 +253,7 @@ export default function ClaimPage() {
  )}
 
  <p className="text-muted-foreground mt-6 text-xs text-center border-t border-input pt-4">
- The horse&apos;s full Hoofprint™ history will transfer with it.
+ The horse&apos;s full Hoofprint history will transfer with it.
  <br />
  Photos, show records, and provenance are preserved forever.
  </p>

@@ -8,7 +8,7 @@ import { Lock, Sparkles, PawPrint, Gavel, Users, Palette, Package, Smartphone, H
 export const metadata: Metadata = {
     title: "About — Model Horse Hub",
     description:
-        "Learn about Model Horse Hub — the first digital stable built by a collector who was tired of notebooks, spreadsheets, and scattered albums. 10,500+ reference entries, Hoofprint™ provenance, and a privacy-first design.",
+        "Learn about Model Horse Hub — the first digital stable built by a collector who was tired of notebooks, spreadsheets, and scattered albums. 10,500+ reference entries, Hoofprint provenance, and a privacy-first design.",
 };
 
 export default function AboutPage() {
@@ -121,9 +121,9 @@ export default function AboutPage() {
                             <div className="text-forest mb-4 flex justify-center">
                                 <PawPrint size={32} strokeWidth={1.5} />
                             </div>
-                            <h3>Hoofprint™ — A First for the Hobby</h3>
+                            <h3>Hoofprint — A First for the Hobby</h3>
                             <p>
-                                No platform has ever built provenance tracking for model horses. Hoofprint™ creates a
+                                No platform has ever built provenance tracking for model horses. Hoofprint creates a
                                 permanent digital identity for every horse — ownership history, customization records,
                                 show results, and photos that follow the horse, not the owner. The CarFax of model
                                 horses.
@@ -144,7 +144,7 @@ export default function AboutPage() {
                         </p>
                         <p>
                             So here&apos;s our commitment, in plain English: your data is backed up automatically, every
-                            single night. You can export your entire collection — every horse, every Hoofprint™ record,
+                            single night. You can export your entire collection — every horse, every Hoofprint record,
                             every qualification card — as a CSV or PDF, anytime you want, straight from your dashboard.
                             You don&apos;t have to ask us, and you don&apos;t have to wait.
                         </p>
@@ -174,7 +174,7 @@ export default function AboutPage() {
                                 your entire show structure in seconds. Run live shows from a phone-based ring console
                                 with table-side placings and champion callbacks, or host an online photo show with judge
                                 or community voting. Every result becomes a qualification card on the horse&apos;s
-                                Hoofprint™ — publicly verifiable, so a buyer can check a card before they buy.
+                                Hoofprint — publicly verifiable, so a buyer can check a card before they buy.
                             </p>
                         </div>
                         <div className="ledger-paper [&_p]:text-secondary-foreground p-8 text-center transition-transform duration-300 hover:-translate-y-1 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
@@ -196,7 +196,7 @@ export default function AboutPage() {
                             <p>
                                 Artists manage their commission queue, share WIP photos with clients, and build a
                                 portfolio that speaks for itself. When a custom is delivered, the creation story flows
-                                into the horse&apos;s Hoofprint&trade; — permanently.
+                                into the horse&apos;s Hoofprint — permanently.
                             </p>
                         </div>
                         <div className="ledger-paper [&_p]:text-secondary-foreground p-8 text-center transition-transform duration-300 hover:-translate-y-1 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">

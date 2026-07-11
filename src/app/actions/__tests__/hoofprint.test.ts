@@ -36,7 +36,7 @@ import {
     getMyPendingTransfers,
 } from "@/app/actions/hoofprint";
 
-describe("Hoofprint™ — Transfer & Provenance System", () => {
+describe("Hoofprint — Transfer & Provenance System", () => {
     beforeEach(() => {
         mockClient = createMockSupabaseClient();
         mockAdmin = createMockSupabaseClient();

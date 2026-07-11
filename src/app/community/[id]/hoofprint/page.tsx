@@ -19,8 +19,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
  .single();
  return {
  title: horse
-  ? `🐾 Hoofprint™ — ${(horse as { custom_name: string }).custom_name} | Model Horse Hub`
-  :"Hoofprint™ Report | Model Horse Hub",
+  ? `🐾 Hoofprint — ${(horse as { custom_name: string }).custom_name} | Model Horse Hub`
+  :"Hoofprint Report | Model Horse Hub",
  };
 }
 
@@ -55,7 +55,7 @@ export default async function HoofprintReportPage({ params }: { params: Promise<
 
  return (
  <ExplorerLayout
-  title={<>🐾 <span className="text-forest">Hoofprint™ Report</span></>}
+  title={<>🐾 <span className="text-forest">Hoofprint Report</span></>}
   description={<>Full provenance record for <strong>{h.custom_name}</strong>{refName && <> · {refName} · {h.finish_type} · {h.condition_grade}</>}</>}
   headerActions={
   <>
@@ -65,7 +65,7 @@ export default async function HoofprintReportPage({ params }: { params: Promise<
    ← Back to Passport
    </Link></Button>
    <ShareButton
-   title={`🐾 Hoofprint™ — ${h.custom_name}`}
+   title={`🐾 Hoofprint — ${h.custom_name}`}
    text={`Check out the full provenance record for ${h.custom_name} on Model Horse Hub!`}
    variant="full"
    label="Share Report"

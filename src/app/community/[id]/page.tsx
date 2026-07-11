@@ -736,7 +736,7 @@ editionSize: rawPedigree.edition_size,
  </div>
  )}
 
- {/* 🐾 Hoofprint™ — Public Read-Only */}
+ {/* 🐾 Hoofprint — Public Read-Only */}
  {await (async () => {
  const {
  timeline: hfTimeline,

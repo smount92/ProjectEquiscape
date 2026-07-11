@@ -210,7 +210,7 @@ export default function CertificateOfAuthenticity({ data }: { data: CoaData }) {
  <Text style={s.brand}>MODEL HORSE HUB</Text>
  <View>
  <Text style={s.title}>Certificate of Authenticity</Text>
- <Text style={s.subtitle}>Hoofprint™ Verified Provenance</Text>
+ <Text style={s.subtitle}>Hoofprint Verified Provenance</Text>
  </View>
  <Text style={{ fontSize: 8, color:"#a0a0b8" }}>{data.generatedAt}</Text>
  </View>
@@ -268,14 +268,14 @@ export default function CertificateOfAuthenticity({ data }: { data: CoaData }) {
  <Text style={s.pinCode}>{data.pin}</Text>
  <Text style={s.instructions}>
  Scan this QR code or visit modelhorsehub.com/claim and enter PIN {data.pin} to claim this model
- and inherit its full Hoofprint™ history.
+ and inherit its full Hoofprint history.
  </Text>
  </View>
 
  {/* Footer */}
  <View style={s.footer}>
  <Text>Model Horse Hub — modelhorsehub.com</Text>
- <Text>This certificate verifies provenance through the Hoofprint™ system</Text>
+ <Text>This certificate verifies provenance through the Hoofprint system</Text>
  <Text>{data.generatedAt}</Text>
  </View>
  </Page>

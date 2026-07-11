@@ -125,10 +125,10 @@ export default function TermsPage() {
 
  {/* Hoofprint */}
  <section className="mb-12">
- <h2>7. Hoofprint&trade; Provenance</h2>
+ <h2>7. Hoofprint Provenance</h2>
  <p>
- Hoofprint&trade; records are designed to be a permanent, trustworthy provenance trail for model
- horses. By using Hoofprint&trade;, you understand that:
+ Hoofprint records are designed to be a permanent, trustworthy provenance trail for model
+ horses. By using Hoofprint, you understand that:
  </p>
  <ul className="mb-4 list-none p-0">
  <li>
@@ -136,12 +136,12 @@ export default function TermsPage() {
  and cannot be deleted
  </li>
  <li>
- When you transfer a horse, the Hoofprint&trade; history travels with the horse to the new
+ When you transfer a horse, the Hoofprint history travels with the horse to the new
  owner
  </li>
  <li>Your display alias will appear in the ownership chain of any horse you&apos;ve owned</li>
  <li>
- Financial vault data (prices, values) is <strong>never</strong> included in Hoofprint&trade;
+ Financial vault data (prices, values) is <strong>never</strong> included in Hoofprint
  transfers
  </li>
  </ul>
@@ -156,9 +156,9 @@ export default function TermsPage() {
  manufacturer information) is sourced from publicly available catalogs and community databases.
  </p>
  <p>
- &ldquo;Hoofprint&rdquo; and the Hoofprint&trade; mark are trademarks of Model Horse Hub. Breyer,
- Stone, and all other manufacturer names are trademarks of their respective owners and are used
- for reference purposes only.
+ &ldquo;Hoofprint&rdquo; is a feature name used by Model Horse Hub. Breyer, Stone, and all
+ other manufacturer names are trademarks of their respective owners and are used for reference
+ purposes only.
  </p>
  </section>
 
@@ -194,7 +194,7 @@ export default function TermsPage() {
  <h2>10. Account Termination</h2>
  <p>
  You may delete your account at any time from your Settings page. Upon deletion, your collection
- data, photos, and private information will be permanently removed. Hoofprint&trade; provenance
+ data, photos, and private information will be permanently removed. Hoofprint provenance
  records for horses you have already transferred to other users will remain intact, as they are
  part of the horse&apos;s history, not your account.
  </p>

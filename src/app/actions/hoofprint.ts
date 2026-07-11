@@ -9,7 +9,7 @@ import { checkRateLimit } from "@/lib/utils/rateLimit";
 import { randomInt } from "crypto";
 
 // ============================================================
-// HOOFPRINT™ — Living Model Horse Provenance Actions
+// HOOFPRINT — Living Model Horse Provenance Actions
 // ============================================================
 
 // ── Types ──

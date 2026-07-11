@@ -62,7 +62,7 @@ const STUDIO_FEATURES = [
     },
     {
         icon: "🔗",
-        title: "Hoofprint™ Artist Credit",
+        title: "Hoofprint Artist Credit",
         description: "Your name permanently linked to every custom you create via Hoofprint provenance",
     },
     {
@@ -74,7 +74,7 @@ const STUDIO_FEATURES = [
 
 const FREE_FEATURES = [
     "Unlimited horses in your stable",
-    "Hoofprint™ provenance tracking",
+    "Hoofprint provenance tracking",
     "Community Show Ring & social features",
     "Basic Price Guide (avg / median)",
     "5 standard LSQ photo angles per horse",

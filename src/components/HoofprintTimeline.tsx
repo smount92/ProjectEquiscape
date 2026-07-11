@@ -105,7 +105,7 @@ export default function HoofprintTimeline({
  <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
  <div className="flex items-center gap-4">
  <h2 className="text-xl font-bold">
- 🐾 <span className="text-forest">Hoofprint™</span>
+ 🐾 <span className="text-forest">Hoofprint</span>
  </h2>
  <span className={`hoofprint-stage-badge stage-${lifeStage}`}>
  {STAGE_ICONS[lifeStage] ||"📋"} {STAGE_LABELS[lifeStage] || lifeStage}
@@ -190,7 +190,7 @@ export default function HoofprintTimeline({
  />
  </div>
  <div className="mt-2 flex items-center gap-4">
- <span className="text-muted-foreground text-xs">📝 Notes appear on the Hoofprint™ timeline</span>
+ <span className="text-muted-foreground text-xs">📝 Notes appear on the Hoofprint timeline</span>
  <Button
  type="submit" className="ml-auto"
  disabled={saving}

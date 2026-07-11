@@ -1285,7 +1285,7 @@ export default function EditHorsePage() {
  className="text-sm"
  rows={2}
  maxLength={300}
- placeholder="What happened? (optional — visible on Hoofprint™)"
+ placeholder="What happened? (optional — visible on Hoofprint)"
  value={conditionNote}
  onChange={(e) => setConditionNote(e.target.value)}
  />
@@ -1329,7 +1329,7 @@ export default function EditHorsePage() {
  <option value="for_sale">💲 For Sale</option>
  </select>
  <span className="text-muted-foreground mt-1 block text-xs">
- Changing this will add a stage update to the Hoofprint™ timeline.
+ Changing this will add a stage update to the Hoofprint timeline.
  </span>
  </div>
  )}

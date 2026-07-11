@@ -21,7 +21,7 @@ const FAQ_ITEMS: FaqItem[] = [
     {
         category: "Getting Started",
         q: "Is Model Horse Hub really free?",
-        a: "Yes! The core platform — including your stable, reference database, photo galleries, the Show Ring, and Hoofprint™ provenance — is completely free. No credit card required. We plan to offer optional premium features in the future, but the free tier will always be fully functional.",
+        a: "Yes! The core platform — including your stable, reference database, photo galleries, the Show Ring, and Hoofprint provenance — is completely free. No credit card required. We plan to offer optional premium features in the future, but the free tier will always be fully functional.",
     },
     {
         category: "Getting Started",
@@ -73,21 +73,21 @@ const FAQ_ITEMS: FaqItem[] = [
         a: "Photos are stored in secure cloud storage and accessed via time-limited signed URLs. They cannot be hotlinked or scraped by third parties. Each URL expires and must be re-signed for access.",
     },
 
-    // Hoofprint™
+    // Hoofprint
     {
-        category: "Hoofprint™ Provenance",
-        q: "What is Hoofprint™?",
-        a: "Hoofprint™ is the first living provenance system for model horses. It creates a permanent digital identity for each horse — tracking ownership history, customization records, show results, and photos. Think of it as a CarFax for model horses.",
+        category: "Hoofprint Provenance",
+        q: "What is Hoofprint?",
+        a: "Hoofprint is the first living provenance system for model horses. It creates a permanent digital identity for each horse — tracking ownership history, customization records, show results, and photos. Think of it as a CarFax for model horses.",
     },
     {
-        category: "Hoofprint™ Provenance",
+        category: "Hoofprint Provenance",
         q: "What happens when I sell or transfer a horse?",
-        a: "When you transfer a horse, the entire Hoofprint™ history — ownership chain, show results, photos — travels with the horse to the new owner. Your financial vault data (prices, values) is NEVER transferred. The new owner gets the horse's story; your private data stays private.",
+        a: "When you transfer a horse, the entire Hoofprint history — ownership chain, show results, photos — travels with the horse to the new owner. Your financial vault data (prices, values) is NEVER transferred. The new owner gets the horse's story; your private data stays private.",
     },
     {
-        category: "Hoofprint™ Provenance",
-        q: "Can I delete Hoofprint™ records?",
-        a: "Hoofprint™ provenance events are permanent by design. This is what makes them trustworthy — like a title history for a car. You can delete your account, but any provenance already transferred to another user's horse will remain.",
+        category: "Hoofprint Provenance",
+        q: "Can I delete Hoofprint records?",
+        a: "Hoofprint provenance events are permanent by design. This is what makes them trustworthy — like a title history for a car. You can delete your account, but any provenance already transferred to another user's horse will remain.",
     },
 
     // Commerce
@@ -109,14 +109,14 @@ const FAQ_ITEMS: FaqItem[] = [
     {
         category: "Buying & Selling",
         q: "What are qualification cards, and can I verify one before I buy a horse?",
-        a: "When a horse places in a Model Horse Hub show, it earns a qualification card — a permanent record that becomes part of the horse's Hoofprint™ and travels with it if it's ever sold (these are Model Horse Hub platform cards, built on NAMHSA-style class structures, not official NAMHSA/NAN paperwork). Every card has its own public verification page at a short link — anyone, including an anonymous buyer, can check that a card is real before money changes hands. Buying a horse with show history? Ask the seller for its card link.",
+        a: "When a horse places in a Model Horse Hub show, it earns a qualification card — a permanent record that becomes part of the horse's Hoofprint and travels with it if it's ever sold (these are Model Horse Hub platform cards, built on NAMHSA-style class structures, not official NAMHSA/NAN paperwork). Every card has its own public verification page at a short link — anyone, including an anonymous buyer, can check that a card is real before money changes hands. Buying a horse with show history? Ask the seller for its card link.",
     },
 
     // Shows & Community
     {
         category: "Shows & Community",
         q: "How do virtual photo shows work?",
-        a: "Shows are hosted with themed classes, entry deadlines, and voting periods. You enter your horse, the community votes (or an expert judge places), and winners are announced. Results flow into your horse's Hoofprint™ automatically.",
+        a: "Shows are hosted with themed classes, entry deadlines, and voting periods. You enter your horse, the community votes (or an expert judge places), and winners are announced. Results flow into your horse's Hoofprint automatically.",
     },
     {
         category: "Shows & Community",
@@ -126,7 +126,7 @@ const FAQ_ITEMS: FaqItem[] = [
     {
         category: "Shows & Community",
         q: "Can I host an online photo show?",
-        a: "Yes. Choose the Online mode when you create your show, and entrants submit photos to your classes during the entry window. Judge it yourself, invite an outside judge, or open it to community voting. Results post automatically and flow straight into every entrant's Hoofprint™.",
+        a: "Yes. Choose the Online mode when you create your show, and entrants submit photos to your classes during the entry window. Judge it yourself, invite an outside judge, or open it to community voting. Results post automatically and flow straight into every entrant's Hoofprint.",
     },
     {
         category: "Shows & Community",
@@ -143,7 +143,7 @@ const FAQ_ITEMS: FaqItem[] = [
     {
         category: "Your Account",
         q: "Can I delete my account?",
-        a: "Yes, from your Settings page. Account deletion permanently removes all your collection data, photos, and private information. Hoofprint™ provenance records for horses already transferred to other users will remain, as they're part of the horse's history.",
+        a: "Yes, from your Settings page. Account deletion permanently removes all your collection data, photos, and private information. Hoofprint provenance records for horses already transferred to other users will remain, as they're part of the horse's history.",
     },
     {
         category: "Your Account",

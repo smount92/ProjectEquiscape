@@ -125,7 +125,7 @@ export default function RatingForm({
  marginBottom:"var(--space-md)",
  }}
  >
- ℹ️ No verified Hoofprint™ transfer found between you and this user.
+ ℹ️ No verified Hoofprint transfer found between you and this user.
  </div>
  )}
  <form onSubmit={handleSubmit}>

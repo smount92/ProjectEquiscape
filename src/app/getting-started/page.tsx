@@ -22,7 +22,7 @@ import {
 export const metadata: Metadata = {
     title: "Getting Started — Model Horse Hub",
     description:
-        "Learn how to set up your digital stable on Model Horse Hub. Add your first horse, explore the Show Ring, and discover Hoofprint™ provenance tracking.",
+        "Learn how to set up your digital stable on Model Horse Hub. Add your first horse, explore the Show Ring, and discover Hoofprint provenance tracking.",
 };
 
 export default function GettingStartedPage() {
@@ -102,11 +102,11 @@ export default function GettingStartedPage() {
                 {/* Step 3 */}
                 <section className="mb-12">
                     <h2 className="flex items-center gap-2">
-                        <PawPrint size={22} strokeWidth={1.5} className="text-forest" /> Step 3: Meet Hoofprint™
+                        <PawPrint size={22} strokeWidth={1.5} className="text-forest" /> Step 3: Meet Hoofprint
                     </h2>
                     <p>
                         Every horse you add automatically gets a{" "}
-                        <strong>Hoofprint™ &mdash; a permanent digital identity</strong>. Think of it like a passport
+                        <strong>Hoofprint &mdash; a permanent digital identity</strong>. Think of it like a passport
                         that follows the horse, not the owner.
                     </p>
                     <p>Your Hoofprint timeline tracks:</p>
@@ -205,7 +205,7 @@ export default function GettingStartedPage() {
                     </p>
                     <p>
                         Either way, every result becomes a permanent record &mdash; and a qualification card &mdash; on
-                        the horse&apos;s Hoofprint™, with a public verification page anyone can check.
+                        the horse&apos;s Hoofprint, with a public verification page anyone can check.
                     </p>
                 </section>
 

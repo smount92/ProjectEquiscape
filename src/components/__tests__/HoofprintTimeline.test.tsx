@@ -97,10 +97,10 @@ describe("HoofprintTimeline", () => {
  vi.clearAllMocks();
  });
 
- it("renders the Hoofprint™ header", () => {
+ it("renders the Hoofprint header", () => {
  render(<HoofprintTimeline {...defaultProps} />);
 
- expect(screen.getByText("Hoofprint™")).toBeInTheDocument();
+ expect(screen.getByText("Hoofprint")).toBeInTheDocument();
  });
 
  it("displays the life stage badge", () => {

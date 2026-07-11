@@ -642,7 +642,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  {/* Pedigree Card */}
  <PedigreeCard horseId={horseId} pedigree={pedigree} isOwner={true} />
 
- {/* 🐾 Hoofprint™ Timeline — model + other_model only */}
+ {/* 🐾 Hoofprint Timeline — model + other_model only */}
  {assetConfig.showHoofprint && (
  <HoofprintTimeline
  horseId={horseId}

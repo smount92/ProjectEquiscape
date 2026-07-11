@@ -129,7 +129,7 @@ export default function ParkedExportPanel({
  <p className="text-secondary-foreground mb-6 leading-[1.6]">
  Selling <strong>{horseName}</strong> at a live show, via Facebook, or another platform? Park it
  here and get a <strong>Certificate of Authenticity</strong> with a QR code the buyer can scan to
- claim the horse — and inherit its full Hoofprint™ history.
+ claim the horse — and inherit its full Hoofprint history.
  </p>
  <ul className="mb-3 list-none p-0">
  <li>1. Click &quot;Park This Horse&quot; — a unique claim PIN is generated</li>
@@ -156,7 +156,7 @@ export default function ParkedExportPanel({
  <div>
  <div className="parked-export-status">
  <p className="text-secondary-foreground mb-4">
- <strong>{horseName}</strong> is parked. Its Hoofprint™ history is frozen until claimed by a
+ <strong>{horseName}</strong> is parked. Its Hoofprint history is frozen until claimed by a
  new owner.
  </p>
  </div>

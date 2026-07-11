@@ -31,7 +31,7 @@ export const metadata: Metadata = {
  siteName:"Model Horse Hub",
  title:"Model Horse Hub — Your Digital Stable",
  description:
-"The all-in-one platform for model horse collectors and artists. 10,500+ reference releases, Hoofprint™ provenance, LSQ photography, private financial vault, and community marketplace.",
+"The all-in-one platform for model horse collectors and artists. 10,500+ reference releases, Hoofprint provenance, LSQ photography, private financial vault, and community marketplace.",
  locale:"en_US",
   images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Model Horse Hub" }],
  },
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
  card:"summary",
  title:"Model Horse Hub — Your Digital Stable",
  description:
-"The all-in-one platform for model horse collectors and artists. 10,500+ reference releases, Hoofprint™ provenance, and community marketplace.",
+"The all-in-one platform for model horse collectors and artists. 10,500+ reference releases, Hoofprint provenance, and community marketplace.",
  },
  robots: {
  index: true,

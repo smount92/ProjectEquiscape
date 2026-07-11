@@ -23,7 +23,7 @@ import {
 export const metadata: Metadata = {
     title: "Model Horse Hub — The Digital Home for the Model Horse Hobby",
     description:
-        "The all-in-one platform for model horse collectors and artists. 10,500+ reference releases, Hoofprint™ provenance tracking, LSQ photography, private financial vault, community marketplace, virtual photo shows with NAMHSA templates, AI Stablemaster insights, and artist commission tools. Free forever tier.",
+        "The all-in-one platform for model horse collectors and artists. 10,500+ reference releases, Hoofprint provenance tracking, LSQ photography, private financial vault, community marketplace, virtual photo shows with NAMHSA templates, AI Stablemaster insights, and artist commission tools. Free forever tier.",
 };
 
 export default function LandingPage() {
@@ -38,7 +38,7 @@ export default function LandingPage() {
             >
                 <div className="animate-fade-in-up relative z-[1] max-w-[780px] text-center">
                     <span className="text-forest border-forest/20 bg-forest/5 mb-5 inline-flex items-center gap-2 rounded-full border px-5 py-1 text-sm font-semibold tracking-[0.01em]">
-                        <Fingerprint size={16} strokeWidth={1.5} /> Hoofprint™ — Living Provenance for Model Horses
+                        <Fingerprint size={16} strokeWidth={1.5} /> Hoofprint — Living Provenance for Model Horses
                     </span>
                     <h1 className="text-engraved-light mb-4 font-serif text-[clamp(1.6rem,3.8vw,2.4rem)] leading-[1.15] font-extrabold tracking-[0.12em] uppercase">
                         The Only Platform Built <span className="text-forest">for This Hobby</span>
@@ -210,7 +210,7 @@ export default function LandingPage() {
                                 No other platform does this. Build a full classlist in one click from a NAMHSA-style
                                 template, then run it your way: a phone-based ring console for placing live-show tables,
                                 champion callbacks, and judging on the spot — or an online photo show with judge or
-                                community voting. Results become qualification cards on the horse&apos;s Hoofprint™
+                                community voting. Results become qualification cards on the horse&apos;s Hoofprint
                                 forever, each with a public verification page so a buyer can check a card before they
                                 buy.
                             </p>
@@ -244,7 +244,7 @@ export default function LandingPage() {
                             <p className="text-secondary-foreground text-sm leading-relaxed">
                                 Artists: manage your commission queue, share WIP progress photos, and build a portfolio.
                                 Clients: watch your custom come to life. Every brushstroke becomes part of the
-                                horse&apos;s Hoofprint™.
+                                horse&apos;s Hoofprint.
                             </p>
                         </div>
 
@@ -267,14 +267,14 @@ export default function LandingPage() {
                 </div>
             </section>
 
-            {/* ─── Hoofprint™ Teaser — a page torn from the ledger itself ─── */}
+            {/* ─── Hoofprint Teaser — a page torn from the ledger itself ─── */}
             <section className="hoofprint-teaser-section" id="hoofprint-teaser">
                 <div className="ledger-paper mx-auto max-w-[720px] px-8 py-10">
                     <div className="mb-6">
                         <span className="stamp">Now Live</span>
                     </div>
                     <h2 className="mb-6 font-serif text-[clamp(1.5rem,3.5vw,2.5rem)] leading-[1.2] font-extrabold">
-                        Every Horse Has a Story. <span className="text-forest">Hoofprint™ Tells It.</span>
+                        Every Horse Has a Story. <span className="text-forest">Hoofprint Tells It.</span>
                     </h2>
                     <p className="text-secondary-foreground mb-4 text-base leading-[1.7]">
                         Imagine a permanent digital identity for every model horse. From the moment a blank resin is
@@ -282,7 +282,7 @@ export default function LandingPage() {
                         collector after that.
                     </p>
                     <p className="text-secondary-foreground mb-4 text-base leading-[1.7]">
-                        Hoofprint™ is the first-ever living provenance system for model horses. Photos, ownership
+                        Hoofprint is the first-ever living provenance system for model horses. Photos, ownership
                         transfers, customization records, and show results all follow the horse — not the owner. Like a
                         passport that never expires.
                     </p>
@@ -348,7 +348,7 @@ export default function LandingPage() {
                             <p>
                                 Manage commissions, share WIP progress with clients, and build a portfolio that speaks
                                 for itself. When you deliver a custom, your creation story becomes part of its
-                                Hoofprint&trade; — forever.
+                                Hoofprint — forever.
                             </p>
                         </div>
                         <div className="ledger-paper [&_p]:text-secondary-foreground p-8 text-center transition-transform duration-300 hover:-translate-y-1 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
@@ -376,7 +376,7 @@ export default function LandingPage() {
                         <div className="stat-num flex justify-center">
                             <PawPrint size={28} strokeWidth={1.5} />
                         </div>
-                        <div className="stat-label">Hoofprint™ Tracking</div>
+                        <div className="stat-label">Hoofprint Tracking</div>
                     </div>
                     <div>
                         <div className="stat-num flex justify-center">

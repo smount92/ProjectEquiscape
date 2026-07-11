@@ -1365,7 +1365,7 @@ export default function AddHorsePage() {
  <option value="for_sale">💲 For Sale</option>
  </select>
  <span className="text-muted-foreground mt-1 block text-xs">
- This sets the life stage on your Hoofprint™ timeline.
+ This sets the life stage on your Hoofprint timeline.
  </span>
  </div>
  )}

@@ -83,7 +83,7 @@ export default function PrivacyPage() {
  <li>Display your public collection in the Show Ring (only when you opt in)</li>
  <li>Facilitate messaging and commerce features between users</li>
  <li>Send transactional emails (e.g., message notifications, transfer confirmations)</li>
- <li>Generate Hoofprint&trade; provenance records for your horses</li>
+ <li>Generate Hoofprint provenance records for your horses</li>
  <li>Improve the platform based on aggregate usage patterns</li>
  </ul>
  <p className="mt-4">
@@ -138,7 +138,7 @@ export default function PrivacyPage() {
  data is <em>never</em> shown publicly.
  </li>
  <li>
- <strong>Hoofprint&trade; transfers</strong> &mdash; when you transfer a horse to another
+ <strong>Hoofprint transfers</strong> &mdash; when you transfer a horse to another
  user, provenance records (ownership dates, show results) transfer with the horse. Financial
  vault data is <em>never</em> transferred.
  </li>
