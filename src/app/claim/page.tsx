@@ -7,6 +7,7 @@ import { claimTransfer } from"@/app/actions/hoofprint";
 import { getParkedHorseByPin, claimParkedHorse } from"@/app/actions/parked-export";
 import { Input } from "@/components/ui/input";
 import FocusLayout from"@/components/layouts/FocusLayout";
+import PageMasthead from"@/components/layouts/PageMasthead";
 
 export default function ClaimPage() {
  const router = useRouter();
@@ -145,17 +146,9 @@ export default function ClaimPage() {
  }
 
  return (
- <FocusLayout title="Claim a Horse" description="Enter a transfer code or Certificate of Authenticity PIN.">
+ <FocusLayout noHeader>
+ <PageMasthead compact icon="📦" title="Claim a Horse" subtitle="Enter a transfer code or Certificate of Authenticity PIN" />
  <div className="bg-card border-input animate-fade-in-up mx-auto max-w-[520px] rounded-lg border shadow-md transition-all p-8">
- <div className="mb-8 text-center">
- <div className="mb-2 text-[2.5rem]">📦</div>
- <h1 className="font-serif text-3xl font-bold text-foreground">
- Claim a Horse
- </h1>
- <p className="text-secondary-foreground mt-2 text-sm">
- Enter a transfer code or Certificate of Authenticity PIN to claim a horse.
- </p>
- </div>
 
  {/* Preview Card (CoA PIN lookup result) */}
  {preview && (
@@ -230,7 +223,7 @@ export default function ClaimPage() {
 
  {error && (
  <p
- className="mb-4 text-sm text-[#ef4444] text-center"
+ className="mb-4 text-sm text-destructive text-center"
  >
  {error}
  </p>

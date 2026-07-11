@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import FocusLayout from"@/components/layouts/FocusLayout";
+import PageMasthead from"@/components/layouts/PageMasthead";
 import { Button } from "@/components/ui/button";
 
 const NOTIF_LABELS: { key: string; emoji: string; label: string }[] = [
@@ -157,17 +158,10 @@ export default function SettingsPage() {
  }
 
  return (
- <FocusLayout title="Settings" description="Manage your profile, notifications, and account.">
- <nav className="text-secondary-foreground animate-fade-in-up mb-6 flex items-center gap-2 text-sm" aria-label="Breadcrumb">
- <Link href="/dashboard">Digital Stable</Link>
- <span className="separator" aria-hidden="true">
- /
- </span>
- <span>Settings</span>
- </nav>
+ <FocusLayout noHeader>
+ <PageMasthead compact icon="⚙️" title="Settings" subtitle="Manage your profile, notifications, and account" backHref="/dashboard" backLabel="Digital Stable" />
 
         <div className="animate-fade-in-up max-w-[680px]">
- {/* Page heading is rendered by FocusLayout (brass-heading) from `title` */}
 
  {/* ═══ Profile ═══ */}
  <div className="mb-12 max-sm:mb-8">
