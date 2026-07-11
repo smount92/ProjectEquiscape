@@ -24,6 +24,7 @@ export async function getProfile(): Promise<{
     notificationPrefs: Record<string, boolean>;
     defaultHorsePublic: boolean;
     watermarkPhotos: boolean;
+    watermarkText: string;
     currencySymbol: string;
     showBadges: boolean;
     exhibitorNumber: string;
@@ -32,7 +33,7 @@ export async function getProfile(): Promise<{
 
     const { data } = await supabase
         .from("users")
-        .select("alias_name, bio, avatar_url, notification_prefs, default_horse_public, watermark_photos, currency_symbol, show_badges, exhibitor_number")
+        .select("alias_name, bio, avatar_url, notification_prefs, default_horse_public, watermark_photos, watermark_text, currency_symbol, show_badges, exhibitor_number")
         .eq("id", user.id)
         .single();
 
@@ -44,6 +45,7 @@ export async function getProfile(): Promise<{
         notification_prefs: Record<string, boolean> | null;
         default_horse_public: boolean | null;
         watermark_photos: boolean | null;
+        watermark_text: string | null;
         currency_symbol: string | null;
         show_badges: boolean | null;
         exhibitor_number: string | null;
@@ -73,7 +75,8 @@ export async function getProfile(): Promise<{
             transfers: true,
         },
         defaultHorsePublic: d.default_horse_public ?? true,
-        watermarkPhotos: d.watermark_photos ?? false,
+        watermarkPhotos: d.watermark_photos ?? true,
+        watermarkText: d.watermark_text ?? "",
         currencySymbol: d.currency_symbol || "$",
         showBadges: d.show_badges ?? true,
         exhibitorNumber: d.exhibitor_number || "",
@@ -91,6 +94,7 @@ export async function updateProfile(data: {
     bio?: string;
     defaultHorsePublic?: boolean;
     watermarkPhotos?: boolean;
+    watermarkText?: string;
     currencySymbol?: string;
     showBadges?: boolean;
     exhibitorNumber?: string;
@@ -125,6 +129,13 @@ export async function updateProfile(data: {
 
     if (data.watermarkPhotos !== undefined) {
         updates.watermark_photos = data.watermarkPhotos;
+    }
+
+    if (data.watermarkText !== undefined) {
+        // Custom watermark stamped onto uploads; blank = fall back to the
+        // default "© @alias — ModelHorseHub". Cap length so it fits the plate.
+        const wm = data.watermarkText.trim().slice(0, 60);
+        updates.watermark_text = wm || null;
     }
 
     if (data.currencySymbol !== undefined) {
