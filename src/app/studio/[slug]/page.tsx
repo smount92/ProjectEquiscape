@@ -81,7 +81,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
   description={<>by <Link href={`/profile/${encodeURIComponent(profile.ownerAlias)}`} className="text-forest">@{profile.ownerAlias}</Link> · {STATUS_EMOJI[profile.status]} {STATUS_LABEL[profile.status]}</>}
  >
  {/* Hero */}
- <div className="animate-fade-in-up rounded-lg border border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50 px-6 py-8">
+ <div className="animate-fade-in-up rounded-lg border border-studio/40 bg-studio/10 px-6 py-8">
  <div className="max-w-[800px]">
  <div className="flex flex-wrap items-center gap-4">
  <h1 className="m-0 text-2xl">
@@ -107,7 +107,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  {profile.specialties.map((s) => (
  <span
  key={s}
- className="inline-block rounded-full border border-purple-300 bg-purple-100 px-[10px] py-[3px] text-xs font-semibold text-purple-500"
+ className="inline-block rounded-full border border-studio/40 bg-studio/15 px-[10px] py-[3px] text-xs font-semibold text-studio"
  >
  {s}
  </span>
