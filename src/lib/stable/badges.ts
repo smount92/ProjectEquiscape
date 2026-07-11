@@ -8,9 +8,10 @@
  * (html[data-theme="night"] in globals.css), so the badges stay
  * legible in both modes — the status-chip pattern ShowEntryForm uses.
  *
- * NOTE: ShowRingGrid.tsx keeps its own duplicate light-only map on
- * purpose — the Show Ring refactor is the next pass and inherits
- * this module.
+ * NOTE: Show Ring v2 (ShowRingBrowser) imports finishBadgeClass from
+ * here. Legacy ShowRingGrid.tsx still carries its old duplicate
+ * light-only map — it is the NEXT_PUBLIC_SHOWRING_V2 flag-off path
+ * and goes away with the legacy page.
  */
 
 /** finish_type is a 3-value enum (OF | Custom | Artist Resin). */

@@ -21,6 +21,7 @@ export function createMockSupabaseClient(overrides: Record<string, unknown> = {}
         delete: vi.fn().mockReturnThis(),
         eq: vi.fn().mockReturnThis(),
         neq: vi.fn().mockReturnThis(),
+        not: vi.fn().mockReturnThis(),
         in: vi.fn().mockReturnThis(),
         is: vi.fn().mockReturnThis(),
         ilike: vi.fn().mockReturnThis(),

@@ -6,6 +6,8 @@ import { getPublicImageUrls } from"@/lib/utils/storage";
 import ShowRingGrid from"@/components/ShowRingGrid";
 import FeaturedHorseCard from"@/components/FeaturedHorseCard";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import ShowRingV2 from"./ShowRingV2";
+import { showRingV2Enabled } from"@/lib/showring/flags";
 
 
 export const metadata = {
@@ -280,6 +282,22 @@ export default async function CommunityPage({
 
  if (!user) {
  redirect("/login");
+ }
+
+ // ── Show Ring v2 (NEXT_PUBLIC_SHOWRING_V2): the filter engine ──
+ // Flag off = the current Show Ring below, untouched. Access is
+ // unchanged either way: auth-gated above.
+ if (showRingV2Enabled()) {
+ return (
+ <ExplorerLayout
+  title={<>🏆 The <span className="text-forest">Show Ring</span></>}
+  description="Browse the latest models shared by collectors from around the world. Every horse has a story."
+ >
+  <Suspense fallback={<ShowRingSkeleton />}>
+  <ShowRingV2 searchParams={params} />
+  </Suspense>
+ </ExplorerLayout>
+ );
  }
 
  return (
