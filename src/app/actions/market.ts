@@ -31,20 +31,16 @@ export interface MarketPrice {
 export async function getMarketPrice(catalogId: string, finishType?: string): Promise<MarketPrice | null> {
     const supabase = await createClient();
 
-    let query = supabase
-        .from("mv_market_prices")
-        .select("*")
-        .eq("catalog_id", catalogId);
+    // Read via get_market_rows (SECURITY DEFINER, migration 126) so this
+    // works for anon on public reference pages — anon SELECT on
+    // mv_market_prices was revoked in 092. Aggregate-only, no per-user data.
+    const { data: rows } = await supabase.rpc("get_market_rows", {
+        p_catalog_id: catalogId,
+        p_finish_type: finishType ?? undefined,
+    });
 
-    if (finishType) {
-        query = query.eq("finish_type", finishType as "OF" | "Custom" | "Artist Resin");
-    }
-
-    const { data } = await query.limit(1).maybeSingle();
-
-    if (!data) return null;
-
-    const row = data as Record<string, unknown>;
+    const row = (rows as Record<string, unknown>[] | null)?.[0];
+    if (!row) return null;
 
     // Get catalog item details
     const { data: catalog } = await supabase
@@ -89,20 +85,14 @@ export async function searchMarketPrices(query?: string, options?: {
     const limit = options?.limit || 20;
     const offset = options?.offset || 0;
 
-    // First get all market data rows (now keyed by catalog_id + finish_type)
-    let priceQuery = supabase
-        .from("mv_market_prices")
-        .select("*");
-
-    if (options?.finishType) {
-        priceQuery = priceQuery.eq("finish_type", options.finishType as "OF" | "Custom" | "Artist Resin");
-    }
-
-    if (options?.lifeStage) {
-        priceQuery = priceQuery.eq("life_stage", options.lifeStage);
-    }
-
-    const { data: priceData } = await priceQuery;
+    // All market rows via get_market_rows (SECURITY DEFINER, migration 126)
+    // so /market works for anon (mv_market_prices anon SELECT was revoked in
+    // 092). Optional finish/life-stage filters applied in SQL; the rest of
+    // the merge/sort/paginate stays in JS.
+    const { data: priceData } = await supabase.rpc("get_market_rows", {
+        p_finish_type: options?.finishType ?? undefined,
+        p_life_stage: options?.lifeStage ?? undefined,
+    });
 
     if (!priceData || priceData.length === 0) {
         return { items: [], total: 0 };

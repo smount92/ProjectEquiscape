@@ -4571,6 +4571,24 @@ export type Database = {
       entry_vote_open: { Args: { p_entry_id: string }; Returns: boolean }
       get_catalog_facets: { Args: never; Returns: Json }
       get_extra_photo_count: { Args: { p_horse_id: string }; Returns: number }
+      get_market_rows: {
+        Args: {
+          p_catalog_id?: string
+          p_finish_type?: string
+          p_life_stage?: string
+        }
+        Returns: {
+          catalog_id: string
+          finish_type: string
+          life_stage: string
+          lowest_price: number
+          highest_price: number
+          average_price: number
+          median_price: number
+          transaction_volume: number
+          last_sold_at: string
+        }[]
+      }
       get_photo_limit: { Args: never; Returns: number }
       get_show_staff_public: {
         Args: { p_show_id: string }
