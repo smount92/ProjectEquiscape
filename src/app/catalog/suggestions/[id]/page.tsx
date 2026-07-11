@@ -244,7 +244,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
               </div>
               <div className="font-mono text-muted-foreground line-through decoration-red-400/50">{v.from}</div>
               <div className="text-center text-muted-foreground">→</div>
-              <div className="font-mono font-bold text-emerald-600">{v.to}</div>
+              <div className="font-mono font-bold text-success">{v.to}</div>
             </div>
           );
         })}
@@ -266,7 +266,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
  <span className="text-muted-foreground text-xs font-semibold tracking-[0.05em] uppercase">
  {k.replace(/_/g,"").replace(/\b\w/g, (c) => c.toUpperCase())}
  </span>
- <span className="text-base font-bold text-[#66bb6a]">
+ <span className="text-base font-bold text-success">
  {String(v)}
  </span>
  </div>
@@ -285,7 +285,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
 
  {/* Admin Notes */}
  {s.admin_notes && (
- <div className="bg-yellow-50/50 rounded-r-md my-3 border-l-[3px] border-tier-gold px-4 py-2">
+ <div className="bg-warning/10 rounded-r-md my-3 border-l-[3px] border-tier-gold px-4 py-2">
  <h3>Admin Notes</h3>
  <p>{s.admin_notes}</p>
  </div>
@@ -312,7 +312,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
 
  {/* Admin Actions */}
  {isAdmin && s.status ==="pending" && (
- <div className="bg-card border-input rounded-lg border border-[#ffc107] p-6 shadow-md transition-all">
+ <div className="bg-card rounded-lg border border-warning p-6 shadow-md transition-all">
  <h3>🛡️ Admin Actions</h3>
  <SuggestionAdminActions suggestionId={s.id} />
  </div>

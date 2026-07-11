@@ -142,7 +142,7 @@ export default function SuggestEditModal({ catalogItem, openOnMount = false }: S
      <label className="flex items-center gap-2 text-sm font-semibold text-foreground">
      {field.label}
      {field.current !== field.original && (
-      <span className="rounded-full bg-[#ffc107] px-2 py-0.5 text-[0.62rem] font-extrabold tracking-wide text-[#1a1a1a] uppercase">
+      <span className="rounded-full bg-warning/20 px-2 py-0.5 text-[0.62rem] font-extrabold tracking-wide text-warning uppercase">
       Changed
       </span>
      )}
@@ -181,7 +181,7 @@ export default function SuggestEditModal({ catalogItem, openOnMount = false }: S
    </div>
 
    {error && (
-    <p className="text-red-700 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm">
+    <p className="text-destructive flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm">
     {error}
     </p>
    )}
@@ -198,8 +198,8 @@ export default function SuggestEditModal({ catalogItem, openOnMount = false }: S
       <span className="font-bold text-foreground">
       {f.label}:
       </span>{" "}
-      <span className="text-red-400 line-through">{f.original}</span> →{" "}
-      <span className="font-bold text-emerald-600">{f.current}</span>
+      <span className="text-destructive/70 line-through">{f.original}</span> →{" "}
+      <span className="font-bold text-success">{f.current}</span>
      </li>
      ))}
     </ul>

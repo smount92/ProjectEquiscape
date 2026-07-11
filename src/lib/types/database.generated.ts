@@ -4579,6 +4579,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_catalog_facets: { Args: never; Returns: Json }
       get_stable_facets: { Args: { p_owner: string }; Returns: Json }
       get_stable_summary: {
         Args: { p_owner: string }

@@ -28,7 +28,7 @@ export default async function SuggestNewEntryPage() {
   </nav>
   }
  >
-  <div className="bg-white border-input rounded-lg border p-8 shadow-md transition-all">
+  <div className="bg-card border-input rounded-lg border p-8 shadow-md transition-all">
   <SuggestNewEntryForm />
   </div>
  </FocusLayout>

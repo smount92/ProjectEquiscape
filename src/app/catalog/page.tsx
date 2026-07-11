@@ -21,19 +21,12 @@ export default async function ReferencePage() {
  .order("title", { ascending: true })
  .range(0, 49);
 
- // Fetch unique makers for filter chips
- const { data: makerRows } = await supabase.from("catalog_items").select("maker").not("maker","is", null);
-
- const makers = [
- ...new Set((makerRows ?? []).map((r: { maker: string }) => r.maker).filter(Boolean)),
- ].sort() as string[];
-
- // Fetch unique scales
- const { data: scaleRows } = await supabase.from("catalog_items").select("scale").not("scale","is", null);
-
- const scales = [
- ...new Set((scaleRows ?? []).map((r: { scale: string | null }) => r.scale).filter(Boolean)),
- ].sort() as string[];
+ // Distinct maker/scale facets in one round-trip (get_catalog_facets,
+ // migration 125) instead of two full-table scans of ~10.5k rows each.
+ const { data: facetData } = await supabase.rpc("get_catalog_facets");
+ const facets = (facetData ?? {}) as { makers?: string[]; scales?: string[] };
+ const makers = facets.makers ?? [];
+ const scales = facets.scales ?? [];
 
  // Fetch top curators
  const { data: curators } = await supabase

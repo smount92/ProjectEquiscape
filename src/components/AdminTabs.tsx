@@ -113,13 +113,12 @@ function DeleteMessageButton({ messageId }: { messageId: string }) {
  if (confirming) {
  return (
  <span className="inline-flex items-center gap-1">
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-red-300 bg-red-50 px-6 py-2 text-sm font-semibold text-[#ef4444] no-underline transition-all"
+ <Button variant="destructive"
  onClick={handleDelete}
  disabled={deleting}
  >
  {deleting ?"…" :"Confirm"}
- </button>
+ </Button>
  <Button variant="outline"
  onClick={() => setConfirming(false)}
  disabled={deleting}
@@ -131,13 +130,12 @@ function DeleteMessageButton({ messageId }: { messageId: string }) {
  }
 
  return (
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-red-200 bg-red-50/80 px-6 py-2 text-sm font-semibold text-[#ef4444] no-underline transition-all"
+ <Button variant="destructive-outline"
  onClick={() => setConfirming(true)}
  title="Delete this message"
  >
  🗑️ Delete
- </button>
+ </Button>
  );
 }
 
@@ -203,7 +201,7 @@ export default function AdminTabs({
  <span
  className={`ml-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[0.65rem] font-bold text-white ${
  tab.key === "reports" && reports.length > 0
- ? "bg-[#ef4444]"
+ ? "bg-destructive"
  : "bg-forest"
  }`}
  >

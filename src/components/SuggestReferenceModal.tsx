@@ -108,8 +108,8 @@ export default function SuggestReferenceModal({
  key={type.value}
  className={`flex cursor-pointer items-start gap-2 rounded-sm border px-4 py-2 transition-all duration-200 ${
  suggestionType === type.value
- ? "border-[var(--primary)] bg-emerald-50/80"
- : "border-[var(--border)] bg-transparent"
+ ? "border-primary bg-primary/10"
+ : "border-border bg-transparent"
  }`}
  >
  <input
@@ -132,7 +132,7 @@ export default function SuggestReferenceModal({
  {/* Name */}
  <div className="mb-6">
  <label className="text-foreground mb-1 block text-sm font-semibold">
- Name <span className="text-[#e74c6f]">*</span>
+ Name <span className="text-destructive">*</span>
  </label>
  <Input
  type="text"
@@ -168,7 +168,7 @@ export default function SuggestReferenceModal({
  </small>
  </div>
 
- {status ==="error" && errorMsg && <div className="mt-2 text-sm text-red-700 mb-4">{errorMsg}</div>}
+ {status ==="error" && errorMsg && <div className="mt-2 text-sm text-destructive mb-4">{errorMsg}</div>}
 
  <div className="flex justify-end gap-2">
  <Button

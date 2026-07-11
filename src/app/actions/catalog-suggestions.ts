@@ -91,9 +91,14 @@ export async function getCatalogItems(filters: CatalogFilters) {
     const pageSize = filters.pageSize ?? 50;
     const from = (page - 1) * pageSize;
 
+    // Explicit columns + estimated count: this runs on every catalog
+    // search keystroke, and an exact COUNT over the filtered set each time
+    // is the expensive part. "estimated" reads the planner stats instead.
     let query = supabase
         .from("catalog_items")
-        .select("*", { count: "exact" })
+        .select("id, item_type, parent_id, title, maker, scale, attributes, created_at", {
+            count: "estimated",
+        })
         .range(from, from + pageSize - 1);
 
     if (filters.maker) query = query.eq("maker", filters.maker);
