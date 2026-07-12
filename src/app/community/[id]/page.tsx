@@ -22,6 +22,7 @@ import AssetDetailRenderer from"@/components/AssetDetailRenderer";
 import { getAssetConfig } from"@/lib/config/assetFields";
 import type { AssetCategory } from"@/lib/types/database";
 import { Button } from "@/components/ui/button";
+import { referenceHref, referencePagesEnabled } from"@/lib/catalog/referenceUrl";
 
 // Force fresh data on every request — prevents stale comments/favorites
 
@@ -136,7 +137,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  trade_status, listing_price,
  finish_details, public_notes, assigned_breed, assigned_gender, assigned_age, regional_id,
  users!inner(alias_name),
- catalog_items:catalog_id(title, maker, scale, item_type, attributes)
+ catalog_items:catalog_id(title, maker, scale, item_type, attributes, maker_slug, slug)
  `,
  )
  .eq("id", horseId)
@@ -269,6 +270,19 @@ editionSize: rawPedigree.edition_size,
  }
  : null;
 
+ // Link to this model's public reference-catalog entry (flag-gated). Shown to
+ // logged-in viewers now; becomes anon-visible once the passport is opened up.
+ const refHref =
+ referencePagesEnabled() && horse.catalog_id && cat
+ ? referenceHref({
+ id: horse.catalog_id,
+ maker: cat.maker,
+ title: cat.title,
+ maker_slug: cat.maker_slug,
+ slug: cat.slug,
+ })
+ : null;
+
  const releaseInfo =
  cat && cat.item_type ==="plastic_release"
  ? {
@@ -329,7 +343,7 @@ editionSize: rawPedigree.edition_size,
  </h1>
  {refInfo ? (
  <p className="mb-1 text-base text-secondary-foreground">
- {refInfo.maker} — {refInfo.name}
+ {refHref ? (<Link href={refHref} className="underline decoration-dotted underline-offset-2 hover:text-forest">{refInfo.maker} — {refInfo.name} <span aria-hidden="true" className="text-forest">→</span></Link>) : (<>{refInfo.maker} — {refInfo.name}</>)}
  </p>
  ) : (
  <p

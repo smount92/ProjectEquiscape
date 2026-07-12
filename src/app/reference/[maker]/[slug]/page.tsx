@@ -287,10 +287,10 @@ export default async function ReferencePage({ params }: Props) {
                                         )}
                                         <div className="text-sm text-muted-foreground">@{l.ownerAlias}</div>
                                         <Link
-                                            href={`/stable/${l.id}`}
+                                            href={`/community/${l.id}`}
                                             className="mt-1 rounded-lg border border-forest py-2 text-center text-sm font-bold text-forest hover:bg-forest hover:text-white"
                                         >
-                                            Message seller ›
+                                            View listing ›
                                         </Link>
                                     </div>
                                 );
