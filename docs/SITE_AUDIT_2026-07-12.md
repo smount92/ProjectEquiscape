@@ -72,11 +72,12 @@
 - **Evidence:** CTA `reference/[maker]/[slug]/page.tsx` → `/add-horse?catalog=X`; `add-horse/page.tsx` has no mount guard, only a submit-time `throw new Error("You must be logged in.")` (~:459); no localStorage/beforeunload draft.
 - **Fix:** Guard on mount → `/login?redirectTo=/add-horse?catalog=X` (needs FUNNEL-1); ideally persist form to localStorage + restore post-login.
 
-### FUNNEL-3 — [CRITICAL] "Message seller" is a dead CTA for everyone — **Status: TODO**
+### FUNNEL-3 — [CRITICAL] "Message seller" is a dead CTA for everyone — **Status: FIXED (branch feat/anon-funnel; reference listing → /community/[id]; verified)**
 - **Evidence:** listing card → `/stable/${horseId}` (`reference/[maker]/[slug]/page.tsx` ~:289); but `stable/[id]/page.tsx:105-107` is owner-only (`notFound()` for non-owner) and `:74-75` redirects anon to login. Real message affordance (`MessageSellerButton`) is on `/community/[id]` + `/profile/[alias]`.
 - **Fix:** Point the listing link to `/community/${horseId}`; make that page anon-viewable with the message action gated behind login+returnTo.
 
-### FUNNEL-4 — [CRITICAL] Indexed public pages render "@unknown" or bounce anon to /login — **Status: TODO**
+### FUNNEL-4 — [CRITICAL] Indexed public pages render "@unknown" or bounce anon to /login — **Status: MOSTLY FIXED (branch feat/anon-funnel)**
+> **Done + verified live (logged out):** `/community/[id]` passport (AnonPassport + `get_public_passport` RPC, migration 135) and `/profile/[alias]` (AnonProfile, service-role public-scoped reads) are now anon-viewable with real aliases; robots/sitemap reconciled (`/feed` `/discover` `/studio` → disallow). **Still TODO:** the v2 public show page `/shows/[id]` renders "@unknown" host/entrant/champion for anon (needs an anon-safe shows-alias DEFINER RPC — the `getAliases` cookie-client path, `lib/shows/queries.ts:60`). `/photo/[slug]` still proxy-walled.
 - **What:** (a) v2 public show `shows/[id]` resolves aliases with the *cookie* client → anon gets `@unknown` (host/entrants/champions) on an indexed, force-dynamic, OG-tagged page. Legacy did it right via `getAdminClient()` (`shows.ts:1107`); v2 regressed it (`shows-v2.ts:1347`, `PublicShowV2Page.tsx:83`, choke point `lib/shows/queries.ts:66 getAliases`). (b) robots/sitemap advertise `/community`, `/discover`, `/feed`, `/profile/*`, `/shows`, `/studio` as crawlable but each self-redirects anon (`profile/[alias]:54-56`, `community/page.tsx:283-285`, discover, feed, shows browse). (c) `/photo/[slug]` 404s for anon (`photo/[slug]/page.tsx:47`).
 - **Fix:** Route anon alias lookups through an anon-granted DEFINER RPC / admin client (single choke point `getAliases`); drop the redirect on genuinely public pages (render read-only) OR remove them from sitemap/robots. Reconcile robots+sitemap with actual anon-accessibility.
 
