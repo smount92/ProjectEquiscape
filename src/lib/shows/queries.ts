@@ -63,6 +63,20 @@ export async function getAliases(
 ): Promise<Map<string, string> | { error: string }> {
     const unique = [...new Set(userIds)];
     if (unique.length === 0) return new Map();
+    // Anon-safe: the users table is SELECT TO authenticated (migrations
+    // 022/109), so a direct read returns nothing for logged-out visitors →
+    // "@unknown" on public show pages. get_public_aliases (migration 136) is a
+    // DEFINER RPC granted to anon that returns only alias_name. Fall back to the
+    // direct read if the RPC isn't deployed yet (authed still resolves).
+    const rpc = supabase.rpc.bind(supabase) as unknown as (
+        fn: string,
+        args: { p_ids: string[] },
+    ) => Promise<{ data: { id: string; alias_name: string | null }[] | null; error: unknown }>;
+    const { data: rpcData, error: rpcErr } = await rpc("get_public_aliases", { p_ids: unique });
+    if (!rpcErr && rpcData) {
+        return new Map(rpcData.map((r) => [r.id, r.alias_name ?? "unknown"]));
+    }
+
     const { data, error } = await supabase
         .from("users")
         .select("id, alias_name")
