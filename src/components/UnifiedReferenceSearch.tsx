@@ -104,16 +104,20 @@ export default function UnifiedReferenceSearch({
     };
   }, [query, runSearch]);
 
-  // When a mold is clicked, expand its releases
+  // When a mold is clicked, expand its releases. We do NOT link the mold yet —
+  // if it has releases we nudge the user to pick the specific one first (linking
+  // to a mold when a release exists is the #1 source of coarse catalog data).
   const handleMoldClick = async (item: CatalogItem) => {
     setSelectedItem(item);
-    onCatalogSelect(item.id, item);
     setLoadingReleases(true);
     setReleases([]);
     const moldReleases = await getReleasesForMold(item.id);
     setReleases(moldReleases);
     setLoadingReleases(false);
     if (moldReleases.length === 0) {
+      // No discrete releases catalogued (e.g. Peter Stone one-of-a-kinds) —
+      // linking the mold itself is the correct choice here.
+      onCatalogSelect(item.id, item);
       setShowDropdown(false);
       setQuery("");
     }
@@ -355,55 +359,56 @@ export default function UnifiedReferenceSearch({
                 </button>
               </div>
 
-              <div className="max-h-[360px] overflow-y-auto">
-                {/* Option: Select mold directly */}
-                <button
-                  className="group flex w-full cursor-pointer items-center gap-3 border-0 border-b border-input bg-emerald-50/30 px-4 py-3 text-left transition-colors hover:bg-emerald-50/60"
-                  onClick={() => handleSelect(selectedItem)}
-                >
-                  <div className="min-w-0 flex-1">
-                    <div className="text-sm font-semibold text-foreground">
-                      {"\u{1F3ED}"} {selectedItem.title}{" "}
-                      <span className="font-normal text-muted-foreground">(any release)</span>
-                    </div>
-                  </div>
-                  <span className="shrink-0 rounded-full bg-forest/10 px-2.5 py-1 text-xs font-semibold text-forest transition-colors group-hover:bg-forest group-hover:text-white">
-                    Select Mold
-                  </span>
-                </button>
+              {/* Nudge: pick the specific release, not the mold */}
+              <div className="border-b border-input bg-forest/5 px-4 py-2.5 text-sm text-secondary-foreground">
+                {"\u{1F3AF}"} <strong className="text-foreground">Pick your exact release</strong> below {"—"} it links accurate values and matches you with buyers &amp; sellers of that exact color. Only link the mold if you truly don{"’"}t know which release yours is.
+              </div>
 
+              <div className="max-h-[360px] overflow-y-auto">
                 {loadingReleases ? (
                   <div className="flex items-center justify-center gap-2 px-4 py-8 text-sm text-muted-foreground">
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-input border-t-forest" />
                     Loading releases...
                   </div>
                 ) : (
-                  releases.map((rel) => (
-                    <button
-                      key={rel.id}
-                      className="group flex w-full cursor-pointer items-center gap-3 border-0 border-b border-input bg-transparent px-4 py-2.5 text-left transition-colors last:border-b-0 hover:bg-emerald-50/50"
-                      onClick={() => handleSelect(rel)}
-                    >
-                      <div className="min-w-0 flex-1">
-                        <div className="text-sm font-semibold text-foreground">
-                          {rel.title}
-                          {!!rel.attributes.model_number && (
-                            <span className="ml-1 font-normal text-muted-foreground">
-                              #{String(rel.attributes.model_number)}
-                            </span>
+                  <>
+                    {releases.map((rel) => (
+                      <button
+                        key={rel.id}
+                        className="group flex w-full cursor-pointer items-center gap-3 border-0 border-b border-input bg-transparent px-4 py-2.5 text-left transition-colors hover:bg-emerald-50/50"
+                        onClick={() => handleSelect(rel)}
+                      >
+                        <div className="min-w-0 flex-1">
+                          <div className="text-sm font-semibold text-foreground">
+                            {rel.title}
+                            {!!rel.attributes.model_number && (
+                              <span className="ml-1 font-normal text-muted-foreground">
+                                #{String(rel.attributes.model_number)}
+                              </span>
+                            )}
+                          </div>
+                          {!!rel.attributes.color_description && (
+                            <div className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">
+                              {String(rel.attributes.color_description)}
+                            </div>
                           )}
                         </div>
-                        {!!rel.attributes.color_description && (
-                          <div className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">
-                            {String(rel.attributes.color_description)}
-                          </div>
-                        )}
+                        <span className="shrink-0 rounded-full bg-forest/10 px-2.5 py-1 text-xs font-semibold text-forest opacity-0 transition-all group-hover:opacity-100">
+                          Select
+                        </span>
+                      </button>
+                    ))}
+
+                    {/* Fallback: link the mold only — de-emphasized, last */}
+                    <button
+                      className="flex w-full cursor-pointer items-center gap-3 border-0 border-t border-input bg-transparent px-4 py-2.5 text-left transition-colors hover:bg-muted"
+                      onClick={() => handleSelect(selectedItem)}
+                    >
+                      <div className="min-w-0 flex-1 text-sm text-muted-foreground">
+                        {"\u{1F3ED}"} Not sure which release? <span className="underline">Link the mold only</span>
                       </div>
-                      <span className="shrink-0 rounded-full bg-forest/10 px-2.5 py-1 text-xs font-semibold text-forest opacity-0 transition-all group-hover:opacity-100">
-                        Select
-                      </span>
                     </button>
-                  ))
+                  </>
                 )}
               </div>
             </div>
