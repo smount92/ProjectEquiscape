@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createAnonClient } from "@/lib/supabase/anon";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -13,13 +13,17 @@ import {
     getCatalogPhotos,
     getCatalogCounts,
     getChildReleases,
+    getReferenceMarket,
 } from "@/app/actions/reference-pages";
-import { getMarketPrice } from "@/app/actions/market";
 import { buildEbaySearchUrl } from "@/lib/utils/ebayAffiliate";
 
 interface Props {
     params: Promise<{ maker: string; slug: string }>;
 }
+
+// Cookie-free page (all data via the anon client) → statically generated + ISR
+// cached. Keeps a full Googlebot crawl of ~11k pages off the hot DB path.
+export const revalidate = 3600;
 
 interface CatalogRow {
     id: string;
@@ -33,7 +37,7 @@ interface CatalogRow {
 }
 
 async function resolveItem(makerSlug: string, slug: string): Promise<CatalogRow | null> {
-    const supabase = await createClient();
+    const supabase = createAnonClient();
     const { data } = await supabase
         .from("catalog_items")
         .select("id, item_type, title, maker, maker_slug, slug, scale, attributes")
@@ -103,25 +107,14 @@ export default async function ReferencePage({ params }: Props) {
 
     const isMold = item.item_type === "plastic_mold";
 
-    const supabase = await createClient();
-    const {
-        data: { user },
-    } = await supabase.auth.getUser();
-
-    // Everything else in parallel — all anon-safe / aggregate-only.
-    const [counts, market, listings, photos, wishRow, childReleases] = await Promise.all([
+    // Everything in parallel — all anon-safe / aggregate-only and cookie-free,
+    // so this page statically generates + ISR-caches. Per-user state (the
+    // "already wanted?" check) is fetched client-side by WantButton.
+    const [counts, market, listings, photos, childReleases] = await Promise.all([
         getCatalogCounts(item.id),
-        getMarketPrice(item.id),
+        getReferenceMarket(item.id),
         getActiveListingsForCatalog(item.id),
         getCatalogPhotos(item.id, 8),
-        user
-            ? supabase
-                  .from("user_wishlists")
-                  .select("id")
-                  .eq("user_id", user.id)
-                  .eq("catalog_id", item.id)
-                  .maybeSingle()
-            : Promise.resolve({ data: null }),
         isMold ? getChildReleases(item.id) : Promise.resolve([]),
     ]);
 
@@ -374,11 +367,7 @@ export default async function ReferencePage({ params }: Props) {
                             <b className="text-foreground tabular-nums">{counts.wanters}</b> want this
                         </span>
                     )}
-                    <WantButton
-                        catalogId={item.id}
-                        initiallyWanted={Boolean((wishRow as { data: unknown }).data)}
-                        isLoggedIn={Boolean(user)}
-                    />
+                    <WantButton catalogId={item.id} />
                 </div>
 
                 {/* DETAILS */}

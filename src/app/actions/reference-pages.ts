@@ -1,12 +1,14 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createAnonClient } from "@/lib/supabase/anon";
 import { getPublicImageUrls } from "@/lib/utils/storage";
 
 // ============================================================
 // REFERENCE PAGES (MOVE 1 / Batch I) — public catalog release data
 // Anon-safe: reads only public horses (RLS) + anon-safe RPCs. Aggregate only,
-// never exposes vault values or private owners.
+// never exposes vault values or private owners. Uses a COOKIE-LESS anon client
+// so the reference pages can be statically generated / ISR-cached (a Googlebot
+// crawl of ~11k pages must not force per-request SSR against the DB).
 // ============================================================
 
 export interface ReferenceListing {
@@ -29,7 +31,7 @@ export async function getActiveListingsForCatalog(
     catalogId: string,
     limit = 12,
 ): Promise<ReferenceListing[]> {
-    const supabase = await createClient();
+    const supabase = createAnonClient();
     const { data } = await supabase.rpc("get_catalog_listings", {
         p_catalog_id: catalogId,
         p_limit: limit,
@@ -66,7 +68,7 @@ export interface ReferencePhoto {
  * hero + thumbnails on the reference page.
  */
 export async function getCatalogPhotos(catalogId: string, limit = 8): Promise<ReferencePhoto[]> {
-    const supabase = await createClient();
+    const supabase = createAnonClient();
     // SECURITY DEFINER RPC — anon-safe (users table is authenticated-only) and
     // it honors each owner's show_photos_on_reference opt-out (migration 131).
     const { data } = await supabase.rpc("get_catalog_reference_photos", {
@@ -92,7 +94,7 @@ export interface ChildRelease {
  * for molds with no discrete releases (e.g. Peter Stone one-of-a-kinds).
  */
 export async function getChildReleases(moldId: string, limit = 60): Promise<ChildRelease[]> {
-    const supabase = await createClient();
+    const supabase = createAnonClient();
     const { data } = await supabase
         .from("catalog_items")
         .select("id, title, maker_slug, slug, attributes")
@@ -124,7 +126,7 @@ export async function getChildReleases(moldId: string, limit = 60): Promise<Chil
 export async function getCatalogCounts(
     catalogId: string,
 ): Promise<{ collectors: number; wanters: number }> {
-    const supabase = await createClient();
+    const supabase = createAnonClient();
     const [collectorsRes, wantersRes] = await Promise.all([
         supabase.rpc("count_catalog_collectors", { p_catalog_id: catalogId }),
         supabase.rpc("count_catalog_wanters", { p_catalog_id: catalogId }),
@@ -132,5 +134,30 @@ export async function getCatalogCounts(
     return {
         collectors: Number(collectorsRes.data ?? 0),
         wanters: Number(wantersRes.data ?? 0),
+    };
+}
+
+export interface ReferenceMarket {
+    medianPrice: number;
+    lowestPrice: number;
+    highestPrice: number;
+    transactionVolume: number;
+}
+
+/**
+ * Blue Book aggregate for the reference teaser via the anon-safe get_market_rows
+ * RPC (migration 126) — cookie-less so the page stays cacheable. Mirrors
+ * getMarketPrice's "first row" behavior.
+ */
+export async function getReferenceMarket(catalogId: string): Promise<ReferenceMarket | null> {
+    const supabase = createAnonClient();
+    const { data } = await supabase.rpc("get_market_rows", { p_catalog_id: catalogId });
+    const row = (data as Record<string, unknown>[] | null)?.[0];
+    if (!row) return null;
+    return {
+        medianPrice: Number(row.median_price) || 0,
+        lowestPrice: Number(row.lowest_price) || 0,
+        highestPrice: Number(row.highest_price) || 0,
+        transactionVolume: Number(row.transaction_volume) || 0,
     };
 }

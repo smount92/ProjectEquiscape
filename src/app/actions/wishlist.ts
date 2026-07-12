@@ -84,3 +84,26 @@ export async function removeFromWishlist(wishlistId: string) {
 
     return { error: null, success: true };
 }
+
+/**
+ * Per-user wishlist state for a catalog item — whether the viewer is logged in
+ * and whether they already want it. Called client-side by the reference page's
+ * WantButton so the page itself stays cookie-free and cacheable.
+ */
+export async function getWishlistState(
+    catalogId: string,
+): Promise<{ loggedIn: boolean; wanted: boolean }> {
+    const supabase = await createClient();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return { loggedIn: false, wanted: false };
+
+    const { data } = await supabase
+        .from("user_wishlists")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("catalog_id", catalogId)
+        .maybeSingle();
+    return { loggedIn: true, wanted: Boolean(data) };
+}

@@ -7,6 +7,7 @@ import FocusLayout from"@/components/layouts/FocusLayout";
 import CatalogSubMasthead from"@/components/catalog/CatalogSubMasthead";
 import { buildEbaySearchUrl } from"@/lib/utils/ebayAffiliate";
 import { Button } from "@/components/ui/button";
+import { referenceHref, referencePagesEnabled } from"@/lib/catalog/referenceUrl";
 
 interface Props {
  params: Promise<{ id: string }>;
@@ -16,13 +17,20 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
  const { id } = await params;
  const supabase = await createClient();
- const { data } = await supabase.from("catalog_items").select("title, maker").eq("id", id).single();
+ const { data } = await supabase.from("catalog_items").select("title, maker, maker_slug, slug").eq("id", id).single();
 
  if (!data) return { title:"Entry Not Found — Model Horse Hub" };
- const d = data as { title: string; maker: string };
+ const d = data as { title: string; maker: string; maker_slug: string | null; slug: string | null };
+ // When reference pages are live, they're the canonical public view — point
+ // this (now edit-only) page's canonical there so Google consolidates the
+ // duplicate onto /reference instead of splitting signal.
+ const canonicalRef = referencePagesEnabled()
+ ? `${process.env.NEXT_PUBLIC_APP_URL || "https://modelhorsehub.com"}${referenceHref({ id, maker: d.maker, title: d.title, maker_slug: d.maker_slug, slug: d.slug })}`
+ : undefined;
  return {
  title: `${d.title} by ${d.maker} — Reference Catalog — Model Horse Hub`,
  description: `View details for ${d.title} by ${d.maker} in the Model Horse Hub reference catalog.`,
+ ...(canonicalRef ? { alternates: { canonical: canonicalRef } } : {}),
  };
 }
 
