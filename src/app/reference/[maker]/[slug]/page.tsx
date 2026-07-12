@@ -1,4 +1,3 @@
-import { createAnonClient } from "@/lib/supabase/anon";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -9,6 +8,7 @@ import WantButton from "@/components/reference/WantButton";
 import ReferencePhotoGallery from "@/components/reference/ReferencePhotoGallery";
 import { referenceHref, referencePagesEnabled } from "@/lib/catalog/referenceUrl";
 import {
+    resolveReferenceItem,
     getActiveListingsForCatalog,
     getCatalogPhotos,
     getCatalogCounts,
@@ -21,37 +21,15 @@ interface Props {
     params: Promise<{ maker: string; slug: string }>;
 }
 
-// Cookie-free page (all data via the anon client) → statically generated + ISR
-// cached. Keeps a full Googlebot crawl of ~11k pages off the hot DB path.
-export const revalidate = 3600;
-
-interface CatalogRow {
-    id: string;
-    item_type: string;
-    title: string;
-    maker: string;
-    maker_slug: string | null;
-    slug: string | null;
-    scale: string | null;
-    attributes: Record<string, unknown> | null;
-}
-
-async function resolveItem(makerSlug: string, slug: string): Promise<CatalogRow | null> {
-    const supabase = createAnonClient();
-    const { data } = await supabase
-        .from("catalog_items")
-        .select("id, item_type, title, maker, maker_slug, slug, scale, attributes")
-        .eq("maker_slug", makerSlug)
-        .eq("slug", slug)
-        .maybeSingle();
-    return (data as CatalogRow | null) ?? null;
-}
+// The global authenticated <Header> forces this page dynamic (SSR per request),
+// so page-level ISR can't apply — the DB load is handled by unstable_cache in
+// reference-pages.ts (each read cached ~1h) so a crawl doesn't re-query per hit.
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://modelhorsehub.com";
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { maker, slug } = await params;
-    const item = await resolveItem(maker, slug);
+    const item = await resolveReferenceItem(maker, slug);
     if (!item) return { title: "Model Not Found — Model Horse Hub" };
 
     const attrs = item.attributes ?? {};
@@ -102,7 +80,7 @@ export default async function ReferencePage({ params }: Props) {
     if (!referencePagesEnabled()) notFound();
 
     const { maker, slug } = await params;
-    const item = await resolveItem(maker, slug);
+    const item = await resolveReferenceItem(maker, slug);
     if (!item) notFound();
 
     const isMold = item.item_type === "plastic_mold";
