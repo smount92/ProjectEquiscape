@@ -7,7 +7,7 @@ import type { Database } from "@/lib/types/database.generated";
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
-import { createNotification } from "@/app/actions/notifications";
+import { createNotification } from "@/lib/notifications/createNotification";
 import { createActivityEvent } from "@/app/actions/activity";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";

@@ -21,7 +21,7 @@ vi.mock("next/cache", () => ({
 vi.mock("next/server", () => ({
     after: vi.fn(),
 }));
-vi.mock("@/app/actions/notifications", () => ({
+vi.mock("@/lib/notifications/createNotification", () => ({
     createNotification: vi.fn().mockResolvedValue({ success: true }),
 }));
 vi.mock("@/app/actions/activity", () => ({

@@ -31,6 +31,7 @@ import { z } from "zod";
 
 import { requireAuth } from "@/lib/auth";
 import { getPublicImageUrls } from "@/lib/utils/storage";
+import { sanitizeForOr } from "@/lib/utils/search";
 import { firstZodError, getShowRingPageSchema } from "@/lib/showring/schemas";
 import type { ShowRingCard, ShowRingFacetOptions } from "@/lib/showring/types";
 
@@ -53,11 +54,6 @@ const FACET_SCAN_CAP = 2000;
 
 type ShowRingPageInput = z.infer<typeof getShowRingPageSchema>;
 type ShowRingFilterInput = Omit<ShowRingPageInput, "offset" | "limit">;
-
-/** PostgREST .or() strings break on commas/parens — strip them. */
-function sanitizeForOr(q: string): string {
-    return q.replace(/[,()]/g, " ").trim();
-}
 
 /**
  * The viewer's block list, bounded for the SQL .not() exclusion.

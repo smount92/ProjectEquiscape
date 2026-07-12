@@ -8,6 +8,7 @@ import { getAdminClient } from "@/lib/supabase/admin";
 import { GROUP_FILE_MAX_SIZE, GROUP_FILE_ALLOWED_EXTENSIONS } from "@/lib/groupFiles";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { sanitizeText } from "@/lib/utils/validation";
+import { sanitizeForOr } from "@/lib/utils/search";
 
 // ============================================================
 // GROUPS — Server Actions
@@ -176,7 +177,8 @@ export async function getGroups(filters?: {
         query = query.ilike("region", `%${filters.region}%`);
     }
     if (filters?.search) {
-        query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
+        const s = sanitizeForOr(filters.search);
+        if (s) query = query.or(`name.ilike.%${s}%,description.ilike.%${s}%`);
     }
 
     const { data } = await query;

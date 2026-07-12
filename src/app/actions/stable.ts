@@ -25,6 +25,7 @@ import { revalidatePath } from "next/cache";
 
 import { requireAuth } from "@/lib/auth";
 import { getPublicImageUrls } from "@/lib/utils/storage";
+import { sanitizeForOr } from "@/lib/utils/search";
 import {
     deleteStableViewSchema,
     firstZodError,
@@ -55,11 +56,6 @@ const SELECT_ALL_CAP = 500;
 
 type StablePageInput = z.infer<typeof getStablePageSchema>;
 type StableFilterInput = z.infer<typeof getMatchingHorseIdsSchema>;
-
-/** PostgREST .or() strings break on commas/parens — strip them. */
-function sanitizeForOr(q: string): string {
-    return q.replace(/[,()]/g, " ").trim();
-}
 
 /**
  * Resolve filters that constrain by horse-id set (junction-aware

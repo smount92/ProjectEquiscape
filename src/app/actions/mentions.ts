@@ -1,4 +1,4 @@
-"use server";
+import "server-only";
 
 import { getAdminClient } from "@/lib/supabase/admin";
 import { extractMentions } from "@/lib/utils/mentions";
@@ -6,6 +6,13 @@ import { extractMentions } from "@/lib/utils/mentions";
 /**
  * Parse @mentions from content and send notifications.
  * Fire-and-forget — never fails the parent action.
+ *
+ * SECURITY: this is an INTERNAL server-only helper, NOT a "use server" action —
+ * it must never be a client-callable endpoint. `actorId`/`actorAlias` are
+ * trusted here precisely because the only callers are authenticated server
+ * actions that derive them from requireAuth(); if this were exposed as an
+ * action, a client could forge "@<anyone> mentioned you" notifications. Keep
+ * `import "server-only"` and do NOT add a "use server" directive.
  */
 export async function parseAndNotifyMentions(
     content: string,

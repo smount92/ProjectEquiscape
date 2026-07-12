@@ -121,7 +121,7 @@ export async function createSuggestion(
                         .eq("id", suggesterUserId)
                         .single();
                     const alias = (suggester as { alias_name: string } | null)?.alias_name || "Someone";
-                    const { createNotification } = await import("@/app/actions/notifications");
+                    const { createNotification } = await import("@/lib/notifications/createNotification");
                     await createNotification({
                         userId: authorId,
                         type: "help_id",

@@ -3,7 +3,7 @@
 import { logger } from "@/lib/logger";
 
 import { createClient } from "@/lib/supabase/server";
-import { createNotification } from "@/app/actions/notifications";
+import { createNotification } from "@/lib/notifications/createNotification";
 import { createActivityEvent } from "@/app/actions/activity";
 import { after } from "next/server";
 

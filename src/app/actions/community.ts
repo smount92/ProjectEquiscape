@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { getPublicImageUrls } from "@/lib/utils/storage";
+import { sanitizeForOr } from "@/lib/utils/search";
 
 const PAGE_SIZE = 24;
 
@@ -66,7 +67,8 @@ export async function loadMoreShowRing(
 
     // Apply filters
     if (filters?.q) {
-        query = query.or(`custom_name.ilike.%${filters.q}%,sculptor.ilike.%${filters.q}%`);
+        const q = sanitizeForOr(filters.q);
+        if (q) query = query.or(`custom_name.ilike.%${q}%,sculptor.ilike.%${q}%`);
     }
     if (filters?.finishType && filters.finishType !== "all") {
         query = query.eq("finish_type", filters.finishType as "OF" | "Custom" | "Artist Resin");

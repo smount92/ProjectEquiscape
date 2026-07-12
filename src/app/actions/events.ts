@@ -642,7 +642,7 @@ export async function addEventJudge(
             const { data: actor } = await supabaseDeferred.from("users").select("alias_name").eq("id", assignerId).single();
             const alias = (actor as { alias_name: string } | null)?.alias_name || "Someone";
             const showName = (ev as { name: string } | null)?.name || "a show";
-            const { createNotification } = await import("@/app/actions/notifications");
+            const { createNotification } = await import("@/lib/notifications/createNotification");
             await createNotification({
                 userId: judgeUserId,
                 type: "judge_assigned",
@@ -730,7 +730,7 @@ export async function addEventComment(
             if (event && (event as { created_by: string }).created_by !== userId) {
                 const { data: actor } = await supabaseDeferred.from("users").select("alias_name").eq("id", userId).single();
                 const alias = (actor as { alias_name: string } | null)?.alias_name || "Someone";
-                const { createNotification } = await import("@/app/actions/notifications");
+                const { createNotification } = await import("@/lib/notifications/createNotification");
                 await createNotification({
                     userId: (event as { created_by: string }).created_by,
                     type: "comment",

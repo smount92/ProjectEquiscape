@@ -2,6 +2,7 @@
 
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { sanitizeForOr } from "@/lib/utils/search";
 
 // ============================================================
 // MARKET PRICE GUIDE — Server Actions
@@ -115,8 +116,9 @@ export async function searchMarketPrices(query?: string, options?: {
         .select("id, title, maker, item_type, scale")
         .in("id", catalogIds);
 
-    if (query && query.trim()) {
-        catalogQuery = catalogQuery.or(`title.ilike.%${query.trim()}%,maker.ilike.%${query.trim()}%`);
+    const q = sanitizeForOr(query ?? "");
+    if (q) {
+        catalogQuery = catalogQuery.or(`title.ilike.%${q}%,maker.ilike.%${q}%`);
     }
 
     if (options?.itemType && options.itemType !== "all") {

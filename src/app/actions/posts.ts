@@ -102,7 +102,7 @@ export async function createPost(data: {
             const supabaseDeferred = await (await import("@/lib/supabase/server")).createClient();
             const { data: actor } = await supabaseDeferred.from("users").select("alias_name").eq("id", userId).single();
             const alias = (actor as { alias_name: string } | null)?.alias_name || "Someone";
-            const { createNotification } = await import("@/app/actions/notifications");
+            const { createNotification } = await import("@/lib/notifications/createNotification");
             const { parseAndNotifyMentions } = await import("@/app/actions/mentions");
 
             // Notify event creator
@@ -180,7 +180,7 @@ export async function replyToPost(
             const alias = (actor as { alias_name: string } | null)?.alias_name || "Someone";
 
             if (parentPost && (parentPost as { author_id: string }).author_id !== userId) {
-                const { createNotification } = await import("@/app/actions/notifications");
+                const { createNotification } = await import("@/lib/notifications/createNotification");
                 await createNotification({
                     userId: (parentPost as { author_id: string }).author_id,
                     type: "reply",
@@ -313,7 +313,7 @@ export async function togglePostLike(
                 if (post && (post as { author_id: string }).author_id !== userId) {
                     const { data: actor } = await supabaseDeferred.from("users").select("alias_name").eq("id", userId).single();
                     const alias = (actor as { alias_name: string } | null)?.alias_name || "Someone";
-                    const { createNotification } = await import("@/app/actions/notifications");
+                    const { createNotification } = await import("@/lib/notifications/createNotification");
                     await createNotification({
                         userId: (post as { author_id: string }).author_id,
                         type: "like",

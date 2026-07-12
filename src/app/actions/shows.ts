@@ -383,8 +383,11 @@ export async function voteForEntry(
 ): Promise<{ success: boolean; newVotes?: number; error?: string }> {
     const { supabase, user } = await requireAuth();
 
-    const admin = getAdminClient();
-    const { data, error } = await admin.rpc("vote_for_entry", {
+    // vote_for_entry is SECURITY DEFINER and now enforces auth.uid() == p_user_id
+    // (migration 133), so it MUST be called via the user client — the admin /
+    // service-role client carries no JWT, so auth.uid() would be NULL and every
+    // vote would raise 'Unauthorized'. DEFINER still runs the writes as owner.
+    const { data, error } = await supabase.rpc("vote_for_entry", {
         p_entry_id: entryId,
         p_user_id: user.id,
     });
@@ -566,7 +569,7 @@ export async function updateShowStatus(
                     "Grand Champion": "🏆", "Reserve Grand Champion": "🥈",
                 };
 
-                const { createNotification } = await import("@/app/actions/notifications");
+                const { createNotification } = await import("@/lib/notifications/createNotification");
 
                 for (const entry of entries as { user_id: string; placing: string | null; horse_id: string }[]) {
                     const horseName = horseNameMap.get(entry.horse_id) || "your horse";

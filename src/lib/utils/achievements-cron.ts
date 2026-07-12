@@ -4,7 +4,7 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { createNotification } from "@/app/actions/notifications";
+import { createNotification } from "@/lib/notifications/createNotification";
 import { logger } from "@/lib/logger";
 
 export async function evaluateComplexBadges(admin: SupabaseClient): Promise<number> {

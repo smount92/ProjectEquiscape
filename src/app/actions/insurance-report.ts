@@ -48,8 +48,10 @@ export async function getInsuranceReportData(collectionId?: string): Promise<{
         } = await supabase.auth.getUser();
         if (!user) return { success: false, error: "Not authenticated." };
 
-        // Get user profile
-        const { data: profile } = await supabase
+        // Get user profile. full_name is column-REVOKE'd from the authenticated
+        // role (migration 133), so read it with the service-role client, scoped
+        // to this authenticated user's own id.
+        const { data: profile } = await getAdminClient()
             .from("users")
             .select("alias_name, full_name")
             .eq("id", user.id)

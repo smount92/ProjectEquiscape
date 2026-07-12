@@ -234,7 +234,7 @@ export async function createSuggestion(input: SuggestionInput) {
         after(async () => {
             try {
                 const { createNotification } = await import(
-                    "@/app/actions/notifications"
+                    "@/lib/notifications/createNotification"
                 );
                 const adminClient = getAdminClient();
                 const { data: admins } = await adminClient
@@ -561,7 +561,7 @@ export async function reviewSuggestion(decision: ReviewDecision) {
     after(async () => {
         try {
             const { createNotification } = await import(
-                "@/app/actions/notifications"
+                "@/lib/notifications/createNotification"
             );
             const emoji =
                 decision.decision === "approved" ? "✅" : "❌";

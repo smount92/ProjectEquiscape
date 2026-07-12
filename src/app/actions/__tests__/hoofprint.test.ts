@@ -22,7 +22,7 @@ vi.mock("@/lib/utils/rateLimit", () => ({
 vi.mock("@/app/actions/transactions", () => ({
     createTransaction: vi.fn().mockResolvedValue({ success: true }),
 }));
-vi.mock("@/app/actions/notifications", () => ({
+vi.mock("@/lib/notifications/createNotification", () => ({
     createNotification: vi.fn().mockResolvedValue({ success: true }),
 }));
 

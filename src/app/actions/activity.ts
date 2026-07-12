@@ -37,6 +37,16 @@ export async function createActivityEvent(data: {
     metadata?: Json;
 }): Promise<void> {
     try {
+        // SECURITY: directly-callable "use server" action. The actor must be the
+        // authenticated caller — never a caller-supplied id — or a client could
+        // forge feed events attributed to anyone. Every internal caller already
+        // passes its own auth.uid(), so this only blocks direct-call forgery.
+        const supabase = await createClient();
+        const {
+            data: { user },
+        } = await supabase.auth.getUser();
+        if (!user || user.id !== data.actorId) return;
+
         const supabaseAdmin = getAdminClient();
 
         await supabaseAdmin.from("activity_events").insert({

@@ -1,10 +1,6 @@
 "use server";
 
-import { logger } from "@/lib/logger";
-import * as Sentry from "@sentry/nextjs";
-
 import { createClient } from "@/lib/supabase/server";
-import { getAdminClient } from "@/lib/supabase/admin";
 
 /**
  * Get the count of unread notifications for the current user.
@@ -122,40 +118,4 @@ export async function clearNotifications(): Promise<{ success: boolean }> {
         .eq("user_id", user.id);
 
     return { success: !error };
-}
-
-/**
- * Internal: Create a notification using Service Role (fire-and-forget).
- * Called from other server actions. Should NEVER cause the parent action to fail.
- */
-export async function createNotification(data: {
-    userId: string;
-    type: string;
-    actorId: string;
-    content: string;
-    horseId?: string;
-    conversationId?: string;
-    /** Deep-link URL for this notification (e.g. /shows/uuid). Falls back to horse/conversation/actor profile. */
-    linkUrl?: string;
-}): Promise<void> {
-    try {
-        // Don't notify yourself
-        if (data.userId === data.actorId) return;
-
-        const supabaseAdmin = getAdminClient();
-
-        await supabaseAdmin.from("notifications").insert({
-            user_id: data.userId,
-            type: data.type,
-            actor_id: data.actorId,
-            content: data.content,
-            horse_id: data.horseId || null,
-            conversation_id: data.conversationId || null,
-            link_url: data.linkUrl || null,
-        });
-    } catch (err) {
-        // Fire-and-forget — never fail the parent action
-        Sentry.captureException(err, { tags: { domain: "notifications" }, level: "warning" });
-        logger.error("Notification", "Failed to create notification");
-    }
 }

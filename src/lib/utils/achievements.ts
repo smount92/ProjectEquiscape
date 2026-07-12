@@ -7,7 +7,7 @@
  */
 
 import { getAdminClient } from "@/lib/supabase/admin";
-import { createNotification } from "@/app/actions/notifications";
+import { createNotification } from "@/lib/notifications/createNotification";
 import { logger } from "@/lib/logger";
 
 export type AchievementTrigger =

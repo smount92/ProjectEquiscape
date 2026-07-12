@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { InsuranceReportDocument } from "@/lib/pdf/InsuranceReport";
 import { getUserTier } from "@/lib/auth";
+import { getAdminClient } from "@/lib/supabase/admin";
 
 export async function GET() {
     const supabase = await createClient();
@@ -24,8 +25,10 @@ export async function GET() {
             .is("deleted_at", null)
             .order("custom_name");
 
-        // Fetch owner profile for report header
-        const { data: profile } = await supabase
+        // Fetch owner profile for report header. full_name + email are
+        // column-REVOKE'd from the authenticated role (migration 133), so read
+        // them with the service-role client, scoped to this user's own id.
+        const { data: profile } = await getAdminClient()
             .from("users")
             .select("alias_name, full_name, email")
             .eq("id", user.id)

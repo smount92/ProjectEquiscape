@@ -391,7 +391,7 @@ export async function replyToThread(
             const supabaseDeferred = await (await import("@/lib/supabase/server")).createClient();
             const { data: actor } = await supabaseDeferred.from("users").select("alias_name").eq("id", userId).single();
             const alias = (actor as { alias_name: string } | null)?.alias_name || "Someone";
-            const { createNotification } = await import("@/app/actions/notifications");
+            const { createNotification } = await import("@/lib/notifications/createNotification");
 
             const { data: groupRow } = await supabaseDeferred.from("groups").select("slug").eq("id", groupId).single();
             const slug = (groupRow as { slug: string } | null)?.slug;

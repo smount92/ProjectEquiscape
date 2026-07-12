@@ -21,7 +21,7 @@ vi.mock("next/server", () => ({
         afterCallbacks.push(cb);
     }),
 }));
-vi.mock("@/app/actions/notifications", () => ({ createNotification }));
+vi.mock("@/lib/notifications/createNotification", () => ({ createNotification }));
 vi.mock("@/app/actions/mentions", () => ({ parseAndNotifyMentions }));
 vi.mock("@/lib/utils/avatars.server", () => ({
     resolveAvatarUrls: vi.fn(async () => new Map<string, string>()),
