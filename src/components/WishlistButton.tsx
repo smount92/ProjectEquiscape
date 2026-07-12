@@ -23,7 +23,7 @@ export default function WishlistButton({ catalogId }: WishlistButtonProps) {
 
   if (result.success) {
    setStatus("saved");
-  } else if (result.error === "Already in your wishlist!") {
+  } else if (result.error === "Already on your Want List!") {
    setStatus("saved");
   } else {
    setStatus("error");
@@ -40,8 +40,8 @@ export default function WishlistButton({ catalogId }: WishlistButtonProps) {
    }`}
    onClick={handleClick}
    disabled={status === "saving"}
-   title={status === "saved" ? "In your wishlist" : "Add to wishlist"}
-   aria-label={status === "saved" ? "In your wishlist" : "Add to wishlist"}
+   title={status === "saved" ? "On your Want List" : "Add to Want List"}
+   aria-label={status === "saved" ? "On your Want List" : "Add to Want List"}
    whileTap={{ scale: 0.85 }}
    whileHover={{ scale: 1.15 }}
    transition={{ type: "spring" as const, stiffness: 400, damping: 15 }}

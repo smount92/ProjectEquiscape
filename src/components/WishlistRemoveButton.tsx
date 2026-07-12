@@ -24,8 +24,8 @@ export default function WishlistRemoveButton({ wishlistId }: { wishlistId: strin
  className="text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 absolute top-2 right-2 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full rounded-lg border border-none bg-transparent p-0 opacity-0 shadow-md transition-all hover:bg-red-50 hover:text-[#ef4444] max-[600px]:opacity-100"
  onClick={handleRemove}
  disabled={removing}
- title="Remove from wishlist"
- aria-label="Remove from wishlist"
+ title="Remove from Want List"
+ aria-label="Remove from Want List"
  >
  {removing ? (
  <span

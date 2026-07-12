@@ -4602,6 +4602,7 @@ export type Database = {
       get_catalog_reference_photos: {
         Args: { p_catalog_id: string; p_limit?: number }
         Returns: {
+          horse_id: string
           horse_name: string
           image_url: string
         }[]

@@ -75,7 +75,7 @@ export default function WishlistSearch() {
  setAdding(true);
  const result = await addToWishlist(item.id);
  if (result.success) {
- setToast({ message: `✅"${item.title}" added to Wishlist!`, type:"success" });
+ setToast({ message: `✅"${item.title}" added to your Want List!`, type:"success" });
  setQuery("");
  setShowDropdown(false);
  router.refresh();
@@ -91,7 +91,7 @@ export default function WishlistSearch() {
  const searchTerm = query.trim();
  const result = await addToWishlist(null, `Searching for: ${searchTerm}`);
  if (result.success) {
- setToast({ message: `✅"${searchTerm}" added to Wishlist as custom entry!`, type:"success" });
+ setToast({ message: `✅"${searchTerm}" added to your Want List as a custom entry!`, type:"success" });
  setQuery("");
  setShowDropdown(false);
  router.refresh();
@@ -138,7 +138,7 @@ export default function WishlistSearch() {
  <input
  type="text"
  className="text-muted-foreground"
- placeholder="Search molds, releases & resins to add to your wishlist…"
+ placeholder="Search molds, releases & resins to add to your Want List…"
  value={query}
  onChange={(e) => setQuery(e.target.value)}
  onFocus={() => {
@@ -290,7 +290,7 @@ export default function WishlistSearch() {
  <line x1="12" y1="8" x2="12" y2="16" />
  <line x1="8" y1="12" x2="16" y2="12" />
  </svg>
- Can&apos;t find it? Add &ldquo;{query}&rdquo; to Wishlist
+ Can&apos;t find it? Add &ldquo;{query}&rdquo; to Want List
  </Button>
  </div>
  )}

@@ -259,8 +259,8 @@ export default function LandingPage() {
                             <h3 className="text-foreground mb-2 text-xl font-bold">Buy, Sell &amp; Trade with Trust</h3>
                             <p className="text-secondary-foreground text-sm leading-relaxed">
                                 List models for sale with multi-angle photos. Make and receive offers through structured
-                                Safe-Trade flows. Verified seller badges, post-transaction reviews, and wishlist
-                                matchmaking alerts when your dream horse appears.
+                                Safe-Trade flows. Verified seller badges, post-transaction reviews, and
+                                Want List matchmaking alerts when your dream horse appears.
                             </p>
                         </div>
                     </div>

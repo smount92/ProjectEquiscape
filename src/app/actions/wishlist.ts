@@ -23,7 +23,7 @@ export async function addToWishlist(
 
     // Allow either a catalogId OR notes-only (custom escape hatch)
     if (!catalogId && !notes?.trim()) {
-        return { error: "No reference or custom note to wishlist.", success: false };
+        return { error: "Nothing to add to your Want List.", success: false };
     }
 
     const { error } = await supabase.from("user_wishlists").insert({
@@ -35,10 +35,10 @@ export async function addToWishlist(
     if (error) {
         // Unique constraint violation = already wishlisted
         if (error.code === "23505") {
-            return { error: "Already in your wishlist!", success: false };
+            return { error: "Already on your Want List!", success: false };
         }
         logger.error("Wishlist", "Insert error", error);
-        return { error: "Failed to add to wishlist.", success: false };
+        return { error: "Failed to add to your Want List.", success: false };
     }
 
     // Wanted engine (MOVE 1): nudge owners of this model that someone wants it.

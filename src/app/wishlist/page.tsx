@@ -9,8 +9,8 @@ import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import { Button } from"@/components/ui/button";
 
 export const metadata = {
- title:"My Wishlist — Model Horse Hub",
- description:"Models you're hunting for — your personal wishlist with Matchmaker.",
+ title:"My Want List — Model Horse Hub",
+ description:"Models you're hunting for — your personal Want List with Matchmaker.",
 };
 
 
@@ -120,7 +120,7 @@ export default async function WishlistPage() {
 
  return (
  <ExplorerLayout
-  title={<>❤️ <span className="text-forest">My Wishlist</span></>}
+  title={<>🔖 <span className="text-forest">My Want List</span></>}
   description={`Models you're hunting for — ${items.length} item${items.length !== 1 ?"s" :""}${totalMatches > 0 ? ` 🔥 ${totalMatches} marketplace match${totalMatches !== 1 ?"es" :""} found!` :""}`}
   headerActions={
   <Button asChild><Link
@@ -138,7 +138,7 @@ export default async function WishlistPage() {
   {items.length === 0 ? (
   <div className="bg-card border-input animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
    <div className="mb-4 text-5xl">❤️</div>
-   <h2>Your Wishlist is Empty</h2>
+   <h2>Your Want List is Empty</h2>
    <p>Browse the Show Ring and tap the heart icon on models you love to start your hunt!</p>
    <Button asChild><Link
    href="/community"

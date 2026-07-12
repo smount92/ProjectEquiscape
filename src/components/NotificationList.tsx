@@ -32,7 +32,7 @@ function getNotifIcon(type: string): string {
  case"feature":
  return"🌟";
  case"wishlist_match":
- return"❤️‍🔥";
+ return"🔖";
  case"show_vote":
  return"📸";
  case"show_result":

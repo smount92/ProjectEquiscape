@@ -15,7 +15,7 @@ import {
     Package,
     Users,
     Newspaper,
-    Heart,
+    Bookmark,
     Mail,
     Lightbulb,
 } from "lucide-react";
@@ -217,7 +217,7 @@ export default function GettingStartedPage() {
                     <p>
                         Add models to your{" "}
                         <Link href="/wishlist" className="text-forest inline-flex items-center gap-1.5 font-semibold">
-                            <Heart size={16} strokeWidth={1.5} /> Wishlist
+                            <Bookmark size={16} strokeWidth={1.5} /> Want List
                         </Link>{" "}
                         and you&apos;ll get notified when a matching model is listed for sale.
                     </p>

@@ -15,6 +15,7 @@ import HoofprintTimeline from"@/components/HoofprintTimeline";
 import { getHoofprint } from"@/app/actions/hoofprint";
 import ReportButton from"@/components/ReportButton";
 import MessageSellerButton from"@/components/MessageSellerButton";
+import WishlistButton from"@/components/WishlistButton";
 import TrustedBadge from"@/components/TrustedBadge";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import PageMasthead from"@/components/layouts/PageMasthead";
@@ -689,6 +690,7 @@ editionSize: rawPedigree.edition_size,
  initialIsFavorited={!!userFav}
  initialCount={favoriteCount ?? 0}
  />
+ {horse.catalog_id && <WishlistButton catalogId={horse.catalog_id} />}
  <ShareButton
  title={`${horse.custom_name} — Model Horse Hub`}
  text={`Check out ${horse.custom_name} on Model Horse Hub!`}

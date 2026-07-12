@@ -116,7 +116,7 @@ async function checkWishlistMatches(data: {
                 user_id: matchUserId,
                 type: "wishlist_match",
                 actor_id: data.userId,
-                content: `A ${data.horseName} matching your wishlist is now ${data.tradeStatus}!`,
+                content: `A ${data.horseName} matching your Want List is now ${data.tradeStatus}!`,
                 horse_id: data.horseId,
             });
         }

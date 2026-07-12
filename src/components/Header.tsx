@@ -20,7 +20,6 @@ import {
  Building2,
  Calendar,
  TrendingUp,
- Heart,
  Package,
  Settings,
  User,
@@ -32,6 +31,7 @@ import {
  ChevronDown,
  MoreHorizontal,
  BookOpen,
+ Bookmark,
  Gem,
 } from"lucide-react";
 import { Button } from "@/components/ui/button";
@@ -381,10 +381,10 @@ export default function Header() {
  <Link
  href="/wishlist"
  className="leather-icon-btn bg-card border-input relative flex h-[36px] w-[36px] items-center justify-center rounded-full border text-base text-muted-foreground no-underline transition-all"
- title="Wishlist"
+ title="Want List"
  id="nav-wishlist-icon"
  >
- <Heart size={18} strokeWidth={1.5} />
+ <Bookmark size={18} strokeWidth={1.5} />
  </Link>
  </div>
 
@@ -618,7 +618,7 @@ export default function Header() {
  id="nav-wishlist-m"
  onClick={closeMobileMenu}
  >
- <Heart size={16} strokeWidth={1.5} /> Wishlist
+ <Bookmark size={16} strokeWidth={1.5} /> Want List
  </Link>
  <Link
  href="/claim"

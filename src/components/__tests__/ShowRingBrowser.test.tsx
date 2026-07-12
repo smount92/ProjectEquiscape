@@ -165,7 +165,7 @@ describe("ShowRingBrowser", () => {
         renderBrowser();
         expect(screen.getAllByText("@collector1")).toHaveLength(2);
         // h-1 has a catalogId → wishlist button renders; h-2 (null) no-ops
-        expect(screen.getAllByLabelText("Add to wishlist")).toHaveLength(1);
+        expect(screen.getAllByLabelText("Add to Want List")).toHaveLength(1);
     });
 
     it("uses the shared night-safe finish badge palette (no light-only amber)", () => {

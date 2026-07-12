@@ -149,7 +149,7 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
 
  <span className="text-muted-foreground mt-1 block text-xs">
  Organize your models into collections like &quot;Childhood Herd&quot;, &quot;Show String&quot;, or
- &quot;Wishlist&quot;.
+ &quot;Grails&quot;.
  </span>
 
  {/* ---- Create Collection Modal ---- */}
