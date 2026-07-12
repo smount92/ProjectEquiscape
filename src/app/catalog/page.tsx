@@ -12,6 +12,7 @@ import {
     countActiveCatalogFilters,
     type CatalogFilters,
 } from "@/lib/catalog/filterParams";
+import { referenceHref, referencePagesEnabled } from "@/lib/catalog/referenceUrl";
 
 export const metadata: Metadata = {
     title: "Reference Catalog — Model Horse Hub",
@@ -32,6 +33,8 @@ interface CatalogItemRow {
     item_type: string;
     title: string;
     maker: string;
+    maker_slug: string | null;
+    slug: string | null;
     scale: string | null;
 }
 
@@ -149,7 +152,11 @@ export default async function ReferencePage({
                                         <tr key={item.id} className="transition-colors hover:bg-muted/50">
                                             <td className="py-2 pr-4 font-semibold">
                                                 <Link
-                                                    href={`/catalog/${item.id}`}
+                                                    href={
+                                                        referencePagesEnabled()
+                                                            ? referenceHref(item)
+                                                            : `/catalog/${item.id}`
+                                                    }
                                                     className="text-foreground no-underline hover:text-forest hover:underline"
                                                 >
                                                     {item.title}

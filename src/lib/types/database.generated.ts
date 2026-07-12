@@ -305,8 +305,10 @@ export type Database = {
           id: string
           item_type: string
           maker: string
+          maker_slug: string | null
           parent_id: string | null
           scale: string | null
+          slug: string | null
           title: string
         }
         Insert: {
@@ -315,8 +317,10 @@ export type Database = {
           id?: string
           item_type: string
           maker: string
+          maker_slug?: string | null
           parent_id?: string | null
           scale?: string | null
+          slug?: string | null
           title: string
         }
         Update: {
@@ -325,8 +329,10 @@ export type Database = {
           id?: string
           item_type?: string
           maker?: string
+          maker_slug?: string | null
           parent_id?: string | null
           scale?: string | null
+          slug?: string | null
           title?: string
         }
         Relationships: [
@@ -4375,6 +4381,7 @@ export type Database = {
           pref_simple_mode: boolean
           role: string | null
           show_badges: boolean
+          show_photos_on_reference: boolean
           watermark_photos: boolean | null
           watermark_text: string | null
         }
@@ -4399,6 +4406,7 @@ export type Database = {
           pref_simple_mode?: boolean
           role?: string | null
           show_badges?: boolean
+          show_photos_on_reference?: boolean
           watermark_photos?: boolean | null
           watermark_text?: string | null
         }
@@ -4423,6 +4431,7 @@ export type Database = {
           pref_simple_mode?: boolean
           role?: string | null
           show_badges?: boolean
+          show_photos_on_reference?: boolean
           watermark_photos?: boolean | null
           watermark_text?: string | null
         }
@@ -4537,6 +4546,7 @@ export type Database = {
         Args: { p_horses: Json; p_user_id: string }
         Returns: Json
       }
+      catalog_slugify: { Args: { txt: string }; Returns: string }
       check_rate_limit: {
         Args: {
           p_endpoint: string
@@ -4568,11 +4578,34 @@ export type Database = {
         }
         Returns: string
       }
+      count_catalog_collectors: {
+        Args: { p_catalog_id: string }
+        Returns: number
+      }
+      count_catalog_wanters: { Args: { p_catalog_id: string }; Returns: number }
       count_user_horses_public: { Args: { p_user_id: string }; Returns: number }
       count_user_horses_total: { Args: { p_user_id: string }; Returns: number }
       entry_owner_of: { Args: { p_entry_id: string }; Returns: string }
       entry_vote_open: { Args: { p_entry_id: string }; Returns: boolean }
       get_catalog_facets: { Args: never; Returns: Json }
+      get_catalog_listings: {
+        Args: { p_catalog_id: string; p_limit?: number }
+        Returns: {
+          custom_name: string
+          horse_id: string
+          listing_price: number
+          marketplace_notes: string
+          owner_alias: string
+          trade_status: string
+        }[]
+      }
+      get_catalog_reference_photos: {
+        Args: { p_catalog_id: string; p_limit?: number }
+        Returns: {
+          horse_name: string
+          image_url: string
+        }[]
+      }
       get_extra_photo_count: { Args: { p_horse_id: string }; Returns: number }
       get_market_rows: {
         Args: {
@@ -4628,6 +4661,10 @@ export type Database = {
           p_seller_id: string
         }
         Returns: Json
+      }
+      notify_catalog_owners_of_demand: {
+        Args: { p_catalog_id: string; p_wanter_id: string }
+        Returns: number
       }
       refresh_market_prices: { Args: never; Returns: undefined }
       refresh_mv_trusted_sellers: { Args: never; Returns: undefined }

@@ -1,19 +1,35 @@
 import type { MetadataRoute } from "next";
+import { createClient } from "@/lib/supabase/server";
+import { referencePagesEnabled } from "@/lib/catalog/referenceUrl";
 
 /**
  * sitemap.xml — Tells search engines about all discoverable pages.
  *
  * Static pages are always included with appropriate priorities.
- * Dynamic pages (community horses, shows, profiles) could be added later
- * by querying the database for public content.
+ * Dynamic pages (catalog reference releases) are appended by querying the
+ * database for public content. Other dynamic pages (community horses, shows,
+ * profiles) could be added later the same way.
  *
  * Next.js automatically serves this at /sitemap.xml.
  */
-export default function sitemap(): MetadataRoute.Sitemap {
+
+/**
+ * Shape of the catalog_items columns we read for reference pages.
+ * maker_slug / slug / created_at are added in migration 129 and may not yet
+ * exist in the generated Database types, so query rows are cast through
+ * `unknown` to this shape.
+ */
+type CatalogReferenceRow = {
+    maker_slug: string | null;
+    slug: string | null;
+    created_at: string | null;
+};
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://modelhorsehub.com";
     const now = new Date();
 
-    return [
+    const staticEntries: MetadataRoute.Sitemap = [
         // ── Core static pages ──
         {
             url: baseUrl,
@@ -116,4 +132,33 @@ export default function sitemap(): MetadataRoute.Sitemap {
             priority: 0.7,
         },
     ];
+
+    // ── Dynamic catalog reference pages (~10,900 rows, within the 50k limit) ──
+    // Only listed once the reference pages are live (NEXT_PUBLIC_REFERENCE_PAGES),
+    // so we never advertise URLs that 404. Guarded so any DB failure degrades
+    // gracefully to the static entries.
+    let referenceEntries: MetadataRoute.Sitemap = [];
+    if (referencePagesEnabled()) try {
+        const supabase = await createClient();
+        const { data, error } = await supabase
+            .from("catalog_items")
+            .select("maker_slug, slug, created_at");
+
+        if (!error && data) {
+            const rows = data as unknown as CatalogReferenceRow[];
+            referenceEntries = rows
+                .filter((row) => row.maker_slug && row.slug)
+                .map((row): MetadataRoute.Sitemap[number] => ({
+                    url: `${baseUrl}/reference/${row.maker_slug}/${row.slug}`,
+                    lastModified: row.created_at ?? now,
+                    changeFrequency: "weekly",
+                    priority: 0.6,
+                }));
+        }
+    } catch {
+        // Never throw from sitemap(): fall back to the static entries only.
+        referenceEntries = [];
+    }
+
+    return [...staticEntries, ...referenceEntries];
 }

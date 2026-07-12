@@ -101,7 +101,7 @@ export async function getCatalogItems(filters: CatalogFilters) {
     // is the expensive part. "estimated" reads the planner stats instead.
     let query = supabase
         .from("catalog_items")
-        .select("id, item_type, parent_id, title, maker, scale, attributes, created_at", {
+        .select("id, item_type, parent_id, title, maker, maker_slug, slug, scale, attributes, created_at", {
             count: "estimated",
         })
         .range(from, from + pageSize - 1);

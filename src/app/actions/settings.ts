@@ -27,13 +27,14 @@ export async function getProfile(): Promise<{
     watermarkText: string;
     currencySymbol: string;
     showBadges: boolean;
+    showPhotosOnReference: boolean;
     exhibitorNumber: string;
 } | null> {
     const { supabase, user } = await requireAuth();
 
     const { data } = await supabase
         .from("users")
-        .select("alias_name, bio, avatar_url, notification_prefs, default_horse_public, watermark_photos, watermark_text, currency_symbol, show_badges, exhibitor_number")
+        .select("alias_name, bio, avatar_url, notification_prefs, default_horse_public, watermark_photos, watermark_text, currency_symbol, show_badges, show_photos_on_reference, exhibitor_number")
         .eq("id", user.id)
         .single();
 
@@ -48,6 +49,7 @@ export async function getProfile(): Promise<{
         watermark_text: string | null;
         currency_symbol: string | null;
         show_badges: boolean | null;
+        show_photos_on_reference: boolean | null;
         exhibitor_number: string | null;
     };
 
@@ -73,12 +75,14 @@ export async function getProfile(): Promise<{
             messages: true,
             show_results: true,
             transfers: true,
+            demand_alerts: true,
         },
         defaultHorsePublic: d.default_horse_public ?? true,
         watermarkPhotos: d.watermark_photos ?? true,
         watermarkText: d.watermark_text ?? "",
         currencySymbol: d.currency_symbol || "$",
         showBadges: d.show_badges ?? true,
+        showPhotosOnReference: d.show_photos_on_reference ?? true,
         exhibitorNumber: d.exhibitor_number || "",
     };
 }
@@ -97,6 +101,7 @@ export async function updateProfile(data: {
     watermarkText?: string;
     currencySymbol?: string;
     showBadges?: boolean;
+    showPhotosOnReference?: boolean;
     exhibitorNumber?: string;
 }): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
@@ -146,6 +151,10 @@ export async function updateProfile(data: {
 
     if (data.showBadges !== undefined) {
         updates.show_badges = data.showBadges;
+    }
+
+    if (data.showPhotosOnReference !== undefined) {
+        updates.show_photos_on_reference = data.showPhotosOnReference;
     }
 
     if (data.exhibitorNumber !== undefined) {

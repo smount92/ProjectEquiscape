@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from"react";
-import { useRouter } from"next/navigation";
+import { useRouter, useSearchParams } from"next/navigation";
 import Link from"next/link";
 import { createClient } from"@/lib/supabase/client";
 import {
@@ -16,6 +16,7 @@ import type { UserTier } from"@/lib/utils/imageCompression";
 import type { AngleProfile, FinishType, AssetCategory } from"@/lib/types/database";
 import UnifiedReferenceSearch from"@/components/UnifiedReferenceSearch";
 import type { CatalogItem } from"@/app/actions/reference";
+import { getCatalogItem } from"@/app/actions/reference";
 import CollectionPicker from"@/components/CollectionPicker";
 import { notifyHorsePublic } from"@/app/actions/horse-events";
 import { initializeHoofprint } from"@/app/actions/hoofprint";
@@ -72,6 +73,7 @@ interface ImageSlot {
 
 export default function AddHorsePage() {
  const router = useRouter();
+ const searchParams = useSearchParams();
  const supabase = createClient();
 
  // Step management
@@ -188,6 +190,19 @@ export default function AddHorsePage() {
  setNameAutoFilled(true);
  }
  }, [selectedCatalogItem]);
+
+ // Preselect a catalog reference from ?catalog=<id> (e.g. the reference
+ // page's "Add to your stable" CTA). One-time on mount; skips if the param
+ // is absent or a reference is already chosen so existing flows aren't broken.
+ useEffect(() => {
+ const catalogParam = searchParams.get("catalog");
+ if (!catalogParam || selectedCatalogId) return;
+ setSelectedCatalogId(catalogParam);
+ getCatalogItem(catalogParam).then((item) => {
+ if (item) setSelectedCatalogItem(item);
+ });
+ // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, []);
 
  // Fetch watermark preference + user tier
  useEffect(() => {
