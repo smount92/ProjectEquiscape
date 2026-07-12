@@ -90,6 +90,8 @@ export interface ReferencePhoto {
     url: string;
     /** The owning collector's name for their horse — distinguishes finishes on a mold. */
     name: string;
+    /** The owner's public horse id — links the photo to its passport (/community/[id]). */
+    horseId: string;
 }
 
 /**
@@ -105,12 +107,24 @@ export const getCatalogPhotos = unstable_cache(
             p_catalog_id: catalogId,
             p_limit: limit,
         });
-        const rows = (data ?? []) as { image_url: string | null; horse_name: string | null }[];
-        const withPhoto = rows.filter((r) => r.image_url) as { image_url: string; horse_name: string | null }[];
+        const rows = (data ?? []) as unknown as {
+            horse_id: string;
+            image_url: string | null;
+            horse_name: string | null;
+        }[];
+        const withPhoto = rows.filter((r) => r.image_url) as {
+            horse_id: string;
+            image_url: string;
+            horse_name: string | null;
+        }[];
         const urlMap = getPublicImageUrls(withPhoto.map((r) => r.image_url));
-        return withPhoto.map((r) => ({ url: urlMap.get(r.image_url) ?? r.image_url, name: r.horse_name ?? "" }));
+        return withPhoto.map((r) => ({
+            url: urlMap.get(r.image_url) ?? r.image_url,
+            name: r.horse_name ?? "",
+            horseId: r.horse_id,
+        }));
     },
-    ["reference:photos"],
+    ["reference:photos-v2"],
     { revalidate: REVALIDATE },
 );
 

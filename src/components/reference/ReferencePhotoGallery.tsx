@@ -5,6 +5,8 @@ import { useState } from "react";
 export interface GalleryPhoto {
     url: string;
     name: string;
+    /** The owner's public horse id — links the photo to its passport. */
+    horseId?: string;
 }
 
 /**
@@ -74,12 +76,22 @@ export default function ReferencePhotoGallery({
             </div>
 
             {current && (
-                <p className="px-3 py-2 text-xs text-muted-foreground italic">
-                    {current.name && <span className="text-foreground not-italic">“{current.name}”</span>}
-                    {current.name ? " — " : ""}
-                    {multi ? `${idx + 1} of ${photos.length}, ` : ""}
-                    {contextLabel}.
-                </p>
+                <div className="flex items-center justify-between gap-3 px-3 py-2">
+                    <p className="m-0 text-xs text-muted-foreground italic">
+                        {current.name && <span className="text-foreground not-italic">“{current.name}”</span>}
+                        {current.name ? " — " : ""}
+                        {multi ? `${idx + 1} of ${photos.length}, ` : ""}
+                        {contextLabel}.
+                    </p>
+                    {current.horseId && (
+                        <a
+                            href={`/community/${current.horseId}`}
+                            className="shrink-0 text-xs font-semibold whitespace-nowrap text-forest hover:underline"
+                        >
+                            View passport →
+                        </a>
+                    )}
+                </div>
             )}
         </div>
     );
