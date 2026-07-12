@@ -6,6 +6,32 @@
 
 ---
 
+## Status snapshot — updated 2026-07-12 (end of session)
+
+*This snapshot is authoritative for current state. The inline **Status** fields in the detailed findings below predate deployment and may lag — trust this section.*
+
+### ✅ Shipped & deployed since this audit (all live on `main` / modelhorsehub.com)
+- **Security batch 1 (migration 133 applied + live):** SEC-1 (PII columns revoked), SEC-2 (DEFINER RPCs check `auth.uid()`), SEC-3 (notification/nudge spoofing closed), SEC-4 (search-filter sanitized), plus the two sweep sinks SEC-2b (`createActivityEvent`) and SEC-3b (`createNotification` moved server-only).
+- **Anon funnel:** FUNNEL-1 (login/signup honor `redirectTo`), FUNNEL-2 (query string preserved through login), FUNNEL-3 (message-seller routes to `/community/[id]` + **two-way reference↔passport links**), FUNNEL-4 (anon passport [mig 135], anon profile [= PROD-3], anon show-page aliases [mig 136], robots/sitemap reconciled), FUNNEL-5 (signup CTA in anon header).
+- **Catalog:** community stats column — owner / want / for-sale counts (mig 134); collectors chip hidden when zero.
+- **Reference:** photos deep-link to their passports (mig 137 adds `horse_id`).
+- **Analytics (PROD-1, partial):** `sign_up` + `want_click` GA events live.
+- **UX polish:** "Want List" naming/icons unified (🔖 bookmark = want list, ❤️ heart = favorite); duplicate-photo double-submit fixed; passport ledger-card dark-mode contrast fixed.
+- Migrations **134 / 135 / 136 / 137** applied; DB types regenerated.
+
+### 📌 Newly actionable — do next / don't lose
+- **`NEXT_PUBLIC_WANTED_NUDGE=1` is SET in Vercel (2026-07-12).** It's a `NEXT_PUBLIC_` var (read in `wishlist.ts:49`), so it's inlined at **build time** — the demand nudge goes live on the **next rebuild/deploy**, not the moment the var was saved. Trigger a redeploy to activate it.
+- **Mark `sign_up` + `want_click` as conversions** (Key Events) in the GA4 UI — the events fire but aren't flagged as conversions yet.
+
+### 📌 Still outstanding (detail below)
+- **Security:** SEC-5 (`search_path` hardening), SEC-6 (money-flow atomicity RPCs — deferred), SEC-7 (drop `NEXT_PUBLIC_ADMIN_EMAIL`).
+- **Funnel:** `/photo/[slug]` anon view (last FUNNEL-4 piece); FUNNEL-6 (transfer/parked strands); FUNNEL-7 (built-but-unreachable features).
+- **Perf/SEO:** PERF-1 (`generateStaticParams` for reference), PERF-2 (`/market` rewrite), PERF-3 (`next/image`), PERF-4/5/6/8/9/10, PERF-7 (add public passport/show URLs to sitemap).
+- **Product:** PROD-1 remaining GA events (`add_horse`, `list_for_sale`, `message_seller`, `checkout_start`, `show_entry`, `export`); PROD-2 (delete 3 dead live-Stripe endpoints); PROD-4 (export completeness); PROD-5/7 (share previews/badges); PROD-6 (weekly liveness); PROD-8 (misc).
+- **Tech debt:** DEBT-1..8 (test coverage, `HorseForm` extraction, show-engine cutover, UI consistency, legacy-table drop, gen-types CI guard, resilience).
+
+---
+
 ## 0. Two corrected diagnoses (read first — they change the plan)
 
 - **MYTH: "the global `<Header>` forces every page dynamic."** FALSE. `Header.tsx` is a client component; the build's `prerender-manifest.json` shows `/`, `/about`, etc. are statically prerendered *with* the Header. Reference pages are **static-eligible** — the correct caching lever is `generateStaticParams` (see PERF-1), not the `unstable_cache` data-cache workaround already shipped in `reference-pages.ts` (that's fine to keep, just not the primary fix). The reference page file comment (`reference/[maker]/[slug]/page.tsx`) still asserts the myth — correct it when touching PERF-1.
@@ -18,7 +44,7 @@
 
 ## 🔴 SECURITY — fix first (SEC-1/2/3 before anything else; SEC-3 gates the Wanted-nudge flip)
 
-> **⚙️ SECURITY BATCH 1 — built + locally verified on branch `feat/security-hardening` (2026-07-12); NOT yet deployed.** SEC-1/2/3/4 are FIXED in code + migration `133_security_hardening.sql`. Full vitest green (1076 tests), tsc + eslint clean on all touched files, migration adversarially reviewed. **Owner action to go live: (1) paste `supabase/migrations/133_security_hardening.sql` into the Supabase SQL editor + run it, then `npm run gen-types`; (2) deploy the branch.** A background sweep found two more instances of the same "forgeable-identity server action" class, now also fixed: **SEC-2b `createActivityEvent`** (activity.ts — added `session.uid == actorId` guard; all callers are session-ful) and **SEC-3b `createNotification`** (moved out of the `"use server"` `notifications.ts` to server-only `src/lib/notifications/createNotification.ts` so it's no longer client-callable — it's invoked by session-less crons so it cannot gate on `auth.uid()`). Do NOT flip `NEXT_PUBLIC_WANTED_NUDGE` until 133 is applied (closes SEC-3's demand-nudge spam).
+> **⚙️ SECURITY BATCH 1 — ✅ DEPLOYED 2026-07-12 — migration 133 applied in Supabase + merged to `main`.** SEC-1/2/3/4 are FIXED in code + migration `133_security_hardening.sql`. Full vitest green (1076 tests), tsc + eslint clean on all touched files, migration adversarially reviewed. **Done:** migration 133 pasted + run in Supabase, types regenerated, branch merged + deployed. A background sweep found two more instances of the same "forgeable-identity server action" class, now also fixed: **SEC-2b `createActivityEvent`** (activity.ts — added `session.uid == actorId` guard; all callers are session-ful) and **SEC-3b `createNotification`** (moved out of the `"use server"` `notifications.ts` to server-only `src/lib/notifications/createNotification.ts` so it's no longer client-callable — it's invoked by session-less crons so it cannot gate on `auth.uid()`). 133 is applied, so `NEXT_PUBLIC_WANTED_NUDGE` is now UNBLOCKED — flip it to `1` in Vercel when ready (closes SEC-3's demand-nudge spam).
 
 ### SEC-1 — [HIGH] Every user's email + legal name readable by any logged-in user — **Status: FIXED (133 §A + insurance reads → admin client)**
 - **What:** `users` SELECT policy is `TO authenticated USING (true)` with no column-level security; table holds `email` + `full_name`. RLS is row-level only → "select any row" = "select every column." Schema comment falsely claims `full_name` is private.
@@ -76,8 +102,8 @@
 - **Evidence:** listing card → `/stable/${horseId}` (`reference/[maker]/[slug]/page.tsx` ~:289); but `stable/[id]/page.tsx:105-107` is owner-only (`notFound()` for non-owner) and `:74-75` redirects anon to login. Real message affordance (`MessageSellerButton`) is on `/community/[id]` + `/profile/[alias]`.
 - **Fix:** Point the listing link to `/community/${horseId}`; make that page anon-viewable with the message action gated behind login+returnTo.
 
-### FUNNEL-4 — [CRITICAL] Indexed public pages render "@unknown" or bounce anon to /login — **Status: MOSTLY FIXED (branch feat/anon-funnel)**
-> **Done + verified live (logged out):** `/community/[id]` passport (AnonPassport + `get_public_passport` RPC, migration 135) and `/profile/[alias]` (AnonProfile, service-role public-scoped reads) are now anon-viewable with real aliases; robots/sitemap reconciled (`/feed` `/discover` `/studio` → disallow). **Still TODO:** the v2 public show page `/shows/[id]` renders "@unknown" host/entrant/champion for anon (needs an anon-safe shows-alias DEFINER RPC — the `getAliases` cookie-client path, `lib/shows/queries.ts:60`). `/photo/[slug]` still proxy-walled.
+### FUNNEL-4 — [CRITICAL] Indexed public pages render "@unknown" or bounce anon to /login — **Status: DEPLOYED — only `/photo/[slug]` remains**
+> **Done + verified live (logged out):** `/community/[id]` passport (AnonPassport + `get_public_passport` RPC, migration 135) and `/profile/[alias]` (AnonProfile, service-role public-scoped reads) are now anon-viewable with real aliases; robots/sitemap reconciled (`/feed` `/discover` `/studio` → disallow). **Shipped since:** `/shows/[id]` anon aliases now resolve via the `get_public_aliases` DEFINER RPC (migration 136). **Still TODO:** only `/photo/[slug]` remains proxy-walled for anon.
 - **What:** (a) v2 public show `shows/[id]` resolves aliases with the *cookie* client → anon gets `@unknown` (host/entrants/champions) on an indexed, force-dynamic, OG-tagged page. Legacy did it right via `getAdminClient()` (`shows.ts:1107`); v2 regressed it (`shows-v2.ts:1347`, `PublicShowV2Page.tsx:83`, choke point `lib/shows/queries.ts:66 getAliases`). (b) robots/sitemap advertise `/community`, `/discover`, `/feed`, `/profile/*`, `/shows`, `/studio` as crawlable but each self-redirects anon (`profile/[alias]:54-56`, `community/page.tsx:283-285`, discover, feed, shows browse). (c) `/photo/[slug]` 404s for anon (`photo/[slug]/page.tsx:47`).
 - **Fix:** Route anon alias lookups through an anon-granted DEFINER RPC / admin client (single choke point `getAliases`); drop the redirect on genuinely public pages (render read-only) OR remove them from sitemap/robots. Reconcile robots+sitemap with actual anon-accessibility.
 
@@ -112,7 +138,7 @@
 
 ## 🟢 PRODUCT / STRATEGY — cheap high-leverage
 
-- **PROD-1 — [HIGH] GA fires zero conversion events — Status: STARTED (branch).** Added `src/lib/analytics.ts` `track()` helper (client-only, no-ops w/o gtag, respects the `ga-disable` opt-out) + wired 2 core events: `sign_up` (signup success) and `want_click` (WantButton, both anon+auth, w/ catalog_id). Verified in preview (gtag captured). **Remaining:** `add_horse`, `list_for_sale`, `message_seller`, `checkout_start`, `show_entry`, `export`; then mark all as conversions in the GA UI. (WantButton anon CTA also gained `redirectTo` here — completes FUNNEL-1 for the want path.)
+- **PROD-1 — [HIGH] GA fires zero conversion events — Status: PARTIAL — `sign_up` + `want_click` deployed 2026-07-12.** Added `src/lib/analytics.ts` `track()` helper (client-only, no-ops w/o gtag, respects the `ga-disable` opt-out) + wired 2 core events: `sign_up` (signup success) and `want_click` (WantButton, both anon+auth, w/ catalog_id). Verified in preview (gtag captured). **Remaining:** `add_horse`, `list_for_sale`, `message_seller`, `checkout_start`, `show_entry`, `export`; then mark all as conversions in the GA UI. (WantButton anon CTA also gained `redirectTo` here — completes FUNNEL-1 for the want path.)
 - **PROD-2 — [HIGH] Three dead live-Stripe endpoints — Status: TODO.** Boost ISO $1.99 / Promote $2.99 / one-off Insurance $1.99: no UI caller, nothing reads what they write (`is_boosted_until`/`is_promoted_until` written-only; `purchased_reports` never queried; insurance PDF already free at `/api/insurance-report`). Delete routes + webhook branches + columns + `purchased_reports` (migration) OR wire consumption. Don't leave `sk_live` endpoints half-shipped. Callers confirmed only for `/api/checkout` + `/api/checkout/studio-pro`.
 - **PROD-3 — [HIGH] MOVE 6 seller profile login-walled — Status: TODO** (= FUNNEL-4b for `/profile`). `profile/[alias_name]/page.tsx:54` `redirect("/login")` — kills "paste your reputation in a FB thread." Give it an anon read path (DEFINER alias/rating lookup), mirror reference-page pattern.
 - **PROD-4 — [MED] Data export breaks its About-page promise — Status: TODO.** `about/page.tsx:135-140` promises "every horse, every Hoofprint record, every qualification card"; `api/export/route.ts:27-96` returns horses+vault only. Add Hoofprint + cards to the export (best) or soften copy.

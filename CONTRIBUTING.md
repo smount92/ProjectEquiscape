@@ -221,7 +221,7 @@ When adding new features, verify:
 - **Utility functions** (`src/lib/utils/`) — Write unit tests in `__tests__/`. Pure functions are highest-ROI.
 - **Critical server actions** — When modifying `transactions.ts`, `hoofprint.ts`, `horse.ts`, `collections.ts`, `competition.ts`, or any of the 5 rebuilt-domain action files (`shows-v2.ts`, `shows-v2-ring.ts`, `groups-forum.ts`, `stable.ts`, `showring.ts`), add or update integration tests. Mock `after()` from `next/server` as a no-op.
 - **Domain libs** (`src/lib/<domain>/`) — pure functions get unit tests in their own `__tests__/` folder; this is the highest-ROI test surface in the rebuilt domains (state machines, card issuance, callback ladders, filter params).
-- **UI components** — Write React Testing Library tests in `src/components/__tests__/`. Use `// @vitest-environment jsdom` and the shared `setup.ts` for mocks. Currently 1,031 tests across 71 test files.
+- **UI components** — Write React Testing Library tests in `src/components/__tests__/`. Use `// @vitest-environment jsdom` and the shared `setup.ts` for mocks. Currently 1,076 tests across 75 test files.
 - **New features** — If it involves a state machine, complex validation, or financial data, it needs tests. Note there are still zero tests in `events`/`art-studio`/`messaging`/`competition`/`posts`/`market` — don't treat their current lack of coverage as precedent for skipping tests on new work in those areas.
 - **Type safety** — After schema changes, run `npm run gen-types` to regenerate TypeScript types. The build will fail if query shapes drift from the schema.
 

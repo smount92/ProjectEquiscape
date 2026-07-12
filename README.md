@@ -14,7 +14,7 @@ Model Horse Hub is a privacy-first platform purpose-built for the model horse co
 | **Hoofprint Provenance** | Permanent digital identity for every model — transfers, show records, and customization history follow the horse |
 | **LSQ Photo Suite** | 5 standardized photo angles (Near-Side, Off-Side, Front, Hind, Belly) + unlimited extras, with automatic (opt-out) photo watermarking and optional custom watermark text |
 | **Financial Vault** | Private purchase prices and estimated values — never exposed on public pages |
-| **Safe-Trade Commerce** | Formal offer → accept → pay → verify → transfer state machine |
+| **Safe-Trade Commerce** | Formal offer → accept → pay → verify → transfer workflow (payment settled off-platform — no in-app escrow yet) |
 | **Art Studio** | Artist profiles, commission management, WIP photo portal |
 | **Show Hosting (live + online)** | One-click NAMHSA classlist builder, entry + proxy handling, phone-based live ring console with leg-tag placing and champion callbacks, expert or community-vote judging, results that file to permanent Hoofprint records |
 | **Qualification Cards** | Auto-issued on 1st/2nd, transfer with the horse on sale, public `/cards/[code]` verification page |
@@ -82,7 +82,7 @@ npm run test:e2e           # Playwright E2E (requires dev server running)
 npm run test:devices       # Device matrix (Desktop, iPhone, Pixel, iPad)
 ```
 
-**1,031 tests across 71 test files:**
+**1,076 tests across 75 test files:**
 - Utility functions at 100% coverage (mentions, validation, storage, rateLimit)
 - Server action integration tests (transactions, horse, provenance, collections, hoofprint, shows-v2, shows-v2-ring, groups-forum, stable, showring, catalog-suggestions)
 - Domain-lib unit tests for the pure, tested `src/lib/{shows,groups,stable,showring,commerce}/` modules (state machines, card issuance, callback ladders, filter params, schemas)
@@ -106,7 +106,7 @@ npm run test:devices       # Device matrix (Desktop, iPhone, Pixel, iPad)
 | Database migrations | 124 files (numbered 001–128; a handful of numbers skipped) |
 | Reference catalog entries | 10,900+ |
 | CSS files | 1 (`globals.css` — Tailwind v4 design tokens) |
-| Unit/integration/component tests | 1,063 (73 test files) |
+| Unit/integration/component tests | 1,076 (75 test files) |
 | E2E specs | 9 (Playwright + axe-core) |
 | CI | GitHub Actions + Husky pre-commit |
 

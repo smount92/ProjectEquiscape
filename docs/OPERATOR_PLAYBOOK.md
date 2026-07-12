@@ -14,8 +14,8 @@ Model Horse Hub (modelhorsehub.com, repo `model-horse-hub`, Vercel +
 Supabase). ~100 users, ~1,800 cataloged horses. Owner: smount92 (+ wife
 as design lead). Features ALREADY BUILT AND LIVE: digital stable with
 faceted filtering + saved views; Hoofprint provenance (permanent
-per-horse history); Safe-Trade escrow marketplace (hardened, state-machine
-guarded); Blue Book price data; photo AND live show hosting (unique in the
+per-horse history); Safe-Trade marketplace (hardened, state-machine-guarded trades; payment
+off-platform — escrow is a planned future layer, not yet live); Blue Book price data; photo AND live show hosting (unique in the
 hobby: classlist builder w/ NAMHSA template, entry flow with proxy
 handlers, blind entry galleries, community voting, judge queue, live ring
 console with leg-tag placing recorder + champion callback ladder + offline
@@ -170,7 +170,7 @@ STEPS:
 ### MOVE 6 — Portable reputation + escrow marketing
 1. Public per-seller reference page: completed Safe-Trades, reviews,
    member-since — linkable in any FB thread.
-2. Copy angle everywhere: "the only place in the hobby with real escrow.
+2. Copy angle everywhere (valid ONLY once escrow actually ships — not yet built): "the only place in the hobby with real escrow.
    No friends-&-family roulette." (Verified: literally nobody else has
    it.)
 3. Target resin sellers first (highest anxiety, highest value).

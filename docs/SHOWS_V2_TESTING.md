@@ -77,5 +77,5 @@ a production account for the production pass.
       at night (report page + element)
 - [ ] Leather edition on production: passport page + show picker in DAY
       mode after the fixes (was re-verified on dev only)
-- [ ] Wishlist page buttons (corrupt-class fix from the task chip — confirm
+- [ ] Want List page buttons (corrupt-class fix from the task chip — confirm
       it merged and renders)

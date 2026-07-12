@@ -68,10 +68,10 @@ docs/
 │   ├── schema-overview.md             # Visual ERD + table groups
 │   ├── rls-policies.md                # Row Level Security inventory
 │   ├── materialized-views.md          # Computed views and refresh schedules
-│   ├── migrations.md                   # Migration index (001—128)
+│   ├── migrations.md                   # Migration index (001—137)
 │   └── seed-data.md                   # Reference catalog seeding
 ├── api/
-│   ├── server-actions.md              # Index of all 42 server action files
+│   ├── server-actions.md              # Index of all 44 server action files
 │   └── routes.md                      # API route reference (18 routes + /auth/callback)
 ├── components/
 │   ├── catalog.md                     # ~175-component index by domain
@@ -86,7 +86,7 @@ docs/
 │   ├── catalog-curation.md            # Catalog curation guide (V32)
 │   └── deployment.md                  # Vercel + Supabase deployment
 └── routes/
-    └── route-map.md                   # Complete URL → page mapping (73 routes)
+    └── route-map.md                   # Complete URL → page mapping (76 routes)
 ```
 
 
