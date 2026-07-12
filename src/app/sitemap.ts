@@ -140,21 +140,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     let referenceEntries: MetadataRoute.Sitemap = [];
     if (referencePagesEnabled()) try {
         const supabase = await createClient();
-        const { data, error } = await supabase
-            .from("catalog_items")
-            .select("maker_slug, slug, created_at");
-
-        if (!error && data) {
-            const rows = data as unknown as CatalogReferenceRow[];
-            referenceEntries = rows
-                .filter((row) => row.maker_slug && row.slug)
-                .map((row): MetadataRoute.Sitemap[number] => ({
-                    url: `${baseUrl}/reference/${row.maker_slug}/${row.slug}`,
-                    lastModified: row.created_at ?? now,
-                    changeFrequency: "weekly",
-                    priority: 0.6,
-                }));
+        // PostgREST caps a query at 1000 rows — page through all ~10,900.
+        const PAGE = 1000;
+        const rows: CatalogReferenceRow[] = [];
+        for (let from = 0; from < 60_000; from += PAGE) {
+            const { data, error } = await supabase
+                .from("catalog_items")
+                .select("maker_slug, slug, created_at")
+                .range(from, from + PAGE - 1);
+            if (error || !data || data.length === 0) break;
+            rows.push(...(data as unknown as CatalogReferenceRow[]));
+            if (data.length < PAGE) break;
         }
+        referenceEntries = rows
+            .filter((row) => row.maker_slug && row.slug)
+            .map((row): MetadataRoute.Sitemap[number] => ({
+                url: `${baseUrl}/reference/${row.maker_slug}/${row.slug}`,
+                lastModified: row.created_at ?? now,
+                changeFrequency: "weekly",
+                priority: 0.6,
+            }));
     } catch {
         // Never throw from sitemap(): fall back to the static entries only.
         referenceEntries = [];
