@@ -3,6 +3,7 @@
 import { useState, useEffect, useTransition } from "react";
 import { addToWishlist, getWishlistState } from "@/app/actions/wishlist";
 import { Button } from "@/components/ui/button";
+import { track } from "@/lib/analytics";
 
 /**
  * "I want this" — the demand signal on a reference page. Fetches its own
@@ -30,9 +31,18 @@ export default function WantButton({ catalogId }: { catalogId: string }) {
     }, [catalogId]);
 
     if (loggedIn === false) {
+        // Carry the reference page as redirectTo so an anon "want" returns here
+        // after login to finish (this branch only renders client-side).
+        const here = typeof window !== "undefined" ? window.location.pathname : "";
+        const loginHref = here ? `/login?redirectTo=${encodeURIComponent(here)}` : "/login";
         return (
             <Button asChild>
-                <a href="/login">＋ I want this</a>
+                <a
+                    href={loginHref}
+                    onClick={() => track("want_click", { catalog_id: catalogId, logged_in: false })}
+                >
+                    ＋ I want this
+                </a>
             </Button>
         );
     }
@@ -44,6 +54,7 @@ export default function WantButton({ catalogId }: { catalogId: string }) {
             if (res.success) {
                 setWanted(true);
                 setMessage("Added to your want list");
+                track("want_click", { catalog_id: catalogId, logged_in: true });
             } else {
                 if (res.error?.includes("Already")) setWanted(true);
                 setMessage(res.error ?? "Something went wrong");

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { resendConfirmationAction, signupAction, type AuthFormState } from "@/app/auth/actions";
+import { track } from "@/lib/analytics";
 import { Input } from "@/components/ui/input";
 import FocusLayout from "@/components/layouts/FocusLayout";
 import PageMasthead from "@/components/layouts/PageMasthead";
@@ -25,6 +26,7 @@ export default function SignupPage() {
         if (result.success) {
             setSignupEmail((formData.get("email") as string) || null);
             setSuccess(true);
+            track("sign_up", { method: "email" });
         } else {
             setError(result.error);
         }
