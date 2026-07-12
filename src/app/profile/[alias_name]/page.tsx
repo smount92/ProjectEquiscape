@@ -1,5 +1,5 @@
 import { createClient } from"@/lib/supabase/server";
-import { redirect, notFound } from"next/navigation";
+import { notFound } from"next/navigation";
 import Link from"next/link";
 import { getPublicImageUrls } from"@/lib/utils/storage";
 import { getAdminClient } from"@/lib/supabase/admin";
@@ -17,6 +17,7 @@ import { isBlocked as checkIsBlocked } from"@/app/actions/blocks";
 import TrophyCase from"@/components/TrophyCase";
 import ProfileLoadMore from"@/components/ProfileLoadMore";
 import { Button } from "@/components/ui/button";
+import AnonProfile from"@/components/profile/AnonProfile";
 
 
 function formatDate(dateStr: string): string {
@@ -51,8 +52,11 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  data: { user },
  } = await supabase.auth.getUser();
 
+ // Logged-out visitors get a read-only public profile (service-role reads,
+ // scoped to public data); the full interactive profile below is unchanged
+ // for logged-in members.
  if (!user) {
- redirect("/login");
+ return <AnonProfile alias={aliasDecoded} />;
  }
 
  // Look up the user by alias_name
