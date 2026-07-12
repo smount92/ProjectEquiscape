@@ -79,6 +79,7 @@ export default function AddHorsePage() {
  // Step management
  const [currentStep, setCurrentStep] = useState(0);
  const [isSubmitting, setIsSubmitting] = useState(false);
+ const isSubmittingRef = useRef(false);
  const [submitError, setSubmitError] = useState<string | null>(null);
  const [showSuccess, setShowSuccess] = useState(false);
  const [savedHorseName, setSavedHorseName] = useState("");
@@ -448,6 +449,11 @@ export default function AddHorsePage() {
  // ---- SUBMIT handler ----
 
  const handleSubmit = async () => {
+ // Re-entrancy guard (mirrors the edit form): prevents a double-submit during
+ // the create + slow photo-upload window from creating duplicate photos or a
+ // duplicate horse. A synchronous ref beats the async isSubmitting state.
+ if (isSubmittingRef.current) return;
+ isSubmittingRef.current = true;
  setIsSubmitting(true);
  setSubmitError(null);
 
@@ -589,8 +595,10 @@ export default function AddHorsePage() {
  setShowSuccess(true);
  } catch (err) {
  setSubmitError(err instanceof Error ? err.message :"Something went wrong.");
- } finally {
+ // Reset the guard only on error — on success the form is replaced by the
+ // success screen, so keeping it set blocks any duplicate submit.
  setIsSubmitting(false);
+ isSubmittingRef.current = false;
  }
  };
 

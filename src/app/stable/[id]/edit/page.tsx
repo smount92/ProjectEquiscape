@@ -484,7 +484,14 @@ export default function EditHorsePage() {
  };
 
  // ---- Save handler ----
+ const isSavingRef = useRef(false);
  const handleSave = async () => {
+ // Re-entrancy guard: photo uploads are slow and the Save button briefly
+ // re-enables while the post-save redirect is in flight. Without this, a
+ // second Save click (e.g. after editing another field) re-runs the whole
+ // save and re-uploads the same new photos → duplicates. A synchronous ref
+ // beats the isSaving state here, whose update is async/batched.
+ if (isSavingRef.current) return;
  if (!customName.trim()) {
  setSaveError("Please enter a name.");
  return;
@@ -494,6 +501,7 @@ export default function EditHorsePage() {
   return;
   }
 
+ isSavingRef.current = true;
  setIsSaving(true);
  setSaveError(null);
 
@@ -699,8 +707,10 @@ export default function EditHorsePage() {
  );
  } catch (err) {
  setSaveError(err instanceof Error ? err.message :"Failed to save changes.");
- } finally {
+ // Reset the guard ONLY on error — on success we navigate away, and keeping
+ // it set blocks a re-submit during the redirect transition.
  setIsSaving(false);
+ isSavingRef.current = false;
  }
  };
 
