@@ -25,6 +25,7 @@ import type { AssetCategory } from"@/lib/types/database";
 import { Button } from "@/components/ui/button";
 import { referenceHref, referencePagesEnabled } from"@/lib/catalog/referenceUrl";
 import AnonPassport from"@/components/passport/AnonPassport";
+import { PARCHMENT_INK } from"@/lib/theme/parchment";
 
 // Force fresh data on every request — prevents stale comments/favorites
 
@@ -324,7 +325,7 @@ editionSize: rawPedigree.edition_size,
  </div>
 
  {/* Right: The Ledger Card */}
- <div className="flex min-h-[100%] flex-col gap-2 rounded-3xl border border-input bg-[#C8B596] px-6 py-8 shadow-sm md:px-10">
+ <div className="flex min-h-[100%] flex-col gap-2 rounded-3xl border border-input bg-[#C8B596] px-6 py-8 shadow-sm md:px-10" style={PARCHMENT_INK}>
  {/* Stolen/Missing Banner */}
  {horse.trade_status ==="Stolen/Missing" && (
  <div
@@ -347,7 +348,7 @@ editionSize: rawPedigree.edition_size,
  </h1>
  {refInfo ? (
  <p className="mb-1 text-base text-secondary-foreground">
- {refHref ? (<Link href={refHref} className="underline decoration-dotted underline-offset-2 hover:text-forest">{refInfo.maker} — {refInfo.name} <span aria-hidden="true" className="text-forest">→</span></Link>) : (<>{refInfo.maker} — {refInfo.name}</>)}
+ {refHref ? (<Link href={refHref} className="font-semibold text-forest underline decoration-2 underline-offset-2">{refInfo.maker} — {refInfo.name} <span aria-hidden="true" className="text-forest">→</span></Link>) : (<>{refInfo.maker} — {refInfo.name}</>)}
  </p>
  ) : (
  <p

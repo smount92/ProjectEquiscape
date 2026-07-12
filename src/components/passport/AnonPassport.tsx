@@ -7,6 +7,7 @@ import ExplorerLayout from "@/components/layouts/ExplorerLayout";
 import PageMasthead from "@/components/layouts/PageMasthead";
 import { Button } from "@/components/ui/button";
 import { referenceHref, referencePagesEnabled } from "@/lib/catalog/referenceUrl";
+import { PARCHMENT_INK } from "@/lib/theme/parchment";
 
 // Read-only public passport for logged-OUT visitors (FUNNEL-4). The full
 // interactive passport (favorite/comment/message/hoofprint) stays in
@@ -108,7 +109,10 @@ export default async function AnonPassport({ horseId }: { horseId: string }) {
                 </div>
 
                 {/* Ledger card (read-only) */}
-                <div className="flex min-h-[100%] flex-col gap-4 rounded-3xl border border-input bg-[#C8B596] px-6 py-8 shadow-sm md:px-10">
+                <div
+                    className="flex min-h-[100%] flex-col gap-4 rounded-3xl border border-input bg-[#C8B596] px-6 py-8 shadow-sm md:px-10"
+                    style={PARCHMENT_INK}
+                >
                     <div>
                         <h1 className="mb-1 font-serif text-4xl font-bold leading-tight tracking-tight text-foreground md:text-5xl">
                             {horse.custom_name}
@@ -118,7 +122,7 @@ export default async function AnonPassport({ horseId }: { horseId: string }) {
                                 {refHref ? (
                                     <Link
                                         href={refHref}
-                                        className="underline decoration-dotted underline-offset-2 hover:text-forest"
+                                        className="font-semibold text-forest underline decoration-2 underline-offset-2"
                                     >
                                         {cat.maker} — {cat.title}{" "}
                                         <span aria-hidden="true" className="text-forest">
