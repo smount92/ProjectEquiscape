@@ -106,8 +106,10 @@ export async function proxy(request: NextRequest) {
 export const config = {
     matcher: [
         /*
-         * Match all request paths except static files and images
+         * Match all request paths except static files, images, and the public
+         * SEO metadata routes (sitemap.xml / robots.txt) — those must serve to
+         * anonymous crawlers, never get auth-redirected to /login.
          */
-        "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+        "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
     ],
 };
