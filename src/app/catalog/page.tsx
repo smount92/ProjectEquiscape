@@ -38,6 +38,13 @@ interface CatalogItemRow {
     scale: string | null;
 }
 
+interface CatalogStat {
+    catalog_id: string;
+    owner_count: number;
+    want_count: number;
+    for_sale_count: number;
+}
+
 /** Build a /catalog href for a page number, preserving the active filters. */
 function pageHref(filters: CatalogFilters, page: number): string {
     const qs = buildCatalogSearchParams({ ...filters, page }).toString();
@@ -85,6 +92,27 @@ export default async function ReferencePage({
     const facets = (facetRes.data ?? {}) as { makers?: string[]; scales?: string[]; materials?: string[] };
     const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
     const activeCount = countActiveCatalogFilters(filters);
+
+    // At-a-glance community stats for the visible page (batch, anon-safe RPC —
+    // migration 134). One call for the whole page; degrades to no stats if the
+    // RPC isn't deployed yet. Cast until gen-types includes get_catalog_stats.
+    const statsMap = new Map<string, { owner: number; want: number; forSale: number }>();
+    if (items.length > 0) {
+        const rpc = supabase.rpc.bind(supabase) as unknown as (
+            fn: string,
+            args: { p_ids: string[] },
+        ) => Promise<{ data: CatalogStat[] | null }>;
+        const { data: statsRows } = await rpc("get_catalog_stats", {
+            p_ids: items.map((i) => i.id),
+        });
+        for (const s of statsRows ?? []) {
+            statsMap.set(s.catalog_id, {
+                owner: Number(s.owner_count) || 0,
+                want: Number(s.want_count) || 0,
+                forSale: Number(s.for_sale_count) || 0,
+            });
+        }
+    }
 
     // Sidebar data (unchanged from the previous catalog page).
     const [{ data: curators }, { count: pendingSuggestions }, { count: recentChanges }] =
@@ -145,10 +173,13 @@ export default async function ReferencePage({
                                         <th className="py-2 pr-4">Maker</th>
                                         <th className="py-2 pr-4">Type</th>
                                         <th className="py-2 pr-4">Scale</th>
+                                        <th className="py-2 pr-4">Collectors</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {items.map((item) => (
+                                    {items.map((item) => {
+                                        const st = statsMap.get(item.id);
+                                        return (
                                         <tr key={item.id} className="transition-colors hover:bg-muted/50">
                                             <td className="py-2 pr-4 font-semibold">
                                                 <Link
@@ -167,8 +198,20 @@ export default async function ReferencePage({
                                                 {TYPE_LABELS[item.item_type] ?? item.item_type}
                                             </td>
                                             <td className="py-2 pr-4 text-secondary-foreground">{item.scale ?? "—"}</td>
+                                            <td className="py-2 pr-4 text-xs tabular-nums">
+                                                {st && (st.owner > 0 || st.want > 0 || st.forSale > 0) ? (
+                                                    <div className="flex items-center gap-2 whitespace-nowrap">
+                                                        <span className="text-secondary-foreground" title="in collections">👥 {st.owner}</span>
+                                                        {st.want > 0 && <span className="text-forest" title="want this">⭐ {st.want}</span>}
+                                                        {st.forSale > 0 && <span title="for sale" style={{ color: "var(--color-warning)" }}>🏷️ {st.forSale}</span>}
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-muted-foreground">—</span>
+                                                )}
+                                            </td>
                                         </tr>
-                                    ))}
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>
