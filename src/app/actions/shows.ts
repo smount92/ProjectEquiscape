@@ -414,10 +414,11 @@ export async function voteForEntry(
                 .single();
             const voterAlias = (voter as { alias_name: string } | null)?.alias_name || "Someone";
 
-            await admin.from("notifications").insert({
-                user_id: result.entry_owner,
+            const { createNotification } = await import("@/lib/notifications/createNotification");
+            await createNotification({
+                userId: result.entry_owner,
                 type: "show_vote",
-                actor_id: user.id,
+                actorId: user.id,
                 content: `@${voterAlias} voted for your show entry!`,
             });
         } catch (err) { logger.error("Shows", "Background task failed", err); }
