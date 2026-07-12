@@ -4591,12 +4591,12 @@ export type Database = {
       get_catalog_listings: {
         Args: { p_catalog_id: string; p_limit?: number }
         Returns: {
-          horse_id: string
           custom_name: string
-          trade_status: string
+          horse_id: string
           listing_price: number
           marketplace_notes: string
           owner_alias: string
+          trade_status: string
         }[]
       }
       get_catalog_reference_photos: {
