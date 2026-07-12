@@ -19,70 +19,38 @@ export interface ReferenceListing {
     ownerAlias: string;
 }
 
-interface RawHorseRow {
-    id: string;
-    custom_name: string | null;
-    trade_status: string | null;
-    listing_price: number | null;
-    marketplace_notes: string | null;
-    owner_id: string;
-    users: { alias_name: string } | { alias_name: string }[] | null;
-    horse_images: { image_url: string; angle_profile: string }[] | null;
-}
-
-function aliasOf(u: RawHorseRow["users"]): string {
-    if (!u) return "";
-    return Array.isArray(u) ? (u[0]?.alias_name ?? "") : u.alias_name;
-}
-
-function pickThumb(imgs: RawHorseRow["horse_images"]): string | null {
-    if (!imgs || imgs.length === 0) return null;
-    const primary = imgs.find((i) => i.angle_profile === "Primary_Thumbnail");
-    return primary?.image_url || imgs[0].image_url || null;
-}
-
-const HORSE_SELECT = `
-    id, custom_name, trade_status, listing_price, marketplace_notes, owner_id,
-    users!inner(alias_name),
-    horse_images(image_url, angle_profile)
-`;
-
 /**
- * Active for-sale listings of a given catalog model, cheapest first.
- * Generalized from the /wishlist Matchmaker query. Anon sees only public,
- * non-deleted horses (RLS) — exactly what a reference page should show.
+ * Active for-sale listings of a given catalog model, cheapest first, via the
+ * anon-safe get_catalog_listings RPC (migration 132) so the seller alias renders
+ * for anonymous visitors too (the users table is authenticated-only). Text-only
+ * (no thumbnail), so the photo opt-out doesn't affect listings.
  */
 export async function getActiveListingsForCatalog(
     catalogId: string,
     limit = 12,
 ): Promise<ReferenceListing[]> {
     const supabase = await createClient();
-    const { data } = await supabase
-        .from("user_horses")
-        .select(HORSE_SELECT)
-        .eq("is_public", true)
-        .eq("catalog_id", catalogId)
-        .is("deleted_at", null)
-        .in("trade_status", ["For Sale", "Open to Offers"])
-        .order("listing_price", { ascending: true, nullsFirst: false })
-        .limit(limit);
-
-    const rows = (data ?? []) as unknown as RawHorseRow[];
-    const rawThumbs = rows.map((r) => pickThumb(r.horse_images)).filter(Boolean) as string[];
-    const urlMap = getPublicImageUrls(rawThumbs);
-
-    return rows.map((r) => {
-        const raw = pickThumb(r.horse_images);
-        return {
-            id: r.id,
-            name: r.custom_name ?? "Unnamed",
-            tradeStatus: r.trade_status ?? "",
-            price: r.listing_price,
-            notes: r.marketplace_notes,
-            thumbnailUrl: raw ? (urlMap.get(raw) ?? raw) : null,
-            ownerAlias: aliasOf(r.users),
-        };
+    const { data } = await supabase.rpc("get_catalog_listings", {
+        p_catalog_id: catalogId,
+        p_limit: limit,
     });
+    const rows = (data ?? []) as {
+        horse_id: string;
+        custom_name: string | null;
+        trade_status: string | null;
+        listing_price: number | null;
+        marketplace_notes: string | null;
+        owner_alias: string | null;
+    }[];
+    return rows.map((r) => ({
+        id: r.horse_id,
+        name: r.custom_name ?? "Unnamed",
+        tradeStatus: r.trade_status ?? "",
+        price: r.listing_price != null ? Number(r.listing_price) : null,
+        notes: r.marketplace_notes,
+        thumbnailUrl: null,
+        ownerAlias: r.owner_alias ?? "",
+    }));
 }
 
 export interface ReferencePhoto {
