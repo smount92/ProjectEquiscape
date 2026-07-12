@@ -4606,6 +4606,15 @@ export type Database = {
           image_url: string
         }[]
       }
+      get_catalog_stats: {
+        Args: { p_ids: string[] }
+        Returns: {
+          catalog_id: string
+          for_sale_count: number
+          owner_count: number
+          want_count: number
+        }[]
+      }
       get_extra_photo_count: { Args: { p_horse_id: string }; Returns: number }
       get_market_rows: {
         Args: {
@@ -4626,6 +4635,15 @@ export type Database = {
         }[]
       }
       get_photo_limit: { Args: never; Returns: number }
+      get_public_passport: {
+        Args: { p_horse_id: string }
+        Returns: {
+          catalog: Json
+          horse: Json
+          images: Json
+          owner_alias: string
+        }[]
+      }
       get_show_staff_public: {
         Args: { p_show_id: string }
         Returns: {
