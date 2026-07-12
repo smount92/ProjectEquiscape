@@ -89,7 +89,11 @@ export async function proxy(request: NextRequest) {
     if (!user && !isPublicRoute) {
         const url = request.nextUrl.clone();
         url.pathname = "/login";
-        url.searchParams.set("redirectTo", request.nextUrl.pathname);
+        // Preserve the FULL intended URL (path + query) so intent survives the
+        // login round-trip — e.g. /add-horse?catalog=<id> must come back with the
+        // catalog still pre-selected, not bare /add-horse. loginAction guards
+        // this against open-redirects before honoring it.
+        url.searchParams.set("redirectTo", request.nextUrl.pathname + request.nextUrl.search);
         return NextResponse.redirect(url);
     }
 

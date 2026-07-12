@@ -62,12 +62,13 @@
 
 ## 🟠 ANON FUNNEL — MOVE 1's payoff leaks here (do after security)
 
-### FUNNEL-1 — [CRITICAL] Login/signup discard `redirectTo` — return-trip broken — **Status: TODO**
+### FUNNEL-1 — [CRITICAL] Login/signup discard `redirectTo` — return-trip broken — **Status: FIXED (branch; hidden input + open-redirect guard; verified)**
 - **What:** `proxy.ts:92` sets `?redirectTo=<path>` (and it runs — see §0), but `loginAction` hard-redirects to `/dashboard` and never reads it; login/signup pages take no param.
 - **Evidence:** `src/app/auth/actions.ts:33`; `app/login/page.tsx`; only other setter is `upgrade/page.tsx:92` (hardcoded).
 - **Fix:** Make `loginAction`/signup read `redirectTo` and redirect back. Unblocks the whole funnel.
 
-### FUNNEL-2 — [CRITICAL] "Add to your stable" lets anon fill the 1,700-line form then fails at submit — **Status: TODO**
+### FUNNEL-2 — [CRITICAL] "Add to your stable" lets anon fill the 1,700-line form then fails at submit — **Status: FIXED (proxy already guards the route; real gap was query-string loss)**
+> **Correction:** `proxy.ts` DOES gate `/add-horse` for anon (not in `publicPaths`) — anon never actually reaches the form. The real bug was `proxy.ts:92` capturing only `pathname` in `redirectTo`, dropping `?catalog=<id>`, so the round-trip lost the pre-selection. Fixed by preserving `pathname + search`. Verified: `/add-horse?catalog=X` → login → `redirectTo=/add-horse?catalog=X`.
 - **Evidence:** CTA `reference/[maker]/[slug]/page.tsx` → `/add-horse?catalog=X`; `add-horse/page.tsx` has no mount guard, only a submit-time `throw new Error("You must be logged in.")` (~:459); no localStorage/beforeunload draft.
 - **Fix:** Guard on mount → `/login?redirectTo=/add-horse?catalog=X` (needs FUNNEL-1); ideally persist form to localStorage + restore post-login.
 
@@ -79,7 +80,7 @@
 - **What:** (a) v2 public show `shows/[id]` resolves aliases with the *cookie* client → anon gets `@unknown` (host/entrants/champions) on an indexed, force-dynamic, OG-tagged page. Legacy did it right via `getAdminClient()` (`shows.ts:1107`); v2 regressed it (`shows-v2.ts:1347`, `PublicShowV2Page.tsx:83`, choke point `lib/shows/queries.ts:66 getAliases`). (b) robots/sitemap advertise `/community`, `/discover`, `/feed`, `/profile/*`, `/shows`, `/studio` as crawlable but each self-redirects anon (`profile/[alias]:54-56`, `community/page.tsx:283-285`, discover, feed, shows browse). (c) `/photo/[slug]` 404s for anon (`photo/[slug]/page.tsx:47`).
 - **Fix:** Route anon alias lookups through an anon-granted DEFINER RPC / admin client (single choke point `getAliases`); drop the redirect on genuinely public pages (render read-only) OR remove them from sitemap/robots. Reconcile robots+sitemap with actual anon-accessibility.
 
-### FUNNEL-5 — [HIGH] No "Create Free Account" CTA in the persistent chrome — **Status: TODO**
+### FUNNEL-5 — [HIGH] No "Create Free Account" CTA in the persistent chrome — **Status: FIXED (branch; primary signup CTA in anon header; verified)**
 - **Evidence:** anon `Header.tsx:731-739` shows only Log In; full nav gated behind `{user && …}`; Footer links to anon-bouncing routes, no signup link. Strong CTAs exist only on `page.tsx:57,537` (home). Good pattern to copy: `WantButton.tsx:32-38`, `catalog/[id]:125-133`.
 - **Fix:** Add "Create Free Account" to the anon header + a signup nudge on reference pages; surface a few anon-safe nav links.
 
