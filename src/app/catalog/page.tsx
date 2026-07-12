@@ -201,7 +201,7 @@ export default async function ReferencePage({
                                             <td className="py-2 pr-4 text-xs tabular-nums">
                                                 {st && (st.owner > 0 || st.want > 0 || st.forSale > 0) ? (
                                                     <div className="flex items-center gap-2 whitespace-nowrap">
-                                                        <span className="text-secondary-foreground" title="in collections">👥 {st.owner}</span>
+                                                        {st.owner > 0 && <span className="text-secondary-foreground" title="in collections">👥 {st.owner}</span>}
                                                         {st.want > 0 && <span className="text-forest" title="want this">⭐ {st.want}</span>}
                                                         {st.forSale > 0 && <span title="for sale" style={{ color: "var(--color-warning)" }}>🏷️ {st.forSale}</span>}
                                                     </div>
