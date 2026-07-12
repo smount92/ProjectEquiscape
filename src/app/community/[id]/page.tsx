@@ -1,5 +1,5 @@
 import { createClient } from"@/lib/supabase/server";
-import { redirect, notFound } from"next/navigation";
+import { notFound } from"next/navigation";
 import Link from"next/link";
 import { getPublicImageUrls } from"@/lib/utils/storage";
 import HorseshoeIcon from"@/components/icons/HorseshoeIcon";
@@ -23,6 +23,7 @@ import { getAssetConfig } from"@/lib/config/assetFields";
 import type { AssetCategory } from"@/lib/types/database";
 import { Button } from "@/components/ui/button";
 import { referenceHref, referencePagesEnabled } from"@/lib/catalog/referenceUrl";
+import AnonPassport from"@/components/passport/AnonPassport";
 
 // Force fresh data on every request — prevents stale comments/favorites
 
@@ -119,8 +120,10 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  data: { user },
  } = await supabase.auth.getUser();
 
+ // Logged-out visitors get a read-only public passport (get_public_passport
+ // RPC); the full interactive passport below is unchanged for members.
  if (!user) {
- redirect("/login");
+ return <AnonPassport horseId={horseId} />;
  }
 
  // ================================================================
