@@ -8,6 +8,19 @@ export interface AuthFormState {
   success: boolean;
 }
 
+/**
+ * Open-redirect guard for post-login return trips. Only same-origin absolute
+ * paths are allowed — rejects protocol-relative (`//evil.com`), scheme-carrying,
+ * and backslash-escaped values so a crafted `?redirectTo=` can't bounce a user
+ * off-site. Returns null when the value isn't a safe internal path.
+ */
+function safeRedirectPath(value: FormDataEntryValue | null): string | null {
+  if (typeof value !== "string" || value.length === 0) return null;
+  if (!value.startsWith("/")) return null;
+  if (value.startsWith("//") || value.startsWith("/\\")) return null;
+  return value;
+}
+
 export async function loginAction(
   _prevState: AuthFormState,
   formData: FormData
@@ -30,7 +43,9 @@ export async function loginAction(
     return { error: error.message, success: false };
   }
 
-  redirect("/dashboard");
+  // Return the user to where they were headed before the login wall (set by
+  // proxy.ts as ?redirectTo=), falling back to the dashboard.
+  redirect(safeRedirectPath(formData.get("redirectTo")) ?? "/dashboard");
 }
 
 export async function signupAction(

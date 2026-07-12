@@ -731,11 +731,17 @@ export default function Header() {
  {/* ── Desktop auth actions for logged-out users ── */}
  {!user && (
  <div className="flex shrink-0 items-center gap-4">
- <Button asChild><Link
+ <Button asChild variant="ghost"><Link
  href="/login"
  id="header-login-button"
  >
  Log In
+ </Link></Button>
+ <Button asChild><Link
+ href="/signup"
+ id="header-signup-button"
+ >
+ Create Free Account
  </Link></Button>
  <button
  className="border-input bg-card relative flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-full border text-[1.2rem] text-muted-foreground transition-all"

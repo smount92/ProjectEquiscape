@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState, useState } from"react";
+import { Suspense, useActionState, useState } from"react";
 import Link from"next/link";
+import { useSearchParams } from"next/navigation";
 import { loginAction, type AuthFormState } from"@/app/auth/actions";
 import { Input } from "@/components/ui/input";
 import FocusLayout from"@/components/layouts/FocusLayout";
@@ -13,12 +14,29 @@ const initialState: AuthFormState = {
 };
 
 export default function LoginPage() {
+ return (
+ <FocusLayout noHeader>
+  <PageMasthead compact icon="🔑" title="Welcome Back" subtitle="Sign in to your Digital Stable" />
+  <Suspense
+   fallback={
+   <div className="animate-fade-in-up h-[420px] w-full max-w-[440px] rounded-xl border border-input bg-card shadow-lg" />
+   }
+  >
+  <LoginCard />
+  </Suspense>
+ </FocusLayout>
+ );
+}
+
+function LoginCard() {
+ // The login wall (proxy.ts) appends ?redirectTo=<intended path> when it bounces
+ // an anon user here; thread it through the form so we return them there on
+ // success instead of always dumping them on /dashboard.
+ const redirectTo = useSearchParams().get("redirectTo") ?? "";
  const [state, formAction, isPending] = useActionState(loginAction, initialState);
  const [showPassword, setShowPassword] = useState(false);
 
  return (
- <FocusLayout noHeader>
-  <PageMasthead compact icon="🔑" title="Welcome Back" subtitle="Sign in to your Digital Stable" />
   <div className="animate-fade-in-up relative w-full max-w-[440px] overflow-hidden rounded-xl border border-input bg-card shadow-lg">
   {/* Body */}
   <div className="px-8 pb-8 pt-6">
@@ -38,6 +56,7 @@ export default function LoginPage() {
    )}
 
    <form action={formAction} noValidate>
+   <input type="hidden" name="redirectTo" value={redirectTo} />
    <div className="mb-5">
     <label htmlFor="login-email" className="mb-1.5 block text-sm font-semibold text-foreground">
     Email Address
@@ -112,13 +131,16 @@ export default function LoginPage() {
    <div className="mt-6 border-t border-input pt-5 text-center text-sm text-muted-foreground">
    <p>
     Don&apos;t have an account?{" "}
-    <Link href="/signup" className="font-semibold text-forest hover:underline" id="go-to-signup">
+    <Link
+     href={redirectTo ? `/signup?redirectTo=${encodeURIComponent(redirectTo)}` : "/signup"}
+     className="font-semibold text-forest hover:underline"
+     id="go-to-signup"
+    >
     Create one here
     </Link>
    </p>
    </div>
   </div>
   </div>
- </FocusLayout>
  );
 }
