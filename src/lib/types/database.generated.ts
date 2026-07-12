@@ -4635,6 +4635,13 @@ export type Database = {
         }[]
       }
       get_photo_limit: { Args: never; Returns: number }
+      get_public_aliases: {
+        Args: { p_ids: string[] }
+        Returns: {
+          alias_name: string
+          id: string
+        }[]
+      }
       get_public_passport: {
         Args: { p_horse_id: string }
         Returns: {
