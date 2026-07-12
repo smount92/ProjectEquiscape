@@ -44,6 +44,7 @@ export default function SettingsPage() {
  const [watermarkPhotos, setWatermarkPhotos] = useState(false);
  const [watermarkText, setWatermarkText] = useState("");
  const [showBadges, setShowBadges] = useState(true);
+ const [showPhotosOnReference, setShowPhotosOnReference] = useState(true);
  const [currencySymbol, setCurrencySymbol] = useState("$");
  const [exhibitorNumber, setExhibitorNumber] = useState("");
  const [profileMsg, setProfileMsg] = useState<{ type:"success" |"error"; text: string } | null>(null);
@@ -82,6 +83,7 @@ export default function SettingsPage() {
  setWatermarkPhotos(profile.watermarkPhotos);
  setWatermarkText(profile.watermarkText);
  setShowBadges(profile.showBadges);
+ setShowPhotosOnReference(profile.showPhotosOnReference);
  setCurrencySymbol(profile.currencySymbol);
  setExhibitorNumber(profile.exhibitorNumber || "");
  setIsLoading(false);
@@ -100,6 +102,7 @@ export default function SettingsPage() {
  watermarkPhotos,
  watermarkText,
  showBadges,
+ showPhotosOnReference,
  currencySymbol,
  exhibitorNumber,
  });
@@ -310,6 +313,26 @@ export default function SettingsPage() {
  aria-pressed={showBadges ? "true" : "false"}
  aria-label="Toggle Trophy Case on profile"
  title="Toggle Trophy Case visibility"
+ />
+ </div>
+
+ {/* Show my photos on public reference pages */}
+ <div className="border-input flex items-center justify-between gap-4 border-b py-4 first:pt-0 last:border-b-0 last:pb-0 max-sm:gap-2">
+ <div>
+ <span className="text-foreground flex items-center gap-2 text-sm font-medium">
+ 📸 Feature my photos on model pages
+ </span>
+ <span className="text-muted-foreground mt-1 mt-[2] block text-xs">
+ When off, your horse photos won&apos;t appear in the community galleries on public reference/model pages (your public horses are still visible on your own profile).
+ </span>
+ </div>
+ <button
+ type="button"
+ className={showPhotosOnReference ?"settings-toggle-active" :"settings-toggle"}
+ onClick={() => setShowPhotosOnReference(!showPhotosOnReference)}
+ aria-pressed={showPhotosOnReference ? "true" : "false"}
+ aria-label="Toggle featuring my photos on model pages"
+ title="Toggle photos on reference pages"
  />
  </div>
 

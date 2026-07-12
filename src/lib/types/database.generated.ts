@@ -4381,6 +4381,7 @@ export type Database = {
           pref_simple_mode: boolean
           role: string | null
           show_badges: boolean
+          show_photos_on_reference: boolean
           watermark_photos: boolean | null
           watermark_text: string | null
         }
@@ -4405,6 +4406,7 @@ export type Database = {
           pref_simple_mode?: boolean
           role?: string | null
           show_badges?: boolean
+          show_photos_on_reference?: boolean
           watermark_photos?: boolean | null
           watermark_text?: string | null
         }
@@ -4429,6 +4431,7 @@ export type Database = {
           pref_simple_mode?: boolean
           role?: string | null
           show_badges?: boolean
+          show_photos_on_reference?: boolean
           watermark_photos?: boolean | null
           watermark_text?: string | null
         }
@@ -4585,6 +4588,10 @@ export type Database = {
       }
       entry_vote_open: { Args: { p_entry_id: string }; Returns: boolean }
       get_catalog_facets: { Args: never; Returns: Json }
+      get_catalog_reference_photos: {
+        Args: { p_catalog_id: string; p_limit?: number }
+        Returns: { image_url: string | null; horse_name: string | null }[]
+      }
       get_extra_photo_count: { Args: { p_horse_id: string }; Returns: number }
       get_market_rows: {
         Args: {

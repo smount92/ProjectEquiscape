@@ -99,23 +99,16 @@ export interface ReferencePhoto {
  */
 export async function getCatalogPhotos(catalogId: string, limit = 8): Promise<ReferencePhoto[]> {
     const supabase = await createClient();
-    const { data } = await supabase
-        .from("user_horses")
-        .select(`id, custom_name, horse_images(image_url, angle_profile)`)
-        .eq("is_public", true)
-        .eq("catalog_id", catalogId)
-        .is("deleted_at", null)
-        .limit(limit);
-
-    const rows = (data ?? []) as unknown as {
-        custom_name: string | null;
-        horse_images: RawHorseRow["horse_images"];
-    }[];
-    const withPhoto = rows
-        .map((r) => ({ raw: pickThumb(r.horse_images), name: r.custom_name ?? "" }))
-        .filter((x) => x.raw) as { raw: string; name: string }[];
-    const urlMap = getPublicImageUrls(withPhoto.map((x) => x.raw));
-    return withPhoto.map((x) => ({ url: urlMap.get(x.raw) ?? x.raw, name: x.name }));
+    // SECURITY DEFINER RPC — anon-safe (users table is authenticated-only) and
+    // it honors each owner's show_photos_on_reference opt-out (migration 131).
+    const { data } = await supabase.rpc("get_catalog_reference_photos", {
+        p_catalog_id: catalogId,
+        p_limit: limit,
+    });
+    const rows = (data ?? []) as { image_url: string | null; horse_name: string | null }[];
+    const withPhoto = rows.filter((r) => r.image_url) as { image_url: string; horse_name: string | null }[];
+    const urlMap = getPublicImageUrls(withPhoto.map((r) => r.image_url));
+    return withPhoto.map((r) => ({ url: urlMap.get(r.image_url) ?? r.image_url, name: r.horse_name ?? "" }));
 }
 
 export interface ChildRelease {
