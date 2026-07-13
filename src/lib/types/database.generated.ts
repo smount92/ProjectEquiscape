@@ -3440,17 +3440,17 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "show_records_show_id_fkey"
-            columns: ["show_id"]
-            isOneToOne: false
-            referencedRelation: "shows"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "show_records_horse_id_fkey"
             columns: ["horse_id"]
             isOneToOne: false
             referencedRelation: "user_horses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "show_records_show_id_fkey"
+            columns: ["show_id"]
+            isOneToOne: false
+            referencedRelation: "shows"
             referencedColumns: ["id"]
           },
           {
