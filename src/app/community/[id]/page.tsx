@@ -211,7 +211,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  const { data: rawRecords } = await supabase
  .from("show_records")
  .select(
- 'id, show_name, show_date, division, class_name,"placing", ribbon_color, judge_name, is_nan, notes, show_location, section_name, award_category, competition_level, show_date_text, verification_tier',
+ 'id, show_name, show_date, show_id, division, class_name,"placing", ribbon_color, judge_name, is_nan, notes, show_location, section_name, award_category, competition_level, show_date_text, verification_tier',
  )
  .eq("horse_id", horseId)
  .order("show_date", { ascending: false, nullsFirst: false });
@@ -220,6 +220,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  (r) => ({
  id: r.id,
  showName: r.show_name,
+ showId: r.show_id,
  showDate: r.show_date,
  division: r.division,
  className: r.class_name,

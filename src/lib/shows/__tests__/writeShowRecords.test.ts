@@ -46,6 +46,7 @@ describe("buildShowRecords — the vocabulary → trophy-case mapping", () => {
         expect(rows[0]).toEqual({
             horse_id: "horse-1",
             user_id: "owner-1",
+            show_id: "show-1",
             show_name: "July Photo Classic",
             // Online show → the judging window's end date.
             show_date: "2026-07-08",

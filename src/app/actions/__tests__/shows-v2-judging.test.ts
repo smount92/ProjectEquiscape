@@ -647,6 +647,7 @@ describe("shows-v2 — results publish on completed", () => {
             {
                 horse_id: HORSE_ID,
                 user_id: "owner-9",
+                show_id: SHOW_ID,
                 show_name: "July Photo Classic",
                 show_date: "2026-07-08",
                 division: "Halter",

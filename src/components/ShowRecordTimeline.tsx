@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from"react";
+import Link from"next/link";
 import { deleteShowRecord } from"@/app/actions/provenance";
 import ShowRecordForm from"@/components/ShowRecordForm";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ import { Button } from "@/components/ui/button";
 interface ShowRecordDisplay {
  id: string;
  showName: string;
+ showId?: string | null;
  showDate: string | null;
  division: string | null;
  className: string | null;
@@ -152,7 +154,13 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
  ) : (
  <>
  <div className="mb-1 flex items-center gap-2 text-sm font-semibold">
+ {record.showId ? (
+ <Link href={`/shows/${record.showId}`} className="no-underline hover:text-forest hover:underline">
  {record.showName}
+ </Link>
+ ) : (
+ record.showName
+ )}
  {record.isNan && (
  <span className="inline-flex items-center gap-[2px] rounded-sm bg-warning/15 px-2 py-[1px] text-xs font-bold tracking-wider text-warning uppercase">
  ⭐ NAN

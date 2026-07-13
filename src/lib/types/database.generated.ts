@@ -3362,6 +3362,7 @@ export type Database = {
           section_name: string | null
           show_date: string | null
           show_date_text: string | null
+          show_id: string | null
           show_location: string | null
           show_name: string
           show_type: string | null
@@ -3394,6 +3395,7 @@ export type Database = {
           section_name?: string | null
           show_date?: string | null
           show_date_text?: string | null
+          show_id?: string | null
           show_location?: string | null
           show_name: string
           show_type?: string | null
@@ -3426,6 +3428,7 @@ export type Database = {
           section_name?: string | null
           show_date?: string | null
           show_date_text?: string | null
+          show_id?: string | null
           show_location?: string | null
           show_name?: string
           show_type?: string | null
@@ -3436,6 +3439,13 @@ export type Database = {
           verified_by?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "show_records_show_id_fkey"
+            columns: ["show_id"]
+            isOneToOne: false
+            referencedRelation: "shows"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "show_records_horse_id_fkey"
             columns: ["horse_id"]

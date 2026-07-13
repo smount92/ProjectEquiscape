@@ -231,7 +231,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  const { data: rawRecords } = await supabase
  .from("show_records")
  .select(
- "id, horse_id, show_name, class_name, division, placing, show_date, is_nan_qualifying, nan_card_type, created_at, user_horses!inner(custom_name, visibility)",
+ "id, horse_id, show_name, show_id, class_name, division, placing, show_date, is_nan_qualifying, nan_card_type, created_at, user_horses!inner(custom_name, visibility)",
  )
  .eq("user_id", profileUser.id)
  .eq("user_horses.visibility","public")
@@ -243,6 +243,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
   horseId: r.horse_id,
   horseName: (r.user_horses as unknown as { custom_name: string } | null)?.custom_name ?? "—",
   showName: r.show_name,
+  showId: r.show_id,
   className: r.class_name || r.division || null,
   placing: r.placing,
   showDate: r.show_date,
@@ -721,7 +722,15 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  </Link>
  </td>
  <td className="px-2.5 py-2 text-secondary-foreground">{rec.className ??"—"}</td>
- <td className="px-2.5 py-2 text-secondary-foreground">{rec.showName}</td>
+ <td className="px-2.5 py-2 text-secondary-foreground">
+ {rec.showId ? (
+ <Link href={`/shows/${rec.showId}`} className="text-secondary-foreground no-underline hover:text-forest hover:underline">
+ {rec.showName}
+ </Link>
+ ) : (
+ rec.showName
+ )}
+ </td>
  <td className="px-2.5 py-2 text-secondary-foreground">
  {rec.showDate ? formatDate(rec.showDate) :"—"}
  </td>

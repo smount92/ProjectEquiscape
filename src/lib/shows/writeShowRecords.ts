@@ -41,6 +41,7 @@ import type { CallbackScope, Place, ShowMode } from "./types";
 export interface ShowRecordInsert {
     horse_id: string;
     user_id: string;
+    show_id: string;
     show_name: string;
     show_date: string | null;
     division: string | null;
@@ -160,6 +161,7 @@ export function buildShowRecords(input: PublishShowInput): {
         rows.push({
             horse_id: entry.horseId,
             user_id: entry.ownerId,
+            show_id: input.show.id,
             show_name: input.show.title,
             show_date: showDate,
             division: division?.name ?? null,
@@ -198,6 +200,7 @@ export function buildShowRecords(input: PublishShowInput): {
             rows.push({
                 horse_id: entry.horseId,
                 user_id: entry.ownerId,
+                show_id: input.show.id,
                 show_name: input.show.title,
                 show_date: showDate,
                 division: scopeName.division,
