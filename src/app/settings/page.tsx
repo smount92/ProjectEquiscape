@@ -176,7 +176,7 @@ export default function SettingsPage() {
  <h2 className="text-foreground mb-4 flex items-center gap-2 text-lg font-bold tracking-tight">
  <User className="h-5 w-5" /> Profile
  </h2>
- <div className="ledger-card">
+ <div className="bg-card border-input rounded-lg border p-6 shadow-sm">
  {/* Avatar */}
             <div className="mb-8 flex items-center gap-6 border-b border-input pb-6 max-sm:gap-4">
               <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-[2.5px] border-input bg-gradient-to-br from-forest/5 to-saddle/5 text-[2rem] transition-colors hover:border-forest [&_img]:h-full [&_img]:w-full [&_img]:object-cover">
@@ -408,7 +408,7 @@ export default function SettingsPage() {
  <h2 className="text-foreground mb-4 flex items-center gap-2 text-lg font-bold tracking-tight">
  <Lock className="h-5 w-5" /> Security
  </h2>
- <div className="ledger-card">
+ <div className="bg-card border-input rounded-lg border p-6 shadow-sm">
  <div className="mb-6">
  <label className="text-foreground mb-1 block text-sm font-semibold">Email</label>
  <Input
@@ -480,7 +480,7 @@ export default function SettingsPage() {
  <h2 className="text-foreground mb-4 flex items-center gap-2 text-lg font-bold tracking-tight">
  <Bell className="h-5 w-5" /> Notifications
  </h2>
- <div className="ledger-card">
+ <div className="bg-card border-input rounded-lg border p-6 shadow-sm">
  {NOTIF_LABELS.map((n) => (
  <div
  key={n.key}
@@ -507,7 +507,7 @@ export default function SettingsPage() {
  <h2 className="text-foreground mb-4 flex items-center gap-2 text-lg font-bold tracking-tight">
  <BarChart3 className="h-5 w-5" /> Data & Reports
  </h2>
- <div className="ledger-card">
+ <div className="bg-card border-input rounded-lg border p-6 shadow-sm">
  <div className="flex flex-col gap-6">
  {/* CSV Export */}
  <div>
@@ -543,7 +543,7 @@ export default function SettingsPage() {
  <h2 className="text-foreground mb-4 flex items-center gap-2 text-lg font-bold tracking-tight">
  <Gem className="h-5 w-5" /> Subscription
  </h2>
- <div className="ledger-card">
+ <div className="bg-card border-input rounded-lg border p-6 shadow-sm">
  <p className="mb-4 text-sm leading-[1.6]">
  Upgrade to <strong>MHH Pro</strong> for advanced analytics, expanded photo storage,
  AI-powered collection reports, and more.
@@ -562,7 +562,7 @@ export default function SettingsPage() {
  <h2 className="mb-4 flex items-center gap-2 text-lg font-bold tracking-tight text-destructive">
  <AlertTriangle className="h-5 w-5" /> Danger Zone
  </h2>
- <div className="ledger-card ring-1 ring-destructive/50">
+ <div className="bg-card border-input rounded-lg border p-6 shadow-sm ring-1 ring-destructive/50">
  <p className="mb-4 leading-[1.6]">
  Permanently delete your account. This action <strong>cannot be undone</strong>.
  </p>
