@@ -5,6 +5,7 @@ import Papa from"papaparse";
 import fuzzysort from"fuzzysort";
 import type { CsvRow, MatchResult, ReferenceMatch } from"@/lib/types/csv-import";
 import { executeBatchImport } from"@/app/actions/csv-import";
+import { decodeHtmlEntities } from"@/lib/utils/decodeEntities";
 import { Button } from "@/components/ui/button";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -191,7 +192,7 @@ export default function CsvImport() {
 
  for (const [csvCol, mhhField] of Object.entries(columnMapping)) {
  if (mhhField && row[csvCol] !== undefined) {
- mapped[mhhField] = row[csvCol];
+ mapped[mhhField] = mhhField ==="name" ? decodeHtmlEntities(row[csvCol]) : row[csvCol];
  }
  }
 

@@ -65,8 +65,14 @@ describe("GET /api/export (CSV)", () => {
         expect(res.status).toBe(200);
         const body = await res.text();
         expect(body).toContain("Custom Name");
+        // Section scaffolding is always present (Horses + Hoofprint +
+        // Qualification Cards headers); no data rows.
+        expect(body).toContain("# Hoofprint Timeline");
+        expect(body).toContain("# Qualification Cards");
+        expect(body).toContain("Card Code");
         const lines = body.trim().split("\n");
-        expect(lines.length).toBe(1); // just headers
+        // headers/sections only — no data rows beyond the fixed scaffold
+        expect(lines.length).toBeLessThanOrEqual(10);
     });
 
     it("escapes commas in values", async () => {

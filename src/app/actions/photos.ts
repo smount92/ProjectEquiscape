@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { getAdminClient } from "@/lib/supabase/admin";
 import { getPublicImageUrl } from "@/lib/utils/storage";
 
 export interface PhotoDetail {
@@ -19,9 +19,15 @@ export interface PhotoDetail {
 /**
  * Look up a photo by its short_slug for the /photo/[slug] route.
  * Returns null if not found or horse is soft-deleted/private.
+ *
+ * Admin client (justified downgrade, AnonProfile pattern): the share
+ * page is anon-viewable, but user_horses/users RLS is authenticated-
+ * only. Everything returned is public-scoped share content — private
+ * and deleted horses are excluded below, and the slug itself is the
+ * unguessable capability.
  */
 export async function getPhotoBySlug(slug: string): Promise<PhotoDetail | null> {
-  const supabase = await createClient();
+  const supabase = getAdminClient();
 
   const { data: image } = await supabase
     .from("horse_images")

@@ -46,6 +46,44 @@ export async function GET() {
     }
 
     const horses = rawHorses ?? [];
+    const horseIds = horses.map((h) => h.id as string);
+    const horseNameById = new Map(
+        horses.map((h) => [h.id as string, h.custom_name as string])
+    );
+
+    // Fetch Hoofprint timeline for all of the user's horses (view already
+    // UNIONs creation/transfer/condition/show/customization/note events —
+    // one query covers every "Hoofprint record" the About page promises).
+    let rawTimeline: Record<string, unknown>[] = [];
+    if (horseIds.length > 0) {
+        const { data } = await supabase
+            .from("v_horse_hoofprint")
+            .select(
+                "source_id, horse_id, event_type, title, description, event_date, metadata, created_at, source_table"
+            )
+            .in("horse_id", horseIds)
+            .order("horse_id", { ascending: true })
+            .order("event_date", { ascending: false, nullsFirst: false });
+        rawTimeline = (data ?? []) as unknown as Record<string, unknown>[];
+    }
+
+    // Fetch qualification cards the user currently owns or originally
+    // earned (RLS already scopes this; the OR mirrors "Card people read
+    // their cards" so transferred-away cards the user earned still show).
+    const { data: rawCards } = await supabase
+        .from("qualification_cards")
+        .select(
+            `
+      id, earned_place, status, show_year, issued_at,
+      shows:show_id(title),
+      show_classes:class_id(name),
+      user_horses:horse_id(custom_name)
+    `
+        )
+        .or(`current_owner_id.eq.${user.id},earned_by_owner_id.eq.${user.id}`)
+        .order("issued_at", { ascending: false });
+
+    const cards = rawCards ?? [];
 
     // CSV Header
     const headers = [
@@ -95,9 +133,76 @@ export async function GET() {
         ].join(",");
     });
 
-    // Combine with BOM for Excel compatibility
+    // -- Hoofprint Timeline section --
+    const timelineHeaders = [
+        "Horse",
+        "Event Type",
+        "Title",
+        "Description",
+        "Event Date",
+        "Metadata",
+        "Source",
+        "Recorded At",
+    ];
+    const timelineRows = (rawTimeline as {
+        horse_id: string | null;
+        event_type: string | null;
+        title: string | null;
+        description: string | null;
+        event_date: string | null;
+        metadata: unknown;
+        created_at: string | null;
+        source_table: string | null;
+    }[]).map((e) => [
+        escapeCSV(horseNameById.get(e.horse_id || "")),
+        escapeCSV(e.event_type),
+        escapeCSV(e.title),
+        escapeCSV(e.description),
+        escapeCSV(e.event_date),
+        escapeCSV(e.metadata ? JSON.stringify(e.metadata) : ""),
+        escapeCSV(e.source_table),
+        e.created_at ? new Date(e.created_at).toLocaleDateString("en-US") : "",
+    ].join(","));
+
+    // -- Qualification Cards section --
+    const cardHeaders = [
+        "Card Code",
+        "Horse",
+        "Show",
+        "Class",
+        "Placing",
+        "Show Year",
+        "Status",
+        "Issued Date",
+    ];
+    const cardRows = cards.map((c) => {
+        const placing = c.earned_place === 1 ? "1st" : c.earned_place === 2 ? "2nd" : "";
+        return [
+            escapeCSV(c.id),
+            escapeCSV(c.user_horses?.custom_name),
+            escapeCSV(c.shows?.title),
+            escapeCSV(c.show_classes?.name),
+            placing,
+            c.show_year ?? "",
+            escapeCSV(c.status),
+            c.issued_at ? new Date(c.issued_at).toLocaleDateString("en-US") : "",
+        ].join(",");
+    });
+
+    // Combine with BOM for Excel compatibility. One section per entity
+    // (Horses / Hoofprint Timeline / Qualification Cards) in a single
+    // CSV file - show_records are folded into the Hoofprint Timeline
+    // section (source = show_records), matching the About page promise
+    // of "every horse, every Hoofprint record, every qualification card."
     const bom = "\uFEFF";
-    const csv = bom + headers.join(",") + "\n" + rows.join("\n");
+    const csv =
+        bom +
+        "# Horses\n" +
+        headers.join(",") + "\n" + rows.join("\n") +
+        "\n\n# Hoofprint Timeline\n" +
+        timelineHeaders.join(",") + "\n" + timelineRows.join("\n") +
+        "\n\n# Qualification Cards\n" +
+        cardHeaders.join(",") + "\n" + cardRows.join("\n");
 
     // Return as downloadable CSV
     return new NextResponse(csv, {

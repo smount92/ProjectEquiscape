@@ -135,8 +135,8 @@ export default function AboutPage() {
                         <p>
                             So here&apos;s our commitment, in plain English: your data is backed up automatically, every
                             single night. You can export your entire collection — every horse, every Hoofprint record,
-                            every qualification card — as a CSV or PDF, anytime you want, straight from your dashboard.
-                            You don&apos;t have to ask us, and you don&apos;t have to wait.
+                            every qualification card — as a CSV, plus a PDF insurance report, anytime you want,
+                            straight from your settings. You don&apos;t have to ask us, and you don&apos;t have to wait.
                         </p>
                         <p>
                             And if we ever have to wind Model Horse Hub down — we hope we never do, but we&apos;re not

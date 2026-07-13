@@ -61,6 +61,9 @@ export async function proxy(request: NextRequest) {
         "/reference",
         "/market",
         "/show-ring",
+        // Shared photo pages: link-only share surface; the page's data
+        // layer excludes private/deleted horses itself (photos.ts).
+        "/photo",
         "/faq",
         "/privacy",
         "/terms",

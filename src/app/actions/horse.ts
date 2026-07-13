@@ -10,6 +10,7 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import { after } from "next/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { sanitizeText } from "@/lib/utils/validation";
+import { decodeHtmlEntities } from "@/lib/utils/decodeEntities";
 
 type UserHorseInsert = Database["public"]["Tables"]["user_horses"]["Insert"];
 type FinancialVaultInsert = Database["public"]["Tables"]["financial_vault"]["Insert"];
@@ -196,6 +197,13 @@ export async function updateHorseAction(horseId: string, data: {
             if (horseUpdate.life_stage === "in_progress") {
                 horseUpdate.condition_grade = null;
             }
+            // Decode any HTML entities that leaked in from copy/paste or imports
+            if (typeof horseUpdate.custom_name === "string") {
+                horseUpdate.custom_name = decodeHtmlEntities(horseUpdate.custom_name);
+            }
+            if (typeof horseUpdate.public_notes === "string") {
+                horseUpdate.public_notes = decodeHtmlEntities(horseUpdate.public_notes);
+            }
         }
 
         const vaultData = data.vaultData
@@ -333,7 +341,7 @@ export async function createHorseRecord(data: {
     const isModel = category === 'model';
     const horseInsert: UserHorseInsert = {
         owner_id: user.id,
-        custom_name: sanitizeText(data.customName),
+        custom_name: sanitizeText(decodeHtmlEntities(data.customName)),
         asset_category: category,
         finish_type: (data.finishType || null) as UserHorseInsert["finish_type"],
         condition_grade: isModel && data.lifeStage !== "in_progress" ? data.conditionGrade || null : null,
@@ -353,7 +361,7 @@ export async function createHorseRecord(data: {
     if (data.editionNumber) horseInsert.edition_number = data.editionNumber;
     if (data.editionSize) horseInsert.edition_size = data.editionSize;
     if (data.finishDetails) horseInsert.finish_details = data.finishDetails.trim();
-    if (data.publicNotes) horseInsert.public_notes = data.publicNotes.trim();
+    if (data.publicNotes) horseInsert.public_notes = decodeHtmlEntities(data.publicNotes.trim());
     if (data.assignedBreed) horseInsert.assigned_breed = data.assignedBreed.trim();
     if (data.assignedGender) horseInsert.assigned_gender = data.assignedGender.trim();
     if (data.assignedAge) horseInsert.assigned_age = data.assignedAge.trim();
@@ -639,7 +647,7 @@ export async function quickAddHorse(data: {
     const { supabase, user } = await requireAuth();
 
     // If catalogId provided, auto-name from catalog
-    let horseName = data.customName?.trim() || "";
+    let horseName = decodeHtmlEntities(data.customName?.trim() || "");
     if (data.catalogId && !horseName) {
         const { data: catalog } = await supabase
             .from("catalog_items")
