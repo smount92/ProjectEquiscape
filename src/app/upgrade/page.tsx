@@ -6,68 +6,82 @@ import UpgradeButton from "@/components/UpgradeButton";
 import StudioProButton from "@/components/StudioProButton";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
 import PageMasthead from "@/components/layouts/PageMasthead";
+import {
+    BarChart3,
+    Bot,
+    Camera,
+    CheckCircle,
+    ClipboardList,
+    FileText,
+    Link2,
+    Palette,
+    PartyPopper,
+    Sparkles,
+    Tag,
+    type LucideIcon,
+} from "lucide-react";
 
 export const metadata = {
     title: "Upgrade to MHH Pro — Model Horse Hub",
     description: "Unlock advanced analytics, expanded photo storage, and AI-powered collection reports.",
 };
 
-const PRO_FEATURES = [
+const PRO_FEATURES: { icon: LucideIcon; title: string; description: string }[] = [
     {
-        icon: "📊",
+        icon: BarChart3,
         title: "Blue Book PRO",
         description: "5-year historical price trends with interactive scatter plots",
     },
     {
-        icon: "📸",
+        icon: Camera,
         title: "Photo Suite+",
         description: "Up to 30 extra detail photos per horse — close-ups, markings, and more",
     },
     {
-        icon: "📄",
+        icon: FileText,
         title: "Smart Insurance Reports",
         description: "PDFs stamped with live Market Replacement Values from verified sales",
     },
     {
-        icon: "🤖",
+        icon: Bot,
         title: "Stablemaster AI",
         description: "Monthly AI-powered collection analysis delivered to your inbox",
     },
     {
-        icon: "🏷️",
+        icon: Tag,
         title: "Printable Show Tags",
         description: "Generate cut-out PDF tags for your live show entries",
     },
     {
-        icon: "✨",
+        icon: Sparkles,
         title: "Early Access & Priority Support",
         description: "Be first to try new features and get direct access to the MHH team",
     },
 ];
 
-const STUDIO_FEATURES = [
+const STUDIO_FEATURES: { icon: LucideIcon; title: string; description: string }[] = [
     {
-        icon: "🎨",
+        icon: Palette,
         title: "Artist Profile & Portfolio",
         description: "Public portfolio page showcasing your work and commission availability",
     },
     {
-        icon: "📋",
+        icon: ClipboardList,
         title: "Commission Queue Manager",
         description: "Track commissions from inquiry to delivery with status workflows",
     },
     {
-        icon: "📷",
+        icon: Camera,
         title: "WIP Photo Portal",
         description: "Share work-in-progress updates with clients — every brushstroke becomes provenance",
     },
     {
-        icon: "🔗",
+        icon: Link2,
         title: "Hoofprint Artist Credit",
         description: "Your name permanently linked to every custom you create via Hoofprint provenance",
     },
     {
-        icon: "📊",
+        icon: BarChart3,
         title: "Everything in MHH Pro",
         description: "Blue Book PRO, Photo Suite+, Smart Insurance Reports, Stablemaster AI — all included",
     },
@@ -95,7 +109,7 @@ export default async function UpgradePage({
     const params = await searchParams;
     const status = params.status;
 
-    const tierLabel = tier === "pro" ? "💎 Pro" : "Free";
+    const tierLabel = tier === "pro" ? "Pro" : "Free";
 
     return (
         <ExplorerLayout noHeader>
@@ -110,24 +124,24 @@ export default async function UpgradePage({
             />
             {/* Success / Cancel banners */}
             {status === "success" && (
-                <div className="animate-fade-in-up mb-8 rounded-xl border border-emerald-300 bg-gradient-to-r from-emerald-50 to-teal-50 p-6 text-center shadow-lg">
-                    <span className="text-3xl">🎉</span>
-                    <h2 className="mt-2 text-xl font-bold text-emerald-800">Welcome to MHH Pro!</h2>
-                    <p className="mt-1 text-sm text-emerald-600">
+                <div className="animate-fade-in-up mb-8 rounded-xl border border-success/30 bg-success/10 p-6 text-center shadow-lg">
+                    <PartyPopper className="mx-auto h-8 w-8 text-success" />
+                    <h2 className="mt-2 text-xl font-bold text-success">Welcome to MHH Pro!</h2>
+                    <p className="mt-1 text-sm text-secondary-foreground">
                         Your account has been upgraded. Log out and back in to activate all Pro features.
                     </p>
                 </div>
             )}
             {status === "cancelled" && (
-                <div className="animate-fade-in-up mb-8 rounded-xl border border-amber-300 bg-amber-50 p-6 text-center">
-                    <p className="text-sm text-amber-700">Checkout was cancelled. No charges were made.</p>
+                <div className="animate-fade-in-up mb-8 rounded-xl border border-warning/30 bg-warning/10 p-6 text-center">
+                    <p className="text-sm text-warning">Checkout was cancelled. No charges were made.</p>
                 </div>
             )}
 
             {/* Current plan badge */}
             <div className="animate-fade-in-up mb-12 text-center">
                 <p className="inline-block rounded-full bg-muted px-3 py-1 text-xs font-medium text-secondary-foreground">
-                    Current plan: <span className={tier === 'pro' ? 'font-bold text-amber-600' : 'font-bold'}>{tierLabel}</span>
+                    Current plan: <span className={tier === 'pro' ? 'font-bold text-warning' : 'font-bold'}>{tierLabel}</span>
                 </p>
             </div>
 
@@ -158,12 +172,12 @@ export default async function UpgradePage({
                 </div>
 
                 {/* Pro tier */}
-                <div className="relative rounded-xl border-2 border-amber-400 bg-gradient-to-br from-amber-50 to-orange-50 p-8 shadow-xl">
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-1 text-xs font-bold text-white shadow-md">
-                        ✨ MOST POPULAR
+                <div className="relative rounded-xl border-2 border-tier-gold/60 bg-card bg-gradient-to-br from-tier-gold/10 to-saddle/5 p-8 shadow-xl">
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-tier-gold px-4 py-1 text-xs font-bold text-forest-dark shadow-md">
+                        <Sparkles className="h-3 w-3" /> MOST POPULAR
                     </div>
                     <div className="mb-4">
-                        <span className="text-sm font-semibold uppercase tracking-wider text-amber-600">Pro</span>
+                        <span className="text-sm font-semibold uppercase tracking-wider text-warning">Pro</span>
                         <div className="mt-2 flex items-baseline gap-1">
                             <span className="text-3xl font-bold text-foreground">$5</span>
                             <span className="text-sm text-secondary-foreground">/month</span>
@@ -172,7 +186,7 @@ export default async function UpgradePage({
                     <ul className="space-y-3">
                         {PRO_FEATURES.map((feature) => (
                             <li key={feature.title} className="flex items-start gap-2 text-sm">
-                                <span className="mt-0.5">{feature.icon}</span>
+                                <feature.icon className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
                                 <div>
                                     <span className="font-semibold text-foreground">{feature.title}</span>
                                     <span className="text-secondary-foreground"> — {feature.description}</span>
@@ -182,8 +196,8 @@ export default async function UpgradePage({
                     </ul>
 
                     {tier === "pro" ? (
-                        <div className="mt-6 rounded-lg bg-emerald-100 py-2 text-center text-sm font-bold text-emerald-700">
-                            ✅ Active
+                        <div className="mt-6 inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-success/10 py-2 text-center text-sm font-bold text-success">
+                            <CheckCircle className="h-4 w-4" /> Active
                         </div>
                     ) : (
                         <div className="mt-6">
@@ -193,12 +207,12 @@ export default async function UpgradePage({
                 </div>
 
                 {/* Studio Pro tier */}
-                <div className="relative rounded-xl border-2 border-violet-400 bg-gradient-to-br from-violet-50 to-purple-50 p-8 shadow-xl">
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-violet-500 to-purple-600 px-4 py-1 text-xs font-bold text-white shadow-md">
-                        🎨 FOR ARTISTS
+                <div className="relative rounded-xl border-2 border-studio/60 bg-card bg-gradient-to-br from-studio/15 to-studio/5 p-8 shadow-xl">
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-studio px-4 py-1 text-xs font-bold text-background shadow-md">
+                        <Palette className="h-3 w-3" /> FOR ARTISTS
                     </div>
                     <div className="mb-4">
-                        <span className="text-sm font-semibold uppercase tracking-wider text-violet-600">Studio Pro</span>
+                        <span className="text-sm font-semibold uppercase tracking-wider text-studio">Studio Pro</span>
                         <div className="mt-2 flex items-baseline gap-1">
                             <span className="text-3xl font-bold text-foreground">$10</span>
                             <span className="text-sm text-secondary-foreground">/month</span>
@@ -207,7 +221,7 @@ export default async function UpgradePage({
                     <ul className="space-y-3">
                         {STUDIO_FEATURES.map((feature) => (
                             <li key={feature.title} className="flex items-start gap-2 text-sm">
-                                <span className="mt-0.5">{feature.icon}</span>
+                                <feature.icon className="mt-0.5 h-4 w-4 shrink-0 text-studio" />
                                 <div>
                                     <span className="font-semibold text-foreground">{feature.title}</span>
                                     <span className="text-secondary-foreground"> — {feature.description}</span>

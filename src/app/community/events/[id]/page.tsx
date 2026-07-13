@@ -15,6 +15,7 @@ import VoteButton from"@/components/VoteButton";
 import WithdrawButton from"@/components/WithdrawButton";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import PageMasthead from"@/components/layouts/PageMasthead";
+import { ClipboardList, Camera, Users } from"lucide-react";
 
 import { EVENT_TYPE_LABELS } from"@/lib/constants/events";
 import { getPublicImageUrl } from"@/lib/utils/storage";
@@ -124,7 +125,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  <div className="mx-auto max-w-6xl px-6 max-w-[720]">
 
  <div className="mb-6 flex items-start gap-6">
- <div className="flex h-[56px] min-w-[56px] shrink-0 flex-col items-center justify-center rounded-md border border-forest/30 bg-gradient-to-br from-forest/15 to-violet-500/10">
+ <div className="flex h-[56px] min-w-[56px] shrink-0 flex-col items-center justify-center rounded-md border border-forest/30 bg-gradient-to-br from-forest/15 to-studio/10">
  <span className="text-xs font-bold tracking-wider text-forest uppercase">
  {date.toLocaleDateString("en-US", { month:"short" }).toUpperCase()}
  </span>
@@ -136,9 +137,9 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  <div className="text-muted-foreground mt-2 flex flex-wrap gap-4">
  <span>{EVENT_TYPE_LABELS[event.eventType] || event.eventType}</span>
  <span>👥 {event.rsvpCount} attending</span>
- {event.isOfficial && <span className="text-[#f59e0b]">⭐ Official</span>}
+ {event.isOfficial && <span className="text-warning">⭐ Official</span>}
  {event.judgingMethod ==="expert_judge" && (
- <span className="text-[#8b5cf6]">🏅 Expert Judged</span>
+ <span className="text-studio">🏅 Expert Judged</span>
  )}
  </div>
  </div>
@@ -247,8 +248,8 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  {/* Division / Class Tree */}
  {divisions.length > 0 && (
  <div className="bg-card border-input mt-6 rounded-lg border p-6 shadow-md transition-all">
- <h3 className="mb-4">
- 📋 Class List ({divisions.reduce((s, d) => s + d.classes.length, 0)} classes)
+ <h3 className="mb-4 flex items-center gap-2">
+ <ClipboardList className="h-5 w-5" /> Class List ({divisions.reduce((s, d) => s + d.classes.length, 0)} classes)
  </h3>
  {divisions.map((div) => (
  <div key={div.id} className="mb-4">
@@ -299,7 +300,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  {/* Show Entries Grid */}
  {isShowEvent && showEntries.length > 0 && (
  <div className="bg-card border-input mt-6 rounded-lg border p-6 shadow-md transition-all">
- <h3 className="mb-4">📸 Entries ({showEntries.length})</h3>
+ <h3 className="mb-4 flex items-center gap-2"><Camera className="h-5 w-5" /> Entries ({showEntries.length})</h3>
  <div className="border border-input flex flex-col gap-0 overflow-hidden rounded-lg border">
  {showEntries.map((entry, index) => (
  <div
@@ -346,7 +347,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  {isExpertJudged ? (
  entry.placing && showStatus ==="closed" ? (
  <span
- className="rounded-sm bg-amber-100/60 px-2 py-1 text-sm font-semibold text-amber-500"
+ className="rounded-sm bg-warning/10 px-2 py-1 text-sm font-semibold text-warning"
  >
  {entry.placing}
  </span>
@@ -385,8 +386,8 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
  {/* Attendees */}
  {attendees.length > 0 && (
  <div className="bg-card border-input mt-6 rounded-lg border p-6 shadow-md transition-all">
- <h3 className="mb-2">
- 👥 Who&apos;s Going ({attendees.filter((a) => a.status ==="going").length})
+ <h3 className="mb-2 flex items-center gap-2">
+ <Users className="h-5 w-5" /> Who&apos;s Going ({attendees.filter((a) => a.status ==="going").length})
  </h3>
  <div className="flex flex-wrap gap-1">
  {attendees

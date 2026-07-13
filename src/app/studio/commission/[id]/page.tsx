@@ -8,20 +8,8 @@ import GuestLinkButton from"@/components/GuestLinkButton";
 import LinkHorseToCommission from"@/components/LinkHorseToCommission";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import { Button } from "@/components/ui/button";
-
-
-const STATUS_STYLES: Record<string, string> = {
- requested: "bg-stone-500/20 text-secondary-foreground border-stone-500/40",
- accepted: "bg-blue-500/20 text-blue-600 border-blue-500/40",
- in_progress: "bg-amber-500/20 text-amber-600 border-amber-500/40",
- review: "bg-studio/20 text-studio border-studio/40",
- revision: "bg-orange-500/20 text-orange-600 border-orange-500/40",
- completed: "bg-green-500/20 text-green-600 border-green-500/40",
- shipping: "bg-sky-500/20 text-sky-600 border-sky-500/40",
- delivered: "bg-teal-500/20 text-teal-600 border-teal-500/40",
- declined: "bg-red-500/20 text-red-600 border-red-500/40",
- cancelled: "bg-red-500/20 text-red-600 border-red-500/40",
-};
+import { STATUS_STYLES } from "@/lib/studio/statusStyles";
+import { User, Palette, Calendar, CheckCircle, Clock } from "lucide-react";
 
 export default async function CommissionDetailPage({
  params,
@@ -108,10 +96,14 @@ export default async function CommissionDetailPage({
   title={commission.commissionType}
   description={
   <>
-   {isArtist && commission.clientAlias && <span>👤 Client: @{commission.clientAlias} · </span>}
-   {isClient && <span>🎨 Artist: @{commission.artistAlias} · </span>}
-   <span>
-   📅{" "}
+   {isArtist && commission.clientAlias && (
+   <span className="inline-flex items-center gap-1"><User className="h-4 w-4" /> Client: @{commission.clientAlias} · </span>
+   )}
+   {isClient && (
+   <span className="inline-flex items-center gap-1"><Palette className="h-4 w-4" /> Artist: @{commission.artistAlias} · </span>
+   )}
+   <span className="inline-flex items-center gap-1">
+   <Calendar className="h-4 w-4" />{" "}
    {new Date(commission.createdAt).toLocaleDateString("en-US", {
     month:"short",
     day:"numeric",
@@ -122,7 +114,7 @@ export default async function CommissionDetailPage({
   }
   headerActions={
   <span
-   className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold whitespace-nowrap border ${STATUS_STYLES[commission.status] || "bg-stone-500/20 text-secondary-foreground border-stone-500/40"}`}
+   className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold whitespace-nowrap border ${STATUS_STYLES[commission.status] || "bg-muted text-muted-foreground border-input"}`}
   >
    {commission.statusLabel}
   </span>
@@ -147,9 +139,9 @@ export default async function CommissionDetailPage({
    {commission.depositAmount && (
    <div>
     <span className="text-muted-foreground block text-xs">Deposit</span>
-    <span className="font-bold">
+    <span className="inline-flex items-center gap-1 font-bold">
     ${commission.depositAmount}
-    {commission.depositPaid ?" ✅" :" ⏳"}
+    {commission.depositPaid ? <CheckCircle className="h-4 w-4 text-success" /> : <Clock className="h-4 w-4 text-warning" />}
     </span>
    </div>
    )}

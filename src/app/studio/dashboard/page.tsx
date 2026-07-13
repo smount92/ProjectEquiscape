@@ -5,6 +5,7 @@ import { getArtistProfile, getArtistCommissions } from"@/app/actions/art-studio"
 import CommissionBoard from"@/components/CommissionBoard";
 import CommandCenterLayout from"@/components/layouts/CommandCenterLayout";
 import { Button } from "@/components/ui/button";
+import { Eye, Pencil } from "lucide-react";
 
 
 export const metadata = {
@@ -37,13 +38,15 @@ export default async function StudioDashboardPage() {
   <>
    <Button asChild variant="outline" size="wide"><Link
    href={`/studio/${profile.studioSlug}`}
+   className="inline-flex items-center gap-2"
    >
-   👁️ Public Page
+   <Eye className="h-4 w-4" /> Public Page
    </Link></Button>
    <Button asChild variant="outline" size="wide"><Link
    href="/studio/setup"
+   className="inline-flex items-center gap-2"
    >
-   ✏️ Edit Studio
+   <Pencil className="h-4 w-4" /> Edit Studio
    </Link></Button>
   </>
   }
@@ -80,9 +83,9 @@ export default async function StudioDashboardPage() {
     </div>
     <div className="flex flex-col items-center gap-[2px]">
     <span
-     className={`studio-status-badge status-${profile.status} text-xs`}
+     className={`studio-status-badge status-${profile.status} inline-flex items-center gap-1.5 text-xs`}
     >
-     {profile.status ==="open" ?"🟢" : profile.status ==="waitlist" ?"🟡" :"🔴"}{""}
+     <span className={`inline-block h-2 w-2 rounded-full ${profile.status ==="open" ?"bg-success" : profile.status ==="waitlist" ?"bg-warning" :"bg-destructive"}`} />
      {profile.status.charAt(0).toUpperCase() + profile.status.slice(1)}
     </span>
     <span className="text-muted-foreground text-xs tracking-wider uppercase">

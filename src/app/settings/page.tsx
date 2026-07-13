@@ -16,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import FocusLayout from"@/components/layouts/FocusLayout";
 import PageMasthead from"@/components/layouts/PageMasthead";
 import { Button } from "@/components/ui/button";
+import { User, Lock, Bell, BarChart3, Gem, AlertTriangle, Camera, FileText, Shield, Trash2 } from "lucide-react";
 
 const NOTIF_LABELS: { key: string; emoji: string; label: string }[] = [
  { key:"show_votes", emoji:"📸", label:"Show votes on your entries" },
@@ -173,12 +174,12 @@ export default function SettingsPage() {
  {/* ═══ Profile ═══ */}
  <div className="mb-12 max-sm:mb-8">
  <h2 className="text-foreground mb-4 flex items-center gap-2 text-lg font-bold tracking-tight">
- 👤 Profile
+ <User className="h-5 w-5" /> Profile
  </h2>
  <div className="ledger-card">
  {/* Avatar */}
             <div className="mb-8 flex items-center gap-6 border-b border-input pb-6 max-sm:gap-4">
-              <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-[2.5px] border-stone-300 bg-gradient-to-br from-forest/5 to-amber-800/5 text-[2rem] transition-colors hover:border-emerald-700 [&_img]:h-full [&_img]:w-full [&_img]:object-cover">
+              <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-[2.5px] border-input bg-gradient-to-br from-forest/5 to-saddle/5 text-[2rem] transition-colors hover:border-forest [&_img]:h-full [&_img]:w-full [&_img]:object-cover">
  {avatarUrl ? (
  // eslint-disable-next-line @next/next/no-img-element
  <img src={avatarUrl} alt="Your avatar" />
@@ -187,13 +188,14 @@ export default function SettingsPage() {
  )}
  </div>
  <div>
- <button
-                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-stone-300 bg-transparent px-6 py-2 text-sm font-medium text-secondary-foreground no-underline transition-all hover:border-emerald-700 hover:text-forest"
+ <Button
+ type="button"
+ variant="outline"
  onClick={() => avatarInputRef.current?.click()}
  disabled={isUploadingAvatar}
  >
- {isUploadingAvatar ?"Uploading…" :"📷 Change Avatar"}
- </button>
+ {isUploadingAvatar ?"Uploading…" : <><Camera className="h-4 w-4" /> Change Avatar</>}
+ </Button>
  <Input
  ref={avatarInputRef}
  type="file"
@@ -232,7 +234,7 @@ export default function SettingsPage() {
  </label>
  <Textarea
  id="settings-bio"
- className="w-full resize-y rounded-lg border border-stone-300 bg-card px-4 py-3 text-sm text-foreground transition-colors focus:border-forest focus:outline-none focus:ring-1 focus:ring-forest"
+ className="w-full resize-y rounded-lg border border-input bg-card px-4 py-3 text-sm text-foreground transition-colors focus:border-forest focus:outline-none focus:ring-1 focus:ring-forest"
  rows={3}
  maxLength={500}
  placeholder="Tell other collectors about yourself…"
@@ -384,13 +386,12 @@ export default function SettingsPage() {
  </span>
  </div>
 
- <button
-                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-lg border-0 bg-forest px-6 py-2.5 text-sm font-semibold text-white no-underline shadow-sm transition-all hover:bg-forest/90"
+ <Button
  onClick={handleSaveProfile}
  disabled={isSavingProfile}
  >
  {isSavingProfile ?"Saving…" :"Save Profile"}
- </button>
+ </Button>
 
  {profileMsg && (
  <p
@@ -405,7 +406,7 @@ export default function SettingsPage() {
  {/* ═══ Security ═══ */}
  <div className="mb-12 max-sm:mb-8">
  <h2 className="text-foreground mb-4 flex items-center gap-2 text-lg font-bold tracking-tight">
- 🔒 Security
+ <Lock className="h-5 w-5" /> Security
  </h2>
  <div className="ledger-card">
  <div className="mb-6">
@@ -477,7 +478,7 @@ export default function SettingsPage() {
  {/* ═══ Notifications ═══ */}
  <div className="mb-12 max-sm:mb-8">
  <h2 className="text-foreground mb-4 flex items-center gap-2 text-lg font-bold tracking-tight">
- 🔔 Notifications
+ <Bell className="h-5 w-5" /> Notifications
  </h2>
  <div className="ledger-card">
  {NOTIF_LABELS.map((n) => (
@@ -504,7 +505,7 @@ export default function SettingsPage() {
  {/* ═══ Data & Reports ═══ */}
  <div className="mb-12 max-sm:mb-8">
  <h2 className="text-foreground mb-4 flex items-center gap-2 text-lg font-bold tracking-tight">
- 📊 Data & Reports
+ <BarChart3 className="h-5 w-5" /> Data & Reports
  </h2>
  <div className="ledger-card">
  <div className="flex flex-col gap-6">
@@ -514,9 +515,9 @@ export default function SettingsPage() {
  href="/api/export"
  download
  >
- 📄 Download Collection (CSV)
+ <FileText className="h-4 w-4" /> Download Collection (CSV)
  </a></Button>
- <p className="text-secondary-foreground mt-1 mt-[4] block text-xs">
+ <p className="text-secondary-foreground mt-1 block text-xs">
  Spreadsheet format — compatible with Excel, Google Sheets.
  </p>
  </div>
@@ -527,9 +528,9 @@ export default function SettingsPage() {
  href="/api/insurance-report"
  download
  >
- 🛡️ Download Insurance Report (PDF)
+ <Shield className="h-4 w-4" /> Download Insurance Report (PDF)
  </a></Button>
- <p className="text-secondary-foreground mt-1 mt-[4] block text-xs">
+ <p className="text-secondary-foreground mt-1 block text-xs">
  Professional PDF with photos and values — share with your insurance agent.
  </p>
  </div>
@@ -540,7 +541,7 @@ export default function SettingsPage() {
  {/* ═══ Subscription ═══ */}
  <div className="mb-12 max-sm:mb-8">
  <h2 className="text-foreground mb-4 flex items-center gap-2 text-lg font-bold tracking-tight">
- 💎 Subscription
+ <Gem className="h-5 w-5" /> Subscription
  </h2>
  <div className="ledger-card">
  <p className="mb-4 text-sm leading-[1.6]">
@@ -549,9 +550,9 @@ export default function SettingsPage() {
  </p>
  <Link
   href="/upgrade"
-  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-lg border-0 bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-2.5 text-sm font-bold text-white no-underline shadow-sm transition-all hover:from-amber-600 hover:to-orange-600"
+  className="btn-brass"
  >
-  💎 View Plans & Upgrade
+  <Gem className="h-4 w-4" /> View Plans & Upgrade
  </Link>
  </div>
  </div>
@@ -559,7 +560,7 @@ export default function SettingsPage() {
  {/* ═══ Danger Zone ═══ */}
  <div className="mb-12 max-sm:mb-8">
  <h2 className="mb-4 flex items-center gap-2 text-lg font-bold tracking-tight text-destructive">
- ⚠️ Danger Zone
+ <AlertTriangle className="h-5 w-5" /> Danger Zone
  </h2>
  <div className="ledger-card ring-1 ring-destructive/50">
  <p className="mb-4 leading-[1.6]">
@@ -602,7 +603,7 @@ export default function SettingsPage() {
  }
  }}
  >
- {isDeleting ?"Deleting…" :"🗑️ Permanently Delete Account"}
+ {isDeleting ?"Deleting…" : <><Trash2 className="h-4 w-4" /> Permanently Delete Account</>}
  </Button>
  {deleteError && (
  <p className="text-destructive mt-2 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm">

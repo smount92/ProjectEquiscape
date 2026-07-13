@@ -5,6 +5,7 @@ import { getArtistProfileBySlug } from"@/app/actions/art-studio";
 import CommissionRequestForm from"@/components/CommissionRequestForm";
 import FocusLayout from"@/components/layouts/FocusLayout";
 import { Button } from "@/components/ui/button";
+import { XCircle, Palette, LayoutDashboard } from "lucide-react";
 
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
@@ -30,7 +31,7 @@ export default async function CommissionRequestPage({ params }: { params: Promis
  return (
   <FocusLayout title="Commissions Closed">
   <div className="animate-fade-in-up text-center">
-   <div className="mb-4 text-[2.5rem]">🔴</div>
+   <XCircle className="mx-auto mb-4 h-10 w-10 text-destructive" />
    <p className="text-secondary-foreground mt-2">{profile.studioName} is not accepting commissions right now.</p>
    <Button asChild variant="outline" size="wide"><Link
    href={`/studio/${slug}`}
@@ -46,14 +47,15 @@ export default async function CommissionRequestPage({ params }: { params: Promis
  return (
   <FocusLayout title="This is your studio!">
   <div className="animate-fade-in-up text-center">
-   <div className="mb-4 text-[2.5rem]">🎨</div>
+   <Palette className="mx-auto mb-4 h-10 w-10 text-studio" />
    <p className="text-secondary-foreground mt-2">
    You can&apos;t commission yourself. Manage your commissions from the dashboard.
    </p>
    <Button asChild><Link
    href="/studio/dashboard"
+   className="inline-flex items-center gap-2"
    >
-   📊 Go to Dashboard
+   <LayoutDashboard className="h-4 w-4" /> Go to Dashboard
    </Link></Button>
   </div>
   </FocusLayout>
@@ -73,8 +75,8 @@ export default async function CommissionRequestPage({ params }: { params: Promis
   }
  >
   {profile.status ==="waitlist" && (
-  <p className="mt-1 text-sm text-amber-500">
-   🟡 This artist is currently on waitlist — your request will be queued.
+  <p className="mt-1 inline-flex items-center gap-2 text-sm text-warning">
+   <span className="inline-block h-2 w-2 rounded-full bg-warning" /> This artist is currently on waitlist — your request will be queued.
   </p>
   )}
 

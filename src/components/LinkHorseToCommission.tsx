@@ -3,6 +3,7 @@
 import { useState, useEffect } from"react";
 import { createClient } from"@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
+import { CheckCircle } from "lucide-react";
 
 export default function LinkHorseToCommission({ commissionId }: { commissionId: string }) {
  const [horses, setHorses] = useState<{ id: string; name: string }[]>([]);
@@ -47,8 +48,8 @@ export default function LinkHorseToCommission({ commissionId }: { commissionId: 
 
  if (done) {
  return (
- <div className="mt-4 mb-6 rounded-lg border border-emerald-200 bg-emerald-50/80 px-6 py-4 text-sm leading-relaxed">
- ✅ Horse linked! WIP photos will appear on its Hoofprint upon delivery.
+ <div className="mt-4 mb-6 flex items-center gap-2 rounded-lg border border-success/30 bg-success/10 px-6 py-4 text-sm leading-relaxed">
+ <CheckCircle className="h-4 w-4 text-success" /> Horse linked! WIP photos will appear on its Hoofprint upon delivery.
  </div>
  );
  }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Palette } from "lucide-react";
 
 /**
  * StudioProButton — triggers Stripe Checkout for Studio Pro artist tier
@@ -36,19 +37,21 @@ export default function StudioProButton() {
             <button
                 onClick={handleUpgrade}
                 disabled={loading}
-                className="w-full cursor-pointer rounded-lg bg-gradient-to-r from-violet-500 to-purple-600 px-6 py-3 text-base font-bold text-white shadow-lg transition-all hover:from-violet-600 hover:to-purple-700 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50"
+                className="w-full cursor-pointer rounded-lg bg-studio px-6 py-3 text-base font-bold text-background shadow-lg transition-all hover:bg-studio/90 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50"
             >
                 {loading ? (
                     <span className="flex items-center justify-center gap-2">
-                        <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                        <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
                         Starting checkout…
                     </span>
                 ) : (
-                    "🎨 Upgrade to Studio Pro — $10/mo"
+                    <span className="flex items-center justify-center gap-2">
+                        <Palette className="h-4 w-4" /> Upgrade to Studio Pro — $10/mo
+                    </span>
                 )}
             </button>
             {error && (
-                <p className="mt-2 text-center text-sm text-red-600">{error}</p>
+                <p className="mt-2 text-center text-sm text-destructive">{error}</p>
             )}
         </div>
     );

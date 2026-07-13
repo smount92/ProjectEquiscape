@@ -29,7 +29,7 @@
 - **Perf/SEO:** PERF-1 (`generateStaticParams` for reference), PERF-2 (`/market` rewrite), PERF-3 (`next/image`), PERF-4/5/6/8/9/10, PERF-7 (add public passport/show URLs to sitemap).
 - **Product:** PROD-1 remaining GA events (`add_horse`, `list_for_sale`, `message_seller`, `checkout_start`, `show_entry`, `export`); PROD-2 (delete 3 dead live-Stripe endpoints); PROD-4 (export completeness); PROD-5/7 (share previews/badges); PROD-6 (weekly liveness); PROD-8 (misc).
 - **Tech debt:** DEBT-1..8 (test coverage, `HorseForm` extraction, show-engine cutover, UI consistency, legacy-table drop, gen-types CI guard, resilience).
-- **Design (added 2026-07-12, full-site sweep):** DESIGN-1..8 — one MAJOR page (`/settings` body), `transition-colors-*` corruption exact lines, night-unsafe chip sweep (~15 shared components), `bg-white` cards, emoji→lucide, `/upgrade` gradients call, `SHOWRING_V2` flag flip retires the worst legacy surface free. See 🟣 tier below.
+- **Design (added 2026-07-12, full-site sweep):** DESIGN-1..8 — see 🟣 tier below. **BATCH SHIPPED on `feat/design-consistency` (same day): DESIGN-1/2/3/4/5 FIXED, DESIGN-6 done for all flagged surfaces, DESIGN-7 DECIDED+BUILT (Pro = btn-brass/tier-gold, Studio Pro = studio token w/ text-background night contrast).** Verified: tsc clean (changed files), eslint no new findings, 1076 vitest green, `next build` clean, Playwright day/night screenshots of settings/upgrade/inbox/my-commissions/feed/market. Still open: DESIGN-8 (`SHOWRING_V2` Vercel flip — owner), `/market` card grid needs a prod eyeball once real price rows render (empty in dev), CommissionBoard's inline-style hex `STATUS_COLORS` map (small, feeds DEBT-5), toggle-row/list-item decorative emoji intentionally kept.
 
 ---
 

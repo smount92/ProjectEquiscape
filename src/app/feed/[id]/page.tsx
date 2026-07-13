@@ -72,7 +72,7 @@ export default async function FeedPostPage({ params }: { params: Promise<{ id: s
 
  return (
   <ExplorerLayout title="Post" description="View and interact with this post.">
- <div className="mx-auto max-w-6xl px-6 max-w-[640]">
+ <div className="mx-auto max-w-6xl px-6 max-w-[640px]">
  <Button asChild variant="outline" size="wide"><Link
  href="/feed"
  >

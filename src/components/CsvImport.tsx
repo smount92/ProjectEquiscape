@@ -407,7 +407,7 @@ export default function CsvImport() {
  </div>
 
  {parseError && (
- <div className="text-red-700 mt-4 rounded-md border border-red-200 bg-red-50 px-6 py-4 text-sm">
+ <div className="text-destructive mt-4 rounded-md border border-destructive/30 bg-destructive/10 px-6 py-4 text-sm">
  {parseError}
  </div>
  )}
@@ -525,13 +525,13 @@ export default function CsvImport() {
 
  {/* Match summary badges */}
  <div className="mb-8 flex flex-wrap gap-4">
- <span className="bg-emerald-100/70 text-success border-emerald-300 perfect border">
+ <span className="bg-success/10 text-success border-success/30 perfect border">
  ✅ {perfectCount} perfect
  </span>
- <span className="bg-emerald-100/70 text-success border-emerald-300 review border">
+ <span className="bg-success/10 text-success border-success/30 review border">
  ⚠️ {reviewCount} review
  </span>
- <span className="bg-emerald-100/70 text-success border-emerald-300 no-match border">
+ <span className="bg-success/10 text-success border-success/30 no-match border">
  ❌ {noMatchCount} no match
  </span>
  </div>
@@ -585,7 +585,7 @@ export default function CsvImport() {
  checked={result.selectedMatch?.id === match.id}
  onChange={() => handleSelectMatch(result.rowIndex, match)}
  />
- <span className="transition-colors-text flex cursor-pointer items-start gap-2 rounded-sm px-4 py-2">
+ <span className="flex flex-col gap-[2px]">
  <span className="text-foreground text-sm">{match.display}</span>
  <span className="text-secondary-foreground text-xs tabular-nums">
  Score: {match.score > 0 ? `+${match.score}` : match.score}
@@ -600,7 +600,7 @@ export default function CsvImport() {
  checked={result.selectedMatch === null}
  onChange={() => handleSelectMatch(result.rowIndex, null)}
  />
- <span className="transition-colors-text flex cursor-pointer items-start gap-2 rounded-sm px-4 py-2">
+ <span className="flex flex-col gap-[2px]">
  <span className="text-foreground text-sm">
  Custom / Unknown — no reference link
  </span>

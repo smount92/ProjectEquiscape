@@ -3,6 +3,7 @@ import { redirect } from"next/navigation";
 import Link from"next/link";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import { Button } from "@/components/ui/button";
+import { Trophy, MessageCircle, DollarSign, Handshake, Star } from "lucide-react";
 
 export const metadata = {
  title:"Inbox — Model Horse Hub",
@@ -180,14 +181,14 @@ export default async function InboxPage() {
 
  return (
  <ExplorerLayout
-  title={<>✉️ <span className="text-forest">Inbox</span></>}
+  title={<span className="text-forest">Inbox</span>}
   description={`Your private conversations — ${inboxItems.length} thread${inboxItems.length !== 1 ?"s" :""}`}
   headerActions={
   <Button asChild><Link
    href="/community"
    id="browse-showring"
   >
-   🏆 Browse Show Ring
+   <Trophy className="h-4 w-4" /> Browse Show Ring
   </Link></Button>
   }
  >
@@ -199,7 +200,7 @@ export default async function InboxPage() {
    <Button asChild><Link
    href="/community"
    >
-   🏆 Browse the Show Ring
+   <Trophy className="h-4 w-4" /> Browse the Show Ring
    </Link></Button>
   </div>
   ) : (
@@ -235,8 +236,8 @@ export default async function InboxPage() {
      @{item.otherAlias}
      </span>
      {item.isRated && (
-     <span className="ml-1 text-xs text-warning">
-      ⭐ Rated
+     <span className="ml-1 flex items-center gap-1 text-xs text-warning">
+      <Star className="h-3 w-3 fill-current" /> Rated
      </span>
      )}
      <span className="text-muted-foreground shrink-0 text-xs">{timeAgo(item.latestTime)}</span>
@@ -248,17 +249,17 @@ export default async function InboxPage() {
       <span
       className={
        item.horseTradeStatus ==="For Sale"
-       ?"rounded-full bg-success/15 px-1.5 py-[1px] text-[0.65rem] font-bold text-success"
-       :"rounded-full bg-info/10 px-1.5 py-[1px] text-[0.65rem] font-bold text-info"
+       ?"flex items-center gap-1 rounded-full bg-success/15 px-1.5 py-[1px] text-[0.65rem] font-bold text-success"
+       :"flex items-center gap-1 rounded-full bg-info/10 px-1.5 py-[1px] text-[0.65rem] font-bold text-info"
       }
       >
-      {item.horseTradeStatus ==="For Sale" ?"💲 For Sale" :"🤝 Offers"}
+      {item.horseTradeStatus ==="For Sale" ? <><DollarSign className="h-3 w-3" /> For Sale</> : <><Handshake className="h-3 w-3" /> Offers</>}
       </span>
      )}
      </div>
     ) : (
      <div className="text-muted-foreground mt-[2px] flex items-center gap-1 text-xs">
-     💬 Direct Message
+     <MessageCircle className="h-3 w-3" /> Direct Message
      </div>
     )}
     <div className="text-secondary-foreground mt-1 overflow-hidden text-xs text-ellipsis whitespace-nowrap">

@@ -271,7 +271,7 @@ export default function UniversalFeed({
  </Button>
  </div>
  {error && (
- <p className="text-red-700 mt-2 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm">
+ <p className="text-destructive mt-2 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm">
  {error}
  </p>
  )}
@@ -384,14 +384,14 @@ function PostCard({ post, currentUserId, currentUserAlias, currentUserAvatar, va
  const gridMedia = post.media.slice(heroMedia ? 1 : 0, 4);
 
  return (
- <div className={`leather-frame pb-3 ${post.isPinned ? "bg-amber-50/30" : ""}`}>
+ <div className={`leather-frame pb-3 ${post.isPinned ? "bg-warning/5" : ""}`}>
  {/* Hero photo — same plain <img> the grid renders (no click handler to preserve) */}
  {heroMedia && (
  // eslint-disable-next-line @next/next/no-img-element
  <img className="feed-leather-hero" src={heroMedia.imageUrl} alt={heroMedia.caption || "Post photo"} loading="lazy" />
  )}
  {post.isPinned && (
- <span className="mb-1 block text-xs font-semibold uppercase tracking-wider text-amber-600">📌 Pinned</span>
+ <span className="mb-1 block text-xs font-semibold uppercase tracking-wider text-warning">📌 Pinned</span>
  )}
  {/* Header with avatar */}
  <PostHeader

@@ -6,6 +6,7 @@ import { getPublicImageUrl } from"@/lib/utils/storage";
 import HelpIdRequestForm from"@/components/HelpIdRequestForm";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import PageMasthead from"@/components/layouts/PageMasthead";
+import { Search, CheckCircle } from "lucide-react";
 
 export const metadata: Metadata = {
  title:"Help Me ID This Model — Model Horse Hub",
@@ -102,7 +103,7 @@ export default async function HelpIdPage() {
   {/* Open Requests */}
   {openRequests.length > 0 && (
   <section className="mt-12">
-   <h2 className="mb-6 text-lg font-bold">🔍 Open Requests ({openRequests.length})</h2>
+   <h2 className="mb-6 flex items-center gap-2 text-lg font-bold"><Search className="h-5 w-5" /> Open Requests ({openRequests.length})</h2>
    <div className="grid-cols-[repeat(auto-fill,minmax(280px,1fr))] grid gap-6">
    {openRequests.map((req) => (
    <Link
@@ -152,8 +153,8 @@ export default async function HelpIdPage() {
   {/* Resolved Requests */}
   {resolvedRequests.length > 0 && (
   <section className="mt-12">
-   <h2 className="text-secondary-foreground mb-6 text-lg font-bold">
-   ✅ Resolved ({resolvedRequests.length})
+   <h2 className="text-secondary-foreground mb-6 flex items-center gap-2 text-lg font-bold">
+   <CheckCircle className="h-5 w-5 text-success" /> Resolved ({resolvedRequests.length})
    </h2>
    <div className="grid-cols-[repeat(auto-fill,minmax(280px,1fr))] grid gap-6">
    {resolvedRequests.map((req) => (

@@ -327,7 +327,7 @@ export default function ChatThread({ conversationId, currentUserId, currentUserA
  {/* Risky Payment Warning */}
  {showPaymentWarning && (
  <div
- className="mx-4 flex animate-[fadeInUp_0.2s_ease] items-start gap-2 rounded-md border border-amber-300 bg-amber-50 px-4 py-2 text-xs leading-relaxed text-[#f59e0b]"
+ className="mx-4 flex animate-[fadeInUp_0.2s_ease] items-start gap-2 rounded-md border border-warning/30 bg-warning/10 px-4 py-2 text-xs leading-relaxed text-warning"
  role="alert"
  >
  <span className="mt-px shrink-0 text-[1.2rem]">🛡️</span>
@@ -352,7 +352,7 @@ export default function ChatThread({ conversationId, currentUserId, currentUserA
  />
  <button
  onClick={() => setPendingFiles(prev => prev.filter((_, j) => j !== i))}
- className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] text-white hover:bg-red-600"
+ className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] text-white hover:bg-destructive/90"
  aria-label={`Remove ${file.name}`}
  >
  ✕
@@ -401,7 +401,7 @@ export default function ChatThread({ conversationId, currentUserId, currentUserA
 
  <textarea
  ref={inputRef}
- className="border-input text-foreground font-inherit placeholder:text-muted-foreground max-h-[40dvh] min-h-[42px] flex-1 resize-none overflow-y-auto rounded-lg border bg-card px-3.5 py-2.5 text-sm transition-colors focus:border-emerald-500 focus:shadow-[0_0_0_3px_rgba(44,85,69,0.1)] focus:outline-none"
+ className="border-input text-foreground font-inherit placeholder:text-muted-foreground max-h-[40dvh] min-h-[42px] flex-1 resize-none overflow-y-auto rounded-lg border bg-card px-3.5 py-2.5 text-sm transition-colors focus:border-forest focus:shadow-[0_0_0_3px_var(--color-forest-glow)] focus:outline-none"
  value={newMessage}
  onChange={(e) => {
  setNewMessage(e.target.value);

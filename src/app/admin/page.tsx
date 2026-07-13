@@ -6,6 +6,7 @@ import { getPendingSuggestions } from"@/app/actions/suggestions";
 import { getOpenReports } from"@/app/actions/moderation";
 import AdminTabs from"@/components/AdminTabs";
 import CommandCenterLayout from"@/components/layouts/CommandCenterLayout";
+import { Zap, Shield, Users, Mail } from "lucide-react";
 
 export const metadata = {
  title:"Admin Console — Model Horse Hub",
@@ -84,23 +85,11 @@ export default async function AdminPage() {
 
  return (
  <CommandCenterLayout
-  title={<><span className="text-forest">⚡ Admin Console</span></>}
+  title={<span className="inline-flex items-center gap-2 text-forest"><Zap className="h-6 w-6" /> Admin Console</span>}
   description="Founder's Command Center — Full system overview"
   headerActions={
   <div className="inline-flex items-center gap-2 rounded-full border border-forest/20 bg-forest/10 px-3 py-1.5 text-xs font-semibold text-forest">
-   <svg
-   width="14"
-   height="14"
-   viewBox="0 0 24 24"
-   fill="none"
-   stroke="currentColor"
-   strokeWidth="2"
-   strokeLinecap="round"
-   strokeLinejoin="round"
-   aria-hidden="true"
-   >
-   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-   </svg>
+   <Shield className="h-3.5 w-3.5" />
    Service Role Access
   </div>
   }
@@ -109,7 +98,7 @@ export default async function AdminPage() {
    {/* Metrics Row */}
    <div className="grid-cols-[repeat(auto-fit,minmax(200px,1fr))] grid gap-4">
    <div className="bg-card border-input shadow-sm rounded-lg border p-6 text-center transition-all">
-    <div className="mb-1 text-[2rem]">👥</div>
+    <div className="mb-1 flex justify-center"><Users className="h-8 w-8" /></div>
     <div className="text-foreground text-3xl leading-none font-bold">{totalUsers}</div>
     <div className="text-muted-foreground mt-1 text-xs font-medium">Registered Users</div>
    </div>
@@ -119,7 +108,7 @@ export default async function AdminPage() {
     <div className="text-muted-foreground mt-1 text-xs font-medium">Horses in Database</div>
    </div>
    <div className="bg-card border-input shadow-sm rounded-lg border p-6 text-center text-destructive transition-all">
-    <div className="mb-1 text-[2rem]">📨</div>
+    <div className="mb-1 flex justify-center"><Mail className="h-8 w-8" /></div>
     <div className="text-foreground text-3xl leading-none font-bold">{unreadMessages}</div>
     <div className="text-muted-foreground mt-1 text-xs font-medium">Unread Messages</div>
    </div>

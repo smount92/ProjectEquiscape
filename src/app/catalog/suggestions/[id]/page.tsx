@@ -8,6 +8,7 @@ import SuggestionAdminActions from"@/components/SuggestionAdminActions";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import CatalogSubMasthead from"@/components/catalog/CatalogSubMasthead";
 import { referenceHref, referencePagesEnabled } from"@/lib/catalog/referenceUrl";
+import { MessageCircle, Shield } from"lucide-react";
 
 interface Props {
  params: Promise<{ id: string }>;
@@ -242,7 +243,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
               <div className="font-semibold text-foreground">
                 {key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
               </div>
-              <div className="font-mono text-muted-foreground line-through decoration-red-400/50">{v.from}</div>
+              <div className="font-mono text-muted-foreground line-through decoration-destructive/50">{v.from}</div>
               <div className="text-center text-muted-foreground">→</div>
               <div className="font-mono font-bold text-success">{v.to}</div>
             </div>
@@ -294,7 +295,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
 
  {/* Discussion Thread */}
  <div className="bg-card border-input rounded-lg border p-6 shadow-md transition-all">
- <h3>💬 Discussion ({(comments ?? []).length})</h3>
+ <h3 className="flex items-center gap-2"><MessageCircle className="h-5 w-5" /> Discussion ({(comments ?? []).length})</h3>
  <SuggestionCommentThread
  suggestionId={s.id}
  comments={
@@ -313,7 +314,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
  {/* Admin Actions */}
  {isAdmin && s.status ==="pending" && (
  <div className="bg-card rounded-lg border border-warning p-6 shadow-md transition-all">
- <h3>🛡️ Admin Actions</h3>
+ <h3 className="flex items-center gap-2"><Shield className="h-5 w-5" /> Admin Actions</h3>
  <SuggestionAdminActions suggestionId={s.id} />
  </div>
  )}

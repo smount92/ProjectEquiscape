@@ -6,6 +6,7 @@ import ShareButton from"@/components/ShareButton";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import PageMasthead from"@/components/layouts/PageMasthead";
 import { Button } from "@/components/ui/button";
+import { DollarSign, FileText, ClipboardList, CheckCircle } from "lucide-react";
 
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
@@ -19,10 +20,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
  };
 }
 
-const STATUS_EMOJI: Record<string, string> = {
- open:"🟢",
- waitlist:"🟡",
- closed:"🔴",
+const STATUS_DOT: Record<string, string> = {
+ open:"bg-success",
+ waitlist:"bg-warning",
+ closed:"bg-destructive",
 };
 
 const STATUS_LABEL: Record<string, string> = {
@@ -87,8 +88,8 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  <h1 className="m-0 text-2xl">
  <span className="text-forest">{profile.studioName}</span>
  </h1>
- <span className={`studio-status-badge status-${profile.status}`}>
- {STATUS_EMOJI[profile.status]} {STATUS_LABEL[profile.status]}
+ <span className={`studio-status-badge status-${profile.status} inline-flex items-center gap-1.5`}>
+ <span className={`inline-block h-2 w-2 rounded-full ${STATUS_DOT[profile.status]}`} /> {STATUS_LABEL[profile.status]}
  </span>
  </div>
  <p className="text-secondary-foreground mt-1 text-sm">
@@ -153,7 +154,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  <div>
  {/* Pricing & Turnaround */}
  <div className="bg-card border-input mb-6 rounded-lg border p-6 shadow-md transition-all">
- <h2 className="mb-4 text-lg">💰 Pricing & Timeline</h2>
+ <h2 className="mb-4 flex items-center gap-2 text-lg"><DollarSign className="h-5 w-5" /> Pricing & Timeline</h2>
  <div className="grid gap-2">
  {(profile.priceRangeMin || profile.priceRangeMax) && (
  <div className="flex items-center justify-between py-1">
@@ -235,7 +236,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  {/* Terms */}
  {profile.termsText && (
  <div className="bg-card border-input rounded-lg border p-6 shadow-md transition-all">
- <h2 className="mb-4 text-lg">📄 Terms & Conditions</h2>
+ <h2 className="mb-4 flex items-center gap-2 text-lg"><FileText className="h-5 w-5" /> Terms & Conditions</h2>
  <p className="text-secondary-foreground text-sm leading-[1.6] whitespace-pre-wrap">
  {profile.termsText}
  </p>
@@ -246,7 +247,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  {/* Right: Commission Queue */}
  <div>
  <div className="bg-card border-input rounded-lg border p-6 shadow-md transition-all">
- <h2 className="mb-4 text-lg">📋 Commission Queue</h2>
+ <h2 className="mb-4 flex items-center gap-2 text-lg"><ClipboardList className="h-5 w-5" /> Commission Queue</h2>
  {queue.length === 0 ? (
  <p className="text-muted-foreground text-sm">
  No active commissions in the queue.
@@ -284,7 +285,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  {/* Accepting */}
  {profile.acceptingTypes.length > 0 && (
  <div className="bg-card border-input mt-6 rounded-lg border p-6 shadow-md transition-all">
- <h2 className="mb-4 text-lg">✅ Currently Accepting</h2>
+ <h2 className="mb-4 flex items-center gap-2 text-lg"><CheckCircle className="h-5 w-5" /> Currently Accepting</h2>
  <div className="grid gap-1">
  {profile.acceptingTypes.map((t) => (
  <div

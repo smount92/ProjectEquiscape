@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import FocusLayout from"@/components/layouts/FocusLayout";
 import PageMasthead from"@/components/layouts/PageMasthead";
 import { Button } from "@/components/ui/button";
+import { Tag, Wrench, ClipboardList, DollarSign, Save, Eye, Palette } from "lucide-react";
 
 // ── Option Lists ──
 const SPECIALTIES = [
@@ -197,7 +198,7 @@ export default function StudioSetupPage() {
   <form onSubmit={handleSubmit}>
    {/* Studio Identity */}
    <fieldset className="border-input mb-6 rounded-lg border p-6">
-   <legend>🏷️ Studio Identity</legend>
+   <legend className="flex items-center gap-2"><Tag className="h-4 w-4" /> Studio Identity</legend>
 
    <div className="mb-6">
     <label className="text-foreground mb-1 block text-sm font-semibold">Studio Name *</label>
@@ -242,7 +243,7 @@ export default function StudioSetupPage() {
 
    {/* Skills & Services */}
    <fieldset className="border-input mb-6 rounded-lg border p-6">
-   <legend>🛠️ Skills & Services</legend>
+   <legend className="flex items-center gap-2"><Wrench className="h-4 w-4" /> Skills & Services</legend>
 
    <div className="mb-6">
     <label className="text-foreground mb-1 block text-sm font-semibold">Specialties</label>
@@ -313,7 +314,7 @@ export default function StudioSetupPage() {
 
    {/* Commission Settings */}
    <fieldset className="border-input mb-6 rounded-lg border p-6">
-   <legend>📋 Commission Settings</legend>
+   <legend className="flex items-center gap-2"><ClipboardList className="h-4 w-4" /> Commission Settings</legend>
 
    <div className="mb-6">
     <label className="text-foreground mb-1 block text-sm font-semibold">Commission Status</label>
@@ -325,8 +326,10 @@ export default function StudioSetupPage() {
      className={`studio-status-btn ${status === s ? `active-${s}` :""}`}
      onClick={() => setStatus(s)}
      >
-     {s ==="open" ?"🟢" : s ==="waitlist" ?"🟡" :"🔴"}{""}
+     <span className="inline-flex items-center gap-1.5">
+     <span className={`inline-block h-2 w-2 rounded-full ${s ==="open" ?"bg-success" : s ==="waitlist" ?"bg-warning" :"bg-destructive"}`} />
      {s.charAt(0).toUpperCase() + s.slice(1)}
+     </span>
      </button>
     ))}
     </div>
@@ -410,7 +413,7 @@ export default function StudioSetupPage() {
 
    {/* Policies & Payment */}
    <fieldset className="border-input mb-6 rounded-lg border p-6">
-   <legend>💰 Policies & Payment</legend>
+   <legend className="flex items-center gap-2"><DollarSign className="h-4 w-4" /> Policies & Payment</legend>
 
    <div className="mb-6">
     <label className="text-foreground mb-1 block text-sm font-semibold">Terms & Conditions</label>
@@ -436,30 +439,31 @@ export default function StudioSetupPage() {
 
    {/* Feedback */}
    {error && (
-   <p className="mb-4 text-center text-sm text-[#ef4444]">
+   <p className="mb-4 text-center text-sm text-destructive">
     {error}
    </p>
    )}
    {success && (
-   <p className="mb-4 text-center text-sm text-[#22c55e]">
+   <p className="mb-4 text-center text-sm text-success">
     {success}
    </p>
    )}
 
    <Button
-   type="submit" className="w-full"
+   type="submit" className="w-full inline-flex items-center justify-center gap-2"
    disabled={saving || !studioName.trim()}
    id="save-studio-btn"
    >
-   {saving ?"Saving…" : existing ?"💾 Save Changes" :"🎨 Create Studio"}
+   {saving ?"Saving…" : existing ? <><Save className="h-4 w-4" /> Save Changes</> : <><Palette className="h-4 w-4" /> Create Studio</>}
    </Button>
 
    {existing && (
    <div className="mt-4 text-center">
     <Button asChild variant="outline" size="wide"><a
     href={`/studio/${existing.studioSlug}`}
+    className="inline-flex items-center gap-2"
     >
-    👁️ View Public Studio Page
+    <Eye className="h-4 w-4" /> View Public Studio Page
     </a></Button>
    </div>
    )}

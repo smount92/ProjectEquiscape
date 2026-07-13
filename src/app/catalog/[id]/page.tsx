@@ -8,6 +8,7 @@ import CatalogSubMasthead from"@/components/catalog/CatalogSubMasthead";
 import { buildEbaySearchUrl } from"@/lib/utils/ebayAffiliate";
 import { Button } from "@/components/ui/button";
 import { referenceHref, referencePagesEnabled } from"@/lib/catalog/referenceUrl";
+import { FileEdit } from"lucide-react";
 
 interface Props {
  params: Promise<{ id: string }>;
@@ -135,9 +136,9 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
     href={buildEbaySearchUrl(catalogItem.title, catalogItem.maker, (attrs as Record<string, string>).item_number ?? null)}
     target="_blank"
     rel="noopener noreferrer"
-    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-1 text-sm font-semibold text-blue-700 no-underline shadow-sm transition-colors hover:bg-blue-100"
+    className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-info/30 bg-info/10 px-4 py-1 text-sm font-semibold text-info no-underline shadow-sm transition-colors hover:bg-info/20"
    >
-    🔎 Find on eBay <span className="text-xs text-blue-400">↗</span>
+    🔎 Find on eBay <span className="text-xs text-info/70">↗</span>
    </a>
    </div>
   </div>
@@ -145,7 +146,7 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
   {/* Pending Suggestions */}
   {(suggestionCount ?? 0) > 0 && (
    <div className="bg-card border-input rounded-lg border p-4 shadow-md transition-all">
-   <h3>📝 Pending Suggestions ({suggestionCount})</h3>
+   <h3 className="flex items-center gap-2"><FileEdit className="h-5 w-5" /> Pending Suggestions ({suggestionCount})</h3>
    <ul className="my-2 list-none p-0">
     {(
     suggestions as {

@@ -94,7 +94,7 @@ export default function EventBrowser({ events, typeLabels }: Props) {
  key={e.id}
  className="bg-muted border-input flex items-center gap-6 rounded-lg border p-6 transition-colors"
  >
- <div className="bg-muted border-input transition-colors-date flex items-center gap-6 rounded-lg border p-6">
+ <div className="flex w-12 flex-shrink-0 flex-col items-center">
  <span className="text-xs font-bold tracking-[0.05em] text-forest uppercase">
  {month}
  </span>
@@ -102,34 +102,34 @@ export default function EventBrowser({ events, typeLabels }: Props) {
  {day}
  </span>
  </div>
- <div className="bg-muted border-input transition-colors-body flex items-center gap-6 rounded-lg border p-6">
+ <div className="min-w-0 flex-1">
  <Link
  href={`/community/events/${e.id}`}
- className="bg-muted border-input transition-colors-name flex items-center gap-6 rounded-lg border p-6"
+ className="text-foreground truncate font-semibold no-underline hover:underline"
  >
  {TYPE_ICONS[e.eventType] ||"📌"} {e.name}
  </Link>
- <div className="bg-muted border-input transition-colors-meta flex items-center gap-6 rounded-lg border p-6">
+ <div className="text-muted-foreground text-sm">
  {e.isVirtual ?"🌐 Virtual" : e.locationName ||"Location TBD"}
  {e.groupName && <> · 🏛️ {e.groupName}</>}
  </div>
- <div className="bg-muted border-input transition-colors-meta flex items-center gap-6 rounded-lg border p-6">
+ <div className="text-muted-foreground text-sm">
  {e.isAllDay
  ?"All Day"
  : date.toLocaleTimeString("en-US", { hour:"numeric", minute:"2-digit" })}
  {" ·"}👥 {e.rsvpCount} attending
  </div>
  </div>
- <div className="bg-muted border-input transition-colors-actions flex items-center gap-6 rounded-lg border p-6">
+ <div className="flex flex-shrink-0 items-center gap-2">
  {e.userRsvp ==="going" ? (
  <span
- className="inline-flex items-center rounded-full border border-emerald-300 bg-emerald-100/70 px-[10px] py-[3px] text-xs font-semibold whitespace-nowrap text-[#22c55e]"
+ className="inline-flex items-center rounded-full border border-success/30 bg-success/10 px-[10px] py-[3px] text-xs font-semibold whitespace-nowrap text-success"
  >
  ✓ Going
  </span>
  ) : e.userRsvp ==="interested" ? (
  <span
- className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-[10px] py-[3px] text-xs font-semibold whitespace-nowrap text-[#f59e0b]"
+ className="inline-flex items-center rounded-full border border-warning/30 bg-warning/10 px-[10px] py-[3px] text-xs font-semibold whitespace-nowrap text-warning"
  >
  ⭐ Interested
  </span>

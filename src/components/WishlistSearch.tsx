@@ -192,7 +192,7 @@ export default function WishlistSearch() {
  {item.scale ? ` · ${item.scale}` :""}
  </span>
  </div>
- <span className="bg-emerald-100 shrink-0 rounded-full px-[10px] py-[3px] text-xs font-bold text-[#22c55e]">
+ <span className="bg-success/10 shrink-0 rounded-full px-[10px] py-[3px] text-xs font-bold text-success">
  + Add
  </span>
  </button>
@@ -228,7 +228,7 @@ export default function WishlistSearch() {
  · {item.maker}
  </span>
  </div>
- <span className="bg-emerald-100 shrink-0 rounded-full px-[10px] py-[3px] text-xs font-bold text-[#22c55e]">
+ <span className="bg-success/10 shrink-0 rounded-full px-[10px] py-[3px] text-xs font-bold text-success">
  + Add
  </span>
  </button>
@@ -259,7 +259,7 @@ export default function WishlistSearch() {
  {item.scale ? ` · ${item.scale}` :""}
  </span>
  </div>
- <span className="bg-emerald-100 shrink-0 rounded-full px-[10px] py-[3px] text-xs font-bold text-[#22c55e]">
+ <span className="bg-success/10 shrink-0 rounded-full px-[10px] py-[3px] text-xs font-bold text-success">
  + Add
  </span>
  </button>

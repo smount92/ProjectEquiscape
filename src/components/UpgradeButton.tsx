@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Gem } from "lucide-react";
 
 /**
  * UpgradeButton — triggers Stripe Checkout flow
@@ -37,19 +38,21 @@ export default function UpgradeButton() {
             <button
                 onClick={handleUpgrade}
                 disabled={loading}
-                className="w-full cursor-pointer rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-3 text-base font-bold text-white shadow-lg transition-all hover:from-amber-600 hover:to-orange-600 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50"
+                className="btn-brass w-full py-3 text-base font-bold shadow-lg transition-all hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50"
             >
                 {loading ? (
                     <span className="flex items-center justify-center gap-2">
-                        <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                        <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
                         Starting checkout…
                     </span>
                 ) : (
-                    "💎 Upgrade to MHH Pro — $5/mo"
+                    <span className="flex items-center justify-center gap-2">
+                        <Gem className="h-4 w-4" /> Upgrade to MHH Pro — $5/mo
+                    </span>
                 )}
             </button>
             {error && (
-                <p className="mt-2 text-center text-sm text-red-600">{error}</p>
+                <p className="mt-2 text-center text-sm text-destructive">{error}</p>
             )}
         </div>
     );

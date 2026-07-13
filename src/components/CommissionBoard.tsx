@@ -5,11 +5,12 @@ import Link from"next/link";
 import { useRouter } from"next/navigation";
 import { updateCommissionStatus } from"@/app/actions/art-studio";
 import type { Commission } from"@/app/actions/art-studio";
+import { Eye } from "lucide-react";
 
 const TABS = [
  { key:"requested", label:"📥 Requests", statuses: ["requested"] },
  { key:"active", label:"🎨 Active", statuses: ["accepted","in_progress","revision"] },
- { key:"review", label:"👁️ Review", statuses: ["review"] },
+ { key:"review", label: <span className="inline-flex items-center gap-1"><Eye className="h-4 w-4" /> Review</span>, statuses: ["review"] },
  { key:"done", label:"✅ Done", statuses: ["completed","delivered"] },
  { key:"closed", label:"🚫 Closed", statuses: ["declined","cancelled"] },
 ];
@@ -131,7 +132,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
  ✅ Accept
  </button>
  <button
- className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-2 py-1 text-xs font-semibold text-red-700 no-underline transition-all"
+ className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-2 py-1 text-xs font-semibold text-destructive no-underline transition-all"
  onClick={() => handleStatusChange(c.id,"declined")}
  disabled={acting === c.id}
  >
@@ -154,7 +155,7 @@ export default function CommissionBoard({ commissions }: { commissions: Commissi
  onClick={() => handleStatusChange(c.id,"review")}
  disabled={acting === c.id}
  >
- 👁️ Submit for Review
+ <Eye className="inline h-4 w-4" /> Submit for Review
  </button>
  )}
  {c.status ==="review" && (

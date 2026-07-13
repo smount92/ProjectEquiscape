@@ -11,6 +11,7 @@ import { getTransactionByConversation } from"@/app/actions/transactions";
 import { getConversationAttachments } from"@/app/actions/messaging";
 import { getPublicImageUrls } from"@/lib/utils/storage";
 import { resolveAvatarUrl } from"@/lib/utils/avatars.server";
+import { MessageCircle, Calendar, Package, Star } from "lucide-react";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
  const { id } = await params;
@@ -247,7 +248,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  {horseContext ? (
  <span className="text-muted-foreground mt-0.5 text-xs">🐴 Re: {horseContext.name}</span>
  ) : (
- <span className="text-muted-foreground mt-0.5 text-xs opacity-70">💬 Direct Message</span>
+ <span className="text-muted-foreground mt-0.5 flex items-center gap-1 text-xs opacity-70"><MessageCircle className="h-3 w-3" /> Direct Message</span>
  )}
  </div>
 
@@ -258,21 +259,21 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
  className="border-input text-muted-foreground inline-flex items-center gap-[3px] rounded-sm border bg-card px-2 py-0.5 text-xs whitespace-nowrap"
  title="Account age"
  >
- 📅 Member since {memberSince}
+ <Calendar className="h-3 w-3" /> Member since {memberSince}
  </span>
  )}
  <span
  className="border-input text-muted-foreground inline-flex items-center gap-[3px] rounded-sm border bg-card px-2 py-0.5 text-xs whitespace-nowrap"
  title="Completed Hoofprint transfers"
  >
- 📦 {transferCount || 0} transfer{transferCount !== 1 ?"s" :""}
+ <Package className="h-3 w-3" /> {transferCount || 0} transfer{transferCount !== 1 ?"s" :""}
  </span>
  {avgRating !== null && (
  <span
  className="border-input text-muted-foreground inline-flex items-center gap-[3px] rounded-sm border bg-card px-2 py-0.5 text-xs whitespace-nowrap"
  title="Average user rating"
  >
- ⭐ {avgRating} ({ratingsArr.length})
+ <Star className="h-3 w-3 fill-current" /> {avgRating} ({ratingsArr.length})
  </span>
  )}
  </div>

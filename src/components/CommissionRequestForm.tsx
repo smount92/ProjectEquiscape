@@ -151,7 +151,7 @@ export default function CommissionRequestForm({ artist }: { artist: ArtistProfil
 
  {error && (
  <p
- className="mb-4 text-center text-sm text-[#ef4444]"
+ className="mb-4 text-center text-sm text-destructive"
  >
  {error}
  </p>

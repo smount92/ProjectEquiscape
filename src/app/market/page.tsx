@@ -116,22 +116,22 @@ export default async function MarketPricePage({
     </span>
    </div>
 
-   <div className="bg-muted sticky top-0 font-semibold">
+   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
     {items.map((item) => {
     const key = `${item.catalogId}::${item.finishType}::${item.lifeStage}`;
     const card = (
     <div
      className="bg-card border-input rounded-lg border p-6 shadow-md transition-all transition-colors"
     >
-     <div className="px-6 py-6">
-     <span className="bg-card border-input transition-colors-icon rounded-lg border p-6 shadow-md transition-all">
+     <div className="flex items-center gap-3">
+     <span className="flex-shrink-0 text-2xl">
       {typeIcon(item.itemType)}
      </span>
-     <div className="bg-card border-input transition-colors-info rounded-lg border p-6 shadow-md transition-all">
-      <span className="bg-card border-input transition-colors-title rounded-lg border p-6 shadow-md transition-all">
+     <div className="min-w-0 flex-1">
+      <span className="text-foreground block truncate font-semibold">
       {item.title}
       </span>
-      <span className="bg-card border-input transition-colors-maker rounded-lg border p-6 shadow-md transition-all">
+      <span className="text-muted-foreground block text-sm">
       {item.maker}
       {item.scale ? ` · ${item.scale}` :""}
       {item.finishType ? ` · ${item.finishType}` :""}
@@ -142,7 +142,7 @@ export default async function MarketPricePage({
      </div>
      </div>
 
-     <div className="bg-card border-input transition-colors-prices rounded-lg border p-6 shadow-md transition-all">
+     <div className="mt-4">
      <div className="text-forest text-lg font-bold">
       {formatCurrency(item.lowestPrice)}
       {item.lowestPrice !== item.highestPrice
@@ -155,7 +155,7 @@ export default async function MarketPricePage({
      </div>
      </div>
 
-     <div className="bg-card border-input transition-colors-footer rounded-lg border p-6 shadow-md transition-all">
+     <div className="border-input mt-4 flex items-center justify-between border-t pt-4">
      <span className="text-forest inline-flex items-center rounded-full bg-success/10 px-[8px] py-[2px] font-semibold">
       {item.transactionVolume} sale{item.transactionVolume !== 1 ?"s" :""}
      </span>

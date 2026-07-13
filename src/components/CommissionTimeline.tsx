@@ -230,7 +230,7 @@ export default function CommissionTimeline({
  <button
  key={action.label}
  className={`btn ${action.style === "primary" ? "btn-primary" : "btn-ghost"} text-sm ${
- action.style === "danger" ? "text-red-700 border-red-200" : ""
+ action.style === "danger" ? "text-destructive border-destructive/30" : ""
  }`}
  onClick={() => handleStatusAction(action.label)}
  disabled={acting}
@@ -336,7 +336,7 @@ export default function CommissionTimeline({
  </p>
  )}
  {uploadError && (
- <p className="text-red-700 mt-2 mt-[4] flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm">
+ <p className="text-destructive mt-2 mt-[4] flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm">
  {uploadError}
  </p>
  )}
@@ -415,7 +415,7 @@ export default function CommissionTimeline({
  </div>
  </div>
  {update.requiresPayment && (
- <span className="text-xs font-semibold text-amber-500">
+ <span className="text-xs font-semibold text-warning">
  💰 Payment Due
  </span>
  )}

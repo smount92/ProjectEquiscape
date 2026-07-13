@@ -50,7 +50,7 @@ export default function MatchmakerMatches({
  {matches.map((match) => (
  <div
  key={match.id}
- className="bg-muted border-input flex gap-2 rounded-md border p-2 transition-all duration-200 hover:border-orange-300 hover:shadow-[0_2px_12px_rgba(251,146,60,0.1)]"
+ className="bg-muted border-input flex gap-2 rounded-md border p-2 transition-all duration-200 hover:border-warning/40 hover:shadow-[0_2px_12px_rgba(251,146,60,0.1)]"
  >
  <div className="h-[52px] w-[52px] shrink-0 overflow-hidden rounded-sm bg-black/[0.03]">
  {match.thumbnailUrl ? (
@@ -76,7 +76,7 @@ export default function MatchmakerMatches({
  </Link>
  <div className="mt-[2px] flex items-center gap-2">
  <span
- className={`rounded-full px-2 py-[2px] text-xs font-bold ${match.trade_status ==="For Sale" ?"bg-emerald-100 text-[#22c55e]" :"bg-blue-50 text-info"}`}
+ className={`rounded-full px-2 py-[2px] text-xs font-bold ${match.trade_status ==="For Sale" ?"bg-success/10 text-success" :"bg-info/10 text-info"}`}
  >
  {match.trade_status ==="For Sale" ?"💲" :"🤝"}{""}
  {match.listing_price

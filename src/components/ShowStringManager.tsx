@@ -207,7 +207,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
     and convert results to ribbons when you get home.
   </p>
  {error && (
- <p className="text-red-700 mt-2 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm">
+ <p className="text-destructive mt-2 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm">
  {error}
  </p>
  )}
@@ -368,7 +368,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  <div
  className="mb-1 flex items-center gap-2"
  >
- <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-xs font-semibold text-[#ef4444]">
+ <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-semibold text-destructive">
  ⚠️ {conflicts.length} Conflict
  {conflicts.length !== 1 ?"s" :""}
  </span>
@@ -382,7 +382,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  return (
  <div
  key={entry.id}
- className={`relative flex flex-1 items-center justify-center text-xs font-semibold text-white transition-opacity ${isConflict ?"animate-pulse bg-[#ef4444]" :"bg-forest"}`}
+ className={`relative flex flex-1 items-center justify-center text-xs font-semibold text-white transition-opacity ${isConflict ?"animate-pulse bg-destructive" :"bg-forest"}`}
  title={`${entry.horseName} — ${entry.className}${entry.timeSlot ? ` @ ${entry.timeSlot}` :""}`}
  >
  {entry.className.slice(0, 3)}
@@ -458,7 +458,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
   </span>
   <span className="flex-1">{entry.className}</span>
   {entry.division && (
-  <span className="rounded-full bg-purple-100/50 px-[8px] py-[2px] text-xs text-[#a78bfa]">
+  <span className="rounded-full bg-studio/10 px-[8px] py-[2px] text-xs text-studio">
   {entry.division}
   </span>
   )}
@@ -606,7 +606,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
     <input
       id="show-advanced-toggle"
       type="checkbox"
-      className="h-4 w-4 rounded border-gray-300 text-forest focus:ring-forest accent-forest"
+      className="h-4 w-4 rounded border-input text-forest focus:ring-forest accent-forest"
       checked={showAdvanced}
       onChange={(e) => setShowAdvanced(e.target.checked)}
     />
@@ -768,7 +768,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
               },
             }))
           }
-          className="h-4 w-4 rounded border-gray-300 text-forest focus:ring-forest accent-forest"
+          className="h-4 w-4 rounded border-input text-forest focus:ring-forest accent-forest"
         />
       </td>
     </>

@@ -275,7 +275,7 @@ export default function SuggestNewEntryForm() {
  </div>
 
  {error && (
- <p className="text-red-700 mt-2 flex items-center gap-2 rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm">
+ <p className="text-destructive mt-2 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm">
  {error}
  </p>
  )}

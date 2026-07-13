@@ -4,22 +4,11 @@ import Link from"next/link";
 import { getClientCommissions } from"@/app/actions/art-studio";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import { Button } from "@/components/ui/button";
-
+import { STATUS_STYLES } from "@/lib/studio/statusStyles";
+import { Palette, CheckCircle, Ban, DollarSign, type LucideIcon } from "lucide-react";
 
 export const metadata = {
  title:"My Commissions — Model Horse Hub",
-};
-
-const STATUS_STYLES: Record<string, string> = {
- requested: "bg-stone-500/20 text-secondary-foreground border-stone-500/40",
- accepted: "bg-blue-500/20 text-blue-600 border-blue-500/40",
- in_progress: "bg-amber-500/20 text-amber-600 border-amber-500/40",
- review: "bg-studio/20 text-studio border-studio/40",
- revision: "bg-orange-500/20 text-orange-600 border-orange-500/40",
- completed: "bg-green-500/20 text-green-600 border-green-500/40",
- delivered: "bg-teal-500/20 text-teal-600 border-teal-500/40",
- declined: "bg-red-500/20 text-red-600 border-red-500/40",
- cancelled: "bg-red-500/20 text-red-600 border-red-500/40",
 };
 
 export default async function MyCommissionsPage() {
@@ -38,12 +27,12 @@ export default async function MyCommissionsPage() {
  const completed = commissions.filter((c) => ["completed","delivered"].includes(c.status));
  const closed = commissions.filter((c) => ["declined","cancelled"].includes(c.status));
 
- const renderGroup = (title: string, items: typeof commissions, emoji: string) => {
+ const renderGroup = (title: string, items: typeof commissions, Icon: LucideIcon) => {
  if (items.length === 0) return null;
  return (
   <div className="mb-8">
-  <h2 className="mb-4 text-lg">
-   {emoji} {title} ({items.length})
+  <h2 className="mb-4 flex items-center gap-2 text-lg">
+   <Icon className="h-5 w-5" /> {title} ({items.length})
   </h2>
   <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-4 max-md:grid-cols-1">
    {items.map((c) => (
@@ -57,14 +46,14 @@ export default async function MyCommissionsPage() {
      {c.commissionType}
     </span>
     <span
-     className={`inline-flex items-center rounded-full px-[10px] py-[3px] text-xs font-semibold whitespace-nowrap border ${STATUS_STYLES[c.status] || "bg-stone-500/20 text-secondary-foreground border-stone-500/40"}`}
+     className={`inline-flex items-center rounded-full px-[10px] py-[3px] text-xs font-semibold whitespace-nowrap border ${STATUS_STYLES[c.status] || "bg-muted text-muted-foreground border-input"}`}
     >
      {c.statusLabel}
     </span>
     </div>
     <div className="text-muted-foreground mb-2 flex gap-4 text-sm">
-    <span>🎨 @{c.artistAlias}</span>
-    {c.priceQuoted && <span>💰 ${c.priceQuoted}</span>}
+    <span className="inline-flex items-center gap-1"><Palette className="h-4 w-4" /> @{c.artistAlias}</span>
+    {c.priceQuoted && <span className="inline-flex items-center gap-1"><DollarSign className="h-4 w-4" /> {c.priceQuoted}</span>}
     </div>
     <p className="text-secondary-foreground mb-2 text-sm leading-normal">
     {c.description.length > 100 ? c.description.substring(0, 100) +"…" : c.description}
@@ -87,14 +76,14 @@ export default async function MyCommissionsPage() {
 
  return (
  <ExplorerLayout
-  title={<>🎨 <span className="text-forest">My Commissions</span></>}
+  title={<span className="text-forest">My Commissions</span>}
   description="Track commissions you've requested from artists."
  >
   {commissions.length === 0 ? (
   <div
-   className="bg-white border-input animate-fade-in-up rounded-lg border text-center shadow-md transition-all"
+   className="bg-card border-input animate-fade-in-up rounded-lg border text-center shadow-md transition-all"
   >
-   <p className="mb-4 text-[2rem]">🎨</p>
+   <Palette className="mx-auto mb-4 h-8 w-8 text-muted-foreground" />
    <p className="text-muted-foreground">You haven&apos;t requested any commissions yet.</p>
    <Button asChild><Link
    href="/discover"
@@ -104,9 +93,9 @@ export default async function MyCommissionsPage() {
   </div>
   ) : (
   <div className="animate-fade-in-up">
-   {renderGroup("Active", active,"🎨")}
-   {renderGroup("Completed", completed,"✅")}
-   {renderGroup("Closed", closed,"🚫")}
+   {renderGroup("Active", active, Palette)}
+   {renderGroup("Completed", completed, CheckCircle)}
+   {renderGroup("Closed", closed, Ban)}
   </div>
   )}
  </ExplorerLayout>

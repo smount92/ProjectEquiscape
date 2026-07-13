@@ -5,6 +5,7 @@ import { leaveReview, deleteReview } from"@/app/actions/transactions";
 import RatingStars from"@/components/RatingStars";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { CheckCircle } from "lucide-react";
 
 interface ExistingRating {
  id: string;
@@ -99,7 +100,7 @@ export default function RatingForm({
  {status ==="retracting" ?"Retracting…" :"Retract Rating"}
  </Button>
  </div>
- {status ==="error" && errorMsg && <div className="mt-2 text-sm text-red-700">{errorMsg}</div>}
+ {status ==="error" && errorMsg && <div className="mt-2 text-sm text-destructive">{errorMsg}</div>}
  </div>
  );
  }
@@ -154,11 +155,11 @@ export default function RatingForm({
  <div className="text-muted-foreground mt-1 text-right text-xs">{reviewText.length}/300</div>
  </div>
 
- {status ==="error" && errorMsg && <div className="mt-2 text-sm text-red-700 mb-4">{errorMsg}</div>}
+ {status ==="error" && errorMsg && <div className="mt-2 text-sm text-destructive mb-4">{errorMsg}</div>}
 
  {status ==="saved" && (
- <div className="mb-4 rounded-md border border-emerald-300 bg-emerald-50 px-4 py-2 text-sm text-[#22C55E]">
- ✅ Rating submitted! Thank you.
+ <div className="mb-4 flex items-center gap-2 rounded-md border border-success/30 bg-success/10 px-4 py-2 text-sm text-success">
+ <CheckCircle className="h-4 w-4" /> Rating submitted! Thank you.
  </div>
  )}
 

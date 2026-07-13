@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from"react";
+import { useState, useEffect, useCallback, type ReactNode } from"react";
 import {
     Dialog,
     DialogContent,
@@ -29,6 +29,18 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import { Button } from "@/components/ui/button";
+import {
+ FileEdit,
+ ClipboardList,
+ Gavel,
+ Settings,
+ Pencil,
+ Trash2,
+ ChevronUp,
+ ChevronDown,
+ Star,
+ Save,
+} from "lucide-react";
 
 type TabId ="details" |"classes" |"judges";
 
@@ -416,10 +428,10 @@ export default function ManageEventPage() {
  const totalClasses = divisions.reduce((sum, d) => sum + d.classes.length, 0);
  const totalEntries = divisions.reduce((sum, d) => sum + d.classes.reduce((s, c) => s + (c.entryCount || 0), 0), 0);
 
- const tabs: { id: TabId; label: string; icon: string; hidden?: boolean }[] = [
- { id:"details", label:"Edit Details", icon:"📝" },
- { id:"classes", label:"Class List", icon:"📋" },
- { id:"judges", label:"Judges", icon:"🧑‍⚖️", hidden: eventData.judgingMethod !=="expert_judge" },
+ const tabs: { id: TabId; label: string; icon: ReactNode; hidden?: boolean }[] = [
+ { id:"details", label:"Edit Details", icon: <FileEdit className="h-4 w-4" /> },
+ { id:"classes", label:"Class List", icon: <ClipboardList className="h-4 w-4" /> },
+ { id:"judges", label:"Judges", icon: <Gavel className="h-4 w-4" />, hidden: eventData.judgingMethod !=="expert_judge" },
  ];
 
  return (
@@ -431,7 +443,7 @@ export default function ManageEventPage() {
  <Link href={`/community/events/${eventId}`} className="text-muted-foreground mb-1 inline-block text-sm">
  ← Back to Event
  </Link>
- <h1>⚙️ Manage Event</h1>
+ <h1 className="inline-flex items-center gap-2"><Settings className="h-5 w-5" /> Manage Event</h1>
  <p className="text-secondary-foreground">{eventName}</p>
  </div>
  <div className="flex gap-2">
@@ -450,7 +462,7 @@ export default function ManageEventPage() {
  <button
  key={tab.id}
  onClick={() => setActiveTab(tab.id)}
- className={`cursor-pointer border-0 border-b-2 bg-transparent px-[var(--space-md)] py-[var(--space-sm)] text-sm transition-all duration-200 ${
+ className={`inline-flex cursor-pointer items-center gap-2 border-0 border-b-2 bg-transparent px-[var(--space-md)] py-[var(--space-sm)] text-sm transition-all duration-200 ${
  activeTab === tab.id
  ? "border-b-[var(--primary)] font-semibold text-foreground"
  : "border-b-transparent font-normal text-muted-foreground"
@@ -666,7 +678,7 @@ export default function ManageEventPage() {
  onClick={handleSaveDetails}
  disabled={isSaving || !eventData.name.trim()}
  >
- {isSaving ?"Saving…" :"💾 Save Details"}
+ {isSaving ?"Saving…" : <><Save className="h-4 w-4" /> Save Details</>}
  </Button>
  {detailsSaved && <span className="text-sm text-success">✅ Saved!</span>}
  </div>
@@ -695,7 +707,7 @@ export default function ManageEventPage() {
  disabled={divIndex === 0}
  title="Move up"
  >
- ▲
+ <ChevronUp className="h-3 w-3" />
  </button>
  <button
  className="border-input text-muted-foreground hover:border-success hover:text-forest flex h-[18px] w-[24px] cursor-pointer items-center justify-center rounded-sm border bg-transparent p-0 font-sans text-[0.6rem] transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-[0.3]"
@@ -703,7 +715,7 @@ export default function ManageEventPage() {
  disabled={divIndex === divisions.length - 1}
  title="Move down"
  >
- ▼
+ <ChevronDown className="h-3 w-3" />
  </button>
  </div>
 
@@ -746,14 +758,14 @@ export default function ManageEventPage() {
  }}
  title="Edit"
  >
- ✏️
+ <Pencil className="h-3.5 w-3.5" />
  </button>
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-destructive/30 bg-transparent px-6 py-2 text-sm font-semibold text-destructive no-underline transition-all hover:bg-destructive/10"
  onClick={() => handleDeleteDivision(div.id, div.name)}
  title="Delete"
  >
- 🗑️
+ <Trash2 className="h-4 w-4" />
  </button>
  <Button variant="outline" size="wide"
  onClick={() => {
@@ -779,14 +791,14 @@ export default function ManageEventPage() {
  onClick={() => handleMoveClass(div.id, clsIndex, -1)}
  disabled={clsIndex === 0}
  >
- ▲
+ <ChevronUp className="h-3 w-3" />
  </button>
  <button
  className="border-input text-muted-foreground hover:border-success hover:text-forest flex h-[14px] h-[18px] w-[20px] w-[24px] cursor-pointer items-center justify-center rounded-sm border bg-transparent p-0 font-sans text-[0.5rem] text-[0.6rem] transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-[0.3]"
  onClick={() => handleMoveClass(div.id, clsIndex, 1)}
  disabled={clsIndex === div.classes.length - 1}
  >
- ▼
+ <ChevronDown className="h-3 w-3" />
  </button>
  </div>
 
@@ -833,7 +845,7 @@ export default function ManageEventPage() {
  className="bg-warning/15 inline-flex items-center gap-[2px] rounded-full px-[6px] py-[1px] text-xs font-semibold whitespace-nowrap text-warning"
  title="NAN Qualifying"
  >
- ⭐ NAN
+ <Star className="h-3 w-3 fill-current" /> NAN
  </span>
  )}
  {(cls.entryCount || 0) > 0 && (
@@ -850,7 +862,7 @@ export default function ManageEventPage() {
  }
  title={cls.isNanQualifying ?"Remove NAN" :"Mark NAN"}
  >
- {cls.isNanQualifying ?"⭐" :"☆"}
+ {cls.isNanQualifying ? <Star className="h-3.5 w-3.5 fill-current" /> : <Star className="h-3.5 w-3.5" />}
  </button>
  <button
  className="cursor-pointer rounded-sm border-0 bg-transparent p-[2px] p-[4px] text-xs text-[0.9rem] transition-colors"
@@ -861,14 +873,14 @@ export default function ManageEventPage() {
  }}
  title="Edit"
  >
- ✏️
+ <Pencil className="h-3.5 w-3.5" />
  </button>
  <button
  className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-destructive/30 bg-transparent px-6 py-2 text-sm font-semibold text-destructive no-underline transition-all hover:bg-destructive/10"
  onClick={() => handleDeleteClass(cls.id, cls.name)}
  title="Delete"
  >
- 🗑️
+ <Trash2 className="h-4 w-4" />
  </button>
  </div>
  </>

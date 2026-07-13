@@ -18,6 +18,7 @@ import {
 import FocusLayout from"@/components/layouts/FocusLayout";
 import PageMasthead from"@/components/layouts/PageMasthead";
 import { Button } from "@/components/ui/button";
+import { Vote, Medal } from "lucide-react";
 
 export default function CreateEventPage() {
  const router = useRouter();
@@ -134,7 +135,7 @@ export default function CreateEventPage() {
     checked={judgingMethod ==="community_vote"}
     onChange={() => setJudgingMethod("community_vote")}
     />
-    🗳️ Community Vote
+    <Vote className="h-4 w-4" /> Community Vote
    </label>
    <label className="flex cursor-pointer items-center gap-1">
     <input
@@ -144,7 +145,7 @@ export default function CreateEventPage() {
     checked={judgingMethod ==="expert_judge"}
     onChange={() => setJudgingMethod("expert_judge")}
     />
-    🏅 Expert Judge
+    <Medal className="h-4 w-4" /> Expert Judge
    </label>
    </div>
    <span className="text-muted-foreground mt-1 block text-xs">

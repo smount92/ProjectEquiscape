@@ -6,6 +6,7 @@ import UniversalFeed from"@/components/UniversalFeed";
 import LoadMoreFeed from"@/components/LoadMoreFeed";
 import Link from"next/link";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import { Globe, Users } from "lucide-react";
 
 export const metadata = {
  title:"Activity Feed — Model Horse Hub",
@@ -40,7 +41,7 @@ export default async function FeedPage({ searchParams }: { searchParams: Promise
 
  return (
  <ExplorerLayout
-  title={<>📰 <span className="text-forest">Activity Feed</span></>}
+  title={<span className="text-forest">Activity Feed</span>}
   description="Stay up to date with what's happening in the community."
   /* Global tab brings its own leather panel — skip the archetype's
      ledger surface so leather sits directly on the page background
@@ -50,15 +51,15 @@ export default async function FeedPage({ searchParams }: { searchParams: Promise
   <div className="flex w-fit gap-1 rounded-lg border border-input bg-muted/60 p-1">
    <Link
    href="/feed"
-   className={`rounded-md px-5 py-2 text-sm whitespace-nowrap no-underline transition-all ${activeTab ==="global" ?"bg-forest font-semibold text-white shadow-sm" :"text-secondary-foreground hover:bg-card hover:text-foreground"}`}
+   className={`inline-flex items-center gap-2 rounded-md px-5 py-2 text-sm whitespace-nowrap no-underline transition-all ${activeTab ==="global" ?"bg-forest font-semibold text-white shadow-sm" :"text-secondary-foreground hover:bg-card hover:text-foreground"}`}
    >
-   🌐 Global
+   <Globe className="h-4 w-4" /> Global
    </Link>
    <Link
    href="/feed?tab=following"
-   className={`rounded-md px-5 py-2 text-sm whitespace-nowrap no-underline transition-all ${activeTab ==="following" ?"bg-forest font-semibold text-white shadow-sm" :"text-secondary-foreground hover:bg-card hover:text-foreground"}`}
+   className={`inline-flex items-center gap-2 rounded-md px-5 py-2 text-sm whitespace-nowrap no-underline transition-all ${activeTab ==="following" ?"bg-forest font-semibold text-white shadow-sm" :"text-secondary-foreground hover:bg-card hover:text-foreground"}`}
    >
-   👥 Following
+   <Users className="h-4 w-4" /> Following
    </Link>
   </div>
   }
