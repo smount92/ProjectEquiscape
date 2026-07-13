@@ -6,14 +6,14 @@ export default async function TransferHistorySection() {
  if (history.length === 0) return null;
 
  return (
- <details className="mt-8" id="transfer-history">
- <summary className="hidden">
- 📤 Transfer History
- <span className="inline-flex h-[20px] min-w-[20px] items-center justify-center rounded-full bg-[rgb(245 245 244)] px-[6px] py-0 text-xs font-semibold">
+ <details className="mt-6 rounded-xl border border-input bg-card p-4 shadow-sm" id="transfer-history">
+ <summary className="flex cursor-pointer list-none items-center gap-2 px-2 py-2 text-base font-bold text-foreground select-none [&::-webkit-details-marker]:hidden">
+ 📤 <span>Transfer History</span>
+ <span className="ml-auto inline-flex h-[20px] min-w-[20px] items-center justify-center rounded-full bg-muted px-[6px] py-0 text-xs font-semibold">
  {history.length}
  </span>
  </summary>
- <div className="grid-cols-[repeat(auto-fill,minmax(240px,1fr))] mt-2 grid gap-4">
+ <div className="grid-cols-[repeat(auto-fill,minmax(240px,1fr))] mt-2 grid gap-4 px-2 pb-2">
  {history.map((item) => (
  <Link
  key={item.id}

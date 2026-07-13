@@ -26,6 +26,7 @@ import PropFormFields from "@/components/forms/PropFormFields";
 import DioramaFormFields from "@/components/forms/DioramaFormFields";
 import OtherModelFormFields from "@/components/forms/OtherModelFormFields";
 import { Button } from "@/components/ui/button";
+import { track } from "@/lib/analytics";
 
 // ---- Types ----
 
@@ -580,6 +581,10 @@ export default function EditHorsePage() {
  });
 
  if (!result.success) throw new Error(result.error ||"Failed to save.");
+
+ if (tradeStatus === "For Sale" || tradeStatus === "Open to Offers") {
+ track("list_for_sale", { status: tradeStatus, has_price: !!listingPrice });
+ }
 
  // Update multi-collection assignments via junction table
  await setHorseCollections(horseId, selectedCollectionIds);

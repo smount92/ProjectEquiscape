@@ -9,7 +9,7 @@ import PageMasthead from"@/components/layouts/PageMasthead";
 import { Search, CheckCircle } from "lucide-react";
 
 export const metadata: Metadata = {
- title:"Help Me ID This Model — Model Horse Hub",
+ title:"Help Me ID This Model",
  description:
 "Can't identify a model horse? Upload a photo and let the community help! Our collectors can identify from 10,500+ reference releases and artist resins.",
 };
@@ -106,10 +106,9 @@ export default async function HelpIdPage() {
    <h2 className="mb-6 flex items-center gap-2 text-lg font-bold"><Search className="h-5 w-5" /> Open Requests ({openRequests.length})</h2>
    <div className="grid-cols-[repeat(auto-fill,minmax(280px,1fr))] grid gap-6">
    {openRequests.map((req) => (
-   <Link
+   <div
     key={req.id}
-    href={`/community/help-id/${req.id}`}
-    className="bg-card border-input flex flex-col overflow-hidden rounded-lg border no-underline shadow-md transition-all hover:shadow-lg"
+    className="bg-card border-input relative flex flex-col overflow-hidden rounded-lg border no-underline shadow-md transition-all hover:shadow-lg"
     id={`help-id-${req.id}`}
    >
     <div className="relative aspect-square overflow-hidden bg-[var(--muted)]">
@@ -129,22 +128,30 @@ export default async function HelpIdPage() {
     </span>
     </div>
     <div className="flex flex-1 flex-col gap-2 p-4">
-    <p className="text-secondary-foreground line-clamp-2 text-sm leading-relaxed">
+    <Link
+     href={`/community/help-id/${req.id}`}
+     className="text-secondary-foreground line-clamp-2 text-sm leading-relaxed no-underline after:absolute after:inset-0 after:content-['']"
+    >
      {req.description
      ? req.description.length > 100
      ? req.description.substring(0, 100) +"…"
      : req.description
      :"No description provided"}
-    </p>
+    </Link>
     <div className="text-muted-foreground mt-auto flex items-center justify-between text-xs">
-     <span>by {req.userName}</span>
+     <Link
+      href={`/profile/${encodeURIComponent(req.userName)}`}
+      className="relative z-10 hover:underline"
+     >
+      by {req.userName}
+     </Link>
      <span>
      💬 {suggestionCounts.get(req.id) || 0} suggestion
      {(suggestionCounts.get(req.id) || 0) !== 1 ?"s" :""}
      </span>
     </div>
     </div>
-   </Link>
+   </div>
    ))}
    </div>
   </section>
@@ -158,10 +165,9 @@ export default async function HelpIdPage() {
    </h2>
    <div className="grid-cols-[repeat(auto-fill,minmax(280px,1fr))] grid gap-6">
    {resolvedRequests.map((req) => (
-   <Link
+   <div
     key={req.id}
-    href={`/community/help-id/${req.id}`}
-    className="bg-card border-input flex flex-col overflow-hidden rounded-lg border opacity-80 no-underline shadow-md transition-all hover:opacity-100 hover:shadow-lg"
+    className="bg-card border-input relative flex flex-col overflow-hidden rounded-lg border opacity-80 no-underline shadow-md transition-all hover:opacity-100 hover:shadow-lg"
     id={`help-id-${req.id}`}
    >
     <div className="relative aspect-square overflow-hidden bg-[var(--muted)]">
@@ -181,19 +187,27 @@ export default async function HelpIdPage() {
     </span>
     </div>
     <div className="flex flex-1 flex-col gap-2 p-4">
-    <p className="text-secondary-foreground line-clamp-2 text-sm leading-relaxed">
+    <Link
+     href={`/community/help-id/${req.id}`}
+     className="text-secondary-foreground line-clamp-2 text-sm leading-relaxed no-underline after:absolute after:inset-0 after:content-['']"
+    >
      {req.description
      ? req.description.length > 100
      ? req.description.substring(0, 100) +"…"
      : req.description
      :"No description"}
-    </p>
+    </Link>
     <div className="text-muted-foreground mt-auto flex items-center justify-between text-xs">
-     <span>by {req.userName}</span>
+     <Link
+      href={`/profile/${encodeURIComponent(req.userName)}`}
+      className="relative z-10 hover:underline"
+     >
+      by {req.userName}
+     </Link>
      <span>💬 {suggestionCounts.get(req.id) || 0}</span>
     </div>
     </div>
-   </Link>
+   </div>
    ))}
    </div>
   </section>

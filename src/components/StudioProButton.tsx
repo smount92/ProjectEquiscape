@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Palette } from "lucide-react";
+import { track } from "@/lib/analytics";
 
 /**
  * StudioProButton — triggers Stripe Checkout for Studio Pro artist tier
@@ -25,6 +26,7 @@ export default function StudioProButton() {
                 return;
             }
 
+            track("checkout_start", { tier: "studio_pro" });
             window.location.href = data.url;
         } catch {
             setError("Network error. Please check your connection.");

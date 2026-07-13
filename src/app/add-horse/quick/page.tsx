@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import FocusLayout from"@/components/layouts/FocusLayout";
 import PageMasthead from"@/components/layouts/PageMasthead";
 import { Button } from "@/components/ui/button";
+import { track } from "@/lib/analytics";
 
 const FINISH_TYPES = ["OF","Custom","Artist Resin"];
 const CONDITION_GRADES = [
@@ -80,6 +81,8 @@ export default function QuickAddPage() {
  setError(result.error ||"Failed to add horse.");
  return;
  }
+
+ track("add_horse", { category: "model", quick: true });
 
  setRecentAdds((prev) =>
  [

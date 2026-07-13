@@ -46,6 +46,7 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
  });
  if (result.success && result.code) {
  setGeneratedCode(result.code);
+ setTransferId(result.transferId ?? null);
  setStep("code");
  } else {
  setError(result.error ||"Failed to generate code.");
@@ -78,8 +79,6 @@ export default function TransferModal({ horseId, horseName }: TransferModalProps
  setGeneratedCode(null);
  setError(null);
  };
-
- void transferId;
 
  return (
  <>

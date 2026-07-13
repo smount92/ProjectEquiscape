@@ -250,7 +250,15 @@ export default function OfferCard({ transaction, currentUserId }: OfferCardProps
  ) : isBuyer ? (
  <p className="text-muted-foreground text-sm">✅ Funds verified. Check notifications for your claim PIN.</p>
  ) : (
+ <div className="mt-2 flex flex-wrap items-center gap-2">
  <p className="text-muted-foreground text-sm">✅ PIN released to buyer. Transfer in progress…</p>
+ <Button variant="destructive-outline" size="wide"
+ onClick={handleCancel}
+ disabled={saving}
+ >
+ {saving ?"…" :"🚫 Cancel Sale"}
+ </Button>
+ </div>
  )}
  </div>
  )}

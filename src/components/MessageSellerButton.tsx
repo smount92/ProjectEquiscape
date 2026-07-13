@@ -5,6 +5,7 @@ import { useRouter } from"next/navigation";
 import { createOrFindConversation } from"@/app/actions/messaging";
 import MakeOfferModal from"@/components/MakeOfferModal";
 import { Button } from "@/components/ui/button";
+import { track } from "@/lib/analytics";
 
 interface MessageSellerButtonProps {
  sellerId: string;
@@ -45,6 +46,7 @@ export default function MessageSellerButton({
  const result = await createOrFindConversation(sellerId, horseId);
 
  if (result.success && result.conversationId) {
+ track("message_seller", { horse_id: horseId });
  router.push(`/inbox/${result.conversationId}`);
  } else {
  setLoading(false);

@@ -128,11 +128,34 @@ function ShowMasthead({ show, entryCount }: { show: PublicShow; entryCount: numb
     );
 }
 
+/** Event JSON-LD — built only from data PublicShowV2Page already fetched
+ *  (no extra queries). https://schema.org/Event */
+function buildShowJsonLd(show: PublicShow) {
+    const startDate = show.mode === "live" ? show.showDate : show.entriesOpenAt;
+    return {
+        "@context": "https://schema.org",
+        "@type": "Event",
+        name: show.title,
+        ...(startDate ? { startDate } : {}),
+        eventAttendanceMode:
+            show.mode === "live"
+                ? "https://schema.org/OfflineEventAttendanceMode"
+                : "https://schema.org/OnlineEventAttendanceMode",
+        eventStatus: "https://schema.org/EventScheduled",
+        organizer: { "@type": "Person", name: show.hostAlias },
+        location:
+            show.mode === "live"
+                ? { "@type": "Place", name: show.venueName ?? undefined, address: show.venueAddress ?? undefined }
+                : { "@type": "VirtualLocation", url: `${process.env.NEXT_PUBLIC_APP_URL || "https://modelhorsehub.com"}/shows/${show.id}` },
+    };
+}
+
 export default async function PublicShowV2Page({ showId }: { showId: string }) {
     const result = await getPublicShow({ showId });
     // Bad id, missing show, and drafts all land here.
     if (!result.success) notFound();
     const { show, divisions, entryCount } = result;
+    const showJsonLd = buildShowJsonLd(show);
 
     // Auth is OPTIONAL on this page — anon browsers read everything,
     // authed viewers additionally get their entries + the entry flow.
@@ -179,12 +202,14 @@ export default async function PublicShowV2Page({ showId }: { showId: string }) {
                     : "An online photo show — enter from your stable."
             }
         >
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(showJsonLd) }} />
             <div className="flex flex-col gap-6">
                 <ShowMasthead show={show} entryCount={entryCount} />
 
                 {champions && <ShowChampions champions={champions} />}
 
                 <ShowEntrySection
+                    showId={showId}
                     mode={show.mode}
                     status={show.status}
                     divisions={divisions}

@@ -24,6 +24,7 @@ import type { EntrantHorse } from "@/lib/shows/public";
 import type { ShowMode } from "@/lib/shows/types";
 import { createClient } from "@/lib/supabase/client";
 import { getPublicImageUrl } from "@/lib/utils/storage";
+import { track } from "@/lib/analytics";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -49,6 +50,7 @@ export interface EnterableClass {
 }
 
 interface EnterClassDialogProps {
+    showId: string;
     cls: EnterableClass;
     mode: ShowMode;
     horses: EntrantHorse[];
@@ -58,6 +60,7 @@ interface EnterClassDialogProps {
 }
 
 export default function EnterClassDialog({
+    showId,
     cls,
     mode,
     horses,
@@ -149,6 +152,7 @@ export default function EnterClassDialog({
         });
         setSubmitting(false);
         if (result.success) {
+            track("show_entry", { show_id: showId });
             onEntered();
             onClose();
         } else {

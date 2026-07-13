@@ -34,6 +34,7 @@ import PropFormFields from "@/components/forms/PropFormFields";
 import DioramaFormFields from "@/components/forms/DioramaFormFields";
 import OtherModelFormFields from "@/components/forms/OtherModelFormFields";
 import { Button } from "@/components/ui/button";
+import { track } from "@/lib/analytics";
 
 // ---- Constants ----
 
@@ -496,6 +497,10 @@ export default function AddHorsePage() {
  setSavedHorseName(customName.trim());
  setNewHorseId(horseId);
  setShowSuccess(true);
+ track("add_horse", { category: assetCategory, has_catalog: !!selectedCatalogId });
+ if (tradeStatus === "For Sale" || tradeStatus === "Open to Offers") {
+ track("list_for_sale", { status: tradeStatus, has_price: !!listingPrice });
+ }
  } catch (err) {
  setSubmitError(err instanceof Error ? err.message :"Something went wrong.");
  // Reset the guard only on error — on success the form is replaced by the

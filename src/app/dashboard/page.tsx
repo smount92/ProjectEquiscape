@@ -23,6 +23,7 @@ import { stableV2Enabled } from"@/lib/stable/flags";
 import ExportButton from"@/components/ExportButton";
 import InsuranceReportButton from"@/components/InsuranceReportButton";
 import TransferHistorySection from"@/components/TransferHistorySection";
+import PendingTransfersSection from"@/components/PendingTransfersSection";
 import NanDashboardWidget from"@/components/NanDashboardWidget";
 import ShowHistoryWidget from"@/components/ShowHistoryWidget";
 import { getShowHistory } from"@/app/actions/shows";
@@ -415,6 +416,11 @@ async function DashboardContent({ userId, page }: { userId: string; page: number
   </div>
   </div>
   )}
+
+  {/* Pending Transfers — outgoing codes awaiting claim */}
+  <Suspense fallback={null}>
+  <PendingTransfersSection />
+  </Suspense>
 
   {/* NAN Qualification Dashboard */}
   <Suspense fallback={null}>

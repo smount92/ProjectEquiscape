@@ -291,7 +291,7 @@ export async function generateTransferCode(data: {
     salePrice?: number;
     isPricePublic?: boolean;
     notes?: string;
-}): Promise<{ success: boolean; code?: string; error?: string }> {
+}): Promise<{ success: boolean; code?: string; transferId?: string; error?: string }> {
     const { supabase, user } = await requireAuth();
 
     // Verify ownership
@@ -316,18 +316,22 @@ export async function generateTransferCode(data: {
         .eq("status", "pending");
 
     const code = generateCode();
-    const { error } = await supabase.from("horse_transfers").insert({
-        horse_id: data.horseId,
-        sender_id: user.id,
-        transfer_code: code,
-        acquisition_type: data.acquisitionType,
-        sale_price: data.salePrice ?? null,
-        is_price_public: data.isPricePublic ?? false,
-        notes: data.notes ?? null,
-    });
+    const { data: inserted, error } = await supabase
+        .from("horse_transfers")
+        .insert({
+            horse_id: data.horseId,
+            sender_id: user.id,
+            transfer_code: code,
+            acquisition_type: data.acquisitionType,
+            sale_price: data.salePrice ?? null,
+            is_price_public: data.isPricePublic ?? false,
+            notes: data.notes ?? null,
+        })
+        .select("id")
+        .single();
 
     if (error) return { success: false, error: error.message };
-    return { success: true, code };
+    return { success: true, code, transferId: (inserted as { id: string } | null)?.id };
 }
 
 /** Claim a horse using a transfer code. */
@@ -429,6 +433,7 @@ export async function getMyPendingTransfers(): Promise<{
     horseId: string;
     horseName: string;
     transferCode: string;
+    createdAt: string;
     expiresAt: string;
     acquisitionType: string;
 }[]> {
@@ -436,7 +441,7 @@ export async function getMyPendingTransfers(): Promise<{
 
     const { data } = await supabase
         .from("horse_transfers")
-        .select("id, horse_id, transfer_code, expires_at, acquisition_type")
+        .select("id, horse_id, transfer_code, created_at, expires_at, acquisition_type")
         .eq("sender_id", user.id)
         .eq("status", "pending")
         .order("created_at", { ascending: false });
@@ -453,11 +458,12 @@ export async function getMyPendingTransfers(): Promise<{
     const nameMap = new Map<string, string>();
     (horses ?? []).forEach((h: { id: string; custom_name: string }) => nameMap.set(h.id, h.custom_name));
 
-    return data.map((t: { id: string; horse_id: string; transfer_code: string; expires_at: string; acquisition_type: string }) => ({
+    return data.map((t: { id: string; horse_id: string; transfer_code: string; created_at: string; expires_at: string; acquisition_type: string }) => ({
         id: t.id,
         horseId: t.horse_id,
         horseName: nameMap.get(t.horse_id) || "Unknown Horse",
         transferCode: t.transfer_code,
+        createdAt: t.created_at,
         expiresAt: t.expires_at,
         acquisitionType: t.acquisition_type,
     }));

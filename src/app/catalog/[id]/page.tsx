@@ -8,7 +8,7 @@ import CatalogSubMasthead from"@/components/catalog/CatalogSubMasthead";
 import { buildEbaySearchUrl } from"@/lib/utils/ebayAffiliate";
 import { Button } from "@/components/ui/button";
 import { referenceHref, referencePagesEnabled } from"@/lib/catalog/referenceUrl";
-import { FileEdit } from"lucide-react";
+import { FileEdit, Plus } from"lucide-react";
 
 interface Props {
  params: Promise<{ id: string }>;
@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
  const supabase = await createClient();
  const { data } = await supabase.from("catalog_items").select("title, maker, maker_slug, slug").eq("id", id).single();
 
- if (!data) return { title:"Entry Not Found — Model Horse Hub" };
+ if (!data) return { title:"Entry Not Found" };
  const d = data as { title: string; maker: string; maker_slug: string | null; slug: string | null };
  // When reference pages are live, they're the canonical public view — point
  // this (now edit-only) page's canonical there so Google consolidates the
@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
  ? `${process.env.NEXT_PUBLIC_APP_URL || "https://modelhorsehub.com"}${referenceHref({ id, maker: d.maker, title: d.title, maker_slug: d.maker_slug, slug: d.slug })}`
  : undefined;
  return {
- title: `${d.title} by ${d.maker} — Reference Catalog — Model Horse Hub`,
+ title: `${d.title} by ${d.maker} — Reference Catalog`,
  description: `View details for ${d.title} by ${d.maker} in the Model Horse Hub reference catalog.`,
  ...(canonicalRef ? { alternates: { canonical: canonicalRef } } : {}),
  };
@@ -123,6 +123,11 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
 
    {/* Action Buttons */}
    <div className="flex gap-2">
+   <Button asChild>
+    <Link href={`/add-horse?catalog=${id}`}>
+    <Plus className="h-4 w-4" /> Add to My Stable
+    </Link>
+   </Button>
    {user ? (
     <SuggestEditModal catalogItem={catalogItem} openOnMount={suggest ==="true"} />
    ) : (

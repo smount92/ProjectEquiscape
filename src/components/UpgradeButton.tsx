@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Gem } from "lucide-react";
+import { track } from "@/lib/analytics";
 
 /**
  * UpgradeButton — triggers Stripe Checkout flow
@@ -26,6 +27,7 @@ export default function UpgradeButton() {
             }
 
             // Redirect to Stripe's hosted checkout
+            track("checkout_start", { tier: "pro" });
             window.location.href = data.url;
         } catch {
             setError("Network error. Please check your connection.");

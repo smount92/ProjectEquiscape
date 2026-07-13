@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/table";
 
 interface ShowEntrySectionProps {
+    showId: string;
     mode: ShowMode;
     status: ShowStatus;
     divisions: ConsoleDivision[];
@@ -48,6 +49,7 @@ function classLabel(cls: { classNumber: string | null; name: string }): string {
 }
 
 export default function ShowEntrySection({
+    showId,
     mode,
     status,
     divisions,
@@ -347,6 +349,7 @@ export default function ShowEntrySection({
             {activeClass && (
                 <EnterClassDialog
                     key={`${activeClass.id}-${dialogNonce}`}
+                    showId={showId}
                     cls={activeClass}
                     mode={mode}
                     horses={horses}
