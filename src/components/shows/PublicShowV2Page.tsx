@@ -13,6 +13,7 @@
  *  - Fees: manual checklist (fee_info free text below), Phase F.
  */
 
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import {
@@ -80,7 +81,17 @@ function ShowMasthead({ show, entryCount }: { show: PublicShow; entryCount: numb
                 {show.isMhhQualifying && <Badge>MHH Qualifying</Badge>}
             </div>
             <dl className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-3">
-                <MastheadFact label="Host" value={`@${show.hostAlias}`} />
+                <MastheadFact
+                    label="Host"
+                    value={
+                        <Link
+                            href={`/profile/${encodeURIComponent(show.hostAlias)}`}
+                            className="text-(--leather-text) hover:underline"
+                        >
+                            @{show.hostAlias}
+                        </Link>
+                    }
+                />
                 {show.mode === "live" ? (
                     <>
                         <MastheadFact label="Show date" value={formatDate(show.showDate)} />

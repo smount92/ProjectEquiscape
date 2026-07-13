@@ -242,7 +242,16 @@ export default function ShowEntryGallery({ gallery, authed }: ShowEntryGalleryPr
                                                         #{entry.entryNumber}
                                                     </span>
                                                 )}
-                                                {entry.horseName}
+                                                {entry.horseId !== null ? (
+                                                    <Link
+                                                        href={`/community/${entry.horseId}`}
+                                                        className="hover:underline"
+                                                    >
+                                                        {entry.horseName}
+                                                    </Link>
+                                                ) : (
+                                                    entry.horseName
+                                                )}
                                             </p>
                                             {entry.ownerAlias !== null && (
                                                 <Link

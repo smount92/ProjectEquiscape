@@ -13,6 +13,7 @@
  */
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { scratchEntry } from "@/app/actions/shows-v2";
@@ -134,14 +135,23 @@ export default function ShowEntrySection({
                                 return (
                                     <TableRow key={entry.id}>
                                         <TableCell>{entry.entryNumber ?? "—"}</TableCell>
-                                        <TableCell className={scratched ? "line-through" : ""}>
-                                            {entry.horseName}
+                                        <TableCell>
+                                            <Link
+                                                href={`/community/${entry.horseId}`}
+                                                className={scratched ? "line-through" : ""}
+                                            >
+                                                {entry.horseName}
+                                            </Link>
                                         </TableCell>
                                         <TableCell>{cls ? classLabel(cls) : "—"}</TableCell>
                                         <TableCell>
                                             {entry.handlerAlias ? (
                                                 <span>
-                                                    @{entry.handlerAlias}{" "}
+                                                    <Link
+                                                        href={`/profile/${encodeURIComponent(entry.handlerAlias)}`}
+                                                    >
+                                                        @{entry.handlerAlias}
+                                                    </Link>{" "}
                                                     <Badge variant="outline">proxy</Badge>
                                                 </span>
                                             ) : (

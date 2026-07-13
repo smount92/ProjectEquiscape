@@ -36,6 +36,7 @@ vi.mock("@/app/actions/shows-v2", () => actions);
 function entry(overrides: Partial<GalleryEntry> = {}): GalleryEntry {
     return {
         id: "entry-1",
+        horseId: null,
         horseName: "Dash of Cash",
         entryNumber: 12,
         photoUrl: "https://cdn.test/photo1.webp",

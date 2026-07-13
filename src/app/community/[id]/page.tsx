@@ -320,7 +320,7 @@ editionSize: rawPedigree.edition_size,
  {/* Two-column layout: Gallery | Ledger Card */}
  <div className="animate-fade-in-up grid grid-cols-1 gap-8 lg:grid-cols-[1.5fr_1fr] lg:gap-12">
  {/* Left: Gallery */}
- <div className="overflow-hidden rounded-2xl shadow-md">
+ <div className="self-start overflow-hidden rounded-2xl shadow-md">
  <PassportGallery images={galleryImages} />
  </div>
 

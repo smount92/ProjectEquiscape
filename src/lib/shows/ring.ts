@@ -127,6 +127,7 @@ export interface RingBoardData {
 
 export interface ChampionEntry {
     entryId: string;
+    horseId: string;
     horseName: string;
     entryNumber: number | null;
     /** Owner alias — results are published, identities are public. */

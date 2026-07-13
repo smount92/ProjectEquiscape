@@ -758,7 +758,13 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  <div key={r.id} className="border-input border-b py-4 last:border-b-0">
  <div className="mb-1 flex items-center justify-between max-sm:flex-col max-sm:items-start max-sm:gap-1">
  <span className="text-sm text-secondary-foreground">
- @{r.reviewerAlias} — {"★".repeat(r.stars)}
+ <Link
+ href={`/profile/${encodeURIComponent(r.reviewerAlias)}`}
+ className="no-underline hover:text-forest hover:underline"
+ >
+ @{r.reviewerAlias}
+ </Link>{" "}
+ — {"★".repeat(r.stars)}
  {"☆".repeat(5 - r.stars)}
  </span>
  <span className="text-xs text-muted-foreground">

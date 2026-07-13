@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from"react";
+import { Camera } from "lucide-react";
 import PhotoLightbox from"@/components/PhotoLightbox";
 
 interface GalleryImage {
@@ -34,19 +35,9 @@ export default function PassportGallery({ images }: PassportGalleryProps) {
 
  if (images.length === 0) {
  return (
- <div>
- <div className="bg-black/15 h-full w-full object-contain">
- <div className="h-full w-full object-contain">
- <span>📷</span>
- <p
- style={{
- fontSize: "0.875rem",
- }}
- >
- No photos uploaded
- </p>
- </div>
- </div>
+ <div className="flex aspect-[4/3] w-full min-h-[320px] max-w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-input bg-muted/50 text-muted-foreground">
+ <Camera className="h-8 w-8" aria-hidden="true" />
+ <p className="text-sm">No photos yet</p>
  </div>
  );
  }

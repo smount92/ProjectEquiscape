@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from"react";
+import { useState, useEffect, useRef } from"react";
 import { useRouter, useSearchParams } from"next/navigation";
 import Link from"next/link";
 import { createClient } from"@/lib/supabase/client";
@@ -34,20 +34,6 @@ import PropFormFields from "@/components/forms/PropFormFields";
 import DioramaFormFields from "@/components/forms/DioramaFormFields";
 import OtherModelFormFields from "@/components/forms/OtherModelFormFields";
 import { Button } from "@/components/ui/button";
-
-// ---- AI Detection types ----
-interface AiDetectionResult {
- manufacturer: string;
- mold_name: string;
- scale: string;
- confidence_score: number;
-}
-
-interface AiToast {
- message: string;
- type:"success" |"error" |"info";
- id: number;
-}
 
 // ---- Constants ----
 
@@ -83,6 +69,7 @@ export default function AddHorsePage() {
  const [submitError, setSubmitError] = useState<string | null>(null);
  const [showSuccess, setShowSuccess] = useState(false);
  const [savedHorseName, setSavedHorseName] = useState("");
+ const [newHorseId, setNewHorseId] = useState<string | null>(null);
 
  // Validation feedback
  const [validationErrors, setValidationErrors] = useState<string[]>([]);
@@ -100,17 +87,10 @@ export default function AddHorsePage() {
  const [isCroppingExtra, setIsCroppingExtra] = useState(false);
  const [reCropExtraIdx, setReCropExtraIdx] = useState<number | null>(null);
 
- // AI Vision Detection
- const [aiDetecting, setAiDetecting] = useState(false);
- const [aiResult, setAiResult] = useState<AiDetectionResult | null>(null);
- const [aiToasts, setAiToasts] = useState<AiToast[]>([]);
- const toastIdRef = useRef(0);
-
  // Step 2 (index 1): Reference
  const [selectedCatalogId, setSelectedCatalogId] = useState<string | null>(null);
  const [selectedCatalogItem, setSelectedCatalogItem] = useState<CatalogItem | null>(null);
  const [nameAutoFilled, setNameAutoFilled] = useState(false);
- const [aiSearchQuery, setAiSearchQuery] = useState<string | undefined>(undefined);
 
  // Step 3 (index 2): Identity
  const [customName, setCustomName] = useState("");
@@ -239,84 +219,6 @@ export default function AddHorsePage() {
  };
  // eslint-disable-next-line react-hooks/exhaustive-deps
  }, []);
-
- // ---- Toast helper ----
- const showToast = useCallback((message: string, type: AiToast["type"] ="info") => {
- const id = ++toastIdRef.current;
- setAiToasts((prev) => [...prev, { message, type, id }]);
- setTimeout(() => {
- setAiToasts((prev) => prev.filter((t) => t.id !== id));
- }, 5000);
- }, []);
-
- // ---- AI Mold Detection ----
- const handleAiDetect = useCallback(async () => {
- const primarySlot = imageSlots["Primary_Thumbnail"];
- if (!primarySlot) {
- showToast("Upload a Primary Thumbnail first.","error");
- return;
- }
-
- setAiDetecting(true);
- setAiResult(null);
-
- try {
- const formData = new FormData();
- formData.append("image", primarySlot.file);
-
- const res = await fetch("/api/identify-mold", {
- method:"POST",
- body: formData,
- });
-
- const data = await res.json();
-
- if (!res.ok) {
- throw new Error(data.error ||"AI detection failed.");
- }
-
- // Non-equine image detection
- if (data.error && data.not_equine) {
- throw new Error(
-"This doesn't appear to be a model horse. Please upload a photo of an equine model or figurine.",
- );
- }
-
- const result = data as AiDetectionResult;
- setAiResult(result);
-
- // Show success toast with confidence
- const pct =
- typeof result.confidence_score ==="number"
- ? result.confidence_score <= 1
- ? Math.round(result.confidence_score * 100)
- : Math.round(result.confidence_score)
- : 0;
- showToast(`✨ AI identified: ${result.mold_name} (${pct}% confidence)`,"success");
-
- // Auto-navigate to Reference step (now index 1) and inject search
- setAiSearchQuery(result.mold_name);
- setCurrentStep(1); // Reference is step index 1
- window.scrollTo({ top: 0, behavior:"smooth" });
-
- // Give the search a moment to execute, then try to auto-select from catalog
- setTimeout(async () => {
- const { searchCatalogAction } = await import("@/app/actions/reference");
- const items = await searchCatalogAction(result.mold_name);
- if (items.length > 0) {
- const exactMatch = items.find((m) => m.title.toLowerCase() === result.mold_name.toLowerCase());
- const bestMatch = exactMatch || items[0];
- setSelectedCatalogId(bestMatch.id);
- setSelectedCatalogItem(bestMatch);
- }
- }, 600);
- } catch (err) {
- const msg = err instanceof Error ? err.message :"AI detection failed.";
- showToast(msg,"error");
- } finally {
- setAiDetecting(false);
- }
- }, [imageSlots, showToast]);
 
  // ---- Handlers ----
 
@@ -592,6 +494,7 @@ export default function AddHorsePage() {
 
  // 6. Show success!
  setSavedHorseName(customName.trim());
+ setNewHorseId(horseId);
  setShowSuccess(true);
  } catch (err) {
  setSubmitError(err instanceof Error ? err.message :"Something went wrong.");
@@ -617,8 +520,16 @@ export default function AddHorsePage() {
  Your {assetCategory ==="model" ?"model" : assetCategory} has been successfully cataloged in
  your Digital Stable.
  </p>
+ <div className="flex flex-col items-center gap-4">
+ {newHorseId && (
+ <Button asChild size="wide"><Link
+ href={visibility ==="public" ? `/community/${newHorseId}` : `/stable/${newHorseId}`}
+ >
+ View Passport →
+ </Link></Button>
+ )}
  <div className="flex justify-center gap-4">
- <Button asChild><Link
+ <Button asChild variant="outline"><Link
  href="/add-horse"
  onClick={() => window.location.reload()}
  >
@@ -629,6 +540,7 @@ export default function AddHorsePage() {
  >
  View Stable
  </Link></Button>
+ </div>
  </div>
  </div>
  </div>
@@ -762,6 +674,10 @@ export default function AddHorsePage() {
  </div>
  </div>
 
+ <p className="mb-4 text-sm text-muted-foreground">
+ Just cataloguing? <Link href="/add-horse/quick" className="text-sm text-muted-foreground hover:text-forest">Try Quick Add →</Link>
+ </p>
+
  <p className="mb-6 text-sm">
  Click any slot below to upload a photo. Images are automatically compressed before saving.
  The <strong>Primary Thumbnail</strong> will be shown on your Digital Shelf.
@@ -773,7 +689,7 @@ export default function AddHorsePage() {
  return (
  <div
  key={slot.angle}
- className={`relative flex aspect-square cursor-pointer flex-col items-center justify-center overflow-hidden rounded-xl border-2 transition-all hover:bg-forest/5 ${
+ className={`relative flex aspect-[4/3] cursor-pointer flex-col items-center justify-center overflow-hidden rounded-xl border-2 transition-all hover:bg-forest/5 ${
  existing
  ? "border-solid border-forest bg-forest/5 shadow-sm"
  : "border-dashed border-input bg-card"
@@ -800,48 +716,6 @@ export default function AddHorsePage() {
  <div className="bg-success text-white absolute bottom-[6px] left-[6px] z-[2] flex h-[24px] w-[24px] items-center justify-center rounded-full text-[0.7rem] font-extrabold">
  ✓
  </div>
-
- {/* AI Auto-Detect button — hidden for now */}
- {false && isPrimary && (
- <button
- className={`ai-detect-btn ${aiDetecting ?"detecting" :""}`}
- onClick={(e) => {
- e.stopPropagation();
- e.preventDefault();
- handleAiDetect();
- }}
- disabled={aiDetecting}
- id="ai-detect-mold"
- title="Auto-Detect Mold"
- >
- {aiDetecting ? (
- <>
- <span
- className="ai-detect-spinner"
- aria-hidden="true"
- />
- <span className="text-xs">Analyzing…</span>
- </>
- ) : (
- <>
- <svg
- className="ai-detect-sparkle"
- width="18"
- height="18"
- viewBox="0 0 24 24"
- fill="none"
- stroke="currentColor"
- strokeWidth="2"
- strokeLinecap="round"
- strokeLinejoin="round"
- >
- <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z" />
- </svg>
- <span className="text-xs">Auto-Detect Mold</span>
- </>
- )}
- </button>
- )}
  </>
  ) : (
  <div className="flex w-full flex-col items-center gap-2 p-2 text-center text-muted-foreground">
@@ -967,27 +841,6 @@ export default function AddHorsePage() {
  )}
  </div>
 
- {/* AI result badge (shown after detection) */}
- {aiResult && (
- <div className="text-forest shrink-0">
- <svg
- width="16"
- height="16"
- viewBox="0 0 24 24"
- fill="none"
- stroke="currentColor"
- strokeWidth="2"
- strokeLinecap="round"
- strokeLinejoin="round"
- >
- <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z" />
- </svg>
- <span>
- AI Detected: <strong>{aiResult.mold_name}</strong> · {aiResult.manufacturer} ·{""}
- {aiResult.scale}
- </span>
- </div>
- )}
  </div>
 
  <div className="mt-8 flex items-center justify-between gap-4">
@@ -1047,28 +900,6 @@ export default function AddHorsePage() {
  setCurrentStep(2);
  window.scrollTo({ top: 0, behavior:"smooth" });
  }}
- externalSearchQuery={aiSearchQuery}
- aiNotice={
- aiResult ? (
- <div className="text-forest mb-6 shrink-0">
- <svg
- width="16"
- height="16"
- viewBox="0 0 24 24"
- fill="none"
- stroke="currentColor"
- strokeWidth="2"
- strokeLinecap="round"
- strokeLinejoin="round"
- >
- <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z" />
- </svg>
- <span>
- AI pre-filled: <strong>{aiResult.mold_name}</strong> — you can change it below
- </span>
- </div>
- ) : undefined
- }
  />
  </div>
 
@@ -1695,21 +1526,6 @@ export default function AddHorsePage() {
  </div>
  </div>
  )}
-
- {/* ── AI Toast Notifications ── */}
- <div
- className="fixed top-20 right-6 z-50 flex flex-col gap-2"
- aria-live="polite"
- >
- {aiToasts.map((toast) => (
- <div key={toast.id} className={`flex items-center gap-2 rounded-lg border px-4 py-3 text-sm shadow-lg ${toast.type === "success" ? "border-success/30 bg-success/10 text-success" : toast.type === "error" ? "border-destructive/30 bg-destructive/10 text-destructive" : "border-info/30 bg-info/10 text-info"}`} role="status">
- <span className="shrink-0 text-lg">
- {toast.type ==="success" ?"✨" : toast.type ==="error" ?"⚠️" :"ℹ️"}
- </span>
- <span className="flex-1">{toast.message}</span>
- </div>
- ))}
- </div>
 
  {/* ── Image Crop Modal ── */}
  {cropFile && (

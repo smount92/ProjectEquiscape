@@ -72,7 +72,7 @@ const CATEGORY_KEYS: Record<AssetCategory, Set<string>> = {
 // ── Gallery slots per category ──
 
 const MODEL_GALLERY: GallerySlot[] = [
-  { angle: "Primary_Thumbnail", label: "Near-Side (Required)", primary: true },
+  { angle: "Primary_Thumbnail", label: "Near-Side (Recommended)", primary: true },
   { angle: "Right_Side", label: "Off-Side" },
   { angle: "Front_Chest", label: "Front / Chest" },
   { angle: "Back_Hind", label: "Hindquarters / Tail" },
@@ -80,28 +80,28 @@ const MODEL_GALLERY: GallerySlot[] = [
 ];
 
 const TACK_GALLERY: GallerySlot[] = [
-  { angle: "Primary_Thumbnail", label: "Main View (Required)", primary: true },
+  { angle: "Primary_Thumbnail", label: "Main View (Recommended)", primary: true },
   { angle: "Detail_Face_Eyes", label: "Detail / Hardware" },
   { angle: "Belly_Makers_Mark", label: "Maker's Mark" },
   { angle: "Right_Side", label: "On-Model Fit" },
 ];
 
 const PROP_GALLERY: GallerySlot[] = [
-  { angle: "Primary_Thumbnail", label: "Main View (Required)", primary: true },
+  { angle: "Primary_Thumbnail", label: "Main View (Recommended)", primary: true },
   { angle: "Right_Side", label: "Scale Reference" },
   { angle: "Detail_Face_Eyes", label: "Detail" },
   { angle: "Back_Hind", label: "In-Use / Scene" },
 ];
 
 const DIORAMA_GALLERY: GallerySlot[] = [
-  { angle: "Primary_Thumbnail", label: "Overview (Required)", primary: true },
+  { angle: "Primary_Thumbnail", label: "Overview (Recommended)", primary: true },
   { angle: "Detail_Face_Eyes", label: "Close-Up 1" },
   { angle: "Right_Side", label: "Close-Up 2" },
   { angle: "Belly_Makers_Mark", label: "Documentation Card" },
 ];
 
 const OTHER_MODEL_GALLERY: GallerySlot[] = [
-  { angle: "Primary_Thumbnail", label: "Main View (Required)", primary: true },
+  { angle: "Primary_Thumbnail", label: "Main View (Recommended)", primary: true },
   { angle: "Right_Side", label: "Side View" },
   { angle: "Detail_Face_Eyes", label: "Detail" },
   { angle: "Belly_Makers_Mark", label: "Maker's Mark" },

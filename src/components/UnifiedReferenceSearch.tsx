@@ -154,9 +154,9 @@ export default function UnifiedReferenceSearch({
       {/* Selected Item Display (hide when browsing releases) */}
       {selectedItem && selectedCatalogId && releases.length === 0 ? (
         <>
-          <div className="bg-emerald-50/70 border-emerald-200 flex items-center justify-between gap-4 rounded-lg border px-6 py-4">
+          <div className="bg-success/10 border-success/30 flex items-center justify-between gap-4 rounded-lg border px-6 py-4">
             <div className="flex min-w-0 flex-wrap items-center gap-2">
-              <span className="bg-emerald-100/70 text-success border-emerald-300 border">
+              <span className="bg-success/10 text-success border-success/30 border">
                 {TYPE_BADGES[selectedItem.itemType]?.icon || "\u{1F4CB}"}{" "}
                 {TYPE_BADGES[selectedItem.itemType]?.label || selectedItem.itemType}
               </span>
@@ -212,7 +212,7 @@ export default function UnifiedReferenceSearch({
             />
             {query && (
               <button
-                className="text-muted-foreground hover:text-foreground absolute top-[50%] right-[12px] flex h-[28px] w-[28px] translate-y-[-50%] cursor-pointer items-center justify-center rounded-full border-0 bg-[rgb(245_245_244)] text-[0.8rem] transition-all duration-150"
+                className="text-muted-foreground hover:text-foreground absolute top-[50%] right-[12px] flex h-[28px] w-[28px] translate-y-[-50%] cursor-pointer items-center justify-center rounded-full border-0 bg-muted text-[0.8rem] transition-all duration-150"
                 onClick={() => {
                   setQuery("");
                   setShowDropdown(false);
@@ -243,7 +243,7 @@ export default function UnifiedReferenceSearch({
                       {molds.map((item) => (
                         <button
                           key={item.id}
-                          className="group flex w-full cursor-pointer items-center gap-3 border-0 border-b border-input bg-transparent px-4 py-2.5 text-left transition-colors last:border-b-0 hover:bg-emerald-50/50"
+                          className="group flex w-full cursor-pointer items-center gap-3 border-0 border-b border-input bg-transparent px-4 py-2.5 text-left transition-colors last:border-b-0 hover:bg-success/10"
                           onClick={() => handleMoldClick(item)}
                         >
                           <div className="min-w-0 flex-1">
@@ -269,7 +269,7 @@ export default function UnifiedReferenceSearch({
                       {releaseResults.map((item) => (
                         <button
                           key={item.id}
-                          className="group flex w-full cursor-pointer items-center gap-3 border-0 border-b border-input bg-transparent px-4 py-2.5 text-left transition-colors last:border-b-0 hover:bg-emerald-50/50"
+                          className="group flex w-full cursor-pointer items-center gap-3 border-0 border-b border-input bg-transparent px-4 py-2.5 text-left transition-colors last:border-b-0 hover:bg-success/10"
                           onClick={() => handleSelect(item)}
                         >
                           <div className="min-w-0 flex-1">
@@ -300,7 +300,7 @@ export default function UnifiedReferenceSearch({
                       {resins.map((item) => (
                         <button
                           key={item.id}
-                          className="group flex w-full cursor-pointer items-center gap-3 border-0 border-b border-input bg-transparent px-4 py-2.5 text-left transition-colors last:border-b-0 hover:bg-emerald-50/50"
+                          className="group flex w-full cursor-pointer items-center gap-3 border-0 border-b border-input bg-transparent px-4 py-2.5 text-left transition-colors last:border-b-0 hover:bg-success/10"
                           onClick={() => handleSelect(item)}
                         >
                           <div className="min-w-0 flex-1">
@@ -347,12 +347,12 @@ export default function UnifiedReferenceSearch({
           {/* Expanded Releases (when a mold is clicked) */}
           {releases.length > 0 && selectedItem && selectedItem.itemType === "plastic_mold" && (
             <div className="animate-fade-in-up mt-4 flex flex-col overflow-hidden rounded-lg border border-input bg-card shadow-md transition-all">
-              <div className="flex items-center justify-between border-b border-input bg-emerald-50/60 px-4 py-2.5">
+              <div className="flex items-center justify-between border-b border-input bg-success/10 px-4 py-2.5">
                 <span className="text-sm text-secondary-foreground">
                   Releases for <strong className="text-foreground">{selectedItem.title}</strong>
                 </span>
                 <button
-                  className="cursor-pointer rounded-md border border-input bg-transparent px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-red-300 hover:text-red-600"
+                  className="cursor-pointer rounded-md border border-input bg-transparent px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-destructive hover:text-destructive"
                   onClick={handleClear}
                 >
                   {"\u2715"} Clear
@@ -375,7 +375,7 @@ export default function UnifiedReferenceSearch({
                     {releases.map((rel) => (
                       <button
                         key={rel.id}
-                        className="group flex w-full cursor-pointer items-center gap-3 border-0 border-b border-input bg-transparent px-4 py-2.5 text-left transition-colors hover:bg-emerald-50/50"
+                        className="group flex w-full cursor-pointer items-center gap-3 border-0 border-b border-input bg-transparent px-4 py-2.5 text-left transition-colors hover:bg-success/10"
                         onClick={() => handleSelect(rel)}
                       >
                         <div className="min-w-0 flex-1">

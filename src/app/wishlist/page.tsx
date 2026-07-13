@@ -7,6 +7,7 @@ import WishlistSearch from"@/components/WishlistSearch";
 import { getPublicImageUrls } from"@/lib/utils/storage";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import { Button } from"@/components/ui/button";
+import { referenceHref, referencePagesEnabled } from"@/lib/catalog/referenceUrl";
 
 export const metadata = {
  title:"My Want List — Model Horse Hub",
@@ -124,10 +125,10 @@ export default async function WishlistPage() {
   description={`Models you're hunting for — ${items.length} item${items.length !== 1 ?"s" :""}${totalMatches > 0 ? ` 🔥 ${totalMatches} marketplace match${totalMatches !== 1 ?"es" :""} found!` :""}`}
   headerActions={
   <Button asChild><Link
-   href="/community"
+   href="/catalog"
    id="browse-showring"
   >
-   🏆 Browse Show Ring
+   📚 Browse the Catalog
   </Link></Button>
   }
  >
@@ -137,13 +138,13 @@ export default async function WishlistPage() {
   {/* Wishlist Grid */}
   {items.length === 0 ? (
   <div className="bg-card border-input animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
-   <div className="mb-4 text-5xl">❤️</div>
+   <div className="mb-4 text-5xl">🔖</div>
    <h2>Your Want List is Empty</h2>
-   <p>Browse the Show Ring and tap the heart icon on models you love to start your hunt!</p>
+   <p>Browse the Reference Catalog and tap the bookmark on models you&apos;re hunting for!</p>
    <Button asChild><Link
-   href="/community"
+   href="/catalog"
    >
-   🏆 Browse the Show Ring
+   📚 Browse the Catalog
    </Link></Button>
   </div>
   ) : (
@@ -160,19 +161,35 @@ export default async function WishlistPage() {
     ?"📦"
     :"🏭";
    const matches = matchMap.get(item.id) ?? [];
+   const catalogHref = item.catalog_id
+    ? referencePagesEnabled()
+     ? referenceHref({ id: item.catalog_id, maker, title })
+     : `/catalog/${item.catalog_id}`
+    : null;
 
    return (
     <div
     key={item.id}
-    className="group/bg-card border-input hover:border-success relative flex gap-4 rounded-lg border bg-muted/80 backdrop-blur-sm p-6 shadow-md transition-all duration-250 hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(44,85,69,0.15)]"
+    className="group border-input hover:border-success relative flex gap-4 rounded-lg border bg-card backdrop-blur-sm p-6 shadow-md transition-all duration-250 hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(44,85,69,0.15)]"
     id={`wishlist-${item.id}`}
     >
     <div className="mt-[2px] shrink-0 text-[2rem] leading-none">🐴</div>
     <div className="min-w-0 flex-1">
-     <div className="text-foreground mb-1 text-base font-semibold">
-     {typeIcon} {title}
-     </div>
-     {maker && <div className="text-forest mb-1 text-sm">{maker}</div>}
+     {catalogHref ? (
+     <Link href={catalogHref} className="block no-underline">
+      <div className="text-foreground mb-1 text-base font-semibold hover:text-forest">
+      {typeIcon} {title}
+      </div>
+      {maker && <div className="text-forest mb-1 text-sm">{maker}</div>}
+     </Link>
+     ) : (
+     <>
+      <div className="text-foreground mb-1 text-base font-semibold">
+      {typeIcon} {title}
+      </div>
+      {maker && <div className="text-forest mb-1 text-sm">{maker}</div>}
+     </>
+     )}
      {scale && <div className="text-muted-foreground mb-[2px] text-sm">📏 {scale}</div>}
      {item.notes && (
      <div className="text-muted-foreground mt-1 text-sm italic">📝 {item.notes}</div>

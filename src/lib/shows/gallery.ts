@@ -46,6 +46,9 @@ export function isOwnerRevealed(status: ShowStatus, blindBrowsing: boolean): boo
 
 export interface GalleryEntry {
     id: string;
+    /** null while the blind rule holds — a horse-passport link would
+     *  reveal the owner just as surely as ownerAlias/ownerId would. */
+    horseId: string | null;
     horseName: string;
     entryNumber: number | null;
     /** Public storage URL of the entry photo; null = no photo. */

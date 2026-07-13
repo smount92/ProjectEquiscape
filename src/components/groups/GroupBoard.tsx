@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -272,10 +273,18 @@ export default function GroupBoard({
                     </p>
                 )}
                 {threads.map((t) => (
-                    <button
+                    <div
                         key={t.id}
+                        role="button"
+                        tabIndex={0}
                         className={`grid w-full cursor-pointer grid-cols-[26px_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-0.5 border-0 border-b border-solid border-[color-mix(in_srgb,var(--color-forest,#2C5545)_16%,transparent)] bg-transparent px-4 py-3 pl-8 text-left last:border-b-0 hover:bg-[color-mix(in_srgb,var(--color-forest,#2C5545)_4%,transparent)] ${t.isPinned ? "bg-[color-mix(in_srgb,var(--brass,#B08D3E)_8%,transparent)] hover:bg-[color-mix(in_srgb,var(--brass,#B08D3E)_13%,transparent)]" : ""}`}
                         onClick={() => router.push(`/community/groups/${slug}/thread/${t.id}`)}
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault();
+                                router.push(`/community/groups/${slug}/thread/${t.id}`);
+                            }
+                        }}
                     >
                         {t.isPinned ? (
                             <span className="justify-self-center text-sm" title="Pinned" aria-label="Pinned">📌</span>
@@ -295,15 +304,30 @@ export default function GroupBoard({
                             <span className="text-muted-foreground block text-[0.68rem] italic">{timeAgo(t.lastActivity)}</span>
                         </span>
                         <span className="text-muted-foreground col-start-2 truncate text-xs">
-                            started by <b className="text-saddle font-bold">@{t.authorAlias}</b>
+                            started by{" "}
+                            <Link
+                                href={`/profile/${encodeURIComponent(t.authorAlias)}`}
+                                className="text-saddle font-bold hover:underline"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                @{t.authorAlias}
+                            </Link>
                             {t.isPinned && " · pinned"}
                             {t.lastReplyAlias && (
                                 <>
-                                    {" "}· last reply <b className="text-saddle font-bold">@{t.lastReplyAlias}</b>, {timeAgo(t.lastActivity)}
+                                    {" "}· last reply{" "}
+                                    <Link
+                                        href={`/profile/${encodeURIComponent(t.lastReplyAlias)}`}
+                                        className="text-saddle font-bold hover:underline"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        @{t.lastReplyAlias}
+                                    </Link>
+                                    , {timeAgo(t.lastActivity)}
                                 </>
                             )}
                         </span>
-                    </button>
+                    </div>
                 ))}
             </div>
 

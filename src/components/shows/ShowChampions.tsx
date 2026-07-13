@@ -9,6 +9,8 @@
  * (placings.ts) and never themed.
  */
 
+import Link from "next/link";
+
 import { championHex, championLabel } from "@/lib/shows/placings";
 import type { ChampionAward, ShowChampionsData } from "@/lib/shows/ring";
 
@@ -36,9 +38,19 @@ function AwardLine({
                     #{entry.entryNumber}
                 </span>
             )}
-            <span className="text-sm font-medium text-foreground">{entry.horseName}</span>
+            <Link
+                href={`/community/${entry.horseId}`}
+                className="text-sm font-medium text-foreground hover:underline"
+            >
+                {entry.horseName}
+            </Link>
             {entry.ownerAlias && (
-                <span className="text-xs text-muted-foreground">@{entry.ownerAlias}</span>
+                <Link
+                    href={`/profile/${encodeURIComponent(entry.ownerAlias)}`}
+                    className="text-xs text-muted-foreground hover:text-foreground"
+                >
+                    @{entry.ownerAlias}
+                </Link>
             )}
         </div>
     );

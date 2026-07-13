@@ -10,6 +10,22 @@ vi.mock("next/navigation", () => ({
     useRouter: () => ({ push: mockPush, refresh: vi.fn() }),
 }));
 
+vi.mock("next/link", () => ({
+    default: ({
+        children,
+        href,
+        ...props
+    }: {
+        children: React.ReactNode;
+        href: string;
+        [key: string]: unknown;
+    }) => (
+        <a href={href} {...props}>
+            {children}
+        </a>
+    ),
+}));
+
 const { getGroupBoard, createThread, markGroupRead, createGroupChannel } = vi.hoisted(() => ({
     getGroupBoard: vi.fn(),
     createThread: vi.fn(),

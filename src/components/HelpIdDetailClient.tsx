@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from"react";
+import Link from"next/link";
 import {
  upvoteSuggestion,
  acceptSuggestion,
@@ -20,6 +21,7 @@ interface Suggestion {
  upvotes: number;
  created_at: string;
  userName: string;
+ catalogId: string | null;
  releaseDisplay: string | null;
  resinDisplay: string | null;
  isAccepted: boolean;
@@ -115,7 +117,16 @@ export default function HelpIdDetailClient({
 
  <div className="mb-4">
  {s.releaseDisplay && (
- <p className="text-forest mb-1 text-sm font-semibold">🏷️ {s.releaseDisplay}</p>
+ <p className="text-forest mb-1 text-sm font-semibold">
+ 🏷️{" "}
+ {s.catalogId ? (
+  <Link href={`/catalog/${s.catalogId}`} className="no-underline hover:underline">
+  {s.releaseDisplay}
+  </Link>
+ ) : (
+  s.releaseDisplay
+ )}
+ </p>
  )}
  {s.resinDisplay && (
  <p className="text-forest mb-1 text-sm font-semibold">🎨 {s.resinDisplay}</p>

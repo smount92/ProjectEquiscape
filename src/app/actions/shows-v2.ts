@@ -1986,6 +1986,9 @@ export async function getShowGallery(
         const list = entriesByClass.get(e.class_id as string) ?? [];
         list.push({
             id: entryId,
+            // Same blind gate as ownerAlias/ownerId: a passport link
+            // would out the owner just as directly as their alias.
+            horseId: revealed ? (e.horse_id as string) : null,
             horseName: horseNames.get(e.horse_id as string) ?? "Unnamed horse",
             entryNumber: (e.entry_number as number | null) ?? null,
             photoUrl: e.photo_id ? (photoUrls.get(e.photo_id as string) ?? null) : null,

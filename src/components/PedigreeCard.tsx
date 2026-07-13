@@ -339,7 +339,7 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  />
  </div>
 
- {status ==="error" && errorMsg && <div className="mt-2 text-sm text-red-700 mb-4">{errorMsg}</div>}
+ {status ==="error" && errorMsg && <div className="mt-2 text-sm text-destructive mb-4">{errorMsg}</div>}
 
  <div className="mt-6 flex justify-end gap-2">
  <Button

@@ -98,6 +98,7 @@ export default async function HelpIdDetailPage({ params }: PageProps) {
  upvotes: s.upvotes,
  created_at: s.created_at,
  userName: sugUserMap.get(s.user_id) ??"Unknown",
+ catalogId: s.catalog_id,
  releaseDisplay: s.catalog_id ? catalogDisplayMap.get(s.catalog_id) || null : null,
  resinDisplay: null as string | null,
  isAccepted: s.id === req.accepted_suggestion_id,
@@ -120,7 +121,14 @@ export default async function HelpIdDetailPage({ params }: PageProps) {
     )}
    </h1>
    <p className="text-secondary-foreground mt-1">
-    Submitted by {requesterName} on {new Date(req.created_at).toLocaleDateString()}
+    Submitted by{" "}
+    <Link
+    href={`/profile/${encodeURIComponent(requesterName)}`}
+    className="no-underline hover:text-forest hover:underline"
+    >
+    {requesterName}
+    </Link>{" "}
+    on {new Date(req.created_at).toLocaleDateString()}
    </p>
    </div>
    <Button asChild variant="outline" size="wide" className="text-muted-foreground"><Link

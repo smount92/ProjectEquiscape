@@ -584,6 +584,7 @@ export async function getShowChampions(
         if (!entry) return null;
         return {
             entryId,
+            horseId: entry.horse_id,
             horseName: horseNames.get(entry.horse_id) ?? "Unnamed horse",
             entryNumber: entry.entry_number,
             ownerAlias: aliases.get(entry.owner_id) ?? null,

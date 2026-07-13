@@ -140,7 +140,7 @@ export default function HoofprintTimeline({
 
  {/* Ownership Chain */}
  {ownershipChain.length > 0 && (
- <div className="bg-muted border-[rgb(245 245 244)] mb-6 flex flex-wrap items-center gap-2 rounded-lg border p-4">
+ <div className="bg-muted border-input mb-6 flex flex-wrap items-center gap-2 rounded-lg border p-4">
  <span className="text-muted-foreground mr-1 text-xs">Chain of Custody:</span>
  {ownershipChain.map((owner, i) => (
  <span key={owner.id} className="inline-flex items-center gap-1">
@@ -156,7 +156,7 @@ export default function HoofprintTimeline({
  </span>
  </Link>
  ) : (
- <span className="border-[var(--color-accent, #f59e0b)] border">{owner.ownerAlias}</span>
+ <span className="border-warning border">{owner.ownerAlias}</span>
  )}
  </span>
  ))}
@@ -167,7 +167,7 @@ export default function HoofprintTimeline({
  {showForm && (
  <form
  onSubmit={handleAddEvent}
- className="bg-muted border-[rgb(245 245 244)] mb-6 rounded-lg border p-4"
+ className="bg-muted border-input mb-6 rounded-lg border p-4"
  >
  <div className="mb-6">
  <label className="text-foreground mb-1 block text-sm font-semibold">Title</label>

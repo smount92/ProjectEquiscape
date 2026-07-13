@@ -198,6 +198,48 @@ Full inventory: Pro card :161–166 + Studio Pro :196–201 gradients/badges/lab
 
 ---
 
+## 🔵 POLISH — "little things that add up" (sweep 2026-07-12 evening; owner-named surfaces + sitewide unlinked-entity hunt)
+
+### POLISH-1 — Want List page (owner-reported) — **Status: FIXED (batch 1) — cards link via referenceHref, 🔖 empty state, /catalog CTAs; `group/bg-card` typo was also breaking the remove-button hover fade**
+- Cards never link anywhere: `wishlist/page.tsx` has `catalog_id` in hand but renders title/maker/scale as plain text → link card to `/catalog/[id]` (use `referenceHref()` like market does).
+- Empty state contradicts the icon unification: big ❤️ + "tap the heart icon" copy, but ❤️ = favorite now; want-list adds are 🔖 on catalog/reference pages. Both CTAs send users to the Show Ring; should point at the Catalog.
+- Broken class `group/bg-card` on the item card (find/replace casualty).
+
+### POLISH-2 — Add-horse form (owner: "OK but could use help") — **Status: PARTIAL (batch 1: success→passport link, quick-add cross-link, uniform aspect-[4/3] photo grid, "(Recommended)" label, dead AI-detect code fully excised [orphaned /api/identify-mold route remains — fold into PROD-2], UnifiedReferenceSearch tokenized). REMAINING (design batch): category chips + step-card leather treatment; autosave = DEBT-8**
+Good bones (4-step wizard, low first-paint, clean tokens in page itself). Gaps:
+- Five colorful cartoon-emoji category chips + emoji step headers (📸🔗🏷️🔒) clash with leather system; step cards are generic `bg-card` boxes — masthead is leather, interior isn't.
+- Photo-slot grid renders ragged (unequal heights, 2-2-1 layout with dangling 5th slot).
+- "Near-Side (Required)" label is not enforced (`canProceedStep` step 0 always true) — either enforce or relabel "recommended".
+- Success overlay doesn't link to the new horse's passport (only Add Another / View Stable).
+- Full form never links to `/add-horse/quick` (quick→full exists, not the reverse).
+- `UnifiedReferenceSearch.tsx` = raw emerald/red palette throughout (night-unsafe; missed by DESIGN sweep).
+- Dead code: force-disabled AI auto-detect (`{false && …}` page.tsx:805).
+- No draft/autosave (= DEBT-8, mobile tab-eviction wipes 4 steps of input).
+
+### POLISH-3 — Passport /community/[id] (owner: "OK but isn't that great") — **Status: PARTIAL (batch 1: fixed-height empty-photo placeholder + `self-start` on gallery column [stretch was the root cause], ShowRecordTimeline/HoofprintTimeline/PedigreeCard tokenized). REMAINING (design batch): below-hero parchment treatment, action-row spacing, dedupe hoofprint/back-links**
+- No-photo horses render a huge blank ruled column (empty state is a thin gray strip, then ~900px of nothing) → fixed-height framed placeholder.
+- Design investment stops below the hero grid: ShowRecordTimeline / PedigreeCard / HoofprintTimeline / comments are generic `bg-card` boxes after the bespoke parchment card.
+- Raw palette missed by DESIGN sweep: `ShowRecordTimeline.tsx` (:141 rgb bg, :157 amber gradient/hex, :162/:167 emerald/blue-100 chips, :213 `#e74c6f`), `HoofprintTimeline.tsx` (:143/:159/:170 hex/rgb), `PedigreeCard.tsx:342` text-red-700.
+- Cramped action row (❤️🔖 share/report icons); Hoofprint appears twice (inline timeline + View Hoofprint page link); duplicate back-to-Show-Ring links top+bottom.
+
+### POLISH-4 — Unlinked-entity dead-ends (sitewide hunt; canonical targets: horse→/community/[id], user→/profile/[alias], show→/shows/[id], model→/catalog/[id]) — **Status: MOSTLY FIXED (batch 1)** — all pure missing-Link items + horseId plumbing (ChampionEntry, GalleryEntry w/ blind-rule-gated null) + help-id catalogId pass-through shipped; GroupBoard row converted button→div[role=button] so nested profile links are valid. REMAINING: help-id LIST page aliases (nested-anchor constraint), show_records.show_id schema migration (separate decision), legacy voteForEntry linkUrl.
+Pure missing-`<Link>` (data already in scope — cheap):
+- `profile/[alias_name]/page.tsx:761` reviewer alias in reviews list.
+- `ShowEntrySection.tsx:136-149` My-Entries horse name (`entry.horseId` in scope!) + handler alias.
+- `PublicShowV2Page.tsx:83` host alias (MastheadFact renders plain dd).
+- `help-id/[id]/page.tsx:122` requester alias; `GroupBoard.tsx:297-305` thread author/last-reply aliases (nested-in-button — needs stopPropagation span); `help-id/page.tsx:140,192` requester (nested in card link, same caveat).
+Needs small data additions first:
+- `ShowChampions.tsx:39` + `ShowEntryGallery.tsx:245` horse names — add `horseId` to `ChampionAward` (`lib/shows/ring.ts:129`) / `GalleryEntry` (`lib/shows/gallery.ts:47`) (mind the blind-rule for gallery).
+- `HelpIdDetailClient.tsx:117` resolved catalog match — parent drops `catalog_id` when mapping suggestions; pass it through, link to catalog.
+Needs schema (bigger, separately decided):
+- **Show records never store the originating show id** — `show_records` has no `show_id` column, so profile table (:724) + passport ShowRecordTimeline can't link to `/shows/[id]` even for platform-generated rows. Nullable FK + populate in `buildShowRecords()`; backfill optional.
+- Legacy v1 `voteForEntry` notification (`shows.ts:408`) has no linkUrl → lands on generic /shows (legacy; fix only if v1 lives on).
+NOTE: linking target may shift `/catalog/[id]` → `/reference/[maker]/[slug]` when NEXT_PUBLIC_REFERENCE_PAGES flips — use `referenceHref()` helper everywhere so it's one switch.
+
+Verified clean: MatchmakerMatches, NotificationList, inbox/ChatThread, UniversalFeed/PostHeader, ActivityFeed, PedigreeCard sire/dam, ThreadView — all link correctly.
+
+---
+
 ## ⚪ TECH DEBT — bigger bets (track, not urgent)
 
 - **DEBT-1 — Test coverage:** ~90 mutations across `competition.ts`(19)/`events.ts`(16)/`groups.ts`(15)/`art-studio.ts`(14)/`parked-export.ts`(11)/`posts.ts`(8)/`messaging.ts`(6) have zero unit tests. Start with `competition.ts` + `parked-export.ts` (escrow-adjacent, real-world-show results). 1,001 tests today cover the money core well.
