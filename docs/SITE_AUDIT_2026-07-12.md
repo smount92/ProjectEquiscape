@@ -29,6 +29,7 @@
 - **Perf/SEO:** PERF-1 (`generateStaticParams` for reference), PERF-2 (`/market` rewrite), PERF-3 (`next/image`), PERF-4/5/6/8/9/10, PERF-7 (add public passport/show URLs to sitemap).
 - **Product:** PROD-1 remaining GA events (`add_horse`, `list_for_sale`, `message_seller`, `checkout_start`, `show_entry`, `export`); PROD-2 (delete 3 dead live-Stripe endpoints); PROD-4 (export completeness); PROD-5/7 (share previews/badges); PROD-6 (weekly liveness); PROD-8 (misc).
 - **Tech debt:** DEBT-1..8 (test coverage, `HorseForm` extraction, show-engine cutover, UI consistency, legacy-table drop, gen-types CI guard, resilience).
+- **Design (added 2026-07-12, full-site sweep):** DESIGN-1..8 — one MAJOR page (`/settings` body), `transition-colors-*` corruption exact lines, night-unsafe chip sweep (~15 shared components), `bg-white` cards, emoji→lucide, `/upgrade` gradients call, `SHOWRING_V2` flag flip retires the worst legacy surface free. See 🟣 tier below.
 
 ---
 
@@ -146,6 +147,54 @@
 - **PROD-6 — [MED] No liveness cadence — Status: TODO.** No weekly-show automation / "this week" surface (crons: refresh-market, transition-shows, monthly Pro stablemaster-agent). Auto-create a recurring weekly virtual show or a "Show of the Week"/"New this week" strip.
 - **PROD-7 — [MED] Share-preview gaps (MOVE 5) — Status: TODO.** `/cards/[code]` has no `generateMetadata`/OG (bare-link preview); public horse OG uses raw `horse_images.image_url` (may be private → imageless preview); no branded `next/og` cards. Add card metadata; verify bucket URLs are crawler-fetchable.
 - **PROD-8 — [LOW] Misc — Status: TODO.** Continuity statement is a section in `/about`, not a footer-linked `/continuity` page; Footer has no FB/IG links (no social presence — MOVE 5). "🔒 Members" lock on the reference Blue Book points at fully-public `/market` (cosmetic — enforce or drop). Estate report (MOVE 8) absent (insurance covers core).
+
+---
+
+## 🟣 DESIGN — Leather Edition consistency (sweep added 2026-07-12, four parallel reviewers over all 78 routes + imported components)
+
+**Headline:** the redesign held up far better than feared. Landmark coverage is complete — every route has either `PageMasthead`, a layout `brass-heading`, or a deliberate bespoke leather hero. The whole shows-v2 stack (host console, judge queue, ring console, announcer board, `/cards/[code]`), dashboard ledger, catalog suite, profile, privacy/terms are token-clean. Exactly **one page is MAJOR** (`/settings` body). The rest of the drift is **night-unsafe raw-palette status chips concentrated in ~15 shared components**, a handful of `bg-white` cards, scattered raw hex, and emoji-in-headings. Calibration rule used: emoji passed as a masthead `icon` prop = house style, fine; emoji inside `<h1>/<h2>/<h3>` or tab labels = drift (per `/about`/`/faq` precedent). 🔖/❤️ and rubber-stamp/parchment fixed-ink surfaces are deliberate, not drift.
+
+### DESIGN-1 — [HIGH] `/settings` body is the one MAJOR page — **Status: TODO**
+- Shell is compliant (PageMasthead compact :169, ledger-card surfaces) but the interior drifted: emoji section headers ×6 (`👤` :177, `🔒` :408, `🔔` :480, `📊` :507, `💎` :543, `⚠️` :562); night-unsafe `border-stone-300` + `hover:border-emerald-700` (:181, :191, :235); token-bypassing `bg-gradient-to-r from-amber-500 to-orange-500` subscription CTA (:552); hand-rolled raw `<button>` at :190/:387 (Security section already uses shadcn Button :460 — copy it). `settings-toggle` class buttons are deliberate, keep.
+
+### DESIGN-2 — [HIGH, live visual bug] `transition-colors-<word>` className corruption (= PERF-10, exact lines) — **Status: TODO**
+- `market/page.tsx` :127 `-icon`, :130 `-info`, :131 `-title`, :134 `-maker`, :145 `-prices`, :158 `-footer` · `components/EventBrowser.tsx` :97 `-date`, :105 `-body`, :108 `-name`, :112/:116 `-meta`, :123 `-actions` · `components/CsvImport.tsx` :588/:603 `-text` (newly found). `LegacyShowPage.tsx` is CLEAN (audit's earlier "legacy Shows" attribution was wrong). Mechanical fix: restore `transition-colors` + move the stray suffix word back to its element.
+
+### DESIGN-3 — [MED] Night-unsafe raw-palette status chips/banners in shared components — **Status: TODO**
+Light pastel bg + dark same-hue text; under Lamplight the tokens flip but these don't → glowing light cards on a dark page. Tokenize to `bg-success/10 text-success`-style equivalents (or a shared chip variant):
+- `ChatThread.tsx` :330 (`border-amber-300 bg-amber-50 text-[#f59e0b]`), :355 (`bg-red-500/600`)
+- `UniversalFeed.tsx` :274 (red error banner), :387/:394 (amber pinned)
+- `EventBrowser.tsx` :126 (emerald + `#22c55e`), :132 (amber + `#f59e0b`)
+- `CsvImport.tsx` :410 (red banner), :528–534 (emerald badges)
+- `MatchmakerMatches.tsx` :53/:79, `WishlistSearch.tsx` :195/:231/:262, `WishlistRemoveButton.tsx` :24 (all emerald/`#22c55e`/red hex)
+- `CommissionTimeline.tsx` :233/:339/:418, `RatingForm.tsx` :102/:157/:160, `LinkHorseToCommission.tsx` :50, `CommissionRequestForm.tsx` :154
+- `ShowStringManager.tsx` :210/:371/:385/:461/:609/:771 (red/purple/gray + hex timeline blocks)
+- `SuggestNewEntryForm.tsx` :278 (red banner) · `catalog/[id]/page.tsx` :138/:140 (raw-blue eBay link) · `community/events/[id]/page.tsx` :127/:139/:141/:349 (violet/amber + hex) · `catalog/suggestions/[id]/page.tsx` :245 (`decoration-red-400/50`) · `studio/[slug]/request/page.tsx` :76 · `studio/setup/page.tsx` :439/:444 (`text-[#ef4444]`/`text-[#22c55e]`)
+- `auth-code-error/page.tsx` :18 nit (`text-white` on bg-forest)
+
+### DESIGN-4 — [MED] Duplicated raw-palette STATUS_STYLES map in studio — **Status: TODO**
+- `studio/commission/[id]/page.tsx` :13–23 and `studio/my-commissions/page.tsx` :13–22 carry the same 8-status map on raw `bg-*-500/20 text-*-600` (only `review` is tokenized `bg-studio/20`). Extract one shared, tokenized map.
+
+### DESIGN-5 — [LOW, trivial] `bg-white` cards — **Status: TODO**
+- `error.tsx` :8, `not-found.tsx` :7, `studio/my-commissions/page.tsx` :95 → `bg-card`.
+
+### DESIGN-6 — [MED, needs design call] Emoji → lucide in headings — **Status: TODO (judgment)**
+Beyond DESIGN-1: `inbox/page.tsx` :183 title + :190/:203 buttons (weakest landmark — also the only list page with no leather band); `feed/page.tsx` :43 title + :54/:61 tabs; `events/[id]/manage` :434 h1 + tab/action emoji (also **confirm()×3** :237/:276/:328 + ~12 raw buttons — worst single file for DEBT-5); `help-id/page.tsx` :105/:156 h2s; `admin/page.tsx` :87/:112–122 metric emoji + hand-rolled svg shield :91; `catalog/[id]` :148, `suggestions/[id]` :297/:316 h3s; studio suite fieldset legends + 🟢🟡🔴 status glyphs (systemic convention — decide once).
+
+### DESIGN-7 — [OPEN DESIGN CALL] `/upgrade` tier treatment — **Status: awaiting owner/wife decision (known open item)**
+Full inventory: Pro card :161–166 + Studio Pro :196–201 gradients/badges/labels; success banner :113–116, cancelled banner :122–123, current-plan label :130, Active badge :185; `UpgradeButton.tsx` :40/:52, `StudioProButton.tsx` :39/:51. ~14 raw utilities, all night-unsafe (pastel-on-dark). Free card + FAQ cards already tokenized. Decision: keep premium gradients (add night variants) vs map to `tier-gold`/`studio`.
+
+### DESIGN-8 — [DECISION] Legacy surfaces: fix or let cutover delete them — **Status: TODO (cheap flag flip available)**
+- **`SHOWRING_V2` is still not set in prod Vercel** → `/community` serves v1 `ShowRingGrid.tsx`, the single heaviest raw-palette file (:45 OF-chip, :292 `bg-amber-400`, :307 `bg-blue-500`, :319, :388). v2 (`components/showring/`) greps fully clean. Flipping the flag (after owner preview sign-off) retires the worst drift surface for free — don't hand-fix v1 first.
+- `LegacyShowPage.tsx` 6 amber night-unsafe lines (:133/:183/:188/:202/:207/:257) — dies with DEBT-4 cutover; only fix if cutover stays far out.
+
+### Cross-cutting (feeds DEBT-5)
+42 `alert()`/`confirm()` across 23 files (hotspots: GroupFiles ×6, add-horse ×4, ChatThread ×3, GroupAdminPanel ×3, events-manage ×3) — replace with a shared shadcn confirm dialog. ~190 decorative emoji across 60+ files (many deliberate). Non-design bug found in passing: `feed/[id]/page.tsx` :75 `max-w-[640]` missing unit.
+
+### Suggested batching (deploy discipline: one push)
+1. **Mechanical batch** (no decisions): DESIGN-2 + DESIGN-5 + DESIGN-4 + DESIGN-3 sweep — all verifiable by eye in Lamplight + vitest/tsc.
+2. **Judgment batch**: DESIGN-1 settings body + DESIGN-6 worst headings (inbox, feed, admin, events-manage).
+3. **Owner calls**: DESIGN-7 gradients; DESIGN-8 SHOWRING_V2 flip; legacy fix-vs-wait.
 
 ---
 
