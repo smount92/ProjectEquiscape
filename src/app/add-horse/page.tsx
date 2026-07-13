@@ -35,6 +35,7 @@ import DioramaFormFields from "@/components/forms/DioramaFormFields";
 import OtherModelFormFields from "@/components/forms/OtherModelFormFields";
 import { Button } from "@/components/ui/button";
 import { track } from "@/lib/analytics";
+import { Camera, Link2, Tag } from "lucide-react";
 
 // ---- Constants ----
 
@@ -576,11 +577,11 @@ export default function AddHorsePage() {
  <button
  key={cat.value}
  type="button"
-              className={`flex cursor-pointer flex-col items-center gap-1.5 rounded-xl border-2 px-5 py-3 transition-all ${assetCategory === cat.value ? "border-forest bg-forest/5 shadow-sm" : "border-input bg-card hover:border-input"}`}
+              className={`group flex cursor-pointer flex-col items-center gap-1.5 rounded-xl border-2 px-5 py-3 transition-all ${assetCategory === cat.value ? "border-forest bg-forest/10 shadow-sm" : "border-input bg-card hover:border-forest/40"}`}
  onClick={() => setAssetCategory(cat.value)}
  >
- <span className="text-2xl">{cat.icon}</span>
-              <span className="text-sm font-semibold text-secondary-foreground">{cat.label}</span>
+ <span className={`text-2xl transition-all ${assetCategory === cat.value ? "" : "opacity-60 grayscale group-hover:opacity-90 group-hover:grayscale-0"}`}>{cat.icon}</span>
+              <span className={`text-sm font-semibold ${assetCategory === cat.value ? "text-forest" : "text-secondary-foreground"}`}>{cat.label}</span>
  </button>
  ))}
  </div>
@@ -670,8 +671,8 @@ export default function AddHorsePage() {
  <div className="step-content" key="step-0">
  <div className="relative overflow-visible rounded-xl border border-input bg-card p-6 shadow-sm">
  <div className="mb-6 flex items-center gap-3">
- <div className="text-2xl">
- 📸
+ <div className="flex h-10 w-10 items-center justify-center rounded-full bg-forest/10 text-forest">
+ <Camera className="h-5 w-5" />
  </div>
  <div>
  <h2>Photo Gallery</h2>
@@ -867,8 +868,8 @@ export default function AddHorsePage() {
  <div className={`step-content ${activeConfig.showReferenceStep && currentStep === 1 ?"block" :"hidden"}`} key="step-1">
  <div className="relative overflow-visible rounded-xl border border-input bg-card p-6 shadow-sm">
  <div className="mb-6 flex items-center gap-3">
- <div className="text-2xl">
- 🔗
+ <div className="flex h-10 w-10 items-center justify-center rounded-full bg-forest/10 text-forest">
+ <Link2 className="h-5 w-5" />
  </div>
  <div>
  <h2>Reference Link</h2>
@@ -939,8 +940,8 @@ export default function AddHorsePage() {
  )}
 
  <div className="mb-6 flex items-center gap-3">
- <div className="text-2xl">
- 🏷️
+ <div className="flex h-10 w-10 items-center justify-center rounded-full bg-forest/10 text-forest">
+ <Tag className="h-5 w-5" />
  </div>
  <div>
  <h2>

@@ -113,10 +113,13 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
  id="show-records"
  >
  <div className="mb-6 flex flex-wrap items-center justify-between gap-2">
- <h3 className="m-0 flex items-center gap-2 text-lg">
- <span aria-hidden="true">🏅</span> Show Records
+ <div className="brass-heading">
+ <span className="brass-heading-bar" aria-hidden="true" />
+ <h3 className="m-0 text-lg">
+ Show Records
  {records.length > 0 && ` (${records.length})`}
  </h3>
+ </div>
  {isOwner && (
  <Button
  onClick={handleAdd}

@@ -204,10 +204,20 @@ export default function UniversalFeed({
  // Leather variant: the surrounding .feed-leather panel provides the
  // background/border, so skip the default card chrome.
  <div className={isLeather ? "relative" : "mt-6 rounded-lg border border-input bg-card p-6 shadow-md transition-all"}>
- <h3 className={`mb-4 ${isLeather ? "feed-leather-label" : ""}`}>
- {isLeather ? "" : "💬 "}{label} ({posts.length}
+ {isLeather ? (
+ <h3 className="feed-leather-label mb-4">
+ {label} ({posts.length}
  {hasMore ?"+" :""})
  </h3>
+ ) : (
+ <div className="brass-heading mb-4">
+ <span className="brass-heading-bar" aria-hidden="true" />
+ <h3 className="m-0">
+ {label} ({posts.length}
+ {hasMore ?"+" :""})
+ </h3>
+ </div>
+ )}
 
  {/* ── Composer ── */}
  {showComposer && (

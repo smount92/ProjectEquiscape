@@ -105,9 +105,12 @@ export default function HoofprintTimeline({
  {/* Header */}
  <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
  <div className="flex items-center gap-4">
- <h2 className="text-xl font-bold">
+ <div className="brass-heading">
+ <span className="brass-heading-bar" aria-hidden="true" />
+ <h2 className="m-0 flex items-center gap-2 text-xl font-bold">
  <HorseshoeIcon className="text-forest" /> <span className="text-forest">Hoofprint</span>
  </h2>
+ </div>
  <span className={`hoofprint-stage-badge stage-${lifeStage}`}>
  {STAGE_ICONS[lifeStage] ||"📋"} {STAGE_LABELS[lifeStage] || lifeStage}
  </span>

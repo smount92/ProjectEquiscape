@@ -727,14 +727,6 @@ editionSize: rawPedigree.edition_size,
   </Link></Button>
   )}
  </div>
-
- {/* Back link */}
- <Link
- href="/community"
- className="px-0 py-1 text-center text-sm text-secondary-foreground no-underline opacity-[0.6] transition-all"
- >
- ← Back to Show Ring
- </Link>
  </div>
  </div>
 
