@@ -16,7 +16,7 @@ import { MessageCircle, Calendar, Package, Star } from "lucide-react";
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
  const { id } = await params;
  return {
- title: `Conversation — Model Horse Hub`,
+ title: `Conversation`,
  description: `Private message thread ${id}.`,
  };
 }

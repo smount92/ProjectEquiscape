@@ -7,7 +7,7 @@ import FocusLayout from"@/components/layouts/FocusLayout";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
- title:"Batch CSV Import — Model Horse Hub",
+ title:"Batch CSV Import",
  description:
 "Import your model horse collection from a CSV spreadsheet. Fuzzy-match against 10,500+ reference releases and artist resins, review matches, and bulk import.",
 };

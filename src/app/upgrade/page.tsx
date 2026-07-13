@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 
 export const metadata = {
-    title: "Upgrade to MHH Pro — Model Horse Hub",
+    title: "Upgrade to MHH Pro",
     description: "Unlock advanced analytics, expanded photo storage, and AI-powered collection reports.",
 };
 

@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 
 
 export const metadata = {
- title:"Events — Model Horse Hub",
+ title:"Events",
  description:"Discover shows, swap meets, meetups, and more in the model horse community.",
 };
 

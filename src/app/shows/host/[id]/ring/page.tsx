@@ -17,7 +17,7 @@ import RingConsole from "@/components/shows/RingConsole";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-    title: "Ring Console — Model Horse Hub",
+    title: "Ring Console",
     description: "Call classes, record placings by leg tag, run the callbacks.",
 };
 

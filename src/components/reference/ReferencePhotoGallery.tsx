@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 
 export interface GalleryPhoto {
     url: string;
@@ -34,8 +35,14 @@ export default function ReferencePhotoGallery({
         <div className="overflow-hidden rounded-xl border border-input bg-card shadow-md">
             <div className="relative flex aspect-[4/3] items-center justify-center bg-muted">
                 {current ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={current.url} alt={current.name || alt} className="h-full w-full object-contain" />
+                    <Image
+                        src={current.url}
+                        alt={current.name || alt}
+                        fill
+                        sizes="(min-width: 768px) 360px, 100vw"
+                        className="object-contain"
+                        priority
+                    />
                 ) : (
                     <span className="text-5xl opacity-40">🐴</span>
                 )}

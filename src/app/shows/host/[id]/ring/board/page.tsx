@@ -18,7 +18,7 @@ import RingBoard from "@/components/shows/RingBoard";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-    title: "Ring Board — Model Horse Hub",
+    title: "Ring Board",
     description: "Now judging, on deck, and the latest results.",
 };
 

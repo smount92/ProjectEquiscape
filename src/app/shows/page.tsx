@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 export const metadata = {
- title:"Photo Shows — Model Horse Hub",
+ title:"Photo Shows",
  description:"Browse and enter virtual photo shows. Show off your models and vote for favorites!",
 };
 

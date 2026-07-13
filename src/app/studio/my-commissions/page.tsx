@@ -8,7 +8,7 @@ import { STATUS_STYLES } from "@/lib/studio/statusStyles";
 import { Palette, CheckCircle, Ban, DollarSign, type LucideIcon } from "lucide-react";
 
 export const metadata = {
- title:"My Commissions — Model Horse Hub",
+ title:"My Commissions",
 };
 
 export default async function MyCommissionsPage() {

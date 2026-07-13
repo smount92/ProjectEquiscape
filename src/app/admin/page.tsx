@@ -9,7 +9,7 @@ import CommandCenterLayout from"@/components/layouts/CommandCenterLayout";
 import { Zap, Shield, Users, Mail } from "lucide-react";
 
 export const metadata = {
- title:"Admin Console — Model Horse Hub",
+ title:"Admin Console",
  description:"Founder's Command Center.",
 };
 

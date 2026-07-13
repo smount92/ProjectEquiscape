@@ -11,7 +11,7 @@ import { showRingV2Enabled } from"@/lib/showring/flags";
 
 
 export const metadata = {
- title:"The Show Ring — Model Horse Hub",
+ title:"The Show Ring",
  description:"Browse the community showcase of model horses cataloged by collectors around the world.",
 };
 

@@ -7,7 +7,7 @@ import PageMasthead from"@/components/layouts/PageMasthead";
 
 
 export const metadata = {
- title:"Art Studios — Model Horse Hub",
+ title:"Art Studios",
  description:"Browse custom artists — painters, sculptors, and tack makers in the model horse community.",
 };
 

@@ -2,6 +2,7 @@
 
 import { useState } from"react";
 import { Button } from "@/components/ui/button";
+import { track } from "@/lib/analytics";
 
 export default function ExportButton() {
  const [loading, setLoading] = useState(false);
@@ -11,6 +12,8 @@ export default function ExportButton() {
  try {
  const response = await fetch("/api/export");
  if (!response.ok) throw new Error("Export failed");
+
+ track("export", { type: "csv" });
 
  const blob = new Blob([await response.text()], { type: "text/csv;charset=utf-8" });
  const url = window.URL.createObjectURL(blob);

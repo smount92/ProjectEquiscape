@@ -5,7 +5,7 @@ import FocusLayout from"@/components/layouts/FocusLayout";
 import CatalogSubMasthead from"@/components/catalog/CatalogSubMasthead";
 
 export const metadata = {
- title:"Suggest New Catalog Entry — Model Horse Hub",
+ title:"Suggest New Catalog Entry",
  description:"Suggest a model that's missing from the reference catalog.",
 };
 

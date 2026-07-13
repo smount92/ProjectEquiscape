@@ -16,7 +16,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
  return {
- title:"Suggestion Detail — Model Horse Hub",
+ title:"Suggestion Detail",
  description:"View, vote on, and discuss a catalog suggestion.",
  };
 }

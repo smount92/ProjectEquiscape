@@ -87,7 +87,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
  const h = horse;
 
- const title = `${h.custom_name} — Model Horse Hub`;
+ const title = `${h.custom_name}`;
  const catalogInfo = h.catalog_items ? `${h.catalog_items.maker} ${h.catalog_items.title}` :"";
  const description = [catalogInfo, h.finish_type, h.condition_grade].filter(Boolean).join(" ·");
 
@@ -693,7 +693,7 @@ editionSize: rawPedigree.edition_size,
  />
  {horse.catalog_id && <WishlistButton catalogId={horse.catalog_id} />}
  <ShareButton
- title={`${horse.custom_name} — Model Horse Hub`}
+ title={`${horse.custom_name}`}
  text={`Check out ${horse.custom_name} on Model Horse Hub!`}
  label="Share"
  variant="full"

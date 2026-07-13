@@ -5,7 +5,7 @@ import NotificationList from"@/components/NotificationList";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 
 export const metadata = {
- title:"Notifications — Model Horse Hub",
+ title:"Notifications",
  description:"Your latest activity notifications from the Model Horse Hub community.",
 };
 

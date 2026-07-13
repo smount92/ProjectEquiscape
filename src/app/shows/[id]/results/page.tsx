@@ -35,16 +35,16 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     const data = await getPublicShowResults(id);
 
     if (!data) {
-        return { title: "Show Results — Model Horse Hub" };
+        return { title: "Show Results" };
     }
 
     const placedCount = data.divisions.reduce((acc, d) => acc + d.classes.reduce((a, c) => a + c.results.length, 0), 0);
 
     return {
-        title: `${data.event.name} Results — Model Horse Hub`,
+        title: `${data.event.name} Results`,
         description: `View results from ${data.event.name}. ${data.totalEntries} entries across ${data.totalClasses} classes. ${placedCount} horses placed.`,
         openGraph: {
-            title: `${data.event.name} Results — Model Horse Hub`,
+            title: `${data.event.name} Results`,
             description: `View results from ${data.event.name}. ${data.totalEntries} entries across ${data.totalClasses} classes.`,
             type: "website",
         },

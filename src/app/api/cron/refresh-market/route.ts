@@ -1,14 +1,6 @@
 // ============================================================
 // Vercel Cron: Refresh Market Prices
-// Schedule: Every 6 hours (0 */6 * * *)
-//
-// To activate, add to vercel.json:
-// {
-//     "crons": [{
-//         "path": "/api/cron/refresh-market",
-//         "schedule": "0 */6 * * *"
-//     }]
-// }
+// Schedule: Daily at 06:00 UTC (0 6 * * *) — see vercel.json.
 //
 // Requires CRON_SECRET environment variable in Vercel dashboard.
 // ============================================================

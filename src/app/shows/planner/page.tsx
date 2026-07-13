@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 
 
 export const metadata = {
- title:"Live Show Packer — Model Horse Hub",
+ title:"Live Show Packer",
  description:"Plan your show entries, track class assignments, and convert results into records.",
 };
 

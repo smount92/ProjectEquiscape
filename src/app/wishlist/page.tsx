@@ -10,7 +10,7 @@ import { Button } from"@/components/ui/button";
 import { referenceHref, referencePagesEnabled } from"@/lib/catalog/referenceUrl";
 
 export const metadata = {
- title:"My Want List — Model Horse Hub",
+ title:"My Want List",
  description:"Models you're hunting for — your personal Want List with Matchmaker.",
 };
 

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Lock, Sparkles, PawPrint, Gavel, Users, Palette, Package, Smartphone, Handshake } from "lucide-react";
 
 export const metadata: Metadata = {
-    title: "About — Model Horse Hub",
+    title: "About",
     description:
         "Learn about Model Horse Hub — the first digital stable built by a collector who was tired of notebooks, spreadsheets, and scattered albums. 10,500+ reference entries, Hoofprint provenance, and a privacy-first design.",
 };

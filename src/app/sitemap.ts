@@ -1,6 +1,8 @@
 import type { MetadataRoute } from "next";
 import { createClient } from "@/lib/supabase/server";
+import { getAdminClient } from "@/lib/supabase/admin";
 import { referencePagesEnabled } from "@/lib/catalog/referenceUrl";
+import { showsV2Enabled } from "@/lib/shows/flags";
 
 /**
  * sitemap.xml — Tells search engines about all discoverable pages.
@@ -23,6 +25,18 @@ type CatalogReferenceRow = {
     maker_slug: string | null;
     slug: string | null;
     created_at: string | null;
+};
+
+/** Public horse passport (/community/[id]) — id + created_at only, no PII. */
+type PublicHorseRow = {
+    id: string;
+    created_at: string | null;
+};
+
+/** Public v2 show (/shows/[id]) — id + updated_at only. */
+type PublicShowRow = {
+    id: string;
+    updated_at: string | null;
 };
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -147,5 +161,78 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         referenceEntries = [];
     }
 
-    return [...staticEntries, ...referenceEntries];
+    // ── Dynamic public horse passports (/community/[id]) ──
+    // user_horses is `SELECT TO authenticated` only (migration 109) — anon
+    // can't read it directly, which is why /community/[id] serves logged-out
+    // visitors through the get_public_passport RPC (migration 135) instead of
+    // a table query. Sitemap generation has no user session, so it needs the
+    // admin (service-role) client to enumerate rows; we still manually filter
+    // to `visibility = 'public'` (never 'unlisted' — those are link-only by
+    // design, not meant to be crawled) and select only id/created_at, never
+    // owner_id or any other private/PII column. Capped well under the 50k
+    // sitemap limit; any DB failure degrades gracefully.
+    let horseEntries: MetadataRoute.Sitemap = [];
+    try {
+        const admin = getAdminClient();
+        const PAGE = 1000;
+        const HORSE_CAP = 20_000;
+        const rows: PublicHorseRow[] = [];
+        for (let from = 0; from < HORSE_CAP; from += PAGE) {
+            const { data, error } = await admin
+                .from("user_horses")
+                .select("id, created_at")
+                .eq("visibility", "public")
+                .is("deleted_at", null)
+                .range(from, from + PAGE - 1);
+            if (error || !data || data.length === 0) break;
+            rows.push(...(data as unknown as PublicHorseRow[]));
+            if (data.length < PAGE) break;
+        }
+        horseEntries = rows.map((row): MetadataRoute.Sitemap[number] => ({
+            url: `${baseUrl}/community/${row.id}`,
+            lastModified: row.created_at ?? now,
+            changeFrequency: "monthly",
+            priority: 0.5,
+        }));
+    } catch {
+        horseEntries = [];
+    }
+
+    // ── Dynamic public v2 shows (/shows/[id]) ──
+    // /shows/[id] is the canonical URL for v2 shows too (src/app/shows/[id]/
+    // page.tsx resolves by id; /shows/v2/[id] just redirects here). Every
+    // non-draft status is anon-visible on the show page itself (RLS policy
+    // "Public reads non-draft shows", migration 118) — draft is the only
+    // status that never renders publicly — so this uses the same anon-safe
+    // server client as the catalog reference query above. Gated behind
+    // NEXT_PUBLIC_SHOWS_V2 (default off, src/lib/shows/flags.ts) — same
+    // reasoning as referencePagesEnabled() above: never advertise URLs the
+    // resolver would fall through to the legacy show system for.
+    let showEntries: MetadataRoute.Sitemap = [];
+    if (showsV2Enabled()) try {
+        const supabase = await createClient();
+        const PAGE = 1000;
+        const SHOW_CAP = 5_000;
+        const rows: PublicShowRow[] = [];
+        for (let from = 0; from < SHOW_CAP; from += PAGE) {
+            const { data, error } = await supabase
+                .from("shows")
+                .select("id, updated_at")
+                .neq("status", "draft")
+                .range(from, from + PAGE - 1);
+            if (error || !data || data.length === 0) break;
+            rows.push(...(data as unknown as PublicShowRow[]));
+            if (data.length < PAGE) break;
+        }
+        showEntries = rows.map((row): MetadataRoute.Sitemap[number] => ({
+            url: `${baseUrl}/shows/${row.id}`,
+            lastModified: row.updated_at ?? now,
+            changeFrequency: "weekly",
+            priority: 0.6,
+        }));
+    } catch {
+        showEntries = [];
+    }
+
+    return [...staticEntries, ...referenceEntries, ...horseEntries, ...showEntries];
 }

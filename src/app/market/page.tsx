@@ -1,11 +1,19 @@
 import Link from"next/link";
 import { Suspense } from"react";
+import type { Metadata } from"next";
 import { searchMarketPrices } from"@/app/actions/market";
 import MarketFilters from"@/components/MarketFilters";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import PageMasthead from"@/components/layouts/PageMasthead";
 import { Button } from "@/components/ui/button";
 import { referenceHref, referencePagesEnabled } from "@/lib/catalog/referenceUrl";
+
+export const metadata: Metadata = {
+    title: "Model Horse Price Guide — The Blue Book",
+    description:
+        "Real sale data from real collectors. Browse average, median, and range pricing for model horses, tack, and props based on completed Model Horse Hub transactions.",
+    alternates: { canonical: "/market" },
+};
 
 const formatCurrency = (value: number) =>
  new Intl.NumberFormat("en-US", { style:"currency", currency:"USD", maximumFractionDigits: 0 }).format(value);

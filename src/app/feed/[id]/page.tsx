@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
  const alias = (p?.users as { alias_name: string } | null)?.alias_name ??"Unknown";
 
  return {
- title: content ? `${alias}: ${content.slice(0, 60)}… — Model Horse Hub` :"Post — Model Horse Hub",
+ title: content ? `${alias}: ${content.slice(0, 60)}…` :"Post",
  description: content.slice(0, 160) ||"A post on Model Horse Hub",
  };
 }

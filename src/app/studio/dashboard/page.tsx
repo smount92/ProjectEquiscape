@@ -9,7 +9,7 @@ import { Eye, Pencil } from "lucide-react";
 
 
 export const metadata = {
- title:"Studio Dashboard — Model Horse Hub",
+ title:"Studio Dashboard",
 };
 
 export default async function StudioDashboardPage() {

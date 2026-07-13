@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from"react";
+import Image from "next/image";
 import { Camera } from "lucide-react";
 import PhotoLightbox from"@/components/PhotoLightbox";
 
@@ -54,15 +55,18 @@ export default function PassportGallery({ images }: PassportGalleryProps) {
  <div>
  {/* Hero Image — click to open lightbox */}
  <div
- className="bg-black/15 h-full w-full object-contain"
+ className="relative aspect-[4/3] w-full bg-black/15"
  onClick={() => setLightboxIndex(activeIndex)}
  style={{ cursor:"zoom-in" }}
  >
- {/* eslint-disable-next-line @next/next/no-img-element */}
- <img
+ <Image
  src={activeImage.signedUrl}
  alt={ANGLE_LABELS[activeImage.angle_profile] || activeImage.angle_profile}
  key={activeImage.signedUrl}
+ fill
+ sizes="(min-width: 1024px) 60vw, 100vw"
+ className="object-contain"
+ priority
  />
  </div>
 
@@ -82,8 +86,15 @@ export default function PassportGallery({ images }: PassportGalleryProps) {
  aria-label={`View ${ANGLE_LABELS[img.angle_profile] || img.angle_profile} photo`}
  title={ANGLE_LABELS[img.angle_profile] || img.angle_profile}
  >
- {/* eslint-disable-next-line @next/next/no-img-element */}
- <img src={img.signedUrl} alt={ANGLE_LABELS[img.angle_profile] || img.angle_profile} />
+ <div className="relative aspect-square w-full">
+ <Image
+ src={img.signedUrl}
+ alt={ANGLE_LABELS[img.angle_profile] || img.angle_profile}
+ fill
+ sizes="72px"
+ className="object-contain"
+ />
+ </div>
  </div>
  ))}
  </div>

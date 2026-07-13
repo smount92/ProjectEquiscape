@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import WantButton from "@/components/reference/WantButton";
 import ReferencePhotoGallery from "@/components/reference/ReferencePhotoGallery";
 import { referenceHref, referencePagesEnabled } from "@/lib/catalog/referenceUrl";
+import { createAnonClient } from "@/lib/supabase/anon";
 import {
     resolveReferenceItem,
     getActiveListingsForCatalog,
@@ -21,16 +22,86 @@ interface Props {
     params: Promise<{ maker: string; slug: string }>;
 }
 
-// The global authenticated <Header> forces this page dynamic (SSR per request),
-// so page-level ISR can't apply — the DB load is handled by unstable_cache in
-// reference-pages.ts (each read cached ~1h) so a crawl doesn't re-query per hit.
+// This page renders via createAnonClient (cookie-less) end to end — the
+// global <Header> reads the session cookie, but Header rendering doesn't
+// force *this* route dynamic; only a page's own use of the cookie-based
+// server client would. That cookie-free data path is what makes build-time
+// SSG + daily ISR safe here (see generateStaticParams + revalidate below).
+// The DB load is additionally wrapped in unstable_cache in reference-pages.ts
+// (each read cached ~1h) so on-demand renders of the long tail don't
+// re-query per hit.
+
+export const revalidate = 86400; // 24h ISR
+export const dynamicParams = true; // long tail renders on demand, then caches
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://modelhorsehub.com";
+
+/**
+ * Prebuild a bounded top-N of the most-relevant reference pages at build time
+ * so they're served from the static/ISR cache from the first request instead
+ * of a cold on-demand render. Ranked by collector (owner) count via the
+ * existing anon-safe batch RPC get_catalog_stats (migration 134) — the same
+ * aggregate already used on /catalog — so this adds no new DB objects.
+ * Everything here goes through the cookie-less createAnonClient, matching the
+ * page's own data path. Never throws: any DB hiccup just yields an empty
+ * params list and dynamicParams + ISR cover every page on first request.
+ */
+export async function generateStaticParams(): Promise<{ maker: string; slug: string }[]> {
+    if (!referencePagesEnabled()) return [];
+
+    try {
+        const supabase = createAnonClient();
+
+        // Page through all catalog rows (mirrors sitemap.ts's pattern) — cheap,
+        // anon-readable columns only.
+        const PAGE = 1000;
+        const rows: { id: string; maker_slug: string | null; slug: string | null }[] = [];
+        for (let from = 0; from < 20_000; from += PAGE) {
+            const { data, error } = await supabase
+                .from("catalog_items")
+                .select("id, maker_slug, slug")
+                .range(from, from + PAGE - 1);
+            if (error || !data || data.length === 0) break;
+            rows.push(...(data as { id: string; maker_slug: string | null; slug: string | null }[]));
+            if (data.length < PAGE) break;
+        }
+
+        const withSlugs = rows.filter((r) => r.maker_slug && r.slug);
+        if (withSlugs.length === 0) return [];
+
+        // Rank by collector count, batching get_catalog_stats to stay under
+        // RPC/payload limits.
+        const CHUNK = 500;
+        const ownerCounts = new Map<string, number>();
+        const rpc = supabase.rpc.bind(supabase) as unknown as (
+            fn: string,
+            args: { p_ids: string[] },
+        ) => Promise<{ data: { catalog_id: string; owner_count: number }[] | null }>;
+        for (let i = 0; i < withSlugs.length; i += CHUNK) {
+            const chunk = withSlugs.slice(i, i + CHUNK);
+            const { data } = await rpc("get_catalog_stats", { p_ids: chunk.map((r) => r.id) });
+            for (const row of data ?? []) {
+                ownerCounts.set(row.catalog_id, Number(row.owner_count) || 0);
+            }
+        }
+
+        const TOP_N = 300;
+        const ranked = withSlugs
+            .slice()
+            .sort((a, b) => (ownerCounts.get(b.id) ?? 0) - (ownerCounts.get(a.id) ?? 0))
+            .slice(0, TOP_N);
+
+        return ranked.map((r) => ({ maker: r.maker_slug as string, slug: r.slug as string }));
+    } catch {
+        // Never block the build over a ranking query — ISR covers the rest.
+        return [];
+    }
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { maker, slug } = await params;
     const item = await resolveReferenceItem(maker, slug);
-    if (!item) return { title: "Model Not Found — Model Horse Hub" };
+    if (!item) return { title: "Model Not Found" };
 
     const attrs = item.attributes ?? {};
     const year = attrs.release_year_start ? ` (${attrs.release_year_start})` : "";
@@ -96,6 +167,36 @@ export default async function ReferencePage({ params }: Props) {
         isMold ? getChildReleases(item.id) : Promise.resolve([]),
     ]);
 
+    // Product JSON-LD — built only from data the page already fetched above
+    // (no additional queries). AggregateOffer/additionalProperty are included
+    // only when that data is present.
+    const productJsonLd = {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        name: item.title,
+        brand: { "@type": "Brand", name: item.maker },
+        url: `${APP_URL}${referenceHref(item)}`,
+        ...(photos[0] ? { image: photos[0].url } : {}),
+        additionalProperty: [
+            {
+                "@type": "PropertyValue",
+                name: "Collector count",
+                value: counts.collectors,
+            },
+        ],
+        ...(market
+            ? {
+                  offers: {
+                      "@type": "AggregateOffer",
+                      priceCurrency: "USD",
+                      lowPrice: Math.round(market.lowestPrice),
+                      highPrice: Math.round(market.highestPrice),
+                      offerCount: market.transactionVolume,
+                  },
+              }
+            : {}),
+    };
+
     const attrs = item.attributes ?? {};
     const chip = (label: string, value: unknown) =>
         value != null && value !== "" ? (
@@ -114,6 +215,10 @@ export default async function ReferencePage({ params }: Props) {
 
     return (
         <FocusLayout noHeader>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+            />
             <CatalogSubMasthead
                 icon={isMold ? "🗿" : "🐴"}
                 title={item.title}

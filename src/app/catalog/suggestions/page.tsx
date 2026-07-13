@@ -7,7 +7,7 @@ import CatalogSubMasthead from"@/components/catalog/CatalogSubMasthead";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
- title:"Catalog Suggestions — Model Horse Hub",
+ title:"Catalog Suggestions",
  description:
 "View community suggestions for the Model Horse Hub reference catalog. Vote, discuss, and help keep catalog data accurate.",
 };

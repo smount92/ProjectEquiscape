@@ -24,7 +24,7 @@ import type { CardStatus } from "@/lib/shows/types";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-    title: "Verify a Qualification Card — Model Horse Hub",
+    title: "Verify a Qualification Card",
     description:
         "Check the authenticity of a Model Horse Hub qualification card by its short code.",
 };

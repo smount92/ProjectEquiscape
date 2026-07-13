@@ -17,7 +17,7 @@ import JudgeQueue from "@/components/shows/JudgeQueue";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-    title: "Judge Queue — Model Horse Hub",
+    title: "Judge Queue",
     description: "Work the classes: photos side by side, tap to place.",
 };
 

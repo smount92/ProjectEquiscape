@@ -34,7 +34,7 @@ function entryHref(entry: ChangelogEntry): string {
 }
 
 export const metadata: Metadata = {
- title:"Catalog Changelog — Model Horse Hub",
+ title:"Catalog Changelog",
  description:
 "See recent community updates to the Model Horse Hub reference catalog. Corrections, additions, and photo submissions.",
 };

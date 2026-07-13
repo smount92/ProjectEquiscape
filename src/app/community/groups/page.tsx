@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 
 
 export const metadata = {
- title:"Groups — Model Horse Hub",
+ title:"Groups",
  description:"Join clubs, circuits, and communities in the model horse hobby.",
 };
 

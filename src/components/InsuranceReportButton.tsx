@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from"react";
 import { getInsuranceReportData } from"@/app/actions/insurance-report";
 import type { InsuranceReportPayload } from"@/app/actions/insurance-report";
 import { Button } from "@/components/ui/button";
+import { track } from "@/lib/analytics";
 
 interface Collection {
  id: string;
@@ -64,6 +65,8 @@ export default function InsuranceReportButton() {
 
  // Generate PDF client-side
  const blob = await pdf(<InsuranceReport data={data} />).toBlob();
+
+ track("export", { type: "insurance_pdf" });
 
  // Trigger download
  const url = URL.createObjectURL(blob);

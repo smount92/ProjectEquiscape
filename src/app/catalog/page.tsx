@@ -15,7 +15,7 @@ import {
 import { referenceHref, referencePagesEnabled } from "@/lib/catalog/referenceUrl";
 
 export const metadata: Metadata = {
-    title: "Reference Catalog — Model Horse Hub",
+    title: "Reference Catalog",
     description:
         "Browse 10,500+ model horse reference entries. Search by name, maker, mold, and scale. Community-maintained catalog for Breyer, Stone, and Artist Resins.",
 };

@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: { params: Promise<{ alias_nam
  const { alias_name } = await params;
  const decoded = decodeURIComponent(alias_name);
  return {
- title: `@${decoded}'s Stable — Model Horse Hub`,
+ title: `@${decoded}'s Stable`,
  description: `Browse the public collection of @${decoded} on Model Horse Hub.`,
  };
 }
@@ -512,7 +512,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  </span>
  )}
  <ShareButton
- title={`@${profileUser.alias_name}'s Stable — Model Horse Hub`}
+ title={`@${profileUser.alias_name}'s Stable`}
  text={`Check out @${profileUser.alias_name}'s model horse collection on Model Horse Hub!`}
  variant="icon"
  />

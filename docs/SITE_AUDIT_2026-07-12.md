@@ -82,8 +82,9 @@
 - **Evidence:** `docs/NEXT_SYSTEMS_ROADMAP.md:12-13,27`; `transactions.ts:855-879` (park-then-update), `:731-750` (JS-loop competing-offer cancel), `:906-958` (3-step cancel).
 - **Fix:** Ship the owed `cancel_transaction_atomic`/`verify_funds_atomic` single-transaction RPCs; fold competing-offer + stale-offer (S2) sweep in.
 
-### SEC-7 — [LOW] `NEXT_PUBLIC_ADMIN_EMAIL` in client bundle — **Status: TODO**
-- **Evidence:** `.env.local:10`. Not an authz bypass (server uses non-public `ADMIN_EMAIL`), but hands attackers the one account whose compromise = full admin. Fix: drop the `NEXT_PUBLIC_` copy; gate admin UI via a server-returned boolean.
+### SEC-7 — [LOW] `NEXT_PUBLIC_ADMIN_EMAIL` in client bundle — **Status: CODE FIXED, ENV CLEANUP OUTSTANDING**
+- **Evidence:** `.env.local:10` still defines `NEXT_PUBLIC_ADMIN_EMAIL`. Confirmed zero references to `NEXT_PUBLIC_ADMIN_EMAIL` anywhere in `src/` — `Header.tsx` gets `isAdmin` as a server-computed boolean from `getHeaderData()` (`src/app/actions/header.ts`), which derives it from non-public `ADMIN_EMAIL` server-side.
+- **Remaining:** delete the `NEXT_PUBLIC_ADMIN_EMAIL` line from `.env.local` and remove the matching var from Vercel project env settings (owner action — not done by this pass).
 
 ---
 

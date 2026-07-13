@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
  const { slug } = await params;
  const profile = await getArtistProfileBySlug(slug);
  return {
- title: profile ? `${profile.studioName} — Art Studio | Model Horse Hub` :"Studio Not Found — Model Horse Hub",
+ title: profile ? `${profile.studioName} — Art Studio` :"Studio Not Found",
  description: profile
  ? `${profile.studioName} — ${profile.specialties.join(",") ||"Model horse artist"}`
  :"This studio could not be found.",
@@ -140,7 +140,7 @@ export default async function PublicStudioPage({ params }: { params: Promise<{ s
  </>
  )}
  <ShareButton
- title={`${profile.studioName} — Model Horse Hub`}
+ title={`${profile.studioName}`}
  text={`Check out ${profile.studioName} on Model Horse Hub!`}
  label="Share"
  variant="full"

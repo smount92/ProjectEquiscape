@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 
 
 export const metadata: Metadata = {
- title:"Help ID Request — Model Horse Hub",
+ title:"Help ID Request",
  description:"View a mystery model identification request and community suggestions.",
 };
 

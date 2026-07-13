@@ -22,7 +22,7 @@ import {
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-    title: "Show Office — Model Horse Hub",
+    title: "Show Office",
     description: "Create and run your shows — live or online — from one console.",
 };
 

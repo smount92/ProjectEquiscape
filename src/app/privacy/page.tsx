@@ -4,7 +4,7 @@ import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import AiDataPolicySection from"@/components/AiDataPolicySection";
 
 export const metadata: Metadata = {
- title:"Privacy Policy — Model Horse Hub",
+ title:"Privacy Policy",
  description:"How Model Horse Hub collects, uses, and protects your data. Privacy-first by design.",
 };
 

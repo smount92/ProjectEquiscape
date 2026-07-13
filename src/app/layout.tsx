@@ -21,7 +21,7 @@ const GA_MEASUREMENT_ID ="G-7DWKBT1JV9";
 export const metadata: Metadata = {
  title: {
  default:"Model Horse Hub — Your Digital Stable",
- template:"%s — Model Horse Hub",
+ template:"%s",
  },
  description:
 "A secure, privacy-first platform for model horse collectors to catalog their inventory with multi-angle photo galleries.",

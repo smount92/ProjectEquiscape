@@ -9,7 +9,7 @@ import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import { Globe, Users } from "lucide-react";
 
 export const metadata = {
- title:"Activity Feed — Model Horse Hub",
+ title:"Activity Feed",
  description:"See the latest activity from the Model Horse Hub community.",
 };
 

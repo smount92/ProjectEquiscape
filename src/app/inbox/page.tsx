@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Trophy, MessageCircle, DollarSign, Handshake, Star } from "lucide-react";
 
 export const metadata = {
- title:"Inbox — Model Horse Hub",
+ title:"Inbox",
  description:"Your private conversations with other collectors.",
 };
 

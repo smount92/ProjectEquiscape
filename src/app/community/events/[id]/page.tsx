@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
  const { id } = await params;
  const event = await getEvent(id);
  return {
- title: event ? `${event.name} — Model Horse Hub` :"Event Not Found",
+ title: event ? `${event.name}` :"Event Not Found",
  description: event?.description ||"Model Horse Hub event",
  };
 }

@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
  const { slug } = await params;
  const group = await getGroup(slug);
  return {
- title: group ? `${group.name} — Model Horse Hub` :"Group Not Found",
+ title: group ? `${group.name}` :"Group Not Found",
  description: group?.description ||"Model Horse Hub group",
  };
 }

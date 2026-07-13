@@ -12,10 +12,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const photo = await getPhotoBySlug(slug);
 
   if (!photo) {
-    return { title: "Photo Not Found — Model Horse Hub" };
+    return { title: "Photo Not Found" };
   }
 
-  const title = `${photo.horseName} — Model Horse Hub`;
+  const title = `${photo.horseName}`;
   const description = photo.catalogRef
     ? `${photo.horseName} (${photo.catalogRef}) — shared by ${photo.ownerAlias} on Model Horse Hub`
     : `${photo.horseName} — shared by ${photo.ownerAlias} on Model Horse Hub`;

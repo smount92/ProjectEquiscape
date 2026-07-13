@@ -9,7 +9,7 @@ import ShowConsole from "@/components/shows/ShowConsole";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-    title: "Show Console — Model Horse Hub",
+    title: "Show Console",
     description: "Run your show: status, classlist, staff, and entries.",
 };
 

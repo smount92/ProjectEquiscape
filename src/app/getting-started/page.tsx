@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-    title: "Getting Started — Model Horse Hub",
+    title: "Getting Started",
     description:
         "Learn how to set up your digital stable on Model Horse Hub. Add your first horse, explore the Show Ring, and discover Hoofprint provenance tracking.",
 };

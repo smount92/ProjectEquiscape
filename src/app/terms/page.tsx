@@ -3,7 +3,7 @@ import type { Metadata } from"next";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 
 export const metadata: Metadata = {
- title:"Terms of Service — Model Horse Hub",
+ title:"Terms of Service",
  description:"Terms of Service for Model Horse Hub. Fair, transparent rules for using the platform.",
 };
 

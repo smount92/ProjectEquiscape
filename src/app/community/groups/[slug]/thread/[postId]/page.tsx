@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     if (!groupsForumEnabled()) return { title: "Not Found" };
     const { slug } = await params;
     const group = await getGroup(slug);
-    return { title: group ? `Thread — ${group.name} — Model Horse Hub` : "Thread — Model Horse Hub" };
+    return { title: group ? `Thread — ${group.name}` : "Thread" };
 }
 
 export default async function GroupThreadPage({
