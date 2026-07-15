@@ -665,6 +665,10 @@ export default function EditHorsePage() {
  if (!finalizeResult.success) {
  console.error("Finalize failed:", finalizeResult.error);
  uploadErrors.push(`Save failed: ${finalizeResult.error ||"Unknown error"}`);
+ } else if (finalizeResult.skippedReason) {
+ // Standard photos saved; the extra-detail subset was skipped
+ // (Pro gate / cap) — surface it like other photo problems.
+ uploadErrors.push(finalizeResult.skippedReason);
  }
  }
 

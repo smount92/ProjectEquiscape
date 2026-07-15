@@ -20,7 +20,7 @@ import { getCatalogItem } from"@/app/actions/reference";
 import CollectionPicker from"@/components/CollectionPicker";
 import { notifyHorsePublic } from"@/app/actions/horse-events";
 import { initializeHoofprint } from"@/app/actions/hoofprint";
-import { createHorseRecord, finalizeHorseImages } from"@/app/actions/horse";
+import { createHorseRecord, finalizeHorseImages, getMyTier } from"@/app/actions/horse";
 import { getProfile } from"@/app/actions/settings";
 import { setHorseCollections } from"@/app/actions/collections";
 import ImageCropModal from"@/components/ImageCropModal";
@@ -72,6 +72,14 @@ export default function AddHorsePage() {
  const [showSuccess, setShowSuccess] = useState(false);
  const [savedHorseName, setSavedHorseName] = useState("");
  const [newHorseId, setNewHorseId] = useState<string | null>(null);
+ // Non-fatal photo problem discovered during finalize — the horse
+ // saved, so this renders as a warning on the success screen.
+ const [photoWarning, setPhotoWarning] = useState<string | null>(null);
+ // Viewer tier gates the Pro-only extra-detail dropzone honestly.
+ const [viewerTier, setViewerTier] = useState<string | null>(null);
+ useEffect(() => {
+ getMyTier().then(setViewerTier).catch(() => setViewerTier(null));
+ }, []);
 
  // Validation feedback
  const [validationErrors, setValidationErrors] = useState<string[]>([]);
@@ -467,9 +475,18 @@ export default function AddHorsePage() {
  }
  }
 
- // Step 3: Finalize image metadata on server
+ // Step 3: Finalize image metadata on server. The horse row
+ // already exists, so a photo problem must NOT fail the submit —
+ // it surfaces as a warning on the success screen instead.
  if (uploadedImages.length > 0) {
- await finalizeHorseImages(horseId, uploadedImages);
+ const finalizeResult = await finalizeHorseImages(horseId, uploadedImages);
+ if (!finalizeResult.success) {
+ setPhotoWarning(
+ `Your ${assetCategory === "model" ? "model" : assetCategory} was saved, but the photos could not be attached: ${finalizeResult.error ?? "unknown error"}`,
+ );
+ } else if (finalizeResult.skippedReason) {
+ setPhotoWarning(finalizeResult.skippedReason);
+ }
  }
 
  // 4. Activity event if public
@@ -526,6 +543,11 @@ export default function AddHorsePage() {
  Your {assetCategory ==="model" ?"model" : assetCategory} has been successfully cataloged in
  your Digital Stable.
  </p>
+ {photoWarning && (
+ <div className="mb-4 rounded-md border border-warning/40 bg-warning/10 px-4 py-3 text-left text-sm text-warning" role="alert">
+ {photoWarning}
+ </div>
+ )}
  <div className="flex flex-col items-center gap-4">
  {newHorseId && (
  <Button asChild size="wide"><Link
@@ -747,7 +769,20 @@ export default function AddHorsePage() {
  })}
  </div>
 
- {/* Extra Details Multi-Upload Zone */}
+ {/* Extra Details Multi-Upload Zone — Pro feature; free-tier
+ users get an honest notice instead of a dropzone whose
+ uploads the finalize step would discard. */}
+ {viewerTier === "free" ? (
+ <div className="mt-6 flex min-h-[80px] w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-input bg-muted/40 p-6 text-center">
+ <p className="text-sm font-semibold text-secondary-foreground">
+ Extra detail photos (up to 30) are an MHH Pro feature
+ </p>
+ <p className="text-xs text-muted-foreground">
+ Your five standard angle photos above are always free.{" "}
+ <Link href="/upgrade" className="text-forest hover:underline">See MHH Pro →</Link>
+ </p>
+ </div>
+ ) : (
  <div className="mt-6">
  <label
  htmlFor="extra-photos-input"
@@ -846,6 +881,7 @@ export default function AddHorsePage() {
  </div>
  )}
  </div>
+ )}
 
  </div>
 

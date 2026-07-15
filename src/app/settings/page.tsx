@@ -62,6 +62,7 @@ export default function SettingsPage() {
 
  // Avatar upload
  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+ const [avatarError, setAvatarError] = useState<string | null>(null);
 
  // Delete account
  const [deleteConfirm, setDeleteConfirm] = useState("");
@@ -142,11 +143,14 @@ export default function SettingsPage() {
  const file = e.target.files?.[0];
  if (!file) return;
  setIsUploadingAvatar(true);
+ setAvatarError(null);
  const formData = new FormData();
  formData.set("avatar", file);
  const result = await uploadAvatar(formData);
  if (result.success && result.url) {
  setAvatarUrl(result.url +"?t=" + Date.now()); // bust cache
+ } else {
+ setAvatarError(result.error ||"Avatar upload failed — please try again.");
  }
  setIsUploadingAvatar(false);
  e.target.value ="";
@@ -207,6 +211,11 @@ export default function SettingsPage() {
               <p className="mt-1 text-xs text-secondary-foreground">
  Max 2MB. JPG, PNG, or WebP.
  </p>
+ {avatarError && (
+ <p className="mt-1 text-xs text-destructive" role="alert">
+ {avatarError}
+ </p>
+ )}
  </div>
  </div>
 

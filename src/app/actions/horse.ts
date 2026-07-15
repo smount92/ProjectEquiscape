@@ -423,7 +423,7 @@ export async function createHorseRecord(data: {
 export async function finalizeHorseImages(
     horseId: string,
     images: { path: string; angle: string }[]
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; error?: string; skippedExtraDetail?: number; skippedReason?: string }> {
     const { supabase, user } = await requireAuth();
 
     // Verify ownership
@@ -437,34 +437,45 @@ export async function finalizeHorseImages(
 
     if (images.length === 0) return { success: true };
 
-    // Enforce tier-based photo limits for extra_detail uploads
+    // Enforce tier-based photo limits for extra_detail uploads.
     // Free: 5 standard LSQ angles only (no extra_detail)
     // Pro: 5 standard LSQ angles + up to 30 extra_detail photos
+    //
+    // NEVER reject the whole batch: standard gallery-slot photos must
+    // save even when the extra-detail subset is over a limit — an
+    // all-or-nothing rejection here once silently ate every photo a
+    // free user attached (the caller showed success regardless).
+    let skippedExtraDetail = 0;
+    let skippedReason: string | undefined;
     const extraDetailImages = images.filter(img => img.angle === "extra_detail");
     if (extraDetailImages.length > 0) {
         const { getUserTier } = await import("@/lib/auth");
         const tier = await getUserTier();
 
         if (tier === "free") {
-            return {
-                success: false,
-                error: "Extra detail photos are an MHH Pro feature. Upgrade to add close-ups, markings, and detail shots (up to 30 per horse).",
-            };
+            skippedExtraDetail = extraDetailImages.length;
+            skippedReason =
+                "Extra detail photos are an MHH Pro feature — your standard angle photos were saved, but the extra shots were not. Upgrade to add close-ups and detail shots (up to 30 per horse).";
+        } else {
+            // Pro users: enforce 30 extra_detail limit
+            const { count } = await supabase
+                .from("horse_images")
+                .select("id", { count: "exact", head: true })
+                .eq("horse_id", horseId)
+                .eq("angle_profile", "extra_detail");
+
+            const currentCount = count ?? 0;
+            if (currentCount + extraDetailImages.length > 30) {
+                skippedExtraDetail = extraDetailImages.length;
+                skippedReason = `Extra detail photo limit reached (${currentCount}/30) — your standard angle photos were saved, but the extra shots were not.`;
+            }
         }
+    }
 
-        // Pro users: enforce 30 extra_detail limit
-        const { count } = await supabase
-            .from("horse_images")
-            .select("id", { count: "exact", head: true })
-            .eq("horse_id", horseId)
-            .eq("angle_profile", "extra_detail");
-
-        const currentCount = count ?? 0;
-        if (currentCount + extraDetailImages.length > 30) {
-            return {
-                success: false,
-                error: `Extra detail photo limit reached (${currentCount}/30).`,
-            };
+    if (skippedExtraDetail > 0) {
+        images = images.filter((img) => img.angle !== "extra_detail");
+        if (images.length === 0) {
+            return { success: true, skippedExtraDetail, skippedReason };
         }
     }
 
@@ -479,7 +490,7 @@ export async function finalizeHorseImages(
     });
 
     const { error } = await supabase.from("horse_images").insert(inserts);
-    if (error) return { success: false, error: error.message };
+    if (error) return { success: false, error: error.message, skippedExtraDetail, skippedReason };
 
     revalidatePath("/dashboard");
     revalidatePath(`/stable/${horseId}`);
@@ -493,7 +504,20 @@ export async function finalizeHorseImages(
         } catch (err) { Sentry.captureException(err, { tags: { domain: "horse" } }); logger.error("Horse", "Achievement evaluation failed after photo upload", err); }
     });
 
-    return { success: true };
+    return skippedExtraDetail > 0
+        ? { success: true, skippedExtraDetail, skippedReason }
+        : { success: true };
+}
+
+/**
+ * The caller's subscription tier — lets client forms gate Pro-only
+ * inputs (e.g. the extra-detail photo dropzone) honestly instead of
+ * accepting uploads that the finalize step would skip.
+ */
+export async function getMyTier(): Promise<string> {
+    await requireAuth();
+    const { getUserTier } = await import("@/lib/auth");
+    return getUserTier();
 }
 
 // ============================================================
