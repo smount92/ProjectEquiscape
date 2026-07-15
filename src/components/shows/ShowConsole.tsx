@@ -28,7 +28,7 @@ const TABS: { key: TabKey; label: string }[] = [
 
 export default function ShowConsole({ data }: { data: ShowConsoleData }) {
     const [activeTab, setActiveTab] = useState<TabKey>("overview");
-    const { show, viewerRole, divisions, staff, entries } = data;
+    const { show, viewerRole, divisions, staff, entries, feePaidUserIds } = data;
 
     const canManage = viewerRole === "host" || viewerRole === "co_host";
     const classCount = divisions.reduce(
@@ -115,9 +115,13 @@ export default function ShowConsole({ data }: { data: ShowConsoleData }) {
                 )}
                 {activeTab === "entries" && (
                     <ShowEntriesPanel
+                        showId={show.id}
                         divisions={divisions}
                         entries={entries}
                         showStatus={show.status}
+                        feePaidUserIds={feePaidUserIds}
+                        feeInfo={show.feeInfo}
+                        canManage={canManage}
                     />
                 )}
             </div>

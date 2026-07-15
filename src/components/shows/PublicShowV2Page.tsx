@@ -10,7 +10,8 @@
  *  - Show-string / packer integration: legacy show_string_entries
  *    .class_id FKs to legacy event_classes — cross-linking to
  *    show_classes needs a schema decision.
- *  - Fees: manual checklist (fee_info free text below), Phase F.
+ *  - Fees: manual checklist (fee_info free text, shown above the
+ *    entry section so entrants see cost before entering), Phase F.
  */
 
 import Link from "next/link";
@@ -208,6 +209,28 @@ export default async function PublicShowV2Page({ showId }: { showId: string }) {
 
                 {champions && <ShowChampions champions={champions} />}
 
+                {show.feeInfo && (
+                    <section className="ledger-card" aria-labelledby="show-fees-heading">
+                        <span className="ledger-tab" id="show-fees-heading">
+                            Fees
+                        </span>
+                        {/* Fees v1 = manual checklist (LOCKED decision) — the
+                            host's free-text instructions; Stripe lands Phase F.
+                            Moved above the entry section so entrants see fees
+                            BEFORE they enter, not after. */}
+                        <p className="text-sm whitespace-pre-wrap text-secondary-foreground">
+                            {show.feeInfo}
+                        </p>
+                    </section>
+                )}
+
+                {show.isMhhQualifying && (
+                    <p className="text-sm text-muted-foreground">
+                        Classes marked &ldquo;qualifying&rdquo; earn digital cards for 1st and 2nd
+                        place.
+                    </p>
+                )}
+
                 <ShowEntrySection
                     showId={showId}
                     mode={show.mode}
@@ -220,25 +243,21 @@ export default async function PublicShowV2Page({ showId }: { showId: string }) {
 
                 {gallery && <ShowEntryGallery gallery={gallery} authed={!!user} />}
 
+                {show.aboutMd && (
+                    <section className="ledger-card" aria-labelledby="show-about-heading">
+                        <span className="ledger-tab" id="show-about-heading">
+                            About this show
+                        </span>
+                        <RichText content={show.aboutMd} />
+                    </section>
+                )}
+
                 {show.rulesMd && (
                     <section className="ledger-card" aria-labelledby="show-rules-heading">
                         <span className="ledger-tab" id="show-rules-heading">
                             Rules
                         </span>
                         <RichText content={show.rulesMd} />
-                    </section>
-                )}
-
-                {show.feeInfo && (
-                    <section className="ledger-card" aria-labelledby="show-fees-heading">
-                        <span className="ledger-tab" id="show-fees-heading">
-                            Fees
-                        </span>
-                        {/* Fees v1 = manual checklist (LOCKED decision) — the
-                            host's free-text instructions; Stripe lands Phase F. */}
-                        <p className="text-sm whitespace-pre-wrap text-secondary-foreground">
-                            {show.feeInfo}
-                        </p>
                     </section>
                 )}
             </div>

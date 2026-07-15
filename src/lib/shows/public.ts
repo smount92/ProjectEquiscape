@@ -63,6 +63,7 @@ export interface PublicShow {
     entriesOpenAt: string | null;
     entriesCloseAt: string | null;
     judgingEndsAt: string | null;
+    aboutMd: string | null;
     rulesMd: string | null;
     feeInfo: string | null;
     capacity: number | null;

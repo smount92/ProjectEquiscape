@@ -30,6 +30,7 @@ import {
     castVoteSchema,
     combineClassesSchema,
     createShowSchema,
+    deleteShowSchema,
     enterClassSchema,
     finalizeCommunityVotesSchema,
     findUserByAliasSchema,
@@ -45,9 +46,12 @@ import {
     removeVoteSchema,
     reorderClasslistSchema,
     scratchEntrySchema,
+    setFeePaidSchema,
     splitClassSchema,
     transitionShowStatusSchema,
     updateClassSchema,
+    updateDivisionSchema,
+    updateSectionSchema,
     updateShowSettingsSchema,
 } from "@/lib/shows/schemas";
 import {
@@ -174,6 +178,7 @@ export async function createShow(
             entries_open_at: v.entriesOpenAt ?? null,
             entries_close_at: v.entriesCloseAt ?? null,
             judging_ends_at: v.judgingEndsAt ?? null,
+            about_md: v.aboutMd ?? null,
             rules_md: v.rulesMd ?? null,
             fee_info: v.feeInfo ?? null,
             capacity: v.capacity ?? null,
@@ -225,6 +230,7 @@ export async function updateShowSettings(
     if (patch.entriesOpenAt !== undefined) update.entries_open_at = patch.entriesOpenAt;
     if (patch.entriesCloseAt !== undefined) update.entries_close_at = patch.entriesCloseAt;
     if (patch.judgingEndsAt !== undefined) update.judging_ends_at = patch.judgingEndsAt;
+    if (patch.aboutMd !== undefined) update.about_md = patch.aboutMd;
     if (patch.rulesMd !== undefined) update.rules_md = patch.rulesMd;
     if (patch.feeInfo !== undefined) update.fee_info = patch.feeInfo;
     if (patch.capacity !== undefined) update.capacity = patch.capacity;
@@ -233,6 +239,33 @@ export async function updateShowSettings(
     if (patch.blindBrowsing !== undefined) update.blind_browsing = patch.blindBrowsing;
 
     const { error } = await supabase.from("shows").update(update).eq("id", showId);
+    if (error) return { success: false, error: error.message };
+    return { success: true };
+}
+
+/**
+ * Delete a show outright — DRAFTS ONLY, host only. Anything past
+ * draft has public history (entries, staff invites, published
+ * pages) and must go through archived status instead of deletion.
+ */
+export async function deleteShow(
+    input: z.input<typeof deleteShowSchema>,
+): Promise<ActionResult> {
+    const parsed = deleteShowSchema.safeParse(input);
+    if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
+    const { supabase, user } = await requireAuth();
+    const { showId } = parsed.data;
+
+    const ctx = await getShowRole(supabase, showId, user.id);
+    if ("error" in ctx) return { success: false, error: ctx.error };
+    if (ctx.role !== "host") {
+        return { success: false, error: "Only the host can delete a show." };
+    }
+    if (ctx.show.status !== "draft") {
+        return { success: false, error: "Only draft shows can be deleted — archive it instead." };
+    }
+
+    const { error } = await supabase.from("shows").delete().eq("id", showId);
     if (error) return { success: false, error: error.message };
     return { success: true };
 }
@@ -492,6 +525,67 @@ export async function addSection(
         .single();
     if (error || !data) return { success: false, error: error?.message ?? "Failed to add section." };
     return { success: true, sectionId: data.id as string };
+}
+
+export async function updateDivision(
+    input: z.input<typeof updateDivisionSchema>,
+): Promise<ActionResult> {
+    const parsed = updateDivisionSchema.safeParse(input);
+    if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
+    const { supabase, user } = await requireAuth();
+    const v = parsed.data;
+
+    const { data: division, error: dErr } = await supabase
+        .from("show_divisions")
+        .select("id, show_id")
+        .eq("id", v.divisionId)
+        .maybeSingle();
+    if (dErr) return { success: false, error: dErr.message };
+    if (!division) return { success: false, error: "Division not found." };
+
+    const ctx = await getShowRole(supabase, division.show_id as string, user.id);
+    if ("error" in ctx) return { success: false, error: ctx.error };
+    if (!ctx.role || !MANAGER_ROLES.includes(ctx.role)) {
+        return { success: false, error: "Only the host or a co-host can edit the classlist." };
+    }
+    if (!isShowMutableForClasslist(ctx.show.status)) {
+        return { success: false, error: CLASSLIST_FROZEN_ERROR };
+    }
+
+    const { error } = await supabase
+        .from("show_divisions")
+        .update({ name: v.name })
+        .eq("id", v.divisionId);
+    if (error) return { success: false, error: error.message };
+    return { success: true };
+}
+
+export async function updateSection(
+    input: z.input<typeof updateSectionSchema>,
+): Promise<ActionResult> {
+    const parsed = updateSectionSchema.safeParse(input);
+    if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
+    const { supabase, user } = await requireAuth();
+    const v = parsed.data;
+
+    const located = await getShowIdOfClass(supabase, v.sectionId);
+    if ("error" in located) return { success: false, error: located.error };
+
+    const ctx = await getShowRole(supabase, located.showId, user.id);
+    if ("error" in ctx) return { success: false, error: ctx.error };
+    if (!ctx.role || !MANAGER_ROLES.includes(ctx.role)) {
+        return { success: false, error: "Only the host or a co-host can edit the classlist." };
+    }
+    if (!isShowMutableForClasslist(ctx.show.status)) {
+        return { success: false, error: CLASSLIST_FROZEN_ERROR };
+    }
+
+    const { error } = await supabase
+        .from("show_sections")
+        .update({ name: v.name })
+        .eq("id", v.sectionId);
+    if (error) return { success: false, error: error.message };
+    return { success: true };
 }
 
 export async function addClass(
@@ -999,7 +1093,7 @@ export async function getShowConsole(
     const { data: show, error: showError } = await supabase
         .from("shows")
         .select(
-            "id, title, mode, judging, status, venue_name, venue_address, show_date, entries_open_at, entries_close_at, judging_ends_at, rules_md, fee_info, capacity, is_mhh_qualifying, sanctioning_note, blind_browsing, created_at",
+            "id, title, mode, judging, status, venue_name, venue_address, show_date, entries_open_at, entries_close_at, judging_ends_at, about_md, rules_md, fee_info, capacity, is_mhh_qualifying, sanctioning_note, blind_browsing, created_at",
         )
         .eq("id", showId)
         .maybeSingle();
@@ -1148,6 +1242,7 @@ export async function getShowConsole(
         id: e.id as string,
         classId: e.class_id as string,
         horseName: horseNames.get(e.horse_id as string) ?? "Unnamed horse",
+        ownerId: e.owner_id as string,
         ownerAlias: aliases.get(e.owner_id as string) ?? "unknown",
         handlerAlias:
             e.handler_id && e.handler_id !== e.owner_id
@@ -1156,6 +1251,14 @@ export async function getShowConsole(
         entryNumber: (e.entry_number as number | null) ?? null,
         status: e.status as EntryStatus,
     }));
+
+    // ── Fee checklist (migration 139) — RLS scopes reads to managers
+    // (plus each entrant's own row), so stewards/judges just get [].
+    const { data: feeRows } = await supabase
+        .from("show_fee_payments")
+        .select("user_id")
+        .eq("show_id", parsed.data.showId);
+    const feePaidUserIds = (feeRows ?? []).map((r) => r.user_id as string);
 
     return {
         success: true,
@@ -1172,6 +1275,7 @@ export async function getShowConsole(
                 entriesOpenAt: show.entries_open_at as string | null,
                 entriesCloseAt: show.entries_close_at as string | null,
                 judgingEndsAt: show.judging_ends_at as string | null,
+                aboutMd: show.about_md as string | null,
                 rulesMd: show.rules_md as string | null,
                 feeInfo: show.fee_info as string | null,
                 capacity: show.capacity as number | null,
@@ -1184,8 +1288,43 @@ export async function getShowConsole(
             divisions,
             staff: staffMembers,
             entries: consoleEntries,
+            feePaidUserIds,
         },
     };
+}
+
+/**
+ * Toggle an entrant's fee-paid mark on the host's manual checklist
+ * (migration 139). Managers only — RLS backs this up.
+ */
+export async function setFeePaid(
+    input: z.input<typeof setFeePaidSchema>,
+): Promise<ActionResult> {
+    const parsed = setFeePaidSchema.safeParse(input);
+    if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
+    const { supabase, user } = await requireAuth();
+    const v = parsed.data;
+
+    const ctx = await getShowRole(supabase, v.showId, user.id);
+    if ("error" in ctx) return { success: false, error: ctx.error };
+    if (!ctx.role || !MANAGER_ROLES.includes(ctx.role)) {
+        return { success: false, error: "Only the host or a co-host can mark fees." };
+    }
+
+    if (v.paid) {
+        const { error } = await supabase
+            .from("show_fee_payments")
+            .upsert({ show_id: v.showId, user_id: v.userId, marked_by: user.id });
+        if (error) return { success: false, error: error.message };
+    } else {
+        const { error } = await supabase
+            .from("show_fee_payments")
+            .delete()
+            .eq("show_id", v.showId)
+            .eq("user_id", v.userId);
+        if (error) return { success: false, error: error.message };
+    }
+    return { success: true };
 }
 
 /**
@@ -1350,7 +1489,7 @@ export async function getPublicShow(
     const { data: show, error: showError } = await supabase
         .from("shows")
         .select(
-            "id, host_id, title, mode, judging, status, venue_name, venue_address, show_date, entries_open_at, entries_close_at, judging_ends_at, rules_md, fee_info, capacity, is_mhh_qualifying, sanctioning_note",
+            "id, host_id, title, mode, judging, status, venue_name, venue_address, show_date, entries_open_at, entries_close_at, judging_ends_at, about_md, rules_md, fee_info, capacity, is_mhh_qualifying, sanctioning_note",
         )
         .eq("id", showId)
         .maybeSingle();
@@ -1472,6 +1611,7 @@ export async function getPublicShow(
             entriesOpenAt: (show.entries_open_at as string | null) ?? null,
             entriesCloseAt: (show.entries_close_at as string | null) ?? null,
             judgingEndsAt: (show.judging_ends_at as string | null) ?? null,
+            aboutMd: (show.about_md as string | null) ?? null,
             rulesMd: (show.rules_md as string | null) ?? null,
             feeInfo: (show.fee_info as string | null) ?? null,
             capacity: (show.capacity as number | null) ?? null,

@@ -47,6 +47,7 @@ export interface ConsoleShow {
     entriesOpenAt: string | null;
     entriesCloseAt: string | null;
     judgingEndsAt: string | null;
+    aboutMd: string | null;
     rulesMd: string | null;
     feeInfo: string | null;
     capacity: number | null;
@@ -97,6 +98,7 @@ export interface ConsoleEntry {
     id: string;
     classId: string;
     horseName: string;
+    ownerId: string;
     ownerAlias: string;
     /** Set when the entry is shown by proxy (handler ≠ owner). */
     handlerAlias: string | null;
@@ -111,4 +113,7 @@ export interface ShowConsoleData {
     divisions: ConsoleDivision[];
     staff: ConsoleStaffMember[];
     entries: ConsoleEntry[];
+    /** Entrants marked paid on the manual fee checklist (139).
+     *  RLS scopes the read to managers; stewards/judges see []. */
+    feePaidUserIds: string[];
 }

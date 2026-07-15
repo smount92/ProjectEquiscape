@@ -1,11 +1,12 @@
 /**
- * Shows domain — NAMHSA-style core classlist template, adapted
- * from src/lib/constants/showTemplates.ts (kept intact for the
- * legacy system) into the new three-level shape:
+ * Shows domain — the classlist template registry. The NAMHSA-style
+ * core classlist (adapted from src/lib/constants/showTemplates.ts,
+ * kept intact for the legacy system) in the three-level shape:
  * divisions (finish × axis) → sections (breed/discipline group)
- * → classes.
+ * → classes — plus per-axis slices of it and a small starter
+ * classlist for online photo shows.
  *
- * Free tier gets this 1-click; custom saved templates are Pro
+ * Free tier gets these 1-click; custom saved templates are Pro
  * (Phase F). Pure data + pure helpers, no I/O.
  */
 
@@ -43,7 +44,7 @@ export interface ShowClasslistTemplate {
  * collectibility_fun templates.
  */
 export const NAMHSA_CORE_TEMPLATE: ShowClasslistTemplate = {
-    key: "namhsa_core",
+    key: "namhsa_full",
     label: "NAMHSA Core Classlist",
     description:
         "Traditional NAMHSA-style show: breed halter (5 sections, 20 classes), " +
@@ -163,12 +164,113 @@ export const NAMHSA_CORE_TEMPLATE: ShowClasslistTemplate = {
     ],
 };
 
+/** A single division of the core template, shared by reference. */
+function coreDivision(axis: DivisionAxis): TemplateDivision {
+    const division = NAMHSA_CORE_TEMPLATE.divisions.find((d) => d.axis === axis);
+    if (!division) throw new Error(`NAMHSA core template is missing its ${axis} division.`);
+    return division;
+}
+
+export const HALTER_TEMPLATE: ShowClasslistTemplate = {
+    key: "halter",
+    label: "Breed Halter Only",
+    description:
+        "Just the NAMHSA breed halter division — light, sport, stock, draft & " +
+        "pony, and other breeds across 5 sections, 20 classes.",
+    divisions: [coreDivision("halter")],
+};
+
+export const PERFORMANCE_TEMPLATE: ShowClasslistTemplate = {
+    key: "performance",
+    label: "Performance Only",
+    description:
+        "Just the NAMHSA performance division — western, english, and other " +
+        "performance across 3 sections, 13 classes.",
+    divisions: [coreDivision("performance")],
+};
+
+export const COLLECTIBILITY_TEMPLATE: ShowClasslistTemplate = {
+    key: "collectibility",
+    label: "Collectibility & Fun Only",
+    description:
+        "Just the NAMHSA collectibility & fun division — Breyer collectibility " +
+        "plus fun classes across 2 sections, 8 classes.",
+    divisions: [coreDivision("collectibility")],
+};
+
+/**
+ * A compact starter classlist for a small online photo show:
+ * finish-split halter plus workmanship, collectibility, and fun.
+ * Fun classes never count toward qualification cards.
+ */
+export const VIRTUAL_STARTER_TEMPLATE: ShowClasslistTemplate = {
+    key: "virtual_starter",
+    label: "Virtual Starter Show",
+    description:
+        "A small online photo show: finish-split halter (5 classes) plus " +
+        "workmanship, collectibility, vintage, and 2 fun classes — 10 classes total.",
+    divisions: [
+        {
+            name: "Halter",
+            axis: "halter",
+            sections: [
+                {
+                    name: "Halter by Finish",
+                    classes: [
+                        { name: "OF Breyer Halter", classNumber: "101" },
+                        { name: "OF Stone Halter", classNumber: "102" },
+                        { name: "Custom Halter", classNumber: "103" },
+                        { name: "Artist Resin Halter", classNumber: "104" },
+                        { name: "Mini/Stablemate Halter", classNumber: "105" },
+                    ],
+                },
+            ],
+        },
+        {
+            name: "Fun & Collectibility",
+            axis: "collectibility",
+            sections: [
+                {
+                    name: "Workmanship & Collectibility",
+                    classes: [
+                        { name: "Workmanship", classNumber: "201" },
+                        { name: "Collectibility", classNumber: "202" },
+                        { name: "Vintage", classNumber: "203" },
+                    ],
+                },
+                {
+                    name: "Fun Classes",
+                    classes: [
+                        // Fun classes don't count toward qualification cards.
+                        { name: "Fun: Best Photo", classNumber: "204", isQualifying: false },
+                        { name: "Fun: Themed", classNumber: "205", isQualifying: false },
+                    ],
+                },
+            ],
+        },
+    ],
+};
+
 export const SHOW_CLASSLIST_TEMPLATES: ShowClasslistTemplate[] = [
     NAMHSA_CORE_TEMPLATE,
+    HALTER_TEMPLATE,
+    PERFORMANCE_TEMPLATE,
+    COLLECTIBILITY_TEMPLATE,
+    VIRTUAL_STARTER_TEMPLATE,
 ];
 
+/**
+ * "namhsa_core" was the full template's key before the registry
+ * grew (it is still the loadTemplateSchema default), so it keeps
+ * resolving to the full classlist.
+ */
+const LEGACY_KEY_ALIASES: Record<string, string> = {
+    namhsa_core: "namhsa_full",
+};
+
 export function getClasslistTemplate(key: string): ShowClasslistTemplate | null {
-    return SHOW_CLASSLIST_TEMPLATES.find((t) => t.key === key) ?? null;
+    const resolved = LEGACY_KEY_ALIASES[key] ?? key;
+    return SHOW_CLASSLIST_TEMPLATES.find((t) => t.key === resolved) ?? null;
 }
 
 export function countTemplateClasses(template: ShowClasslistTemplate): number {

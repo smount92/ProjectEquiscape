@@ -15,12 +15,15 @@ import {
     addShowStaff,
     combineClasses,
     createShow,
+    deleteShow,
     loadNamhsaTemplate,
     removeShowStaff,
     reorderClasslist,
+    setFeePaid,
     splitClass,
     transitionShowStatus,
     updateClass,
+    updateDivision,
     updateShowSettings,
 } from "@/app/actions/shows-v2";
 
@@ -800,5 +803,89 @@ describe("shows-v2 — staff management (host only)", () => {
             .mockResolvedValueOnce({ data: { role: "steward" }, error: null });
         const result = await removeShowStaff({ showId: SHOW_ID, userId: OTHER_ID });
         expect(result.success).toBe(false);
+    });
+});
+
+describe("shows-v2 — deleteShow (drafts only, host only)", () => {
+    it("deletes a draft as the host", async () => {
+        mockClient._mockQuery.maybeSingle
+            .mockResolvedValueOnce({ data: showRow({ status: "draft" }), error: null });
+        mockClient._setImplicitResolve({ data: null, error: null });
+        const result = await deleteShow({ showId: SHOW_ID });
+        expect(result).toEqual({ success: true });
+        expect(mockClient._mockQuery.delete).toHaveBeenCalled();
+        expect(mockClient._mockQuery.eq).toHaveBeenCalledWith("id", SHOW_ID);
+    });
+
+    it("refuses once the show has left draft", async () => {
+        mockClient._mockQuery.maybeSingle
+            .mockResolvedValueOnce({ data: showRow({ status: "published" }), error: null });
+        const result = await deleteShow({ showId: SHOW_ID });
+        expect(result.success).toBe(false);
+        if (!result.success) expect(result.error).toMatch(/only draft/i);
+        expect(mockClient._mockQuery.delete).not.toHaveBeenCalled();
+    });
+
+    it("refuses co-hosts — host only", async () => {
+        mockClient._mockQuery.maybeSingle
+            .mockResolvedValueOnce({ data: showRow({ host_id: "someone-else" }), error: null })
+            .mockResolvedValueOnce({ data: { role: "co_host" }, error: null });
+        const result = await deleteShow({ showId: SHOW_ID });
+        expect(result.success).toBe(false);
+        if (!result.success) expect(result.error).toMatch(/only the host/i);
+        expect(mockClient._mockQuery.delete).not.toHaveBeenCalled();
+    });
+});
+
+describe("shows-v2 — setFeePaid (manual fee checklist)", () => {
+    it("marks an entrant paid via upsert as a manager", async () => {
+        mockClient._mockQuery.maybeSingle
+            .mockResolvedValueOnce({ data: showRow(), error: null });
+        mockClient._setImplicitResolve({ data: null, error: null });
+        const result = await setFeePaid({ showId: SHOW_ID, userId: HOST_UUID, paid: true });
+        expect(result).toEqual({ success: true });
+        expect(mockClient._mockQuery.upsert).toHaveBeenCalledWith(
+            expect.objectContaining({ show_id: SHOW_ID, user_id: HOST_UUID, marked_by: "user-1" }),
+        );
+    });
+
+    it("unmarks via delete", async () => {
+        mockClient._mockQuery.maybeSingle
+            .mockResolvedValueOnce({ data: showRow(), error: null });
+        mockClient._setImplicitResolve({ data: null, error: null });
+        const result = await setFeePaid({ showId: SHOW_ID, userId: HOST_UUID, paid: false });
+        expect(result).toEqual({ success: true });
+        expect(mockClient._mockQuery.delete).toHaveBeenCalled();
+        expect(mockClient._mockQuery.eq).toHaveBeenCalledWith("user_id", HOST_UUID);
+    });
+
+    it("refuses non-managers (judge)", async () => {
+        mockClient._mockQuery.maybeSingle
+            .mockResolvedValueOnce({ data: showRow({ host_id: "someone-else" }), error: null })
+            .mockResolvedValueOnce({ data: { role: "judge" }, error: null });
+        const result = await setFeePaid({ showId: SHOW_ID, userId: HOST_UUID, paid: true });
+        expect(result.success).toBe(false);
+        expect(mockClient._mockQuery.upsert).not.toHaveBeenCalled();
+    });
+});
+
+describe("shows-v2 — updateDivision (rename)", () => {
+    it("renames for a manager while the classlist is mutable", async () => {
+        mockClient._mockQuery.maybeSingle
+            .mockResolvedValueOnce({ data: { id: DIVISION_ID, show_id: SHOW_ID }, error: null })
+            .mockResolvedValueOnce({ data: showRow({ status: "draft" }), error: null });
+        mockClient._setImplicitResolve({ data: null, error: null });
+        const result = await updateDivision({ divisionId: DIVISION_ID, name: "OF Plastic Halter" });
+        expect(result).toEqual({ success: true });
+        expect(mockClient._mockQuery.update).toHaveBeenCalledWith({ name: "OF Plastic Halter" });
+    });
+
+    it("refuses once the classlist is frozen (completed)", async () => {
+        mockClient._mockQuery.maybeSingle
+            .mockResolvedValueOnce({ data: { id: DIVISION_ID, show_id: SHOW_ID }, error: null })
+            .mockResolvedValueOnce({ data: showRow({ status: "completed" }), error: null });
+        const result = await updateDivision({ divisionId: DIVISION_ID, name: "Renamed" });
+        expect(result.success).toBe(false);
+        expect(mockClient._mockQuery.update).not.toHaveBeenCalled();
     });
 });

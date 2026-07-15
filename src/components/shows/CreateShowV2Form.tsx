@@ -50,7 +50,7 @@ function toIso(local: string): string | undefined {
 
 export default function CreateShowV2Form() {
     const router = useRouter();
-    const [mode, setMode] = useState<ShowMode>("live");
+    const [mode, setMode] = useState<ShowMode>("online");
     const [judging, setJudging] = useState<ShowJudging>("judged");
     const [title, setTitle] = useState("");
     const [showDate, setShowDate] = useState("");
@@ -60,6 +60,7 @@ export default function CreateShowV2Form() {
     const [entriesOpenAt, setEntriesOpenAt] = useState("");
     const [entriesCloseAt, setEntriesCloseAt] = useState("");
     const [judgingEndsAt, setJudgingEndsAt] = useState("");
+    const [aboutMd, setAboutMd] = useState("");
     const [rulesMd, setRulesMd] = useState("");
     const [feeInfo, setFeeInfo] = useState("");
     const [isMhhQualifying, setIsMhhQualifying] = useState(true);
@@ -78,6 +79,7 @@ export default function CreateShowV2Form() {
             mode,
             judging,
             isMhhQualifying,
+            aboutMd: aboutMd.trim() || undefined,
             rulesMd: rulesMd.trim() || undefined,
             feeInfo: feeInfo.trim() || undefined,
             sanctioningNote: sanctioningNote.trim() || undefined,
@@ -212,6 +214,18 @@ export default function CreateShowV2Form() {
                 </div>
             )}
 
+            <Field
+                label="About this show"
+                hint="A welcome for your entrants — what makes this show fun. Shown at the top of your show page."
+            >
+                <Textarea
+                    value={aboutMd}
+                    onChange={(e) => setAboutMd(e.target.value)}
+                    rows={4}
+                    placeholder="Welcome to our spring fling! This is a laid-back show for..."
+                />
+            </Field>
+
             <Field label="Rules" hint="Markdown supported — entrants see this on the show page.">
                 <Textarea
                     value={rulesMd}
@@ -240,7 +254,9 @@ export default function CreateShowV2Form() {
                     />
                     MHH qualifying show
                     <span className="font-normal text-muted-foreground">
-                        (1st &amp; 2nd in qualifying classes earn cards)
+                        (1st and 2nd place in each qualifying class automatically earn digital
+                        qualification cards. You can exempt individual classes (e.g. fun classes)
+                        in the classlist builder.)
                     </span>
                 </label>
                 <Field label="Sanctioning note (optional)">

@@ -2,8 +2,9 @@
 
 /**
  * Console CLASSLIST tab — the builder. Tree of divisions (axis
- * badge) → sections → classes with add/edit/reorder via the
- * shows-v2 actions. "Load NAMHSA template" leads the empty state.
+ * badge) → sections → classes with add/edit/rename/reorder via
+ * the shows-v2 actions. A template picker (full NAMHSA classlist,
+ * per-axis slices, virtual starter) leads the empty state.
  *
  * When the show has left its running phases
  * (!isShowMutableForClasslist) or the viewer isn't host/co-host,
@@ -12,8 +13,9 @@
  * classlist, per the design doc.
  */
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Pencil } from "lucide-react";
 
 import {
     addClass,
@@ -22,8 +24,11 @@ import {
     loadNamhsaTemplate,
     reorderClasslist,
     updateClass,
+    updateDivision,
+    updateSection,
 } from "@/app/actions/shows-v2";
 import type { ConsoleClass, ConsoleDivision, ConsoleSection } from "@/lib/shows/console";
+import { countTemplateClasses, SHOW_CLASSLIST_TEMPLATES } from "@/lib/shows/namhsaTemplate";
 import { formatStatus, isShowMutableForClasslist } from "@/lib/shows/stateMachine";
 import type { DivisionAxis, ShowStatus } from "@/lib/shows/types";
 import { Badge } from "@/components/ui/badge";
@@ -52,6 +57,13 @@ const AXIS_OPTIONS: { value: DivisionAxis; label: string }[] = [
     { value: "collectibility", label: "Collectibility" },
     { value: "other", label: "Other" },
 ];
+
+/**
+ * The exact FinishType values horses store (add-horse's Finish Type
+ * select) — entry eligibility is an exact string match, so anything
+ * else (e.g. "CM") would reject every entry.
+ */
+const FINISH_OPTIONS = ["OF", "Custom", "Artist Resin"] as const;
 
 function parseCommaList(value: string): string[] | null {
     const items = value
@@ -109,26 +121,121 @@ function ReorderButtons({
     );
 }
 
+/**
+ * A division/section name with a pencil that swaps it for an inline
+ * input — Enter/blur saves, Escape cancels. `display` carries the
+ * caller's styled name so the two headers keep their own looks.
+ */
+function RenamableName({
+    name,
+    label,
+    disabled,
+    display,
+    onRename,
+}: {
+    name: string;
+    label: string;
+    disabled: boolean;
+    display: React.ReactNode;
+    onRename: (name: string) => Promise<void>;
+}) {
+    const [editing, setEditing] = useState(false);
+    const [value, setValue] = useState(name);
+    // Enter both commits and blurs — the ref keeps blur from saving twice.
+    const done = useRef(false);
+
+    if (!editing) {
+        return (
+            <>
+                {display}
+                <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    disabled={disabled}
+                    onClick={() => {
+                        setValue(name);
+                        done.current = false;
+                        setEditing(true);
+                    }}
+                    aria-label={`Rename ${label}`}
+                >
+                    <Pencil className="size-3.5" />
+                </Button>
+            </>
+        );
+    }
+
+    const commit = async () => {
+        if (done.current) return;
+        done.current = true;
+        setEditing(false);
+        const trimmed = value.trim();
+        if (trimmed && trimmed !== name) await onRename(trimmed);
+    };
+
+    return (
+        <Input
+            autoFocus
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            onBlur={() => void commit()}
+            onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    void commit();
+                } else if (e.key === "Escape") {
+                    done.current = true;
+                    setEditing(false);
+                }
+            }}
+            className="h-8 w-56 max-w-full"
+            maxLength={120}
+            aria-label={`Rename ${label}`}
+        />
+    );
+}
+
 interface InlineAddFormProps {
     placeholder: string;
     buttonLabel: string;
     pending: boolean;
-    onAdd: (name: string) => Promise<void>;
+    onAdd: (name: string, classNumber?: string) => Promise<void>;
+    /** Show the optional "No." input (class numbers) beside the name. */
+    withNumber?: boolean;
     extra?: React.ReactNode;
 }
 
-function InlineAddForm({ placeholder, buttonLabel, pending, onAdd, extra }: InlineAddFormProps) {
+function InlineAddForm({
+    placeholder,
+    buttonLabel,
+    pending,
+    onAdd,
+    withNumber,
+    extra,
+}: InlineAddFormProps) {
     const [name, setName] = useState("");
+    const [number, setNumber] = useState("");
     return (
         <form
             className="flex flex-wrap items-center gap-2"
             onSubmit={async (e) => {
                 e.preventDefault();
                 if (!name.trim()) return;
-                await onAdd(name.trim());
+                await onAdd(name.trim(), withNumber ? number.trim() || undefined : undefined);
                 setName("");
+                setNumber("");
             }}
         >
+            {withNumber && (
+                <Input
+                    value={number}
+                    onChange={(e) => setNumber(e.target.value)}
+                    placeholder="No."
+                    className="h-9 w-16 shrink-0"
+                    maxLength={20}
+                    aria-label="Class number (optional)"
+                />
+            )}
             <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -162,7 +269,13 @@ function ClassEditDialog({ cls, open, onClose, onSaved, setError }: ClassEditDia
         cls.maxPerEntrant !== null ? String(cls.maxPerEntrant) : "",
     );
     const [scales, setScales] = useState((cls.allowedScales ?? []).join(", "));
-    const [finishes, setFinishes] = useState((cls.allowedFinishes ?? []).join(", "));
+    // Drop any legacy non-canonical finish (e.g. "CM") — it could never
+    // match a horse, so unchecking it here is the repair.
+    const [finishes, setFinishes] = useState<string[]>(
+        (cls.allowedFinishes ?? []).filter((f) =>
+            (FINISH_OPTIONS as readonly string[]).includes(f),
+        ),
+    );
     const [isQualifying, setIsQualifying] = useState(cls.isQualifying);
     const [saving, setSaving] = useState(false);
 
@@ -178,7 +291,8 @@ function ClassEditDialog({ cls, open, onClose, onSaved, setError }: ClassEditDia
                 classNumber: classNumber.trim() || undefined,
                 maxPerEntrant: max !== null && Number.isFinite(max) ? max : null,
                 allowedScales: parseCommaList(scales),
-                allowedFinishes: parseCommaList(finishes),
+                // None checked = open to any finish (null clears the rule).
+                allowedFinishes: finishes.length > 0 ? finishes : null,
                 isQualifying,
             },
         });
@@ -229,20 +343,42 @@ function ClassEditDialog({ cls, open, onClose, onSaved, setError }: ClassEditDia
                     </div>
                     <label className="flex flex-col gap-1.5 text-sm font-semibold">
                         Allowed scales
+                        {/* Scales stay free text — horses inherit their catalog
+                            item's scale string, which is not a closed vocabulary.
+                            The placeholder shows the canonical catalog forms. */}
                         <Input
                             value={scales}
                             onChange={(e) => setScales(e.target.value)}
-                            placeholder="Traditional, Classic (comma-separated, blank = any)"
+                            placeholder="Traditional (1:9), Stablemate (1:32) — comma-separated, blank = any"
                         />
                     </label>
-                    <label className="flex flex-col gap-1.5 text-sm font-semibold">
-                        Allowed finishes
-                        <Input
-                            value={finishes}
-                            onChange={(e) => setFinishes(e.target.value)}
-                            placeholder="OF, CM (comma-separated, blank = any)"
-                        />
-                    </label>
+                    <fieldset className="flex flex-col gap-1.5">
+                        <legend className="text-sm font-semibold">
+                            Allowed finishes (none checked = any)
+                        </legend>
+                        <div className="flex flex-wrap gap-x-4 gap-y-1.5 pt-1.5">
+                            {FINISH_OPTIONS.map((finish) => (
+                                <label
+                                    key={finish}
+                                    className="flex items-center gap-2 text-sm font-medium"
+                                >
+                                    <input
+                                        type="checkbox"
+                                        checked={finishes.includes(finish)}
+                                        onChange={(e) =>
+                                            setFinishes((prev) =>
+                                                e.target.checked
+                                                    ? [...prev, finish]
+                                                    : prev.filter((f) => f !== finish),
+                                            )
+                                        }
+                                        className="size-4 accent-forest"
+                                    />
+                                    {finish}
+                                </label>
+                            ))}
+                        </div>
+                    </fieldset>
                     <label className="flex items-center gap-2.5 text-sm font-semibold">
                         <input
                             type="checkbox"
@@ -302,7 +438,13 @@ function ClassRow({
             {cls.status !== "scheduled" && (
                 <span className={`stamp ${cancelled ? "stamp-red" : ""}`}>{formatStatus(cls.status)}</span>
             )}
-            {!cls.isQualifying && <Badge variant="outline">non-qualifying</Badge>}
+            {/* Same badge the public show page uses (ShowEntrySection),
+                so hosts see the flag without opening Edit. */}
+            {cls.isQualifying ? (
+                <Badge variant="outline">qualifying</Badge>
+            ) : (
+                <Badge variant="outline">non-qualifying</Badge>
+            )}
             {cls.maxPerEntrant !== null && (
                 <Badge variant="secondary">max {cls.maxPerEntrant}/entrant</Badge>
             )}
@@ -358,6 +500,7 @@ export default function ClasslistBuilder({
     const [pending, setPending] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [editingClass, setEditingClass] = useState<ConsoleClass | null>(null);
+    const [cancellingClass, setCancellingClass] = useState<ConsoleClass | null>(null);
 
     const mutable = isShowMutableForClasslist(showStatus);
     const canEdit = canManage && mutable;
@@ -411,17 +554,45 @@ export default function ClasslistBuilder({
                 <div className="ledger-card flex flex-col items-center gap-4 py-10 text-center">
                     <span className="ledger-tab">Empty Classlist</span>
                     <p className="max-w-md text-sm text-muted-foreground">
-                        Start from the NAMHSA core classlist — breed halter, performance, and
-                        collectibility across 10 sections and 41 classes — then tailor it, or build
+                        Start from a template — the full NAMHSA core classlist, one of its
+                        divisions, or a small virtual-show starter — then tailor it, or build
                         your own from scratch below.
                     </p>
                     {canEdit && (
-                        <Button
-                            disabled={pending}
-                            onClick={() => run(() => loadNamhsaTemplate({ showId }))}
-                        >
-                            {pending ? "Loading…" : "Load NAMHSA template"}
-                        </Button>
+                        <ul className="grid w-full max-w-2xl list-none grid-cols-1 gap-3 p-0 sm:grid-cols-2">
+                            {SHOW_CLASSLIST_TEMPLATES.map((template) => (
+                                <li key={template.key} className="flex">
+                                    <button
+                                        type="button"
+                                        disabled={pending}
+                                        onClick={() =>
+                                            run(() =>
+                                                loadNamhsaTemplate({
+                                                    showId,
+                                                    templateKey: template.key,
+                                                }),
+                                            )
+                                        }
+                                        className="flex w-full cursor-pointer flex-col gap-1 rounded-xl border-2 border-input bg-card px-4 py-3 text-left transition-all hover:border-forest/40 disabled:cursor-default disabled:opacity-60"
+                                    >
+                                        <span className="flex items-baseline justify-between gap-2">
+                                            <span className="text-sm font-semibold text-foreground">
+                                                {template.label}
+                                            </span>
+                                            <span className="shrink-0 font-mono text-xs text-muted-foreground">
+                                                {countTemplateClasses(template)} classes
+                                            </span>
+                                        </span>
+                                        <span className="text-xs text-muted-foreground">
+                                            {template.description}
+                                        </span>
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                    {canEdit && pending && (
+                        <p className="text-sm text-muted-foreground">Loading template…</p>
                     )}
                 </div>
             ) : (
@@ -429,7 +600,23 @@ export default function ClasslistBuilder({
                     {divisions.map((division, dIndex) => (
                         <li key={division.id} className="ledger-card">
                             <div className="flex flex-wrap items-center gap-3">
-                                <span className="ledger-tab !mb-0">{division.name}</span>
+                                {canEdit ? (
+                                    <RenamableName
+                                        name={division.name}
+                                        label={division.name}
+                                        disabled={pending}
+                                        display={
+                                            <span className="ledger-tab !mb-0">{division.name}</span>
+                                        }
+                                        onRename={(name) =>
+                                            run(() =>
+                                                updateDivision({ divisionId: division.id, name }),
+                                            )
+                                        }
+                                    />
+                                ) : (
+                                    <span className="ledger-tab !mb-0">{division.name}</span>
+                                )}
                                 <Badge variant="secondary">{division.axis}</Badge>
                                 {canEdit && (
                                     <span className="ml-auto">
@@ -456,18 +643,16 @@ export default function ClasslistBuilder({
                                             onMoveClass={(cIndex, dir) =>
                                                 moveNode("class", section.classes, cIndex, dir)
                                             }
-                                            onAddClass={(name) =>
-                                                run(() => addClass({ sectionId: section.id, name, sortOrder: section.classes.length }))
+                                            onAddClass={(name, classNumber) =>
+                                                run(() => addClass({ sectionId: section.id, name, classNumber, sortOrder: section.classes.length }))
                                             }
-                                            onEditClass={setEditingClass}
-                                            onCancelClass={(cls) =>
+                                            onRenameSection={(name) =>
                                                 run(() =>
-                                                    updateClass({
-                                                        classId: cls.id,
-                                                        patch: { status: "cancelled" },
-                                                    }),
+                                                    updateSection({ sectionId: section.id, name }),
                                                 )
                                             }
+                                            onEditClass={setEditingClass}
+                                            onCancelClass={setCancellingClass}
                                             onRestoreClass={(cls) =>
                                                 run(() =>
                                                     updateClass({
@@ -516,6 +701,45 @@ export default function ClasslistBuilder({
                     setError={setError}
                 />
             )}
+
+            {cancellingClass && (
+                <Dialog open onOpenChange={(o) => !o && setCancellingClass(null)}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Cancel “{cancellingClass.name}”?</DialogTitle>
+                            <DialogDescription>
+                                Cancel class — entrants&rsquo; entries stay recorded as history.
+                                Restore is available.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter>
+                            <Button
+                                variant="outline"
+                                onClick={() => setCancellingClass(null)}
+                                disabled={pending}
+                            >
+                                Keep class
+                            </Button>
+                            <Button
+                                variant="destructive-outline"
+                                disabled={pending}
+                                onClick={async () => {
+                                    const cls = cancellingClass;
+                                    await run(() =>
+                                        updateClass({
+                                            classId: cls.id,
+                                            patch: { status: "cancelled" },
+                                        }),
+                                    );
+                                    setCancellingClass(null);
+                                }}
+                            >
+                                Cancel class
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+            )}
         </div>
     );
 }
@@ -528,6 +752,7 @@ function SectionBlock({
     onMoveSection,
     onMoveClass,
     onAddClass,
+    onRenameSection,
     onEditClass,
     onCancelClass,
     onRestoreClass,
@@ -538,17 +763,31 @@ function SectionBlock({
     entriesExist: boolean;
     onMoveSection: (direction: -1 | 1) => void;
     onMoveClass: (classIndex: number, direction: -1 | 1) => void;
-    onAddClass: (name: string) => Promise<void>;
+    onAddClass: (name: string, classNumber?: string) => Promise<void>;
+    onRenameSection: (name: string) => Promise<void>;
     onEditClass: (cls: ConsoleClass) => void;
     onCancelClass: (cls: ConsoleClass) => void;
     onRestoreClass: (cls: ConsoleClass) => void;
 }) {
+    const heading = (
+        <h4 className="font-serif text-sm font-bold tracking-wide text-forest uppercase">
+            {section.name}
+        </h4>
+    );
     return (
         <section aria-label={section.name} className="border-l-2 border-forest/30 pl-4">
             <div className="flex items-center gap-2">
-                <h4 className="font-serif text-sm font-bold tracking-wide text-forest uppercase">
-                    {section.name}
-                </h4>
+                {canEdit ? (
+                    <RenamableName
+                        name={section.name}
+                        label={section.name}
+                        disabled={pending}
+                        display={heading}
+                        onRename={onRenameSection}
+                    />
+                ) : (
+                    heading
+                )}
                 {canEdit && (
                     <ReorderButtons disabled={pending} onMove={onMoveSection} label={section.name} />
                 )}
@@ -577,6 +816,7 @@ function SectionBlock({
                         placeholder="New class name"
                         buttonLabel="Add class"
                         pending={pending}
+                        withNumber
                         onAdd={onAddClass}
                     />
                 </div>
@@ -622,6 +862,11 @@ function AddDivisionForm({
                     </Select>
                 }
             />
+            <p className="mt-2 text-xs text-muted-foreground">
+                Axis controls the one-breed-halter-class-per-horse rule — a horse may enter one
+                halter class per show, but any number of performance/workmanship/collectibility
+                classes.
+            </p>
         </div>
     );
 }

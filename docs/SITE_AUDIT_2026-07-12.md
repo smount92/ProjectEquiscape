@@ -241,6 +241,47 @@ Verified clean: MatchmakerMatches, NotificationList, inbox/ChatThread, Universal
 
 ---
 
+## 🟤 SHOWS-UX — first-time-host feedback (owner hosted a virtual show, 2026-07-15; all items code-verified)
+
+> **BATCH BUILT 2026-07-15 on `feat/shows-host-ux` (stacked on feat/audit-closeout): SHOWUX-1..10 all addressed + extras (transition confirms incl. the card-minting completed transition, axis hint, online default mode, entry-dialog stable link + photo guidance, fee text above entry section). Migration `139_show_hosting_ux.sql` (about_md + show_fee_payments) — APPLY BEFORE MERGE, then gen-types (types hand-patched). Verified: tsc/eslint/1088 vitest (8 new action tests)/build; Playwright confirmed landing cards + create form; the create→console→template→delete E2E stops at the missing column until 139 is applied (script saved for post-apply rerun). Upload-photo-at-entry deliberately NOT built (owner design call pending).**
+
+### SHOWUX-1 — [BUG] `allowed_finishes` free-text trap — **Status: TODO (worst find)**
+`ClasslistBuilder.tsx:238-245` placeholder says "OF, CM" but horses store `OF|Custom|Artist Resin` — a host following the UI's own hint creates classes that silently reject every entry (`entryRules.ts:167`). Fix: checkbox group bound to the canonical finish vocabulary.
+
+### SHOWUX-2 — Host landing + drafts — **Status: TODO**
+"My Shows" list EXISTS and includes drafts (`getHostedShows`, no status filter) but visually blends with the create form (one shared ledger-paper, `CommandCenterLayout.tsx:47`). Fix: separate `.ledger-card` per section. Owner couldn't find drafts = this, not a data bug.
+
+### SHOWUX-3 — No deleteShow — **Status: TODO**
+No delete action exists at all (only internal rollback `shows-v2.ts:194`). Fix: `deleteShow` gated to `draft` + host role, button in ShowStatusCard on drafts only.
+
+### SHOWUX-4 — No About/description — **Status: TODO (migration)**
+`shows` has rules_md/fee_info/sanctioning_note, no description (legacy HAD one). Fix: `about_md` column (mig 139) + Textarea above Rules + render above Rules on public page.
+
+### SHOWUX-5 — Divisions/sections uneditable — **Status: TODO**
+No updateDivision/updateSection actions (classes ARE editable via ClassEditDialog→updateClass). Legacy `competition.ts:792-824` has the pattern. Fix: rename actions + inline affordances; keep no-delete semantics.
+
+### SHOWUX-6 — Class numbers only settable post-hoc — **Status: TODO**
+`class_number` exists, shown everywhere, template pre-numbers; but InlineAddForm only collects name (`addClassSchema` already accepts classNumber). Fix: "Class #" input in the add row.
+
+### SHOWUX-7 — Fee = notice text only; promised "manual checklist" NEVER built — **Status: TODO (migration)**
+`fee_info` renders verbatim; zero paid-tracking despite comments claiming "fees v1 = manual checklist". Fix: `paid_at` on entries (mig 139) + host toggle column in ShowEntriesPanel.
+
+### SHOWUX-8 — Qualifying-cards copy/discoverability — **Status: TODO**
+Two-level flag works (`is_mhh_qualifying` show × `is_qualifying` class, both default true; card mint = both, 1st/2nd). Badge only on PUBLIC page (`ShowEntrySection.tsx:297`), not in the builder. Fix: badge in ClasslistBuilder + rewrite checkbox copy + tooltip on public badge.
+
+### SHOWUX-9 — Only the 41-class NAMHSA mega-template — **Status: TODO**
+v2 merged legacy's 3 templates (17/13/8 classes) into one 41-class dump, single button. Fix: split back into pickable sub-templates + add a small "Virtual Photo Show starter" (~8-12 classes).
+
+### SHOWUX-10 — Champs/Overall works but invisible in advance — **Status: TODO (copy only)**
+Callback ladder auto-opens in judge queue at 100% placed (JudgeQueue:119-144), self-explanatory once there. Fix: one line in ShowStatusCard's judging status ("champion round opens automatically when all classes are placed").
+
+### SHOWUX-11 — Entry-photo model (answer, mostly by-design) — **Status: PARTIAL TODO**
+Online entries PICK an existing stable photo (no upload at entry, by design; photo required only for online mode; judge/gallery see the picked photo, snapshotted by id). Gaps: mid-dialog dead-end copy "add photos in your stable" with no link; no guidance on what photo angles judges expect. Upload-at-entry = owner decision (provenance tradeoff).
+
+### Also noted: Cancel-class + status transitions fire with NO confirm; "axis" dropdown unexplained; mode defaults to "live" though online is the common case; handler/proxy field needs alias autocomplete; fee text renders BELOW the entry UI.
+
+---
+
 ## ⚪ TECH DEBT — bigger bets (track, not urgent)
 
 - **DEBT-1 — Test coverage:** ~90 mutations across `competition.ts`(19)/`events.ts`(16)/`groups.ts`(15)/`art-studio.ts`(14)/`parked-export.ts`(11)/`posts.ts`(8)/`messaging.ts`(6) have zero unit tests. Start with `competition.ts` + `parked-export.ts` (escrow-adjacent, real-world-show results). 1,001 tests today cover the money core well.

@@ -89,7 +89,7 @@ beforeEach(() => {
 });
 
 describe("ClasslistBuilder — empty state", () => {
-    it("leads with the NAMHSA template button and loads it on click", async () => {
+    it("offers the template picker and loads the chosen template", async () => {
         render(
             <ClasslistBuilder
                 showId={SHOW_ID}
@@ -100,11 +100,19 @@ describe("ClasslistBuilder — empty state", () => {
             />,
         );
 
-        const templateButton = screen.getByRole("button", { name: /load namhsa template/i });
-        fireEvent.click(templateButton);
+        // All five templates render as picker cards.
+        expect(screen.getByRole("button", { name: /namhsa core classlist/i })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /breed halter only/i })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /performance only/i })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /collectibility & fun only/i })).toBeInTheDocument();
+
+        fireEvent.click(screen.getByRole("button", { name: /virtual starter show/i }));
 
         await waitFor(() =>
-            expect(actions.loadNamhsaTemplate).toHaveBeenCalledWith({ showId: SHOW_ID }),
+            expect(actions.loadNamhsaTemplate).toHaveBeenCalledWith({
+                showId: SHOW_ID,
+                templateKey: "virtual_starter",
+            }),
         );
     });
 });

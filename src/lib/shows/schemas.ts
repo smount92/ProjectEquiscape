@@ -61,6 +61,7 @@ export const createShowSchema = z
         entriesOpenAt: isoDateTime.optional(),
         entriesCloseAt: isoDateTime.optional(),
         judgingEndsAt: isoDateTime.optional(),
+        aboutMd: longText.optional(),
         rulesMd: longText.optional(),
         feeInfo: longText.optional(),
         capacity: z.number().int().positive().max(10000).optional(),
@@ -90,6 +91,7 @@ export const updateShowSettingsSchema = z.object({
             entriesOpenAt: isoDateTime.nullable().optional(),
             entriesCloseAt: isoDateTime.nullable().optional(),
             judgingEndsAt: isoDateTime.nullable().optional(),
+            aboutMd: longText.nullable().optional(),
             rulesMd: longText.nullable().optional(),
             feeInfo: longText.nullable().optional(),
             capacity: z.number().int().positive().max(10000).nullable().optional(),
@@ -108,6 +110,16 @@ export const transitionShowStatusSchema = z.object({
     to: showStatusSchema,
 });
 
+export const deleteShowSchema = z.object({
+    showId: uuidSchema,
+});
+
+export const setFeePaidSchema = z.object({
+    showId: uuidSchema,
+    userId: uuidSchema,
+    paid: z.boolean(),
+});
+
 // ── Classlist structure ──
 
 export const addDivisionSchema = z.object({
@@ -121,6 +133,16 @@ export const addSectionSchema = z.object({
     divisionId: uuidSchema,
     name: z.string().trim().min(1, "Section name is required.").max(120),
     sortOrder: z.number().int().min(0).optional(),
+});
+
+export const updateDivisionSchema = z.object({
+    divisionId: uuidSchema,
+    name: z.string().trim().min(1, "Division name is required.").max(120),
+});
+
+export const updateSectionSchema = z.object({
+    sectionId: uuidSchema,
+    name: z.string().trim().min(1, "Section name is required.").max(120),
 });
 
 const classFields = {

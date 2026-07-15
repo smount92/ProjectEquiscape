@@ -3561,6 +3561,35 @@ export type Database = {
           },
         ]
       }
+      show_fee_payments: {
+        Row: {
+          marked_by: string
+          paid_at: string
+          show_id: string
+          user_id: string
+        }
+        Insert: {
+          marked_by: string
+          paid_at?: string
+          show_id: string
+          user_id: string
+        }
+        Update: {
+          marked_by?: string
+          paid_at?: string
+          show_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "show_fee_payments_show_id_fkey"
+            columns: ["show_id"]
+            isOneToOne: false
+            referencedRelation: "shows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       show_staff: {
         Row: {
           coi_flag: boolean
@@ -3742,6 +3771,7 @@ export type Database = {
       }
       shows: {
         Row: {
+          about_md: string | null
           blind_browsing: boolean
           capacity: number | null
           created_at: string
@@ -3765,6 +3795,7 @@ export type Database = {
           venue_name: string | null
         }
         Insert: {
+          about_md?: string | null
           blind_browsing?: boolean
           capacity?: number | null
           created_at?: string
@@ -3788,6 +3819,7 @@ export type Database = {
           venue_name?: string | null
         }
         Update: {
+          about_md?: string | null
           blind_browsing?: boolean
           capacity?: number | null
           created_at?: string

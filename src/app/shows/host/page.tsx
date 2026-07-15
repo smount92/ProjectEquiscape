@@ -74,7 +74,11 @@ function MyShowsList({ shows }: { shows: HostedShowSummary[] }) {
                         </TableCell>
                         <TableCell>{show.mode === "live" ? "Live" : "Online"}</TableCell>
                         <TableCell>
-                            <span className="stamp">{formatStatus(show.status)}</span>
+                            <span
+                                className={`stamp ${show.status === "draft" ? "stamp-red" : ""}`}
+                            >
+                                {formatStatus(show.status)}
+                            </span>
                         </TableCell>
                         <TableCell>
                             {formatDate(show.mode === "live" ? show.showDate : show.entriesCloseAt)}
@@ -110,7 +114,7 @@ export default async function HostShowsPage() {
             description="Create and run your shows — live or online — from one console."
             mainContent={
                 <>
-                    <section aria-labelledby="my-shows-heading">
+                    <section className="ledger-card" aria-labelledby="my-shows-heading">
                         <span className="ledger-tab" id="my-shows-heading">
                             My Shows
                         </span>
@@ -122,7 +126,7 @@ export default async function HostShowsPage() {
                         <MyShowsList shows={shows} />
                     </section>
 
-                    <section aria-labelledby="create-show-heading">
+                    <section className="ledger-card" aria-labelledby="create-show-heading">
                         <span className="ledger-tab" id="create-show-heading">
                             Open a New Show
                         </span>

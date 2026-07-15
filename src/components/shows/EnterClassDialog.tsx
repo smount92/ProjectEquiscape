@@ -18,6 +18,7 @@
  */
 
 import { useRef, useState } from "react";
+import Link from "next/link";
 
 import { enterClass, findUserByAlias } from "@/app/actions/shows-v2";
 import type { EntrantHorse } from "@/lib/shows/public";
@@ -86,14 +87,11 @@ export default function EnterClassDialog({
     // Stale-response guard for the photo fetch (fast horse switching).
     const photoFetchSeq = useRef(0);
 
-    /** Pick a horse; online shows then fetch its existing photos
-     *  (same client-side pattern as the legacy entry form /
-     *  passport pages — entries point at stable photos, no upload). */
-    const selectHorse = (h: EntrantHorse) => {
-        setHorse(h);
-        setViolations([]);
-        setPhotos([]);
-        setPhotoId(null);
+    /** Online shows only: (re)fetch a horse's existing photos (same
+     *  client-side pattern as the legacy entry form / passport pages
+     *  — entries point at stable photos, no upload). Shared by
+     *  selectHorse and the "Refresh photos" retry button below. */
+    const fetchPhotos = (h: EntrantHorse) => {
         if (mode !== "online") return;
 
         const seq = ++photoFetchSeq.current;
@@ -121,6 +119,15 @@ export default function EnterClassDialog({
                 setPhotoId(primary?.id ?? mapped[0]?.id ?? null);
                 setLoadingPhotos(false);
             });
+    };
+
+    /** Pick a horse; online shows then fetch its existing photos. */
+    const selectHorse = (h: EntrantHorse) => {
+        setHorse(h);
+        setViolations([]);
+        setPhotos([]);
+        setPhotoId(null);
+        fetchPhotos(h);
     };
 
     const lookupHandler = async () => {
@@ -243,14 +250,34 @@ export default function EnterClassDialog({
                                 <span className="mb-1 block text-sm font-semibold text-foreground">
                                     Entry photo
                                 </span>
+                                <p className="mb-2 text-sm text-muted-foreground">
+                                    Judges see this photo at full size — a sharp, well-lit side
+                                    profile on a plain background shows best.
+                                </p>
                                 {loadingPhotos ? (
                                     <p className="text-sm text-muted-foreground">Loading photos…</p>
                                 ) : photos.length === 0 ? (
-                                    <p className="text-sm text-muted-foreground">
-                                        This horse has no photos yet. Online shows judge the
-                                        photo — add photos to the horse&rsquo;s passport in your
-                                        stable, then come back.
-                                    </p>
+                                    <div className="flex flex-col items-start gap-2">
+                                        <p className="text-sm text-muted-foreground">
+                                            This horse has no photos yet. Online shows judge the
+                                            photo — add photos to the horse&rsquo;s passport in your
+                                            stable, then come back.
+                                        </p>
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <Button variant="outline" size="sm" asChild>
+                                                <Link href={`/stable/${horse.id}`} target="_blank">
+                                                    Open this horse&rsquo;s stable page →
+                                                </Link>
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => fetchPhotos(horse)}
+                                            >
+                                                Refresh photos
+                                            </Button>
+                                        </div>
+                                    </div>
                                 ) : (
                                     <div
                                         className="grid grid-cols-[repeat(auto-fill,minmax(72px,1fr))] gap-1"
