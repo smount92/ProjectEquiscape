@@ -25,7 +25,7 @@ vi.mock("@/app/actions/activity", () => ({
     createActivityEvent: vi.fn().mockResolvedValue(undefined),
 }));
 
-import { bulkDeleteHorses, bulkUpdateHorses, createHorseRecord, deleteHorse, quickAddHorse, updateHorseAction } from "@/app/actions/horse";
+import { bulkDeleteHorses, bulkUpdateHorses, createHorseRecord, deleteHorse, finalizeHorseImages, quickAddHorse, updateHorseAction } from "@/app/actions/horse";
 
 describe("horse.ts — CRUD", () => {
     beforeEach(() => {
@@ -311,5 +311,112 @@ describe("horse.ts — CRUD", () => {
             expect(result.success).toBe(true);
             expect(result.horseName).toBe("Unnamed Horse");
         });
+    });
+});
+
+describe("finalizeHorseImages — tier limits never eat the batch", () => {
+    const HORSE_ID = "123e4567-e89b-42d3-a456-426614174000";
+
+    /** Queue ONE implicit-await result (count reads, inserts) in order. */
+    function queueThen(result: Record<string, unknown>) {
+        mockClient._mockQuery.then.mockImplementationOnce(((
+            resolve: (value: unknown) => unknown,
+        ) => Promise.resolve({ error: null, ...result }).then(resolve)) as never);
+    }
+
+    function asUser(tier?: string) {
+        mockClient.auth.getUser.mockResolvedValue({
+            data: { user: { id: "user-1", email: "t@test.com", app_metadata: tier ? { tier } : {} } },
+        });
+    }
+
+    function mockOwnership() {
+        mockClient._mockQuery.single.mockResolvedValueOnce({ data: { id: HORSE_ID }, error: null });
+    }
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+        mockClient._mockQuery.single.mockReset();
+        mockClient._mockQuery.then.mockReset();
+        mockClient._setImplicitResolve({ data: null, error: null, count: 0 });
+        asUser();
+    });
+
+    it("free tier: standard + flaw photos all save (flaws are never Pro-gated)", async () => {
+        mockOwnership();
+        queueThen({ count: 0 }); // existing flaw count
+        queueThen({ data: null }); // insert
+        const result = await finalizeHorseImages(HORSE_ID, [
+            { path: "p1", angle: "Primary_Thumbnail" },
+            { path: "f1", angle: "Flaw_Rub_Damage" },
+            { path: "f2", angle: "Flaw_Rub_Damage" },
+        ]);
+        expect(result.success).toBe(true);
+        expect(result.skippedReason).toBeUndefined();
+        const inserted = mockClient._mockQuery.insert.mock.calls.at(-1)?.[0] as { angle_profile: string }[];
+        expect(inserted).toHaveLength(3);
+    });
+
+    it("flaw overflow past 5 skips only the overflow, with a reason", async () => {
+        mockOwnership();
+        queueThen({ count: 4 }); // 4 existing flaws → room for 1
+        queueThen({ data: null }); // insert
+        const result = await finalizeHorseImages(HORSE_ID, [
+            { path: "p1", angle: "Primary_Thumbnail" },
+            { path: "f1", angle: "Flaw_Rub_Damage" },
+            { path: "f2", angle: "Flaw_Rub_Damage" },
+            { path: "f3", angle: "Flaw_Rub_Damage" },
+        ]);
+        expect(result.success).toBe(true);
+        expect(result.skippedExtraDetail).toBe(2);
+        expect(result.skippedReason).toMatch(/flaw photo limit/i);
+        const inserted = mockClient._mockQuery.insert.mock.calls.at(-1)?.[0] as { angle_profile: string }[];
+        expect(inserted).toHaveLength(2); // primary + 1 flaw
+    });
+
+    it("free tier: extras skip but standard photos still save", async () => {
+        mockOwnership();
+        queueThen({ data: null }); // insert (no flaw count read — no flaws)
+        const result = await finalizeHorseImages(HORSE_ID, [
+            { path: "p1", angle: "Primary_Thumbnail" },
+            { path: "e1", angle: "extra_detail" },
+            { path: "e2", angle: "extra_detail" },
+        ]);
+        expect(result.success).toBe(true);
+        expect(result.skippedExtraDetail).toBe(2);
+        expect(result.skippedReason).toMatch(/pro feature/i);
+        const inserted = mockClient._mockQuery.insert.mock.calls.at(-1)?.[0] as { angle_profile: string }[];
+        expect(inserted).toHaveLength(1);
+    });
+
+    it("free tier: flaw overflow + extras produce a combined reason", async () => {
+        mockOwnership();
+        queueThen({ count: 5 }); // flaws full
+        queueThen({ data: null }); // insert
+        const result = await finalizeHorseImages(HORSE_ID, [
+            { path: "p1", angle: "Primary_Thumbnail" },
+            { path: "f1", angle: "Flaw_Rub_Damage" },
+            { path: "e1", angle: "extra_detail" },
+        ]);
+        expect(result.success).toBe(true);
+        expect(result.skippedExtraDetail).toBe(2);
+        expect(result.skippedReason).toMatch(/flaw photo limit/i);
+        expect(result.skippedReason).toMatch(/pro feature/i);
+        const inserted = mockClient._mockQuery.insert.mock.calls.at(-1)?.[0] as { angle_profile: string }[];
+        expect(inserted).toHaveLength(1);
+    });
+
+    it("pro tier: extras save under the 30 cap and skip over it", async () => {
+        asUser("pro");
+        mockOwnership();
+        queueThen({ count: 29 }); // existing extras
+        queueThen({ data: null }); // insert
+        const result = await finalizeHorseImages(HORSE_ID, [
+            { path: "e1", angle: "extra_detail" },
+            { path: "e2", angle: "extra_detail" },
+        ]);
+        expect(result.success).toBe(true);
+        expect(result.skippedExtraDetail).toBe(2);
+        expect(result.skippedReason).toMatch(/limit reached \(29\/30\)/i);
     });
 });

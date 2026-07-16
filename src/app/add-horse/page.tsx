@@ -89,6 +89,11 @@ export default function AddHorsePage() {
  const [imageSlots, setImageSlots] = useState<Partial<Record<AngleProfile, ImageSlot>>>({});
  const [extraFiles, setExtraFiles] = useState<{ file: File; previewUrl: string }[]>([]);
  const extraInputRef = useRef<HTMLInputElement>(null);
+ // Flaw/condition photos — free for every tier, capped at 5. Mirrors the
+ // extras dropzone state above; kept as a parallel set of state rather than
+ // a shared/tagged queue so each zone's crop flow stays simple to follow.
+ const [flawFiles, setFlawFiles] = useState<{ file: File; previewUrl: string }[]>([]);
+ const flawInputRef = useRef<HTMLInputElement>(null);
 
  // Crop modal state
  const [cropFile, setCropFile] = useState<File | null>(null);
@@ -96,6 +101,9 @@ export default function AddHorsePage() {
  const [extraCropQueue, setExtraCropQueue] = useState<File[]>([]);
  const [isCroppingExtra, setIsCroppingExtra] = useState(false);
  const [reCropExtraIdx, setReCropExtraIdx] = useState<number | null>(null);
+ const [flawCropQueue, setFlawCropQueue] = useState<File[]>([]);
+ const [isCroppingFlaw, setIsCroppingFlaw] = useState(false);
+ const [reCropFlawIdx, setReCropFlawIdx] = useState<number | null>(null);
 
  // Step 2 (index 1): Reference
  const [selectedCatalogId, setSelectedCatalogId] = useState<string | null>(null);
@@ -259,6 +267,20 @@ export default function AddHorsePage() {
  return;
  }
 
+ // Re-cropping an existing flaw/condition photo
+ if (reCropFlawIdx !== null) {
+ const oldUrl = flawFiles[reCropFlawIdx]?.previewUrl;
+ if (oldUrl) URL.revokeObjectURL(oldUrl);
+ setFlawFiles((prev) =>
+ prev.map((ff, i) =>
+ i === reCropFlawIdx ? { file: croppedFile, previewUrl: URL.createObjectURL(croppedFile) } : ff,
+ ),
+ );
+ setReCropFlawIdx(null);
+ setCropFile(null);
+ return;
+ }
+
  // Cropping an extra from the queue
  if (isCroppingExtra) {
  const previewUrl = URL.createObjectURL(croppedFile);
@@ -271,6 +293,24 @@ export default function AddHorsePage() {
  setCropFile(remaining[0]);
  } else {
  setIsCroppingExtra(false);
+ }
+ return remaining;
+ });
+ return;
+ }
+
+ // Cropping a flaw/condition photo from the queue
+ if (isCroppingFlaw) {
+ const previewUrl = URL.createObjectURL(croppedFile);
+ setFlawFiles((prev) => [...prev, { file: croppedFile, previewUrl }]);
+ setCropFile(null);
+ // Process next in queue
+ setFlawCropQueue((prev) => {
+ const remaining = prev.slice(1);
+ if (remaining.length > 0) {
+ setCropFile(remaining[0]);
+ } else {
+ setIsCroppingFlaw(false);
  }
  return remaining;
  });
@@ -299,6 +339,14 @@ export default function AddHorsePage() {
  if (files.length === 0) return;
  setIsCroppingExtra(true);
  setExtraCropQueue(files);
+ setCropFile(files[0]);
+ setCropAngle(null);
+ };
+
+ const startFlawCropQueue = (files: File[]) => {
+ if (files.length === 0) return;
+ setIsCroppingFlaw(true);
+ setFlawCropQueue(files);
  setCropFile(files[0]);
  setCropAngle(null);
  };
@@ -472,6 +520,23 @@ export default function AddHorsePage() {
 
  if (!uploadError) {
  uploadedImages.push({ path: filePath, angle:"extra_detail" });
+ }
+ }
+
+ // Compress and upload flaw/condition images — free for every tier,
+ // reuses the existing Flaw_Rub_Damage angle enum (server-enforced cap).
+ for (let i = 0; i < flawFiles.length; i++) {
+ const compressed =
+ watermarkEnabled && userAlias
+ ? await compressImageWithWatermark(flawFiles[i].file, userAlias, userTier, userWatermarkText)
+ : await compressImage(flawFiles[i].file, userTier);
+ const filePath = `horses/${horseId}/flaw_rub_damage_${Date.now()}_${i}.webp`;
+ const { error: uploadError } = await supabase.storage
+ .from("horse-images")
+ .upload(filePath, compressed, { contentType:"image/webp" });
+
+ if (!uploadError) {
+ uploadedImages.push({ path: filePath, angle:"Flaw_Rub_Damage" });
  }
  }
 
@@ -767,6 +832,111 @@ export default function AddHorsePage() {
  </div>
  );
  })}
+ </div>
+
+ {/* Flaw & Condition Photos — free for every tier, capped at 5
+ client-side. Reuses the existing Flaw_Rub_Damage angle enum;
+ the server enforces the cap independently. */}
+ <div className="mt-6">
+ <p className="mb-2 text-xs text-muted-foreground">
+ Document rubs, breaks, or repairs — honest condition photos build buyer trust. Free, up to 5.
+ </p>
+ <label
+ htmlFor="flaw-photos-input"
+ className="relative flex min-h-[120px] w-full cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-input bg-card p-6 text-center transition-all hover:border-forest hover:bg-forest/5"
+ onDragOver={(e) => e.preventDefault()}
+ onDrop={(e) => {
+ e.preventDefault();
+ const files = Array.from(e.dataTransfer.files).filter((f) =>
+ f.type.startsWith("image/"),
+ );
+ if (flawFiles.length + files.length > 5) {
+ alert("Maximum 5 flaw/condition photos allowed.");
+ return;
+ }
+ startFlawCropQueue(files);
+ }}
+ >
+ <input
+ id="flaw-photos-input"
+ ref={flawInputRef}
+ type="file"
+ accept="image/*"
+ multiple
+ className="hidden"
+ title="Upload flaw or condition photos"
+ onChange={(e) => {
+ const files = Array.from(e.target.files || []).filter((f) =>
+ f.type.startsWith("image/"),
+ );
+ if (flawFiles.length + files.length > 5) {
+ alert("Maximum 5 flaw/condition photos allowed.");
+ e.target.value ="";
+ return;
+ }
+ startFlawCropQueue(files);
+ e.target.value ="";
+ }}
+ />
+ <svg
+ width="24"
+ height="24"
+ viewBox="0 0 24 24"
+ fill="none"
+ stroke="currentColor"
+ strokeWidth="1.5"
+ strokeLinecap="round"
+ strokeLinejoin="round"
+ className="text-muted-foreground"
+ >
+ <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
+ <circle cx="12" cy="13" r="3" />
+ <line x1="21" y1="9" x2="21.01" y2="9" />
+ </svg>
+ <span className="text-foreground text-sm font-medium">
+ <strong>Flaws &amp; Condition (optional)</strong>
+ </span>
+ <span className="text-muted-foreground text-xs">
+ {flawFiles.length}/5 photos · Click or drag files here
+ </span>
+ </label>
+ {flawFiles.length > 0 && (
+ <div className="mt-4 flex flex-wrap gap-2">
+ {flawFiles.map((ff, i) => (
+ <div
+ key={i}
+ className="border-input relative h-[100px] w-[100px] overflow-hidden rounded-md border"
+ >
+ {/* eslint-disable-next-line @next/next/no-img-element */}
+ <img src={ff.previewUrl} alt={`Flaw photo ${i + 1}`} />
+ <button
+ className="bg-black/70 absolute top-[6px] right-[6px] z-[2] flex h-[28px] w-[28px] cursor-pointer items-center justify-center rounded-full border-0 text-[0.85rem] text-white transition-colors"
+ onClick={(e) => {
+ e.stopPropagation();
+ URL.revokeObjectURL(ff.previewUrl);
+ setFlawFiles((prev) => prev.filter((_, idx) => idx !== i));
+ }}
+ aria-label={`Remove flaw photo ${i + 1}`}
+ >
+ ✕
+ </button>
+ <button
+ className="bg-black/70 absolute right-[4px] bottom-[4px] flex h-[22px] w-[22px] cursor-pointer items-center justify-center rounded-full border-0 text-[13px] leading-none text-white opacity-0 transition-opacity"
+ onClick={(e) => {
+ e.stopPropagation();
+ setReCropFlawIdx(i);
+ setCropFile(ff.file);
+ setCropAngle(null);
+ }}
+ aria-label={`Re-crop flaw photo ${i + 1}`}
+ title="Crop"
+ >
+ ✂
+ </button>
+ </div>
+ ))}
+ </div>
+ )}
  </div>
 
  {/* Extra Details Multi-Upload Zone — Pro feature; free-tier
@@ -1591,6 +1761,21 @@ export default function AddHorsePage() {
  }
  if (reCropExtraIdx !== null) {
  setReCropExtraIdx(null);
+ }
+ // Same treatment for a cancelled flaw/condition crop
+ if (isCroppingFlaw) {
+ setFlawCropQueue((prev) => {
+ const remaining = prev.slice(1);
+ if (remaining.length > 0) {
+ setTimeout(() => setCropFile(remaining[0]), 50);
+ } else {
+ setIsCroppingFlaw(false);
+ }
+ return remaining;
+ });
+ }
+ if (reCropFlawIdx !== null) {
+ setReCropFlawIdx(null);
  }
  }}
  />

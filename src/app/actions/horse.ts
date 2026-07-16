@@ -437,25 +437,51 @@ export async function finalizeHorseImages(
 
     if (images.length === 0) return { success: true };
 
-    // Enforce tier-based photo limits for extra_detail uploads.
-    // Free: 5 standard LSQ angles only (no extra_detail)
-    // Pro: 5 standard LSQ angles + up to 30 extra_detail photos
+    // Enforce tier-based photo limits.
+    // Free: 5 standard LSQ angles + up to 5 flaw photos (condition
+    //       documentation is trust infrastructure — never Pro-gated;
+    //       owner decision 2026-07-15)
+    // Pro:  the same + up to 30 extra_detail photos
     //
     // NEVER reject the whole batch: standard gallery-slot photos must
-    // save even when the extra-detail subset is over a limit — an
-    // all-or-nothing rejection here once silently ate every photo a
-    // free user attached (the caller showed success regardless).
-    let skippedExtraDetail = 0;
-    let skippedReason: string | undefined;
+    // save even when a subset is over a limit — an all-or-nothing
+    // rejection here once silently ate every photo a free user
+    // attached (the caller showed success regardless).
+    let skippedCount = 0;
+    const skipReasons: string[] = [];
+
+    // Flaw photos: capped at 5 per horse for every tier — the cap is
+    // the only rule; flaws are never Pro-gated.
+    const flawImages = images.filter((img) => img.angle === "Flaw_Rub_Damage");
+    if (flawImages.length > 0) {
+        const { count: flawCount } = await supabase
+            .from("horse_images")
+            .select("id", { count: "exact", head: true })
+            .eq("horse_id", horseId)
+            .eq("angle_profile", "Flaw_Rub_Damage");
+        const room = Math.max(0, 5 - (flawCount ?? 0));
+        if (flawImages.length > room) {
+            const keep = new Set(flawImages.slice(0, room));
+            const overflow = flawImages.length - room;
+            images = images.filter((img) => img.angle !== "Flaw_Rub_Damage" || keep.has(img));
+            skippedCount += overflow;
+            skipReasons.push(
+                `Flaw photo limit reached (5 per horse) — ${overflow} flaw photo${overflow === 1 ? " was" : "s were"} not attached.`,
+            );
+        }
+    }
+
     const extraDetailImages = images.filter(img => img.angle === "extra_detail");
     if (extraDetailImages.length > 0) {
         const { getUserTier } = await import("@/lib/auth");
         const tier = await getUserTier();
 
+        let dropExtras = false;
         if (tier === "free") {
-            skippedExtraDetail = extraDetailImages.length;
-            skippedReason =
-                "Extra detail photos are an MHH Pro feature — your standard angle photos were saved, but the extra shots were not. Upgrade to add close-ups and detail shots (up to 30 per horse).";
+            dropExtras = true;
+            skipReasons.push(
+                "Extra detail photos are an MHH Pro feature — your other photos were saved, but the extra shots were not. Upgrade to add close-ups and detail shots (up to 30 per horse).",
+            );
         } else {
             // Pro users: enforce 30 extra_detail limit
             const { count } = await supabase
@@ -466,17 +492,22 @@ export async function finalizeHorseImages(
 
             const currentCount = count ?? 0;
             if (currentCount + extraDetailImages.length > 30) {
-                skippedExtraDetail = extraDetailImages.length;
-                skippedReason = `Extra detail photo limit reached (${currentCount}/30) — your standard angle photos were saved, but the extra shots were not.`;
+                dropExtras = true;
+                skipReasons.push(
+                    `Extra detail photo limit reached (${currentCount}/30) — your other photos were saved, but the extra shots were not.`,
+                );
             }
+        }
+        if (dropExtras) {
+            skippedCount += extraDetailImages.length;
+            images = images.filter((img) => img.angle !== "extra_detail");
         }
     }
 
-    if (skippedExtraDetail > 0) {
-        images = images.filter((img) => img.angle !== "extra_detail");
-        if (images.length === 0) {
-            return { success: true, skippedExtraDetail, skippedReason };
-        }
+    const skippedExtraDetail = skippedCount;
+    const skippedReason = skipReasons.length > 0 ? skipReasons.join(" ") : undefined;
+    if (images.length === 0) {
+        return { success: true, skippedExtraDetail, skippedReason };
     }
 
     // Build public URLs and insert image records

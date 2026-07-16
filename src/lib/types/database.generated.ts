@@ -3272,6 +3272,77 @@ export type Database = {
           },
         ]
       }
+      show_fee_payments: {
+        Row: {
+          marked_by: string
+          paid_at: string
+          show_id: string
+          user_id: string
+        }
+        Insert: {
+          marked_by: string
+          paid_at?: string
+          show_id: string
+          user_id: string
+        }
+        Update: {
+          marked_by?: string
+          paid_at?: string
+          show_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "show_fee_payments_marked_by_fkey"
+            columns: ["marked_by"]
+            isOneToOne: false
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "show_fee_payments_marked_by_fkey"
+            columns: ["marked_by"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "show_fee_payments_marked_by_fkey"
+            columns: ["marked_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "show_fee_payments_show_id_fkey"
+            columns: ["show_id"]
+            isOneToOne: false
+            referencedRelation: "shows"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "show_fee_payments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "show_fee_payments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "show_fee_payments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       show_placings: {
         Row: {
           class_id: string
@@ -3557,35 +3628,6 @@ export type Database = {
             columns: ["division_id"]
             isOneToOne: false
             referencedRelation: "show_divisions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      show_fee_payments: {
-        Row: {
-          marked_by: string
-          paid_at: string
-          show_id: string
-          user_id: string
-        }
-        Insert: {
-          marked_by: string
-          paid_at?: string
-          show_id: string
-          user_id: string
-        }
-        Update: {
-          marked_by?: string
-          paid_at?: string
-          show_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "show_fee_payments_show_id_fkey"
-            columns: ["show_id"]
-            isOneToOne: false
-            referencedRelation: "shows"
             referencedColumns: ["id"]
           },
         ]
