@@ -12,6 +12,7 @@ import { compressImage, compressImageWithWatermark, generateThumbnail } from"@/l
 import type { UserTier } from"@/lib/utils/imageCompression";
 import { updateLifeStage } from"@/app/actions/hoofprint";
 import { updateHorseAction, deleteHorseImageAction, finalizeHorseImages, getMyTier } from"@/app/actions/horse";
+import { uploadImageWithRetry } from"@/lib/utils/uploadWithRetry";
 import { getProfile } from"@/app/actions/settings";
 import { getHorseCollections, setHorseCollections } from"@/app/actions/collections";
 import ImageCropModal from"@/components/ImageCropModal";
@@ -683,9 +684,9 @@ export default function EditHorsePage() {
  }
 
  const filePath = `horses/${horseId}/${angle}_${Date.now()}.webp`;
- const { error: uploadError } = await supabase.storage
- .from("horse-images")
- .upload(filePath, compressed, { contentType:"image/webp" });
+ const { error: uploadError } = await uploadImageWithRetry(
+ supabase, "horse-images", filePath, compressed,
+ );
 
  if (uploadError) {
  console.error(`Upload failed for ${angle}:`, uploadError);
@@ -714,9 +715,9 @@ export default function EditHorsePage() {
  ? await compressImageWithWatermark(newExtraFiles[i].file, userAlias, userTier, userWatermarkText)
  : await compressImage(newExtraFiles[i].file, userTier);
  const filePath = `horses/${horseId}/extra_detail_${Date.now()}_${i}.webp`;
- const { error: uploadError } = await supabase.storage
- .from("horse-images")
- .upload(filePath, compressed, { contentType:"image/webp" });
+ const { error: uploadError } = await uploadImageWithRetry(
+ supabase, "horse-images", filePath, compressed,
+ );
 
  if (uploadError) {
  console.error(`Upload failed for extra detail ${i}:`, uploadError);
@@ -733,9 +734,9 @@ export default function EditHorsePage() {
  ? await compressImageWithWatermark(newFlawFiles[i].file, userAlias, userTier, userWatermarkText)
  : await compressImage(newFlawFiles[i].file, userTier);
  const filePath = `horses/${horseId}/flaw_rub_damage_${Date.now()}_${i}.webp`;
- const { error: uploadError } = await supabase.storage
- .from("horse-images")
- .upload(filePath, compressed, { contentType:"image/webp" });
+ const { error: uploadError } = await uploadImageWithRetry(
+ supabase, "horse-images", filePath, compressed,
+ );
 
  if (uploadError) {
  console.error(`Upload failed for flaw photo ${i}:`, uploadError);

@@ -21,6 +21,7 @@ import CollectionPicker from"@/components/CollectionPicker";
 import { notifyHorsePublic } from"@/app/actions/horse-events";
 import { initializeHoofprint } from"@/app/actions/hoofprint";
 import { createHorseRecord, finalizeHorseImages, getMyTier } from"@/app/actions/horse";
+import { uploadImageWithRetry } from"@/lib/utils/uploadWithRetry";
 import { getProfile } from"@/app/actions/settings";
 import { setHorseCollections } from"@/app/actions/collections";
 import ImageCropModal from"@/components/ImageCropModal";
@@ -476,8 +477,12 @@ export default function AddHorsePage() {
  await setHorseCollections(horseId, selectedCollectionIds);
  }
 
- // Step 2: Upload images directly from browser to Supabase Storage
+ // Step 2: Upload images directly from browser to Supabase Storage.
+ // Failed uploads are collected and surfaced on the success screen —
+ // they were silently dropped once, which read as "photos randomly
+ // don't save" from the user's side.
  const uploadedImages: { path: string; angle: string }[] = [];
+ const failedUploads: string[] = [];
 
  // Compress and upload slot images + thumbnails
  const imageEntries = Object.entries(imageSlots) as [AngleProfile, ImageSlot][];
@@ -487,11 +492,13 @@ export default function AddHorsePage() {
  ? await compressImageWithWatermark(slot.file, userAlias, userTier, userWatermarkText)
  : await compressImage(slot.file, userTier);
  const filePath = `horses/${horseId}/${angle}_${Date.now()}.webp`;
- const { error: uploadError } = await supabase.storage
- .from("horse-images")
- .upload(filePath, compressed, { contentType:"image/webp" });
+ const { error: uploadError } = await uploadImageWithRetry(
+ supabase, "horse-images", filePath, compressed,
+ );
 
- if (!uploadError) {
+ if (uploadError) {
+ failedUploads.push(activeGallerySlots.find((s) => s.angle === angle)?.label ?? angle);
+ } else {
  uploadedImages.push({ path: filePath, angle });
 
  // Generate and upload thumbnail (400px WebP)
@@ -514,11 +521,13 @@ export default function AddHorsePage() {
  ? await compressImageWithWatermark(extraFiles[i].file, userAlias, userTier, userWatermarkText)
  : await compressImage(extraFiles[i].file, userTier);
  const filePath = `horses/${horseId}/extra_detail_${Date.now()}_${i}.webp`;
- const { error: uploadError } = await supabase.storage
- .from("horse-images")
- .upload(filePath, compressed, { contentType:"image/webp" });
+ const { error: uploadError } = await uploadImageWithRetry(
+ supabase, "horse-images", filePath, compressed,
+ );
 
- if (!uploadError) {
+ if (uploadError) {
+ failedUploads.push(`Extra photo ${i + 1}`);
+ } else {
  uploadedImages.push({ path: filePath, angle:"extra_detail" });
  }
  }
@@ -531,11 +540,13 @@ export default function AddHorsePage() {
  ? await compressImageWithWatermark(flawFiles[i].file, userAlias, userTier, userWatermarkText)
  : await compressImage(flawFiles[i].file, userTier);
  const filePath = `horses/${horseId}/flaw_rub_damage_${Date.now()}_${i}.webp`;
- const { error: uploadError } = await supabase.storage
- .from("horse-images")
- .upload(filePath, compressed, { contentType:"image/webp" });
+ const { error: uploadError } = await uploadImageWithRetry(
+ supabase, "horse-images", filePath, compressed,
+ );
 
- if (!uploadError) {
+ if (uploadError) {
+ failedUploads.push(`Flaw photo ${i + 1}`);
+ } else {
  uploadedImages.push({ path: filePath, angle:"Flaw_Rub_Damage" });
  }
  }
@@ -543,15 +554,24 @@ export default function AddHorsePage() {
  // Step 3: Finalize image metadata on server. The horse row
  // already exists, so a photo problem must NOT fail the submit —
  // it surfaces as a warning on the success screen instead.
+ const photoProblems: string[] = [];
+ if (failedUploads.length > 0) {
+ photoProblems.push(
+ `${failedUploads.length} photo${failedUploads.length === 1 ? "" : "s"} (${failedUploads.join(", ")}) failed to upload — you can add ${failedUploads.length === 1 ? "it" : "them"} again from the horse's Edit page.`,
+ );
+ }
  if (uploadedImages.length > 0) {
  const finalizeResult = await finalizeHorseImages(horseId, uploadedImages);
  if (!finalizeResult.success) {
- setPhotoWarning(
- `Your ${assetCategory === "model" ? "model" : assetCategory} was saved, but the photos could not be attached: ${finalizeResult.error ?? "unknown error"}`,
+ photoProblems.push(
+ `The uploaded photos could not be attached: ${finalizeResult.error ?? "unknown error"}`,
  );
  } else if (finalizeResult.skippedReason) {
- setPhotoWarning(finalizeResult.skippedReason);
+ photoProblems.push(finalizeResult.skippedReason);
  }
+ }
+ if (photoProblems.length > 0) {
+ setPhotoWarning(photoProblems.join(" "));
  }
 
  // 4. Activity event if public
