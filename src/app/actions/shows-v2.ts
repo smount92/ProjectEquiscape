@@ -265,8 +265,19 @@ export async function deleteShow(
         return { success: false, error: "Only draft shows can be deleted — archive it instead." };
     }
 
-    const { error } = await supabase.from("shows").delete().eq("id", showId);
+    // .select() makes the delete self-verifying: if RLS (or anything
+    // else) silently filters the row, report failure instead of a
+    // false success — a delete that "succeeds" without deleting is
+    // the bug class that quietly eats user trust.
+    const { data: deleted, error } = await supabase
+        .from("shows")
+        .delete()
+        .eq("id", showId)
+        .select("id");
     if (error) return { success: false, error: error.message };
+    if (!deleted || deleted.length === 0) {
+        return { success: false, error: "The show could not be deleted — please refresh and try again." };
+    }
     return { success: true };
 }
 

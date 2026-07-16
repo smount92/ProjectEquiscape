@@ -810,11 +810,20 @@ describe("shows-v2 — deleteShow (drafts only, host only)", () => {
     it("deletes a draft as the host", async () => {
         mockClient._mockQuery.maybeSingle
             .mockResolvedValueOnce({ data: showRow({ status: "draft" }), error: null });
-        mockClient._setImplicitResolve({ data: null, error: null });
+        mockClient._setImplicitResolve({ data: [{ id: SHOW_ID }], error: null });
         const result = await deleteShow({ showId: SHOW_ID });
         expect(result).toEqual({ success: true });
         expect(mockClient._mockQuery.delete).toHaveBeenCalled();
         expect(mockClient._mockQuery.eq).toHaveBeenCalledWith("id", SHOW_ID);
+    });
+
+    it("reports failure when the delete silently affects zero rows", async () => {
+        mockClient._mockQuery.maybeSingle
+            .mockResolvedValueOnce({ data: showRow({ status: "draft" }), error: null });
+        mockClient._setImplicitResolve({ data: [], error: null });
+        const result = await deleteShow({ showId: SHOW_ID });
+        expect(result.success).toBe(false);
+        if (!result.success) expect(result.error).toMatch(/could not be deleted/i);
     });
 
     it("refuses once the show has left draft", async () => {

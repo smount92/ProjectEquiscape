@@ -243,6 +243,7 @@ Verified clean: MatchmakerMatches, NotificationList, inbox/ChatThread, Universal
 
 ## 🟤 SHOWS-UX — first-time-host feedback (owner hosted a virtual show, 2026-07-15; all items code-verified)
 
+> **SHIPPED 2026-07-15 — migration 139 applied, full E2E verified (create → About saves → template picker → Virtual Starter loads → draft deleted, DB-confirmed) and merged to main.** deleteShow hardened post-E2E: `.select()` self-verification so a silently-filtered delete reports failure instead of false success. NOTE: a long-running `next dev` served STALE server-action code during verification — restart the dev server after pulling action changes.
 > **BATCH BUILT 2026-07-15 on `feat/shows-host-ux` (stacked on feat/audit-closeout): SHOWUX-1..10 all addressed + extras (transition confirms incl. the card-minting completed transition, axis hint, online default mode, entry-dialog stable link + photo guidance, fee text above entry section). Migration `139_show_hosting_ux.sql` (about_md + show_fee_payments) — APPLY BEFORE MERGE, then gen-types (types hand-patched). Verified: tsc/eslint/1088 vitest (8 new action tests)/build; Playwright confirmed landing cards + create form; the create→console→template→delete E2E stops at the missing column until 139 is applied (script saved for post-apply rerun). Upload-photo-at-entry deliberately NOT built (owner design call pending).**
 
 ### SHOWUX-1 — [BUG] `allowed_finishes` free-text trap — **Status: TODO (worst find)**
