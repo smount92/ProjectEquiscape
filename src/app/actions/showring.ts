@@ -32,6 +32,7 @@ import { z } from "zod";
 import { requireAuth } from "@/lib/auth";
 import { getPublicImageUrls } from "@/lib/utils/storage";
 import { sanitizeForOr } from "@/lib/utils/search";
+import { summarizeShowRecords, type RecordSummaryInputRow } from "@/lib/market/recordSummary";
 import { firstZodError, getShowRingPageSchema } from "@/lib/showring/schemas";
 import type { ShowRingCard, ShowRingFacetOptions } from "@/lib/showring/types";
 
@@ -93,13 +94,23 @@ async function queryShowRing(
         ? "catalog_items:catalog_id!inner(title, maker, scale, item_type)"
         : "catalog_items:catalog_id(title, maker, scale, item_type)";
 
+    // "Has show record" (Wave 3): EXISTS semantics via an inner-join
+    // embed — the filter runs IN the page query (count/hasMore stay
+    // exact, no id-list fan-out). The stable engine's approach
+    // (fetch the user's record horse_ids, then .in()) doesn't scale
+    // ring-wide. RLS on show_records already scopes the embed to
+    // records the viewer may see. The embed itself is dropped in
+    // buildShowRingCards — the chip aggregates come from the one
+    // batched query there.
+    const recordJoin = filters.hasRecords ? ",\n             show_records!inner(horse_id)" : "";
+
     let query = supabase
         .from("user_horses")
         .select(
             `id, owner_id, custom_name, finish_type, condition_grade, asset_category, created_at, sculptor, trade_status, listing_price, marketplace_notes, catalog_id,
              users!inner(alias_name),
              ${catalogSelect},
-             horse_images(image_url, angle_profile)`,
+             horse_images(image_url, angle_profile)${recordJoin}`,
             { count: "exact" },
         )
         .eq("visibility", "public")
@@ -154,7 +165,7 @@ async function buildShowRingCards(
     if (rows.length === 0) return [];
     const pageIds = rows.map((r) => r.id as string);
 
-    const [allFavsResult, userFavsResult, hoofprintResult] = await Promise.all([
+    const [allFavsResult, userFavsResult, hoofprintResult, recordsResult] = await Promise.all([
         supabase.from("horse_favorites").select("horse_id").in("horse_id", pageIds),
         supabase
             .from("horse_favorites")
@@ -166,6 +177,12 @@ async function buildShowRingCards(
             .select("horse_id")
             .in("horse_id", pageIds)
             .eq("is_public", true),
+        // Wave 3 — record chips: ONE batched query for the whole page
+        // (never per-card). RLS scopes rows to public horses' records.
+        supabase
+            .from("show_records")
+            .select("horse_id, placing, ribbon_color, verification_tier")
+            .in("horse_id", pageIds),
     ]);
 
     const favCountMap = new Map<string, number>();
@@ -179,6 +196,9 @@ async function buildShowRingCards(
     for (const e of (hoofprintResult.data ?? []) as { horse_id: string | null }[]) {
         if (e.horse_id) hoofprintCountMap.set(e.horse_id, (hoofprintCountMap.get(e.horse_id) || 0) + 1);
     }
+    const recordSummaryMap = summarizeShowRecords(
+        (recordsResult.data ?? []) as RecordSummaryInputRow[],
+    );
 
     const thumbnailUrls: string[] = [];
     for (const row of rows) {
@@ -216,6 +236,7 @@ async function buildShowRingCards(
             scale: catalog?.scale || null,
             hoofprintCount: hoofprintCountMap.get(row.id as string) || 0,
             assetCategory: (row.asset_category as string | null) || "model",
+            recordSummary: recordSummaryMap.get(row.id as string) ?? null,
         };
     });
 }

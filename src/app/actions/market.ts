@@ -1,8 +1,17 @@
 "use server";
 
+import { z } from "zod";
+
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { sanitizeForOr } from "@/lib/utils/search";
+import { getPublicHorseCards } from "@/lib/shows/publicCards";
+import {
+    sortRecordsBestFirst,
+    summarizeShowRecords,
+    type HorseRecordSummary,
+    type MarketRecordDetailRow,
+} from "@/lib/market/recordSummary";
 
 // ============================================================
 // MARKET PRICE GUIDE — Server Actions
@@ -212,4 +221,112 @@ export async function refreshMarketPrices(): Promise<{ success: boolean; error?:
     if (error) return { success: false, error: error.message };
 
     return { success: true };
+}
+
+// ============================================================
+// MARKET LISTINGS — competitive record (Wave 3)
+// "The horse's record is the product": the quick-look dialog a
+// buyer opens from a listing's record chip.
+// ============================================================
+
+/** Bound the trophy-case read for one horse (campaigners included). */
+const MAX_DETAIL_RECORDS = 200;
+/** "Recent placings, best first" — the dialog shows at most this many. */
+const TOP_RECORDS_SHOWN = 5;
+
+export interface MarketHorseRecord {
+    summary: HorseRecordSummary | null;
+    /** Best-first (championships, then placings, recency tiebreak), ≤5. */
+    topRecords: MarketRecordDetailRow[];
+    /** Live MHH qualification cards (issued/transferred) on the horse. */
+    cardCount: number;
+}
+
+const marketHorseRecordSchema = z.object({ horseId: z.uuid() });
+
+/**
+ * One listed horse's competitive record for the market quick-look
+ * dialog — fetched on demand when a buyer opens it (never per-card in
+ * the list). Two bounded reads for ONE horse:
+ *  - show_records via the viewer's client — RLS only returns rows for
+ *    public horses (or the viewer's own), so a delisted/private horse
+ *    honestly yields nothing;
+ *  - qualification cards via the anon-granted get_public_horse_cards
+ *    DEFINER RPC (migration 141) — the same public-passport path,
+ *    feature-detecting and [] until the migration is applied.
+ */
+export async function getMarketHorseRecord(
+    input: z.input<typeof marketHorseRecordSchema>,
+): Promise<
+    | { success: true; record: MarketHorseRecord }
+    | { success: false; error: string }
+> {
+    const parsed = marketHorseRecordSchema.safeParse(input);
+    if (!parsed.success) return { success: false, error: "Invalid horse id." };
+    const { horseId } = parsed.data;
+
+    const { supabase } = await requireAuth();
+
+    const [recordsResult, cards] = await Promise.all([
+        supabase
+            .from("show_records")
+            .select(
+                'id, show_name, show_id, show_date, show_date_text, division, class_name, "placing", ribbon_color, verification_tier, is_nan',
+            )
+            .eq("horse_id", horseId)
+            .order("show_date", { ascending: false, nullsFirst: false })
+            .limit(MAX_DETAIL_RECORDS),
+        getPublicHorseCards(horseId),
+    ]);
+
+    if (recordsResult.error) {
+        return { success: false, error: "Could not load the show record." };
+    }
+
+    const rows = (recordsResult.data ?? []) as {
+        id: string;
+        show_name: string;
+        show_id: string | null;
+        show_date: string | null;
+        show_date_text: string | null;
+        division: string | null;
+        class_name: string | null;
+        placing: string | null;
+        ribbon_color: string | null;
+        verification_tier: string | null;
+        is_nan: boolean | null;
+    }[];
+
+    const summary =
+        summarizeShowRecords(
+            rows.map((r) => ({
+                horse_id: horseId,
+                placing: r.placing,
+                ribbon_color: r.ribbon_color,
+                verification_tier: r.verification_tier,
+            })),
+        ).get(horseId) ?? null;
+
+    const detailRows: MarketRecordDetailRow[] = rows.map((r) => ({
+        id: r.id,
+        showName: r.show_name,
+        showId: r.show_id,
+        showDate: r.show_date,
+        showDateText: r.show_date_text,
+        className: r.class_name,
+        division: r.division,
+        placing: r.placing,
+        ribbonColor: r.ribbon_color,
+        verificationTier: r.verification_tier,
+        isNan: r.is_nan === true,
+    }));
+
+    return {
+        success: true,
+        record: {
+            summary,
+            topRecords: sortRecordsBestFirst(detailRows).slice(0, TOP_RECORDS_SHOWN),
+            cardCount: cards.length,
+        },
+    };
 }

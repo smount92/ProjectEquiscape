@@ -4,6 +4,8 @@
  * card markup could be ported without a redesign.
  */
 
+import type { HorseRecordSummary } from "@/lib/market/recordSummary";
+
 /** One public horse card in the Show Ring grid. */
 export interface ShowRingCard {
     id: string;
@@ -27,6 +29,13 @@ export interface ShowRingCard {
     scale: string | null;
     hoofprintCount: number;
     assetCategory: string;
+    /**
+     * Compact competitive record (Wave 3 — records on market
+     * listings), batched in ONE show_records query per page. Absent /
+     * null = no records: the card renders nothing (never "0 placings").
+     * Optional so the retired v1 card path never has to fake it.
+     */
+    recordSummary?: HorseRecordSummary | null;
 }
 
 /**

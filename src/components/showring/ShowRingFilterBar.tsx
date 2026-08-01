@@ -164,6 +164,28 @@ export default function ShowRingFilterBar({
                     id="showring-facet-trade"
                 />
 
+                {/* Has show record — buyers hunting proven horses
+                    (Wave 3). Same toggle treatment as the Digital
+                    Stable's stable-has-records button. */}
+                <button
+                    type="button"
+                    onClick={() => {
+                        const next = { ...filters };
+                        if (next.hasRecords) delete next.hasRecords;
+                        else next.hasRecords = true;
+                        onFiltersChange(next);
+                    }}
+                    aria-pressed={Boolean(filters.hasRecords)}
+                    className={`cursor-pointer rounded-full border px-3 py-1.5 font-serif text-xs tracking-wide transition-colors ${
+                        filters.hasRecords
+                            ? "border-warning bg-warning/15 font-semibold text-warning"
+                            : "border-warning/50 bg-warning/5 text-warning/90 hover:bg-warning/10"
+                    }`}
+                    id="showring-has-records"
+                >
+                    🏆 Has show record
+                </button>
+
                 {/* Sort */}
                 <Select
                     value={filters.sort}
