@@ -5,11 +5,19 @@ import { setSupporterLedgerListing } from "@/app/actions/supporter";
 
 /**
  * SupporterLedgerToggle — a supporter's opt-IN for the public Supporters'
- * Ledger on the About page. Lives on the /upgrade page (shown only when the
- * viewer is an active supporter). Default is opted out; this only ever
- * touches the user's own preference column.
+ * Ledger on the About page. Lives on /upgrade and in Settings (both render
+ * it only when the viewer is an active supporter). Default is opted out;
+ * this only ever touches the user's own preference column.
  */
-export default function SupporterLedgerToggle({ initialListed }: { initialListed: boolean }) {
+export default function SupporterLedgerToggle({
+    initialListed,
+    label = "List me on the Supporters' Ledger",
+}: {
+    initialListed: boolean;
+    /** Checkbox label — pages that sit further from the ledger (Settings)
+     *  pass a more located variant. */
+    label?: string;
+}) {
     const [listed, setListed] = useState(initialListed);
     const [error, setError] = useState<string | null>(null);
     const [pending, startTransition] = useTransition();
@@ -38,7 +46,7 @@ export default function SupporterLedgerToggle({ initialListed }: { initialListed
                     className="mt-0.5 h-4 w-4 accent-(--brass)"
                 />
                 <span>
-                    <span className="font-semibold text-foreground">List me on the Supporters&apos; Ledger</span>
+                    <span className="font-semibold text-foreground">{label}</span>
                     <span className="block text-xs text-secondary-foreground">
                         Your alias and the month you first supported, on the About page. Off by default — the
                         plaque on your profile stays either way.

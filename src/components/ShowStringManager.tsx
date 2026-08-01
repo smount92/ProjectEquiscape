@@ -17,6 +17,7 @@ import {
  type ShowStringEntry,
 } from"@/app/actions/competition";
 import { batchRecordResults } from"@/app/actions/shows";
+import { matchesQuery } from "@/lib/shows/horsePicker";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -413,16 +414,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
   <div>
   <label className="text-foreground mb-1 block text-xs font-semibold">Horse</label>
-  <select
-  className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-  value={editEntryHorseId}
-  onChange={(e) => setEditEntryHorseId(e.target.value)}
-  title="Select horse"
-  >
-  {horses.map((h) => (
-  <option key={h.id} value={h.id}>{h.name}</option>
-  ))}
-  </select>
+  <HorseSearchPicker horses={horses} value={editEntryHorseId} onChange={setEditEntryHorseId} />
   </div>
   <div>
   <label className="text-foreground mb-1 block text-xs font-semibold">Class *</label>
@@ -498,19 +490,7 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  <label className="text-foreground mb-1 block text-sm font-semibold">
  Horse *
  </label>
- <select
- className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
- value={entryHorseId}
- onChange={(e) => setEntryHorseId(e.target.value)}
- title="Select horse"
- >
- <option value="">Select horse...</option>
- {horses.map((h) => (
- <option key={h.id} value={h.id}>
- {h.name}
- </option>
- ))}
- </select>
+ <HorseSearchPicker horses={horses} value={entryHorseId} onChange={setEntryHorseId} />
  </div>
  <div className="mb-6">
  <label className="text-foreground mb-1 block text-sm font-semibold">
@@ -900,4 +880,112 @@ export default function ShowStringManager({ showStrings, horses }: Props) {
  )}
  </div>
  );
+}
+
+/** More matches than this render at once — a 500-horse stable stays snappy. */
+const PICKER_RENDER_CAP = 30;
+
+/**
+ * Searchable horse picker for the string packer — replaces the old
+ * whole-stable native <select>, which was unusable past a few dozen
+ * horses. Search-first: type to filter (matchesQuery, the same tested
+ * helper the shows picker uses), click a row to pick. Once a horse is
+ * picked it collapses to a single row with a "Change" affordance, so
+ * the edit form opens compact.
+ */
+function HorseSearchPicker({
+    horses,
+    value,
+    onChange,
+}: {
+    horses: { id: string; name: string }[];
+    value: string;
+    onChange: (id: string) => void;
+}) {
+    const [query, setQuery] = useState("");
+    const [changing, setChanging] = useState(false);
+    const selected = horses.find((h) => h.id === value) ?? null;
+
+    if (selected && !changing) {
+        return (
+            <div className="flex min-h-10 items-center justify-between gap-2 rounded-md border border-input bg-card px-3 py-1.5 text-sm">
+                <span className="truncate font-medium text-foreground">🐴 {selected.name}</span>
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                        setQuery("");
+                        setChanging(true);
+                    }}
+                >
+                    Change
+                </Button>
+            </div>
+        );
+    }
+
+    const matches = horses.filter((h) =>
+        matchesQuery({ ...h, thumbnailUrl: null, scale: null, finish: null }, query),
+    );
+    const shown = matches.slice(0, PICKER_RENDER_CAP);
+    const pick = (id: string) => {
+        onChange(id);
+        setChanging(false);
+        setQuery("");
+    };
+
+    return (
+        <div className="flex flex-col gap-1">
+            <Input
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => {
+                    // Exactly one match → Enter picks it (picking never submits).
+                    if (e.key === "Enter" && matches.length === 1) {
+                        e.preventDefault();
+                        pick(matches[0].id);
+                    }
+                }}
+                placeholder="Search your horses by name…"
+                aria-label="Search your horses by name"
+            />
+            {matches.length === 0 ? (
+                <p className="m-0 py-2 text-sm text-muted-foreground">
+                    No horses named &ldquo;{query.trim()}&rdquo; in your stable.
+                </p>
+            ) : (
+                <ul className="m-0 flex max-h-[240px] list-none flex-col divide-y divide-input overflow-y-auto rounded-md border border-input p-0">
+                    {shown.map((h) => (
+                        <li key={h.id}>
+                            <button
+                                type="button"
+                                className="flex min-h-9 w-full cursor-pointer items-center bg-card px-3 py-1.5 text-left text-sm text-foreground transition-colors hover:bg-muted focus-visible:bg-muted"
+                                onClick={() => pick(h.id)}
+                            >
+                                <span className="truncate">{h.name}</span>
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+            )}
+            {matches.length > shown.length && (
+                <p className="m-0 text-xs text-muted-foreground">
+                    Showing {shown.length} of {matches.length} matches — keep typing to narrow.
+                </p>
+            )}
+            {selected && changing && (
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="self-start"
+                    onClick={() => setChanging(false)}
+                >
+                    Keep {selected.name}
+                </Button>
+            )}
+        </div>
+    );
 }
