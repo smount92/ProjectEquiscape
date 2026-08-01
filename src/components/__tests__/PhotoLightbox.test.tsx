@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach } from"vitest";
 import { render, screen, fireEvent } from"@testing-library/react";
 import userEvent from"@testing-library/user-event";
-import PhotoLightbox from"../PhotoLightbox";
+import PhotoLightbox, { swipeAction, SWIPE_THRESHOLD_PX } from"../PhotoLightbox";
 
 // Mock createPortal to render inline for testing
 vi.mock("react-dom", async () => {
@@ -155,5 +155,63 @@ describe("PhotoLightbox", () => {
  render(<PhotoLightbox images={noLabelImages} initialIndex={0} onClose={mockOnClose} />);
 
  expect(screen.getByAltText("Photo 1")).toBeInTheDocument();
+ });
+
+ it("puts initial focus on the close button (dialog behavior)", () => {
+ render(<PhotoLightbox images={mockImages} initialIndex={0} onClose={mockOnClose} />);
+
+ expect(screen.getByLabelText("Close lightbox")).toHaveFocus();
+ });
+
+ it("swipes left for next and right for prev via pointer events", () => {
+ render(<PhotoLightbox images={mockImages} initialIndex={0} onClose={mockOnClose} />);
+ const overlay = screen.getByRole("dialog");
+
+ // Left swipe (dx = -80) → next image.
+ fireEvent.pointerDown(overlay, { clientX: 200, clientY: 100 });
+ fireEvent.pointerUp(overlay, { clientX: 120, clientY: 104 });
+ expect(screen.getByAltText("Off Side")).toBeInTheDocument();
+
+ // Right swipe (dx = +80) → back to the first image.
+ fireEvent.pointerDown(overlay, { clientX: 120, clientY: 100 });
+ fireEvent.pointerUp(overlay, { clientX: 200, clientY: 96 });
+ expect(screen.getByAltText("Near Side")).toBeInTheDocument();
+
+ // A completed swipe never doubles as the closing overlay tap.
+ fireEvent.click(overlay);
+ expect(mockOnClose).not.toHaveBeenCalled();
+ });
+
+ it("treats a sub-threshold move as a tap, not a swipe", () => {
+ render(<PhotoLightbox images={mockImages} initialIndex={0} onClose={mockOnClose} />);
+ const overlay = screen.getByRole("dialog");
+
+ fireEvent.pointerDown(overlay, { clientX: 200, clientY: 100 });
+ fireEvent.pointerUp(overlay, { clientX: 200 - (SWIPE_THRESHOLD_PX - 1), clientY: 100 });
+ expect(screen.getByAltText("Near Side")).toBeInTheDocument();
+ });
+});
+
+describe("swipeAction — the threshold logic", () => {
+ it("needs at least the threshold of horizontal travel", () => {
+ expect(swipeAction(-(SWIPE_THRESHOLD_PX - 1), 0)).toBeNull();
+ expect(swipeAction(SWIPE_THRESHOLD_PX - 1, 0)).toBeNull();
+ expect(swipeAction(-SWIPE_THRESHOLD_PX, 0)).toBe("next");
+ expect(swipeAction(SWIPE_THRESHOLD_PX, 0)).toBe("prev");
+ });
+
+ it("maps direction: left = next, right = prev", () => {
+ expect(swipeAction(-120, 10)).toBe("next");
+ expect(swipeAction(120, -10)).toBe("prev");
+ });
+
+ it("ignores mostly-vertical gestures (scroll intent)", () => {
+ expect(swipeAction(-50, 60)).toBeNull();
+ expect(swipeAction(50, -50)).toBeNull(); // ties go to vertical
+ });
+
+ it("honors a custom threshold", () => {
+ expect(swipeAction(-30, 0, 20)).toBe("next");
+ expect(swipeAction(-30, 0, 31)).toBeNull();
  });
 });

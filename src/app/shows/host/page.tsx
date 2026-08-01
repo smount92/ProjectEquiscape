@@ -4,7 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { getHostedShows } from "@/app/actions/shows-v2";
 import type { HostedShowSummary } from "@/lib/shows/console";
 import { showsV2Enabled } from "@/lib/shows/flags";
-import { formatStatus } from "@/lib/shows/stateMachine";
+import { friendlyShowStatus } from "@/lib/shows/plainWords";
 import { createClient } from "@/lib/supabase/server";
 import CommandCenterLayout from "@/components/layouts/CommandCenterLayout";
 import CreateShowV2Form from "@/components/shows/CreateShowV2Form";
@@ -85,7 +85,7 @@ function MyShowsList({ shows }: { shows: HostedShowSummary[] }) {
                             <span
                                 className={`stamp ${show.status === "draft" ? "stamp-red" : ""}`}
                             >
-                                {formatStatus(show.status)}
+                                {friendlyShowStatus(show.status)}
                             </span>
                         </TableCell>
                         <TableCell>

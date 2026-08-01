@@ -36,6 +36,7 @@ export const NOTIFICATION_TYPE_PREF_KEYS: Record<string, string> = {
     show_result: "show_results",
     show_card: "show_results",
     show_staff: "show_staff",
+    show_judging_open: "show_staff",
     show_class_change: "show_updates",
     show_entry_scratched: "show_updates",
     show_announcement: "show_announcements",

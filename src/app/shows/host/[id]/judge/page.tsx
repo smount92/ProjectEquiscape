@@ -6,6 +6,7 @@
  * holds.
  */
 
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import { getJudgeQueue } from "@/app/actions/shows-v2";
@@ -46,7 +47,20 @@ export default async function JudgeQueuePage({
         <CommandCenterLayout
             title={`Judging — ${queue.show.title}`}
             description="Photos side by side. Tap entries in placing order, add critiques, mark each class done."
-            mainContent={<JudgeQueue queue={queue} />}
+            mainContent={
+                <>
+                    {/* Way back to the console — same link style as StaffBanner. */}
+                    <div className="mb-3">
+                        <Link
+                            href={`/shows/host/${id}`}
+                            className="text-sm font-semibold text-forest hover:underline"
+                        >
+                            ← Console
+                        </Link>
+                    </div>
+                    <JudgeQueue queue={queue} />
+                </>
+            }
         />
     );
 }

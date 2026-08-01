@@ -6,6 +6,7 @@
  * (recording stays disabled until it is).
  */
 
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import { getRingConsole } from "@/app/actions/shows-v2-ring";
@@ -46,7 +47,20 @@ export default async function RingConsolePage({
         <CommandCenterLayout
             title={`Ring — ${data.show.title}`}
             description="Leg tags first: tap entries in placing order, split or combine at the table, run the championship callbacks."
-            mainContent={<RingConsole data={data} />}
+            mainContent={
+                <>
+                    {/* Way back to the console — same link style as StaffBanner. */}
+                    <div className="mb-3">
+                        <Link
+                            href={`/shows/host/${id}`}
+                            className="text-sm font-semibold text-forest hover:underline"
+                        >
+                            ← Console
+                        </Link>
+                    </div>
+                    <RingConsole data={data} />
+                </>
+            }
         />
     );
 }

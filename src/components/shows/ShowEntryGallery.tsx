@@ -15,15 +15,19 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Heart } from "lucide-react";
 
 import { castVote, removeVote } from "@/app/actions/shows-v2";
 import type { GalleryClass, GalleryEntry, ShowGalleryData } from "@/lib/shows/gallery";
 import { placeLabel, ribbonHex } from "@/lib/shows/placings";
 import PhotoLightbox from "@/components/PhotoLightbox";
+import VoteButton from "@/components/shows/VoteButton";
+import { useShowToast } from "@/components/shows/useShowToast";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 interface ShowEntryGalleryProps {
+    /** For the anon sign-in CTA's redirect back to this show. */
+    showId: string;
     gallery: ShowGalleryData;
     authed: boolean;
 }
@@ -47,55 +51,9 @@ function RibbonChip({ place }: { place: NonNullable<GalleryEntry["place"]> }) {
     );
 }
 
-function VoteButton({
-    entry,
-    votingOpen,
-    authed,
-    pending,
-    onToggle,
-}: {
-    entry: GalleryEntry;
-    votingOpen: boolean;
-    authed: boolean;
-    pending: boolean;
-    onToggle: (entry: GalleryEntry) => void;
-}) {
-    const disabled = !votingOpen || !authed || entry.isOwn || pending;
-    const title = !authed
-        ? "Sign in to vote"
-        : entry.isOwn
-          ? "You can't vote for your own entry"
-          : !votingOpen
-            ? "Voting is closed"
-            : entry.viewerHasVoted
-              ? "Remove your vote"
-              : "Vote for this entry";
-    return (
-        <button
-            type="button"
-            className={`flex min-h-8 cursor-pointer items-center gap-1 rounded-full border border-input bg-card px-2.5 py-0.5 text-xs font-semibold transition-all disabled:cursor-default disabled:opacity-60 ${
-                entry.viewerHasVoted ? "text-destructive" : "text-muted-foreground"
-            }`}
-            disabled={disabled}
-            aria-pressed={entry.viewerHasVoted}
-            aria-label={`${title} — ${entry.voteCount} vote${entry.voteCount === 1 ? "" : "s"}`}
-            title={title}
-            data-testid="vote-button"
-            onClick={() => onToggle(entry)}
-        >
-            <Heart
-                size={14}
-                strokeWidth={2}
-                aria-hidden="true"
-                fill={entry.viewerHasVoted ? "currentColor" : "none"}
-            />
-            <span data-testid="vote-count">{entry.voteCount}</span>
-        </button>
-    );
-}
-
-export default function ShowEntryGallery({ gallery, authed }: ShowEntryGalleryProps) {
+export default function ShowEntryGallery({ showId, gallery, authed }: ShowEntryGalleryProps) {
     const router = useRouter();
+    const { showToast, toastNode } = useShowToast();
     const { classes, votingEnabled, votingOpen, revealed, resultsPublished } = gallery;
 
     const [pendingVote, setPendingVote] = useState<string | null>(null);
@@ -149,6 +107,11 @@ export default function ShowEntryGallery({ gallery, authed }: ShowEntryGalleryPr
         if (!result.success) {
             setError(result.error);
         } else {
+            showToast(
+                entry.viewerHasVoted
+                    ? "Vote removed."
+                    : `Vote counted — thanks for judging ${entry.horseName}!`,
+            );
             router.refresh();
         }
         setPendingVote(null);
@@ -173,17 +136,31 @@ export default function ShowEntryGallery({ gallery, authed }: ShowEntryGalleryPr
                 {votingEnabled && !votingOpen && !resultsPublished && (
                     <Badge variant="secondary">Community vote</Badge>
                 )}
-                {!revealed && (
-                    <Badge variant="outline" title="Owner identities are hidden until results publish">
-                        Blind browsing
-                    </Badge>
-                )}
+                {!revealed && <Badge variant="outline">Blind browsing</Badge>}
             </div>
 
-            {votingOpen && !authed && (
-                <p className="mb-3 text-sm text-muted-foreground" role="note">
-                    Community voting is open — sign in to vote for your favorites.
+            {!revealed && (
+                <p className="mb-3 text-xs text-muted-foreground">
+                    Blind browsing: owner names are hidden until results publish — every entry
+                    stands on its photo alone.
                 </p>
+            )}
+
+            {votingOpen && !authed && (
+                <div
+                    className="mb-3 flex flex-wrap items-center gap-3 text-sm text-muted-foreground"
+                    role="note"
+                >
+                    <span>Community voting is open — sign in to vote for your favorites.</span>
+                    <Button asChild size="sm">
+                        <Link href={`/login?redirectTo=${encodeURIComponent(`/shows/${showId}`)}`}>
+                            Sign in to vote
+                        </Link>
+                    </Button>
+                    <Button asChild variant="outline" size="sm">
+                        <Link href="/signup">Create free account</Link>
+                    </Button>
+                </div>
             )}
 
             {error && (
@@ -289,6 +266,8 @@ export default function ShowEntryGallery({ gallery, authed }: ShowEntryGalleryPr
                     onClose={() => setLightbox(null)}
                 />
             )}
+
+            {toastNode}
         </section>
     );
 }

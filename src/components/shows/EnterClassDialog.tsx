@@ -99,8 +99,9 @@ interface EnterClassDialogProps {
     /** Refetch the enterable-horse list when it's empty/stale. */
     onRefreshHorses?: () => Promise<void> | void;
     onClose: () => void;
-    /** Fires after a successful entry so the page can re-flow. */
-    onEntered: () => void;
+    /** Fires after a successful entry so the page can re-flow —
+     *  carries the horse name so the parent can toast it. */
+    onEntered: (entered: { horseName: string }) => void;
 }
 
 export default function EnterClassDialog({
@@ -129,6 +130,12 @@ export default function EnterClassDialog({
         [horses, cls, horseQuery],
     );
     const anyMismatchListed = rankedHorses.some((p) => !p.fitsClass);
+    /** The class's limits, spelled out visibly (never a tooltip):
+     *  "Class allows: Traditional (1:9) · OF". Empty = no limits. */
+    const classAllowsText = [
+        ...(cls.allowedScales ?? []),
+        ...(cls.allowedFinishes ?? []),
+    ].join(" · ");
 
     // Focus the search box whenever the picker (re)appears — desktop
     // only; on touch the keyboard would cover half the list.
@@ -324,7 +331,7 @@ export default function EnterClassDialog({
         setSubmitting(false);
         if (result.success) {
             track("show_entry", { show_id: showId });
-            onEntered();
+            onEntered({ horseName: horse.name });
             onClose();
         } else {
             setViolations(result.violations ?? [result.error]);
@@ -451,7 +458,7 @@ export default function EnterClassDialog({
                                     className="m-0 flex max-h-[min(60dvh,560px)] list-none flex-col divide-y divide-input overflow-y-auto rounded-lg border border-input p-0"
                                     data-testid="horse-picker-list"
                                 >
-                                    {rankedHorses.map(({ horse: h, fitsClass, mismatches }) => (
+                                    {rankedHorses.map(({ horse: h, fitsClass }) => (
                                         <li key={h.id}>
                                             <button
                                                 type="button"
@@ -487,10 +494,7 @@ export default function EnterClassDialog({
                                                     )}
                                                 </span>
                                                 {!fitsClass && (
-                                                    <span
-                                                        className="shrink-0 text-[0.65rem] whitespace-nowrap text-muted-foreground italic"
-                                                        title={`May not fit this class's restrictions: ${mismatches.join("; ")}`}
-                                                    >
+                                                    <span className="shrink-0 text-[0.65rem] whitespace-nowrap text-muted-foreground italic">
                                                         may not fit
                                                     </span>
                                                 )}
@@ -500,7 +504,7 @@ export default function EnterClassDialog({
                                 </ul>
                             ) : (
                                 <div className="grid max-h-[400px] grid-cols-2 gap-3 overflow-y-auto sm:grid-cols-3">
-                                    {rankedHorses.map(({ horse: h, fitsClass, mismatches }) => (
+                                    {rankedHorses.map(({ horse: h, fitsClass }) => (
                                         <button
                                             key={h.id}
                                             type="button"
@@ -532,10 +536,7 @@ export default function EnterClassDialog({
                                                 </span>
                                             )}
                                             {!fitsClass && (
-                                                <span
-                                                    className="text-[0.65rem] text-muted-foreground italic"
-                                                    title={`May not fit this class's restrictions: ${mismatches.join("; ")}`}
-                                                >
+                                                <span className="text-[0.65rem] text-muted-foreground italic">
                                                     may not fit
                                                 </span>
                                             )}
@@ -546,9 +547,13 @@ export default function EnterClassDialog({
 
                             {anyMismatchListed && (
                                 <p className="m-0 text-[0.7rem] text-muted-foreground">
-                                    Horses that may not fit this class&rsquo;s scale/finish limits
-                                    are listed last — you can still pick any horse; the
-                                    host&rsquo;s rules decide at entry.
+                                    {classAllowsText && (
+                                        <span className="font-semibold">
+                                            Class allows: {classAllowsText}.{" "}
+                                        </span>
+                                    )}
+                                    Horses that may not fit those limits are listed last — you can
+                                    still pick any horse; the host&rsquo;s rules decide at entry.
                                 </p>
                             )}
                         </div>

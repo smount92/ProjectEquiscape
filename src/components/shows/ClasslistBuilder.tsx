@@ -29,8 +29,10 @@ import {
 } from "@/app/actions/shows-v2";
 import type { ConsoleClass, ConsoleDivision, ConsoleSection } from "@/lib/shows/console";
 import { countTemplateClasses, SHOW_CLASSLIST_TEMPLATES } from "@/lib/shows/namhsaTemplate";
-import { formatStatus, isShowMutableForClasslist } from "@/lib/shows/stateMachine";
+import { friendlyClassStatus, friendlyShowStatus } from "@/lib/shows/plainWords";
+import { isShowMutableForClasslist } from "@/lib/shows/stateMachine";
 import type { DivisionAxis, ShowStatus } from "@/lib/shows/types";
+import { useShowToast } from "@/components/shows/useShowToast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -436,7 +438,9 @@ function ClassRow({
                 {cls.name}
             </span>
             {cls.status !== "scheduled" && (
-                <span className={`stamp ${cancelled ? "stamp-red" : ""}`}>{formatStatus(cls.status)}</span>
+                <span className={`stamp ${cancelled ? "stamp-red" : ""}`}>
+                    {friendlyClassStatus(cls.status)}
+                </span>
             )}
             {/* Same badge the public show page uses (ShowEntrySection),
                 so hosts see the flag without opening Edit. */}
@@ -497,6 +501,7 @@ export default function ClasslistBuilder({
     entriesExist,
 }: ClasslistBuilderProps) {
     const router = useRouter();
+    const { showToast, toastNode } = useShowToast();
     const [pending, setPending] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [editingClass, setEditingClass] = useState<ConsoleClass | null>(null);
@@ -506,12 +511,14 @@ export default function ClasslistBuilder({
     const canEdit = canManage && mutable;
     const isEmpty = divisions.length === 0;
 
-    /** Run a mutation, surface its refusal verbatim, refresh on success. */
+    /** Run a mutation, surface its refusal verbatim, refresh + one
+     *  "Saved." toast on success — every builder edit answers back. */
     const run = async (action: () => Promise<{ success: boolean; error?: string }>) => {
         setPending(true);
         setError(null);
         const result = await action();
         if (result.success) {
+            showToast("Saved.");
             router.refresh();
         } else {
             setError(result.error ?? "Something went wrong.");
@@ -534,8 +541,9 @@ export default function ClasslistBuilder({
         <div className="flex flex-col gap-6">
             {!mutable && (
                 <p className="ledger-card text-sm text-muted-foreground" role="note">
-                    This show is {formatStatus(showStatus)} — the classlist is frozen and shown
-                    read-only. Results stay tied to the classlist exactly as it ran.
+                    The show has reached &ldquo;{friendlyShowStatus(showStatus)}&rdquo; — the
+                    classlist is frozen and shown read-only. Results stay tied to the classlist
+                    exactly as it ran.
                 </p>
             )}
             {mutable && !canManage && (
@@ -697,7 +705,10 @@ export default function ClasslistBuilder({
                     cls={editingClass}
                     open
                     onClose={() => setEditingClass(null)}
-                    onSaved={() => router.refresh()}
+                    onSaved={() => {
+                        showToast("Saved.");
+                        router.refresh();
+                    }}
                     setError={setError}
                 />
             )}
@@ -740,6 +751,8 @@ export default function ClasslistBuilder({
                     </DialogContent>
                 </Dialog>
             )}
+
+            {toastNode}
         </div>
     );
 }

@@ -216,7 +216,7 @@ function CallbackRound({
                 </h3>
                 {round.state === "decided" && (
                     <span className="stamp" data-testid="round-decided">
-                        decided
+                        Decided ✓
                     </span>
                 )}
                 {waiting && (

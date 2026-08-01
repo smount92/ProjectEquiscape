@@ -615,7 +615,9 @@ p {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   animation: share-toast-in 0.35s ease forwards;
   pointer-events: none;
-  white-space: nowrap;
+  max-width: min(92vw, 480px);
+  white-space: normal;
+  text-align: center;
 }
 
 @keyframes share-toast-in {

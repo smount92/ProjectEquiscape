@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 
 import { scratchEntry, setFeePaid } from "@/app/actions/shows-v2";
 import type { ConsoleDivision, ConsoleEntry } from "@/lib/shows/console";
+import { friendlyEntryStatus } from "@/lib/shows/plainWords";
 import type { ShowStatus, StaffRole } from "@/lib/shows/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -347,7 +348,7 @@ export default function ShowEntriesPanel({
                                         <span
                                             className={`stamp ${isScratched ? "stamp-red" : ""}`}
                                         >
-                                            {entry.status}
+                                            {friendlyEntryStatus(entry.status)}
                                         </span>
                                     </TableCell>
                                     {canScratch && (

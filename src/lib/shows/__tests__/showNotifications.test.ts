@@ -13,6 +13,7 @@ import {
     buildDeadlinePlans,
     buildEntrantResults,
     buildEntryScratchedPlan,
+    buildJudgingOpenPlans,
     buildResultsNotificationPlans,
     buildStaffAddedPlan,
     buildVotingOpenPlans,
@@ -112,7 +113,8 @@ describe("buildResultsNotificationPlans", () => {
             userId: "alice",
             type: "show_result",
             actorId: null,
-            linkUrl: "/shows/show-1",
+            // Anchored: the reader lands on the results region.
+            linkUrl: "/shows/show-1#results",
         });
         expect(plan.content).toBe(
             "🏆 Ruffian placed 1st in Breed Halter at Summer Classic",
@@ -225,7 +227,11 @@ describe("buildClassChangePlans", () => {
             ],
         });
         expect(plans).toHaveLength(2);
-        expect(plans[0]).toMatchObject({ type: "show_class_change", actorId: null });
+        expect(plans[0]).toMatchObject({
+            type: "show_class_change",
+            actorId: null,
+            linkUrl: "/shows/show-1#entries",
+        });
         expect(plans[0].content).toContain('"Breed Halter" was split');
         expect(plans[0].content).toContain('"Breed Halter — Stock"');
     });
@@ -260,8 +266,44 @@ describe("buildVotingOpenPlans", () => {
             ],
         });
         expect(plans).toHaveLength(1);
-        expect(plans[0]).toMatchObject({ userId: "alice", type: "show_voting_open", actorId: null });
+        expect(plans[0]).toMatchObject({
+            userId: "alice",
+            type: "show_voting_open",
+            actorId: null,
+            // Anchored: voting notifications land on the gallery.
+            linkUrl: "/shows/show-1#gallery",
+        });
         expect(plans[0].content).toContain("Community voting is open");
+    });
+});
+
+describe("buildJudgingOpenPlans", () => {
+    it("pings each judge once, deep-linked to the queue", () => {
+        const plans = buildJudgingOpenPlans({
+            showId: "show-1",
+            showTitle: "Summer Classic",
+            judgeUserIds: ["judge-1", "judge-2", "judge-1"],
+        });
+        expect(plans).toHaveLength(2);
+        expect(plans[0]).toMatchObject({
+            userId: "judge-1",
+            type: "show_judging_open",
+            actorId: null,
+            linkUrl: "/shows/host/show-1/judge",
+        });
+        expect(plans[0].content).toBe(
+            "⚖️ Judging is open for Summer Classic — your queue is ready.",
+        );
+    });
+
+    it("builds nothing for a show with no judges", () => {
+        expect(
+            buildJudgingOpenPlans({
+                showId: "show-1",
+                showTitle: "Summer Classic",
+                judgeUserIds: [],
+            }),
+        ).toEqual([]);
     });
 });
 
@@ -280,7 +322,7 @@ describe("buildEntryScratchedPlan", () => {
             userId: "alice",
             type: "show_entry_scratched",
             actorId: "host-1",
-            linkUrl: "/shows/show-1",
+            linkUrl: "/shows/show-1#entries",
         });
         expect(plan.content).toContain("Ruffian");
         expect(plan.content).toContain("Reason: Wrong class — host will re-enter");
@@ -333,7 +375,7 @@ describe("buildAnnouncementPlans", () => {
         expect(plans[0]).toMatchObject({
             type: "show_announcement",
             actorId: "host-1",
-            linkUrl: "/shows/show-1",
+            linkUrl: "/shows/show-1#entries",
         });
         expect(plans[0].content).toBe("📣 @maggie (Summer Classic): Ring 2 starts at noon.");
     });
@@ -350,7 +392,7 @@ describe("buildDeadlinePlans / isClosingWithin24h", () => {
         expect(plans[0]).toMatchObject({
             type: "show_deadline",
             actorId: null,
-            linkUrl: "/shows/show-1",
+            linkUrl: "/shows/show-1#entries",
         });
         expect(plans[0].content).toContain("close in less than 24 hours");
     });

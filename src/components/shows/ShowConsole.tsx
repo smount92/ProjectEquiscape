@@ -8,9 +8,16 @@
  * managers (Wave 2 — the host steering wheel). Mutations live in
  * the tab components; each router.refresh()es so the server data
  * re-flows.
+ *
+ * Wave 4a: the active tab lives in the URL (?tab=, updated shallowly
+ * via history.replaceState so refresh/share/back keep your place), a
+ * "← Show page" link heads the console, and arriving with ?created=1
+ * (the create-show form's landing) greets the host with a toast.
  */
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 import type { ShowConsoleData } from "@/lib/shows/console";
 import ClasslistBuilder from "@/components/shows/ClasslistBuilder";
@@ -20,6 +27,7 @@ import ShowEntriesPanel from "@/components/shows/ShowEntriesPanel";
 import ShowSettingsForm from "@/components/shows/ShowSettingsForm";
 import ShowStaffPanel from "@/components/shows/ShowStaffPanel";
 import ShowStatusCard from "@/components/shows/ShowStatusCard";
+import { useShowToast } from "@/components/shows/useShowToast";
 
 type TabKey = "overview" | "classlist" | "staff" | "entries" | "settings";
 
@@ -31,12 +39,47 @@ const TABS: { key: TabKey; label: string }[] = [
     { key: "settings", label: "Settings" },
 ];
 
+const TAB_KEYS = TABS.map((t) => t.key);
+
 export default function ShowConsole({ data }: { data: ShowConsoleData }) {
-    const [activeTab, setActiveTab] = useState<TabKey>("overview");
     const { show, viewerId, viewerRole, divisions, staff, entries, feePaidUserIds } = data;
+    const searchParams = useSearchParams();
+    const { showToast, toastNode } = useShowToast();
 
     const canManage = viewerRole === "host" || viewerRole === "co_host";
     const visibleTabs = TABS.filter((tab) => tab.key !== "settings" || canManage);
+
+    // ?tab= is the source of the INITIAL tab (deep links, refreshes);
+    // clicks update state and mirror to the URL shallowly below.
+    const [activeTab, setActiveTab] = useState<TabKey>(() => {
+        const raw = searchParams.get("tab");
+        const valid =
+            raw !== null && (TAB_KEYS as string[]).includes(raw) ? (raw as TabKey) : "overview";
+        return valid === "settings" && !canManage ? "overview" : valid;
+    });
+
+    const selectTab = (key: TabKey) => {
+        setActiveTab(key);
+        // Shallow URL update — no server round-trip, no scroll jump.
+        const url = new URL(window.location.href);
+        if (key === "overview") url.searchParams.delete("tab");
+        else url.searchParams.set("tab", key);
+        window.history.replaceState(null, "", url.toString());
+    };
+
+    // The create-show form lands here with ?created=1 — answer it
+    // once, then strip the flag so a refresh stays quiet.
+    const createdHandled = useRef(false);
+    useEffect(() => {
+        if (createdHandled.current) return;
+        if (searchParams.get("created") !== "1") return;
+        createdHandled.current = true;
+        showToast("Show created — build the classlist, then publish when you're ready.");
+        const url = new URL(window.location.href);
+        url.searchParams.delete("created");
+        window.history.replaceState(null, "", url.toString());
+    }, [searchParams, showToast]);
+
     const classCount = divisions.reduce(
         (sum, d) => sum + d.sections.reduce((s, sec) => s + sec.classes.length, 0),
         0,
@@ -66,6 +109,17 @@ export default function ShowConsole({ data }: { data: ShowConsoleData }) {
 
     return (
         <>
+            {/* Way back out — the console is a room, not a trap. */}
+            <div className="mb-3">
+                <Link
+                    href={`/shows/${show.id}`}
+                    className="text-sm font-semibold text-forest hover:underline"
+                    data-testid="console-back-link"
+                >
+                    ← Show page
+                </Link>
+            </div>
+
             {/* Tab bar — scrolls horizontally on mobile */}
             <div
                 role="tablist"
@@ -85,7 +139,7 @@ export default function ShowConsole({ data }: { data: ShowConsoleData }) {
                                     ? "border-forest text-forest"
                                     : "border-transparent text-muted-foreground hover:text-foreground"
                             }`}
-                            onClick={() => setActiveTab(tab.key)}
+                            onClick={() => selectTab(tab.key)}
                         >
                             <span>{tab.label}</span>
                             {badge !== null && (
@@ -149,6 +203,8 @@ export default function ShowConsole({ data }: { data: ShowConsoleData }) {
                 )}
                 {activeTab === "settings" && canManage && <ShowSettingsForm show={show} />}
             </div>
+
+            {toastNode}
         </>
     );
 }
