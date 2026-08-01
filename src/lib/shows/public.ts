@@ -13,8 +13,10 @@
 import type { EntryStatus, Place, ShowJudging, ShowMode, ShowStatus } from "./types";
 
 /** Statuses the public browse ledger lists. Draft is never public;
- *  completed/archived shows leave the browse page (their results
- *  live on the horses' records and the show page stays reachable). */
+ *  archived shows leave the browse page (their results live on the
+ *  horses' records and the show page stays reachable). Completed
+ *  shows STAY listed — the browse page files them under "Past" so
+ *  results are discoverable without a direct link. */
 export const PUBLIC_BROWSE_STATUSES: ShowStatus[] = [
     "published",
     "entries_open",
@@ -22,6 +24,7 @@ export const PUBLIC_BROWSE_STATUSES: ShowStatus[] = [
     "running",
     "judging",
     "results_review",
+    "completed",
 ];
 
 // ── /shows — v2 browse ledger ──
