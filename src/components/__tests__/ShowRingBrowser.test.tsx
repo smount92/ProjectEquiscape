@@ -44,6 +44,16 @@ vi.mock("@/app/actions/wishlist", () => ({
     addToWishlist: vi.fn().mockResolvedValue({ success: true }),
 }));
 
+// The record chip's quick-look dialog fetches on demand — stub the
+// server action ("use server" module: importing the real one drags the
+// supabase server chain into jsdom).
+const { getMarketHorseRecord } = vi.hoisted(() => ({
+    getMarketHorseRecord: vi.fn(),
+}));
+vi.mock("@/app/actions/market", () => ({
+    getMarketHorseRecord,
+}));
+
 function card(overrides: Partial<ShowRingCard> = {}): ShowRingCard {
     return {
         id: "h-1",
@@ -89,6 +99,28 @@ beforeEach(() => {
         success: true,
         cards: [card({ id: "h-3", customName: "Oberon" })],
         hasMore: false,
+    });
+    getMarketHorseRecord.mockResolvedValue({
+        success: true,
+        record: {
+            summary: { total: 3, placings: 2, championships: 1, verified: 2 },
+            topRecords: [
+                {
+                    id: "r-1",
+                    showName: "Summerween Live",
+                    showId: "s-1",
+                    showDate: "2026-06-01",
+                    showDateText: null,
+                    className: "OF Stock",
+                    division: "OF Halter",
+                    placing: "Grand Champion",
+                    ribbonColor: "Purple",
+                    verificationTier: "platform_generated",
+                    isNan: false,
+                },
+            ],
+            cardCount: 2,
+        },
     });
 });
 
@@ -174,5 +206,52 @@ describe("ShowRingBrowser", () => {
         const badge = badges.find((el) => el.className.includes("text-warning"));
         expect(badge).toBeTruthy();
         expect(badge?.className).not.toContain("amber");
+    });
+
+    // ── Wave 3: record chips on market listings ──
+
+    it("shows the record chip only for horses that have a record (no '0 placings' noise)", () => {
+        renderBrowser({
+            initialCards: [
+                card({
+                    id: "h-1",
+                    recordSummary: { total: 4, placings: 3, championships: 1, verified: 0 },
+                }),
+                card({ id: "h-2", customName: "Stonewall", recordSummary: null }),
+            ],
+        });
+        expect(screen.getByText("3 placings · 1 championship")).toBeInTheDocument();
+        // Exactly one chip — the recordless horse renders nothing.
+        expect(document.querySelectorAll("[id^='record-chip-']")).toHaveLength(1);
+        expect(screen.queryByText(/0 placings/)).not.toBeInTheDocument();
+    });
+
+    it("marks fully verified records on the chip", () => {
+        renderBrowser({
+            initialCards: [
+                card({ recordSummary: { total: 2, placings: 2, championships: 0, verified: 2 } }),
+            ],
+        });
+        expect(screen.getByText(/✅ verified/)).toBeInTheDocument();
+    });
+
+    it("opens the quick-look dialog and fetches that horse's record on demand", async () => {
+        const user = userEvent.setup();
+        renderBrowser({
+            initialCards: [
+                card({ recordSummary: { total: 3, placings: 2, championships: 1, verified: 2 } }),
+            ],
+        });
+        await user.click(document.getElementById("record-chip-h-1")!);
+        await waitFor(() => {
+            expect(getMarketHorseRecord).toHaveBeenCalledWith({ horseId: "h-1" });
+        });
+        expect(await screen.findByText(/Grand Champion/)).toBeInTheDocument();
+        expect(screen.getByText(/2 MHH qualification cards/)).toBeInTheDocument();
+        // The road to the full trophy case: the public passport.
+        expect(screen.getByRole("link", { name: /full trophy case/i })).toHaveAttribute(
+            "href",
+            "/community/h-1",
+        );
     });
 });

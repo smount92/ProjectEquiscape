@@ -19,6 +19,7 @@ export const showRingFiltersSchema = z.object({
     maker: z.string().trim().min(1).max(80).optional(),
     scale: z.string().trim().min(1).max(40).optional(),
     trade: z.enum(SHOWRING_TRADE_OPTIONS).optional(),
+    hasRecords: z.boolean().optional(),
     sort: z.enum(SHOWRING_SORTS).default("newest"),
 });
 

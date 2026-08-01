@@ -62,6 +62,15 @@ describe("parseShowRingSearchParams", () => {
     it("treats whitespace-only values as absent", () => {
         expect(parseShowRingSearchParams({ q: "   ", maker: " " })).toEqual({ sort: "newest" });
     });
+
+    it("parses records=1 as the has-show-record filter and drops other values", () => {
+        expect(parseShowRingSearchParams({ records: "1" })).toEqual({
+            hasRecords: true,
+            sort: "newest",
+        });
+        expect(parseShowRingSearchParams({ records: "0" })).toEqual({ sort: "newest" });
+        expect(parseShowRingSearchParams({ records: "yes" })).toEqual({ sort: "newest" });
+    });
 });
 
 describe("buildShowRingSearchParams", () => {
@@ -88,11 +97,18 @@ describe("buildShowRingSearchParams", () => {
             finish: "Custom",
             scale: "Stablemate",
             trade: "Open to Offers",
+            records: "1",
             sort: "oldest",
         });
         const qs = buildShowRingSearchParams(filters);
         const back = parseShowRingSearchParams(Object.fromEntries(qs.entries()));
         expect(back).toEqual(filters);
+    });
+
+    it("serializes hasRecords as records=1", () => {
+        expect(buildShowRingSearchParams({ hasRecords: true, sort: "newest" }).toString()).toBe(
+            "records=1",
+        );
     });
 });
 
@@ -113,10 +129,19 @@ describe("activeShowRingChips", () => {
             maker: "Breyer",
             scale: "Classic",
             trade: "For Sale",
+            hasRecords: true,
             sort: "newest",
         });
-        expect(chips.map((c) => c.key)).toEqual(["q", "finish", "maker", "scale", "trade"]);
+        expect(chips.map((c) => c.key)).toEqual([
+            "q",
+            "finish",
+            "maker",
+            "scale",
+            "trade",
+            "hasRecords",
+        ]);
         expect(chips.find((c) => c.key === "q")?.label).toBe("“chic”");
+        expect(chips.find((c) => c.key === "hasRecords")?.label).toBe("Has show record");
     });
 });
 
@@ -126,9 +151,20 @@ describe("removeShowRingFilter / clearAllShowRingFilters", () => {
         expect(next).toEqual({ maker: "Breyer", sort: "oldest" });
     });
 
+    it("removes the hasRecords toggle via its chip", () => {
+        const next = removeShowRingFilter({ hasRecords: true, sort: "newest" }, "hasRecords");
+        expect(next).toEqual({ sort: "newest" });
+    });
+
     it("clear-all keeps the sort preference", () => {
         expect(
-            clearAllShowRingFilters({ q: "x", finish: "OF", trade: "For Sale", sort: "oldest" }),
+            clearAllShowRingFilters({
+                q: "x",
+                finish: "OF",
+                trade: "For Sale",
+                hasRecords: true,
+                sort: "oldest",
+            }),
         ).toEqual({ sort: "oldest" });
     });
 });

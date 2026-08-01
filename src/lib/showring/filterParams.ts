@@ -40,6 +40,12 @@ export interface ShowRingFilters {
     maker?: string;
     scale?: string;
     trade?: ShowRingTradeOption;
+    /**
+     * Only horses with at least one show record — buyers hunting
+     * proven horses. URL param `records=1` (same vocabulary as the
+     * Digital Stable's hasRecords toggle).
+     */
+    hasRecords?: boolean;
     sort: ShowRingSort;
 }
 
@@ -83,6 +89,8 @@ export function parseShowRingSearchParams(
         filters.trade = trade as ShowRingTradeOption;
     }
 
+    if (first(params.records) === "1") filters.hasRecords = true;
+
     const sort = nonEmpty(params.sort, 20);
     if (sort && (SHOWRING_SORTS as readonly string[]).includes(sort)) {
         filters.sort = sort as ShowRingSort;
@@ -102,6 +110,7 @@ export function buildShowRingSearchParams(filters: Partial<ShowRingFilters>): UR
     if (filters.maker) params.set("maker", filters.maker);
     if (filters.scale) params.set("scale", filters.scale);
     if (filters.trade) params.set("trade", filters.trade);
+    if (filters.hasRecords) params.set("records", "1");
     if (filters.sort && filters.sort !== "newest") params.set("sort", filters.sort);
     return params;
 }
@@ -109,7 +118,7 @@ export function buildShowRingSearchParams(filters: Partial<ShowRingFilters>): UR
 /** A rubber-stamp chip describing one active filter. */
 export interface ShowRingFilterChip {
     /** Which ShowRingFilters key removing this chip clears. */
-    key: "q" | "finish" | "maker" | "scale" | "trade";
+    key: "q" | "finish" | "maker" | "scale" | "trade" | "hasRecords";
     label: string;
 }
 
@@ -124,6 +133,7 @@ export function activeShowRingChips(filters: ShowRingFilters): ShowRingFilterChi
     if (filters.maker) chips.push({ key: "maker", label: filters.maker });
     if (filters.scale) chips.push({ key: "scale", label: filters.scale });
     if (filters.trade) chips.push({ key: "trade", label: filters.trade });
+    if (filters.hasRecords) chips.push({ key: "hasRecords", label: "Has show record" });
     return chips;
 }
 

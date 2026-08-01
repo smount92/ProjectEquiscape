@@ -37,6 +37,12 @@ describe("showRingFiltersSchema", () => {
     it("rejects empty-string maker/scale (absent means not filtered)", () => {
         expect(showRingFiltersSchema.safeParse({ maker: "" }).success).toBe(false);
     });
+
+    it("accepts the boolean hasRecords toggle and rejects truthy strings", () => {
+        expect(showRingFiltersSchema.parse({ hasRecords: true }).hasRecords).toBe(true);
+        expect(showRingFiltersSchema.parse({}).hasRecords).toBeUndefined();
+        expect(showRingFiltersSchema.safeParse({ hasRecords: "1" }).success).toBe(false);
+    });
 });
 
 describe("getShowRingPageSchema", () => {

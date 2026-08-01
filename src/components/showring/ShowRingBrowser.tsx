@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import ShowRingFilterBar from "@/components/showring/ShowRingFilterBar";
+import HorseRecordChip from "@/components/market/HorseRecordChip";
 import WishlistButton from "@/components/WishlistButton";
 import FavoriteButton from "@/components/FavoriteButton";
 import { Badge } from "@/components/ui/badge";
@@ -163,6 +164,20 @@ function ShowRingHorseCard({ horse }: { horse: ShowRingCard }) {
                     )}
                 </div>
             </Link>
+
+            {/* Record chip (Wave 3) — the horse's competitive record at
+                the exact moment it commands a price premium. Outside
+                the Link so the quick-look dialog opens without
+                navigating; renders nothing when there is no record. */}
+            {horse.recordSummary && (
+                <div className="mt-2 px-1">
+                    <HorseRecordChip
+                        horseId={horse.id}
+                        horseName={horse.customName}
+                        summary={horse.recordSummary}
+                    />
+                </div>
+            )}
 
             {/* Footer — owner + actions */}
             <div className="mt-3 flex items-center justify-between border-t border-input px-1 pt-2.5 text-xs">

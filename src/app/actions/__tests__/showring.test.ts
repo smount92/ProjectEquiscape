@@ -32,6 +32,7 @@ function chainResolving(data: unknown) {
     const q: Record<string, unknown> = {};
     q.select = vi.fn(() => q);
     q.eq = vi.fn(() => q);
+    q.in = vi.fn(() => q);
     q.limit = vi.fn(() => q);
     q.then = (resolve: (v: unknown) => void) =>
         Promise.resolve({ data, error: null }).then(resolve);
@@ -171,6 +172,78 @@ describe("getShowRingPage", () => {
             expect(result.totalCount).toBe(0);
             expect(result.hasMore).toBe(false);
         }
+    });
+
+    // ── Wave 3: records on market listings ──
+
+    it("hasRecords filters IN the page query via the inner-join embed", async () => {
+        await getShowRingPage({ hasRecords: true });
+        expect(selectArgs().some((s) => s.includes("show_records!inner(horse_id)"))).toBe(true);
+    });
+
+    it("does not join show_records when the filter is off", async () => {
+        await getShowRingPage({});
+        expect(selectArgs().some((s) => s.includes("show_records!inner"))).toBe(false);
+    });
+
+    it("rejects truthy-string hasRecords at the zod boundary", async () => {
+        const result = await getShowRingPage({ hasRecords: "1" as never });
+        expect(result.success).toBe(false);
+        expect(mockClient.from).not.toHaveBeenCalled();
+    });
+
+    it("batches record summaries in ONE show_records query for the page — never per card", async () => {
+        const horse = (id: string) => ({
+            id,
+            owner_id: "o-1",
+            custom_name: "Avalon",
+            finish_type: "OF",
+            condition_grade: "",
+            asset_category: "model",
+            created_at: "2026-07-01T00:00:00Z",
+            sculptor: null,
+            trade_status: "For Sale",
+            listing_price: 100,
+            marketplace_notes: null,
+            catalog_id: null,
+            users: { alias_name: "seller" },
+            catalog_items: null,
+            horse_images: [],
+        });
+        const recordsChain = chainResolving([
+            { horse_id: "h-1", placing: "1st", ribbon_color: "Blue", verification_tier: "platform_generated" },
+            { horse_id: "h-1", placing: "Grand Champion", ribbon_color: "Purple", verification_tier: "platform_generated" },
+            { horse_id: "h-1", placing: "4th", ribbon_color: "White", verification_tier: "self_reported" },
+        ]);
+        let recordsQueries = 0;
+        (mockClient.from as MockFn).mockImplementation((table: string) => {
+            if (table === "show_records") {
+                recordsQueries += 1;
+                return recordsChain;
+            }
+            if (table === "horse_favorites" || table === "v_horse_hoofprint" || table === "user_blocks") {
+                return chainResolving([]);
+            }
+            return mockClient._mockQuery;
+        });
+        mockClient._setImplicitResolve({ data: [horse("h-1"), horse("h-2")], error: null });
+
+        const result = await getShowRingPage({});
+        expect(result.success).toBe(true);
+        if (result.success) {
+            expect(result.cards[0].recordSummary).toEqual({
+                total: 3,
+                placings: 2,
+                championships: 1,
+                verified: 2,
+            });
+            // Empty-state honesty: no records → null, so the card can
+            // render nothing (never "0 placings").
+            expect(result.cards[1].recordSummary).toBeNull();
+        }
+        // One batched query with BOTH page ids — not one per card.
+        expect(recordsQueries).toBe(1);
+        expect((recordsChain.in as MockFn).mock.calls).toEqual([["horse_id", ["h-1", "h-2"]]]);
     });
 });
 
