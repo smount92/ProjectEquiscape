@@ -4739,6 +4739,10 @@ export type Database = {
         Args: { p_horses: Json; p_user_id: string }
         Returns: Json
       }
+      batch_import_horses_v2: {
+        Args: { p_is_public?: boolean; rows: Json }
+        Returns: Json
+      }
       catalog_slugify: { Args: { txt: string }; Returns: string }
       check_rate_limit: {
         Args: {
@@ -4846,6 +4850,22 @@ export type Database = {
           show_title: string
           show_year: number
           status: string
+        }[]
+      }
+      get_public_horse_records: {
+        Args: { p_horse_id: string }
+        Returns: {
+          class_name: string
+          division: string
+          id: string
+          is_nan: boolean
+          placing: string
+          ribbon_color: string
+          show_date: string
+          show_date_text: string
+          show_id: string
+          show_name: string
+          verification_tier: string
         }[]
       }
       get_public_passport: {
