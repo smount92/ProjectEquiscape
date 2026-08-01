@@ -166,6 +166,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
                 changeFrequency: "weekly",
                 priority: 0.6,
             }));
+
+        // Maker hub pages (/reference + /reference/[maker]) — distinct
+        // maker_slugs derived from the rows already fetched above (no extra
+        // query), capped well under any sanity limit.
+        const MAKER_CAP = 500;
+        const makerSlugs = [
+            ...new Set(rows.map((row) => row.maker_slug).filter((s): s is string => !!s)),
+        ].slice(0, MAKER_CAP);
+        referenceEntries.push(
+            {
+                url: `${baseUrl}/reference`,
+                lastModified: now,
+                changeFrequency: "weekly",
+                priority: 0.7,
+            },
+            ...makerSlugs.map((slug): MetadataRoute.Sitemap[number] => ({
+                url: `${baseUrl}/reference/${slug}`,
+                lastModified: now,
+                changeFrequency: "weekly",
+                priority: 0.7,
+            })),
+        );
     } catch {
         // Never throw from sitemap(): fall back to the static entries only.
         referenceEntries = [];

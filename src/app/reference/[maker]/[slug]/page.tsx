@@ -238,7 +238,23 @@ export default async function ReferencePage({ params }: Props) {
             <CatalogSubMasthead
                 icon={isMold ? "🗿" : "🐴"}
                 title={item.title}
-                subtitle={<>by {item.maker}{isMold ? " · Mold" : ""}</>}
+                subtitle={
+                    <>
+                        by{" "}
+                        {item.maker_slug ? (
+                            <Link
+                                href={`/reference/${item.maker_slug}`}
+                                className="underline decoration-dotted hover:decoration-solid"
+                                style={{ color: "inherit" }}
+                            >
+                                {item.maker}
+                            </Link>
+                        ) : (
+                            item.maker
+                        )}
+                        {isMold ? " · Mold" : ""}
+                    </>
+                }
                 backHref="/catalog"
                 backLabel="Reference Catalog"
             />
@@ -258,7 +274,16 @@ export default async function ReferencePage({ params }: Props) {
 
                     <div className="flex flex-col gap-4">
                         <div className="text-sm font-bold tracking-widest text-forest uppercase">
-                            {item.maker}
+                            {item.maker_slug ? (
+                                <Link
+                                    href={`/reference/${item.maker_slug}`}
+                                    className="text-forest hover:underline"
+                                >
+                                    {item.maker}
+                                </Link>
+                            ) : (
+                                item.maker
+                            )}
                             {item.scale ? ` · ${item.scale}` : ""}
                             {isMold ? " · Mold" : ""}
                         </div>
