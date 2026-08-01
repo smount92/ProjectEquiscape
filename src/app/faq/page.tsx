@@ -49,7 +49,7 @@ const FAQ_ITEMS: FaqItem[] = [
     {
         category: "Your Collection",
         q: "What photo angles should I upload?",
-        a: "We provide 5 dedicated LSQ (Live Show Quality) slots: Near-Side, Off-Side, Front/Chest, Hindquarters, and Belly/Maker's Mark. You can also upload unlimited extra detail photos for flaws, marks, or special features. The more angles, the better your horse's passport looks!",
+        a: "We provide 5 dedicated LSQ (Live Show Quality) slots: Near-Side, Off-Side, Front/Chest, Hindquarters, and Belly/Maker's Mark. Every account also gets 5 flaw-documentation photos per horse — honest condition notes are free, always. Pro members can add up to 30 extra detail photos for close-ups, marks, and special features. The more angles, the better your horse's passport looks!",
     },
     {
         category: "Your Collection",

@@ -24,13 +24,13 @@ test.describe("Show System — E2E", () => {
         await page.goto("/shows");
         await page.waitForLoadState("networkidle");
 
-        // Verify page heading (inside ExplorerLayout)
-        await expect(page.getByText("Virtual Photo Shows", { exact: true })).toBeVisible({ timeout: 10000 });
+        // Verify the masthead heading (PageMasthead h1)
+        await expect(page.getByRole("heading", { level: 1, name: "Shows" })).toBeVisible({ timeout: 10000 });
 
         // Page should render without server errors
         await expect(page.locator("body")).not.toContainText("Application error");
 
-        // Verify either shows grid or empty state is rendered
+        // Verify either show cards (v2 or legacy) or the empty state rendered
         const hasShows = await page.locator("a[id^='show-']").count();
         const hasEmpty = await page.locator("text=No Shows Yet").count();
         expect(hasShows + hasEmpty).toBeGreaterThan(0);
@@ -319,12 +319,19 @@ test.describe("Show System — E2E", () => {
 
     // ── Navigation Guards ──
 
-    test("unauthenticated user is redirected from shows page", async ({ browser }) => {
+    test("unauthenticated user can browse the shows index (doors open)", async ({ browser }) => {
+        // Batch 1 "Unlock the doors": /shows is public — anon must NOT be
+        // bounced to /login anymore.
         const context = await browser.newContext();
         const freshPage = await context.newPage();
 
         await freshPage.goto("/shows");
-        await freshPage.waitForURL("**/login**", { timeout: 10000 });
+        await freshPage.waitForLoadState("networkidle");
+
+        await expect(freshPage).not.toHaveURL(/\/login/);
+        await expect(
+            freshPage.getByRole("heading", { level: 1, name: "Shows" }),
+        ).toBeVisible({ timeout: 10000 });
 
         await context.close();
     });

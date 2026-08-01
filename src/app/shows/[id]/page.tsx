@@ -81,6 +81,9 @@ export async function generateMetadata({
             description,
             alternates: { canonical },
             openGraph: { title, description, url: canonical, type: "website", siteName: "Model Horse Hub" },
+            // The opengraph-image route (./opengraph-image.tsx) supplies the
+            // card art; this opts shared links into the large-preview card.
+            twitter: { card: "summary_large_image" },
         };
     }
 
@@ -110,6 +113,7 @@ export async function generateMetadata({
         description,
         alternates: { canonical },
         openGraph: { title, description, url: canonical, type: "website", siteName: "Model Horse Hub" },
+        twitter: { card: "summary_large_image" },
     };
 }
 

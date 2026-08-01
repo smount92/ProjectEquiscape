@@ -25,7 +25,9 @@ export default function robots(): MetadataRoute.Robots {
                     "/contact",
                     "/privacy",
                     "/terms",
-                    "/community",
+                    // Horse passports (/community/[id]) are genuinely public
+                    // (anon RPC) — the login-walled community INDEX pages are
+                    // disallowed below until they actually open up.
                     "/community/*",
                     "/catalog",
                     "/catalog/*",
@@ -39,6 +41,16 @@ export default function robots(): MetadataRoute.Robots {
                     "/getting-started",
                 ],
                 disallow: [
+                    // Login-walled community surfaces (anon → /login). The $
+                    // anchor keeps exactly /community out while /community/*
+                    // passport pages stay crawlable via the allow above.
+                    "/community$",
+                    "/community/groups",
+                    "/community/groups/*",
+                    "/community/events",
+                    "/community/events/*",
+                    "/community/help-id",
+                    "/community/help-id/*",
                     "/dashboard",
                     "/dashboard/*",
                     "/stable",

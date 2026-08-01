@@ -56,7 +56,8 @@ export default function GettingStartedPage() {
                     </p>
                     <p>
                         Upload up to <strong>5 LSQ-style photos</strong> (Near-Side, Off-Side, Front, Hindquarters,
-                        Belly/Maker&apos;s Mark) plus unlimited extra detail shots. Set your condition grade, finish
+                        Belly/Maker&apos;s Mark) plus <strong>5 flaw-documentation photos</strong> — free on every
+                        tier. Pro members can add up to 30 extra detail shots. Set your condition grade, finish
                         type, and give your horse a name.
                     </p>
                     <div className="border-forest/20 bg-forest/5 mt-4 rounded-lg border px-6 py-4 text-sm leading-relaxed">

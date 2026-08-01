@@ -88,31 +88,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             priority: 0.6,
         },
 
-        // ── Public community pages ──
-        {
-            url: `${baseUrl}/community`,
-            lastModified: now,
-            changeFrequency: "daily",
-            priority: 0.9,
-        },
-        {
-            url: `${baseUrl}/community/groups`,
-            lastModified: now,
-            changeFrequency: "daily",
-            priority: 0.7,
-        },
-        {
-            url: `${baseUrl}/community/events`,
-            lastModified: now,
-            changeFrequency: "daily",
-            priority: 0.7,
-        },
-        {
-            url: `${baseUrl}/community/help-id`,
-            lastModified: now,
-            changeFrequency: "daily",
-            priority: 0.6,
-        },
+        // NOTE: /community, /community/groups, /community/events and
+        // /community/help-id are login-walled (each page redirects anon
+        // to /login) — advertising them here just feeds crawlers a wall.
+        // Re-add them if/when they actually render for anon. The PUBLIC
+        // community surface — horse passports at /community/[id] — is
+        // still listed dynamically below.
 
         // ── Public feature pages ──
         {
