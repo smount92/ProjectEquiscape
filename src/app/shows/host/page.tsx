@@ -26,6 +26,14 @@ export const metadata = {
     description: "Create and run your shows — live or online — from one console.",
 };
 
+/** Stamp label for non-host roles on My Shows cards (Batch 2 —
+ *  judges/stewards see their shows here too). */
+const ROLE_STAMPS: Partial<Record<HostedShowSummary["role"], string>> = {
+    co_host: "Co-host",
+    steward: "Steward",
+    judge: "Judge",
+};
+
 function formatDate(iso: string | null): string {
     if (!iso) return "—";
     const d = new Date(iso);
@@ -66,9 +74,9 @@ function MyShowsList({ shows }: { shows: HostedShowSummary[] }) {
                             >
                                 {show.title}
                             </Link>
-                            {show.role === "co_host" && (
+                            {show.role !== "host" && (
                                 <Badge variant="outline" className="ml-2">
-                                    co-host
+                                    {ROLE_STAMPS[show.role] ?? show.role}
                                 </Badge>
                             )}
                         </TableCell>

@@ -17,6 +17,23 @@ const mockClient = createMockSupabaseClient();
 vi.mock("@/lib/supabase/server", () => ({
     createClient: vi.fn(() => Promise.resolve(mockClient)),
 }));
+vi.mock("@/lib/supabase/admin", () => ({
+    getAdminClient: vi.fn(() => createMockSupabaseClient()),
+}));
+// The Batch 2 notification spine (and its server-only import chain)
+// is out of scope for these action tests.
+vi.mock("next/server", () => ({
+    after: vi.fn((fn: () => void) => {
+        fn();
+    }),
+}));
+vi.mock("@/lib/shows/notifications", () => ({
+    runClassChangeFanout: vi.fn().mockResolvedValue(undefined),
+    runEntryScratchedNotification: vi.fn().mockResolvedValue(undefined),
+    runResultsPublishedFanout: vi.fn().mockResolvedValue(undefined),
+    runStaffAddedNotification: vi.fn().mockResolvedValue(undefined),
+    runVotingOpenedFanout: vi.fn().mockResolvedValue(undefined),
+}));
 
 import { enterClass, scratchEntry } from "@/app/actions/shows-v2";
 
@@ -327,14 +344,28 @@ describe("shows-v2 — scratchEntry", () => {
         expect(result).toEqual({ success: false, error: "Entry not found." });
     });
 
-    it("only the owner can scratch", async () => {
-        mockClient._mockQuery.maybeSingle.mockResolvedValueOnce({
-            data: { id: ENTRY_ID, owner_id: "user-2", status: "entered", show_id: SHOW_ID },
-            error: null,
-        });
+    it("a caller who is neither owner nor staff cannot scratch (Batch 2 contract)", async () => {
+        mockClient._mockQuery.maybeSingle
+            .mockResolvedValueOnce({
+                data: {
+                    id: ENTRY_ID,
+                    owner_id: "user-2",
+                    status: "entered",
+                    show_id: SHOW_ID,
+                    class_id: CLASS_ID,
+                    horse_id: HORSE_ID,
+                },
+                error: null,
+            })
+            // getShowRole: the show, then no staff row for the caller
+            .mockResolvedValueOnce({
+                data: { id: SHOW_ID, host_id: "user-2", status: "entries_open", mode: "live", judging: "judged" },
+                error: null,
+            })
+            .mockResolvedValueOnce({ data: null, error: null });
         const result = await scratchEntry({ entryId: ENTRY_ID });
         expect(result.success).toBe(false);
-        if (!result.success) expect(result.error).toMatch(/owner/i);
+        if (!result.success) expect(result.error).toMatch(/owner or the show's staff/i);
         expect(mockClient._mockQuery.update).not.toHaveBeenCalled();
     });
 
@@ -370,15 +401,20 @@ describe("shows-v2 — scratchEntry", () => {
                 data: { id: ENTRY_ID, owner_id: "user-1", status: "entered", show_id: SHOW_ID },
                 error: null,
             })
+            // getShowRole: the show, then no staff row for the caller
             .mockResolvedValueOnce({
-                data: { id: SHOW_ID, status: "entries_open" },
+                data: { id: SHOW_ID, host_id: "user-9", status: "entries_open", mode: "live", judging: "judged" },
                 error: null,
-            });
-        mockClient._setImplicitResolve({ data: null, error: null }); // the UPDATE
+            })
+            .mockResolvedValueOnce({ data: null, error: null });
+        // the self-verifying UPDATE ... .select("id")
+        mockClient._setImplicitResolve({ data: [{ id: ENTRY_ID }], error: null });
 
         const result = await scratchEntry({ entryId: ENTRY_ID });
         expect(result).toEqual({ success: true });
-        expect(mockClient._mockQuery.update).toHaveBeenCalledWith({ status: "scratched" });
-        expect(mockClient._mockQuery.eq).toHaveBeenCalledWith("owner_id", "user-1");
+        expect(mockClient._mockQuery.update).toHaveBeenCalledWith(
+            expect.objectContaining({ status: "scratched" }),
+        );
+        expect(mockClient._mockQuery.eq).toHaveBeenCalledWith("id", ENTRY_ID);
     });
 });

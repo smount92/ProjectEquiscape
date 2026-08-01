@@ -253,6 +253,18 @@ export const enterClassSchema = z.object({
 
 export const scratchEntrySchema = z.object({
     entryId: uuidSchema,
+    /** Optional short reason — surfaced to the owner when staff scratch. */
+    reason: z.string().trim().max(200, "Keep the reason under 200 characters.").optional(),
+});
+
+/** Host/co-host broadcast to every current entrant (Batch 2). */
+export const announceToEntrantsSchema = z.object({
+    showId: uuidSchema,
+    message: z
+        .string()
+        .trim()
+        .min(1, "The announcement can't be empty.")
+        .max(1000, "Announcements are capped at 1000 characters."),
 });
 
 export const findUserByAliasSchema = z.object({

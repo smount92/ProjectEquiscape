@@ -28,7 +28,8 @@ export interface HostedShowSummary {
     showDate: string | null;
     entriesCloseAt: string | null;
     createdAt: string;
-    /** The caller's role on the show (host or co_host). */
+    /** The caller's role on the show — any staff role since Batch 2
+     *  (judges and stewards find their shows in this list too). */
     role: StaffRole;
     entryCount: number;
 }

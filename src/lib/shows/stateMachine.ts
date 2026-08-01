@@ -6,8 +6,11 @@
  *         → running (live) | judging (online)
  *         → results_review → completed → archived
  *
- * Transitions are explicit host actions (plus cron auto-close on
- * deadlines). No status flips hidden inside read functions.
+ * Transitions are explicit host actions, plus two the hourly
+ * transition-shows cron performs at the posted deadlines (through
+ * this same machine): published → entries_open at entries_open_at,
+ * and entries_open → entries_closed at entries_close_at. No status
+ * flips hidden inside read functions.
  */
 
 import type { ClassStatus, ShowMode, ShowStatus } from "./types";

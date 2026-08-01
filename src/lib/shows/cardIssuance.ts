@@ -163,6 +163,10 @@ export async function assignCardCodes(
 interface IssueResult {
     issued: number;
     skipped: number;
+    /** The cards minted by THIS call (already-issued ones are not
+     *  repeated) — the notification fan-out pokes exactly these
+     *  owners, so an idempotent re-publish never re-notifies. */
+    cards: PlannedCard[];
 }
 
 export async function issueQualificationCardsForShow(
@@ -178,7 +182,7 @@ export async function issueQualificationCardsForShow(
         .maybeSingle();
     if (showError) return { error: showError.message };
     if (!show) return { error: "Show not found." };
-    if (!show.is_mhh_qualifying) return { issued: 0, skipped: 0 };
+    if (!show.is_mhh_qualifying) return { issued: 0, skipped: 0, cards: [] };
 
     // ── Classlist (ids + qualifying flags only) ──
     const { data: divisionRows, error: dErr } = await supabase
@@ -187,7 +191,7 @@ export async function issueQualificationCardsForShow(
         .eq("show_id", showId);
     if (dErr) return { error: dErr.message };
     const divisionIds = (divisionRows ?? []).map((d: { id: string }) => d.id);
-    if (divisionIds.length === 0) return { issued: 0, skipped: 0 };
+    if (divisionIds.length === 0) return { issued: 0, skipped: 0, cards: [] };
 
     const { data: sectionRows, error: sErr } = await supabase
         .from("show_sections")
@@ -195,7 +199,7 @@ export async function issueQualificationCardsForShow(
         .in("division_id", divisionIds);
     if (sErr) return { error: sErr.message };
     const sectionIds = (sectionRows ?? []).map((s: { id: string }) => s.id);
-    if (sectionIds.length === 0) return { issued: 0, skipped: 0 };
+    if (sectionIds.length === 0) return { issued: 0, skipped: 0, cards: [] };
 
     const { data: classRows, error: cErr } = await supabase
         .from("show_classes")
@@ -203,7 +207,7 @@ export async function issueQualificationCardsForShow(
         .in("section_id", sectionIds);
     if (cErr) return { error: cErr.message };
     const classes = (classRows ?? []) as { id: string; is_qualifying: boolean }[];
-    if (classes.length === 0) return { issued: 0, skipped: 0 };
+    if (classes.length === 0) return { issued: 0, skipped: 0, cards: [] };
 
     // ── Entries + placings + already-issued cards ──
     const { data: entryRows, error: eErr } = await supabase
@@ -276,7 +280,7 @@ export async function issueQualificationCardsForShow(
         skippedExisting: number;
     }): Promise<IssueResult | { error: string } | "conflict"> => {
         if (plan.cards.length === 0) {
-            return { issued: 0, skipped: plan.skippedExisting };
+            return { issued: 0, skipped: plan.skippedExisting, cards: [] };
         }
 
         const codes = await assignCardCodes(
@@ -313,7 +317,7 @@ export async function issueQualificationCardsForShow(
             if ((insertError as { code?: string }).code === "23505") return "conflict";
             return { error: insertError.message };
         }
-        return { issued: rows.length, skipped: plan.skippedExisting };
+        return { issued: rows.length, skipped: plan.skippedExisting, cards: plan.cards };
     };
 
     const first = await insertPlan(buildCardIssuePlan(toInput(existing)));
