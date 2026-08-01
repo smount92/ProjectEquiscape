@@ -281,7 +281,7 @@ export default function ShowEntriesPanel({
                                                 checked={isPaid}
                                                 disabled={togglingId === owner.ownerId}
                                                 onChange={() => handleTogglePaid(owner.ownerId)}
-                                                className="size-4 accent-forest"
+                                                className="size-5 min-h-6 min-w-6 accent-forest"
                                                 aria-label={`Mark @${owner.alias} paid`}
                                             />
                                         ) : isPaid ? (

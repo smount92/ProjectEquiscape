@@ -399,7 +399,7 @@ export default function ShowSettingsForm({ show }: { show: ConsoleShow }) {
                                 type="checkbox"
                                 checked={values.isMhhQualifying}
                                 onChange={(e) => set("isMhhQualifying", e.target.checked)}
-                                className="size-4 accent-forest"
+                                className="size-5 min-h-6 min-w-6 accent-forest"
                             />
                             MHH qualifying show
                             <span className="font-normal text-muted-foreground">
