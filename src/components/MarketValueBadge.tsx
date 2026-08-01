@@ -57,7 +57,7 @@ export default function MarketValueBadge({ catalogId, compact = false }: MarketV
  if (compact) {
  return (
  <span
- className="bg-teal-50 inline-flex items-center gap-[4px] rounded-full px-[8px] py-[2px] text-xs font-semibold whitespace-nowrap text-[#10b981]"
+ className="inline-flex items-center gap-[4px] rounded-full bg-[color-mix(in_srgb,var(--color-success)_12%,transparent)] px-[8px] py-[2px] text-xs font-semibold whitespace-nowrap text-[var(--color-success)]"
  title={`${price.volume} sale${price.volume !== 1 ?"s" :""} — Avg: ${formatCurrency(price.average)}`}
  >
  📈 {formatCurrency(price.lowest)}

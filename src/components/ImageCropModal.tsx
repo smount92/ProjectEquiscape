@@ -71,11 +71,14 @@ export default function ImageCropModal({
  const offsetX = (containerRect.width - displayW) / 2;
  const offsetY = (containerRect.height - displayH) / 2;
 
- let cropW = displayW * 0.8;
- let cropH = displayH * 0.8;
+ // Default to the FULL frame (100%) so "Apply Crop" without touching
+ // anything is lossless — the old 80% default silently shaved the
+ // edges off every photo whose owner just clicked through.
+ let cropW = displayW;
+ let cropH = displayH;
 
  if (aspectRatio) {
- // Fit to aspect ratio within the 80% region
+ // Fit to aspect ratio within the full frame
  if (cropW / cropH > aspectRatio) {
  cropW = cropH * aspectRatio;
  } else {
@@ -269,7 +272,8 @@ export default function ImageCropModal({
 
  if (!imageUrl) return null;
 
- const HANDLE_SIZE = 12;
+ // 24px handles — the old 12px targets were nearly impossible on touch.
+ const HANDLE_SIZE = 24;
 
  const handles = [
  { key:"nw", cursor:"nwse-resize", style: { top: -HANDLE_SIZE / 2, left: -HANDLE_SIZE / 2 } },
@@ -408,8 +412,8 @@ export default function ImageCropModal({
  right: 8,
  padding:"4px 8px",
  background:"rgba(0, 0, 0, 0.7)",
- color:"rgba(255, 255, 255, 0.8)",
- fontSize:"11px",
+ color:"rgba(255, 255, 255, 0.9)",
+ fontSize:"12px",
  borderRadius:"var(--radius-sm)",
  fontFamily:"monospace",
  pointerEvents:"none",

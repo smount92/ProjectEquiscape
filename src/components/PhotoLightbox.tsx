@@ -29,22 +29,44 @@ export function swipeAction(
  return dx < 0 ? "next" : "prev";
 }
 
+/** Zoom factor a double-tap toggles to; pinch can go a bit past it. */
+const DOUBLE_TAP_ZOOM = 2;
+const MAX_ZOOM = 3;
+const DOUBLE_TAP_MS = 300;
+
 export default function PhotoLightbox({ images, initialIndex, onClose }: PhotoLightboxProps) {
  const [currentIndex, setCurrentIndex] = useState(initialIndex);
  const overlayRef = useRef<HTMLDivElement>(null);
  const closeButtonRef = useRef<HTMLButtonElement>(null);
+ const imgRef = useRef<HTMLImageElement>(null);
  // Swipe tracking (pointer events, so touch and pen both work).
  const pointerStart = useRef<{ x: number; y: number } | null>(null);
  // A swipe must not ALSO count as the overlay tap that closes.
  const suppressClick = useRef(false);
 
+ // ── Zoom & pan (double-tap toggles 2×; pinch zooms continuously) ──
+ const [zoom, setZoom] = useState(1);
+ const [pan, setPan] = useState({ x: 0, y: 0 });
+ const lastTapAt = useRef(0);
+ // All pointers currently down on the overlay — two of them = a pinch.
+ const activePointers = useRef(new Map<number, { x: number; y: number }>());
+ const pinchStart = useRef<{ dist: number; zoom: number } | null>(null);
+ const panStart = useRef<{ x: number; y: number; panX: number; panY: number } | null>(null);
+
+ const resetZoom = useCallback(() => {
+ setZoom(1);
+ setPan({ x: 0, y: 0 });
+ }, []);
+
  const goNext = useCallback(() => {
  setCurrentIndex((prev) => (prev + 1) % images.length);
- }, [images.length]);
+ resetZoom();
+ }, [images.length, resetZoom]);
 
  const goPrev = useCallback(() => {
  setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
- }, [images.length]);
+ resetZoom();
+ }, [images.length, resetZoom]);
 
  // Keyboard navigation + focus trap (Tab loops inside the dialog,
  // matching the dialog primitive's behavior).
@@ -104,7 +126,7 @@ export default function PhotoLightbox({ images, initialIndex, onClose }: PhotoLi
  ref={overlayRef}
  className="lightbox-overlay touch-none"
  onClick={() => {
- // A finished swipe ends in a click on the overlay — eat it.
+ // A finished swipe/pan ends in a click on the overlay — eat it.
  if (suppressClick.current) {
  suppressClick.current = false;
  return;
@@ -112,12 +134,76 @@ export default function PhotoLightbox({ images, initialIndex, onClose }: PhotoLi
  onClose();
  }}
  onPointerDown={(e) => {
+ activePointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+ const pointers = [...activePointers.current.values()];
+ if (pointers.length === 2) {
+ // Second finger down → this is a pinch, not a swipe/pan.
+ pointerStart.current = null;
+ panStart.current = null;
+ pinchStart.current = {
+ dist: Math.hypot(pointers[0].x - pointers[1].x, pointers[0].y - pointers[1].y),
+ zoom,
+ };
+ return;
+ }
+ if (zoom > 1) {
+ // Zoomed: a single-finger drag pans the photo.
+ panStart.current = { x: e.clientX, y: e.clientY, panX: pan.x, panY: pan.y };
+ return;
+ }
  pointerStart.current = { x: e.clientX, y: e.clientY };
  }}
+ onPointerMove={(e) => {
+ if (activePointers.current.has(e.pointerId)) {
+ activePointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+ }
+ // Pinch: scale from the starting finger distance, clamped.
+ if (pinchStart.current && activePointers.current.size >= 2) {
+ const pointers = [...activePointers.current.values()];
+ const dist = Math.hypot(pointers[0].x - pointers[1].x, pointers[0].y - pointers[1].y);
+ if (pinchStart.current.dist > 0) {
+ const next = Math.min(
+ MAX_ZOOM,
+ Math.max(1, (pinchStart.current.zoom * dist) / pinchStart.current.dist),
+ );
+ setZoom(next);
+ if (next === 1) setPan({ x: 0, y: 0 });
+ }
+ return;
+ }
+ // Pan while zoomed.
+ if (panStart.current) {
+ const dx = e.clientX - panStart.current.x;
+ const dy = e.clientY - panStart.current.y;
+ if (Math.abs(dx) > 3 || Math.abs(dy) > 3) suppressClick.current = true;
+ setPan({ x: panStart.current.panX + dx, y: panStart.current.panY + dy });
+ }
+ }}
  onPointerUp={(e) => {
+ activePointers.current.delete(e.pointerId);
+ if (pinchStart.current) {
+ if (activePointers.current.size < 2) {
+ pinchStart.current = null;
+ // Snap back to 1:1 from a near-1 pinch.
+ setZoom((z) => {
+ if (z < 1.15) {
+ setPan({ x: 0, y: 0 });
+ return 1;
+ }
+ return z;
+ });
+ // The tap that ends a pinch must not close the lightbox.
+ suppressClick.current = true;
+ }
+ return;
+ }
+ if (panStart.current) {
+ panStart.current = null;
+ return;
+ }
  const start = pointerStart.current;
  pointerStart.current = null;
- if (!start || images.length <= 1) return;
+ if (!start || images.length <= 1 || zoom > 1) return;
  const action = swipeAction(e.clientX - start.x, e.clientY - start.y);
  if (action) {
  suppressClick.current = true;
@@ -125,8 +211,11 @@ export default function PhotoLightbox({ images, initialIndex, onClose }: PhotoLi
  else goPrev();
  }
  }}
- onPointerCancel={() => {
+ onPointerCancel={(e) => {
+ activePointers.current.delete(e.pointerId);
+ if (activePointers.current.size < 2) pinchStart.current = null;
  pointerStart.current = null;
+ panStart.current = null;
  }}
  role="dialog"
  aria-modal="true"
@@ -159,10 +248,46 @@ export default function PhotoLightbox({ images, initialIndex, onClose }: PhotoLi
  {/* Image */}
  {/* eslint-disable-next-line @next/next/no-img-element */}
  <img
+ ref={imgRef}
  src={current.url}
  alt={current.label || `Photo ${currentIndex + 1}`}
  className="lightbox-image"
- onClick={(e) => e.stopPropagation()}
+ style={
+ zoom > 1
+ ? { transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`, cursor:"grab" }
+ : undefined
+ }
+ onClick={(e) => {
+ e.stopPropagation();
+ // stopPropagation means the overlay's click handler never runs
+ // for taps on the photo — clear a swipe/pan flag HERE too, or a
+ // swipe ending on the image strands it and silently eats the
+ // next background tap (the close gesture).
+ const wasSuppressed = suppressClick.current;
+ suppressClick.current = false;
+ if (wasSuppressed) return;
+ // Double-tap toggles 2× zoom centered on the tapped point.
+ const now = Date.now();
+ if (now - lastTapAt.current < DOUBLE_TAP_MS) {
+ lastTapAt.current = 0;
+ if (zoom > 1) {
+ resetZoom();
+ } else {
+ const rect = imgRef.current?.getBoundingClientRect();
+ if (rect) {
+ const cx = rect.left + rect.width / 2;
+ const cy = rect.top + rect.height / 2;
+ setZoom(DOUBLE_TAP_ZOOM);
+ setPan({
+ x: (cx - e.clientX) * DOUBLE_TAP_ZOOM,
+ y: (cy - e.clientY) * DOUBLE_TAP_ZOOM,
+ });
+ }
+ }
+ } else {
+ lastTapAt.current = now;
+ }
+ }}
  draggable={false}
  />
 

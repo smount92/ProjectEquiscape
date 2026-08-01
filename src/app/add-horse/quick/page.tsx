@@ -21,20 +21,12 @@ import FocusLayout from"@/components/layouts/FocusLayout";
 import PageMasthead from"@/components/layouts/PageMasthead";
 import { Button } from "@/components/ui/button";
 import { track } from "@/lib/analytics";
+import { CONDITION_GRADES } from "@/lib/conditionGrades";
 
 const FINISH_TYPES = ["OF","Custom","Artist Resin"];
-const CONDITION_GRADES = [
-"Mint",
-"Near Mint",
-"Excellent",
-"Very Good",
-"Good",
-"Body Quality",
-"Fair",
-"Poor",
-"Play Grade",
-"Not Graded",
-];
+// Grade values come from the shared module (single source of truth with
+// Add Horse and Edit) — Quick Add shows the short names only.
+const CONDITION_VALUES = CONDITION_GRADES.map((g) => g.value);
 
 interface RecentAdd {
  id: string;
@@ -63,6 +55,11 @@ export default function QuickAddPage() {
  const [isPublic, setIsPublic] = useState(true);
  const [photo, setPhoto] = useState<{ file: File; previewUrl: string } | null>(null);
  const [photoNote, setPhotoNote] = useState<string | null>(null);
+ // Above-the-fold success confirmation (the only feedback used to be the
+ // below-fold "Recently Added" list) + double-tap guard: after a success
+ // the Add button stays disabled until something on the form changes.
+ const [justAdded, setJustAdded] = useState<{ id: string; name: string; hasPhoto: boolean } | null>(null);
+ const [addedSignature, setAddedSignature] = useState<string | null>(null);
  const [userTier, setUserTier] = useState<UserTier>("free");
  const [watermarkEnabled, setWatermarkEnabled] = useState(false);
  const [userAlias, setUserAlias] = useState("");
@@ -141,6 +138,19 @@ export default function QuickAddPage() {
  }
  };
 
+ /** One string per distinct form state — used to keep the Add button
+  * disabled after a success until the user actually changes something
+  * (guards the accidental second tap that created duplicate horses). */
+ const formSignature = JSON.stringify({
+ c: selectedCatalog?.id ?? null,
+ n: customName.trim(),
+ f: finishType,
+ g: conditionGrade,
+ col: collectionId,
+ p: isPublic,
+ ph: photo?.previewUrl ?? null,
+ });
+
  const handleAdd = async () => {
  setIsAdding(true);
  setError(null);
@@ -190,6 +200,27 @@ export default function QuickAddPage() {
  ].slice(0, 10),
  );
 
+ // Success is confirmed at the top of the form (not only in the
+ // below-fold list), and the button locks until the form changes.
+ setJustAdded({ id: result.horseId!, name: result.horseName!, hasPhoto });
+ // Lock against the form state as it will look AFTER the clears
+ // below (name consumed, photo consumed) so an unchanged form
+ // can't be double-submitted.
+ setAddedSignature(
+ JSON.stringify({
+ c: selectedCatalog?.id ?? null,
+ n:"",
+ f: finishType,
+ g: conditionGrade,
+ col: collectionId,
+ p: isPublic,
+ ph: null,
+ }),
+ );
+ // Custom-entry name is consumed; the catalog selection is kept on
+ // purpose — it feeds"Duplicate as New Finish".
+ setCustomName("");
+
  // Don't clear catalog selection — supports"Duplicate as New"
  } catch {
  setError("An unexpected error occurred.");
@@ -224,7 +255,28 @@ export default function QuickAddPage() {
    backHref="/dashboard"
    backLabel="Dashboard"
   />
- <div className="animate-fade-in-up mx-auto max-w-[640]">
+ <div className="animate-fade-in-up mx-auto max-w-[640px]">
+ {/* Above-the-fold success confirmation */}
+ {justAdded && (
+ <div
+ className="border-success/40 bg-success/10 mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border px-4 py-3 text-sm"
+ role="status"
+ aria-live="polite"
+ >
+ <span className="font-semibold text-forest">✅ {justAdded.name} added to your stable</span>
+ <span className="text-muted-foreground text-xs">
+ {justAdded.hasPhoto
+ ?"Show-ready — public with a photo."
+ :"Add a photo before entering a show."}
+ </span>
+ <Link
+ href={`/stable/${justAdded.id}`}
+ className="ml-auto font-semibold text-forest hover:underline"
+ >
+ View →
+ </Link>
+ </div>
+ )}
  <div className="bg-card border-input rounded-lg border p-8 shadow-md transition-all">
  {/* Catalog Search */}
  <div className="mb-6">
@@ -292,7 +344,7 @@ export default function QuickAddPage() {
  id="quick-condition"
  title="Select condition grade"
  >
- {CONDITION_GRADES.map((c) => (
+ {CONDITION_VALUES.map((c) => (
  <option key={c} value={c}>
  {c}
  </option>
@@ -409,10 +461,15 @@ export default function QuickAddPage() {
  <div className="flex flex-wrap items-center gap-4">
  <Button
  onClick={handleAdd}
- disabled={isAdding || (!selectedCatalog && !customName.trim())}
+ disabled={
+ isAdding ||
+ (!selectedCatalog && !customName.trim()) ||
+ // Just added exactly this — change something (or Duplicate) first.
+ formSignature === addedSignature
+ }
  id="quick-add-submit"
  >
- {isAdding ?"Adding…" :"🐴 Add to Stable"}
+ {isAdding ?"Adding…" : formSignature === addedSignature ?"✅ Added" :"🐴 Add to Stable"}
  </Button>
  {selectedCatalog && recentAdds.length > 0 && (
  <Button variant="outline" size="wide"
@@ -440,24 +497,24 @@ export default function QuickAddPage() {
  {recentAdds.map((item) => (
  <div
  key={item.id}
- className="border-input rounded-lg-item mt-8 border bg-card p-6"
+ className="border-input mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border bg-card px-4 py-3 first:mt-0"
  >
- <span>✅ {item.name}</span>
- <span className="text-muted-foreground">
+ <span className="font-semibold">✅ {item.name}</span>
+ <span className="text-muted-foreground text-sm">
  {item.finish} · {item.condition} — {timeSince(item.timestamp)}
  </span>
- <span className="text-muted-foreground block text-xs">
+ <Button asChild variant="outline" className="ml-auto px-4 text-xs"><Link
+ href={`/stable/${item.id}`}
+ >
+ View →
+ </Link></Button>
+ <span className="text-muted-foreground block w-full text-xs">
  {!item.isPublic
  ?"Private — set it public to enter shows."
  : item.hasPhoto
  ?"Show-ready — public with a photo."
  :"Add a photo before entering a show."}
  </span>
- <Button asChild variant="outline" className="px-4 text-xs"><Link
- href={`/stable/${item.id}`}
- >
- View →
- </Link></Button>
  </div>
  ))}
  <Button variant="outline" size="wide" className="mt-4 w-full"

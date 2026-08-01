@@ -50,7 +50,9 @@ function getTierClasses(tier: number): string {
 }
 
 export default function TrophyCase({ badges }: TrophyCaseProps) {
- const [hoveredBadge, setHoveredBadge] = useState<string | null>(null);
+ // Click/tap/keyboard-toggled — the old hover-only tooltip meant badge
+ // meanings were unreachable on touch (and hidden entirely <480px).
+ const [openBadge, setOpenBadge] = useState<string | null>(null);
 
  if (badges.length === 0) {
  return (
@@ -82,27 +84,29 @@ export default function TrophyCase({ badges }: TrophyCaseProps) {
  </h4>
  <div className="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-4 max-[480px]:grid-cols-[repeat(auto-fill,minmax(90px,1fr))] max-[480px]:gap-2">
  {grouped.get(category)!.map((badge) => (
- <div
+ <button
  key={badge.id}
- className={`brass-plaque relative cursor-default rounded-lg border p-4 text-center transition-transform hover:-translate-y-0.5 max-[480px]:p-2 ${getTierClasses(badge.tier)}`}
- onMouseEnter={() => setHoveredBadge(badge.id)}
- onMouseLeave={() => setHoveredBadge(null)}
+ type="button"
+ className={`brass-plaque relative cursor-pointer rounded-lg border p-4 text-center transition-transform hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--brass-hi,#E8C878)] max-[480px]:p-2 ${getTierClasses(badge.tier)}`}
+ onClick={() => setOpenBadge((prev) => (prev === badge.id ? null : badge.id))}
+ aria-expanded={openBadge === badge.id}
+ aria-label={`${badge.name} badge — ${openBadge === badge.id ?"hide" :"show"} what it means`}
  >
- <span className="mb-1 block text-[2rem] drop-shadow-[0_3px_3px_rgba(0,0,0,0.35)] max-[480px]:text-2xl">{badge.icon}</span>
+ <span className="mb-1 block text-[2rem] drop-shadow-[0_3px_3px_rgba(0,0,0,0.35)] max-[480px]:text-2xl" aria-hidden="true">{badge.icon}</span>
  <span className="text-engraved-brass block font-serif text-xs font-bold tracking-[0.06em] uppercase">
  {badge.name}
  </span>
  <span className="text-engraved-brass mt-0.5 block text-xs">
  {formatDate(badge.earnedAt)}
  </span>
- {hoveredBadge === badge.id && (
- <div className="[&_p]:text-[var(--paper-lit-ink-soft)] [&>span]:text-[var(--paper-lit-ink-soft)] pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-50 max-w-[260px] min-w-[200px] -translate-x-1/2 animate-[fadeInUp_0.15s_ease] rounded-md border border-[var(--ledger-border)] bg-[var(--paper-lit)] px-4 py-2 text-left text-[var(--paper-lit-ink)] shadow-lg max-[480px]:hidden [&_p]:m-0 [&_p]:mb-1 [&_p]:text-xs [&_p]:leading-snug [&_strong]:mb-1 [&_strong]:block [&_strong]:text-sm [&>span]:text-xs">
+ {openBadge === badge.id && (
+ <div className="[&_p]:text-[var(--paper-lit-ink-soft)] [&>span]:text-[var(--paper-lit-ink-soft)] pointer-events-none absolute bottom-[calc(100%+8px)] left-1/2 z-50 max-w-[min(260px,80vw)] min-w-[200px] -translate-x-1/2 animate-[fadeInUp_0.15s_ease] rounded-md border border-[var(--ledger-border,#CBC3A4)] bg-[var(--paper-lit)] px-4 py-2 text-left text-[var(--paper-lit-ink)] shadow-lg [&_p]:m-0 [&_p]:mb-1 [&_p]:text-xs [&_p]:leading-snug [&_strong]:mb-1 [&_strong]:block [&_strong]:text-sm [&>span]:text-xs">
  <strong>{badge.name}</strong>
  <p>{badge.description}</p>
  <span>Earned {formatDate(badge.earnedAt)}</span>
  </div>
  )}
- </div>
+ </button>
  ))}
  </div>
  </div>

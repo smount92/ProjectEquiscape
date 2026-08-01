@@ -1224,6 +1224,42 @@ p {
   }
 }
 
+/* Edit page Photo Studio slot. Only the .drag-active / .has-preview
+   modifiers existed — the base zone rendered as an unstyled block, so
+   the dashed dropzone look (matching add-horse) is restored here. */
+.image-upload-zone {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 140px;
+  overflow: hidden;
+  cursor: pointer;
+  text-align: center;
+  border: 2px dashed var(--input);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  transition: border-color var(--transition-fast), background var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.image-upload-zone:hover,
+.image-upload-zone:focus-visible {
+  border-color: var(--color-forest, #2C5545);
+  background: rgba(44, 85, 69, 0.05);
+}
+
+/* The edit page's preview <img> carries no utility classes — constrain
+   it to the slot so a portrait photo can't blow the layout out. */
+.image-upload-zone img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
 .image-upload-zone.drag-active {
   border-color: var(--primary);
   background: rgba(44, 85, 69, 0.08);
@@ -1233,6 +1269,25 @@ p {
 .image-upload-zone.has-preview {
   border-style: solid;
   border-color: var(--border);
+}
+
+/* Existing extras / flaw thumbnails on the edit page — the desktop base
+   rule was missing (only the <768px 80px override existed below). */
+.extras-preview-item {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  overflow: hidden;
+  border: 1px solid var(--input);
+  border-radius: var(--radius-sm);
+  background: var(--muted);
+}
+
+.extras-preview-item img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 @media (max-width: 768px) {
@@ -1271,6 +1326,15 @@ p {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   margin-top: var(--space-xs);
+}
+
+/* Quick Add's three-selector row (Finish / Condition / Collection).
+   The base grid rule was missing — only this <600px override existed,
+   so on desktop the selectors stacked as full-width blocks. */
+.quick-add-selectors {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-md);
 }
 
 @media (max-width: 600px) {
@@ -1646,6 +1710,10 @@ p {
   display: flex;
   align-items: center;
   justify-content: center;
+  /* Phones: the card is taller than small viewports — give the overlay
+     breathing room and let it scroll instead of clipping the actions. */
+  padding: var(--space-md);
+  overflow-y: auto;
   background: rgba(10, 10, 18, 0.9);
   animation: fadeInUp 0.3s ease forwards;
 }
@@ -2584,7 +2652,8 @@ p {
 .ledger-card th,
 .ledger-paper th {
   font-family: var(--serif-display);
-  font-size: 0.68rem;
+  /* a11y floor: was 0.68rem — column headers must be legible */
+  font-size: 0.8125rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   text-align: left;
@@ -2642,7 +2711,107 @@ p {
   color: #9B3028;
   rotate: 2deg;
 }
+
+/* ── Hoofprint provenance timeline ────────────────────────────────
+   The stage badge is a rubber-stamp chip (stamp recipe, toned per
+   life stage); the ownership chain renders as ledger chips with the
+   CURRENT holder ringed in forest. Token-routed throughout so
+   Lamplight recolors everything for free. */
+.hoofprint-stage-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  rotate: -2deg;
+  border: 2px solid var(--color-forest, #2C5545);
+  border-radius: 4px;
+  color: var(--color-forest, #2C5545);
+  background: color-mix(in srgb, var(--color-forest, #2C5545) 7%, transparent);
+  font-family: var(--serif-display);
+  /* a11y floor — status stamps must be legible */
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+/* workbench stages read saddle-leather, not forest */
+.hoofprint-stage-badge.stage-blank,
+.hoofprint-stage-badge.stage-stripped,
+.hoofprint-stage-badge.stage-in_progress {
+  border-color: var(--color-saddle, #8B5A2B);
+  color: var(--color-saddle, #8B5A2B);
+  background: color-mix(in srgb, var(--color-saddle, #8B5A2B) 8%, transparent);
+}
+/* parked (off-platform sale) is a caution state */
+.hoofprint-stage-badge.stage-parked {
+  border-color: var(--color-warning, #B8860B);
+  color: var(--color-warning, #B8860B);
+  background: color-mix(in srgb, var(--color-warning, #B8860B) 8%, transparent);
+}
+
+/* Ownership chain chips (chain of custody) */
+.ownership-link {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  padding: 2px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--card);
+  color: var(--color-forest, #2C5545);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+.ownership-link:hover {
+  border-color: var(--color-forest, #2C5545);
+  text-decoration: underline;
+}
+.ownership-link.current {
+  border-color: var(--color-forest, #2C5545);
+  box-shadow: 0 0 0 2px var(--color-forest-glow, rgba(44, 85, 69, 0.15)),
+    inset 0 0 0 1px var(--color-forest, #2C5545);
+  font-weight: 700;
+}
+/* the small "(trade)/(purchase)" gloss inside a chip — readable size */
+.ownership-link .ownership-acq {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--muted-foreground);
+}
+/* previous owners who never joined the platform: an honest labeled
+   chip, not a bare warning border */
+.ownership-offplatform {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 2px 10px;
+  border: 1px dashed var(--color-border-tan, #b8a484);
+  border-radius: var(--radius-full);
+  background: var(--muted);
+  color: var(--secondary-foreground);
+  font-size: 0.8125rem;
+}
+.ownership-offplatform .ownership-acq {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
 } /* end @layer components (ledger / stamp) */
+
+/* Simple Mode: stamps sit straight (mirrors the .stamp strip). */
+[data-simple-mode="true"] .hoofprint-stage-badge {
+  rotate: none;
+  background: transparent;
+}
+/* Lamplight: the saddle ramp isn't night-flipped globally (leather uses
+   it as a material), so brighten the workbench stamp for contrast. */
+html[data-theme="night"] .hoofprint-stage-badge.stage-blank,
+html[data-theme="night"] .hoofprint-stage-badge.stage-stripped,
+html[data-theme="night"] .hoofprint-stage-badge.stage-in_progress {
+  border-color: #C99A63;
+  color: #C99A63;
+  background: color-mix(in srgb, #C99A63 10%, transparent);
+}
 
 /* ── Green strap stats bar (profile / landing) ───────────────────── */
 @layer components {

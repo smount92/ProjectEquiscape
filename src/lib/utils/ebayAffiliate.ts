@@ -6,6 +6,18 @@
  * @param maker - e.g. "Breyer"
  * @param itemNumber - e.g. "712053"
  */
+
+/**
+ * rel for every affiliate anchor: `sponsored` is Google's required
+ * marker for paid/affiliate links; noopener/noreferrer are the usual
+ * target=_blank hygiene. Keep link markup and URL construction in one
+ * module so a call site can't ship one without the other.
+ */
+export const EBAY_AFFILIATE_REL = "noopener noreferrer sponsored";
+
+/** Plain-language disclosure to render near any affiliate link (FTC). */
+export const EBAY_AFFILIATE_DISCLOSURE =
+    "MHH may earn a commission from eBay links.";
 export function buildEbaySearchUrl(
     title: string,
     maker?: string | null,
