@@ -17,22 +17,31 @@ function safeInternalPath(value: string | string[] | undefined): string | null {
  return raw;
 }
 
+function first(value: string | string[] | undefined): string | undefined {
+ return Array.isArray(value) ? value[0] : value;
+}
+
 export default async function SuggestNewEntryPage({
  searchParams,
 }: {
  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+ const params = await searchParams;
+ const prefill = first(params.prefill);
+ const redirectTo = safeInternalPath(params.redirectTo);
  const supabase = await createClient();
  const {
  data: { user },
  } = await supabase.auth.getUser();
- const redirectTo = safeInternalPath((await searchParams).redirectTo);
  // /catalog/* is on the middleware's public list, so the login wall never
  // appends redirectTo for this page — carry the FULL intended URL ourselves
  // (house idiom, see /discover /feed) so "Suggest a new entry?" survives
- // the login round-trip, search context and all.
+ // the login round-trip, search context, prefill and all.
  if (!user) {
- const self = "/catalog/suggestions/new" + (redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : "");
+ const qs = new URLSearchParams();
+ if (prefill) qs.set("prefill", prefill);
+ if (redirectTo) qs.set("redirectTo", redirectTo);
+ const self = "/catalog/suggestions/new" + (qs.size ? `?${qs.toString()}` : "");
  redirect("/login?redirectTo=" + encodeURIComponent(self));
  }
 
@@ -51,7 +60,7 @@ export default async function SuggestNewEntryPage({
   </p>
   )}
   <div className="bg-card border-input rounded-lg border p-8 shadow-md transition-all">
-  <SuggestNewEntryForm />
+  <SuggestNewEntryForm initialTitle={(prefill ??"").slice(0, 200)} />
   </div>
  </FocusLayout>
  );

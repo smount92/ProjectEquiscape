@@ -16,6 +16,15 @@ import { getPublicImageUrls } from "@/lib/utils/storage";
 
 const REVALIDATE = 3600;
 
+/**
+ * Cache tag on every reference-page read below. Approving a catalog
+ * suggestion calls revalidateTag(REFERENCE_PAGES_CACHE_TAG, "max")
+ * (catalog-suggestions.ts) so corrections show up immediately instead of
+ * after the hour-long revalidate window. One coarse tag on purpose:
+ * approvals are rare, correctness beats cache-partition finesse.
+ */
+export const REFERENCE_PAGES_CACHE_TAG = "reference-pages";
+
 export interface CatalogRow {
     id: string;
     item_type: string;
@@ -39,7 +48,7 @@ export const resolveReferenceItem = unstable_cache(
         return (data as CatalogRow | null) ?? null;
     },
     ["reference:item"],
-    { revalidate: REVALIDATE },
+    { revalidate: REVALIDATE, tags: [REFERENCE_PAGES_CACHE_TAG] },
 );
 
 export interface ReferenceListing {
@@ -83,7 +92,7 @@ export const getActiveListingsForCatalog = unstable_cache(
         }));
     },
     ["reference:listings"],
-    { revalidate: REVALIDATE },
+    { revalidate: REVALIDATE, tags: [REFERENCE_PAGES_CACHE_TAG] },
 );
 
 export interface ReferencePhoto {
@@ -125,7 +134,7 @@ export const getCatalogPhotos = unstable_cache(
         }));
     },
     ["reference:photos-v2"],
-    { revalidate: REVALIDATE },
+    { revalidate: REVALIDATE, tags: [REFERENCE_PAGES_CACHE_TAG] },
 );
 
 export interface ChildRelease {
@@ -166,7 +175,7 @@ export const getChildReleases = unstable_cache(
         }));
     },
     ["reference:child-releases"],
-    { revalidate: REVALIDATE },
+    { revalidate: REVALIDATE, tags: [REFERENCE_PAGES_CACHE_TAG] },
 );
 
 /**
@@ -185,7 +194,7 @@ export const getCatalogCounts = unstable_cache(
         };
     },
     ["reference:counts"],
-    { revalidate: REVALIDATE },
+    { revalidate: REVALIDATE, tags: [REFERENCE_PAGES_CACHE_TAG] },
 );
 
 export interface ReferenceMarket {
@@ -213,5 +222,5 @@ export const getReferenceMarket = unstable_cache(
         };
     },
     ["reference:market"],
-    { revalidate: REVALIDATE },
+    { revalidate: REVALIDATE, tags: [REFERENCE_PAGES_CACHE_TAG] },
 );

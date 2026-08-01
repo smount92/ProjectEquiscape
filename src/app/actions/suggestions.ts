@@ -6,9 +6,15 @@ import { getAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 
 /**
- * Submit a suggestion for a missing catalog entry.
- * Goes to admin review queue.
- * @param data - Suggestion details: maker, title, description
+ * @deprecated LEGACY — do not add new callers. This writes to
+ * `database_suggestions`, whose approval path guesses the maker from free
+ * text, can orphan releases (no parent_id), logs no changelog entry, and
+ * awards no curator credit. New suggestion UIs must use
+ * `createSuggestion` in catalog-suggestions.ts (the catalog_suggestions
+ * pipeline). The last UI caller (SuggestReferenceModal) was retired in
+ * Wave 5a-B; this stays only so any in-flight client bundle doesn't 500,
+ * and `reviewSuggestion` below stays so admins can drain the existing
+ * pending queue (Admin → 💡 Content, labeled "legacy queue").
  */
 export async function submitSuggestion(data: {
     suggestionType: "mold" | "release" | "resin";

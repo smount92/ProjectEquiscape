@@ -132,7 +132,7 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
     <SuggestEditModal catalogItem={catalogItem} openOnMount={suggest ==="true"} />
    ) : (
     <Button asChild><Link
-    href="/login"
+    href={`/login?redirectTo=${encodeURIComponent(`/catalog/${id}?suggest=true`)}`}
     >
     Log in to Suggest Edit
     </Link></Button>

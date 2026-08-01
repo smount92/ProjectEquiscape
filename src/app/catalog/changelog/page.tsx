@@ -78,18 +78,18 @@ export default async function ChangelogPage() {
      {entry.change_summary}
     </p>
     <p className="text-forest">
-     Contributed by{""}
+     Contributed by{" "}
      <Link
      href={`/profile/${entry.contributor_alias}`}
      className="text-forest font-semibold"
      >
      @{entry.contributor_alias}
      </Link>
-     {" ·"}
+     {" · "}
      {timeAgo}
      {entry.catalog_item_id && (
      <>
-      {" ·"}
+      {" · "}
       <Link href={entryHref(entry)} className="font-semibold text-secondary-foreground hover:text-foreground">View entry →</Link>
      </>
      )}

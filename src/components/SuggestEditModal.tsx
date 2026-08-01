@@ -43,12 +43,16 @@ export default function SuggestEditModal({ catalogItem, openOnMount = false }: S
  const { toast } = useToast();
 
  const attrs = catalogItem.attributes ?? {};
+ // Pipeline plumbing, not catalog facts: the reference page hides these
+ // (reference/[maker]/[slug] filters source/source_id), so offering them
+ // as editable fields just invited corrections nobody can see.
+ const HIDDEN_ATTRIBUTES = new Set(["source", "source_id"]);
  const initialFields: FieldEdit[] = [
  { key: "title", label: "Title", original: catalogItem.title, current: catalogItem.title },
  { key: "maker", label: "Maker", original: catalogItem.maker, current: catalogItem.maker },
  { key: "scale", label: "Scale", original: catalogItem.scale ?? "", current: catalogItem.scale ?? "" },
  ...Object.entries(attrs)
- .filter(([, v]) => v != null)
+ .filter(([k, v]) => v != null && !HIDDEN_ATTRIBUTES.has(k))
  .map(([k, v]) => ({
   key: k,
   label: k.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
