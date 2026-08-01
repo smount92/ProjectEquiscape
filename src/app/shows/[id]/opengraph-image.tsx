@@ -124,13 +124,26 @@ export default async function OpengraphImage({ params }: { params: Promise<{ id:
 
     const isLive = show.mode === "live";
     const dateIso = (isLive ? show.show_date : show.entries_close_at) as string | null;
+    // Live show dates are calendar dates (UTC keeps the printed day
+    // honest). Entries-close is an instant: a static image can't know
+    // the viewer's zone, so print the time and NAME the zone (UTC) —
+    // never a bare wall-clock time.
     const dateLabel = dateIso
-        ? new Date(dateIso).toLocaleDateString("en-US", {
-              month: "long",
-              day: "numeric",
-              year: "numeric",
-              timeZone: "UTC",
-          })
+        ? isLive
+            ? new Date(dateIso).toLocaleDateString("en-US", {
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
+                  timeZone: "UTC",
+              })
+            : `${new Date(dateIso).toLocaleString("en-US", {
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
+                  hour: "numeric",
+                  minute: "2-digit",
+                  timeZone: "UTC",
+              })} UTC`
         : null;
 
     return new ImageResponse(
