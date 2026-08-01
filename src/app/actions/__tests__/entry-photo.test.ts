@@ -97,7 +97,7 @@ describe("entry-photo — addShowPhotoToHorse", () => {
         expect(q.insert).not.toHaveBeenCalled();
     });
 
-    it("attaches the photo under the Other angle and returns it for the grid", async () => {
+    it("attaches the photo under the Show_Photo angle and returns it for the grid", async () => {
         mockStorage();
         q.single
             .mockResolvedValueOnce({ data: { id: HORSE }, error: null }) // ownership
@@ -110,12 +110,12 @@ describe("entry-photo — addShowPhotoToHorse", () => {
         expect(result.photo).toEqual({
             id: "img-1",
             publicUrl: `https://cdn.test/horse-images/${PATH}`,
-            angleProfile: "Other",
+            angleProfile: "Show_Photo",
         });
         expect(q.insert).toHaveBeenCalledWith({
             horse_id: HORSE,
             image_url: `https://cdn.test/horse-images/${PATH}`,
-            angle_profile: "Other",
+            angle_profile: "Show_Photo",
         });
     });
 

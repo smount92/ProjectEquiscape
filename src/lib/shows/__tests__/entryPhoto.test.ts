@@ -10,10 +10,10 @@ const HORSE = "123e4567-e89b-42d3-a456-426614174000";
 
 describe("entryPhoto — show-photo constants", () => {
     it("files show photos under an existing angle_profile enum member", () => {
-        // angle_profile is a constrained Postgres enum (no Show_Photo
-        // member; migrations out of scope) — "Other" is the neutral
+        // Dedicated enum member since migration 140 — pre-migration
+        // uploads were filed under "Other" and no longer count toward
         // member no upload flow writes today.
-        expect(SHOW_PHOTO_ANGLE).toBe("Other");
+        expect(SHOW_PHOTO_ANGLE).toBe("Show_Photo");
     });
 
     it("caps at 5 per horse — the flaw-photo precedent", () => {

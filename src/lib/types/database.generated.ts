@@ -4736,6 +4736,18 @@ export type Database = {
           id: string
         }[]
       }
+      get_public_horse_cards: {
+        Args: { p_horse_id: string }
+        Returns: {
+          class_name: string
+          code: string
+          earned_place: number
+          issued_at: string
+          show_title: string
+          show_year: number
+          status: string
+        }[]
+      }
       get_public_passport: {
         Args: { p_horse_id: string }
         Returns: {
@@ -4767,7 +4779,7 @@ export type Database = {
         Args: never
         Returns: {
           alias_name: string
-          supporter_since: string | null
+          supporter_since: string
         }[]
       }
       get_user_tier: { Args: never; Returns: string }
@@ -4886,6 +4898,7 @@ export type Database = {
         | "Other"
         | "Belly_Makers_Mark"
         | "extra_detail"
+        | "Show_Photo"
       finish_type: "OF" | "Custom" | "Artist Resin"
     }
     CompositeTypes: {
@@ -5027,6 +5040,7 @@ export const Constants = {
         "Other",
         "Belly_Makers_Mark",
         "extra_detail",
+        "Show_Photo",
       ],
       finish_type: ["OF", "Custom", "Artist Resin"],
     },

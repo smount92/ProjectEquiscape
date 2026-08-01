@@ -12,9 +12,8 @@
  * Show photos are FREE for every tier and capped at 5 per horse —
  * the flaw-photo precedent copied exactly (trust/show features are
  * never paywalled; the cap is the only rule). See
- * src/lib/shows/entryPhoto.ts for why the angle lands on "Other"
- * (angle_profile is a constrained enum with no Show_Photo member and
- * migrations are out of scope for this batch).
+ * src/lib/shows/entryPhoto.ts for the "Show_Photo" angle history
+ * (dedicated enum member since migration 140).
  */
 
 import { z } from "zod";
