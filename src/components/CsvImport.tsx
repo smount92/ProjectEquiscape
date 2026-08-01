@@ -4,11 +4,16 @@ import { useState, useCallback, useRef, useEffect } from"react";
 import Papa from"papaparse";
 import fuzzysort from"fuzzysort";
 import type { CsvRow, MatchResult, ReferenceMatch } from"@/lib/types/csv-import";
-import { executeBatchImport } from"@/app/actions/csv-import";
+import { executeBatchImport, getExistingHorseNames, type BatchImportResult } from"@/app/actions/csv-import";
+import {
+ validateCsvRows,
+ matchScoreLabel,
+ findDuplicateNames,
+ type CsvRowError,
+} from"@/lib/csv-import/validation";
 import { decodeHtmlEntities } from"@/lib/utils/decodeEntities";
 import { Button } from "@/components/ui/button";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DictRelease = { i: string; n: string; m: string | null; c: string | null; mn: string | null; mf: string | null };
 type DictResin = { i: string; n: string; s: string };
 interface RefDict {
@@ -79,13 +84,15 @@ export default function CsvImport() {
  const [matchResults, setMatchResults] = useState<MatchResult[]>([]);
  const [isMatching, setIsMatching] = useState(false);
  const [isImporting, setIsImporting] = useState(false);
- const [importResult, setImportResult] = useState<{
- success: boolean;
- imported?: number;
- error?: string;
- } | null>(null);
+ const [importResult, setImportResult] = useState<BatchImportResult | null>(null);
  const [dragOver, setDragOver] = useState(false);
  const [parseError, setParseError] = useState<string | null>(null);
+ // Pre-upload validation problems (spreadsheet row numbers) — shown at
+ // step 3 so bad rows never surprise the user post-import.
+ const [validationErrors, setValidationErrors] = useState<CsvRowError[]>([]);
+ // The user's current stable names for the duplicate warning.
+ const [existingNames, setExistingNames] = useState<string[]>([]);
+ const [showDupePanel, setShowDupePanel] = useState(false);
  const fileInputRef = useRef<HTMLInputElement>(null);
  const dictRef = useRef<RefDict | null>(null);
 
@@ -97,6 +104,13 @@ export default function CsvImport() {
  dictRef.current = data;
  })
  .catch((err) => console.error("[CSV] Failed to load dictionary:", err));
+ }, []);
+
+ // Fetch the user's existing horse names once — powers the dedupe warning.
+ useEffect(() => {
+ getExistingHorseNames()
+ .then(setExistingNames)
+ .catch(() => setExistingNames([]));
  }, []);
 
  // ── Step 1: File Upload ──────────────────────────────────────
@@ -199,6 +213,20 @@ export default function CsvImport() {
  return mapped;
  });
 
+ // Pre-validate BEFORE upload: finish enum, condition, prices — with the
+ // user's spreadsheet row numbers, so most errors never round-trip.
+ setValidationErrors(
+ validateCsvRows(
+ mappedRows.map((r) => ({
+ name: r.name,
+ finish_type: r.finish_type,
+ condition: r.condition,
+ purchase_price: r.purchase_price,
+ estimated_value: r.estimated_value,
+ })),
+ ),
+ );
+
  // Client-side fuzzy matching using cached dictionary
  if (!dictRef.current) {
  setParseError("Reference dictionary not loaded yet. Please wait and try again.");
@@ -298,6 +326,7 @@ export default function CsvImport() {
 
  setIsMatching(false);
  setMatchResults(results);
+ setShowDupePanel(false);
  setStep(3);
  };
 
@@ -324,28 +353,49 @@ export default function CsvImport() {
  const reviewCount = matchResults.filter((r) => r.status ==="review").length;
  const noMatchCount = matchResults.filter((r) => r.status ==="no_match").length;
 
- // Publish to feed toggle — defaults to off for batch imports
- const [publishToFeed, setPublishToFeed] = useState(false);
+ // Publish toggle — defaults ON: public horses can enter shows.
+ const [publishImported, setPublishImported] = useState(true);
+
+ // Duplicate check against the user's existing stable (case-insensitive).
+ const duplicates = findDuplicateNames(
+ matchResults.map((r) => r.customName),
+ existingNames,
+ );
 
  // ── Step 4: Import ──────────────────────────────────────────
- const handleImport = async () => {
+ const runImport = async () => {
  setIsImporting(true);
+ setShowDupePanel(false);
 
- const confirmedRows = matchResults.map((r) => ({
+ const rows = matchResults.map((r) => ({
+ rowNumber: r.rowIndex + 2, // header is spreadsheet row 1
  customName: r.customName,
  condition: (r.csvRow as Record<string, string>).condition ||"",
  finishType: (r.csvRow as Record<string, string>).finish_type ||"",
  purchasePrice: (r.csvRow as Record<string, string>).purchase_price ||"",
  estimatedValue: (r.csvRow as Record<string, string>).estimated_value ||"",
  notes: (r.csvRow as Record<string, string>).notes ||"",
- selectedMatch: r.selectedMatch,
+ catalogId: r.selectedMatch?.id ?? null,
  }));
 
- const result = await executeBatchImport(confirmedRows);
+ const result = await executeBatchImport({ rows, publish: publishImported });
  setImportResult(result);
  setIsImporting(false);
  setStep(4);
  };
+
+ const handleImport = () => {
+ if (isImporting) return;
+ // Duplicate names in the stable? Ask before importing.
+ if (duplicates.rowCount > 0 && !showDupePanel) {
+ setShowDupePanel(true);
+ return;
+ }
+ runImport();
+ };
+
+ const rowErrors = importResult?.rowErrors ?? [];
+ const importedCount = importResult?.imported ?? 0;
 
  // ── Render ──────────────────────────────────────────────────
 
@@ -363,10 +413,10 @@ export default function CsvImport() {
  key={s.num}
  className={`csv-step-dot ${step >= s.num ?"active" :""} ${step === s.num ?"current" :""}`}
  >
- <span className="bg-card border-input text-muted-foreground flex h-[36px] w-[36px] items-center justify-center rounded-full rounded-lg border border-[2px] text-sm font-bold shadow-md transition-all">
+ <span className="csv-step-number">
  {s.num}
  </span>
- <span className="text-secondary-foreground text-xs font-medium transition-all">{s.label}</span>
+ <span className="csv-step-label">{s.label}</span>
  </div>
  ))}
  </div>
@@ -391,7 +441,7 @@ export default function CsvImport() {
  onClick={() => fileInputRef.current?.click()}
  >
  <div className="mb-4 text-[3rem] opacity-[0.7]">📁</div>
- <p className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-input bg-card p-8 text-center transition-all">
+ <p className="text-center">
  Drag &amp; drop your CSV file here
  <br />
  <span className="text-forest text-sm underline">or click to browse</span>
@@ -437,7 +487,7 @@ export default function CsvImport() {
  {csvHeaders.map((header) => (
  <div
  key={header}
- className="bg-card border-input flex items-center gap-4 rounded-lg rounded-md border px-6 py-4 shadow-md transition-all"
+ className="bg-card border-input flex items-center gap-4 rounded-md border px-6 py-4 shadow-md transition-all"
  >
  <span className="text-foreground min-w-0 flex-1 overflow-hidden text-sm font-semibold text-ellipsis whitespace-nowrap">
  {header}
@@ -524,15 +574,32 @@ export default function CsvImport() {
  the matches below.
  </p>
 
+ {/* Pre-upload validation problems — caught here, before anything uploads */}
+ {validationErrors.length > 0 && (
+ <div className="border-warning/40 bg-warning/10 mb-8 rounded-md border px-6 py-4">
+ <p className="text-warning mb-2 text-sm font-bold">
+ ⚠️ {validationErrors.length} problem{validationErrors.length === 1 ?"" :"s"} found in your
+ file. These rows will be skipped unless you fix the CSV and re-upload:
+ </p>
+ <ul className="m-0 flex max-h-[160px] list-none flex-col gap-1 overflow-y-auto p-0 text-sm text-secondary-foreground">
+ {validationErrors.map((err, i) => (
+ <li key={i}>
+ <strong>Row {err.rowNumber}</strong> ({err.name}): {err.message}
+ </li>
+ ))}
+ </ul>
+ </div>
+ )}
+
  {/* Match summary badges */}
  <div className="mb-8 flex flex-wrap gap-4">
- <span className="bg-success/10 text-success border-success/30 perfect border">
- ✅ {perfectCount} perfect
+ <span className="bg-success/10 text-success border-success/30 rounded-full border px-3 py-1 text-sm font-semibold">
+ ✅ {perfectCount} strong match{perfectCount === 1 ?"" :"es"}
  </span>
- <span className="bg-success/10 text-success border-success/30 review border">
- ⚠️ {reviewCount} review
+ <span className="bg-warning/10 text-warning border-warning/30 rounded-full border px-3 py-1 text-sm font-semibold">
+ ⚠️ {reviewCount} to review
  </span>
- <span className="bg-success/10 text-success border-success/30 no-match border">
+ <span className="bg-destructive/10 text-destructive border-destructive/30 rounded-full border px-3 py-1 text-sm font-semibold">
  ❌ {noMatchCount} no match
  </span>
  </div>
@@ -545,7 +612,7 @@ export default function CsvImport() {
  className={`csv-match-card ${result.status}`}
  id={`match-row-${result.rowIndex}`}
  >
- <div className="px-6 py-6">
+ <div className="mb-3 flex items-center gap-3">
  <span className="shrink-0 text-xl">
  {result.status ==="perfect" ?"✅" : result.status ==="review" ?"⚠️" :"❌"}
  </span>
@@ -588,8 +655,8 @@ export default function CsvImport() {
  />
  <span className="flex flex-col gap-[2px]">
  <span className="text-foreground text-sm">{match.display}</span>
- <span className="text-secondary-foreground text-xs tabular-nums">
- Score: {match.score > 0 ? `+${match.score}` : match.score}
+ <span className={`text-xs font-medium ${matchScoreLabel(match.score) ==="Strong match" ?"text-success" :"text-warning"}`}>
+ {matchScoreLabel(match.score)}
  </span>
  </span>
  </label>
@@ -620,6 +687,31 @@ export default function CsvImport() {
  ))}
  </div>
 
+ {/* Duplicate warning — confirm before importing look-alike rows */}
+ {showDupePanel && duplicates.rowCount > 0 && (
+ <div className="border-warning/40 bg-warning/10 mb-6 rounded-md border px-6 py-4">
+ <p className="text-warning mb-2 text-sm font-bold">
+ ⚠️ {duplicates.rowCount} row{duplicates.rowCount === 1 ?"" :"s"} match{duplicates.rowCount === 1 ?"es" :""} horses already in your stable:
+ </p>
+ <p className="mb-3 text-sm text-secondary-foreground">
+ {duplicates.names.slice(0, 8).join(", ")}
+ {duplicates.names.length > 8 ? ` and ${duplicates.names.length - 8} more` :""}
+ </p>
+ <p className="mb-3 text-xs text-muted-foreground">
+ Importing will create a second copy of each — that&apos;s fine if you own duplicates, but
+ double-check if you already imported this file.
+ </p>
+ <div className="flex flex-wrap gap-2">
+ <Button variant="outline" size="wide" onClick={() => setShowDupePanel(false)}>
+ ← Go back and review
+ </Button>
+ <Button onClick={runImport} disabled={isImporting}>
+ Import anyway →
+ </Button>
+ </div>
+ </div>
+ )}
+
  <div className="border-input flex items-center justify-between gap-4 border-t pt-6">
  <Button variant="outline" size="wide"
  onClick={() => setStep(2)}
@@ -627,19 +719,22 @@ export default function CsvImport() {
  ← Back
  </Button>
  <div className="flex flex-col items-end gap-2">
+ {duplicates.rowCount > 0 && !showDupePanel && (
+ <span className="text-warning text-xs font-medium">
+ ⚠️ {duplicates.rowCount} row{duplicates.rowCount === 1 ?"" :"s"} match
+ {duplicates.rowCount === 1 ?"es" :""} horses already in your stable
+ </span>
+ )}
  <label
  className="flex cursor-pointer items-center gap-2 text-sm"
  >
  <input
  type="checkbox"
- checked={publishToFeed}
- onChange={(e) => setPublishToFeed(e.target.checked)}
+ checked={publishImported}
+ onChange={(e) => setPublishImported(e.target.checked)}
  />
- <span>Publish imported models to the community feed</span>
+ <span>Publish imported horses (public horses can enter shows)</span>
  </label>
- <span className="text-secondary-foreground mt-1 block text-right text-xs">
- Models without photos will be excluded regardless.
- </span>
  <Button
  onClick={handleImport}
  disabled={isImporting}
@@ -662,13 +757,57 @@ export default function CsvImport() {
  {step === 4 && (
  <div className="animate-fade-in-up mx-auto max-w-[900px]">
  {importResult?.success ? (
- <div className="text-success">
- <div className="csv-success-icon">🎉</div>
- <h2>Import Complete!</h2>
- <p className="text-secondary-foreground mb-8 text-base">
- Successfully imported <strong>{importResult.imported}</strong> model
- {importResult.imported !== 1 ?"s" :""} to your stable.
+ <div className="text-center">
+ <div className="mb-4 text-[4rem]">
+ {rowErrors.length === 0 ?"🎉" : importedCount > 0 ?"⚠️" :"❌"}
+ </div>
+ <h2>
+ {rowErrors.length === 0
+ ?"Import Complete!"
+ : importedCount > 0
+ ?"Import Finished — With Skipped Rows"
+ :"Nothing Was Imported"}
+ </h2>
+ <p className="text-secondary-foreground mb-4 text-base">
+ Imported <strong>{importedCount}</strong> model
+ {importedCount !== 1 ?"s" :""} to your stable
+ {rowErrors.length > 0 ? (
+ <>
+ {" — "}
+ <strong>{rowErrors.length}</strong> row{rowErrors.length !== 1 ?"s were" :" was"} skipped.
+ </>
+ ) : (
+ "."
+ )}
  </p>
+
+ {/* Fallback notice: migration 144 not applied yet */}
+ {importResult.usedFallback && (
+ <div className="border-info/30 bg-info/10 mx-auto mb-6 max-w-[560px] rounded-md border px-6 py-3 text-left text-sm text-secondary-foreground">
+ ℹ️ Imported with the older import engine: horses were saved as{""}
+ <strong>private</strong> and the Notes column was not saved. You can publish
+ them anytime from your stable.
+ </div>
+ )}
+
+ {/* Per-row errors, with the user's spreadsheet row numbers */}
+ {rowErrors.length > 0 && (
+ <div className="border-destructive/30 bg-destructive/10 mx-auto mb-6 max-w-[640px] rounded-md border px-6 py-4 text-left">
+ <p className="text-destructive mb-2 text-sm font-bold">Skipped rows:</p>
+ <ul className="m-0 flex max-h-[220px] list-none flex-col gap-1 overflow-y-auto p-0 text-sm text-secondary-foreground">
+ {rowErrors.map((err, i) => (
+ <li key={i}>
+ <strong>Row {err.rowNumber}</strong> ({err.name}): {err.message}
+ </li>
+ ))}
+ </ul>
+ <p className="mt-3 text-xs text-muted-foreground">
+ Fix these rows in your spreadsheet and import just those rows again — the
+ imported ones are already saved.
+ </p>
+ </div>
+ )}
+
  <div className="flex flex-wrap justify-center gap-4">
  <Button asChild variant="outline"><a
  href="/dashboard"
@@ -683,6 +822,8 @@ export default function CsvImport() {
  setColumnMapping({});
  setMatchResults([]);
  setImportResult(null);
+ setValidationErrors([]);
+ setShowDupePanel(false);
  }}
  >
  📄 Import Another CSV

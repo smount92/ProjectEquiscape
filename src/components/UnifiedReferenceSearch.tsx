@@ -3,7 +3,15 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { searchCatalogAction, getReleasesForMold, getCatalogItem, type CatalogItem } from "@/app/actions/reference";
 import MarketValueBadge from "@/components/MarketValueBadge";
-import SuggestReferenceModal from "@/components/SuggestReferenceModal";
+import SuggestNewEntryForm from "@/components/SuggestNewEntryForm";
+import IdentifyMoldDialog from "@/components/IdentifyMoldDialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
 /* ------------------------------------------------------------------ */
@@ -41,6 +49,9 @@ export default function UnifiedReferenceSearch({
 }: UnifiedReferenceSearchProps) {
   const [query, setQuery] = useState("");
   const [showSuggestModal, setShowSuggestModal] = useState(false);
+  // Captured when the user clicks "Suggest adding it" — the old modal read
+  // the term at mount (always "") and lost it; this reads it at click time.
+  const [suggestTerm, setSuggestTerm] = useState("");
   const [results, setResults] = useState<CatalogItem[]>([]);
   const [releases, setReleases] = useState<CatalogItem[]>([]);
   const [selectedItem, setSelectedItem] = useState<CatalogItem | null>(null);
@@ -181,47 +192,56 @@ export default function UnifiedReferenceSearch({
         </>
       ) : (
         <>
-          {/* Search Input */}
-          <div className="relative mb-4">
-            <svg
-              className="text-muted-foreground pointer-events-none absolute top-[50%] left-[16px] z-[1] translate-y-[-50%]"
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-            <input
-              type="text"
-              className="flex h-11 w-full rounded-md border border-input bg-card px-10 py-2 text-sm text-foreground ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-              placeholder="Search molds, releases, or resins..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onFocus={() => {
-                if (query.trim() && hasResults) setShowDropdown(true);
-              }}
-              id="reference-search-input"
-              autoComplete="off"
-            />
-            {query && (
-              <button
-                className="text-muted-foreground hover:text-foreground absolute top-[50%] right-[12px] flex h-[28px] w-[28px] translate-y-[-50%] cursor-pointer items-center justify-center rounded-full border-0 bg-muted text-[0.8rem] transition-all duration-150"
-                onClick={() => {
-                  setQuery("");
-                  setShowDropdown(false);
-                }}
-                aria-label="Clear"
+          {/* Search Input + photo identify */}
+          <div className="mb-4 flex flex-wrap items-center gap-2">
+            <div className="relative min-w-[220px] flex-1">
+              <svg
+                className="text-muted-foreground pointer-events-none absolute top-[50%] left-[16px] z-[1] translate-y-[-50%]"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
               >
-                {"\u2715"}
-              </button>
-            )}
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input
+                type="text"
+                className="flex h-11 w-full rounded-md border border-input bg-card px-10 py-2 text-sm text-foreground ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                placeholder="Search molds, releases, or resins..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onFocus={() => {
+                  if (query.trim() && hasResults) setShowDropdown(true);
+                }}
+                id="reference-search-input"
+                autoComplete="off"
+              />
+              {query && (
+                <button
+                  className="text-muted-foreground hover:text-foreground absolute top-[50%] right-[12px] flex h-[28px] w-[28px] translate-y-[-50%] cursor-pointer items-center justify-center rounded-full border-0 bg-muted text-[0.8rem] transition-all duration-150"
+                  onClick={() => {
+                    setQuery("");
+                    setShowDropdown(false);
+                  }}
+                  aria-label="Clear"
+                >
+                  {"\u2715"}
+                </button>
+              )}
+            </div>
+            <IdentifyMoldDialog
+              onIdentified={(moldName) => {
+                // Feed the AI's mold name into the normal search path,
+                // same flow as the externalSearchQuery AI detection.
+                setQuery(moldName);
+              }}
+            />
           </div>
 
           {/* Dropdown Results */}
@@ -328,15 +348,25 @@ export default function UnifiedReferenceSearch({
                         </a>{" "}
                         for market data, or suggest a new entry.
                       </p>
-                      <button
-                        className="mt-1 inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-input bg-transparent px-6 py-2 text-sm font-medium text-secondary-foreground transition-all hover:border-forest hover:text-forest"
-                        onClick={() => {
-                          setShowSuggestModal(true);
-                          setShowDropdown(false);
-                        }}
-                      >
-                        {"\u270D\uFE0F"} Suggest adding it
-                      </button>
+                      <div className="mt-1 flex flex-wrap items-center justify-center gap-2">
+                        <button
+                          className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-input bg-transparent px-6 py-2 text-sm font-medium text-secondary-foreground transition-all hover:border-forest hover:text-forest"
+                          onClick={() => {
+                            // Carry the search term into the suggestion form.
+                            setSuggestTerm(query.trim());
+                            setShowSuggestModal(true);
+                            setShowDropdown(false);
+                          }}
+                        >
+                          {"\u270D\uFE0F"} Suggest adding it
+                        </button>
+                        <IdentifyMoldDialog
+                          onIdentified={(moldName) => {
+                            setShowDropdown(false);
+                            setQuery(moldName);
+                          }}
+                        />
+                      </div>
                     </div>
                   )}
                 </>
@@ -415,18 +445,38 @@ export default function UnifiedReferenceSearch({
           )}
         </>
       )}
-      {/* Suggest Reference Modal */}
-      <SuggestReferenceModal
-        isOpen={showSuggestModal}
-        searchTerm={query.trim()}
-        onClose={() => setShowSuggestModal(false)}
-        onSubmitted={(searchTerm) => {
-          setShowSuggestModal(false);
-          if (onCustomEntry) {
-            onCustomEntry(searchTerm);
-          }
+      {/* Suggest a new entry — the MODERN catalog_suggestions flow
+          (votes, changelog, curator credit), replacing the legacy
+          database_suggestions modal that guessed makers from free text
+          and orphaned releases. */}
+      <Dialog
+        open={showSuggestModal}
+        onOpenChange={(open) => {
+          if (!open) setShowSuggestModal(false);
         }}
-      />
+      >
+        <DialogContent className="max-h-[85dvh] overflow-y-auto sm:max-w-[580px]">
+          <DialogHeader>
+            <DialogTitle>{"📗"} Suggest a New Entry</DialogTitle>
+            <DialogDescription>
+              Couldn&apos;t find it? Propose it for the reference catalog — the community
+              reviews it, and you get contributor credit when it&apos;s approved.
+            </DialogDescription>
+          </DialogHeader>
+          <SuggestNewEntryForm
+            key={suggestTerm}
+            variant="dialog"
+            initialTitle={suggestTerm}
+            onCancel={() => setShowSuggestModal(false)}
+            onSubmitted={(title) => {
+              setShowSuggestModal(false);
+              if (onCustomEntry) {
+                onCustomEntry(title);
+              }
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

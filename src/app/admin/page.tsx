@@ -68,7 +68,7 @@ export default async function AdminPage() {
  // Fetch pending catalog curation suggestions
  const { data: catalogSuggestionRows } = await supabaseAdmin
  .from("catalog_suggestions")
- .select("id, user_id, suggestion_type, field_changes, reason, status, upvotes, downvotes, created_at")
+ .select("id, user_id, catalog_item_id, suggestion_type, field_changes, reason, status, upvotes, downvotes, created_at")
  .eq("status","pending")
  .order("created_at", { ascending: true })
  .limit(50);

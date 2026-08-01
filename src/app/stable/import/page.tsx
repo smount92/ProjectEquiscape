@@ -3,7 +3,6 @@ import { redirect } from"next/navigation";
 import Link from"next/link";
 import type { Metadata } from"next";
 import CsvImport from"@/components/CsvImport";
-import FocusLayout from"@/components/layouts/FocusLayout";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
@@ -19,22 +18,36 @@ export default async function ImportPage() {
  } = await supabase.auth.getUser();
 
  if (!user) {
- redirect("/login");
+ redirect("/login?redirectTo=" + encodeURIComponent("/stable/import"));
  }
 
  return (
- <FocusLayout
-  title={<><span className="text-forest">Batch Import</span></>}
-  description="Import your collection from a CSV spreadsheet"
-  backLink={
+ // Own wide wrapper, NOT FocusLayout: its max-w-2xl (672px) crushed the
+ // column-mapping table and match cards. Same header idiom, import-sized.
+ <div className="mx-auto flex w-full max-w-[1000px] flex-col gap-8 px-4 py-12 sm:px-6 md:py-16">
+  <div>
   <Button asChild variant="outline" size="wide"><Link
    href="/dashboard"
   >
    ← Back to Stable
   </Link></Button>
-  }
- >
+  </div>
+
+  <div>
+  <div className="brass-heading">
+   <span className="brass-heading-bar" aria-hidden="true" />
+   <h1 className="font-serif text-2xl font-bold tracking-tight text-foreground md:text-3xl">
+   <span className="text-forest">Batch Import</span>
+   </h1>
+  </div>
+  <p className="mt-2 max-w-2xl text-lg leading-relaxed text-muted-foreground">
+   Import your collection from a CSV spreadsheet
+  </p>
+  </div>
+
+  <div className="w-full ledger-paper animate-fade-in-up">
   <CsvImport />
- </FocusLayout>
+  </div>
+ </div>
  );
 }

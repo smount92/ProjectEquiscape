@@ -1320,6 +1320,67 @@ p {
   animation: bubble-in 0.2s ease;
 }
 
+/* ── CSV import (base rules) ──────────────────────────────────
+   The state rules below (.active/.current/.dragover/.perfect …)
+   predate these and targeted children the JSX never rendered.
+   The JSX now emits .csv-step-number/.csv-step-label, and these
+   base rules own the dots' appearance end-to-end (no Tailwind
+   utilities on those spans — inside @layer base, utilities would
+   beat the .active state overrides). */
+.csv-step-dot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.csv-step-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--border);
+  background: var(--card);
+  color: var(--muted-foreground);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.csv-step-label {
+  color: var(--muted-foreground);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  transition: color var(--transition-fast);
+}
+
+.csv-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2xl) var(--space-xl);
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.csv-match-card {
+  padding: var(--space-md) var(--space-lg);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
 .csv-step-dot.active .csv-step-number {
   background: var(--primary);
   border-color: var(--primary);
@@ -1635,6 +1696,76 @@ p {
     margin-bottom: var(--space-md);
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+}
+
+/* Filter tab pills (catalog/suggestions) — the .ref-filter-tabs
+   container predates these; the tab + active classes were
+   referenced by the JSX but never defined. */
+.ref-filter-tab {
+    flex-shrink: 0;
+    padding: var(--space-xs) var(--space-md);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    background: var(--card);
+    color: var(--secondary-foreground);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    white-space: nowrap;
+    text-decoration: none;
+    transition: all var(--transition-fast);
+}
+
+.ref-filter-tab:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.ref-filter-tab-active,
+.ref-filter-tab-active:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--primary-foreground, #fff);
+}
+
+/* Suggestion status badges (catalog/suggestions list + detail) —
+   referenced by the JSX but never defined. */
+.ref-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: 2px var(--space-sm);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    background: var(--muted);
+    color: var(--secondary-foreground);
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.ref-status-pending {
+    background: color-mix(in srgb, var(--color-warning) 12%, transparent);
+    border-color: color-mix(in srgb, var(--color-warning) 35%, transparent);
+    color: var(--color-warning);
+}
+
+.ref-status-approved {
+    background: color-mix(in srgb, var(--color-success) 12%, transparent);
+    border-color: color-mix(in srgb, var(--color-success) 35%, transparent);
+    color: var(--color-success);
+}
+
+.ref-status-auto {
+    background: color-mix(in srgb, var(--color-info) 12%, transparent);
+    border-color: color-mix(in srgb, var(--color-info) 35%, transparent);
+    color: var(--color-info);
+}
+
+.ref-status-rejected {
+    background: color-mix(in srgb, var(--destructive) 12%, transparent);
+    border-color: color-mix(in srgb, var(--destructive) 35%, transparent);
+    color: var(--destructive);
 }
 
 .ref-curator-inline {

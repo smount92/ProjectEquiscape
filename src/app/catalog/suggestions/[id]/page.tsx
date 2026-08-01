@@ -265,7 +265,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
  .map(([k, v]) => (
  <div key={k} className="flex flex-col gap-[2px]">
  <span className="text-muted-foreground text-xs font-semibold tracking-[0.05em] uppercase">
- {k.replace(/_/g,"").replace(/\b\w/g, (c) => c.toUpperCase())}
+ {k.replace(/_/g," ").replace(/\b\w/g, (c) => c.toUpperCase())}
  </span>
  <span className="text-base font-bold text-success">
  {String(v)}

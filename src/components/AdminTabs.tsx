@@ -57,6 +57,7 @@ interface Report {
 interface CatalogSuggestionAdmin {
  id: string;
  user_id: string;
+ catalog_item_id?: string | null;
  suggestion_type: string;
  field_changes: Record<string, unknown>;
  reason: string;
@@ -67,6 +68,22 @@ interface CatalogSuggestionAdmin {
  author_alias: string;
  author_approved_count: number;
 }
+
+/** Friendly labels — no status.replace(/_/g,"") "autoapproved" mush. */
+const SUGGESTION_TYPE_LABELS: Record<string, string> = {
+ correction:"Correction",
+ addition:"New entry",
+ photo:"Photo",
+ removal:"Removal",
+};
+
+const SUGGESTION_STATUS_LABELS: Record<string, string> = {
+ pending:"Pending",
+ under_review:"Under review",
+ approved:"Approved",
+ auto_approved:"Auto-approved",
+ rejected:"Rejected",
+};
 
 interface AdminTabsProps {
  messages: ContactMessage[];
@@ -324,8 +341,15 @@ function ContentTab({ suggestions }: { suggestions: Suggestion[] }) {
  <div className="admin-content-grid">
  <div>
  <h3 className="mb-4 flex items-center gap-2 text-base font-bold">
- 💡 Database Suggestions <span className="mt-6-count">{suggestions.length} pending</span>
+ 💡 Database Suggestions{""}
+ <span className="text-muted-foreground text-xs font-medium">(legacy queue)</span>{""}
+ <span className="mt-6-count">{suggestions.length} pending</span>
  </h3>
+ <p className="text-muted-foreground mb-4 text-xs">
+ The old database_suggestions pipeline — no new submissions arrive here (the
+ add-horse picker now files into Catalog suggestions). Review these until the
+ queue drains, then this section retires.
+ </p>
  <AdminSuggestionsPanel suggestions={suggestions} />
  </div>
  <div>
@@ -416,7 +440,7 @@ function CatalogTab({ suggestions }: { suggestions: CatalogSuggestionAdmin[] }) 
  const val = v as { from: string; to: string };
  return `${k}: ${val.from} → ${val.to}`;
  })
- .join(",");
+ .join(", ");
  } else if (s.suggestion_type ==="addition") {
  changeText = `New: ${(s.field_changes as { title?: string })?.title ??"Untitled"}`;
  }
@@ -426,10 +450,10 @@ function CatalogTab({ suggestions }: { suggestions: CatalogSuggestionAdmin[] }) 
  <div className="mb-1 flex justify-between">
  <strong>
  {typeIcon}{""}
- {s.suggestion_type.replace(/_/g,"").replace(/\b\w/g, (c) => c.toUpperCase())}
+ {SUGGESTION_TYPE_LABELS[s.suggestion_type] ?? s.suggestion_type}
  </strong>
  <span className="text-muted-foreground text-xs">
- ▲{s.upvotes} ▼{s.downvotes} · {new Date(s.created_at).toLocaleDateString()}
+ {SUGGESTION_STATUS_LABELS[s.status] ?? s.status} · ▲{s.upvotes} ▼{s.downvotes} · {new Date(s.created_at).toLocaleDateString()}
  </span>
  </div>
  <p className="mb-1 text-sm">
@@ -443,6 +467,17 @@ function CatalogTab({ suggestions }: { suggestions: CatalogSuggestionAdmin[] }) 
  <p className="text-muted-foreground mb-2 text-sm italic">
  &ldquo;{s.reason.slice(0, 200)}
  {s.reason.length > 200 ?"…" :""}&rdquo;
+ </p>
+ {/* Context links — review without leaving the console blind */}
+ <p className="mb-2 flex flex-wrap gap-4 text-sm">
+ <a href={`/catalog/suggestions/${s.id}`} className="text-forest font-medium">
+ View suggestion &amp; discussion →
+ </a>
+ {s.catalog_item_id && (
+ <a href={`/catalog/${s.catalog_item_id}`} className="text-forest font-medium">
+ View catalog item →
+ </a>
+ )}
  </p>
  <SuggestionAdminActions suggestionId={s.id} />
  </div>

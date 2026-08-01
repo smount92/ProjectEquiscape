@@ -9,12 +9,22 @@ export const metadata = {
  description:"Suggest a model that's missing from the reference catalog.",
 };
 
-export default async function SuggestNewEntryPage() {
+interface Props {
+ searchParams: Promise<{ prefill?: string }>;
+}
+
+export default async function SuggestNewEntryPage({ searchParams }: Props) {
+ const { prefill } = await searchParams;
  const supabase = await createClient();
  const {
  data: { user },
  } = await supabase.auth.getUser();
- if (!user) redirect("/login");
+ if (!user) {
+ // Round-trip back here (prefill intact) after login.
+ const returnTo =
+"/catalog/suggestions/new" + (prefill ? `?prefill=${encodeURIComponent(prefill)}` :"");
+ redirect("/login?redirectTo=" + encodeURIComponent(returnTo));
+ }
 
  return (
  <FocusLayout noHeader>
@@ -24,7 +34,7 @@ export default async function SuggestNewEntryPage() {
    subtitle="Community-reviewed additions to the catalog"
   />
   <div className="bg-card border-input rounded-lg border p-8 shadow-md transition-all">
-  <SuggestNewEntryForm />
+  <SuggestNewEntryForm initialTitle={(prefill ??"").slice(0, 200)} />
   </div>
  </FocusLayout>
  );

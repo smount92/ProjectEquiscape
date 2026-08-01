@@ -4,9 +4,12 @@ import { useState, useTransition } from"react";
 import { useRouter } from"next/navigation";
 import { createSuggestion } from"@/app/actions/catalog-suggestions";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 
-const MAKERS = ["Breyer","Stone","Hartland","Hagen-Renaker","Peter Stone","Artist Resin","Other"];
+// "Stone" and "Peter Stone" are the same maker (collapsed), and
+// "Artist Resin" is an entry TYPE, not a maker — both fixed here.
+const MAKERS = ["Breyer","Peter Stone","Hartland","Hagen-Renaker","Other"];
 const ITEM_TYPES = [
  { value:"release", label:"Release (specific color/year of a mold)" },
  { value:"mold", label:"Mold (sculpture, not a specific release)" },
@@ -14,13 +17,31 @@ const ITEM_TYPES = [
  { value:"tack", label:"Tack / Accessory" },
 ];
 
-export default function SuggestNewEntryForm() {
+interface SuggestNewEntryFormProps {
+ /** Prefill the title — e.g. the search term that found nothing. */
+ initialTitle?: string;
+ /** "dialog": hosted inside a Dialog (add-horse picker). Cancel and the
+  *  success CTA hand control back to the host instead of navigating. */
+ variant?:"page" |"dialog";
+ /** Dialog mode: called when the user continues after a successful submit. */
+ onSubmitted?: (title: string) => void;
+ /** Dialog mode: called when the user cancels. */
+ onCancel?: () => void;
+}
+
+export default function SuggestNewEntryForm({
+ initialTitle ="",
+ variant ="page",
+ onSubmitted,
+ onCancel,
+}: SuggestNewEntryFormProps = {}) {
  const router = useRouter();
  const [isPending, startTransition] = useTransition();
  const [error, setError] = useState<string | null>(null);
  const [success, setSuccess] = useState(false);
+ const [submittedTitle, setSubmittedTitle] = useState("");
 
- const [title, setTitle] = useState("");
+ const [title, setTitle] = useState(initialTitle);
  const [maker, setMaker] = useState("");
  const [customMaker, setCustomMaker] = useState("");
  const [itemType, setItemType] = useState("release");
@@ -62,11 +83,20 @@ export default function SuggestNewEntryForm() {
  });
 
  if (result.success) {
+ setSubmittedTitle(title.trim());
  setSuccess(true);
  } else {
  setError(result.error ||"Failed to submit suggestion.");
  }
  });
+ };
+
+ const handleCancel = () => {
+ if (variant ==="dialog" && onCancel) {
+ onCancel();
+ } else {
+ router.back();
+ }
  };
 
  if (success) {
@@ -79,7 +109,15 @@ export default function SuggestNewEntryForm() {
  <p className="text-muted-foreground mb-6">
  Your new entry suggestion is now pending review. The community can vote and discuss it.
  </p>
- <div className="flex justify-center gap-4">
+ <div className="flex flex-wrap justify-center gap-4">
+ {variant ==="dialog" ? (
+ <Button
+ onClick={() => onSubmitted?.(submittedTitle)}
+ >
+ Continue →
+ </Button>
+ ) : (
+ <>
  <Button
  onClick={() => router.push("/catalog/suggestions")}
  >
@@ -94,6 +132,8 @@ export default function SuggestNewEntryForm() {
  >
  Submit Another
  </Button>
+ </>
+ )}
  </div>
  </div>
  );
@@ -108,7 +148,7 @@ export default function SuggestNewEntryForm() {
  </label>
  <Input
  id="new-entry-title"
- 
+
  value={title}
  onChange={(e) => setTitle(e.target.value)}
  placeholder="e.g. Breyer #712 — Misty of Chincoteague"
@@ -191,7 +231,7 @@ export default function SuggestNewEntryForm() {
  </label>
  <Input
  id="new-entry-color"
- 
+
  value={color}
  onChange={(e) => setColor(e.target.value)}
  placeholder="e.g. Bay, Palomino"
@@ -208,7 +248,7 @@ export default function SuggestNewEntryForm() {
  </label>
  <Input
  id="new-entry-mold"
- 
+
  value={moldName}
  onChange={(e) => setMoldName(e.target.value)}
  placeholder="e.g. Family Arabian Stallion"
@@ -222,7 +262,7 @@ export default function SuggestNewEntryForm() {
  <Input
  id="new-entry-year"
  type="number"
- 
+
  value={year}
  onChange={(e) => setYear(e.target.value)}
  placeholder="e.g. 1995"
@@ -258,9 +298,9 @@ export default function SuggestNewEntryForm() {
  <label className="text-foreground mb-1 block text-sm font-semibold" htmlFor="new-entry-reason">
  Reason / Evidence *
  </label>
- <textarea
+ <Textarea
  id="new-entry-reason"
- className="inline-flex min-h-[36px] w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all resize-y"
+ className="min-h-[72px] resize-y"
  value={reason}
  onChange={(e) => setReason(e.target.value)}
  rows={3}
@@ -268,7 +308,7 @@ export default function SuggestNewEntryForm() {
  placeholder="Explain why this entry should be added. Include sources if available (e.g. 'Listed in the 2019 Breyer dealer catalog, page 12')."
  />
  <span
- className="text-muted-foreground mt-[4] block text-right text-xs"
+ className="text-muted-foreground mt-1 block text-right text-xs"
  >
  {reason.length}/2000
  </span>
@@ -283,7 +323,7 @@ export default function SuggestNewEntryForm() {
  {/* Actions */}
  <div className="flex justify-end gap-4">
  <Button variant="outline" size="wide"
- onClick={() => router.back()}
+ onClick={handleCancel}
  disabled={isPending}
  >
  Cancel

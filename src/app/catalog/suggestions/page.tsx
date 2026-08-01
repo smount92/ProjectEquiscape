@@ -77,6 +77,15 @@ export default async function SuggestionsPage({ searchParams }: Props) {
  { key:"rejected", label:"❌ Rejected" },
  ];
 
+ // Friendly status labels — status.replace(/_/g,"") printed "autoapproved".
+ const statusLabels: Record<string, string> = {
+ pending:"Under review",
+ under_review:"Under review",
+ approved:"Approved",
+ auto_approved:"Auto-approved",
+ rejected:"Rejected",
+ };
+
  return (
   <ExplorerLayout noHeader>
  <CatalogSubMasthead
@@ -137,7 +146,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
  const val = v as { from: string; to: string };
  return `${k}: ${val.from} → ${val.to}`;
  })
- .join(",");
+ .join(", ");
  changeSummary = changes;
  } else if (s.suggestion_type ==="addition") {
  changeSummary = `New: ${(s.field_changes as { title?: string })?.title ??"Untitled"}`;
@@ -163,7 +172,7 @@ export default async function SuggestionsPage({ searchParams }: Props) {
  >
  <div className="mb-1 flex items-center justify-between">
  <span className="text-[1.2rem]">{typeIcon}</span>
- <span className={`ref-status-badge ${statusBadge}`}>{s.status.replace(/_/g,"")}</span>
+ <span className={`ref-status-badge ${statusBadge}`}>{statusLabels[s.status] ?? s.status}</span>
  </div>
 
  <div className="text-sm text-secondary-foreground leading-relaxed">

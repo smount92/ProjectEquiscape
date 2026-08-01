@@ -3,7 +3,7 @@
 import { requireAuth } from "@/lib/auth";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { after } from "next/server";
 import { sanitizeText } from "@/lib/utils/validation";
 import {
@@ -11,6 +11,8 @@ import {
     buildCorrectionUpdate,
     correctionTouchesAttributes,
 } from "@/lib/catalog/corrections";
+import { referenceHref } from "@/lib/catalog/referenceUrl";
+import { REFERENCE_PAGES_CACHE_TAG } from "@/app/actions/reference-pages";
 import type { Database } from "@/lib/types/database.generated";
 
 type CatalogItemInsert = Database["public"]["Tables"]["catalog_items"]["Insert"];
@@ -654,10 +656,14 @@ async function applyApprovedSuggestion(
             .join(", ");
         changeSummary = `🔧 Correction: ${changes}`;
     } else if (s.suggestion_type === "addition") {
-        // Map field_changes to catalog_items columns
+        // Map field_changes to catalog_items columns. Form values are
+        // release/mold/resin/tack; tack is a REAL catalog_items.item_type
+        // (048/053 CHECK constraint) — it used to be silently filed as a
+        // plastic_mold, which lied about what the entry was.
         const fc = s.field_changes as Record<string, unknown>;
         const itemType = fc.item_type === "resin" ? "artist_resin"
             : fc.item_type === "release" ? "plastic_release"
+            : fc.item_type === "tack" ? "tack"
             : "plastic_mold";
         const insertPayload: CatalogItemInsert = {
             item_type: itemType,
@@ -669,6 +675,10 @@ async function applyApprovedSuggestion(
                 ...(fc.color ? { color_description: fc.color } : {}),
                 ...(fc.model_number ? { model_number: fc.model_number } : {}),
                 ...(fc.material ? { material: fc.material } : {}),
+                // The form collects the parent mold's name for releases —
+                // this used to be dropped on apply. Kept as an attribute so
+                // admins can wire parent_id from it later.
+                ...(fc.mold_name && fc.title ? { mold_name: fc.mold_name } : {}),
             })),
         };
         const { data: newItem, error: insertError } = await admin
@@ -742,6 +752,38 @@ async function applyApprovedSuggestion(
             .from("users")
             .update({ is_trusted_curator: true })
             .eq("id", userId);
+    }
+
+    // ── Revalidate what the change just made stale ──
+    // Reference pages read through hour-long unstable_cache entries
+    // (reference-pages.ts) — bust the tag so an approved correction shows
+    // up now, not in ≤60 minutes. Also refresh the affected pages.
+    revalidateTag(REFERENCE_PAGES_CACHE_TAG, "max");
+    revalidatePath("/catalog");
+    if (catalogItemId) {
+        revalidatePath(`/catalog/${catalogItemId}`);
+        const { data: refItem } = await admin
+            .from("catalog_items")
+            .select("maker, title, maker_slug, slug")
+            .eq("id", catalogItemId)
+            .single();
+        if (refItem) {
+            const r = refItem as {
+                maker: string | null;
+                title: string | null;
+                maker_slug: string | null;
+                slug: string | null;
+            };
+            revalidatePath(
+                referenceHref({
+                    id: catalogItemId,
+                    maker: r.maker,
+                    title: r.title,
+                    maker_slug: r.maker_slug,
+                    slug: r.slug,
+                })
+            );
+        }
     }
 }
 
