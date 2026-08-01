@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { sanitizeText } from "@/lib/utils/validation";
+import { sanitizeForOr } from "@/lib/utils/search";
 import {
     SILVER_AUTO_FIELDS,
     buildCorrectionUpdate,
@@ -90,26 +91,67 @@ export interface SuggestionComment {
 
 // ── BROWSING (public — no auth required) ──
 
+/**
+ * How many fuzzy candidates a text search feeds into the facet/sort
+ * query. Similarity-ranked, so every realistic name/maker search fits;
+ * ~200 UUIDs also keeps the PostgREST `.in()` URL well under limits.
+ */
+const FUZZY_CANDIDATE_LIMIT = 200;
+
 export async function getCatalogItems(filters: CatalogFilters) {
     const supabase = await createClient();
     const page = filters.page ?? 1;
     const pageSize = filters.pageSize ?? 50;
     const from = (page - 1) * pageSize;
 
-    // Explicit columns + estimated count: this runs on every catalog
-    // search keystroke, and an exact COUNT over the filtered set each time
-    // is the expensive part. "estimated" reads the planner stats instead.
+    // ── Text search composition: fuzzy-FIRST, then filter the ids ──
+    // search_catalog_fuzzy (migration 110: trigram title + maker ILIKE,
+    // anon-granted — the same RPC the reference search uses) takes no
+    // facet filters, no count, no pagination, so it cannot compose with
+    // the facet query directly. Instead the RPC returns the best-matching
+    // candidate ids (similarity-ranked, capped) and the regular query
+    // below applies facets, sort, exact count, and pagination over that
+    // id set — the whole existing filter/facet/pagination contract is
+    // preserved. Trade-offs: results within a search sort by the chosen
+    // catalog sort (not raw similarity), and a text query is capped at
+    // FUZZY_CANDIDATE_LIMIT candidates — broad sweeps like a bare maker
+    // name belong in the (uncapped) Maker facet.
+    let searchIds: string[] | null = null;
+    if (filters.search) {
+        const { data: fuzzyRows, error: fuzzyError } = await supabase.rpc("search_catalog_fuzzy", {
+            search_term: filters.search,
+            max_results: FUZZY_CANDIDATE_LIMIT,
+        });
+        if (!fuzzyError && Array.isArray(fuzzyRows)) {
+            searchIds = (fuzzyRows as { id: string }[]).map((r) => r.id);
+            if (searchIds.length === 0) {
+                return { success: true as const, items: [], total: 0, page, pageSize };
+            }
+        }
+        // RPC unavailable (fresh env, migration pending)? searchIds stays
+        // null and the title/maker ILIKE fallback below keeps search alive.
+    }
+
+    // Explicit columns; count mode matches the path: the id-set path is
+    // ≤FUZZY_CANDIDATE_LIMIT rows, so an exact count is cheap AND honest
+    // there, while "estimated" (planner stats) stays for whole-catalog
+    // browsing where exact counting is the expensive part.
     let query = supabase
         .from("catalog_items")
         .select("id, item_type, parent_id, title, maker, maker_slug, slug, scale, attributes, created_at", {
-            count: "estimated",
+            count: searchIds ? "exact" : "estimated",
         })
         .range(from, from + pageSize - 1);
 
     if (filters.maker) query = query.eq("maker", filters.maker);
     if (filters.scale) query = query.eq("scale", filters.scale);
     if (filters.type) query = query.eq("item_type", filters.type);
-    if (filters.search) query = query.ilike("title", `%${filters.search}%`);
+    if (searchIds) {
+        query = query.in("id", searchIds);
+    } else if (filters.search) {
+        const q = sanitizeForOr(filters.search);
+        if (q) query = query.or(`title.ilike.%${q}%,maker.ilike.%${q}%`);
+    }
 
     // Advanced filters live in the attributes JSONB. Year is stored as a
     // 4-digit value, so lexical text comparison on ->> matches numeric order

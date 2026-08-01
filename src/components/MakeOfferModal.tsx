@@ -111,13 +111,24 @@ export default function MakeOfferModal({ horseId, horseName, sellerId, askingPri
  )}
  </div>
 
- <label className="mb-2 flex cursor-pointer items-center gap-1 text-sm">
- <Input type="checkbox" checked={isBundle} onChange={(e) => setIsBundle(e.target.checked)} />
+ <label className="mb-2 flex cursor-pointer items-center gap-2 text-sm">
+ <input
+ type="checkbox"
+ checked={isBundle}
+ onChange={(e) => setIsBundle(e.target.checked)}
+ className="size-5 min-h-6 min-w-6 accent-forest"
+ />
  This is a bundle/lot sale (excluded from market price index)
  </label>
 
  <label className="mb-2 flex cursor-pointer items-start gap-2 text-xs text-muted-foreground mt-4">
-  <Input type="checkbox" checked={disclaimerAccepted} onChange={(e) => setDisclaimerAccepted(e.target.checked)} className="mt-0.5" required />
+  <input
+  type="checkbox"
+  checked={disclaimerAccepted}
+  onChange={(e) => setDisclaimerAccepted(e.target.checked)}
+  className="mt-0.5 size-5 min-h-6 min-w-6 shrink-0 accent-forest"
+  required
+  />
   <span>
    I understand that Model Horse Hub does not process payments and cannot
    mediate financial disputes. All transactions are between buyer and seller.

@@ -195,7 +195,7 @@ export default function CatalogFilterBar({
                             if (e.key === "Enter") submitSearch();
                         }}
                         onBlur={submitSearch}
-                        placeholder="Search the catalog by name, mold, or maker…"
+                        placeholder="Search by name or maker…"
                         id="catalog-search"
                         aria-label="Search the reference catalog"
                     />

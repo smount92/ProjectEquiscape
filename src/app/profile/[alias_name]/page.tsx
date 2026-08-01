@@ -44,7 +44,13 @@ export async function generateMetadata({ params }: { params: Promise<{ alias_nam
  };
 }
 
-export default async function ProfilePage({ params }: { params: Promise<{ alias_name: string }> }) {
+export default async function ProfilePage({
+ params,
+ searchParams,
+}: {
+ params: Promise<{ alias_name: string }>;
+ searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
  const { alias_name } = await params;
  const aliasDecoded = decodeURIComponent(alias_name);
  const supabase = await createClient();
@@ -56,9 +62,10 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
 
  // Logged-out visitors get a read-only public profile (service-role reads,
  // scoped to public data); the full interactive profile below is unchanged
- // for logged-in members.
+ // for logged-in members. ?shown= drives the anon "Show more" paging.
  if (!user) {
- return <AnonProfile alias={aliasDecoded} />;
+ const sp = await searchParams;
+ return <AnonProfile alias={aliasDecoded} shownParam={sp.shown} />;
  }
 
  // Look up the user by alias_name

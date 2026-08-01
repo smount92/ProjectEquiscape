@@ -685,6 +685,31 @@ editionSize: rawPedigree.edition_size,
  {/* Market Value Badge */}
  {horse.catalog_id && <MarketValueBadge catalogId={horse.catalog_id} />}
 
+ {/* For Sale — price + status a signed-in buyer can actually see.
+     Mirrors the AnonPassport block (AnonPassport.tsx) so members and
+     visitors read the same ledger line. For Sale / Open to Offers only. */}
+ {(horse.trade_status === "For Sale" || horse.trade_status === "Open to Offers") && (
+ <div className="rounded-lg border border-forest/30 bg-forest/5 p-4" id="passport-for-sale">
+ <div className="flex flex-wrap items-center justify-between gap-2">
+ <span className={horse.trade_status === "For Sale" ? "stamp stamp-red" : "stamp"}>
+ {horse.trade_status}
+ </span>
+ <span className="font-serif text-2xl font-bold text-foreground">
+ {horse.listing_price != null
+ ? `$${Number(horse.listing_price).toLocaleString("en-US")}`
+ : "Open to offers"}
+ </span>
+ </div>
+ {!isOwnHorse && (
+ <p className="mt-2 mb-0 text-sm text-secondary-foreground">
+ {horse.listing_price != null
+ ? "Asking price — make an offer or ask the seller a question below."
+ : "No asking price set — the seller is taking offers."}
+ </p>
+ )}
+ </div>
+ )}
+
  {/* Action Bar — split layout: icon row + full-width CTA */}
  <div className="passport-action-bar">
  <div className="flex flex-wrap items-center justify-center gap-1">
