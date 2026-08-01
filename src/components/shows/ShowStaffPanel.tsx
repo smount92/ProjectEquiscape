@@ -51,11 +51,13 @@ export default function ShowStaffPanel({ showId, staff, viewerRole }: ShowStaffP
     const [coiNote, setCoiNote] = useState("");
     const [pending, setPending] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [addedNote, setAddedNote] = useState<string | null>(null);
 
     const handleLookup = async (e: React.FormEvent) => {
         e.preventDefault();
         setPending(true);
         setError(null);
+        setAddedNote(null);
         setCandidate(null);
         setNotFoundAlias(null);
         const result = await findUserByAlias({ alias });
@@ -73,6 +75,7 @@ export default function ShowStaffPanel({ showId, staff, viewerRole }: ShowStaffP
         if (!candidate) return;
         setPending(true);
         setError(null);
+        setAddedNote(null);
         const result = await addShowStaff({
             showId,
             userId: candidate.id,
@@ -81,6 +84,9 @@ export default function ShowStaffPanel({ showId, staff, viewerRole }: ShowStaffP
             coiNote: coiFlag && coiNote.trim() ? coiNote.trim() : undefined,
         });
         if (result.success) {
+            setAddedNote(
+                `@${candidate.alias} added as ${ROLE_LABELS[role]} — they've been notified.`,
+            );
             setAlias("");
             setCandidate(null);
             setCoiFlag(false);
@@ -95,6 +101,7 @@ export default function ShowStaffPanel({ showId, staff, viewerRole }: ShowStaffP
     const handleRemove = async (userId: string) => {
         setPending(true);
         setError(null);
+        setAddedNote(null);
         const result = await removeShowStaff({ showId, userId });
         if (result.success) {
             router.refresh();
@@ -229,9 +236,15 @@ export default function ShowStaffPanel({ showId, staff, viewerRole }: ShowStaffP
                             {error}
                         </p>
                     )}
+                    {addedNote && (
+                        <p role="status" className="mt-3 text-sm font-semibold text-success">
+                            {addedNote}
+                        </p>
+                    )}
                     <p className="mt-4 text-xs text-muted-foreground">
                         Co-hosts can edit everything except staff. Stewards record day-of class
-                        statuses. Judges will get the judging queue when it ships.
+                        statuses and can scratch entries. Judges work their classes in the judge
+                        queue once judging begins.
                     </p>
                 </section>
             ) : (

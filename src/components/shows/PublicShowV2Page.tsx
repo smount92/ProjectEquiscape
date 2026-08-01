@@ -26,8 +26,10 @@ import {
 import { getShowChampions } from "@/app/actions/shows-v2-ring";
 import { GALLERY_STATUSES, RESULTS_STATUSES, type ShowGalleryData } from "@/lib/shows/gallery";
 import type { EntrantHorse, MyShowEntry, PublicShow } from "@/lib/shows/public";
+import { getShowRole } from "@/lib/shows/queries";
 import type { ShowChampionsData } from "@/lib/shows/ring";
 import { formatStatus } from "@/lib/shows/stateMachine";
+import type { StaffRole } from "@/lib/shows/types";
 import { createClient } from "@/lib/supabase/server";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
 import RichText from "@/components/RichText";
@@ -147,6 +149,49 @@ function ShowMasthead({ show, entryCount }: { show: PublicShow; entryCount: numb
     );
 }
 
+/** "You are staff here" phrasing per role. */
+const STAFF_PHRASES: Record<StaffRole, string> = {
+    host: "the host",
+    co_host: "a co-host",
+    steward: "a steward",
+    judge: "a judge",
+};
+
+/**
+ * Slim ledger strip under the masthead for the show's own staff
+ * (Wave 2): names the viewer's role and deep-links to their bench —
+ * the judge queue while an online judged show is judging, otherwise
+ * the console. Public viewers never see it (staffRole is null).
+ */
+function StaffBanner({ show, role }: { show: PublicShow; role: StaffRole }) {
+    const judgeQueueLive =
+        role === "judge" &&
+        show.mode === "online" &&
+        show.judging === "judged" &&
+        show.status === "judging";
+    const href = judgeQueueLive ? `/shows/host/${show.id}/judge` : `/shows/host/${show.id}`;
+    const label = judgeQueueLive ? "Open the judge queue →" : "Open the show console →";
+    return (
+        <section
+            className="ledger-card flex flex-wrap items-center gap-3 py-3"
+            aria-label="Your role at this show"
+            data-testid="staff-banner"
+        >
+            <span className="stamp">Show Staff</span>
+            <p className="text-sm text-foreground">
+                You are {STAFF_PHRASES[role]} for this show.
+            </p>
+            <Link
+                href={href}
+                className="ml-auto text-sm font-semibold text-forest hover:underline"
+                data-testid="staff-banner-link"
+            >
+                {label}
+            </Link>
+        </section>
+    );
+}
+
 /** Event JSON-LD — built only from data PublicShowV2Page already fetched
  *  (no extra queries). https://schema.org/Event */
 function buildShowJsonLd(show: PublicShow) {
@@ -185,6 +230,11 @@ export default async function PublicShowV2Page({ showId }: { showId: string }) {
 
     let myEntries: MyShowEntry[] = [];
     let horses: EntrantHorse[] = [];
+    // The viewer's staff role on THIS show (host/co-host/steward/judge),
+    // null for everyone else — drives the staff banner. One focused
+    // read on the viewer's own client (getShowRole: shows + show_staff,
+    // RLS-gated); errors just mean "no banner".
+    let staffRole: StaffRole | null = null;
     if (user) {
         const entriesResult = await getMyShowEntries({ showId });
         if (entriesResult.success) myEntries = entriesResult.entries;
@@ -192,6 +242,8 @@ export default async function PublicShowV2Page({ showId }: { showId: string }) {
             const horsesResult = await getMyEntrantHorses();
             if (horsesResult.success) horses = horsesResult.horses;
         }
+        const roleResult = await getShowRole(supabase, showId, user.id);
+        if (!("error" in roleResult)) staffRole = roleResult.role;
     }
 
     // THE ENTRY GALLERY — online shows only, from entries_open
@@ -224,6 +276,8 @@ export default async function PublicShowV2Page({ showId }: { showId: string }) {
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(showJsonLd) }} />
             <div className="flex flex-col gap-6">
                 <ShowMasthead show={show} entryCount={entryCount} />
+
+                {staffRole && <StaffBanner show={show} role={staffRole} />}
 
                 {champions && <ShowChampions champions={champions} />}
 
