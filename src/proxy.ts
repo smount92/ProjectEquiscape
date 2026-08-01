@@ -86,6 +86,11 @@ export async function proxy(request: NextRequest) {
         // (glossary, first-show guide) — public SEO surfaces, no
         // auth, no user data.
         "/learn",
+        // Calendar of record (Wave 3): the merged MHH + external
+        // show calendar — a public SEO surface. Reads are anon-safe
+        // (approved-only external_shows RLS + the public shows
+        // read); submitting a listing gates itself in the action.
+        "/calendar",
     ];
 
     const isPublicRoute =

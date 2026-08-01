@@ -1417,6 +1417,78 @@ export type Database = {
           },
         ]
       }
+      external_shows: {
+        Row: {
+          created_at: string
+          description: string
+          entries_close_on: string | null
+          host_name: string
+          id: string
+          location: string | null
+          platform: string
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          starts_on: string
+          status: string
+          submitted_by: string
+          title: string
+          url: string
+          venue_type: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          entries_close_on?: string | null
+          host_name: string
+          id?: string
+          location?: string | null
+          platform: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          starts_on: string
+          status?: string
+          submitted_by: string
+          title: string
+          url: string
+          venue_type: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          entries_close_on?: string | null
+          host_name?: string
+          id?: string
+          location?: string | null
+          platform?: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          starts_on?: string
+          status?: string
+          submitted_by?: string
+          title?: string
+          url?: string
+          venue_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_shows_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "external_shows_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       featured_horses: {
         Row: {
           created_by: string

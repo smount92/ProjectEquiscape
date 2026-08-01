@@ -11,6 +11,8 @@ import AdminShowManager from"@/components/AdminShowManager";
 import AdminSuggestionsPanel from"@/components/AdminSuggestionsPanel";
 import ReportActions from"@/components/ReportActions";
 import SuggestionAdminActions from"@/components/SuggestionAdminActions";
+import ExternalShowAdminActions from"@/components/calendar/ExternalShowAdminActions";
+import type { PendingExternalShow } from"@/app/actions/external-shows";
 import { Button } from "@/components/ui/button";
 
 interface ContactMessage {
@@ -73,9 +75,10 @@ interface AdminTabsProps {
  suggestions: Suggestion[];
  reports: Report[];
  catalogSuggestions?: CatalogSuggestionAdmin[];
+ externalShows?: PendingExternalShow[];
 }
 
-type TabKey ="mailbox" |"shows" |"content" |"reports" |"catalog";
+type TabKey ="mailbox" |"shows" |"content" |"reports" |"catalog" |"calendar";
 
 const TABS: { key: TabKey; emoji: string; label: string }[] = [
  { key:"mailbox", emoji:"📬", label:"Mailbox" },
@@ -83,6 +86,7 @@ const TABS: { key: TabKey; emoji: string; label: string }[] = [
  { key:"content", emoji:"💡", label:"Content" },
  { key:"reports", emoji:"🚩", label:"Reports" },
  { key:"catalog", emoji:"📚", label:"Catalog" },
+ { key:"calendar", emoji:"🗓️", label:"Calendar" },
 ];
 
 function formatDate(dateStr: string): string {
@@ -146,6 +150,7 @@ export default function AdminTabs({
  suggestions,
  reports,
  catalogSuggestions = [],
+ externalShows = [],
 }: AdminTabsProps) {
  const [activeTab, setActiveTab] = useState<TabKey>("mailbox");
 
@@ -174,6 +179,8 @@ export default function AdminTabs({
  return reports.length > 0 ? reports.length : null;
  case"catalog":
  return catalogSuggestions.length > 0 ? catalogSuggestions.length : null;
+ case"calendar":
+ return externalShows.length > 0 ? externalShows.length : null;
  default:
  return null;
  }
@@ -220,6 +227,7 @@ export default function AdminTabs({
  {activeTab ==="content" && <ContentTab suggestions={suggestions} />}
  {activeTab ==="reports" && <ReportsTab reports={reports} />}
  {activeTab ==="catalog" && <CatalogTab suggestions={catalogSuggestions} />}
+ {activeTab ==="calendar" && <CalendarQueueTab shows={externalShows} />}
  </div>
  </>
  );
@@ -440,6 +448,62 @@ function CatalogTab({ suggestions }: { suggestions: CatalogSuggestionAdmin[] }) 
  </div>
  );
  })}
+ </div>
+ );
+}
+
+/* ═══════════════════════════════════════════
+ Calendar Tab — External Show Listing Queue
+ ═══════════════════════════════════════════ */
+const EXTERNAL_VENUE_LABELS: Record<string, string> = {
+ online_photo:"Online photo show",
+ live:"Live show",
+ mail_in:"Mail-in show",
+};
+
+function CalendarQueueTab({ shows }: { shows: PendingExternalShow[] }) {
+ if (shows.length === 0) {
+ return (
+ <div className="bg-card border-input rounded-lg border px-8 py-12 text-center shadow-md transition-all">
+ <div className="mb-4 text-5xl">🗓️</div>
+ <h2>No Pending Listings</h2>
+ <p>Community-submitted external shows will appear here for review before joining the calendar.</p>
+ </div>
+ );
+ }
+
+ return (
+ <div className="flex flex-col gap-2">
+ {shows.map((s) => (
+ <div key={s.id} className="bg-card border-input rounded-lg border px-6 py-4 transition-all">
+ <div className="mb-1 flex flex-wrap justify-between gap-2">
+ <strong>{s.title}</strong>
+ <span className="text-muted-foreground text-xs">
+ {EXTERNAL_VENUE_LABELS[s.venue_type] ?? s.venue_type} · {s.platform} ·{""}
+ {new Date(s.created_at).toLocaleDateString()}
+ </span>
+ </div>
+ <p className="mb-1 text-sm">
+ By: @{s.submitter_alias} · Host: {s.host_name} · Show date: {s.starts_on}
+ {s.entries_close_on ? ` · Entries close: ${s.entries_close_on}` :""}
+ {s.location ? ` · ${s.location}` :""}
+ </p>
+ <p className="mb-1 text-sm">
+ {/* The link is reviewed, not trusted: opens in a new tab,
+  never passes referrer or opener. */}
+ <a href={s.url} target="_blank" rel="noopener noreferrer nofollow" className="text-forest break-all underline">
+ {s.url}
+ </a>
+ </p>
+ {s.description && (
+ <p className="text-muted-foreground mb-2 text-sm italic">
+ &ldquo;{s.description.slice(0, 200)}
+ {s.description.length > 200 ?"…" :""}&rdquo;
+ </p>
+ )}
+ <ExternalShowAdminActions showId={s.id} />
+ </div>
+ ))}
  </div>
  );
 }

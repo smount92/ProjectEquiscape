@@ -128,6 +128,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             changeFrequency: "daily",
             priority: 0.8,
         },
+        // The calendar of record (Wave 3) — THE landing page for
+        // "model horse show calendar" searches, so it carries the
+        // highest feature-page priority.
+        {
+            url: `${baseUrl}/calendar`,
+            lastModified: now,
+            changeFrequency: "daily",
+            priority: 0.9,
+        },
     ];
 
     // ── Dynamic catalog reference pages (~10,900 rows, within the 50k limit) ──
