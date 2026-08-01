@@ -336,7 +336,7 @@ editionSize: rawPedigree.edition_size,
  <span className="text-[1.3em]">🚨</span>
  <div>
  <strong className="text-destructive">Stolen / Missing</strong>
- <p className="m-[4px 0 0] text-muted-foreground text-sm">
+ <p className="mt-1 text-muted-foreground text-sm">
  This model has been flagged by its owner. Transfers and offers are blocked.
  </p>
  </div>
@@ -364,7 +364,7 @@ editionSize: rawPedigree.edition_size,
  {/* Owner Pill */}
  <Link
  href={`/profile/${encodeURIComponent(ownerAlias)}`}
- className="p-[6px 14px 6px 6px] bg-card border-input text-foreground inline-flex w-fit items-center gap-1 rounded-full rounded-lg border text-sm font-semibold no-underline shadow-md transition-all"
+ className="py-1.5 pr-3.5 pl-1.5 bg-card border-input text-foreground inline-flex w-fit items-center gap-1 rounded-full border text-sm font-semibold no-underline shadow-md transition-all"
  >
  <span className="bg-muted border-input text-muted-foreground flex h-[28px] w-[28px] shrink-0 items-center justify-center rounded-full border">
  <svg
