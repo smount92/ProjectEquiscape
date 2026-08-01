@@ -4,6 +4,7 @@ import { redirect } from"next/navigation";
 import { getPhotoShows } from"@/app/actions/shows";
 import { getPendingSuggestions } from"@/app/actions/suggestions";
 import { getOpenReports } from"@/app/actions/moderation";
+import { listPendingExternalShows } from"@/app/actions/external-shows";
 import AdminTabs from"@/components/AdminTabs";
 import CommandCenterLayout from"@/components/layouts/CommandCenterLayout";
 import { Zap, Shield, Users, Mail } from "lucide-react";
@@ -58,6 +59,11 @@ export default async function AdminPage() {
  const allShows = await getPhotoShows();
  const pendingSuggestions = await getPendingSuggestions();
  const reports = await getOpenReports();
+
+ // Calendar of record: pending external-show listings. The action
+ // re-gates with requireAdmin() and degrades to [] pre-migration.
+ const externalShowsResult = await listPendingExternalShows();
+ const pendingExternalShows = externalShowsResult.success ? externalShowsResult.shows : [];
 
  // Fetch pending catalog curation suggestions
  const { data: catalogSuggestionRows } = await supabaseAdmin
@@ -128,6 +134,7 @@ export default async function AdminPage() {
    suggestions={pendingSuggestions}
    reports={reports}
    catalogSuggestions={catalogSuggestions}
+   externalShows={pendingExternalShows}
    />
   </>
   }
