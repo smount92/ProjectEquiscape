@@ -35,7 +35,7 @@ export default async function DiscoverPage({
  data: { user },
  } = await supabase.auth.getUser();
 
- if (!user) redirect("/login");
+ if (!user) redirect("/login?redirectTo=" + encodeURIComponent("/discover"));
 
  const page = parsePage(await searchParams);
  const from = (page - 1) * PAGE_SIZE;

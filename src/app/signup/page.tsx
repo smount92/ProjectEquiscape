@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { resendConfirmationAction, signupAction, type AuthFormState } from "@/app/auth/actions";
 import { track } from "@/lib/analytics";
 import { Input } from "@/components/ui/input";
@@ -9,6 +10,20 @@ import FocusLayout from "@/components/layouts/FocusLayout";
 import PageMasthead from "@/components/layouts/PageMasthead";
 
 export default function SignupPage() {
+    // useSearchParams needs a Suspense boundary for prerendering.
+    return (
+        <Suspense fallback={null}>
+            <SignupPageInner />
+        </Suspense>
+    );
+}
+
+function SignupPageInner() {
+    // The login page forwards ?redirectTo= here so a visitor who hit a
+    // login wall keeps their destination even if they need an account
+    // first. signupAction stows it in a short-lived cookie so the email
+    // confirmation round-trip (auth/callback) can honor it.
+    const redirectTo = useSearchParams().get("redirectTo") ?? "";
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
     const [isPending, setIsPending] = useState(false);
@@ -149,6 +164,7 @@ export default function SignupPage() {
                     </div>
 
                     <form action={handleSubmit} noValidate>
+                        <input type="hidden" name="redirectTo" value={redirectTo} />
                         <div className="mb-5">
                             <label
                                 htmlFor="signup-alias"

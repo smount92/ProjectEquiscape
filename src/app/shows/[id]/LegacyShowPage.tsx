@@ -28,7 +28,7 @@ export default async function LegacyShowPage({ showId }: { showId: string }) {
  const {
  data: { user },
  } = await supabase.auth.getUser();
- if (!user) redirect("/login");
+ if (!user) redirect("/login?redirectTo=" + encodeURIComponent(`/shows/${showId}`));
 
  const { show, entries } = await getShowEntries(showId);
  if (!show) notFound();

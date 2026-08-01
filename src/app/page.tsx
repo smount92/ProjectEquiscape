@@ -64,11 +64,11 @@ export default function LandingPage() {
                             <Flag size={18} strokeWidth={1.5} /> Host a Show
                         </Link>
                         <Link
-                            href="/community"
+                            href="/shows"
                             className="text-foreground hover:border-forest hover:text-forest inline-flex min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-stone-300 bg-transparent px-8 py-2.5 text-base font-semibold no-underline transition-all"
-                            id="hero-cta-explore"
+                            id="hero-cta-find-show"
                         >
-                            Explore the Show Ring
+                            Find a Show
                         </Link>
                     </div>
                     <p className="text-muted-foreground text-xs tracking-[0.03em]">
@@ -542,6 +542,13 @@ export default function LandingPage() {
                             id="final-cta-host"
                         >
                             <Flag size={18} strokeWidth={1.5} /> Host a Show
+                        </Link>
+                        <Link
+                            href="/shows"
+                            className="text-foreground hover:border-forest hover:text-forest inline-flex min-h-[44px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-stone-300 bg-transparent px-8 py-3 text-base font-semibold no-underline transition-all"
+                            id="final-cta-find-show"
+                        >
+                            Find a Show
                         </Link>
                     </div>
                 </div>

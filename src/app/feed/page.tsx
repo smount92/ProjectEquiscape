@@ -20,7 +20,7 @@ export default async function FeedPage({ searchParams }: { searchParams: Promise
  data: { user },
  } = await supabase.auth.getUser();
 
- if (!user) redirect("/login");
+ if (!user) redirect("/login?redirectTo=" + encodeURIComponent("/feed"));
 
  const { tab } = await searchParams;
  const activeTab = tab ==="following" ?"following" :"global";

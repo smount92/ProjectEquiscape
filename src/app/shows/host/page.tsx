@@ -103,7 +103,7 @@ export default async function HostShowsPage() {
     const {
         data: { user },
     } = await supabase.auth.getUser();
-    if (!user) redirect("/login");
+    if (!user) redirect("/login?redirectTo=" + encodeURIComponent("/shows/host"));
 
     const result = await getHostedShows();
     const shows = result.success ? result.shows : [];

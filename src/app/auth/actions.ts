@@ -1,12 +1,25 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 export interface AuthFormState {
   error: string | null;
   success: boolean;
 }
+
+/**
+ * Where a new signup wanted to go before the account wall: the
+ * `mhh_post_auth_redirect` cookie. Set by signupAction, consumed
+ * (read + cleared) by /auth/callback after the email-confirmation
+ * round-trip. Short-lived: the confirmation link is usually clicked
+ * within minutes; after an hour we fall back to the normal
+ * /getting-started onboarding. (Name inlined here and in
+ * auth/callback/route.ts — "use server" files may only export
+ * async functions.)
+ */
+const POST_AUTH_REDIRECT_COOKIE = "mhh_post_auth_redirect";
 
 /**
  * Open-redirect guard for post-login return trips. Only same-origin absolute
@@ -116,6 +129,21 @@ export async function signupAction(
 
   if (error) {
     return { error: error.message, success: false };
+  }
+
+  // Stow the pre-signup destination (e.g. the show they tried to enter)
+  // so /auth/callback can land them there after email confirmation.
+  // Guarded by safeRedirectPath — never an off-site value.
+  const postAuthRedirect = safeRedirectPath(formData.get("redirectTo"));
+  if (postAuthRedirect) {
+    const cookieStore = await cookies();
+    cookieStore.set(POST_AUTH_REDIRECT_COOKIE, postAuthRedirect, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 60 * 60, // 1 hour
+    });
   }
 
   return {

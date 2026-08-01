@@ -281,7 +281,9 @@ export default async function CommunityPage({
  } = await supabase.auth.getUser();
 
  if (!user) {
- redirect("/login");
+ // Preserve intent through the login round-trip (matches proxy.ts;
+ // loginAction honors it via safeRedirectPath).
+ redirect("/login?redirectTo=" + encodeURIComponent("/community"));
  }
 
  // ── Show Ring v2 (NEXT_PUBLIC_SHOWRING_V2): the filter engine ──

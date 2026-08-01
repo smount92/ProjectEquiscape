@@ -701,9 +701,23 @@ export default function Header() {
  {/* ── Public Navigation (not signed in) ── */}
  {!user && (
  <nav
- className="leather-nav flex flex-row items-center gap-4"
+ className="leather-nav flex flex-row items-center gap-4 max-md:hidden"
  aria-label="Public navigation"
  >
+ <Link
+ href="/shows"
+ className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+ id="nav-shows-public"
+ >
+ <Camera size={16} strokeWidth={1.5} /> Shows
+ </Link>
+ <Link
+ href="/catalog"
+ className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+ id="nav-catalog-public"
+ >
+ <BookOpen size={16} strokeWidth={1.5} /> Catalog
+ </Link>
  <Link
  href="/about"
  className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
@@ -711,27 +725,78 @@ export default function Header() {
  >
  About
  </Link>
- <Link
- href="/catalog"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-catalog-public"
- >
- 📚 Catalog
- </Link>
- <Link
- href="/contact"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-contact"
- >
- Contact
- </Link>
  </nav>
  )}
 
- {/* ── Desktop auth actions for logged-out users ── */}
+ {/* ── Mobile navigation for logged-out users ── */}
  {!user && (
- <div className="flex shrink-0 items-center gap-4">
+ <nav
+ ref={navRef}
+ className={`leather-menu absolute left-0 top-[var(--header-height)] z-[150] flex w-full flex-col gap-1 border-b border-input bg-secondary px-4 py-3 shadow-lg transition-all md:hidden ${mobileMenuOpen ?"" :"hidden"}`}
+ aria-label="Mobile navigation"
+ >
+ <Link
+ href="/shows"
+ className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+ id="nav-shows-public-m"
+ onClick={closeMobileMenu}
+ >
+ <Camera size={16} strokeWidth={1.5} /> Shows
+ </Link>
+ <Link
+ href="/catalog"
+ className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+ id="nav-catalog-public-m"
+ onClick={closeMobileMenu}
+ >
+ <BookOpen size={16} strokeWidth={1.5} /> Catalog
+ </Link>
+ <Link
+ href="/about"
+ className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+ id="nav-about-m"
+ onClick={closeMobileMenu}
+ >
+ About
+ </Link>
+ <div className="mt-2 flex flex-col gap-2 border-t border-input pt-3">
  <Button asChild variant="ghost"><Link
+ href="/login"
+ id="header-login-button-m"
+ onClick={closeMobileMenu}
+ >
+ Log In
+ </Link></Button>
+ <Button asChild><Link
+ href="/signup"
+ id="header-signup-button-m"
+ onClick={closeMobileMenu}
+ >
+ Create Free Account
+ </Link></Button>
+ <button
+ className="border-input bg-card relative flex h-auto w-full cursor-pointer items-center justify-start gap-2 rounded-full border px-2 py-1 text-sm text-muted-foreground transition-all"
+ onClick={() => toggleSimpleMode()}
+ aria-pressed={isSimpleMode ? "true" : "false"}
+ >
+ {isSimpleMode ? (
+ <>
+ <Eye size={16} strokeWidth={1.5} /> Simple Mode: ON
+ </>
+ ) : (
+ <>
+ <EyeOff size={16} strokeWidth={1.5} /> Simple Mode: OFF
+ </>
+ )}
+ </button>
+ </div>
+ </nav>
+ )}
+
+ {/* ── Auth actions for logged-out users (+ mobile hamburger) ── */}
+ {!user && (
+ <div className="flex shrink-0 items-center gap-4 max-md:gap-2">
+ <Button asChild variant="ghost" className="max-md:hidden"><Link
  href="/login"
  id="header-login-button"
  >
@@ -744,7 +809,45 @@ export default function Header() {
  Create Free Account
  </Link></Button>
  <button
- className="border-input bg-card relative flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-full border text-[1.2rem] text-muted-foreground transition-all"
+ className="leather-icon-btn relative hidden max-md:flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-md border border-input bg-transparent text-muted-foreground transition-all"
+ onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+ aria-label={mobileMenuOpen ?"Close menu" :"Open menu"}
+ aria-expanded={mobileMenuOpen ? "true" : "false"}
+ id="public-hamburger"
+ >
+ {mobileMenuOpen ? (
+ <svg
+ width="20"
+ height="20"
+ viewBox="0 0 24 24"
+ fill="none"
+ stroke="currentColor"
+ strokeWidth="2"
+ strokeLinecap="round"
+ strokeLinejoin="round"
+ >
+ <line x1="18" y1="6" x2="6" y2="18" />
+ <line x1="6" y1="6" x2="18" y2="18" />
+ </svg>
+ ) : (
+ <svg
+ width="20"
+ height="20"
+ viewBox="0 0 24 24"
+ fill="none"
+ stroke="currentColor"
+ strokeWidth="2"
+ strokeLinecap="round"
+ strokeLinejoin="round"
+ >
+ <line x1="3" y1="6" x2="21" y2="6" />
+ <line x1="3" y1="12" x2="21" y2="12" />
+ <line x1="3" y1="18" x2="21" y2="18" />
+ </svg>
+ )}
+ </button>
+ <button
+ className="border-input bg-card relative flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-full border text-[1.2rem] text-muted-foreground transition-all max-md:hidden"
  onClick={toggleSimpleMode}
  aria-pressed={isSimpleMode ? "true" : "false"}
  aria-label={
