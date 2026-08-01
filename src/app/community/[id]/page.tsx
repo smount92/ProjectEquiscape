@@ -25,6 +25,7 @@ import type { AssetCategory } from"@/lib/types/database";
 import { Button } from "@/components/ui/button";
 import { referenceHref, referencePagesEnabled } from"@/lib/catalog/referenceUrl";
 import AnonPassport from"@/components/passport/AnonPassport";
+import PublicCardsSection from"@/components/shows/PublicCardsSection";
 import { PARCHMENT_INK } from"@/lib/theme/parchment";
 
 // Force fresh data on every request — prevents stale comments/favorites
@@ -743,6 +744,11 @@ editionSize: rawPedigree.edition_size,
  )}
  </div>
  )}
+
+ {/* MHH Qualification Cards — public trust section (anon-safe RPC,
+     migration 141). Renders nothing until the migration is applied
+     or when the horse holds no live cards. */}
+ <PublicCardsSection horseId={horseId} />
 
  {/* 🐾 Hoofprint — Public Read-Only */}
  {await (async () => {

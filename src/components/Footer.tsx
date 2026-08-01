@@ -21,7 +21,9 @@ export default function Footer() {
                 <div className="flex gap-16 max-md:flex-wrap max-md:justify-center max-md:gap-12">
                     <div className="flex flex-col gap-2 max-md:min-w-[120px] max-md:items-center max-md:text-center [&_a]:text-sm [&_a]:text-secondary-foreground [&_a]:no-underline [&_a]:transition-colors [&_a:hover]:text-forest">
                         <h4 className="mb-1 text-xs font-bold tracking-wider text-secondary-foreground/70 uppercase">Platform</h4>
-                        <Link href="/discover">Show Ring</Link>
+                        {/* Show Ring lives at /community (matches the header nav —
+                            this previously pointed at /discover by mistake). */}
+                        <Link href="/community">Show Ring</Link>
                         <Link href="/market">Price Guide</Link>
                         <Link href="/studio">Art Studio</Link>
                         <Link href="/shows">Photo Shows</Link>
@@ -32,6 +34,8 @@ export default function Footer() {
                         <Link href="/community/events">Events</Link>
                         <Link href="/feed">Activity Feed</Link>
                         <Link href="/community/help-id">Help ID</Link>
+                        <Link href="/learn/glossary">Showing Glossary</Link>
+                        <Link href="/learn/enter-your-first-photo-show">Your First Photo Show</Link>
                     </div>
                     <div className="flex flex-col gap-2 max-md:min-w-[120px] max-md:items-center max-md:text-center [&_a]:text-sm [&_a]:text-secondary-foreground [&_a]:no-underline [&_a]:transition-colors [&_a:hover]:text-forest">
                         <h4 className="mb-1 text-xs font-bold tracking-wider text-secondary-foreground/70 uppercase">Company</h4>

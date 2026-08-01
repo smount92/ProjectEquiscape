@@ -18,6 +18,7 @@ import InsuranceReportButton from "@/components/InsuranceReportButton";
 import TransferHistorySection from "@/components/TransferHistorySection";
 import NanDashboardWidget from "@/components/NanDashboardWidget";
 import ShowHistoryWidget from "@/components/ShowHistoryWidget";
+import ShowLifeRail from "@/components/shows/ShowLifeRail";
 import { getShowHistory } from "@/app/actions/shows";
 import { getStablePage, getStableSummary, listStableViews } from "@/app/actions/stable";
 import { parseStableSearchParams } from "@/lib/stable/filterParams";
@@ -167,6 +168,14 @@ export default async function DashboardV2({
                             </div>
                         </div>
                     )}
+
+                    {/* Shows — the member's show life (audit: "member home
+                        never mentions shows"). Hides itself for members with
+                        no entries/results, behind the v2 flag, and on any
+                        data failure. */}
+                    <Suspense fallback={null}>
+                        <ShowLifeRail />
+                    </Suspense>
 
                     {/* Collections */}
                     {summary.collections.length > 0 && (

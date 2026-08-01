@@ -82,6 +82,10 @@ export async function proxy(request: NextRequest) {
         // "anyone can verify a card" trust page — anon must reach it.
         // Reads go through the anon-safe verify_qualification_card RPC.
         "/cards",
+        // Education (Wave 2): /learn/* are static hobby guides
+        // (glossary, first-show guide) — public SEO surfaces, no
+        // auth, no user data.
+        "/learn",
     ];
 
     const isPublicRoute =
