@@ -228,6 +228,28 @@ export async function updateShowSettings(
         return { success: false, error: "A show's mode can only change while it is a draft." };
     }
 
+    // Entry window must stay ordered even when the patch carries only
+    // one of the two dates — compare against the stored other half.
+    // (The schema already rejects a patch carrying both inverted.)
+    if (patch.entriesOpenAt !== undefined || patch.entriesCloseAt !== undefined) {
+        const { data: stored } = await supabase
+            .from("shows")
+            .select("entries_open_at, entries_close_at")
+            .eq("id", showId)
+            .single<{ entries_open_at: string | null; entries_close_at: string | null }>();
+        const effectiveOpen =
+            patch.entriesOpenAt !== undefined ? patch.entriesOpenAt : stored?.entries_open_at;
+        const effectiveClose =
+            patch.entriesCloseAt !== undefined ? patch.entriesCloseAt : stored?.entries_close_at;
+        if (
+            effectiveOpen &&
+            effectiveClose &&
+            new Date(effectiveOpen) >= new Date(effectiveClose)
+        ) {
+            return { success: false, error: "Entries must open before they close." };
+        }
+    }
+
     const update: Record<string, unknown> = {};
     if (patch.title !== undefined) update.title = patch.title;
     if (patch.mode !== undefined) update.mode = patch.mode;

@@ -102,7 +102,17 @@ export const updateShowSettingsSchema = z.object({
         })
         .refine((p) => Object.keys(p).length > 0, {
             message: "Nothing to update.",
-        }),
+        })
+        // When a patch carries BOTH dates, the window must be ordered.
+        // A patch carrying only one is checked in the action against
+        // the stored other half (the schema can't see the DB).
+        .refine(
+            (p) =>
+                !p.entriesOpenAt ||
+                !p.entriesCloseAt ||
+                new Date(p.entriesOpenAt) < new Date(p.entriesCloseAt),
+            { message: "Entries must open before they close." },
+        ),
 });
 
 export const transitionShowStatusSchema = z.object({

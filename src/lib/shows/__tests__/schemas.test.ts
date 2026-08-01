@@ -90,6 +90,38 @@ describe("schemas — updateShowSettings / transitionShowStatus", () => {
         expect(updateShowSettingsSchema.safeParse({ showId: "abc", patch: { title: "New Name" } }).success).toBe(false);
     });
 
+    it("rejects a patch whose entry window is inverted", () => {
+        const r = updateShowSettingsSchema.safeParse({
+            showId: UUID,
+            patch: {
+                entriesOpenAt: "2026-09-01T10:00:00.000Z",
+                entriesCloseAt: "2026-08-01T10:00:00.000Z",
+            },
+        });
+        expect(r.success).toBe(false);
+        if (!r.success) expect(firstZodError(r.error)).toMatch(/open before they close/i);
+    });
+
+    it("accepts an ordered entry window, and a single-date patch", () => {
+        expect(
+            updateShowSettingsSchema.safeParse({
+                showId: UUID,
+                patch: {
+                    entriesOpenAt: "2026-08-01T10:00:00.000Z",
+                    entriesCloseAt: "2026-09-01T10:00:00.000Z",
+                },
+            }).success,
+        ).toBe(true);
+        // One date alone passes the schema — the action checks it
+        // against the stored other half.
+        expect(
+            updateShowSettingsSchema.safeParse({
+                showId: UUID,
+                patch: { entriesCloseAt: "2026-09-01T10:00:00.000Z" },
+            }).success,
+        ).toBe(true);
+    });
+
     it("transition accepts only known statuses", () => {
         expect(transitionShowStatusSchema.safeParse({ showId: UUID, to: "published" }).success).toBe(true);
         expect(transitionShowStatusSchema.safeParse({ showId: UUID, to: "on_fire" }).success).toBe(false);
