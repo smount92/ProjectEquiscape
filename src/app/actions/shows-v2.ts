@@ -1371,6 +1371,7 @@ export async function getShowConsole(
                 blindBrowsing: show.blind_browsing as boolean,
                 createdAt: show.created_at as string,
             },
+            viewerId: user.id,
             viewerRole: ctx.role,
             divisions,
             staff: staffMembers,

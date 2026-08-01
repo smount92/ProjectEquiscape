@@ -109,6 +109,9 @@ export interface ConsoleEntry {
 
 export interface ShowConsoleData {
     show: ConsoleShow;
+    /** The viewer's own user id — lets client tabs exclude the viewer
+     *  from counts (e.g. the announce composer's recipient preview). */
+    viewerId: string;
     /** The viewer's role on this show — never null (reads are staff-gated). */
     viewerRole: StaffRole;
     divisions: ConsoleDivision[];
