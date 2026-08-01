@@ -45,8 +45,11 @@ test.describe("Show System — E2E", () => {
 
         if (cardCount > 0) {
             const firstCard = showLinks.first();
-            // Every show card should have a status badge (🟢/🟡/🔴)
-            await expect(firstCard.locator(".show-status-badge")).toBeVisible();
+            // Every v2 card carries a status stamp (published / entries
+            // open / judging / results final …)
+            await expect(
+                firstCard.getByText(/published|entries open|entries closed|judging|results|final|archived/i).first(),
+            ).toBeVisible();
         } else {
             test.skip(true, "No shows exist");
         }
@@ -64,8 +67,10 @@ test.describe("Show System — E2E", () => {
 
         await firstCard.click();
         await page.waitForURL("**/shows/**", { timeout: 10000 });
-        // Verify we're on a show detail page — should have breadcrumb
-        await expect(page.locator("text=← All Shows")).toBeVisible({ timeout: 5000 });
+        // Verify we're on a v2 show detail page — the state banner is
+        // its stable landmark (legacy pages had a "← All Shows"
+        // breadcrumb; v2 does not).
+        await expect(page.getByTestId("show-state-banner")).toBeVisible({ timeout: 5000 });
     });
 
     // ── Show Detail Page ──
@@ -83,14 +88,16 @@ test.describe("Show System — E2E", () => {
         await firstCard.click();
         await page.waitForURL("**/shows/**", { timeout: 10000 });
 
+        // Generous timeouts: under full-suite parallelism the dev server
+        // may still be cold-compiling this route (observed flake, solo-green).
         // Title should be visible (h1 with show name)
-        await expect(page.locator("h1").first()).toBeVisible();
+        await expect(page.locator("h1").first()).toBeVisible({ timeout: 20000 });
 
-        // Stats section should show entry count
-        await expect(page.locator("text=Entries")).toBeVisible();
+        // At-a-glance card shows the entries line
+        await expect(page.getByText(/Entries/i).first()).toBeVisible({ timeout: 20000 });
 
-        // Breadcrumb back to all shows
-        await expect(page.locator("text=← All Shows")).toBeVisible();
+        // State banner is the v2 page landmark
+        await expect(page.getByTestId("show-state-banner")).toBeVisible({ timeout: 20000 });
     });
 
     test("open show displays entry form with horse selector", async ({ page }) => {
@@ -156,8 +163,10 @@ test.describe("Show System — E2E", () => {
         await showCard.click();
         await page.waitForURL("**/shows/**", { timeout: 10000 });
 
-        // Page should render — any entries will be displayed in ShowResultsView
-        await expect(page.locator("h1").first()).toBeVisible();
+        // Page should render — any entries will be displayed in ShowResultsView.
+        // Generous timeout: under full-suite parallelism the dev server may
+        // still be cold-compiling this route (observed flake, passes solo).
+        await expect(page.locator("h1").first()).toBeVisible({ timeout: 20000 });
 
         // Check for entry count in stats
         const entriesText = page.locator("text=Entries");
