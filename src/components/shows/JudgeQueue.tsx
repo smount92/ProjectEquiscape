@@ -1,33 +1,62 @@
 "use client";
 
 /**
- * Phase E1 — the online JUDGE QUEUE (/shows/host/[id]/judge).
- * Class-by-class: every entry photo side by side, tap entries in
- * the order they place (1st, 2nd, … 6th — the placings.ts
- * vocabulary), optional per-entry critique, then save the slate
- * (whole-class batch via recordPlacings) and mark the class done.
+ * Wave 4a — RIBBON-TRAY JUDGING (/shows/host/[id]/judge).
  *
- * Mobile-first by design — judges work from tablets and phones.
- * Blind judging: when the payload carries no owner aliases the
- * queue shows leg-tag numbers only (server-enforced, see
- * getJudgeQueue).
+ * The judge works class by class between two leather rails: a sticky
+ * class header (prev/next + "All classes" jump list) on top and THE
+ * RIBBON TRAY stuck to the bottom. Tapping a horse pins the lowest
+ * empty ribbon on it; tapping a ribbon in the tray (or a placed
+ * horse) takes exactly that ribbon back — nobody else shifts. The
+ * model is a sparse place → entry map (judgeTray.ts), not an ordered
+ * list, which is the whole anxiety fix.
+ *
+ * Every tray change autosaves (debounced ~900ms, one request in
+ * flight, latest state wins) through the unchanged recordPlacings
+ * contract; the tray whispers "Saving… / Saved ✓". "Class done →"
+ * runs the final save with markDone and moves to the next unplaced
+ * class. Blind judging stays server-enforced — no aliases in the
+ * payload means none render.
+ *
+ * Mobile-first: a volunteer judge places 22 classes on her phone.
  */
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { recordPlacings } from "@/app/actions/shows-v2";
 import type { JudgeQueueClass, JudgeQueueData } from "@/lib/shows/gallery";
-import { MAX_PLACE, placeLabel, ribbonHex } from "@/lib/shows/placings";
+import {
+    AUTOSAVE_DEBOUNCE_MS,
+    autosaveReducer,
+    clearSlot,
+    entryAriaLabel,
+    hydrateTray,
+    INITIAL_AUTOSAVE,
+    placeOfEntry,
+    relaxDelayMs,
+    tapEntry,
+    toServerPlacings,
+    whisperText,
+    type TraySlots,
+} from "@/lib/shows/judgeTray";
+import { placeLabel, ribbonHex } from "@/lib/shows/placings";
 import type { Place } from "@/lib/shows/types";
 import PhotoLightbox from "@/components/PhotoLightbox";
 import CallbackLadder from "@/components/shows/CallbackLadder";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import JudgeClassHeader from "@/components/shows/JudgeClassHeader";
+import RibbonTray from "@/components/shows/RibbonTray";
 import { Textarea } from "@/components/ui/textarea";
 
 function classLabel(cls: { classNumber: string | null; className: string }): string {
     return cls.classNumber ? `${cls.classNumber} · ${cls.className}` : cls.className;
+}
+
+/** Clock read kept out of the component body (react-hooks/purity —
+ *  same pattern as catalog/page.tsx). Only ever called from the
+ *  async save pipeline and effects, never during render. */
+function nowMs(): number {
+    return Date.now();
 }
 
 export default function JudgeQueue({ queue }: { queue: JudgeQueueData }) {
@@ -38,12 +67,89 @@ export default function JudgeQueue({ queue }: { queue: JudgeQueueData }) {
         const first = classes.findIndex((c) => c.status !== "placed");
         return first >= 0 ? first : 0;
     });
-    // Remount the per-class recorder whenever fresh server data flows.
-    const [refreshNonce, setRefreshNonce] = useState(0);
+    // Classes marked done this session — server props catch up via
+    // router.refresh(); this keeps progress + advance instant.
+    const [locallyDone, setLocallyDone] = useState<ReadonlySet<string>>(() => new Set());
+    const [toast, setToast] = useState<string | null>(null);
+    const [celebrating, setCelebrating] = useState(false);
+    const ladderRef = useRef<HTMLDivElement | null>(null);
 
-    const placedCount = classes.filter((c) => c.status === "placed").length;
+    // First-visit instruction: a queue with no ribbons pinned anywhere yet.
+    const [showHint] = useState(
+        () =>
+            classes.every((c) => c.status !== "placed") &&
+            classes.every((c) => c.entries.every((e) => e.place === null)),
+    );
+
+    const placedIds = useMemo(() => {
+        const ids = new Set<string>();
+        for (const c of classes) if (c.status === "placed") ids.add(c.classId);
+        for (const id of locallyDone) ids.add(id);
+        return ids;
+    }, [classes, locallyDone]);
+    const placedCount = placedIds.size;
+    const serverPlacedCount = classes.filter((c) => c.status === "placed").length;
+
     const activeClass = classes[activeIndex];
     const canRecord = show.status === "judging";
+
+    // Transient "class done" toast.
+    useEffect(() => {
+        if (toast === null) return;
+        const timer = setTimeout(() => setToast(null), 2600);
+        return () => clearTimeout(timer);
+    }, [toast]);
+
+    // The championship round mounts from SERVER truth (contract
+    // unchanged); once the 🎉 shows and the ladder is real, scroll
+    // it into view a beat later.
+    const ladderMounted = classes.length > 0 && serverPlacedCount === classes.length;
+    useEffect(() => {
+        if (!celebrating || !ladderMounted) return;
+        const timer = setTimeout(() => {
+            ladderRef.current?.scrollIntoView?.({ behavior: "smooth", block: "start" });
+        }, 1400);
+        return () => clearTimeout(timer);
+    }, [celebrating, ladderMounted]);
+
+    // Any edit re-opens a class server-side (recordPlacings flips it
+    // back to judging) — drop the optimistic ✓ so the header stays
+    // honest, and step out of the celebration if we were in it.
+    const handleClassEdited = (cls: JudgeQueueClass) => {
+        setLocallyDone((prev) => {
+            if (!prev.has(cls.classId)) return prev;
+            const next = new Set(prev);
+            next.delete(cls.classId);
+            return next;
+        });
+        setCelebrating(false);
+    };
+
+    const handleClassDone = (cls: JudgeQueueClass) => {
+        const done = new Set(placedIds);
+        done.add(cls.classId);
+        setLocallyDone((prev) => {
+            const next = new Set(prev);
+            next.add(cls.classId);
+            return next;
+        });
+        // Advance to the next class not yet marked done (forward from
+        // here, wrapping) — or celebrate when that was the last one.
+        let nextIndex: number | null = null;
+        for (let step = 1; step < classes.length; step++) {
+            const i = (activeIndex + step) % classes.length;
+            if (!done.has(classes[i].classId)) {
+                nextIndex = i;
+                break;
+            }
+        }
+        if (nextIndex !== null) {
+            setToast(`${classLabel(cls)} done ✓`);
+            setActiveIndex(nextIndex);
+        } else {
+            setCelebrating(true);
+        }
+    };
 
     if (classes.length === 0) {
         return (
@@ -58,123 +164,265 @@ export default function JudgeQueue({ queue }: { queue: JudgeQueueData }) {
 
     return (
         <div className="flex flex-col gap-4">
-            {/* ── Progress + class navigation ── */}
-            <div className="ledger-card">
-                <span className="ledger-tab">Judging Progress</span>
-                <div className="flex flex-wrap items-center gap-3">
-                    <span className="stamp" data-testid="judge-progress">
-                        {placedCount} of {classes.length} classes placed
-                    </span>
-                    {!canRecord && (
-                        <span className="text-sm text-muted-foreground">
-                            {show.status === "results_review"
-                                ? "This show is in results review — reopen judging from the console to change placings."
-                                : "Recording opens when the show enters judging."}
-                        </span>
-                    )}
-                </div>
-                <div
-                    className="mt-3 flex gap-1 overflow-x-auto pb-1 [-webkit-overflow-scrolling:touch]"
-                    role="tablist"
-                    aria-label="Classes"
-                >
-                    {classes.map((cls, i) => (
-                        <button
-                            key={cls.classId}
-                            role="tab"
-                            aria-selected={i === activeIndex}
-                            title={classLabel(cls)}
-                            className={`flex min-h-9 min-w-9 cursor-pointer items-center justify-center rounded-md border px-2 font-mono text-xs font-semibold whitespace-nowrap transition-all ${
-                                i === activeIndex
-                                    ? "border-forest bg-forest text-primary-foreground"
-                                    : cls.status === "placed"
-                                      ? "border-forest/40 bg-muted text-forest"
-                                      : "border-input bg-card text-muted-foreground"
-                            }`}
-                            onClick={() => setActiveIndex(i)}
-                        >
-                            {cls.classNumber ?? i + 1}
-                            {cls.status === "placed" && <span aria-label="placed"> ✓</span>}
-                        </button>
-                    ))}
-                </div>
-            </div>
+            <JudgeClassHeader
+                items={classes.map((c) => ({
+                    classId: c.classId,
+                    className: c.className,
+                    classNumber: c.classNumber,
+                    entryCount: c.entries.length,
+                    placed: placedIds.has(c.classId),
+                }))}
+                activeIndex={activeIndex}
+                placedCount={placedCount}
+                onNavigate={setActiveIndex}
+            />
+
+            {!canRecord && (
+                <p className="text-sm text-muted-foreground">
+                    {show.status === "results_review"
+                        ? "This show is in results review — reopen judging from the console to change placings."
+                        : "Recording opens when the show enters judging."}
+                </p>
+            )}
+
+            {showHint && canRecord && (
+                <p data-testid="tray-hint" className="text-sm text-muted-foreground">
+                    Tap a horse to pin the next ribbon on it. Tap a ribbon in the tray to
+                    take it back. Everything saves as you go.
+                </p>
+            )}
 
             {activeClass && (
                 <ClassRecorder
-                    key={`${activeClass.classId}-${refreshNonce}`}
+                    key={activeClass.classId}
                     cls={activeClass}
                     canRecord={canRecord}
-                    onSaved={() => {
-                        setRefreshNonce((n) => n + 1);
-                    }}
-                    onNext={
-                        activeIndex < classes.length - 1
-                            ? () => setActiveIndex(activeIndex + 1)
-                            : null
-                    }
+                    onEdited={() => handleClassEdited(activeClass)}
+                    onDone={() => handleClassDone(activeClass)}
                 />
+            )}
+
+            {celebrating && (
+                <div className="ledger-card" role="status" data-testid="judging-complete">
+                    <p className="text-base font-semibold text-forest">
+                        All {classes.length} classes judged 🎉 — championship callbacks are
+                        ready.
+                    </p>
+                </div>
             )}
 
             {/* ── THE CHAMPIONSHIP ROUND (Phase E2) — once every class
                 is placed, the same section → division → show callback
                 ladder as the live ring, photos side by side. ── */}
-            {placedCount === classes.length && (
-                <CallbackLadder
-                    showId={show.id}
-                    canRecord={canRecord}
-                    classes={classes.map((c) => ({
-                        classId: c.classId,
-                        sectionId: c.sectionId,
-                        divisionId: c.divisionId,
-                        status: c.status,
-                        entries: c.entries.map((e) => ({
-                            id: e.id,
-                            horseName: e.horseName,
-                            entryNumber: e.entryNumber,
-                            photoUrl: e.photoUrl,
-                            place: e.place,
-                        })),
-                    }))}
-                    sections={sections}
-                    divisions={divisions}
-                    callbacks={callbacks}
-                    onSaved={() => router.refresh()}
-                />
+            {ladderMounted && (
+                <div ref={ladderRef}>
+                    <CallbackLadder
+                        showId={show.id}
+                        canRecord={canRecord}
+                        classes={classes.map((c) => ({
+                            classId: c.classId,
+                            sectionId: c.sectionId,
+                            divisionId: c.divisionId,
+                            status: c.status,
+                            entries: c.entries.map((e) => ({
+                                id: e.id,
+                                horseName: e.horseName,
+                                entryNumber: e.entryNumber,
+                                photoUrl: e.photoUrl,
+                                place: e.place,
+                            })),
+                        }))}
+                        sections={sections}
+                        divisions={divisions}
+                        callbacks={callbacks}
+                        onSaved={() => router.refresh()}
+                    />
+                </div>
             )}
+
+            {/* Persistent live region: the container pre-exists so the
+                class-done announcement is actually read out. */}
+            <div
+                role="status"
+                aria-live="polite"
+                className="pointer-events-none fixed bottom-28 left-1/2 z-50 -translate-x-1/2"
+            >
+                {toast && (
+                    <span
+                        data-testid="judge-toast"
+                        className="stamp bg-(--paper-lit) whitespace-nowrap shadow-lg"
+                    >
+                        {toast}
+                    </span>
+                )}
+            </div>
         </div>
     );
 }
 
-/** One class's tap-to-place recorder. Remounted per class/save. */
+/**
+ * One class's ribbon-tray recorder. Mounted per class (key=classId);
+ * local state is the source of truth while judging — server props
+ * refresh underneath via router.refresh() and re-hydrate on the next
+ * mount of this class.
+ */
 function ClassRecorder({
     cls,
     canRecord,
-    onSaved,
-    onNext,
+    onEdited,
+    onDone,
 }: {
     cls: JudgeQueueClass;
     canRecord: boolean;
-    onSaved: () => void;
-    onNext: (() => void) | null;
+    /** Fires on every local edit — the parent drops its optimistic ✓. */
+    onEdited: () => void;
+    onDone: () => void;
 }) {
     const router = useRouter();
-    // The slate: entry ids in place order (index 0 = 1st).
-    const [order, setOrder] = useState<string[]>(() =>
-        cls.entries
-            .filter((e) => e.place !== null)
-            .sort((a, b) => (a.place as number) - (b.place as number))
-            .map((e) => e.id),
-    );
+    const [slots, setSlots] = useState<TraySlots>(() => hydrateTray(cls.entries));
     const [notes, setNotes] = useState<Record<string, string>>(() => {
         const initial: Record<string, string> = {};
         for (const e of cls.entries) if (e.note) initial[e.id] = e.note;
         return initial;
     });
     const [noteOpenFor, setNoteOpenFor] = useState<string | null>(null);
-    const [saving, setSaving] = useState<"save" | "done" | null>(null);
-    const [error, setError] = useState<string | null>(null);
+    const [refusal, setRefusal] = useState<string | null>(null);
+    const [doneSaving, setDoneSaving] = useState(false);
     const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+    const [autosave, dispatch] = useReducer(autosaveReducer, INITIAL_AUTOSAVE);
+    // The savedAtMs whose "Saved just now ✓" has relaxed to "Saved ✓".
+    // Keyed to the timestamp so a fresh save un-relaxes by identity —
+    // no state resets in effects needed.
+    const [relaxedAtMs, setRelaxedAtMs] = useState<number | null>(null);
+
+    // Latest-state mirrors for the async save pipeline: the payload
+    // always reflects the newest tap, whichever request carries it.
+    // Written in the depless effect below (never during render) and
+    // read only by timers, handlers and save completions.
+    const payloadRef = useRef({ slots, notes });
+    const versionRef = useRef(0);
+    const savedVersionRef = useRef(0);
+    const inFlightRef = useRef(false);
+    const pendingDoneRef = useRef(false);
+    const onDoneRef = useRef(onDone);
+    const onEditedRef = useRef(onEdited);
+
+    const markChanged = () => {
+        versionRef.current += 1;
+        dispatch({ type: "change" });
+        onEditedRef.current();
+    };
+
+    /**
+     * The single save pipeline (autosave + Class done). One request
+     * in flight; a done-tap during a flight queues behind it; a
+     * success for a stale version immediately chases the newest
+     * state. Errors preserve the tray and wait for a change/retry.
+     */
+    const runSave = async (markDone: boolean): Promise<void> => {
+        if (!canRecord) return;
+        if (inFlightRef.current) {
+            if (markDone) pendingDoneRef.current = true;
+            return;
+        }
+        if (!markDone && versionRef.current <= savedVersionRef.current) return;
+        inFlightRef.current = true;
+        const sentVersion = versionRef.current;
+        if (markDone) setDoneSaving(true);
+        dispatch({ type: "saveStart" });
+        const { slots: currentSlots, notes: currentNotes } = payloadRef.current;
+        const result = await recordPlacings({
+            classId: cls.classId,
+            placings: toServerPlacings(currentSlots, currentNotes),
+            markDone,
+        });
+        inFlightRef.current = false;
+        if (markDone) setDoneSaving(false);
+        if (!result.success) {
+            pendingDoneRef.current = false;
+            dispatch({ type: "saveError", version: sentVersion, error: result.error });
+            return;
+        }
+        savedVersionRef.current = Math.max(savedVersionRef.current, sentVersion);
+        dispatch({ type: "saveSuccess", version: sentVersion, atMs: nowMs() });
+        router.refresh();
+        if (markDone) {
+            pendingDoneRef.current = false;
+            onDoneRef.current();
+            return;
+        }
+        if (pendingDoneRef.current) {
+            pendingDoneRef.current = false;
+            void runSave(true);
+            return;
+        }
+        if (versionRef.current > sentVersion) void runSave(false);
+    };
+    const runSaveRef = useRef(runSave);
+
+    // Keep the mirrors fresh after every commit. React flushes
+    // passive effects before processing the next discrete event, so
+    // handlers and timers always read the latest committed state.
+    useEffect(() => {
+        payloadRef.current = { slots, notes };
+        onDoneRef.current = onDone;
+        onEditedRef.current = onEdited;
+        runSaveRef.current = runSave;
+    });
+
+    // Debounce: every edit re-arms the ~900ms timer.
+    useEffect(() => {
+        if (!canRecord || autosave.version === 0) return;
+        if (autosave.version <= savedVersionRef.current) return;
+        const timer = setTimeout(() => {
+            void runSaveRef.current(false);
+        }, AUTOSAVE_DEBOUNCE_MS);
+        return () => clearTimeout(timer);
+    }, [autosave.version, canRecord]);
+
+    // Relax "Saved just now ✓" to "Saved ✓" ~30s after a save lands.
+    // Clock reads stay in the effect; the state write happens only in
+    // the timer callback. A stale relax (older savedAtMs) is inert.
+    useEffect(() => {
+        if (autosave.status !== "saved" || autosave.savedAtMs === null) return;
+        const at = autosave.savedAtMs;
+        const timer = setTimeout(() => setRelaxedAtMs(at), relaxDelayMs(at, nowMs()));
+        return () => clearTimeout(timer);
+    }, [autosave.status, autosave.savedAtMs]);
+
+    const whisper = whisperText(
+        autosave,
+        autosave.savedAtMs !== null && autosave.savedAtMs !== relaxedAtMs,
+    );
+
+    const handleTapEntry = (entryId: string) => {
+        if (!canRecord) return;
+        const result = tapEntry(payloadRef.current.slots, entryId);
+        if (result.kind === "refused") {
+            setRefusal(result.message);
+            return;
+        }
+        setRefusal(null);
+        setSlots(result.slots);
+        markChanged();
+    };
+
+    const handleClearSlot = (place: Place) => {
+        if (!canRecord) return;
+        setRefusal(null);
+        setSlots((prev) => clearSlot(prev, place));
+        markChanged();
+    };
+
+    const handleNoteChange = (entryId: string, value: string) => {
+        setNotes((prev) => ({ ...prev, [entryId]: value }));
+        markChanged();
+    };
+
+    const handleRetry = () => {
+        dispatch({ type: "retry" });
+        void runSaveRef.current(false);
+    };
 
     const lightboxImages = useMemo(
         () =>
@@ -189,91 +437,47 @@ function ClassRecorder({
         [cls.entries],
     );
 
-    const placeOf = (entryId: string): Place | null => {
-        const i = order.indexOf(entryId);
-        return i >= 0 ? ((i + 1) as Place) : null;
-    };
-
-    /** Tap: unplaced entries take the next open place; placed
-     *  entries step back out (everyone below moves up). */
-    const toggleEntry = (entryId: string) => {
-        if (!canRecord) return;
-        setError(null);
-        setOrder((prev) => {
-            if (prev.includes(entryId)) return prev.filter((id) => id !== entryId);
-            if (prev.length >= MAX_PLACE) return prev;
-            return [...prev, entryId];
-        });
-    };
-
-    const save = async (markDone: boolean) => {
-        setSaving(markDone ? "done" : "save");
-        setError(null);
-        const result = await recordPlacings({
-            classId: cls.classId,
-            placings: order.map((entryId, i) => ({
-                entryId,
-                place: i + 1,
-                note: notes[entryId]?.trim() ? notes[entryId].trim() : undefined,
-            })),
-            markDone,
-        });
-        setSaving(null);
-        if (!result.success) {
-            setError(result.error);
-            return;
-        }
-        onSaved();
-        router.refresh();
-        if (markDone && onNext) onNext();
-    };
-
     return (
-        <section className="ledger-card" aria-label={`Judging ${classLabel(cls)}`}>
-            <div className="flex flex-wrap items-center gap-3">
-                <span className="ledger-tab !mb-0">{classLabel(cls)}</span>
-                <span className="text-xs text-muted-foreground">
+        <section className="flex flex-col gap-3" aria-label={`Judging ${classLabel(cls)}`}>
+            <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                <span>
                     {cls.divisionName} · {cls.sectionName}
                 </span>
                 {cls.status === "placed" && <span className="stamp">placed</span>}
             </div>
 
-            {cls.entries.length === 0 ? (
-                <p className="mt-3 text-sm text-muted-foreground">
-                    No live entries in this class — mark it done and move on.
-                </p>
-            ) : (
-                <>
-                    <p className="mt-2 text-sm text-muted-foreground">
-                        Tap entries in placing order — first tap is 1st place. Tap again to
-                        remove. {MAX_PLACE} places maximum.
-                    </p>
-                    <ul className="mt-3 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3">
-                        {cls.entries.map((entry) => {
-                            const place = placeOf(entry.id);
-                            return (
-                                <li key={entry.id} className="flex flex-col gap-1.5">
+            {cls.entries.length === 0 && !canRecord && (
+                <p className="text-sm text-muted-foreground">No live entries in this class.</p>
+            )}
+
+            {cls.entries.length > 0 && (
+                <ul className="grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3">
+                    {cls.entries.map((entry) => {
+                        const place = placeOfEntry(slots, entry.id);
+                        const hasNote = Boolean(notes[entry.id]?.trim());
+                        return (
+                            <li key={entry.id} className="flex flex-col gap-1.5">
+                                <div
+                                    className={`relative overflow-hidden rounded-lg border-2 bg-card transition-all ${
+                                        place !== null
+                                            ? "border-forest ring-2 ring-forest"
+                                            : "border-input"
+                                    }`}
+                                >
                                     <button
                                         type="button"
                                         data-testid="judge-entry"
                                         aria-pressed={place !== null}
-                                        aria-label={
-                                            place !== null
-                                                ? `${entry.horseName} — ${placeLabel(place)}. Tap to remove.`
-                                                : `${entry.horseName} — tap to place`
-                                        }
-                                        className={`relative min-h-11 cursor-pointer overflow-hidden rounded-lg border-2 bg-card p-0 text-left transition-all ${
-                                            place !== null
-                                                ? "border-forest ring-2 ring-forest"
-                                                : "border-input"
-                                        }`}
-                                        onClick={() => toggleEntry(entry.id)}
+                                        aria-label={entryAriaLabel(entry.horseName, place)}
+                                        disabled={!canRecord}
+                                        className="block w-full cursor-pointer p-0 text-left disabled:cursor-default"
+                                        onClick={() => handleTapEntry(entry.id)}
                                     >
                                         {entry.photoUrl ? (
                                             // eslint-disable-next-line @next/next/no-img-element
                                             <img
                                                 src={entry.photoUrl}
-                                                alt={entry.horseName}
+                                                alt=""
                                                 className="aspect-square w-full object-cover"
                                                 loading="lazy"
                                             />
@@ -285,42 +489,68 @@ function ClassRecorder({
                                                 🐴
                                             </div>
                                         )}
+                                        {entry.entryNumber !== null && (
+                                            <span
+                                                aria-hidden="true"
+                                                className="absolute top-1.5 right-1.5 rounded bg-black/60 px-1.5 py-0.5 font-mono text-xs font-semibold text-white"
+                                            >
+                                                #{entry.entryNumber}
+                                            </span>
+                                        )}
                                         {place !== null && (
                                             <span
-                                                className="stamp absolute top-2 left-2 inline-flex items-center gap-1.5 bg-(--paper-lit)"
+                                                className="stamp absolute top-1.5 left-1.5 inline-flex items-center gap-1.5 bg-(--paper-lit)"
                                                 data-testid="place-chip"
                                             >
                                                 <span
                                                     aria-hidden="true"
                                                     className="inline-block h-2.5 w-2.5 rounded-full border border-border"
                                                     style={{
-                                                        backgroundColor: ribbonHex(place) ?? undefined,
+                                                        backgroundColor:
+                                                            ribbonHex(place) ?? undefined,
                                                     }}
                                                 />
                                                 {placeLabel(place)}
                                             </span>
                                         )}
-                                        <div className="flex items-baseline gap-1.5 px-2 py-1.5">
-                                            {entry.entryNumber !== null && (
-                                                <span className="font-mono text-xs text-muted-foreground">
-                                                    #{entry.entryNumber}
-                                                </span>
-                                            )}
-                                            <span className="truncate text-sm font-medium text-foreground">
+                                        <span
+                                            aria-hidden="true"
+                                            className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 via-black/40 to-transparent px-2 pt-7 pb-1.5"
+                                        >
+                                            <span className="block truncate pr-[5.75rem] text-sm font-medium text-white">
                                                 {entry.horseName}
                                             </span>
-                                        </div>
-                                        {entry.ownerAlias !== null && (
-                                            <div className="px-2 pb-1.5 text-xs text-muted-foreground">
-                                                @{entry.ownerAlias}
-                                            </div>
-                                        )}
+                                            {entry.ownerAlias !== null && (
+                                                <span className="block truncate pr-[5.75rem] text-xs text-white/75">
+                                                    @{entry.ownerAlias}
+                                                </span>
+                                            )}
+                                        </span>
                                     </button>
-                                    <div className="flex items-center gap-2">
+                                    {/* Corner tools — siblings of the place button, never nested. */}
+                                    <div className="absolute right-1.5 bottom-1.5 flex gap-1.5">
+                                        {canRecord && (
+                                            <button
+                                                type="button"
+                                                data-testid="entry-critique"
+                                                aria-expanded={noteOpenFor === entry.id}
+                                                aria-label={`${hasNote ? "Edit" : "Add"} critique for ${entry.horseName}`}
+                                                className="flex min-h-10 min-w-10 cursor-pointer items-center justify-center rounded-md bg-black/60 text-sm text-white transition-all hover:bg-black/75 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring"
+                                                onClick={() =>
+                                                    setNoteOpenFor((cur) =>
+                                                        cur === entry.id ? null : entry.id,
+                                                    )
+                                                }
+                                            >
+                                                <span aria-hidden="true">✎{hasNote ? " ✓" : ""}</span>
+                                            </button>
+                                        )}
                                         {entry.photoUrl && (
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
+                                            <button
+                                                type="button"
+                                                data-testid="entry-zoom"
+                                                aria-label={`Zoom ${entry.horseName} photo`}
+                                                className="flex min-h-10 min-w-10 cursor-pointer items-center justify-center rounded-md bg-black/60 text-sm text-white transition-all hover:bg-black/75 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring"
                                                 onClick={() =>
                                                     setLightboxIndex(
                                                         lightboxImages.findIndex(
@@ -329,82 +559,47 @@ function ClassRecorder({
                                                     )
                                                 }
                                             >
-                                                Zoom
-                                            </Button>
-                                        )}
-                                        {canRecord && (
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                aria-expanded={noteOpenFor === entry.id}
-                                                onClick={() =>
-                                                    setNoteOpenFor((cur) =>
-                                                        cur === entry.id ? null : entry.id,
-                                                    )
-                                                }
-                                            >
-                                                {notes[entry.id]?.trim() ? "Critique ✎" : "Critique"}
-                                            </Button>
+                                                <span aria-hidden="true">🔍</span>
+                                            </button>
                                         )}
                                     </div>
-                                    {noteOpenFor === entry.id && (
-                                        <Textarea
-                                            value={notes[entry.id] ?? ""}
-                                            onChange={(e) =>
-                                                setNotes((prev) => ({
-                                                    ...prev,
-                                                    [entry.id]: e.target.value,
-                                                }))
-                                            }
-                                            placeholder="Optional critique for the entrant…"
-                                            maxLength={2000}
-                                            rows={3}
-                                            aria-label={`Critique for ${entry.horseName}`}
-                                        />
-                                    )}
-                                </li>
-                            );
-                        })}
-                    </ul>
-                </>
-            )}
-
-            {error && (
-                <p role="alert" className="mt-3 text-sm font-semibold text-destructive">
-                    {error}
-                </p>
+                                </div>
+                                {noteOpenFor === entry.id && (
+                                    <Textarea
+                                        value={notes[entry.id] ?? ""}
+                                        onChange={(e) => handleNoteChange(entry.id, e.target.value)}
+                                        placeholder="Optional critique for the entrant…"
+                                        maxLength={2000}
+                                        rows={3}
+                                        aria-label={`Critique for ${entry.horseName}`}
+                                    />
+                                )}
+                            </li>
+                        );
+                    })}
+                </ul>
             )}
 
             {canRecord && (
-                <div className="mt-4 flex flex-wrap items-center gap-3">
-                    <Button
-                        onClick={() => save(true)}
-                        disabled={saving !== null}
-                        data-testid="save-done"
-                    >
-                        {saving === "done" ? "Saving…" : "Save & mark class done"}
-                    </Button>
-                    <Button
-                        variant="outline"
-                        onClick={() => save(false)}
-                        disabled={saving !== null}
-                        data-testid="save-placings"
-                    >
-                        {saving === "save" ? "Saving…" : "Save placings"}
-                    </Button>
-                    {order.length > 0 && (
-                        <Badge variant="secondary">
-                            {order.length} place{order.length === 1 ? "" : "s"} assigned
-                        </Badge>
-                    )}
-                </div>
-            )}
-            {!canRecord && onNext && (
-                <div className="mt-4">
-                    <Button variant="outline" onClick={onNext}>
-                        Next class →
-                    </Button>
-                </div>
+                <RibbonTray
+                    entries={cls.entries.map((e) => ({
+                        id: e.id,
+                        horseName: e.horseName,
+                        photoUrl: e.photoUrl,
+                    }))}
+                    slots={slots}
+                    onClearSlot={handleClearSlot}
+                    onDone={() => {
+                        setRefusal(null);
+                        void runSaveRef.current(true);
+                    }}
+                    doneSaving={doneSaving}
+                    whisper={whisper}
+                    error={autosave.error}
+                    onRetry={handleRetry}
+                    refusal={refusal}
+                    hasEntries={cls.entries.length > 0}
+                />
             )}
 
             {lightboxIndex !== null && lightboxIndex >= 0 && (
