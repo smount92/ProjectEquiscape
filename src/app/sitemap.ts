@@ -88,6 +88,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             priority: 0.6,
         },
 
+        // ── Education pages (Wave 2) — static, anon-safe hobby guides ──
+        {
+            url: `${baseUrl}/learn`,
+            lastModified: now,
+            changeFrequency: "monthly",
+            priority: 0.6,
+        },
+        {
+            url: `${baseUrl}/learn/glossary`,
+            lastModified: now,
+            changeFrequency: "monthly",
+            priority: 0.7,
+        },
+        {
+            url: `${baseUrl}/learn/enter-your-first-photo-show`,
+            lastModified: now,
+            changeFrequency: "monthly",
+            priority: 0.7,
+        },
+
         // NOTE: /community, /community/groups, /community/events and
         // /community/help-id are login-walled (each page redirects anon
         // to /login) — advertising them here just feeds crawlers a wall.

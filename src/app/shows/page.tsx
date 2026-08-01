@@ -1,10 +1,13 @@
 import { createClient } from"@/lib/supabase/server";
 import { getPhotoShows } from"@/app/actions/shows";
 import { getPublicShows } from"@/app/actions/shows-v2";
+import { getMyShowLife } from"@/app/actions/show-life";
 import Link from"next/link";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import PageMasthead from"@/components/layouts/PageMasthead";
+import MyShowLifeSection from"@/components/shows/MyShowLifeSection";
 import { showsV2Enabled } from"@/lib/shows/flags";
+import { EMPTY_SHOW_LIFE } from"@/lib/shows/showLife";
 import type { PublicShowSummary } from"@/lib/shows/public";
 import type { ShowStatus } from"@/lib/shows/types";
 import { formatStatus } from"@/lib/shows/stateMachine";
@@ -113,6 +116,11 @@ export default async function ShowsPage() {
   if (v2Result.success) v2Shows = v2Result.shows;
  }
 
+ // "My show life" — the signed-in entrant's cross-show strip above
+ // the browse shelves. Empty (and hidden) for anon, for members who
+ // don't show, and on any data failure.
+ const showLife = user && showsV2Enabled() ? await getMyShowLife() : EMPTY_SHOW_LIFE;
+
  // Batch-check which shows this user is a judge for
  const showIds = shows.map((s) => s.id);
  let judgeShowIds = new Set<string>();
@@ -161,6 +169,8 @@ export default async function ShowsPage() {
     )
    }
   />
+  <MyShowLifeSection life={showLife} />
+
   {V2_GROUPS.map((group) => (
    <V2ShowsSection
     key={group.title}

@@ -5,6 +5,7 @@ import { getPublicImageUrls } from "@/lib/utils/storage";
 import PassportGallery from "@/components/PassportGallery";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
 import PageMasthead from "@/components/layouts/PageMasthead";
+import PublicCardsSection from "@/components/shows/PublicCardsSection";
 import { Button } from "@/components/ui/button";
 import { referenceHref, referencePagesEnabled } from "@/lib/catalog/referenceUrl";
 import { PARCHMENT_INK } from "@/lib/theme/parchment";
@@ -201,6 +202,11 @@ export default async function AnonPassport({ horseId }: { horseId: string }) {
                     </div>
                 </div>
             </div>
+
+            {/* MHH Qualification Cards — the buyer trust section, same
+                anon-safe RPC path as the rest of this page (migration
+                141). Renders nothing pre-migration or with no cards. */}
+            <PublicCardsSection horseId={horseId} />
         </ExplorerLayout>
     );
 }
