@@ -138,6 +138,25 @@ export default function Header() {
  return () => subscription.unsubscribe();
  }, [supabase, fetchHeaderInfo, router]);
 
+ // Server-action login sets the session cookie server-side and soft-redirects,
+ // so the browser client never fires SIGNED_IN and this layout-mounted Header
+ // keeps its stale anon state until a hard refresh. On every route change while
+ // we still think the viewer is anonymous, re-check the session locally
+ // (getSession is a cookie parse — no network) and hydrate if one appeared.
+ useEffect(() => {
+ if (user) return;
+ let cancelled = false;
+ supabase.auth.getSession().then(({ data: { session } }) => {
+ if (cancelled || !session?.user) return;
+ setUser({ id: session.user.id, email: session.user.email ?? undefined });
+ fetchHeaderInfo();
+ });
+ return () => {
+ cancelled = true;
+ };
+ // eslint-disable-next-line react-hooks/exhaustive-deps -- pathname is the trigger; user guards re-entry
+ }, [pathname]);
+
 
 
  const handleSignOut = () => {
@@ -159,7 +178,6 @@ export default function Header() {
 
  // Close mobile menu on route change (fixes touch devices where onClick can race)
  useEffect(() => {
- // eslint-disable-next-line react-hooks/set-state-in-effect
  setMobileMenuOpen(false);
  }, [pathname]);
 
