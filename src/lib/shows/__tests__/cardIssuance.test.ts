@@ -222,7 +222,14 @@ describe("issueQualificationCardsForShow", () => {
         );
 
         const result = await issueQualificationCardsForShow(supabase, "show-1");
-        expect(result).toEqual({ issued: 2, skipped: 0 });
+        expect(result).toEqual({
+            issued: 2,
+            skipped: 0,
+            cards: [
+                { classId: "class-1", horseId: "h1", earnedPlace: 1, ownerId: "o1" },
+                { classId: "class-1", horseId: "h2", earnedPlace: 2, ownerId: "o2" },
+            ],
+        });
 
         const rows = mockClient._mockQuery.insert.mock.calls[0][0] as Record<
             string,
@@ -251,7 +258,7 @@ describe("issueQualificationCardsForShow", () => {
             error: null,
         });
         const result = await issueQualificationCardsForShow(supabase, "show-1");
-        expect(result).toEqual({ issued: 0, skipped: 0 });
+        expect(result).toEqual({ issued: 0, skipped: 0, cards: [] });
         expect(mockClient._mockQuery.insert).not.toHaveBeenCalled();
     });
 
@@ -273,7 +280,7 @@ describe("issueQualificationCardsForShow", () => {
         );
 
         const result = await issueQualificationCardsForShow(supabase, "show-1");
-        expect(result).toEqual({ issued: 0, skipped: 2 });
+        expect(result).toEqual({ issued: 0, skipped: 2, cards: [] });
         expect(mockClient._mockQuery.insert).not.toHaveBeenCalled();
     });
 
@@ -298,7 +305,7 @@ describe("issueQualificationCardsForShow", () => {
         );
 
         const result = await issueQualificationCardsForShow(supabase, "show-1");
-        expect(result).toEqual({ issued: 0, skipped: 2 });
+        expect(result).toEqual({ issued: 0, skipped: 2, cards: [] });
         expect(mockClient._mockQuery.insert).toHaveBeenCalledTimes(1);
     });
 

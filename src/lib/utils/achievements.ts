@@ -210,11 +210,13 @@ export async function evaluateUserAchievements(
                     const badgeName = (badge as { name: string; icon: string } | null)?.name || rule.badgeId;
                     const badgeIcon = (badge as { name: string; icon: string } | null)?.icon || "🏆";
 
-                    // Send achievement notification
+                    // Send achievement notification — system event, actor
+                    // null. Passing userId as actor ("self-award") tripped
+                    // the self-guard and dropped every achievement ping.
                     await createNotification({
                         userId,
                         type: "achievement",
-                        actorId: userId, // self-award
+                        actorId: null,
                         content: `${badgeIcon} You earned the "${badgeName}" achievement!`,
                     });
                 }

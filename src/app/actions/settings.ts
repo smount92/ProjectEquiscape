@@ -67,6 +67,10 @@ export async function getProfile(): Promise<{
         bio: d.bio || "",
         avatarUrl: resolvedAvatarUrl,
         email: user.email || "",
+        // Defaults mirror NOTIFICATION_TYPE_PREF_KEYS in
+        // src/lib/notifications/prefs.ts — keys absent from a user's
+        // saved jsonb default ON at delivery time, so adding a key
+        // here never silences existing users.
         notificationPrefs: d.notification_prefs || {
             show_votes: true,
             favorites: true,
@@ -76,6 +80,10 @@ export async function getProfile(): Promise<{
             show_results: true,
             transfers: true,
             demand_alerts: true,
+            show_staff: true,
+            show_updates: true,
+            show_announcements: true,
+            show_deadlines: true,
         },
         defaultHorsePublic: d.default_horse_public ?? true,
         watermarkPhotos: d.watermark_photos ?? true,

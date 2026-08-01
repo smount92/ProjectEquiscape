@@ -574,12 +574,15 @@ export async function updateShowStatus(
 
                 for (const entry of entries as { user_id: string; placing: string | null; horse_id: string }[]) {
                     const horseName = horseNameMap.get(entry.horse_id) || "your horse";
+                    // System event — actor null. The old code passed the
+                    // RECIPIENT as actorId, which tripped the self-guard and
+                    // silently dropped every result notification ever sent.
                     if (entry.placing) {
                         const medal = MEDAL_EMOJI[entry.placing] || "🏅";
                         await createNotification({
                             userId: entry.user_id,
                             type: "show_result",
-                            actorId: entry.user_id,
+                            actorId: null,
                             content: `${medal} Congratulations! ${horseName} took ${entry.placing} in "${showName}"!`,
                             linkUrl: `/shows/${closingShowId}`,
                         });
@@ -587,7 +590,7 @@ export async function updateShowStatus(
                         await createNotification({
                             userId: entry.user_id,
                             type: "show_result",
-                            actorId: entry.user_id,
+                            actorId: null,
                             content: `📸 Results are in for "${showName}"! Thanks for entering ${horseName}.`,
                             linkUrl: `/shows/${closingShowId}`,
                         });

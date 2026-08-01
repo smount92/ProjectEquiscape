@@ -48,7 +48,7 @@ export async function evaluateComplexBadges(admin: SupabaseClient): Promise<numb
                         await createNotification({
                             userId,
                             type: "achievement",
-                            actorId: userId,
+                            actorId: null, // system event — a self actor would trip the guard
                             content: '🎠 You earned the "Conga Line" achievement!',
                         });
                         awarded++;
@@ -92,7 +92,7 @@ export async function evaluateComplexBadges(admin: SupabaseClient): Promise<numb
                         await createNotification({
                             userId,
                             type: "achievement",
-                            actorId: userId,
+                            actorId: null, // system event — a self actor would trip the guard
                             content: '❤️ You earned the "Popular Kid" achievement!',
                         });
                         awarded++;
@@ -133,7 +133,7 @@ export async function evaluateComplexBadges(admin: SupabaseClient): Promise<numb
                         await createNotification({
                             userId,
                             type: "achievement",
-                            actorId: userId,
+                            actorId: null, // system event — a self actor would trip the guard
                             content: '🎀 You earned the "Ribbon Collector I" achievement!',
                         });
                         awarded++;
@@ -152,7 +152,7 @@ export async function evaluateComplexBadges(admin: SupabaseClient): Promise<numb
                         await createNotification({
                             userId,
                             type: "achievement",
-                            actorId: userId,
+                            actorId: null, // system event — a self actor would trip the guard
                             content: '🎀 You earned the "Ribbon Collector II" achievement!',
                         });
                         awarded++;

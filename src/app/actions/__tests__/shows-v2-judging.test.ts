@@ -26,6 +26,20 @@ vi.mock("@/lib/supabase/server", () => ({
 vi.mock("@/lib/supabase/admin", () => ({
     getAdminClient: vi.fn(() => mockAdmin),
 }));
+// The Batch 2 notification spine (and its server-only import chain)
+// is out of scope for these action tests.
+vi.mock("next/server", () => ({
+    after: vi.fn((fn: () => void) => {
+        fn();
+    }),
+}));
+vi.mock("@/lib/shows/notifications", () => ({
+    runClassChangeFanout: vi.fn().mockResolvedValue(undefined),
+    runEntryScratchedNotification: vi.fn().mockResolvedValue(undefined),
+    runResultsPublishedFanout: vi.fn().mockResolvedValue(undefined),
+    runStaffAddedNotification: vi.fn().mockResolvedValue(undefined),
+    runVotingOpenedFanout: vi.fn().mockResolvedValue(undefined),
+}));
 
 import {
     castVote,

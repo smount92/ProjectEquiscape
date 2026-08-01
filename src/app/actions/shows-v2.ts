@@ -17,6 +17,7 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { after } from "next/server";
 import { z } from "zod";
 
 import { requireAuth } from "@/lib/auth";
@@ -63,7 +64,14 @@ import {
 } from "@/lib/shows/queries";
 import { deriveVotePlacings, type VoteTally } from "@/lib/shows/deriveVotePlacings";
 import { buildShowRecords } from "@/lib/shows/writeShowRecords";
-import { issueQualificationCardsForShow } from "@/lib/shows/cardIssuance";
+import { issueQualificationCardsForShow, type PlannedCard } from "@/lib/shows/cardIssuance";
+import {
+    runClassChangeFanout,
+    runEntryScratchedNotification,
+    runResultsPublishedFanout,
+    runStaffAddedNotification,
+    runVotingOpenedFanout,
+} from "@/lib/shows/notifications";
 import {
     GALLERY_STATUSES,
     isOwnerRevealed,
@@ -303,6 +311,7 @@ export async function transitionShowStatus(
     // written BEFORE the status flips — writeShowRecords is
     // idempotent, so a failure here leaves the show safely in
     // results_review and the host simply retries.
+    let issuedCards: PlannedCard[] = [];
     if (to === "completed") {
         const published = await writeShowRecordsForShow(supabase, showId);
         if ("error" in published) {
@@ -327,10 +336,30 @@ export async function transitionShowStatus(
                 error: `Qualification cards could not be issued — the show stays in results review. (${cards.error})`,
             };
         }
+        issuedCards = cards.cards;
     }
 
     const { error } = await supabase.from("shows").update({ status: to }).eq("id", showId);
     if (error) return { success: false, error: error.message };
+
+    // ── The payoff loop (Batch 2): notify + email once the flip is
+    // real. Runs in after() so the host's save never waits on the
+    // fan-out; the fan-out reads run on the ADMIN client because
+    // after() outlives the request (the cookie-scoped client may be
+    // torn down) and the reads/inserts span every entrant's rows —
+    // exactly the writeShowRecordsForShow precedent above. The
+    // host/co-host role check already gated this transition.
+    if (to === "completed") {
+        const cardsForFanout = issuedCards;
+        after(async () => {
+            await runResultsPublishedFanout(getAdminClient(), showId, cardsForFanout);
+        });
+    }
+    if (to === "judging" && ctx.show.judging === "community_vote") {
+        after(async () => {
+            await runVotingOpenedFanout(getAdminClient(), showId);
+        });
+    }
     return { success: true };
 }
 
@@ -748,7 +777,7 @@ export async function splitClass(
 
     const { data: cls, error: cErr } = await supabase
         .from("show_classes")
-        .select("id, section_id, status")
+        .select("id, name, section_id, status")
         .eq("id", v.classId)
         .maybeSingle();
     if (cErr) return { success: false, error: cErr.message };
@@ -784,6 +813,22 @@ export async function splitClass(
     if (rpcError) return { success: false, error: rpcError.message };
     if (!newClassId) return { success: false, error: "Failed to create the split class." };
 
+    // Tell owners of the moved entries where their horse now shows —
+    // admin client because after() outlives the request-scoped client
+    // and the recipients' rows aren't the host's to read (Batch 2).
+    const movedEntryIds = v.entryIdsToMove;
+    const oldClassName = cls.name as string;
+    const showIdForFanout = located.showId;
+    after(async () => {
+        await runClassChangeFanout(getAdminClient(), {
+            showId: showIdForFanout,
+            kind: "split",
+            oldClassNames: [oldClassName],
+            newClassName: v.newClassName,
+            moved: { entryIds: movedEntryIds },
+        });
+    });
+
     return { success: true, newClassId: newClassId as string };
 }
 
@@ -797,7 +842,7 @@ export async function combineClasses(
 
     const { data: classes, error: cErr } = await supabase
         .from("show_classes")
-        .select("id, section_id, status")
+        .select("id, name, section_id, status")
         .in("id", v.classIds);
     if (cErr) return { success: false, error: cErr.message };
     if (!classes || classes.length !== v.classIds.length) {
@@ -849,7 +894,24 @@ export async function combineClasses(
     if (rpcError) return { success: false, error: rpcError.message };
     if (!newClassId) return { success: false, error: "Failed to create the combined class." };
 
-    return { success: true, newClassId: newClassId as string };
+    // Every live entry of the sources now lives in the combined
+    // class — notify their owners, naming old → new. Admin client:
+    // after() outlives the request-scoped client and the recipients'
+    // rows aren't the host's to read (Batch 2).
+    const oldClassNames = classes.map((c) => c.name as string);
+    const combinedClassId = newClassId as string;
+    const showIdForFanout = showId;
+    after(async () => {
+        await runClassChangeFanout(getAdminClient(), {
+            showId: showIdForFanout,
+            kind: "combined",
+            oldClassNames,
+            newClassName: v.newClassName,
+            moved: { newClassId: combinedClassId },
+        });
+    });
+
+    return { success: true, newClassId: combinedClassId };
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -987,6 +1049,19 @@ export async function addShowStaff(
                 : error?.message ?? "Failed to add staff member.",
         };
     }
+
+    // Tell the appointee about their new role (judges deep-link to
+    // their bench). Admin client: after() outlives the request-scoped
+    // client; the host stays the notification's actor (Batch 2).
+    const appointment = { showId: v.showId, userId: v.userId, role: v.role };
+    const hostId = user.id;
+    after(async () => {
+        await runStaffAddedNotification(getAdminClient(), {
+            ...appointment,
+            addedByUserId: hostId,
+        });
+    });
+
     return { success: true, staffId: data.id as string };
 }
 
@@ -1029,8 +1104,10 @@ function countBy(rows: { key: string }[]): Map<string, number> {
 }
 
 /**
- * Shows where the caller is host or co_host, newest first —
- * the /shows/host "My Shows" list.
+ * Shows where the caller holds ANY staff role (host, co-host,
+ * steward, judge), newest first — the /shows/host "My Shows" list.
+ * Each row carries the caller's role so the list can stamp
+ * non-host cards (a judge finds their bench here too).
  */
 export async function getHostedShows(): Promise<ActionResult<{ shows: HostedShowSummary[] }>> {
     const { supabase, user } = await requireAuth();
@@ -1038,8 +1115,7 @@ export async function getHostedShows(): Promise<ActionResult<{ shows: HostedShow
     const { data: staffRows, error: staffError } = await supabase
         .from("show_staff")
         .select("show_id, role")
-        .eq("user_id", user.id)
-        .in("role", MANAGER_ROLES);
+        .eq("user_id", user.id);
     if (staffError) return { success: false, error: staffError.message };
     if (!staffRows || staffRows.length === 0) return { success: true, shows: [] };
 
@@ -1970,11 +2046,21 @@ export async function enterClass(
     return { success: true, entryId: inserted.id as string, entryNumber };
 }
 
+/** Staff who may scratch someone else's live entry (judges place, they don't manage entries — matches the 118 UPDATE policy). */
+const SCRATCH_STAFF_ROLES: StaffRole[] = ["host", "co_host", "steward"];
+
 /**
- * Scratch an entry (owner, while entries are open — the RLS UPDATE
- * policy is the backstop). Scratched rows are history: re-entering
- * afterwards creates a NEW row (partial unique index, 117), which
- * is why the UI says "Scratch" / "Re-enter" rather than "undo".
+ * Scratch an entry. Two doors, both RLS-backstopped by the 118
+ * UPDATE policy ("Owner updates own entry while open, staff
+ * anytime"):
+ *   — the OWNER, while entries are open (unchanged);
+ *   — show STAFF (host/co-host/steward), any live entry, until the
+ *     show completes — the day-of pressure valve entrants are told
+ *     to "ask the host" about.
+ * Staff scratches notify the entry's owner (with the optional
+ * reason). Scratched rows are history: re-entering afterwards
+ * creates a NEW row (partial unique index, 117), which is why the
+ * UI says "Scratch" / "Re-enter" rather than "undo".
  */
 export async function scratchEntry(
     input: z.input<typeof scratchEntrySchema>,
@@ -1982,40 +2068,90 @@ export async function scratchEntry(
     const parsed = scratchEntrySchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { supabase, user } = await requireAuth();
+    const reason = parsed.data.reason?.length ? parsed.data.reason : null;
 
     const { data: entry, error: eErr } = await supabase
         .from("show_class_entries")
-        .select("id, owner_id, status, show_id")
+        .select("id, owner_id, status, show_id, class_id, horse_id")
         .eq("id", parsed.data.entryId)
         .maybeSingle();
     if (eErr) return { success: false, error: eErr.message };
     if (!entry) return { success: false, error: "Entry not found." };
-    if (entry.owner_id !== user.id) {
-        return { success: false, error: "Only the entry's owner can scratch it." };
-    }
     if (entry.status === "scratched") {
         return { success: false, error: "This entry is already scratched." };
     }
 
-    const { data: show, error: sErr } = await supabase
-        .from("shows")
-        .select("id, status")
-        .eq("id", entry.show_id as string)
-        .maybeSingle();
-    if (sErr) return { success: false, error: sErr.message };
-    if (!show || show.status !== "entries_open") {
+    const ctx = await getShowRole(supabase, entry.show_id as string, user.id);
+    if ("error" in ctx) return { success: false, error: ctx.error };
+
+    const isOwner = entry.owner_id === user.id;
+    const isStaff = !!ctx.role && SCRATCH_STAFF_ROLES.includes(ctx.role);
+    if (!isOwner && !isStaff) {
+        return {
+            success: false,
+            error: "Only the entry's owner or the show's staff can scratch an entry.",
+        };
+    }
+
+    // Results are final once the show completes — nobody scratches.
+    const showOver = ctx.show.status === "completed" || ctx.show.status === "archived";
+    if (showOver) {
+        return {
+            success: false,
+            error: "This show's results are final — entries can no longer be scratched.",
+        };
+    }
+
+    const staffMayScratch = isStaff; // any live entry, pre-completed
+    const ownerMayScratch = isOwner && ctx.show.status === "entries_open";
+    if (!staffMayScratch && !ownerMayScratch) {
+        // Owner after the gate shut — and this is now genuinely true:
+        // staff CAN scratch it for them (the door above).
         return {
             success: false,
             error: "Entries are closed — ask the host to scratch this entry for you.",
         };
     }
 
-    const { error: uErr } = await supabase
+    // .select() makes the update self-verifying (an RLS-filtered
+    // no-op must not report success). The reason lands in the entry's
+    // note the same way combine's auto-scratch does.
+    const { data: updated, error: uErr } = await supabase
         .from("show_class_entries")
-        .update({ status: "scratched" })
+        .update({
+            status: "scratched",
+            ...(reason
+                ? { note: `Scratched by ${isOwner ? "owner" : "show staff"}: ${reason}` }
+                : {}),
+        })
         .eq("id", parsed.data.entryId)
-        .eq("owner_id", user.id);
+        .select("id");
     if (uErr) return { success: false, error: uErr.message };
+    if (!updated || updated.length === 0) {
+        return { success: false, error: "The entry could not be scratched — please refresh and try again." };
+    }
+
+    // Staff scratched someone else's entry → tell the owner (with the
+    // reason). Admin client: after() outlives the request-scoped
+    // client and the owner's notification row isn't the staffer's to
+    // write under RLS (Batch 2).
+    if (!isOwner) {
+        const scratched = {
+            showId: entry.show_id as string,
+            classId: entry.class_id as string,
+            horseId: entry.horse_id as string,
+            ownerId: entry.owner_id as string,
+        };
+        const scratchedBy = user.id;
+        after(async () => {
+            await runEntryScratchedNotification(getAdminClient(), {
+                ...scratched,
+                scratchedByUserId: scratchedBy,
+                reason,
+            });
+        });
+    }
+
     return { success: true };
 }
 
