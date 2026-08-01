@@ -8,8 +8,11 @@ import type { FinishType, AngleProfile, AssetCategory } from"@/lib/types/databas
 import UnifiedReferenceSearch from"@/components/UnifiedReferenceSearch";
 import type { CatalogItem } from"@/app/actions/reference";
 import CollectionPicker from"@/components/CollectionPicker";
-import { compressImage, compressImageWithWatermark, generateThumbnail } from"@/lib/utils/imageCompression";
+import { compressImage, compressImageWithWatermark, generateThumbnail, validateImageFile } from"@/lib/utils/imageCompression";
 import type { UserTier } from"@/lib/utils/imageCompression";
+import { SHOW_PHOTO_ANGLE, SHOW_PHOTO_CAP } from"@/lib/shows/entryPhoto";
+import { CONDITION_GRADES, conditionOptionLabel, conditionToneVar, getConditionGrade } from"@/lib/conditionGrades";
+import GlossaryLink from"@/components/GlossaryLink";
 import { updateLifeStage } from"@/app/actions/hoofprint";
 import { updateHorseAction, deleteHorseImageAction, finalizeHorseImages, getMyTier } from"@/app/actions/horse";
 import { uploadImageWithRetry } from"@/lib/utils/uploadWithRetry";
@@ -54,16 +57,11 @@ interface ExistingImage {
  storagePath: string | null;
 }
 
-const CONDITION_GRADES = [
- { value:"Mint", label:"Mint — Flawless, like new" },
- { value:"Near Mint", label:"Near Mint — Minimal handling wear" },
- { value:"Excellent", label:"Excellent — Very light wear, no breaks" },
- { value:"Very Good", label:"Very Good — Minor rubs or scuffs" },
- { value:"Good", label:"Good — Noticeable wear, still displays well" },
- { value:"Body Quality", label:"Body Quality — Suitable for customizing" },
- { value:"Fair", label:"Fair — Visible flaws, repairs, or damage" },
- { value:"Poor", label:"Poor — Significant damage or missing parts" },
-];
+// Condition grades come from the shared module (src/lib/conditionGrades)
+// so this form can no longer drift from Add Horse / Quick Add. The old
+// local list here lacked Quick Add's "Play Grade" / "Not Graded", which
+// rendered imported horses with a blank required select and a Save
+// button that could never enable.
 
 // ---- Component ----
 export default function EditHorsePage() {
@@ -163,6 +161,15 @@ export default function EditHorsePage() {
  const [newFlawFiles, setNewFlawFiles] = useState<{ file: File; previewUrl: string }[]>([]);
  const [dragFlawIdx, setDragFlawIdx] = useState<number | null>(null);
  const flawInputRef = useRef<HTMLInputElement>(null);
+
+ // Show photos (uploaded from show entries) — loaded but previously
+ // never rendered here, so they were undeletable ghosts. View + delete.
+ const [existingShowPhotos, setExistingShowPhotos] = useState<ExistingImage[]>([]);
+
+ // Inline photo notices (replace the old blocking alert() calls)
+ const [galleryNotice, setGalleryNotice] = useState<string | null>(null);
+ const [flawNotice, setFlawNotice] = useState<string | null>(null);
+ const [extraNotice, setExtraNotice] = useState<string | null>(null);
 
  // Deferred image deletions (only executed on save)
  const [pendingImageDeletes, setPendingImageDeletes] = useState<{ recordId: string; path: string | null }[]>([]);
@@ -381,6 +388,19 @@ export default function EditHorsePage() {
  };
  });
  setExistingFlaws(flaws);
+
+ // Separate out show photos (uploaded from show entry dialogs)
+ const showPhotos = (allImages as { id: string; image_url: string; angle_profile: string }[])
+ .filter((img) => img.angle_profile === SHOW_PHOTO_ANGLE)
+ .map((img) => {
+ const urlParts = img.image_url.split("/horse-images/");
+ return {
+ recordId: img.id,
+ imageUrl: getPublicImageUrl(img.image_url),
+ storagePath: urlParts.length > 1 ? urlParts[1] : null,
+ };
+ });
+ setExistingShowPhotos(showPhotos);
  }
 
  setIsLoading(false);
@@ -405,9 +425,52 @@ export default function EditHorsePage() {
     }
   }, [lifeStage]);
 
+ // Save re-entrancy guard (declared up here so the unload guard below
+ // can see an in-flight save and stay quiet).
+ const isSavingRef = useRef(false);
+
+ // ---- Dirty-state guard: warn before a hard unload (refresh / tab
+ // close / external nav) discards unsaved edits. Router links are SPA
+ // navigations and never trigger beforeunload. The first effect run
+ // after the async load is consumed by loadedRef so loading the horse
+ // doesn't count as "dirty". ----
+ const isDirtyRef = useRef(false);
+ const loadedRef = useRef(false);
+ useEffect(() => {
+ if (isLoading) return;
+ if (!loadedRef.current) {
+ loadedRef.current = true;
+ return;
+ }
+ isDirtyRef.current = true;
+ }, [
+ isLoading, customName, sculptor, finishingArtist, editionNumber, editionSize,
+ finishType, conditionGrade, conditionNote, visibility, tradeStatus, listingPrice,
+ marketplaceNotes, lifeStage, assetCategory, finishDetails, publicNotes,
+ assignedBreed, assignedGender, assignedAge, regionalId, purchasePrice,
+ purchaseDate, estimatedValue, insuranceNotes, isTrade, purchaseDateText,
+ newFiles, newExtraFiles, newFlawFiles, pendingImageDeletes,
+ ]);
+ useEffect(() => {
+ const handler = (e: BeforeUnloadEvent) => {
+ if (!isDirtyRef.current || isSavingRef.current) return;
+ e.preventDefault();
+ e.returnValue ="";
+ };
+ window.addEventListener("beforeunload", handler);
+ return () => window.removeEventListener("beforeunload", handler);
+ }, []);
+
  // ---- Photo Studio handlers ----
  const handleSlotSelect = (angle: AngleProfile, file: File) => {
- if (!file.type.startsWith("image/")) return;
+ // Same guard as the add form (type + size), surfaced inline instead
+ // of silently ignoring bad files.
+ const validationError = validateImageFile(file);
+ if (validationError) {
+ setGalleryNotice(validationError);
+ return;
+ }
+ setGalleryNotice(null);
  // Open crop modal instead of directly setting
  setCropFile(file);
  setCropAngle(angle);
@@ -553,7 +616,6 @@ export default function EditHorsePage() {
  };
 
  // ---- Save handler ----
- const isSavingRef = useRef(false);
  const handleSave = async () => {
  // Re-entrancy guard: photo uploads are slow and the Save button briefly
  // re-enables while the post-save redirect is in flight. Without this, a
@@ -819,7 +881,8 @@ export default function EditHorsePage() {
  className="mx-auto max-w-[680px] px-0 py-12 text-center"
  >
  <div
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input border-t-[color:var(--primary)] bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
+ className="border-3 border-muted mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-t-forest"
+ aria-hidden="true"
  />
  <p>Loading horse details…</p>
  </div>
@@ -884,7 +947,7 @@ export default function EditHorsePage() {
  <h2>Photo Studio</h2>
  </div>
  <p className="text-muted-foreground mb-4 text-sm">
- Upload up to 4 standardized angles. The primary photo is used as the thumbnail everywhere.
+ Upload up to 5 standardized angles. The primary photo is used as the thumbnail everywhere.
  </p>
 
  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -900,12 +963,12 @@ export default function EditHorsePage() {
  {slot.label}
  {slot.primary && (
  <span className="bg-success/10 rounded-full px-[8px] py-[2px] text-xs font-bold text-forest">
- Required
+ Recommended
  </span>
  )}
  </div>
  <div
- className={`image-upload-zone ${isDrag ?"drag-active" :""} ${preview ?"has-preview" :""}`}
+ className={`image-upload-zone group ${isDrag ?"drag-active" :""} ${preview ?"has-preview" :""}`}
  onClick={() => fileInputRefs.current[angle]?.click()}
  onDragOver={(e) => {
  e.preventDefault();
@@ -934,7 +997,7 @@ export default function EditHorsePage() {
  <div className="relative w-full">
  {/* eslint-disable-next-line @next/next/no-img-element */}
  <img src={preview} alt={slot.label} />
- <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/60 text-sm font-medium text-white opacity-[0] transition-all">
+ <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/60 text-sm font-medium text-white opacity-0 transition-all group-focus-within:opacity-100 pointer-fine:group-hover:opacity-100">
  <svg
  width="20"
  height="20"
@@ -975,7 +1038,7 @@ export default function EditHorsePage() {
  {hasNew && (
  <button
  type="button"
- className="hover:0.2)] hover:0.5)] mt-2 inline-flex cursor-pointer items-center gap-[4px] rounded-full border border-warning/30 bg-warning/10 px-[14px] py-[6px] font-[inherit] text-xs font-semibold text-warning transition-all"
+ className="mt-2 inline-flex cursor-pointer items-center gap-[4px] rounded-full border border-warning/30 bg-warning/10 px-[14px] py-[6px] font-[inherit] text-xs font-semibold text-warning transition-all hover:bg-warning/20 hover:border-warning/50"
  onClick={(e) => {
  e.stopPropagation();
  handleSlotRevert(angle);
@@ -1001,6 +1064,12 @@ export default function EditHorsePage() {
  })}
  </div>
 
+ {galleryNotice && (
+ <p className="mt-3 rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-sm text-warning" role="alert">
+ {galleryNotice}
+ </p>
+ )}
+
  {/* Flaws & Condition Multi-Upload Zone — free for everyone, capped
  at 5. Condition documentation is trust infrastructure and is
  never Pro-gated (owner decision 2026-07-15). */}
@@ -1015,7 +1084,7 @@ export default function EditHorsePage() {
  Document rubs, breaks, or repairs — buyers and Safe-Trade trust honest condition photos. Free, up to 5.
  </p>
  <div
- className="opacity-[0.4]"
+ className="relative flex min-h-[100px] w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-input bg-card p-4 text-center transition-all hover:border-forest hover:bg-forest/5"
  onClick={() => flawInputRef.current?.click()}
  onDragOver={(e) => e.preventDefault()}
  onDrop={(e) => {
@@ -1024,9 +1093,10 @@ export default function EditHorsePage() {
  f.type.startsWith("image/"),
  );
  if (existingFlaws.length + newFlawFiles.length + files.length > 5) {
- alert("Maximum 5 flaw/condition photos allowed.");
+ setFlawNotice("That's more than 5 flaw/condition photos — remove one first or pick fewer files.");
  return;
  }
+ setFlawNotice(null);
  startFlawCropQueue(files);
  }}
  role="button"
@@ -1042,10 +1112,11 @@ export default function EditHorsePage() {
  f.type.startsWith("image/"),
  );
  if (existingFlaws.length + newFlawFiles.length + files.length > 5) {
- alert("Maximum 5 flaw/condition photos allowed.");
+ setFlawNotice("That's more than 5 flaw/condition photos — remove one first or pick fewer files.");
  e.target.value ="";
  return;
  }
+ setFlawNotice(null);
  startFlawCropQueue(files);
  e.target.value ="";
  }}
@@ -1067,6 +1138,12 @@ export default function EditHorsePage() {
  </svg>
  <span>Upload up to 5 · Click or drag files here</span>
  </div>
+
+ {flawNotice && (
+ <p className="mt-2 rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-sm text-warning" role="alert">
+ {flawNotice}
+ </p>
+ )}
 
  {/* Existing flaw/condition photos — drag to reorder */}
  {(existingFlaws.length > 0 || newFlawFiles.length > 0) && (
@@ -1127,7 +1204,7 @@ export default function EditHorsePage() {
  {newFlawFiles.map((ff, i) => (
  <div
  key={`new-flaw-${i}`}
- className="border-input relative h-[100px] w-[100px] overflow-hidden rounded-md border"
+ className="border-input group relative h-[100px] w-[100px] overflow-hidden rounded-md border"
  >
  {/* eslint-disable-next-line @next/next/no-img-element */}
  <img src={ff.previewUrl} alt={`New flaw ${i + 1}`} />
@@ -1143,7 +1220,7 @@ export default function EditHorsePage() {
  ✕
  </button>
  <button
- className="bg-black/70 absolute right-[4px] bottom-[4px] flex h-[22px] w-[22px] cursor-pointer items-center justify-center rounded-full border-0 text-[13px] leading-none text-white opacity-0 transition-opacity"
+ className="bg-black/70 absolute right-[4px] bottom-[4px] flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border-0 text-[13px] leading-none text-white transition-opacity pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100 pointer-fine:group-focus-within:opacity-100 focus-visible:opacity-100"
  onClick={(e) => {
  e.stopPropagation();
  setReCropFlawIdx(i);
@@ -1169,7 +1246,7 @@ export default function EditHorsePage() {
  <div className="text-foreground mb-1 flex items-center gap-1 text-sm font-semibold">
  Extra Details
  <span className="text-muted-foreground text-xs font-normal">
- {existingExtras.length + newExtraFiles.length}/10
+ {existingExtras.length + newExtraFiles.length}/30
  </span>
  </div>
  {viewerTier === "free" ? (
@@ -1183,7 +1260,7 @@ export default function EditHorsePage() {
  </div>
  ) : (
  <div
- className="opacity-[0.4]"
+ className="relative flex min-h-[100px] w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-input bg-card p-4 text-center transition-all hover:border-forest hover:bg-forest/5"
  onClick={() => extraInputRef.current?.click()}
  onDragOver={(e) => e.preventDefault()}
  onDrop={(e) => {
@@ -1191,10 +1268,11 @@ export default function EditHorsePage() {
  const files = Array.from(e.dataTransfer.files).filter((f) =>
  f.type.startsWith("image/"),
  );
- if (existingExtras.length + newExtraFiles.length + files.length > 10) {
- alert("Maximum 10 extra detail photos allowed.");
+ if (existingExtras.length + newExtraFiles.length + files.length > 30) {
+ setExtraNotice("That's more than 30 extra detail photos — remove one first or pick fewer files.");
  return;
  }
+ setExtraNotice(null);
  startExtraCropQueue(files);
  }}
  role="button"
@@ -1209,11 +1287,12 @@ export default function EditHorsePage() {
  const files = Array.from(e.target.files || []).filter((f) =>
  f.type.startsWith("image/"),
  );
- if (existingExtras.length + newExtraFiles.length + files.length > 10) {
- alert("Maximum 10 extra detail photos allowed.");
+ if (existingExtras.length + newExtraFiles.length + files.length > 30) {
+ setExtraNotice("That's more than 30 extra detail photos — remove one first or pick fewer files.");
  e.target.value ="";
  return;
  }
+ setExtraNotice(null);
  startExtraCropQueue(files);
  e.target.value ="";
  }}
@@ -1233,8 +1312,14 @@ export default function EditHorsePage() {
  <line x1="12" y1="5" x2="12" y2="19" />
  <line x1="5" y1="12" x2="19" y2="12" />
  </svg>
- <span>Upload up to 10 · Click or drag files here</span>
+ <span>Upload up to 30 · Click or drag files here</span>
  </div>
+ )}
+
+ {extraNotice && (
+ <p className="mt-2 rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-sm text-warning" role="alert">
+ {extraNotice}
+ </p>
  )}
 
  {/* Existing extras — drag to reorder */}
@@ -1296,7 +1381,7 @@ export default function EditHorsePage() {
  {newExtraFiles.map((ef, i) => (
  <div
  key={`new-${i}`}
- className="border-input relative h-[100px] w-[100px] overflow-hidden rounded-md border"
+ className="border-input group relative h-[100px] w-[100px] overflow-hidden rounded-md border"
  >
  {/* eslint-disable-next-line @next/next/no-img-element */}
  <img src={ef.previewUrl} alt={`New extra ${i + 1}`} />
@@ -1312,7 +1397,7 @@ export default function EditHorsePage() {
  ✕
  </button>
  <button
- className="bg-black/70 absolute right-[4px] bottom-[4px] flex h-[22px] w-[22px] cursor-pointer items-center justify-center rounded-full border-0 text-[13px] leading-none text-white opacity-0 transition-opacity"
+ className="bg-black/70 absolute right-[4px] bottom-[4px] flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border-0 text-[13px] leading-none text-white transition-opacity pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100 pointer-fine:group-focus-within:opacity-100 focus-visible:opacity-100"
  onClick={(e) => {
  e.stopPropagation();
  setReCropExtraIdx(i);
@@ -1329,6 +1414,50 @@ export default function EditHorsePage() {
  </div>
  )}
  </div>
+
+ {/* Show photos — uploaded from show-entry dialogs. They were
+ loaded but never rendered here, which made them impossible
+ to review or delete outside a show. View + delete only; new
+ ones are added when entering a show. */}
+ {existingShowPhotos.length > 0 && (
+ <div className="border-input mt-6 border-t pt-6">
+ <div className="text-foreground mb-1 flex items-center gap-1 text-sm font-semibold">
+ Show photos
+ <span className="text-muted-foreground text-xs font-normal">
+ {existingShowPhotos.length}/{SHOW_PHOTO_CAP}
+ </span>
+ </div>
+ <p className="text-muted-foreground mb-2 text-xs">
+ Uploaded when entering shows — capped at {SHOW_PHOTO_CAP} per horse, free for every tier.
+ New ones are added from a show&apos;s entry dialog.
+ </p>
+ <div className="mt-2 flex flex-wrap gap-2">
+ {existingShowPhotos.map((sp) => (
+ <div
+ key={sp.recordId}
+ className="border-input relative h-[100px] w-[100px] overflow-hidden rounded-md border"
+ >
+ {/* eslint-disable-next-line @next/next/no-img-element */}
+ <img src={sp.imageUrl} alt="Show photo" className="h-full w-full object-cover" />
+ <button
+ className="bg-black/70 absolute top-[6px] right-[6px] z-[2] flex h-[28px] w-[28px] cursor-pointer items-center justify-center rounded-full border-0 text-[0.85rem] text-white transition-colors"
+ onClick={async (e) => {
+ e.stopPropagation();
+ await deleteHorseImageAction(sp.recordId, sp.storagePath || null);
+ setExistingShowPhotos((prev) =>
+ prev.filter((item) => item.recordId !== sp.recordId),
+ );
+ }}
+ aria-label="Delete show photo"
+ type="button"
+ >
+ ✕
+ </button>
+ </div>
+ ))}
+ </div>
+ </div>
+ )}
  </div>
 
  {/* ===== Section 1: Identity ===== */}
@@ -1415,7 +1544,6 @@ export default function EditHorsePage() {
  <div className="mb-6">
  <label className="text-foreground mb-1 block text-sm font-semibold">Public Notes</label>
  <Textarea
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
  value={publicNotes}
  onChange={(e) => setPublicNotes(e.target.value)}
  placeholder="Visible on your passport — e.g. comes with original box, factory rubs on near leg"
@@ -1530,6 +1658,7 @@ export default function EditHorsePage() {
  <div className={`mb-6 ${lifeStage === "in_progress" ? "opacity-40 pointer-events-none" : ""}`}>
   <label htmlFor="edit-condition" className="text-foreground mb-1 block text-sm font-semibold">
   Condition Grade {lifeStage !== "in_progress" && "*"}
+  <GlossaryLink anchor="condition-grades" term="Condition grades" />
   </label>
   <select
   id="edit-condition"
@@ -1541,10 +1670,15 @@ export default function EditHorsePage() {
   <option value="">Select condition…</option>
   {CONDITION_GRADES.map((g) => (
   <option key={g.value} value={g.value}>
-  {g.label}
+  {conditionOptionLabel(g)}
   </option>
   ))}
   </select>
+  {conditionGrade && getConditionGrade(conditionGrade) && (
+  <p className="mt-1 text-xs font-medium" style={{ color: conditionToneVar(conditionGrade) }}>
+  {getConditionGrade(conditionGrade)!.gloss} — an honest state, not a fault.
+  </p>
+  )}
   {lifeStage === "in_progress" && (
     <p className="text-xs text-muted-foreground mt-1">
       Condition grade is not applicable for Work in Progress horses.
@@ -1666,7 +1800,6 @@ export default function EditHorsePage() {
  </label>
  <Textarea
  id="edit-marketplace-notes"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
  rows={3}
  maxLength={500}
  placeholder="e.g. Will ship anywhere, Trades welcome..."
@@ -1879,10 +2012,7 @@ export default function EditHorsePage() {
  >
  {isSaving ? (
  <>
- <span
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
- aria-hidden="true"
- />
+ <span className="spinner-inline" aria-hidden="true" />
  {Object.keys(newFiles).length > 0 ?"Uploading…" :"Saving…"}
  </>
  ) : (

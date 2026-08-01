@@ -48,7 +48,11 @@ export default function CatalogSubMasthead({
                     {icon}
                 </span>
                 <div className="min-w-0">
-                    <h1 className="text-engraved-light m-0 font-serif text-2xl font-bold tracking-[0.08em] break-words uppercase">
+                    {/* No `uppercase` here: titles are proper nouns (10.9k
+                        reference H1s — "Alborozo", "Othello") and forcing caps
+                        destroys their casing. The eyebrow + subtitle keep the
+                        small-caps ledger voice. */}
+                    <h1 className="text-engraved-light m-0 font-serif text-2xl font-bold tracking-[0.04em] break-words">
                         {title}
                     </h1>
                     {subtitle && (

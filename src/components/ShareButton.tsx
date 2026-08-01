@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from"react";
+import { buttonVariants } from "@/components/ui/button";
 
 interface ShareButtonProps {
  /** The title for the share dialog */
@@ -9,8 +10,9 @@ interface ShareButtonProps {
  text?: string;
  /** Label text shown beside the icon (optional) */
  label?: string;
- /** CSS class variant:"icon" (default compact) or"full" (styled button) */
- variant?:"icon" |"full";
+ /** CSS class variant:"icon" (default compact),"full" (outline button on
+  * paper surfaces), or"leather" (ghost-leather button for masthead bands) */
+ variant?:"icon" |"full" |"leather";
  /** Override the URL to share (default: current page URL) */
  url?: string;
 }
@@ -82,7 +84,16 @@ export default function ShareButton({ title, text, label, variant ="icon", url: 
  return (
  <>
  <button
- className={variant ==="full" ?"btn btn-ghost share-btn" :"share-icon-btn"}
+ className={
+ /* "full" routes through the Button primitive's outline recipe —
+    the old "btn btn-ghost share-btn" classes never existed.
+    "leather" uses the ghost-leather CTA for masthead bands. */
+ variant ==="leather"
+ ?"btn-ghostleather"
+ : variant ==="full"
+ ? buttonVariants({ variant:"outline" })
+ :"share-icon-btn"
+ }
  onClick={handleShare}
  id="share-button"
  title="Share this page"

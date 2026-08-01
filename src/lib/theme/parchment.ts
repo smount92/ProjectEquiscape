@@ -18,4 +18,13 @@ export const PARCHMENT_INK = {
     "--muted": "#EAE1CD",
     "--input": "#E0D5C1",
     "--color-forest": "#234838",
+    /* Status tokens pinned to their day (ink-on-parchment) values so
+       badges routed through them (market value, condition tones, info
+       notes) stay legible on the tan card in Lamplight — the night
+       overrides lighten these for the dark ground, which would wash
+       them out here. */
+    "--color-success": "#356845",
+    "--color-warning": "#B8860B",
+    "--color-info": "#3b82f6",
+    "--destructive": "#9B3028",
 } as CSSProperties;

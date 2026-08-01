@@ -7,6 +7,7 @@ import { motion } from"framer-motion";
 import { addTimelineEvent, deleteTimelineEvent, updateLifeStage } from"@/app/actions/hoofprint";
 import type { TimelineEvent, OwnershipRecord } from"@/app/actions/hoofprint";
 import HorseshoeIcon from"@/components/icons/HorseshoeIcon";
+import GlossaryLink from"@/components/GlossaryLink";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -109,6 +110,7 @@ export default function HoofprintTimeline({
  <span className="brass-heading-bar" aria-hidden="true" />
  <h2 className="m-0 flex items-center gap-2 text-xl font-bold">
  <HorseshoeIcon className="text-forest" /> <span className="text-forest">Hoofprint</span>
+ <GlossaryLink anchor="hoofprint" term="Hoofprint" />
  </h2>
  </div>
  <span className={`hoofprint-stage-badge stage-${lifeStage}`}>
@@ -144,22 +146,28 @@ export default function HoofprintTimeline({
  {/* Ownership Chain */}
  {ownershipChain.length > 0 && (
  <div className="bg-muted border-input mb-6 flex flex-wrap items-center gap-2 rounded-lg border p-4">
- <span className="text-muted-foreground mr-1 text-xs">Chain of Custody:</span>
+ <span className="text-muted-foreground mr-1 text-xs font-semibold tracking-wide uppercase">Chain of Custody:</span>
  {ownershipChain.map((owner, i) => (
  <span key={owner.id} className="inline-flex items-center gap-1">
- {i > 0 && <span className="text-muted-foreground text-[0.8rem]">→</span>}
+ {i > 0 && <span className="text-muted-foreground text-[0.8rem]" aria-hidden="true">→</span>}
  {owner.ownerId ? (
  <Link
  href={`/profile/${encodeURIComponent(owner.ownerAlias)}`}
  className={`ownership-link ${!owner.releasedAt ?"current" :""}`}
  >
  @{owner.ownerAlias}
- <span className="text-[0.6rem] opacity-[0.7]">
- {owner.acquisitionType !=="original" ? ` (${owner.acquisitionType})` :""}
- </span>
+ {owner.acquisitionType !=="original" && (
+ <span className="ownership-acq">({owner.acquisitionType})</span>
+ )}
+ {!owner.releasedAt && (
+ <span className="ownership-acq font-semibold text-forest">· Current owner</span>
+ )}
  </Link>
  ) : (
- <span className="border-warning border">{owner.ownerAlias}</span>
+ <span className="ownership-offplatform">
+ {owner.ownerAlias}
+ <span className="ownership-acq">(off-platform)</span>
+ </span>
  )}
  </span>
  ))}
@@ -217,32 +225,44 @@ export default function HoofprintTimeline({
  </div>
  ) : (
  <motion.div
-  className="relative pl-[32px]"
+  className="relative pl-11 before:absolute before:top-2 before:bottom-2 before:left-[15px] before:w-[2px] before:rounded-full before:bg-[color-mix(in_srgb,var(--brass,#B08D3E)_45%,transparent)] before:content-['']"
   initial="hidden"
   animate="visible"
   variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.08 } } }}
  >
  {timeline.map((event) => (
- <motion.div key={event.id} className="relative pb-6" variants={{ hidden: { opacity: 0, x: -20 }, visible: { opacity: 1, x: 0, transition: { type: "spring" as const, stiffness: 200, damping: 25 } } }}>
- <div className="pb-6-dot relative">{EVENT_ICONS[event.eventType] ||"📋"}</div>
- <div className="flex items-start justify-between">
- <div>
- <div className="pb-6-title relative">
+ <motion.div key={event.id} className="relative pb-6 last:pb-0" variants={{ hidden: { opacity: 0, x: -20 }, visible: { opacity: 1, x: 0, transition: { type: "spring" as const, stiffness: 200, damping: 25 } } }}>
+ {/* Brass event dot on the rail */}
+ <div
+ className="absolute top-0 -left-11 z-[1] flex h-8 w-8 items-center justify-center rounded-full border-2 border-[var(--brass,#B08D3E)] bg-card text-[0.85rem] shadow-sm"
+ aria-hidden="true"
+ >
+ {EVENT_ICONS[event.eventType] ||"📋"}
+ </div>
+ <div className="flex items-start justify-between gap-2">
+ <div className="min-w-0">
+ <div className="text-[0.95rem] leading-snug font-semibold text-foreground">
  {event.title}
  {!event.isPublic && (
- <span className="ml-[6px] text-[0.65rem] opacity-[0.5]">🔒 Private</span>
+ <span className="text-muted-foreground ml-1.5 text-xs font-normal whitespace-nowrap">🔒 Private</span>
  )}
  </div>
- <div className="pb-6-meta relative">
- {event.eventDate &&
- new Date(event.eventDate).toLocaleDateString("en-US", {
+ <div className="text-muted-foreground mt-0.5 text-xs">
+ {event.eventDate && (
+ <>
+ {new Date(event.eventDate).toLocaleDateString("en-US", {
  month:"short",
  day:"numeric",
  year:"numeric",
  })}
- {" ·"}by @{event.userAlias}
+ {" · "}
+ </>
+ )}
+ by @{event.userAlias}
  </div>
- {event.description && <div className="pb-6-desc relative">{event.description}</div>}
+ {event.description && (
+ <div className="text-secondary-foreground mt-1 text-sm leading-relaxed">{event.description}</div>
+ )}
  </div>
  {/* Only user-authored notes (from posts) can be deleted */}
  {isOwner &&
@@ -250,9 +270,10 @@ export default function HoofprintTimeline({
  event.userId === currentUserId &&
  event.sourceTable ==="posts" && (
  <button
- className="text-[0.7rem] p-[2px_6px] opacity-50"
+ className="shrink-0 cursor-pointer rounded-md border border-transparent p-1.5 text-sm opacity-60 transition-opacity hover:border-destructive/30 hover:bg-destructive/10 hover:opacity-100"
  onClick={() => handleDelete(event.id)}
  title="Delete note"
+ aria-label={`Delete note: ${event.title}`}
  >
  🗑
  </button>

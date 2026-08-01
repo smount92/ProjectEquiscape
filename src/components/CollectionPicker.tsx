@@ -109,7 +109,7 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
  key={c.id}
  className={`flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1 transition-[background] duration-150 ${
  selectedCollectionIds.includes(c.id)
- ? "bg-emerald-100/70"
+ ? "bg-forest/10"
  : "bg-transparent"
  }`}
  >

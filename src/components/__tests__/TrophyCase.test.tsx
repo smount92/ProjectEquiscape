@@ -99,29 +99,51 @@ describe("TrophyCase", () => {
  expect(headers[2].textContent).toBe("🦋 Social");
  });
 
- it("shows tooltip on badge hover", async () => {
+ // Wave 5a-C: badge meanings are click/tap/keyboard-toggled buttons now
+ // (the old hover-only tooltip was unreachable on touch and hidden <480px).
+ it("shows the badge meaning when the badge button is clicked", async () => {
  const user = userEvent.setup();
  render(<TrophyCase badges={mockBadges} />);
 
- // Hover on the first badge name text
- const firstBadgeName = screen.getByText("Beta Pioneer"); // exclusive = first category
- await user.hover(firstBadgeName.closest("div")!);
+ const badgeButton = screen.getByRole("button", { name: /Beta Pioneer/ }); // exclusive = first category
+ await user.click(badgeButton);
 
- // Tooltip should show the description
+ expect(screen.getByText("Joined during beta testing phase")).toBeInTheDocument();
+ expect(badgeButton).toHaveAttribute("aria-expanded","true");
+ });
+
+ it("hides the meaning on a second click", async () => {
+ const user = userEvent.setup();
+ render(<TrophyCase badges={mockBadges} />);
+
+ const badgeButton = screen.getByRole("button", { name: /Beta Pioneer/ });
+ await user.click(badgeButton);
+ await user.click(badgeButton);
+
+ expect(screen.queryByText("Joined during beta testing phase")).not.toBeInTheDocument();
+ expect(badgeButton).toHaveAttribute("aria-expanded","false");
+ });
+
+ it("is keyboard-operable (Enter toggles the meaning)", async () => {
+ const user = userEvent.setup();
+ render(<TrophyCase badges={mockBadges} />);
+
+ const badgeButton = screen.getByRole("button", { name: /Beta Pioneer/ });
+ badgeButton.focus();
+ await user.keyboard("{Enter}");
+
  expect(screen.getByText("Joined during beta testing phase")).toBeInTheDocument();
  });
 
- it("hides tooltip on mouse leave", async () => {
+ it("shows only one badge meaning at a time", async () => {
  const user = userEvent.setup();
  render(<TrophyCase badges={mockBadges} />);
 
- const firstBadgeName = screen.getByText("Beta Pioneer");
- const card = firstBadgeName.closest("div")!;
- await user.hover(card);
- await user.unhover(card);
+ await user.click(screen.getByRole("button", { name: /Beta Pioneer/ }));
+ await user.click(screen.getByRole("button", { name: /First Ride/ }));
 
- // Description tooltip should disappear
  expect(screen.queryByText("Joined during beta testing phase")).not.toBeInTheDocument();
+ expect(screen.getByText("Added your first horse to the stable")).toBeInTheDocument();
  });
 
  it("handles unknown category gracefully", () => {

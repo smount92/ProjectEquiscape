@@ -16,7 +16,12 @@ import {
     getChildReleases,
     getReferenceMarket,
 } from "@/app/actions/reference-pages";
-import { buildEbaySearchUrl } from "@/lib/utils/ebayAffiliate";
+import {
+    buildEbaySearchUrl,
+    EBAY_AFFILIATE_DISCLOSURE,
+    EBAY_AFFILIATE_REL,
+} from "@/lib/utils/ebayAffiliate";
+import GlossaryLink from "@/components/GlossaryLink";
 
 interface Props {
     params: Promise<{ maker: string; slug: string }>;
@@ -198,12 +203,23 @@ export default async function ReferencePage({ params }: Props) {
     };
 
     const attrs = item.attributes ?? {};
-    const chip = (label: string, value: unknown) =>
+    const chip = (label: string, value: unknown, glossary?: { anchor: string; term: string }) =>
         value != null && value !== "" ? (
             <span className="rounded-full border border-input bg-muted px-3 py-1 text-sm text-secondary-foreground">
                 {label} <b className="text-foreground">{String(value)}</b>
+                {glossary && <GlossaryLink anchor={glossary.anchor} term={glossary.term} />}
             </span>
         ) : null;
+
+    // Finish jargon → its glossary definition (OF / CM / AR are the
+    // hobby's densest shorthand for outsiders).
+    const finishGlossary = (finish: unknown): { anchor: string; term: string } | undefined => {
+        const f = String(finish ?? "").toLowerCase();
+        if (f === "of" || f.includes("original finish")) return { anchor: "of", term: "OF — Original Finish" };
+        if (f === "cm" || f.includes("custom")) return { anchor: "cm", term: "CM — Custom" };
+        if (f === "ar" || f.includes("resin")) return { anchor: "ar", term: "AR — Artist Resin" };
+        return undefined;
+    };
 
     const specRows: [string, string][] = [
         ["Maker", item.maker],
@@ -248,14 +264,15 @@ export default async function ReferencePage({ params }: Props) {
                         </div>
                         {isMold && (
                             <p className="rounded-lg border border-input bg-muted/50 px-3 py-2 text-sm text-secondary-foreground">
-                                This is a <b className="text-foreground">mold</b> (the sculpture). Collectors
-                                finish it in many different colors, so the photos below are a range of finishes —
-                                not a single model.
+                                This is a <b className="text-foreground">mold</b>
+                                <GlossaryLink anchor="mold-release" term="Mold vs. release" /> (the sculpture).
+                                Collectors finish it in many different colors, so the photos below are a range of
+                                finishes — not a single model.
                             </p>
                         )}
                         <div className="flex flex-wrap gap-2">
                             {chip("Year", attrs.release_year_start)}
-                            {chip("Finish", attrs.finish)}
+                            {chip("Finish", attrs.finish, finishGlossary(attrs.finish))}
                             {chip("Material", attrs.material)}
                             {chip("Run", attrs.run_count)}
                             {chip("Model #", attrs.model_number)}
@@ -278,18 +295,22 @@ export default async function ReferencePage({ params }: Props) {
                                     (attrs as Record<string, string>).model_number ?? null,
                                 )}
                                 target="_blank"
-                                rel="noopener noreferrer"
+                                rel={EBAY_AFFILIATE_REL}
                                 className="text-sm text-secondary-foreground underline decoration-dotted hover:text-foreground"
                             >
                                 🔎 Find one on eBay ↗
                             </a>
                         </div>
+                        <p className="m-0 text-xs text-muted-foreground">{EBAY_AFFILIATE_DISCLOSURE}</p>
                     </div>
                 </div>
 
                 {/* BLUE BOOK TEASER */}
                 <section>
-                    <h2 className="mb-3 font-serif text-xl font-bold text-foreground">Blue Book value</h2>
+                    <h2 className="mb-3 font-serif text-xl font-bold text-foreground">
+                        Blue Book value
+                        <GlossaryLink anchor="blue-book" term="Blue Book" />
+                    </h2>
                     <div className="overflow-hidden rounded-xl border border-input bg-card shadow-sm">
                         {market ? (
                             <>
@@ -329,14 +350,17 @@ export default async function ReferencePage({ params }: Props) {
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3 border-t border-input px-5 py-3">
+                                    {/* /market is public — the old 🔒 "Members" pill was a
+                                        false gate. Honest link, no Pro language: nothing on
+                                        /market is Pro-gated today. */}
                                     <span className="text-sm text-secondary-foreground">
-                                        Full price history &amp; trend charts
+                                        Full price data &amp; recent sales on the Blue Book
                                     </span>
                                     <Link
                                         href="/market"
-                                        className="ml-auto rounded-full border border-[color:var(--color-warning)] px-3 py-1 text-xs font-bold tracking-wide text-[color:var(--color-warning)] uppercase"
+                                        className="ml-auto text-sm font-bold whitespace-nowrap text-forest hover:underline"
                                     >
-                                        🔒 Members
+                                        See market data →
                                     </Link>
                                 </div>
                             </>

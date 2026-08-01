@@ -3,6 +3,7 @@ import { notFound } from"next/navigation";
 import { getHoofprint } from"@/app/actions/hoofprint";
 import HoofprintTimeline from"@/components/HoofprintTimeline";
 import ShareButton from"@/components/ShareButton";
+import GlossaryLink from"@/components/GlossaryLink";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import PageMasthead from"@/components/layouts/PageMasthead";
 import HorseshoeIcon from"@/components/icons/HorseshoeIcon";
@@ -66,7 +67,7 @@ export default async function HoofprintReportPage({ params }: { params: Promise<
    <ShareButton
    title={`🐾 Hoofprint — ${h.custom_name}`}
    text={`Check out the full provenance record for ${h.custom_name} on Model Horse Hub!`}
-   variant="full"
+   variant="leather"
    label="Share Report"
    />
   }
@@ -76,10 +77,15 @@ export default async function HoofprintReportPage({ params }: { params: Promise<
   <div className="animate-fade-in-up mb-8">
   <h1 className="font-serif text-2xl font-bold tracking-tight text-foreground md:text-3xl">
    <HorseshoeIcon className="text-forest" /> <span className="text-forest">Hoofprint Report</span>
+   <GlossaryLink anchor="hoofprint" term="Hoofprint" />
   </h1>
   <p className="mt-2 max-w-2xl text-lg leading-relaxed text-muted-foreground">
    Full provenance record for <strong>{h.custom_name}</strong>
    {refName && <> · {refName} · {h.finish_type} · {h.condition_grade}</>}
+  </p>
+  <p className="mt-1 max-w-2xl text-sm leading-relaxed text-secondary-foreground">
+   A Hoofprint is this horse&apos;s paper trail — who has owned it, how its condition has
+   changed, and what it has won — and it stays with the horse when it changes hands.
   </p>
   </div>
 

@@ -195,6 +195,16 @@ export const GLOSSARY_SECTIONS: GlossarySection[] = [
                 term: "Hoofprint",
                 def: "This site's provenance record: a horse's ownership chain, show results, and history, traveling with the horse between owners. It's the reason a buyer can trust a show record they never witnessed.",
             },
+            {
+                id: "blue-book",
+                term: "Blue Book",
+                def: "Model Horse Hub's community price guide: sale ranges and medians computed from completed sales logged on the platform, model by model. Named after the used-car guide — a starting point for fair pricing, not a formal appraisal.",
+            },
+            {
+                id: "condition-grades",
+                term: "Condition grades",
+                def: "The ladder Model Horse Hub uses to describe wear honestly: Mint and Near Mint at the top, Excellent through Good in the solid middle, then Body Quality (a customizing canvas), Fair, Poor, and Play Grade (well-loved). They're honest states, not judgments — one collector's Play Grade is another artist's next masterpiece.",
+            },
         ],
     },
 ];

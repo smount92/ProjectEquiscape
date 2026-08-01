@@ -37,19 +37,8 @@ import OtherModelFormFields from "@/components/forms/OtherModelFormFields";
 import { Button } from "@/components/ui/button";
 import { track } from "@/lib/analytics";
 import { Camera, Link2, Tag } from "lucide-react";
-
-// ---- Constants ----
-
-const CONDITION_GRADES = [
- { value:"Mint", label:"Mint — Flawless, like new" },
- { value:"Near Mint", label:"Near Mint — Minimal handling wear" },
- { value:"Excellent", label:"Excellent — Very light wear, no breaks" },
- { value:"Very Good", label:"Very Good — Minor rubs or scuffs" },
- { value:"Good", label:"Good — Noticeable wear, still displays well" },
- { value:"Body Quality", label:"Body Quality — Suitable for customizing" },
- { value:"Fair", label:"Fair — Visible flaws, repairs, or damage" },
- { value:"Poor", label:"Poor — Significant damage or missing parts" },
-];
+import { CONDITION_GRADES, conditionOptionLabel, conditionToneVar, getConditionGrade } from "@/lib/conditionGrades";
+import GlossaryLink from "@/components/GlossaryLink";
 
 // ---- Types ----
 
@@ -104,6 +93,11 @@ export default function AddHorsePage() {
  // Validation feedback
  const [validationErrors, setValidationErrors] = useState<string[]>([]);
  const [shakeFields, setShakeFields] = useState(false);
+
+ // Inline photo notices (replace the old blocking alert() calls)
+ const [galleryNotice, setGalleryNotice] = useState<string | null>(null);
+ const [flawNotice, setFlawNotice] = useState<string | null>(null);
+ const [extraNotice, setExtraNotice] = useState<string | null>(null);
 
  // Step 1 (index 0): Gallery
  const [imageSlots, setImageSlots] = useState<Partial<Record<AngleProfile, ImageSlot>>>({});
@@ -258,14 +252,42 @@ export default function AddHorsePage() {
  // eslint-disable-next-line react-hooks/exhaustive-deps
  }, []);
 
+ // ---- Dirty-state guard: warn before losing entered work on a hard
+ // unload (refresh / tab close / external nav). SPA links are safe —
+ // beforeunload only fires for real unloads.
+ const isDirtyRef = useRef(false);
+ useEffect(() => {
+ isDirtyRef.current =
+ !showSuccess &&
+ (customName.trim() !=="" ||
+ Object.keys(imageSlots).length > 0 ||
+ extraFiles.length > 0 ||
+ flawFiles.length > 0 ||
+ sculptor !=="" ||
+ finishingArtist !=="" ||
+ publicNotes !=="" ||
+ purchasePrice !=="" ||
+ selectedCatalogId !== null);
+ }, [showSuccess, customName, imageSlots, extraFiles, flawFiles, sculptor, finishingArtist, publicNotes, purchasePrice, selectedCatalogId]);
+ useEffect(() => {
+ const handler = (e: BeforeUnloadEvent) => {
+ if (!isDirtyRef.current || isSubmittingRef.current) return;
+ e.preventDefault();
+ e.returnValue ="";
+ };
+ window.addEventListener("beforeunload", handler);
+ return () => window.removeEventListener("beforeunload", handler);
+ }, []);
+
  // ---- Handlers ----
 
  const handleImageSelect = async (angle: AngleProfile, file: File) => {
  const validationError = validateImageFile(file);
  if (validationError) {
- alert(validationError);
+ setGalleryNotice(validationError);
  return;
  }
+ setGalleryNotice(null);
 
  // Open crop modal
  setCropFile(file);
@@ -638,7 +660,7 @@ export default function AddHorsePage() {
  if (showSuccess) {
  return (
  <div className="success-overlay">
-          <div className="animate-fade-in-up max-w-[480px] rounded-xl border border-input bg-card p-12 text-center shadow-lg">
+          <div className="animate-fade-in-up max-h-[calc(100dvh-2rem)] max-w-[480px] overflow-y-auto rounded-xl border border-input bg-card p-12 text-center shadow-lg max-sm:p-6">
  <div className="success-icon">🎉</div>
  <h2>
  <span className="text-forest">{savedHorseName}</span> Added!
@@ -706,7 +728,14 @@ export default function AddHorsePage() {
 
  return (
  <FocusLayout noHeader>
- <PageMasthead compact icon="🐴" title="Add a Horse" subtitle="Add a new model to your digital stable" />
+ <PageMasthead
+ compact
+ icon="🐴"
+ title="Add a Horse"
+ subtitle="Add a new model to your digital stable"
+ backHref="/dashboard"
+ backLabel="Dashboard"
+ />
  {/* Page Header */}
  <div className="animate-fade-in-up">
           <p className="mt-2 text-sm text-secondary-foreground">
@@ -729,7 +758,17 @@ export default function AddHorsePage() {
  key={cat.value}
  type="button"
               className={`group flex cursor-pointer flex-col items-center gap-1.5 rounded-xl border-2 px-5 py-3 transition-all ${assetCategory === cat.value ? "border-forest bg-forest/10 shadow-sm" : "border-input bg-card hover:border-forest/40"}`}
- onClick={() => setAssetCategory(cat.value)}
+ onClick={() => {
+ // Clamp the step index when the step list shrinks (model's 4
+ // steps → 3 for tack/prop/diorama): switching categories on the
+ // last step used to strand currentStep past the end — no step
+ // content, no nav buttons, a dead end. Entered values are kept;
+ // all field state lives outside the step components.
+ const nextSteps = getSteps(cat.value);
+ setAssetCategory(cat.value);
+ setCurrentStep((s) => Math.min(s, nextSteps.length - 1));
+ setValidationErrors([]);
+ }}
  >
  <span className={`text-2xl transition-all ${assetCategory === cat.value ? "" : "opacity-60 grayscale group-hover:opacity-90 group-hover:grayscale-0"}`}>{cat.icon}</span>
               <span className={`text-sm font-semibold ${assetCategory === cat.value ? "text-forest" : "text-secondary-foreground"}`}>{cat.label}</span>
@@ -898,6 +937,12 @@ export default function AddHorsePage() {
  })}
  </div>
 
+ {galleryNotice && (
+ <p className="mt-3 rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-sm text-warning" role="alert">
+ {galleryNotice}
+ </p>
+ )}
+
  {/* Flaw & Condition Photos — free for every tier, capped at 5
  client-side. Reuses the existing Flaw_Rub_Damage angle enum;
  the server enforces the cap independently. */}
@@ -915,9 +960,10 @@ export default function AddHorsePage() {
  f.type.startsWith("image/"),
  );
  if (flawFiles.length + files.length > 5) {
- alert("Maximum 5 flaw/condition photos allowed.");
+ setFlawNotice("That's more than 5 flaw/condition photos — remove one first or pick fewer files.");
  return;
  }
+ setFlawNotice(null);
  startFlawCropQueue(files);
  }}
  >
@@ -934,10 +980,11 @@ export default function AddHorsePage() {
  f.type.startsWith("image/"),
  );
  if (flawFiles.length + files.length > 5) {
- alert("Maximum 5 flaw/condition photos allowed.");
+ setFlawNotice("That's more than 5 flaw/condition photos — remove one first or pick fewer files.");
  e.target.value ="";
  return;
  }
+ setFlawNotice(null);
  startFlawCropQueue(files);
  e.target.value ="";
  }}
@@ -964,12 +1011,17 @@ export default function AddHorsePage() {
  {flawFiles.length}/5 photos · Click or drag files here
  </span>
  </label>
+ {flawNotice && (
+ <p className="mt-2 rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-sm text-warning" role="alert">
+ {flawNotice}
+ </p>
+ )}
  {flawFiles.length > 0 && (
  <div className="mt-4 flex flex-wrap gap-2">
  {flawFiles.map((ff, i) => (
  <div
  key={i}
- className="border-input relative h-[100px] w-[100px] overflow-hidden rounded-md border"
+ className="border-input group relative h-[100px] w-[100px] overflow-hidden rounded-md border"
  >
  {/* eslint-disable-next-line @next/next/no-img-element */}
  <img src={ff.previewUrl} alt={`Flaw photo ${i + 1}`} />
@@ -985,7 +1037,7 @@ export default function AddHorsePage() {
  ✕
  </button>
  <button
- className="bg-black/70 absolute right-[4px] bottom-[4px] flex h-[22px] w-[22px] cursor-pointer items-center justify-center rounded-full border-0 text-[13px] leading-none text-white opacity-0 transition-opacity"
+ className="bg-black/70 absolute right-[4px] bottom-[4px] flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border-0 text-[13px] leading-none text-white transition-opacity pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100 pointer-fine:group-focus-within:opacity-100 focus-visible:opacity-100"
  onClick={(e) => {
  e.stopPropagation();
  setReCropFlawIdx(i);
@@ -1028,9 +1080,10 @@ export default function AddHorsePage() {
  f.type.startsWith("image/"),
  );
  if (extraFiles.length + files.length > 30) {
- alert("Maximum 30 extra detail photos allowed.");
+ setExtraNotice("That's more than 30 extra detail photos — remove one first or pick fewer files.");
  return;
  }
+ setExtraNotice(null);
  startExtraCropQueue(files);
  }}
  >
@@ -1047,10 +1100,11 @@ export default function AddHorsePage() {
  f.type.startsWith("image/"),
  );
  if (extraFiles.length + files.length > 30) {
- alert("Maximum 30 extra detail photos allowed.");
+ setExtraNotice("That's more than 30 extra detail photos — remove one first or pick fewer files.");
  e.target.value ="";
  return;
  }
+ setExtraNotice(null);
  startExtraCropQueue(files);
  e.target.value ="";
  }}
@@ -1077,12 +1131,17 @@ export default function AddHorsePage() {
  {extraFiles.length}/30 photos · Click or drag files here
  </span>
  </label>
+ {extraNotice && (
+ <p className="mt-2 rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-sm text-warning" role="alert">
+ {extraNotice}
+ </p>
+ )}
  {extraFiles.length > 0 && (
  <div className="mt-4 flex flex-wrap gap-2">
  {extraFiles.map((ef, i) => (
  <div
  key={i}
- className="border-input relative h-[100px] w-[100px] overflow-hidden rounded-md border"
+ className="border-input group relative h-[100px] w-[100px] overflow-hidden rounded-md border"
  >
  {/* eslint-disable-next-line @next/next/no-img-element */}
  <img src={ef.previewUrl} alt={`Extra detail ${i + 1}`} />
@@ -1098,7 +1157,7 @@ export default function AddHorsePage() {
  ✕
  </button>
  <button
- className="bg-black/70 absolute right-[4px] bottom-[4px] flex h-[22px] w-[22px] cursor-pointer items-center justify-center rounded-full border-0 text-[13px] leading-none text-white opacity-0 transition-opacity"
+ className="bg-black/70 absolute right-[4px] bottom-[4px] flex h-7 w-7 cursor-pointer items-center justify-center rounded-full border-0 text-[13px] leading-none text-white transition-opacity pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100 pointer-fine:group-focus-within:opacity-100 focus-visible:opacity-100"
  onClick={(e) => {
  e.stopPropagation();
  setReCropExtraIdx(i);
@@ -1120,7 +1179,8 @@ export default function AddHorsePage() {
  </div>
 
  <div className="mt-8 flex items-center justify-between gap-4">
- <div className="mt-8-spacer flex items-center justify-between gap-4" />
+ {/* spacer keeps Next right-aligned (no Back on step 1) */}
+ <div aria-hidden="true" />
  <Button
  onClick={goNext}
  id="step-1-next"
@@ -1447,6 +1507,7 @@ export default function AddHorsePage() {
  <div className={`mb-6 ${lifeStage === "in_progress" ? "opacity-40 pointer-events-none" : ""}`}>
  <label htmlFor="condition-grade" className="text-foreground mb-1 block text-sm font-semibold">
  Condition Grade {lifeStage !== "in_progress" && "*"}
+ <GlossaryLink anchor="condition-grades" term="Condition grades" />
  </label>
  <select
  id="condition-grade"
@@ -1465,10 +1526,15 @@ export default function AddHorsePage() {
  <option value="">Select condition…</option>
  {CONDITION_GRADES.map((grade) => (
  <option key={grade.value} value={grade.value}>
- {grade.label}
+ {conditionOptionLabel(grade)}
  </option>
  ))}
  </select>
+ {conditionGrade && getConditionGrade(conditionGrade) && (
+ <p className="mt-1 text-xs font-medium" style={{ color: conditionToneVar(conditionGrade) }}>
+ {getConditionGrade(conditionGrade)!.gloss} — an honest state, not a fault.
+ </p>
+ )}
  {lifeStage === "in_progress" && (
    <p className="text-xs text-muted-foreground mt-1">
      Condition grade is not applicable for Work in Progress horses.
@@ -1557,7 +1623,6 @@ export default function AddHorsePage() {
  </label>
  <Textarea
  id="marketplace-notes"
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-4 py-2 text-sm font-semibold no-underline transition-all"
  rows={3}
  maxLength={500}
  placeholder="e.g. Will ship anywhere, Trades welcome, Smoke-free home..."
@@ -1569,23 +1634,9 @@ export default function AddHorsePage() {
  )}
  </div>
 
- <div className="mt-8 flex items-center justify-between gap-4">
- <Button variant="outline" size="wide"
- onClick={goBack}
- id="step-3-back"
- >
- ← Back
- </Button>
- <Button
- onClick={goNext}
- disabled={!canProceedStep(2)}
- id="step-3-next"
- >
- Next: Financial Vault →
- </Button>
- </div>
-
- {/* Community visibility selector */}
+ {/* Community visibility selector — ABOVE the nav row so it can't
+ read as part of the next step (it used to render below Next,
+ where nobody scrolled back to see it). */}
  <div className="mt-6 rounded-lg border border-input bg-muted px-6 py-4">
  <div
  className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between"
@@ -1628,6 +1679,22 @@ export default function AddHorsePage() {
  ))}
  </div>
  </div>
+ </div>
+
+ <div className="mt-8 flex items-center justify-between gap-4">
+ <Button variant="outline" size="wide"
+ onClick={goBack}
+ id="step-3-back"
+ >
+ ← Back
+ </Button>
+ <Button
+ onClick={goNext}
+ disabled={!canProceedStep(2)}
+ id="step-3-next"
+ >
+ Next: Financial Vault →
+ </Button>
  </div>
  </div>
  )}
@@ -1789,10 +1856,7 @@ export default function AddHorsePage() {
  >
  {isSubmitting ? (
  <>
- <span
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
- aria-hidden="true"
- />
+ <span className="spinner-inline" aria-hidden="true" />
  Saving to Stable…
  </>
  ) : (
