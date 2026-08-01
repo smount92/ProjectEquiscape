@@ -159,7 +159,13 @@ export default async function ReferencePage({
                             <h2 className="mb-2 font-serif text-xl font-semibold text-foreground">No entries found</h2>
                             <p className="max-w-sm text-muted-foreground">
                                 Nothing matches these filters.{" "}
-                                <Link href="/catalog/suggestions/new" className="text-forest hover:underline">
+                                {/* redirectTo = this filtered catalog URL, so the
+                                    suggest flow (and its login bounce) can bring
+                                    the searcher back to where they left off. */}
+                                <Link
+                                    href={`/catalog/suggestions/new?redirectTo=${encodeURIComponent(pageHref(filters, filters.page))}`}
+                                    className="text-forest hover:underline"
+                                >
                                     Suggest a new entry?
                                 </Link>
                             </p>

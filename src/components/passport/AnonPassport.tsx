@@ -9,6 +9,15 @@ import PublicCardsSection from "@/components/shows/PublicCardsSection";
 import { Button } from "@/components/ui/button";
 import { referenceHref, referencePagesEnabled } from "@/lib/catalog/referenceUrl";
 import { PARCHMENT_INK } from "@/lib/theme/parchment";
+import { getPublicHorseRecords } from "@/lib/shows/publicRecords";
+import {
+    isChampionshipRecord,
+    recordChipLabel,
+    sortRecordsBestFirst,
+    summarizeShowRecords,
+    verifiedChipLabel,
+    type MarketRecordDetailRow,
+} from "@/lib/market/recordSummary";
 
 // Read-only public passport for logged-OUT visitors (FUNNEL-4). The full
 // interactive passport (favorite/comment/message/hoofprint) stays in
@@ -54,6 +63,83 @@ interface PassportRow {
     images: { image_url: string; angle_profile: string; short_slug: string | null }[] | null;
 }
 
+/** "Recent placings, best first" — the anon record list shows at most this many. */
+const TOP_RECORDS_SHOWN = 10;
+
+/** Same fuzzy-date preference as HorseRecordChip / ShowRecordTimeline. */
+function formatShowDate(dateStr: string | null, dateText: string | null): string | null {
+    if (dateText && (!dateStr || dateStr.endsWith("-01-01"))) return dateText;
+    if (!dateStr) return null;
+    return new Date(dateStr + "T00:00:00").toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+    });
+}
+
+/**
+ * Verification tier as VISIBLE text — anon buyers are mostly on shared
+ * links/mobile, where title-attr tooltips don't exist. Legacy NAN rows
+ * carry their own ⭐ badge, so self-reported NAN rows skip the 📝 tag.
+ */
+function TierText({ tier, isNan }: { tier: string | null; isNan: boolean }) {
+    if (tier === "platform_generated") {
+        return (
+            <span className="inline-flex items-center gap-[2px] rounded-sm bg-success/15 px-1.5 py-[1px] text-[0.65rem] font-bold text-success">
+                🛡️ MHH verified
+            </span>
+        );
+    }
+    if (tier === "host_verified") {
+        return (
+            <span className="inline-flex items-center gap-[2px] rounded-sm bg-info/15 px-1.5 py-[1px] text-[0.65rem] font-bold text-info">
+                ✅ Host verified
+            </span>
+        );
+    }
+    if (isNan) return null;
+    return (
+        <span className="inline-flex items-center gap-[2px] rounded-sm bg-muted px-1.5 py-[1px] text-[0.65rem] font-medium text-muted-foreground">
+            📝 Self-reported
+        </span>
+    );
+}
+
+/** One compact record line — adapted from the market quick-look RecordRow. */
+function AnonRecordRow({ record }: { record: MarketRecordDetailRow }) {
+    const champion = isChampionshipRecord(record.placing, record.ribbonColor);
+    const date = formatShowDate(record.showDate, record.showDateText);
+    return (
+        <li className="rounded-md bg-muted px-3 py-2">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <span className={champion ? "font-serif font-bold text-warning" : "font-semibold text-foreground"}>
+                    {champion ? "🏆 " : "🎖️ "}
+                    {record.placing || "Shown"}
+                </span>
+                {record.isNan && (
+                    <span className="inline-flex items-center gap-[2px] rounded-sm bg-warning/15 px-1.5 py-[1px] text-[0.65rem] font-bold tracking-wider text-warning uppercase">
+                        ⭐ NAN
+                    </span>
+                )}
+                <TierText tier={record.verificationTier} isNan={record.isNan} />
+            </div>
+            <div className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-secondary-foreground">
+                {record.className && <span>{record.className}</span>}
+                <span>
+                    {record.showId ? (
+                        <Link href={`/shows/${record.showId}`} className="text-forest no-underline hover:underline">
+                            {record.showName}
+                        </Link>
+                    ) : (
+                        record.showName
+                    )}
+                </span>
+                {date && <span>· {date}</span>}
+            </div>
+        </li>
+    );
+}
+
 export default async function AnonPassport({ horseId }: { horseId: string }) {
     const supabase = createAnonClient();
     // get_public_passport ships in migration 135 (not yet in generated types → cast).
@@ -65,6 +151,22 @@ export default async function AnonPassport({ horseId }: { horseId: string }) {
 
     const row = data?.[0];
     if (!row || !row.horse) notFound();
+
+    // Show records via the anon-safe get_public_horse_records RPC
+    // (migration 146) — [] until the migration is applied, so the
+    // section below feature-detects itself away. Best results first,
+    // capped, with the summary line the market quick-look uses.
+    const showRecords = await getPublicHorseRecords(horseId);
+    const recordSummary =
+        summarizeShowRecords(
+            showRecords.map((r) => ({
+                horse_id: horseId,
+                placing: r.placing,
+                ribbon_color: r.ribbonColor,
+                verification_tier: r.verificationTier,
+            })),
+        ).get(horseId) ?? null;
+    const topRecords = sortRecordsBestFirst(showRecords).slice(0, TOP_RECORDS_SHOWN);
 
     const horse = row.horse;
     const cat = row.catalog;
@@ -144,7 +246,13 @@ export default async function AnonPassport({ horseId }: { horseId: string }) {
                     </div>
 
                     <div className="text-sm text-secondary-foreground">
-                        Owned by <span className="font-semibold">@{ownerAlias}</span>
+                        Owned by{" "}
+                        <Link
+                            href={`/profile/${encodeURIComponent(ownerAlias)}`}
+                            className="font-semibold text-forest underline decoration-2 underline-offset-2"
+                        >
+                            @{ownerAlias}
+                        </Link>
                     </div>
 
                     {forSale && (
@@ -202,6 +310,42 @@ export default async function AnonPassport({ horseId }: { horseId: string }) {
                     </div>
                 </div>
             </div>
+
+            {/* Show Record — the buyer trust section. Anon-safe RPC
+                (migration 146); renders nothing pre-migration or when
+                the horse has no records. Best placings first, tier
+                labels as visible text (no hover-only meaning). */}
+            {topRecords.length > 0 && (
+                <section className="animate-fade-in-up mt-8" aria-label="Show record">
+                    <div className="bg-card border-input rounded-lg border p-6 shadow-md">
+                        <h3 className="mb-1 font-serif text-lg font-bold text-foreground">
+                            <span aria-hidden="true">🏆</span> Show Record
+                        </h3>
+                        <div className="mb-3 flex flex-wrap items-center gap-2 text-sm text-secondary-foreground">
+                            <span className="font-semibold text-foreground">{recordChipLabel(recordSummary)}</span>
+                            {verifiedChipLabel(recordSummary) && (
+                                <span className="inline-flex items-center gap-1 rounded-sm bg-success/15 px-2 py-[1px] text-xs font-bold text-success">
+                                    ✅ {verifiedChipLabel(recordSummary)}
+                                </span>
+                            )}
+                        </div>
+                        <ul className="m-0 list-none space-y-2 p-0">
+                            {topRecords.map((record) => (
+                                <AnonRecordRow key={record.id} record={record} />
+                            ))}
+                        </ul>
+                        {showRecords.length > topRecords.length && (
+                            <p className="mt-3 mb-0 text-xs text-muted-foreground italic">
+                                Best {topRecords.length} of {showRecords.length} results shown —{" "}
+                                <Link href={loginHref} className="text-forest hover:underline">
+                                    log in
+                                </Link>{" "}
+                                to see the full trophy case.
+                            </p>
+                        )}
+                    </div>
+                </section>
+            )}
 
             {/* MHH Qualification Cards — the buyer trust section, same
                 anon-safe RPC path as the rest of this page (migration

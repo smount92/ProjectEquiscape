@@ -176,10 +176,18 @@ export default async function MarketPricePage({
     </div>
     );
     // Link to the reference page only when it's live (ships dark otherwise).
+    // Stored slugs (migration 129) — the client-side slugify fallback can't
+    // reproduce collision suffixes (-2, item-<id8>) and 404s on them.
     return referencePagesEnabled() ? (
      <Link
       key={key}
-      href={referenceHref({ id: item.catalogId, maker: item.maker, title: item.title })}
+      href={referenceHref({
+       id: item.catalogId,
+       maker: item.maker,
+       title: item.title,
+       maker_slug: item.makerSlug,
+       slug: item.slug,
+      })}
       className="block no-underline"
      >
       {card}

@@ -25,8 +25,31 @@ interface ProfileHorse {
     horse_images: { image_url: string; angle_profile: string }[] | null;
 }
 
-export default async function AnonProfile({ alias }: { alias: string }) {
+/** One wood shelf of polaroids per click — matches the members' PROFILE_PAGE_SIZE. */
+const ANON_PAGE_SIZE = 24;
+/** Abuse guard for the ?shown= URL param (mirrors the 10k page clamp in filterParams). */
+const MAX_SHOWN = 10_000;
+
+/**
+ * `shownParam` is the raw ?shown= searchParam (threaded through by
+ * profile/[alias_name]/page.tsx). Server-rendered "Show more" paging:
+ * the link re-renders this page with a larger range, so every public
+ * horse is reachable without client JS — same URL-as-state pattern as
+ * the catalog pagination.
+ */
+export default async function AnonProfile({
+    alias,
+    shownParam,
+}: {
+    alias: string;
+    shownParam?: string | string[];
+}) {
     const admin = getAdminClient();
+
+    const parsedShown = Number.parseInt(Array.isArray(shownParam) ? (shownParam[0] ?? "") : (shownParam ?? ""), 10);
+    const shown = Number.isFinite(parsedShown)
+        ? Math.min(Math.max(parsedShown, ANON_PAGE_SIZE), MAX_SHOWN)
+        : ANON_PAGE_SIZE;
 
     const { data: profileUser } = await admin
         .from("users")
@@ -66,8 +89,9 @@ export default async function AnonProfile({ alias }: { alias: string }) {
         .eq("visibility", "public")
         .is("deleted_at", null)
         .order("created_at", { ascending: false })
-        .range(0, 23);
+        .range(0, shown - 1);
     const horses = (rawHorses ?? []) as unknown as ProfileHorse[];
+    const remaining = Math.max(0, (publicHorseCount ?? 0) - horses.length);
 
     const { count: totalHorseCount } = await admin
         .from("user_horses")
@@ -191,6 +215,21 @@ export default async function AnonProfile({ alias }: { alias: string }) {
                                 );
                             })}
                         </div>
+                        {/* Server-rendered "Show more": re-renders with a larger
+                            range so ALL public horses are reachable — the strap
+                            count above must never advertise models a visitor
+                            can't get to. */}
+                        {remaining > 0 && (
+                            <div className="flex justify-center pt-2 pb-6">
+                                <Link
+                                    href={`/profile/${encodeURIComponent(profileUser.alias_name)}?shown=${shown + ANON_PAGE_SIZE}#stable`}
+                                    className="btn-brass no-underline hover:no-underline"
+                                    id="anon-profile-show-more"
+                                >
+                                    Show more ({remaining} remaining)
+                                </Link>
+                            </div>
+                        )}
                     </div>
                 )}
             </section>

@@ -22,6 +22,10 @@ export interface MarketPrice {
     catalogId: string;
     title: string;
     maker: string;
+    /** Stored reference slugs (migration 129) — referenceHref must get
+     *  these, never re-slugify maker/title (collision suffixes differ). */
+    makerSlug: string | null;
+    slug: string | null;
     itemType: string;
     finishType: string;
     lifeStage: string;
@@ -55,16 +59,25 @@ export async function getMarketPrice(catalogId: string, finishType?: string): Pr
     // Get catalog item details
     const { data: catalog } = await supabase
         .from("catalog_items")
-        .select("title, maker, item_type, scale")
+        .select("title, maker, maker_slug, slug, item_type, scale")
         .eq("id", catalogId)
         .single();
 
-    const cat = catalog as { title: string; maker: string; item_type: string; scale: string | null } | null;
+    const cat = catalog as {
+        title: string;
+        maker: string;
+        maker_slug: string | null;
+        slug: string | null;
+        item_type: string;
+        scale: string | null;
+    } | null;
 
     return {
         catalogId,
         title: cat?.title || "Unknown",
         maker: cat?.maker || "Unknown",
+        makerSlug: cat?.maker_slug ?? null,
+        slug: cat?.slug ?? null,
         itemType: cat?.item_type || "unknown",
         finishType: (row.finish_type as string) || "OF",
         lifeStage: (row.life_stage as string) || "completed",
@@ -119,10 +132,12 @@ export async function searchMarketPrices(query?: string, options?: {
     // Unique catalog IDs for catalog lookup
     const catalogIds = [...new Set(priceRows.map(r => r.catalog_id as string))];
 
-    // Get catalog items for those IDs
+    // Get catalog items for those IDs. maker_slug/slug ride along so
+    // /market cards can link to the STORED reference URL — client-side
+    // re-slugifying ignores migration 129's collision suffixes and 404s.
     let catalogQuery = supabase
         .from("catalog_items")
-        .select("id, title, maker, item_type, scale")
+        .select("id, title, maker, maker_slug, slug, item_type, scale")
         .in("id", catalogIds);
 
     const q = sanitizeForOr(query ?? "");
@@ -141,7 +156,15 @@ export async function searchMarketPrices(query?: string, options?: {
     }
 
     // Merge: one catalog item may have multiple finish types
-    const catalogRows = catalogData as { id: string; title: string; maker: string; item_type: string; scale: string | null }[];
+    const catalogRows = catalogData as {
+        id: string;
+        title: string;
+        maker: string;
+        maker_slug: string | null;
+        slug: string | null;
+        item_type: string;
+        scale: string | null;
+    }[];
     let merged: MarketPrice[] = [];
 
     for (const cat of catalogRows) {
@@ -152,6 +175,8 @@ export async function searchMarketPrices(query?: string, options?: {
                     catalogId: cat.id,
                     title: cat.title,
                     maker: cat.maker,
+                    makerSlug: cat.maker_slug ?? null,
+                    slug: cat.slug ?? null,
                     itemType: cat.item_type,
                     finishType: (price.finish_type as string) || "OF",
                     lifeStage: (price.life_stage as string) || "completed",

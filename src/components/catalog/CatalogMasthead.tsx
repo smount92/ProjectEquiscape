@@ -63,7 +63,8 @@ export default function CatalogMasthead({ totalCount }: { totalCount: number }) 
                 style={{ color: "var(--leather-text)" }}
             >
                 The community-maintained record of every model — Breyer, Stone, and artist resins.
-                Search a mold, a maker, or a color to find its page.
+                Search by name or maker to find a model&apos;s page, or dig into color and year
+                under Advanced.
             </p>
         </div>
     );
