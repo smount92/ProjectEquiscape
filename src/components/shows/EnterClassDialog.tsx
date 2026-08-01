@@ -4,7 +4,12 @@
  * Phase D — the entry dialog. Class-first: the classlist picks the
  * class, this dialog picks the rest.
  *
- *   1. Pick one of YOUR public horses.
+ *   1. Pick one of YOUR public horses. Small stables (≤12) keep the
+ *      original card grid; bigger stables get a search-first compact
+ *      list (rows scale to 50–500 horses where cards can't), with
+ *      horses that look compatible with the class's scale/finish
+ *      limits floated to the top (lib/shows/horsePicker — SOFT
+ *      ordering: a mismatch is a hint, nothing is hidden/disabled).
  *   2. Online shows only: pick the entry photo from that horse's
  *      existing photos (117: photo_id → horse_images), or upload a
  *      new one right here (Batch 3 — the v1 "no upload at entry"
@@ -20,12 +25,13 @@
  * authority; this dialog never pre-judges eligibility.
  */
 
-import { useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 
 import { enterClass, findUserByAlias } from "@/app/actions/shows-v2";
 import { addShowPhotoToHorse } from "@/app/actions/entry-photo";
 import { getProfile } from "@/app/actions/settings";
+import { filterAndRankHorses } from "@/lib/shows/horsePicker";
 import type { EntrantHorse } from "@/lib/shows/public";
 import type { ShowMode } from "@/lib/shows/types";
 import { createClient } from "@/lib/supabase/client";
@@ -60,6 +66,29 @@ export interface EnterableClass {
     id: string;
     name: string;
     classNumber: string | null;
+    /**
+     * Soft-ordering context — optional so lighter callers still
+     * compile; ConsoleClass (what the show page passes) carries all
+     * three. Used ONLY to order the picker and hint at mismatches;
+     * the server's validateEntry stays the sole authority.
+     */
+    maxPerEntrant?: number | null;
+    allowedScales?: string[] | null;
+    allowedFinishes?: string[] | null;
+}
+
+/** Grid cards stay comfortable up to a dozen horses; past that the
+ *  picker switches to the search-first compact list. */
+const GRID_MAX_HORSES = 12;
+
+/** Desktop-ish pointer → safe to auto-focus the search box without
+ *  popping a mobile keyboard over the list. */
+function hasFinePointer(): boolean {
+    return (
+        typeof window !== "undefined" &&
+        typeof window.matchMedia === "function" &&
+        window.matchMedia("(pointer: fine)").matches
+    );
 }
 
 interface EnterClassDialogProps {
@@ -85,6 +114,29 @@ export default function EnterClassDialog({
 }: EnterClassDialogProps) {
     const [horse, setHorse] = useState<EntrantHorse | null>(null);
     const [refreshingHorses, setRefreshingHorses] = useState(false);
+
+    // Picker search — deliberately NOT reset when a horse is picked,
+    // so "← Choose a different horse" returns to the same filtered
+    // view the user left.
+    const [horseQuery, setHorseQuery] = useState("");
+    const searchInputRef = useRef<HTMLInputElement>(null);
+    const compactPicker = horses.length > GRID_MAX_HORSES;
+    /** Name-filtered, likely-fits-first (soft), server order within
+     *  each group. Applied to BOTH layouts so small stables get the
+     *  same smart ordering. */
+    const rankedHorses = useMemo(
+        () => filterAndRankHorses(horses, cls, horseQuery),
+        [horses, cls, horseQuery],
+    );
+    const anyMismatchListed = rankedHorses.some((p) => !p.fitsClass);
+
+    // Focus the search box whenever the picker (re)appears — desktop
+    // only; on touch the keyboard would cover half the list.
+    useEffect(() => {
+        if (horse === null && compactPicker && hasFinePointer()) {
+            searchInputRef.current?.focus();
+        }
+    }, [horse, compactPicker]);
 
     // Online shows: the judged object is a photo of the horse.
     const [photos, setPhotos] = useState<EntryPhoto[]>([]);
@@ -285,7 +337,20 @@ export default function EnterClassDialog({
 
     return (
         <Dialog open onOpenChange={(o) => !o && onClose()}>
-            <DialogContent className="sm:max-w-[560px]">
+            <DialogContent
+                // Big stables get the roomier box while picking; the
+                // photo/handler step keeps its familiar width.
+                className={
+                    !horse && compactPicker ? "sm:max-w-2xl" : "sm:max-w-[560px]"
+                }
+                // Radix focuses the first tabbable on open — that's the
+                // search box now, which is exactly right on desktop but
+                // pops the keyboard over the list on touch. Let the
+                // effect above decide instead.
+                onOpenAutoFocus={(e) => {
+                    if (!hasFinePointer()) e.preventDefault();
+                }}
+            >
                 <DialogHeader>
                     <DialogTitle>Enter {classLabel}</DialogTitle>
                     <DialogDescription>
@@ -333,43 +398,159 @@ export default function EnterClassDialog({
                             </div>
                         </div>
                     ) : (
-                        <div
-                            className="grid max-h-[400px] grid-cols-2 gap-3 overflow-y-auto sm:grid-cols-3"
-                            data-testid="horse-picker"
-                        >
-                            {horses.map((h) => (
-                                <button
-                                    key={h.id}
-                                    type="button"
-                                    className="flex min-h-11 cursor-pointer flex-col items-center gap-1 rounded-lg border border-input bg-card p-2 transition-all hover:ring-2 hover:ring-forest"
-                                    onClick={() => selectHorse(h)}
+                        <div className="flex min-w-0 flex-col gap-2" data-testid="horse-picker">
+                            {compactPicker && (
+                                <>
+                                    <Input
+                                        ref={searchInputRef}
+                                        type="search"
+                                        value={horseQuery}
+                                        onChange={(e) => setHorseQuery(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            // Exactly one match → Enter picks it.
+                                            // Picking is never submitting: the
+                                            // confirm step (and the server) still
+                                            // stand between here and an entry.
+                                            if (e.key === "Enter" && rankedHorses.length === 1) {
+                                                e.preventDefault();
+                                                selectHorse(rankedHorses[0].horse);
+                                            }
+                                        }}
+                                        placeholder="Search your horses by name…"
+                                        aria-label="Search your horses by name"
+                                        className="h-9"
+                                    />
+                                    <p
+                                        className="m-0 text-xs text-muted-foreground"
+                                        aria-live="polite"
+                                        data-testid="horse-picker-count"
+                                    >
+                                        {horseQuery.trim()
+                                            ? `${rankedHorses.length} of ${horses.length} horses`
+                                            : `All ${horses.length} horses`}
+                                    </p>
+                                </>
+                            )}
+
+                            {rankedHorses.length === 0 ? (
+                                <div className="flex flex-col items-start gap-2 py-4">
+                                    <p className="text-sm text-muted-foreground">
+                                        No horses named &ldquo;{horseQuery.trim()}&rdquo; in your
+                                        stable.
+                                    </p>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => setHorseQuery("")}
+                                    >
+                                        Clear search
+                                    </Button>
+                                </div>
+                            ) : compactPicker ? (
+                                <ul
+                                    className="m-0 flex max-h-[min(60dvh,560px)] list-none flex-col divide-y divide-input overflow-y-auto rounded-lg border border-input p-0"
+                                    data-testid="horse-picker-list"
                                 >
-                                    {h.thumbnailUrl ? (
-                                        // eslint-disable-next-line @next/next/no-img-element
-                                        <img
-                                            src={h.thumbnailUrl}
-                                            alt={h.name}
-                                            className="aspect-square w-full rounded-md object-cover"
-                                            loading="lazy"
-                                        />
-                                    ) : (
-                                        <div
-                                            className="flex aspect-square w-full items-center justify-center rounded-md bg-muted text-3xl"
-                                            aria-hidden="true"
+                                    {rankedHorses.map(({ horse: h, fitsClass, mismatches }) => (
+                                        <li key={h.id}>
+                                            <button
+                                                type="button"
+                                                className="flex min-h-11 w-full cursor-pointer items-center gap-3 bg-card px-3 py-2 text-left transition-colors hover:bg-muted focus-visible:bg-muted"
+                                                onClick={() => selectHorse(h)}
+                                            >
+                                                {h.thumbnailUrl ? (
+                                                    // eslint-disable-next-line @next/next/no-img-element
+                                                    <img
+                                                        src={h.thumbnailUrl}
+                                                        alt=""
+                                                        className="h-10 w-10 shrink-0 rounded-md object-cover"
+                                                        loading="lazy"
+                                                    />
+                                                ) : (
+                                                    <span
+                                                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-muted text-lg"
+                                                        aria-hidden="true"
+                                                    >
+                                                        🐴
+                                                    </span>
+                                                )}
+                                                <span className="flex min-w-0 flex-1 flex-col">
+                                                    <span className="truncate text-sm font-medium text-foreground">
+                                                        {h.name}
+                                                    </span>
+                                                    {(h.scale || h.finish) && (
+                                                        <span className="truncate text-xs text-muted-foreground">
+                                                            {[h.scale, h.finish]
+                                                                .filter(Boolean)
+                                                                .join(" · ")}
+                                                        </span>
+                                                    )}
+                                                </span>
+                                                {!fitsClass && (
+                                                    <span
+                                                        className="shrink-0 text-[0.65rem] whitespace-nowrap text-muted-foreground italic"
+                                                        title={`May not fit this class's restrictions: ${mismatches.join("; ")}`}
+                                                    >
+                                                        may not fit
+                                                    </span>
+                                                )}
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <div className="grid max-h-[400px] grid-cols-2 gap-3 overflow-y-auto sm:grid-cols-3">
+                                    {rankedHorses.map(({ horse: h, fitsClass, mismatches }) => (
+                                        <button
+                                            key={h.id}
+                                            type="button"
+                                            className="flex min-h-11 cursor-pointer flex-col items-center gap-1 rounded-lg border border-input bg-card p-2 transition-all hover:ring-2 hover:ring-forest"
+                                            onClick={() => selectHorse(h)}
                                         >
-                                            🐴
-                                        </div>
-                                    )}
-                                    <span className="max-w-full truncate text-xs font-medium text-foreground">
-                                        {h.name}
-                                    </span>
-                                    {(h.scale || h.finish) && (
-                                        <span className="text-[0.65rem] text-muted-foreground">
-                                            {[h.scale, h.finish].filter(Boolean).join(" · ")}
-                                        </span>
-                                    )}
-                                </button>
-                            ))}
+                                            {h.thumbnailUrl ? (
+                                                // eslint-disable-next-line @next/next/no-img-element
+                                                <img
+                                                    src={h.thumbnailUrl}
+                                                    alt={h.name}
+                                                    className="aspect-square w-full rounded-md object-cover"
+                                                    loading="lazy"
+                                                />
+                                            ) : (
+                                                <div
+                                                    className="flex aspect-square w-full items-center justify-center rounded-md bg-muted text-3xl"
+                                                    aria-hidden="true"
+                                                >
+                                                    🐴
+                                                </div>
+                                            )}
+                                            <span className="max-w-full truncate text-xs font-medium text-foreground">
+                                                {h.name}
+                                            </span>
+                                            {(h.scale || h.finish) && (
+                                                <span className="text-[0.65rem] text-muted-foreground">
+                                                    {[h.scale, h.finish].filter(Boolean).join(" · ")}
+                                                </span>
+                                            )}
+                                            {!fitsClass && (
+                                                <span
+                                                    className="text-[0.65rem] text-muted-foreground italic"
+                                                    title={`May not fit this class's restrictions: ${mismatches.join("; ")}`}
+                                                >
+                                                    may not fit
+                                                </span>
+                                            )}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+
+                            {anyMismatchListed && (
+                                <p className="m-0 text-[0.7rem] text-muted-foreground">
+                                    Horses that may not fit this class&rsquo;s scale/finish limits
+                                    are listed last — you can still pick any horse; the
+                                    host&rsquo;s rules decide at entry.
+                                </p>
+                            )}
                         </div>
                     )
                 ) : (

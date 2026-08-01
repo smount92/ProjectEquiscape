@@ -18,6 +18,8 @@ import PageMasthead from"@/components/layouts/PageMasthead";
 import { Button } from "@/components/ui/button";
 import { User, Lock, Bell, BarChart3, Gem, AlertTriangle, Camera, FileText, Shield, Trash2 } from "lucide-react";
 
+// Keys mirror the defaults in src/app/actions/settings.ts getProfile
+// (and NOTIFICATION_TYPE_PREF_KEYS in src/lib/notifications/prefs.ts).
 const NOTIF_LABELS: { key: string; emoji: string; label: string }[] = [
  { key:"show_votes", emoji:"📸", label:"Show votes on your entries" },
  { key:"favorites", emoji:"❤️", label:"Favorites on your horses" },
@@ -25,9 +27,23 @@ const NOTIF_LABELS: { key: string; emoji: string; label: string }[] = [
  { key:"new_followers", emoji:"👥", label:"New followers" },
  { key:"messages", emoji:"✉️", label:"Messages" },
  { key:"show_results", emoji:"🏆", label:"Show results" },
+ { key:"show_staff", emoji:"🧑‍⚖️", label:"Show staffing" },
+ { key:"show_updates", emoji:"🔀", label:"Class changes & voting" },
+ { key:"show_announcements", emoji:"📣", label:"Host announcements" },
+ { key:"show_deadlines", emoji:"⏳", label:"Entry deadlines" },
  { key:"transfers", emoji:"📦", label:"Transfer notifications" },
  { key:"demand_alerts", emoji:"🎯", label:"Someone wants a model you own" },
 ];
+
+/**
+ * Delivery semantics (lib/notifications/prefs.ts): a key missing
+ * from the saved jsonb is ON — only an explicit false mutes. The
+ * toggles must render the same truth, or every pref added after a
+ * user last saved would show "off" while still delivering.
+ */
+function isNotifPrefOn(prefs: Record<string, boolean>, key: string): boolean {
+ return prefs[key] !== false;
+}
 
 export default function SettingsPage() {
  const router = useRouter();
@@ -118,7 +134,9 @@ export default function SettingsPage() {
 
  // ── Notification toggle ──
  const handleToggleNotif = async (key: string) => {
- const updated = { ...notifPrefs, [key]: !notifPrefs[key] };
+ // Flip the EFFECTIVE value (missing key = on), so the first tap on
+ // a never-saved pref turns it off rather than "re-enabling" it.
+ const updated = { ...notifPrefs, [key]: !isNotifPrefOn(notifPrefs, key) };
  setNotifPrefs(updated);
  await updateNotificationPrefs(updated);
  };
@@ -500,9 +518,9 @@ export default function SettingsPage() {
  </span>
  <button
  type="button"
- className={notifPrefs[n.key] ?"settings-toggle-active" :"settings-toggle"}
+ className={isNotifPrefOn(notifPrefs, n.key) ?"settings-toggle-active" :"settings-toggle"}
  onClick={() => handleToggleNotif(n.key)}
- aria-pressed={notifPrefs[n.key] ? "true" : "false"}
+ aria-pressed={isNotifPrefOn(notifPrefs, n.key) ? "true" : "false"}
  aria-label={`Toggle ${n.label}`}
  title={`Toggle ${n.label}`}
  />

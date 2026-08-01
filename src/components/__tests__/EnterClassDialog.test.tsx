@@ -7,9 +7,9 @@
  * verbatim.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 
-import EnterClassDialog from "@/components/shows/EnterClassDialog";
+import EnterClassDialog, { type EnterableClass } from "@/components/shows/EnterClassDialog";
 import type { EntrantHorse } from "@/lib/shows/public";
 
 const actions = vi.hoisted(() => ({
@@ -61,13 +61,17 @@ beforeEach(() => {
     });
 });
 
-function renderDialog(mode: "live" | "online", horses: EntrantHorse[] = HORSES) {
+function renderDialog(
+    mode: "live" | "online",
+    horses: EntrantHorse[] = HORSES,
+    cls: EnterableClass = CLS,
+) {
     const onClose = vi.fn();
     const onEntered = vi.fn();
     render(
         <EnterClassDialog
             showId="33333333-3333-4333-8333-333333333333"
-            cls={CLS}
+            cls={cls}
             mode={mode}
             horses={horses}
             onClose={onClose}
@@ -165,5 +169,108 @@ describe("EnterClassDialog — class-first flow", () => {
     it("explains when the viewer has no public horses", () => {
         renderDialog("live", []);
         expect(screen.getByText(/at least one public horse/i)).toBeInTheDocument();
+    });
+});
+
+/** A 14-horse stable: even indices Traditional, odd Stablemate. */
+function bigStable(n = 14): EntrantHorse[] {
+    return Array.from({ length: n }, (_, i) => ({
+        id: `big-${i}`,
+        name: `Stable Star ${String(i).padStart(2, "0")}`,
+        thumbnailUrl: null,
+        scale: i % 2 === 0 ? "Traditional" : "Stablemate",
+        finish: "OF",
+    }));
+}
+
+describe("EnterClassDialog — big-stable horse picker (search-first list)", () => {
+    it("small stables keep the card grid — no search box", () => {
+        renderDialog("live");
+        expect(screen.getByTestId("horse-picker")).toBeInTheDocument();
+        expect(screen.queryByLabelText(/search your horses/i)).not.toBeInTheDocument();
+        expect(screen.queryByTestId("horse-picker-list")).not.toBeInTheDocument();
+    });
+
+    it(">12 horses switches to the compact list with search and a count", () => {
+        renderDialog("live", bigStable());
+        expect(screen.getByLabelText(/search your horses/i)).toBeInTheDocument();
+        expect(screen.getByTestId("horse-picker-list")).toBeInTheDocument();
+        expect(screen.getByTestId("horse-picker-count")).toHaveTextContent("All 14 horses");
+        // Every horse is listed — nothing hidden.
+        expect(
+            within(screen.getByTestId("horse-picker-list")).getAllByRole("listitem"),
+        ).toHaveLength(14);
+    });
+
+    it("typing filters by name and updates the N-of-M count", () => {
+        renderDialog("live", bigStable());
+        fireEvent.change(screen.getByLabelText(/search your horses/i), {
+            target: { value: "star 0" },
+        });
+        // Stable Star 00–09
+        expect(screen.getByTestId("horse-picker-count")).toHaveTextContent("10 of 14 horses");
+        fireEvent.change(screen.getByLabelText(/search your horses/i), {
+            target: { value: "star 07" },
+        });
+        expect(screen.getByTestId("horse-picker-count")).toHaveTextContent("1 of 14 horses");
+        expect(screen.getByText("Stable Star 07")).toBeInTheDocument();
+        expect(screen.queryByText("Stable Star 03")).not.toBeInTheDocument();
+    });
+
+    it("Enter on an exactly-one match picks that horse (picking ≠ submitting)", async () => {
+        renderDialog("live", bigStable());
+        const search = screen.getByLabelText(/search your horses/i);
+        fireEvent.change(search, { target: { value: "star 07" } });
+        fireEvent.keyDown(search, { key: "Enter" });
+        // Advanced to the confirm step — but no entry was submitted.
+        await screen.findByRole("button", { name: /enter stable star 07/i });
+        expect(actions.enterClass).not.toHaveBeenCalled();
+    });
+
+    it("soft-orders likely fits first and hints mismatches WITHOUT blocking them", async () => {
+        const restricted: EnterableClass = { ...CLS, allowedScales: ["Traditional"] };
+        renderDialog("live", bigStable(), restricted);
+
+        const items = within(screen.getByTestId("horse-picker-list")).getAllByRole("listitem");
+        // Evens (Traditional) float up in server order; odds trail with a hint.
+        expect(items[0]).toHaveTextContent("Stable Star 00");
+        expect(items[6]).toHaveTextContent("Stable Star 12");
+        expect(items[7]).toHaveTextContent("Stable Star 01");
+        expect(items[7]).toHaveTextContent(/may not fit/i);
+        expect(items[0]).not.toHaveTextContent(/may not fit/i);
+        expect(
+            within(screen.getByTestId("horse-picker-list")).getAllByText(/may not fit/i),
+        ).toHaveLength(7);
+        // …and the soft-ordering legend explains why, below the list.
+        expect(screen.getByText(/the host.s rules decide/i)).toBeInTheDocument();
+
+        // SOFT: a mismatching horse is still fully selectable — the
+        // server is the only authority on eligibility.
+        fireEvent.click(screen.getByText("Stable Star 01"));
+        expect(
+            await screen.findByRole("button", { name: /enter stable star 01/i }),
+        ).toBeEnabled();
+    });
+
+    it("no matches offers Clear search instead of a dead end", () => {
+        renderDialog("live", bigStable());
+        fireEvent.change(screen.getByLabelText(/search your horses/i), {
+            target: { value: "zanzibar" },
+        });
+        expect(screen.getByText(/no horses named/i)).toBeInTheDocument();
+        fireEvent.click(screen.getByRole("button", { name: /clear search/i }));
+        expect(screen.getByTestId("horse-picker-count")).toHaveTextContent("All 14 horses");
+    });
+
+    it("the search survives picking and coming back to choose again", async () => {
+        renderDialog("live", bigStable());
+        fireEvent.change(screen.getByLabelText(/search your horses/i), {
+            target: { value: "star 07" },
+        });
+        fireEvent.click(screen.getByText("Stable Star 07"));
+        fireEvent.click(await screen.findByRole("button", { name: /choose a different horse/i }));
+
+        expect(screen.getByLabelText(/search your horses/i)).toHaveValue("star 07");
+        expect(screen.getByTestId("horse-picker-count")).toHaveTextContent("1 of 14 horses");
     });
 });

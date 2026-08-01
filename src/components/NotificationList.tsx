@@ -37,6 +37,20 @@ function getNotifIcon(type: string): string {
  return"📸";
  case"show_result":
  return"🏆";
+ case"show_card":
+ return"🎖️";
+ case"show_staff":
+ return"🧑‍⚖️";
+ case"show_class_change":
+ return"🔀";
+ case"show_voting_open":
+ return"🗳️";
+ case"show_entry_scratched":
+ return"✂️";
+ case"show_announcement":
+ return"📣";
+ case"show_deadline":
+ return"⏳";
  case"judge_assigned":
  return"🏅";
  case"achievement":
@@ -56,7 +70,20 @@ function getNotifLink(n: NotifItem): string {
  // 4. Follow → actor's profile (correct destination for follows)
  if (n.type ==="follow" && n.actorAlias) return `/profile/${encodeURIComponent(n.actorAlias)}`;
  // 5. Show-related types → shows listing page as fallback
- if (["show_result","show_vote","judge_assigned"].includes(n.type)) return"/shows";
+ // (v2 show notifications normally arrive with linkUrl set — this
+ // catches any that don't so they never dead-end at /notifications)
+ if ([
+"show_result",
+"show_vote",
+"judge_assigned",
+"show_card",
+"show_staff",
+"show_class_change",
+"show_voting_open",
+"show_entry_scratched",
+"show_announcement",
+"show_deadline",
+ ].includes(n.type)) return"/shows";
  // 6. Actor profile as last resort
  if (n.actorAlias) return `/profile/${encodeURIComponent(n.actorAlias)}`;
  return"/notifications";
