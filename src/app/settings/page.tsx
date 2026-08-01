@@ -11,8 +11,10 @@ import {
  uploadAvatar,
  deleteAccount,
 } from"@/app/actions/settings";
+import { createClient } from "@/lib/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import SupporterLedgerToggle from "@/components/SupporterLedgerToggle";
 import FocusLayout from"@/components/layouts/FocusLayout";
 import PageMasthead from"@/components/layouts/PageMasthead";
 import { Button } from "@/components/ui/button";
@@ -85,6 +87,10 @@ export default function SettingsPage() {
  const [isDeleting, setIsDeleting] = useState(false);
  const [deleteError, setDeleteError] = useState<string | null>(null);
 
+ // Supporters' Ledger opt-in — null until (unless) the viewer turns out
+ // to be an active supporter; the toggle stays hidden for everyone else.
+ const [supporterLedger, setSupporterLedger] = useState<{ listed: boolean } | null>(null);
+
  useEffect(() => {
  async function load() {
  const profile = await getProfile();
@@ -105,6 +111,27 @@ export default function SettingsPage() {
  setCurrencySymbol(profile.currencySymbol);
  setExhibitorNumber(profile.exhibitorNumber || "");
  setIsLoading(false);
+
+ // Supporter state, read client-side from the viewer's own users row
+ // (columns are SELECT-granted to authenticated per migration 142).
+ // Runs after the page is interactive; any error — including the
+ // columns not existing yet — just leaves the toggle hidden.
+ try {
+ const supabase = createClient();
+ const { data: { user } } = await supabase.auth.getUser();
+ if (user) {
+ const { data: srow } = await supabase
+ .from("users")
+ .select("is_supporter, show_in_supporters_ledger")
+ .eq("id", user.id)
+ .maybeSingle();
+ if (srow?.is_supporter === true) {
+ setSupporterLedger({ listed: srow.show_in_supporters_ledger === true });
+ }
+ }
+ } catch {
+ // Not a supporter as far as this page can tell — no toggle.
+ }
  }
  load();
  }, [router]);
@@ -581,6 +608,16 @@ export default function SettingsPage() {
  >
   <Gem className="h-4 w-4" /> View Plans & Upgrade
  </Link>
+
+ {/* Supporters' Ledger opt-in — active supporters only. */}
+ {supporterLedger && (
+ <div className="mt-6 border-t border-input pt-4">
+ <SupporterLedgerToggle
+ initialListed={supporterLedger.listed}
+ label="List me on the Supporters' Ledger (About page)"
+ />
+ </div>
+ )}
  </div>
  </div>
 

@@ -8,6 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { enterShow } from "@/app/actions/shows";
+import { filterAndRankHorses } from "@/lib/shows/horsePicker";
 import { createClient } from "@/lib/supabase/client";
 import { getPublicImageUrl } from "@/lib/utils/storage";
 import { Input } from "@/components/ui/input";
@@ -256,10 +257,18 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
     divisionGroups.set(c.divisionName, group);
   }
 
-  // Filter horses by search
-  const filteredHorses = userHorses.filter(
-    (h) => h.name.toLowerCase().includes(horseSearch.toLowerCase()),
+  // Name-filter via the tested v2 picker helper (same list the
+  // EnterClassDialog uses). This legacy form has no class-restriction
+  // data on hand, so restrictions are {} and ranking degrades to pure
+  // name filtering in the server's order.
+  const rankedHorses = filterAndRankHorses(
+    userHorses.map((h) => ({ ...h, scale: null, finish: null })),
+    {},
+    horseSearch,
   );
+  // Past a dozen horses the card grid squishes into thumbnail soup —
+  // switch to the same compact row list the v2 dialog uses.
+  const compactPicker = userHorses.length > 12;
 
   const selectedHorseName = userHorses.find((h) => h.id === selectedHorse)?.name || "";
   const selectedClassName = selectedClassId ? classes?.find((c) => c.id === selectedClassId)?.name : "General";
@@ -382,46 +391,96 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
                 transition={{ duration: 0.2 }}
               >
                 {userHorses.length > 6 && (
-                  <Input
-                    type="text"
-                    className="mb-3"
-                    placeholder="Search your horses…"
-                    value={horseSearch}
-                    onChange={(e) => setHorseSearch(e.target.value)}
-                  />
+                  <>
+                    <Input
+                      type="search"
+                      className="mb-1"
+                      placeholder="Search your horses by name…"
+                      aria-label="Search your horses by name"
+                      value={horseSearch}
+                      onChange={(e) => setHorseSearch(e.target.value)}
+                      onKeyDown={(e) => {
+                        // Exactly one match → Enter picks it. Picking is
+                        // never submitting: the photo/caption step still
+                        // stands between here and an entry.
+                        if (e.key === "Enter" && rankedHorses.length === 1) {
+                          e.preventDefault();
+                          handleHorseSelect(rankedHorses[0].horse.id);
+                        }
+                      }}
+                    />
+                    <p className="mb-2 text-xs text-muted-foreground" aria-live="polite">
+                      {horseSearch.trim()
+                        ? `${rankedHorses.length} of ${userHorses.length} horses`
+                        : `All ${userHorses.length} horses`}
+                    </p>
+                  </>
                 )}
-                <div className="grid max-h-[400px] grid-cols-2 gap-3 overflow-y-auto sm:grid-cols-3">
-                  {filteredHorses.map((h) => (
-                    <button
-                      key={h.id}
-                      type="button"
-                      className="flex cursor-pointer flex-col items-center gap-1 rounded-lg border border-input bg-card p-2 transition-all hover:ring-2 hover:ring-forest"
-                      onClick={() => handleHorseSelect(h.id)}
-                    >
-                      {h.thumbnailUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={h.thumbnailUrl}
-                          alt={h.name}
-                          className="aspect-square w-full rounded-md object-cover"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="flex aspect-square w-full items-center justify-center rounded-md bg-muted text-3xl">
-                          🐴
-                        </div>
-                      )}
-                      <span className="max-w-full truncate text-xs font-medium text-foreground">
-                        {h.name}
-                      </span>
-                    </button>
-                  ))}
-                  {filteredHorses.length === 0 && (
-                    <div className="col-span-full py-6 text-center text-sm text-muted-foreground">
-                      No horses match your search.
-                    </div>
-                  )}
-                </div>
+                {rankedHorses.length === 0 ? (
+                  <div className="py-6 text-center text-sm text-muted-foreground">
+                    No horses match your search.
+                  </div>
+                ) : compactPicker ? (
+                  <ul className="m-0 flex max-h-[min(60dvh,560px)] list-none flex-col divide-y divide-input overflow-y-auto rounded-lg border border-input p-0">
+                    {rankedHorses.map(({ horse: h }) => (
+                      <li key={h.id}>
+                        <button
+                          type="button"
+                          className="flex min-h-11 w-full cursor-pointer items-center gap-3 bg-card px-3 py-2 text-left transition-colors hover:bg-muted focus-visible:bg-muted"
+                          onClick={() => handleHorseSelect(h.id)}
+                        >
+                          {h.thumbnailUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={h.thumbnailUrl}
+                              alt=""
+                              className="h-10 w-10 shrink-0 rounded-md object-cover"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <span
+                              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-muted text-lg"
+                              aria-hidden="true"
+                            >
+                              🐴
+                            </span>
+                          )}
+                          <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">
+                            {h.name}
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className="grid max-h-[400px] grid-cols-2 gap-3 overflow-y-auto sm:grid-cols-3">
+                    {rankedHorses.map(({ horse: h }) => (
+                      <button
+                        key={h.id}
+                        type="button"
+                        className="flex cursor-pointer flex-col items-center gap-1 rounded-lg border border-input bg-card p-2 transition-all hover:ring-2 hover:ring-forest"
+                        onClick={() => handleHorseSelect(h.id)}
+                      >
+                        {h.thumbnailUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={h.thumbnailUrl}
+                            alt={h.name}
+                            className="aspect-square w-full rounded-md object-cover"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="flex aspect-square w-full items-center justify-center rounded-md bg-muted text-3xl">
+                            🐴
+                          </div>
+                        )}
+                        <span className="max-w-full truncate text-xs font-medium text-foreground">
+                          {h.name}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </motion.div>
             )}
 
