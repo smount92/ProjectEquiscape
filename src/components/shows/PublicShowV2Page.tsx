@@ -31,21 +31,28 @@ import { formatStatus } from "@/lib/shows/stateMachine";
 import { createClient } from "@/lib/supabase/server";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
 import RichText from "@/components/RichText";
+import ShareButton from "@/components/ShareButton";
+import LocalTime from "@/components/shows/LocalTime";
 import ShowChampions from "@/components/shows/ShowChampions";
 import ShowEntryGallery from "@/components/shows/ShowEntryGallery";
 import ShowEntrySection from "@/components/shows/ShowEntrySection";
+import ShowStateBanner from "@/components/shows/ShowStateBanner";
 import { Badge } from "@/components/ui/badge";
 
-function formatDate(iso: string | null, withTime = false): string | null {
+/** Timestamps render through LocalTime (viewer's zone, zone named);
+ *  calendar dates render UTC so the printed day never shifts. */
+function localDate(iso: string | null, withTime = false): React.ReactNode {
     if (!iso) return null;
-    const d = new Date(iso);
-    if (Number.isNaN(d.getTime())) return null;
-    return d.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-        ...(withTime ? { hour: "numeric", minute: "2-digit" } : {}),
-    });
+    return <LocalTime iso={iso} withTime={withTime} />;
+}
+
+/** Fees v1 is the host's free text; blank or a bare zero MEANS free —
+ *  say so instead of hiding the card or printing "0". */
+const ZERO_FEES = new Set(["0", "$0", "0.0", "0.00", "$0.00", "0,00", "$0,00"]);
+function feeText(feeInfo: string | null): string {
+    const trimmed = (feeInfo ?? "").trim();
+    if (trimmed === "" || ZERO_FEES.has(trimmed)) return "Free";
+    return trimmed;
 }
 
 function MastheadFact({ label, value }: { label: string; value: React.ReactNode }) {
@@ -80,7 +87,18 @@ function ShowMasthead({ show, entryCount }: { show: PublicShow; entryCount: numb
                     <Badge variant="secondary">Community vote</Badge>
                 )}
                 {show.isMhhQualifying && <Badge>MHH Qualifying</Badge>}
+                <span className="ml-auto text-(--leather-text)">
+                    <ShareButton
+                        title={show.title}
+                        text={`${show.title} — a ${show.mode === "live" ? "live" : "online"} model horse show on Model Horse Hub`}
+                    />
+                </span>
             </div>
+            <ShowStateBanner
+                status={show.status}
+                entriesOpenAt={show.entriesOpenAt}
+                entriesCloseAt={show.entriesCloseAt}
+            />
             <dl className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-3">
                 <MastheadFact
                     label="Host"
@@ -95,27 +113,27 @@ function ShowMasthead({ show, entryCount }: { show: PublicShow; entryCount: numb
                 />
                 {show.mode === "live" ? (
                     <>
-                        <MastheadFact label="Show date" value={formatDate(show.showDate)} />
+                        <MastheadFact label="Show date" value={localDate(show.showDate)} />
                         <MastheadFact label="Venue" value={show.venueName} />
                         <MastheadFact label="Address" value={show.venueAddress} />
                         <MastheadFact
                             label="Entries close"
-                            value={formatDate(show.entriesCloseAt, true)}
+                            value={localDate(show.entriesCloseAt, true)}
                         />
                     </>
                 ) : (
                     <>
                         <MastheadFact
                             label="Entries open"
-                            value={formatDate(show.entriesOpenAt, true)}
+                            value={localDate(show.entriesOpenAt, true)}
                         />
                         <MastheadFact
                             label="Entries close"
-                            value={formatDate(show.entriesCloseAt, true)}
+                            value={localDate(show.entriesCloseAt, true)}
                         />
                         <MastheadFact
                             label="Judging ends"
-                            value={formatDate(show.judgingEndsAt, true)}
+                            value={localDate(show.judgingEndsAt, true)}
                         />
                     </>
                 )}
@@ -209,20 +227,19 @@ export default async function PublicShowV2Page({ showId }: { showId: string }) {
 
                 {champions && <ShowChampions champions={champions} />}
 
-                {show.feeInfo && (
-                    <section className="ledger-card" aria-labelledby="show-fees-heading">
-                        <span className="ledger-tab" id="show-fees-heading">
-                            Fees
-                        </span>
-                        {/* Fees v1 = manual checklist (LOCKED decision) — the
-                            host's free-text instructions; Stripe lands Phase F.
-                            Moved above the entry section so entrants see fees
-                            BEFORE they enter, not after. */}
-                        <p className="text-sm whitespace-pre-wrap text-secondary-foreground">
-                            {show.feeInfo}
-                        </p>
-                    </section>
-                )}
+                <section className="ledger-card" aria-labelledby="show-fees-heading">
+                    <span className="ledger-tab" id="show-fees-heading">
+                        Fees
+                    </span>
+                    {/* Fees v1 = manual checklist (LOCKED decision) — the
+                        host's free-text instructions; Stripe lands Phase F.
+                        Above the entry section so entrants see fees BEFORE
+                        they enter. Blank/zero fee info renders as "Free"
+                        (feeText) — never a bare 0 or a silent gap. */}
+                    <p className="text-sm whitespace-pre-wrap text-secondary-foreground">
+                        {feeText(show.feeInfo)}
+                    </p>
+                </section>
 
                 {show.isMhhQualifying && (
                     <p className="text-sm text-muted-foreground">
