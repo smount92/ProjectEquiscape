@@ -6,7 +6,7 @@ import Link from"next/link";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import PageMasthead from"@/components/layouts/PageMasthead";
 import MyShowLifeSection from"@/components/shows/MyShowLifeSection";
-import { showsV2Enabled } from"@/lib/shows/flags";
+import { showStandingsEnabled, showsV2Enabled } from"@/lib/shows/flags";
 import { EMPTY_SHOW_LIFE } from"@/lib/shows/showLife";
 import type { PublicShowSummary } from"@/lib/shows/public";
 import type { ShowStatus } from"@/lib/shows/types";
@@ -159,10 +159,20 @@ export default async function ShowsPage() {
    subtitle="Enter your models, vote for your favorites, and compete for community glory!"
    actions={
     user ? (
-     showsV2Enabled() ? (
-      <Button asChild variant="outline">
-       <Link href="/shows/host">Host a show</Link>
-      </Button>
+     showsV2Enabled() || showStandingsEnabled() ? (
+      <>
+       {/* Wave 3, flag-gated dark: the season-standings door. */}
+       {showStandingsEnabled() && (
+        <Button asChild variant="outline">
+         <Link href="/standings">Standings</Link>
+        </Button>
+       )}
+       {showsV2Enabled() && (
+        <Button asChild variant="outline">
+         <Link href="/shows/host">Host a show</Link>
+        </Button>
+       )}
+      </>
      ) : undefined
     ) : (
      signInCta
