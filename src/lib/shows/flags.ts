@@ -16,3 +16,15 @@ export function showsV2Enabled(): boolean {
 export function showStandingsEnabled(): boolean {
     return process.env.NEXT_PUBLIC_SHOW_STANDINGS === "1";
 }
+
+/**
+ * Album show page feature flag (Wave 4b — photos first, program
+ * second). Ships dark for the design lead's preview: set
+ * NEXT_PUBLIC_SHOW_PAGE_V3=1 to enable. Default OFF.
+ * With the flag off, PublicShowV2Page renders its legacy tree
+ * unchanged (instant rollback); with it on, the sibling
+ * AlbumShowPage takes over the same route + payloads.
+ */
+export function showPageV3Enabled(): boolean {
+    return process.env.NEXT_PUBLIC_SHOW_PAGE_V3 === "1";
+}

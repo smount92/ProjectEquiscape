@@ -26,7 +26,7 @@ import {
 import { getShowChampions } from "@/app/actions/shows-v2-ring";
 import { GALLERY_STATUSES, RESULTS_STATUSES, type ShowGalleryData } from "@/lib/shows/gallery";
 import type { EntrantHorse, MyShowEntry, PublicShow } from "@/lib/shows/public";
-import { friendlyShowStatus } from "@/lib/shows/plainWords";
+import { feeText, friendlyShowStatus } from "@/lib/shows/plainWords";
 import { getShowRole } from "@/lib/shows/queries";
 import type { ShowChampionsData } from "@/lib/shows/ring";
 import type { StaffRole } from "@/lib/shows/types";
@@ -46,15 +46,6 @@ import { Badge } from "@/components/ui/badge";
 function localDate(iso: string | null, withTime = false): React.ReactNode {
     if (!iso) return null;
     return <LocalTime iso={iso} withTime={withTime} />;
-}
-
-/** Fees v1 is the host's free text; blank or a bare zero MEANS free —
- *  say so instead of hiding the card or printing "0". */
-const ZERO_FEES = new Set(["0", "$0", "0.0", "0.00", "$0.00", "0,00", "$0,00"]);
-function feeText(feeInfo: string | null): string {
-    const trimmed = (feeInfo ?? "").trim();
-    if (trimmed === "" || ZERO_FEES.has(trimmed)) return "Free";
-    return trimmed;
 }
 
 function MastheadFact({ label, value }: { label: string; value: React.ReactNode }) {
@@ -166,7 +157,7 @@ const STAFF_PHRASES: Record<StaffRole, string> = {
  * the judge queue while an online judged show is judging, otherwise
  * the console. Public viewers never see it (staffRole is null).
  */
-function StaffBanner({ show, role }: { show: PublicShow; role: StaffRole }) {
+export function StaffBanner({ show, role }: { show: PublicShow; role: StaffRole }) {
     const judgeQueueLive =
         role === "judge" &&
         show.mode === "online" &&
@@ -197,7 +188,7 @@ function StaffBanner({ show, role }: { show: PublicShow; role: StaffRole }) {
 
 /** Event JSON-LD — built only from data PublicShowV2Page already fetched
  *  (no extra queries). https://schema.org/Event */
-function buildShowJsonLd(show: PublicShow) {
+export function buildShowJsonLd(show: PublicShow) {
     const startDate = show.mode === "live" ? show.showDate : show.entriesOpenAt;
     return {
         "@context": "https://schema.org",

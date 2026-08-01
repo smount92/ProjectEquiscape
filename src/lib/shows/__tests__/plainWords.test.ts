@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
     AXIS_GLOSS,
+    feeText,
     friendlyClassStatus,
     friendlyEntryStatus,
     friendlyShowStatus,
@@ -88,6 +89,22 @@ describe("friendlyClassStatus", () => {
     it("never echoes the raw judging/called machine words bare-cased", () => {
         expect(friendlyClassStatus("judging")).toBe("Being judged");
         expect(friendlyClassStatus("called")).toBe("In the ring");
+    });
+});
+
+describe("feeText", () => {
+    it("reads blank and bare-zero fee info as Free", () => {
+        expect(feeText(null)).toBe("Free");
+        expect(feeText("")).toBe("Free");
+        expect(feeText("  ")).toBe("Free");
+        expect(feeText("0")).toBe("Free");
+        expect(feeText("$0.00")).toBe("Free");
+        expect(feeText("0,00")).toBe("Free");
+    });
+
+    it("passes real fee instructions through verbatim (trimmed)", () => {
+        expect(feeText(" $2 per class, PayPal only ")).toBe("$2 per class, PayPal only");
+        expect(feeText("$10 flat")).toBe("$10 flat");
     });
 });
 

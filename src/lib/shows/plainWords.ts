@@ -63,6 +63,16 @@ export function friendlyClassStatus(status: ClassStatus): string {
     return CLASS_STATUS_WORDS[status];
 }
 
+/** Fees v1 is the host's free text; blank or a bare zero MEANS free —
+ *  say so instead of hiding the card or printing "0". Shared by the
+ *  public page's Fees card and the album masthead's status line. */
+const ZERO_FEES = new Set(["0", "$0", "0.0", "0.00", "$0.00", "0,00", "$0,00"]);
+export function feeText(feeInfo: string | null): string {
+    const trimmed = (feeInfo ?? "").trim();
+    if (trimmed === "" || ZERO_FEES.has(trimmed)) return "Free";
+    return trimmed;
+}
+
 /**
  * One-line gloss per division axis — visible text under the
  * division header (never a tooltip), so a first-time visitor knows

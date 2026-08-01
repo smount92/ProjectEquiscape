@@ -9,16 +9,23 @@
  * /shows/v2/[id] permanently redirects here, so old shared links
  * keep working. The legacy page enforces its own login redirect;
  * the v2 page is public by design.
+ *
+ * Wave 4b: the v2 branch forks once more on NEXT_PUBLIC_SHOW_PAGE_V3
+ * — flag ON renders the album layout (AlbumShowPage), flag OFF
+ * renders PublicShowV2Page byte-identical to today. The branch
+ * lives HERE (not inside PublicShowV2Page) so the legacy tree
+ * stays untouched for instant rollback.
  */
 
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { createAnonClient } from "@/lib/supabase/anon";
 import { getAdminClient } from "@/lib/supabase/admin";
-import { showsV2Enabled } from "@/lib/shows/flags";
+import { showPageV3Enabled, showsV2Enabled } from "@/lib/shows/flags";
 import { resolveShowRoute } from "@/lib/shows/resolver";
 import { getAliases } from "@/lib/shows/queries";
 import LegacyShowPage from "./LegacyShowPage";
+import AlbumShowPage from "@/components/shows/AlbumShowPage";
 import PublicShowV2Page from "@/components/shows/PublicShowV2Page";
 
 // force-dynamic stays: PublicShowV2Page itself reads the viewer's session
@@ -126,6 +133,11 @@ export default async function ShowDetailPage({
     const supabase = await createClient();
 
     const target = await resolveShowRoute(supabase, id, showsV2Enabled());
-    if (target === "v2") return <PublicShowV2Page showId={id} />;
+    if (target === "v2") {
+        // Wave 4b — dark launch: the album layout only ever renders
+        // with the flag on; off keeps today's page byte-identical.
+        if (showPageV3Enabled()) return <AlbumShowPage showId={id} />;
+        return <PublicShowV2Page showId={id} />;
+    }
     return <LegacyShowPage showId={id} />;
 }

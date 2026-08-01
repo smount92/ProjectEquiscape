@@ -1,19 +1,15 @@
 "use client";
 
 /**
- * Phase D — the public show page's interactive body: the full
- * classlist (division → section → class) plus, for the authed
- * viewer, the "My entries" panel and the class-first entry flow.
+ * Wave 4b — the album's "#entries" body: the viewer's entries +
+ * readiness panel (the SAME MyEntriesCard/ShowReadinessPanel the
+ * legacy layout renders) and the program accordion under #program
+ * (divisions collapsed with counts → the existing class rows with
+ * Enter buttons).
  *
- * Entering is only offered while the show is entries_open; anyone
- * else (anon, or any other status) gets the same classlist
- * read-only. Scratch/re-enter wording is deliberate: a scratched
- * entry is history and re-entering creates a NEW entry (partial
- * unique index in migration 117).
- *
- * Wave 4b: the My Entries table and the classlist row moved
- * VERBATIM to ShowEntrySectionParts so the album page can reuse
- * them — this component keeps the state and renders the same tree.
+ * State wiring (enter dialog, self-scratch confirm, horse refetch)
+ * mirrors ShowEntrySection — the blocks are shared, the layout is
+ * the album's.
  */
 
 import { useCallback, useMemo, useState } from "react";
@@ -25,16 +21,14 @@ import { listMyEntrantHorses } from "@/app/actions/show-readiness";
 import type { ConsoleClass, ConsoleDivision } from "@/lib/shows/console";
 import type { EntrantHorse, MyShowEntry } from "@/lib/shows/public";
 import type { ShowMode, ShowStatus } from "@/lib/shows/types";
-import { AXIS_GLOSS } from "@/lib/shows/plainWords";
-import EnterClassDialog, { type EnterableClass } from "@/components/shows/EnterClassDialog";
+import EnterClassDialog from "@/components/shows/EnterClassDialog";
+import ProgramAccordion from "@/components/shows/ProgramAccordion";
 import ShowReadinessPanel from "@/components/shows/ShowReadinessPanel";
 import {
     classLabel,
     MyEntriesCard,
-    PublicClassRow,
 } from "@/components/shows/ShowEntrySectionParts";
 import { useShowToast } from "@/components/shows/useShowToast";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -45,7 +39,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 
-interface ShowEntrySectionProps {
+interface AlbumEntrySectionProps {
     showId: string;
     mode: ShowMode;
     status: ShowStatus;
@@ -55,7 +49,7 @@ interface ShowEntrySectionProps {
     authed: boolean;
 }
 
-export default function ShowEntrySection({
+export default function AlbumEntrySection({
     showId,
     mode,
     status,
@@ -63,36 +57,26 @@ export default function ShowEntrySection({
     myEntries,
     horses,
     authed,
-}: ShowEntrySectionProps) {
+}: AlbumEntrySectionProps) {
     const router = useRouter();
     const entriesOpen = status === "entries_open";
     const canEnter = authed && entriesOpen;
 
     const { showToast, toastNode } = useShowToast();
-    const [activeClass, setActiveClass] = useState<EnterableClass | null>(null);
-    // Remounts the dialog fresh each time it opens.
+    const [activeClass, setActiveClass] = useState<ConsoleClass | null>(null);
     const [dialogNonce, setDialogNonce] = useState(0);
-    // Self-scratch pauses on a confirm dialog (same pattern as the
-    // console's staff scratch) — scratching is a real withdrawal.
     const [scratchTarget, setScratchTarget] = useState<MyShowEntry | null>(null);
     const [scratching, setScratching] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Client-side refetch of the enterable-horse list (Batch 3): a
-    // horse added or made public mid-visit becomes usable without a
-    // full reload. null → the server-rendered prop still stands.
     const [freshHorses, setFreshHorses] = useState<EntrantHorse[] | null>(null);
     const effectiveHorses = freshHorses ?? horses;
 
     const refreshHorses = useCallback(async () => {
         const result = await listMyEntrantHorses();
-        if (result.success) {
-            setFreshHorses(result.horses);
-        }
+        if (result.success) setFreshHorses(result.horses);
     }, []);
 
-    /** The readiness panel says the stable is enterable — pull the
-     *  fresh horse list AND re-sync the server-rendered page. */
     const handleHorsesReady = useCallback(async () => {
         await refreshHorses();
         router.refresh();
@@ -108,7 +92,7 @@ export default function ShowEntrySection({
         return map;
     }, [divisions]);
 
-    const openDialog = (cls: EnterableClass) => {
+    const openDialog = (cls: ConsoleClass) => {
         setError(null);
         setDialogNonce((n) => n + 1);
         setActiveClass(cls);
@@ -129,8 +113,6 @@ export default function ShowEntrySection({
         setScratching(false);
     };
 
-    /** A scratched entry can re-enter only while no LIVE entry exists
-     *  for the same class+horse (the server enforces this too). */
     const hasLiveEntry = (classId: string, horseId: string) =>
         myEntries.some(
             (e) => e.classId === classId && e.horseId === horseId && e.status !== "scratched",
@@ -144,7 +126,6 @@ export default function ShowEntrySection({
                 </p>
             )}
 
-            {/* ── My entries ── */}
             {authed && myEntries.length > 0 && (
                 <MyEntriesCard
                     myEntries={myEntries}
@@ -160,7 +141,6 @@ export default function ShowEntrySection({
                 />
             )}
 
-            {/* ── Entry availability notes ── */}
             {entriesOpen && !authed && (
                 <div
                     className="ledger-card flex flex-wrap items-center gap-3 text-sm text-muted-foreground"
@@ -181,63 +161,21 @@ export default function ShowEntrySection({
                 <ShowReadinessPanel showId={showId} mode={mode} onHorsesReady={handleHorsesReady} />
             )}
 
-            {/* ── The classlist ── */}
-            {divisions.length === 0 ? (
-                <div className="ledger-card flex flex-col items-center gap-3 py-10 text-center">
-                    <span className="ledger-tab">Classlist Coming</span>
-                    <p className="max-w-md text-sm text-muted-foreground">
-                        The host hasn&rsquo;t published the classlist yet.
-                    </p>
-                </div>
-            ) : (
-                <ul className="flex list-none flex-col gap-6 p-0">
-                    {divisions.map((division) => (
-                        <li key={division.id} className="ledger-card">
-                            <div className="flex flex-wrap items-center gap-3">
-                                <span className="ledger-tab !mb-0">{division.name}</span>
-                                <Badge variant="secondary" className="capitalize">
-                                    {division.axis}
-                                </Badge>
-                            </div>
-                            {/* What the axis word MEANS — visible, never a tooltip. */}
-                            <p className="mt-1 mb-0 text-xs text-muted-foreground">
-                                {AXIS_GLOSS[division.axis]}
-                            </p>
-                            <ul className="mt-3 flex list-none flex-col gap-4 p-0">
-                                {division.sections.map((section) => (
-                                    <li key={section.id}>
-                                        <section
-                                            aria-label={section.name}
-                                            className="border-l-2 border-forest/30 pl-4"
-                                        >
-                                            <h4 className="font-serif text-sm font-bold tracking-wide text-forest uppercase">
-                                                {section.name}
-                                            </h4>
-                                            <ul className="mt-1 flex list-none flex-col p-0">
-                                                {section.classes.map((cls) => (
-                                                    <PublicClassRow
-                                                        key={cls.id}
-                                                        cls={cls}
-                                                        canEnter={
-                                                            canEnter && effectiveHorses.length > 0
-                                                        }
-                                                        onEnter={openDialog}
-                                                    />
-                                                ))}
-                                                {section.classes.length === 0 && (
-                                                    <li className="py-1.5 text-sm text-muted-foreground italic">
-                                                        No classes yet.
-                                                    </li>
-                                                )}
-                                            </ul>
-                                        </section>
-                                    </li>
-                                ))}
-                            </ul>
-                        </li>
-                    ))}
-                </ul>
-            )}
+            {/* ── The program (accordion) ── */}
+            <section
+                id="program"
+                className="ledger-card scroll-mt-32"
+                aria-labelledby="album-program-heading"
+            >
+                <span className="ledger-tab" id="album-program-heading">
+                    Program
+                </span>
+                <ProgramAccordion
+                    divisions={divisions}
+                    canEnter={canEnter && effectiveHorses.length > 0}
+                    onEnter={openDialog}
+                />
+            </section>
 
             {activeClass && (
                 <EnterClassDialog
@@ -255,8 +193,8 @@ export default function ShowEntrySection({
                 />
             )}
 
-            {/* Self-scratch confirm — the same pause the console's staff
-                scratch takes, with the record-keeping rule in plain words. */}
+            {/* Self-scratch confirm — same pause, same plain words as
+                the legacy layout. */}
             <Dialog
                 open={scratchTarget !== null}
                 onOpenChange={(next) => {
