@@ -1,5 +1,5 @@
 /**
- * Phase E1 — /shows/host/[id]/judge: the online judging queue.
+ * Wave 4a — /shows/host/[id]/judge: ribbon-tray judging.
  * Staff-gated (judge / host / co-host) by getJudgeQueue; online
  * expert-judged shows only. Blind judging is server-enforced —
  * the payload carries no owner identities while the blind rule
@@ -19,7 +19,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata = {
     title: "Judge Queue",
-    description: "Work the classes: photos side by side, tap to place.",
+    description: "Work the classes: tap a horse to pin the next ribbon on it.",
 };
 
 export default async function JudgeQueuePage({
@@ -46,7 +46,7 @@ export default async function JudgeQueuePage({
     return (
         <CommandCenterLayout
             title={`Judging — ${queue.show.title}`}
-            description="Photos side by side. Tap entries in placing order, add critiques, mark each class done."
+            description="Photos side by side. Tap a horse to pin the next ribbon on it — everything saves as you go."
             mainContent={
                 <>
                     {/* Way back to the console — same link style as StaffBanner. */}
