@@ -1,5 +1,6 @@
 "use server";
 
+import { z } from "zod";
 import { logger } from "@/lib/logger";
 import * as Sentry from "@sentry/nextjs";
 import type { Database } from "@/lib/types/database.generated";
@@ -686,11 +687,23 @@ export async function bulkDeleteHorses(
 // QUICK ADD (Frictionless Intake)
 // ============================================================
 
+const quickAddHorseSchema = z.object({
+    catalogId: z.uuid().optional(),
+    customName: z.string().trim().max(100).optional(),
+    finishType: z.enum(["OF", "Custom", "Artist Resin"]),
+    conditionGrade: z.string().trim().min(1).max(50),
+    collectionId: z.uuid().optional(),
+    /** Public by default (Batch 3): Quick Add horses used to be
+     *  hardcoded private, which silently made them un-enterable in
+     *  shows (eligibility needs is_public). */
+    isPublic: z.boolean().optional().default(true),
+});
+
 /**
  * Quick-add a horse with minimal fields (used by /add-horse/quick).
  * Auto-names the horse from the catalog reference if no custom name provided.
- * Defaults to private, not-for-sale, and model category.
- * @param data - Quick-add fields: catalogId, customName, finishType, conditionGrade, collectionId
+ * Defaults to PUBLIC (show-eligible), not-for-sale, and model category.
+ * @param data - Quick-add fields: catalogId, customName, finishType, conditionGrade, collectionId, isPublic
  */
 export async function quickAddHorse(data: {
     catalogId?: string;
@@ -698,16 +711,23 @@ export async function quickAddHorse(data: {
     finishType: string;
     conditionGrade: string;
     collectionId?: string;
+    isPublic?: boolean;
 }): Promise<{ success: boolean; horseId?: string; horseName?: string; error?: string }> {
+    const parsed = quickAddHorseSchema.safeParse(data);
+    if (!parsed.success) {
+        return { success: false, error: parsed.error.issues[0]?.message ?? "Invalid input." };
+    }
+    const input = parsed.data;
+
     const { supabase, user } = await requireAuth();
 
     // If catalogId provided, auto-name from catalog
-    let horseName = decodeHtmlEntities(data.customName?.trim() || "");
-    if (data.catalogId && !horseName) {
+    let horseName = decodeHtmlEntities(input.customName?.trim() || "");
+    if (input.catalogId && !horseName) {
         const { data: catalog } = await supabase
             .from("catalog_items")
             .select("title, maker")
-            .eq("id", data.catalogId)
+            .eq("id", input.catalogId)
             .single<{ title: string; maker: string }>();
         if (catalog) {
             horseName = `${catalog.maker} ${catalog.title}`;
@@ -718,14 +738,15 @@ export async function quickAddHorse(data: {
     const horseInsert: UserHorseInsert = {
         owner_id: user.id,
         custom_name: horseName,
-        finish_type: data.finishType as UserHorseInsert["finish_type"],
-        condition_grade: data.conditionGrade,
-        is_public: false,
+        finish_type: input.finishType as UserHorseInsert["finish_type"],
+        condition_grade: input.conditionGrade,
+        is_public: input.isPublic,
+        visibility: input.isPublic ? "public" : "private",
         trade_status: "Not for Sale",
         asset_category: "model",
     };
-    if (data.catalogId) horseInsert.catalog_id = data.catalogId;
-    if (data.collectionId) horseInsert.collection_id = data.collectionId;
+    if (input.catalogId) horseInsert.catalog_id = input.catalogId;
+    if (input.collectionId) horseInsert.collection_id = input.collectionId;
 
     const { data: horse, error } = await supabase
         .from("user_horses")
@@ -736,6 +757,7 @@ export async function quickAddHorse(data: {
     if (error || !horse) return { success: false, error: error?.message || "Failed to add." };
 
     revalidatePath("/dashboard");
+    if (input.isPublic) revalidateTag("public_horses", "max");
     return { success: true, horseId: horse.id, horseName };
 }
 

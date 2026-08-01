@@ -3,10 +3,19 @@
 import { useState, useEffect } from"react";
 import Link from"next/link";
 import { useRouter } from"next/navigation";
-import { quickAddHorse } from"@/app/actions/horse";
+import { finalizeHorseImages, quickAddHorse } from"@/app/actions/horse";
+import { getProfile } from"@/app/actions/settings";
 import UnifiedReferenceSearch from"@/components/UnifiedReferenceSearch";
 import type { CatalogItem } from"@/app/actions/reference";
 import { createClient } from"@/lib/supabase/client";
+import {
+ compressImage,
+ compressImageWithWatermark,
+ generateThumbnail,
+ validateImageFile,
+ type UserTier,
+} from"@/lib/utils/imageCompression";
+import { uploadImageWithRetry } from"@/lib/utils/uploadWithRetry";
 import { Input } from "@/components/ui/input";
 import FocusLayout from"@/components/layouts/FocusLayout";
 import PageMasthead from"@/components/layouts/PageMasthead";
@@ -33,6 +42,8 @@ interface RecentAdd {
  finish: string;
  condition: string;
  timestamp: number;
+ isPublic: boolean;
+ hasPhoto: boolean;
 }
 
 export default function QuickAddPage() {
@@ -46,8 +57,18 @@ export default function QuickAddPage() {
  const [isAdding, setIsAdding] = useState(false);
  const [recentAdds, setRecentAdds] = useState<RecentAdd[]>([]);
  const [error, setError] = useState<string | null>(null);
+ // Batch 3: Quick Add horses default to PUBLIC so they can actually
+ // enter shows (they were hardcoded private, which silently made
+ // them un-enterable), plus an optional single photo.
+ const [isPublic, setIsPublic] = useState(true);
+ const [photo, setPhoto] = useState<{ file: File; previewUrl: string } | null>(null);
+ const [photoNote, setPhotoNote] = useState<string | null>(null);
+ const [userTier, setUserTier] = useState<UserTier>("free");
+ const [watermarkEnabled, setWatermarkEnabled] = useState(false);
+ const [userAlias, setUserAlias] = useState("");
+ const [userWatermarkText, setUserWatermarkText] = useState("");
 
- // Load user collections
+ // Load user collections + tier + watermark preference
  useEffect(() => {
  async function loadCollections() {
  const supabase = createClient();
@@ -55,6 +76,7 @@ export default function QuickAddPage() {
  data: { user },
  } = await supabase.auth.getUser();
  if (!user) return;
+ if (user.app_metadata?.tier) setUserTier(user.app_metadata.tier as UserTier);
  const { data } = await supabase
  .from("user_collections")
  .select("id, name")
@@ -63,11 +85,66 @@ export default function QuickAddPage() {
  if (data) setCollections(data as { id: string; name: string }[]);
  }
  loadCollections();
+ getProfile().then((profile) => {
+ if (profile) {
+ setWatermarkEnabled(profile.watermarkPhotos);
+ setUserAlias(profile.aliasName);
+ setUserWatermarkText(profile.watermarkText);
+ }
+ }).catch(() => {});
  }, []);
+
+ const handlePhotoSelect = (file: File) => {
+ const invalid = validateImageFile(file);
+ if (invalid) {
+ setPhotoNote(invalid);
+ return;
+ }
+ setPhotoNote(null);
+ if (photo) URL.revokeObjectURL(photo.previewUrl);
+ setPhoto({ file, previewUrl: URL.createObjectURL(file) });
+ };
+
+ /** Same 2-step pipeline as the full form: client compress + direct
+ * Storage upload (with retry + thumbnail), then finalize metadata.
+ * Non-fatal — the horse is already saved when this runs. */
+ const uploadQuickPhoto = async (horseId: string, file: File): Promise<boolean> => {
+ try {
+ const supabase = createClient();
+ const compressed =
+ watermarkEnabled && userAlias
+ ? await compressImageWithWatermark(file, userAlias, userTier, userWatermarkText)
+ : await compressImage(file, userTier);
+ const filePath = `horses/${horseId}/Primary_Thumbnail_${Date.now()}.webp`;
+ const { error: uploadError } = await uploadImageWithRetry(
+ supabase, "horse-images", filePath, compressed,
+ );
+ if (uploadError) return false;
+
+ // Thumbnail is best-effort — grids fall back to full-res.
+ try {
+ const thumbnail = await generateThumbnail(file);
+ const thumbPath = filePath.replace(/\.webp$/, "_thumb.webp");
+ await supabase.storage
+ .from("horse-images")
+ .upload(thumbPath, thumbnail, { contentType: "image/webp" });
+ } catch {
+ // non-fatal
+ }
+
+ const finalize = await finalizeHorseImages(horseId, [
+ { path: filePath, angle: "Primary_Thumbnail" },
+ ]);
+ return finalize.success;
+ } catch {
+ return false;
+ }
+ };
 
  const handleAdd = async () => {
  setIsAdding(true);
  setError(null);
+ setPhotoNote(null);
  try {
  const result = await quickAddHorse({
  catalogId: selectedCatalog?.id,
@@ -75,6 +152,7 @@ export default function QuickAddPage() {
  finishType,
  conditionGrade,
  collectionId: collectionId || undefined,
+ isPublic,
  });
 
  if (!result.success) {
@@ -84,6 +162,19 @@ export default function QuickAddPage() {
 
  track("add_horse", { category: "model", quick: true });
 
+ // Optional photo — reuses the full form's upload pipeline.
+ let hasPhoto = false;
+ if (photo) {
+ hasPhoto = await uploadQuickPhoto(result.horseId!, photo.file);
+ if (!hasPhoto) {
+ setPhotoNote(
+ "The horse saved, but its photo didn't upload — add one from the horse's page.",
+ );
+ }
+ URL.revokeObjectURL(photo.previewUrl);
+ setPhoto(null);
+ }
+
  setRecentAdds((prev) =>
  [
  {
@@ -92,6 +183,8 @@ export default function QuickAddPage() {
  finish: finishType,
  condition: conditionGrade,
  timestamp: Date.now(),
+ isPublic,
+ hasPhoto,
  },
  ...prev,
  ].slice(0, 10),
@@ -110,6 +203,8 @@ export default function QuickAddPage() {
  setFinishType("OF");
  setConditionGrade("Mint");
  setCustomName("");
+ if (photo) URL.revokeObjectURL(photo.previewUrl);
+ setPhoto(null);
  };
 
  const timeSince = (ts: number) => {
@@ -223,6 +318,86 @@ export default function QuickAddPage() {
  </div>
  </div>
 
+ {/* Visibility — Public by default so the horse can show */}
+ <div className="mt-6 mb-6">
+ <label className="text-foreground mb-1 block text-sm font-semibold">Visibility</label>
+ <div className="flex flex-wrap gap-2" role="group" aria-label="Visibility">
+ {[
+ { value: true, icon:"🌐", label:"Public" },
+ { value: false, icon:"🔒", label:"Private" },
+ ].map((opt) => (
+ <button
+ key={opt.label}
+ type="button"
+ className={`flex min-w-[110px] cursor-pointer items-center justify-center gap-2 rounded-lg border-2 px-3 py-2 text-sm font-semibold transition-all ${isPublic === opt.value ?"border-forest bg-forest/10 text-forest" :"border-input bg-card text-secondary-foreground hover:border-forest/40"}`}
+ onClick={() => setIsPublic(opt.value)}
+ aria-pressed={isPublic === opt.value}
+ id={`quick-visibility-${opt.label.toLowerCase()}`}
+ >
+ <span aria-hidden="true">{opt.icon}</span> {opt.label}
+ </button>
+ ))}
+ </div>
+ <span className="text-muted-foreground mt-1 block text-xs">
+ Public horses can enter shows and appear in the Show Ring.
+ </span>
+ </div>
+
+ {/* Optional single photo — one clear shot makes it show-ready */}
+ <div className="mb-6">
+ <label
+ htmlFor="quick-photo-input"
+ className="relative flex min-h-[88px] w-full cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-input bg-card p-4 text-center transition-all hover:border-forest hover:bg-forest/5"
+ onDragOver={(e) => e.preventDefault()}
+ onDrop={(e) => {
+ e.preventDefault();
+ const file = Array.from(e.dataTransfer.files).find((f) => f.type.startsWith("image/"));
+ if (file) handlePhotoSelect(file);
+ }}
+ >
+ <input
+ id="quick-photo-input"
+ type="file"
+ accept="image/jpeg,image/png,image/webp,image/gif"
+ className="hidden"
+ title="Upload a photo"
+ onChange={(e) => {
+ const file = e.target.files?.[0];
+ if (file) handlePhotoSelect(file);
+ e.target.value ="";
+ }}
+ />
+ <span className="text-foreground text-sm font-medium">
+ <strong>Photo (optional)</strong>
+ </span>
+ <span className="text-muted-foreground text-xs">
+ One clear side shot makes it show-ready · Click or drag a file here
+ </span>
+ </label>
+ {photo && (
+ <div className="border-input relative mt-3 h-[100px] w-[100px] overflow-hidden rounded-md border">
+ {/* eslint-disable-next-line @next/next/no-img-element */}
+ <img src={photo.previewUrl} alt="Photo preview" className="h-full w-full object-cover" />
+ <button
+ className="bg-black/70 absolute top-[6px] right-[6px] z-[2] flex h-[28px] w-[28px] cursor-pointer items-center justify-center rounded-full border-0 text-[0.85rem] text-white transition-colors"
+ onClick={() => {
+ URL.revokeObjectURL(photo.previewUrl);
+ setPhoto(null);
+ }}
+ aria-label="Remove photo"
+ type="button"
+ >
+ ✕
+ </button>
+ </div>
+ )}
+ {photoNote && (
+ <p className="mt-2 rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-xs text-warning" role="alert">
+ {photoNote}
+ </p>
+ )}
+ </div>
+
  {/* Error */}
  {error && (
  <div className="text-destructive mt-2 mt-4 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm">
@@ -270,6 +445,13 @@ export default function QuickAddPage() {
  <span>✅ {item.name}</span>
  <span className="text-muted-foreground">
  {item.finish} · {item.condition} — {timeSince(item.timestamp)}
+ </span>
+ <span className="text-muted-foreground block text-xs">
+ {!item.isPublic
+ ?"Private — set it public to enter shows."
+ : item.hasPhoto
+ ?"Show-ready — public with a photo."
+ :"Add a photo before entering a show."}
  </span>
  <Button asChild variant="outline" className="px-4 text-xs"><Link
  href={`/stable/${item.id}`}

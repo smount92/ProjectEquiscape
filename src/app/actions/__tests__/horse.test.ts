@@ -291,7 +291,8 @@ describe("horse.ts — CRUD", () => {
                 error: null,
             });
             const result = await quickAddHorse({
-                catalogId: "cat-1",
+                // Catalog ids are uuids — the zod boundary now enforces it.
+                catalogId: "223e4567-e89b-42d3-a456-426614174001",
                 finishType: "OF",
                 conditionGrade: "Mint",
             });
@@ -310,6 +311,46 @@ describe("horse.ts — CRUD", () => {
             });
             expect(result.success).toBe(true);
             expect(result.horseName).toBe("Unnamed Horse");
+        });
+
+        it("rejects an invalid finish type at the zod boundary", async () => {
+            const result = await quickAddHorse({
+                finishType: "Chrome" as never,
+                conditionGrade: "Mint",
+            });
+            expect(result.success).toBe(false);
+            expect(mockClient._mockQuery.insert).not.toHaveBeenCalled();
+        });
+
+        it("defaults to PUBLIC so quick-added horses are show-eligible", async () => {
+            mockClient._mockQuery.single.mockResolvedValueOnce({
+                data: { id: "horse-1" },
+                error: null,
+            });
+            const result = await quickAddHorse({
+                finishType: "OF",
+                conditionGrade: "Mint",
+            });
+            expect(result.success).toBe(true);
+            expect(mockClient._mockQuery.insert).toHaveBeenCalledWith(
+                expect.objectContaining({ is_public: true, visibility: "public" }),
+            );
+        });
+
+        it("honors an explicit private choice", async () => {
+            mockClient._mockQuery.single.mockResolvedValueOnce({
+                data: { id: "horse-1" },
+                error: null,
+            });
+            const result = await quickAddHorse({
+                finishType: "OF",
+                conditionGrade: "Mint",
+                isPublic: false,
+            });
+            expect(result.success).toBe(true);
+            expect(mockClient._mockQuery.insert).toHaveBeenCalledWith(
+                expect.objectContaining({ is_public: false, visibility: "private" }),
+            );
         });
     });
 });

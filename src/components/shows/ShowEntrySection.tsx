@@ -12,17 +12,19 @@
  * unique index in migration 117).
  */
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { scratchEntry } from "@/app/actions/shows-v2";
+import { listMyEntrantHorses } from "@/app/actions/show-readiness";
 import type { ConsoleClass, ConsoleDivision } from "@/lib/shows/console";
 import type { EntrantHorse, MyShowEntry } from "@/lib/shows/public";
 import type { ShowMode, ShowStatus } from "@/lib/shows/types";
 import { formatStatus } from "@/lib/shows/stateMachine";
 import { placeLabel, ribbonHex } from "@/lib/shows/placings";
 import EnterClassDialog, { type EnterableClass } from "@/components/shows/EnterClassDialog";
+import ShowReadinessPanel from "@/components/shows/ShowReadinessPanel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -68,6 +70,26 @@ export default function ShowEntrySection({
     const [dialogNonce, setDialogNonce] = useState(0);
     const [pendingScratch, setPendingScratch] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+
+    // Client-side refetch of the enterable-horse list (Batch 3): a
+    // horse added or made public mid-visit becomes usable without a
+    // full reload. null → the server-rendered prop still stands.
+    const [freshHorses, setFreshHorses] = useState<EntrantHorse[] | null>(null);
+    const effectiveHorses = freshHorses ?? horses;
+
+    const refreshHorses = useCallback(async () => {
+        const result = await listMyEntrantHorses();
+        if (result.success) {
+            setFreshHorses(result.horses);
+        }
+    }, []);
+
+    /** The readiness panel says the stable is enterable — pull the
+     *  fresh horse list AND re-sync the server-rendered page. */
+    const handleHorsesReady = useCallback(async () => {
+        await refreshHorses();
+        router.refresh();
+    }, [refreshHorses, router]);
 
     const classById = useMemo(() => {
         const map = new Map<string, ConsoleClass>();
@@ -236,11 +258,8 @@ export default function ShowEntrySection({
                     Entries are open — sign in to enter your horses.
                 </p>
             )}
-            {canEnter && horses.length === 0 && (
-                <p className="ledger-card text-sm text-muted-foreground" role="note">
-                    Entries are open, but you have no public horses yet — add horses to your
-                    stable (and set them public) to enter.
-                </p>
+            {canEnter && effectiveHorses.length === 0 && (
+                <ShowReadinessPanel showId={showId} mode={mode} onHorsesReady={handleHorsesReady} />
             )}
 
             {/* ── The classlist ── */}
@@ -317,7 +336,7 @@ export default function ShowEntrySection({
                                                             </span>
                                                             {canEnter &&
                                                                 cls.status === "scheduled" &&
-                                                                horses.length > 0 && (
+                                                                effectiveHorses.length > 0 && (
                                                                     <span className="ml-auto">
                                                                         <Button
                                                                             variant="outline"
@@ -352,7 +371,8 @@ export default function ShowEntrySection({
                     showId={showId}
                     cls={activeClass}
                     mode={mode}
-                    horses={horses}
+                    horses={effectiveHorses}
+                    onRefreshHorses={refreshHorses}
                     onClose={() => setActiveClass(null)}
                     onEntered={() => router.refresh()}
                 />

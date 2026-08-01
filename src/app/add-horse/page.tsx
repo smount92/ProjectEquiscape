@@ -58,12 +58,31 @@ interface ImageSlot {
  previewUrl: string;
 }
 
+/**
+ * Open-redirect guard for ?returnTo= round-trips (e.g. the show
+ * page's "Add your first horse" ramp). Same rules as the auth
+ * safeRedirectPath: same-origin absolute paths only — rejects
+ * protocol-relative (`//evil.com`), scheme-carrying, and
+ * backslash-escaped values. Null when unsafe or absent.
+ */
+function safeReturnToPath(value: string | null): string | null {
+ if (!value || !value.startsWith("/")) return null;
+ if (value.startsWith("//") || value.startsWith("/\\")) return null;
+ return value;
+}
+
 // ---- Component ----
 
 export default function AddHorsePage() {
  const router = useRouter();
  const searchParams = useSearchParams();
  const supabase = createClient();
+
+ // Where to send the user after saving (internal paths only). A
+ // /shows/... value means they arrived from a show's "get show-ready"
+ // ramp and the success screen offers the way back.
+ const returnTo = safeReturnToPath(searchParams.get("returnTo"));
+ const showReturnTo = returnTo && returnTo.startsWith("/shows/") ? returnTo : null;
 
  // Step management
  const [currentStep, setCurrentStep] = useState(0);
@@ -634,12 +653,37 @@ export default function AddHorsePage() {
  </div>
  )}
  <div className="flex flex-col items-center gap-4">
+ {showReturnTo ? (
+ <>
+ <Button asChild size="wide"><Link href={showReturnTo}>
+ Back to the show →
+ </Link></Button>
+ {visibility === "private" && (
+ <p className="rounded-md border border-warning/40 bg-warning/10 px-4 py-2 text-left text-xs text-warning" role="note">
+ Heads up: this horse is private — set it public to enter the show.
+ </p>
+ )}
+ {newHorseId && (
+ <Button asChild variant="outline"><Link
+ href={visibility ==="public" ? `/community/${newHorseId}` : `/stable/${newHorseId}`}
+ >
+ View Passport →
+ </Link></Button>
+ )}
+ </>
+ ) : (
+ <>
  {newHorseId && (
  <Button asChild size="wide"><Link
  href={visibility ==="public" ? `/community/${newHorseId}` : `/stable/${newHorseId}`}
  >
  View Passport →
  </Link></Button>
+ )}
+ <Button asChild variant="outline"><Link href="/shows">
+ Enter in a show →
+ </Link></Button>
+ </>
  )}
  <div className="flex justify-center gap-4">
  <Button asChild variant="outline"><Link
@@ -983,8 +1027,8 @@ export default function AddHorsePage() {
  const files = Array.from(e.dataTransfer.files).filter((f) =>
  f.type.startsWith("image/"),
  );
- if (extraFiles.length + files.length > 10) {
- alert("Maximum 10 extra detail photos allowed.");
+ if (extraFiles.length + files.length > 30) {
+ alert("Maximum 30 extra detail photos allowed.");
  return;
  }
  startExtraCropQueue(files);
@@ -1002,8 +1046,8 @@ export default function AddHorsePage() {
  const files = Array.from(e.target.files || []).filter((f) =>
  f.type.startsWith("image/"),
  );
- if (extraFiles.length + files.length > 10) {
- alert("Maximum 10 extra detail photos allowed.");
+ if (extraFiles.length + files.length > 30) {
+ alert("Maximum 30 extra detail photos allowed.");
  e.target.value ="";
  return;
  }
@@ -1027,10 +1071,10 @@ export default function AddHorsePage() {
  <line x1="21" y1="9" x2="21.01" y2="9" />
  </svg>
  <span className="text-foreground text-sm font-medium">
- <strong>Additional photos (up to 10)</strong>
+ <strong>Additional photos (up to 30)</strong>
  </span>
  <span className="text-muted-foreground text-xs">
- {extraFiles.length}/10 photos · Click or drag files here
+ {extraFiles.length}/30 photos · Click or drag files here
  </span>
  </label>
  {extraFiles.length > 0 && (
