@@ -133,7 +133,8 @@ export function buildResultsNotificationPlans(input: {
             type: "show_result",
             actorId: null,
             content,
-            linkUrl: `/shows/${input.showId}`,
+            // #results — straight to the champions/results region.
+            linkUrl: `/shows/${input.showId}#results`,
         };
     });
 }
@@ -229,7 +230,8 @@ export function buildClassChangePlans(input: {
         type: "show_class_change",
         actorId: null,
         content,
-        linkUrl: `/shows/${input.showId}`,
+        // #entries — where the moved entry now shows.
+        linkUrl: `/shows/${input.showId}#entries`,
     }));
 }
 
@@ -249,7 +251,28 @@ export function buildVotingOpenPlans(input: {
         type: "show_voting_open",
         actorId: null,
         content: `🗳️ Community voting is open at ${input.showTitle} — your entries are on the ring.`,
-        linkUrl: `/shows/${input.showId}`,
+        // #gallery — straight to the hearts.
+        linkUrl: `/shows/${input.showId}#gallery`,
+    }));
+}
+
+/**
+ * Online judged show entered judging → tell every judge-role staff
+ * member their bench is ready, deep-linked to the queue. (The
+ * voting-open plan above is the entrant side; this is the judge
+ * side of the same flip.)
+ */
+export function buildJudgingOpenPlans(input: {
+    showId: string;
+    showTitle: string;
+    judgeUserIds: string[];
+}): NotificationInput[] {
+    return [...new Set(input.judgeUserIds)].map((userId) => ({
+        userId,
+        type: "show_judging_open",
+        actorId: null,
+        content: `⚖️ Judging is open for ${input.showTitle} — your queue is ready.`,
+        linkUrl: `/shows/host/${input.showId}/judge`,
     }));
 }
 
@@ -269,7 +292,8 @@ export function buildEntryScratchedPlan(input: {
         type: "show_entry_scratched",
         actorId: input.scratchedByUserId,
         content: `Your entry ${input.horseName} in "${input.className}" was scratched by show staff at ${input.showTitle}.${reason ? ` Reason: ${reason}` : ""}`,
-        linkUrl: `/shows/${input.showId}`,
+        // #entries — the scratched row stays visible there as history.
+        linkUrl: `/shows/${input.showId}#entries`,
     };
 }
 
@@ -306,7 +330,8 @@ export function buildAnnouncementPlans(input: {
         type: "show_announcement",
         actorId: input.hostUserId,
         content: `📣 @${input.hostAlias} (${input.showTitle}): ${input.message}`,
-        linkUrl: `/shows/${input.showId}`,
+        // #entries — announcements are almost always "about your entries".
+        linkUrl: `/shows/${input.showId}#entries`,
     }));
 }
 
@@ -321,7 +346,8 @@ export function buildDeadlinePlans(input: {
         type: "show_deadline",
         actorId: null,
         content: `⏰ Entries for ${input.showTitle} close in less than 24 hours.`,
-        linkUrl: `/shows/${input.showId}`,
+        // #entries — the last-call landing spot.
+        linkUrl: `/shows/${input.showId}#entries`,
     }));
 }
 
@@ -483,6 +509,54 @@ export async function runVotingOpenedFanout(
         );
     } catch (err) {
         logger.error("ShowNotifications", "Voting-open fan-out failed", err);
+    }
+}
+
+/**
+ * Judged online show entered judging → tell its judges the queue is
+ * ready. Admin client for the same after()-lifecycle reason as the
+ * voting fan-out; the transition itself was already host-gated.
+ */
+export async function runJudgingOpenedFanout(
+    client: SupabaseClient,
+    showId: string,
+): Promise<void> {
+    try {
+        const { data: show, error: showError } = await client
+            .from("shows")
+            .select("id, title")
+            .eq("id", showId)
+            .maybeSingle();
+        if (showError || !show) {
+            logger.error(
+                "ShowNotifications",
+                `Judging-open fan-out show load failed: ${showError?.message ?? "not found"}`,
+            );
+            return;
+        }
+
+        const { data: judgeRows, error: staffError } = await client
+            .from("show_staff")
+            .select("user_id")
+            .eq("show_id", showId)
+            .eq("role", "judge");
+        if (staffError) {
+            logger.error(
+                "ShowNotifications",
+                `Judging-open fan-out staff load failed: ${staffError.message}`,
+            );
+            return;
+        }
+
+        await createNotificationsBulk(
+            buildJudgingOpenPlans({
+                showId,
+                showTitle: show.title as string,
+                judgeUserIds: (judgeRows ?? []).map((r) => r.user_id as string),
+            }),
+        );
+    } catch (err) {
+        logger.error("ShowNotifications", "Judging-open fan-out failed", err);
     }
 }
 

@@ -68,6 +68,7 @@ import { issueQualificationCardsForShow, type PlannedCard } from "@/lib/shows/ca
 import {
     runClassChangeFanout,
     runEntryScratchedNotification,
+    runJudgingOpenedFanout,
     runResultsPublishedFanout,
     runStaffAddedNotification,
     runVotingOpenedFanout,
@@ -380,6 +381,14 @@ export async function transitionShowStatus(
     if (to === "judging" && ctx.show.judging === "community_vote") {
         after(async () => {
             await runVotingOpenedFanout(getAdminClient(), showId);
+        });
+    }
+    // The judge side of the same flip: a judged show entering judging
+    // pings its judge-role staff that the queue is ready. (Community
+    // votes have no queue — entrants got the fan-out above instead.)
+    if (to === "judging" && ctx.show.judging === "judged") {
+        after(async () => {
+            await runJudgingOpenedFanout(getAdminClient(), showId);
         });
     }
     return { success: true };

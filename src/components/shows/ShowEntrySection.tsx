@@ -21,12 +21,21 @@ import { listMyEntrantHorses } from "@/app/actions/show-readiness";
 import type { ConsoleClass, ConsoleDivision } from "@/lib/shows/console";
 import type { EntrantHorse, MyShowEntry } from "@/lib/shows/public";
 import type { ShowMode, ShowStatus } from "@/lib/shows/types";
-import { formatStatus } from "@/lib/shows/stateMachine";
+import { AXIS_GLOSS, friendlyClassStatus, friendlyEntryStatus } from "@/lib/shows/plainWords";
 import { placeLabel, ribbonHex } from "@/lib/shows/placings";
 import EnterClassDialog, { type EnterableClass } from "@/components/shows/EnterClassDialog";
 import ShowReadinessPanel from "@/components/shows/ShowReadinessPanel";
+import { useShowToast } from "@/components/shows/useShowToast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import {
     Table,
     TableBody,
@@ -65,10 +74,14 @@ export default function ShowEntrySection({
     // Result stamps arrive with the completed transition (Phase E1).
     const hasResults = myEntries.some((e) => e.place !== null);
 
+    const { showToast, toastNode } = useShowToast();
     const [activeClass, setActiveClass] = useState<EnterableClass | null>(null);
     // Remounts the dialog fresh each time it opens.
     const [dialogNonce, setDialogNonce] = useState(0);
-    const [pendingScratch, setPendingScratch] = useState<string | null>(null);
+    // Self-scratch pauses on a confirm dialog (same pattern as the
+    // console's staff scratch) — scratching is a real withdrawal.
+    const [scratchTarget, setScratchTarget] = useState<MyShowEntry | null>(null);
+    const [scratching, setScratching] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     // Client-side refetch of the enterable-horse list (Batch 3): a
@@ -107,16 +120,19 @@ export default function ShowEntrySection({
         setActiveClass(cls);
     };
 
-    const handleScratch = async (entryId: string) => {
-        setPendingScratch(entryId);
+    const handleScratch = async () => {
+        if (!scratchTarget) return;
+        setScratching(true);
         setError(null);
-        const result = await scratchEntry({ entryId });
+        const result = await scratchEntry({ entryId: scratchTarget.id });
         if (result.success) {
+            setScratchTarget(null);
+            showToast(`${scratchTarget.horseName} scratched — the entry stays on the record.`);
             router.refresh();
         } else {
             setError(result.error);
         }
-        setPendingScratch(null);
+        setScratching(false);
     };
 
     /** A scratched entry can re-enter only while no LIVE entry exists
@@ -128,7 +144,7 @@ export default function ShowEntrySection({
 
     return (
         <>
-            {error && (
+            {error && scratchTarget === null && (
                 <p role="alert" className="text-sm font-semibold text-destructive">
                     {error}
                 </p>
@@ -171,12 +187,15 @@ export default function ShowEntrySection({
                                         <TableCell>
                                             {entry.handlerAlias ? (
                                                 <span>
+                                                    shown by{" "}
                                                     <Link
                                                         href={`/profile/${encodeURIComponent(entry.handlerAlias)}`}
                                                     >
                                                         @{entry.handlerAlias}
                                                     </Link>{" "}
-                                                    <Badge variant="outline">proxy</Badge>
+                                                    <span className="text-xs text-muted-foreground">
+                                                        (proxy)
+                                                    </span>
                                                 </span>
                                             ) : (
                                                 "—"
@@ -184,7 +203,7 @@ export default function ShowEntrySection({
                                         </TableCell>
                                         <TableCell>
                                             <span className={`stamp ${scratched ? "stamp-red" : ""}`}>
-                                                {entry.status}
+                                                {friendlyEntryStatus(entry.status)}
                                             </span>
                                         </TableCell>
                                         {hasResults && (
@@ -216,12 +235,14 @@ export default function ShowEntrySection({
                                                     <Button
                                                         variant="destructive-outline"
                                                         size="sm"
-                                                        disabled={pendingScratch !== null}
-                                                        onClick={() => handleScratch(entry.id)}
+                                                        disabled={scratching}
+                                                        onClick={() => {
+                                                            setError(null);
+                                                            setScratchTarget(entry);
+                                                        }}
+                                                        aria-label={`Scratch ${entry.horseName}`}
                                                     >
-                                                        {pendingScratch === entry.id
-                                                            ? "Scratching…"
-                                                            : "Scratch"}
+                                                        Scratch
                                                     </Button>
                                                 )}
                                                 {scratched &&
@@ -254,9 +275,20 @@ export default function ShowEntrySection({
 
             {/* ── Entry availability notes ── */}
             {entriesOpen && !authed && (
-                <p className="ledger-card text-sm text-muted-foreground" role="note">
-                    Entries are open — sign in to enter your horses.
-                </p>
+                <div
+                    className="ledger-card flex flex-wrap items-center gap-3 text-sm text-muted-foreground"
+                    role="note"
+                >
+                    <span>Entries are open — sign in to enter your horses.</span>
+                    <Button asChild size="sm">
+                        <Link href={`/login?redirectTo=${encodeURIComponent(`/shows/${showId}`)}`}>
+                            Sign in to enter
+                        </Link>
+                    </Button>
+                    <Button asChild variant="outline" size="sm">
+                        <Link href="/signup">Create free account</Link>
+                    </Button>
+                </div>
             )}
             {canEnter && effectiveHorses.length === 0 && (
                 <ShowReadinessPanel showId={showId} mode={mode} onHorsesReady={handleHorsesReady} />
@@ -276,8 +308,14 @@ export default function ShowEntrySection({
                         <li key={division.id} className="ledger-card">
                             <div className="flex flex-wrap items-center gap-3">
                                 <span className="ledger-tab !mb-0">{division.name}</span>
-                                <Badge variant="secondary">{division.axis}</Badge>
+                                <Badge variant="secondary" className="capitalize">
+                                    {division.axis}
+                                </Badge>
                             </div>
+                            {/* What the axis word MEANS — visible, never a tooltip. */}
+                            <p className="mt-1 mb-0 text-xs text-muted-foreground">
+                                {AXIS_GLOSS[division.axis]}
+                            </p>
                             <ul className="mt-3 flex list-none flex-col gap-4 p-0">
                                 {division.sections.map((section) => (
                                     <li key={section.id}>
@@ -310,7 +348,7 @@ export default function ShowEntrySection({
                                                                 <span
                                                                     className={`stamp ${cancelled ? "stamp-red" : ""}`}
                                                                 >
-                                                                    {formatStatus(cls.status)}
+                                                                    {friendlyClassStatus(cls.status)}
                                                                 </span>
                                                             )}
                                                             {cls.isQualifying && (
@@ -374,9 +412,65 @@ export default function ShowEntrySection({
                     horses={effectiveHorses}
                     onRefreshHorses={refreshHorses}
                     onClose={() => setActiveClass(null)}
-                    onEntered={() => router.refresh()}
+                    onEntered={({ horseName }) => {
+                        showToast(`${horseName} is entered — see My Entries above.`);
+                        router.refresh();
+                    }}
                 />
             )}
+
+            {/* Self-scratch confirm — the same pause the console's staff
+                scratch takes, with the record-keeping rule in plain words. */}
+            <Dialog
+                open={scratchTarget !== null}
+                onOpenChange={(next) => {
+                    if (!next && !scratching) setScratchTarget(null);
+                }}
+            >
+                <DialogContent className="sm:max-w-[440px]">
+                    <DialogHeader>
+                        <DialogTitle>
+                            {scratchTarget && `Scratch ${scratchTarget.horseName}?`}
+                        </DialogTitle>
+                        <DialogDescription>
+                            {scratchTarget &&
+                                `This withdraws ${scratchTarget.horseName} from ${
+                                    classById.get(scratchTarget.classId)
+                                        ? classLabel(classById.get(scratchTarget.classId)!)
+                                        : "its class"
+                                }. Scratching keeps the entry on the record as history — you can re-enter while entries are open, which creates a fresh entry.`}
+                        </DialogDescription>
+                    </DialogHeader>
+                    {error && (
+                        <p role="alert" className="text-sm font-semibold text-destructive">
+                            {error}
+                        </p>
+                    )}
+                    <DialogFooter>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="wide"
+                            onClick={() => setScratchTarget(null)}
+                            disabled={scratching}
+                        >
+                            Keep the entry
+                        </Button>
+                        <Button
+                            type="button"
+                            variant="destructive-outline"
+                            size="wide"
+                            onClick={handleScratch}
+                            disabled={scratching}
+                            data-testid="self-scratch-confirm"
+                        >
+                            {scratching ? "Scratching…" : "Scratch entry"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {toastNode}
         </>
     );
 }

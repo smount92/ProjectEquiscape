@@ -130,15 +130,14 @@ export default function ShowStaffPanel({ showId, staff, viewerRole }: ShowStaffP
                                 {ROLE_LABELS[member.role]}
                             </Badge>
                             {member.coiFlag && (
-                                <Badge
-                                    variant="destructive"
-                                    title={member.coiNote ?? "Conflict of interest declared"}
-                                >
-                                    COI
-                                </Badge>
-                            )}
-                            {member.coiFlag && member.coiNote && (
-                                <span className="text-xs text-muted-foreground">{member.coiNote}</span>
+                                <>
+                                    <Badge variant="destructive">COI</Badge>
+                                    {/* Say what COI means — visibly, not in a tooltip. */}
+                                    <span className="text-xs text-muted-foreground">
+                                        Conflict of interest declared
+                                        {member.coiNote ? ` — ${member.coiNote}` : ""}
+                                    </span>
+                                </>
                             )}
                             {isHost && member.role !== "host" && (
                                 <span className="ml-auto">

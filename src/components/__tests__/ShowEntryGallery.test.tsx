@@ -79,7 +79,7 @@ beforeEach(() => {
 
 describe("ShowEntryGallery — the blind rule (render side)", () => {
     it("renders NO owner text for a blind payload", () => {
-        render(<ShowEntryGallery gallery={gallery()} authed />);
+        render(<ShowEntryGallery showId="show-1" gallery={gallery()} authed />);
 
         // The entry is there: photo, horse name, leg-tag number.
         expect(screen.getByText("Dash of Cash")).toBeInTheDocument();
@@ -94,6 +94,7 @@ describe("ShowEntryGallery — the blind rule (render side)", () => {
     it("links the owner once the payload is revealed", () => {
         render(
             <ShowEntryGallery
+                showId="show-1"
                 gallery={gallery({
                     revealed: true,
                     classes: [
@@ -115,7 +116,7 @@ describe("ShowEntryGallery — the blind rule (render side)", () => {
 
 describe("ShowEntryGallery — voting", () => {
     it("casts a vote from the heart button", async () => {
-        render(<ShowEntryGallery gallery={gallery()} authed />);
+        render(<ShowEntryGallery showId="show-1" gallery={gallery()} authed />);
         expect(screen.getByTestId("vote-count")).toHaveTextContent("3");
 
         fireEvent.click(screen.getByTestId("vote-button"));
@@ -128,6 +129,7 @@ describe("ShowEntryGallery — voting", () => {
     it("un-votes when the viewer already voted", async () => {
         render(
             <ShowEntryGallery
+                showId="show-1"
                 gallery={gallery({
                     classes: [
                         {
@@ -148,6 +150,7 @@ describe("ShowEntryGallery — voting", () => {
     it("disables the heart on your own entry", () => {
         render(
             <ShowEntryGallery
+                showId="show-1"
                 gallery={gallery({
                     classes: [
                         { ...gallery().classes[0], entries: [entry({ isOwn: true })] },
@@ -160,7 +163,7 @@ describe("ShowEntryGallery — voting", () => {
     });
 
     it("disables the heart for anonymous viewers but still shows the count", () => {
-        render(<ShowEntryGallery gallery={gallery()} authed={false} />);
+        render(<ShowEntryGallery showId="show-1" gallery={gallery()} authed={false} />);
         expect(screen.getByTestId("vote-button")).toBeDisabled();
         expect(screen.getByTestId("vote-count")).toHaveTextContent("3");
     });
@@ -170,6 +173,7 @@ describe("ShowEntryGallery — results view", () => {
     it("shows ribbons and the Results heading once published", () => {
         render(
             <ShowEntryGallery
+                showId="show-1"
                 gallery={gallery({
                     votingOpen: false,
                     revealed: true,

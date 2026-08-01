@@ -14,8 +14,10 @@ import { Trash2 } from "lucide-react";
 
 import { deleteShow, transitionShowStatus, updateShowSettings } from "@/app/actions/shows-v2";
 import type { ConsoleShow } from "@/lib/shows/console";
-import { formatStatus, legalNextStatuses, SHOW_STATUS_ORDER } from "@/lib/shows/stateMachine";
+import { friendlyShowStatus } from "@/lib/shows/plainWords";
+import { legalNextStatuses, SHOW_STATUS_ORDER } from "@/lib/shows/stateMachine";
 import type { ShowStatus } from "@/lib/shows/types";
+import { useShowToast } from "@/components/shows/useShowToast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,6 +46,19 @@ const TRANSITION_LABELS: Record<ShowStatus, string> = {
 function isForward(from: ShowStatus, to: ShowStatus): boolean {
     return SHOW_STATUS_ORDER.indexOf(to) > SHOW_STATUS_ORDER.indexOf(from);
 }
+
+/** Success toast per arrival status — the system says what it just did. */
+const TRANSITION_SUCCESS: Record<ShowStatus, string> = {
+    draft: "Reverted to draft — the show is hidden again.",
+    published: "Show published — it's visible to everyone now.",
+    entries_open: "Entries are open!",
+    entries_closed: "Entries are closed.",
+    running: "Show day is running — good luck out there.",
+    judging: "Judging has begun.",
+    results_review: "Moved to results review — check the placings.",
+    completed: "Results are final and published to every record.",
+    archived: "Show archived.",
+};
 
 /**
  * Transitions serious enough to pause for a confirm dialog: every
@@ -100,6 +115,7 @@ interface ShowStatusCardProps {
 
 export default function ShowStatusCard({ show, entryCount, canManage }: ShowStatusCardProps) {
     const router = useRouter();
+    const { showToast, toastNode } = useShowToast();
     const [pending, setPending] = useState<ShowStatus | null>(null);
     const [togglingBlind, setTogglingBlind] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -115,6 +131,11 @@ export default function ShowStatusCard({ show, entryCount, canManage }: ShowStat
             patch: { blindBrowsing: !show.blindBrowsing },
         });
         if (result.success) {
+            showToast(
+                show.blindBrowsing
+                    ? "Blind browsing is off — owner names show in the gallery."
+                    : "Blind browsing is on — owner names hide until results publish.",
+            );
             router.refresh();
         } else {
             setError(result.error);
@@ -133,6 +154,7 @@ export default function ShowStatusCard({ show, entryCount, canManage }: ShowStat
         const result = await transitionShowStatus({ showId: show.id, to });
         if (result.success) {
             setConfirmTarget(null);
+            showToast(TRANSITION_SUCCESS[to]);
             router.refresh();
         } else {
             setError(result.error);
@@ -161,7 +183,7 @@ export default function ShowStatusCard({ show, entryCount, canManage }: ShowStat
                 </span>
                 <div className="flex flex-wrap items-center gap-4">
                     <span className="stamp text-lg" data-testid="current-status">
-                        {formatStatus(show.status)}
+                        {friendlyShowStatus(show.status)}
                     </span>
                     <span className="text-sm text-muted-foreground">
                         {show.status === "draft" &&
@@ -415,26 +437,33 @@ export default function ShowStatusCard({ show, entryCount, canManage }: ShowStat
                         <SummaryRow
                             label="Blind browsing"
                             value={
-                                <span className="flex flex-wrap items-center gap-2">
-                                    <Badge variant={show.blindBrowsing ? "default" : "outline"}>
-                                        {show.blindBrowsing ? "On" : "Off"}
-                                    </Badge>
-                                    {canManage && (
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            disabled={togglingBlind}
-                                            title="While on, the public gallery hides owner identities until results publish (the digital leg-tag convention)."
-                                            onClick={handleBlindToggle}
-                                            data-testid="blind-toggle"
-                                        >
-                                            {togglingBlind
-                                                ? "Saving…"
-                                                : show.blindBrowsing
-                                                  ? "Turn off"
-                                                  : "Turn on"}
-                                        </Button>
-                                    )}
+                                <span className="flex flex-col gap-1">
+                                    <span className="flex flex-wrap items-center gap-2">
+                                        <Badge variant={show.blindBrowsing ? "default" : "outline"}>
+                                            {show.blindBrowsing ? "On" : "Off"}
+                                        </Badge>
+                                        {canManage && (
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                disabled={togglingBlind}
+                                                onClick={handleBlindToggle}
+                                                data-testid="blind-toggle"
+                                            >
+                                                {togglingBlind
+                                                    ? "Saving…"
+                                                    : show.blindBrowsing
+                                                      ? "Turn off"
+                                                      : "Turn on"}
+                                            </Button>
+                                        )}
+                                    </span>
+                                    {/* The rationale, visible — not a tooltip. */}
+                                    <span className="text-xs text-muted-foreground">
+                                        While on, the public gallery hides owner names until
+                                        results publish — entries compete by number, like leg
+                                        tags at a live show.
+                                    </span>
                                 </span>
                             }
                         />
@@ -450,6 +479,8 @@ export default function ShowStatusCard({ show, entryCount, canManage }: ShowStat
                     <SummaryRow label="Sanctioning" value={show.sanctioningNote} />
                 </dl>
             </section>
+
+            {toastNode}
         </div>
     );
 }

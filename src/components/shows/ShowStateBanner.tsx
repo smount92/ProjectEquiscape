@@ -5,12 +5,18 @@
  * its lifecycle, on a lit-paper strip in the masthead, in the ledger's
  * rubber-stamp language. Times render in the viewer's timezone
  * (LocalTime); when entries open within 24 hours a live countdown
- * ticks beside the date.
+ * ticks beside the date — and at T-0 the page refreshes itself once,
+ * so "refresh to enter" is the fallback, not the instruction.
+ *
+ * Wave 4a: entries_closed / running / judging each get their own
+ * sentence (they are different moments), and community-vote judging
+ * says "Voting is open!" because for those shows it literally is.
  */
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
+import { useRouter } from "next/navigation";
 
-import type { ShowStatus } from "@/lib/shows/types";
+import type { ShowJudging, ShowStatus } from "@/lib/shows/types";
 import LocalTime from "./LocalTime";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -29,17 +35,30 @@ function clockServerSnapshot(): null {
     return null;
 }
 
-/** Live tick to entries-open, shown only inside the final 24 hours. */
+/** Live tick to entries-open, shown only inside the final 24 hours.
+ *  Crossing T-0 refreshes the page data ONCE — if the cron has
+ *  flipped the show, the Enter buttons appear without the user
+ *  doing anything. */
 function Countdown({ target }: { target: string }) {
+    const router = useRouter();
+    const refreshedAtZero = useRef(false);
     const nowSeconds = useSyncExternalStore(
         subscribeToClock,
         clockSecondsSnapshot,
         clockServerSnapshot,
     );
-    if (nowSeconds === null) return null;
+
     const targetMs = new Date(target).getTime();
-    if (Number.isNaN(targetMs)) return null;
-    const remaining = targetMs - nowSeconds * 1000;
+    const remaining =
+        nowSeconds === null || Number.isNaN(targetMs) ? null : targetMs - nowSeconds * 1000;
+
+    useEffect(() => {
+        if (remaining === null || remaining > 0 || refreshedAtZero.current) return;
+        refreshedAtZero.current = true;
+        router.refresh();
+    }, [remaining, router]);
+
+    if (remaining === null) return null;
     if (remaining > DAY_MS) return null;
     // A little grace past zero for hosts/cron flipping the status; a
     // long-stale open date just shows its (past) date with no ticker.
@@ -47,7 +66,7 @@ function Countdown({ target }: { target: string }) {
     return (
         <span className="font-mono text-sm font-bold tabular-nums text-(--paper-lit-ink)">
             {remaining <= 0
-                ? "Opening any moment — refresh to enter"
+                ? "Opening any moment…"
                 : `Opens in ${Math.floor(remaining / 3_600_000)}h ${String(
                       Math.floor((remaining % 3_600_000) / 60_000),
                   ).padStart(2, "0")}m ${String(Math.floor((remaining % 60_000) / 1000)).padStart(
@@ -60,10 +79,14 @@ function Countdown({ target }: { target: string }) {
 
 export default function ShowStateBanner({
     status,
+    judging,
     entriesOpenAt,
     entriesCloseAt,
 }: {
     status: ShowStatus;
+    /** Distinguishes "Voting is open!" from "Judging in progress." —
+     *  optional so older callers keep the judged wording. */
+    judging?: ShowJudging;
     entriesOpenAt: string | null;
     entriesCloseAt: string | null;
 }) {
@@ -96,10 +119,21 @@ export default function ShowStateBanner({
             );
             break;
         case "entries_closed":
+            stampWord = "Entries closed";
+            message = "Entries are closed — judging starts soon.";
+            break;
         case "running":
+            stampWord = "Show day";
+            message = "Show day is running — placings land as the classes are judged.";
+            break;
         case "judging":
-            stampWord = "Judging";
-            message = "Judging in progress.";
+            if (judging === "community_vote") {
+                stampWord = "Voting open";
+                message = "Voting is open! Pick your favorites in the gallery below.";
+            } else {
+                stampWord = "Judging";
+                message = "Judging in progress.";
+            }
             break;
         case "results_review":
             stampWord = "Results soon";

@@ -452,7 +452,8 @@ function RingPlacingRecorder({
             <div className="flex flex-wrap items-center gap-3">
                 <span className="ledger-tab !mb-0">Record Placings</span>
                 <span className="text-sm text-muted-foreground">
-                    Tap leg tags in placing order — first tap is 1st. Tap again to remove.
+                    Tap leg tags (the number card each horse wears) in placing order — first
+                    tap is 1st. Tap again to remove.
                 </span>
             </div>
 
@@ -648,8 +649,9 @@ function SplitDialog({
                 <DialogHeader>
                     <DialogTitle>Split {classLabel(cls)}</DialogTitle>
                     <DialogDescription>
-                        Tap the leg tags that MOVE to the new class; the rest stay. Lineage
-                        is preserved — the published classlist is never destroyed.
+                        Tap the leg tags that MOVE to the new class; the rest stay. The
+                        original class stays in the classlist — it&rsquo;s kept for the
+                        records.
                     </DialogDescription>
                 </DialogHeader>
                 <label className="flex flex-col gap-1 text-sm font-medium">
@@ -752,7 +754,8 @@ function CombineDialog({
                     <DialogTitle>Combine {classLabel(cls)}</DialogTitle>
                     <DialogDescription>
                         Pick the classes to fold together with this one. Entries move to the
-                        combined class; the sources close with their lineage kept.
+                        combined class; the original classes close but stay in the classlist
+                        — kept for the records.
                     </DialogDescription>
                 </DialogHeader>
                 <label className="flex flex-col gap-1 text-sm font-medium">

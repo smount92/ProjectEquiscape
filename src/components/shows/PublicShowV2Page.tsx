@@ -26,9 +26,9 @@ import {
 import { getShowChampions } from "@/app/actions/shows-v2-ring";
 import { GALLERY_STATUSES, RESULTS_STATUSES, type ShowGalleryData } from "@/lib/shows/gallery";
 import type { EntrantHorse, MyShowEntry, PublicShow } from "@/lib/shows/public";
+import { friendlyShowStatus } from "@/lib/shows/plainWords";
 import { getShowRole } from "@/lib/shows/queries";
 import type { ShowChampionsData } from "@/lib/shows/ring";
-import { formatStatus } from "@/lib/shows/stateMachine";
 import type { StaffRole } from "@/lib/shows/types";
 import { createClient } from "@/lib/supabase/server";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
@@ -81,7 +81,9 @@ function ShowMasthead({ show, entryCount }: { show: PublicShow; entryCount: numb
             <div className="flex flex-wrap items-center gap-3">
                 {/* Lit-paper backing: the forest stamp ink has no contrast
                     directly on leather. */}
-                <span className="stamp bg-(--paper-lit) text-lg">{formatStatus(show.status)}</span>
+                <span className="stamp bg-(--paper-lit) text-lg">
+                    {friendlyShowStatus(show.status)}
+                </span>
                 <Badge variant="secondary">
                     {show.mode === "live" ? "Live show" : "Online photo show"}
                 </Badge>
@@ -98,6 +100,7 @@ function ShowMasthead({ show, entryCount }: { show: PublicShow; entryCount: numb
             </div>
             <ShowStateBanner
                 status={show.status}
+                judging={show.judging}
                 entriesOpenAt={show.entriesOpenAt}
                 entriesCloseAt={show.entriesCloseAt}
             />
@@ -279,7 +282,12 @@ export default async function PublicShowV2Page({ showId }: { showId: string }) {
 
                 {staffRole && <StaffBanner show={show} role={staffRole} />}
 
-                {champions && <ShowChampions champions={champions} />}
+                {/* #results — notification deep-links land here. */}
+                {champions && (
+                    <div id="results" className="scroll-mt-20">
+                        <ShowChampions champions={champions} />
+                    </div>
+                )}
 
                 <section className="ledger-card" aria-labelledby="show-fees-heading">
                     <span className="ledger-tab" id="show-fees-heading">
@@ -302,17 +310,27 @@ export default async function PublicShowV2Page({ showId }: { showId: string }) {
                     </p>
                 )}
 
-                <ShowEntrySection
-                    showId={showId}
-                    mode={show.mode}
-                    status={show.status}
-                    divisions={divisions}
-                    myEntries={myEntries}
-                    horses={horses}
-                    authed={!!user}
-                />
+                {/* #entries — entry/scratch/class-change notifications land
+                    here. The wrapper repeats the page's flex gap because
+                    ShowEntrySection renders sibling cards. */}
+                <div id="entries" className="flex scroll-mt-20 flex-col gap-6">
+                    <ShowEntrySection
+                        showId={showId}
+                        mode={show.mode}
+                        status={show.status}
+                        divisions={divisions}
+                        myEntries={myEntries}
+                        horses={horses}
+                        authed={!!user}
+                    />
+                </div>
 
-                {gallery && <ShowEntryGallery gallery={gallery} authed={!!user} />}
+                {/* #gallery — voting-open notifications land here. */}
+                {gallery && (
+                    <div id="gallery" className="scroll-mt-20">
+                        <ShowEntryGallery showId={showId} gallery={gallery} authed={!!user} />
+                    </div>
+                )}
 
                 {show.aboutMd && (
                     <section className="ledger-card" aria-labelledby="show-about-heading">

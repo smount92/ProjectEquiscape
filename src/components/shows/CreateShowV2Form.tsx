@@ -101,7 +101,8 @@ export default function CreateShowV2Form() {
         });
 
         if (result.success) {
-            router.push(`/shows/host/${result.showId}`);
+            // ?created=1 → the console greets the new show with a toast.
+            router.push(`/shows/host/${result.showId}?created=1`);
             router.refresh();
             return;
         }

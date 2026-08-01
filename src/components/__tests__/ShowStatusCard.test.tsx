@@ -47,7 +47,8 @@ describe("ShowStatusCard — legal transitions", () => {
     it("stamps the current status and offers only the legal next steps for a draft", () => {
         render(<ShowStatusCard show={consoleShow()} entryCount={0} canManage />);
 
-        expect(screen.getByTestId("current-status")).toHaveTextContent("draft");
+        // Plain words, not the machine word (Wave 4a).
+        expect(screen.getByTestId("current-status")).toHaveTextContent("Draft — not public yet");
         expect(screen.getByRole("button", { name: "Publish show" })).toBeInTheDocument();
         // Nothing else is reachable from draft.
         expect(screen.queryByRole("button", { name: "Open entries" })).not.toBeInTheDocument();

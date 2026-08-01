@@ -77,8 +77,16 @@ function V2ShowsSection({ title, shows }: { title: string; shows: PublicShowSumm
       <div className="mt-2 flex flex-wrap items-center gap-2">
        <span className="stamp">{formatStatus(show.status)}</span>
        <Badge variant="secondary">{show.mode ==="live" ?"Live" :"Online"}</Badge>
+       {show.judging ==="community_vote" && <Badge variant="secondary">Community vote</Badge>}
        {show.isMhhQualifying && <Badge>MHH Qualifying</Badge>}
       </div>
+      {/* Findability for votable shows: community-vote shows in their
+          judging window are open to EVERY voter — say so on the card. */}
+      {show.judging ==="community_vote" && show.status ==="judging" && (
+       <p className="mt-2 mb-0 text-sm font-semibold text-forest">
+        🗳️ Voting open — everyone can vote
+       </p>
+      )}
       <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
        <span>Hosted by @{show.hostAlias}</span>
        {v2ShowDate(show) && <span>{v2ShowDate(show)}</span>}
