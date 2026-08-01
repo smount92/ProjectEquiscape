@@ -250,7 +250,7 @@ export default function CreateShowV2Form() {
                         type="checkbox"
                         checked={isMhhQualifying}
                         onChange={(e) => setIsMhhQualifying(e.target.checked)}
-                        className="size-4 accent-forest"
+                        className="size-5 min-h-6 min-w-6 accent-forest"
                     />
                     MHH qualifying show
                     <span className="font-normal text-muted-foreground">

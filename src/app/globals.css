@@ -130,7 +130,11 @@ html, body {
 }
 
 html {
-  font-size: 16px;
+  /* Simple Mode's --font-scale multiplies the ROOT font size, so every
+     rem-based size on the site (Tailwind text-* utilities, shadcn, the
+     --font-size-* tokens below) scales together. Element rules must NOT
+     multiply by --font-scale themselves — that double-scales (1.3 × 1.3). */
+  font-size: calc(16px * var(--font-scale, 1));
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
     @apply font-sans;
@@ -138,7 +142,7 @@ html {
 
 body {
   font-family: var(--font-family);
-  font-size: calc(var(--font-size-base) * var(--font-scale));
+  font-size: var(--font-size-base);
   line-height: 1.6;
   color: var(--foreground);
   background-color: var(--background);
@@ -149,10 +153,11 @@ body {
     @apply bg-background text-foreground;
 }
 
-/* Prevent iOS Safari from zooming on form focus */
+/* Prevent iOS Safari from zooming on form focus (needs >= 16px). Scales
+   with Simple Mode so form text isn't pinned small while the page grows. */
 @media screen and (max-width: 767px) {
   input, textarea, select {
-    font-size: 16px !important;
+    font-size: calc(16px * var(--font-scale, 1)) !important;
   }
 }
 
@@ -200,23 +205,23 @@ h6 {
 }
 
 h1 {
-  font-size: calc(var(--font-size-3xl) * var(--font-scale));
+  font-size: var(--font-size-3xl);
 }
 
 h2 {
-  font-size: calc(var(--font-size-2xl) * var(--font-scale));
+  font-size: var(--font-size-2xl);
 }
 
 h3 {
-  font-size: calc(var(--font-size-xl) * var(--font-scale));
+  font-size: var(--font-size-xl);
 }
 
 h4 {
-  font-size: calc(var(--font-size-lg) * var(--font-scale));
+  font-size: var(--font-size-lg);
 }
 
 p {
-  font-size: calc(var(--font-size-base) * var(--font-scale));
+  font-size: var(--font-size-base);
   color: var(--secondary-foreground);
 }
 
@@ -589,6 +594,25 @@ p {
   background-clip: text;
 }
 
+/* Icon-only share button: keep the quiet icon look, but give it a real
+   44x44px tap target (WCAG 2.5.5) — previously it had no base rule and
+   rendered at the raw 18px svg size. */
+.share-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  min-width: 44px;
+  min-height: 44px;
+  padding: var(--space-xs);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  color: inherit;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
 .share-icon-btn:hover {
   background: rgba(44, 85, 69, 0.16);
   border-color: rgba(44, 85, 69, 0.4);
@@ -647,7 +671,7 @@ p {
   }
 
   .analytics-value {
-    font-size: calc(1.2rem * var(--font-scale));
+    font-size: 1.2rem;
   }
 
   .analytics-icon {
@@ -744,7 +768,7 @@ p {
   right: var(--space-sm);
   padding: 4px 10px;
   border-radius: var(--radius-full);
-  font-size: calc(0.65rem * var(--font-scale));
+  font-size: 0.65rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -775,7 +799,7 @@ p {
   background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(251, 146, 60, 0.1));
   color: #fb923c;
   font-weight: 600;
-  font-size: calc(var(--font-size-sm) * var(--font-scale));
+  font-size: var(--font-size-sm);
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -856,7 +880,7 @@ p {
   right: 20px;
   padding: 12px 20px;
   border-radius: var(--radius-md);
-  font-size: calc(var(--font-size-sm) * var(--font-scale));
+  font-size: var(--font-size-sm);
   font-weight: 600;
   z-index: 1000;
   animation: toast-slide 0.3s ease;
@@ -905,7 +929,7 @@ p {
   }
 
   .welcome-card h2 {
-    font-size: calc(var(--font-size-lg) * var(--font-scale));
+    font-size: var(--font-size-lg);
   }
 
   .feed-tab:not(.feed-tab-active) {
@@ -914,7 +938,7 @@ p {
   }
 
   .community-hero h1 {
-    font-size: calc(var(--font-size-xl) * var(--font-scale));
+    font-size: var(--font-size-xl);
   }
 
   .show-ring-controls {
@@ -927,12 +951,12 @@ p {
   }
 
   .notif-time {
-    font-size: calc(var(--font-size-xs) * var(--font-scale));
+    font-size: var(--font-size-xs);
   }
 
   .chat-bubble {
     max-width: 85%;
-    font-size: calc(var(--font-size-sm) * var(--font-scale));
+    font-size: var(--font-size-sm);
   }
 
   .chat-input-area {
@@ -1083,7 +1107,7 @@ p {
   }
 
   .passport-title {
-    font-size: calc(var(--font-size-lg) * var(--font-scale));
+    font-size: var(--font-size-lg);
   }
 }
 
@@ -1175,7 +1199,7 @@ p {
 .division-reorder {
   min-height: 32px;
   padding: var(--space-xs) var(--space-sm);
-  font-size: calc(var(--font-size-sm) * var(--font-scale));
+  font-size: var(--font-size-sm);
 }
 
 @media (max-width: 640px) {
@@ -1185,7 +1209,7 @@ p {
 
   .class-row {
     padding-left: var(--space-md);
-    font-size: calc(var(--font-size-xs) * var(--font-scale));
+    font-size: var(--font-size-xs);
   }
 
   .class-actions {
@@ -1271,7 +1295,7 @@ p {
 .admin-mark-btn {
   padding: 4px 10px;
   border-radius: var(--radius-full);
-  font-size: calc(var(--font-size-xs) * var(--font-scale));
+  font-size: var(--font-size-xs);
   font-weight: 600;
   cursor: pointer;
   border: 1px solid;
@@ -1420,7 +1444,7 @@ p {
   gap: 6px;
   padding: 8px 14px;
   font-family: var(--font-family);
-  font-size: calc(var(--font-size-xs) * var(--font-scale));
+  font-size: var(--font-size-xs);
   font-weight: 700;
   color: #fff;
   background: linear-gradient(135deg, rgba(44, 85, 69, 0.85), rgba(101, 84, 212, 0.9));
@@ -1531,7 +1555,7 @@ p {
     bottom: 6px;
     right: 6px;
     padding: 6px 10px;
-    font-size: calc(0.65rem * var(--font-scale));
+    font-size: 0.65rem;
   }
 
   .ai-detect-label {
@@ -1959,7 +1983,19 @@ p {
   --serif-display: "Palatino Linotype", Palatino, "Book Antiqua", var(--font-family-serif, Georgia), serif;
 }
 
+/* ══ LAYERING NOTE (Wave 4a) ══════════════════════════════════════
+   Material CLASS DEFINITIONS below live in @layer components so that
+   authors' Tailwind utilities (@layer utilities) win when specified —
+   e.g. `stamp text-lg` actually renders 18px. Rules that deliberately
+   OVERRIDE other components/utilities (leather header+footer chrome,
+   .leather-masthead, .masthead-cta, strap-nav link restyles, engraved
+   ink, Simple Mode strips, the whole Lamplight night section) stay
+   UNLAYERED on purpose: unlayered beats every layer, which is the only
+   way they can defeat call-site utilities like the Header's legacy
+   bg-card/border-input or night-patched .bg-white. Do not layer them. */
+
 /* ── Leather ─────────────────────────────────────────────────────── */
+@layer components {
 .leather-panel {
   position: relative;
   background:
@@ -1974,8 +2010,11 @@ p {
     inset -14px 0 28px rgba(0, 0, 0, 0.25),
     0 6px 18px rgba(46, 30, 18, 0.35);
 }
+} /* end @layer components (leather-panel) */
 
-/* full-width leather strip (header / footer bands) — no radius, softer inset */
+/* full-width leather strip (header / footer bands) — no radius, softer inset.
+   UNLAYERED: the Footer call site carries legacy text-secondary-foreground
+   utilities that this band's color must keep beating. */
 .leather-band {
   position: relative;
   color: var(--leather-text);
@@ -1991,6 +2030,7 @@ p {
 }
 
 /* stitched saddle-thread border (pairs with .leather-panel / .leather-band) */
+@layer components {
 .stitched {
   position: relative;
 }
@@ -2004,8 +2044,11 @@ p {
   opacity: 0.75;
   filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.6));
 }
+} /* end @layer components (stitched) */
 
-/* ── Engraved / embossed text ────────────────────────────────────── */
+/* ── Engraved / embossed text ──────────────────────────────────────
+   UNLAYERED: ink treatments that must beat call-site color utilities
+   (e.g. the footer brand link's legacy text-foreground). */
 .text-engraved-light {
   color: var(--leather-text);
   text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.85), 0 1px 1px rgba(255, 230, 180, 0.28);
@@ -2016,7 +2059,9 @@ p {
   text-shadow: 0 1px 0 rgba(255, 244, 210, 0.9);
 }
 
-/* ── Green strap (forest webbing band for nav / CTA rows) ────────── */
+/* ── Green strap (forest webbing band for nav / CTA rows) ──────────
+   UNLAYERED: the link restyles below must beat the hero CTA's own
+   bg-forest / text-white utilities (landing page brass CTA). */
 .strap-nav {
   position: relative;
   background:
@@ -2056,6 +2101,7 @@ p {
 }
 
 /* ── Wood ────────────────────────────────────────────────────────── */
+@layer components {
 .wood-panel {
   position: relative;
   border-radius: 12px;
@@ -2231,8 +2277,12 @@ p {
   object-fit: cover;
   border-radius: 2px 2px 0 0;
 }
+} /* end @layer components (wood / brass / frames / feed-leather) */
 
-/* ── Leather header chrome (nav links, icon buttons, mobile menu) ── */
+/* ── Leather header chrome (nav links, icon buttons, mobile menu) ──
+   UNLAYERED: restyle-don't-rebuild overrides. Header call sites still
+   carry their pre-leather utilities (bg-card, border-input,
+   text-muted-foreground) that these rules must keep beating. */
 .leather-nav a,
 .leather-nav-link {
   color: var(--leather-text);
@@ -2363,6 +2413,7 @@ p {
    including forms/grids. The two classes are now equivalent; both names
    kept so they can diverge again if the ruling proves busy somewhere.)
    Both pad 30px on the left so text clears the red margin line. */
+@layer components {
 .ledger-paper,
 .ledger-card {
   position: relative;
@@ -2388,7 +2439,8 @@ p {
   background: linear-gradient(180deg, #37664F, var(--color-forest-dark, #1E3D31));
   border-radius: 3px 10px 3px 3px;
   font-family: var(--serif-display);
-  font-size: 0.72rem;
+  /* a11y floor: was 0.72rem — too small for a section label */
+  font-size: 0.8125rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: #EDE4CC;
@@ -2442,7 +2494,8 @@ p {
   border-radius: 4px;
   color: var(--color-forest, #2C5545);
   font-family: var(--serif-display);
-  font-size: 0.66rem;
+  /* a11y floor: was 0.66rem — status stamps must be legible */
+  font-size: 0.8125rem;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -2456,8 +2509,10 @@ p {
   color: #9B3028;
   rotate: 2deg;
 }
+} /* end @layer components (ledger / stamp) */
 
 /* ── Green strap stats bar (profile / landing) ───────────────────── */
+@layer components {
 .stats-strap {
   position: relative;
   z-index: 1;
@@ -2567,9 +2622,11 @@ p {
   outline: 3px solid var(--brass-hi);
   outline-offset: 2px;
 }
+} /* end @layer components (stats-strap / medallion / brass buttons) */
 
 /* existing follow/message buttons restyled when placed in a leather
-   masthead CTA row — restyle, don't rebuild (FollowButton et al.) */
+   masthead CTA row — restyle, don't rebuild (FollowButton et al.).
+   UNLAYERED: must beat those components' own utility classes. */
 .masthead-cta .btn-primary {
   background: linear-gradient(165deg, #F0D494 0%, #C6A253 45%, #96762F 100%);
   border: 0;
@@ -2620,6 +2677,7 @@ p {
 }
 
 /* ── Wood display shelf + tilted polaroids (profile showcase) ────── */
+@layer components {
 .shelfwrap {
   border-radius: 12px;
   padding: 20px 18px 8px;
@@ -2779,8 +2837,11 @@ a.polaroid:focus-visible {
     filter: brightness(1.12);
   }
 }
+} /* end @layer components (shelves / polaroids / motion) */
 
-/* ── SIMPLE MODE — strip textures back to flat tokens ────────────── */
+/* ── SIMPLE MODE — strip textures back to flat tokens ──────────────
+   UNLAYERED (with the whole Lamplight section below): these override
+   the material definitions and must keep beating layered styles. */
 [data-simple-mode="true"] .leather-panel,
 [data-simple-mode="true"] .leather-band,
 [data-simple-mode="true"] .leather-menu,
@@ -3223,6 +3284,7 @@ html[data-theme="night"][data-simple-mode="true"] .polaroid {
    Compact brass disc that sits in the Header icon cluster (next to
    NotificationBell / Inbox), sized to match .leather-icon-btn (36px).
    The global mobile touch-target rule lifts it to 44px on phones. */
+@layer components {
 .lamplight-toggle {
   height: 36px;
   width: 36px;
@@ -3246,3 +3308,4 @@ html[data-theme="night"][data-simple-mode="true"] .polaroid {
   outline: 3px solid var(--brass-hi, #E8C878);
   outline-offset: 2px;
 }
+} /* end @layer components (lamplight-toggle) */

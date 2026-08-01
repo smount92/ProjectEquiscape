@@ -372,7 +372,7 @@ function ClassEditDialog({ cls, open, onClose, onSaved, setError }: ClassEditDia
                                                     : prev.filter((f) => f !== finish),
                                             )
                                         }
-                                        className="size-4 accent-forest"
+                                        className="size-5 min-h-6 min-w-6 accent-forest"
                                     />
                                     {finish}
                                 </label>
@@ -384,7 +384,7 @@ function ClassEditDialog({ cls, open, onClose, onSaved, setError }: ClassEditDia
                             type="checkbox"
                             checked={isQualifying}
                             onChange={(e) => setIsQualifying(e.target.checked)}
-                            className="size-4 accent-forest"
+                            className="size-5 min-h-6 min-w-6 accent-forest"
                         />
                         Qualifying class (1st &amp; 2nd earn MHH cards)
                     </label>

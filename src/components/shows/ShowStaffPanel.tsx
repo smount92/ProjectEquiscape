@@ -201,7 +201,7 @@ export default function ShowStaffPanel({ showId, staff, viewerRole }: ShowStaffP
                                         type="checkbox"
                                         checked={coiFlag}
                                         onChange={(e) => setCoiFlag(e.target.checked)}
-                                        className="size-4 accent-forest"
+                                        className="size-5 min-h-6 min-w-6 accent-forest"
                                     />
                                     Conflict of interest
                                 </label>
