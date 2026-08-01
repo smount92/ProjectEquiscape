@@ -1,9 +1,12 @@
 import { getUserTier } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { fetchSupporterBadge, formatSupporterSince } from "@/lib/supporter";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import UpgradeButton from "@/components/UpgradeButton";
 import StudioProButton from "@/components/StudioProButton";
+import SupporterButton from "@/components/SupporterButton";
+import SupporterLedgerToggle from "@/components/SupporterLedgerToggle";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
 import PageMasthead from "@/components/layouts/PageMasthead";
 import {
@@ -13,6 +16,7 @@ import {
     CheckCircle,
     ClipboardList,
     FileText,
+    Lamp,
     Link2,
     Palette,
     PartyPopper,
@@ -20,6 +24,45 @@ import {
     Tag,
     type LucideIcon,
 } from "lucide-react";
+
+// ── Supporter price display ──
+// The amount + yearly interval live entirely in Stripe (STRIPE_SUPPORTER_PRICE_ID)
+// — never hardcoded here. Dark ship: env unset → null → the Supporter card and
+// its FAQ entry simply don't render. A misconfigured price id behaves the same.
+// Tiny module-level memo so the upgrade page doesn't call Stripe on every view.
+let supporterPriceCache: { key: string; label: string | null; at: number } | null = null;
+
+async function getSupporterPriceLabel(): Promise<string | null> {
+    const priceId = process.env.STRIPE_SUPPORTER_PRICE_ID;
+    if (!priceId || !process.env.STRIPE_SECRET_KEY) return null;
+
+    const ttl = supporterPriceCache?.label ? 10 * 60 * 1000 : 60 * 1000;
+    if (supporterPriceCache?.key === priceId && Date.now() - supporterPriceCache.at < ttl) {
+        return supporterPriceCache.label;
+    }
+
+    let label: string | null = null;
+    try {
+        const Stripe = (await import("stripe")).default;
+        const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+            apiVersion: "2026-02-25.clover",
+        });
+        const price = await stripe.prices.retrieve(priceId);
+        if (typeof price.unit_amount === "number" && price.currency) {
+            const amount = price.unit_amount / 100;
+            const formatted = new Intl.NumberFormat("en-US", {
+                style: "currency",
+                currency: price.currency.toUpperCase(),
+                minimumFractionDigits: Number.isInteger(amount) ? 0 : 2,
+            }).format(amount);
+            label = `${formatted}/${price.recurring?.interval ?? "year"}`;
+        }
+    } catch {
+        label = null;
+    }
+    supporterPriceCache = { key: priceId, label, at: Date.now() };
+    return label;
+}
 
 export const metadata = {
     title: "Upgrade to MHH Pro",
@@ -111,6 +154,13 @@ export default async function UpgradePage({
 
     const tierLabel = tier === "pro" ? "Pro" : "Free";
 
+    // Supporter is orthogonal to tier — cosmetic recognition, gates nothing.
+    const supporterPriceLabel = await getSupporterPriceLabel();
+    const supporterBadge = supporterPriceLabel
+        ? await fetchSupporterBadge(supabase, user.id)
+        : { isSupporter: false, since: null, showInLedger: false };
+    const supporterSinceLabel = formatSupporterSince(supporterBadge.since);
+
     return (
         <ExplorerLayout noHeader>
             <PageMasthead
@@ -129,6 +179,16 @@ export default async function UpgradePage({
                     <h2 className="mt-2 text-xl font-bold text-success">Welcome to MHH Pro!</h2>
                     <p className="mt-1 text-sm text-secondary-foreground">
                         Your account has been upgraded. Log out and back in to activate all Pro features.
+                    </p>
+                </div>
+            )}
+            {status === "supporter-success" && (
+                <div className="animate-fade-in-up mb-8 rounded-xl border border-(--brass) bg-card p-6 text-center shadow-lg">
+                    <Lamp className="mx-auto h-8 w-8 text-(--brass)" />
+                    <h2 className="mt-2 text-xl font-bold text-foreground">The lights stay on. Thank you.</h2>
+                    <p className="mt-1 text-sm text-secondary-foreground">
+                        Your brass plaque will appear on your profile within a minute or two. It unlocks
+                        nothing — and that&apos;s exactly the point.
                     </p>
                 </div>
             )}
@@ -236,6 +296,51 @@ export default async function UpgradePage({
                 </div>
             </div>
 
+            {/* Supporter — "keep the lights on", cosmetic only. Renders ONLY
+                when STRIPE_SUPPORTER_PRICE_ID is set and resolvable (dark
+                ship). Deliberately quieter than the Pro card. */}
+            {supporterPriceLabel && (
+                <div className="animate-fade-in-up mx-auto mt-6 max-w-[1100px]">
+                    <div className="rounded-xl border-2 border-(--brass) bg-card p-6 shadow-lg sm:p-8">
+                        <div className="flex flex-col items-center gap-6 md:flex-row">
+                            <div
+                                className="brass-plaque flex shrink-0 items-center gap-2 px-4 py-2 text-xs font-bold tracking-[0.14em] uppercase"
+                                aria-hidden="true"
+                            >
+                                <Lamp className="h-4 w-4" /> Supporter
+                            </div>
+                            <div className="flex-1 text-center md:text-left">
+                                <span className="text-sm font-semibold uppercase tracking-wider text-(--brass)">
+                                    Supporter
+                                </span>
+                                <p className="mt-1 text-sm text-secondary-foreground">
+                                    Keeps the lights on. Unlocks nothing — the Hub stays free. Brass plaque on
+                                    your profile, our eternal gratitude, and a line in the ledger if you want
+                                    it.
+                                </p>
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                    Annual, cancel anytime. Every feature stays free for everyone — that&apos;s
+                                    the point.
+                                </p>
+                            </div>
+                            <div className="w-full shrink-0 md:w-[280px]">
+                                {supporterBadge.isSupporter ? (
+                                    <div className="space-y-3">
+                                        <div className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-success/10 py-2 text-center text-sm font-bold text-success">
+                                            <CheckCircle className="h-4 w-4" /> Supporter
+                                            {supporterSinceLabel ? ` since ${supporterSinceLabel}` : ""}
+                                        </div>
+                                        <SupporterLedgerToggle initialListed={supporterBadge.showInLedger} />
+                                    </div>
+                                ) : (
+                                    <SupporterButton priceLabel={supporterPriceLabel} />
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* FAQ */}
             <div className="animate-fade-in-up mx-auto mt-16 max-w-[600px]">
                 <h2 className="mb-6 text-center text-lg font-bold">Frequently Asked Questions</h2>
@@ -258,6 +363,19 @@ export default async function UpgradePage({
                             Pro is for collectors — analytics, extra photos, insurance reports, and AI insights. Studio Pro adds artist tools: commission management, WIP portals, and permanent Hoofprint credit on every custom you create.
                         </p>
                     </div>
+                    {supporterPriceLabel && (
+                        <div className="rounded-lg border border-input bg-card p-4">
+                            <h3 className="font-semibold">What does Supporter unlock?</h3>
+                            <p className="mt-1 text-sm text-secondary-foreground">
+                                Nothing — on purpose. This hobby has watched platforms paywall their way into
+                                irrelevance or vanish overnight, and we&apos;re not doing either. Supporter is
+                                for people who want Model Horse Hub to still be here next year: the money keeps
+                                the servers running, and every feature stays free for everyone. You get a brass
+                                plaque on your profile, a line in the Supporters&apos; Ledger if you opt in, and
+                                our genuine gratitude.
+                            </p>
+                        </div>
+                    )}
                     <div className="rounded-lg border border-input bg-card p-4">
                         <h3 className="font-semibold">Do you offer beta tester discounts?</h3>
                         <p className="mt-1 text-sm text-secondary-foreground">

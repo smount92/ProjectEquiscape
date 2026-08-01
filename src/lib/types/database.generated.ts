@@ -4458,6 +4458,7 @@ export type Database = {
           exhibitor_number: string | null
           full_name: string | null
           id: string
+          is_supporter: boolean
           is_test_account: boolean
           is_trusted_curator: boolean
           is_verified: boolean
@@ -4465,7 +4466,9 @@ export type Database = {
           pref_simple_mode: boolean
           role: string | null
           show_badges: boolean
+          show_in_supporters_ledger: boolean
           show_photos_on_reference: boolean
+          supporter_since: string | null
           watermark_photos: boolean | null
           watermark_text: string | null
         }
@@ -4483,6 +4486,7 @@ export type Database = {
           exhibitor_number?: string | null
           full_name?: string | null
           id: string
+          is_supporter?: boolean
           is_test_account?: boolean
           is_trusted_curator?: boolean
           is_verified?: boolean
@@ -4490,7 +4494,9 @@ export type Database = {
           pref_simple_mode?: boolean
           role?: string | null
           show_badges?: boolean
+          show_in_supporters_ledger?: boolean
           show_photos_on_reference?: boolean
+          supporter_since?: string | null
           watermark_photos?: boolean | null
           watermark_text?: string | null
         }
@@ -4508,6 +4514,7 @@ export type Database = {
           exhibitor_number?: string | null
           full_name?: string | null
           id?: string
+          is_supporter?: boolean
           is_test_account?: boolean
           is_trusted_curator?: boolean
           is_verified?: boolean
@@ -4515,7 +4522,9 @@ export type Database = {
           pref_simple_mode?: boolean
           role?: string | null
           show_badges?: boolean
+          show_in_supporters_ledger?: boolean
           show_photos_on_reference?: boolean
+          supporter_since?: string | null
           watermark_photos?: boolean | null
           watermark_text?: string | null
         }
@@ -4752,6 +4761,13 @@ export type Database = {
           for_sale_count: number
           total_horses: number
           vault_total: number
+        }[]
+      }
+      get_supporters_ledger: {
+        Args: never
+        Returns: {
+          alias_name: string
+          supporter_since: string | null
         }[]
       }
       get_user_tier: { Args: never; Returns: string }

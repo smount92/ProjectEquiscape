@@ -3,6 +3,8 @@ import Link from "next/link";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { getPublicImageUrls } from "@/lib/utils/storage";
 import { Button } from "@/components/ui/button";
+import SupporterPlaque from "@/components/profile/SupporterPlaque";
+import { fetchSupporterBadge } from "@/lib/supporter";
 
 // Read-only public profile for logged-OUT visitors (FUNNEL-4 / MOVE-6). The full
 // interactive profile (follow/message/block/rate/edit) stays in
@@ -41,6 +43,10 @@ export default async function AnonProfile({ alias }: { alias: string }) {
         }>();
 
     if (!profileUser || profileUser.account_status === "deleted") notFound();
+
+    // Supporter plaque (public recognition) — separate tolerant read so anon
+    // profiles keep rendering even before migration 142 is applied.
+    const supporterBadge = await fetchSupporterBadge(admin, profileUser.id);
 
     // Avatar → signed URL (service role can read the avatars bucket).
     let avatarUrl = profileUser.avatar_url;
@@ -108,6 +114,7 @@ export default async function AnonProfile({ alias }: { alias: string }) {
                 <div className="font-serif text-[0.78rem] tracking-[0.2em] uppercase text-(--leather-text-soft)">
                     @{profileUser.alias_name} · Member since {memberSince}
                 </div>
+                {supporterBadge.isSupporter && <SupporterPlaque since={supporterBadge.since} />}
                 {profileUser.bio && (
                     <p className="mx-auto mt-3 mb-0 max-w-[52ch] text-[0.92rem] italic text-(--leather-text)">
                         {profileUser.bio}
