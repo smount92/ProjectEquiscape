@@ -4,7 +4,8 @@ import ExplorerLayout from "@/components/layouts/ExplorerLayout";
 import PageMasthead from "@/components/layouts/PageMasthead";
 import AiDataPolicySection from "@/components/AiDataPolicySection";
 import { Button } from "@/components/ui/button";
-import { Lock, Sparkles, PawPrint, Gavel, Users, Palette, Package, Smartphone, Handshake } from "lucide-react";
+import { Lock, Sparkles, PawPrint, Gavel, Users, Palette, Package, Smartphone, Handshake, Lamp } from "lucide-react";
+import { fetchSupportersLedger, formatSupporterSince } from "@/lib/supporter";
 
 export const metadata: Metadata = {
     title: "About",
@@ -12,7 +13,14 @@ export const metadata: Metadata = {
         "Learn about Model Horse Hub — the first digital stable built by a collector who was tired of notebooks, spreadsheets, and scattered albums. 10,500+ reference entries, Hoofprint provenance, and a privacy-first design.",
 };
 
-export default function AboutPage() {
+// The Supporters' Ledger reads via the cookie-less anon client, so the page
+// stays cacheable — refresh it hourly (opt-ins also revalidate it on save).
+export const revalidate = 3600;
+
+export default async function AboutPage() {
+    // Only supporters who opted IN, via DEFINER RPC (migration 142).
+    // Empty / RPC-not-deployed → the section renders nothing at all.
+    const supporters = await fetchSupportersLedger();
     return (
         <ExplorerLayout noHeader>
             <div className="animate-fade-in-up">
@@ -146,6 +154,49 @@ export default function AboutPage() {
                         </p>
                     </div>
                 </section>
+
+                {/* Supporters' Ledger — only renders when someone has opted in.
+                    Cosmetic recognition for "keep the lights on" contributions;
+                    supporters get nothing else, deliberately. */}
+                {supporters.length > 0 && (
+                    <section className="mb-12">
+                        <h2>The Supporters&apos; Ledger</h2>
+                        <div className="text-secondary-foreground space-y-4 text-base leading-relaxed">
+                            <p>
+                                These collectors chip in a little each year to keep the lights on. It buys
+                                them nothing — no features, no priority, no fine print — because the Hub
+                                stays free for everyone. Just this line, a brass plaque on their profile,
+                                and our lasting gratitude.
+                            </p>
+                        </div>
+                        <div className="ledger-paper mt-6 p-6 sm:p-8">
+                            <ul className="m-0 grid list-none grid-cols-1 gap-x-8 gap-y-2 p-0 sm:grid-cols-2">
+                                {supporters.map((supporter) => {
+                                    const sinceLabel = formatSupporterSince(supporter.supporter_since);
+                                    return (
+                                        <li
+                                            key={supporter.alias_name}
+                                            className="flex items-baseline justify-between gap-3 border-b border-dotted border-(--brass) pb-1 text-sm"
+                                        >
+                                            <Link
+                                                href={`/profile/${encodeURIComponent(supporter.alias_name)}`}
+                                                className="inline-flex items-center gap-1.5 font-semibold no-underline"
+                                            >
+                                                <Lamp className="h-3.5 w-3.5 shrink-0 text-(--brass)" aria-hidden="true" />
+                                                @{supporter.alias_name}
+                                            </Link>
+                                            {sinceLabel && (
+                                                <span className="shrink-0 text-xs text-muted-foreground">
+                                                    since {sinceLabel}
+                                                </span>
+                                            )}
+                                        </li>
+                                    );
+                                })}
+                            </ul>
+                        </div>
+                    </section>
+                )}
 
                 {/* What's Live Now */}
                 <section className="mb-12">

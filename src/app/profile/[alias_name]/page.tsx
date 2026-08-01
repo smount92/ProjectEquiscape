@@ -18,6 +18,8 @@ import TrophyCase from"@/components/TrophyCase";
 import ProfileLoadMore from"@/components/ProfileLoadMore";
 import { Button } from "@/components/ui/button";
 import AnonProfile from"@/components/profile/AnonProfile";
+import SupporterPlaque from"@/components/profile/SupporterPlaque";
+import { fetchSupporterBadge } from"@/lib/supporter";
 
 
 function formatDate(dateStr: string): string {
@@ -86,6 +88,10 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  }
 
  const isOwnProfile = profileUser.id === user.id;
+
+ // Supporter plaque — separate tolerant read so profiles keep rendering even
+ // before migration 142 is applied (main auto-deploys).
+ const supporterBadge = await fetchSupporterBadge(supabase, profileUser.id);
 
  // Fetch rating summary for this profile user
  const ratingSummary = await getUserReviewSummary(profileUser.id);
@@ -472,6 +478,9 @@ export default async function ProfilePage({ params }: { params: Promise<{ alias_
  <div className="font-serif text-[0.78rem] tracking-[0.2em] uppercase text-(--leather-text-soft)">
  @{profileUser.alias_name} · Member since {memberSince}
  </div>
+ {supporterBadge.isSupporter && (
+ <SupporterPlaque since={supporterBadge.since} />
+ )}
  {profileUser.bio && (
  <p className="mx-auto mt-3 mb-0 max-w-[52ch] text-[0.92rem] italic text-(--leather-text)">
  {profileUser.bio}

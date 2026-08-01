@@ -86,6 +86,32 @@ export async function POST(request: NextRequest) {
                     });
                     logger.error("StripeWebhook", `User ${userId} upgraded to Studio Pro`);
 
+                } else if (metadata.type === "supporter") {
+                    // Supporter ("keep the lights on", cosmetic only) is a flag
+                    // on public.users — deliberately NOT app_metadata.tier, so
+                    // it can never interact with pro/studio state. Keep the
+                    // original supporter_since across lapse + resubscribe.
+                    const { data: existing } = await admin
+                        .from("users")
+                        .select("supporter_since")
+                        .eq("id", userId)
+                        .maybeSingle();
+                    const { error: supporterWriteError } = await admin
+                        .from("users")
+                        .update({
+                            is_supporter: true,
+                            supporter_since: existing?.supporter_since ?? new Date().toISOString(),
+                        })
+                        .eq("id", userId);
+                    if (supporterWriteError) {
+                        // 500 so Stripe retries — e.g. env enabled before
+                        // migration 142 is applied; the paid flag must not be
+                        // silently dropped.
+                        logger.error("StripeWebhook", `Failed to set supporter flag for ${userId}`, supporterWriteError);
+                        return NextResponse.json({ error: "Supporter update failed" }, { status: 500 });
+                    }
+                    logger.error("StripeWebhook", `User ${userId} became a Supporter`, { sessionId: session.id });
+
                 } else {
                     // Default: MHH Pro subscription upgrade
                     await admin.auth.admin.updateUserById(userId, {
@@ -101,6 +127,55 @@ export async function POST(request: NextRequest) {
             case "customer.subscription.deleted": {
                 const subscription = event.data.object as import("stripe").Stripe.Subscription;
                 const customerId = subscription.customer as string;
+
+                // ── Supporter subscriptions route here and ONLY here ──
+                // Identified by the subscription metadata stamped at checkout
+                // (belt-and-braces: also by the supporter price id). They must
+                // never fall through to the tier logic below — a supporter
+                // renewal would otherwise set tier "pro", and a supporter
+                // cancellation would strip a paying Pro back to "free".
+                // Mirrors the Pro cancel flow: `cancel_at_period_end` keeps
+                // status "active" (plaque stays), the period-end
+                // customer.subscription.deleted event clears the flag.
+                const supporterPriceId = process.env.STRIPE_SUPPORTER_PRICE_ID;
+                const isSupporterSubscription =
+                    subscription.metadata?.type === "supporter" ||
+                    (!!supporterPriceId &&
+                        subscription.items?.data?.some((item) => item.price?.id === supporterPriceId));
+                if (isSupporterSubscription) {
+                    const supporterUserId = subscription.metadata?.supabase_user_id;
+                    const supporterActive =
+                        subscription.status === "active" || subscription.status === "trialing";
+                    if (!supporterUserId) {
+                        logger.error(
+                            "StripeWebhook",
+                            `Supporter subscription ${subscription.id} missing supabase_user_id metadata`
+                        );
+                        break;
+                    }
+                    // supporter_since is kept for lapsed supporters —
+                    // is_supporter alone gates the plaque and the ledger.
+                    const { error: supporterSubWriteError } = await admin
+                        .from("users")
+                        .update({ is_supporter: supporterActive })
+                        .eq("id", supporterUserId);
+                    if (supporterSubWriteError) {
+                        // 500 so Stripe retries rather than silently dropping
+                        // a supporter state change.
+                        logger.error(
+                            "StripeWebhook",
+                            `Failed to update supporter flag for ${supporterUserId}`,
+                            supporterSubWriteError
+                        );
+                        return NextResponse.json({ error: "Supporter update failed" }, { status: 500 });
+                    }
+                    logger.error(
+                        "StripeWebhook",
+                        `User ${supporterUserId} is_supporter set to ${supporterActive}`,
+                        { subscriptionId: subscription.id, status: subscription.status }
+                    );
+                    break;
+                }
 
                 // Look up user by stored stripe_customer_id in app_metadata
                 // We need to find the user — iterate auth users (admin API)
