@@ -132,6 +132,14 @@ export default async function WishlistPage() {
   </Link></Button>
   }
  >
+  {/* Cross-link: wants are catalog-level, favorites are horse-level */}
+  <p className="mb-4 text-sm text-muted-foreground">
+  Looking for individual horses you favorited?{" "}
+  <Link href="/favorites" className="text-forest underline underline-offset-2" id="wishlist-favorites-crosslink">
+   → Favorites
+  </Link>
+  </p>
+
   {/* Search to Add */}
   <WishlistSearch />
 

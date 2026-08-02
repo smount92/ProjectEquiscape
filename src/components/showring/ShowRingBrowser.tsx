@@ -206,6 +206,7 @@ function ShowRingHorseCard({ horse }: { horse: ShowRingCard }) {
                         horseId={horse.id}
                         initialIsFavorited={horse.isFavorited}
                         initialCount={horse.favoriteCount}
+                        variant="compact"
                     />
                     {/* WishlistButton no-ops (renders nothing) on null catalogId */}
                     <WishlistButton catalogId={horse.catalogId} />

@@ -361,6 +361,7 @@ export default function ShowRingGrid({
            horseId={horse.id}
            initialIsFavorited={horse.isFavorited}
            initialCount={horse.favoriteCount}
+           variant="compact"
           />
           <WishlistButton catalogId={horse.catalogId} />
          </div>
