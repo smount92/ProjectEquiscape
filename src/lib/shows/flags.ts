@@ -28,3 +28,15 @@ export function showStandingsEnabled(): boolean {
 export function showPageV3Enabled(): boolean {
     return process.env.NEXT_PUBLIC_SHOW_PAGE_V3 === "1";
 }
+
+/**
+ * Catalog cards browse feature flag (growth — identification cards).
+ * Ships dark: set NEXT_PUBLIC_CATALOG_V2=1 to enable. Default OFF.
+ * With the flag off, /catalog renders the existing five-column table
+ * unchanged; with it on, the same route + data render identification
+ * cards (thumbnail · disambiguation line · chips) with a compact-table
+ * toggle for power curators.
+ */
+export function catalogV2Enabled(): boolean {
+    return process.env.NEXT_PUBLIC_CATALOG_V2 === "1";
+}
