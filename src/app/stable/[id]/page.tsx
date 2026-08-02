@@ -23,6 +23,7 @@ import AssetDetailRenderer from"@/components/AssetDetailRenderer";
 import { getAssetConfig } from"@/lib/config/assetFields";
 import type { AssetCategory } from"@/lib/types/database";
 import { Button } from "@/components/ui/button";
+import { PARCHMENT_INK } from"@/lib/theme/parchment";
 
 
 // Types
@@ -368,7 +369,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  </div>
 
  {/* Right: The Ledger Card */}
- <div className="flex min-h-[100%] flex-col gap-2 rounded-3xl border border-input bg-[#C8B596] px-6 py-8 shadow-sm md:px-10">
+ <div className="flex min-h-[100%] flex-col gap-2 rounded-3xl border border-input bg-[#C8B596] px-6 py-8 shadow-sm md:px-10" style={PARCHMENT_INK}>
  {/* Title */}
  <div>
  <h1 className="mb-1 font-serif text-4xl font-bold leading-tight tracking-tight text-foreground md:text-5xl">

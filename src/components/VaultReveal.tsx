@@ -49,14 +49,14 @@ export default function VaultReveal({ vault, currencySymbol ="$" }: VaultRevealP
  <div
  className={`vault-reveal relative overflow-hidden rounded-lg border border-orange-200 bg-[var(--card)] ${isUnlocked ?"unlocked" :""}`}
  >
- <div className="flex items-center gap-4 p-8">
+ <div className="flex flex-wrap items-center gap-4 p-8">
  <div
  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-orange-200 bg-[linear-gradient(135deg,rgba(240,160,108,0.15),rgba(240,208,108,0.1))] text-[1.4rem] transition-all"
  aria-hidden="true"
  >
  {isUnlocked ?"🔓" :"🔒"}
  </div>
- <div className="flex-1">
+ <div className="min-w-[11rem] flex-1">
  <h3>Financial Vault</h3>
  <p>
  {isUnlocked

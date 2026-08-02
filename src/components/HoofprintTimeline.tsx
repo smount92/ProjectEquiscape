@@ -105,11 +105,11 @@ export default function HoofprintTimeline({
  <div className="mt-8">
  {/* Header */}
  <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
- <div className="flex items-center gap-4">
+ <div className="flex flex-wrap items-center gap-4">
  <div className="brass-heading">
  <span className="brass-heading-bar" aria-hidden="true" />
  <h2 className="m-0 flex items-center gap-2 text-xl font-bold">
- <HorseshoeIcon className="text-forest" /> <span className="text-forest">Hoofprint</span>
+ <HorseshoeIcon className="text-forest" /> <span className="whitespace-nowrap text-forest">Hoofprint</span>
  <GlossaryLink anchor="hoofprint" term="Hoofprint" />
  </h2>
  </div>
@@ -117,11 +117,11 @@ export default function HoofprintTimeline({
  {STAGE_ICONS[lifeStage] ||"📋"} {STAGE_LABELS[lifeStage] || lifeStage}
  </span>
  </div>
- <div className="flex items-center gap-2">
+ <div className="flex flex-wrap items-center gap-2">
  {isOwner && (
  <>
  <select
- className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 w-auto min-w-[140px] text-sm"
+ className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm text-foreground ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 w-auto min-w-[140px] text-sm"
  value={lifeStage}
  onChange={(e) => handleStageChange(e.target.value)}
  disabled={stageUpdating}
