@@ -14,7 +14,9 @@ import ParkedExportPanel from"@/components/ParkedExportPanel";
 import { getHoofprint } from"@/app/actions/hoofprint";
 import QualificationCardsSection, { type PassportQualificationCard } from"@/components/shows/QualificationCardsSection";
 import { showsV2Enabled } from"@/lib/shows/flags";
-import type { CardStatus } from"@/lib/shows/types";
+import { resolvePlacingHrefs } from"@/lib/shows/placingShare";
+import { RESULTS_STATUSES } from"@/lib/shows/gallery";
+import type { CardStatus, ShowStatus } from"@/lib/shows/types";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import PageMasthead from"@/components/layouts/PageMasthead";
 import AssetDetailRenderer from"@/components/AssetDetailRenderer";
@@ -190,6 +192,63 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  verificationTier: r.verification_tier,
  }),
  );
+
+ // ── SHARE-YOUR-PLACING: record → public placing page ──
+ // Records store no entry id (migration 138 added only show_id),
+ // so v2-linked platform records are matched to this horse's own
+ // entry by (show, class name) — deterministic, a horse enters a
+ // class at most once. Results-published shows only: the placing
+ // page 404s pre-publish, so no dead Share links render.
+ let placingHrefs: Record<string, string> = {};
+ if (showsV2Enabled()) {
+ const linkedShowIds = [
+ ...new Set(
+ showRecords
+ .filter((r) => r.showId && r.verificationTier ==="platform_generated")
+ .map((r) => r.showId as string),
+ ),
+ ];
+ if (linkedShowIds.length > 0) {
+ const { data: linkedShows } = await supabase
+ .from("shows")
+ .select("id, status")
+ .in("id", linkedShowIds);
+ const publishedIds = (linkedShows ?? [])
+ .filter((s) => RESULTS_STATUSES.includes(s.status as ShowStatus))
+ .map((s) => s.id as string);
+ if (publishedIds.length > 0) {
+ const { data: entryRows } = await supabase
+ .from("show_class_entries")
+ .select("id, show_id, class_id, status")
+ .eq("horse_id", horseId)
+ .in("show_id", publishedIds);
+ const liveEntries = (entryRows ?? []).filter((e) => e.status !=="scratched");
+ const classIds = [...new Set(liveEntries.map((e) => e.class_id as string))];
+ if (classIds.length > 0) {
+ const { data: classRows } = await supabase
+ .from("show_classes")
+ .select("id, name")
+ .in("id", classIds);
+ const classNameById = new Map(
+ (classRows ?? []).map((c) => [c.id as string, c.name as string]),
+ );
+ placingHrefs = resolvePlacingHrefs(
+ showRecords.map((r) => ({
+ id: r.id as string,
+ showId: (r.showId as string | null) ?? null,
+ className: (r.className as string | null) ?? null,
+ verificationTier: (r.verificationTier as string | null) ?? null,
+ })),
+ liveEntries.map((e) => ({
+ entryId: e.id as string,
+ showId: e.show_id as string,
+ className: classNameById.get(e.class_id as string) ?? null,
+ })),
+ );
+ }
+ }
+ }
+ }
 
  // ── MHH Qualification Cards (Phase F, flag-gated) ──
  // RLS scopes reads to the card's people; this page is owner-only,
@@ -629,7 +688,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  {horse.catalog_id && <MarketValueBadge catalogId={horse.catalog_id} />}
 
  {/* Show Records */}
- <ShowRecordTimeline horseId={horseId} records={showRecords} isOwner={true} />
+ <ShowRecordTimeline horseId={horseId} records={showRecords} isOwner={true} placingHrefs={placingHrefs} />
 
  {/* MHH Qualification Cards (Phase F) — renders nothing when empty */}
  <QualificationCardsSection cards={qualificationCards} />
