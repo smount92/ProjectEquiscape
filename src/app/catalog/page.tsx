@@ -4,6 +4,16 @@ import Link from "next/link";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
 import CatalogMasthead from "@/components/catalog/CatalogMasthead";
 import CatalogFilterBar from "@/components/catalog/CatalogFilterBar";
+import CatalogResultsTable from "@/components/catalog/CatalogResultsTable";
+import CatalogCardsList from "@/components/catalog/CatalogCardsList";
+import CatalogViewToggle from "@/components/catalog/CatalogViewToggle";
+import { catalogV2Enabled } from "@/lib/shows/flags";
+import {
+    pickQuickChips,
+    PREFERRED_QUICK_MAKERS,
+    PREFERRED_QUICK_SCALES,
+    type CardAttributes,
+} from "@/lib/catalog/cardDisplay";
 import { getCatalogItems } from "@/app/actions/catalog-suggestions";
 import {
     parseCatalogSearchParams,
@@ -12,7 +22,6 @@ import {
     countActiveCatalogFilters,
     type CatalogFilters,
 } from "@/lib/catalog/filterParams";
-import { referenceHref, referencePagesEnabled } from "@/lib/catalog/referenceUrl";
 
 export const metadata: Metadata = {
     title: "Reference Catalog",
@@ -22,12 +31,6 @@ export const metadata: Metadata = {
 
 const PAGE_SIZE = 50;
 
-const TYPE_LABELS: Record<string, string> = {
-    plastic_mold: "Mold",
-    plastic_release: "Release",
-    artist_resin: "Artist Resin",
-};
-
 interface CatalogItemRow {
     id: string;
     item_type: string;
@@ -36,6 +39,10 @@ interface CatalogItemRow {
     maker_slug: string | null;
     slug: string | null;
     scale: string | null;
+    /* getCatalogItems already selects these; the CARDS browse reads them
+       (the flag-off table ignores them, as it always has). */
+    parent_id?: string | null;
+    attributes?: CardAttributes | null;
 }
 
 interface CatalogStat {
@@ -114,6 +121,54 @@ export default async function ReferencePage({
         }
     }
 
+    // ── CATALOG_V2 (cards browse) extras — exactly two more batched calls ──
+    // 1. get_catalog_browse_thumbs (migration 147): one community thumbnail
+    //    per visible item. Feature-detected: pre-apply the RPC errors, the
+    //    catch keeps the map empty, and cards render 🐴 placeholders.
+    // 2. One grouped children query for the visible MOLDS' release counts
+    //    (aggregated here — PostgREST has no GROUP BY). No per-item loops.
+    const v2 = catalogV2Enabled();
+    const thumbsMap = new Map<string, string>();
+    const releaseCounts = new Map<string, number>();
+    if (v2 && items.length > 0) {
+        const moldIds = items
+            .filter((i) => i.item_type === "plastic_mold")
+            .map((i) => i.id);
+        const thumbsRpc = supabase.rpc.bind(supabase) as unknown as (
+            fn: string,
+            args: { p_ids: string[] },
+        ) => Promise<{ data: { catalog_id: string; image_url: string }[] | null; error: unknown }>;
+        const [thumbsRes, childRes] = await Promise.all([
+            // Feature-detect wrapper: an RPC that doesn't exist yet reports
+            // through `error` (ignored below); the try/catch only guards
+            // transport-level throws. PostgrestBuilder is thenable-only, so
+            // await-in-try rather than .catch().
+            (async () => {
+                try {
+                    return await thumbsRpc("get_catalog_browse_thumbs", {
+                        p_ids: items.map((i) => i.id),
+                    });
+                } catch {
+                    return { data: null, error: true as unknown };
+                }
+            })(),
+            moldIds.length > 0
+                ? supabase
+                      .from("catalog_items")
+                      .select("parent_id")
+                      .in("parent_id", moldIds)
+                      .limit(10_000)
+                : Promise.resolve({ data: null }),
+        ]);
+        for (const t of thumbsRes.data ?? []) {
+            if (t.catalog_id && t.image_url) thumbsMap.set(t.catalog_id, t.image_url);
+        }
+        for (const c of (childRes.data ?? []) as { parent_id: string | null }[]) {
+            if (c.parent_id)
+                releaseCounts.set(c.parent_id, (releaseCounts.get(c.parent_id) ?? 0) + 1);
+        }
+    }
+
     // Sidebar data (unchanged from the previous catalog page).
     const [{ data: curators }, { count: pendingSuggestions }, { count: recentChanges }] =
         await Promise.all([
@@ -146,6 +201,22 @@ export default async function ReferencePage({
                         makers={facets.makers ?? []}
                         scales={facets.scales ?? []}
                         materials={facets.materials ?? []}
+                        {...(v2
+                            ? {
+                                  v2: {
+                                      quickMakers: pickQuickChips(
+                                          facets.makers,
+                                          [...PREFERRED_QUICK_MAKERS],
+                                          4,
+                                      ),
+                                      quickScales: pickQuickChips(
+                                          facets.scales,
+                                          [...PREFERRED_QUICK_SCALES],
+                                          3,
+                                      ),
+                                  },
+                              }
+                            : {})}
                     />
 
                     <p className="mt-3 mb-3 pl-1 text-sm text-muted-foreground italic" id="catalog-result-line">
@@ -170,57 +241,23 @@ export default async function ReferencePage({
                                 </Link>
                             </p>
                         </div>
+                    ) : v2 ? (
+                        /* CATALOG_V2: identification cards (the approved mock),
+                           with the compact-table toggle for power curators —
+                           the table node IS the original renderer, unforked. */
+                        <CatalogViewToggle
+                            cards={
+                                <CatalogCardsList
+                                    items={items}
+                                    statsMap={statsMap}
+                                    thumbs={thumbsMap}
+                                    releaseCounts={releaseCounts}
+                                />
+                            }
+                            table={<CatalogResultsTable items={items} statsMap={statsMap} />}
+                        />
                     ) : (
-                        <div className="w-full overflow-x-auto">
-                            <table className="w-full min-w-[560px] border-collapse text-sm">
-                                <thead>
-                                    <tr>
-                                        <th className="py-2 pr-4">Name</th>
-                                        <th className="py-2 pr-4">Maker</th>
-                                        <th className="py-2 pr-4">Type</th>
-                                        <th className="py-2 pr-4">Scale</th>
-                                        <th className="py-2 pr-4">Collectors</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {items.map((item) => {
-                                        const st = statsMap.get(item.id);
-                                        return (
-                                        <tr key={item.id} className="transition-colors hover:bg-muted/50">
-                                            <td className="py-2 pr-4 font-semibold">
-                                                <Link
-                                                    href={
-                                                        referencePagesEnabled()
-                                                            ? referenceHref(item)
-                                                            : `/catalog/${item.id}`
-                                                    }
-                                                    className="text-foreground no-underline hover:text-forest hover:underline"
-                                                >
-                                                    {item.title}
-                                                </Link>
-                                            </td>
-                                            <td className="py-2 pr-4 text-secondary-foreground">{item.maker}</td>
-                                            <td className="py-2 pr-4 text-secondary-foreground">
-                                                {TYPE_LABELS[item.item_type] ?? item.item_type}
-                                            </td>
-                                            <td className="py-2 pr-4 text-secondary-foreground">{item.scale ?? "—"}</td>
-                                            <td className="py-2 pr-4 text-xs tabular-nums">
-                                                {st && (st.owner > 0 || st.want > 0 || st.forSale > 0) ? (
-                                                    <div className="flex items-center gap-2 whitespace-nowrap">
-                                                        {st.owner > 0 && <span className="text-secondary-foreground" title="in collections">👥 {st.owner}</span>}
-                                                        {st.want > 0 && <span className="text-forest" title="want this">⭐ {st.want}</span>}
-                                                        {st.forSale > 0 && <span title="for sale" style={{ color: "var(--color-warning)" }}>🏷️ {st.forSale}</span>}
-                                                    </div>
-                                                ) : (
-                                                    <span className="text-muted-foreground">—</span>
-                                                )}
-                                            </td>
-                                        </tr>
-                                        );
-                                    })}
-                                </tbody>
-                            </table>
-                        </div>
+                        <CatalogResultsTable items={items} statsMap={statsMap} />
                     )}
 
                     {/* Pagination — plain anchor links (SEO-crawlable, no client JS) */}

@@ -11,10 +11,18 @@
  * /catalog?… so the server page re-renders the filtered table (shareable,
  * back-button-friendly, SEO-canonical). Text/number inputs keep local state
  * until submit. Mirrors src/components/showring/ShowRingFilterBar.tsx.
+ *
+ * CATALOG_V2 (cards browse): passing the optional `v2` prop additionally
+ * renders a horizontally-scrollable quick-chip row (top makers + top scales
+ * + "More ▾" opening the same Advanced panel) and a "📷 Identify" chip
+ * beside the search box (the existing IdentifyMoldDialog; its result feeds
+ * the normal search path). With `v2` absent this component renders exactly
+ * what it always did — the flag-off catalog is untouched.
  */
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import IdentifyMoldDialog from "@/components/IdentifyMoldDialog";
 import {
     Select,
     SelectContent,
@@ -93,11 +101,14 @@ export default function CatalogFilterBar({
     makers,
     scales,
     materials = [],
+    v2,
 }: {
     filters: CatalogFilters;
     makers: string[];
     scales: string[];
     materials?: string[];
+    /** CATALOG_V2 extras — quick chips + Identify. Absent = legacy render. */
+    v2?: { quickMakers: string[]; quickScales: string[] };
 }) {
     const router = useRouter();
     const [searchInput, setSearchInput] = useState(filters.q ?? "");
@@ -200,6 +211,17 @@ export default function CatalogFilterBar({
                         aria-label="Search the reference catalog"
                     />
                 </div>
+                {v2 && (
+                    /* "Which mold is this?" — photo identification feeds the
+                       normal search path (anon sees a sign-in link instead). */
+                    <IdentifyMoldDialog
+                        triggerLabel="📷 Identify"
+                        onIdentified={(moldName) => {
+                            setSearchInput(moldName);
+                            push({ ...filters, q: moldName, page: 1 });
+                        }}
+                    />
+                )}
                 <FacetSelect
                     label="Maker"
                     value={filters.maker}
@@ -257,6 +279,65 @@ export default function CatalogFilterBar({
                     Advanced {advOpen ? "▴" : "▾"}
                 </button>
             </div>
+
+            {/* CATALOG_V2 quick-chip row: top makers + top scales, one tap to
+                filter, active chip forest-filled. Horizontally scrollable on
+                mobile (the cards browse never scrolls a table sideways). */}
+            {v2 && (v2.quickMakers.length > 0 || v2.quickScales.length > 0) && (
+                <div
+                    className="mt-3 flex items-center gap-2 overflow-x-auto pb-1"
+                    role="group"
+                    aria-label="Quick filters"
+                    id="catalog-quick-chips"
+                >
+                    {v2.quickMakers.map((m) => {
+                        const active = filters.maker === m;
+                        return (
+                            <button
+                                key={`maker-${m}`}
+                                type="button"
+                                onClick={() => setOrClear("maker", active ? undefined : m)}
+                                aria-pressed={active}
+                                className={
+                                    active
+                                        ? "shrink-0 cursor-pointer rounded-full border border-forest bg-forest px-3 py-1 font-serif text-xs tracking-wide whitespace-nowrap text-white"
+                                        : "shrink-0 cursor-pointer rounded-full border border-input bg-transparent px-3 py-1 font-serif text-xs tracking-wide whitespace-nowrap text-secondary-foreground transition-colors hover:border-forest hover:text-forest"
+                                }
+                            >
+                                {m}
+                            </button>
+                        );
+                    })}
+                    {v2.quickScales.map((s) => {
+                        const active = filters.scale === s;
+                        return (
+                            <button
+                                key={`scale-${s}`}
+                                type="button"
+                                onClick={() => setOrClear("scale", active ? undefined : s)}
+                                aria-pressed={active}
+                                className={
+                                    active
+                                        ? "shrink-0 cursor-pointer rounded-full border border-forest bg-forest px-3 py-1 font-serif text-xs tracking-wide whitespace-nowrap text-white"
+                                        : "shrink-0 cursor-pointer rounded-full border border-input bg-transparent px-3 py-1 font-serif text-xs tracking-wide whitespace-nowrap text-secondary-foreground transition-colors hover:border-forest hover:text-forest"
+                                }
+                            >
+                                {s}
+                            </button>
+                        );
+                    })}
+                    <button
+                        type="button"
+                        onClick={() => setAdvOpen(true)}
+                        aria-expanded={advOpen}
+                        aria-controls="catalog-advanced"
+                        className="shrink-0 cursor-pointer rounded-full border border-input bg-transparent px-3 py-1 font-serif text-xs tracking-wide whitespace-nowrap text-secondary-foreground transition-colors hover:border-forest hover:text-forest"
+                        id="catalog-quick-more"
+                    >
+                        More ▾
+                    </button>
+                </div>
+            )}
 
             {/* Advanced sub-row: attributes-JSONB filters (collapsed by default) */}
             {advOpen && (
