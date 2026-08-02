@@ -4784,6 +4784,13 @@ export type Database = {
       count_user_horses_total: { Args: { p_user_id: string }; Returns: number }
       entry_owner_of: { Args: { p_entry_id: string }; Returns: string }
       entry_vote_open: { Args: { p_entry_id: string }; Returns: boolean }
+      get_catalog_browse_thumbs: {
+        Args: { p_ids: string[] }
+        Returns: {
+          catalog_id: string
+          image_url: string
+        }[]
+      }
       get_catalog_facets: { Args: never; Returns: Json }
       get_catalog_listings: {
         Args: { p_catalog_id: string; p_limit?: number }
