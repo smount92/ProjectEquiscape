@@ -28,3 +28,15 @@ export function showStandingsEnabled(): boolean {
 export function showPageV3Enabled(): boolean {
     return process.env.NEXT_PUBLIC_SHOW_PAGE_V3 === "1";
 }
+
+/**
+ * Passport v2 feature flag (masthead + buyer panel). The rebuilt
+ * public-passport top — leather masthead where the horse's name is
+ * the H1, plus the single honest buyer panel on For Sale horses —
+ * ships dark: set NEXT_PUBLIC_PASSPORT_V2=1 to enable. Default OFF.
+ * With the flag off, /community/[id] (authed) and AnonPassport render
+ * their current trees byte-identically (instant rollback).
+ */
+export function passportV2Enabled(): boolean {
+    return process.env.NEXT_PUBLIC_PASSPORT_V2 === "1";
+}

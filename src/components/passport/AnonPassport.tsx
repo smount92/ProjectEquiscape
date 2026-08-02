@@ -18,6 +18,10 @@ import {
     verifiedChipLabel,
     type MarketRecordDetailRow,
 } from "@/lib/market/recordSummary";
+import PassportMasthead from "@/components/passport/PassportMasthead";
+import BuyerPanel from "@/components/passport/BuyerPanel";
+import { passportV2Enabled } from "@/lib/shows/flags";
+import { getPublicHorseCards } from "@/lib/shows/publicCards";
 
 // Read-only public passport for logged-OUT visitors (FUNNEL-4). The full
 // interactive passport (favorite/comment/message/hoofprint) stays in
@@ -195,19 +199,36 @@ export default async function AnonPassport({ horseId }: { horseId: string }) {
     const forSale = horse.trade_status === "For Sale" || horse.trade_status === "Open to Offers";
     const loginHref = `/login?redirectTo=${encodeURIComponent(`/community/${horseId}`)}`;
 
+    // ── Passport v2 (NEXT_PUBLIC_PASSPORT_V2) — same masthead + buyer
+    // panel treatment as the member page. Flag OFF: every v2 branch is
+    // dead and the anon tree renders byte-identically.
+    const v2 = passportV2Enabled();
+    const cardsCount = v2 && forSale ? (await getPublicHorseCards(horseId)).length : 0;
+
     return (
         <ExplorerLayout noHeader>
-            <PageMasthead
-                compact
-                icon="🏆"
-                title="Show Ring"
-                subtitle="Public passport"
-                backHref="/community"
-                backLabel="Show Ring"
-            />
+            {v2 ? (
+                <PassportMasthead
+                    horseName={horse.custom_name}
+                    ownerAlias={ownerAlias}
+                    referenceName={cat ? `${cat.maker} — ${cat.title}` : null}
+                    referenceHref={refHref}
+                    backHref="/community"
+                    backLabel="Show Ring"
+                />
+            ) : (
+                <PageMasthead
+                    compact
+                    icon="🏆"
+                    title="Show Ring"
+                    subtitle="Public passport"
+                    backHref="/community"
+                    backLabel="Show Ring"
+                />
+            )}
             <div className="animate-fade-in-up grid grid-cols-1 gap-8 lg:grid-cols-[1.5fr_1fr] lg:gap-12">
                 {/* Gallery */}
-                <div className="overflow-hidden rounded-2xl shadow-md">
+                <div className="overflow-hidden rounded-2xl shadow-md" id={v2 ? "passport-photos" : undefined}>
                     <PassportGallery images={galleryImages} />
                 </div>
 
@@ -216,46 +237,69 @@ export default async function AnonPassport({ horseId }: { horseId: string }) {
                     className="flex min-h-[100%] flex-col gap-4 rounded-3xl border border-input bg-[#C8B596] px-6 py-8 shadow-sm md:px-10"
                     style={PARCHMENT_INK}
                 >
-                    <div>
-                        <h1 className="mb-1 font-serif text-4xl font-bold leading-tight tracking-tight text-foreground md:text-5xl">
-                            {horse.custom_name}
-                        </h1>
-                        {cat ? (
-                            <p className="mb-1 text-base text-secondary-foreground">
-                                {refHref ? (
-                                    <Link
-                                        href={refHref}
-                                        className="font-semibold text-forest underline decoration-2 underline-offset-2"
-                                    >
-                                        {cat.maker} — {cat.title}{" "}
-                                        <span aria-hidden="true" className="text-forest">
-                                            →
-                                        </span>
-                                    </Link>
-                                ) : (
-                                    <>
-                                        {cat.maker} — {cat.title}
-                                    </>
-                                )}
-                            </p>
-                        ) : (
-                            <p className="mb-1 text-base italic text-secondary-foreground opacity-60">
-                                Unlisted / Custom Entry
-                            </p>
-                        )}
-                    </div>
+                    {/* v2: the masthead carries the name + reference — the
+                        card must not add a second h1 */}
+                    {!v2 && (
+                        <div>
+                            <h1 className="mb-1 font-serif text-4xl font-bold leading-tight tracking-tight text-foreground md:text-5xl">
+                                {horse.custom_name}
+                            </h1>
+                            {cat ? (
+                                <p className="mb-1 text-base text-secondary-foreground">
+                                    {refHref ? (
+                                        <Link
+                                            href={refHref}
+                                            className="font-semibold text-forest underline decoration-2 underline-offset-2"
+                                        >
+                                            {cat.maker} — {cat.title}{" "}
+                                            <span aria-hidden="true" className="text-forest">
+                                                →
+                                            </span>
+                                        </Link>
+                                    ) : (
+                                        <>
+                                            {cat.maker} — {cat.title}
+                                        </>
+                                    )}
+                                </p>
+                            ) : (
+                                <p className="mb-1 text-base italic text-secondary-foreground opacity-60">
+                                    Unlisted / Custom Entry
+                                </p>
+                            )}
+                        </div>
+                    )}
 
-                    <div className="text-sm text-secondary-foreground">
-                        Owned by{" "}
-                        <Link
-                            href={`/profile/${encodeURIComponent(ownerAlias)}`}
-                            className="font-semibold text-forest underline decoration-2 underline-offset-2"
-                        >
-                            @{ownerAlias}
-                        </Link>
-                    </div>
+                    {!v2 && (
+                        <div className="text-sm text-secondary-foreground">
+                            Owned by{" "}
+                            <Link
+                                href={`/profile/${encodeURIComponent(ownerAlias)}`}
+                                className="font-semibold text-forest underline decoration-2 underline-offset-2"
+                            >
+                                @{ownerAlias}
+                            </Link>
+                        </div>
+                    )}
 
-                    {forSale && (
+                    {/* v2 buyer panel — supersedes the plain price block; the
+                        anon variant renders login-CTA equivalents with the
+                        same redirectTo the bottom CTA uses. */}
+                    {v2 && forSale && (
+                        <BuyerPanel
+                            horseId={horseId}
+                            horseName={horse.custom_name}
+                            tradeStatus={horse.trade_status as "For Sale" | "Open to Offers"}
+                            listingPrice={horse.listing_price}
+                            conditionGrade={horse.condition_grade}
+                            recordSummary={recordSummary}
+                            cardsCount={cardsCount}
+                            variant="anon"
+                            loginHref={loginHref}
+                            hoofprintHref={`/community/${horseId}/hoofprint`}
+                        />
+                    )}
+                    {!v2 && forSale && (
                         <div className="rounded-lg border border-forest/30 bg-forest/5 p-4">
                             <div className="text-lg font-bold text-foreground">
                                 {horse.listing_price != null ? `$${horse.listing_price}` : "Open to offers"}
@@ -316,7 +360,11 @@ export default async function AnonPassport({ horseId }: { horseId: string }) {
                 the horse has no records. Best placings first, tier
                 labels as visible text (no hover-only meaning). */}
             {topRecords.length > 0 && (
-                <section className="animate-fade-in-up mt-8" aria-label="Show record">
+                <section
+                    className="animate-fade-in-up mt-8"
+                    aria-label="Show record"
+                    id={v2 ? "passport-show-record" : undefined}
+                >
                     <div className="bg-card border-input rounded-lg border p-6 shadow-md">
                         <h3 className="mb-1 font-serif text-lg font-bold text-foreground">
                             <span aria-hidden="true">🏆</span> Show Record
