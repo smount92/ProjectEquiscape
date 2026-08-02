@@ -27,6 +27,12 @@ import { referenceHref, referencePagesEnabled } from"@/lib/catalog/referenceUrl"
 import AnonPassport from"@/components/passport/AnonPassport";
 import PublicCardsSection from"@/components/shows/PublicCardsSection";
 import { PARCHMENT_INK } from"@/lib/theme/parchment";
+import PassportMasthead from"@/components/passport/PassportMasthead";
+import BuyerPanel from"@/components/passport/BuyerPanel";
+import { passportV2Enabled } from"@/lib/shows/flags";
+import { summarizeShowRecords } from"@/lib/market/recordSummary";
+import { getPublicHorseCards } from"@/lib/shows/publicCards";
+import { getMarketPrice } from"@/app/actions/market";
 
 // Force fresh data on every request — prevents stale comments/favorites
 
@@ -315,21 +321,68 @@ editionSize: rawPedigree.edition_size,
  .maybeSingle();
  const isTrustedSeller = !!trustedData;
 
+ // ── Passport v2 (NEXT_PUBLIC_PASSPORT_V2) — masthead + buyer panel.
+ // Flag OFF: every v2 branch below is dead and the page renders its
+ // current tree byte-identically.
+ const v2 = passportV2Enabled();
+ const isForSale = horse.trade_status === "For Sale" || horse.trade_status === "Open to Offers";
+ const recordSummary = v2
+ ? (summarizeShowRecords(
+ (rawRecords ?? []).map((r) => ({
+ horse_id: horseId,
+ placing: r.placing,
+ ribbon_color: r.ribbon_color,
+ verification_tier: r.verification_tier,
+ })),
+ ).get(horseId) ?? null)
+ : null;
+ const cardsCount = v2 && isForSale ? (await getPublicHorseCards(horseId)).length : 0;
+ const refName = refInfo ? `${refInfo.maker} — ${refInfo.name}` : null;
+ // The estimate caption must never render orphaned: MarketValueBadge
+ // hides itself client-side when the mold has no sales, so check the
+ // volume server-side before rendering the adjacent-estimate block.
+ const marketEstimate =
+ v2 && isForSale && horse.catalog_id ? await getMarketPrice(horse.catalog_id) : null;
+ const hasMarketEstimate = !!marketEstimate && marketEstimate.transactionVolume > 0;
+
  return (
  <ExplorerLayout noHeader>
+ {/* v2: the stolen/missing banner stays above EVERYTHING */}
+ {v2 && horse.trade_status ==="Stolen/Missing" && (
+ <div className="mb-4 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 p-4">
+ <span className="text-[1.3em]">🚨</span>
+ <div>
+ <strong className="text-destructive">Stolen / Missing</strong>
+ <p className="mt-1 text-muted-foreground text-sm">
+ This model has been flagged by its owner. Transfers and offers are blocked.
+ </p>
+ </div>
+ </div>
+ )}
+ {v2 ? (
+ <PassportMasthead
+ horseName={horse.custom_name}
+ ownerAlias={ownerAlias}
+ referenceName={refName}
+ referenceHref={refHref}
+ backHref="/community"
+ backLabel="Show Ring"
+ />
+ ) : (
  <PageMasthead compact icon="🏆" title="Show Ring" subtitle="Public passport" backHref="/community" backLabel="Show Ring" />
+ )}
 
  {/* Two-column layout: Gallery | Ledger Card */}
  <div className="animate-fade-in-up grid grid-cols-1 gap-8 lg:grid-cols-[1.5fr_1fr] lg:gap-12">
  {/* Left: Gallery */}
- <div className="self-start overflow-hidden rounded-2xl shadow-md">
+ <div className="self-start overflow-hidden rounded-2xl shadow-md" id={v2 ?"passport-photos" : undefined}>
  <PassportGallery images={galleryImages} />
  </div>
 
  {/* Right: The Ledger Card */}
  <div className="flex min-h-[100%] flex-col gap-2 rounded-3xl border border-input bg-[#C8B596] px-6 py-8 shadow-sm md:px-10" style={PARCHMENT_INK}>
- {/* Stolen/Missing Banner */}
- {horse.trade_status ==="Stolen/Missing" && (
+ {/* Stolen/Missing Banner (v2 moves it above the masthead) */}
+ {!v2 && horse.trade_status ==="Stolen/Missing" && (
  <div
  className="flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 p-4"
  >
@@ -343,7 +396,40 @@ editionSize: rawPedigree.edition_size,
  </div>
  )}
 
- {/* Free-floating Title — no card wrapper */}
+ {/* v2 buyer panel — the ONE honest commerce surface. Supersedes the
+     Wave 5a standalone For-Sale block AND the old h1 title block
+     (the masthead now carries the name + reference). The market
+     ESTIMATE sits adjacent but visually distinct: asking price and
+     estimate must never read as the same number. */}
+ {v2 && isForSale && (
+ <>
+ <BuyerPanel
+ horseId={horseId}
+ horseName={horse.custom_name}
+ tradeStatus={horse.trade_status as"For Sale" |"Open to Offers"}
+ listingPrice={horse.listing_price}
+ conditionGrade={horse.condition_grade}
+ recordSummary={recordSummary}
+ cardsCount={cardsCount}
+ variant="member"
+ sellerId={horse.owner_id}
+ isOwner={isOwnHorse}
+ hoofprintHref="#passport-hoofprint"
+ />
+ {hasMarketEstimate && horse.catalog_id && (
+ <div data-testid="market-estimate">
+ <MarketValueBadge catalogId={horse.catalog_id} />
+ <p className="mt-1 mb-0 text-xs text-muted-foreground italic">
+ Market estimate from recent sales of this reference — not the asking price above.
+ </p>
+ </div>
+ )}
+ </>
+ )}
+
+ {/* Free-floating Title — no card wrapper (v2: the masthead is the
+     title; exactly one h1 on the page, the horse's name) */}
+ {!v2 && (
  <div className="p-0">
  <h1 className="mb-1 font-serif text-4xl font-bold leading-tight tracking-tight text-foreground md:text-5xl">
  {horse.custom_name}
@@ -360,6 +446,7 @@ editionSize: rawPedigree.edition_size,
  </p>
  )}
  </div>
+ )}
 
  {/* Owner Pill */}
  <Link
@@ -682,13 +769,15 @@ editionSize: rawPedigree.edition_size,
 
  {/* 🔒 NO Financial Vault section — this is a PUBLIC view */}
 
- {/* Market Value Badge */}
- {horse.catalog_id && <MarketValueBadge catalogId={horse.catalog_id} />}
+ {/* Market Value Badge (v2 + for-sale: moved adjacent to the buyer
+     panel above with its estimate framing) */}
+ {!(v2 && isForSale) && horse.catalog_id && <MarketValueBadge catalogId={horse.catalog_id} />}
 
  {/* For Sale — price + status a signed-in buyer can actually see.
      Mirrors the AnonPassport block (AnonPassport.tsx) so members and
-     visitors read the same ledger line. For Sale / Open to Offers only. */}
- {(horse.trade_status === "For Sale" || horse.trade_status === "Open to Offers") && (
+     visitors read the same ledger line. For Sale / Open to Offers only.
+     SUPERSEDED by the v2 buyer panel when the flag is on. */}
+ {!v2 && (horse.trade_status === "For Sale" || horse.trade_status === "Open to Offers") && (
  <div className="rounded-lg border border-forest/30 bg-forest/5 p-4" id="passport-for-sale">
  <div className="flex flex-wrap items-center justify-between gap-2">
  <span className={horse.trade_status === "For Sale" ? "stamp stamp-red" : "stamp"}>
@@ -726,7 +815,10 @@ editionSize: rawPedigree.edition_size,
  variant="full"
  />
  {!isOwnHorse && <ReportButton targetType="horse" targetId={horseId} />}
- {!isOwnHorse &&
+ {/* v2: contact actions live in the buyer panel — one honest panel,
+     no duplicate CTAs in the icon row */}
+ {!v2 &&
+ !isOwnHorse &&
  horse.trade_status !=="Stolen/Missing" &&
  (horse.trade_status ==="For Sale" || horse.trade_status ==="Open to Offers") && (
  <MessageSellerButton
@@ -758,7 +850,7 @@ editionSize: rawPedigree.edition_size,
 
  {/* Provenance — Read Only */}
  {(showRecords.length > 0 || pedigree) && (
- <div className="animate-fade-in-up mt-8">
+ <div className="animate-fade-in-up mt-8" id={v2 ?"passport-show-record" : undefined}>
  {showRecords.length > 0 && (
  <ShowRecordTimeline horseId={horseId} records={showRecords} isOwner={false} />
  )}
@@ -784,7 +876,7 @@ editionSize: rawPedigree.edition_size,
  } = await getHoofprint(horseId);
  if (hfTimeline.length === 0 && hfChain.length === 0) return null;
  return (
- <div className="animate-fade-in-up mt-8">
+ <div className="animate-fade-in-up mt-8" id={v2 ?"passport-hoofprint" : undefined}>
  <HoofprintTimeline
  horseId={horseId}
  timeline={hfTimeline}
