@@ -194,8 +194,11 @@ export default async function ReferencePage({
             <CatalogMasthead totalCount={total} />
 
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_280px]">
-                {/* Main: filter bar + results table + pagination */}
-                <div>
+                {/* Main: filter bar + results table + pagination.
+                    min-w-0: a grid child's default min-width:auto lets wide
+                    content (the v2 chips row's overflow-x-auto) blow the 1fr
+                    track past the container and shove the aside off-viewport. */}
+                <div className="min-w-0">
                     <CatalogFilterBar
                         filters={filters}
                         makers={facets.makers ?? []}
