@@ -31,6 +31,11 @@ interface ShowRecordTimelineProps {
  horseId: string;
  records: ShowRecordDisplay[];
  isOwner: boolean;
+ /** SHARE-YOUR-PLACING: recordId → public placing-page href for
+  *  v2-linked, results-published records (resolved server-side by
+  *  the passport page via resolvePlacingHrefs — records store no
+  *  entry id, so the match is show + class name). Owner-only UI. */
+ placingHrefs?: Record<string, string>;
 }
 
 function formatShowDate(dateStr: string | null, dateText: string | null): string {
@@ -68,7 +73,7 @@ function getRibbonClass(ribbon: string | null): string {
  return map[lower] ||"";
 }
 
-export default function ShowRecordTimeline({ horseId, records: initialRecords, isOwner }: ShowRecordTimelineProps) {
+export default function ShowRecordTimeline({ horseId, records: initialRecords, isOwner, placingHrefs }: ShowRecordTimelineProps) {
  const [records, setRecords] = useState<ShowRecordDisplay[]>(initialRecords);
  const [formMode, setFormMode] = useState<string | null>(null); // null,"add","edit-{id}"
  const [editingRecord, setEditingRecord] = useState<ShowRecordDisplay | null>(null);
@@ -183,6 +188,16 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
  <span className="inline-flex items-center gap-[2px] rounded-sm bg-muted px-2 py-[1px] text-xs font-medium text-muted-foreground" title="Self-reported by collector">
  📝 Self-Reported
  </span>
+ )}
+ {isOwner && placingHrefs?.[record.id] && (
+ <Link
+ href={placingHrefs[record.id]}
+ className="inline-flex items-center gap-1 rounded-sm border border-forest/40 px-2 py-[1px] text-xs font-bold text-forest no-underline transition-colors hover:bg-forest/10"
+ title="Open this placing's public share page"
+ data-testid="record-share-link"
+ >
+ Share <span aria-hidden="true">↗</span>
+ </Link>
  )}
  </div>
 
