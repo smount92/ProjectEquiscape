@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import ShowRingBrowser from "../showring/ShowRingBrowser";
+import { ToastProvider } from "@/lib/context/ToastContext";
 import type { ShowRingCard } from "@/lib/showring/types";
 
 const mockPush = vi.fn();
@@ -81,15 +82,19 @@ function card(overrides: Partial<ShowRingCard> = {}): ShowRingCard {
 }
 
 function renderBrowser(props: Partial<Parameters<typeof ShowRingBrowser>[0]> = {}) {
+    // ToastProvider: the card footer's FavoriteButton now toasts on
+    // favorite/unfavorite, and useToast throws outside the provider.
     return render(
-        <ShowRingBrowser
-            initialCards={[card(), card({ id: "h-2", customName: "Stonewall", catalogId: null })]}
-            totalCount={30}
-            initialHasMore={true}
-            facetOptions={{ makers: ["Breyer"], scales: ["Traditional"], finishes: ["OF"] }}
-            filters={{ finish: "OF", sort: "newest" }}
-            {...props}
-        />,
+        <ToastProvider>
+            <ShowRingBrowser
+                initialCards={[card(), card({ id: "h-2", customName: "Stonewall", catalogId: null })]}
+                totalCount={30}
+                initialHasMore={true}
+                facetOptions={{ makers: ["Breyer"], scales: ["Traditional"], finishes: ["OF"] }}
+                filters={{ finish: "OF", sort: "newest" }}
+                {...props}
+            />
+        </ToastProvider>,
     );
 }
 

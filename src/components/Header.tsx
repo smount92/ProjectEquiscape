@@ -32,6 +32,7 @@ import {
  MoreHorizontal,
  BookOpen,
  Bookmark,
+ Heart,
  Gem,
 } from"lucide-react";
 import { Button } from "@/components/ui/button";
@@ -456,6 +457,14 @@ export default function Header() {
  <User size={16} strokeWidth={1.5} /> My Profile
  </Link>
  <Link
+ href="/favorites"
+ className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-muted-foreground no-underline transition-all"
+ id="nav-favorites"
+ onClick={() => setUserMenuOpen(false)}
+ >
+ <Heart size={16} strokeWidth={1.5} /> Favorites
+ </Link>
+ <Link
  href="/settings"
  className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-muted-foreground no-underline transition-all"
  onClick={() => setUserMenuOpen(false)}
@@ -637,6 +646,14 @@ export default function Header() {
  onClick={closeMobileMenu}
  >
  <Bookmark size={16} strokeWidth={1.5} /> Want List
+ </Link>
+ <Link
+ href="/favorites"
+ className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+ id="nav-favorites-m"
+ onClick={closeMobileMenu}
+ >
+ <Heart size={16} strokeWidth={1.5} /> Favorites
  </Link>
  <Link
  href="/claim"
