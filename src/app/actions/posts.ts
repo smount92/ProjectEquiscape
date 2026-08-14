@@ -97,6 +97,7 @@ export async function createPost(data: {
     const postIdFinal = post!.id;
     const eventId = data.eventId;
     const studioId = data.studioId;
+    const horseId = data.horseId;
     after(async () => {
         try {
             const supabaseDeferred = await (await import("@/lib/supabase/server")).createClient();
@@ -115,6 +116,26 @@ export async function createPost(data: {
                         actorId: userId,
                         content: `@${alias} commented on your event "${(event as { name: string }).name}"`,
                         linkUrl: `/shows/${eventId}`,
+                    });
+                }
+            }
+
+            // Notify horse owner — passport comments are the most common
+            // social act on the site and previously notified NOBODY: the
+            // owner only discovered comments by revisiting their own page.
+            if (horseId) {
+                const { data: horse } = await supabaseDeferred
+                    .from("user_horses")
+                    .select("owner_id, custom_name")
+                    .eq("id", horseId)
+                    .single();
+                if (horse && (horse as { owner_id: string }).owner_id !== userId) {
+                    await createNotification({
+                        userId: (horse as { owner_id: string }).owner_id,
+                        type: "comment",
+                        actorId: userId,
+                        content: `@${alias} commented on ${(horse as { custom_name: string }).custom_name}`,
+                        linkUrl: `/community/${horseId}`,
                     });
                 }
             }
@@ -186,13 +207,13 @@ export async function replyToPost(
                     type: "reply",
                     actorId: userId,
                     content: `@${alias} replied to your post`,
-                    linkUrl: `/feed`,
+                    linkUrl: `/feed/${parentId}`,
                 });
             }
 
             // @mentions in reply
             const { parseAndNotifyMentions } = await import("@/app/actions/mentions");
-            await parseAndNotifyMentions(trimmedContent, userId, alias, `/feed`);
+            await parseAndNotifyMentions(trimmedContent, userId, alias, `/feed/${parentId}`);
         } catch (err) { logger.error("Posts", "Background task failed", err); }
     });
 
@@ -219,20 +240,20 @@ export async function deletePost(
         return { success: false, error: "You can only delete your own posts." };
     }
 
-    // Clean up storage files for attached media
+    // Clean up storage files for attached media. The table stores
+    // bucket-relative storage_path (there is no image_url column — the
+    // old select for one errored silently and leaked every file since
+    // migration 042).
     try {
         const { data: media } = await supabase
             .from("media_attachments")
-            .select("image_url")
+            .select("storage_path")
             .eq("post_id", postId);
 
         if (media && media.length > 0) {
-            const paths = (media as { image_url: string }[])
-                .map(m => {
-                    const match = m.image_url.match(/horse-images\/(.+?)(\?|$)/);
-                    return match ? match[1] : null;
-                })
-                .filter(Boolean) as string[];
+            const paths = (media as { storage_path: string }[])
+                .map(m => m.storage_path)
+                .filter(Boolean);
 
             if (paths.length > 0) {
                 await supabase.storage.from("horse-images").remove(paths);
@@ -551,20 +572,18 @@ export async function deleteEventMedia(
 ): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
-    // Fetch the image URL before deleting the row
+    // Fetch the storage path before deleting the row (bucket-relative;
+    // same nonexistent-column fix as deletePost).
     try {
         const { data: media } = await supabase
             .from("media_attachments")
-            .select("image_url")
+            .select("storage_path")
             .eq("id", mediaId)
             .maybeSingle();
 
-        if (media) {
-            const url = (media as { image_url: string }).image_url;
-            const match = url.match(/horse-images\/(.+?)(\?|$)/);
-            if (match) {
-                await supabase.storage.from("horse-images").remove([match[1]]);
-            }
+        const path = (media as { storage_path: string } | null)?.storage_path;
+        if (path) {
+            await supabase.storage.from("horse-images").remove([path]);
         }
     } catch (err) { logger.error("Posts", "Background task failed", err); }
 
