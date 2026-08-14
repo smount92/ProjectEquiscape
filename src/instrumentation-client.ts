@@ -1,3 +1,6 @@
+// Next 16 + Turbopack loads browser Sentry ONLY from
+// instrumentation-client.ts — the old sentry.client.config.ts was
+// never injected, so client errors silently went unreported.
 import * as Sentry from "@sentry/nextjs";
 
 Sentry.init({
@@ -18,3 +21,5 @@ Sentry.init({
         "AbortError",
     ],
 });
+
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
