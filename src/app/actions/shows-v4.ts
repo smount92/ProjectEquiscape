@@ -20,9 +20,22 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { requireAuth } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { canApplyCardAction } from "@/lib/shows/cards";
-import { getAliases, getShowRole } from "@/lib/shows/queries";
+import {
+    GALLERY_STATUSES,
+    RESULTS_STATUSES,
+    isOwnerRevealed,
+    type ClassRoomData,
+    type ClassRoomEntry,
+} from "@/lib/shows/gallery";
+import {
+    getAliases,
+    getEntryPhotoUrls,
+    getHorseNames,
+    getShowRole,
+} from "@/lib/shows/queries";
 import {
     attachDocumentToEntrySchema,
     barEntrantSchema,
@@ -478,6 +491,191 @@ export async function unpublishClassResults(
     const parsed = unpublishClassResultsSchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     return setClassPublished(parsed.data, null);
+}
+
+// ══════════════════════════════════════════════════════════════
+// The class room — the v4 spectator read ("the class is the room")
+// ══════════════════════════════════════════════════════════════
+
+const getClassRoomSchema = z.object({ classId: z.uuid() });
+
+/**
+ * One class as a room: the lineup, and — once THIS class's results
+ * are published (rolling reveal, or show completion) — the ribbon
+ * rail with per-entry critiques. Anon-safe: the blind rule is
+ * enforced server-side exactly as in getShowGallery, and critique
+ * columns are not even selected before the class publishes.
+ */
+export async function getClassRoom(
+    input: z.input<typeof getClassRoomSchema>,
+): Promise<{ success: true; room: ClassRoomData } | { success: false; error: string }> {
+    const parsed = getClassRoomSchema.safeParse(input);
+    if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
+    // Generic client type: the 148 tables/columns aren't in the
+    // generated types until the owner applies the migration and runs
+    // gen-types (same posture as the requireAuth-based actions above).
+    const supabase = (await createClient()) as import("@supabase/supabase-js").SupabaseClient;
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+
+    // Class → section → division → show (the standard context walk).
+    const { data: cls, error: cErr } = await supabase
+        .from("show_classes")
+        .select(
+            "id, name, class_number, status, results_published_at, show_sections!inner(name, show_divisions!inner(name, show_id))",
+        )
+        .eq("id", parsed.data.classId)
+        .maybeSingle();
+    if (cErr) return { success: false, error: cErr.message };
+    if (!cls) return { success: false, error: "Class not found." };
+    const clsRow = cls as unknown as {
+        id: string;
+        name: string;
+        class_number: string | null;
+        status: string;
+        results_published_at: string | null;
+        show_sections: { name: string; show_divisions: { name: string; show_id: string } };
+    };
+    const showId = clsRow.show_sections.show_divisions.show_id;
+
+    const { data: show, error: shErr } = await supabase
+        .from("shows")
+        .select("id, title, mode, status, blind_browsing")
+        .eq("id", showId)
+        .maybeSingle();
+    if (shErr) return { success: false, error: shErr.message };
+    if (!show || show.status === "draft") return { success: false, error: "Show not found." };
+    if (show.mode !== "online") {
+        return { success: false, error: "Live shows have no class rooms — see the published results." };
+    }
+    const status = show.status as import("@/lib/shows/types").ShowStatus;
+    if (!GALLERY_STATUSES.includes(status)) {
+        return { success: false, error: "The class room opens when entries open." };
+    }
+
+    // THIS class's results are public: rolling per-class reveal
+    // (results_published_at) or the show-level publish.
+    const resultsPublished =
+        clsRow.results_published_at !== null || RESULTS_STATUSES.includes(status);
+    const revealed = isOwnerRevealed(status, show.blind_browsing as boolean);
+
+    // Critique columns are selected ONLY once published — the data
+    // never rides the wire before the reveal.
+    const entryColumns = resultsPublished
+        ? "id, horse_id, owner_id, entry_number, photo_id, status, document_id, created_at, critique_text, critique_photo_text"
+        : "id, horse_id, owner_id, entry_number, photo_id, status, document_id, created_at";
+    const { data: entryRows, error: eErr } = await supabase
+        .from("show_class_entries")
+        .select(entryColumns)
+        .eq("class_id", clsRow.id)
+        .order("created_at", { ascending: true });
+    if (eErr) return { success: false, error: eErr.message };
+    type EntryRow = {
+        id: string;
+        horse_id: string;
+        owner_id: string;
+        entry_number: number | null;
+        photo_id: string | null;
+        status: string;
+        document_id: string | null;
+        critique_text?: string | null;
+        critique_photo_text?: string | null;
+    };
+    const entries = ((entryRows ?? []) as unknown as EntryRow[]).filter(
+        (e) => e.status !== "scratched",
+    );
+
+    const photoUrls = await getEntryPhotoUrls(
+        supabase,
+        entries.flatMap((e) => (e.photo_id ? [e.photo_id] : [])),
+    );
+    if (!(photoUrls instanceof Map)) return { success: false, error: photoUrls.error };
+    const horseNames = await getHorseNames(supabase, entries.map((e) => e.horse_id));
+    if (!(horseNames instanceof Map)) return { success: false, error: horseNames.error };
+
+    let aliases = new Map<string, string>();
+    if (revealed) {
+        const loaded = await getAliases(supabase, entries.map((e) => e.owner_id));
+        if (!(loaded instanceof Map)) return { success: false, error: loaded.error };
+        aliases = loaded;
+    }
+
+    const placeByEntry = new Map<string, number>();
+    if (resultsPublished && entries.length > 0) {
+        const { data: placingRows, error: pErr } = await supabase
+            .from("show_placings")
+            .select("entry_id, place")
+            .in("entry_id", entries.map((e) => e.id));
+        if (pErr) return { success: false, error: pErr.message };
+        for (const p of placingRows ?? []) {
+            if (p.place !== null) placeByEntry.set(p.entry_id as string, p.place as number);
+        }
+    }
+
+    // Documentation cards (RLS: readable exactly when the entry is).
+    const docByEntry = new Map<string, { kind: string; title: string; bodyMd: string }>();
+    const docIds = entries.flatMap((e) => (e.document_id ? [e.document_id] : []));
+    if (docIds.length > 0) {
+        const { data: docRows } = await supabase
+            .from("horse_documents")
+            .select("id, kind, title, body_md")
+            .in("id", docIds);
+        const docs = new Map(
+            ((docRows ?? []) as { id: string; kind: string; title: string; body_md: string }[]).map(
+                (d) => [d.id, { kind: d.kind, title: d.title, bodyMd: d.body_md }],
+            ),
+        );
+        for (const e of entries) {
+            if (e.document_id && docs.has(e.document_id)) {
+                docByEntry.set(e.id, docs.get(e.document_id)!);
+            }
+        }
+    }
+
+    const roomEntries: ClassRoomEntry[] = entries.map((e) => ({
+        id: e.id,
+        horseId: revealed ? e.horse_id : null,
+        horseName: horseNames.get(e.horse_id) ?? "Unnamed horse",
+        entryNumber: e.entry_number,
+        photoUrl: e.photo_id ? (photoUrls.get(e.photo_id) ?? null) : null,
+        ownerAlias: revealed ? (aliases.get(e.owner_id) ?? "unknown") : null,
+        ownerId: revealed ? e.owner_id : null,
+        isOwn: !!user && e.owner_id === user.id,
+        place: resultsPublished
+            ? ((placeByEntry.get(e.id) as ClassRoomEntry["place"]) ?? null)
+            : null,
+        critique: resultsPublished ? (e.critique_text ?? null) : null,
+        photoCritique: resultsPublished ? (e.critique_photo_text ?? null) : null,
+        document: docByEntry.get(e.id) ?? null,
+    }));
+    if (resultsPublished) {
+        roomEntries.sort((a, b) => (a.place ?? 99) - (b.place ?? 99));
+    }
+
+    return {
+        success: true,
+        room: {
+            show: {
+                id: showId,
+                title: show.title as string,
+                status,
+                blindBrowsing: show.blind_browsing as boolean,
+            },
+            room: {
+                classId: clsRow.id,
+                className: clsRow.name,
+                classNumber: clsRow.class_number,
+                sectionName: clsRow.show_sections.name,
+                divisionName: clsRow.show_sections.show_divisions.name,
+                classStatus: clsRow.status as ClassRoomData["room"]["classStatus"],
+                resultsPublished,
+                resultsPublishedAt: clsRow.results_published_at,
+            },
+            revealed,
+            entries: roomEntries,
+        },
+    };
 }
 
 // ══════════════════════════════════════════════════════════════

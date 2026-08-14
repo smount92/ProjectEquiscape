@@ -13,7 +13,10 @@
  * free, and Simple Mode's root scaling applies untouched.
  */
 
+import Link from "next/link";
+
 import type { ConsoleClass, ConsoleDivision } from "@/lib/shows/console";
+import { showsV4Enabled } from "@/lib/shows/flags";
 import { AXIS_GLOSS } from "@/lib/shows/plainWords";
 import { PublicClassRow } from "@/components/shows/ShowEntrySectionParts";
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +29,9 @@ interface ProgramAccordionProps {
     /** Index of the division to render open initially (the CTA
      *  dialog opens the first; #program starts all collapsed). */
     defaultOpenIndex?: number | null;
+    /** v4 class rooms: when set (and the flag is on), each class row
+     *  grows a "class room" link to /shows/[showId]/class/[classId]. */
+    showId?: string;
 }
 
 function divisionEntryCount(division: ConsoleDivision): number {
@@ -44,7 +50,9 @@ export default function ProgramAccordion({
     canEnter,
     onEnter,
     defaultOpenIndex = null,
+    showId,
 }: ProgramAccordionProps) {
+    const classRooms = !!showId && showsV4Enabled();
     if (divisions.length === 0) {
         return (
             <p className="py-4 text-center text-sm text-muted-foreground">
@@ -99,12 +107,23 @@ export default function ProgramAccordion({
                                                 </h4>
                                                 <ul className="mt-1 flex list-none flex-col p-0">
                                                     {section.classes.map((cls) => (
-                                                        <PublicClassRow
-                                                            key={cls.id}
-                                                            cls={cls}
-                                                            canEnter={canEnter}
-                                                            onEnter={onEnter}
-                                                        />
+                                                        <li key={cls.id} className="list-none">
+                                                            <ul className="list-none p-0">
+                                                                <PublicClassRow
+                                                                    cls={cls}
+                                                                    canEnter={canEnter}
+                                                                    onEnter={onEnter}
+                                                                />
+                                                            </ul>
+                                                            {classRooms && (
+                                                                <Link
+                                                                    href={`/shows/${showId}/class/${cls.id}`}
+                                                                    className="text-xs text-muted-foreground hover:underline"
+                                                                >
+                                                                    Visit the class room →
+                                                                </Link>
+                                                            )}
+                                                        </li>
                                                     ))}
                                                     {section.classes.length === 0 && (
                                                         <li className="py-1.5 text-sm text-muted-foreground italic">

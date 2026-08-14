@@ -30,6 +30,18 @@ export function showPageV3Enabled(): boolean {
 }
 
 /**
+ * Shows v4 feature flag — the class-room rebuild ("the class is
+ * the room"): per-class pages with the lineup, ribbon rail,
+ * per-entry critiques, and rolling class-by-class result reveals.
+ * Requires migration 148. Ships dark: set NEXT_PUBLIC_SHOWS_V4=1
+ * to enable. Default OFF. Gated surfaces: /shows/[id]/class/[classId]
+ * (notFound when off) and the class-room links that point at it.
+ */
+export function showsV4Enabled(): boolean {
+    return process.env.NEXT_PUBLIC_SHOWS_V4 === "1";
+}
+
+/**
  * Passport v2 feature flag (masthead + buyer panel). The rebuilt
  * public-passport top — leather masthead where the horse's name is
  * the H1, plus the single honest buyer panel on For Sale horses —

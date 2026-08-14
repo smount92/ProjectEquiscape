@@ -174,6 +174,7 @@ export default function AlbumEntrySection({
                     divisions={divisions}
                     canEnter={canEnter && effectiveHorses.length > 0}
                     onEnter={openDialog}
+                    showId={showId}
                 />
             </section>
 

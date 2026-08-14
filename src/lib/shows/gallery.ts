@@ -88,6 +88,53 @@ export interface ShowGalleryData {
     classes: GalleryClass[];
 }
 
+// ── The class room (v4 — "the class is the room") ──
+
+export interface ClassRoomEntry {
+    id: string;
+    /** null while the blind rule holds (passport link = identity). */
+    horseId: string | null;
+    horseName: string;
+    entryNumber: number | null;
+    photoUrl: string | null;
+    /** null while the blind rule holds. */
+    ownerAlias: string | null;
+    /** null while the blind rule holds. */
+    ownerId: string | null;
+    isOwn: boolean;
+    /** Present once THIS CLASS's results are published. */
+    place: Place | null;
+    /** Judge feedback on the model — published classes only. */
+    critique: string | null;
+    /** Judge feedback on the photograph — published classes only. */
+    photoCritique: string | null;
+    /** Attached documentation (the show-binder card), if any. */
+    document: { kind: string; title: string; bodyMd: string } | null;
+}
+
+export interface ClassRoomData {
+    show: {
+        id: string;
+        title: string;
+        status: ShowStatus;
+        blindBrowsing: boolean;
+    };
+    room: {
+        classId: string;
+        className: string;
+        classNumber: string | null;
+        sectionName: string;
+        divisionName: string;
+        classStatus: ClassStatus;
+        /** THIS class's results are public (rolling reveal or show completion). */
+        resultsPublished: boolean;
+        resultsPublishedAt: string | null;
+    };
+    /** Owner identities included in this payload. */
+    revealed: boolean;
+    entries: ClassRoomEntry[];
+}
+
 // ── The judge queue ──
 
 export interface JudgeQueueEntry {
