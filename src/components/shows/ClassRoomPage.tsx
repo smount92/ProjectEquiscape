@@ -140,19 +140,20 @@ export default function ClassRoomPage({ room }: { room: ClassRoomData }) {
     return (
         <ExplorerLayout frameless noHeader>
             <div className="flex flex-col gap-5">
-                {/* ── Masthead ── */}
-                <header className="leather-panel flex flex-col gap-2 rounded-lg p-5">
+                {/* ── Masthead (leather = light text via the leather vars,
+                     matching AlbumMasthead) ── */}
+                <header className="leather-panel stitched flex flex-col gap-2 rounded-lg p-5 sm:p-6">
                     <Link
                         href={`/shows/${room.show.id}`}
-                        className="text-sm text-muted-foreground hover:underline"
+                        className="text-sm text-(--leather-text-muted) hover:underline"
                     >
                         ← {room.show.title}
                     </Link>
-                    <h1 className="text-2xl font-semibold">
+                    <h1 className="m-0 font-serif text-xl font-bold tracking-tight text-(--leather-text) sm:text-2xl">
                         {room.room.classNumber ? `Class ${room.room.classNumber} — ` : ""}
                         {room.room.className}
                     </h1>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="m-0 text-sm text-(--leather-text-muted)">
                         {room.room.sectionName} · {room.room.divisionName} · {statusLine(room)}
                         {!room.revealed && room.show.blindBrowsing && " · blind browsing — exhibitors revealed with results"}
                     </p>
