@@ -207,3 +207,73 @@ function escapeHtml(str: string): string {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
 }
+
+/**
+ * Suspend a user site-wide (v4 safety, migration 148). Two stamps:
+ * app_metadata.is_suspended (requireAuth throws on it — takes effect
+ * on the user's next server-validated request, no extra query) and
+ * users.is_suspended (RLS backstop on the entries INSERT policy +
+ * the admin list). Suspension blocks every mutation but leaves
+ * content readable; it is fully reversible via unsuspendUser.
+ */
+export async function suspendUser(
+  userId: string,
+  reason: string
+): Promise<{ success: boolean; error?: string }> {
+  const user = await verifyAdmin();
+  if (!user) return { success: false, error: "Unauthorized" };
+  if (userId === user.id) return { success: false, error: "You cannot suspend yourself." };
+  const trimmedReason = reason.trim();
+  if (!trimmedReason) return { success: false, error: "Give a reason — it lands on the audit trail." };
+
+  const admin = getAdminSupabase();
+
+  const { data: target, error: fetchError } = await admin.auth.admin.getUserById(userId);
+  if (fetchError || !target?.user) return { success: false, error: "User not found." };
+
+  const { error: authError } = await admin.auth.admin.updateUserById(userId, {
+    app_metadata: { ...target.user.app_metadata, is_suspended: true },
+  });
+  if (authError) return { success: false, error: authError.message };
+
+  const { error: dbError } = await admin
+    .from("users")
+    .update({
+      is_suspended: true,
+      suspended_at: new Date().toISOString(),
+      suspended_reason: trimmedReason,
+    })
+    .eq("id", userId);
+  if (dbError) {
+    logger.error("Admin", `users.is_suspended write failed for ${userId} (app_metadata IS set)`, dbError);
+    return { success: false, error: "Suspension partially applied — retry to sync the database flag." };
+  }
+
+  return { success: true };
+}
+
+/** Reverse suspendUser — clears both stamps. */
+export async function unsuspendUser(
+  userId: string
+): Promise<{ success: boolean; error?: string }> {
+  const user = await verifyAdmin();
+  if (!user) return { success: false, error: "Unauthorized" };
+
+  const admin = getAdminSupabase();
+
+  const { data: target, error: fetchError } = await admin.auth.admin.getUserById(userId);
+  if (fetchError || !target?.user) return { success: false, error: "User not found." };
+
+  const { error: authError } = await admin.auth.admin.updateUserById(userId, {
+    app_metadata: { ...target.user.app_metadata, is_suspended: false },
+  });
+  if (authError) return { success: false, error: authError.message };
+
+  const { error: dbError } = await admin
+    .from("users")
+    .update({ is_suspended: false, suspended_at: null, suspended_reason: null })
+    .eq("id", userId);
+  if (dbError) return { success: false, error: dbError.message };
+
+  return { success: true };
+}

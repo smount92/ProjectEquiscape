@@ -26,6 +26,13 @@ export async function requireAuth(): Promise<{
         data: { user },
     } = await supabase.auth.getUser();
     if (!user) throw new AuthError();
+    // Suspension gate (v4 safety): suspendUser() stamps app_metadata
+    // via the auth admin API, so this costs no extra query — getUser()
+    // is server-validated. Read surfaces (optionalAuth) stay open;
+    // every mutation funnels through here.
+    if (user.app_metadata?.is_suspended) {
+        throw new AuthError("This account is suspended.");
+    }
     return { supabase, user };
 }
 

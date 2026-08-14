@@ -1939,6 +1939,16 @@ export async function enterClass(
     if (shErr) return { success: false, error: shErr.message };
     if (!show) return { success: false, error: "Show not found." };
 
+    // ── Barred from this show? (sticky scratch — v4 safety; RLS on
+    // the barred table lets the barred user read their own row, and
+    // the entries INSERT policy re-checks this at the DB.) ──
+    const { data: barRow } = await supabase
+        .from("show_barred_entrants")
+        .select("show_id")
+        .eq("show_id", showId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
     // ── The horse: ownership, visibility, scale/finish facts ──
     const { data: horse, error: hErr } = await supabase
         .from("user_horses")
@@ -2005,6 +2015,7 @@ export async function enterClass(
             divisionAxis: e.show_classes.show_sections.show_divisions
                 .axis as DivisionAxis,
         })),
+        isBarred: !!barRow,
     });
 
     const violations = result.ok ? [] : [...result.errors];

@@ -103,18 +103,24 @@ function existingEntry(overrides: Record<string, unknown> = {}, axis = "performa
     };
 }
 
-/** Queue the standard context walk: class → section → division → show → horse. */
+/**
+ * Queue the standard context walk:
+ * class → section → division → show → bar check (v4) → horse.
+ */
 function queueEntryContext(opts: {
     cls?: Record<string, unknown>;
     division?: Record<string, unknown>;
     show?: Record<string, unknown>;
     horse?: Record<string, unknown>;
+    /** Row in show_barred_entrants — null (default) = not barred. */
+    barred?: Record<string, unknown> | null;
 } = {}) {
     mockClient._mockQuery.maybeSingle
         .mockResolvedValueOnce({ data: classRow(opts.cls), error: null })
         .mockResolvedValueOnce({ data: sectionRow, error: null })
         .mockResolvedValueOnce({ data: divisionRow(opts.division), error: null })
         .mockResolvedValueOnce({ data: showRow(opts.show), error: null })
+        .mockResolvedValueOnce({ data: opts.barred ?? null, error: null })
         .mockResolvedValueOnce({ data: horseRow(opts.horse), error: null });
 }
 
@@ -163,6 +169,14 @@ describe("shows-v2 — enterClass", () => {
             expect(result.violations?.[1]).toMatch(/only enter horses you own/i);
             expect(result.error).toMatch(/entries are not open/i);
         }
+        expect(mockClient._mockQuery.insert).not.toHaveBeenCalled();
+    });
+
+    it("refuses a barred entrant (v4 sticky scratch)", async () => {
+        queueEntryContext({ barred: { show_id: SHOW_ID } });
+        const result = await enterClass({ classId: CLASS_ID, horseId: HORSE_ID });
+        expect(result.success).toBe(false);
+        if (!result.success) expect(result.error).toMatch(/not able to enter this show/i);
         expect(mockClient._mockQuery.insert).not.toHaveBeenCalled();
     });
 

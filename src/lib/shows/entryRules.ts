@@ -85,6 +85,12 @@ export interface ValidateEntryInput {
     targetClass: ClassFacts;
     /** ALL entries at this show for rule evaluation (scratched ones are ignored). */
     existingEntries: ExistingEntry[];
+    /**
+     * The entrant is barred from this show (show_barred_entrants row
+     * exists). Loaded by the caller; also enforced by the entries
+     * INSERT policy (148) as the DB backstop.
+     */
+    isBarred?: boolean;
     /** Injectable clock for the window check; defaults to now. */
     now?: Date;
 }
@@ -97,6 +103,11 @@ export function validateEntry(input: ValidateEntryInput): ValidateEntryResult {
     const { candidate, horse, show, targetClass, existingEntries } = input;
     const now = input.now ?? new Date();
     const errors: string[] = [];
+
+    // ── Barred from this show (sticky scratch) ──
+    if (input.isBarred) {
+        errors.push("You are not able to enter this show. Contact the host if you believe this is a mistake.");
+    }
 
     // ── Window: show must be accepting entries ──
     if (show.status !== "entries_open") {
