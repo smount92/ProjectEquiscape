@@ -32,7 +32,9 @@ import type { ShowMode, ShowStatus } from "@/lib/shows/types";
  */
 export async function GET(request: NextRequest) {
     const authHeader = request.headers.get("authorization");
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    // Unset-secret guard: without it, an env missing CRON_SECRET
+    // (e.g. preview deploys) accepts the literal "Bearer undefined".
+    if (!process.env.CRON_SECRET || authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

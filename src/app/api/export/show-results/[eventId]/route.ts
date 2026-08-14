@@ -1,19 +1,24 @@
 import { getAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
+import { escapeCSV } from "@/lib/utils/csv";
 import { NextResponse } from "next/server";
-
-function escapeCSV(value: string | null | undefined): string {
-    if (value === null || value === undefined) return "";
-    const str = String(value);
-    if (str.includes(",") || str.includes('"') || str.includes("\n")) {
-        return `"${str.replace(/"/g, '""')}"`;
-    }
-    return str;
-}
 
 export async function GET(
     _request: Request,
     { params }: { params: Promise<{ eventId: string }> }
 ) {
+    // Auth follows the export-route conventions (see the v2 twin,
+    // show-results-v2): this route previously had NO auth check and
+    // handed out exhibitor aliases via the service role to anyone
+    // holding an event UUID.
+    const supabase = await createClient();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+        return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
+
     const { eventId } = await params;
     const admin = getAdminClient();
 

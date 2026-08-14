@@ -12,6 +12,8 @@
  * the classes, mirroring how live results sheets read.
  */
 
+import { escapeCSV as escapeCsv } from "@/lib/utils/csv";
+
 import { championLabel, placeLabel } from "./placings";
 import { resolveShowRecordDate } from "./writeShowRecords";
 import type { CallbackScope, EntryStatus, Place, ShowMode } from "./types";
@@ -68,15 +70,6 @@ export const RESULTS_CSV_HEADERS = [
     "Horse",
     "Owner",
 ] as const;
-
-function escapeCsv(value: string | number | null | undefined): string {
-    if (value === null || value === undefined) return "";
-    const str = String(value);
-    if (str.includes(",") || str.includes('"') || str.includes("\n")) {
-        return `"${str.replace(/"/g, '""')}"`;
-    }
-    return str;
-}
 
 export function buildShowResultsCsv(input: ResultsExportInput): string {
     const entryById = new Map(input.entries.map((e) => [e.id, e]));
