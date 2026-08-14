@@ -112,6 +112,17 @@ export interface ClassRoomEntry {
     document: { kind: string; title: string; bodyMd: string } | null;
 }
 
+/** One stop on the class-room quick-nav rail (run order). */
+export interface ClassRoomNavItem {
+    classId: string;
+    className: string;
+    classNumber: string | null;
+    sectionName: string;
+    divisionName: string;
+    entryCount: number;
+    isCurrent: boolean;
+}
+
 export interface ClassRoomData {
     show: {
         id: string;
@@ -133,6 +144,11 @@ export interface ClassRoomData {
     /** Owner identities included in this payload. */
     revealed: boolean;
     entries: ClassRoomEntry[];
+    /** The whole classlist in run order — the quick-nav rail. */
+    program: ClassRoomNavItem[];
+    /** Ring-walk neighbors (run order; null at the ends). */
+    prev: { classId: string; label: string } | null;
+    next: { classId: string; label: string } | null;
 }
 
 // ── The judge queue ──

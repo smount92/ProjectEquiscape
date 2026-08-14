@@ -2012,6 +2012,68 @@ export type Database = {
           },
         ]
       }
+      horse_documents: {
+        Row: {
+          body_md: string
+          created_at: string
+          horse_id: string
+          id: string
+          kind: string
+          owner_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body_md: string
+          created_at?: string
+          horse_id: string
+          id?: string
+          kind?: string
+          owner_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body_md?: string
+          created_at?: string
+          horse_id?: string
+          id?: string
+          kind?: string
+          owner_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "horse_documents_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: false
+            referencedRelation: "user_horses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "horse_documents_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "horse_documents_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "horse_documents_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       horse_favorites: {
         Row: {
           created_at: string
@@ -2833,6 +2895,9 @@ export type Database = {
           show_id: string
           show_year: number | null
           status: string
+          void_reason: string | null
+          voided_at: string | null
+          voided_by: string | null
         }
         Insert: {
           class_id: string
@@ -2845,6 +2910,9 @@ export type Database = {
           show_id: string
           show_year?: number | null
           status?: string
+          void_reason?: string | null
+          voided_at?: string | null
+          voided_by?: string | null
         }
         Update: {
           class_id?: string
@@ -2857,6 +2925,9 @@ export type Database = {
           show_id?: string
           show_year?: number | null
           status?: string
+          void_reason?: string | null
+          voided_at?: string | null
+          voided_by?: string | null
         }
         Relationships: [
           {
@@ -2920,6 +2991,27 @@ export type Database = {
             columns: ["show_id"]
             isOneToOne: false
             referencedRelation: "shows"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "qualification_cards_voided_by_fkey"
+            columns: ["voided_by"]
+            isOneToOne: false
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "qualification_cards_voided_by_fkey"
+            columns: ["voided_by"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "qualification_cards_voided_by_fkey"
+            columns: ["voided_by"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -3028,6 +3120,80 @@ export type Database = {
           },
         ]
       }
+      show_barred_entrants: {
+        Row: {
+          barred_by: string | null
+          created_at: string
+          reason: string | null
+          show_id: string
+          user_id: string
+        }
+        Insert: {
+          barred_by?: string | null
+          created_at?: string
+          reason?: string | null
+          show_id: string
+          user_id: string
+        }
+        Update: {
+          barred_by?: string | null
+          created_at?: string
+          reason?: string | null
+          show_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "show_barred_entrants_barred_by_fkey"
+            columns: ["barred_by"]
+            isOneToOne: false
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "show_barred_entrants_barred_by_fkey"
+            columns: ["barred_by"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "show_barred_entrants_barred_by_fkey"
+            columns: ["barred_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "show_barred_entrants_show_id_fkey"
+            columns: ["show_id"]
+            isOneToOne: false
+            referencedRelation: "shows"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "show_barred_entrants_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "show_barred_entrants_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "show_barred_entrants_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       show_callbacks: {
         Row: {
           champion_entry_id: string | null
@@ -3108,6 +3274,11 @@ export type Database = {
         Row: {
           class_id: string
           created_at: string
+          critique_at: string | null
+          critique_by: string | null
+          critique_photo_text: string | null
+          critique_text: string | null
+          document_id: string | null
           entry_number: number | null
           handler_id: string | null
           horse_id: string
@@ -3121,6 +3292,11 @@ export type Database = {
         Insert: {
           class_id: string
           created_at?: string
+          critique_at?: string | null
+          critique_by?: string | null
+          critique_photo_text?: string | null
+          critique_text?: string | null
+          document_id?: string | null
           entry_number?: number | null
           handler_id?: string | null
           horse_id: string
@@ -3134,6 +3310,11 @@ export type Database = {
         Update: {
           class_id?: string
           created_at?: string
+          critique_at?: string | null
+          critique_by?: string | null
+          critique_photo_text?: string | null
+          critique_text?: string | null
+          document_id?: string | null
           entry_number?: number | null
           handler_id?: string | null
           horse_id?: string
@@ -3150,6 +3331,34 @@ export type Database = {
             columns: ["class_id"]
             isOneToOne: false
             referencedRelation: "show_classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "show_class_entries_critique_by_fkey"
+            columns: ["critique_by"]
+            isOneToOne: false
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "show_class_entries_critique_by_fkey"
+            columns: ["critique_by"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "show_class_entries_critique_by_fkey"
+            columns: ["critique_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "show_class_entries_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "horse_documents"
             referencedColumns: ["id"]
           },
           {
@@ -3228,6 +3437,7 @@ export type Database = {
           is_qualifying: boolean
           max_per_entrant: number | null
           name: string
+          results_published_at: string | null
           section_id: string
           sort_order: number
           split_from_class_id: string | null
@@ -3243,6 +3453,7 @@ export type Database = {
           is_qualifying?: boolean
           max_per_entrant?: number | null
           name: string
+          results_published_at?: string | null
           section_id: string
           sort_order?: number
           split_from_class_id?: string | null
@@ -3258,6 +3469,7 @@ export type Database = {
           is_qualifying?: boolean
           max_per_entrant?: number | null
           name?: string
+          results_published_at?: string | null
           section_id?: string
           sort_order?: number
           split_from_class_id?: string | null
@@ -4559,6 +4771,7 @@ export type Database = {
           full_name: string | null
           id: string
           is_supporter: boolean
+          is_suspended: boolean
           is_test_account: boolean
           is_trusted_curator: boolean
           is_verified: boolean
@@ -4569,6 +4782,8 @@ export type Database = {
           show_in_supporters_ledger: boolean
           show_photos_on_reference: boolean
           supporter_since: string | null
+          suspended_at: string | null
+          suspended_reason: string | null
           watermark_photos: boolean | null
           watermark_text: string | null
         }
@@ -4587,6 +4802,7 @@ export type Database = {
           full_name?: string | null
           id: string
           is_supporter?: boolean
+          is_suspended?: boolean
           is_test_account?: boolean
           is_trusted_curator?: boolean
           is_verified?: boolean
@@ -4597,6 +4813,8 @@ export type Database = {
           show_in_supporters_ledger?: boolean
           show_photos_on_reference?: boolean
           supporter_since?: string | null
+          suspended_at?: string | null
+          suspended_reason?: string | null
           watermark_photos?: boolean | null
           watermark_text?: string | null
         }
@@ -4615,6 +4833,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_supporter?: boolean
+          is_suspended?: boolean
           is_test_account?: boolean
           is_trusted_curator?: boolean
           is_verified?: boolean
@@ -4625,6 +4844,8 @@ export type Database = {
           show_in_supporters_ledger?: boolean
           show_photos_on_reference?: boolean
           supporter_since?: string | null
+          suspended_at?: string | null
+          suspended_reason?: string | null
           watermark_photos?: boolean | null
           watermark_text?: string | null
         }

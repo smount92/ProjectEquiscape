@@ -3611,3 +3611,29 @@ html[data-theme="night"][data-simple-mode="true"] .polaroid {
   outline-offset: 2px;
 }
 } /* end @layer components (lamplight-toggle) */
+
+/* ══════════════════════════════════════════════════════════════
+   v4 ENTRY RIBBON — the at-a-glance marquee on the show page.
+   Two duplicated tracks slide -50% for a seamless loop; hover
+   pauses; reduced-motion gets a static, hand-scrollable row
+   (the duplicate track hides so nothing repeats).
+   ══════════════════════════════════════════════════════════════ */
+@keyframes ribbon-scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+}
+.entry-ribbon { overflow: hidden; }
+.entry-ribbon-track {
+    display: flex;
+    width: max-content;
+    animation: ribbon-scroll var(--ribbon-duration, 60s) linear infinite;
+}
+.entry-ribbon:hover .entry-ribbon-track,
+.entry-ribbon:focus-within .entry-ribbon-track {
+    animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+    .entry-ribbon { overflow-x: auto; }
+    .entry-ribbon-track { animation: none; }
+    .entry-ribbon-dup { display: none; }
+}

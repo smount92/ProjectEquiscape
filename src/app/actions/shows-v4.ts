@@ -35,6 +35,7 @@ import {
     getEntryPhotoUrls,
     getHorseNames,
     getShowRole,
+    loadClassContexts,
 } from "@/lib/shows/queries";
 import {
     attachDocumentToEntrySchema,
@@ -633,6 +634,41 @@ export async function getClassRoom(
         }
     }
 
+    // ── The program rail: every class in run order with live entry
+    // counts — the quick-nav + prev/next "ring walk". One tree load
+    // plus one grouped count query. ──
+    const tree = await loadClassContexts(supabase, showId);
+    if ("error" in tree) return { success: false, error: tree.error };
+    const { data: countRows, error: cntErr } = await supabase
+        .from("show_class_entries")
+        .select("class_id, status")
+        .eq("show_id", showId);
+    if (cntErr) return { success: false, error: cntErr.message };
+    const countByClass = new Map<string, number>();
+    for (const r of (countRows ?? []) as { class_id: string; status: string }[]) {
+        if (r.status === "scratched") continue;
+        countByClass.set(r.class_id, (countByClass.get(r.class_id) ?? 0) + 1);
+    }
+    const program = tree.contexts
+        .filter((ctx) => ctx.status !== "cancelled" && ctx.status !== "combined")
+        .map((ctx) => ({
+            classId: ctx.classId,
+            className: ctx.className,
+            classNumber: ctx.classNumber,
+            sectionName: ctx.sectionName,
+            divisionName: ctx.divisionName,
+            entryCount: countByClass.get(ctx.classId) ?? 0,
+            isCurrent: ctx.classId === clsRow.id,
+        }));
+    const currentIndex = program.findIndex((p) => p.isCurrent);
+    const navLabel = (p: (typeof program)[number]) =>
+        p.classNumber ? `Class ${p.classNumber} — ${p.className}` : p.className;
+    const prev = currentIndex > 0 ? program[currentIndex - 1] : null;
+    const next =
+        currentIndex >= 0 && currentIndex < program.length - 1
+            ? program[currentIndex + 1]
+            : null;
+
     const roomEntries: ClassRoomEntry[] = entries.map((e) => ({
         id: e.id,
         horseId: revealed ? e.horse_id : null,
@@ -674,6 +710,9 @@ export async function getClassRoom(
             },
             revealed,
             entries: roomEntries,
+            program,
+            prev: prev ? { classId: prev.classId, label: navLabel(prev) } : null,
+            next: next ? { classId: next.classId, label: navLabel(next) } : null,
         },
     };
 }

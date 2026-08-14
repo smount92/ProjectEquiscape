@@ -35,12 +35,14 @@ import { getShowRole } from "@/lib/shows/queries";
 import type { ShowChampionsData } from "@/lib/shows/ring";
 import type { StaffRole } from "@/lib/shows/types";
 import { createClient } from "@/lib/supabase/server";
+import { showsV4Enabled } from "@/lib/shows/flags";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
 import RichText from "@/components/RichText";
 import AlbumCtaRow from "@/components/shows/AlbumCtaRow";
 import AlbumEntrySection from "@/components/shows/AlbumEntrySection";
 import AlbumMasthead from "@/components/shows/AlbumMasthead";
 import AlbumWall from "@/components/shows/AlbumWall";
+import EntryRibbon from "@/components/shows/EntryRibbon";
 import { buildShowJsonLd, StaffBanner } from "@/components/shows/PublicShowV2Page";
 import ShowChampions from "@/components/shows/ShowChampions";
 
@@ -121,17 +123,23 @@ export default async function AlbumShowPage({ showId }: { showId: string }) {
                     </div>
                 )}
 
-                {/* #gallery — THE WALL (voting-open deep-links land
-                    here). Online shows only, like the legacy gallery. */}
+                {/* #gallery — v4: the at-a-glance ENTRY RIBBON funneling
+                    into class rooms (the wall stopped scaling past ~30
+                    entries). Flag off: THE WALL, byte-identical. Online
+                    shows only, like the legacy gallery. */}
                 {show.mode === "online" && (
                     <div id="gallery" className="scroll-mt-32">
                         {gallery ? (
-                            <AlbumWall
-                                showId={showId}
-                                gallery={gallery}
-                                authed={!!user}
-                                hasRules={!!show.rulesMd}
-                            />
+                            showsV4Enabled() ? (
+                                <EntryRibbon showId={showId} gallery={gallery} />
+                            ) : (
+                                <AlbumWall
+                                    showId={showId}
+                                    gallery={gallery}
+                                    authed={!!user}
+                                    hasRules={!!show.rulesMd}
+                                />
+                            )
                         ) : (
                             <div className="ledger-card">
                                 <span className="ledger-tab">Entry Album</span>
