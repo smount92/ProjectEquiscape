@@ -29,10 +29,13 @@ function Track({
     entries,
     showId,
     duplicate,
+    thumbClass,
 }: {
     entries: RibbonEntry[];
     showId: string;
     duplicate?: boolean;
+    /** Sizing classes for the thumb image (row-count dependent). */
+    thumbClass: string;
 }) {
     return (
         <ul
@@ -51,10 +54,10 @@ function Track({
                         <img
                             src={entry.photoUrl}
                             alt={`${entry.horseName} — entry in ${entry.className}`}
-                            className="h-24 w-32 object-cover transition-transform group-hover:scale-105"
+                            className={`${thumbClass} object-cover transition-transform group-hover:scale-105`}
                             loading="lazy"
                         />
-                        <span className="absolute right-0 bottom-0 left-0 truncate bg-black/55 px-1.5 py-0.5 text-[11px] text-white">
+                        <span className="absolute right-0 bottom-0 left-0 truncate bg-black/55 px-1.5 py-0.5 text-xs text-white">
                             {entry.entryNumber !== null ? `#${entry.entryNumber} · ` : ""}
                             {entry.horseName}
                         </span>
@@ -64,6 +67,9 @@ function Track({
         </ul>
     );
 }
+
+/** Two rows only at real volume — under this, one tall row. */
+const TWO_ROW_THRESHOLD = 50;
 
 export default function EntryRibbon({
     showId,
@@ -95,11 +101,13 @@ export default function EntryRibbon({
         );
     }
 
-    // Two rows past a dozen entries; alternate so neighbors differ.
-    const twoRows = entries.length > 12;
+    // One TALL row by default; a second row only at real volume,
+    // alternating so ring neighbors differ.
+    const twoRows = entries.length >= TWO_ROW_THRESHOLD;
     const rows: RibbonEntry[][] = twoRows
         ? [entries.filter((_, i) => i % 2 === 0), entries.filter((_, i) => i % 2 === 1)]
         : [entries];
+    const thumbClass = twoRows ? "h-28 w-40" : "h-48 w-64";
 
     return (
         <section aria-label="All entries at a glance" className="flex flex-col gap-2">
@@ -116,8 +124,8 @@ export default function EntryRibbon({
                     }
                 >
                     <div className="entry-ribbon-track">
-                        <Track entries={row} showId={showId} />
-                        <Track entries={row} showId={showId} duplicate />
+                        <Track entries={row} showId={showId} thumbClass={thumbClass} />
+                        <Track entries={row} showId={showId} thumbClass={thumbClass} duplicate />
                     </div>
                 </div>
             ))}

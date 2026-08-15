@@ -3632,6 +3632,11 @@ html[data-theme="night"][data-simple-mode="true"] .polaroid {
 .entry-ribbon:focus-within .entry-ribbon-track {
     animation-play-state: paused;
 }
+.entry-ribbon {
+    /* Never show a scrollbar — motion (or hand-scroll) only. */
+    scrollbar-width: none;
+}
+.entry-ribbon::-webkit-scrollbar { display: none; }
 @media (prefers-reduced-motion: reduce) {
     .entry-ribbon { overflow-x: auto; }
     .entry-ribbon-track { animation: none; }
