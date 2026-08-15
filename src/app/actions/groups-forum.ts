@@ -338,8 +338,19 @@ export async function createThread(
             const supabaseDeferred = await (await import("@/lib/supabase/server")).createClient();
             const { data: actor } = await supabaseDeferred.from("users").select("alias_name").eq("id", userId).single();
             const alias = (actor as { alias_name: string } | null)?.alias_name || "Someone";
+            // Deep-link the THREAD, not the groups index — a mention
+            // notification must land where the mention happened.
+            const { data: group } = await supabaseDeferred
+                .from("groups")
+                .select("slug")
+                .eq("id", groupId)
+                .maybeSingle();
+            const slug = (group as { slug: string } | null)?.slug;
+            const sourceUrl = slug
+                ? `/community/groups/${slug}/thread/${threadId}`
+                : "/community/groups";
             const { parseAndNotifyMentions } = await import("@/app/actions/mentions");
-            await parseAndNotifyMentions(trimmed, userId, alias, `/community/groups`);
+            await parseAndNotifyMentions(trimmed, userId, alias, sourceUrl);
         } catch (err) {
             logger.error("GroupsForum", "Background task failed", err);
         }

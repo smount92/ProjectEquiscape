@@ -319,11 +319,23 @@ export async function leaveReview(data: {
     // Notify reviewed user + activity event (fire-and-forget)
     const { data: actor } = await supabase.from("users").select("alias_name").eq("id", user.id).single();
     const alias = (actor as { alias_name: string } | null)?.alias_name || "Someone";
+    // Deep-link where the review actually renders — the REVIEWED
+    // user's profile (without this the bell fell back to the
+    // reviewer's profile, which is not where the review lives).
+    const { data: target } = await supabase
+        .from("users")
+        .select("alias_name")
+        .eq("id", input.targetId)
+        .maybeSingle();
+    const targetAlias = (target as { alias_name: string } | null)?.alias_name;
     await createNotification({
         userId: input.targetId,
         type: "rating",
         actorId: user.id,
         content: `@${alias} left you a ★${input.stars} review`,
+        ...(targetAlias
+            ? { linkUrl: `/profile/${encodeURIComponent(targetAlias)}` }
+            : {}),
     });
     await createActivityEvent({
         actorId: user.id,
