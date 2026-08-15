@@ -18,7 +18,7 @@ export async function parseAndNotifyMentions(
     content: string,
     actorId: string,
     actorAlias: string,
-    _sourceUrl: string
+    sourceUrl: string
 ): Promise<void> {
     try {
         const rawAliases = extractMentions(content);
@@ -53,6 +53,10 @@ export async function parseAndNotifyMentions(
                 type: "mention",
                 actor_id: actorId,
                 content: `@${actorAlias} mentioned you`,
+                // Deep link to the mentioning post — callers already pass
+                // real permalinks; this was previously discarded, so the
+                // notification could only fall back to the actor's profile.
+                link_url: sourceUrl,
             }));
 
         if (inserts.length > 0) {

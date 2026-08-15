@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { checkRateLimit } from "@/lib/utils/rateLimit";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -196,11 +197,25 @@ export async function forgotPasswordAction(
     return { error: "Please enter your email address.", success: false };
   }
 
+  const allowed = await checkRateLimit("password_reset", 5, 60);
+  if (!allowed) {
+    return {
+      error: "Too many reset requests. Please try again in an hour.",
+      success: false,
+    };
+  }
+
   try {
     const supabase = await createClient();
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    // NEXT_PUBLIC_APP_URL + prod fallback — the same base-URL source as
+    // the rest of the app. (NEXT_PUBLIC_SITE_URL was never set anywhere,
+    // so reset emails pointed at localhost.)
+    const siteUrl =
+      process.env.NEXT_PUBLIC_APP_URL ||
+      (process.env.NODE_ENV === "production"
+        ? "https://modelhorsehub.com"
+        : "http://localhost:3000");
     const redirectTo = `${siteUrl}/auth/reset-password`;
-
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo,
