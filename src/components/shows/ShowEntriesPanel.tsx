@@ -18,6 +18,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { scratchEntry, setFeePaid } from "@/app/actions/shows-v2";
+import { barEntrant } from "@/app/actions/shows-v4";
 import type { ConsoleDivision, ConsoleEntry } from "@/lib/shows/console";
 import { friendlyEntryStatus } from "@/lib/shows/plainWords";
 import type { ShowStatus, StaffRole } from "@/lib/shows/types";
@@ -87,6 +88,9 @@ export default function ShowEntriesPanel({
     const [scratchReason, setScratchReason] = useState("");
     const [scratching, setScratching] = useState(false);
     const [scratchError, setScratchError] = useState<string | null>(null);
+    // v4 sticky scratch: host/co-host may bar the entrant in the same
+    // motion — scratches ALL their live entries and blocks re-entry.
+    const [alsoBar, setAlsoBar] = useState(false);
     const [toast, setToast] = useState<string | null>(null);
     const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -108,25 +112,43 @@ export default function ShowEntriesPanel({
     const openScratch = (entry: ConsoleEntry) => {
         setScratchError(null);
         setScratchReason("");
+        setAlsoBar(false);
         setScratchTarget(entry);
     };
+
+    // The bar door is narrower than the scratch door: host/co-host
+    // only, never on your own entry (mirrors barEntrant's checks).
+    const canBar = (target: ConsoleEntry | null): boolean =>
+        !!target &&
+        (viewerRole === "host" || viewerRole === "co_host") &&
+        target.ownerId !== viewerId;
 
     const handleScratch = async () => {
         if (!scratchTarget) return;
         setScratching(true);
         setScratchError(null);
         const reason = scratchReason.trim();
-        const result = await scratchEntry({
-            entryId: scratchTarget.id,
-            ...(reason ? { reason } : {}),
-        });
+        const barring = alsoBar && canBar(scratchTarget);
+        const result = barring
+            ? await barEntrant({
+                  showId,
+                  userId: scratchTarget.ownerId,
+                  ...(reason ? { reason } : {}),
+                  scratchEntries: true,
+              })
+            : await scratchEntry({
+                  entryId: scratchTarget.id,
+                  ...(reason ? { reason } : {}),
+              });
         if (result.success) {
             const notified = scratchTarget.ownerId !== viewerId;
             setScratchTarget(null);
             setToast(
-                notified
-                    ? "Entry scratched — the owner has been notified."
-                    : "Entry scratched.",
+                barring
+                    ? `@${scratchTarget.ownerAlias} barred — all their entries scratched and re-entry blocked.`
+                    : notified
+                      ? "Entry scratched — the owner has been notified."
+                      : "Entry scratched.",
             );
             if (toastTimer.current) clearTimeout(toastTimer.current);
             toastTimer.current = setTimeout(() => setToast(null), 3000);
@@ -413,6 +435,27 @@ export default function ShowEntriesPanel({
                             {scratchReason.length}/200
                         </span>
                     </label>
+                    {canBar(scratchTarget) && (
+                        <label className="flex items-start gap-2 rounded-md border border-input bg-card/60 p-3">
+                            <input
+                                type="checkbox"
+                                checked={alsoBar}
+                                onChange={(e) => setAlsoBar(e.target.checked)}
+                                disabled={scratching}
+                                className="mt-0.5"
+                                data-testid="scratch-also-bar"
+                            />
+                            <span className="text-sm">
+                                <span className="font-semibold">
+                                    Also bar @{scratchTarget?.ownerAlias} from this show
+                                </span>
+                                <span className="block text-xs text-muted-foreground">
+                                    Scratches ALL of their entries and blocks re-entry while
+                                    entries are open. Reversible from the bar list.
+                                </span>
+                            </span>
+                        </label>
+                    )}
                     {scratchError && (
                         <p role="alert" className="text-sm font-semibold text-destructive">
                             {scratchError}
@@ -436,7 +479,11 @@ export default function ShowEntriesPanel({
                             disabled={scratching}
                             data-testid="scratch-confirm"
                         >
-                            {scratching ? "Scratching…" : "Scratch entry"}
+                            {scratching
+                                ? "Working…"
+                                : alsoBar && canBar(scratchTarget)
+                                  ? "Scratch & bar entrant"
+                                  : "Scratch entry"}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
