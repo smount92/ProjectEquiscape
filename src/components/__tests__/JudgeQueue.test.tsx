@@ -339,7 +339,7 @@ describe("JudgeQueue — autosave", () => {
         fireEvent.click(
             screen.getByRole("button", { name: "Add critique for Copper Penny" }),
         );
-        fireEvent.change(screen.getByLabelText("Critique for Copper Penny"), {
+        fireEvent.change(screen.getByLabelText("Placing note for Copper Penny"), {
             target: { value: "Gorgeous shading." },
         });
         await act(async () => {

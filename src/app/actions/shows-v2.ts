@@ -2523,13 +2523,31 @@ export async function getJudgeQueue(
 
     const { data: entryRows, error: eErr } = await supabase
         .from("show_class_entries")
-        .select("id, class_id, horse_id, owner_id, entry_number, photo_id, status, created_at")
+        // v4: critique columns ride along — staff-only surface, so
+        // pre-publish visibility is fine here (unlike the public room).
+        .select("id, class_id, horse_id, owner_id, entry_number, photo_id, status, created_at, critique_text, critique_photo_text")
         .eq("show_id", showId)
         .order("created_at", { ascending: true });
     if (eErr) return { success: false, error: eErr.message };
     const entries = (entryRows ?? []).filter(
         (e: { status: string }) => e.status !== "scratched",
     );
+
+    // v4: per-class reveal state for the publish control.
+    const publishedByClass = new Map<string, string | null>();
+    if (contexts.length > 0) {
+        const { data: pubRows, error: pubErr } = await supabase
+            .from("show_classes")
+            .select("id, results_published_at")
+            .in("id", contexts.map((c) => c.classId));
+        if (pubErr) return { success: false, error: pubErr.message };
+        for (const r of pubRows ?? []) {
+            publishedByClass.set(
+                r.id as string,
+                (r.results_published_at as string | null) ?? null,
+            );
+        }
+    }
 
     const photoUrls = await getEntryPhotoUrls(
         supabase,
@@ -2583,6 +2601,8 @@ export async function getJudgeQueue(
             ownerAlias: revealed ? (aliases.get(e.owner_id as string) ?? "unknown") : null,
             place: recorded?.place ?? null,
             note: recorded?.note ?? null,
+            critiqueText: (e.critique_text as string | null) ?? null,
+            critiquePhotoText: (e.critique_photo_text as string | null) ?? null,
         });
         entriesByClass.set(e.class_id as string, list);
     }
@@ -2596,6 +2616,7 @@ export async function getJudgeQueue(
         sectionId: c.sectionId,
         sectionName: c.sectionName,
         status: c.status,
+        resultsPublishedAt: publishedByClass.get(c.classId) ?? null,
         entries: entriesByClass.get(c.classId) ?? [],
     }));
 

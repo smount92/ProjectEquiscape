@@ -542,7 +542,7 @@ export async function getClassRoom(
 
     const { data: show, error: shErr } = await supabase
         .from("shows")
-        .select("id, title, mode, status, blind_browsing")
+        .select("id, title, mode, status, judging, blind_browsing")
         .eq("id", showId)
         .maybeSingle();
     if (shErr) return { success: false, error: shErr.message };
@@ -600,6 +600,25 @@ export async function getClassRoom(
         const loaded = await getAliases(supabase, entries.map((e) => e.owner_id));
         if (!(loaded instanceof Map)) return { success: false, error: loaded.error };
         aliases = loaded;
+    }
+
+    // ── Votes (community-vote shows — the room must carry the same
+    // hearts as the gallery, or funneling viewers here breaks voting) ──
+    const votingEnabled = show.judging === "community_vote";
+    const votingOpen = votingEnabled && status === "judging";
+    const voteCounts = new Map<string, number>();
+    const viewerVotes = new Set<string>();
+    if (votingEnabled && entries.length > 0) {
+        const { data: voteRows, error: vErr } = await supabase
+            .from("show_entry_votes")
+            .select("entry_id, voter_id")
+            .in("entry_id", entries.map((e) => e.id));
+        if (vErr) return { success: false, error: vErr.message };
+        for (const v of voteRows ?? []) {
+            const entryId = v.entry_id as string;
+            voteCounts.set(entryId, (voteCounts.get(entryId) ?? 0) + 1);
+            if (user && v.voter_id === user.id) viewerVotes.add(entryId);
+        }
     }
 
     const placeByEntry = new Map<string, number>();
@@ -684,6 +703,8 @@ export async function getClassRoom(
         critique: resultsPublished ? (e.critique_text ?? null) : null,
         photoCritique: resultsPublished ? (e.critique_photo_text ?? null) : null,
         document: docByEntry.get(e.id) ?? null,
+        voteCount: voteCounts.get(e.id) ?? 0,
+        viewerHasVoted: viewerVotes.has(e.id),
     }));
     if (resultsPublished) {
         roomEntries.sort((a, b) => (a.place ?? 99) - (b.place ?? 99));
@@ -709,6 +730,9 @@ export async function getClassRoom(
                 resultsPublishedAt: clsRow.results_published_at,
             },
             revealed,
+            votingEnabled,
+            votingOpen,
+            authed: !!user,
             entries: roomEntries,
             program,
             prev: prev ? { classId: prev.classId, label: navLabel(prev) } : null,
