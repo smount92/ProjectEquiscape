@@ -88,6 +88,78 @@ export interface ShowGalleryData {
     classes: GalleryClass[];
 }
 
+// ── The class room (v4 — "the class is the room") ──
+
+export interface ClassRoomEntry {
+    id: string;
+    /** null while the blind rule holds (passport link = identity). */
+    horseId: string | null;
+    horseName: string;
+    entryNumber: number | null;
+    photoUrl: string | null;
+    /** null while the blind rule holds. */
+    ownerAlias: string | null;
+    /** null while the blind rule holds. */
+    ownerId: string | null;
+    isOwn: boolean;
+    /** Present once THIS CLASS's results are published. */
+    place: Place | null;
+    /** Judge feedback on the model — published classes only. */
+    critique: string | null;
+    /** Judge feedback on the photograph — published classes only. */
+    photoCritique: string | null;
+    /** Attached documentation (the show-binder card), if any. */
+    document: { kind: string; title: string; bodyMd: string } | null;
+    /** Community-vote shows only (0 otherwise). */
+    voteCount: number;
+    viewerHasVoted: boolean;
+}
+
+/** One stop on the class-room quick-nav rail (run order). */
+export interface ClassRoomNavItem {
+    classId: string;
+    className: string;
+    classNumber: string | null;
+    sectionName: string;
+    divisionName: string;
+    entryCount: number;
+    isCurrent: boolean;
+}
+
+export interface ClassRoomData {
+    show: {
+        id: string;
+        title: string;
+        status: ShowStatus;
+        blindBrowsing: boolean;
+    };
+    room: {
+        classId: string;
+        className: string;
+        classNumber: string | null;
+        sectionName: string;
+        divisionName: string;
+        classStatus: ClassStatus;
+        /** THIS class's results are public (rolling reveal or show completion). */
+        resultsPublished: boolean;
+        resultsPublishedAt: string | null;
+    };
+    /** Owner identities included in this payload. */
+    revealed: boolean;
+    /** Community-vote show: render hearts in the room. */
+    votingEnabled: boolean;
+    /** Voting live right now (status = judging). */
+    votingOpen: boolean;
+    /** Viewer is signed in (vote buttons need to know). */
+    authed: boolean;
+    entries: ClassRoomEntry[];
+    /** The whole classlist in run order — the quick-nav rail. */
+    program: ClassRoomNavItem[];
+    /** Ring-walk neighbors (run order; null at the ends). */
+    prev: { classId: string; label: string } | null;
+    next: { classId: string; label: string } | null;
+}
+
 // ── The judge queue ──
 
 export interface JudgeQueueEntry {
@@ -100,6 +172,9 @@ export interface JudgeQueueEntry {
     /** Already-recorded placing, for resume/corrections. */
     place: Place | null;
     note: string | null;
+    /** v4 per-entry critique (model / photo), for resume + edit. */
+    critiqueText: string | null;
+    critiquePhotoText: string | null;
 }
 
 export interface JudgeQueueClass {
@@ -111,6 +186,8 @@ export interface JudgeQueueClass {
     sectionId: string;
     sectionName: string;
     status: ClassStatus;
+    /** v4: when this class's results went public (rolling reveal). */
+    resultsPublishedAt: string | null;
     entries: JudgeQueueEntry[];
 }
 

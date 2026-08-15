@@ -25,7 +25,12 @@ import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { recordPlacings } from "@/app/actions/shows-v2";
-import type { JudgeQueueClass, JudgeQueueData } from "@/lib/shows/gallery";
+import {
+    publishClassResults,
+    unpublishClassResults,
+    writeCritique,
+} from "@/app/actions/shows-v4";
+import type { JudgeQueueClass, JudgeQueueData, JudgeQueueEntry } from "@/lib/shows/gallery";
 import {
     AUTOSAVE_DEBOUNCE_MS,
     autosaveReducer,
@@ -197,6 +202,7 @@ export default function JudgeQueue({ queue }: { queue: JudgeQueueData }) {
                     key={activeClass.classId}
                     cls={activeClass}
                     canRecord={canRecord}
+                    canPublish={queue.viewerRole === "host" || queue.viewerRole === "co_host"}
                     onEdited={() => handleClassEdited(activeClass)}
                     onDone={() => handleClassDone(activeClass)}
                 />
@@ -269,11 +275,14 @@ export default function JudgeQueue({ queue }: { queue: JudgeQueueData }) {
 function ClassRecorder({
     cls,
     canRecord,
+    canPublish,
     onEdited,
     onDone,
 }: {
     cls: JudgeQueueClass;
     canRecord: boolean;
+    /** v4: host/co-host may publish this class's results (rolling reveal). */
+    canPublish: boolean;
     /** Fires on every local edit — the parent drops its optimistic ✓. */
     onEdited: () => void;
     onDone: () => void;
@@ -565,14 +574,17 @@ function ClassRecorder({
                                     </div>
                                 </div>
                                 {noteOpenFor === entry.id && (
-                                    <Textarea
-                                        value={notes[entry.id] ?? ""}
-                                        onChange={(e) => handleNoteChange(entry.id, e.target.value)}
-                                        placeholder="Optional critique for the entrant…"
-                                        maxLength={2000}
-                                        rows={3}
-                                        aria-label={`Critique for ${entry.horseName}`}
-                                    />
+                                    <div className="flex flex-col gap-2">
+                                        <Textarea
+                                            value={notes[entry.id] ?? ""}
+                                            onChange={(e) => handleNoteChange(entry.id, e.target.value)}
+                                            placeholder="Placing note (rides with the trophy-case record)…"
+                                            maxLength={2000}
+                                            rows={2}
+                                            aria-label={`Placing note for ${entry.horseName}`}
+                                        />
+                                        <EntryCritiqueEditor entry={entry} />
+                                    </div>
                                 )}
                             </li>
                         );
@@ -602,6 +614,10 @@ function ClassRecorder({
                 />
             )}
 
+            {canPublish && cls.status === "placed" && (
+                <PublishClassControl cls={cls} />
+            )}
+
             {lightboxIndex !== null && lightboxIndex >= 0 && (
                 <PhotoLightbox
                     images={lightboxImages}
@@ -610,5 +626,122 @@ function ClassRecorder({
                 />
             )}
         </section>
+    );
+}
+
+/**
+ * v4 — per-ENTRY critique (model + photo separated; unplaced entries
+ * included: the MEPSA teaching tradition). Saves via writeCritique;
+ * hidden from entrants until the class's results publish.
+ */
+function EntryCritiqueEditor({ entry }: { entry: JudgeQueueEntry }) {
+    const [model, setModel] = useState(entry.critiqueText ?? "");
+    const [photo, setPhoto] = useState(entry.critiquePhotoText ?? "");
+    const [state, setState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+    const [error, setError] = useState<string | null>(null);
+
+    const save = async () => {
+        setState("saving");
+        setError(null);
+        const result = await writeCritique({
+            entryId: entry.id,
+            critique: model.trim() || null,
+            photoCritique: photo.trim() || null,
+        });
+        if (result.success) {
+            setState("saved");
+        } else {
+            setState("error");
+            setError(result.error);
+        }
+    };
+
+    return (
+        <div className="flex flex-col gap-2 rounded-md border border-input bg-card/60 p-2">
+            <p className="m-0 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                Critique for the entrant (revealed with class results)
+            </p>
+            <Textarea
+                value={model}
+                onChange={(e) => { setModel(e.target.value); setState("idle"); }}
+                placeholder="The model — conformation, breed fit, condition…"
+                maxLength={2000}
+                rows={2}
+                aria-label={`Model critique for ${entry.horseName}`}
+            />
+            <Textarea
+                value={photo}
+                onChange={(e) => { setPhoto(e.target.value); setState("idle"); }}
+                placeholder="The photo — angle, light, footing… (kept separate so photo skill never reads as a model fault)"
+                maxLength={2000}
+                rows={2}
+                aria-label={`Photo critique for ${entry.horseName}`}
+            />
+            <div className="flex items-center gap-2">
+                <button
+                    type="button"
+                    className="btn-brass rounded px-3 py-1 text-sm"
+                    disabled={state === "saving" || (!model.trim() && !photo.trim())}
+                    onClick={() => void save()}
+                >
+                    {state === "saving" ? "Saving…" : "Save critique"}
+                </button>
+                {state === "saved" && (
+                    <span className="text-xs text-muted-foreground">Saved ✓</span>
+                )}
+                {state === "error" && error && (
+                    <span role="alert" className="text-xs text-destructive">{error}</span>
+                )}
+            </div>
+        </div>
+    );
+}
+
+/**
+ * v4 — the rolling reveal: host/co-host publishes a placed class's
+ * results (and critiques) to the public class room while the rest of
+ * the show is still being judged. Unpublish = corrections hatch.
+ */
+function PublishClassControl({ cls }: { cls: JudgeQueueClass }) {
+    const router = useRouter();
+    const [pending, setPending] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const published = !!cls.resultsPublishedAt;
+
+    const toggle = async () => {
+        setPending(true);
+        setError(null);
+        const result = published
+            ? await unpublishClassResults({ classId: cls.classId })
+            : await publishClassResults({ classId: cls.classId });
+        if (!result.success) setError(result.error);
+        else router.refresh();
+        setPending(false);
+    };
+
+    return (
+        <div className="mt-3 flex flex-wrap items-center gap-3 rounded-md border border-input bg-card/60 p-3">
+            <div className="min-w-0 flex-1">
+                <p className="m-0 text-sm font-medium">
+                    {published ? "Results are live in the class room" : "Class is judged — results not yet public"}
+                </p>
+                <p className="m-0 text-xs text-muted-foreground">
+                    {published
+                        ? "Entrants can see placings and critiques for this class."
+                        : "Publish to reveal this class's ribbon rail and critiques while you keep judging."}
+                </p>
+            </div>
+            <button
+                type="button"
+                className="btn-brass rounded px-3 py-1.5 text-sm"
+                disabled={pending}
+                onClick={() => void toggle()}
+            >
+                {pending ? "Working…" : published ? "Unpublish" : "Publish class results"}
+            </button>
+            {error && (
+                <p role="alert" className="w-full text-xs text-destructive">{error}</p>
+            )}
+        </div>
     );
 }

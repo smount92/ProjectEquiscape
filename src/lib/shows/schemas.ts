@@ -367,6 +367,91 @@ export const recordCallbackSchema = z
         message: "Champion and reserve must be different entries.",
     });
 
+// ══════════════════════════════════════════════════════════════
+// V4 — safety-native showing + the class room (migration 148)
+// ══════════════════════════════════════════════════════════════
+
+export const barEntrantSchema = z.object({
+    showId: uuidSchema,
+    userId: uuidSchema,
+    reason: z.string().trim().max(500).optional(),
+    /** Also staff-scratch every live entry the user has at this show. */
+    scratchEntries: z.boolean().default(true),
+});
+
+export const liftBarSchema = z.object({
+    showId: uuidSchema,
+    userId: uuidSchema,
+});
+
+export const listBarredEntrantsSchema = z.object({
+    showId: uuidSchema,
+});
+
+export const voidCardSchema = z.object({
+    code: z
+        .string()
+        .regex(/^[A-HJ-NP-Za-km-z2-9]{8}$/, "That is not a valid card code."),
+    reason: z.string().trim().min(3, "Give a short reason — it lands on the card's audit trail.").max(500),
+});
+
+export const strikeEntrySchema = z.object({
+    entryId: uuidSchema,
+    reason: z.string().trim().min(3, "Give a short reason — it lands on the entry's audit trail.").max(500),
+});
+
+export const writeCritiqueSchema = z
+    .object({
+        entryId: uuidSchema,
+        /** Feedback about the MODEL (conformation, breed fit, condition). */
+        critique: z.string().trim().max(2000).nullable().optional(),
+        /** Feedback about the PHOTO (angle, light, footing) — kept separate
+         * so photography skill never masquerades as model faults. */
+        photoCritique: z.string().trim().max(2000).nullable().optional(),
+    })
+    .refine((v) => (v.critique ?? "") !== "" || (v.photoCritique ?? "") !== "", {
+        message: "Write at least one of the two critique fields.",
+    });
+
+export const publishClassResultsSchema = z.object({
+    classId: uuidSchema,
+});
+
+export const unpublishClassResultsSchema = z.object({
+    classId: uuidSchema,
+});
+
+export const documentKindSchema = z.enum([
+    "breed",
+    "performance",
+    "collectibility",
+    "other",
+]);
+
+export const createHorseDocumentSchema = z.object({
+    horseId: uuidSchema,
+    kind: documentKindSchema.default("breed"),
+    title: z.string().trim().min(1, "Give the document a title.").max(120),
+    bodyMd: z.string().trim().min(1, "Write the documentation body.").max(4000),
+});
+
+export const updateHorseDocumentSchema = z.object({
+    documentId: uuidSchema,
+    kind: documentKindSchema.optional(),
+    title: z.string().trim().min(1).max(120).optional(),
+    bodyMd: z.string().trim().min(1).max(4000).optional(),
+});
+
+export const deleteHorseDocumentSchema = z.object({
+    documentId: uuidSchema,
+});
+
+export const attachDocumentToEntrySchema = z.object({
+    entryId: uuidSchema,
+    /** null detaches. */
+    documentId: uuidSchema.nullable(),
+});
+
 /** First zod issue as a user-facing error string. */
 export function firstZodError(error: z.ZodError): string {
     return error.issues[0]?.message ?? "Invalid input.";
