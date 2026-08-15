@@ -191,9 +191,11 @@ interface PublicClassRowProps {
      *  per-class `scheduled` gate stays here with the row. */
     canEnter: boolean;
     onEnter: (cls: ConsoleClass) => void;
+    /** v4: when set, an inline "Class room →" link renders in the row. */
+    classRoomHref?: string;
 }
 
-export function PublicClassRow({ cls, canEnter, onEnter }: PublicClassRowProps) {
+export function PublicClassRow({ cls, canEnter, onEnter, classRoomHref }: PublicClassRowProps) {
     const cancelled = cls.status === "cancelled";
     const combined = cls.status === "combined";
     return (
@@ -229,6 +231,14 @@ export function PublicClassRow({ cls, canEnter, onEnter }: PublicClassRowProps) 
                 </span>
             )}
             <span className="text-xs text-muted-foreground">{cls.entryCount} entered</span>
+            {classRoomHref && (
+                <Link
+                    href={classRoomHref}
+                    className="text-xs font-medium whitespace-nowrap text-forest hover:underline"
+                >
+                    Class room →
+                </Link>
+            )}
             {canEnter && cls.status === "scheduled" && (
                 <span className="ml-auto">
                     <Button variant="outline" size="sm" onClick={() => onEnter(cls)}>

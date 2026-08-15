@@ -3627,6 +3627,10 @@ html[data-theme="night"][data-simple-mode="true"] .polaroid {
     display: flex;
     width: max-content;
     animation: ribbon-scroll var(--ribbon-duration, 60s) linear infinite;
+    /* Compositor-only motion — without these the huge image strip
+       repaints on CPU and stutters. */
+    will-change: transform;
+    backface-visibility: hidden;
 }
 .entry-ribbon:hover .entry-ribbon-track,
 .entry-ribbon:focus-within .entry-ribbon-track {

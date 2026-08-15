@@ -56,6 +56,7 @@ function Track({
                             alt={`${entry.horseName} — entry in ${entry.className}`}
                             className={`${thumbClass} object-cover transition-transform group-hover:scale-105`}
                             loading="lazy"
+                            decoding="async"
                         />
                         <span className="absolute right-0 bottom-0 left-0 truncate bg-black/55 px-1.5 py-0.5 text-xs text-white">
                             {entry.entryNumber !== null ? `#${entry.entryNumber} · ` : ""}
