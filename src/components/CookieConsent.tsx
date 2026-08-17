@@ -19,6 +19,15 @@ export default function CookieConsent() {
  useEffect(() => {
  // Don't show if user has already consented
  const consent = localStorage.getItem(COOKIE_CONSENT_KEY);
+ // A stored decline must be RE-APPLIED every load — the old code set
+ // the ga-disable flag only in the click handler, so the opt-out
+ // silently lapsed on the next visit (audit truth-pass #6). The
+ // inline script in layout.tsx sets it before GA loads; this is the
+ // belt for client-side navigations.
+ if (consent === "declined" && typeof window !== "undefined") {
+ // @ts-expect-error — gtag global
+ window["ga-disable-G-7DWKBT1JV9"] = true;
+ }
  if (!consent) {
  // Small delay so it doesn't flash on initial load
  const timer = setTimeout(() => setVisible(true), 1500);

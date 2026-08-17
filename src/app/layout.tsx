@@ -77,6 +77,12 @@ export default function RootLayout({
  __html: `try{if(localStorage.getItem("mhh-theme")==="night"){document.documentElement.dataset.theme="night"}}catch(e){}`,
  }}
  />
+ {/* Consent gate BEFORE the GA loader: a stored decline sets the
+ ga-disable flag so GA never sends a hit, on every page load —
+ previously the decline only held for the click's session. */}
+ <Script id="ga-consent-gate" strategy="beforeInteractive">
+ {`try{if(localStorage.getItem('mhh-cookie-consent')==='declined'){window['ga-disable-${GA_MEASUREMENT_ID}']=true}}catch(e){}`}
+ </Script>
  <Script
  src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
  strategy="afterInteractive"
