@@ -924,7 +924,7 @@ export default function AddHorsePage() {
  )}
  <input
  type="file"
- accept="image/jpeg,image/png,image/webp,image/gif"
+ accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif"
  className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
  onChange={(e) => {
  const file = e.target.files?.[0];
@@ -977,9 +977,13 @@ export default function AddHorsePage() {
  className="hidden"
  title="Upload flaw or condition photos"
  onChange={(e) => {
- const files = Array.from(e.target.files || []).filter((f) =>
- f.type.startsWith("image/"),
- );
+ // Same validation as the gallery slots — this zone previously
+ // skipped it entirely (no size cap, HEIC died later in the
+ // crop modal with no message).
+ const picked = Array.from(e.target.files || []);
+ const firstBad = picked.map(validateImageFile).find((err) => err !== null);
+ const files = picked.filter((f) => validateImageFile(f) === null);
+ if (firstBad) setFlawNotice(firstBad);
  if (flawFiles.length + files.length > 5) {
  setFlawNotice("That's more than 5 flaw/condition photos — remove one first or pick fewer files.");
  e.target.value ="";
@@ -1097,9 +1101,11 @@ export default function AddHorsePage() {
  className="hidden"
  title="Upload extra photos"
  onChange={(e) => {
- const files = Array.from(e.target.files || []).filter((f) =>
- f.type.startsWith("image/"),
- );
+ // Same validation as the gallery slots (see flaw zone note).
+ const picked = Array.from(e.target.files || []);
+ const firstBad = picked.map(validateImageFile).find((err) => err !== null);
+ const files = picked.filter((f) => validateImageFile(f) === null);
+ if (firstBad) setExtraNotice(firstBad);
  if (extraFiles.length + files.length > 30) {
  setExtraNotice("That's more than 30 extra detail photos — remove one first or pick fewer files.");
  e.target.value ="";

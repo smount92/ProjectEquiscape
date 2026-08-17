@@ -22,11 +22,16 @@ const TIER_CONFIG: Record<UserTier, CompressionConfig> = {
 
 const THUMB_DIMENSION = 400;
 const THUMB_QUALITY = 0.60;
-const MAX_FILE_SIZE_MB = 10; // Bumped for Pro tier high-res
+// Pre-compression cap. Modern phone cameras produce 15-25MB originals;
+// they are downscaled/transcoded to WebP client-side before upload, so
+// the STORAGE cap (10MB, migration 149) still holds for what we send.
+const MAX_FILE_SIZE_MB = 30;
 
 export async function compressImage(file: File, tier: UserTier = "free"): Promise<File> {
-  // Skip if already small enough
-  if (file.size < 200 * 1024) {
+  // Skip only when small AND already WebP — the old skip returned the
+  // original bytes (JPEG/PNG/GIF) which were then uploaded under a
+  // .webp name with an image/webp content type (audit collection D3).
+  if (file.size < 200 * 1024 && file.type === "image/webp") {
     return file;
   }
 
@@ -84,16 +89,25 @@ export async function compressImage(file: File, tier: UserTier = "free"): Promis
           config.quality
         );
       };
-      img.onerror = () => reject(new Error("Failed to load image"));
+      img.onerror = () =>
+        reject(
+          new Error(
+            file.type === "image/heic" || file.type === "image/heif"
+              ? "This browser can't read HEIC photos — try Safari, or set your iPhone camera to 'Most Compatible' (JPEG)."
+              : "Failed to load image",
+          ),
+        );
     };
     reader.onerror = () => reject(new Error("Failed to read file"));
   });
 }
 
 export function validateImageFile(file: File): string | null {
-  const validTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+  // HEIC/HEIF accepted: iPhones either hand us a JPEG (most browsers)
+  // or a real HEIC that Safari can decode into the canvas transcoder.
+  const validTypes = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/heic", "image/heif"];
   if (!validTypes.includes(file.type)) {
-    return "Please upload a JPEG, PNG, WebP, or GIF image.";
+    return "Please upload a JPEG, PNG, WebP, GIF, or HEIC photo.";
   }
   if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
     return `Image must be under ${MAX_FILE_SIZE_MB}MB.`;
@@ -232,7 +246,14 @@ export async function compressImageWithWatermark(
           config.quality
         );
       };
-      img.onerror = () => reject(new Error("Failed to load image"));
+      img.onerror = () =>
+        reject(
+          new Error(
+            file.type === "image/heic" || file.type === "image/heif"
+              ? "This browser can't read HEIC photos — try Safari, or set your iPhone camera to 'Most Compatible' (JPEG)."
+              : "Failed to load image",
+          ),
+        );
     };
     reader.onerror = () => reject(new Error("Failed to read file"));
   });
