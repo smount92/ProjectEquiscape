@@ -19,7 +19,7 @@ export default function TermsPage() {
  <p className="mt-2 text-lg text-secondary-foreground">
  Fair rules for a fair platform.
  </p>
- <p className="text-secondary-foreground mt-2 text-sm">Last updated: March 14, 2026</p>
+ <p className="text-secondary-foreground mt-2 text-sm">Last updated: August 17, 2026</p>
  </div>
 
  {/* Agreement */}
@@ -101,10 +101,22 @@ export default function TermsPage() {
  identity and trustworthiness of other users.
  </li>
  <li>
- <strong>User ratings are permanent.</strong> Transaction reviews, once submitted, cannot be
- altered or removed to maintain trust integrity.
+ <strong>Reviews attach to real transactions only.</strong> A review can only be left on a
+ verified completed trade. You may retract a review you wrote; the reviewed party can never
+ edit or remove reviews about them.
  </li>
  </ul>
+
+ <h3>Paid Subscriptions</h3>
+ <p>
+ Model Horse Hub offers optional paid tiers (such as MHH Pro) billed through Stripe. Core
+ collection and trust features are free and always will be. Paid subscriptions renew
+ automatically each billing period until cancelled. You can cancel at any time &mdash; from
+ your Stripe receipt emails or by contacting us &mdash; and cancellation stops future charges.
+ If a renewal payment fails, paid features may be suspended until payment succeeds. Fees
+ already paid are non-refundable except where required by law; if something went wrong,
+ contact us and we&apos;ll make it right.
+ </p>
  </section>
 
  {/* Community Conduct */}
@@ -132,8 +144,8 @@ export default function TermsPage() {
  </p>
  <ul className="mb-4 list-none p-0">
  <li>
- Provenance events (ownership transfers, show results, customization records) are permanent
- and cannot be deleted
+ System provenance events (ownership transfers, show results, customization records) cannot
+ be edited or deleted through the platform &mdash; they are the horse&apos;s permanent record
  </li>
  <li>
  When you transfer a horse, the Hoofprint history travels with the horse to the new
@@ -184,7 +196,7 @@ export default function TermsPage() {
  </li>
  <li>
  Our total liability for any claim related to the Platform is limited to the amount you have
- paid us (which, for our free tier, is zero).
+ paid us in the twelve months before the claim (for free accounts, zero).
  </li>
  </ul>
  </section>
@@ -193,10 +205,12 @@ export default function TermsPage() {
  <section className="mb-12">
  <h2>10. Account Termination</h2>
  <p>
- You may delete your account at any time from your Settings page. Upon deletion, your collection
- data, photos, and private information will be permanently removed. Hoofprint provenance
- records for horses you have already transferred to other users will remain intact, as they are
- part of the horse&apos;s history, not your account.
+ You may delete your account at any time from your Settings page. Deletion anonymizes and
+ permanently locks your account: your alias, bio, avatar, and message contents are removed or
+ scrubbed, your horses are hidden from public view, and you can no longer sign in. Hoofprint
+ provenance records and show results remain intact in anonymized form, as they are part of each
+ horse&apos;s history, not your account &mdash; including for horses you transferred to other
+ users. To request removal of specific content beyond this, contact us.
  </p>
  <p>
  We may suspend or terminate accounts that violate these Terms, engage in abuse, or threaten the

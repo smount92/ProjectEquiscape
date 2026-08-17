@@ -44,21 +44,23 @@ export default function GettingStartedPage() {
                     <p>
                         Click{" "}
                         <strong className="inline-flex items-center gap-1">
-                            <Home size={15} strokeWidth={1.5} /> &ldquo;Digital Stable&rdquo;
+                            <Home size={15} strokeWidth={1.5} /> &ldquo;Stable&rdquo;
                         </strong>{" "}
-                        in the navigation, then hit <strong>&ldquo;+ Add Horse&rdquo;</strong>.
+                        in the navigation, then hit <strong>&ldquo;Add to Stable&rdquo;</strong> (or use{" "}
+                        <strong>Quick Add</strong> for a fast one-tap entry).
                     </p>
                     <p>
-                        Start by selecting your model type &mdash; <strong>Breyer/Stone</strong> or{" "}
-                        <strong>Artist Resin</strong>. Our database has <strong>10,500+ reference entries</strong>, so
-                        search by name, mold, or manufacturer to auto-fill the details. If your model isn&apos;t in the
-                        database, you can enter it manually.
+                        The form walks you through four short steps: <strong>photos first</strong>, then the{" "}
+                        <strong>reference link</strong> &mdash; our database has{" "}
+                        <strong>10,500+ reference entries</strong>, so search by name, mold, or manufacturer to
+                        auto-fill the details (skip it if your model isn&apos;t listed, or suggest we add it) &mdash;
+                        then <strong>identity</strong> (name, finish type, condition grade) and an optional{" "}
+                        <strong>financial vault</strong> entry.
                     </p>
                     <p>
                         Upload up to <strong>5 LSQ-style photos</strong> (Near-Side, Off-Side, Front, Hindquarters,
                         Belly/Maker&apos;s Mark) plus <strong>5 flaw-documentation photos</strong> — free on every
-                        tier. Pro members can add up to 30 extra detail shots. Set your condition grade, finish
-                        type, and give your horse a name.
+                        tier. Pro members can add up to 30 extra detail shots.
                     </p>
                     <div className="border-forest/20 bg-forest/5 mt-4 rounded-lg border px-6 py-4 text-sm leading-relaxed">
                         <strong className="inline-flex items-center gap-1.5">
@@ -139,9 +141,9 @@ export default function GettingStartedPage() {
                                     <Trophy size={16} strokeWidth={1.5} /> Show Ring
                                 </Link>
                             </strong>{" "}
-                            &mdash; Browse all public models. Filter by finish type, trade status, manufacturer, scale,
-                            and the full set of facets in your Stable &mdash; then save the combinations you use most as
-                            a view you can jump back to anytime.
+                            &mdash; Browse all public models. Filter by finish type, trade status, manufacturer, and
+                            scale. (In your own Stable you get the full facet set, and you can save the filter
+                            combinations you use most as views to jump back to anytime.)
                         </li>
                         <li>
                             <strong>
@@ -157,8 +159,8 @@ export default function GettingStartedPage() {
                                     <Newspaper size={16} strokeWidth={1.5} /> Feed
                                 </Link>
                             </strong>{" "}
-                            &mdash; See activity from collectors you follow &mdash; new additions, favorites, comments,
-                            and show results.
+                            &mdash; See activity from collectors you follow &mdash; new horses joining their stables,
+                            sales, and show results &mdash; plus community posts in the Global tab.
                         </li>
                         <li>
                             <strong>
@@ -244,8 +246,9 @@ export default function GettingStartedPage() {
                         <li>Change your password</li>
                     </ul>
                     <p>
-                        You can also toggle <strong>Simple Mode</strong> (the eye icon in the header) for high-contrast,
-                        large text &mdash; great for accessibility or photo show judging.
+                        You can also toggle <strong>Simple Mode</strong> for high-contrast, large text &mdash; the eye
+                        icon in the header when you&apos;re browsing logged out, or in your account menu once
+                        you&apos;re signed in. Great for accessibility or photo show judging.
                     </p>
                 </section>
 

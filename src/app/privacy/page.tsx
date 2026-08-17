@@ -20,7 +20,7 @@ export default function PrivacyPage() {
  <p className="mt-2 text-lg text-secondary-foreground">
  Your data is yours. Full stop.
  </p>
- <p className="text-secondary-foreground mt-2 text-sm">Last updated: March 14, 2026</p>
+ <p className="text-secondary-foreground mt-2 text-sm">Last updated: August 17, 2026</p>
  </div>
 
  {/* Overview */}
@@ -55,16 +55,20 @@ export default function PrivacyPage() {
  <h3>Financial Vault Data</h3>
  <p>
  Purchase prices, estimated values, insurance notes, and purchase dates you optionally provide.
- This data is <strong>encrypted at rest</strong> and accessible only to you. Our team cannot view
- your financial vault &mdash; it is protected by cryptographic row-level security policies that
- enforce access at the database level.
+ Vault data is <strong>never shown to any other user</strong>, never transferred with a horse,
+ and never sent to third parties. Access is enforced by row-level security at the database
+ level; the only automated reads are features you invoke yourself (your insurance report and
+ your monthly collection digest, both computed on our own servers). Like all our data, it is
+ encrypted at rest and in transit by our hosting infrastructure.
  </p>
 
  <h3>Photos</h3>
  <p>
- Images you upload are stored in secure cloud storage with signed URL access controls. Photos are
- only accessible via time-limited signed URLs &mdash; they cannot be hotlinked or scraped by
- third parties.
+ Images you upload are stored in secure cloud storage. Photos of <strong>public</strong> horses
+ are served from stable public URLs so they load fast and can be shared; photos of{""}
+ <strong>private</strong> horses are never linked or listed anywhere on the site, and their
+ storage addresses are long random identifiers that cannot be guessed or browsed. Uploads are
+ limited to image files with a size cap enforced at the storage layer.
  </p>
 
  <h3>Usage Data</h3>
@@ -82,7 +86,7 @@ export default function PrivacyPage() {
  <li>Provide and operate the Model Horse Hub platform</li>
  <li>Display your public collection in the Show Ring (only when you opt in)</li>
  <li>Facilitate messaging and commerce features between users</li>
- <li>Send transactional emails (e.g., message notifications, transfer confirmations)</li>
+ <li>Send transactional emails (e.g., message notifications, show results, entry deadline reminders)</li>
  <li>Generate Hoofprint provenance records for your horses</li>
  <li>Improve the platform based on aggregate usage patterns</li>
  </ul>
@@ -93,7 +97,7 @@ export default function PrivacyPage() {
  <li>Sell your data to third parties &mdash; ever</li>
  <li>Display ads or share data with advertisers</li>
  <li>Use your collection data for machine learning training</li>
- <li>Share your financial vault data with anyone, including our own staff</li>
+ <li>Show your financial vault data to any other user, or share it with any third party</li>
  <li>Send marketing emails without your explicit consent</li>
  </ul>
  </section>
@@ -113,12 +117,11 @@ export default function PrivacyPage() {
  TLS/HTTPS
  </li>
  <li>
- <strong>Signed URLs for photos</strong> &mdash; image access requires time-limited
- cryptographic tokens
+ <strong>Storage upload limits</strong> &mdash; image-only uploads with size caps enforced
+ at the storage layer, and unguessable storage addresses for every photo
  </li>
  <li>
- <strong>Secure authentication</strong> &mdash; powered by Supabase Auth with PKCE flow and
- HTTP-only session cookies
+ <strong>Secure authentication</strong> &mdash; powered by Supabase Auth with the PKCE flow
  </li>
  <li>
  <strong>Rate limiting</strong> &mdash; sensitive actions are protected against abuse and
@@ -169,11 +172,26 @@ export default function PrivacyPage() {
  <strong>Resend</strong> &mdash; transactional email delivery
  </li>
  <li>
- <strong>Google Analytics</strong> &mdash; anonymized usage analytics
+ <strong>Google Analytics</strong> &mdash; anonymized usage analytics (you can decline this
+ in the cookie banner)
  </li>
  <li>
- <strong>Google Gemini</strong> &mdash; optional AI mold identification (images are processed
- but not stored by Google)
+ <strong>Stripe</strong> &mdash; payment processing for optional paid tiers. Card details go
+ directly to Stripe; we never see or store them
+ </li>
+ <li>
+ <strong>Sentry</strong> &mdash; error monitoring, so we find crashes before you have to
+ report them (error reports may include browser and page context, never vault data)
+ </li>
+ <li>
+ <strong>Google Gemini</strong> &mdash; only the optional, opt-in mold identification tool
+ sends the photo you choose for analysis (images are processed but not stored by Google).
+ Nothing else on the platform uses AI on your data
+ </li>
+ <li>
+ <strong>eBay Partner Network</strong> &mdash; some catalog pages include clearly marked
+ sponsored eBay search links; if you buy through one, we may earn a small commission. No
+ data about you is shared with eBay
  </li>
  </ul>
  <p className="mt-4">
@@ -188,19 +206,22 @@ export default function PrivacyPage() {
  <ul className="mb-4 list-none p-0">
  <li>
  <strong>Export your data</strong> &mdash; download your entire collection as CSV at any time
- from your dashboard
+ from your Settings page
  </li>
  <li>
- <strong>Delete your account</strong> &mdash; request full account deletion from your
- Settings page, which removes all your data including photos
+ <strong>Delete your account</strong> &mdash; from your Settings page. Deletion anonymizes
+ your account (your alias, bio, avatar, and message contents are removed or scrubbed) and
+ permanently locks it. Records that other collectors rely on &mdash; provenance chains and
+ show results attached to horses &mdash; are retained in anonymized form, because they are
+ part of other people&apos;s horses&apos; histories too. To request removal of specific
+ content beyond this, <Link href="/contact">contact us</Link>
  </li>
  <li>
- <strong>Control visibility</strong> &mdash; set any horse to private, unlisted, or public at
- any time
+ <strong>Control visibility</strong> &mdash; make any horse public or private at any time
  </li>
  <li>
- <strong>Opt out of analytics</strong> &mdash; use any standard ad-blocker or Do Not Track
- setting
+ <strong>Opt out of analytics</strong> &mdash; choose &ldquo;Decline Analytics&rdquo; in the
+ cookie banner; your choice is remembered and enforced on every visit
  </li>
  </ul>
  </section>
@@ -210,9 +231,10 @@ export default function PrivacyPage() {
  <h2>7. Cookies</h2>
  <p>
  We use only <strong>essential cookies</strong> required for authentication and session
- management. We do not use tracking cookies, advertising cookies, or third-party marketing
- pixels. The only non-essential cookie is from Google Analytics, which respects Do Not Track
- headers.
+ management, plus Google Analytics for anonymized usage statistics. We do not use tracking
+ cookies, advertising cookies, or third-party marketing pixels. You can decline analytics via
+ the cookie banner &mdash; declining is remembered and disables Google Analytics on every
+ subsequent visit.
  </p>
  </section>
 
@@ -233,9 +255,9 @@ export default function PrivacyPage() {
  <section className="mb-12">
  <h2>9. Changes to This Policy</h2>
  <p>
- We may update this Privacy Policy from time to time. We will notify registered users of any
- material changes via email. The &ldquo;Last updated&rdquo; date at the top of this page reflects
- the most recent revision.
+ We may update this Privacy Policy from time to time. Material changes will be announced on the
+ site, and the &ldquo;Last updated&rdquo; date at the top of this page always reflects the most
+ recent revision.
  </p>
  </section>
 

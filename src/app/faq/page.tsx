@@ -22,7 +22,7 @@ const FAQ_ITEMS: FaqItem[] = [
     {
         category: "Getting Started",
         q: "Is Model Horse Hub really free?",
-        a: "Yes! The core platform — including your stable, reference database, photo galleries, the Show Ring, and Hoofprint provenance — is completely free. No credit card required. We plan to offer optional premium features in the future, but the free tier will always be fully functional.",
+        a: "Yes! The core platform — including your stable, reference database, photo galleries, the Show Ring, shows, and Hoofprint provenance — is completely free. No credit card required. Optional paid tiers (like MHH Pro) add conveniences such as extra detail photos and reports, but trust and safety features are never paywalled, and the free tier is fully functional forever.",
     },
     {
         category: "Getting Started",
@@ -32,7 +32,7 @@ const FAQ_ITEMS: FaqItem[] = [
     {
         category: "Getting Started",
         q: "Can I import my existing collection from a spreadsheet?",
-        a: 'Yes! Go to your Stable and click "Import CSV." Upload your spreadsheet and we\'ll fuzzy-match each row against our 10,500+ reference database. You can review and confirm matches before importing.',
+        a: 'Yes! Go to your Stable and click "Batch Import." Upload your spreadsheet and we\'ll fuzzy-match each row against our 10,500+ reference database. You can review and confirm matches before importing.',
     },
 
     // Collection Management
@@ -54,24 +54,24 @@ const FAQ_ITEMS: FaqItem[] = [
     {
         category: "Your Collection",
         q: "What is the Financial Vault?",
-        a: "The Financial Vault is where you store purchase prices, estimated values, purchase dates, and insurance notes. This data is protected by row-level security — even our team cannot access it. It's completely private to you.",
+        a: "The Financial Vault is where you store purchase prices, estimated values, purchase dates, and insurance notes. It's completely private to you: no other user can ever see it, it never transfers with a horse, and it's never shared with any third party. Access is locked down by row-level security at the database level.",
     },
 
     // Privacy & Security
     {
         category: "Privacy & Security",
         q: "Can other users see my financial data?",
-        a: "Absolutely not. Your purchase prices, estimated values, and insurance notes are locked behind cryptographic row-level security at the database level. Not even Model Horse Hub administrators can view this data. Only you can access your financial vault.",
+        a: "No. Your purchase prices, estimated values, and insurance notes are never shown to any other user, never travel with a horse when it's sold, and are never sent to any third party. Database row-level security enforces that only your account can read your vault; the only automated reads are features you run yourself, like your insurance report.",
     },
     {
         category: "Privacy & Security",
         q: "What does 'public' vs 'private' vs 'unlisted' mean?",
-        a: '"Public" horses appear in the Show Ring and search results. "Unlisted" horses can be viewed via direct link but don\'t appear in search. "Private" horses are visible only to you. You control this per-horse from your stable.',
+        a: '"Public" horses appear in the Show Ring and can be seen by anyone with the link. "Private" horses are visible only to you. You control this per-horse from your stable, and you can change it at any time.',
     },
     {
         category: "Privacy & Security",
         q: "How are my photos stored?",
-        a: "Photos are stored in secure cloud storage and accessed via time-limited signed URLs. They cannot be hotlinked or scraped by third parties. Each URL expires and must be re-signed for access.",
+        a: "Photos live in secure cloud storage. Photos of public horses are served from stable URLs so pages load fast and links you share keep working; photos of private horses are never linked or listed anywhere, and their storage addresses are long random identifiers that can't be guessed or browsed. Uploads are restricted to image files with enforced size limits.",
     },
 
     // Hoofprint
@@ -100,7 +100,7 @@ const FAQ_ITEMS: FaqItem[] = [
     {
         category: "Buying & Selling",
         q: "Are seller ratings permanent?",
-        a: "Yes. Transaction ratings cannot be edited or removed once submitted. This ensures trust integrity — every rating reflects a real interaction.",
+        a: "Every rating is tied to a verified completed transaction — you can't review someone you haven't actually traded with. You can retract a review you wrote if you change your mind, but the person being reviewed can never edit or remove reviews about them.",
     },
     {
         category: "Buying & Selling",
@@ -149,7 +149,7 @@ const FAQ_ITEMS: FaqItem[] = [
     {
         category: "Your Account",
         q: "Can I export my data?",
-        a: "Yes, anytime — your data is never trapped here. Download your entire collection (horses, records, and qualification cards) as a CSV file, or generate PDF reports, right from your Dashboard. We also back up everything automatically every night. This hobby has been burned before — Model Horse Blab went dark for years, MH$P was hit by ransomware — so we built exports in from day one, and if we ever wind Model Horse Hub down, every user gets a real advance-notice export window first. Your data is yours, full stop.",
+        a: "Yes, anytime — your data is never trapped here. Download your entire collection (horses, records, and qualification cards) as a CSV file, or generate PDF reports, right from your Settings page. Our database is also backed up automatically every day. This hobby has been burned before — Model Horse Blab went dark for years, MH$P was hit by ransomware — so we built exports in from day one, and if we ever wind Model Horse Hub down, every user gets a real advance-notice export window first. Your data is yours, full stop.",
     },
 ];
 
