@@ -319,20 +319,34 @@ export async function claimParkedHorse(pin: string): Promise<{
             return { success: false, error: result.error || "Claim failed." };
         }
 
-        // Create a completed transaction for this parked sale (enables reviews)
+        // Create a completed transaction for this parked sale (enables
+        // reviews) — UNLESS this claim closes an offer-flow sale, whose
+        // funds_verified transaction gets completed below instead (audit
+        // D5: the double row inflated review-eligible transaction lists).
         try {
-            const { createTransaction } = await import("@/app/actions/transactions");
-            await createTransaction({
-                type: "parked_sale",
-                partyAId: result.sender_id!,
-                partyBId: user.id,
-                horseId: result.horse_id,
-                status: "completed",
-                metadata: {
-                    pin,
-                    sale_price: result.sale_price || null,
-                },
-            });
+            const adminDupCheck = getAdminClient();
+            const { data: offerFlowTxn } = result.horse_id
+                ? await adminDupCheck
+                      .from("transactions")
+                      .select("id")
+                      .eq("horse_id", result.horse_id)
+                      .eq("status", "funds_verified")
+                      .maybeSingle()
+                : { data: null };
+            if (!offerFlowTxn) {
+                const { createTransaction } = await import("@/app/actions/transactions");
+                await createTransaction({
+                    type: "parked_sale",
+                    partyAId: result.sender_id!,
+                    partyBId: user.id,
+                    horseId: result.horse_id,
+                    status: "completed",
+                    metadata: {
+                        pin,
+                        sale_price: result.sale_price || null,
+                    },
+                });
+            }
         } catch (err) { logger.error("Transfer", "Background task failed", err); }
 
         // Close state machine: if this claim came from a commerce offer flow,

@@ -1,5 +1,5 @@
 // ============================================================
-// Vercel Cron: Stablemaster AI Agent
+// Vercel Cron: Stablemaster Monthly Report
 // Monthly collection analysis for MHH Pro subscribers
 //
 // To activate, add to vercel.json:
@@ -10,7 +10,7 @@
 //     }]
 // }
 //
-// Requires: CRON_SECRET, GEMINI_API_KEY, RESEND_API_KEY
+// Requires: CRON_SECRET, RESEND_API_KEY (no LLM — deterministic digest)
 // ============================================================
 
 import { NextRequest, NextResponse } from "next/server";
@@ -19,7 +19,6 @@ import { logger } from "@/lib/logger";
 import { Resend } from "resend";
 import * as Sentry from "@sentry/nextjs";
 
-const GEMINI_MODEL = "gemini-2.5-flash";
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "Model Horse Hub <noreply@modelhorsehub.com>";
 
 export async function GET(request: NextRequest) {
@@ -29,11 +28,6 @@ export async function GET(request: NextRequest) {
     // (e.g. preview deploys) accepts the literal "Bearer undefined".
     if (!process.env.CRON_SECRET || authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-        return NextResponse.json({ error: "GEMINI_API_KEY not configured" }, { status: 500 });
     }
 
     const resendKey = process.env.RESEND_API_KEY;
@@ -82,7 +76,7 @@ export async function GET(request: NextRequest) {
                     .filter(Boolean) as string[];
 
                 // Fetch current market prices
-                let marketPrices: Record<string, number> = {};
+                const marketPrices: Record<string, number> = {};
                 if (catalogIds.length > 0) {
                     const { data: prices } = await admin
                         .from("mv_market_prices")
@@ -113,59 +107,38 @@ export async function GET(request: NextRequest) {
                 const totalEstimated = portfolioSummary.reduce((s, h) => s + (h.estimatedValue || 0), 0);
                 const totalMarket = portfolioSummary.reduce((s, h) => s + (h.marketValue || 0), 0);
 
-                // Call Gemini for analysis
-                const systemPrompt = `Act as an expert equine model horse appraiser and market analyst named "Stablemaster". 
-You are writing a monthly collection report for a Pro subscriber of Model Horse Hub. 
-Summarize the portfolio in 3 concise, friendly paragraphs:
-1. Overall collection health and value trends
-2. Notable items — highlight any horses where market value significantly differs from estimated value
-3. Brief actionable insight — a suggestion for the collector
-
-Do NOT hallucinate financial advice. Only reference data present in the JSON.
-Keep the tone warm, professional, and hobby-enthusiastic. Use the collector's name "${alias}" once.
-Format your response as HTML with <p> tags for each paragraph. Use <strong> for emphasis.`;
-
-                const geminiBody = {
-                    systemInstruction: { parts: [{ text: systemPrompt }] },
-                    generationConfig: { temperature: 0.6 },
-                    contents: [{
-                        parts: [{
-                            text: JSON.stringify({
-                                totalModels: horses.length,
-                                totalPurchaseValue: totalPurchase,
-                                totalEstimatedValue: totalEstimated,
-                                totalMarketValue: totalMarket,
-                                portfolio: portfolioSummary.slice(0, 50), // Cap at 50 to avoid token limits
-                            }),
-                        }],
-                    }],
-                };
-
-                const geminiRes = await fetch(
-                    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
-                    {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(geminiBody),
-                    }
-                );
-
-                if (!geminiRes.ok) {
-                    logger.error("Stablemaster", `Gemini API error for user ${proUser.id}`, {
-                        status: geminiRes.status,
-                    });
-                    errors++;
-                    continue;
-                }
-
-                const geminiData = await geminiRes.json();
-                const analysisHtml = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || "";
-
-                if (!analysisHtml) {
-                    logger.error("Stablemaster", `Empty Gemini response for user ${proUser.id}`);
-                    errors++;
-                    continue;
-                }
+                // Deterministic digest — NO LLM. Vault data previously
+                // left the platform to Google's Gemini API here, directly
+                // contradicting the "even our team cannot access your
+                // vault" privacy promise (audit Part 2 §Area 8 #3). The
+                // community also rejected AI features outright; the
+                // numbers below are computed in-process and nothing
+                // leaves the building.
+                const usd = (n: number) =>
+                    n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+                const movers = portfolioSummary
+                    .filter((h) => h.marketValue !== null && h.estimatedValue !== null)
+                    .map((h) => ({
+                        name: h.name,
+                        diff: (h.marketValue as number) - (h.estimatedValue as number),
+                    }))
+                    .filter((m) => Math.abs(m.diff) >= 5)
+                    .sort((a, b) => Math.abs(b.diff) - Math.abs(a.diff))
+                    .slice(0, 3);
+                const escapeHtml = (s: string) =>
+                    s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                const moversHtml = movers.length
+                    ? `<p><strong>Worth a look:</strong> ${movers
+                          .map(
+                              (m) =>
+                                  `${escapeHtml(m.name)} — Blue Book ${m.diff > 0 ? "above" : "below"} your estimate by <strong>${usd(Math.abs(m.diff))}</strong>`,
+                          )
+                          .join("; ")}. Blue Book values come from real completed sales on the Hub.</p>`
+                    : "";
+                const analysisHtml = `
+<p>Hi ${escapeHtml(alias)} — here's your stable's ledger for the month: <strong>${horses.length} ${horses.length === 1 ? "model" : "models"}</strong>${totalPurchase > 0 ? `, ${usd(totalPurchase)} invested` : ""}${totalEstimated > 0 ? `, ${usd(totalEstimated)} in your estimated values` : ""}${totalMarket > 0 ? `, and ${usd(totalMarket)} at current Blue Book prices for the models the market has data on` : ""}.</p>
+${moversHtml}
+<p>Tip: keeping purchase prices and estimates current in each horse's vault makes this report — and your insurance export — sharper every month.</p>`;
 
                 // Send email via Resend
                 const emailHtml = `

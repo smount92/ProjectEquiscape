@@ -19,7 +19,16 @@ Sentry.init({
         "Network request failed",
         "Load failed",
         "AbortError",
+        // Facebook in-app browser injects its own perf logger into every
+        // page and throws when its Java bridge dies on navigation — their
+        // script, not ours (first seen 2026-08-17, /signup via FB app).
+        "Java object is gone",
+        "Error invoking postMessage",
     ],
+    // Third-party scripts injected by app WebViews report under app://
+    // pseudo-URLs (e.g. app://navigation_performance_logger_android).
+    // Our own chunks report as app:///_next/* — keep those.
+    denyUrls: [/^app:\/\/(?!\/_next\/)/],
 });
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;

@@ -95,6 +95,61 @@ export async function createTransaction(data: {
     // counterparty, which is inherently a cross-user write.
     const admin = getAdminClient();
 
+    // ── Forgery guard (audit F2): a COMPLETED transaction may only be
+    // minted over a verifiable underlying event — without this, any
+    // authed user could invoke the action directly, name a victim as
+    // counterparty, and fabricate unlimited "verified" reviews on them.
+    // Every legitimate call site satisfies these checks because each
+    // fires AFTER the event it records (claim RPC succeeded, commission
+    // delivered, conversation completed).
+    if ((input.status || "completed") === "completed") {
+        let eventVerified = false;
+        if (input.type === "transfer" || input.type === "parked_sale") {
+            if (input.horseId) {
+                const { data: t } = await admin
+                    .from("horse_transfers")
+                    .select("id")
+                    .eq("horse_id", input.horseId)
+                    .eq("sender_id", input.partyAId)
+                    .eq("claimed_by", input.partyBId)
+                    .eq("status", "claimed")
+                    .limit(1)
+                    .maybeSingle();
+                eventVerified = !!t;
+            }
+        } else if (input.type === "commission") {
+            if (input.commissionId) {
+                const { data: c } = await admin
+                    .from("commissions")
+                    .select("id")
+                    .eq("id", input.commissionId)
+                    .eq("artist_id", input.partyAId)
+                    .eq("client_id", input.partyBId)
+                    .in("status", ["delivered", "completed"])
+                    .maybeSingle();
+                eventVerified = !!c;
+            }
+        } else if (input.type === "marketplace_sale") {
+            if (input.conversationId) {
+                const { data: conv } = await admin
+                    .from("conversations")
+                    .select("id")
+                    .eq("id", input.conversationId)
+                    .eq("seller_id", input.partyAId)
+                    .eq("buyer_id", input.partyBId)
+                    .eq("transaction_status", "completed")
+                    .maybeSingle();
+                eventVerified = !!conv;
+            }
+        }
+        if (!eventVerified) {
+            return {
+                success: false,
+                error: "No verifiable completed trade found between these parties.",
+            };
+        }
+    }
+
     const insertData: TransactionInsert = {
         type: input.type,
         status: input.status || "completed",

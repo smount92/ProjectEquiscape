@@ -516,8 +516,24 @@ describe("Commerce State Machine — transactions.ts", () => {
             expect(mockAdmin.from).not.toHaveBeenCalled();
         });
 
+        it("rejects a completed transaction with no verifiable underlying event (forgery guard)", async () => {
+            authAs(BUYER);
+            // No claimed horse_transfers row → the guard's maybeSingle
+            // resolves null → forged "completed" transactions die here.
+            mockAdmin._mockQuery.maybeSingle.mockResolvedValueOnce({ data: null, error: null });
+            const result = await createTransaction(validTxn);
+            expect(result.success).toBe(false);
+            if (!result.success) expect(result.error).toMatch(/verifiable completed trade/i);
+            expect(mockAdmin._mockQuery.insert).not.toHaveBeenCalled();
+        });
+
         it("succeeds when the caller is a party (admin insert)", async () => {
             authAs(BUYER);
+            // Underlying event: the claimed transfer row the guard verifies.
+            mockAdmin._mockQuery.maybeSingle.mockResolvedValueOnce({
+                data: { id: "transfer-1" },
+                error: null,
+            });
             mockAdmin._mockQuery.single.mockResolvedValueOnce({ data: { id: TXN }, error: null });
             const result = await createTransaction(validTxn);
             expect(result.success).toBe(true);
