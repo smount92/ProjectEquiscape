@@ -93,11 +93,12 @@ export default function AiDataPolicySection() {
    <li className="flex items-start gap-3 text-base leading-relaxed text-secondary-foreground">
    <span className="mt-0.5 shrink-0 text-lg" aria-hidden="true">📊</span>
    <span>
-    <strong>Data Summarization (Pro Feature):</strong> Premium users receive an
+    <strong>Monthly Collection Report (Pro Feature):</strong> Premium users receive an
     automated monthly email summarizing their collection&apos;s market value changes.
-    This feature uses a secure Enterprise text-generation API purely as a calculator to
-    turn numerical data into a readable text summary. It does not look at, scan, or
-    analyze your photographs.
+    As of August 2026 this report is computed entirely on our own servers with plain
+    arithmetic &mdash; <strong>no AI is involved and your data never leaves the
+    platform</strong>. The only AI feature on the site is the optional mold-identification
+    tool, which analyzes a photo only when you explicitly choose to submit one.
    </span>
    </li>
   </ul>
