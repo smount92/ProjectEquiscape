@@ -18,7 +18,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { scratchEntry, setFeePaid } from "@/app/actions/shows-v2";
-import { barEntrant } from "@/app/actions/shows-v4";
+import { barEntrant, strikeEntryFromResults } from "@/app/actions/shows-v4";
 import type { ConsoleDivision, ConsoleEntry } from "@/lib/shows/console";
 import { friendlyEntryStatus } from "@/lib/shows/plainWords";
 import type { ShowStatus, StaffRole } from "@/lib/shows/types";
@@ -109,6 +109,16 @@ export default function ShowEntriesPanel({
         showStatus !== "completed" &&
         showStatus !== "archived";
 
+    // v4: once results exist, the door changes — scratch closes and
+    // STRIKE opens (host/co-host): removes the placing, voids the card,
+    // deletes platform trophy-case records, scratches with an audit
+    // note. The publish escape hatch, previously SQL-only.
+    const strikeMode =
+        (viewerRole === "host" || viewerRole === "co_host") &&
+        (showStatus === "results_review" ||
+            showStatus === "completed" ||
+            showStatus === "archived");
+
     const openScratch = (entry: ConsoleEntry) => {
         setScratchError(null);
         setScratchReason("");
@@ -128,6 +138,28 @@ export default function ShowEntriesPanel({
         setScratching(true);
         setScratchError(null);
         const reason = scratchReason.trim();
+        if (strikeMode) {
+            if (reason.length < 3) {
+                setScratchError("A reason is required — it lands on the entry's audit trail.");
+                setScratching(false);
+                return;
+            }
+            const result = await strikeEntryFromResults({
+                entryId: scratchTarget.id,
+                reason,
+            });
+            if (result.success) {
+                setScratchTarget(null);
+                setToast("Entry struck — placing removed, card voided, records deleted.");
+                if (toastTimer.current) clearTimeout(toastTimer.current);
+                toastTimer.current = setTimeout(() => setToast(null), 3000);
+                router.refresh();
+            } else {
+                setScratchError(result.error);
+            }
+            setScratching(false);
+            return;
+        }
         const barring = alsoBar && canBar(scratchTarget);
         const result = barring
             ? await barEntrant({
@@ -336,7 +368,7 @@ export default function ShowEntriesPanel({
                             <TableHead>Handler</TableHead>
                             <TableHead>Class</TableHead>
                             <TableHead>Status</TableHead>
-                            {canScratch && (
+                            {(canScratch || strikeMode) && (
                                 <TableHead className="text-right">
                                     <span className="sr-only">Actions</span>
                                 </TableHead>
@@ -373,7 +405,7 @@ export default function ShowEntriesPanel({
                                             {friendlyEntryStatus(entry.status)}
                                         </span>
                                     </TableCell>
-                                    {canScratch && (
+                                    {(canScratch || strikeMode) && (
                                         <TableCell className="text-right">
                                             {!isScratched && (
                                                 <Button
@@ -381,9 +413,9 @@ export default function ShowEntriesPanel({
                                                     size="xs"
                                                     disabled={scratching}
                                                     onClick={() => openScratch(entry)}
-                                                    aria-label={`Scratch ${entry.horseName}`}
+                                                    aria-label={`${strikeMode ? "Strike" : "Scratch"} ${entry.horseName}`}
                                                 >
-                                                    Scratch
+                                                    {strikeMode ? "Strike" : "Scratch"}
                                                 </Button>
                                             )}
                                         </TableCell>
@@ -406,22 +438,34 @@ export default function ShowEntriesPanel({
                 <DialogContent className="sm:max-w-[440px]">
                     <DialogHeader>
                         <DialogTitle>
-                            {scratchTarget && `Scratch ${scratchTarget.horseName}?`}
+                            {scratchTarget &&
+                                (strikeMode
+                                    ? `Strike ${scratchTarget.horseName} from the results?`
+                                    : `Scratch ${scratchTarget.horseName}?`)}
                         </DialogTitle>
                         <DialogDescription>
                             {scratchTarget &&
-                                `The entry stays in the list as history, but leaves ${
-                                    classLabels.get(scratchTarget.classId) ?? "its class"
-                                }. ${
-                                    scratchTarget.ownerId === viewerId
-                                        ? "This is your own entry."
-                                        : `@${scratchTarget.ownerAlias} will be notified.`
-                                }`}
+                                (strikeMode
+                                    ? `Removes this entry's placing from ${
+                                          classLabels.get(scratchTarget.classId) ?? "its class"
+                                      }, voids any qualification card it earned, deletes the platform trophy-case records this show wrote for the horse, and scratches the entry with your reason on its audit note. This is the correction tool for a result that should never have stood.`
+                                    : `The entry stays in the list as history, but leaves ${
+                                          classLabels.get(scratchTarget.classId) ?? "its class"
+                                      }. ${
+                                          scratchTarget.ownerId === viewerId
+                                              ? "This is your own entry."
+                                              : `@${scratchTarget.ownerAlias} will be notified.`
+                                      }`)}
                         </DialogDescription>
                     </DialogHeader>
                     <label className="flex flex-col gap-1.5">
                         <span className="text-sm font-semibold text-foreground">
-                            Reason <span className="font-normal text-muted-foreground">(optional, shared with the owner)</span>
+                            Reason{" "}
+                            <span className="font-normal text-muted-foreground">
+                                {strikeMode
+                                    ? "(required — lands on the audit trail)"
+                                    : "(optional, shared with the owner)"}
+                            </span>
                         </span>
                         <Textarea
                             value={scratchReason}
@@ -435,7 +479,7 @@ export default function ShowEntriesPanel({
                             {scratchReason.length}/200
                         </span>
                     </label>
-                    {canBar(scratchTarget) && (
+                    {!strikeMode && canBar(scratchTarget) && (
                         <label className="flex items-start gap-2 rounded-md border border-input bg-card/60 p-3">
                             <input
                                 type="checkbox"
@@ -481,9 +525,11 @@ export default function ShowEntriesPanel({
                         >
                             {scratching
                                 ? "Working…"
-                                : alsoBar && canBar(scratchTarget)
-                                  ? "Scratch & bar entrant"
-                                  : "Scratch entry"}
+                                : strikeMode
+                                  ? "Strike from results"
+                                  : alsoBar && canBar(scratchTarget)
+                                    ? "Scratch & bar entrant"
+                                    : "Scratch entry"}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

@@ -277,3 +277,33 @@ export async function unsuspendUser(
 
   return { success: true };
 }
+
+/** Alias-based wrappers so the admin console doesn't need a user-id lookup UI. */
+export async function suspendUserByAlias(
+  alias: string,
+  reason: string
+): Promise<{ success: boolean; error?: string }> {
+  const user = await verifyAdmin();
+  if (!user) return { success: false, error: "Unauthorized" };
+  const { data: target } = await getAdminSupabase()
+    .from("users")
+    .select("id, alias_name")
+    .ilike("alias_name", alias.trim())
+    .maybeSingle();
+  if (!target) return { success: false, error: `No user with alias "${alias.trim()}".` };
+  return suspendUser((target as { id: string }).id, reason);
+}
+
+export async function unsuspendUserByAlias(
+  alias: string
+): Promise<{ success: boolean; error?: string }> {
+  const user = await verifyAdmin();
+  if (!user) return { success: false, error: "Unauthorized" };
+  const { data: target } = await getAdminSupabase()
+    .from("users")
+    .select("id")
+    .ilike("alias_name", alias.trim())
+    .maybeSingle();
+  if (!target) return { success: false, error: `No user with alias "${alias.trim()}".` };
+  return unsuspendUser((target as { id: string }).id);
+}

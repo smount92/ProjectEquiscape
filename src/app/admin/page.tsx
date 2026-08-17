@@ -5,6 +5,7 @@ import { getPhotoShows } from"@/app/actions/shows";
 import { getPendingSuggestions } from"@/app/actions/suggestions";
 import { getOpenReports } from"@/app/actions/moderation";
 import { listPendingExternalShows } from"@/app/actions/external-shows";
+import AdminModerationCard from"@/components/AdminModerationCard";
 import AdminTabs from"@/components/AdminTabs";
 import CommandCenterLayout from"@/components/layouts/CommandCenterLayout";
 import { Zap, Shield, Users, Mail } from "lucide-react";
@@ -121,6 +122,11 @@ export default async function AdminPage() {
    </div>
 
    {/* Tabbed sections */}
+   {/* Site-wide suspension (v4 safety) — above the tabs so it's
+       reachable regardless of which tab is active. */}
+   <div className="mb-6">
+    <AdminModerationCard />
+   </div>
    <AdminTabs
    messages={messages}
    unreadCount={unreadMessages}
