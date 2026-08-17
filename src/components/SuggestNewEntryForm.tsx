@@ -9,7 +9,11 @@ import { Button } from "@/components/ui/button";
 
 // "Stone" and "Peter Stone" are the same maker (collapsed), and
 // "Artist Resin" is an entry TYPE, not a maker — both fixed here.
-const MAKERS = ["Breyer","Peter Stone","Hartland","Hagen-Renaker","Other"];
+// North Light: commercially produced OF resins (North Light factory,
+// England — later Wade Ceramics). A FACTORY maker, so its models are
+// molds/releases, never "Artist Resin" (owner-approved 2026-08 after
+// a user request; 15 catalog items exist under maker_slug north-light).
+const MAKERS = ["Breyer","Peter Stone","Hartland","Hagen-Renaker","North Light","Other"];
 const ITEM_TYPES = [
  { value:"release", label:"Release (specific color/year of a mold)" },
  { value:"mold", label:"Mold (sculpture, not a specific release)" },
