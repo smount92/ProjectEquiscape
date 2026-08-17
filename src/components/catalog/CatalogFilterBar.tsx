@@ -15,14 +15,13 @@
  * CATALOG_V2 (cards browse): passing the optional `v2` prop additionally
  * renders a horizontally-scrollable quick-chip row (top makers + top scales
  * + "More ▾" opening the same Advanced panel) and a "📷 Identify" chip
- * beside the search box (the existing IdentifyMoldDialog; its result feeds
+ * beside the search box (its result feeds
  * the normal search path). With `v2` absent this component renders exactly
  * what it always did — the flag-off catalog is untouched.
  */
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import IdentifyMoldDialog from "@/components/IdentifyMoldDialog";
 import {
     Select,
     SelectContent,
@@ -211,17 +210,6 @@ export default function CatalogFilterBar({
                         aria-label="Search the reference catalog"
                     />
                 </div>
-                {v2 && (
-                    /* "Which mold is this?" — photo identification feeds the
-                       normal search path (anon sees a sign-in link instead). */
-                    <IdentifyMoldDialog
-                        triggerLabel="📷 Identify"
-                        onIdentified={(moldName) => {
-                            setSearchInput(moldName);
-                            push({ ...filters, q: moldName, page: 1 });
-                        }}
-                    />
-                )}
                 <FacetSelect
                     label="Maker"
                     value={filters.maker}

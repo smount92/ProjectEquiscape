@@ -87,8 +87,8 @@ const PRO_FEATURES: { icon: LucideIcon; title: string; description: string }[] =
     },
     {
         icon: Bot,
-        title: "Stablemaster AI",
-        description: "Monthly AI-powered collection analysis delivered to your inbox",
+        title: "Monthly Stablemaster Report",
+        description: "A monthly collection ledger — totals and Blue Book movers — delivered to your inbox",
     },
     {
         icon: Tag,
@@ -126,7 +126,7 @@ const STUDIO_FEATURES: { icon: LucideIcon; title: string; description: string }[
     {
         icon: BarChart3,
         title: "Everything in MHH Pro",
-        description: "Blue Book PRO, Photo Suite+, Smart Insurance Reports, Stablemaster AI — all included",
+        description: "Blue Book PRO, Photo Suite+, Smart Insurance Reports, the Monthly Stablemaster Report — all included",
     },
 ];
 

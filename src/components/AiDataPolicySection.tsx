@@ -79,7 +79,10 @@ export default function AiDataPolicySection() {
    4. Where is AI actually used on the platform?
   </h3>
   <p className="mb-4 text-base leading-relaxed text-secondary-foreground">
-   AI is utilized exclusively as a backend utility to save time:
+   <strong>Nowhere that touches your data.</strong> We listened to the community on this
+   one: as of August 2026, no feature on Model Horse Hub sends your photos, collection
+   data, or vault information to any AI service. (An earlier optional mold-identification
+   tool has been removed.) The only remaining AI involvement is behind the scenes:
   </p>
   <ul className="flex flex-col gap-3 p-0">
    <li className="flex items-start gap-3 text-base leading-relaxed text-secondary-foreground">
@@ -95,10 +98,8 @@ export default function AiDataPolicySection() {
    <span>
     <strong>Monthly Collection Report (Pro Feature):</strong> Premium users receive an
     automated monthly email summarizing their collection&apos;s market value changes.
-    As of August 2026 this report is computed entirely on our own servers with plain
-    arithmetic &mdash; <strong>no AI is involved and your data never leaves the
-    platform</strong>. The only AI feature on the site is the optional mold-identification
-    tool, which analyzes a photo only when you explicitly choose to submit one.
+    This report is computed entirely on our own servers with plain arithmetic &mdash;{" "}
+    <strong>no AI is involved and your data never leaves the platform</strong>.
    </span>
    </li>
   </ul>

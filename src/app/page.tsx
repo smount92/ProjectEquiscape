@@ -430,10 +430,11 @@ export default function LandingPage() {
                             <div className="text-forest mb-4 flex justify-center">
                                 <Bot size={32} strokeWidth={1.5} />
                             </div>
-                            <h3>AI Stablemaster</h3>
+                            <h3>Monthly Stablemaster Report</h3>
                             <p>
-                                Monthly AI-powered collection analysis for Pro members. Insights about your collection
-                                trends, value highlights, and personalized recommendations — powered by Google Gemini.
+                                A monthly collection ledger for Pro members — totals, Blue Book value highlights, and
+                                the models whose market prices moved. Computed on our own servers from real sale data.
+                                No AI involved.
                             </p>
                         </div>
                     </div>

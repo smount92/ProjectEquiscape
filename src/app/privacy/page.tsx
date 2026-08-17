@@ -184,11 +184,6 @@ export default function PrivacyPage() {
  report them (error reports may include browser and page context, never vault data)
  </li>
  <li>
- <strong>Google Gemini</strong> &mdash; only the optional, opt-in mold identification tool
- sends the photo you choose for analysis (images are processed but not stored by Google).
- Nothing else on the platform uses AI on your data
- </li>
- <li>
  <strong>eBay Partner Network</strong> &mdash; some catalog pages include clearly marked
  sponsored eBay search links; if you buy through one, we may earn a small commission. No
  data about you is shared with eBay

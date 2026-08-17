@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { searchCatalogAction, getReleasesForMold, getCatalogItem, type CatalogItem } from "@/app/actions/reference";
 import MarketValueBadge from "@/components/MarketValueBadge";
 import SuggestNewEntryForm from "@/components/SuggestNewEntryForm";
-import IdentifyMoldDialog from "@/components/IdentifyMoldDialog";
 import {
   Dialog,
   DialogContent,
@@ -235,13 +234,6 @@ export default function UnifiedReferenceSearch({
                 </button>
               )}
             </div>
-            <IdentifyMoldDialog
-              onIdentified={(moldName) => {
-                // Feed the AI's mold name into the normal search path,
-                // same flow as the externalSearchQuery AI detection.
-                setQuery(moldName);
-              }}
-            />
           </div>
 
           {/* Dropdown Results */}
@@ -360,12 +352,6 @@ export default function UnifiedReferenceSearch({
                         >
                           {"\u270D\uFE0F"} Suggest adding it
                         </button>
-                        <IdentifyMoldDialog
-                          onIdentified={(moldName) => {
-                            setShowDropdown(false);
-                            setQuery(moldName);
-                          }}
-                        />
                       </div>
                     </div>
                   )}

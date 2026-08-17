@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
                     });
                 }
 
-                // Build portfolio summary for Gemini
+                // Build portfolio summary for the digest
                 const portfolioSummary = horses.map((h: {
                     custom_name: string;
                     catalog_id: string | null;
