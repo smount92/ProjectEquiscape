@@ -651,7 +651,9 @@ export default function EditHorsePage() {
  finish_type: isModel ? finishType : null,
  condition_grade: isModel ? conditionGrade : null,
  asset_category: assetCategory,
- is_public: visibility ==="public" || visibility ==="unlisted",
+ // visibility only — sending is_public alongside made the 109 trigger
+ // flip an unchanged-"unlisted" horse back to fully public on every
+ // save (audit collection M1). The trigger derives is_public itself.
  visibility,
  trade_status: tradeStatus,
  listing_price: tradeStatus !=="Not for Sale" && listingPrice ? parseFloat(listingPrice) : null,

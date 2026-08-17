@@ -302,6 +302,10 @@ export async function createHorseRecord(data: {
     finishType: string;
     conditionGrade?: string;
     isPublic: boolean;
+    /** Authoritative three-state visibility. When present it wins over
+     * isPublic — the old mapping silently turned "unlisted" into fully
+     * public (audit collection M1). */
+    visibility?: "public" | "unlisted" | "private";
     tradeStatus?: string;
     lifeStage?: string;
     catalogId?: string;
@@ -346,8 +350,10 @@ export async function createHorseRecord(data: {
         asset_category: category,
         finish_type: (data.finishType || null) as UserHorseInsert["finish_type"],
         condition_grade: isModel && data.lifeStage !== "in_progress" ? data.conditionGrade || null : null,
-        is_public: data.isPublic,
-        visibility: data.isPublic ? "public" : "private",
+        // visibility is authoritative; the 109 trigger derives is_public
+        // (true only for 'public' — unlisted is link-only by design).
+        visibility: data.visibility ?? (data.isPublic ? "public" : "private"),
+        is_public: (data.visibility ?? (data.isPublic ? "public" : "private")) === "public",
         trade_status: (data.tradeStatus || null) as UserHorseInsert["trade_status"],
         life_stage: data.lifeStage || "completed",
     };

@@ -480,6 +480,7 @@ export default function AddHorsePage() {
  finishType: isModel ? finishType :"",
  conditionGrade: isModel ? conditionGrade || undefined : undefined,
  isPublic: visibility ==="public" || visibility ==="unlisted",
+ visibility,
  tradeStatus: tradeStatus || undefined,
  lifeStage: isModel ? lifeStage || undefined : undefined,
  catalogId: selectedCatalogId || undefined,

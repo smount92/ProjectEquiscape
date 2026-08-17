@@ -66,7 +66,7 @@ const FAQ_ITEMS: FaqItem[] = [
     {
         category: "Privacy & Security",
         q: "What does 'public' vs 'private' vs 'unlisted' mean?",
-        a: '"Public" horses appear in the Show Ring and can be seen by anyone with the link. "Private" horses are visible only to you. You control this per-horse from your stable, and you can change it at any time.',
+        a: '"Public" horses appear in the Show Ring and can be seen by anyone. "Unlisted" horses can be viewed by anyone you share the link with, but appear in no listings or searches. "Private" horses are visible only to you. You control this per-horse from your stable, and you can change it at any time.',
     },
     {
         category: "Privacy & Security",
