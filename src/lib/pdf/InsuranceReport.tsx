@@ -30,7 +30,7 @@ export interface InsuranceReportProps {
  horses: InsuranceHorse[];
  thumbnailMap: Map<string, string>;
  generatedAt: string;
- tier?: "free" | "pro";
+ tier?: "free" | "pro" | "studio";
  marketValueMap?: Map<string, number>;
 }
 

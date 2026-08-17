@@ -75,13 +75,18 @@ export async function requireAdmin(): Promise<{
     return { supabase, user };
 }
 
+export type UserTier = "studio" | "pro" | "free";
+
 /**
  * Get the current user's subscription tier from app_metadata.
  * Uses getUser() (server-validated) instead of getSession() (cached JWT)
  * to ensure tier changes are reflected immediately.
- * Returns 'pro' | 'free'. Defaults to 'free' if unauthenticated.
+ * Returns 'studio' | 'pro' | 'free'. Defaults to 'free' if unauthenticated.
+ * (The old signature claimed 'pro' | 'free' — studio passed through the
+ * value untyped and then failed every `=== "pro"` gate, denying paying
+ * Studio subscribers the Pro benefits their tier includes. Use isPro().)
  */
-export async function getUserTier(): Promise<"pro" | "free"> {
+export async function getUserTier(): Promise<UserTier> {
     const supabase = await createClient();
     const {
         data: { user },
@@ -89,5 +94,11 @@ export async function getUserTier(): Promise<"pro" | "free"> {
     if (!user) return "free";
     // Admin always gets Pro
     if (user.email?.toLowerCase() === process.env.ADMIN_EMAIL?.toLowerCase()) return "pro";
-    return (user.app_metadata?.tier as "pro" | "free") || "free";
+    const tier = user.app_metadata?.tier;
+    return tier === "studio" || tier === "pro" ? tier : "free";
+}
+
+/** Studio includes everything in Pro — every Pro gate must use this. */
+export function isPro(tier: UserTier | string | null | undefined): boolean {
+    return tier === "pro" || tier === "studio";
 }

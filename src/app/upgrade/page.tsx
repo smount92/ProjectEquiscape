@@ -1,4 +1,4 @@
-import { getUserTier } from "@/lib/auth";
+import { getUserTier, isPro } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { fetchSupporterBadge, formatSupporterSince } from "@/lib/supporter";
 import { redirect } from "next/navigation";
@@ -152,7 +152,7 @@ export default async function UpgradePage({
     const params = await searchParams;
     const status = params.status;
 
-    const tierLabel = tier === "pro" ? "Pro" : "Free";
+    const tierLabel = tier === "studio" ? "Studio Pro" : tier === "pro" ? "Pro" : "Free";
 
     // Supporter is orthogonal to tier — cosmetic recognition, gates nothing.
     const supporterPriceLabel = await getSupporterPriceLabel();
@@ -165,9 +165,9 @@ export default async function UpgradePage({
         <ExplorerLayout noHeader>
             <PageMasthead
                 icon="💎"
-                title={tier === "pro" ? "You're on MHH Pro" : "Upgrade to MHH Pro"}
+                title={isPro(tier) ? (tier === "studio" ? "You're on Studio Pro" : "You're on MHH Pro") : "Upgrade to MHH Pro"}
                 subtitle={
-                    tier === "pro"
+                    isPro(tier)
                         ? "Thank you for supporting Model Horse Hub"
                         : "Take your collection management to the next level"
                 }
@@ -255,7 +255,7 @@ export default async function UpgradePage({
                         ))}
                     </ul>
 
-                    {tier === "pro" ? (
+                    {isPro(tier) ? (
                         <div className="mt-6 inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-success/10 py-2 text-center text-sm font-bold text-success">
                             <CheckCircle className="h-4 w-4" /> Active
                         </div>

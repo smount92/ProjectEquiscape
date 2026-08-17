@@ -177,6 +177,58 @@ export async function POST(request: NextRequest) {
                     break;
                 }
 
+                // ── Studio Pro subscriptions route here and ONLY here ──
+                // Same isolation pattern as supporter above. Without this
+                // branch, a studio renewal fell into the generic logic below
+                // and set tier "pro" — silently downgrading a $10 subscriber
+                // while still charging them (audit Part 2, market M1).
+                const studioPriceId = process.env.STRIPE_STUDIO_PRO_PRICE_ID;
+                const isStudioSubscription =
+                    subscription.metadata?.type === "studio_pro" ||
+                    (!!studioPriceId &&
+                        subscription.items?.data?.some((item) => item.price?.id === studioPriceId));
+                if (isStudioSubscription) {
+                    const studioUserId = subscription.metadata?.supabase_user_id;
+                    const studioActive =
+                        subscription.status === "active" || subscription.status === "trialing";
+                    if (!studioUserId) {
+                        // Pre-fix subscriptions carry no subscription metadata —
+                        // fall back to the customer-id scan below, but with the
+                        // STUDIO tier, never "pro".
+                        const { data: scanUsers } = await admin.auth.admin.listUsers({ perPage: 1000 });
+                        const studioUser = scanUsers?.users?.find(
+                            (u) => u.app_metadata?.stripe_customer_id === customerId
+                        );
+                        if (!studioUser) {
+                            logger.error("StripeWebhook", `No user found for studio customer ${customerId}`);
+                            break;
+                        }
+                        await admin.auth.admin.updateUserById(studioUser.id, {
+                            app_metadata: {
+                                ...studioUser.app_metadata,
+                                tier: studioActive ? "studio" : "free",
+                            },
+                        });
+                        break;
+                    }
+                    const { data: studioUserById } = await admin.auth.admin.getUserById(studioUserId);
+                    if (!studioUserById?.user) {
+                        logger.error("StripeWebhook", `Studio user ${studioUserId} not found`);
+                        break;
+                    }
+                    await admin.auth.admin.updateUserById(studioUserId, {
+                        app_metadata: {
+                            ...studioUserById.user.app_metadata,
+                            tier: studioActive ? "studio" : "free",
+                        },
+                    });
+                    logger.error("StripeWebhook", `User ${studioUserId} tier set to ${studioActive ? "studio" : "free"}`, {
+                        subscriptionId: subscription.id,
+                        status: subscription.status,
+                    });
+                    break;
+                }
+
                 // Look up user by stored stripe_customer_id in app_metadata
                 // We need to find the user — iterate auth users (admin API)
                 const { data: users } = await admin.auth.admin.listUsers({ perPage: 1000 });

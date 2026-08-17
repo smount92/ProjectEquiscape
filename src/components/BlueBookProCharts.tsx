@@ -16,7 +16,7 @@ interface ChartDataPoint {
 }
 
 interface BlueBookProChartsProps {
-    tier: "free" | "pro";
+    tier: "free" | "pro" | "studio";
     catalogId: string;
     title: string;
     historicalData?: ChartDataPoint[];

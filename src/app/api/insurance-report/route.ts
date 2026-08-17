@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { InsuranceReportDocument } from "@/lib/pdf/InsuranceReport";
-import { getUserTier } from "@/lib/auth";
+import { getUserTier, isPro } from "@/lib/auth";
 import { getAdminClient } from "@/lib/supabase/admin";
 
 export async function GET() {
@@ -51,7 +51,7 @@ export async function GET() {
 
         // Pro users: fetch market replacement values from mv_market_prices
         const marketValueMap = new Map<string, number>();
-        if (tier === "pro") {
+        if (isPro(tier)) {
             const catalogIds = (horses || [])
                 .map((h: { catalog_id: string | null }) => h.catalog_id)
                 .filter(Boolean) as string[];

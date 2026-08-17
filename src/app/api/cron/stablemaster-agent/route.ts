@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
         // Find all Pro users
         const { data: users } = await admin.auth.admin.listUsers({ perPage: 1000 });
         const proUsers = users?.users?.filter(
-            (u) => u.app_metadata?.tier === "pro" && u.email
+            (u) => (u.app_metadata?.tier === "pro" || u.app_metadata?.tier === "studio") && u.email
         ) || [];
 
         for (const proUser of proUsers) {

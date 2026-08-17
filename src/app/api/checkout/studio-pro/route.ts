@@ -45,6 +45,17 @@ export async function POST() {
                 type: "studio_pro",
                 supabase_user_id: user.id,
             },
+            // CRITICAL: stamp the SUBSCRIPTION too (the session metadata
+            // above never rides on customer.subscription.* events). Without
+            // this, every renewal fell into the generic pro branch and
+            // silently downgraded studio -> pro while still charging $10
+            // (audit Part 2, market M1). Mirrors the supporter checkout.
+            subscription_data: {
+                metadata: {
+                    type: "studio_pro",
+                    supabase_user_id: user.id,
+                },
+            },
             success_url: `${appUrl}/studio/dashboard?upgraded=success`,
             cancel_url: `${appUrl}/upgrade`,
         });

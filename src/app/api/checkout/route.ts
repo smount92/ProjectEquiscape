@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getUserTier } from "@/lib/auth";
+import { getUserTier, isPro } from "@/lib/auth";
 import Stripe from "stripe";
 
 // ============================================================
@@ -17,9 +17,9 @@ export async function POST() {
 
     // Prevent double-subscription
     const tier = await getUserTier();
-    if (tier === "pro") {
+    if (isPro(tier)) {
         return NextResponse.json(
-            { error: "You're already on MHH Pro! No need to upgrade again." },
+            { error: tier === "studio" ? "Studio Pro already includes everything in MHH Pro!" : "You're already on MHH Pro! No need to upgrade again." },
             { status: 400 }
         );
     }
