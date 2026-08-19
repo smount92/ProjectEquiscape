@@ -1,65 +1,61 @@
 /**
- * Shows domain — SEASON POINTS + STANDINGS (Wave 3, v1). Pure, no I/O.
+ * Shows domain — SEASON POINTS + STANDINGS (v2 — the Championship
+ * Series scale). Pure, no I/O.
  *
  * ══════════════════════════════════════════════════════════════
- * THE SCALE (v1 — change it HERE and nowhere else)
+ * THE SCALE (v2 — ratified 2026-08, change it HERE and nowhere else)
  *
- *   Placements        1st 7 · 2nd 5 · 3rd 4 · 4th 3 · 5th 2 · 6th 1
- *                     (participation — place NULL — scores 0)
- *   Championships     section champion +3 · division champion +5 ·
- *                     show (grand) champion +10
- *                     (reserves score 0 in v1)
+ *   "First place is worth the class" —
+ *     1st = number of live entries in the class, capped at 10;
+ *     each place below is one point less, floor 1.
+ *       class of 3:  1st 3 · 2nd 2 · 3rd 1
+ *       class of 8:  1st 8 · 2nd 7 · … · 6th 3
+ *       class of 25: 1st 10 · 2nd 9 · … · 6th 5
+ *   Classes with fewer than 2 DISTINCT EXHIBITORS score 0 — you
+ *   cannot earn points beating only yourself.
+ *   Championships   section +3 · division +5 · show (grand) +10
  *
- * The numbers are deliberately a plain lookup table
- * (PLACEMENT_POINTS / CHAMPIONSHIP_POINTS) so the owner can retune
- * the scale without touching any aggregation logic. Nothing is
- * persisted: standings are COMPUTED on read from show_placings +
- * show_callbacks, so a scale change re-scores history for free.
+ *   THE CAP: only a PAIR's (horse × owner-on-entry) best
+ *   BEST_RESULTS_CAP placement results count per season.
+ *   Championship bonuses always count. Without the cap, free
+ *   online entry makes season awards measure attendance, not
+ *   quality (the CFA best-100-rings / Pokémon Best-Finish-Limit
+ *   mechanism). Recalibrated annually per the program rules.
  * ══════════════════════════════════════════════════════════════
  *
- * Points accrue to the HORSE; stable standings roll the same
- * points up to the owner. Attribution rules (v1):
- *   - Placement/championship points go to the horse on the entry,
- *     and to the OWNER RECORDED ON THAT ENTRY (the person who
- *     campaigned the horse at that show — a mid-year transfer
- *     doesn't move last season's points to the new owner's stable).
- *   - A horse's display owner is the owner of its most recent
- *     counted entry (entries arrive oldest → newest).
+ * The scoring unit is the PAIR (Championship program §0): points
+ * belong to (horse, owner recorded on the entry). Horse standings
+ * aggregate a horse's pairs; stable standings aggregate an owner's
+ * pairs. A mid-season transfer starts a fresh pair — the buyer
+ * inherits nothing, the seller keeps what they campaigned.
  *
  * Which shows count:
  *   - status completed | archived ONLY (results_review is
- *     provisional — house precedent, mirrors RESULT_LIFE_STATUSES
- *     in showLife.ts / RESULTS_STATUSES in gallery.ts);
- *   - shows.show_year === the requested year (May 1 → Apr 30,
- *     trigger-derived — see showYear.ts);
+ *     provisional — house precedent);
+ *   - shows.show_year === the requested year (May 1 → Apr 30);
  *   - filter.qualifyingOnly → shows.is_mhh_qualifying only.
  *
- * Ranking: standard competition ranking ("1224") — tied points
- * share a rank, the next distinct total takes 1 + rows above it.
- * Within a tie, rows order alphabetically (then by id, so the
- * order is fully deterministic).
+ * Ranking: standard competition ranking ("1224"); ties share a
+ * rank, ordered alphabetically then by id (fully deterministic).
  *
  * The server action (src/app/actions/standings.ts) feeds this
- * module raw scoped rows; everything here is pure shaping so a
- * materialized view can replace the computation later without the
- * row shape changing.
+ * module raw scoped rows; everything here is pure shaping.
  */
 
-import type { CallbackScope, Place, ShowStatus } from "./types";
+import type { CallbackScope, ShowStatus } from "./types";
 
-// ── The scale ──
+// ── The scale (v2) ──
 
-/** Placement points, 1st → 6th. v1 scale — the one place to retune. */
-export const PLACEMENT_POINTS: Record<Place, number> = {
-    1: 7,
-    2: 5,
-    3: 4,
-    4: 3,
-    5: 2,
-    6: 1,
-};
+/** 1st place never pays more than this, however deep the class. */
+export const POINTS_CAP = 10;
 
-/** Championship bonuses per callback scope. v1 scale. */
+/** A class needs this many DISTINCT exhibitors to pay any points. */
+export const MIN_EXHIBITORS_FOR_POINTS = 2;
+
+/** Only a pair's best N placement results count per season. */
+export const BEST_RESULTS_CAP = 30;
+
+/** Championship bonuses per callback scope (unchanged from v1). */
 export const CHAMPIONSHIP_POINTS: Record<CallbackScope, number> = {
     section: 3,
     division: 5,
@@ -69,10 +65,21 @@ export const CHAMPIONSHIP_POINTS: Record<CallbackScope, number> = {
 /** Shows whose results are final enough to score (published results). */
 export const STANDINGS_SHOW_STATUSES: ShowStatus[] = ["completed", "archived"];
 
-/** Points for a recorded place; participation (null) and out-of-range score 0. */
-export function placementPoints(place: number | null): number {
-    if (place === null) return 0;
-    return PLACEMENT_POINTS[place as Place] ?? 0;
+/**
+ * v2 placement points: 1st = min(classSize, cap), one less per
+ * place, floor 1 — but a class with < 2 distinct exhibitors pays 0,
+ * and participation (place null) pays 0.
+ */
+export function placementPoints(
+    place: number | null,
+    classSize: number,
+    distinctExhibitors: number,
+): number {
+    if (place === null || place < 1) return 0;
+    if (distinctExhibitors < MIN_EXHIBITORS_FOR_POINTS) return 0;
+    if (classSize < 1) return 0;
+    const first = Math.min(classSize, POINTS_CAP);
+    return Math.max(first - (place - 1), 1);
 }
 
 /** Bonus for a championship at the given callback scope; unknown scopes score 0. */
@@ -93,6 +100,8 @@ export interface StandingsShowRow {
 export interface StandingsEntryRow {
     id: string;
     show_id: string;
+    /** v2: class context (size + exhibitor spread) derives from this. */
+    class_id: string;
     horse_id: string;
     owner_id: string;
 }
@@ -107,7 +116,7 @@ export interface StandingsCallbackRow {
     champion_entry_id: string | null;
 }
 
-// ── Output row contracts ──
+// ── Output row contracts (unchanged from v1) ──
 
 export interface HorseStandingRow {
     rank: number;
@@ -169,68 +178,94 @@ export function countedShowIds(shows: StandingsShowRow[], filter: StandingsFilte
     return counted;
 }
 
-// ── Internal tally (shared by both scopes) ──
+// ── The pair tally (v2 core) ──
 
-interface Tally {
-    points: number;
+interface PairTally {
+    horseId: string;
+    ownerId: string;
+    /** Placement point values, uncapped — capped at read-out. */
+    placementResults: number[];
     placings: number;
+    championshipBonus: number;
     championships: number;
     showIds: Set<string>;
 }
 
-function emptyTally(): Tally {
-    return { points: 0, placings: 0, championships: 0, showIds: new Set() };
+/** Sum of a pair's points under the best-N cap (+ bonuses, uncapped). */
+function pairPoints(pair: PairTally): number {
+    const best = [...pair.placementResults]
+        .sort((a, b) => b - a)
+        .slice(0, BEST_RESULTS_CAP);
+    return best.reduce((sum, p) => sum + p, 0) + pair.championshipBonus;
 }
 
 /**
- * One pass over entries/placings/callbacks, keyed by keyOf(entry)
- * (horse_id for horse standings, owner_id for stables). Every horse
- * that ENTERED a counted show gets a row — a 0-point campaigner is
- * still standing, just at the bottom of the ledger.
+ * One pass building pair tallies. Class size / exhibitor spread are
+ * derived from the counted live entries themselves — no extra input.
  */
-function tallyByKey(
-    input: StandingsInput,
-    keyOf: (entry: StandingsEntryRow) => string,
-): Map<string, Tally> {
+function tallyPairs(input: StandingsInput): Map<string, PairTally> {
     const counted = countedShowIds(input.shows, input.filter);
-    const tallies = new Map<string, Tally>();
+
+    // Class context from the entry list (live entries only, by contract).
+    const classSize = new Map<string, number>();
+    const classOwners = new Map<string, Set<string>>();
+    for (const entry of input.entries) {
+        if (!counted.has(entry.show_id)) continue;
+        classSize.set(entry.class_id, (classSize.get(entry.class_id) ?? 0) + 1);
+        const owners = classOwners.get(entry.class_id) ?? new Set<string>();
+        owners.add(entry.owner_id);
+        classOwners.set(entry.class_id, owners);
+    }
+
+    const pairs = new Map<string, PairTally>();
     const countedEntriesById = new Map<string, StandingsEntryRow>();
+    const keyOf = (e: StandingsEntryRow) => `${e.horse_id}|${e.owner_id}`;
 
     for (const entry of input.entries) {
         if (!counted.has(entry.show_id)) continue;
         countedEntriesById.set(entry.id, entry);
         const key = keyOf(entry);
-        const tally = tallies.get(key) ?? emptyTally();
-        tally.showIds.add(entry.show_id);
-        tallies.set(key, tally);
+        const pair = pairs.get(key) ?? {
+            horseId: entry.horse_id,
+            ownerId: entry.owner_id,
+            placementResults: [],
+            placings: 0,
+            championshipBonus: 0,
+            championships: 0,
+            showIds: new Set<string>(),
+        };
+        pair.showIds.add(entry.show_id);
+        pairs.set(key, pair);
     }
 
     for (const placing of input.placings) {
         if (placing.place === null) continue; // participation: 0 points
         const entry = countedEntriesById.get(placing.entry_id);
         if (!entry) continue; // placing from an uncounted show
-        const tally = tallies.get(keyOf(entry))!;
-        tally.points += placementPoints(placing.place);
-        tally.placings += 1;
+        const pair = pairs.get(keyOf(entry))!;
+        const points = placementPoints(
+            placing.place,
+            classSize.get(entry.class_id) ?? 0,
+            classOwners.get(entry.class_id)?.size ?? 0,
+        );
+        pair.placings += 1;
+        if (points > 0) pair.placementResults.push(points);
     }
 
     for (const callback of input.callbacks) {
         if (!callback.champion_entry_id) continue; // undecided round
         const entry = countedEntriesById.get(callback.champion_entry_id);
         if (!entry) continue;
-        const tally = tallies.get(keyOf(entry))!;
-        tally.points += championshipPoints(callback.scope);
-        tally.championships += 1;
+        const pair = pairs.get(keyOf(entry))!;
+        pair.championshipBonus += championshipPoints(callback.scope);
+        pair.championships += 1;
     }
 
-    return tallies;
+    return pairs;
 }
 
-/**
- * Standard competition ranking ("1224") over rows already sorted by
- * points desc, then name asc, then id asc. Ties share the rank of
- * the first tied row.
- */
+// ── Ranking helpers (unchanged from v1) ──
+
 function assignRanks<T extends { points: number }>(sorted: T[]): (T & { rank: number })[] {
     let rank = 0;
     let lastPoints: number | null = null;
@@ -252,34 +287,47 @@ function byPointsThenName<T extends { points: number; id: string; name: string }
 
 // ── Builders ──
 
-/** Horse standings for one show year. Rank 1 = most points. */
+/** Horse standings for one show year (aggregating the horse's pairs). */
 export function buildHorseStandings(input: StandingsInput): HorseStandingRow[] {
-    const tallies = tallyByKey(input, (entry) => entry.horse_id);
-
-    // Display owner = owner of the horse's most recent counted entry
-    // (entries arrive oldest → newest, so last write wins).
+    const pairs = tallyPairs(input);
     const counted = countedShowIds(input.shows, input.filter);
+
+    // Display owner = owner of the horse's most recent counted entry.
     const ownerByHorse = new Map<string, string>();
     for (const entry of input.entries) {
         if (!counted.has(entry.show_id)) continue;
         ownerByHorse.set(entry.horse_id, entry.owner_id);
     }
 
-    const unranked = [...tallies.entries()].map(([horseId, tally]) => {
-        const ownerId = ownerByHorse.get(horseId)!;
-        return {
-            id: horseId,
-            name: input.horseNamesById.get(horseId) ?? FALLBACK_HORSE_NAME,
-            ownerId,
-            points: tally.points,
-            placings: tally.placings,
-            championships: tally.championships,
-            showsEntered: tally.showIds.size,
+    const byHorse = new Map<
+        string,
+        { points: number; placings: number; championships: number; showIds: Set<string> }
+    >();
+    for (const pair of pairs.values()) {
+        const agg = byHorse.get(pair.horseId) ?? {
+            points: 0,
+            placings: 0,
+            championships: 0,
+            showIds: new Set<string>(),
         };
-    });
+        agg.points += pairPoints(pair);
+        agg.placings += pair.placings;
+        agg.championships += pair.championships;
+        for (const id of pair.showIds) agg.showIds.add(id);
+        byHorse.set(pair.horseId, agg);
+    }
+
+    const unranked = [...byHorse.entries()].map(([horseId, agg]) => ({
+        id: horseId,
+        name: input.horseNamesById.get(horseId) ?? FALLBACK_HORSE_NAME,
+        ownerId: ownerByHorse.get(horseId)!,
+        points: agg.points,
+        placings: agg.placings,
+        championships: agg.championships,
+        showsEntered: agg.showIds.size,
+    }));
     unranked.sort(byPointsThenName);
 
-    // Explicit pick — the row-shape contract holds no stray keys.
     return assignRanks(unranked).map((row) => ({
         rank: row.rank,
         horseId: row.id,
@@ -293,21 +341,38 @@ export function buildHorseStandings(input: StandingsInput): HorseStandingRow[] {
     }));
 }
 
-/** Stable (owner) standings for one show year. Rank 1 = most points. */
+/** Stable (owner) standings for one show year (aggregating the owner's pairs). */
 export function buildStableStandings(input: StandingsInput): StableStandingRow[] {
-    const tallies = tallyByKey(input, (entry) => entry.owner_id);
+    const pairs = tallyPairs(input);
 
-    const unranked = [...tallies.entries()].map(([ownerId, tally]) => ({
+    const byOwner = new Map<
+        string,
+        { points: number; placings: number; championships: number; showIds: Set<string> }
+    >();
+    for (const pair of pairs.values()) {
+        const agg = byOwner.get(pair.ownerId) ?? {
+            points: 0,
+            placings: 0,
+            championships: 0,
+            showIds: new Set<string>(),
+        };
+        agg.points += pairPoints(pair);
+        agg.placings += pair.placings;
+        agg.championships += pair.championships;
+        for (const id of pair.showIds) agg.showIds.add(id);
+        byOwner.set(pair.ownerId, agg);
+    }
+
+    const unranked = [...byOwner.entries()].map(([ownerId, agg]) => ({
         id: ownerId,
         name: input.ownerAliasById.get(ownerId) ?? FALLBACK_OWNER_ALIAS,
-        points: tally.points,
-        placings: tally.placings,
-        championships: tally.championships,
-        showsEntered: tally.showIds.size,
+        points: agg.points,
+        placings: agg.placings,
+        championships: agg.championships,
+        showsEntered: agg.showIds.size,
     }));
     unranked.sort(byPointsThenName);
 
-    // Explicit pick — the row-shape contract holds no stray keys.
     return assignRanks(unranked).map((row) => ({
         rank: row.rank,
         ownerId: row.id,

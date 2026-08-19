@@ -1,9 +1,11 @@
 import { describe, it, expect } from "vitest";
 import {
+    BEST_RESULTS_CAP,
     CHAMPIONSHIP_POINTS,
     FALLBACK_HORSE_NAME,
     FALLBACK_OWNER_ALIAS,
-    PLACEMENT_POINTS,
+    MIN_EXHIBITORS_FOR_POINTS,
+    POINTS_CAP,
     buildHorseStandings,
     buildStableStandings,
     championshipPoints,
@@ -32,8 +34,9 @@ function entry(
     showId: string,
     horseId: string,
     ownerId: string,
+    classId = "class-1",
 ): StandingsEntryRow {
-    return { id, show_id: showId, horse_id: horseId, owner_id: ownerId };
+    return { id, show_id: showId, class_id: classId, horse_id: horseId, owner_id: ownerId };
 }
 
 function input(overrides: Partial<StandingsInput>): StandingsInput {
@@ -49,416 +52,233 @@ function input(overrides: Partial<StandingsInput>): StandingsInput {
     };
 }
 
-describe("points — the v1 scale", () => {
-    it("placements score 7·5·4·3·2·1 for 1st–6th", () => {
-        expect(placementPoints(1)).toBe(7);
-        expect(placementPoints(2)).toBe(5);
-        expect(placementPoints(3)).toBe(4);
-        expect(placementPoints(4)).toBe(3);
-        expect(placementPoints(5)).toBe(2);
-        expect(placementPoints(6)).toBe(1);
+/** N entries in one class from distinct owners (owner-1 … owner-N). */
+function classOf(
+    n: number,
+    showId = "show-1",
+    classId = "class-1",
+): StandingsEntryRow[] {
+    return Array.from({ length: n }, (_, i) =>
+        entry(`e${i + 1}`, showId, `horse-${i + 1}`, `owner-${i + 1}`, classId),
+    );
+}
+
+describe("points — the v2 scale ('first place is worth the class')", () => {
+    it("1st = class size, one less per place, floor 1", () => {
+        // class of 3: 3·2·1
+        expect(placementPoints(1, 3, 3)).toBe(3);
+        expect(placementPoints(2, 3, 3)).toBe(2);
+        expect(placementPoints(3, 3, 3)).toBe(1);
+        // class of 8: 8·7·6·5·4·3
+        expect(placementPoints(1, 8, 5)).toBe(8);
+        expect(placementPoints(6, 8, 5)).toBe(3);
+        // class of 2: 2·1
+        expect(placementPoints(2, 2, 2)).toBe(1);
     });
 
-    it("participation (null) scores 0", () => {
-        expect(placementPoints(null)).toBe(0);
+    it(`1st is capped at ${POINTS_CAP} however deep the class`, () => {
+        expect(placementPoints(1, 25, 9)).toBe(POINTS_CAP);
+        expect(placementPoints(2, 25, 9)).toBe(POINTS_CAP - 1);
+        expect(placementPoints(6, 25, 9)).toBe(POINTS_CAP - 5);
     });
 
-    it("out-of-vocabulary places score 0 instead of crashing", () => {
-        expect(placementPoints(0)).toBe(0);
-        expect(placementPoints(7)).toBe(0);
-        expect(placementPoints(-1)).toBe(0);
+    it(`a class with fewer than ${MIN_EXHIBITORS_FOR_POINTS} distinct exhibitors pays 0`, () => {
+        expect(placementPoints(1, 6, 1)).toBe(0); // six entries, one owner
+        expect(placementPoints(1, 1, 1)).toBe(0);
+    });
+
+    it("participation (null) and invalid places score 0", () => {
+        expect(placementPoints(null, 8, 4)).toBe(0);
+        expect(placementPoints(0, 8, 4)).toBe(0);
+        expect(placementPoints(-1, 8, 4)).toBe(0);
     });
 
     it("championship bonuses: section +3, division +5, show +10", () => {
-        expect(championshipPoints("section")).toBe(3);
-        expect(championshipPoints("division")).toBe(5);
-        expect(championshipPoints("show")).toBe(10);
-    });
-
-    it("unknown callback scopes score 0", () => {
+        expect(championshipPoints("section")).toBe(CHAMPIONSHIP_POINTS.section);
+        expect(championshipPoints("division")).toBe(CHAMPIONSHIP_POINTS.division);
+        expect(championshipPoints("show")).toBe(CHAMPIONSHIP_POINTS.show);
         expect(championshipPoints("galaxy")).toBe(0);
-    });
-
-    it("the lookup tables carry the whole scale (retuning point)", () => {
-        expect(PLACEMENT_POINTS).toEqual({ 1: 7, 2: 5, 3: 4, 4: 3, 5: 2, 6: 1 });
-        expect(CHAMPIONSHIP_POINTS).toEqual({ section: 3, division: 5, show: 10 });
     });
 });
 
 describe("countedShowIds — which shows score", () => {
-    it("counts completed and archived shows of the requested year", () => {
+    it("filters by status, year, and qualifying flag", () => {
         const shows = [
-            show({ id: "a", status: "completed" }),
-            show({ id: "b", status: "archived" }),
+            show({ id: "counts" }),
+            show({ id: "provisional", status: "results_review" }),
+            show({ id: "wrong-year", show_year: 2025 }),
+            show({ id: "unsanctioned", is_mhh_qualifying: false }),
         ];
-        expect(countedShowIds(shows, { showYear: 2026, qualifyingOnly: true })).toEqual(
-            new Set(["a", "b"]),
-        );
-    });
-
-    it("excludes provisional results_review and every earlier status", () => {
-        const shows = [
-            show({ id: "a", status: "results_review" }),
-            show({ id: "b", status: "judging" }),
-            show({ id: "c", status: "entries_open" }),
-            show({ id: "d", status: "draft" }),
-        ];
-        expect(
-            countedShowIds(shows, { showYear: 2026, qualifyingOnly: false }).size,
-        ).toBe(0);
-    });
-
-    it("filters by show year (May 1 → Apr 30 identity, trigger-stored)", () => {
-        const shows = [
-            show({ id: "this-year", show_year: 2026 }),
-            show({ id: "last-year", show_year: 2025 }),
-            show({ id: "no-year", show_year: null }),
-        ];
-        expect(countedShowIds(shows, { showYear: 2026, qualifyingOnly: true })).toEqual(
-            new Set(["this-year"]),
-        );
-    });
-
-    it("qualifyingOnly excludes non-qualifying shows; all-shows keeps them", () => {
-        const shows = [
-            show({ id: "q", is_mhh_qualifying: true }),
-            show({ id: "fun", is_mhh_qualifying: false }),
-        ];
-        expect(countedShowIds(shows, { showYear: 2026, qualifyingOnly: true })).toEqual(
-            new Set(["q"]),
-        );
-        expect(countedShowIds(shows, { showYear: 2026, qualifyingOnly: false })).toEqual(
-            new Set(["q", "fun"]),
-        );
+        const counted = countedShowIds(shows, { showYear: 2026, qualifyingOnly: true });
+        expect([...counted]).toEqual(["counts"]);
+        const widened = countedShowIds(shows, { showYear: 2026, qualifyingOnly: false });
+        expect(widened.has("unsanctioned")).toBe(true);
     });
 });
 
-describe("buildHorseStandings — aggregation", () => {
-    it("sums placement points per horse across classes and shows", () => {
-        const result = buildHorseStandings(
+describe("buildHorseStandings — v2", () => {
+    it("scores class-size points: 1st in a class of 4 earns 4", () => {
+        const entries = classOf(4);
+        const rows = buildHorseStandings(
             input({
-                shows: [show({ id: "s1" }), show({ id: "s2" })],
-                entries: [
-                    entry("e1", "s1", "h1", "o1"),
-                    entry("e2", "s1", "h1", "o1"),
-                    entry("e3", "s2", "h1", "o1"),
-                ],
-                placings: [
-                    { entry_id: "e1", place: 1 }, // 7
-                    { entry_id: "e2", place: 3 }, // 4
-                    { entry_id: "e3", place: 6 }, // 1
-                ],
-            }),
-        );
-        expect(result).toHaveLength(1);
-        expect(result[0]).toMatchObject({
-            rank: 1,
-            horseId: "h1",
-            points: 12,
-            placings: 3,
-            championships: 0,
-            showsEntered: 2,
-        });
-    });
-
-    it("adds championship bonuses from decided callbacks", () => {
-        const callbacks: StandingsCallbackRow[] = [
-            { scope: "section", champion_entry_id: "e1" }, // +3
-            { scope: "division", champion_entry_id: "e1" }, // +5
-            { scope: "show", champion_entry_id: "e1" }, // +10
-            { scope: "section", champion_entry_id: null }, // undecided: ignored
-        ];
-        const result = buildHorseStandings(
-            input({
-                shows: [show({ id: "s1" })],
-                entries: [entry("e1", "s1", "h1", "o1")],
-                placings: [{ entry_id: "e1", place: 1 }],
-                callbacks,
-            }),
-        );
-        expect(result[0].points).toBe(7 + 3 + 5 + 10);
-        expect(result[0].championships).toBe(3);
-    });
-
-    it("participation rows count the show as entered but score nothing", () => {
-        const result = buildHorseStandings(
-            input({
-                shows: [show({ id: "s1" })],
-                entries: [entry("e1", "s1", "h1", "o1")],
-                placings: [{ entry_id: "e1", place: null }],
-            }),
-        );
-        expect(result[0]).toMatchObject({
-            points: 0,
-            placings: 0,
-            showsEntered: 1,
-        });
-    });
-
-    it("a horse that entered but has no placing rows still stands (0 points)", () => {
-        const result = buildHorseStandings(
-            input({
-                shows: [show({ id: "s1" })],
-                entries: [entry("e1", "s1", "h1", "o1")],
-            }),
-        );
-        expect(result).toHaveLength(1);
-        expect(result[0].points).toBe(0);
-        expect(result[0].showsEntered).toBe(1);
-    });
-
-    it("ignores placings and callbacks from uncounted shows (year + status + qualifying)", () => {
-        const result = buildHorseStandings(
-            input({
-                shows: [
-                    show({ id: "counted" }),
-                    show({ id: "lastYear", show_year: 2025 }),
-                    show({ id: "provisional", status: "results_review" }),
-                    show({ id: "fun", is_mhh_qualifying: false }),
-                ],
-                entries: [
-                    entry("e1", "counted", "h1", "o1"),
-                    entry("e2", "lastYear", "h1", "o1"),
-                    entry("e3", "provisional", "h1", "o1"),
-                    entry("e4", "fun", "h1", "o1"),
-                ],
-                placings: [
-                    { entry_id: "e1", place: 2 }, // 5 — counts
-                    { entry_id: "e2", place: 1 }, // wrong year
-                    { entry_id: "e3", place: 1 }, // provisional
-                    { entry_id: "e4", place: 1 }, // non-qualifying
-                ],
-                callbacks: [
-                    { scope: "show", champion_entry_id: "e3" }, // provisional: ignored
-                ],
-            }),
-        );
-        expect(result).toHaveLength(1);
-        expect(result[0].points).toBe(5);
-        expect(result[0].showsEntered).toBe(1);
-        expect(result[0].championships).toBe(0);
-    });
-
-    it("qualifyingOnly=false widens the same data to all shows", () => {
-        const base = {
-            shows: [show({ id: "q" }), show({ id: "fun", is_mhh_qualifying: false })],
-            entries: [entry("e1", "q", "h1", "o1"), entry("e2", "fun", "h1", "o1")],
-            placings: [
-                { entry_id: "e1", place: 1 },
-                { entry_id: "e2", place: 1 },
-            ] as StandingsPlacingRow[],
-        };
-        const qualifying = buildHorseStandings(input(base));
-        const all = buildHorseStandings(
-            input({ ...base, filter: { showYear: 2026, qualifyingOnly: false } }),
-        );
-        expect(qualifying[0].points).toBe(7);
-        expect(all[0].points).toBe(14);
-        expect(all[0].showsEntered).toBe(2);
-    });
-
-    it("resolves names and aliases, with honest fallbacks for hidden rows", () => {
-        const result = buildHorseStandings(
-            input({
-                shows: [show({ id: "s1" })],
-                entries: [
-                    entry("e1", "s1", "h1", "o1"),
-                    entry("e2", "s1", "h2", "o2"),
-                ],
+                shows: [show({ id: "show-1" })],
+                entries,
                 placings: [
                     { entry_id: "e1", place: 1 },
                     { entry_id: "e2", place: 2 },
                 ],
-                horseNamesById: new Map([["h1", "Copperline"]]),
-                ownerAliasById: new Map([["o1", "maggie"]]),
             }),
         );
-        expect(result[0]).toMatchObject({ horseName: "Copperline", ownerAlias: "maggie" });
-        expect(result[1]).toMatchObject({
-            horseName: FALLBACK_HORSE_NAME,
-            ownerAlias: FALLBACK_OWNER_ALIAS,
-        });
+        expect(rows[0]).toMatchObject({ horseId: "horse-1", points: 4, rank: 1 });
+        expect(rows[1]).toMatchObject({ horseId: "horse-2", points: 3, rank: 2 });
+        // Entered-but-unplaced horses still stand at 0.
+        expect(rows.find((r) => r.horseId === "horse-3")?.points).toBe(0);
     });
 
-    it("attributes a transferred horse's display owner to its most recent counted entry", () => {
-        const result = buildHorseStandings(
+    it("a self-only class pays 0 points but still counts the placing", () => {
+        // Two entries, both owner-1 — no competition.
+        const entries = [
+            entry("e1", "show-1", "horse-1", "owner-1"),
+            entry("e2", "show-1", "horse-2", "owner-1"),
+        ];
+        const rows = buildHorseStandings(
             input({
-                shows: [show({ id: "s1" }), show({ id: "s2" })],
-                entries: [
-                    entry("e1", "s1", "h1", "sellerId"), // oldest
-                    entry("e2", "s2", "h1", "buyerId"), // newest
-                ],
-                ownerAliasById: new Map([
-                    ["sellerId", "seller"],
-                    ["buyerId", "buyer"],
-                ]),
-            }),
-        );
-        expect(result[0].ownerId).toBe("buyerId");
-        expect(result[0].ownerAlias).toBe("buyer");
-    });
-});
-
-describe("ranking — shared ranks, then alphabetical", () => {
-    const twoTiedOneBehind = input({
-        shows: [show({ id: "s1" })],
-        entries: [
-            entry("e1", "s1", "hA", "o1"),
-            entry("e2", "s1", "hB", "o2"),
-            entry("e3", "s1", "hC", "o3"),
-        ],
-        placings: [
-            { entry_id: "e1", place: 2 }, // 5
-            { entry_id: "e2", place: 2 }, // 5 (another class)
-            { entry_id: "e3", place: 3 }, // 4
-        ],
-        horseNamesById: new Map([
-            ["hA", "zephyr"], // lowercase on purpose: sort is case-insensitive
-            ["hB", "Argo"],
-            ["hC", "Middling"],
-        ]),
-    });
-
-    it("ties share a rank and the next distinct total skips (1-1-3)", () => {
-        const result = buildHorseStandings(twoTiedOneBehind);
-        expect(result.map((r) => r.rank)).toEqual([1, 1, 3]);
-    });
-
-    it("tied rows order alphabetically by name (case-insensitive)", () => {
-        const result = buildHorseStandings(twoTiedOneBehind);
-        expect(result.map((r) => r.horseName)).toEqual(["Argo", "zephyr", "Middling"]);
-    });
-
-    it("identical names fall back to id order for determinism", () => {
-        const result = buildHorseStandings(
-            input({
-                shows: [show({ id: "s1" })],
-                entries: [
-                    entry("e1", "s1", "h-b", "o1"),
-                    entry("e2", "s1", "h-a", "o1"),
-                ],
-                horseNamesById: new Map([
-                    ["h-a", "Twin"],
-                    ["h-b", "Twin"],
-                ]),
-            }),
-        );
-        expect(result.map((r) => r.horseId)).toEqual(["h-a", "h-b"]);
-        expect(result.map((r) => r.rank)).toEqual([1, 1]);
-    });
-});
-
-describe("buildStableStandings — owner rollup", () => {
-    const twoStables = input({
-        shows: [show({ id: "s1" }), show({ id: "s2" })],
-        entries: [
-            entry("e1", "s1", "h1", "o1"),
-            entry("e2", "s1", "h2", "o1"), // second horse, same stable
-            entry("e3", "s2", "h1", "o1"),
-            entry("e4", "s1", "h3", "o2"),
-        ],
-        placings: [
-            { entry_id: "e1", place: 1 }, // 7
-            { entry_id: "e2", place: 4 }, // 3
-            { entry_id: "e3", place: null }, // participation
-            { entry_id: "e4", place: 1 }, // 7
-        ],
-        callbacks: [{ scope: "section", champion_entry_id: "e4" }], // o2 +3
-        ownerAliasById: new Map([
-            ["o1", "brookside"],
-            ["o2", "alder"],
-        ]),
-    });
-
-    it("rolls horse points up to the owner", () => {
-        const result = buildStableStandings(twoStables);
-        expect(result).toHaveLength(2);
-        const byAlias = new Map(result.map((r) => [r.ownerAlias, r]));
-        expect(byAlias.get("brookside")).toMatchObject({
-            points: 10, // 7 + 3 across two horses
-            placings: 2,
-            championships: 0,
-            showsEntered: 2,
-        });
-        expect(byAlias.get("alder")).toMatchObject({
-            points: 10, // 7 + section champion bonus 3
-            placings: 1,
-            championships: 1,
-            showsEntered: 1,
-        });
-    });
-
-    it("tied stables share the rank and order alphabetically", () => {
-        const result = buildStableStandings(twoStables);
-        // both stables total 10 — shared rank 1, alder < brookside
-        expect(result.map((r) => r.rank)).toEqual([1, 1]);
-        expect(result.map((r) => r.ownerAlias)).toEqual(["alder", "brookside"]);
-    });
-
-    it("mid-year transfer: each stable keeps the points it campaigned", () => {
-        const result = buildStableStandings(
-            input({
-                shows: [show({ id: "s1" }), show({ id: "s2" })],
-                entries: [
-                    entry("e1", "s1", "h1", "sellerId"),
-                    entry("e2", "s2", "h1", "buyerId"),
-                ],
-                placings: [
-                    { entry_id: "e1", place: 1 }, // seller campaigned this
-                    { entry_id: "e2", place: 2 }, // buyer campaigned this
-                ],
-            }),
-        );
-        const points = new Map(result.map((r) => [r.ownerId, r.points]));
-        expect(points.get("sellerId")).toBe(7);
-        expect(points.get("buyerId")).toBe(5);
-    });
-});
-
-describe("row-shape contract (materialized-view replacement seam)", () => {
-    it("horse rows carry exactly the contracted keys", () => {
-        const [row] = buildHorseStandings(
-            input({
-                shows: [show({ id: "s1" })],
-                entries: [entry("e1", "s1", "h1", "o1")],
+                shows: [show({ id: "show-1" })],
+                entries,
                 placings: [{ entry_id: "e1", place: 1 }],
             }),
         );
-        expect(Object.keys(row).sort()).toEqual([
-            "championships",
-            "horseId",
-            "horseName",
-            "ownerAlias",
-            "ownerId",
-            "placings",
-            "points",
-            "rank",
-            "showsEntered",
-        ]);
-        expect(typeof row.rank).toBe("number");
-        expect(typeof row.points).toBe("number");
+        const h1 = rows.find((r) => r.horseId === "horse-1")!;
+        expect(h1.points).toBe(0);
+        expect(h1.placings).toBe(1);
     });
 
-    it("stable rows carry exactly the contracted keys", () => {
-        const [row] = buildStableStandings(
+    it("adds championship bonuses from decided callbacks (never capped away)", () => {
+        const entries = classOf(3);
+        const callbacks: StandingsCallbackRow[] = [
+            { scope: "show", champion_entry_id: "e1" },
+            { scope: "section", champion_entry_id: null }, // undecided
+        ];
+        const rows = buildHorseStandings(
             input({
-                shows: [show({ id: "s1" })],
-                entries: [entry("e1", "s1", "h1", "o1")],
+                shows: [show({ id: "show-1" })],
+                entries,
+                placings: [{ entry_id: "e1", place: 1 }],
+                callbacks,
             }),
         );
-        expect(Object.keys(row).sort()).toEqual([
-            "championships",
-            "ownerAlias",
-            "ownerId",
-            "placings",
-            "points",
-            "rank",
-            "showsEntered",
-        ]);
+        expect(rows[0]).toMatchObject({ horseId: "horse-1", points: 3 + 10, championships: 1 });
     });
 
-    it("empty input yields empty standings (the young show year)", () => {
-        expect(buildHorseStandings(input({}))).toEqual([]);
-        expect(buildStableStandings(input({}))).toEqual([]);
+    it(`the best-${BEST_RESULTS_CAP} cap: result #${BEST_RESULTS_CAP + 1} adds nothing`, () => {
+        // One pair placing 1st in (CAP + 1) two-horse classes across one show.
+        const entries: StandingsEntryRow[] = [];
+        const placings: StandingsPlacingRow[] = [];
+        for (let i = 0; i < BEST_RESULTS_CAP + 1; i++) {
+            const classId = `class-${i}`;
+            entries.push(entry(`mine-${i}`, "show-1", "horse-1", "owner-1", classId));
+            entries.push(entry(`theirs-${i}`, "show-1", `rival-${i}`, "owner-2", classId));
+            placings.push({ entry_id: `mine-${i}`, place: 1 }); // 2 points each
+        }
+        const rows = buildHorseStandings(
+            input({ shows: [show({ id: "show-1" })], entries, placings }),
+        );
+        const h1 = rows.find((r) => r.horseId === "horse-1")!;
+        expect(h1.points).toBe(BEST_RESULTS_CAP * 2); // the 31st win is worth 0
+        expect(h1.placings).toBe(BEST_RESULTS_CAP + 1); // …but still counts as a placing
+    });
+
+    it("ignores placings and callbacks from uncounted shows", () => {
+        const rows = buildHorseStandings(
+            input({
+                shows: [show({ id: "old", show_year: 2025 })],
+                entries: classOf(3, "old"),
+                placings: [{ entry_id: "e1", place: 1 }],
+                callbacks: [{ scope: "show", champion_entry_id: "e1" }],
+            }),
+        );
+        expect(rows).toHaveLength(0);
+    });
+
+    it("falls back to honest placeholders for hidden names", () => {
+        const rows = buildHorseStandings(
+            input({
+                shows: [show({ id: "show-1" })],
+                entries: classOf(2),
+                placings: [{ entry_id: "e1", place: 1 }],
+            }),
+        );
+        expect(rows[0].horseName).toBe(FALLBACK_HORSE_NAME);
+        expect(rows[0].ownerAlias).toBe(FALLBACK_OWNER_ALIAS);
+    });
+});
+
+describe("buildStableStandings — v2 pair semantics", () => {
+    it("rolls pair points up to the owner", () => {
+        const entries = classOf(4);
+        const rows = buildStableStandings(
+            input({
+                shows: [show({ id: "show-1" })],
+                entries,
+                placings: [
+                    { entry_id: "e1", place: 1 },
+                    { entry_id: "e2", place: 2 },
+                ],
+            }),
+        );
+        expect(rows[0]).toMatchObject({ ownerId: "owner-1", points: 4, rank: 1 });
+        expect(rows[1]).toMatchObject({ ownerId: "owner-2", points: 3, rank: 2 });
+    });
+
+    it("mid-year transfer: each stable keeps the points it campaigned", () => {
+        // Same horse, two shows, two owners — two PAIRS.
+        const entries = [
+            entry("a1", "show-1", "horse-1", "seller", "c1"),
+            entry("a2", "show-1", "horse-2", "other", "c1"),
+            entry("b1", "show-2", "horse-1", "buyer", "c2"),
+            entry("b2", "show-2", "horse-3", "other", "c2"),
+        ];
+        const rows = buildStableStandings(
+            input({
+                shows: [show({ id: "show-1" }), show({ id: "show-2" })],
+                entries,
+                placings: [
+                    { entry_id: "a1", place: 1 }, // 2 pts to seller's pair
+                    { entry_id: "b1", place: 1 }, // 2 pts to buyer's pair
+                ],
+            }),
+        );
+        expect(rows.find((r) => r.ownerId === "seller")?.points).toBe(2);
+        expect(rows.find((r) => r.ownerId === "buyer")?.points).toBe(2);
+        // The horse's own standing aggregates both pairs.
+        const horseRows = buildHorseStandings(
+            input({
+                shows: [show({ id: "show-1" }), show({ id: "show-2" })],
+                entries,
+                placings: [
+                    { entry_id: "a1", place: 1 },
+                    { entry_id: "b1", place: 1 },
+                ],
+            }),
+        );
+        expect(horseRows.find((r) => r.horseId === "horse-1")?.points).toBe(4);
+    });
+
+    it("tied stables share the rank and order alphabetically", () => {
+        const entries = classOf(3);
+        const rows = buildStableStandings(
+            input({
+                shows: [show({ id: "show-1" })],
+                entries,
+                placings: [], // everyone at 0
+                ownerAliasById: new Map([
+                    ["owner-1", "Zinnia"],
+                    ["owner-2", "Apple"],
+                    ["owner-3", "Maple"],
+                ]),
+            }),
+        );
+        expect(rows.map((r) => r.rank)).toEqual([1, 1, 1]);
+        expect(rows.map((r) => r.ownerAlias)).toEqual(["Apple", "Maple", "Zinnia"]);
     });
 });

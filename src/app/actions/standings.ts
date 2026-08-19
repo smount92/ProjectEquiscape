@@ -115,7 +115,7 @@ export async function getStandings(params: GetStandingsParams): Promise<GetStand
         //    (the points model reads "latest entry" as current owner).
         const { data: rawEntries, error: entriesError } = await supabase
             .from("show_class_entries")
-            .select("id, show_id, horse_id, owner_id")
+            .select("id, show_id, class_id, horse_id, owner_id")
             .in("show_id", [...counted])
             .neq("status", "scratched")
             .order("created_at", { ascending: true });
