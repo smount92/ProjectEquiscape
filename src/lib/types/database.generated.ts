@@ -2885,12 +2885,15 @@ export type Database = {
       }
       qualification_cards: {
         Row: {
+          class_entry_count: number | null
+          class_exhibitor_count: number | null
           class_id: string
           current_owner_id: string
           earned_by_owner_id: string
           earned_place: number
           horse_id: string
           id: string
+          is_stakes: boolean
           issued_at: string
           show_id: string
           show_year: number | null
@@ -2900,12 +2903,15 @@ export type Database = {
           voided_by: string | null
         }
         Insert: {
+          class_entry_count?: number | null
+          class_exhibitor_count?: number | null
           class_id: string
           current_owner_id: string
           earned_by_owner_id: string
           earned_place: number
           horse_id: string
           id: string
+          is_stakes?: boolean
           issued_at?: string
           show_id: string
           show_year?: number | null
@@ -2915,12 +2921,15 @@ export type Database = {
           voided_by?: string | null
         }
         Update: {
+          class_entry_count?: number | null
+          class_exhibitor_count?: number | null
           class_id?: string
           current_owner_id?: string
           earned_by_owner_id?: string
           earned_place?: number
           horse_id?: string
           id?: string
+          is_stakes?: boolean
           issued_at?: string
           show_id?: string
           show_year?: number | null
@@ -5079,9 +5088,12 @@ export type Database = {
       get_public_horse_cards: {
         Args: { p_horse_id: string }
         Returns: {
+          class_entry_count: number
+          class_exhibitor_count: number
           class_name: string
           code: string
           earned_place: number
+          is_stakes: boolean
           issued_at: string
           show_title: string
           show_year: number
@@ -5226,10 +5238,12 @@ export type Database = {
       verify_qualification_card: {
         Args: { p_code: string }
         Returns: {
+          class_entry_count: number
+          class_exhibitor_count: number
           class_name: string
           code: string
           earned_place: number
-          horse_name: string
+          is_stakes: boolean
           issued_at: string
           show_title: string
           show_year: number
