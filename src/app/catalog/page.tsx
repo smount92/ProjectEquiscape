@@ -79,6 +79,8 @@ export default async function ReferencePage({
         getCatalogItems({
             search: filters.q,
             maker: filters.maker,
+            manufacturer: filters.manufacturer,
+            artist: filters.artist,
             scale: filters.scale,
             type: filters.type,
             yearFrom: filters.yearFrom,
@@ -97,7 +99,13 @@ export default async function ReferencePage({
 
     const items = (result.success ? result.items : []) as CatalogItemRow[];
     const total = result.success ? result.total : 0;
-    const facets = (facetRes.data ?? {}) as { makers?: string[]; scales?: string[]; materials?: string[] };
+    const facets = (facetRes.data ?? {}) as {
+        makers?: string[];
+        scales?: string[];
+        materials?: string[];
+        manufacturers?: string[];
+        artists?: string[];
+    };
     // Scales read largest model → smallest, never alphabetically.
     if (facets.scales) facets.scales = sortScalesBySize(facets.scales);
     const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -207,11 +215,17 @@ export default async function ReferencePage({
                         makers={facets.makers ?? []}
                         scales={facets.scales ?? []}
                         materials={facets.materials ?? []}
+                        manufacturers={facets.manufacturers ?? []}
+                        artists={facets.artists ?? []}
                         {...(v2
                             ? {
                                   v2: {
+                                      // Quick chips prefer the split facet
+                                      // (157); legacy makers until it lands.
                                       quickMakers: pickQuickChips(
-                                          facets.makers,
+                                          facets.manufacturers?.length
+                                              ? facets.manufacturers
+                                              : facets.makers,
                                           [...PREFERRED_QUICK_MAKERS],
                                           4,
                                       ),

@@ -108,11 +108,11 @@ export function pickQuickChips(
     return picks;
 }
 
-/** The makers most searched-for in the hobby — quick-chip preference order. */
+/** The makers most searched-for in the hobby — quick-chip preference order.
+ *  ("Stone" dropped: migration 157 unifies it into "Peter Stone".) */
 export const PREFERRED_QUICK_MAKERS = [
     "Breyer",
     "Peter Stone",
-    "Stone",
     "Hartland",
     "Schleich",
     "CollectA",

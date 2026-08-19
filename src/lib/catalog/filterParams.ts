@@ -37,7 +37,11 @@ const MAX_YEAR = 2100;
  */
 export interface CatalogFilters {
     q?: string;
+    /** Legacy mixed-attribution filter (old URLs keep working). */
     maker?: string;
+    /** Attribution split (156): company / person facets. */
+    manufacturer?: string;
+    artist?: string;
     scale?: string;
     type?: string;
     yearFrom?: number;
@@ -82,6 +86,12 @@ export function parseCatalogSearchParams(
 
     const maker = nonEmpty(params.maker, 80);
     if (maker) filters.maker = maker;
+
+    const manufacturer = nonEmpty(params.manufacturer, 80);
+    if (manufacturer) filters.manufacturer = manufacturer;
+
+    const artist = nonEmpty(params.artist, 80);
+    if (artist) filters.artist = artist;
 
     const scale = nonEmpty(params.scale, 40);
     if (scale) filters.scale = scale;
@@ -131,6 +141,8 @@ export function buildCatalogSearchParams(filters: Partial<CatalogFilters>): URLS
     const params = new URLSearchParams();
     if (filters.q) params.set("q", filters.q);
     if (filters.maker) params.set("maker", filters.maker);
+    if (filters.manufacturer) params.set("manufacturer", filters.manufacturer);
+    if (filters.artist) params.set("artist", filters.artist);
     if (filters.scale) params.set("scale", filters.scale);
     if (filters.type) params.set("type", filters.type);
     if (filters.yearFrom !== undefined) params.set("year_from", String(filters.yearFrom));
@@ -177,7 +189,18 @@ export function hasAdvancedCatalogFilters(filters: CatalogFilters): boolean {
 /** A rubber-stamp chip describing one active filter. */
 export interface CatalogFilterChip {
     /** Which filter removing this chip clears (`year` clears both bounds). */
-    key: "q" | "maker" | "scale" | "type" | "year" | "color" | "model" | "medium" | "material";
+    key:
+        | "q"
+        | "maker"
+        | "manufacturer"
+        | "artist"
+        | "scale"
+        | "type"
+        | "year"
+        | "color"
+        | "model"
+        | "medium"
+        | "material";
     label: string;
 }
 
@@ -195,6 +218,9 @@ export function activeCatalogChips(filters: CatalogFilters): CatalogFilterChip[]
     const chips: CatalogFilterChip[] = [];
     if (filters.q) chips.push({ key: "q", label: `“${filters.q}”` });
     if (filters.maker) chips.push({ key: "maker", label: filters.maker });
+    if (filters.manufacturer)
+        chips.push({ key: "manufacturer", label: filters.manufacturer });
+    if (filters.artist) chips.push({ key: "artist", label: `by ${filters.artist}` });
     if (filters.scale) chips.push({ key: "scale", label: filters.scale });
     if (filters.type) chips.push({ key: "type", label: TYPE_LABELS[filters.type] ?? filters.type });
     if (filters.yearFrom !== undefined || filters.yearTo !== undefined) {

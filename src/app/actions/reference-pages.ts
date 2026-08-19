@@ -34,6 +34,9 @@ export interface CatalogRow {
     slug: string | null;
     scale: string | null;
     attributes: Record<string, unknown> | null;
+    /** Attribution split (migration 156) — corrected values win over derivation. */
+    artist: string | null;
+    manufacturer: string | null;
 }
 
 export const resolveReferenceItem = unstable_cache(
@@ -41,7 +44,7 @@ export const resolveReferenceItem = unstable_cache(
         const supabase = createAnonClient();
         const { data } = await supabase
             .from("catalog_items")
-            .select("id, item_type, title, maker, maker_slug, slug, scale, attributes")
+            .select("id, item_type, title, maker, maker_slug, slug, scale, attributes, artist, manufacturer")
             .eq("maker_slug", makerSlug)
             .eq("slug", slug)
             .maybeSingle();

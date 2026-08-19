@@ -300,36 +300,42 @@ export type Database = {
       }
       catalog_items: {
         Row: {
+          artist: string | null
           attributes: Json | null
           created_at: string
           id: string
           item_type: string
           maker: string
           maker_slug: string | null
+          manufacturer: string | null
           parent_id: string | null
           scale: string | null
           slug: string | null
           title: string
         }
         Insert: {
+          artist?: string | null
           attributes?: Json | null
           created_at?: string
           id?: string
           item_type: string
           maker: string
           maker_slug?: string | null
+          manufacturer?: string | null
           parent_id?: string | null
           scale?: string | null
           slug?: string | null
           title: string
         }
         Update: {
+          artist?: string | null
           attributes?: Json | null
           created_at?: string
           id?: string
           item_type?: string
           maker?: string
           maker_slug?: string | null
+          manufacturer?: string | null
           parent_id?: string | null
           scale?: string | null
           slug?: string | null

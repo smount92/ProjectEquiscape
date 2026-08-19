@@ -237,6 +237,8 @@ export default async function ReferencePage({ params }: Props) {
         item_type: item.item_type,
         maker: item.maker,
         sculptor: (attrs as Record<string, unknown>).sculptor as string | null | undefined,
+        artist: item.artist,
+        manufacturer: item.manufacturer,
     });
     const specRows: [string, string][] = [
         ...(attribution.manufacturer

@@ -100,12 +100,18 @@ export default function CatalogFilterBar({
     makers,
     scales,
     materials = [],
+    manufacturers = [],
+    artists = [],
     v2,
 }: {
     filters: CatalogFilters;
     makers: string[];
     scales: string[];
     materials?: string[];
+    /** Attribution-split facets (migration 157). When present they
+     *  replace the legacy mixed "Maker" select. */
+    manufacturers?: string[];
+    artists?: string[];
     /** CATALOG_V2 extras — quick chips + Identify. Absent = legacy render. */
     v2?: { quickMakers: string[]; quickScales: string[] };
 }) {
@@ -149,12 +155,19 @@ export default function CatalogFilterBar({
     };
 
     /** Any filter change resets to page 1 — the result set changed. */
-    const setOrClear = (key: "maker" | "scale" | "type", value: string | undefined) => {
+    const setOrClear = (
+        key: "maker" | "manufacturer" | "artist" | "scale" | "type",
+        value: string | undefined,
+    ) => {
         const next = { ...filters, page: 1 };
         if (value === undefined) delete next[key];
         else next[key] = value;
         push(next);
     };
+
+    // The split facets replace the legacy mixed Maker select once
+    // migration 157's facet lists arrive.
+    const hasSplitFacets = manufacturers.length > 0 || artists.length > 0;
 
     const submitSearch = () => {
         const q = searchInput.trim();
@@ -210,13 +223,32 @@ export default function CatalogFilterBar({
                         aria-label="Search the reference catalog"
                     />
                 </div>
-                <FacetSelect
-                    label="Maker"
-                    value={filters.maker}
-                    options={makers}
-                    onChange={(v) => setOrClear("maker", v)}
-                    id="catalog-facet-maker"
-                />
+                {hasSplitFacets ? (
+                    <>
+                        <FacetSelect
+                            label="Manufacturer"
+                            value={filters.manufacturer}
+                            options={manufacturers}
+                            onChange={(v) => setOrClear("manufacturer", v)}
+                            id="catalog-facet-manufacturer"
+                        />
+                        <FacetSelect
+                            label="Artist"
+                            value={filters.artist}
+                            options={artists}
+                            onChange={(v) => setOrClear("artist", v)}
+                            id="catalog-facet-artist"
+                        />
+                    </>
+                ) : (
+                    <FacetSelect
+                        label="Maker"
+                        value={filters.maker}
+                        options={makers}
+                        onChange={(v) => setOrClear("maker", v)}
+                        id="catalog-facet-maker"
+                    />
+                )}
                 <FacetSelect
                     label="Scale"
                     value={filters.scale}
@@ -279,12 +311,15 @@ export default function CatalogFilterBar({
                     id="catalog-quick-chips"
                 >
                     {v2.quickMakers.map((m) => {
-                        const active = filters.maker === m;
+                        // Post-157 the chips are manufacturer chips; the
+                        // legacy maker param keeps old chips working.
+                        const chipKey = hasSplitFacets ? "manufacturer" : "maker";
+                        const active = filters[chipKey] === m;
                         return (
                             <button
                                 key={`maker-${m}`}
                                 type="button"
-                                onClick={() => setOrClear("maker", active ? undefined : m)}
+                                onClick={() => setOrClear(chipKey, active ? undefined : m)}
                                 aria-pressed={active}
                                 className={
                                     active

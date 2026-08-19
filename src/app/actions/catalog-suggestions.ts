@@ -25,6 +25,9 @@ type CatalogItemUpdate = Database["public"]["Tables"]["catalog_items"]["Update"]
 interface CatalogFilters {
     search?: string;
     maker?: string;
+    /** Attribution split (156). */
+    manufacturer?: string;
+    artist?: string;
     scale?: string;
     type?: string;
     category?: string;
@@ -159,6 +162,9 @@ export async function getCatalogItems(filters: CatalogFilters) {
         .range(from, from + pageSize - 1);
 
     if (filters.maker) query = query.eq("maker", filters.maker);
+    // Attribution split (156): company / person facets.
+    if (filters.manufacturer) query = query.eq("manufacturer", filters.manufacturer);
+    if (filters.artist) query = query.eq("artist", filters.artist);
     if (filters.scale) query = query.eq("scale", filters.scale);
     if (filters.type) query = query.eq("item_type", filters.type);
     if (searchIds) {
