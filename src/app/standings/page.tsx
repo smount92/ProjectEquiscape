@@ -304,7 +304,14 @@ export default async function StandingsPage({
                             exhibitors to pay points · A horse-and-owner pair&apos;s best{" "}
                             {BEST_RESULTS_CAP} results count · Championship bonuses: section +3,
                             division +5, show +10 · Only shows with published results count
-                            {shows === "qualifying" ? " · MHH-qualifying shows only" : ""}.
+                            {shows === "qualifying" ? " · MHH-qualifying shows only" : ""} ·{" "}
+                            <Link
+                                href="/shows/rules"
+                                className="text-muted-foreground underline hover:text-foreground"
+                            >
+                                Full rules
+                            </Link>
+                            .
                         </p>
                     </>
                 )}

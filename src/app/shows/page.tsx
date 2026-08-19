@@ -169,6 +169,9 @@ export default async function ShowsPage() {
     user ? (
      showsV2Enabled() || showStandingsEnabled() ? (
       <>
+       <Button asChild variant="outline">
+        <Link href="/shows/rules">Rules</Link>
+       </Button>
        {/* Wave 3, flag-gated dark: the season-standings door. */}
        {showStandingsEnabled() && (
         <Button asChild variant="outline">

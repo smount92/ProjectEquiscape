@@ -1423,6 +1423,49 @@ export type Database = {
           },
         ]
       }
+      exhibitor_distinctions: {
+        Row: {
+          distinction_code: string
+          evidence: Json | null
+          granted_at: string
+          user_id: string
+        }
+        Insert: {
+          distinction_code: string
+          evidence?: Json | null
+          granted_at?: string
+          user_id: string
+        }
+        Update: {
+          distinction_code?: string
+          evidence?: Json | null
+          granted_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exhibitor_distinctions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exhibitor_distinctions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "exhibitor_distinctions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       external_shows: {
         Row: {
           created_at: string
@@ -2332,6 +2375,41 @@ export type Database = {
             columns: ["image_id"]
             isOneToOne: false
             referencedRelation: "horse_images"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      horse_titles: {
+        Row: {
+          evidence: Json | null
+          granted_at: string
+          horse_id: string
+          id: string
+          show_year: number | null
+          title_code: string
+        }
+        Insert: {
+          evidence?: Json | null
+          granted_at?: string
+          horse_id: string
+          id?: string
+          show_year?: number | null
+          title_code: string
+        }
+        Update: {
+          evidence?: Json | null
+          granted_at?: string
+          horse_id?: string
+          id?: string
+          show_year?: number | null
+          title_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "horse_titles_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: false
+            referencedRelation: "user_horses"
             referencedColumns: ["id"]
           },
         ]
