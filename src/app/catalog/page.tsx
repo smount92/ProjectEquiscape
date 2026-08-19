@@ -22,6 +22,7 @@ import {
     countActiveCatalogFilters,
     type CatalogFilters,
 } from "@/lib/catalog/filterParams";
+import { sortScalesBySize } from "@/lib/catalog/taxonomy";
 
 export const metadata: Metadata = {
     title: "Reference Catalog",
@@ -97,6 +98,8 @@ export default async function ReferencePage({
     const items = (result.success ? result.items : []) as CatalogItemRow[];
     const total = result.success ? result.total : 0;
     const facets = (facetRes.data ?? {}) as { makers?: string[]; scales?: string[]; materials?: string[] };
+    // Scales read largest model → smallest, never alphabetically.
+    if (facets.scales) facets.scales = sortScalesBySize(facets.scales);
     const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
     const activeCount = countActiveCatalogFilters(filters);
 

@@ -5,6 +5,7 @@ import {
     CATALOG_CATEGORIES,
     CATEGORY_LABELS,
     normalizeScale,
+    sortScalesBySize,
     suggestionItemTypeToDb,
 } from "@/lib/catalog/taxonomy";
 
@@ -51,6 +52,40 @@ describe("normalizeScale — one vocabulary to rule them all", () => {
 
     it("every canonical scale normalizes to itself (vocabulary is closed)", () => {
         for (const s of CANONICAL_SCALES) expect(normalizeScale(s)).toBe(s);
+    });
+});
+
+describe("sortScalesBySize — largest model first, never alphabetical", () => {
+    it("orders facet values by physical size", () => {
+        const shuffled = [
+            "Micro Mini",
+            "Classic (1:12)",
+            "Stablemate (1:32)",
+            "Traditional (1:9)",
+            "Mini Whinnies (1:64)",
+        ];
+        expect(sortScalesBySize(shuffled)).toEqual([
+            "Traditional (1:9)",
+            "Classic (1:12)",
+            "Stablemate (1:32)",
+            "Mini Whinnies (1:64)",
+            "Micro Mini",
+        ]);
+    });
+
+    it("ranks legacy spellings by their canonical size, unknowns last alphabetically", () => {
+        expect(sortScalesBySize(["zebra size", "1:32", "Traditional", "aardvark size"])).toEqual([
+            "Traditional",
+            "1:32",
+            "aardvark size",
+            "zebra size",
+        ]);
+    });
+
+    it("does not mutate its input", () => {
+        const input = ["Micro Mini", "Traditional (1:9)"];
+        sortScalesBySize(input);
+        expect(input).toEqual(["Micro Mini", "Traditional (1:9)"]);
     });
 });
 

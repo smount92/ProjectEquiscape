@@ -12,7 +12,12 @@
  * stored rows and both classlists' allowed_scales in lockstep.
  */
 
-/** Canonical scales, display order. Community vocabulary, horse-first. */
+/**
+ * Canonical scales in DISPLAY ORDER: largest physical model first
+ * (by ratio where one exists), then the small china/artist lines,
+ * with the catch-alls last. Dropdowns and facet lists render in
+ * exactly this order — never alphabetically.
+ */
 export const CANONICAL_SCALES = [
     "Traditional (1:9)",
     "Classic (1:12)",
@@ -20,9 +25,9 @@ export const CANONICAL_SCALES = [
     "Paddock Pal (1:24)",
     "Stablemate (1:32)",
     "Mini Whinnies (1:64)",
-    "Micro Mini",
     "Venti",
     "Curio",
+    "Micro Mini",
     "Plush",
     "Other",
 ] as const;
@@ -42,6 +47,7 @@ const SCALE_ALIASES: Record<string, CanonicalScale> = {
     classic: "Classic (1:12)",
     "1:12": "Classic (1:12)",
     pebbles: "Pebbles (1:18)",
+    pebble: "Pebbles (1:18)",
     "1:18": "Pebbles (1:18)",
     "paddock pal": "Paddock Pal (1:24)",
     "paddock pals": "Paddock Pal (1:24)",
@@ -57,6 +63,7 @@ const SCALE_ALIASES: Record<string, CanonicalScale> = {
     "mini whinnies": "Mini Whinnies (1:64)",
     "1:64": "Mini Whinnies (1:64)",
     "micro mini": "Micro Mini",
+    "micro mini (1:64)": "Micro Mini",
     micro: "Micro Mini",
     venti: "Venti",
     curio: "Curio",
@@ -78,9 +85,26 @@ const CANONICAL_BY_LOWER = new Map<string, CanonicalScale>(
  */
 export function normalizeScale(raw: string | null | undefined): string | null {
     const trimmed = (raw ?? "").trim();
-    if (trimmed === "") return null;
+    // "Unknown" is not a scale — an absent scale is honest NULL.
+    if (trimmed === "" || trimmed.toLowerCase() === "unknown") return null;
     const lower = trimmed.toLowerCase();
     return CANONICAL_BY_LOWER.get(lower) ?? SCALE_ALIASES[lower] ?? trimmed;
+}
+
+/**
+ * Sort scale values largest-model-first (CANONICAL_SCALES order).
+ * Unknown values sort after the vocabulary, alphabetically — visible
+ * at the bottom of a dropdown instead of shuffled into it. Used on
+ * the facet lists, which are data-driven (DISTINCT over the column)
+ * and would otherwise render alphabetically.
+ */
+export function sortScalesBySize(scales: readonly string[]): string[] {
+    const rank = (s: string): number => {
+        const norm = normalizeScale(s);
+        const idx = norm ? (CANONICAL_SCALES as readonly string[]).indexOf(norm) : -1;
+        return idx === -1 ? CANONICAL_SCALES.length : idx;
+    };
+    return [...scales].sort((a, b) => rank(a) - rank(b) || a.localeCompare(b));
 }
 
 /**
