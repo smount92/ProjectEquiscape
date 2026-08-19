@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { catalogDisplayName } from "@/lib/catalog/displayName";
 import type { Metadata } from "next";
 import Link from "next/link";
+import BlueBookProCharts from "@/components/BlueBookProCharts";
 import FocusLayout from "@/components/layouts/FocusLayout";
 import CatalogSubMasthead from "@/components/catalog/CatalogSubMasthead";
 import { Button } from "@/components/ui/button";
@@ -388,6 +389,20 @@ export default async function ReferencePage({ params }: Props) {
                                     >
                                         See market data →
                                     </Link>
+                                </div>
+                                {/* Blue Book PRO — the Pro sales page's first feature,
+                                    previously mounted NOWHERE (found during the
+                                    first-customer verification run). Resolves the
+                                    viewer's tier client-side so this ISR page stays
+                                    cacheable; free viewers get the upgrade teaser. */}
+                                <div className="border-t border-input p-5">
+                                    <BlueBookProCharts
+                                        catalogId={item.id}
+                                        title={item.title}
+                                        averagePrice={(market.lowestPrice + market.highestPrice) / 2}
+                                        medianPrice={market.medianPrice}
+                                        transactionVolume={market.transactionVolume}
+                                    />
                                 </div>
                             </>
                         ) : (

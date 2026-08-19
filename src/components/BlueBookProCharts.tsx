@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
+
+import { createClient } from "@/lib/supabase/client";
 
 /**
  * BlueBookProCharts — Premium analytics overlay
@@ -16,7 +18,10 @@ interface ChartDataPoint {
 }
 
 interface BlueBookProChartsProps {
-    tier: "free" | "pro" | "studio";
+    /** Omit to let the component resolve the viewer's tier client-side —
+     * required on ISR/anon-cached pages (reference), where a server tier
+     * prop would either break caching or bake in the wrong tier. */
+    tier?: "free" | "pro" | "studio";
     catalogId: string;
     title: string;
     historicalData?: ChartDataPoint[];
@@ -26,7 +31,7 @@ interface BlueBookProChartsProps {
 }
 
 export default function BlueBookProCharts({
-    tier,
+    tier: tierProp,
     title,
     historicalData = [],
     averagePrice,
@@ -34,6 +39,20 @@ export default function BlueBookProCharts({
     transactionVolume,
 }: BlueBookProChartsProps) {
     const [hoveredPoint, setHoveredPoint] = useState<ChartDataPoint | null>(null);
+    const [resolvedTier, setResolvedTier] = useState<"free" | "pro" | "studio" | null>(
+        tierProp ?? null,
+    );
+    useEffect(() => {
+        if (tierProp) return;
+        createClient()
+            .auth.getUser()
+            .then(({ data }) => {
+                const t = data.user?.app_metadata?.tier;
+                setResolvedTier(t === "pro" || t === "studio" ? t : "free");
+            })
+            .catch(() => setResolvedTier("free"));
+    }, [tierProp]);
+    const tier = resolvedTier ?? "free";
 
     const formatCurrency = (v: number) =>
         new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(v);
