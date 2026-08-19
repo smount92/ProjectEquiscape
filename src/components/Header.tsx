@@ -833,8 +833,15 @@ export default function Header() {
  <div className="flex shrink-0 items-center gap-4 max-md:gap-2">
  {/* Log In stays visible on mobile — hiding it in the hamburger
      made returning members think there was no way in
-     (user-reported). Signup label compacts to fit both. */}
- <Button asChild variant="ghost"><Link
+     (user-reported). Signup label compacts to fit both.
+     Color: the global `a` rule paints bare links forest — invisible
+     on the leather band (user-reported). The band's own text token
+     keeps it legible in every theme that repaints the band. */}
+ <Button
+ asChild
+ variant="ghost"
+ className="text-[color:var(--leather-text)] hover:bg-white/10 hover:text-[color:var(--leather-text)]"
+ ><Link
  href="/login"
  id="header-login-button"
  >
