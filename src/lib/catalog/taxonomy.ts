@@ -183,6 +183,40 @@ export interface Attribution {
 }
 
 /**
+ * Companies the hobby recognizes as manufacturers (MHI-reviewed list
+ * 2026-08 + known factory names in the data). The 156 backfill set
+ * manufacturer = maker for every factory-category row — but some of
+ * those rows carry a PERSON in maker (artist sculptures imported as
+ * molds), which polluted the Manufacturer facet with artist names.
+ * Migration 161 moves any manufacturer NOT on this list to artist;
+ * this list also feeds the suggestion form's Manufacturer dropdown.
+ * A genuinely missing company is a one-line addition + correction.
+ */
+export const KNOWN_MANUFACTURERS = [
+    "Animal Artistry",
+    "Beswick",
+    "Border Fine Arts",
+    "Breyer",
+    "CollectA",
+    "Conversation Concepts",
+    "Copperfox",
+    "Country Artists",
+    "Grand Champions",
+    "Hagen-Renaker",
+    "Hartland",
+    "Horsing Around",
+    "Julip",
+    "North Light",
+    "Pacific Giftware",
+    "Peter Stone",
+    "Royal Doulton",
+    "Safari Ltd",
+    "Schleich",
+    "Stone Critters",
+    "WIA",
+] as const;
+
+/**
  * Derive artist/manufacturer from legacy fields. This IS migration
  * 156's mechanical backfill, expressed in TS so pages can render the
  * split before the columns exist and tests can pin the two in sync:

@@ -339,10 +339,13 @@ editionSize: rawPedigree.edition_size,
  })),
  ).get(horseId) ?? null)
  : null;
- const cardsCount = v2 && isForSale ? (await getPublicHorseCards(horseId)).length : 0;
+ // Parallel: independent reads must not stack round trips (perf).
+ const [publicCardsForCount, publicTitles] = await Promise.all([
+ v2 && isForSale ? getPublicHorseCards(horseId) : Promise.resolve([]),
+ getHorseTitles(horseId),
+ ]);
+ const cardsCount = publicCardsForCount.length;
  const refName = refInfo ? `${refInfo.maker} — ${refInfo.name}` : null;
- // MHH Titles (159) — public record; [] until the migration lands.
- const publicTitles = await getHorseTitles(horseId);
  const publicNamePrefix = titlePrefix(publicTitles.map((t) => t.code));
  // The estimate caption must never render orphaned: MarketValueBadge
  // hides itself client-side when the mold has no sales, so check the

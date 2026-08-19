@@ -3,7 +3,7 @@
 import { useState, useTransition } from"react";
 import { useRouter } from"next/navigation";
 import { createSuggestion } from"@/app/actions/catalog-suggestions";
-import { ARTIST_ATTRIBUTED_CATEGORIES, CANONICAL_SCALES } from "@/lib/catalog/taxonomy";
+import { ARTIST_ATTRIBUTED_CATEGORIES, CANONICAL_SCALES, KNOWN_MANUFACTURERS } from "@/lib/catalog/taxonomy";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,8 @@ import { Button } from "@/components/ui/button";
 // England — later Wade Ceramics). A FACTORY maker, so its models are
 // molds/releases, never "Artist Resin" (owner-approved 2026-08 after
 // a user request; 15 catalog items exist under maker_slug north-light).
-const MAKERS = ["Breyer","Peter Stone","Hartland","Hagen-Renaker","North Light","Other"];
+// Taxonomy v2: the recognized-company list (MHI-reviewed) + Other.
+const MAKERS = [...KNOWN_MANUFACTURERS, "Other"];
 // Taxonomy v2: canonical DB values (legacy release/mold/resin values in
 // old pending suggestions still translate — see taxonomy.ts).
 const ITEM_TYPES = [
