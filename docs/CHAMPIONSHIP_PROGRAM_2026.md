@@ -45,11 +45,11 @@ Why this and not the alternatives: CFA's decay ladder (95/90/85%) is finer-grain
 
 Cards already exist with exactly NAN's semantics (1st/2nd in a qualifying class, one card per horse per class, travels with the horse, one-use, publicly verifiable, May 1–Apr 30 show year). The upgrade is **validity gates**, ARBA's canonical anti-inflation mechanism:
 
-- **A card is only minted if the class had ≥3 live entries from ≥2 distinct exhibitors.** (ARBA uses 5-and-3; our current median class is far smaller — start at 3-and-2 for Season 1 and recalibrate annually toward 5-and-3 as volume grows. AKC's announced-annual-recalibration precedent makes this legitimate rather than rug-pulling.)
-- **Major cards:** a card from a class of **≥6 entries from ≥4 exhibitors** is flagged a *major* — displayed distinctly on the card and passport. Season 1 requires no majors anywhere; Season 2 introduces "at least one major" into title requirements (the AKC majors principle, phased in only when the data supports it).
+- **A card is only minted if the class had ≥5 live entries from ≥3 distinct exhibitors** (OWNER DECISION 2026-08: ARBA's exact bar, adopted as the permanent standard). **Season 1 provision:** classes of 3+/2+ mint a card until Apr 30 2027, clearly labeled Season 1 — the data reality is that Summerween's largest class was 4 entries, so an immediate 5-and-3 would mint zero cards platform-wide and leave the first Championship with nothing to redeem. The provision and its expiry are published in the rules.
+- **Stakes cards** (OWNER DECISION: renamed from "major" to the horse world's own term — a stakes win is the win that matters): a card from a class of **≥15 entries from ≥6 exhibitors**. Rare by design at current volume — that is the point of a prestige marker — and it enters title requirements only when the data supports it (Season 2+, per recalibration).
 - Cards remain earned only in **MHH Sanctioned** shows (the `is_mhh_qualifying` flag, formalized in §5).
 
-**What this fixes about the status quo:** the hobby's open secret is NAN cards minted in 2-horse classes. MHH cards will carry their class size and exhibitor count *on the card* — a card that says "1st of 14, 9 exhibitors — MAJOR" is simply worth more than paper, and everyone can see why.
+**What this fixes about the status quo:** the hobby's open secret is NAN cards minted in 2-horse classes. MHH cards will carry their class size and exhibitor count *on the card* — a card that says "1st of 16, 9 exhibitors — STAKES" is simply worth more than paper, and everyone can see why.
 
 ---
 
@@ -57,7 +57,7 @@ Cards already exist with exactly NAN's semantics (1st/2nd in a qualifying class,
 
 ### Model titles (travel with the horse, minted onto Hoofprint)
 - **MHH Champion (CH):** 3 cards on the same horse, earned at **3 different shows** under **≥2 different judges**, at least 1 in the horse's declared primary axis (halter/performance/etc.). Pure ARBA-shape. Permanent; renders on the passport masthead and travels on sale.
-- **MHH Grand Champion (GC):** CH + either a placing at the annual Championship **or** 3 additional *major* cards. (Season 1: Championship-placing route only, since majors phase in later.)
+- **MHH Grand Champion (GC):** CH + either a placing at the annual Championship **or** 3 Stakes cards. (Season 1: Championship-placing route only, since Stakes phase in later.)
 - **Register of Merit (ROM):** 30 lifetime season points in a single division axis. **Superior:** 75. Fixed-threshold mid-ladder goals (AQHA-shape) reachable by steady quality without ever being #1 — the retention layer for the middle of the pack.
 - **Standards certificates (Championship only, AOS-shape):** panel-scored 100-point judging at the annual Championship awards permanent, any-number-can-earn certificates: **Honors 75+ · Merit 80+ · Excellence 90+**. A model can carry "MHH Excellence 2027" forever regardless of who else entered that year — the anti-discouragement crown jewel: your model competes against the standard, not the field.
 
@@ -66,7 +66,7 @@ Breadth-gated so no single model, show, or judge can carry you:
 - **MHH Star:** 15 placings (top-6) in sanctioned shows, from **≥6 different models** across **≥5 different shows**.
 - **Star 2:** 36 placings, ≥12 models, ≥10 shows, ≥3 judges. **Star 3:** 75, ≥20, ≥20, ≥5. (One level per season maximum — FIAP's rate limit.)
 - **Rookie of the Year:** highest season points among exhibitors whose first-ever entry was that season.
-- **Judge's ladder:** Apprentice (co-judge 1 sanctioned show) → Judge (3 shows judged + 50 critiques written) → Senior Judge (10 shows, 250 critiques, eligible for Championship panels). Critique counts are already recorded per-entry — the accreditation is computable, NACQJ-shaped without the seven years.
+- **Judge's ladder:** Apprentice → **Carded Judge** → Senior Judge ("carded" is the real horse-world term — USEF judges hold cards, and it rhymes with our card economy). Becoming Carded takes EITHER the **MHH Judging Clinic** (paid course: the rubric, the IMEHA guidebook, and a calibration exercise — score a fixed reference set of entries, compared against Senior-Judge consensus; the Zippo principle as a certification instrument, and an honest revenue line: education, never access) OR the apprentice route (co-judge 2 sanctioned shows under a Senior Judge) — the dual path keeps accreditation un-paywalled. Senior = 10 shows judged + 250 critiques written, eligible for paid Championship panels. Critique counts are already recorded per-entry — the whole ladder is computable.
 
 ---
 
@@ -79,7 +79,7 @@ Breadth-gated so no single model, show, or judge can carry you:
 
 ### Championship format
 - **Entry = card redemption.** One card redeemed per championship class entered (the `redeemed` status already modeled in cards.ts finally gets its purpose); the horse must hold a card in the matching axis. Qualification is *automatic* — the site knows who's eligible, the killer feature no paper org can offer. A limited **Buy-In division** (MEPSA precedent) lets unqualified horses enter a separate non-title division so nobody's shut out of the party.
-- **Judging: both layers.** A panel of 3 (Senior Judges preferred) **scores every entry 0–100 against the published rubric** (z-score normalized across panelists — the Pacific Bonsai fix for hard/easy graders), which yields the standards certificates; comparative placings (Top Ten per class, NAN tradition) and the champion ladder come from the same scores. **Every entry receives a written critique** — the NACQJ ceiling, and the single clearest "this is a serious show" signal money can't fake. Judges for the Championship are compensated (NAN pays $100/day; fund from Pro revenue or a modest championship entry fee — the one place a fee fits the volunteer economy, because it pays judges, not the platform).
+- **Judging: both layers.** A panel of 3 (Senior Judges preferred) **scores every entry 0–100 against the published rubric** (z-score normalized across panelists — the Pacific Bonsai fix for hard/easy graders), which yields the standards certificates; comparative placings (Top Ten per class, NAN tradition) and the champion ladder come from the same scores. **Every entry receives a written critique** — the NACQJ ceiling, and the single clearest "this is a serious show" signal money can't fake. Judges are compensated (OWNER DECISION shape): at MHH-run events (Championship, quarterly Opens) a **published percentage of entry fees goes to the judging panel, split evenly, capped per judge** — the fee visibly pays the judges, not the platform, which is the only fee posture this hobby's volunteer economy respects. Community-hosted sanctioned shows keep their own fee arrangements untouched (the no-middleman principle). Paid panels drawn from Senior Judges make the ladder worth climbing — and give judges a direct reason to promote the shows they work.
 - **Sweeps rule (Championship only):** champion and reserve of a class must be different exhibitors; max 3 counted Top-Ten slots per exhibitor per class (IPMS-shape). Regular sanctioned shows keep normal hobby rules.
 - **Blind throughout**, reveals at results — already the platform default.
 
