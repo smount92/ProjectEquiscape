@@ -831,7 +831,10 @@ export default function Header() {
  {/* ── Auth actions for logged-out users (+ mobile hamburger) ── */}
  {!user && (
  <div className="flex shrink-0 items-center gap-4 max-md:gap-2">
- <Button asChild variant="ghost" className="max-md:hidden"><Link
+ {/* Log In stays visible on mobile — hiding it in the hamburger
+     made returning members think there was no way in
+     (user-reported). Signup label compacts to fit both. */}
+ <Button asChild variant="ghost"><Link
  href="/login"
  id="header-login-button"
  >
@@ -841,7 +844,8 @@ export default function Header() {
  href="/signup"
  id="header-signup-button"
  >
- Create Free Account
+ <span className="max-md:hidden">Create Free Account</span>
+ <span className="md:hidden">Sign Up</span>
  </Link></Button>
  <button
  className="leather-icon-btn relative hidden max-md:flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-md border border-input bg-transparent text-muted-foreground transition-all"
