@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { referenceHref, referencePagesEnabled } from "@/lib/catalog/referenceUrl";
+import { CATEGORY_LABELS } from "@/lib/catalog/taxonomy";
 
 /**
  * The five-column catalog results table — the ORIGINAL /catalog renderer,
@@ -11,11 +12,8 @@ import { referenceHref, referencePagesEnabled } from "@/lib/catalog/referenceUrl
  * design lives.
  */
 
-const TYPE_LABELS: Record<string, string> = {
-    plastic_mold: "Mold",
-    plastic_release: "Release",
-    artist_resin: "Artist Resin",
-};
+// Taxonomy v2: labels come from the shared vocabulary.
+const TYPE_LABELS: Record<string, string> = CATEGORY_LABELS;
 
 export interface CatalogTableItem {
     id: string;

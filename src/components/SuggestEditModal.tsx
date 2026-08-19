@@ -2,6 +2,7 @@
 
 import { useState, useTransition, useEffect } from "react";
 import { createSuggestion } from "@/app/actions/catalog-suggestions";
+import { CANONICAL_SCALES } from "@/lib/catalog/taxonomy";
 import { useToast } from "@/lib/context/ToastContext";
 import {
     Dialog,
@@ -151,12 +152,34 @@ export default function SuggestEditModal({ catalogItem, openOnMount = false }: S
       </span>
      )}
      </label>
+     {field.key === "scale" ? (
+     /* Taxonomy v2: scale corrections pick from the canonical
+        vocabulary instead of free text. A non-canonical stored
+        value still shows as a selectable "keep" option so the
+        modal opens without phantom changes. */
+     <select
+     className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+     value={field.current}
+     onChange={(e) => handleFieldChange(i, e.target.value)}
+     aria-label={field.label}
+     >
+     {field.original !== "" &&
+      !CANONICAL_SCALES.includes(field.original as (typeof CANONICAL_SCALES)[number]) && (
+      <option value={field.original}>{field.original} (current)</option>
+     )}
+     {field.original === "" && <option value="">— Select —</option>}
+     {CANONICAL_SCALES.map((s) => (
+      <option key={s} value={s}>{s}</option>
+     ))}
+     </select>
+     ) : (
      <Input
      type="text"
      value={field.current}
      onChange={(e) => handleFieldChange(i, e.target.value)}
      aria-label={field.label}
      />
+     )}
      {field.current !== field.original && (
      <span className="text-muted-foreground text-xs italic">
       Was: {field.original}

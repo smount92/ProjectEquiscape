@@ -225,7 +225,7 @@ export default function CatalogFilterBar({
                     id="catalog-facet-scale"
                 />
                 <FacetSelect
-                    label="Type"
+                    label="Category"
                     value={filters.type}
                     options={CATALOG_TYPE_OPTIONS.map((t) => t.value)}
                     optionLabels={TYPE_LABELS}

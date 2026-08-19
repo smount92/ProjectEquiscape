@@ -25,6 +25,7 @@
  *    exactly what the `active` filter below evaluates against.
  */
 
+import { normalizeScale } from "@/lib/catalog/taxonomy";
 import type {
     ClassStatus,
     DivisionAxis,
@@ -167,8 +168,14 @@ export function validateEntry(input: ValidateEntryInput): ValidateEntryResult {
     }
 
     // ── Scale / finish eligibility ──
+    // Scales compare through the Taxonomy-v2 normalizer so a class
+    // limited to "Traditional (1:9)" still admits a horse whose
+    // catalog row (or a host's hand-typed classlist) says
+    // "Traditional" or "1:9". Migration 154 canonicalized stored
+    // data; this keeps future free-text drift from bouncing entries.
     if (targetClass.allowedScales && targetClass.allowedScales.length > 0) {
-        if (!horse.scale || !targetClass.allowedScales.includes(horse.scale)) {
+        const allowed = targetClass.allowedScales.map((s) => normalizeScale(s));
+        if (!horse.scale || !allowed.includes(normalizeScale(horse.scale))) {
             errors.push(
                 `This class is limited to ${targetClass.allowedScales.join(", ")} scale models${horse.scale ? ` — this horse is ${horse.scale}` : ""}.`,
             );

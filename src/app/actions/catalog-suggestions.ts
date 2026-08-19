@@ -13,6 +13,7 @@ import {
     correctionTouchesAttributes,
 } from "@/lib/catalog/corrections";
 import { referenceHref } from "@/lib/catalog/referenceUrl";
+import { normalizeScale, suggestionItemTypeToDb } from "@/lib/catalog/taxonomy";
 import { REFERENCE_PAGES_CACHE_TAG } from "@/app/actions/reference-pages";
 import type { Database } from "@/lib/types/database.generated";
 
@@ -716,6 +717,11 @@ async function applyApprovedSuggestion(
         );
 
         const updates: CatalogItemUpdate = { ...columnUpdates };
+        // Taxonomy v2: corrections are free-text — normalize scale so
+        // an approved "traditional" lands as "Traditional (1:9)".
+        if (typeof updates.scale === "string") {
+            updates.scale = normalizeScale(updates.scale);
+        }
         if (attributes) {
             (updates as Record<string, unknown>).attributes = JSON.parse(
                 JSON.stringify(attributes)
@@ -735,20 +741,27 @@ async function applyApprovedSuggestion(
             .join(", ");
         changeSummary = `🔧 Correction: ${changes}`;
     } else if (s.suggestion_type === "addition") {
-        // Map field_changes to catalog_items columns. Form values are
-        // release/mold/resin/tack; tack is a REAL catalog_items.item_type
-        // (048/053 CHECK constraint) — it used to be silently filed as a
-        // plastic_mold, which lied about what the entry was.
+        // Map field_changes to catalog_items columns. Taxonomy v2: the
+        // translation lives in taxonomy.ts and accepts both the current
+        // canonical values and the legacy release/mold/resin form values
+        // still sitting in older pending suggestions. Unrecognized types
+        // fall back to plastic_mold (the CHECK constraint would reject
+        // the insert otherwise) — but loudly, not silently.
         const fc = s.field_changes as Record<string, unknown>;
-        const itemType = fc.item_type === "resin" ? "artist_resin"
-            : fc.item_type === "release" ? "plastic_release"
-            : fc.item_type === "tack" ? "tack"
-            : "plastic_mold";
+        const mappedType = suggestionItemTypeToDb(fc.item_type as string | undefined);
+        if (!mappedType) {
+            console.error(
+                `Catalog addition ${s.id}: unknown item_type "${String(fc.item_type)}" — filing as plastic_mold`,
+            );
+        }
+        const itemType = mappedType ?? "plastic_mold";
         const insertPayload: CatalogItemInsert = {
             item_type: itemType,
             title: (fc.title ?? fc.mold_name ?? "Untitled") as string,
             maker: (fc.maker ?? "Unknown") as string,
-            scale: (fc.scale as string) || null,
+            // Scales enter in canonical vocabulary; normalize defensively
+            // (older pending suggestions carry bare "Traditional" etc.).
+            scale: normalizeScale(fc.scale as string | undefined),
             attributes: JSON.parse(JSON.stringify({
                 ...(fc.year ? { release_year_start: fc.year } : {}),
                 ...(fc.color ? { color_description: fc.color } : {}),

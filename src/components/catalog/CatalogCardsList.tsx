@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { referenceHref, referencePagesEnabled } from "@/lib/catalog/referenceUrl";
+import { CATEGORY_LABELS } from "@/lib/catalog/taxonomy";
 import {
     disambiguationLine,
     displayTitle,
@@ -57,14 +58,13 @@ export default function CatalogCardsList({
                             ? `${subLineBase} · ${releases} release${releases === 1 ? "" : "s"}`
                             : `${releases} release${releases === 1 ? "" : "s"}`
                         : subLineBase;
-                const typeChip =
-                    item.item_type === "plastic_mold"
-                        ? { label: "Mold", forest: false }
-                        : item.item_type === "plastic_release"
-                          ? { label: "Release", forest: true }
-                          : item.item_type === "artist_resin"
-                            ? { label: "Artist Resin", forest: true }
-                            : { label: item.item_type, forest: false };
+                const typeChip = {
+                    // Taxonomy v2 labels; raw value only for data drift.
+                    label: CATEGORY_LABELS[item.item_type] ?? item.item_type,
+                    forest:
+                        item.item_type === "plastic_release" ||
+                        item.item_type === "artist_resin",
+                };
 
                 return (
                     <li key={item.id}>

@@ -25,6 +25,7 @@ import {
     EBAY_AFFILIATE_REL,
 } from "@/lib/utils/ebayAffiliate";
 import GlossaryLink from "@/components/GlossaryLink";
+import { getMoldCustoms } from "@/lib/catalog/moldCustoms";
 
 interface Props {
     params: Promise<{ maker: string; slug: string }>;
@@ -167,14 +168,16 @@ export default async function ReferencePage({ params }: Props) {
     // Everything in parallel — all anon-safe / aggregate-only and cookie-free,
     // so this page statically generates + ISR-caches. Per-user state (the
     // "already wanted?" check) is fetched client-side by WantButton.
-    const [counts, market, marketHistory, listings, photos, childReleases] = await Promise.all([
-        getCatalogCounts(item.id),
-        getReferenceMarket(item.id),
-        getReferenceMarketHistory(item.id),
-        getActiveListingsForCatalog(item.id),
-        getCatalogPhotos(item.id, 8),
-        isMold ? getChildReleases(item.id) : Promise.resolve([]),
-    ]);
+    const [counts, market, marketHistory, listings, photos, childReleases, customs] =
+        await Promise.all([
+            getCatalogCounts(item.id),
+            getReferenceMarket(item.id),
+            getReferenceMarketHistory(item.id),
+            getActiveListingsForCatalog(item.id),
+            getCatalogPhotos(item.id, 8),
+            isMold ? getChildReleases(item.id) : Promise.resolve([]),
+            isMold ? getMoldCustoms(item.id) : Promise.resolve([]),
+        ]);
 
     // Product JSON-LD — built only from data the page already fetched above
     // (no additional queries). AggregateOffer/additionalProperty are included
@@ -496,6 +499,60 @@ export default async function ReferencePage({ params }: Props) {
                                 >
                                     <span className="font-semibold text-foreground">{r.title}</span>
                                     {r.color && <span className="text-sm text-muted-foreground">{r.color}</span>}
+                                </Link>
+                            ))}
+                        </div>
+                    </section>
+                )}
+
+                {/* CUSTOMS OF THIS MOLD (Taxonomy v2 — customs are horses,
+                    not catalog rows; the mold page gathers the public ones) */}
+                {isMold && customs.length > 0 && (
+                    <section>
+                        <h2 className="mb-1 font-serif text-xl font-bold text-foreground">
+                            Customs of this mold{" "}
+                            <span className="text-sm font-normal text-muted-foreground">
+                                ({customs.length})
+                            </span>
+                        </h2>
+                        <p className="mb-3 text-sm text-secondary-foreground">
+                            One sculpture, many hands — public customs collectors have made
+                            from this mold.
+                        </p>
+                        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                            {customs.map((c) => (
+                                <Link
+                                    key={c.horseId}
+                                    href={`/community/${c.horseId}`}
+                                    className="flex flex-col overflow-hidden rounded-lg border border-input bg-card no-underline transition-colors hover:border-forest"
+                                >
+                                    {c.imageUrl ? (
+                                        // eslint-disable-next-line @next/next/no-img-element
+                                        <img
+                                            src={c.imageUrl}
+                                            alt={c.customName}
+                                            loading="lazy"
+                                            className="aspect-square w-full object-cover"
+                                        />
+                                    ) : (
+                                        <span
+                                            className="flex aspect-square w-full items-center justify-center bg-muted text-3xl"
+                                            aria-hidden="true"
+                                        >
+                                            🎨
+                                        </span>
+                                    )}
+                                    <span className="flex flex-col gap-0.5 px-3 py-2">
+                                        <span className="truncate text-sm font-semibold text-foreground">
+                                            {c.customName}
+                                        </span>
+                                        {c.finishingArtist && (
+                                            <span className="truncate text-xs text-muted-foreground">
+                                                by {c.finishingArtist}
+                                                {c.finishingArtistVerified ? " ✓" : ""}
+                                            </span>
+                                        )}
+                                    </span>
                                 </Link>
                             ))}
                         </div>

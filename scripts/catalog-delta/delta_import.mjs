@@ -88,7 +88,9 @@ const canonicalMoldTitle = (s) =>
 // known IYB→catalog mold-name mismatches, keyed by normMold+"|"+scale
 const MOLD_ALIAS = { "icelandic|Stablemate (1:32)": "Icelandic Horse" };
 
-// IYB scale → catalog scale strings (kept consistent with get_catalog_facets)
+// IYB scale → canonical catalog scale strings. MUST mirror
+// src/lib/catalog/taxonomy.ts (Taxonomy v2 single source of truth —
+// this .mjs script can't import TS, so keep the values in sync by hand).
 // keys are norm()-ed (punctuation stripped) so lookups via norm(raw) hit
 const SCALE_MAP = {
   "traditional": "Traditional (1:9)",
@@ -97,7 +99,15 @@ const SCALE_MAP = {
   "stablemates": "Stablemate (1:32)",
   "stablemate": "Stablemate (1:32)",
   "classic": "Classic (1:12)",
-  "paddock pals": "Paddock Pals (1:24)",
+  "pebbles": "Pebbles (1:18)",
+  "paddock pal": "Paddock Pal (1:24)",
+  "paddock pals": "Paddock Pal (1:24)",
+  "little bit": "Paddock Pal (1:24)",
+  "little bits": "Paddock Pal (1:24)",
+  "mini whinnie": "Mini Whinnies (1:64)",
+  "mini whinnies": "Mini Whinnies (1:64)",
+  "micro mini": "Micro Mini",
+  "curio": "Curio",
   "plush": "Plush",
 };
 const mapScale = (raw) => SCALE_MAP[norm(raw)] || (raw || null);

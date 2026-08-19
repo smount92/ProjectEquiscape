@@ -118,12 +118,15 @@ export const PREFERRED_QUICK_MAKERS = [
     "CollectA",
 ] as const;
 
-/** Scale preference order for the quick chips (Traditional first). */
+/** Scale preference order for the quick chips (Traditional first).
+ *  Canonical Taxonomy-v2 spellings — pickQuickChips matches facet
+ *  values exactly (case-insensitive), so these must be the stored
+ *  forms; the old bare "Traditional" list never matched anything. */
 export const PREFERRED_QUICK_SCALES = [
-    "Traditional",
-    "Classic",
-    "Stablemate",
-    "1:9",
-    "1:12",
-    "1:32",
+    "Traditional (1:9)",
+    "Classic (1:12)",
+    "Stablemate (1:32)",
+    "Paddock Pal (1:24)",
+    "Mini Whinnies (1:64)",
+    "Micro Mini",
 ] as const;

@@ -3,6 +3,7 @@
 import { useState, useTransition } from"react";
 import { useRouter } from"next/navigation";
 import { createSuggestion } from"@/app/actions/catalog-suggestions";
+import { CANONICAL_SCALES } from "@/lib/catalog/taxonomy";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -14,10 +15,16 @@ import { Button } from "@/components/ui/button";
 // molds/releases, never "Artist Resin" (owner-approved 2026-08 after
 // a user request; 15 catalog items exist under maker_slug north-light).
 const MAKERS = ["Breyer","Peter Stone","Hartland","Hagen-Renaker","North Light","Other"];
+// Taxonomy v2: canonical DB values (legacy release/mold/resin values in
+// old pending suggestions still translate — see taxonomy.ts).
 const ITEM_TYPES = [
- { value:"release", label:"Release (specific color/year of a mold)" },
- { value:"mold", label:"Mold (sculpture, not a specific release)" },
- { value:"resin", label:"Artist Resin" },
+ { value:"plastic_release", label:"Release (specific color/year of a mold)" },
+ { value:"plastic_mold", label:"Mold (sculpture, not a specific release)" },
+ { value:"artist_resin", label:"Artist Resin" },
+ { value:"factory_resin", label:"Factory Resin (OF resin — Stone, North Light…)" },
+ { value:"china", label:"China / Ceramic" },
+ { value:"micro_mini", label:"Micro Mini" },
+ { value:"medallion", label:"Medallion" },
  { value:"tack", label:"Tack / Accessory" },
 ];
 
@@ -251,12 +258,9 @@ export default function SuggestNewEntryForm({
  onChange={(e) => setScale(e.target.value)}
  >
  <option value="">— Select —</option>
- <option value="Traditional">Traditional</option>
- <option value="Classic">Classic</option>
- <option value="Stablemate">Stablemate</option>
- <option value="Paddock Pal">Paddock Pal</option>
- <option value="Mini Whinnies">Mini Whinnies</option>
- <option value="Other">Other</option>
+ {CANONICAL_SCALES.map((s) => (
+ <option key={s} value={s}>{s}</option>
+ ))}
  </select>
  </div>
  <div className="mb-6">

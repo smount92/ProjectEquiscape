@@ -10,19 +10,17 @@
  * Mirrors src/lib/showring/filterParams.ts.
  */
 
+import { CATALOG_CATEGORIES } from "./taxonomy";
+
 export const CATALOG_SORTS = ["name-az", "name-za", "maker", "newest"] as const;
 export type CatalogSort = (typeof CATALOG_SORTS)[number];
 
 /**
- * The item_type values users can filter to, with human labels. Only the
- * populated types are offered (tack/medallion/micro_mini are future
- * catalog_items types with no rows yet — see migration 048).
+ * The Category filter vocabulary — the full item_type list from
+ * taxonomy.ts (Taxonomy v2). Every DB-legal category is filterable;
+ * previously micro_mini rows (Maggie Bennett import) were unreachable.
  */
-export const CATALOG_TYPE_OPTIONS = [
-    { value: "plastic_mold", label: "Mold" },
-    { value: "plastic_release", label: "Release" },
-    { value: "artist_resin", label: "Artist Resin" },
-] as const;
+export const CATALOG_TYPE_OPTIONS = CATALOG_CATEGORIES;
 
 const TYPE_VALUES = CATALOG_TYPE_OPTIONS.map((t) => t.value) as readonly string[];
 const TYPE_LABELS: Record<string, string> = Object.fromEntries(
