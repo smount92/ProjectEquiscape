@@ -240,7 +240,12 @@ export interface MarketHistoryPoint {
 export const getReferenceMarketHistory = unstable_cache(
     async (catalogId: string): Promise<MarketHistoryPoint[]> => {
         const supabase = createAnonClient();
-        const { data } = await supabase.rpc("get_market_history", { p_catalog_id: catalogId });
+        // Untyped call: the RPC lands with migration 152; gen-types picks it
+        // up on the next sync (same pre-migration posture as shows-v4).
+        const { data } = await (supabase.rpc as unknown as (
+            fn: string,
+            args: Record<string, unknown>,
+        ) => Promise<{ data: unknown }>)("get_market_history", { p_catalog_id: catalogId });
         return ((data as Record<string, unknown>[] | null) ?? []).map((row) => ({
             date: String(row.sale_date),
             price: Number(row.price) || 0,
