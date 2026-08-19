@@ -5077,6 +5077,17 @@ export type Database = {
           transaction_volume: number
         }[]
       }
+      get_mold_customs: {
+        Args: { p_catalog_id: string; p_limit?: number }
+        Returns: {
+          created_at: string
+          custom_name: string
+          finishing_artist: string
+          finishing_artist_verified: boolean
+          horse_id: string
+          image_url: string
+        }[]
+      }
       get_photo_limit: { Args: never; Returns: number }
       get_public_aliases: {
         Args: { p_ids: string[] }
