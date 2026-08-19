@@ -92,6 +92,14 @@ export interface ValidateEntryInput {
      * INSERT policy (148) as the DB backstop.
      */
     isBarred?: boolean;
+    /**
+     * COI rule (Championship program §6): user-ids who judge this
+     * show (show_staff role='judge'). Judging is show-wide in v4, so
+     * a judge's horses sit the whole show out — entering under a
+     * proxy handler doesn't help (the OWNER is the conflict), and a
+     * judge handling someone else's horse as proxy is blocked too.
+     */
+    judgeUserIds?: string[];
     /** Injectable clock for the window check; defaults to now. */
     now?: Date;
 }
@@ -108,6 +116,20 @@ export function validateEntry(input: ValidateEntryInput): ValidateEntryResult {
     // ── Barred from this show (sticky scratch) ──
     if (input.isBarred) {
         errors.push("You are not able to enter this show. Contact the host if you believe this is a mistake.");
+    }
+
+    // ── Conflict of interest: judges don't compete in their own ring ──
+    if (input.judgeUserIds && input.judgeUserIds.length > 0) {
+        const judges = new Set(input.judgeUserIds);
+        if (judges.has(candidate.ownerId)) {
+            errors.push(
+                "You are judging this show — a judge's horses can't compete in their own ring.",
+            );
+        } else if (candidate.handlerId && judges.has(candidate.handlerId)) {
+            errors.push(
+                "The chosen handler is judging this show and can't also show in it.",
+            );
+        }
     }
 
     // ── Window: show must be accepting entries ──

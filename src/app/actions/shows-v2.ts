@@ -1960,6 +1960,18 @@ export async function enterClass(
         .eq("user_id", user.id)
         .maybeSingle();
 
+    // ── COI (Championship program §6): the show's judge roster —
+    // a judge's horses sit their own ring out, owner or handler.
+    // Via the public-roster DEFINER RPC (118): direct show_staff
+    // reads are staff-and-self only, which would hide a judge picked
+    // as proxy handler. Empty for community-vote shows; harmless. ──
+    const { data: staffRows } = await supabase.rpc("get_show_staff_public", {
+        p_show_id: showId,
+    });
+    const judgeUserIds = (staffRows ?? [])
+        .filter((r: { role: string }) => r.role === "judge")
+        .map((r: { user_id: string }) => r.user_id);
+
     // ── The horse: ownership, visibility, scale/finish facts ──
     const { data: horse, error: hErr } = await supabase
         .from("user_horses")
@@ -2027,6 +2039,7 @@ export async function enterClass(
                 .axis as DivisionAxis,
         })),
         isBarred: !!barRow,
+        judgeUserIds,
     });
 
     const violations = result.ok ? [] : [...result.errors];

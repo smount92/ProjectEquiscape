@@ -54,6 +54,30 @@ describe("entryRules — validateEntry", () => {
         expect(validateEntry(input())).toEqual({ ok: true });
     });
 
+    describe("conflict of interest (Championship program §6)", () => {
+        it("a judge's own horse can't enter the show they judge", () => {
+            const r = validateEntry(input({ judgeUserIds: ["user-1", "judge-2"] }));
+            expect(r.ok).toBe(false);
+            expect(errorsOf(r).join(" ")).toMatch(/judging this show/i);
+        });
+
+        it("a judge can't slip in as proxy handler either", () => {
+            const r = validateEntry(
+                input({
+                    candidate: { horseId: "horse-1", ownerId: "user-1", handlerId: "judge-2" },
+                    judgeUserIds: ["judge-2"],
+                }),
+            );
+            expect(r.ok).toBe(false);
+            expect(errorsOf(r).join(" ")).toMatch(/handler is judging/i);
+        });
+
+        it("non-judges pass; an empty roster (community vote) never blocks", () => {
+            expect(validateEntry(input({ judgeUserIds: ["judge-2"] })).ok).toBe(true);
+            expect(validateEntry(input({ judgeUserIds: [] })).ok).toBe(true);
+        });
+    });
+
     describe("entry window", () => {
         it("rejects when the show is not entries_open", () => {
             for (const status of ["draft", "published", "entries_closed", "running", "completed"] as const) {
