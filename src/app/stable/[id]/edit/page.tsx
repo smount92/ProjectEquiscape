@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from"react";
+import { GENDER_GROUPS } from"@/lib/config/genders";
 import { useRouter, useParams } from"next/navigation";
 import Link from"next/link";
 import { createClient } from"@/lib/supabase/client";
@@ -1599,12 +1600,13 @@ export default function EditHorsePage() {
  title="Assigned gender"
  >
  <option value="">Select…</option>
- <option value="Stallion">Stallion</option>
- <option value="Mare">Mare</option>
- <option value="Gelding">Gelding</option>
- <option value="Foal">Foal</option>
- <option value="Colt">Colt</option>
- <option value="Filly">Filly</option>
+ {GENDER_GROUPS.map((group) => (
+ <optgroup key={group.label} label={group.label}>
+ {group.options.map((g) => (
+ <option key={g} value={g}>{g}</option>
+ ))}
+ </optgroup>
+ ))}
  </select>
  </div>
  </div>
