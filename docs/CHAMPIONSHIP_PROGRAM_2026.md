@@ -83,8 +83,10 @@ Breadth-gated so no single model, show, or judge can carry you:
 - **Sweeps rule (Championship only):** champion and reserve of a class must be different exhibitors; max 3 counted Top-Ten slots per exhibitor per class (IPMS-shape). Regular sanctioned shows keep normal hobby rules.
 - **Blind throughout**, reveals at results — already the platform default.
 
-### The rubric (published, v1 — community review before adoption)
+### The rubric (published, v1 — OWNER APPROVED 2026-08: weights + cap-at-10 scale confirmed)
 Halter classes, 100 points: **Breed type & conformation 40 · Condition & finish 30 · Photography & presentation 20 · Realism of turnout/footing 10** — with the model/photo split maintained in critiques (photography skill must never silently decide a model contest; capping presentation at 20 makes the ceiling explicit). Performance classes swap the first axis for **Setup accuracy & tack 40** per the IMEHA guidebook, which MHH should host as the shared judging standard (as MEPSA preserved it).
+
+**Per-class guidelines (the scaling path, owner-endorsed):** the master rubric grows into a library of judging guidelines attached to CLASS TEMPLATES, so every sanctioned show inherits the same published standard automatically: axis criteria sheets first (performance = a living IMEHA guidebook), then breed-group guidelines (Light/Sport/Stock/Draft/Pony/Longears), then per-breed pages — authored by the community through the same suggest-and-approve pipeline as the catalog, reviewed by Carded Judges, surfaced in the judge queue while judging, in the class room as "what the judge looks for" (the teaching layer), and as the Judging Clinic curriculum. Also public reference content: "how Arabian model halter is judged" is an acquisition query.
 
 ---
 
