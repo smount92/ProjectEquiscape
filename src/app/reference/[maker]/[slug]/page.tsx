@@ -17,6 +17,7 @@ import {
     getCatalogCounts,
     getChildReleases,
     getReferenceMarket,
+    getReferenceMarketHistory,
 } from "@/app/actions/reference-pages";
 import {
     buildEbaySearchUrl,
@@ -166,9 +167,10 @@ export default async function ReferencePage({ params }: Props) {
     // Everything in parallel — all anon-safe / aggregate-only and cookie-free,
     // so this page statically generates + ISR-caches. Per-user state (the
     // "already wanted?" check) is fetched client-side by WantButton.
-    const [counts, market, listings, photos, childReleases] = await Promise.all([
+    const [counts, market, marketHistory, listings, photos, childReleases] = await Promise.all([
         getCatalogCounts(item.id),
         getReferenceMarket(item.id),
+        getReferenceMarketHistory(item.id),
         getActiveListingsForCatalog(item.id),
         getCatalogPhotos(item.id, 8),
         isMold ? getChildReleases(item.id) : Promise.resolve([]),
@@ -399,6 +401,7 @@ export default async function ReferencePage({ params }: Props) {
                                     <BlueBookProCharts
                                         catalogId={item.id}
                                         title={item.title}
+                                        historicalData={marketHistory}
                                         averagePrice={(market.lowestPrice + market.highestPrice) / 2}
                                         medianPrice={market.medianPrice}
                                         transactionVolume={market.transactionVolume}

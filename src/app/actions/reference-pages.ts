@@ -224,3 +224,29 @@ export const getReferenceMarket = unstable_cache(
     ["reference:market"],
     { revalidate: REVALIDATE, tags: [REFERENCE_PAGES_CACHE_TAG] },
 );
+
+export interface MarketHistoryPoint {
+    date: string;
+    price: number;
+    finishType: string;
+}
+
+/**
+ * Per-item completed-sale points for the Blue Book PRO chart via the
+ * anon-safe get_market_history RPC (migration 152 — dates/prices/finish
+ * only, no transaction ids or parties). Same cache posture as the
+ * aggregate above.
+ */
+export const getReferenceMarketHistory = unstable_cache(
+    async (catalogId: string): Promise<MarketHistoryPoint[]> => {
+        const supabase = createAnonClient();
+        const { data } = await supabase.rpc("get_market_history", { p_catalog_id: catalogId });
+        return ((data as Record<string, unknown>[] | null) ?? []).map((row) => ({
+            date: String(row.sale_date),
+            price: Number(row.price) || 0,
+            finishType: String(row.finish_type ?? "OF"),
+        }));
+    },
+    ["reference:market-history"],
+    { revalidate: REVALIDATE, tags: [REFERENCE_PAGES_CACHE_TAG] },
+);

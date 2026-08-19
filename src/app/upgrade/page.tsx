@@ -69,21 +69,24 @@ export const metadata = {
     description: "Unlock advanced analytics, expanded photo storage, and AI-powered collection reports.",
 };
 
+// Ordered by concrete value today (audit 2026-08: lead with what a
+// collector uses this week; the analytics honestly described as
+// growing with the market rather than "5-year trends" we don't have).
 const PRO_FEATURES: { icon: LucideIcon; title: string; description: string }[] = [
-    {
-        icon: BarChart3,
-        title: "Blue Book PRO",
-        description: "5-year historical price trends with interactive scatter plots",
-    },
     {
         icon: Camera,
         title: "Photo Suite+",
         description: "Up to 30 extra detail photos per horse — close-ups, markings, and more",
     },
     {
+        icon: Tag,
+        title: "Printable Show Tags",
+        description: "Generate cut-out PDF tags for your live show entries",
+    },
+    {
         icon: FileText,
         title: "Smart Insurance Reports",
-        description: "PDFs stamped with live Market Replacement Values from verified sales",
+        description: "PDFs stamped with Market Replacement Values from real completed sales",
     },
     {
         icon: Bot,
@@ -91,9 +94,9 @@ const PRO_FEATURES: { icon: LucideIcon; title: string; description: string }[] =
         description: "A monthly collection ledger — totals and Blue Book movers — delivered to your inbox",
     },
     {
-        icon: Tag,
-        title: "Printable Show Tags",
-        description: "Generate cut-out PDF tags for your live show entries",
+        icon: BarChart3,
+        title: "Blue Book PRO",
+        description: "Sales-history charts on every reference page — built from real Hub sales, growing richer with every one logged",
     },
     {
         icon: Sparkles,
@@ -199,9 +202,20 @@ export default async function UpgradePage({
             )}
 
             {/* Current plan badge */}
-            <div className="animate-fade-in-up mb-12 text-center">
+            <div className="animate-fade-in-up mb-6 text-center">
                 <p className="inline-block rounded-full bg-muted px-3 py-1 text-xs font-medium text-secondary-foreground">
                     Current plan: <span className={tier === 'pro' ? 'font-bold text-warning' : 'font-bold'}>{tierLabel}</span>
+                </p>
+            </div>
+
+            {/* The honest pitch — this hobby has watched its volunteer-run
+                sites go dark; "keep the lights on" IS the product. */}
+            <div className="animate-fade-in-up mx-auto mb-12 max-w-[640px] text-center">
+                <p className="text-sm leading-relaxed text-secondary-foreground">
+                    Pro is how the lights stay on. Everything that keeps this hobby safe and fair —
+                    your stable, showing, provenance, condition records — is free for everyone,
+                    forever. Pro adds the power-user toolkit, and every subscription pays the
+                    hosting bills that keep Model Horse Hub independent and ad-free.
                 </p>
             </div>
 
