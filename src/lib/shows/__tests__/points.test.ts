@@ -6,6 +6,7 @@ import {
     FALLBACK_OWNER_ALIAS,
     MIN_EXHIBITORS_FOR_POINTS,
     POINTS_CAP,
+    buildCareerTotals,
     buildHorseStandings,
     buildStableStandings,
     championshipPoints,
@@ -210,6 +211,56 @@ describe("buildHorseStandings — v2", () => {
         );
         expect(rows[0].horseName).toBe(FALLBACK_HORSE_NAME);
         expect(rows[0].ownerAlias).toBe(FALLBACK_OWNER_ALIAS);
+    });
+});
+
+describe("buildCareerTotals — the titles engine's raw accumulation", () => {
+    it(`the best-${BEST_RESULTS_CAP} cap does NOT apply to career totals`, () => {
+        // One pair winning (CAP + 1) two-horse classes: standings cap
+        // at 30 results, the career ledger counts every one.
+        const entries: StandingsEntryRow[] = [];
+        const placings: StandingsPlacingRow[] = [];
+        for (let i = 0; i < BEST_RESULTS_CAP + 1; i++) {
+            const classId = `class-${i}`;
+            entries.push(entry(`mine-${i}`, "show-1", "horse-1", "owner-1", classId));
+            entries.push(entry(`theirs-${i}`, "show-1", `rival-${i}`, "owner-2", classId));
+            placings.push({ entry_id: `mine-${i}`, place: 1 }); // 2 points each
+        }
+        const totals = buildCareerTotals({
+            shows: [show({ id: "show-1" })],
+            entries,
+            placings,
+            callbacks: [],
+        });
+        expect(totals.horsePoints.get("horse-1")).toBe((BEST_RESULTS_CAP + 1) * 2);
+    });
+
+    it("credits horse and owner, skips uncounted shows, adds bonuses", () => {
+        const entries = [
+            entry("a1", "s1", "h1", "o1", "c1"),
+            entry("a2", "s1", "h2", "o2", "c1"),
+            entry("b1", "s2", "h1", "o1", "c2"),
+            entry("b2", "s2", "h3", "o3", "c2"),
+            entry("x1", "s-fun", "h1", "o1", "c3"),
+            entry("x2", "s-fun", "h4", "o4", "c3"),
+        ];
+        const totals = buildCareerTotals({
+            shows: [
+                show({ id: "s1", show_year: 2025 }),
+                show({ id: "s2", show_year: 2026 }),
+                show({ id: "s-fun", is_mhh_qualifying: false }),
+            ],
+            entries,
+            placings: [
+                { entry_id: "a1", place: 1 }, // class of 2 → 2 pts
+                { entry_id: "b1", place: 1 }, // class of 2 → 2 pts
+                { entry_id: "x1", place: 1 }, // unsanctioned → 0
+            ],
+            callbacks: [{ scope: "show", champion_entry_id: "b1" }], // +10
+        });
+        expect(totals.horsePoints.get("h1")).toBe(2 + 2 + 10);
+        expect(totals.ownerPoints.get("o1")).toBe(2 + 2 + 10);
+        expect(totals.horsePoints.has("h4")).toBe(false);
     });
 });
 

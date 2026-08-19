@@ -12,6 +12,9 @@ import UniversalFeed from"@/components/UniversalFeed";
 import ShowRecordTimeline from"@/components/ShowRecordTimeline";
 import PedigreeCard from"@/components/PedigreeCard";
 import HoofprintTimeline from"@/components/HoofprintTimeline";
+import TitlesSection from"@/components/shows/TitlesSection";
+import { getHorseTitles } from"@/lib/shows/horseTitles";
+import { titlePrefix } from"@/lib/shows/titles";
 import { getHoofprint } from"@/app/actions/hoofprint";
 import ReportButton from"@/components/ReportButton";
 import MessageSellerButton from"@/components/MessageSellerButton";
@@ -338,6 +341,9 @@ editionSize: rawPedigree.edition_size,
  : null;
  const cardsCount = v2 && isForSale ? (await getPublicHorseCards(horseId)).length : 0;
  const refName = refInfo ? `${refInfo.maker} — ${refInfo.name}` : null;
+ // MHH Titles (159) — public record; [] until the migration lands.
+ const publicTitles = await getHorseTitles(horseId);
+ const publicNamePrefix = titlePrefix(publicTitles.map((t) => t.code));
  // The estimate caption must never render orphaned: MarketValueBadge
  // hides itself client-side when the mold has no sales, so check the
  // volume server-side before rendering the adjacent-estimate block.
@@ -361,7 +367,9 @@ editionSize: rawPedigree.edition_size,
  )}
  {v2 ? (
  <PassportMasthead
- horseName={horse.custom_name}
+ horseName={
+ publicNamePrefix ? `${publicNamePrefix} ${horse.custom_name}` : horse.custom_name
+ }
  ownerAlias={ownerAlias}
  referenceName={refName}
  referenceHref={refHref}
@@ -861,6 +869,9 @@ editionSize: rawPedigree.edition_size,
  )}
  </div>
  )}
+
+ {/* MHH Titles (159) — public record; renders nothing when empty */}
+ <TitlesSection titles={publicTitles} />
 
  {/* MHH Qualification Cards — public trust section (anon-safe RPC,
      migration 141). Renders nothing until the migration is applied

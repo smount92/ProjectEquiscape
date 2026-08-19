@@ -13,6 +13,9 @@ import TransferModal from"@/components/TransferModal";
 import ParkedExportPanel from"@/components/ParkedExportPanel";
 import { getHoofprint } from"@/app/actions/hoofprint";
 import QualificationCardsSection, { type PassportQualificationCard } from"@/components/shows/QualificationCardsSection";
+import TitlesSection from"@/components/shows/TitlesSection";
+import { getHorseTitles } from"@/lib/shows/horseTitles";
+import { titlePrefix } from"@/lib/shows/titles";
 import { showsV2Enabled } from"@/lib/shows/flags";
 import { resolvePlacingHrefs } from"@/lib/shows/placingShare";
 import { RESULTS_STATUSES } from"@/lib/shows/gallery";
@@ -277,6 +280,10 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  });
  }
 
+ // ── MHH Titles (159) — permanent, public record; [] until pasted ──
+ const horseTitles = showsV2Enabled() ? await getHorseTitles(horseId) : [];
+ const namePrefix = titlePrefix(horseTitles.map((t) => t.code));
+
  const { data: rawPedigree } = await supabase
  .from("horse_pedigrees")
  .select("id, sire_name, dam_name, sire_id, dam_id, sculptor, cast_number, edition_size, lineage_notes")
@@ -373,6 +380,14 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  {/* Title */}
  <div>
  <h1 className="mb-1 font-serif text-4xl font-bold leading-tight tracking-tight text-foreground md:text-5xl">
+ {namePrefix && (
+ <span
+ className="mr-2 align-middle text-[0.45em] font-bold tracking-[0.18em] text-[color:var(--brass-ink,#6b5327)]"
+ title={horseTitles.map((t) => t.label).join(" · ")}
+ >
+ {namePrefix}
+ </span>
+ )}
  {horse.custom_name}
  </h1>
  {refInfo ? (
@@ -690,6 +705,9 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
 
  {/* Show Records */}
  <ShowRecordTimeline horseId={horseId} records={showRecords} isOwner={true} placingHrefs={placingHrefs} />
+
+ {/* MHH Titles (159) — renders nothing when empty */}
+ <TitlesSection titles={horseTitles} />
 
  {/* MHH Qualification Cards (Phase F) — renders nothing when empty */}
  <QualificationCardsSection cards={qualificationCards} />

@@ -65,6 +65,7 @@ import {
 import { deriveVotePlacings, type VoteTally } from "@/lib/shows/deriveVotePlacings";
 import { buildShowRecords } from "@/lib/shows/writeShowRecords";
 import { issueQualificationCardsForShow, type PlannedCard } from "@/lib/shows/cardIssuance";
+import { grantTitlesForShow } from "@/lib/shows/grantTitles";
 import {
     runClassChangeFanout,
     runEntryScratchedNotification,
@@ -376,6 +377,16 @@ export async function transitionShowStatus(
         const cardsForFanout = issuedCards;
         after(async () => {
             await runResultsPublishedFanout(getAdminClient(), showId, cardsForFanout);
+        });
+        // Titles engine (159): evaluate CH/ROM/SUP + exhibitor stars
+        // for everyone in the published show. Separate after() block —
+        // a grant hiccup must never eat the entrant fan-out (and vice
+        // versa). Idempotent: re-publishing re-runs it for free.
+        after(async () => {
+            const granted = await grantTitlesForShow(getAdminClient(), showId);
+            if ("error" in granted) {
+                console.error(`Title grants for show ${showId} failed: ${granted.error}`);
+            }
         });
     }
     if (to === "judging" && ctx.show.judging === "community_vote") {

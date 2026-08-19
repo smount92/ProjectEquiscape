@@ -58,7 +58,7 @@ Cards already exist with exactly NAN's semantics (1st/2nd in a qualifying class,
 ### Model titles (travel with the horse, minted onto Hoofprint)
 - **MHH Champion (CH):** 3 cards on the same horse, earned at **3 different shows** under **≥2 different judges**, at least 1 in the horse's declared primary axis (halter/performance/etc.). Pure ARBA-shape. Permanent; renders on the passport masthead and travels on sale.
 - **MHH Grand Champion (GC):** CH + either a placing at the annual Championship **or** 3 Stakes cards. (Season 1: Championship-placing route only, since Stakes phase in later.)
-- **Register of Merit (ROM):** 30 lifetime season points in a single division axis. **Superior:** 75. Fixed-threshold mid-ladder goals (AQHA-shape) reachable by steady quality without ever being #1 — the retention layer for the middle of the pack.
+- **Register of Merit (ROM):** 30 lifetime career points. **Superior:** 75. Fixed-threshold mid-ladder goals (AQHA-shape) reachable by steady quality without ever being #1 — the retention layer for the middle of the pack. *(v1 implementation note: career points are undivided — the per-division-axis ROMs, e.g. "ROM Halter", become the natural expansion once class volume justifies them.)*
 - **Standards certificates (Championship only, AOS-shape):** panel-scored 100-point judging at the annual Championship awards permanent, any-number-can-earn certificates: **Honors 75+ · Merit 80+ · Excellence 90+**. A model can carry "MHH Excellence 2027" forever regardless of who else entered that year — the anti-discouragement crown jewel: your model competes against the standard, not the field.
 
 ### Exhibitor distinctions (permanent, person-attached, PSA/FIAP-shape)

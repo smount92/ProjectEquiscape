@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import AnonProfile from"@/components/profile/AnonProfile";
 import SupporterPlaque from"@/components/profile/SupporterPlaque";
 import { fetchSupporterBadge } from"@/lib/supporter";
+import { getExhibitorStar } from"@/lib/shows/horseTitles";
 
 
 function formatDate(dateStr: string): string {
@@ -382,6 +383,11 @@ export default async function ProfilePage({
  ];
  if ((nanCardCount ?? 0) > 0) {
  strapStats.push({ num: String(nanCardCount), label:"NAN Cards" });
+ }
+ // Exhibitor star (titles engine, 159) — nothing until earned.
+ const exhibitorStar = await getExhibitorStar(profileUser.id);
+ if (exhibitorStar) {
+ strapStats.push({ num:"★".repeat(exhibitorStar.stars), label:"Exhibitor" });
  }
  strapStats.push({
  num: String(followStats.followerCount),

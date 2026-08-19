@@ -264,6 +264,75 @@ function tallyPairs(input: StandingsInput): Map<string, PairTally> {
     return pairs;
 }
 
+// ── Career totals (titles engine) ──
+
+export interface CareerTotals {
+    horsePoints: Map<string, number>;
+    ownerPoints: Map<string, number>;
+}
+
+/**
+ * RAW career accumulation for the titles engine (ROM/Superior marks,
+ * exhibitor stars): every result-final MHH-qualifying show, ANY
+ * season, NO best-30 cap — career marks reward longevity (the AQHA
+ * mechanism); the cap is a season-fairness device and stays in the
+ * standings path only. Same scale, same class-context derivation.
+ */
+export function buildCareerTotals(input: {
+    shows: StandingsShowRow[];
+    entries: StandingsEntryRow[];
+    placings: StandingsPlacingRow[];
+    callbacks: StandingsCallbackRow[];
+}): CareerTotals {
+    const counted = new Set<string>();
+    for (const show of input.shows) {
+        if (!STANDINGS_SHOW_STATUSES.includes(show.status as ShowStatus)) continue;
+        if (!show.is_mhh_qualifying) continue;
+        counted.add(show.id);
+    }
+
+    const classSize = new Map<string, number>();
+    const classOwners = new Map<string, Set<string>>();
+    const entriesById = new Map<string, StandingsEntryRow>();
+    for (const entry of input.entries) {
+        if (!counted.has(entry.show_id)) continue;
+        entriesById.set(entry.id, entry);
+        classSize.set(entry.class_id, (classSize.get(entry.class_id) ?? 0) + 1);
+        const owners = classOwners.get(entry.class_id) ?? new Set<string>();
+        owners.add(entry.owner_id);
+        classOwners.set(entry.class_id, owners);
+    }
+
+    const horsePoints = new Map<string, number>();
+    const ownerPoints = new Map<string, number>();
+    const add = (entry: StandingsEntryRow, points: number) => {
+        if (points <= 0) return;
+        horsePoints.set(entry.horse_id, (horsePoints.get(entry.horse_id) ?? 0) + points);
+        ownerPoints.set(entry.owner_id, (ownerPoints.get(entry.owner_id) ?? 0) + points);
+    };
+
+    for (const placing of input.placings) {
+        const entry = entriesById.get(placing.entry_id);
+        if (!entry) continue;
+        add(
+            entry,
+            placementPoints(
+                placing.place,
+                classSize.get(entry.class_id) ?? 0,
+                classOwners.get(entry.class_id)?.size ?? 0,
+            ),
+        );
+    }
+    for (const callback of input.callbacks) {
+        if (!callback.champion_entry_id) continue;
+        const entry = entriesById.get(callback.champion_entry_id);
+        if (!entry) continue;
+        add(entry, championshipPoints(callback.scope));
+    }
+
+    return { horsePoints, ownerPoints };
+}
+
 // ── Ranking helpers (unchanged from v1) ──
 
 function assignRanks<T extends { points: number }>(sorted: T[]): (T & { rank: number })[] {

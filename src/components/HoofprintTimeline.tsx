@@ -33,6 +33,7 @@ const EVENT_ICONS: Record<string, string> = {
  note:"📝",
  status_change:"🔒",
  condition_change:"📊",
+ title_granted:"🎖️",
 };
 
 const STAGE_LABELS: Record<string, string> = {
