@@ -5042,6 +5042,14 @@ export type Database = {
         }[]
       }
       get_extra_photo_count: { Args: { p_horse_id: string }; Returns: number }
+      get_market_history: {
+        Args: { p_catalog_id: string }
+        Returns: {
+          finish_type: string
+          price: number
+          sale_date: string
+        }[]
+      }
       get_market_rows: {
         Args: {
           p_catalog_id?: string
@@ -5135,6 +5143,7 @@ export type Database = {
         Args: { target_user_id: string }
         Returns: undefined
       }
+      is_caller_suspended: { Args: never; Returns: boolean }
       is_trusted_seller: { Args: { p_user_id: string }; Returns: boolean }
       make_offer_atomic: {
         Args: {
