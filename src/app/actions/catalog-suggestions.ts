@@ -45,6 +45,18 @@ interface SuggestionInput {
     suggestionType: "correction" | "addition" | "removal" | "photo";
     fieldChanges: Record<string, unknown>;
     reason: string;
+    /** Addition flow: the submitter saw the duplicate candidates and
+     * confirmed this really is a new entry (North Light lesson: the
+     * same 20 sculpts were suggested twice under different makers). */
+    confirmDuplicates?: boolean;
+}
+
+/** Candidate shown in the "did you mean…" duplicate warning. */
+export interface DuplicateCandidate {
+    id: string;
+    title: string;
+    maker: string | null;
+    item_type: string;
 }
 
 interface ReviewDecision {
@@ -216,6 +228,31 @@ export async function createSuggestion(input: SuggestionInput) {
 
     // Check for trusted curator auto-approve
     const admin = getAdminClient();
+
+    // ── Duplicate guard (additions only): before creating a new-entry
+    // suggestion, look for existing catalog items with a matching
+    // title. The caller renders the candidates and may resubmit with
+    // confirmDuplicates — this is a speed bump, never a wall.
+    if (
+        input.suggestionType === "addition" &&
+        !input.confirmDuplicates &&
+        typeof input.fieldChanges?.title === "string" &&
+        input.fieldChanges.title.trim().length >= 3
+    ) {
+        const needle = input.fieldChanges.title.trim();
+        const { data: dupRows } = await admin
+            .from("catalog_items")
+            .select("id, title, maker, item_type")
+            .ilike("title", `%${needle.replace(/[%_]/g, "")}%`)
+            .limit(5);
+        if (dupRows && dupRows.length > 0) {
+            return {
+                success: false as const,
+                error: "possible-duplicates",
+                duplicates: dupRows as DuplicateCandidate[],
+            };
+        }
+    }
     const { data: profile } = await admin
         .from("users")
         .select("approved_suggestions_count, alias_name")
@@ -717,6 +754,11 @@ async function applyApprovedSuggestion(
                 ...(fc.color ? { color_description: fc.color } : {}),
                 ...(fc.model_number ? { model_number: fc.model_number } : {}),
                 ...(fc.material ? { material: fc.material } : {}),
+                // Sculptor is credit, not maker — factory pieces have a
+                // company maker AND a named sculpting artist (the North
+                // Light lesson: conflating them misfiled 20 sculpts as
+                // artist resins under "Guy Pocock/Anne Godfrey").
+                ...(fc.sculptor ? { sculptor: fc.sculptor } : {}),
                 // The form collects the parent mold's name for releases —
                 // this used to be dropped on apply. Kept as an attribute so
                 // admins can wire parent_id from it later.

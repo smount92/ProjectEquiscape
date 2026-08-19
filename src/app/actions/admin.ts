@@ -307,3 +307,75 @@ export async function unsuspendUserByAlias(
   if (!target) return { success: false, error: `No user with alias "${alias.trim()}".` };
   return unsuspendUser((target as { id: string }).id);
 }
+
+/**
+ * Merge a duplicate catalog item into its canonical entry — the North
+ * Light repair (two suggestion batches created the same sculpts under
+ * different makers), as a button instead of owner SQL. Repoints every
+ * reference (horses, wishlists, id-suggestions, catalog suggestions,
+ * changelog, child molds), logs to the changelog, then deletes the
+ * duplicate. Accepts UUIDs or slugs.
+ */
+export async function mergeCatalogItems(
+  duplicateRef: string,
+  canonicalRef: string
+): Promise<{ success: boolean; error?: string; summary?: string }> {
+  const user = await verifyAdmin();
+  if (!user) return { success: false, error: "Unauthorized" };
+
+  const admin = getAdminSupabase();
+  const resolve = async (ref: string) => {
+    const clean = ref.trim();
+    if (!clean) return null;
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(clean);
+    const { data } = await admin
+      .from("catalog_items")
+      .select("id, title, maker, slug")
+      .eq(isUuid ? "id" : "slug", isUuid ? clean : clean.toLowerCase())
+      .maybeSingle();
+    return data as { id: string; title: string; maker: string | null; slug: string | null } | null;
+  };
+
+  const dup = await resolve(duplicateRef);
+  if (!dup) return { success: false, error: `Duplicate "${duplicateRef}" not found (id or slug).` };
+  const canonical = await resolve(canonicalRef);
+  if (!canonical) return { success: false, error: `Canonical "${canonicalRef}" not found (id or slug).` };
+  if (dup.id === canonical.id) return { success: false, error: "Those are the same entry." };
+
+  const repoints: [string, string][] = [
+    ["user_horses", "catalog_id"],
+    ["user_wishlists", "catalog_id"],
+    ["id_suggestions", "catalog_id"],
+    ["catalog_suggestions", "catalog_item_id"],
+    ["catalog_changelog", "catalog_item_id"],
+    ["catalog_items", "parent_id"],
+  ];
+  let moved = 0;
+  for (const [table, column] of repoints) {
+    const { data, error } = await admin
+      .from(table)
+      .update({ [column]: canonical.id })
+      .eq(column, dup.id)
+      .select("id");
+    if (error) return { success: false, error: `Repointing ${table}.${column} failed: ${error.message}` };
+    moved += data?.length ?? 0;
+  }
+
+  const { error: logError } = await admin.from("catalog_changelog").insert({
+    catalog_item_id: canonical.id,
+    change_type: "removal",
+    change_summary: `Merged duplicate "${dup.title}" (${dup.maker ?? "unknown"}) into "${canonical.title}" — references repointed.`,
+    contributed_by: user.id,
+    contributor_alias: "Admin",
+    approved_by: user.id,
+  });
+  if (logError) logger.error("Admin", "Merge changelog write failed (continuing)", logError);
+
+  const { error: deleteError } = await admin.from("catalog_items").delete().eq("id", dup.id);
+  if (deleteError) return { success: false, error: `Delete failed: ${deleteError.message}` };
+
+  return {
+    success: true,
+    summary: `Merged "${dup.title}" into "${canonical.title}" — ${moved} reference${moved === 1 ? "" : "s"} repointed.`,
+  };
+}
