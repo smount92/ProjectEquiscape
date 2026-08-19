@@ -78,8 +78,13 @@ export async function POST(request: NextRequest) {
                     logger.error("StripeWebhook", `Insurance report purchased for horse ${metadata.horse_id}`);
 
                 } else if (metadata.type === "studio_pro") {
+                    // MERGE app_metadata — a bare object here erased every
+                    // other key (audit N5; is_suspended now lives there, so
+                    // an overwrite would silently unsuspend on purchase).
+                    const { data: studioBuyer } = await admin.auth.admin.getUserById(userId);
                     await admin.auth.admin.updateUserById(userId, {
                         app_metadata: {
+                            ...(studioBuyer?.user?.app_metadata ?? {}),
                             tier: "studio",
                             stripe_customer_id: session.customer as string,
                         },
@@ -113,9 +118,15 @@ export async function POST(request: NextRequest) {
                     logger.error("StripeWebhook", `User ${userId} became a Supporter`, { sessionId: session.id });
 
                 } else {
-                    // Default: MHH Pro subscription upgrade
+                    // Default: MHH Pro subscription upgrade (merge — see
+                    // studio branch note).
+                    const { data: proBuyer } = await admin.auth.admin.getUserById(userId);
                     await admin.auth.admin.updateUserById(userId, {
-                        app_metadata: { tier: "pro", stripe_customer_id: session.customer as string },
+                        app_metadata: {
+                            ...(proBuyer?.user?.app_metadata ?? {}),
+                            tier: "pro",
+                            stripe_customer_id: session.customer as string,
+                        },
                     });
                     logger.error("StripeWebhook", `User ${userId} upgraded to Pro`, { sessionId: session.id });
                 }
