@@ -206,6 +206,20 @@ export async function sendMessage(
                     conversationId,
                 });
             }
+
+            // In-app bell notification too — DMs previously emailed but
+            // never rang the bell (user report: "website doesn't flag
+            // when there's a new unread msg"). Prefs-gated ("messages"
+            // key), self-guarded, deep-links the conversation.
+            const { createNotification } = await import("@/lib/notifications/createNotification");
+            await createNotification({
+                userId: recipientId,
+                type: "message",
+                actorId: user.id,
+                content: `@${senderProfile?.data?.alias_name || "Someone"} sent you a message`,
+                conversationId,
+                linkUrl: `/inbox/${conversationId}`,
+            });
         }
     } catch (emailErr) {
         logger.error("Messaging", "Email notification failed (non-blocking)", emailErr);
