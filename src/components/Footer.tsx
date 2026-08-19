@@ -27,6 +27,7 @@ export default function Footer() {
                         <Link href="/market">Price Guide</Link>
                         <Link href="/studio">Art Studio</Link>
                         <Link href="/shows">Photo Shows</Link>
+                        <Link href="/shows/rules">Showing Rules</Link>
                     </div>
                     <div className="flex flex-col gap-2 max-md:min-w-[120px] max-md:items-center max-md:text-center [&_a]:text-sm [&_a]:text-secondary-foreground [&_a]:no-underline [&_a]:transition-colors [&_a:hover]:text-forest">
                         <h4 className="mb-1 text-xs font-bold tracking-wider text-secondary-foreground/70 uppercase">Community</h4>
