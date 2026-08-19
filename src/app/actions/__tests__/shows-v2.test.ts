@@ -197,10 +197,23 @@ describe("shows-v2 — transitionShowStatus", () => {
     it("applies a legal transition", async () => {
         mockClient._mockQuery.maybeSingle
             .mockResolvedValueOnce({ data: showRow({ status: "draft" }), error: null });
-        mockClient._setImplicitResolve({ data: null, error: null });
+        // CAS flip returns the updated row (empty = lost the race).
+        mockClient._setImplicitResolve({ data: [{ id: SHOW_ID }], error: null });
         const result = await transitionShowStatus({ showId: SHOW_ID, to: "published" });
         expect(result).toEqual({ success: true });
         expect(mockClient._mockQuery.update).toHaveBeenCalledWith({ status: "published" });
+    });
+
+    it("a concurrent transition loses the CAS flip instead of double-firing", async () => {
+        mockClient._mockQuery.maybeSingle
+            .mockResolvedValueOnce({ data: showRow({ status: "draft" }), error: null });
+        // Another writer flipped first: the CAS update matches 0 rows.
+        mockClient._setImplicitResolve({ data: [], error: null });
+        const result = await transitionShowStatus({ showId: SHOW_ID, to: "published" });
+        expect(result).toEqual({
+            success: false,
+            error: "The show's status changed while saving — reload and try again.",
+        });
     });
 
     it("refuses an illegal jump with the state machine's reason", async () => {

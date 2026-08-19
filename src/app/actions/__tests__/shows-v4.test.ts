@@ -215,12 +215,20 @@ describe("strikeEntryFromResults", () => {
             error: null,
         });
 
+        // Class-name read scopes the record delete to the struck class
+        // (audit H1: the old horse-wide delete erased every class).
+        aq.maybeSingle.mockResolvedValueOnce({
+            data: { name: "OF Quarter Horse" },
+            error: null,
+        });
+
         const result = await strikeEntryFromResults({ entryId: ENTRY_ID, reason: "troll placing" });
         expect(result).toEqual({ success: true });
         expect(aq.update).toHaveBeenCalledWith(
             expect.objectContaining({ status: "void" }),
         );
-        expect(aq.delete).toHaveBeenCalledTimes(2); // placing + records
+        expect(aq.delete).toHaveBeenCalledTimes(2); // placing + struck-class records
+        expect(aq.eq).toHaveBeenCalledWith("class_name", "OF Quarter Horse");
         expect(aq.update).toHaveBeenCalledWith(
             expect.objectContaining({ status: "scratched" }),
         );

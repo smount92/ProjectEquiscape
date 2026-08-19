@@ -23,6 +23,7 @@ import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { canApplyCardAction } from "@/lib/shows/cards";
+import { championLabel } from "@/lib/shows/placings";
 import {
     GALLERY_STATUSES,
     RESULTS_STATUSES,
@@ -101,6 +102,28 @@ export async function barEntrant(
 
     let scratched = 0;
     if (v.scratchEntries) {
+        // RESULTS ARE FINAL (audit SEV-1/H5): scratching entries on a
+        // completed/archived show retroactively rewrites published
+        // points (class sizes recompute at read time) while cards and
+        // records stand — the ledgers would disagree forever. The bar
+        // row above still lands (it governs the future); for published
+        // results, per-entry corrections go through Strike, which
+        // voids the card and cleans the record with it.
+        const { data: showRow } = await supabase
+            .from("shows")
+            .select("status")
+            .eq("id", v.showId)
+            .maybeSingle();
+        const finalized = ["completed", "archived"].includes(
+            (showRow?.status as string) ?? "",
+        );
+        if (finalized) {
+            return {
+                success: false,
+                error:
+                    "This show's results are published — the bar is in place, but entries can only be removed one at a time with Strike (which also voids cards and cleans records).",
+            };
+        }
         const { data: rows, error: scratchError } = await supabase
             .from("show_class_entries")
             .update({
@@ -353,15 +376,70 @@ export async function strikeEntryFromResults(
         .eq("entry_id", e.id);
     if (placingError) return { success: false, error: placingError.message };
 
-    // 3. Delete the platform-generated trophy-case records this show
-    // wrote for this horse (self-reported records are untouched).
-    const { error: recordsError } = await adminClient
-        .from("show_records")
-        .delete()
+    // 2b. Championship callbacks won BY THIS ENTRY are vacated (audit
+    // H2: the public champions section read callbacks unconditionally,
+    // so a struck Grand Champion stood forever). Track which champion
+    // labels we vacate so step 3 can remove exactly those records.
+    const vacatedLabels: string[] = [];
+    const { data: cbRows } = await adminClient
+        .from("show_callbacks")
+        .select("id, scope, champion_entry_id, reserve_entry_id")
         .eq("show_id", e.show_id)
-        .eq("horse_id", e.horse_id)
-        .eq("verification_tier", "platform_generated");
-    if (recordsError) return { success: false, error: recordsError.message };
+        .or(`champion_entry_id.eq.${e.id},reserve_entry_id.eq.${e.id}`);
+    for (const cb of (cbRows ?? []) as {
+        id: string;
+        scope: "section" | "division" | "show";
+        champion_entry_id: string | null;
+        reserve_entry_id: string | null;
+    }[]) {
+        const patch: Record<string, null> = {};
+        if (cb.champion_entry_id === e.id) {
+            patch.champion_entry_id = null;
+            vacatedLabels.push(championLabel("champion", cb.scope));
+        }
+        if (cb.reserve_entry_id === e.id) {
+            patch.reserve_entry_id = null;
+            vacatedLabels.push(championLabel("reserve", cb.scope));
+        }
+        const { error: cbError } = await adminClient
+            .from("show_callbacks")
+            .update(patch)
+            .eq("id", cb.id);
+        if (cbError) return { success: false, error: cbError.message };
+    }
+
+    // 3. Delete the platform-generated trophy-case records for THE
+    // STRUCK CLASS only, plus any championship records this entry's
+    // vacated callbacks produced (audit H1: the old horse-wide delete
+    // erased every class the horse placed in at this show — and
+    // completed shows can never rewrite them).
+    const { data: classRow } = await adminClient
+        .from("show_classes")
+        .select("name")
+        .eq("id", e.class_id)
+        .maybeSingle();
+    const className = (classRow as { name: string } | null)?.name ?? null;
+    if (className) {
+        const { error: recordsError } = await adminClient
+            .from("show_records")
+            .delete()
+            .eq("show_id", e.show_id)
+            .eq("horse_id", e.horse_id)
+            .eq("class_name", className)
+            .eq("verification_tier", "platform_generated");
+        if (recordsError) return { success: false, error: recordsError.message };
+    }
+    if (vacatedLabels.length > 0) {
+        const { error: champRecordsError } = await adminClient
+            .from("show_records")
+            .delete()
+            .eq("show_id", e.show_id)
+            .eq("horse_id", e.horse_id)
+            .in("placing", vacatedLabels)
+            .eq("verification_tier", "platform_generated");
+        if (champRecordsError)
+            return { success: false, error: champRecordsError.message };
+    }
 
     // 4. Scratch the entry with the reason on its audit note —
     // standings and galleries exclude scratched rows by construction.
@@ -464,6 +542,24 @@ async function setClassPublished(
 
     if (publishedAt !== null && (cls as { status: string }).status !== "placed") {
         return { success: false, error: "Place the class before publishing its results." };
+    }
+
+    // Rolling reveal belongs to the judging window (audit M6): a class
+    // must not reveal before the show reaches judging, and a completed
+    // show's reveals are final (per-entry corrections go through
+    // Strike, which cleans cards/records with them).
+    const showStatus = roleResult.show.status;
+    if (publishedAt !== null && !["running", "judging", "results_review"].includes(showStatus)) {
+        return {
+            success: false,
+            error: "Class results can only be revealed while the show is running or judging.",
+        };
+    }
+    if (publishedAt === null && ["completed", "archived"].includes(showStatus)) {
+        return {
+            success: false,
+            error: "The show's results are published — individual classes can no longer be pulled back.",
+        };
     }
 
     const { error: updateError } = await supabase

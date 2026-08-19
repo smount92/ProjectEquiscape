@@ -229,6 +229,27 @@ export async function updateShowSettings(
     if (patch.mode && patch.mode !== ctx.show.mode && ctx.show.status !== "draft") {
         return { success: false, error: "A show's mode can only change while it is a draft." };
     }
+    // RESULTS ARE FINAL (audit SEV-3): show_date/entries_close_at drive
+    // the show_year trigger. Editing dates on a completed show would
+    // silently move it to another SEASON — its results vanish from the
+    // standings year they were awarded in while cards/titles keep the
+    // old year. Date fields freeze at publication; qualifying status
+    // too (it decides whether the season counts the show at all).
+    if (["completed", "archived"].includes(ctx.show.status)) {
+        if (
+            patch.showDate !== undefined ||
+            patch.entriesOpenAt !== undefined ||
+            patch.entriesCloseAt !== undefined ||
+            patch.judgingEndsAt !== undefined ||
+            patch.isMhhQualifying !== undefined
+        ) {
+            return {
+                success: false,
+                error:
+                    "Results are published — dates and qualifying status are frozen. Contact the site admin if a date is genuinely wrong.",
+            };
+        }
+    }
 
     // Entry window must stay ordered even when the patch carries only
     // one of the two dates — compare against the stored other half.
@@ -363,8 +384,22 @@ export async function transitionShowStatus(
         issuedCards = cards.cards;
     }
 
-    const { error } = await supabase.from("shows").update({ status: to }).eq("id", showId);
+    // CAS on the current status: a concurrent transition (double-click,
+    // racing cron) loses here instead of double-firing the completed
+    // fan-out (pairs with cardIssuance's failed-flip retry recovery).
+    const { data: flipped, error } = await supabase
+        .from("shows")
+        .update({ status: to })
+        .eq("id", showId)
+        .eq("status", ctx.show.status)
+        .select("id");
     if (error) return { success: false, error: error.message };
+    if (!flipped || flipped.length === 0) {
+        return {
+            success: false,
+            error: "The show's status changed while saving — reload and try again.",
+        };
+    }
 
     // ── The payoff loop (Batch 2): notify + email once the flip is
     // real. Runs in after() so the host's save never waits on the
@@ -483,10 +518,13 @@ async function writeShowRecordsForShow(
     // entrants' records through their own client. Guarded above by
     // the explicit host/co-host role check in transitionShowStatus.
     const admin = getAdminClient();
+    // Dedupe by SHOW ID, not title (audit C2/S7): two shows sharing a
+    // title (annual reruns, NAMHSA template class names) silently
+    // swallowed each other's records when keyed on show_name.
     const { data: existingRows, error: exErr } = await admin
         .from("show_records")
         .select("horse_id, class_name")
-        .eq("show_name", show.title as string)
+        .eq("show_id", showId)
         .eq("verification_tier", "platform_generated");
     if (exErr) return { error: exErr.message };
 
@@ -1070,6 +1108,27 @@ export async function addShowStaff(
     }
     if (v.userId === user.id) {
         return { success: false, error: "You are already the host of this show." };
+    }
+
+    // COI is two-directional (audit H4): entry blocks judges from
+    // entering, and appointing a judge who ALREADY holds live entries
+    // is the same conflict from the other side — without this, they'd
+    // judge their own horses. Scratch the entries first, then appoint.
+    if (v.role === "judge") {
+        const { data: liveEntries } = await supabase
+            .from("show_class_entries")
+            .select("id")
+            .eq("show_id", v.showId)
+            .eq("owner_id", v.userId)
+            .neq("status", "scratched")
+            .limit(1);
+        if (liveEntries && liveEntries.length > 0) {
+            return {
+                success: false,
+                error:
+                    "That user has live entries in this show — a judge can't compete in their own ring. Scratch their entries first, or pick a different judge.",
+            };
+        }
     }
 
     const { data, error } = await supabase
@@ -2099,15 +2158,20 @@ export async function enterClass(
         .select("id")
         .single();
     if (insertError || !inserted) {
-        return {
-            success: false,
-            // 23505 = the partial unique index (one LIVE row per
-            // class+horse) — someone double-clicked or double-tabbed.
-            error:
-                insertError?.code === "23505"
-                    ? "This horse is already entered in this class."
-                    : insertError?.message ?? "Failed to enter the class.",
-        };
+        // 23505 = the partial unique index (one LIVE row per class+horse)
+        // — someone double-clicked. 23503 = handler FK (nonexistent user).
+        // 42501 = RLS refused (the show closed between validate and
+        // insert — the race window is real, the raw message isn't).
+        const friendly =
+            insertError?.code === "23505"
+                ? "This horse is already entered in this class."
+                : insertError?.code === "23503"
+                  ? "The chosen handler's account could not be found — check the alias and try again."
+                  : insertError?.code === "42501" ||
+                      insertError?.message?.includes("row-level security")
+                    ? "Entries closed just as you submitted — refresh the show page to see its current status."
+                    : (insertError?.message ?? "Failed to enter the class.");
+        return { success: false, error: friendly };
     }
 
     return { success: true, entryId: inserted.id as string, entryNumber };

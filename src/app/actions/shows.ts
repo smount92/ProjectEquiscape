@@ -1173,20 +1173,25 @@ export async function getPublicShowResults(eventId: string): Promise<PublicShowR
                     continue;
                 }
 
-                // Batch-fetch horse names
+                // Batch-fetch horse names — admin client, so filter what
+                // RLS would (audit S2): horses that went private or were
+                // deleted after competing must not leak name/photo here.
                 const horseIds = [...new Set((entryRows as { horse_id: string }[]).map(e => e.horse_id))];
                 const { data: horses } = await admin
                     .from("user_horses")
                     .select("id, custom_name")
-                    .in("id", horseIds);
+                    .in("id", horseIds)
+                    .in("visibility", ["public", "unlisted"])
+                    .is("deleted_at", null);
                 const horseNameMap = new Map<string, string>();
                 (horses ?? []).forEach((h: { id: string; custom_name: string }) => horseNameMap.set(h.id, h.custom_name));
+                const visibleHorseIds = (horses ?? []).map((h: { id: string }) => h.id);
 
-                // Batch-fetch thumbnails
+                // Batch-fetch thumbnails (visible horses only)
                 const { data: thumbRows } = await admin
                     .from("horse_images")
                     .select("horse_id, image_url, angle_profile")
-                    .in("horse_id", horseIds);
+                    .in("horse_id", visibleHorseIds);
 
                 const thumbMap = new Map<string, string>();
                 for (const hId of horseIds) {
@@ -1233,10 +1238,13 @@ export async function getPublicShowResults(eventId: string): Promise<PublicShowR
 
         if (allEntries && allEntries.length > 0) {
             const horseIds = [...new Set((allEntries as { horse_id: string }[]).map(e => e.horse_id))];
+            // Admin client — apply the visibility filter RLS would (audit S2).
             const { data: horses } = await admin
                 .from("user_horses")
                 .select("id, custom_name")
-                .in("id", horseIds);
+                .in("id", horseIds)
+                .in("visibility", ["public", "unlisted"])
+                .is("deleted_at", null);
             const horseNameMap = new Map<string, string>();
             (horses ?? []).forEach((h: { id: string; custom_name: string }) => horseNameMap.set(h.id, h.custom_name));
 

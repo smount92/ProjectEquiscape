@@ -333,11 +333,52 @@ export async function issueQualificationCardsForShow(
         existingCards,
     });
 
+    // Failed-flip retry (audit SEV-3): if a previous publish inserted
+    // cards but died before the status flip, the retry plans zero new
+    // cards — and used to hand the fan-out an empty list, so card
+    // earners were never notified. `completed` is terminal, so the one
+    // publish that DOES flip must carry the full card set. (The
+    // concurrent-publish race is closed by the CAS flip in
+    // transitionShowStatus — the loser never reaches the fan-out.)
+    const loadExistingFull = async (): Promise<PlannedCard[] | { error: string }> => {
+        const { data, error } = await supabase
+            .from("qualification_cards")
+            .select(
+                "class_id, horse_id, earned_place, earned_by_owner_id, class_entry_count, class_exhibitor_count, is_stakes",
+            )
+            .eq("show_id", showId);
+        if (error) return { error: error.message };
+        return (data ?? []).map(
+            (r: {
+                class_id: string;
+                horse_id: string;
+                earned_place: number;
+                earned_by_owner_id: string;
+                class_entry_count: number | null;
+                class_exhibitor_count: number | null;
+                is_stakes: boolean | null;
+            }) => ({
+                classId: r.class_id,
+                horseId: r.horse_id,
+                earnedPlace: (r.earned_place as 1 | 2) ?? 1,
+                ownerId: r.earned_by_owner_id,
+                classEntryCount: r.class_entry_count ?? 0,
+                classExhibitorCount: r.class_exhibitor_count ?? 0,
+                isStakes: r.is_stakes === true,
+            }),
+        );
+    };
+
     const insertPlan = async (plan: {
         cards: PlannedCard[];
         skippedExisting: number;
     }): Promise<IssueResult | { error: string } | "conflict"> => {
         if (plan.cards.length === 0) {
+            if (plan.skippedExisting > 0) {
+                const full = await loadExistingFull();
+                if (!Array.isArray(full)) return { error: full.error };
+                return { issued: 0, skipped: plan.skippedExisting, cards: full };
+            }
             return { issued: 0, skipped: plan.skippedExisting, cards: [] };
         }
 

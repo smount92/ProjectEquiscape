@@ -668,6 +668,9 @@ describe("shows-v2 — results publish on completed", () => {
         mockPublishReads();
         mockCardIssuanceReads();
         mockAdmin._setImplicitResolve({ data: [], error: null }); // no existing rows; insert ok
+        // Card insert + CAS status flip ride the implicit resolve; the
+        // flip's .select("id") must return the updated row.
+        mockClient._setImplicitResolve({ data: [{ id: SHOW_ID }], error: null });
 
         const result = await transitionShowStatus({ showId: SHOW_ID, to: "completed" });
         expect(result).toEqual({ success: true });

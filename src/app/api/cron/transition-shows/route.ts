@@ -127,12 +127,16 @@ export async function GET(request: NextRequest) {
             if (owners.length === 0) continue;
 
             // Dedupe: one nudge per user per show, keyed on an existing
-            // show_deadline notification deep-linking this show.
+            // show_deadline notification deep-linking this show. PREFIX
+            // match, not equality: buildDeadlinePlans writes
+            // `/shows/{id}#entries` — the old `.eq` on the bare URL never
+            // matched, so every hourly run re-nudged every entrant
+            // (audit S4: ~720 duplicate emails per 24h deadline window).
             const { data: sentRows, error: sentError } = await admin
                 .from("notifications")
                 .select("user_id")
                 .eq("type", "show_deadline")
-                .eq("link_url", `/shows/${showId}`)
+                .like("link_url", `/shows/${showId}%`)
                 .in("user_id", owners);
             if (sentError) throw sentError;
             const alreadyNudged = new Set((sentRows ?? []).map((r) => r.user_id as string));

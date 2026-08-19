@@ -249,6 +249,17 @@ export async function suspendUser(
     return { success: false, error: "Suspension partially applied — retry to sync the database flag." };
   }
 
+  // Kill live sessions (audit S5): app_metadata only lands in NEW
+  // tokens — an open tab keeps a valid JWT until expiry, which let a
+  // just-suspended user keep voting/judging via direct PostgREST.
+  // signOut revokes their refresh tokens; access tokens then die at
+  // their (short) natural expiry. Best-effort — the suspension stands.
+  try {
+    await admin.auth.admin.signOut(userId, "global");
+  } catch (err) {
+    logger.error("Admin", `session revocation failed for suspended user ${userId}`, err);
+  }
+
   return { success: true };
 }
 
