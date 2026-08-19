@@ -2,6 +2,11 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import { getStandings, type GetStandingsResult } from "@/app/actions/standings";
+import {
+    BEST_RESULTS_CAP,
+    MIN_EXHIBITORS_FOR_POINTS,
+    POINTS_CAP,
+} from "@/lib/shows/points";
 import { showStandingsEnabled } from "@/lib/shows/flags";
 import { showYearLabel, showYearOf } from "@/lib/shows/showYear";
 import { createClient } from "@/lib/supabase/server";
@@ -293,7 +298,11 @@ export default async function StandingsPage({
                                     .{" "}
                                 </>
                             ) : null}
-                            Points: 7·5·4·3·2·1 for 1st–6th · Championship bonuses: section +3,
+                            Points: first place is worth the class — 1st earns the number of
+                            entries in the class (capped at {POINTS_CAP}), one point less per
+                            place, never below 1 · Classes need {MIN_EXHIBITORS_FOR_POINTS}+
+                            exhibitors to pay points · A horse-and-owner pair&apos;s best{" "}
+                            {BEST_RESULTS_CAP} results count · Championship bonuses: section +3,
                             division +5, show +10 · Only shows with published results count
                             {shows === "qualifying" ? " · MHH-qualifying shows only" : ""}.
                         </p>
