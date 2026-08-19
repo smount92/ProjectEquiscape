@@ -5,6 +5,7 @@ import { getPhotoShows } from"@/app/actions/shows";
 import { getPendingSuggestions } from"@/app/actions/suggestions";
 import { getOpenReports } from"@/app/actions/moderation";
 import { listPendingExternalShows } from"@/app/actions/external-shows";
+import AdminCatalogMergeCard from"@/components/AdminCatalogMergeCard";
 import AdminModerationCard from"@/components/AdminModerationCard";
 import AdminTabs from"@/components/AdminTabs";
 import CommandCenterLayout from"@/components/layouts/CommandCenterLayout";
@@ -124,8 +125,9 @@ export default async function AdminPage() {
    {/* Tabbed sections */}
    {/* Site-wide suspension (v4 safety) — above the tabs so it's
        reachable regardless of which tab is active. */}
-   <div className="mb-6">
+   <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
     <AdminModerationCard />
+    <AdminCatalogMergeCard />
    </div>
    <AdminTabs
    messages={messages}

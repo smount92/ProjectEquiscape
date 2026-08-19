@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { createActivityEvent } from "@/app/actions/activity";
+import { FEMALE_GENDERS, MALE_GENDERS } from "@/lib/config/genders";
 
 // ============================================================
 // SHOW RECORDS
@@ -201,8 +202,7 @@ export async function savePedigree(data: {
             .single();
 
         if (sireHorse?.assigned_gender) {
-            const femaleGenders = ["Mare", "Filly"];
-            if (femaleGenders.includes(sireHorse.assigned_gender)) {
+            if (FEMALE_GENDERS.includes(sireHorse.assigned_gender)) {
                 return { success: false, error: `A ${sireHorse.assigned_gender} cannot be assigned as a Sire.` };
             }
         }
@@ -219,8 +219,7 @@ export async function savePedigree(data: {
             .single();
 
         if (damHorse?.assigned_gender) {
-            const maleGenders = ["Stallion", "Gelding", "Colt"];
-            if (maleGenders.includes(damHorse.assigned_gender)) {
+            if (MALE_GENDERS.includes(damHorse.assigned_gender)) {
                 return { success: false, error: `A ${damHorse.assigned_gender} cannot be assigned as a Dam.` };
             }
         }

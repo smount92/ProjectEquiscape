@@ -48,6 +48,7 @@ export default function SuggestNewEntryForm({
  const [title, setTitle] = useState(initialTitle);
  const [maker, setMaker] = useState("");
  const [customMaker, setCustomMaker] = useState("");
+ const [sculptor, setSculptor] = useState("");
  const [itemType, setItemType] = useState("release");
  const [scale, setScale] = useState("");
  const [color, setColor] = useState("");
@@ -55,8 +56,12 @@ export default function SuggestNewEntryForm({
  const [year, setYear] = useState("");
  const [moldName, setMoldName] = useState("");
  const [reason, setReason] = useState("");
+ // Duplicate speed bump: candidates from the server's title match.
+ const [duplicates, setDuplicates] = useState<
+ { id: string; title: string; maker: string | null; item_type: string }[] | null
+ >(null);
 
- const handleSubmit = () => {
+ const handleSubmit = (confirmDuplicates = false) => {
  if (!title.trim()) {
  setError("Title is required.");
  return;
@@ -76,6 +81,7 @@ export default function SuggestNewEntryForm({
  fieldChanges: {
  title: title.trim(),
  maker: effectiveMaker || undefined,
+ sculptor: sculptor.trim() || undefined,
  item_type: itemType,
  scale: scale || undefined,
  color: color || undefined,
@@ -84,11 +90,15 @@ export default function SuggestNewEntryForm({
  mold_name: moldName || undefined,
  },
  reason: reason.trim(),
+ confirmDuplicates,
  });
 
  if (result.success) {
+ setDuplicates(null);
  setSubmittedTitle(title.trim());
  setSuccess(true);
+ } else if (result.error ==="possible-duplicates" &&"duplicates" in result) {
+ setDuplicates(result.duplicates ?? []);
  } else {
  setError(result.error ||"Failed to submit suggestion.");
  }
@@ -208,6 +218,26 @@ export default function SuggestNewEntryForm({
  )}
  </div>
 
+ {/* Sculptor — credit, not maker. Separated after the North Light
+     incident: factory pieces have a company maker AND a named
+     sculpting artist; one field forced contributors to choose. */}
+ <div className="mb-6">
+ <label className="text-foreground mb-1 block text-sm font-semibold" htmlFor="new-entry-sculptor">
+ Sculptor <span className="font-normal text-muted-foreground">(optional)</span>
+ </label>
+ <Input
+ id="new-entry-sculptor"
+ value={sculptor}
+ onChange={(e) => setSculptor(e.target.value)}
+ placeholder="e.g. Guy Pocock, Kathleen Moody"
+ maxLength={100}
+ />
+ <p className="mt-1 mb-0 text-xs text-muted-foreground">
+ Maker is the company or brand (Breyer, North Light). Sculptor is the artist who
+ sculpted it — worth crediting even on factory pieces.
+ </p>
+ </div>
+
  {/* Two-column row: Scale + Color */}
  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
  <div className="mb-6">
@@ -325,6 +355,34 @@ export default function SuggestNewEntryForm({
  )}
 
  {/* Actions */}
+ {duplicates && (
+ <div className="mb-4 rounded-lg border border-input bg-muted/50 p-4" role="alert">
+ <p className="m-0 mb-2 text-sm font-semibold">
+ Is one of these already it? The catalog has similar entries:
+ </p>
+ <ul className="m-0 mb-3 flex list-none flex-col gap-1 p-0">
+ {duplicates.map((d) => (
+ <li key={d.id} className="text-sm">
+ <a
+ href={`/catalog/${d.id}`}
+ target="_blank"
+ rel="noreferrer"
+ className="font-medium text-forest hover:underline"
+ >
+ {d.title}
+ </a>{" "}
+ <span className="text-muted-foreground">
+ — {d.maker ?? "unknown maker"}
+ </span>
+ </li>
+ ))}
+ </ul>
+ <p className="m-0 text-xs text-muted-foreground">
+ If your model is one of these, link it from the search instead of suggesting a
+ duplicate. If it really is new, submit anyway.
+ </p>
+ </div>
+ )}
  <div className="flex justify-end gap-4">
  <Button variant="outline" size="wide"
  onClick={handleCancel}
@@ -333,10 +391,14 @@ export default function SuggestNewEntryForm({
  Cancel
  </Button>
  <Button
- onClick={handleSubmit}
+ onClick={() => handleSubmit(duplicates !== null)}
  disabled={isPending || !title.trim() || !reason.trim()}
  >
- {isPending ?"Submitting…" :"📗 Submit Suggestion"}
+ {isPending
+ ?"Submitting…"
+ : duplicates
+ ?"It's new — submit anyway"
+ :"📗 Submit Suggestion"}
  </Button>
  </div>
  </div>
