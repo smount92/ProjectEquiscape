@@ -4,6 +4,8 @@ import {
     CANONICAL_SCALES,
     CATALOG_CATEGORIES,
     CATEGORY_LABELS,
+    attributionLabel,
+    deriveAttribution,
     normalizeScale,
     sortScalesBySize,
     suggestionItemTypeToDb,
@@ -113,5 +115,60 @@ describe("categories — the Taxonomy v2 item_type vocabulary", () => {
         expect(suggestionItemTypeToDb("sasquatch")).toBeNull();
         expect(suggestionItemTypeToDb("")).toBeNull();
         expect(suggestionItemTypeToDb(undefined)).toBeNull();
+    });
+});
+
+describe("attribution split — artist vs manufacturer", () => {
+    it("labels the primary field by category", () => {
+        expect(attributionLabel("artist_resin")).toBe("Artist");
+        expect(attributionLabel("micro_mini")).toBe("Artist");
+        expect(attributionLabel("medallion")).toBe("Artist");
+        expect(attributionLabel("plastic_mold")).toBe("Manufacturer");
+        expect(attributionLabel("factory_resin")).toBe("Manufacturer");
+        expect(attributionLabel(null)).toBe("Manufacturer");
+    });
+
+    it("artist pieces: maker is the artist, manufacturer only if explicit", () => {
+        expect(
+            deriveAttribution({ item_type: "artist_resin", maker: "Sarah Rose" }),
+        ).toEqual({ artist: "Sarah Rose", manufacturer: null });
+        expect(
+            deriveAttribution({
+                item_type: "artist_resin",
+                maker: "Sarah Rose",
+                manufacturer: "Resins by Randy",
+            }),
+        ).toEqual({ artist: "Sarah Rose", manufacturer: "Resins by Randy" });
+    });
+
+    it("factory pieces: maker is the manufacturer, sculptor credit is the artist", () => {
+        expect(
+            deriveAttribution({
+                item_type: "plastic_mold",
+                maker: "North Light",
+                sculptor: "Guy Pocock",
+            }),
+        ).toEqual({ artist: "Guy Pocock", manufacturer: "North Light" });
+        expect(deriveAttribution({ item_type: "plastic_release", maker: "Breyer" })).toEqual({
+            artist: null,
+            manufacturer: "Breyer",
+        });
+    });
+
+    it("explicit column values (post-156 corrections) beat derivation", () => {
+        expect(
+            deriveAttribution({
+                item_type: "plastic_mold",
+                maker: "Breyer",
+                sculptor: "Chris Hess",
+                artist: "Kathleen Moody",
+            }),
+        ).toEqual({ artist: "Kathleen Moody", manufacturer: "Breyer" });
+    });
+
+    it("blank strings degrade to null, never to empty credit lines", () => {
+        expect(
+            deriveAttribution({ item_type: "artist_resin", maker: "  ", sculptor: " " }),
+        ).toEqual({ artist: null, manufacturer: null });
     });
 });

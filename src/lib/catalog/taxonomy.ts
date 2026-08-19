@@ -156,3 +156,60 @@ export function suggestionItemTypeToDb(raw: string | null | undefined): CatalogC
     if (!raw) return null;
     return SUGGESTION_ITEM_TYPE_MAP[raw] ?? null;
 }
+
+// ── Attribution split (owner decision 2026-08-19) ──
+// A catalog row credits up to two parties: the ARTIST (a person —
+// the sculptor of a factory mold, or the resin artist) and the
+// MANUFACTURER (a company — Breyer, North Light; NULL for
+// one-person artist pieces). The legacy `maker` column remains the
+// row's primary attribution and the permanent basis of maker_slug
+// URLs — the split adds semantics, it never re-slugs.
+
+/** Categories whose primary attribution is a person, not a company. */
+export const ARTIST_ATTRIBUTED_CATEGORIES: ReadonlySet<string> = new Set([
+    "artist_resin",
+    "micro_mini",
+    "medallion",
+]);
+
+/** The user-facing label for the primary-attribution field. */
+export function attributionLabel(itemType: string | null | undefined): "Artist" | "Manufacturer" {
+    return itemType && ARTIST_ATTRIBUTED_CATEGORIES.has(itemType) ? "Artist" : "Manufacturer";
+}
+
+export interface Attribution {
+    artist: string | null;
+    manufacturer: string | null;
+}
+
+/**
+ * Derive artist/manufacturer from legacy fields. This IS migration
+ * 156's mechanical backfill, expressed in TS so pages can render the
+ * split before the columns exist and tests can pin the two in sync:
+ *   - artist categories: maker is the artist; manufacturer unknown.
+ *   - factory categories: maker is the manufacturer; the sculptor
+ *     credit (attributes.sculptor) is the artist.
+ * Real column values (post-156 corrections) always win over this.
+ */
+export function deriveAttribution(row: {
+    item_type: string;
+    maker: string;
+    sculptor?: string | null;
+    artist?: string | null;
+    manufacturer?: string | null;
+}): Attribution {
+    const explicit = {
+        artist: row.artist?.trim() || null,
+        manufacturer: row.manufacturer?.trim() || null,
+    };
+    if (ARTIST_ATTRIBUTED_CATEGORIES.has(row.item_type)) {
+        return {
+            artist: explicit.artist ?? (row.maker.trim() || null),
+            manufacturer: explicit.manufacturer,
+        };
+    }
+    return {
+        artist: explicit.artist ?? (row.sculptor?.trim() || null),
+        manufacturer: explicit.manufacturer ?? (row.maker.trim() || null),
+    };
+}

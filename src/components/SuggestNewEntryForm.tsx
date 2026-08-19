@@ -3,7 +3,7 @@
 import { useState, useTransition } from"react";
 import { useRouter } from"next/navigation";
 import { createSuggestion } from"@/app/actions/catalog-suggestions";
-import { CANONICAL_SCALES } from "@/lib/catalog/taxonomy";
+import { ARTIST_ATTRIBUTED_CATEGORIES, CANONICAL_SCALES } from "@/lib/catalog/taxonomy";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -56,7 +56,10 @@ export default function SuggestNewEntryForm({
  const [maker, setMaker] = useState("");
  const [customMaker, setCustomMaker] = useState("");
  const [sculptor, setSculptor] = useState("");
- const [itemType, setItemType] = useState("release");
+ // Artist categories: the primary attribution is a PERSON.
+ const [artistName, setArtistName] = useState("");
+ const [manufacturer, setManufacturer] = useState("");
+ const [itemType, setItemType] = useState("plastic_release");
  const [scale, setScale] = useState("");
  const [color, setColor] = useState("");
  const [material, setMaterial] = useState("");
@@ -78,7 +81,12 @@ export default function SuggestNewEntryForm({
  return;
  }
 
- const effectiveMaker = maker ==="Other" ? customMaker.trim() : maker;
+ // Attribution split: for artist pieces the person IS the primary
+ // attribution (maker); for factory pieces the company is.
+ const isArtistPiece = ARTIST_ATTRIBUTED_CATEGORIES.has(itemType);
+ const effectiveMaker = isArtistPiece
+ ? artistName.trim()
+ : maker ==="Other" ? customMaker.trim() : maker;
 
  startTransition(async () => {
  setError(null);
@@ -88,7 +96,8 @@ export default function SuggestNewEntryForm({
  fieldChanges: {
  title: title.trim(),
  maker: effectiveMaker || undefined,
- sculptor: sculptor.trim() || undefined,
+ manufacturer: isArtistPiece ? manufacturer.trim() || undefined : undefined,
+ sculptor: isArtistPiece ? undefined : sculptor.trim() || undefined,
  item_type: itemType,
  scale: scale || undefined,
  color: color || undefined,
@@ -196,10 +205,42 @@ export default function SuggestNewEntryForm({
  </select>
  </div>
 
- {/* Maker */}
+ {/* Attribution — category-aware (owner decision 2026-08-19):
+     artist pieces credit a PERSON first (Artist) with an optional
+     company; factory pieces credit a COMPANY first (Manufacturer)
+     with an optional sculptor. */}
+ {ARTIST_ATTRIBUTED_CATEGORIES.has(itemType) ? (
+ <>
+ <div className="mb-6">
+ <label className="text-foreground mb-1 block text-sm font-semibold" htmlFor="new-entry-artist">
+ Artist
+ </label>
+ <Input
+ id="new-entry-artist"
+ value={artistName}
+ onChange={(e) => setArtistName(e.target.value)}
+ placeholder="e.g. Sarah Rose, Maggie Bennett"
+ maxLength={100}
+ />
+ </div>
+ <div className="mb-6">
+ <label className="text-foreground mb-1 block text-sm font-semibold" htmlFor="new-entry-manufacturer">
+ Manufacturer / casting company <span className="font-normal text-muted-foreground">(optional)</span>
+ </label>
+ <Input
+ id="new-entry-manufacturer"
+ value={manufacturer}
+ onChange={(e) => setManufacturer(e.target.value)}
+ placeholder="e.g. Resins by Randy — leave blank if the artist casts their own"
+ maxLength={100}
+ />
+ </div>
+ </>
+ ) : (
+ <>
  <div className="mb-6">
  <label className="text-foreground mb-1 block text-sm font-semibold" htmlFor="new-entry-maker">
- Maker / Manufacturer
+ Manufacturer
  </label>
  <select
  id="new-entry-maker"
@@ -219,7 +260,7 @@ export default function SuggestNewEntryForm({
  className="mt-2"
  value={customMaker}
  onChange={(e) => setCustomMaker(e.target.value)}
- placeholder="Enter maker name"
+ placeholder="Enter manufacturer name"
  maxLength={100}
  />
  )}
@@ -240,10 +281,12 @@ export default function SuggestNewEntryForm({
  maxLength={100}
  />
  <p className="mt-1 mb-0 text-xs text-muted-foreground">
- Maker is the company or brand (Breyer, North Light). Sculptor is the artist who
- sculpted it — worth crediting even on factory pieces.
+ Manufacturer is the company or brand (Breyer, North Light). Sculptor is the
+ artist who sculpted it — worth crediting even on factory pieces.
  </p>
  </div>
+ </>
+ )}
 
  {/* Two-column row: Scale + Color */}
  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

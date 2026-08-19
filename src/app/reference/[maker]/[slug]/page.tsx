@@ -26,6 +26,7 @@ import {
 } from "@/lib/utils/ebayAffiliate";
 import GlossaryLink from "@/components/GlossaryLink";
 import { getMoldCustoms } from "@/lib/catalog/moldCustoms";
+import { deriveAttribution } from "@/lib/catalog/taxonomy";
 
 interface Props {
     params: Promise<{ maker: string; slug: string }>;
@@ -228,11 +229,26 @@ export default async function ReferencePage({ params }: Props) {
         return undefined;
     };
 
+    // Attribution split: a person (Artist) and/or a company
+    // (Manufacturer) — derived until migration 156's columns flow
+    // through this select. The sculptor attribute is surfaced AS the
+    // Artist row, so it's excluded from the generic attribute loop.
+    const attribution = deriveAttribution({
+        item_type: item.item_type,
+        maker: item.maker,
+        sculptor: (attrs as Record<string, unknown>).sculptor as string | null | undefined,
+    });
     const specRows: [string, string][] = [
-        ["Maker", item.maker],
+        ...(attribution.manufacturer
+            ? [["Manufacturer", attribution.manufacturer] as [string, string]]
+            : []),
+        ...(attribution.artist ? [["Artist", attribution.artist] as [string, string]] : []),
         ["Scale", item.scale ?? "—"],
         ...Object.entries(attrs)
-            .filter(([k, v]) => v != null && v !== "" && k !== "source" && k !== "source_id")
+            .filter(
+                ([k, v]) =>
+                    v != null && v !== "" && k !== "source" && k !== "source_id" && k !== "sculptor",
+            )
             .map(([k, v]) => [fmtLabel(k), String(v)] as [string, string]),
     ];
 

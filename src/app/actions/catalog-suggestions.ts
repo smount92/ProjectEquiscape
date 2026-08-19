@@ -13,7 +13,7 @@ import {
     correctionTouchesAttributes,
 } from "@/lib/catalog/corrections";
 import { referenceHref } from "@/lib/catalog/referenceUrl";
-import { normalizeScale, suggestionItemTypeToDb } from "@/lib/catalog/taxonomy";
+import { deriveAttribution, normalizeScale, suggestionItemTypeToDb } from "@/lib/catalog/taxonomy";
 import { REFERENCE_PAGES_CACHE_TAG } from "@/app/actions/reference-pages";
 import type { Database } from "@/lib/types/database.generated";
 
@@ -755,10 +755,21 @@ async function applyApprovedSuggestion(
             );
         }
         const itemType = mappedType ?? "plastic_mold";
-        const insertPayload: CatalogItemInsert = {
+        // Attribution split (156): artist/manufacturer stamped at insert.
+        // No annotation on the literal — the columns enter generated
+        // types after the owner applies 156 (cast at the insert call).
+        const attribution = deriveAttribution({
+            item_type: itemType,
+            maker: (fc.maker ?? "Unknown") as string,
+            sculptor: (fc.sculptor as string | undefined) ?? null,
+            manufacturer: (fc.manufacturer as string | undefined) ?? null,
+        });
+        const insertPayload = {
             item_type: itemType,
             title: (fc.title ?? fc.mold_name ?? "Untitled") as string,
             maker: (fc.maker ?? "Unknown") as string,
+            artist: attribution.artist,
+            manufacturer: attribution.manufacturer,
             // Scales enter in canonical vocabulary; normalize defensively
             // (older pending suggestions carry bare "Traditional" etc.).
             scale: normalizeScale(fc.scale as string | undefined),
@@ -780,7 +791,7 @@ async function applyApprovedSuggestion(
         };
         const { data: newItem, error: insertError } = await admin
             .from("catalog_items")
-            .insert(insertPayload)
+            .insert(insertPayload as CatalogItemInsert)
             .select("id")
             .single();
         if (insertError) {

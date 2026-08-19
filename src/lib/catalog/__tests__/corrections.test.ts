@@ -109,8 +109,10 @@ describe("correctionTouchesAttributes", () => {
 describe("catalog column/attribute vocabulary", () => {
     it("keeps the real-column set to the actual catalog_items columns", () => {
         expect([...CATALOG_REAL_COLUMNS].sort()).toEqual([
+            "artist", // migration 156
             "item_type",
             "maker",
+            "manufacturer", // migration 156
             "parent_id",
             "scale",
             "title",

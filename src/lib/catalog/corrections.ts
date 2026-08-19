@@ -21,6 +21,9 @@ export const CATALOG_REAL_COLUMNS = new Set([
     "scale",
     "item_type",
     "parent_id",
+    // Attribution split (migration 156).
+    "artist",
+    "manufacturer",
 ]);
 
 // Attribute keys a Silver curator (50+ approved) may auto-approve corrections
