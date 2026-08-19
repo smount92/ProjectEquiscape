@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { catalogDisplayName } from "@/lib/catalog/displayName";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { extractStoragePath } from "@/lib/utils/storage";
 import sharp from "sharp";
@@ -194,7 +195,7 @@ export async function getInsuranceReportData(collectionId?: string): Promise<{
             // Build reference display name
             let reference = "Unlisted";
             if (horse.catalog_items) {
-                reference = `${horse.catalog_items.maker} ${horse.catalog_items.title}`;
+                reference = catalogDisplayName(horse.catalog_items.maker, horse.catalog_items.title);
             }
 
             reportHorses.push({

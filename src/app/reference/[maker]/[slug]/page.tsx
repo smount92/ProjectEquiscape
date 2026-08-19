@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { catalogDisplayName } from "@/lib/catalog/displayName";
 import type { Metadata } from "next";
 import Link from "next/link";
 import FocusLayout from "@/components/layouts/FocusLayout";
@@ -110,7 +111,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     const attrs = item.attributes ?? {};
     const year = attrs.release_year_start ? ` (${attrs.release_year_start})` : "";
-    const title = `${item.maker} ${item.title} — value & collector info`;
+    const title = `${catalogDisplayName(item.maker, item.title)} — value & collector info`;
     const description = `${item.title}${year} by ${item.maker}${item.scale ? `, ${item.scale}` : ""}. See specs, photos, current listings, and Blue Book value on Model Horse Hub — the community model-horse catalog.`;
     const canonical = `${APP_URL}/reference/${item.maker_slug}/${item.slug}`;
     const photos = await getCatalogPhotos(item.id, 1);

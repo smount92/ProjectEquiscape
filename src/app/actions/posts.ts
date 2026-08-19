@@ -1,6 +1,7 @@
 "use server";
 
 import { logger } from "@/lib/logger";
+import { catalogDisplayName } from "@/lib/catalog/displayName";
 
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -642,7 +643,7 @@ export async function getHorseEmbedData(horseId: string): Promise<{
         thumbnailUrl = pi.image_url;
     }
 
-    const refName = h.catalog_items ? `${h.catalog_items.maker} ${h.catalog_items.title}` : null;
+    const refName = h.catalog_items ? catalogDisplayName(h.catalog_items.maker, h.catalog_items.title) : null;
 
     return {
         name: h.custom_name,

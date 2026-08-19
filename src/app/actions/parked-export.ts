@@ -1,6 +1,7 @@
 "use server";
 
 import { logger } from "@/lib/logger";
+import { catalogDisplayName } from "@/lib/catalog/displayName";
 
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
@@ -459,7 +460,7 @@ export async function getCoaData(horseId: string): Promise<{
         // Build reference string
         let reference = "Unlisted";
         if (h.catalog_items) {
-            reference = `${h.catalog_items.maker} ${h.catalog_items.title}`;
+            reference = catalogDisplayName(h.catalog_items.maker, h.catalog_items.title);
         }
 
         // Counts

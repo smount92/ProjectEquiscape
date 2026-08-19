@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import { catalogDisplayName } from "@/lib/catalog/displayName";
 import { logger } from "@/lib/logger";
 import * as Sentry from "@sentry/nextjs";
 import type { Database } from "@/lib/types/database.generated";
@@ -240,7 +241,7 @@ export async function updateHorseAction(horseId: string, data: {
                                 .select("title, maker")
                                 .eq("id", oldCatalogId)
                                 .maybeSingle();
-                            if (oldItem) oldName = `${(oldItem as { maker: string }).maker} ${(oldItem as { title: string }).title}`;
+                            if (oldItem) oldName = catalogDisplayName((oldItem as { maker: string }).maker, (oldItem as { title: string }).title);
                         }
                         if (newCatalogId) {
                             const { data: newItem } = await supabase
@@ -248,7 +249,7 @@ export async function updateHorseAction(horseId: string, data: {
                                 .select("title, maker")
                                 .eq("id", newCatalogId)
                                 .maybeSingle();
-                            if (newItem) newName = `${(newItem as { maker: string }).maker} ${(newItem as { title: string }).title}`;
+                            if (newItem) newName = catalogDisplayName((newItem as { maker: string }).maker, (newItem as { title: string }).title);
                         }
 
                         await supabase.from("posts").insert({
@@ -736,7 +737,7 @@ export async function quickAddHorse(data: {
             .eq("id", input.catalogId)
             .single<{ title: string; maker: string }>();
         if (catalog) {
-            horseName = `${catalog.maker} ${catalog.title}`;
+            horseName = catalogDisplayName(catalog.maker, catalog.title);
         }
     }
     if (!horseName) horseName = "Unnamed Horse";

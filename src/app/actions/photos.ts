@@ -1,6 +1,7 @@
 "use server";
 
 import { getAdminClient } from "@/lib/supabase/admin";
+import { catalogDisplayName } from "@/lib/catalog/displayName";
 import { getPublicImageUrl } from "@/lib/utils/storage";
 
 export interface PhotoDetail {
@@ -68,7 +69,7 @@ export async function getPhotoBySlug(slug: string): Promise<PhotoDetail | null> 
     ownerAlias: horse.users?.alias_name || "Collector",
     ownerAvatarUrl: horse.users?.avatar_url || null,
     catalogRef: horse.catalog_items
-      ? `${horse.catalog_items.maker} — ${horse.catalog_items.title}`
+      ? catalogDisplayName(horse.catalog_items.maker, horse.catalog_items.title, " — ")
       : null,
     finishType: horse.finish_type,
   };

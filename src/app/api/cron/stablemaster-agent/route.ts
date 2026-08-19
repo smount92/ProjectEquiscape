@@ -14,6 +14,7 @@
 // ============================================================
 
 import { NextRequest, NextResponse } from "next/server";
+import { catalogDisplayName } from "@/lib/catalog/displayName";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/logger";
 import { Resend } from "resend";
@@ -97,7 +98,7 @@ export async function GET(request: NextRequest) {
                     financial_vault: { purchase_price: number | null; estimated_current_value: number | null } | null;
                 }) => ({
                     name: h.custom_name,
-                    reference: h.catalog_items ? `${h.catalog_items.maker} ${h.catalog_items.title}` : "Custom",
+                    reference: h.catalog_items ? catalogDisplayName(h.catalog_items.maker, h.catalog_items.title) : "Custom",
                     purchasePrice: h.financial_vault?.purchase_price || null,
                     estimatedValue: h.financial_vault?.estimated_current_value || null,
                     marketValue: h.catalog_id ? marketPrices[h.catalog_id] || null : null,

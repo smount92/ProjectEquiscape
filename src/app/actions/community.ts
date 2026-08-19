@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { catalogDisplayName } from "@/lib/catalog/displayName";
 import { getPublicImageUrls } from "@/lib/utils/storage";
 import { sanitizeForOr } from "@/lib/utils/search";
 
@@ -141,7 +142,7 @@ export async function loadMoreShowRing(
 
         const catItem = horse.catalog_items as { title: string; maker: string; scale: string } | null;
         const refName = catItem
-            ? `${catItem.maker} ${catItem.title}`
+            ? `${catalogDisplayName(catItem.maker, catItem.title)}`
             : "Unlisted Mold";
         const ownerAlias = (horse.users as { alias_name: string })?.alias_name ?? "Unknown";
 
