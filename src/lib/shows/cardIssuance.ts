@@ -23,6 +23,29 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { generateCardCode, shouldIssueCard } from "./cards";
 import type { EntryStatus, Place } from "./types";
 
+// ── Validity gates (Championship program §2, ratified 2026-08) ──
+// A card only mints when the class had real competition — the ARBA
+// "leg" mechanism, killing the hobby's 2-horse-class card problem.
+
+/** Permanent bar (ARBA's exact numbers), show years 2027+. */
+export const CARD_GATE = { entries: 5, exhibitors: 3 } as const;
+
+/** Season 1 provision (published, expires with show year 2026). */
+export const SEASON1_CARD_GATE = { entries: 3, exhibitors: 2 } as const;
+
+/** Show years at or below this use the Season 1 provision. */
+export const SEASON1_FINAL_SHOW_YEAR = 2026;
+
+/** A STAKES card — the big win, rare by design ("major" analog). */
+export const STAKES_GATE = { entries: 15, exhibitors: 6 } as const;
+
+/** The gate in force for a show year (null = pre-season data: lenient). */
+export function cardGateFor(showYear: number | null): { entries: number; exhibitors: number } {
+    return showYear === null || showYear <= SEASON1_FINAL_SHOW_YEAR
+        ? SEASON1_CARD_GATE
+        : CARD_GATE;
+}
+
 // ── The pure plan ──
 
 export interface CardIssueInput {
@@ -51,17 +74,36 @@ export interface PlannedCard {
     earnedPlace: 1 | 2;
     /** The entry's owner AT ISSUANCE — frozen as earned_by_owner_id. */
     ownerId: string;
+    /** Stamped onto the card: the competition it was won against. */
+    classEntryCount: number;
+    classExhibitorCount: number;
+    isStakes: boolean;
 }
 
 export function buildCardIssuePlan(input: CardIssueInput): {
     cards: PlannedCard[];
     skippedExisting: number;
+    /** Placings that would have minted but the class was under the gate. */
+    skippedGated: number;
 } {
     // Host opted out — the whole show issues nothing.
-    if (!input.show.isMhhQualifying) return { cards: [], skippedExisting: 0 };
+    if (!input.show.isMhhQualifying)
+        return { cards: [], skippedExisting: 0, skippedGated: 0 };
 
     const entryById = new Map(input.entries.map((e) => [e.id, e]));
     const classById = new Map(input.classes.map((c) => [c.id, c]));
+
+    // Per-class competition, from live (non-scratched) entries only —
+    // a scratched horse never pads the field a card was won against.
+    const liveByClass = new Map<string, { entries: number; owners: Set<string> }>();
+    for (const e of input.entries) {
+        if (e.status === "scratched") continue;
+        const tally = liveByClass.get(e.classId) ?? { entries: 0, owners: new Set() };
+        tally.entries += 1;
+        tally.owners.add(e.ownerId);
+        liveByClass.set(e.classId, tally);
+    }
+    const gate = cardGateFor(input.show.showYear);
     const alreadyIssued = new Set(
         input.existingCards.map((c) => `${c.classId}::${c.horseId}`),
     );
@@ -70,6 +112,7 @@ export function buildCardIssuePlan(input: CardIssueInput): {
 
     const cards: PlannedCard[] = [];
     let skippedExisting = 0;
+    let skippedGated = 0;
 
     for (const placing of input.placings) {
         const entry = entryById.get(placing.entryId);
@@ -88,6 +131,16 @@ export function buildCardIssuePlan(input: CardIssueInput): {
             continue;
         }
 
+        // Validity gate: the class must have had real competition.
+        const live = liveByClass.get(placing.classId) ?? {
+            entries: 0,
+            owners: new Set<string>(),
+        };
+        if (live.entries < gate.entries || live.owners.size < gate.exhibitors) {
+            skippedGated += 1;
+            continue;
+        }
+
         const key = `${placing.classId}::${entry.horseId}`;
         if (alreadyIssued.has(key)) {
             skippedExisting += 1;
@@ -101,10 +154,15 @@ export function buildCardIssuePlan(input: CardIssueInput): {
             horseId: entry.horseId,
             earnedPlace: placing.place as 1 | 2,
             ownerId: entry.ownerId,
+            classEntryCount: live.entries,
+            classExhibitorCount: live.owners.size,
+            isStakes:
+                live.entries >= STAKES_GATE.entries &&
+                live.owners.size >= STAKES_GATE.exhibitors,
         });
     }
 
-    return { cards, skippedExisting };
+    return { cards, skippedExisting, skippedGated };
 }
 
 // ── Short-code assignment (collision-checked) ──
@@ -307,6 +365,9 @@ export async function issueQualificationCardsForShow(
             current_owner_id: card.ownerId,
             status: "issued",
             show_year: (show.show_year as number | null) ?? null,
+            class_entry_count: card.classEntryCount,
+            class_exhibitor_count: card.classExhibitorCount,
+            is_stakes: card.isStakes,
         }));
 
         const { error: insertError } = await supabase

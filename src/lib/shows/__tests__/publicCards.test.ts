@@ -27,6 +27,10 @@ describe("mapPublicCardRows", () => {
             showTitle: "Spring Fling Online",
             className: "Breed Halter",
             issuedAt: "2026-07-10T12:00:00Z",
+            // Pre-153 RPC shape: no field counts, never STAKES.
+            classEntryCount: null,
+            classExhibitorCount: null,
+            isStakes: false,
         });
         expect(cards[1].earnedPlace).toBe(2);
         expect(cards[1].status).toBe("transferred");

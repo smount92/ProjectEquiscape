@@ -26,6 +26,10 @@ export interface PublicCardRow {
     show_title: string;
     class_name: string;
     issued_at: string;
+    /** Migration 153 — absent until the owner applies it. */
+    class_entry_count?: number | null;
+    class_exhibitor_count?: number | null;
+    is_stakes?: boolean | null;
 }
 
 const CARD_STATUSES: readonly string[] = ["issued", "transferred", "redeemed", "void"];
@@ -52,6 +56,11 @@ export function mapPublicCardRows(rows: unknown): PassportQualificationCard[] {
             showTitle: typeof row.show_title === "string" ? row.show_title : "Unknown show",
             className: typeof row.class_name === "string" ? row.class_name : "Unknown class",
             issuedAt: typeof row.issued_at === "string" ? row.issued_at : "",
+            classEntryCount:
+                typeof row.class_entry_count === "number" ? row.class_entry_count : null,
+            classExhibitorCount:
+                typeof row.class_exhibitor_count === "number" ? row.class_exhibitor_count : null,
+            isStakes: row.is_stakes === true,
         });
     }
     return cards;

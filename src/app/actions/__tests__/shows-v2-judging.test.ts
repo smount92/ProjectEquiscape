@@ -641,6 +641,22 @@ describe("shows-v2 — results publish on completed", () => {
                 owner_id: "owner-9",
                 status: "entered",
             },
+            // Two rivals so the class clears the Season 1 card gate
+            // (3 live entries / 2+ exhibitors — see cardIssuance.ts).
+            {
+                id: "entry-rival-1",
+                class_id: CLASS_ID,
+                horse_id: "horse-rival-1",
+                owner_id: "owner-r1",
+                status: "entered",
+            },
+            {
+                id: "entry-rival-2",
+                class_id: CLASS_ID,
+                horse_id: "horse-rival-2",
+                owner_id: "owner-r2",
+                status: "entered",
+            },
         ]);
         queueList([{ entry_id: ENTRY_ID, class_id: CLASS_ID, place: 1 }]);
         queueList([]); // no cards issued yet
@@ -687,6 +703,9 @@ describe("shows-v2 — results publish on completed", () => {
                 current_owner_id: "owner-9",
                 status: "issued",
                 show_year: 2026,
+                class_entry_count: 3,
+                class_exhibitor_count: 3,
+                is_stakes: false,
             }),
         ]);
 

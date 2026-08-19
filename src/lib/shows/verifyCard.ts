@@ -28,6 +28,13 @@ export interface CardVerification {
      * Phase-B-style overlay; regenerate types after 120).
      */
     horseName: string | null;
+    /**
+     * The field the card was won against (migration 153). NULL on
+     * cards minted before the gates — the page omits the line.
+     */
+    classEntryCount: number | null;
+    classExhibitorCount: number | null;
+    isStakes: boolean;
 }
 
 export async function verifyCard(
@@ -53,6 +60,9 @@ export async function verifyCard(
               class_name: string;
               issued_at: string;
               horse_name?: string | null;
+              class_entry_count?: number | null;
+              class_exhibitor_count?: number | null;
+              is_stakes?: boolean | null;
           }
         | undefined;
     if (!row) return null;
@@ -66,5 +76,8 @@ export async function verifyCard(
         className: row.class_name,
         issuedAt: row.issued_at,
         horseName: row.horse_name ?? null,
+        classEntryCount: row.class_entry_count ?? null,
+        classExhibitorCount: row.class_exhibitor_count ?? null,
+        isStakes: row.is_stakes ?? false,
     };
 }

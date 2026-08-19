@@ -22,6 +22,10 @@ export interface PassportQualificationCard {
     showTitle: string;
     className: string;
     issuedAt: string;
+    /** The field it was won against (migration 153) — null on older cards. */
+    classEntryCount?: number | null;
+    classExhibitorCount?: number | null;
+    isStakes?: boolean;
 }
 
 const STATUS_LABELS: Record<CardStatus, string> = {
@@ -74,7 +78,15 @@ export default function QualificationCardsSection({
                                 </span>
                             </div>
                             <p className="text-engraved-brass mt-1 mb-0 text-sm font-semibold">
-                                {card.earnedPlace === 1 ? "1st" : "2nd"} — {card.className}
+                                {card.isStakes && (
+                                    <span className="mr-1.5 tracking-widest">STAKES</span>
+                                )}
+                                {card.earnedPlace === 1 ? "1st" : "2nd"}
+                                {typeof card.classEntryCount === "number" &&
+                                typeof card.classExhibitorCount === "number"
+                                    ? ` of ${card.classEntryCount} (${card.classExhibitorCount} exhibitors)`
+                                    : ""}{" "}
+                                — {card.className}
                             </p>
                             <p className="mt-0.5 mb-0 text-xs text-[color:var(--brass-ink)] opacity-80">
                                 {card.showTitle}

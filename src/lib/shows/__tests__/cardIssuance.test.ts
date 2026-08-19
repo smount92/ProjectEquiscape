@@ -3,8 +3,12 @@ import { createMockSupabaseClient } from "@/__tests__/mocks/supabase";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import {
+    CARD_GATE,
+    SEASON1_CARD_GATE,
+    STAKES_GATE,
     assignCardCodes,
     buildCardIssuePlan,
+    cardGateFor,
     issueQualificationCardsForShow,
     type CardIssueInput,
 } from "@/lib/shows/cardIssuance";
@@ -45,8 +49,8 @@ describe("buildCardIssuePlan — issuance rules", () => {
             }),
         );
         expect(cards).toEqual([
-            { classId: "class-1", horseId: "h1", earnedPlace: 1, ownerId: "o1" },
-            { classId: "class-1", horseId: "h2", earnedPlace: 2, ownerId: "o2" },
+            { classId: "class-1", horseId: "h1", earnedPlace: 1, ownerId: "o1", classEntryCount: 3, classExhibitorCount: 3, isStakes: false },
+            { classId: "class-1", horseId: "h2", earnedPlace: 2, ownerId: "o2", classEntryCount: 3, classExhibitorCount: 3, isStakes: false },
         ]);
     });
 
@@ -89,7 +93,7 @@ describe("buildCardIssuePlan — issuance rules", () => {
             baseInput({ existingCards: [{ classId: "class-1", horseId: "h1" }] }),
         );
         expect(cards).toEqual([
-            { classId: "class-1", horseId: "h2", earnedPlace: 2, ownerId: "o2" },
+            { classId: "class-1", horseId: "h2", earnedPlace: 2, ownerId: "o2", classEntryCount: 3, classExhibitorCount: 3, isStakes: false },
         ]);
         expect(skippedExisting).toBe(1);
     });
@@ -99,6 +103,8 @@ describe("buildCardIssuePlan — issuance rules", () => {
             baseInput({
                 entries: [
                     { id: "e1", classId: "class-1", horseId: "h1", ownerId: "original-owner", status: "placed" },
+                    { id: "e2", classId: "class-1", horseId: "h2", ownerId: "o2", status: "placed" },
+                    { id: "e3", classId: "class-1", horseId: "h3", ownerId: "o3", status: "placed" },
                 ],
                 placings: [{ entryId: "e1", classId: "class-1", place: 1 }],
             }),
@@ -118,6 +124,75 @@ describe("buildCardIssuePlan — issuance rules", () => {
         expect(cards).toEqual([]);
     });
 });
+
+// ══════════════════════════════════════════════════════════════
+// validity gates — "a card means the class was real competition"
+// ══════════════════════════════════════════════════════════════
+
+/** N placed entries in class-1 from distinct owners; 1st place goes to e1. */
+function gatedInput(
+    entryCount: number,
+    ownerCount: number,
+    showYear: number | null,
+): CardIssueInput {
+    const entries = Array.from({ length: entryCount }, (_, i) => ({
+        id: `e${i + 1}`,
+        classId: "class-1",
+        horseId: `h${i + 1}`,
+        ownerId: `o${(i % ownerCount) + 1}`,
+        status: "placed" as const,
+    }));
+    return baseInput({
+        show: { id: "show-1", isMhhQualifying: true, showYear },
+        entries,
+        placings: [{ entryId: "e1", classId: "class-1", place: 1 }],
+    });
+}
+
+describe("buildCardIssuePlan — validity gates", () => {
+    it("cardGateFor: Season 1 (≤2026 or unset year) is 3-and-2; 2027+ is 5-and-3", () => {
+        expect(cardGateFor(2026)).toEqual(SEASON1_CARD_GATE);
+        expect(cardGateFor(null)).toEqual(SEASON1_CARD_GATE);
+        expect(cardGateFor(2027)).toEqual(CARD_GATE);
+        expect(cardGateFor(2030)).toEqual(CARD_GATE);
+    });
+
+    it("Season 1: 3 entries / 2 exhibitors mints; one short on either axis does not", () => {
+        expect(gatedPlan(3, 2, 2026).cards).toHaveLength(1);
+        expect(gatedPlan(2, 2, 2026)).toMatchObject({ cards: [], skippedGated: 1 });
+        expect(gatedPlan(3, 1, 2026)).toMatchObject({ cards: [], skippedGated: 1 });
+    });
+
+    it("Season 2+: 5 entries / 3 exhibitors mints; the Season 1 numbers no longer do", () => {
+        expect(gatedPlan(5, 3, 2027).cards).toHaveLength(1);
+        expect(gatedPlan(4, 3, 2027)).toMatchObject({ cards: [], skippedGated: 1 });
+        expect(gatedPlan(5, 2, 2027)).toMatchObject({ cards: [], skippedGated: 1 });
+        expect(gatedPlan(3, 2, 2027).cards).toEqual([]);
+    });
+
+    it("scratched entries never pad the field a card was won against", () => {
+        const input = gatedInput(3, 3, 2026);
+        input.entries[2].status = "scratched"; // live field drops to 2
+        const { cards, skippedGated } = buildCardIssuePlan(input);
+        expect(cards).toEqual([]);
+        expect(skippedGated).toBe(1);
+    });
+
+    it(`a class of ${STAKES_GATE.entries}+ entries from ${STAKES_GATE.exhibitors}+ exhibitors mints a STAKES card, stamped with the field it beat`, () => {
+        const { cards } = gatedPlan(15, 6, 2027);
+        expect(cards[0]).toMatchObject({
+            isStakes: true,
+            classEntryCount: 15,
+            classExhibitorCount: 6,
+        });
+        // One exhibitor short of the STAKES bar: a normal card.
+        expect(gatedPlan(15, 5, 2027).cards[0]).toMatchObject({ isStakes: false });
+    });
+});
+
+function gatedPlan(entryCount: number, ownerCount: number, showYear: number | null) {
+    return buildCardIssuePlan(gatedInput(entryCount, ownerCount, showYear));
+}
 
 // ══════════════════════════════════════════════════════════════
 // assignCardCodes — collision-checked short codes
@@ -187,6 +262,8 @@ const ENTRIES = {
     data: [
         { id: "e1", class_id: "class-1", horse_id: "h1", owner_id: "o1", status: "placed" },
         { id: "e2", class_id: "class-1", horse_id: "h2", owner_id: "o2", status: "placed" },
+        // Third live entry clears the Season 1 gate (3 entries / 2 exhibitors).
+        { id: "e3", class_id: "class-1", horse_id: "h3", owner_id: "o3", status: "placed" },
     ],
     error: null,
 };
@@ -226,8 +303,8 @@ describe("issueQualificationCardsForShow", () => {
             issued: 2,
             skipped: 0,
             cards: [
-                { classId: "class-1", horseId: "h1", earnedPlace: 1, ownerId: "o1" },
-                { classId: "class-1", horseId: "h2", earnedPlace: 2, ownerId: "o2" },
+                { classId: "class-1", horseId: "h1", earnedPlace: 1, ownerId: "o1", classEntryCount: 3, classExhibitorCount: 3, isStakes: false },
+                { classId: "class-1", horseId: "h2", earnedPlace: 2, ownerId: "o2", classEntryCount: 3, classExhibitorCount: 3, isStakes: false },
             ],
         });
 
@@ -246,6 +323,9 @@ describe("issueQualificationCardsForShow", () => {
                 current_owner_id: "o1",
                 status: "issued",
                 show_year: 2026,
+                class_entry_count: 3,
+                class_exhibitor_count: 3,
+                is_stakes: false,
             }),
         );
         for (const row of rows) expect(isValidCardCode(row.id as string)).toBe(true);

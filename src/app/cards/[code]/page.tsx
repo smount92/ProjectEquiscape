@@ -100,12 +100,23 @@ export default async function CardVerifyPage({
                         </span>
                     </div>
                     <p className="text-engraved-brass mt-1 mb-4 text-sm font-semibold">
-                        MHH Qualification Card
+                        {card.isStakes ? "MHH Qualification Card — STAKES" : "MHH Qualification Card"}
                     </p>
 
                     <div className="rounded-md bg-[color:var(--paper-lit)] px-4 py-2 text-[color:var(--paper-lit-ink)]">
                         {card.horseName && <Row label="Horse" value={card.horseName} />}
-                        <Row label="Earned" value={card.earnedPlace === 1 ? "1st place" : "2nd place"} />
+                        <Row
+                            label="Earned"
+                            value={
+                                // Cards minted before the gates (migration
+                                // 153) carry no field counts — plain place.
+                                card.classEntryCount !== null && card.classExhibitorCount !== null
+                                    ? `${card.earnedPlace === 1 ? "1st" : "2nd"} of ${card.classEntryCount} — ${card.classExhibitorCount} exhibitor${card.classExhibitorCount === 1 ? "" : "s"}`
+                                    : card.earnedPlace === 1
+                                      ? "1st place"
+                                      : "2nd place"
+                            }
+                        />
                         <Row label="Class" value={card.className} />
                         <Row label="Show" value={card.showTitle} />
                         {card.showYear !== null && (

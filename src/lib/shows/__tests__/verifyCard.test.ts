@@ -45,6 +45,10 @@ describe("verifyCard — the public RPC path", () => {
             className: "Quarter Horse",
             issuedAt: "2026-07-10T12:00:00Z",
             horseName: null,
+            // Pre-153 RPC shape: no field counts, never STAKES.
+            classEntryCount: null,
+            classExhibitorCount: null,
+            isStakes: false,
         });
     });
 
