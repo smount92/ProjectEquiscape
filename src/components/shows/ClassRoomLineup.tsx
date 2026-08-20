@@ -11,7 +11,7 @@
  *     room must carry the hearts or funneling viewers here would
  *     quietly break voting.
  *
- * Vote handling mirrors AlbumWall (castVote/removeVote + refresh).
+ * Vote handling is castVote/removeVote + refresh.
  */
 
 import Link from "next/link";

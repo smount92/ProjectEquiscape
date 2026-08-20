@@ -14,7 +14,6 @@
  */
 
 import type { ConsoleClass, ConsoleDivision } from "@/lib/shows/console";
-import { showsV4Enabled } from "@/lib/shows/flags";
 import { AXIS_GLOSS } from "@/lib/shows/plainWords";
 import { PublicClassRow } from "@/components/shows/ShowEntrySectionParts";
 import { Badge } from "@/components/ui/badge";
@@ -27,8 +26,8 @@ interface ProgramAccordionProps {
     /** Index of the division to render open initially (the CTA
      *  dialog opens the first; #program starts all collapsed). */
     defaultOpenIndex?: number | null;
-    /** v4 class rooms: when set (and the flag is on), each class row
-     *  grows a "class room" link to /shows/[showId]/class/[classId]. */
+    /** Class rooms: when set, each class row grows a "class room"
+     *  link to /shows/[showId]/class/[classId]. */
     showId?: string;
     /** Season for the card-gate badges (defaults to the Season 1 gate). */
     showYear?: number | null;
@@ -53,7 +52,7 @@ export default function ProgramAccordion({
     showId,
     showYear,
 }: ProgramAccordionProps) {
-    const classRooms = !!showId && showsV4Enabled();
+    const classRooms = !!showId;
     if (divisions.length === 0) {
         return (
             <p className="py-4 text-center text-sm text-muted-foreground">

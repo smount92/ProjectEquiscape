@@ -8,8 +8,8 @@
  *      with a Details disclosure (AlbumMasthead).
  *   2. Sticky CTA row — brass "Enter this show" → "Pick your class"
  *      → the existing EnterClassDialog flow (AlbumCtaRow).
- *   3. Filter chips + THE WALL — every entry across all classes as
- *      one photo wall, one lightbox reel (AlbumWall).
+ *   3. The ENTRY RIBBON — every entry at a glance, funneling into
+ *      the per-class rooms (EntryRibbon).
  *   4. #entries — My Entries + readiness + the program accordion
  *      under #program (AlbumEntrySection).
  *   5. About + Rules cards, unchanged vocabulary.
@@ -37,13 +37,11 @@ import { getShowRole } from "@/lib/shows/queries";
 import type { ShowChampionsData } from "@/lib/shows/ring";
 import type { StaffRole } from "@/lib/shows/types";
 import { createClient } from "@/lib/supabase/server";
-import { showsV4Enabled } from "@/lib/shows/flags";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
 import RichText from "@/components/RichText";
 import AlbumCtaRow from "@/components/shows/AlbumCtaRow";
 import AlbumEntrySection from "@/components/shows/AlbumEntrySection";
 import AlbumMasthead from "@/components/shows/AlbumMasthead";
-import AlbumWall from "@/components/shows/AlbumWall";
 import EntryRibbon from "@/components/shows/EntryRibbon";
 import { buildShowJsonLd, StaffBanner } from "@/components/shows/PublicShowV2Page";
 import ShowChampions from "@/components/shows/ShowChampions";
@@ -126,23 +124,13 @@ export default async function AlbumShowPage({ showId }: { showId: string }) {
                     </div>
                 )}
 
-                {/* #gallery — v4: the at-a-glance ENTRY RIBBON funneling
+                {/* #gallery — the at-a-glance ENTRY RIBBON funneling
                     into class rooms (the wall stopped scaling past ~30
-                    entries). Flag off: THE WALL, byte-identical. Online
-                    shows only, like the legacy gallery. */}
+                    entries). Online shows only, like the legacy gallery. */}
                 {show.mode === "online" && (
                     <div id="gallery" className="scroll-mt-32">
                         {gallery ? (
-                            showsV4Enabled() ? (
-                                <EntryRibbon showId={showId} gallery={gallery} />
-                            ) : (
-                                <AlbumWall
-                                    showId={showId}
-                                    gallery={gallery}
-                                    authed={!!user}
-                                    hasRules={!!show.rulesMd}
-                                />
-                            )
+                            <EntryRibbon showId={showId} gallery={gallery} />
                         ) : (
                             <div className="ledger-card">
                                 <span className="ledger-tab">Entry Album</span>

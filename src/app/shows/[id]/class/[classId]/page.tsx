@@ -7,16 +7,13 @@
  * THIS class's results are published (rolling reveal, or show
  * completion). Anon-visible like every v2 public show surface; the
  * blind rule is enforced server-side in getClassRoom.
- *
- * Gated on NEXT_PUBLIC_SHOWS_V4 (requires migration 148): flag off
- * → notFound, and nothing links here.
+ * Requires migration 148.
  */
 
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { getClassRoom } from "@/app/actions/shows-v4";
-import { showsV4Enabled } from "@/lib/shows/flags";
 import ClassRoomPage from "@/components/shows/ClassRoomPage";
 
 export const dynamic = "force-dynamic";
@@ -26,7 +23,6 @@ export async function generateMetadata({
 }: {
     params: Promise<{ id: string; classId: string }>;
 }): Promise<Metadata> {
-    if (!showsV4Enabled()) return { title: "Show" };
     const { classId } = await params;
     const result = await getClassRoom({ classId });
     if (!result.success) return { title: "Show" };
@@ -43,7 +39,6 @@ export default async function ClassRoomRoute({
 }: {
     params: Promise<{ id: string; classId: string }>;
 }) {
-    if (!showsV4Enabled()) notFound();
     const { id, classId } = await params;
 
     const result = await getClassRoom({ classId });
