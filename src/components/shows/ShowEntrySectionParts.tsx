@@ -21,6 +21,7 @@ import Link from "next/link";
 
 import type { ConsoleClass } from "@/lib/shows/console";
 import type { MyShowEntry } from "@/lib/shows/public";
+import { cardGateFor } from "@/lib/shows/cardIssuance";
 import { friendlyClassStatus, friendlyEntryStatus } from "@/lib/shows/plainWords";
 import { placeLabel, ribbonHex } from "@/lib/shows/placings";
 import { Badge } from "@/components/ui/badge";
@@ -195,6 +196,33 @@ interface PublicClassRowProps {
     classRoomHref?: string;
 }
 
+/**
+ * The card-gate badge (season-felt wave): a qualifying class SAYS
+ * whether it's minting. "1 more exhibitor mints cards" turns an
+ * entrant into a recruiter — the program's best growth mechanic.
+ * Uses the Season 1 gate until show pages carry show_year.
+ */
+function QualifyingGateBadge({ cls }: { cls: ConsoleClass }) {
+    const gate = cardGateFor(null);
+    const entriesShort = Math.max(0, gate.entries - cls.entryCount);
+    const exhibitorsShort = Math.max(0, gate.exhibitors - cls.exhibitorCount);
+    if (cls.entryCount === 0) {
+        return <Badge variant="outline">🎖️ qualifying — cards for 1st &amp; 2nd</Badge>;
+    }
+    if (entriesShort === 0 && exhibitorsShort === 0) {
+        return <Badge variant="outline">🎖️ minting cards</Badge>;
+    }
+    const needs: string[] = [];
+    if (entriesShort > 0) needs.push(`${entriesShort} more entr${entriesShort === 1 ? "y" : "ies"}`);
+    if (exhibitorsShort > 0)
+        needs.push(`${exhibitorsShort} more exhibitor${exhibitorsShort === 1 ? "" : "s"}`);
+    return (
+        <Badge variant="outline" title="Qualification cards mint when the class has real competition">
+            🎖️ {needs.join(" & ")} mints cards
+        </Badge>
+    );
+}
+
 export function PublicClassRow({ cls, canEnter, onEnter, classRoomHref }: PublicClassRowProps) {
     const cancelled = cls.status === "cancelled";
     const combined = cls.status === "combined";
@@ -216,7 +244,7 @@ export function PublicClassRow({ cls, canEnter, onEnter, classRoomHref }: Public
                     {friendlyClassStatus(cls.status)}
                 </span>
             )}
-            {cls.isQualifying && <Badge variant="outline">qualifying</Badge>}
+            {cls.isQualifying && <QualifyingGateBadge cls={cls} />}
             {cls.maxPerEntrant !== null && (
                 <Badge variant="secondary">max {cls.maxPerEntrant}/entrant</Badge>
             )}
@@ -230,7 +258,10 @@ export function PublicClassRow({ cls, canEnter, onEnter, classRoomHref }: Public
                     {cls.allowedFinishes!.join("/")}
                 </span>
             )}
-            <span className="text-xs text-muted-foreground">{cls.entryCount} entered</span>
+            <span className="text-xs text-muted-foreground">
+                {cls.entryCount} entered
+                {cls.exhibitorCount > 0 ? ` · ${cls.exhibitorCount} exhibitor${cls.exhibitorCount === 1 ? "" : "s"}` : ""}
+            </span>
             {classRoomHref && (
                 <Link
                     href={classRoomHref}

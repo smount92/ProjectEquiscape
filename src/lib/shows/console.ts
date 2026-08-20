@@ -70,6 +70,8 @@ export interface ConsoleClass {
     isQualifying: boolean;
     sortOrder: number;
     entryCount: number;
+    /** Distinct owners with live entries (card-gate context). */
+    exhibitorCount: number;
 }
 
 export interface ConsoleSection {

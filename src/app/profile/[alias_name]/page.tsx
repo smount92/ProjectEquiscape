@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button";
 import AnonProfile from"@/components/profile/AnonProfile";
 import SupporterPlaque from"@/components/profile/SupporterPlaque";
 import { fetchSupporterBadge } from"@/lib/supporter";
-import { getExhibitorStar } from"@/lib/shows/horseTitles";
+import { getExhibitorCardCount, getExhibitorStar } from"@/lib/shows/horseTitles";
 
 
 function formatDate(dateStr: string): string {
@@ -381,11 +381,24 @@ export default async function ProfilePage({
  { num: String(totalHorseCount ?? 0), label:"Horses" },
  { num: String(publicHorseCount ?? 0), label:"Public" },
  ];
+ // MHH FIRST (season-felt wave): our cards lead; the legacy NAN
+ // stat stays for members who track it, but after ours.
+ const [mhhCards, exhibitorStar] = await Promise.all([
+ getExhibitorCardCount(profileUser.id),
+ getExhibitorStar(profileUser.id),
+ ]);
+ if (mhhCards && mhhCards.liveCards > 0) {
+ strapStats.push({
+ num:
+ mhhCards.stakesCards > 0
+ ? `${mhhCards.liveCards} (${mhhCards.stakesCards}★)`
+ : String(mhhCards.liveCards),
+ label:"MHH Cards",
+ });
+ }
  if ((nanCardCount ?? 0) > 0) {
  strapStats.push({ num: String(nanCardCount), label:"NAN Cards" });
  }
- // Exhibitor star (titles engine, 159) — nothing until earned.
- const exhibitorStar = await getExhibitorStar(profileUser.id);
  if (exhibitorStar) {
  strapStats.push({ num:"★".repeat(exhibitorStar.stars), label:"Exhibitor" });
  }

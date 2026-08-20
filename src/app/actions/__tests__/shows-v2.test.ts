@@ -108,7 +108,10 @@ describe("shows-v2 — createShow", () => {
             mode: "live",
             judging: "judged",
             status: "draft",
-            is_mhh_qualifying: true,
+            // Season 1 sanctioning gate: a non-admin host's request is
+            // recorded, never self-granted.
+            is_mhh_qualifying: false,
+            sanctioning_note: "[Host requested MHH sanctioning]",
         }));
         expect(mockClient._mockQuery.insert).toHaveBeenCalledWith(
             expect.objectContaining({ show_id: SHOW_ID, user_id: "user-1", role: "host" }),

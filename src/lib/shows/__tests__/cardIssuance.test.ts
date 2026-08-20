@@ -302,6 +302,7 @@ describe("issueQualificationCardsForShow", () => {
         expect(result).toEqual({
             issued: 2,
             skipped: 0,
+            skippedGated: 0,
             cards: [
                 { classId: "class-1", horseId: "h1", earnedPlace: 1, ownerId: "o1", classEntryCount: 3, classExhibitorCount: 3, isStakes: false, code: expect.any(String) },
                 { classId: "class-1", horseId: "h2", earnedPlace: 2, ownerId: "o2", classEntryCount: 3, classExhibitorCount: 3, isStakes: false, code: expect.any(String) },
@@ -341,7 +342,7 @@ describe("issueQualificationCardsForShow", () => {
             error: null,
         });
         const result = await issueQualificationCardsForShow(supabase, "show-1");
-        expect(result).toEqual({ issued: 0, skipped: 0, cards: [] });
+        expect(result).toEqual({ issued: 0, skipped: 0, skippedGated: 0, cards: [] });
         expect(mockClient._mockQuery.insert).not.toHaveBeenCalled();
     });
 
@@ -363,7 +364,7 @@ describe("issueQualificationCardsForShow", () => {
         );
 
         const result = await issueQualificationCardsForShow(supabase, "show-1");
-        expect(result).toEqual({ issued: 0, skipped: 2, cards: [] });
+        expect(result).toEqual({ issued: 0, skipped: 2, skippedGated: 0, cards: [] });
         expect(mockClient._mockQuery.insert).not.toHaveBeenCalled();
     });
 
@@ -388,7 +389,7 @@ describe("issueQualificationCardsForShow", () => {
         );
 
         const result = await issueQualificationCardsForShow(supabase, "show-1");
-        expect(result).toEqual({ issued: 0, skipped: 2, cards: [] });
+        expect(result).toEqual({ issued: 0, skipped: 2, skippedGated: 0, cards: [] });
         expect(mockClient._mockQuery.insert).toHaveBeenCalledTimes(1);
     });
 

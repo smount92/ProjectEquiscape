@@ -63,7 +63,9 @@ export default function CreateShowV2Form() {
     const [aboutMd, setAboutMd] = useState("");
     const [rulesMd, setRulesMd] = useState("");
     const [feeInfo, setFeeInfo] = useState("");
-    const [isMhhQualifying, setIsMhhQualifying] = useState(true);
+    // Season 1: sanctioning is MANUAL (program §5.1). The box is a
+    // REQUEST for non-admin hosts; the server records it as a note.
+    const [isMhhQualifying, setIsMhhQualifying] = useState(false);
     const [sanctioningNote, setSanctioningNote] = useState("");
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -253,11 +255,12 @@ export default function CreateShowV2Form() {
                         onChange={(e) => setIsMhhQualifying(e.target.checked)}
                         className="size-5 min-h-6 min-w-6 accent-forest"
                     />
-                    MHH qualifying show
+                    Request MHH sanctioning
                     <span className="font-normal text-muted-foreground">
-                        (1st and 2nd place in each qualifying class automatically earn digital
-                        qualification cards. You can exempt individual classes (e.g. fun classes)
-                        in the classlist builder.)
+                        (Sanctioned shows count for the Championship Series: season points,
+                        qualification cards for 1st &amp; 2nd, and titles. Season 1 sanctioning
+                        is granted by MHH — checking this sends a request with your show.
+                        Individual classes can be exempted in the classlist builder.)
                     </span>
                 </label>
                 <Field label="Sanctioning note (optional)">

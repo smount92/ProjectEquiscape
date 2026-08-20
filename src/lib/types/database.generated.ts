@@ -1423,6 +1423,46 @@ export type Database = {
           },
         ]
       }
+      exhibitor_career: {
+        Row: {
+          career_points: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          career_points?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          career_points?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exhibitor_career_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exhibitor_career_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "exhibitor_career_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exhibitor_distinctions: {
         Row: {
           distinction_code: string
@@ -2021,6 +2061,32 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      horse_career: {
+        Row: {
+          career_points: number
+          horse_id: string
+          updated_at: string
+        }
+        Insert: {
+          career_points?: number
+          horse_id: string
+          updated_at?: string
+        }
+        Update: {
+          career_points?: number
+          horse_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "horse_career_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: true
+            referencedRelation: "user_horses"
             referencedColumns: ["id"]
           },
         ]
@@ -5134,6 +5200,22 @@ export type Database = {
           want_count: number
         }[]
       }
+      get_class_cards: {
+        Args: { p_class_id: string }
+        Returns: {
+          code: string
+          earned_place: number
+          horse_id: string
+          is_stakes: boolean
+        }[]
+      }
+      get_exhibitor_card_count: {
+        Args: { p_user_id: string }
+        Returns: {
+          live_cards: number
+          stakes_cards: number
+        }[]
+      }
       get_extra_photo_count: { Args: { p_horse_id: string }; Returns: number }
       get_market_history: {
         Args: { p_catalog_id: string }
@@ -5268,6 +5350,7 @@ export type Database = {
         Args: { p_catalog_id: string; p_wanter_id: string }
         Returns: number
       }
+      placings_announced: { Args: { p_class_id: string }; Returns: boolean }
       refresh_market_prices: { Args: never; Returns: undefined }
       refresh_mv_trusted_sellers: { Args: never; Returns: undefined }
       reorder_show_nodes: {
@@ -5338,6 +5421,7 @@ export type Database = {
           class_name: string
           code: string
           earned_place: number
+          horse_name: string
           is_stakes: boolean
           issued_at: string
           show_title: string

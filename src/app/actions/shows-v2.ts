@@ -167,6 +167,14 @@ async function getShowIdOfClass(
 // Show lifecycle
 // ══════════════════════════════════════════════════════════════
 
+/** Season 1 sanctioning is MANUAL (program §5.1): only the platform
+ *  admin may flag a show MHH-sanctioned. Hosts request it via the
+ *  sanctioning note; the flag itself is admin-set. */
+function callerIsPlatformAdmin(email: string | undefined): boolean {
+    const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase();
+    return !!adminEmail && !!email && email.toLowerCase() === adminEmail;
+}
+
 export async function createShow(
     input: z.input<typeof createShowSchema>,
 ): Promise<ActionResult<{ showId: string }>> {
@@ -174,6 +182,15 @@ export async function createShow(
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { supabase, user } = await requireAuth();
     const v = parsed.data;
+
+    // Sanctioning gate: non-admin hosts create unsanctioned shows;
+    // the request lands in the sanctioning note for review.
+    if (v.isMhhQualifying && !callerIsPlatformAdmin(user.email)) {
+        v.isMhhQualifying = false;
+        v.sanctioningNote = [v.sanctioningNote, "[Host requested MHH sanctioning]"]
+            .filter(Boolean)
+            .join(" ");
+    }
 
     const { data: show, error } = await supabase
         .from("shows")
@@ -230,6 +247,19 @@ export async function updateShowSettings(
     if (patch.mode && patch.mode !== ctx.show.mode && ctx.show.status !== "draft") {
         return { success: false, error: "A show's mode can only change while it is a draft." };
     }
+    // Sanctioning gate (program §5.1): the flag is admin-set in
+    // Season 1. A host flipping it ON becomes a recorded request.
+    if (patch.isMhhQualifying === true) {
+        const { data: caller } = await supabase.auth.getUser();
+        if (!callerIsPlatformAdmin(caller.user?.email)) {
+            return {
+                success: false,
+                error:
+                    "MHH sanctioning is granted by the platform in Season 1 — add a note in the sanctioning field and we'll review your show.",
+            };
+        }
+    }
+
     // RESULTS ARE FINAL (audit SEV-3): show_date/entries_close_at drive
     // the show_year trigger. Editing dates on a completed show would
     // silently move it to another SEASON — its results vanish from the
@@ -358,6 +388,7 @@ export async function transitionShowStatus(
     // idempotent, so a failure here leaves the show safely in
     // results_review and the host simply retries.
     let issuedCards: PlannedCard[] = [];
+    let cardSummary: { issued: number; skippedGated: number; stakes: number } | null = null;
     if (to === "completed") {
         const published = await writeShowRecordsForShow(supabase, showId);
         if ("error" in published) {
@@ -383,6 +414,11 @@ export async function transitionShowStatus(
             };
         }
         issuedCards = cards.cards;
+        cardSummary = {
+            issued: cards.issued,
+            skippedGated: cards.skippedGated,
+            stakes: cards.cards.filter((c) => c.isStakes).length,
+        };
     }
 
     // CAS on the current status: a concurrent transition (double-click,
@@ -414,6 +450,37 @@ export async function transitionShowStatus(
         after(async () => {
             await runResultsPublishedFanout(getAdminClient(), showId, cardsForFanout);
         });
+        // Host's card summary (season-felt wave, audit item 15): the
+        // publisher learns what their show minted AND what fell short
+        // of the gate — the single best recruit-more-entrants nudge.
+        if (cardSummary) {
+            const summary = cardSummary;
+            const hostId = user.id;
+            after(async () => {
+                try {
+                    const { createNotification } = await import(
+                        "@/lib/notifications/createNotification"
+                    );
+                    const bits = [
+                        `Your show minted ${summary.issued} qualification card${summary.issued === 1 ? "" : "s"}`,
+                    ];
+                    if (summary.stakes > 0) bits.push(`${summary.stakes} STAKES`);
+                    const gateBit =
+                        summary.skippedGated > 0
+                            ? ` ${summary.skippedGated} more placing${summary.skippedGated === 1 ? "" : "s"} would have minted with a bigger field — under-gate classes need more entries or exhibitors.`
+                            : "";
+                    await createNotification({
+                        userId: hostId,
+                        type: "show_result",
+                        actorId: null,
+                        content: `📊 ${bits.join(" — ")}.${gateBit}`,
+                        linkUrl: `/shows/host/${showId}`,
+                    });
+                } catch {
+                    // Best-effort.
+                }
+            });
+        }
         // Titles engine (159): evaluate CH/ROM/SUP + exhibitor stars
         // for everyone in the published show. Separate after() block —
         // a grant hiccup must never eat the entrant fan-out (and vice
@@ -1380,6 +1447,15 @@ export async function getShowConsole(
             .filter((e) => e.status !== "scratched")
             .map((e) => ({ key: e.class_id as string })),
     );
+    // Distinct exhibitors per class — the card-gate context every
+    // entry surface renders ("1 more exhibitor mints cards").
+    const exhibitorsByClass = new Map<string, Set<string>>();
+    for (const e of entries) {
+        if (e.status === "scratched") continue;
+        const set = exhibitorsByClass.get(e.class_id as string) ?? new Set<string>();
+        set.add(e.owner_id as string);
+        exhibitorsByClass.set(e.class_id as string, set);
+    }
 
     const classesBySection = new Map<string, ConsoleClass[]>();
     for (const c of classRows) {
@@ -1395,6 +1471,7 @@ export async function getShowConsole(
             isQualifying: c.is_qualifying,
             sortOrder: c.sort_order,
             entryCount: entryCountByClass.get(c.id) ?? 0,
+            exhibitorCount: exhibitorsByClass.get(c.id)?.size ?? 0,
         });
         classesBySection.set(c.section_id, list);
     }
@@ -1734,10 +1811,10 @@ export async function getPublicShow(
         }
     }
 
-    // ── Live entry counts per class ──
+    // ── Live entry + exhibitor counts per class ──
     const { data: entryRows, error: eErr } = await supabase
         .from("show_class_entries")
-        .select("class_id, status")
+        .select("class_id, status, owner_id")
         .eq("show_id", showId);
     if (eErr) return { success: false, error: eErr.message };
     const liveEntries = (entryRows ?? []).filter(
@@ -1746,6 +1823,12 @@ export async function getPublicShow(
     const entryCountByClass = countBy(
         liveEntries.map((r: { class_id: string }) => ({ key: r.class_id })),
     );
+    const exhibitorsByClass = new Map<string, Set<string>>();
+    for (const r of liveEntries as { class_id: string; owner_id: string }[]) {
+        const set = exhibitorsByClass.get(r.class_id) ?? new Set<string>();
+        set.add(r.owner_id);
+        exhibitorsByClass.set(r.class_id, set);
+    }
 
     const aliases = await getAliases(supabase, [show.host_id as string]);
     if (!(aliases instanceof Map)) return { success: false, error: aliases.error };
@@ -1764,6 +1847,7 @@ export async function getPublicShow(
             isQualifying: c.is_qualifying,
             sortOrder: c.sort_order,
             entryCount: entryCountByClass.get(c.id) ?? 0,
+            exhibitorCount: exhibitorsByClass.get(c.id)?.size ?? 0,
         });
         classesBySection.set(c.section_id, list);
     }

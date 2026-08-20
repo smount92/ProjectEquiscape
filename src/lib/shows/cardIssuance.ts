@@ -224,6 +224,9 @@ export async function assignCardCodes(
 interface IssueResult {
     issued: number;
     skipped: number;
+    /** 1st/2nd placings that would have minted but the class was
+     *  under the validity gate — the host's recruit-more nudge. */
+    skippedGated: number;
     /** The cards minted by THIS call (already-issued ones are not
      *  repeated) — the notification fan-out pokes exactly these
      *  owners, so an idempotent re-publish never re-notifies. */
@@ -243,7 +246,7 @@ export async function issueQualificationCardsForShow(
         .maybeSingle();
     if (showError) return { error: showError.message };
     if (!show) return { error: "Show not found." };
-    if (!show.is_mhh_qualifying) return { issued: 0, skipped: 0, cards: [] };
+    if (!show.is_mhh_qualifying) return { issued: 0, skipped: 0, skippedGated: 0, cards: [] };
 
     // ── Classlist (ids + qualifying flags only) ──
     const { data: divisionRows, error: dErr } = await supabase
@@ -252,7 +255,7 @@ export async function issueQualificationCardsForShow(
         .eq("show_id", showId);
     if (dErr) return { error: dErr.message };
     const divisionIds = (divisionRows ?? []).map((d: { id: string }) => d.id);
-    if (divisionIds.length === 0) return { issued: 0, skipped: 0, cards: [] };
+    if (divisionIds.length === 0) return { issued: 0, skipped: 0, skippedGated: 0, cards: [] };
 
     const { data: sectionRows, error: sErr } = await supabase
         .from("show_sections")
@@ -260,7 +263,7 @@ export async function issueQualificationCardsForShow(
         .in("division_id", divisionIds);
     if (sErr) return { error: sErr.message };
     const sectionIds = (sectionRows ?? []).map((s: { id: string }) => s.id);
-    if (sectionIds.length === 0) return { issued: 0, skipped: 0, cards: [] };
+    if (sectionIds.length === 0) return { issued: 0, skipped: 0, skippedGated: 0, cards: [] };
 
     const { data: classRows, error: cErr } = await supabase
         .from("show_classes")
@@ -268,7 +271,7 @@ export async function issueQualificationCardsForShow(
         .in("section_id", sectionIds);
     if (cErr) return { error: cErr.message };
     const classes = (classRows ?? []) as { id: string; is_qualifying: boolean }[];
-    if (classes.length === 0) return { issued: 0, skipped: 0, cards: [] };
+    if (classes.length === 0) return { issued: 0, skipped: 0, skippedGated: 0, cards: [] };
 
     // ── Entries + placings + already-issued cards ──
     const { data: entryRows, error: eErr } = await supabase
@@ -381,14 +384,15 @@ export async function issueQualificationCardsForShow(
     const insertPlan = async (plan: {
         cards: PlannedCard[];
         skippedExisting: number;
+        skippedGated: number;
     }): Promise<IssueResult | { error: string } | "conflict"> => {
         if (plan.cards.length === 0) {
             if (plan.skippedExisting > 0) {
                 const full = await loadExistingFull();
                 if (!Array.isArray(full)) return { error: full.error };
-                return { issued: 0, skipped: plan.skippedExisting, cards: full };
+                return { issued: 0, skipped: plan.skippedExisting, skippedGated: plan.skippedGated, cards: full };
             }
-            return { issued: 0, skipped: plan.skippedExisting, cards: [] };
+            return { issued: 0, skipped: plan.skippedExisting, skippedGated: plan.skippedGated, cards: [] };
         }
 
         const codes = await assignCardCodes(
@@ -431,6 +435,7 @@ export async function issueQualificationCardsForShow(
         return {
             issued: rows.length,
             skipped: plan.skippedExisting,
+            skippedGated: plan.skippedGated,
             // Hand the fan-out the codes: the card notice links to the
             // verify page, the artifact worth sharing.
             cards: plan.cards.map((card, i) => ({ ...card, code: codes[i] })),

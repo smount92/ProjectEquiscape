@@ -140,6 +140,24 @@ export async function getOwnerHorseLadder(
     }
 }
 
+/** Live MHH card counts for a profile strap (anon-safe count-only
+ *  RPC, 164) — null on any failure or pre-migration. */
+export async function getExhibitorCardCount(
+    userId: string,
+): Promise<{ liveCards: number; stakesCards: number } | null> {
+    try {
+        const supabase = createAnonClient();
+        const { data, error } = await supabase.rpc("get_exhibitor_card_count", {
+            p_user_id: userId,
+        });
+        if (error || !Array.isArray(data) || data.length === 0) return null;
+        const row = data[0] as { live_cards: number | null; stakes_cards: number | null };
+        return { liveCards: row.live_cards ?? 0, stakesCards: row.stakes_cards ?? 0 };
+    } catch {
+        return null;
+    }
+}
+
 /** The exhibitor's highest star grade, or null (none / pre-159). */
 export async function getExhibitorStar(
     userId: string,
