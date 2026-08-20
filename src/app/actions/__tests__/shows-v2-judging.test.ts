@@ -316,24 +316,14 @@ describe("shows-v2 — recordPlacings", () => {
         // scheduled → judging when recording starts, → placed on done.
         expect(mockClient._mockQuery.update).toHaveBeenCalledWith({ status: "judging" });
         expect(mockClient._mockQuery.update).toHaveBeenCalledWith({ status: "placed" });
-        // Replace-all slate: old placings cleared, new batch inserted.
-        expect(mockClient._mockQuery.delete).toHaveBeenCalled();
-        expect(mockClient._mockQuery.insert).toHaveBeenCalledWith([
-            {
-                class_id: CLASS_ID,
-                entry_id: ENTRY_ID_2,
-                place: 1,
-                judge_id: "user-1",
-                note: "Clean mold, lovely photo.",
-            },
-            {
-                class_id: CLASS_ID,
-                entry_id: ENTRY_ID,
-                place: 2,
-                judge_id: "user-1",
-                note: null,
-            },
-        ]);
+        // Replace-all slate: one atomic swap via the 165 RPC.
+        expect(mockClient.rpc).toHaveBeenCalledWith("record_class_placings_atomic", {
+            p_class_id: CLASS_ID,
+            p_placings: [
+                { entry_id: ENTRY_ID_2, place: 1, note: "Clean mold, lovely photo." },
+                { entry_id: ENTRY_ID, place: 2, note: null },
+            ],
+        });
     });
 
     it("lets a JUDGE record placings", async () => {
@@ -451,24 +441,15 @@ describe("shows-v2 — finalizeCommunityVotes", () => {
 
         const result = await finalizeCommunityVotes({ showId: SHOW_ID });
         expect(result).toEqual({ success: true, classesPlaced: 1, placingsWritten: 2 });
-        // Provisional slate re-derived from scratch: clear then insert.
-        expect(mockClient._mockQuery.delete).toHaveBeenCalled();
-        expect(mockClient._mockQuery.insert).toHaveBeenCalledWith([
-            {
-                class_id: CLASS_ID,
-                entry_id: ENTRY_ID_2,
-                place: 1,
-                judge_id: "user-1",
-                note: null,
-            },
-            {
-                class_id: CLASS_ID,
-                entry_id: ENTRY_ID,
-                place: 2,
-                judge_id: "user-1",
-                note: null,
-            },
-        ]);
+        // Provisional slate re-derived from scratch: one atomic
+        // swap per class via the 165 RPC.
+        expect(mockClient.rpc).toHaveBeenCalledWith("record_class_placings_atomic", {
+            p_class_id: CLASS_ID,
+            p_placings: [
+                { entry_id: ENTRY_ID_2, place: 1 },
+                { entry_id: ENTRY_ID, place: 2 },
+            ],
+        });
     });
 });
 

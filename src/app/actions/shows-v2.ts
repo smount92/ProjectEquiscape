@@ -3012,25 +3012,23 @@ export async function recordPlacings(
         classStatus = "judging";
     }
 
-    // Replace-all: clear the class's slate, then write the new one.
-    const { error: clearError } = await supabase
-        .from("show_placings")
-        .delete()
-        .eq("class_id", v.classId);
-    if (clearError) return { success: false, error: clearError.message };
-
-    if (v.placings.length > 0) {
-        const { error: insertError } = await supabase.from("show_placings").insert(
-            v.placings.map((p) => ({
-                class_id: v.classId,
-                entry_id: p.entryId,
-                place: p.place,
-                judge_id: user.id,
-                note: p.note?.length ? p.note : null,
-            })),
-        );
-        if (insertError) return { success: false, error: insertError.message };
-    }
+    // Replace-all in ONE transaction: record_class_placings_atomic
+    // (migration 165, not yet in generated types → cast) deletes the
+    // old slate and inserts the new one atomically, so a failed
+    // insert can never leave the class with no placings at all.
+    const swapRpc = supabase.rpc.bind(supabase) as unknown as (
+        fn: string,
+        args: { p_class_id: string; p_placings: unknown },
+    ) => Promise<{ error: { message: string } | null }>;
+    const { error: swapError } = await swapRpc("record_class_placings_atomic", {
+        p_class_id: v.classId,
+        p_placings: v.placings.map((p) => ({
+            entry_id: p.entryId,
+            place: p.place,
+            note: p.note?.length ? p.note : null,
+        })),
+    });
+    if (swapError) return { success: false, error: swapError.message };
 
     if (v.markDone) {
         const legal = canTransitionClass(classStatus, "placed");
@@ -3119,40 +3117,36 @@ export async function finalizeCommunityVotes(
         talliesByClass.set(e.class_id as string, list);
     }
 
-    const inserts: {
-        class_id: string;
-        entry_id: string;
-        place: number;
-        judge_id: string;
-        note: null;
-    }[] = [];
+    const slatesByClass = new Map<string, { entry_id: string; place: number }[]>();
     let classesPlaced = 0;
+    let placingsWritten = 0;
     for (const context of contexts) {
         const derived = deriveVotePlacings(talliesByClass.get(context.classId) ?? []);
         if (derived.length === 0) continue;
         classesPlaced += 1;
-        for (const d of derived) {
-            inserts.push({
-                class_id: context.classId,
-                entry_id: d.entryId,
-                place: d.place,
-                judge_id: user.id,
-                note: null,
-            });
-        }
+        placingsWritten += derived.length;
+        slatesByClass.set(
+            context.classId,
+            derived.map((d) => ({ entry_id: d.entryId, place: d.place })),
+        );
     }
 
-    // Re-derive from scratch each run: clear, then insert.
-    const { error: clearError } = await supabase
-        .from("show_placings")
-        .delete()
-        .in("class_id", contexts.map((c) => c.classId));
-    if (clearError) return { success: false, error: clearError.message };
-
-    if (inserts.length > 0) {
-        const { error: insertError } = await supabase.from("show_placings").insert(inserts);
-        if (insertError) return { success: false, error: insertError.message };
+    // Re-derive from scratch each run, one atomic swap per class
+    // (record_class_placings_atomic, migration 165 — not yet in
+    // generated types → cast). Every context class gets a call, so an
+    // empty slate still clears stale placings from a prior run, and a
+    // failed class never loses its old slate (per-class transaction).
+    const swapRpc = supabase.rpc.bind(supabase) as unknown as (
+        fn: string,
+        args: { p_class_id: string; p_placings: unknown },
+    ) => Promise<{ error: { message: string } | null }>;
+    for (const context of contexts) {
+        const { error: swapError } = await swapRpc("record_class_placings_atomic", {
+            p_class_id: context.classId,
+            p_placings: slatesByClass.get(context.classId) ?? [],
+        });
+        if (swapError) return { success: false, error: swapError.message };
     }
 
-    return { success: true, classesPlaced, placingsWritten: inserts.length };
+    return { success: true, classesPlaced, placingsWritten };
 }
