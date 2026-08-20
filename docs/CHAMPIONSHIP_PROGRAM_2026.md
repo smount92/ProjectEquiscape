@@ -62,9 +62,16 @@ Cards already exist with exactly NAN's semantics (1st/2nd in a qualifying class,
 - **Standards certificates (Championship only, AOS-shape):** panel-scored 100-point judging at the annual Championship awards permanent, any-number-can-earn certificates: **Honors 75+ · Merit 80+ · Excellence 90+**. A model can carry "MHH Excellence 2027" forever regardless of who else entered that year — the anti-discouragement crown jewel: your model competes against the standard, not the field.
 
 ### Exhibitor distinctions (permanent, person-attached, PSA/FIAP-shape)
-Breadth-gated so no single model, show, or judge can carry you:
+End-state design is breadth-gated so no single model, show, or judge can carry you:
 - **MHH Star:** 15 placings (top-6) in sanctioned shows, from **≥6 different models** across **≥5 different shows**.
 - **Star 2:** 36 placings, ≥12 models, ≥10 shows, ≥3 judges. **Star 3:** 75, ≥20, ≥20, ≥5. (One level per season maximum — FIAP's rate limit.)
+
+> **Season 1 implementation note (2026-08-19, owner-approved):** stars v1 ship as
+> career-point thresholds (★ 50 · ★★ 150 · ★★★ 400 · ★★★★ 1000 · ★★★★★ 2500,
+> `titles.ts`), published on /shows/rules as *provisional through Season 1*. The
+> breadth-gated version above is the ratified end-state — it replaces the point
+> thresholds once placings-breadth queries are wired (before the first
+> Championship). Grants already earned stand either way.
 - **Rookie of the Year:** highest season points among exhibitors whose first-ever entry was that season.
 - **Judge's ladder:** Apprentice → **Carded Judge** → Senior Judge ("carded" is the real horse-world term — USEF judges hold cards, and it rhymes with our card economy). Becoming Carded takes EITHER the **MHH Judging Clinic** (paid course: the rubric, the IMEHA guidebook, and a calibration exercise — score a fixed reference set of entries, compared against Senior-Judge consensus; the Zippo principle as a certification instrument, and an honest revenue line: education, never access) OR the apprentice route (co-judge 2 sanctioned shows under a Senior Judge) — the dual path keeps accreditation un-paywalled. Senior = 10 shows judged + 250 critiques written, eligible for paid Championship panels. Critique counts are already recorded per-entry — the whole ladder is computable.
 

@@ -166,28 +166,26 @@ export default async function ShowsPage() {
    title="Shows"
    subtitle="Enter your models, vote for your favorites, and compete for community glory!"
    actions={
-    user ? (
-     showsV2Enabled() || showStandingsEnabled() ? (
-      <>
+    <>
+     {/* The rules ARE marketing (program §0) — anon sees them too. */}
+     <Button asChild variant="outline">
+      <Link href="/shows/rules">Rules</Link>
+     </Button>
+     {showStandingsEnabled() && (
+      <Button asChild variant="outline">
+       <Link href="/standings">Standings</Link>
+      </Button>
+     )}
+     {user ? (
+      showsV2Enabled() && (
        <Button asChild variant="outline">
-        <Link href="/shows/rules">Rules</Link>
+        <Link href="/shows/host">Host a show</Link>
        </Button>
-       {/* Wave 3, flag-gated dark: the season-standings door. */}
-       {showStandingsEnabled() && (
-        <Button asChild variant="outline">
-         <Link href="/standings">Standings</Link>
-        </Button>
-       )}
-       {showsV2Enabled() && (
-        <Button asChild variant="outline">
-         <Link href="/shows/host">Host a show</Link>
-        </Button>
-       )}
-      </>
-     ) : undefined
-    ) : (
-     signInCta
-    )
+      )
+     ) : (
+      signInCta
+     )}
+    </>
    }
   />
   <MyShowLifeSection life={showLife} />
