@@ -1,9 +1,7 @@
 // @vitest-environment jsdom
 /**
- * Onboarding empty-state coverage for BOTH dashboards:
- *  - v1 (flag off): DashboardPage renders the shared StableWelcome for a
- *    0-horse user (replacing the old light-only emerald/indigo card).
- *  - v2 (flag on):  DashboardV2 → StableBrowser renders the same welcome.
+ * Onboarding empty-state coverage: DashboardV2 → StableBrowser renders
+ * the shared StableWelcome for a 0-horse user.
  *
  * Server components are async functions, which React's client renderer
  * can't mount, so `resolveServerTree` pre-renders them: it walks the
@@ -27,28 +25,20 @@ vi.mock("next/navigation", () => ({
 }));
 
 // ── Stub the heavy dashboard chrome; the empty state is what's under test ──
-vi.mock("@/components/DashboardShell", () => ({
-    default: () => <div data-testid="dashboard-shell" />,
-}));
 vi.mock("@/components/DashboardToast", () => ({ default: () => null }));
 vi.mock("@/components/ExportButton", () => ({ default: () => null }));
 vi.mock("@/components/InsuranceReportButton", () => ({ default: () => null }));
 vi.mock("@/components/TransferHistorySection", () => ({ default: () => null }));
+vi.mock("@/components/PendingTransfersSection", () => ({ default: () => null }));
 vi.mock("@/components/NanDashboardWidget", () => ({ default: () => null }));
 vi.mock("@/components/ShowHistoryWidget", () => ({ default: () => null }));
 vi.mock("@/components/stable/StableMasthead", () => ({
     default: () => <div data-testid="stable-masthead" />,
 }));
-vi.mock("@/components/layouts/CommandCenterLayout", () => ({
-    default: ({ mainContent }: { mainContent: ReactNode }) => <div>{mainContent}</div>,
-}));
 
 vi.mock("@/app/actions/shows", () => ({
     getShowHistory: vi.fn(async () => ({ totalRibbons: 0, totalShows: 0, years: [] })),
 }));
-
-// v1 page test keeps the flag off; DashboardV2 is rendered directly below.
-vi.mock("@/lib/stable/flags", () => ({ stableV2Enabled: () => false }));
 
 vi.mock("@/lib/utils/storage", () => ({
     getPublicImageUrls: vi.fn(async () => new Map<string, string>()),
@@ -73,7 +63,6 @@ vi.mock("@/app/actions/horse", () => ({
     bulkDeleteHorses: vi.fn(),
 }));
 
-import DashboardPage from "../page";
 import DashboardV2 from "../DashboardV2";
 
 // ── Minimal RSC pre-renderer ──
@@ -116,18 +105,7 @@ function emptyStablePage() {
 }
 
 describe("dashboard onboarding empty states", () => {
-    it("v1 dashboard (flag off) renders the shared welcome for a 0-horse user", async () => {
-        const tree = await resolveServerTree(
-            <DashboardPage searchParams={Promise.resolve({})} />,
-        );
-        render(<>{tree}</>);
-
-        expect(screen.getByTestId("stable-welcome")).toBeInTheDocument();
-        expect(screen.getByRole("heading", { name: "Welcome to Model Horse Hub!" })).toBeInTheDocument();
-        expect(screen.getByText("Add your first horse with photos")).toBeInTheDocument();
-    });
-
-    it("DashboardV2 (flag on) renders the shared welcome for a 0-horse user", async () => {
+    it("DashboardV2 renders the shared welcome for a 0-horse user", async () => {
         getStablePage.mockResolvedValue(emptyStablePage());
         getStableSummary.mockResolvedValue({
             success: true,

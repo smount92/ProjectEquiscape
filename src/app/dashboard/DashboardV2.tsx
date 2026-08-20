@@ -16,6 +16,7 @@ import StableBrowser from "@/components/stable/StableBrowser";
 import ExportButton from "@/components/ExportButton";
 import InsuranceReportButton from "@/components/InsuranceReportButton";
 import TransferHistorySection from "@/components/TransferHistorySection";
+import PendingTransfersSection from "@/components/PendingTransfersSection";
 import NanDashboardWidget from "@/components/NanDashboardWidget";
 import MhhSeasonWidget from "@/components/shows/MhhSeasonWidget";
 import ShowHistoryWidget from "@/components/ShowHistoryWidget";
@@ -211,6 +212,11 @@ export default async function DashboardV2({
                             </div>
                         </div>
                     )}
+
+                    {/* Pending Transfers — outgoing codes awaiting claim */}
+                    <Suspense fallback={null}>
+                        <PendingTransfersSection />
+                    </Suspense>
 
                     <Suspense fallback={null}>
                         {/* MHH first — the NAN widget stays below for
