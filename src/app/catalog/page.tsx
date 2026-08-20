@@ -7,7 +7,7 @@ import CatalogFilterBar from "@/components/catalog/CatalogFilterBar";
 import CatalogResultsTable from "@/components/catalog/CatalogResultsTable";
 import CatalogCardsList from "@/components/catalog/CatalogCardsList";
 import CatalogViewToggle from "@/components/catalog/CatalogViewToggle";
-import { catalogV2Enabled } from "@/lib/shows/flags";
+
 import {
     pickQuickChips,
     PREFERRED_QUICK_MAKERS,
@@ -138,10 +138,9 @@ export default async function ReferencePage({
     //    catch keeps the map empty, and cards render 🐴 placeholders.
     // 2. One grouped children query for the visible MOLDS' release counts
     //    (aggregated here — PostgREST has no GROUP BY). No per-item loops.
-    const v2 = catalogV2Enabled();
     const thumbsMap = new Map<string, string>();
     const releaseCounts = new Map<string, number>();
-    if (v2 && items.length > 0) {
+    if (items.length > 0) {
         const moldIds = items
             .filter((i) => i.item_type === "plastic_mold")
             .map((i) => i.id);
@@ -217,26 +216,16 @@ export default async function ReferencePage({
                         materials={facets.materials ?? []}
                         manufacturers={facets.manufacturers ?? []}
                         artists={facets.artists ?? []}
-                        {...(v2
-                            ? {
-                                  v2: {
-                                      // Quick chips prefer the split facet
-                                      // (157); legacy makers until it lands.
-                                      quickMakers: pickQuickChips(
-                                          facets.manufacturers?.length
-                                              ? facets.manufacturers
-                                              : facets.makers,
-                                          [...PREFERRED_QUICK_MAKERS],
-                                          4,
-                                      ),
-                                      quickScales: pickQuickChips(
-                                          facets.scales,
-                                          [...PREFERRED_QUICK_SCALES],
-                                          3,
-                                      ),
-                                  },
-                              }
-                            : {})}
+                        quickMakers={pickQuickChips(
+                            facets.manufacturers?.length ? facets.manufacturers : facets.makers,
+                            [...PREFERRED_QUICK_MAKERS],
+                            4,
+                        )}
+                        quickScales={pickQuickChips(
+                            facets.scales,
+                            [...PREFERRED_QUICK_SCALES],
+                            3,
+                        )}
                     />
 
                     <p className="mt-3 mb-3 pl-1 text-sm text-muted-foreground italic" id="catalog-result-line">
@@ -261,10 +250,10 @@ export default async function ReferencePage({
                                 </Link>
                             </p>
                         </div>
-                    ) : v2 ? (
-                        /* CATALOG_V2: identification cards (the approved mock),
-                           with the compact-table toggle for power curators —
-                           the table node IS the original renderer, unforked. */
+                    ) : (
+                        /* Identification cards with the compact-table toggle
+                           for power curators — the table node IS the original
+                           renderer, unforked. */
                         <CatalogViewToggle
                             cards={
                                 <CatalogCardsList
@@ -276,8 +265,6 @@ export default async function ReferencePage({
                             }
                             table={<CatalogResultsTable items={items} statsMap={statsMap} />}
                         />
-                    ) : (
-                        <CatalogResultsTable items={items} statsMap={statsMap} />
                     )}
 
                     {/* Pagination — plain anchor links (SEO-crawlable, no client JS) */}

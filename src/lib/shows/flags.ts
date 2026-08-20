@@ -61,6 +61,3 @@ export function passportV2Enabled(): boolean {
  * cards (thumbnail · disambiguation line · chips) with a compact-table
  * toggle for power curators.
  */
-export function catalogV2Enabled(): boolean {
-    return process.env.NEXT_PUBLIC_CATALOG_V2 === "1";
-}

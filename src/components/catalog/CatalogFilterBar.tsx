@@ -12,12 +12,8 @@
  * back-button-friendly, SEO-canonical). Text/number inputs keep local state
  * until submit. Mirrors src/components/showring/ShowRingFilterBar.tsx.
  *
- * CATALOG_V2 (cards browse): passing the optional `v2` prop additionally
- * renders a horizontally-scrollable quick-chip row (top makers + top scales
- * + "More ▾" opening the same Advanced panel) and a "📷 Identify" chip
- * beside the search box (its result feeds
- * the normal search path). With `v2` absent this component renders exactly
- * what it always did — the flag-off catalog is untouched.
+ * Quick chips (top makers + top scales + "More ▾" opening the same
+ * Advanced panel) render whenever the lists are non-empty.
  */
 
 import { useState } from "react";
@@ -102,7 +98,8 @@ export default function CatalogFilterBar({
     materials = [],
     manufacturers = [],
     artists = [],
-    v2,
+    quickMakers = [],
+    quickScales = [],
 }: {
     filters: CatalogFilters;
     makers: string[];
@@ -112,8 +109,9 @@ export default function CatalogFilterBar({
      *  replace the legacy mixed "Maker" select. */
     manufacturers?: string[];
     artists?: string[];
-    /** CATALOG_V2 extras — quick chips + Identify. Absent = legacy render. */
-    v2?: { quickMakers: string[]; quickScales: string[] };
+    /** Quick-chip rows (top makers + top scales). */
+    quickMakers?: string[];
+    quickScales?: string[];
 }) {
     const router = useRouter();
     const [searchInput, setSearchInput] = useState(filters.q ?? "");
@@ -303,14 +301,14 @@ export default function CatalogFilterBar({
             {/* CATALOG_V2 quick-chip row: top makers + top scales, one tap to
                 filter, active chip forest-filled. Horizontally scrollable on
                 mobile (the cards browse never scrolls a table sideways). */}
-            {v2 && (v2.quickMakers.length > 0 || v2.quickScales.length > 0) && (
+            {(quickMakers.length > 0 || quickScales.length > 0) && (
                 <div
                     className="mt-3 flex items-center gap-2 overflow-x-auto pb-1"
                     role="group"
                     aria-label="Quick filters"
                     id="catalog-quick-chips"
                 >
-                    {v2.quickMakers.map((m) => {
+                    {quickMakers.map((m) => {
                         // Post-157 the chips are manufacturer chips; the
                         // legacy maker param keeps old chips working.
                         const chipKey = hasSplitFacets ? "manufacturer" : "maker";
@@ -331,7 +329,7 @@ export default function CatalogFilterBar({
                             </button>
                         );
                     })}
-                    {v2.quickScales.map((s) => {
+                    {quickScales.map((s) => {
                         const active = filters.scale === s;
                         return (
                             <button
