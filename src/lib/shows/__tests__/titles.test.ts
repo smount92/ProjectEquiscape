@@ -9,6 +9,8 @@ import {
     evaluateExhibitorDistinctions,
     evaluateHorseTitles,
     highestStar,
+    horseTitleProgress,
+    nextStarProgress,
     titlePrefix,
     type TitleCardInput,
 } from "@/lib/shows/titles";
@@ -80,6 +82,60 @@ describe("titlePrefix — the name plaque", () => {
         expect(titlePrefix(["ROM", "SUP"])).toBe("SUP");
         expect(titlePrefix(["CH", "ROM", "SUP"])).toBe("CH SUP");
         expect(titlePrefix([])).toBe("");
+    });
+});
+
+describe("horseTitleProgress — the ladder", () => {
+    it("names exactly what CH is missing", () => {
+        const progress = evaluateAndProgress(
+            [card("s1", ["j1"]), card("s2", ["j1"])],
+            10,
+        );
+        const ch = progress.find((p) => p.code === "CH")!;
+        expect(ch.earned).toBe(false);
+        expect(ch.remaining).toContain("1 more card");
+        expect(ch.remaining).toContain("1 more show");
+        expect(ch.remaining).toContain("a different judge");
+        expect(ch.fraction).toBeGreaterThan(0);
+        expect(ch.fraction).toBeLessThan(1);
+    });
+
+    it("points marks show the distance", () => {
+        const progress = evaluateAndProgress([], 27);
+        const rom = progress.find((p) => p.code === "ROM")!;
+        expect(rom.remaining).toBe("3 more career points");
+        expect(rom.fraction).toBeCloseTo(0.9);
+    });
+
+    it("earned titles read earned with full bars", () => {
+        const progress = horseTitleProgress({
+            cards: [],
+            careerPoints: 100,
+            grantedCodes: ["CH", "ROM", "SUP"],
+        });
+        expect(progress.every((p) => p.earned && p.fraction === 1 && p.remaining === null)).toBe(
+            true,
+        );
+    });
+});
+
+function evaluateAndProgress(cards: TitleCardInput[], careerPoints: number) {
+    return horseTitleProgress({ cards, careerPoints, grantedCodes: [] });
+}
+
+describe("nextStarProgress", () => {
+    it("points at the first unearned tier", () => {
+        const next = nextStarProgress({ careerPoints: 60, grantedCodes: ["STAR_1"] });
+        expect(next).toMatchObject({ code: "STAR_2", pointsNeeded: 90 });
+    });
+
+    it("null at the top of the ladder", () => {
+        expect(
+            nextStarProgress({
+                careerPoints: 9999,
+                grantedCodes: STAR_THRESHOLDS.map((t) => t.code),
+            }),
+        ).toBeNull();
     });
 });
 

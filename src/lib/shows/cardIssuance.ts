@@ -78,6 +78,9 @@ export interface PlannedCard {
     classEntryCount: number;
     classExhibitorCount: number;
     isStakes: boolean;
+    /** The short verify code — set once the card physically exists
+     *  (insert success or reload); absent in a pre-insert plan. */
+    code?: string;
 }
 
 export function buildCardIssuePlan(input: CardIssueInput): {
@@ -347,13 +350,14 @@ export async function issueQualificationCardsForShow(
         const { data, error } = await supabase
             .from("qualification_cards")
             .select(
-                "class_id, horse_id, earned_place, earned_by_owner_id, class_entry_count, class_exhibitor_count, is_stakes",
+                "id, class_id, horse_id, earned_place, earned_by_owner_id, class_entry_count, class_exhibitor_count, is_stakes",
             )
             .eq("show_id", showId)
             .neq("status", "void");
         if (error) return { error: error.message };
         return (data ?? []).map(
             (r: {
+                id: string;
                 class_id: string;
                 horse_id: string;
                 earned_place: number;
@@ -369,6 +373,7 @@ export async function issueQualificationCardsForShow(
                 classEntryCount: r.class_entry_count ?? 0,
                 classExhibitorCount: r.class_exhibitor_count ?? 0,
                 isStakes: r.is_stakes === true,
+                code: r.id,
             }),
         );
     };
@@ -423,7 +428,13 @@ export async function issueQualificationCardsForShow(
             if ((insertError as { code?: string }).code === "23505") return "conflict";
             return { error: insertError.message };
         }
-        return { issued: rows.length, skipped: plan.skippedExisting, cards: plan.cards };
+        return {
+            issued: rows.length,
+            skipped: plan.skippedExisting,
+            // Hand the fan-out the codes: the card notice links to the
+            // verify page, the artifact worth sharing.
+            cards: plan.cards.map((card, i) => ({ ...card, code: codes[i] })),
+        };
     };
 
     const first = await insertPlan(buildCardIssuePlan(toInput(existing)));

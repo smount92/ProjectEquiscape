@@ -303,10 +303,13 @@ describe("issueQualificationCardsForShow", () => {
             issued: 2,
             skipped: 0,
             cards: [
-                { classId: "class-1", horseId: "h1", earnedPlace: 1, ownerId: "o1", classEntryCount: 3, classExhibitorCount: 3, isStakes: false },
-                { classId: "class-1", horseId: "h2", earnedPlace: 2, ownerId: "o2", classEntryCount: 3, classExhibitorCount: 3, isStakes: false },
+                { classId: "class-1", horseId: "h1", earnedPlace: 1, ownerId: "o1", classEntryCount: 3, classExhibitorCount: 3, isStakes: false, code: expect.any(String) },
+                { classId: "class-1", horseId: "h2", earnedPlace: 2, ownerId: "o2", classEntryCount: 3, classExhibitorCount: 3, isStakes: false, code: expect.any(String) },
             ],
         });
+        // The plan's codes ARE the inserted card ids (verify links work).
+        const planned = (result as { cards: { code: string }[] }).cards;
+        for (const c of planned) expect(isValidCardCode(c.code)).toBe(true);
 
         const rows = mockClient._mockQuery.insert.mock.calls[0][0] as Record<
             string,

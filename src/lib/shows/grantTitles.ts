@@ -235,6 +235,31 @@ export async function grantTitlesForShow(
     );
 
     const untypedFrom = supabase.from.bind(supabase) as unknown as UntypedUpsert;
+
+    // Career ledgers (163): persist the totals this run computed so
+    // passports/profiles/progress ladders have a cheap read path.
+    // Full upsert (not ignoreDuplicates) — totals move every publish.
+    const careerHorseRows = horseIds
+        .filter((id) => horsePoints.has(id))
+        .map((id) => ({ horse_id: id, career_points: horsePoints.get(id) ?? 0 }));
+    if (careerHorseRows.length > 0) {
+        const { error } = await untypedFrom("horse_career").upsert(careerHorseRows, {
+            onConflict: "horse_id",
+            ignoreDuplicates: false,
+        });
+        if (error) console.error(`horse_career write failed: ${error.message}`);
+    }
+    const careerOwnerRows = ownerIds
+        .filter((id) => ownerPoints.has(id))
+        .map((id) => ({ user_id: id, career_points: ownerPoints.get(id) ?? 0 }));
+    if (careerOwnerRows.length > 0) {
+        const { error } = await untypedFrom("exhibitor_career").upsert(careerOwnerRows, {
+            onConflict: "user_id",
+            ignoreDuplicates: false,
+        });
+        if (error) console.error(`exhibitor_career write failed: ${error.message}`);
+    }
+
     if (titleRows.length > 0) {
         const { error } = await untypedFrom("horse_titles").upsert(titleRows, {
             onConflict: "horse_id,title_code",

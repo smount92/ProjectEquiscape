@@ -8,6 +8,7 @@ import {
     POINTS_CAP,
 } from "@/lib/shows/points";
 import { showStandingsEnabled } from "@/lib/shows/flags";
+import { titlePrefix } from "@/lib/shows/titles";
 import { showYearLabel, showYearOf } from "@/lib/shows/showYear";
 import { createClient } from "@/lib/supabase/server";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
@@ -24,9 +25,9 @@ import {
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-    title: "Season Standings",
+    title: "Championship Rankings",
     description:
-        "Season standings across the show year — points for placings and championships, by horse and by stable.",
+        "MHH Championship Series rankings — season points for placings and championships, by horse and by stable.",
 };
 
 /** First show year the rebuilt show system produced results in. */
@@ -89,7 +90,15 @@ function RankCell({ rank }: { rank: number }) {
     return <span className="pl-2 font-serif text-sm tabular-nums">{rank}</span>;
 }
 
-function StandingsTable({ result }: { result: GetStandingsResult & { success: true } }) {
+function StandingsTable({
+    result,
+    viewerId,
+    titlePrefixByHorse,
+}: {
+    result: GetStandingsResult & { success: true };
+    viewerId: string;
+    titlePrefixByHorse: Map<string, string>;
+}) {
     if (result.rows.length === 0) {
         return (
             <p className="py-8 text-center text-sm text-muted-foreground">
@@ -98,6 +107,8 @@ function StandingsTable({ result }: { result: GetStandingsResult & { success: tr
         );
     }
     const isHorses = result.scope === "horses";
+    // "You are here": the viewer's own rows read highlighted.
+    const mine = "bg-forest/10";
     return (
         <Table className="min-w-[560px]">
             <TableHeader>
@@ -114,7 +125,10 @@ function StandingsTable({ result }: { result: GetStandingsResult & { success: tr
             <TableBody>
                 {result.scope === "horses"
                     ? result.rows.map((row) => (
-                          <TableRow key={row.horseId}>
+                          <TableRow
+                              key={row.horseId}
+                              className={row.ownerId === viewerId ? mine : undefined}
+                          >
                               <TableCell>
                                   <RankCell rank={row.rank} />
                               </TableCell>
@@ -123,6 +137,11 @@ function StandingsTable({ result }: { result: GetStandingsResult & { success: tr
                                       href={`/stable/${row.horseId}`}
                                       className="text-foreground no-underline hover:underline"
                                   >
+                                      {titlePrefixByHorse.get(row.horseId) && (
+                                          <span className="mr-1.5 text-[0.7em] font-bold tracking-[0.15em] text-forest">
+                                              {titlePrefixByHorse.get(row.horseId)}
+                                          </span>
+                                      )}
                                       {row.horseName}
                                   </Link>
                               </TableCell>
@@ -149,7 +168,10 @@ function StandingsTable({ result }: { result: GetStandingsResult & { success: tr
                           </TableRow>
                       ))
                     : result.rows.map((row) => (
-                          <TableRow key={row.ownerId}>
+                          <TableRow
+                              key={row.ownerId}
+                              className={row.ownerId === viewerId ? mine : undefined}
+                          >
                               <TableCell>
                                   <RankCell rank={row.rank} />
                               </TableCell>
@@ -213,13 +235,50 @@ export default async function StandingsPage({
         years.push(y);
     }
 
+    // Title prefixes for the horse leaderboard (CH SUP Firefly) —
+    // one batched read; typed post-159.
+    const titlePrefixByHorse = new Map<string, string>();
+    if (result.success && result.scope === "horses" && result.rows.length > 0) {
+        const { data: titleRows } = await supabase
+            .from("horse_titles")
+            .select("horse_id, title_code")
+            .in(
+                "horse_id",
+                result.rows.map((r) => r.horseId),
+            );
+        const codesByHorse = new Map<string, string[]>();
+        for (const row of titleRows ?? []) {
+            const list = codesByHorse.get(row.horse_id) ?? [];
+            list.push(row.title_code);
+            codesByHorse.set(row.horse_id, list);
+        }
+        for (const [horseId, codes] of codesByHorse) {
+            const prefix = titlePrefix(codes);
+            if (prefix) titlePrefixByHorse.set(horseId, prefix);
+        }
+    }
+
+    // The viewer's own rank, said plainly above the table.
+    const myStableRow =
+        result.success && result.scope === "stables"
+            ? result.rows.find((r) => r.ownerId === user.id)
+            : undefined;
+
     return (
         <ExplorerLayout noHeader>
             <PageMasthead
                 icon="🏅"
-                title="Season Standings"
-                subtitle="Show year runs May 1 – April 30"
+                title="Championship Rankings"
+                subtitle={`MHH Championship Series · ${showYearLabel(year)} season · show year runs May 1 – April 30`}
             />
+
+            {myStableRow && (
+                <p className="mb-4 text-sm text-secondary-foreground">
+                    Your stable stands <b className="text-foreground">#{myStableRow.rank}</b>{" "}
+                    with <b className="text-foreground">{myStableRow.points}</b> point
+                    {myStableRow.points === 1 ? "" : "s"} this season.
+                </p>
+            )}
 
             <div
                 className="mb-6 flex flex-wrap items-center gap-x-6 gap-y-3"
@@ -277,7 +336,11 @@ export default async function StandingsPage({
                     </p>
                 ) : (
                     <>
-                        <StandingsTable result={result} />
+                        <StandingsTable
+                            result={result}
+                            viewerId={user.id}
+                            titlePrefixByHorse={titlePrefixByHorse}
+                        />
                         <p className="mt-4 text-xs text-muted-foreground">
                             {result.countedShows.length > 0 ? (
                                 <>

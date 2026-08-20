@@ -170,3 +170,96 @@ export function highestStar(codes: readonly string[]): ExhibitorDistinctionCode 
     }
     return null;
 }
+
+// ── Progress ladders (season-felt wave) ──
+// "3 points from ROM" is the retention core of the program: every
+// surface that shows an achievement should show the NEXT one.
+
+export interface TitleProgress {
+    code: HorseTitleCode;
+    label: string;
+    earned: boolean;
+    /** One human sentence of what's missing; null when earned. */
+    remaining: string | null;
+    /** 0..1 for progress bars. */
+    fraction: number;
+}
+
+/**
+ * The horse's full title ladder from its cards + career points.
+ * CH progress counts the binding constraint (cards, shows, judges);
+ * ROM/SUP are simple point distances.
+ */
+export function horseTitleProgress(input: {
+    cards: TitleCardInput[];
+    careerPoints: number;
+    grantedCodes: readonly string[];
+}): TitleProgress[] {
+    const granted = new Set(input.grantedCodes);
+    const eligible = titleEligibleCards(input.cards);
+    const shows = new Set(eligible.map((c) => c.showId)).size;
+    const judges = new Set(eligible.flatMap((c) => c.judgeIds)).size;
+
+    const chParts: string[] = [];
+    if (eligible.length < CH_CARDS_REQUIRED) {
+        const n = CH_CARDS_REQUIRED - eligible.length;
+        chParts.push(`${n} more card${n === 1 ? "" : "s"}`);
+    }
+    if (shows < CH_SHOWS_REQUIRED) {
+        const n = CH_SHOWS_REQUIRED - shows;
+        chParts.push(`${n} more show${n === 1 ? "" : "s"}`);
+    }
+    if (judges < CH_JUDGES_REQUIRED) {
+        const n = CH_JUDGES_REQUIRED - judges;
+        chParts.push(`${n === 1 ? "a different judge" : `${n} different judges`}`);
+    }
+    const chFraction = Math.min(
+        1,
+        (Math.min(eligible.length, CH_CARDS_REQUIRED) / CH_CARDS_REQUIRED +
+            Math.min(shows, CH_SHOWS_REQUIRED) / CH_SHOWS_REQUIRED +
+            Math.min(judges, CH_JUDGES_REQUIRED) / CH_JUDGES_REQUIRED) /
+            3,
+    );
+
+    const pointsProgress = (
+        code: HorseTitleCode,
+        threshold: number,
+    ): TitleProgress => ({
+        code,
+        label: HORSE_TITLE_LABELS[code],
+        earned: granted.has(code),
+        remaining: granted.has(code)
+            ? null
+            : `${threshold - input.careerPoints} more career point${threshold - input.careerPoints === 1 ? "" : "s"}`,
+        fraction: granted.has(code) ? 1 : Math.min(1, input.careerPoints / threshold),
+    });
+
+    return [
+        {
+            code: "CH",
+            label: HORSE_TITLE_LABELS.CH,
+            earned: granted.has("CH"),
+            remaining: granted.has("CH") ? null : chParts.join(" · ") || null,
+            fraction: granted.has("CH") ? 1 : chFraction,
+        },
+        pointsProgress("ROM", ROM_POINTS),
+        pointsProgress("SUP", SUPERIOR_POINTS),
+    ];
+}
+
+/** The exhibitor's next star and the points still needed, or null at ★★★★★. */
+export function nextStarProgress(input: {
+    careerPoints: number;
+    grantedCodes: readonly string[];
+}): { code: ExhibitorDistinctionCode; label: string; pointsNeeded: number; fraction: number } | null {
+    for (const tier of STAR_THRESHOLDS) {
+        if (input.grantedCodes.includes(tier.code)) continue;
+        return {
+            code: tier.code,
+            label: EXHIBITOR_DISTINCTION_LABELS[tier.code],
+            pointsNeeded: Math.max(0, tier.points - input.careerPoints),
+            fraction: Math.min(1, input.careerPoints / tier.points),
+        };
+    }
+    return null;
+}

@@ -141,37 +141,55 @@ export function buildResultsNotificationPlans(input: {
 
 /**
  * Qualification cards minted → one notification per owner, grouping
- * that owner's cards. Links to the (first) horse's stable page.
+ * that owner's cards. The copy carries the CARD — its field, its
+ * STAKES flag, its code — and a single card links straight to its
+ * verify page (the artifact worth sharing); multiples land on the
+ * stable. Season-felt wave: a card notice that just said "earned a
+ * card" hid everything that makes the card worth earning.
  */
 export function buildCardNotificationPlans(input: {
-    cards: { horseId: string; ownerId: string }[];
+    cards: {
+        horseId: string;
+        ownerId: string;
+        earnedPlace?: 1 | 2;
+        classEntryCount?: number;
+        classExhibitorCount?: number;
+        isStakes?: boolean;
+        code?: string;
+    }[];
     horseNamesById: Map<string, string>;
 }): NotificationInput[] {
-    const byOwner = new Map<string, { horseId: string; horseName: string }[]>();
+    const byOwner = new Map<string, (typeof input.cards)[number][]>();
     for (const card of input.cards) {
         const list = byOwner.get(card.ownerId) ?? [];
-        list.push({
-            horseId: card.horseId,
-            horseName: input.horseNamesById.get(card.horseId) ?? "Your horse",
-        });
+        list.push(card);
         byOwner.set(card.ownerId, list);
     }
 
+    const fieldLine = (c: (typeof input.cards)[number]): string => {
+        if (!c.classEntryCount || !c.classExhibitorCount) return "";
+        return ` — ${c.earnedPlace === 2 ? "2nd" : "1st"} of ${c.classEntryCount} (${c.classExhibitorCount} exhibitors)`;
+    };
+
     return [...byOwner.entries()].map(([ownerId, cards]) => {
-        const names = [...new Set(cards.map((c) => c.horseName))];
+        const names = [
+            ...new Set(cards.map((c) => input.horseNamesById.get(c.horseId) ?? "Your horse")),
+        ];
         const listed = names.slice(0, MAX_LISTED_PLACEMENTS).join(", ");
         const extra = names.length - MAX_LISTED_PLACEMENTS;
-        const content =
-            cards.length === 1
-                ? `🎖️ ${cards[0].horseName} earned an MHH Qualification Card`
-                : `🎖️ ${listed}${extra > 0 ? ` and ${extra} more` : ""} earned ${cards.length} MHH Qualification Cards`;
+        const single = cards.length === 1 ? cards[0] : null;
+        const stakesCount = cards.filter((c) => c.isStakes).length;
+        const content = single
+            ? `🎖️ ${names[0]} earned a${single.isStakes ? " STAKES" : "n MHH"} Qualification Card${fieldLine(single)}${single.code ? ` · Card ${single.code}` : ""}`
+            : `🎖️ ${listed}${extra > 0 ? ` and ${extra} more` : ""} earned ${cards.length} MHH Qualification Cards${stakesCount > 0 ? ` (${stakesCount} STAKES!)` : ""}`;
         return {
             userId: ownerId,
             type: "show_card",
             actorId: null,
             content,
             horseId: cards[0].horseId,
-            linkUrl: `/stable/${cards[0].horseId}`,
+            linkUrl:
+                single?.code ? `/cards/${single.code}` : `/stable/${cards[0].horseId}`,
         };
     });
 }
