@@ -1,8 +1,8 @@
 /**
- * Wave 4b — THE ALBUM SHOW PAGE (Mock A): photos first, program
- * second. The flag-gated sibling of PublicShowV2Page — same route,
- * same payloads (getPublicShow / getMyShowEntries / getShowGallery /
- * getShowChampions), restructured top to bottom:
+ * THE ALBUM SHOW PAGE (Mock A): photos first, program second.
+ * The public /shows/[id] page for v2 shows — payloads are
+ * getPublicShow / getMyShowEntries / getShowGallery /
+ * getShowChampions, structured top to bottom:
  *
  *   1. Compact leather masthead — title, host line, ONE status line
  *      with a Details disclosure (AlbumMasthead).
@@ -13,11 +13,7 @@
  *   4. #entries — My Entries + readiness + the program accordion
  *      under #program (AlbumEntrySection).
  *   5. About + Rules cards, unchanged vocabulary.
- *   On completed shows the champions strip renders ABOVE the wall.
- *
- * Renders ONLY behind NEXT_PUBLIC_SHOW_PAGE_V3 (the route branches;
- * flag off leaves PublicShowV2Page byte-identical). No new server
- * reads — this page consumes exactly what the legacy page fetches.
+ *   On completed shows the champions strip renders ABOVE the ribbon.
  */
 
 import Link from "next/link";
@@ -43,7 +39,8 @@ import AlbumCtaRow from "@/components/shows/AlbumCtaRow";
 import AlbumEntrySection from "@/components/shows/AlbumEntrySection";
 import AlbumMasthead from "@/components/shows/AlbumMasthead";
 import EntryRibbon from "@/components/shows/EntryRibbon";
-import { buildShowJsonLd, StaffBanner } from "@/components/shows/PublicShowV2Page";
+import { StaffBanner } from "@/components/shows/StaffBanner";
+import { buildShowJsonLd } from "@/lib/shows/showJsonLd";
 import ShowChampions from "@/components/shows/ShowChampions";
 
 export default async function AlbumShowPage({ showId }: { showId: string }) {

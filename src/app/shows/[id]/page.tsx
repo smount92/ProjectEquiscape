@@ -2,34 +2,26 @@
  * /shows/[id] — THE RESOLVER (Phase E2 cutover).
  *
  * One indexed primary-key lookup decides which system owns the id:
- *   - a v2 show → the v2 public show page (anon-visible, RLS-gated),
- *   - anything else (legacy event id, junk, flag off) → the legacy
+ *   - a v2 show → the album show page (anon-visible, RLS-gated),
+ *   - anything else (legacy event id, junk) → the legacy
  *     events-based page, byte-for-byte unchanged in LegacyShowPage.
  *
  * /shows/v2/[id] permanently redirects here, so old shared links
  * keep working. The legacy page enforces its own login redirect;
  * the v2 page is public by design.
- *
- * Wave 4b: the v2 branch forks once more on NEXT_PUBLIC_SHOW_PAGE_V3
- * — flag ON renders the album layout (AlbumShowPage), flag OFF
- * renders PublicShowV2Page byte-identical to today. The branch
- * lives HERE (not inside PublicShowV2Page) so the legacy tree
- * stays untouched for instant rollback.
  */
 
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { createAnonClient } from "@/lib/supabase/anon";
 import { getAdminClient } from "@/lib/supabase/admin";
-import { showPageV3Enabled } from "@/lib/shows/flags";
 import { resolveShowRoute } from "@/lib/shows/resolver";
 import { getAliases } from "@/lib/shows/queries";
 import LegacyShowPage from "./LegacyShowPage";
 import AlbumShowPage from "@/components/shows/AlbumShowPage";
-import PublicShowV2Page from "@/components/shows/PublicShowV2Page";
 
-// force-dynamic stays: PublicShowV2Page itself reads the viewer's session
-// (supabase.auth.getUser() — see src/components/shows/PublicShowV2Page.tsx)
+// force-dynamic stays: AlbumShowPage itself reads the viewer's session
+// (supabase.auth.getUser() — see src/components/shows/AlbumShowPage.tsx)
 // to populate the authed-only "My Entries" panel, and the legacy branch
 // (LegacyShowPage) redirects anon visitors to /login outright. Both reads
 // are cookie-bound, so this route can't be ISR'd without breaking those
@@ -133,11 +125,6 @@ export default async function ShowDetailPage({
     const supabase = await createClient();
 
     const target = await resolveShowRoute(supabase, id);
-    if (target === "v2") {
-        // Wave 4b — dark launch: the album layout only ever renders
-        // with the flag on; off keeps today's page byte-identical.
-        if (showPageV3Enabled()) return <AlbumShowPage showId={id} />;
-        return <PublicShowV2Page showId={id} />;
-    }
+    if (target === "v2") return <AlbumShowPage showId={id} />;
     return <LegacyShowPage showId={id} />;
 }

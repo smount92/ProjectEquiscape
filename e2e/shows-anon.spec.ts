@@ -49,14 +49,12 @@ test.describe("Shows — anon smoke", () => {
         await v2Card.click();
         await page.waitForURL("**/shows/**", { timeout: 10000 });
 
-        // Not walled, and the lifecycle status is visible in the masthead —
-        // legacy page renders show-state-banner; the album page (flag
-        // NEXT_PUBLIC_SHOW_PAGE_V3) renders album-status-line. Accept either
-        // so the spec is truthful in both deploy configurations.
+        // Not walled, and the lifecycle status is visible in the
+        // album masthead's status line.
         await expect(page).not.toHaveURL(/\/login/);
-        await expect(
-            page.getByTestId("show-state-banner").or(page.getByTestId("album-status-line")).first(),
-        ).toBeVisible({ timeout: 10000 });
+        await expect(page.getByTestId("album-status-line").first()).toBeVisible({
+            timeout: 10000,
+        });
 
         await context.close();
     });
