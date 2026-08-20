@@ -216,6 +216,95 @@ function escapeHtml(str: string): string {
  * the admin list). Suspension blocks every mutation but leaves
  * content readable; it is fully reversible via unsuspendUser.
  */
+// ── Announcements (banner phase 1 — owner-authored) ──
+
+export interface AdminAnnouncement {
+  id: string;
+  message: string;
+  linkUrl: string | null;
+  placement: string;
+  startsAt: string;
+  endsAt: string | null;
+}
+
+/** Untyped access until 165 is in generated types. */
+type AnnouncementsTable = (table: "announcements") => {
+  select: (cols: string) => {
+    order: (
+      col: string,
+      opts: { ascending: boolean },
+    ) => PromiseLike<{ data: unknown; error: { message: string } | null }>;
+  };
+  insert: (row: Record<string, unknown>) => PromiseLike<{ error: { message: string } | null }>;
+  delete: () => {
+    eq: (col: string, val: string) => PromiseLike<{ error: { message: string } | null }>;
+  };
+};
+
+export async function listAnnouncements(): Promise<
+  { success: true; announcements: AdminAnnouncement[] } | { success: false; error: string }
+> {
+  const user = await verifyAdmin();
+  if (!user) return { success: false, error: "Unauthorized" };
+  const from = getAdminSupabase().from.bind(getAdminSupabase()) as unknown as AnnouncementsTable;
+  const { data, error } = await from("announcements")
+    .select("id, message, link_url, placement, starts_at, ends_at")
+    .order("created_at", { ascending: false });
+  if (error) return { success: false, error: error.message };
+  const rows = (Array.isArray(data) ? data : []) as {
+    id: string;
+    message: string;
+    link_url: string | null;
+    placement: string;
+    starts_at: string;
+    ends_at: string | null;
+  }[];
+  return {
+    success: true,
+    announcements: rows.map((r) => ({
+      id: r.id,
+      message: r.message,
+      linkUrl: r.link_url,
+      placement: r.placement,
+      startsAt: r.starts_at,
+      endsAt: r.ends_at,
+    })),
+  };
+}
+
+export async function createAnnouncement(input: {
+  message: string;
+  linkUrl?: string;
+  endsAt?: string;
+  placement?: "site" | "stable" | "shows";
+}): Promise<{ success: boolean; error?: string }> {
+  const user = await verifyAdmin();
+  if (!user) return { success: false, error: "Unauthorized" };
+  const message = input.message.trim();
+  if (!message || message.length > 300) {
+    return { success: false, error: "Announcement text must be 1–300 characters." };
+  }
+  const from = getAdminSupabase().from.bind(getAdminSupabase()) as unknown as AnnouncementsTable;
+  const { error } = await from("announcements").insert({
+    message,
+    link_url: input.linkUrl?.trim() || null,
+    ends_at: input.endsAt || null,
+    placement: input.placement ?? "site",
+    created_by: user.id,
+  });
+  if (error) return { success: false, error: error.message };
+  return { success: true };
+}
+
+export async function deleteAnnouncement(id: string): Promise<{ success: boolean; error?: string }> {
+  const user = await verifyAdmin();
+  if (!user) return { success: false, error: "Unauthorized" };
+  const from = getAdminSupabase().from.bind(getAdminSupabase()) as unknown as AnnouncementsTable;
+  const { error } = await from("announcements").delete().eq("id", id);
+  if (error) return { success: false, error: error.message };
+  return { success: true };
+}
+
 export async function suspendUser(
   userId: string,
   reason: string

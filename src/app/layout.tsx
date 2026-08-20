@@ -7,6 +7,7 @@ import { SimpleModeProvider } from"@/lib/context/SimpleModeContext";
 import { ToastProvider } from"@/lib/context/ToastContext";
 import { NotificationProvider } from"@/lib/context/NotificationProvider";
 import Header from"@/components/Header";
+import AnnouncementSlot from"@/components/AnnouncementSlot";
 import Footer from"@/components/Footer";
 import BackToTop from"@/components/BackToTop";
 import CookieConsent from"@/components/CookieConsent";
@@ -105,6 +106,7 @@ export default function RootLayout({
  <ToastProvider>
  <NotificationProvider>
  <Header />
+ <AnnouncementSlot />
  <main className="min-h-[calc(100dvh-var(--header-height))]">{children}</main>
  <Footer />
  <BackToTop />
