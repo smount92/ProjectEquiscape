@@ -8,10 +8,11 @@
  * writes grants with ignoreDuplicates upserts — re-runs are free,
  * titles are never revoked.
  *
- * Judge attribution for CH (a card has no judge column): the union
- * of the show's show_staff role='judge' roster and the judge_id
- * recorded on the card's own placing row (covers host-judges, who
- * can't hold a second show_staff row).
+ * Judge attribution for CH (a card has no judge column): the
+ * judge_id recorded on the card's own placing row — the person who
+ * ACTUALLY judged it. The staff roster is deliberately not
+ * consulted (owner decision 2026-08-19: a padded roster must not
+ * satisfy the 2-different-judges honesty rule).
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -44,6 +45,24 @@ interface PlacingRow {
     entry_id: string;
     place: number | null;
     judge_id: string | null;
+}
+
+/** PostgREST `.in()` serializes ids into the GET query string — a
+ *  big career (hundreds of classes) would 414. Chunk every
+ *  career-sized id list. */
+const IN_CHUNK = 150;
+
+async function selectInChunks<T>(
+    values: string[],
+    run: (chunk: string[]) => PromiseLike<{ data: unknown; error: { message: string } | null }>,
+): Promise<T[] | { error: string }> {
+    const out: T[] = [];
+    for (let i = 0; i < values.length; i += IN_CHUNK) {
+        const { data, error } = await run(values.slice(i, i + IN_CHUNK));
+        if (error) return { error: error.message };
+        out.push(...(((data as T[]) ?? [])));
+    }
+    return out;
 }
 
 export async function grantTitlesForShow(
@@ -84,36 +103,44 @@ export async function grantTitlesForShow(
     }
     const classIds = [...new Set([...seedEntries.values()].map((e) => e.class_id))];
 
-    const { data: fieldRows, error: fieldError } = await supabase
-        .from("show_class_entries")
-        .select("id, show_id, class_id, horse_id, owner_id")
-        .in("class_id", classIds)
-        .neq("status", "scratched");
-    if (fieldError) return { error: fieldError.message };
+    const fieldRows = await selectInChunks<Record<string, unknown>>(classIds, (chunk) =>
+        supabase
+            .from("show_class_entries")
+            .select("id, show_id, class_id, horse_id, owner_id")
+            .in("class_id", chunk)
+            .neq("status", "scratched"),
+    );
+    if (!Array.isArray(fieldRows)) return { error: fieldRows.error };
     const entriesById = new Map<string, StandingsEntryRow>(seedEntries);
-    for (const row of fieldRows ?? []) {
+    for (const row of fieldRows) {
         entriesById.set(row.id as string, row as unknown as StandingsEntryRow);
     }
     const entries = [...entriesById.values()];
     const showIds = [...new Set(entries.map((e) => e.show_id))];
     const entryIds = entries.map((e) => e.id);
 
-    // 3. Shows, placings (with recorder judge), callbacks — batched.
-    const [showsRes, placingsRes, callbacksRes] = await Promise.all([
-        supabase.from("shows").select("id, status, show_year, is_mhh_qualifying").in("id", showIds),
-        supabase.from("show_placings").select("entry_id, place, judge_id").in("entry_id", entryIds),
-        supabase
-            .from("show_callbacks")
-            .select("scope, champion_entry_id")
-            .in("show_id", showIds)
-            .not("champion_entry_id", "is", null),
+    // 3. Shows, placings (with recorder judge), callbacks — chunked.
+    const [showRows, placingRows, callbackRows] = await Promise.all([
+        selectInChunks<StandingsShowRow>(showIds, (chunk) =>
+            supabase.from("shows").select("id, status, show_year, is_mhh_qualifying").in("id", chunk),
+        ),
+        selectInChunks<PlacingRow>(entryIds, (chunk) =>
+            supabase.from("show_placings").select("entry_id, place, judge_id").in("entry_id", chunk),
+        ),
+        selectInChunks<StandingsCallbackRow>(showIds, (chunk) =>
+            supabase
+                .from("show_callbacks")
+                .select("scope, champion_entry_id")
+                .in("show_id", chunk)
+                .not("champion_entry_id", "is", null),
+        ),
     ]);
-    if (showsRes.error) return { error: showsRes.error.message };
-    if (placingsRes.error) return { error: placingsRes.error.message };
-    if (callbacksRes.error) return { error: callbacksRes.error.message };
-    const shows = (showsRes.data ?? []) as unknown as StandingsShowRow[];
-    const placings = (placingsRes.data ?? []) as unknown as PlacingRow[];
-    const callbacks = (callbacksRes.data ?? []) as unknown as StandingsCallbackRow[];
+    if (!Array.isArray(showRows)) return { error: showRows.error };
+    if (!Array.isArray(placingRows)) return { error: placingRows.error };
+    if (!Array.isArray(callbackRows)) return { error: callbackRows.error };
+    const shows = showRows;
+    const placings = placingRows;
+    const callbacks = callbackRows;
 
     const { horsePoints, ownerPoints } = buildCareerTotals({
         shows,
@@ -122,24 +149,17 @@ export async function grantTitlesForShow(
         callbacks,
     });
 
-    // 4. Cards + judge attribution for CH.
-    const [cardsRes, staffRes] = await Promise.all([
-        supabase
-            .from("qualification_cards")
-            .select("show_id, class_id, horse_id, status")
-            .in("horse_id", horseIds),
-        supabase.from("show_staff").select("show_id, user_id").eq("role", "judge").in("show_id", showIds),
-    ]);
-    if (cardsRes.error) return { error: cardsRes.error.message };
-    if (staffRes.error) return { error: staffRes.error.message };
+    // 4. Cards + judge attribution for CH. Owner decision 2026-08-19
+    // (audit SEV-3): a card's judge is the person who ACTUALLY judged
+    // it — the judge_id recorded on the card's placing row. The staff
+    // roster is ignored: a listed judge who never placed a class must
+    // not satisfy the "2 different judges" honesty rule.
+    const { data: cardRows, error: cardsError } = await supabase
+        .from("qualification_cards")
+        .select("show_id, class_id, horse_id, status")
+        .in("horse_id", horseIds);
+    if (cardsError) return { error: cardsError.message };
 
-    const judgesByShow = new Map<string, Set<string>>();
-    for (const row of staffRes.data ?? []) {
-        const set = judgesByShow.get(row.show_id as string) ?? new Set<string>();
-        set.add(row.user_id as string);
-        judgesByShow.set(row.show_id as string, set);
-    }
-    // Placing-recorder judge per (class, horse): covers host-judges.
     const judgeByEntry = new Map<string, string>();
     for (const p of placings) {
         if (p.judge_id) judgeByEntry.set(p.entry_id, p.judge_id);
@@ -150,16 +170,14 @@ export async function grantTitlesForShow(
     }
 
     const cardsByHorse = new Map<string, TitleCardInput[]>();
-    for (const card of cardsRes.data ?? []) {
-        const judges = new Set<string>(judgesByShow.get(card.show_id as string) ?? []);
+    for (const card of cardRows ?? []) {
         const entryId = entryByClassHorse.get(`${card.class_id}::${card.horse_id}`);
         const recorder = entryId ? judgeByEntry.get(entryId) : undefined;
-        if (recorder) judges.add(recorder);
         const list = cardsByHorse.get(card.horse_id as string) ?? [];
         list.push({
             showId: card.show_id as string,
             status: card.status as string,
-            judgeIds: [...judges],
+            judgeIds: recorder ? [recorder] : [],
         });
         cardsByHorse.set(card.horse_id as string, list);
     }
@@ -195,6 +213,27 @@ export async function grantTitlesForShow(
         }
     }
 
+    // Diff against existing grants BEFORE the upsert so only genuinely
+    // NEW titles notify (audit S8: title grants were silent). The
+    // upsert stays ignoreDuplicates — a racing publish is still free.
+    const [existingTitles, existingDistinctions] = await Promise.all([
+        supabase.from("horse_titles").select("horse_id, title_code").in("horse_id", horseIds),
+        supabase
+            .from("exhibitor_distinctions")
+            .select("user_id, distinction_code")
+            .in("user_id", ownerIds),
+    ]);
+    const hadTitle = new Set(
+        ((existingTitles.data ?? []) as { horse_id: string; title_code: string }[]).map(
+            (r) => `${r.horse_id}::${r.title_code}`,
+        ),
+    );
+    const hadDistinction = new Set(
+        ((existingDistinctions.data ?? []) as { user_id: string; distinction_code: string }[]).map(
+            (r) => `${r.user_id}::${r.distinction_code}`,
+        ),
+    );
+
     const untypedFrom = supabase.from.bind(supabase) as unknown as UntypedUpsert;
     if (titleRows.length > 0) {
         const { error } = await untypedFrom("horse_titles").upsert(titleRows, {
@@ -209,6 +248,67 @@ export async function grantTitlesForShow(
             ignoreDuplicates: true,
         });
         if (error) return { error: error.message };
+    }
+
+    // Notify the payoffs (best-effort; grants stand regardless).
+    try {
+        const newTitleRows = titleRows.filter(
+            (r) => !hadTitle.has(`${r.horse_id}::${r.title_code}`),
+        );
+        if (newTitleRows.length > 0) {
+            const { HORSE_TITLE_LABELS } = await import("./titles");
+            const { createNotification } = await import(
+                "@/lib/notifications/createNotification"
+            );
+            const grantedHorseIds = [...new Set(newTitleRows.map((r) => r.horse_id as string))];
+            const { data: horses } = await supabase
+                .from("user_horses")
+                .select("id, owner_id, custom_name")
+                .in("id", grantedHorseIds);
+            const horseById = new Map(
+                ((horses ?? []) as { id: string; owner_id: string; custom_name: string }[]).map(
+                    (h) => [h.id, h],
+                ),
+            );
+            for (const row of newTitleRows) {
+                const horse = horseById.get(row.horse_id as string);
+                if (!horse) continue;
+                const label =
+                    HORSE_TITLE_LABELS[row.title_code as keyof typeof HORSE_TITLE_LABELS] ??
+                    (row.title_code as string);
+                await createNotification({
+                    userId: horse.owner_id,
+                    type: "show_title",
+                    actorId: null,
+                    content: `🏆 ${horse.custom_name} earned the MHH ${label} (${row.title_code}) title!`,
+                    linkUrl: `/community/${horse.id}`,
+                });
+            }
+        }
+        const newDistinctionRows = distinctionRows.filter(
+            (r) => !hadDistinction.has(`${r.user_id}::${r.distinction_code}`),
+        );
+        if (newDistinctionRows.length > 0) {
+            const { EXHIBITOR_DISTINCTION_LABELS } = await import("./titles");
+            const { createNotification } = await import(
+                "@/lib/notifications/createNotification"
+            );
+            for (const row of newDistinctionRows) {
+                const label =
+                    EXHIBITOR_DISTINCTION_LABELS[
+                        row.distinction_code as keyof typeof EXHIBITOR_DISTINCTION_LABELS
+                    ] ?? (row.distinction_code as string);
+                await createNotification({
+                    userId: row.user_id as string,
+                    type: "show_title",
+                    actorId: null,
+                    content: `⭐ You earned the ${label} distinction!`,
+                    linkUrl: `/standings`,
+                });
+            }
+        }
+    } catch {
+        // Never fail grants over a notification hiccup.
     }
 
     return { horseTitles: titleRows.length, distinctions: distinctionRows.length };

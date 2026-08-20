@@ -285,10 +285,13 @@ export async function issueQualificationCardsForShow(
     > => {
         // Host/co-host reads ride the managers branch of the cards
         // SELECT policy (118) — the publisher always sees this show's cards.
+        // Voided cards don't occupy the slot (162): a void + corrected
+        // placings republish mints the replacement.
         const { data, error } = await supabase
             .from("qualification_cards")
             .select("class_id, horse_id")
-            .eq("show_id", showId);
+            .eq("show_id", showId)
+            .neq("status", "void");
         if (error) return { error: error.message };
         return (data ?? []).map((r: { class_id: string; horse_id: string }) => ({
             classId: r.class_id,
@@ -346,7 +349,8 @@ export async function issueQualificationCardsForShow(
             .select(
                 "class_id, horse_id, earned_place, earned_by_owner_id, class_entry_count, class_exhibitor_count, is_stakes",
             )
-            .eq("show_id", showId);
+            .eq("show_id", showId)
+            .neq("status", "void");
         if (error) return { error: error.message };
         return (data ?? []).map(
             (r: {

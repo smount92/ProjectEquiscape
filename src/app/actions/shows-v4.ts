@@ -294,6 +294,30 @@ export async function voidCard(
         .in("status", ["issued", "transferred"]);
     if (updateError) return { success: false, error: updateError.message };
 
+    // Tell the card holder (audit S8: the bearer token used to go
+    // invalid silently). Owner read needs the admin client — the
+    // caller may not satisfy the card-people SELECT policy.
+    try {
+        const { data: holder } = await getAdminClient()
+            .from("qualification_cards")
+            .select("current_owner_id")
+            .eq("id", cardRow.id)
+            .maybeSingle();
+        const holderId = (holder as { current_owner_id: string } | null)?.current_owner_id;
+        if (holderId) {
+            const { createNotification } = await import("@/lib/notifications/createNotification");
+            await createNotification({
+                userId: holderId,
+                type: "show_moderation",
+                actorId: null,
+                content: `Your qualification card ${cardRow.id} was voided: ${v.reason}`,
+                linkUrl: `/cards/${cardRow.id}`,
+            });
+        }
+    } catch {
+        // Best-effort; the void stands.
+    }
+
     revalidatePath(`/cards/${cardRow.id}`);
     revalidatePath(`/shows/${cardRow.show_id}`);
     return { success: true };
@@ -451,6 +475,21 @@ export async function strikeEntryFromResults(
         })
         .eq("id", e.id);
     if (scratchError) return { success: false, error: scratchError.message };
+
+    // Tell the entrant what happened and why (audit S8: strike used
+    // to remove placing/card/records with zero notice).
+    try {
+        const { createNotification } = await import("@/lib/notifications/createNotification");
+        await createNotification({
+            userId: e.owner_id,
+            type: "show_moderation",
+            actorId: null,
+            content: `Your entry${className ? ` in "${className}"` : ""} was struck from the results: ${v.reason}`,
+            linkUrl: `/shows/${e.show_id}`,
+        });
+    } catch {
+        // Notification is best-effort; the strike stands.
+    }
 
     revalidatePath(`/shows/${e.show_id}`);
     revalidatePath(`/shows/${e.show_id}/results`);

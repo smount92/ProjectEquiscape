@@ -41,6 +41,10 @@ export const NOTIFICATION_TYPE_PREF_KEYS: Record<string, string> = {
     show_entry_scratched: "show_updates",
     show_announcement: "show_announcements",
     show_deadline: "show_deadlines",
+    // ── Shows (v4 + championship program) ──
+    show_moderation: "show_updates",
+    show_handler: "show_updates",
+    show_title: "show_results",
 };
 
 /**

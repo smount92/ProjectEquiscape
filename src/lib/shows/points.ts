@@ -52,6 +52,16 @@ export const POINTS_CAP = 10;
 /** A class needs this many DISTINCT exhibitors to pay any points. */
 export const MIN_EXHIBITORS_FOR_POINTS = 2;
 
+/**
+ * One owner's entries grow a class's PAYABLE size by at most this
+ * many (owner decision 2026-08-19, audit SEV-2): 9 of your own
+ * horses + 1 rival used to pay as a 10-entry class — the payable
+ * size now counts sum(min(ownerEntries, 3)), so the self-pump
+ * collapses to a 4 while real classes are untouched. Cards stamp
+ * the FACTUAL field size; only points use the capped size.
+ */
+export const MAX_ENTRIES_PER_OWNER_FOR_SIZE = 3;
+
 /** Only a pair's best N placement results count per season. */
 export const BEST_RESULTS_CAP = 30;
 
@@ -178,6 +188,39 @@ export function countedShowIds(shows: StandingsShowRow[], filter: StandingsFilte
     return counted;
 }
 
+// ── Class context (shared by season + career tallies) ──
+
+/**
+ * Per-class payable size + distinct owners from live entries.
+ * Payable size = sum over owners of min(theirEntries, cap) — one
+ * owner cannot pump a class's point value with their own herd.
+ */
+function deriveClassContext(
+    entries: StandingsEntryRow[],
+    counted: Set<string>,
+): { classSize: Map<string, number>; classOwners: Map<string, Set<string>> } {
+    const perOwner = new Map<string, Map<string, number>>();
+    const classOwners = new Map<string, Set<string>>();
+    for (const entry of entries) {
+        if (!counted.has(entry.show_id)) continue;
+        const byOwner = perOwner.get(entry.class_id) ?? new Map<string, number>();
+        byOwner.set(entry.owner_id, (byOwner.get(entry.owner_id) ?? 0) + 1);
+        perOwner.set(entry.class_id, byOwner);
+        const owners = classOwners.get(entry.class_id) ?? new Set<string>();
+        owners.add(entry.owner_id);
+        classOwners.set(entry.class_id, owners);
+    }
+    const classSize = new Map<string, number>();
+    for (const [classId, byOwner] of perOwner) {
+        let size = 0;
+        for (const count of byOwner.values()) {
+            size += Math.min(count, MAX_ENTRIES_PER_OWNER_FOR_SIZE);
+        }
+        classSize.set(classId, size);
+    }
+    return { classSize, classOwners };
+}
+
 // ── The pair tally (v2 core) ──
 
 interface PairTally {
@@ -207,15 +250,9 @@ function tallyPairs(input: StandingsInput): Map<string, PairTally> {
     const counted = countedShowIds(input.shows, input.filter);
 
     // Class context from the entry list (live entries only, by contract).
-    const classSize = new Map<string, number>();
-    const classOwners = new Map<string, Set<string>>();
-    for (const entry of input.entries) {
-        if (!counted.has(entry.show_id)) continue;
-        classSize.set(entry.class_id, (classSize.get(entry.class_id) ?? 0) + 1);
-        const owners = classOwners.get(entry.class_id) ?? new Set<string>();
-        owners.add(entry.owner_id);
-        classOwners.set(entry.class_id, owners);
-    }
+    // Payable size caps each owner's contribution — see
+    // MAX_ENTRIES_PER_OWNER_FOR_SIZE.
+    const { classSize, classOwners } = deriveClassContext(input.entries, counted);
 
     const pairs = new Map<string, PairTally>();
     const countedEntriesById = new Map<string, StandingsEntryRow>();
@@ -291,16 +328,11 @@ export function buildCareerTotals(input: {
         counted.add(show.id);
     }
 
-    const classSize = new Map<string, number>();
-    const classOwners = new Map<string, Set<string>>();
+    const { classSize, classOwners } = deriveClassContext(input.entries, counted);
     const entriesById = new Map<string, StandingsEntryRow>();
     for (const entry of input.entries) {
         if (!counted.has(entry.show_id)) continue;
         entriesById.set(entry.id, entry);
-        classSize.set(entry.class_id, (classSize.get(entry.class_id) ?? 0) + 1);
-        const owners = classOwners.get(entry.class_id) ?? new Set<string>();
-        owners.add(entry.owner_id);
-        classOwners.set(entry.class_id, owners);
     }
 
     const horsePoints = new Map<string, number>();

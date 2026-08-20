@@ -23,6 +23,7 @@ import {
 import {
     BEST_RESULTS_CAP,
     CHAMPIONSHIP_POINTS,
+    MAX_ENTRIES_PER_OWNER_FOR_SIZE,
     MIN_EXHIBITORS_FOR_POINTS,
     POINTS_CAP,
 } from "@/lib/shows/points";
@@ -106,8 +107,12 @@ export default function ShowingRulesPage() {
                     <p>
                         A class needs at least <b>{MIN_EXHIBITORS_FOR_POINTS} different
                         exhibitors</b> to pay points — you can place, but you can&apos;t earn
-                        points beating only yourself. Championship callbacks add bonuses on
-                        top: <b>section +{CHAMPIONSHIP_POINTS.section} · division +
+                        points beating only yourself. And one exhibitor&apos;s entries grow a
+                        class&apos;s payable size by at most{" "}
+                        <b>{MAX_ENTRIES_PER_OWNER_FOR_SIZE}</b> — entering your whole herd in
+                        one class doesn&apos;t raise what winning it is worth. Championship
+                        callbacks add bonuses on top:{" "}
+                        <b>section +{CHAMPIONSHIP_POINTS.section} · division +
                         {CHAMPIONSHIP_POINTS.division} · show +{CHAMPIONSHIP_POINTS.show}</b>.
                     </p>
                     <p>

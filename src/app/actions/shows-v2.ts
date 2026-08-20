@@ -17,6 +17,7 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { z } from "zod";
 
@@ -2003,7 +2004,7 @@ export async function enterClass(
     const showId = division.show_id as string;
     const { data: show, error: shErr } = await supabase
         .from("shows")
-        .select("id, mode, status, entries_close_at")
+        .select("id, mode, status, entries_close_at, capacity, title")
         .eq("id", showId)
         .maybeSingle();
     if (shErr) return { success: false, error: shErr.message };
@@ -2080,6 +2081,7 @@ export async function enterClass(
             mode: show.mode as ShowMode,
             status: show.status as ShowStatus,
             entriesCloseAt: (show.entries_close_at as string | null) ?? null,
+            capacity: (show.capacity as number | null) ?? null,
         },
         targetClass: {
             id: cls.id as string,
@@ -2174,7 +2176,63 @@ export async function enterClass(
         return { success: false, error: friendly };
     }
 
+    // Named handler gets told (owner decision 2026-08-19, audit M4:
+    // proxy handling was silent and non-consensual — the notice pairs
+    // with removeSelfAsHandler for a one-click opt-out).
+    const namedHandler = v.handlerId && v.handlerId !== user.id ? v.handlerId : null;
+    if (namedHandler) {
+        const showTitle = (show.title as string) ?? "a show";
+        const entrantId = user.id;
+        after(async () => {
+            // Dynamic import + swallow (house pattern for optional
+            // notices): 'server-only' can't resolve under vitest, and
+            // a notification must never fail the entry.
+            try {
+                const { createNotification } = await import(
+                    "@/lib/notifications/createNotification"
+                );
+                await createNotification({
+                    userId: namedHandler,
+                    type: "show_handler",
+                    actorId: entrantId,
+                    content: `named you as handler for an entry at "${showTitle}". If that's not right, open the show page to remove yourself.`,
+                    linkUrl: `/shows/${showId}`,
+                });
+            } catch {
+                // Best-effort.
+            }
+        });
+    }
+
     return { success: true, entryId: inserted.id as string, entryNumber };
+}
+
+/**
+ * A named handler removes THEMSELF from an entry (owner decision
+ * 2026-08-19). Admin write after an explicit identity check — the
+ * entries UPDATE policy has no handler branch (owners and staff
+ * only), and adding one would let handlers touch other columns.
+ */
+export async function removeSelfAsHandler(input: {
+    entryId: string;
+}): Promise<ActionResult> {
+    const entryId = z.uuid().safeParse(input.entryId);
+    if (!entryId.success) return { success: false, error: "Invalid entry." };
+    const { user } = await requireAuth();
+
+    const admin = getAdminClient();
+    const { data: updated, error } = await admin
+        .from("show_class_entries")
+        .update({ handler_id: null })
+        .eq("id", entryId.data)
+        .eq("handler_id", user.id)
+        .select("id, show_id");
+    if (error) return { success: false, error: error.message };
+    if (!updated || updated.length === 0) {
+        return { success: false, error: "You are not the named handler on this entry." };
+    }
+    revalidatePath(`/shows/${(updated[0] as { show_id: string }).show_id}`);
+    return { success: true };
 }
 
 /** Staff who may scratch someone else's live entry (judges place, they don't manage entries — matches the 118 UPDATE policy). */

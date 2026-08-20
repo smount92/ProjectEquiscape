@@ -53,7 +53,9 @@ export interface TitleCardInput {
      *  redeemed still does (the WIN happened; redemption only
      *  spends the championship entry). */
     status: string;
-    /** The show's judge user-ids (role='judge' staff + host-judge). */
+    /** Who actually judged this card: the judge_id on its placing
+     *  row (empty when unrecorded — contributes nothing to the
+     *  distinct-judge count). */
     judgeIds: string[];
 }
 

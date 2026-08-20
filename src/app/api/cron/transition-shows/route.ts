@@ -96,6 +96,42 @@ export async function GET(request: NextRequest) {
         const opened = await flipV2("published", "entries_open", "entries_open_at");
         const closed = await flipV2("entries_open", "entries_closed", "entries_close_at");
 
+        // ── 3b. Judging deadline: nudge the host, never force-flip ──
+        // (Audit S11: judging_ends_at had no enforcer — shows sat in
+        // judging forever. A forced flip would break community-vote
+        // shows, whose placings only exist after the host finalizes
+        // the tally — so the clock nudges the HOST, once, dedup'd on
+        // the '#judging-overdue' link.)
+        let judgingNudged = 0;
+        const { data: overdueRows, error: overdueError } = await admin
+            .from("shows")
+            .select("id, title, host_id")
+            .eq("status", "judging")
+            .not("judging_ends_at", "is", null)
+            .lte("judging_ends_at", nowIso);
+        if (overdueError) throw overdueError;
+        for (const show of overdueRows ?? []) {
+            const overdueLink = `/shows/host/${show.id}#judging-overdue`;
+            const { data: sent } = await admin
+                .from("notifications")
+                .select("id")
+                .eq("type", "show_deadline")
+                .eq("user_id", show.host_id as string)
+                .eq("link_url", overdueLink)
+                .limit(1);
+            if (sent && sent.length > 0) continue;
+            await createNotificationsBulk([
+                {
+                    userId: show.host_id as string,
+                    type: "show_deadline",
+                    actorId: null,
+                    content: `Judging for "${show.title}" has passed its deadline — finalize the results when ready.`,
+                    linkUrl: overdueLink,
+                },
+            ]);
+            judgingNudged++;
+        }
+
         // ── 4. Deadline nudges: entries_open, closing within 24h ──
         // (Runs AFTER the flips so a just-closed show never nudges.)
         const { data: closingRows, error: closingError } = await admin
@@ -166,6 +202,7 @@ export async function GET(request: NextRequest) {
             v2_opened: opened,
             v2_closed: closed,
             v2_deadline_nudges: reminded,
+            v2_judging_overdue_nudges: judgingNudged,
             checkedAt: nowIso,
         });
     } catch (error) {

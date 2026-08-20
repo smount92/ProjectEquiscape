@@ -68,6 +68,13 @@ export interface ShowFacts {
     status: ShowStatus;
     /** ISO timestamp; null = no explicit deadline (status governs). */
     entriesCloseAt?: string | null;
+    /**
+     * Max DISTINCT exhibitors (owner decision 2026-08-19: "tables"
+     * at a live show are people, not entries). null/0 = uncapped.
+     * Existing entrants may keep adding classes; new people are
+     * refused once the show is full.
+     */
+    capacity?: number | null;
 }
 
 /** An existing entry at this show, as needed by the rules. */
@@ -116,6 +123,20 @@ export function validateEntry(input: ValidateEntryInput): ValidateEntryResult {
     // ── Barred from this show (sticky scratch) ──
     if (input.isBarred) {
         errors.push("You are not able to enter this show. Contact the host if you believe this is a mistake.");
+    }
+
+    // ── Capacity: distinct-entrant cap (a "table" is a person) ──
+    if (show.capacity && show.capacity > 0) {
+        const liveOwners = new Set(
+            existingEntries
+                .filter((e) => e.status !== "scratched")
+                .map((e) => e.ownerId),
+        );
+        if (!liveOwners.has(candidate.ownerId) && liveOwners.size >= show.capacity) {
+            errors.push(
+                `This show is full — it caps at ${show.capacity} exhibitor${show.capacity === 1 ? "" : "s"}.`,
+            );
+        }
     }
 
     // ── Conflict of interest: judges don't compete in their own ring ──

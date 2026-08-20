@@ -54,6 +54,45 @@ describe("entryRules — validateEntry", () => {
         expect(validateEntry(input())).toEqual({ ok: true });
     });
 
+    describe("capacity — distinct-entrant cap", () => {
+        const others: ExistingEntry[] = [
+            { classId: "c1", horseId: "h-a", ownerId: "owner-a", status: "entered", divisionAxis: "halter" },
+            { classId: "c1", horseId: "h-b", ownerId: "owner-b", status: "entered", divisionAxis: "halter" },
+        ];
+
+        it("refuses a NEW entrant once the show is full", () => {
+            const r = validateEntry(
+                input({ show: { ...show, capacity: 2 }, existingEntries: others }),
+            );
+            expect(r.ok).toBe(false);
+            expect(errorsOf(r).join(" ")).toMatch(/full/i);
+        });
+
+        it("existing entrants keep adding classes; scratched rows free a table", () => {
+            const mine = { ...others[0], ownerId: "user-1" };
+            expect(
+                validateEntry(
+                    input({ show: { ...show, capacity: 2 }, existingEntries: [mine, others[1]] }),
+                ).ok,
+            ).toBe(true);
+            const scratched = { ...others[0], status: "scratched" as const };
+            expect(
+                validateEntry(
+                    input({ show: { ...show, capacity: 2 }, existingEntries: [scratched, others[1]] }),
+                ).ok,
+            ).toBe(true);
+        });
+
+        it("null/zero capacity never caps", () => {
+            expect(
+                validateEntry(input({ show: { ...show, capacity: null }, existingEntries: others })).ok,
+            ).toBe(true);
+            expect(
+                validateEntry(input({ show: { ...show, capacity: 0 }, existingEntries: others })).ok,
+            ).toBe(true);
+        });
+    });
+
     describe("conflict of interest (Championship program §6)", () => {
         it("a judge's own horse can't enter the show they judge", () => {
             const r = validateEntry(input({ judgeUserIds: ["user-1", "judge-2"] }));

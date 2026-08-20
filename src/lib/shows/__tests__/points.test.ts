@@ -214,6 +214,37 @@ describe("buildHorseStandings — v2", () => {
     });
 });
 
+describe("per-owner size cap — one herd can't pump a class", () => {
+    it("9 own horses + 1 rival pays as a 4-entry class, not 10", () => {
+        const entries: StandingsEntryRow[] = [];
+        for (let i = 0; i < 9; i++) {
+            entries.push(entry(`mine-${i}`, "show-1", `horse-${i}`, "owner-1"));
+        }
+        entries.push(entry("rival", "show-1", "horse-r", "owner-2"));
+        const rows = buildHorseStandings(
+            input({
+                shows: [show({ id: "show-1" })],
+                entries,
+                placings: [{ entry_id: "mine-0", place: 1 }],
+            }),
+        );
+        // Payable size = min(9,3) + min(1,3) = 4 → 1st pays 4, not 10.
+        expect(rows.find((r) => r.horseId === "horse-0")?.points).toBe(4);
+    });
+
+    it("a genuine spread class is untouched", () => {
+        // 8 entries from 8 owners: payable size stays 8.
+        const rows = buildHorseStandings(
+            input({
+                shows: [show({ id: "show-1" })],
+                entries: classOf(8),
+                placings: [{ entry_id: "e1", place: 1 }],
+            }),
+        );
+        expect(rows.find((r) => r.horseId === "horse-1")?.points).toBe(8);
+    });
+});
+
 describe("buildCareerTotals — the titles engine's raw accumulation", () => {
     it(`the best-${BEST_RESULTS_CAP} cap does NOT apply to career totals`, () => {
         // One pair winning (CAP + 1) two-horse classes: standings cap
