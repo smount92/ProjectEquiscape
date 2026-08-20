@@ -34,6 +34,9 @@ export default function AnnouncementBar({ announcements }: { announcements: Anno
     useEffect(() => {
         const dismissed = loadDismissed();
         const undismissed = announcements.filter((a) => !dismissed.has(a.id));
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- mount-gate:
+        // dismissal lives in localStorage, unreadable during SSR/first paint;
+        // one post-mount set is the hydration-safe reveal (CookieConsent's shape).
         if (undismissed.length > 0) setVisible(undismissed);
     }, [announcements]);
 
