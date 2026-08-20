@@ -1,5 +1,5 @@
 /**
- * Passport v2 buyer panel (NEXT_PUBLIC_PASSPORT_V2) — the ONE honest
+ * The passport buyer panel — the ONE honest
  * commerce surface on a For Sale / Open to Offers passport. Bordered
  * brass panel on lit paper:
  *

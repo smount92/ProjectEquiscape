@@ -10,14 +10,11 @@
  *  - owner viewing their own listing gets no contact buttons
  *  - anon variant renders login-CTA equivalents with redirectTo
  *  - trust line anchors to the passport section ids
- * Plus the flag helper: NEXT_PUBLIC_PASSPORT_V2 defaults OFF, literal
- * "1" only.
  */
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 
 import BuyerPanel, { formatAskingPrice } from "@/components/passport/BuyerPanel";
-import { passportV2Enabled } from "@/lib/shows/flags";
 
 vi.mock("next/link", () => ({
     default: ({
@@ -204,21 +201,5 @@ describe("BuyerPanel — trust line", () => {
             "href",
             "/community/horse-1/hoofprint",
         );
-    });
-});
-
-describe("passportV2Enabled", () => {
-    it("is OFF by default (unset)", () => {
-        vi.stubEnv("NEXT_PUBLIC_PASSPORT_V2", "");
-        expect(passportV2Enabled()).toBe(false);
-    });
-
-    it("is ON only for the literal '1'", () => {
-        vi.stubEnv("NEXT_PUBLIC_PASSPORT_V2", "1");
-        expect(passportV2Enabled()).toBe(true);
-        vi.stubEnv("NEXT_PUBLIC_PASSPORT_V2", "true");
-        expect(passportV2Enabled()).toBe(false);
-        vi.stubEnv("NEXT_PUBLIC_PASSPORT_V2", "0");
-        expect(passportV2Enabled()).toBe(false);
     });
 });

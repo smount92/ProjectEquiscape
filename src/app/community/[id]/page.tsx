@@ -17,11 +17,9 @@ import { getHorseTitles } from"@/lib/shows/horseTitles";
 import { titlePrefix } from"@/lib/shows/titles";
 import { getHoofprint } from"@/app/actions/hoofprint";
 import ReportButton from"@/components/ReportButton";
-import MessageSellerButton from"@/components/MessageSellerButton";
 import WishlistButton from"@/components/WishlistButton";
 import TrustedBadge from"@/components/TrustedBadge";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
-import PageMasthead from"@/components/layouts/PageMasthead";
 import AssetDetailRenderer from"@/components/AssetDetailRenderer";
 import { getAssetConfig } from"@/lib/config/assetFields";
 import type { AssetCategory } from"@/lib/types/database";
@@ -32,7 +30,6 @@ import PublicCardsSection from"@/components/shows/PublicCardsSection";
 import { PARCHMENT_INK } from"@/lib/theme/parchment";
 import PassportMasthead from"@/components/passport/PassportMasthead";
 import BuyerPanel from"@/components/passport/BuyerPanel";
-import { passportV2Enabled } from"@/lib/shows/flags";
 import { summarizeShowRecords } from"@/lib/market/recordSummary";
 import { getPublicHorseCards } from"@/lib/shows/publicCards";
 import { getMarketPrice } from"@/app/actions/market";
@@ -323,24 +320,19 @@ editionSize: rawPedigree.edition_size,
  .maybeSingle();
  const isTrustedSeller = !!trustedData;
 
- // ── Passport v2 (NEXT_PUBLIC_PASSPORT_V2) — masthead + buyer panel.
- // Flag OFF: every v2 branch below is dead and the page renders its
- // current tree byte-identically.
- const v2 = passportV2Enabled();
  const isForSale = horse.trade_status === "For Sale" || horse.trade_status === "Open to Offers";
- const recordSummary = v2
- ? (summarizeShowRecords(
+ const recordSummary =
+ summarizeShowRecords(
  (rawRecords ?? []).map((r) => ({
  horse_id: horseId,
  placing: r.placing,
  ribbon_color: r.ribbon_color,
  verification_tier: r.verification_tier,
  })),
- ).get(horseId) ?? null)
- : null;
+ ).get(horseId) ?? null;
  // Parallel: independent reads must not stack round trips (perf).
  const [publicCardsForCount, publicTitles] = await Promise.all([
- v2 && isForSale ? getPublicHorseCards(horseId) : Promise.resolve([]),
+ isForSale ? getPublicHorseCards(horseId) : Promise.resolve([]),
  getHorseTitles(horseId),
  ]);
  const cardsCount = publicCardsForCount.length;
@@ -350,13 +342,13 @@ editionSize: rawPedigree.edition_size,
  // hides itself client-side when the mold has no sales, so check the
  // volume server-side before rendering the adjacent-estimate block.
  const marketEstimate =
- v2 && isForSale && horse.catalog_id ? await getMarketPrice(horse.catalog_id) : null;
+ isForSale && horse.catalog_id ? await getMarketPrice(horse.catalog_id) : null;
  const hasMarketEstimate = !!marketEstimate && marketEstimate.transactionVolume > 0;
 
  return (
  <ExplorerLayout noHeader>
- {/* v2: the stolen/missing banner stays above EVERYTHING */}
- {v2 && horse.trade_status ==="Stolen/Missing" && (
+ {/* The stolen/missing banner stays above EVERYTHING */}
+ {horse.trade_status ==="Stolen/Missing" && (
  <div className="mb-4 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 p-4">
  <span className="text-[1.3em]">🚨</span>
  <div>
@@ -367,7 +359,6 @@ editionSize: rawPedigree.edition_size,
  </div>
  </div>
  )}
- {v2 ? (
  <PassportMasthead
  horseName={
  publicNamePrefix ? `${publicNamePrefix} ${horse.custom_name}` : horse.custom_name
@@ -378,40 +369,21 @@ editionSize: rawPedigree.edition_size,
  backHref="/community"
  backLabel="Show Ring"
  />
- ) : (
- <PageMasthead compact icon="🏆" title="Show Ring" subtitle="Public passport" backHref="/community" backLabel="Show Ring" />
- )}
 
  {/* Two-column layout: Gallery | Ledger Card */}
  <div className="animate-fade-in-up grid grid-cols-1 gap-8 lg:grid-cols-[1.5fr_1fr] lg:gap-12">
  {/* Left: Gallery */}
- <div className="self-start overflow-hidden rounded-2xl shadow-md" id={v2 ?"passport-photos" : undefined}>
+ <div className="self-start overflow-hidden rounded-2xl shadow-md" id="passport-photos">
  <PassportGallery images={galleryImages} />
  </div>
 
  {/* Right: The Ledger Card */}
  <div className="flex min-h-[100%] flex-col gap-2 rounded-3xl border border-input bg-[#C8B596] px-6 py-8 shadow-sm md:px-10" style={PARCHMENT_INK}>
- {/* Stolen/Missing Banner (v2 moves it above the masthead) */}
- {!v2 && horse.trade_status ==="Stolen/Missing" && (
- <div
- className="flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 p-4"
- >
- <span className="text-[1.3em]">🚨</span>
- <div>
- <strong className="text-destructive">Stolen / Missing</strong>
- <p className="mt-1 text-muted-foreground text-sm">
- This model has been flagged by its owner. Transfers and offers are blocked.
- </p>
- </div>
- </div>
- )}
-
- {/* v2 buyer panel — the ONE honest commerce surface. Supersedes the
-     Wave 5a standalone For-Sale block AND the old h1 title block
-     (the masthead now carries the name + reference). The market
-     ESTIMATE sits adjacent but visually distinct: asking price and
-     estimate must never read as the same number. */}
- {v2 && isForSale && (
+ {/* Buyer panel — the ONE honest commerce surface (the masthead
+     carries the name + reference). The market ESTIMATE sits
+     adjacent but visually distinct: asking price and estimate
+     must never read as the same number. */}
+ {isForSale && (
  <>
  <BuyerPanel
  horseId={horseId}
@@ -435,27 +407,6 @@ editionSize: rawPedigree.edition_size,
  </div>
  )}
  </>
- )}
-
- {/* Free-floating Title — no card wrapper (v2: the masthead is the
-     title; exactly one h1 on the page, the horse's name) */}
- {!v2 && (
- <div className="p-0">
- <h1 className="mb-1 font-serif text-4xl font-bold leading-tight tracking-tight text-foreground md:text-5xl">
- {horse.custom_name}
- </h1>
- {refInfo ? (
- <p className="mb-1 text-base text-secondary-foreground">
- {refHref ? (<Link href={refHref} className="font-semibold text-forest underline decoration-2 underline-offset-2">{refInfo.maker} — {refInfo.name} <span aria-hidden="true" className="text-forest">→</span></Link>) : (<>{refInfo.maker} — {refInfo.name}</>)}
- </p>
- ) : (
- <p
- className="mb-1 text-base italic text-secondary-foreground opacity-60"
- >
- Unlisted / Custom Entry
- </p>
- )}
- </div>
  )}
 
  {/* Owner Pill */}
@@ -779,35 +730,9 @@ editionSize: rawPedigree.edition_size,
 
  {/* 🔒 NO Financial Vault section — this is a PUBLIC view */}
 
- {/* Market Value Badge (v2 + for-sale: moved adjacent to the buyer
-     panel above with its estimate framing) */}
- {!(v2 && isForSale) && horse.catalog_id && <MarketValueBadge catalogId={horse.catalog_id} />}
-
- {/* For Sale — price + status a signed-in buyer can actually see.
-     Mirrors the AnonPassport block (AnonPassport.tsx) so members and
-     visitors read the same ledger line. For Sale / Open to Offers only.
-     SUPERSEDED by the v2 buyer panel when the flag is on. */}
- {!v2 && (horse.trade_status === "For Sale" || horse.trade_status === "Open to Offers") && (
- <div className="rounded-lg border border-forest/30 bg-forest/5 p-4" id="passport-for-sale">
- <div className="flex flex-wrap items-center justify-between gap-2">
- <span className={horse.trade_status === "For Sale" ? "stamp stamp-red" : "stamp"}>
- {horse.trade_status}
- </span>
- <span className="font-serif text-2xl font-bold text-foreground">
- {horse.listing_price != null
- ? `$${Number(horse.listing_price).toLocaleString("en-US")}`
- : "Open to offers"}
- </span>
- </div>
- {!isOwnHorse && (
- <p className="mt-2 mb-0 text-sm text-secondary-foreground">
- {horse.listing_price != null
- ? "Asking price — make an offer or ask the seller a question below."
- : "No asking price set — the seller is taking offers."}
- </p>
- )}
- </div>
- )}
+ {/* Market Value Badge (for-sale horses get it adjacent to the
+     buyer panel above with its estimate framing) */}
+ {!isForSale && horse.catalog_id && <MarketValueBadge catalogId={horse.catalog_id} />}
 
  {/* Action Bar — split layout: icon row + full-width CTA */}
  <div className="passport-action-bar">
@@ -825,20 +750,8 @@ editionSize: rawPedigree.edition_size,
  variant="full"
  />
  {!isOwnHorse && <ReportButton targetType="horse" targetId={horseId} />}
- {/* v2: contact actions live in the buyer panel — one honest panel,
+ {/* Contact actions live in the buyer panel — one honest panel,
      no duplicate CTAs in the icon row */}
- {!v2 &&
- !isOwnHorse &&
- horse.trade_status !=="Stolen/Missing" &&
- (horse.trade_status ==="For Sale" || horse.trade_status ==="Open to Offers") && (
- <MessageSellerButton
- sellerId={horse.owner_id}
- horseId={horseId}
- horseName={horse.custom_name}
- tradeStatus={horse.trade_status}
- askingPrice={horse.listing_price}
- />
- )}
  {isOwnHorse && (
  <Button asChild><Link
  href={`/stable/${horse.id}`}
@@ -860,7 +773,7 @@ editionSize: rawPedigree.edition_size,
 
  {/* Provenance — Read Only */}
  {(showRecords.length > 0 || pedigree) && (
- <div className="animate-fade-in-up mt-8" id={v2 ?"passport-show-record" : undefined}>
+ <div className="animate-fade-in-up mt-8" id="passport-show-record">
  {showRecords.length > 0 && (
  <ShowRecordTimeline horseId={horseId} records={showRecords} isOwner={false} />
  )}
@@ -889,7 +802,7 @@ editionSize: rawPedigree.edition_size,
  } = await getHoofprint(horseId);
  if (hfTimeline.length === 0 && hfChain.length === 0) return null;
  return (
- <div className="animate-fade-in-up mt-8" id={v2 ?"passport-hoofprint" : undefined}>
+ <div className="animate-fade-in-up mt-8" id="passport-hoofprint">
  <HoofprintTimeline
  horseId={horseId}
  timeline={hfTimeline}

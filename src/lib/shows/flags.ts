@@ -8,24 +8,3 @@
 export function showStandingsEnabled(): boolean {
     return process.env.NEXT_PUBLIC_SHOW_STANDINGS === "1";
 }
-
-/**
- * Passport v2 feature flag (masthead + buyer panel). The rebuilt
- * public-passport top — leather masthead where the horse's name is
- * the H1, plus the single honest buyer panel on For Sale horses —
- * ships dark: set NEXT_PUBLIC_PASSPORT_V2=1 to enable. Default OFF.
- * With the flag off, /community/[id] (authed) and AnonPassport render
- * their current trees byte-identically (instant rollback).
- */
-export function passportV2Enabled(): boolean {
-    return process.env.NEXT_PUBLIC_PASSPORT_V2 === "1";
-}
-
-/**
- * Catalog cards browse feature flag (growth — identification cards).
- * Ships dark: set NEXT_PUBLIC_CATALOG_V2=1 to enable. Default OFF.
- * With the flag off, /catalog renders the existing five-column table
- * unchanged; with it on, the same route + data render identification
- * cards (thumbnail · disambiguation line · chips) with a compact-table
- * toggle for power curators.
- */

@@ -1,5 +1,5 @@
 /**
- * Passport v2 masthead (NEXT_PUBLIC_PASSPORT_V2) — the passport finally
+ * The passport masthead — the passport finally
  * leads with the horse. Leather band where the H1 is the HORSE'S NAME,
  * not the section ("Show Ring" lived in PageMasthead; the approved mock
  * kills that). Eyebrow "Public Passport · Model Horse Hub" in small
