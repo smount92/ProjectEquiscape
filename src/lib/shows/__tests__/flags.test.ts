@@ -4,7 +4,7 @@
  */
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { showPageV3Enabled, showsV2Enabled, showStandingsEnabled } from "@/lib/shows/flags";
+import { showPageV3Enabled, showStandingsEnabled } from "@/lib/shows/flags";
 
 afterEach(() => {
     vi.unstubAllEnvs();
@@ -27,12 +27,12 @@ describe("showPageV3Enabled", () => {
 });
 
 describe("the sibling flags keep their contracts", () => {
-    it("showsV2Enabled / showStandingsEnabled read their own vars", () => {
-        vi.stubEnv("NEXT_PUBLIC_SHOWS_V2", "1");
+    it("showStandingsEnabled reads its own var", () => {
         vi.stubEnv("NEXT_PUBLIC_SHOW_STANDINGS", "");
         vi.stubEnv("NEXT_PUBLIC_SHOW_PAGE_V3", "");
-        expect(showsV2Enabled()).toBe(true);
         expect(showStandingsEnabled()).toBe(false);
         expect(showPageV3Enabled()).toBe(false);
+        vi.stubEnv("NEXT_PUBLIC_SHOW_STANDINGS", "1");
+        expect(showStandingsEnabled()).toBe(true);
     });
 });

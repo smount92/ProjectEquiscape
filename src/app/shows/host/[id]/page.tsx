@@ -1,7 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 
 import { getShowConsole } from "@/app/actions/shows-v2";
-import { showsV2Enabled } from "@/lib/shows/flags";
 import { createClient } from "@/lib/supabase/server";
 import CommandCenterLayout from "@/components/layouts/CommandCenterLayout";
 import ShowConsole from "@/components/shows/ShowConsole";
@@ -18,7 +17,6 @@ export default async function ShowConsolePage({
 }: {
     params: Promise<{ id: string }>;
 }) {
-    if (!showsV2Enabled()) notFound();
 
     const supabase = await createClient();
     const {

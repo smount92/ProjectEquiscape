@@ -24,7 +24,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { showsV2Enabled } from "@/lib/shows/flags";
 import { placeLabel } from "@/lib/shows/placings";
 import { placingShareDescription, placingShareTitle } from "@/lib/shows/placingShare";
 import { loadPublicPlacing } from "@/lib/shows/placingShareRead";
@@ -50,7 +49,6 @@ export async function generateMetadata({
     params: Promise<{ id: string; entryId: string }>;
 }): Promise<Metadata> {
     const { id, entryId } = await params;
-    if (!showsV2Enabled()) return GENERIC_METADATA;
 
     // Cookie-less anon client — metadata must never introduce a
     // session-bound read (same rule as /shows/[id]).
@@ -93,7 +91,6 @@ export default async function PlacingSharePage({
     params: Promise<{ id: string; entryId: string }>;
 }) {
     const { id, entryId } = await params;
-    if (!showsV2Enabled()) notFound();
 
     const supabase = await createClient();
     const data = await loadPublicPlacing(supabase, id, entryId);

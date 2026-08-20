@@ -15,13 +15,10 @@ import Link from "next/link";
 import { Trophy } from "lucide-react";
 
 import { getMyShowLife } from "@/app/actions/show-life";
-import { showsV2Enabled } from "@/lib/shows/flags";
 import { createClient } from "@/lib/supabase/server";
 import { formatCloseAt, placeLabel } from "@/lib/shows/showLife";
 
 export default async function ShowLifeRail() {
-    if (!showsV2Enabled()) return null;
-
     const life = await getMyShowLife();
     if (life.activeEntries.length === 0 && life.recentResults.length === 0) return null;
 

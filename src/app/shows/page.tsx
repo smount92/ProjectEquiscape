@@ -8,7 +8,7 @@ import PageMasthead from"@/components/layouts/PageMasthead";
 import MyShowLifeSection from"@/components/shows/MyShowLifeSection";
 import MySeasonCard from"@/components/shows/MySeasonCard";
 import { getMySeason } from"@/app/actions/standings";
-import { showStandingsEnabled, showsV2Enabled } from"@/lib/shows/flags";
+import { showStandingsEnabled } from"@/lib/shows/flags";
 import { EMPTY_SHOW_LIFE } from"@/lib/shows/showLife";
 import type { PublicShowSummary } from"@/lib/shows/public";
 import type { ShowStatus } from"@/lib/shows/types";
@@ -119,19 +119,17 @@ export default async function ShowsPage() {
  // authed-only), so we only fetch it for signed-in viewers.
  const shows = user ? await getPhotoShows() : [];
 
- // v2 shows (flag-gated) render ABOVE the legacy photo-show list.
+ // v2 shows render ABOVE the legacy photo-show list.
  let v2Shows: PublicShowSummary[] = [];
- if (showsV2Enabled()) {
-  const v2Result = await getPublicShows();
-  if (v2Result.success) v2Shows = v2Result.shows;
- }
+ const v2Result = await getPublicShows();
+ if (v2Result.success) v2Shows = v2Result.shows;
 
  // "My show life" — the signed-in entrant's cross-show strip above
  // the browse shelves. Empty (and hidden) for anon, for members who
  // don't show, and on any data failure.
- const showLife = user && showsV2Enabled() ? await getMyShowLife() : EMPTY_SHOW_LIFE;
+ const showLife = user ? await getMyShowLife() : EMPTY_SHOW_LIFE;
  // My Season (season-felt wave): the exhibitor's championship line.
- const mySeason = user && showsV2Enabled() ? await getMySeason() : null;
+ const mySeason = user ? await getMySeason() : null;
 
  // Batch-check which shows this user is a judge for
  const showIds = shows.map((s) => s.id);
@@ -181,11 +179,9 @@ export default async function ShowsPage() {
       </Button>
      )}
      {user ? (
-      showsV2Enabled() && (
-       <Button asChild variant="outline">
-        <Link href="/shows/host">Host a show</Link>
-       </Button>
-      )
+      <Button asChild variant="outline">
+       <Link href="/shows/host">Host a show</Link>
+      </Button>
      ) : (
       signInCta
      )}

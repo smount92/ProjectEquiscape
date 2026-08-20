@@ -21,16 +21,15 @@ export type ShowRouteTarget = "v2" | "legacy";
 
 /**
  * Decide which page /shows/[id] renders. ONE indexed primary-key
- * lookup against shows; anything that isn't a v2 show (flag off,
- * junk id, legacy event id, DB hiccup) falls through to legacy —
- * the legacy page still notFound()s ids it doesn't know.
+ * lookup against shows; anything that isn't a v2 show (junk id,
+ * legacy event id, DB hiccup) falls through to legacy — the legacy
+ * page still notFound()s ids it doesn't know.
  */
 export async function resolveShowRoute(
     supabase: SupabaseClient,
     id: string,
-    v2Enabled: boolean,
 ): Promise<ShowRouteTarget> {
-    if (!v2Enabled || !looksLikeUuid(id)) return "legacy";
+    if (!looksLikeUuid(id)) return "legacy";
     const { data, error } = await supabase
         .from("shows")
         .select("id")

@@ -11,9 +11,7 @@
  *      day-of class-status recording per the design doc),
  *   4. returns { success, error? } — never throws for domain errors.
  *
- * NOTE: these actions target the tables from migrations 117/118,
- * which the owner applies manually. Nothing here runs against the
- * DB until then; the whole feature ships behind NEXT_PUBLIC_SHOWS_V2.
+ * NOTE: these actions target the tables from migrations 117/118.
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";

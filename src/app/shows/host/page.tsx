@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 
 import { getHostedShows } from "@/app/actions/shows-v2";
 import type { HostedShowSummary } from "@/lib/shows/console";
-import { showsV2Enabled } from "@/lib/shows/flags";
 import { friendlyShowStatus } from "@/lib/shows/plainWords";
 import { createClient } from "@/lib/supabase/server";
 import CommandCenterLayout from "@/components/layouts/CommandCenterLayout";
@@ -105,7 +104,6 @@ function MyShowsList({ shows }: { shows: HostedShowSummary[] }) {
 }
 
 export default async function HostShowsPage() {
-    if (!showsV2Enabled()) notFound();
 
     const supabase = await createClient();
     const {

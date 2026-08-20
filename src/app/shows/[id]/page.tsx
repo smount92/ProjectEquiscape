@@ -21,7 +21,7 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { createAnonClient } from "@/lib/supabase/anon";
 import { getAdminClient } from "@/lib/supabase/admin";
-import { showPageV3Enabled, showsV2Enabled } from "@/lib/shows/flags";
+import { showPageV3Enabled } from "@/lib/shows/flags";
 import { resolveShowRoute } from "@/lib/shows/resolver";
 import { getAliases } from "@/lib/shows/queries";
 import LegacyShowPage from "./LegacyShowPage";
@@ -54,7 +54,7 @@ export async function generateMetadata({
     // Cookie-less anon client — metadata must never introduce a session-
     // bound read (that would defeat any future caching of this segment).
     const anon = createAnonClient();
-    const target = await resolveShowRoute(anon, id, showsV2Enabled());
+    const target = await resolveShowRoute(anon, id);
 
     if (target === "v2") {
         const { data: show } = await anon
@@ -132,7 +132,7 @@ export default async function ShowDetailPage({
     const { id } = await params;
     const supabase = await createClient();
 
-    const target = await resolveShowRoute(supabase, id, showsV2Enabled());
+    const target = await resolveShowRoute(supabase, id);
     if (target === "v2") {
         // Wave 4b — dark launch: the album layout only ever renders
         // with the flag on; off keeps today's page byte-identical.

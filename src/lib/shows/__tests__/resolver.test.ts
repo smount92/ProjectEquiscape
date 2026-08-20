@@ -47,24 +47,16 @@ describe("resolver — looksLikeUuid", () => {
 
 describe("resolver — resolveShowRoute", () => {
     it("routes a v2 show id to the v2 page", async () => {
-        expect(await resolveShowRoute(stubClient([V2_ID]), V2_ID, true)).toBe("v2");
+        expect(await resolveShowRoute(stubClient([V2_ID]), V2_ID)).toBe("v2");
     });
 
     it("falls through to legacy for ids the shows table doesn't know", async () => {
-        expect(await resolveShowRoute(stubClient([V2_ID]), LEGACY_ID, true)).toBe("legacy");
+        expect(await resolveShowRoute(stubClient([V2_ID]), LEGACY_ID)).toBe("legacy");
     });
 
     it("junk ids go legacy WITHOUT querying the database", async () => {
         const calls: string[] = [];
-        expect(await resolveShowRoute(stubClient([], calls), "junk-id", true)).toBe(
-            "legacy",
-        );
-        expect(calls).toEqual([]);
-    });
-
-    it("flag off → always legacy, no query", async () => {
-        const calls: string[] = [];
-        expect(await resolveShowRoute(stubClient([V2_ID], calls), V2_ID, false)).toBe(
+        expect(await resolveShowRoute(stubClient([], calls), "junk-id")).toBe(
             "legacy",
         );
         expect(calls).toEqual([]);
@@ -83,6 +75,6 @@ describe("resolver — resolveShowRoute", () => {
                 }),
             }),
         } as unknown as SupabaseClient;
-        expect(await resolveShowRoute(client, V2_ID, true)).toBe("legacy");
+        expect(await resolveShowRoute(client, V2_ID)).toBe("legacy");
     });
 });

@@ -16,7 +16,6 @@ import QualificationCardsSection, { type PassportQualificationCard } from"@/comp
 import TitlesSection from"@/components/shows/TitlesSection";
 import { getHorseTitles, getOwnerHorseLadder } from"@/lib/shows/horseTitles";
 import { titlePrefix } from"@/lib/shows/titles";
-import { showsV2Enabled } from"@/lib/shows/flags";
 import { resolvePlacingHrefs } from"@/lib/shows/placingShare";
 import { RESULTS_STATUSES } from"@/lib/shows/gallery";
 import type { CardStatus, ShowStatus } from"@/lib/shows/types";
@@ -204,7 +203,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  // class at most once. Results-published shows only: the placing
  // page 404s pre-publish, so no dead Share links render.
  let placingHrefs: Record<string, string> = {};
- if (showsV2Enabled()) {
+ {
  const linkedShowIds = [
  ...new Set(
  showRecords
@@ -259,7 +258,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  // and the owner is always current_owner_id (the Safe-Trade hook
  // re-points cards when the horse changes hands).
  let qualificationCards: PassportQualificationCard[] = [];
- if (showsV2Enabled()) {
+ {
  const { data: rawCards } = await supabase
  .from("qualification_cards")
  .select("id, earned_place, show_year, status, issued_at, shows(title), show_classes(name)")
@@ -283,9 +282,10 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  // ── MHH Titles (159) — permanent, public record; [] until pasted ──
  // Owner's passport also gets the LADDER: progress toward unearned
  // titles ("1 more card · a different judge"), career points.
- const [horseTitles, titleLadder] = showsV2Enabled()
- ? await Promise.all([getHorseTitles(horseId), getOwnerHorseLadder(supabase, horseId)])
- : [[], undefined];
+ const [horseTitles, titleLadder] = await Promise.all([
+ getHorseTitles(horseId),
+ getOwnerHorseLadder(supabase, horseId),
+ ]);
  const namePrefix = titlePrefix(horseTitles.map((t) => t.code));
 
  const { data: rawPedigree } = await supabase

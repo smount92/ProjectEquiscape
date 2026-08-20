@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { referencePagesEnabled } from "@/lib/catalog/referenceUrl";
-import { showsV2Enabled } from "@/lib/shows/flags";
+
 
 /**
  * sitemap.xml — Tells search engines about all discoverable pages.
@@ -236,12 +236,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // non-draft status is anon-visible on the show page itself (RLS policy
     // "Public reads non-draft shows", migration 118) — draft is the only
     // status that never renders publicly — so this uses the same anon-safe
-    // server client as the catalog reference query above. Gated behind
-    // NEXT_PUBLIC_SHOWS_V2 (default off, src/lib/shows/flags.ts) — same
-    // reasoning as referencePagesEnabled() above: never advertise URLs the
-    // resolver would fall through to the legacy show system for.
+    // server client as the catalog reference query above.
     let showEntries: MetadataRoute.Sitemap = [];
-    if (showsV2Enabled()) try {
+    try {
         const supabase = await createClient();
         const PAGE = 1000;
         const SHOW_CAP = 5_000;

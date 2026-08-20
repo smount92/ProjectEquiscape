@@ -12,7 +12,6 @@
 import { notFound } from "next/navigation";
 
 import { getRingBoard } from "@/app/actions/shows-v2-ring";
-import { showsV2Enabled } from "@/lib/shows/flags";
 import RingBoard from "@/components/shows/RingBoard";
 
 export const dynamic = "force-dynamic";
@@ -27,7 +26,6 @@ export default async function RingBoardPage({
 }: {
     params: Promise<{ id: string }>;
 }) {
-    if (!showsV2Enabled()) notFound();
 
     const { id } = await params;
     const result = await getRingBoard({ showId: id });

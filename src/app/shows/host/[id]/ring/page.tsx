@@ -10,7 +10,6 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import { getRingConsole } from "@/app/actions/shows-v2-ring";
-import { showsV2Enabled } from "@/lib/shows/flags";
 import { createClient } from "@/lib/supabase/server";
 import CommandCenterLayout from "@/components/layouts/CommandCenterLayout";
 import RingConsole from "@/components/shows/RingConsole";
@@ -27,7 +26,6 @@ export default async function RingConsolePage({
 }: {
     params: Promise<{ id: string }>;
 }) {
-    if (!showsV2Enabled()) notFound();
 
     const supabase = await createClient();
     const {

@@ -19,7 +19,6 @@
 import { NextResponse } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
-import { showsV2Enabled } from "@/lib/shows/flags";
 import {
     getAliases,
     getHorseNames,
@@ -33,10 +32,6 @@ export async function GET(
     _request: Request,
     { params }: { params: Promise<{ showId: string }> },
 ) {
-    if (!showsV2Enabled()) {
-        return NextResponse.json({ error: "Not found" }, { status: 404 });
-    }
-
     const { showId } = await params;
     const supabase = await createClient();
 

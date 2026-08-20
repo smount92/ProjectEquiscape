@@ -10,7 +10,6 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import { getJudgeQueue } from "@/app/actions/shows-v2";
-import { showsV2Enabled } from "@/lib/shows/flags";
 import { createClient } from "@/lib/supabase/server";
 import CommandCenterLayout from "@/components/layouts/CommandCenterLayout";
 import JudgeQueue from "@/components/shows/JudgeQueue";
@@ -27,7 +26,6 @@ export default async function JudgeQueuePage({
 }: {
     params: Promise<{ id: string }>;
 }) {
-    if (!showsV2Enabled()) notFound();
 
     const supabase = await createClient();
     const {

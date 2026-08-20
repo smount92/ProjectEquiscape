@@ -21,7 +21,6 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getPublicShows } from "@/app/actions/shows-v2";
 import { listApprovedExternalShows } from "@/app/actions/external-shows";
-import { showsV2Enabled } from "@/lib/shows/flags";
 import {
     buildCalendarMonths,
     closesSoon,
@@ -172,17 +171,15 @@ export default async function CalendarPage({
         data: { user },
     } = await supabase.auth.getUser();
 
-    // MHH-hosted shows (flag-gated like /shows) + approved external
-    // listings. Either source failing degrades to the other — a
-    // public SEO page never 500s over a half-missing data layer.
+    // MHH-hosted shows + approved external listings. Either source
+    // failing degrades to the other — a public SEO page never 500s
+    // over a half-missing data layer.
     let entries: CalendarEntry[] = [];
-    if (showsV2Enabled()) {
-        const mhh = await getPublicShows();
-        if (mhh.success) {
-            entries = mhh.shows
-                .map(fromMhhShow)
-                .filter((e): e is CalendarEntry => e !== null);
-        }
+    const mhh = await getPublicShows();
+    if (mhh.success) {
+        entries = mhh.shows
+            .map(fromMhhShow)
+            .filter((e): e is CalendarEntry => e !== null);
     }
     const external = await listApprovedExternalShows();
     if (external.success) {
