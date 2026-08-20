@@ -131,6 +131,18 @@ export default function ClassRoomPage({ room }: { room: ClassRoomData }) {
                         {room.room.sectionName} · {room.room.divisionName} · {statusLine(room)}
                         {!room.revealed && room.show.blindBrowsing && " · blind browsing — exhibitors revealed with results"}
                     </p>
+                    {/* Season-felt: the field this class is — what a win here means. */}
+                    {room.room.isQualifying && room.room.liveEntryCount > 0 && (
+                        <p className="m-0 text-xs text-(--leather-text-muted)">
+                            🏅 Qualifying class · {room.room.liveEntryCount}{" "}
+                            {room.room.liveEntryCount === 1 ? "entry" : "entries"} from{" "}
+                            {room.room.distinctExhibitors}{" "}
+                            {room.room.distinctExhibitors === 1 ? "exhibitor" : "exhibitors"} ·{" "}
+                            <Link href="/shows/rules" className="underline decoration-dotted hover:text-(--leather-text)">
+                                how points &amp; cards work
+                            </Link>
+                        </p>
+                    )}
                     {/* Ring walk: prev/next in run order. */}
                     {(room.prev || room.next) && (
                         <div className="mt-1 flex items-center justify-between gap-3 text-sm">

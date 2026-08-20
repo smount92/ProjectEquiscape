@@ -24,6 +24,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { canApplyCardAction } from "@/lib/shows/cards";
 import { championLabel } from "@/lib/shows/placings";
+import { MAX_ENTRIES_PER_OWNER_FOR_SIZE, placementPoints } from "@/lib/shows/points";
 import {
     GALLERY_STATUSES,
     RESULTS_STATUSES,
@@ -659,7 +660,7 @@ export async function getClassRoom(
     const { data: cls, error: cErr } = await supabase
         .from("show_classes")
         .select(
-            "id, name, class_number, status, results_published_at, show_sections!inner(name, show_divisions!inner(name, show_id))",
+            "id, name, class_number, status, results_published_at, is_qualifying, show_sections!inner(name, show_divisions!inner(name, show_id))",
         )
         .eq("id", parsed.data.classId)
         .maybeSingle();
@@ -671,6 +672,7 @@ export async function getClassRoom(
         class_number: string | null;
         status: string;
         results_published_at: string | null;
+        is_qualifying: boolean | null;
         show_sections: { name: string; show_divisions: { name: string; show_id: string } };
     };
     const showId = clsRow.show_sections.show_divisions.show_id;
@@ -768,6 +770,47 @@ export async function getClassRoom(
         }
     }
 
+    // ── Championship context (season-felt wave): what this class
+    // pays and which placings minted cards. Points use the same
+    // per-owner-capped payable size as the standings engine; cards
+    // come through the announced-only DEFINER RPC (164) and degrade
+    // to none until it's applied. ──
+    const distinctExhibitors = new Set(entries.map((e) => e.owner_id)).size;
+    const perOwnerCounts = new Map<string, number>();
+    for (const e of entries) {
+        perOwnerCounts.set(e.owner_id, (perOwnerCounts.get(e.owner_id) ?? 0) + 1);
+    }
+    let payableSize = 0;
+    for (const count of perOwnerCounts.values()) {
+        payableSize += Math.min(count, MAX_ENTRIES_PER_OWNER_FOR_SIZE);
+    }
+    const cardByHorse = new Map<string, { code: string; isStakes: boolean }>();
+    if (resultsPublished && entries.length > 0) {
+        try {
+            const rpc = supabase.rpc.bind(supabase) as unknown as (
+                fn: string,
+                args: { p_class_id: string },
+            ) => Promise<{ data: unknown; error: unknown }>;
+            const { data: cardRows, error: cardErr } = await rpc("get_class_cards", {
+                p_class_id: clsRow.id,
+            });
+            if (!cardErr && Array.isArray(cardRows)) {
+                for (const c of cardRows as {
+                    horse_id: string;
+                    code: string;
+                    is_stakes: boolean | null;
+                }[]) {
+                    cardByHorse.set(c.horse_id, {
+                        code: c.code,
+                        isStakes: c.is_stakes === true,
+                    });
+                }
+            }
+        } catch {
+            // Pre-164: the room simply shows no card chips.
+        }
+    }
+
     // Documentation cards (RLS: readable exactly when the entry is).
     const docByEntry = new Map<string, { kind: string; title: string; bodyMd: string }>();
     const docIds = entries.flatMap((e) => (e.document_id ? [e.document_id] : []));
@@ -835,6 +878,17 @@ export async function getClassRoom(
         place: resultsPublished
             ? ((placeByEntry.get(e.id) as ClassRoomEntry["place"]) ?? null)
             : null,
+        pointsEarned:
+            resultsPublished && placeByEntry.has(e.id)
+                ? placementPoints(placeByEntry.get(e.id) ?? null, payableSize, distinctExhibitors)
+                : null,
+        cardCode:
+            resultsPublished && (placeByEntry.get(e.id) ?? 99) <= 2
+                ? (cardByHorse.get(e.horse_id)?.code ?? null)
+                : null,
+        cardIsStakes:
+            resultsPublished && (cardByHorse.get(e.horse_id)?.isStakes ?? false) &&
+            (placeByEntry.get(e.id) ?? 99) <= 2,
         critique: resultsPublished ? (e.critique_text ?? null) : null,
         photoCritique: resultsPublished ? (e.critique_photo_text ?? null) : null,
         document: docByEntry.get(e.id) ?? null,
@@ -863,6 +917,9 @@ export async function getClassRoom(
                 classStatus: clsRow.status as ClassRoomData["room"]["classStatus"],
                 resultsPublished,
                 resultsPublishedAt: clsRow.results_published_at,
+                isQualifying: clsRow.is_qualifying === true,
+                liveEntryCount: entries.length,
+                distinctExhibitors,
             },
             revealed,
             votingEnabled,

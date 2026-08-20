@@ -125,20 +125,42 @@ export default function ClassRoomLineup({
                             className={`ledger-card flex flex-col gap-3 ${entry.isOwn ? "ring-1 ring-ring" : ""}`}
                             aria-label={`Entry ${entry.entryNumber ?? ""} — ${entry.horseName}`}
                         >
-                            <div className="flex items-baseline justify-between gap-2">
+                            <div className="flex flex-wrap items-baseline justify-between gap-2">
                                 <span className="ledger-tab">
                                     {isPlaced
                                         ? placeLabel(entry.place as Place)
                                         : `Entry ${entry.entryNumber ?? "—"}`}
                                 </span>
-                                {isPlaced && (
-                                    <span className="text-xs text-muted-foreground">
-                                        Leg tag {entry.entryNumber ?? "—"}
-                                    </span>
-                                )}
-                                {entry.isOwn && !isPlaced && (
-                                    <span className="text-xs text-muted-foreground">Your entry</span>
-                                )}
+                                {/* Season-felt: a placing SAYS what it paid
+                                    and whether it minted a card. */}
+                                <span className="flex items-center gap-1.5">
+                                    {isPlaced && entry.pointsEarned !== null && entry.pointsEarned > 0 && (
+                                        <span className="rounded-full bg-forest/10 px-2 py-0.5 text-xs font-bold text-forest tabular-nums">
+                                            +{entry.pointsEarned} pt{entry.pointsEarned === 1 ? "" : "s"}
+                                        </span>
+                                    )}
+                                    {entry.cardCode && (
+                                        <Link
+                                            href={`/cards/${entry.cardCode}`}
+                                            className={`rounded-full px-2 py-0.5 text-xs font-bold no-underline ${
+                                                entry.cardIsStakes
+                                                    ? "bg-[color:var(--color-warning)]/20 text-[color:var(--color-warning)]"
+                                                    : "bg-forest/10 text-forest"
+                                            }`}
+                                            title="View this qualification card"
+                                        >
+                                            {entry.cardIsStakes ? "🎖️ STAKES card" : "🎖️ Card"}
+                                        </Link>
+                                    )}
+                                    {isPlaced && (
+                                        <span className="text-xs text-muted-foreground">
+                                            Leg tag {entry.entryNumber ?? "—"}
+                                        </span>
+                                    )}
+                                    {entry.isOwn && !isPlaced && (
+                                        <span className="text-xs text-muted-foreground">Your entry</span>
+                                    )}
+                                </span>
                             </div>
 
                             {entry.photoUrl ? (

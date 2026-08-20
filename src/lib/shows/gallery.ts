@@ -104,6 +104,12 @@ export interface ClassRoomEntry {
     isOwn: boolean;
     /** Present once THIS CLASS's results are published. */
     place: Place | null;
+    /** Season points this placing paid (published classes only; 0 =
+     *  placed but unpaid, e.g. self-only competition). */
+    pointsEarned: number | null;
+    /** A live qualification card was minted for this placing. */
+    cardCode: string | null;
+    cardIsStakes: boolean;
     /** Judge feedback on the model — published classes only. */
     critique: string | null;
     /** Judge feedback on the photograph — published classes only. */
@@ -143,6 +149,10 @@ export interface ClassRoomData {
         /** THIS class's results are public (rolling reveal or show completion). */
         resultsPublished: boolean;
         resultsPublishedAt: string | null;
+        /** Championship context (season-felt wave): the live field. */
+        isQualifying: boolean;
+        liveEntryCount: number;
+        distinctExhibitors: number;
     };
     /** Owner identities included in this payload. */
     revealed: boolean;
