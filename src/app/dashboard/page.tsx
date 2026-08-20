@@ -25,6 +25,7 @@ import InsuranceReportButton from"@/components/InsuranceReportButton";
 import TransferHistorySection from"@/components/TransferHistorySection";
 import PendingTransfersSection from"@/components/PendingTransfersSection";
 import NanDashboardWidget from"@/components/NanDashboardWidget";
+import MhhSeasonWidget from"@/components/shows/MhhSeasonWidget";
 import ShowHistoryWidget from"@/components/ShowHistoryWidget";
 import { getShowHistory } from"@/app/actions/shows";
 import CommandCenterLayout from"@/components/layouts/CommandCenterLayout";
@@ -422,8 +423,9 @@ async function DashboardContent({ userId, page }: { userId: string; page: number
   <PendingTransfersSection />
   </Suspense>
 
-  {/* NAN Qualification Dashboard */}
+  {/* MHH season first, NAN dashboard below (owner decision) */}
   <Suspense fallback={null}>
+  <MhhSeasonWidget />
   <NanDashboardWidget />
   <ShowHistoryWidgetWrapper />
   </Suspense>

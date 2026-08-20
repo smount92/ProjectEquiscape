@@ -34,6 +34,8 @@ export interface PublicPlacingData {
         status: ShowStatus;
         /** The result's date (same rule as the trophy case). */
         resultDate: string | null;
+        /** Championship Series framing on the share page. */
+        isMhhQualifying: boolean;
     };
     entry: {
         id: string;
@@ -94,7 +96,7 @@ export async function loadPublicPlacing(
     // ── The show — results must be PUBLISHED ──
     const { data: show } = await supabase
         .from("shows")
-        .select("id, title, mode, status, show_date, entries_close_at, judging_ends_at")
+        .select("id, title, mode, status, show_date, entries_close_at, judging_ends_at, is_mhh_qualifying")
         .eq("id", showId)
         .maybeSingle();
     if (!show || !RESULTS_STATUSES.includes(show.status as ShowStatus)) return null;
@@ -165,6 +167,7 @@ export async function loadPublicPlacing(
             title: show.title as string,
             mode: show.mode as ShowMode,
             status: show.status as ShowStatus,
+            isMhhQualifying: (show.is_mhh_qualifying as boolean | null) === true,
             resultDate: resolveShowRecordDate({
                 id: show.id as string,
                 title: show.title as string,

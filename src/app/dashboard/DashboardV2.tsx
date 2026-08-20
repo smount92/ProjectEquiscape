@@ -17,6 +17,7 @@ import ExportButton from "@/components/ExportButton";
 import InsuranceReportButton from "@/components/InsuranceReportButton";
 import TransferHistorySection from "@/components/TransferHistorySection";
 import NanDashboardWidget from "@/components/NanDashboardWidget";
+import MhhSeasonWidget from "@/components/shows/MhhSeasonWidget";
 import ShowHistoryWidget from "@/components/ShowHistoryWidget";
 import ShowLifeRail from "@/components/shows/ShowLifeRail";
 import { getShowHistory } from "@/app/actions/shows";
@@ -212,6 +213,9 @@ export default async function DashboardV2({
                     )}
 
                     <Suspense fallback={null}>
+                        {/* MHH first — the NAN widget stays below for
+                            members who track it (owner decision). */}
+                        <MhhSeasonWidget />
                         <NanDashboardWidget />
                         <ShowHistoryWidgetWrapper />
                     </Suspense>

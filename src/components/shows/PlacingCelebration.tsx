@@ -129,8 +129,10 @@ export default function PlacingCelebration({
                         against the rosette. */}
                     <div className="min-w-[14rem] flex-1">
                         <p className="m-0 text-xs font-semibold tracking-[0.18em] uppercase text-(--leather-text-muted)">
-                            Model Horse Hub · {show.mode === "live" ? "Live show" : "Photo show"}{" "}
-                            result
+                            Model Horse Hub ·{" "}
+                            {show.isMhhQualifying
+                                ? "MHH Championship Series result"
+                                : `${show.mode === "live" ? "Live show" : "Photo show"} result`}
                         </p>
                         <h1 className="m-0 mt-1 font-serif text-2xl leading-tight font-bold tracking-tight text-(--leather-text) sm:text-3xl">
                             {horseName} — {placeLabel(place)} · {data.className} at {show.title}
@@ -206,6 +208,14 @@ export default function PlacingCelebration({
                 <Button asChild variant="outline">
                     <Link href={`/community/${entry.horseId}`}>View {horseName}&rsquo;s passport</Link>
                 </Button>
+                {show.isMhhQualifying && (
+                    <Link
+                        href="/shows/rules"
+                        className="text-sm text-muted-foreground underline decoration-dotted hover:text-foreground"
+                    >
+                        How points, cards &amp; titles work
+                    </Link>
+                )}
             </div>
 
             {!authed && (
