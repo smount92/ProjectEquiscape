@@ -27,21 +27,22 @@ function loadDismissed(): Set<string> {
 export default function AnnouncementBar({ announcements }: { announcements: Announcement[] }) {
     // Render nothing on the server AND the first client paint —
     // dismissal state lives in localStorage, and rendering before
-    // reading it would flash dismissed banners back at the user.
-    const [dismissed, setDismissed] = useState<Set<string> | null>(null);
+    // reading it would flash dismissed banners back at the user
+    // (the CookieConsent hydration pattern: appear only once the
+    // effect confirms there is something undismissed to show).
+    const [visible, setVisible] = useState<Announcement[]>([]);
     useEffect(() => {
-        setDismissed(loadDismissed());
-    }, []);
+        const dismissed = loadDismissed();
+        const undismissed = announcements.filter((a) => !dismissed.has(a.id));
+        if (undismissed.length > 0) setVisible(undismissed);
+    }, [announcements]);
 
-    if (!dismissed) return null;
-    const visible = announcements.filter((a) => !dismissed.has(a.id));
     if (visible.length === 0) return null;
 
     const dismiss = (id: string) => {
-        const next = new Set(dismissed);
-        next.add(id);
-        setDismissed(next);
+        setVisible((prev) => prev.filter((a) => a.id !== id));
         try {
+            const next = new Set([...loadDismissed(), id]);
             localStorage.setItem(DISMISS_KEY, JSON.stringify([...next]));
         } catch {
             // Private browsing — dismissal just won't persist.

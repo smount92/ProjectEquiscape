@@ -31,7 +31,14 @@ export default function AdminAnnouncementsCard() {
         if (result.success) setRows(result.announcements);
     };
     useEffect(() => {
-        void refresh();
+        let cancelled = false;
+        (async () => {
+            const result = await listAnnouncements();
+            if (!cancelled && result.success) setRows(result.announcements);
+        })();
+        return () => {
+            cancelled = true;
+        };
     }, []);
 
     const submit = () => {
