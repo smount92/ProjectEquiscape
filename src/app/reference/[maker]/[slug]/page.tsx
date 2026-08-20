@@ -8,7 +8,7 @@ import CatalogSubMasthead from "@/components/catalog/CatalogSubMasthead";
 import { Button } from "@/components/ui/button";
 import WantButton from "@/components/reference/WantButton";
 import ReferencePhotoGallery from "@/components/reference/ReferencePhotoGallery";
-import { referenceHref, referencePagesEnabled } from "@/lib/catalog/referenceUrl";
+import { referenceHref } from "@/lib/catalog/referenceUrl";
 import { createAnonClient } from "@/lib/supabase/anon";
 import {
     resolveReferenceItem,
@@ -57,8 +57,6 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://modelhorsehub.com";
  * params list and dynamicParams + ISR cover every page on first request.
  */
 export async function generateStaticParams(): Promise<{ maker: string; slug: string }[]> {
-    if (!referencePagesEnabled()) return [];
-
     try {
         const supabase = createAnonClient();
 
@@ -157,9 +155,6 @@ function medianTag(price: number | null, median: number): { text: string; over: 
 }
 
 export default async function ReferencePage({ params }: Props) {
-    // Ships dark: 404 until NEXT_PUBLIC_REFERENCE_PAGES=1 flips it on.
-    if (!referencePagesEnabled()) notFound();
-
     const { maker, slug } = await params;
     const item = await resolveReferenceItem(maker, slug);
     if (!item) notFound();

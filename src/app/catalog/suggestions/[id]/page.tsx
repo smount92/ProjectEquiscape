@@ -7,7 +7,7 @@ import SuggestionCommentThread from"@/components/SuggestionCommentThread";
 import SuggestionAdminActions from"@/components/SuggestionAdminActions";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import CatalogSubMasthead from"@/components/catalog/CatalogSubMasthead";
-import { referenceHref, referencePagesEnabled } from"@/lib/catalog/referenceUrl";
+import { referenceHref } from"@/lib/catalog/referenceUrl";
 import { MessageCircle, Shield } from"lucide-react";
 
 interface Props {
@@ -217,7 +217,7 @@ export default async function SuggestionDetailPage({ params }: Props) {
  {catalogItem && (
  <div className="text-forest">
  <span>For: </span>
- <Link href={referencePagesEnabled() ? referenceHref(catalogItem) : `/catalog/${catalogItem.id}`}>
+ <Link href={referenceHref(catalogItem)}>
  {catalogItem.title} by {catalogItem.maker}
  </Link>
  </div>

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { referenceHref, referencePagesEnabled } from "@/lib/catalog/referenceUrl";
+import { referenceHref } from "@/lib/catalog/referenceUrl";
 import { CATEGORY_LABELS } from "@/lib/catalog/taxonomy";
 
 /**
@@ -57,11 +57,7 @@ export default function CatalogResultsTable({
                         <tr key={item.id} className="transition-colors hover:bg-muted/50">
                             <td className="py-2 pr-4 font-semibold">
                                 <Link
-                                    href={
-                                        referencePagesEnabled()
-                                            ? referenceHref(item)
-                                            : `/catalog/${item.id}`
-                                    }
+                                    href={referenceHref(item)}
                                     className="text-foreground no-underline hover:text-forest hover:underline"
                                 >
                                     {item.title}

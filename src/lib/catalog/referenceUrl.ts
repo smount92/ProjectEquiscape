@@ -8,9 +8,10 @@
  */
 
 /**
- * Kill-switch for the public reference pages (MOVE 1). Ships dark: the route,
- * its sitemap entries, and internal links all stay off until
- * NEXT_PUBLIC_REFERENCE_PAGES=1 (set locally to preview, then in Vercel to go live).
+ * SEO kill-switch — live in prod (NEXT_PUBLIC_REFERENCE_PAGES=1). The routes
+ * and internal links are now unconditional; this gates ONLY the sitemap's
+ * /reference entries, so unsetting the var quietly de-advertises the pages to
+ * crawlers without breaking any link on the site.
  */
 export function referencePagesEnabled(): boolean {
     return process.env.NEXT_PUBLIC_REFERENCE_PAGES === "1";

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { referenceHref, referencePagesEnabled } from "@/lib/catalog/referenceUrl";
+import { referenceHref } from "@/lib/catalog/referenceUrl";
 import { CATEGORY_LABELS } from "@/lib/catalog/taxonomy";
 import {
     disambiguationLine,
@@ -69,11 +69,7 @@ export default function CatalogCardsList({
                 return (
                     <li key={item.id}>
                         <Link
-                            href={
-                                referencePagesEnabled()
-                                    ? referenceHref(item)
-                                    : `/catalog/${item.id}`
-                            }
+                            href={referenceHref(item)}
                             className="group flex items-center gap-3 rounded-lg border border-input bg-card px-3 py-2.5 no-underline transition-colors hover:border-forest hover:bg-muted/40"
                         >
                             {/* 64px identification thumbnail — community photo or 🐴 */}

@@ -10,7 +10,6 @@
 
 import Link from "next/link";
 import { BookOpen, FileText, Lightbulb } from "lucide-react";
-import { referencePagesEnabled } from "@/lib/catalog/referenceUrl";
 
 export default function CatalogMasthead({ totalCount }: { totalCount: number }) {
     return (
@@ -66,18 +65,14 @@ export default function CatalogMasthead({ totalCount }: { totalCount: number }) 
                 The community-maintained record of every model — Breyer, Stone, and artist resins.
                 Search by name or maker to find a model&apos;s page, or dig into color and year
                 under Advanced.
-                {referencePagesEnabled() && (
-                    <>
-                        {" "}
-                        <Link
-                            href="/reference"
-                            className="font-bold whitespace-nowrap not-italic no-underline hover:underline"
-                            style={{ color: "var(--leather-text)" }}
-                        >
-                            Browse by maker →
-                        </Link>
-                    </>
-                )}
+                {" "}
+                <Link
+                    href="/reference"
+                    className="font-bold whitespace-nowrap not-italic no-underline hover:underline"
+                    style={{ color: "var(--leather-text)" }}
+                >
+                    Browse by maker →
+                </Link>
             </p>
         </div>
     );

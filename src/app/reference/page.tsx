@@ -1,9 +1,8 @@
-import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import FocusLayout from "@/components/layouts/FocusLayout";
 import CatalogSubMasthead from "@/components/catalog/CatalogSubMasthead";
-import { referencePagesEnabled } from "@/lib/catalog/referenceUrl";
+
 import { getMakerIndex } from "@/app/actions/maker-hubs";
 
 // Maker index — /reference lists every maker in the catalog with counts,
@@ -16,7 +15,6 @@ export const revalidate = 86400; // 24h ISR
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://modelhorsehub.com";
 
 export async function generateMetadata(): Promise<Metadata> {
-    if (!referencePagesEnabled()) return { title: "Not Found" };
     const title = "Model Horse Makers — Reference Catalog | Model Horse Hub";
     const description =
         "Browse the reference catalog by maker: Breyer, Peter Stone, artist resins, and more. The community-maintained record of every model, with specs, photos, and Blue Book values.";
@@ -37,10 +35,6 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ReferenceIndexPage() {
-    // Ships dark with the rest of the reference surface: 404 until
-    // NEXT_PUBLIC_REFERENCE_PAGES=1.
-    if (!referencePagesEnabled()) notFound();
-
     const makers = await getMakerIndex();
     const total = makers.reduce((sum, m) => sum + m.count, 0);
 

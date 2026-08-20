@@ -7,7 +7,7 @@ import ExplorerLayout from "@/components/layouts/ExplorerLayout";
 import PageMasthead from "@/components/layouts/PageMasthead";
 import PublicCardsSection from "@/components/shows/PublicCardsSection";
 import { Button } from "@/components/ui/button";
-import { referenceHref, referencePagesEnabled } from "@/lib/catalog/referenceUrl";
+import { referenceHref } from "@/lib/catalog/referenceUrl";
 import { PARCHMENT_INK } from "@/lib/theme/parchment";
 import { getPublicHorseRecords } from "@/lib/shows/publicRecords";
 import {
@@ -186,7 +186,7 @@ export default async function AnonPassport({ horseId }: { horseId: string }) {
     }));
 
     const refHref =
-        referencePagesEnabled() && horse.catalog_id && cat
+        horse.catalog_id && cat
             ? referenceHref({
                   id: horse.catalog_id,
                   maker: cat.maker,

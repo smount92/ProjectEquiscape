@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import FocusLayout from "@/components/layouts/FocusLayout";
 import CatalogSubMasthead from "@/components/catalog/CatalogSubMasthead";
-import { referenceHref, referencePagesEnabled } from "@/lib/catalog/referenceUrl";
+import { referenceHref } from "@/lib/catalog/referenceUrl";
 import { getMakerIndex, getMakerMolds, getMakerRecent } from "@/app/actions/maker-hubs";
 
 interface Props {
@@ -22,7 +22,6 @@ export const dynamicParams = true;
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://modelhorsehub.com";
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-    if (!referencePagesEnabled()) return { title: "Not Found" };
     const { maker } = await params;
     const summary = (await getMakerIndex()).find((m) => m.makerSlug === maker);
     if (!summary) return { title: "Maker Not Found" };
@@ -47,10 +46,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function MakerHubPage({ params }: Props) {
-    // Ships dark with the rest of the reference surface: 404 until
-    // NEXT_PUBLIC_REFERENCE_PAGES=1.
-    if (!referencePagesEnabled()) notFound();
-
     const { maker } = await params;
     const index = await getMakerIndex();
     const summary = index.find((m) => m.makerSlug === maker);

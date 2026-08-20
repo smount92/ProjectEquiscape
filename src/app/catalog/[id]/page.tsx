@@ -7,7 +7,7 @@ import FocusLayout from"@/components/layouts/FocusLayout";
 import CatalogSubMasthead from"@/components/catalog/CatalogSubMasthead";
 import { buildEbaySearchUrl } from"@/lib/utils/ebayAffiliate";
 import { Button } from "@/components/ui/button";
-import { referenceHref, referencePagesEnabled } from"@/lib/catalog/referenceUrl";
+import { referenceHref } from"@/lib/catalog/referenceUrl";
 import { FileEdit, Plus } from"lucide-react";
 
 interface Props {
@@ -22,16 +22,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
  if (!data) return { title:"Entry Not Found" };
  const d = data as { title: string; maker: string; maker_slug: string | null; slug: string | null };
- // When reference pages are live, they're the canonical public view — point
- // this (now edit-only) page's canonical there so Google consolidates the
+ // Reference pages are the canonical public view — point this (now
+ // edit-only) page's canonical there so Google consolidates the
  // duplicate onto /reference instead of splitting signal.
- const canonicalRef = referencePagesEnabled()
- ? `${process.env.NEXT_PUBLIC_APP_URL || "https://modelhorsehub.com"}${referenceHref({ id, maker: d.maker, title: d.title, maker_slug: d.maker_slug, slug: d.slug })}`
- : undefined;
+ const canonicalRef = `${process.env.NEXT_PUBLIC_APP_URL || "https://modelhorsehub.com"}${referenceHref({ id, maker: d.maker, title: d.title, maker_slug: d.maker_slug, slug: d.slug })}`;
  return {
  title: `${d.title} by ${d.maker} — Reference Catalog`,
  description: `View details for ${d.title} by ${d.maker} in the Model Horse Hub reference catalog.`,
- ...(canonicalRef ? { alternates: { canonical: canonicalRef } } : {}),
+ alternates: { canonical: canonicalRef },
  };
 }
 

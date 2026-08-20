@@ -4,7 +4,7 @@ import type { Metadata } from"next";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import CatalogSubMasthead from"@/components/catalog/CatalogSubMasthead";
 import { Button } from "@/components/ui/button";
-import { referenceHref, referencePagesEnabled } from"@/lib/catalog/referenceUrl";
+import { referenceHref } from"@/lib/catalog/referenceUrl";
 
 type ChangelogEntry = {
  id: string;
@@ -18,10 +18,10 @@ type ChangelogEntry = {
   | null;
 };
 
-/** Reference page (when live) for a changelog entry's catalog item, else the curation page. */
+/** Reference page for a changelog entry's catalog item, else the curation page. */
 function entryHref(entry: ChangelogEntry): string {
  const cat = entry.catalog_items;
- if (referencePagesEnabled() && cat && entry.catalog_item_id) {
+ if (cat && entry.catalog_item_id) {
   return referenceHref({
    id: entry.catalog_item_id,
    maker: cat.maker,

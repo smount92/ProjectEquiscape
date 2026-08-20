@@ -7,7 +7,7 @@ import WishlistSearch from"@/components/WishlistSearch";
 import { getPublicImageUrls } from"@/lib/utils/storage";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import { Button } from"@/components/ui/button";
-import { referenceHref, referencePagesEnabled } from"@/lib/catalog/referenceUrl";
+import { referenceHref } from"@/lib/catalog/referenceUrl";
 
 export const metadata = {
  title:"My Want List",
@@ -170,9 +170,7 @@ export default async function WishlistPage() {
     :"🏭";
    const matches = matchMap.get(item.id) ?? [];
    const catalogHref = item.catalog_id
-    ? referencePagesEnabled()
-     ? referenceHref({ id: item.catalog_id, maker, title })
-     : `/catalog/${item.catalog_id}`
+    ? referenceHref({ id: item.catalog_id, maker, title })
     : null;
 
    return (

@@ -26,7 +26,7 @@ import AssetDetailRenderer from"@/components/AssetDetailRenderer";
 import { getAssetConfig } from"@/lib/config/assetFields";
 import type { AssetCategory } from"@/lib/types/database";
 import { Button } from "@/components/ui/button";
-import { referenceHref, referencePagesEnabled } from"@/lib/catalog/referenceUrl";
+import { referenceHref } from"@/lib/catalog/referenceUrl";
 import AnonPassport from"@/components/passport/AnonPassport";
 import PublicCardsSection from"@/components/shows/PublicCardsSection";
 import { PARCHMENT_INK } from"@/lib/theme/parchment";
@@ -286,10 +286,9 @@ editionSize: rawPedigree.edition_size,
  }
  : null;
 
- // Link to this model's public reference-catalog entry (flag-gated). Shown to
- // logged-in viewers now; becomes anon-visible once the passport is opened up.
+ // Link to this model's public reference-catalog entry.
  const refHref =
- referencePagesEnabled() && horse.catalog_id && cat
+ horse.catalog_id && cat
  ? referenceHref({
  id: horse.catalog_id,
  maker: cat.maker,

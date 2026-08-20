@@ -6,7 +6,7 @@ import MarketFilters from"@/components/MarketFilters";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import PageMasthead from"@/components/layouts/PageMasthead";
 import { Button } from "@/components/ui/button";
-import { referenceHref, referencePagesEnabled } from "@/lib/catalog/referenceUrl";
+import { referenceHref } from "@/lib/catalog/referenceUrl";
 
 export const metadata: Metadata = {
     title: "Model Horse Price Guide — The Blue Book",
@@ -175,10 +175,9 @@ export default async function MarketPricePage({
      </div>
     </div>
     );
-    // Link to the reference page only when it's live (ships dark otherwise).
     // Stored slugs (migration 129) — the client-side slugify fallback can't
     // reproduce collision suffixes (-2, item-<id8>) and 404s on them.
-    return referencePagesEnabled() ? (
+    return (
      <Link
       key={key}
       href={referenceHref({
@@ -192,8 +191,6 @@ export default async function MarketPricePage({
      >
       {card}
      </Link>
-    ) : (
-     <div key={key}>{card}</div>
     );
     })}
    </div>
