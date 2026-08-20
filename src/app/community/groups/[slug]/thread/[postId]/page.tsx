@@ -2,13 +2,11 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import { getGroup } from "@/app/actions/groups";
 import { getThread } from "@/app/actions/groups-forum";
-import { groupsForumEnabled } from "@/lib/groups/flags";
 import { resolveAvatarUrls } from "@/lib/utils/avatars.server";
 import ThreadView from "@/components/groups/ThreadView";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string; postId: string }> }) {
-    if (!groupsForumEnabled()) return { title: "Not Found" };
     const { slug } = await params;
     const group = await getGroup(slug);
     return { title: group ? `Thread — ${group.name}` : "Thread" };
@@ -19,9 +17,6 @@ export default async function GroupThreadPage({
 }: {
     params: Promise<{ slug: string; postId: string }>;
 }) {
-    // Flag off = this route does not exist.
-    if (!groupsForumEnabled()) notFound();
-
     const { slug, postId } = await params;
     const supabase = await createClient();
     const {
