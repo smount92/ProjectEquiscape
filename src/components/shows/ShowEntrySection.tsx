@@ -53,6 +53,8 @@ interface ShowEntrySectionProps {
     myEntries: MyShowEntry[];
     horses: EntrantHorse[];
     authed: boolean;
+    /** Season for the card-gate badges (defaults to Season 1). */
+    showYear?: number | null;
 }
 
 export default function ShowEntrySection({
@@ -60,6 +62,7 @@ export default function ShowEntrySection({
     mode,
     status,
     divisions,
+    showYear,
     myEntries,
     horses,
     authed,
@@ -218,6 +221,7 @@ export default function ShowEntrySection({
                                                     <PublicClassRow
                                                         key={cls.id}
                                                         cls={cls}
+                                                        showYear={showYear}
                                                         canEnter={
                                                             canEnter && effectiveHorses.length > 0
                                                         }

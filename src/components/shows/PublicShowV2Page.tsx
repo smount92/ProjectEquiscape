@@ -329,6 +329,7 @@ export default async function PublicShowV2Page({ showId }: { showId: string }) {
                         myEntries={myEntries}
                         horses={horses}
                         authed={!!user}
+                        showYear={show.showYear}
                     />
                 </div>
 

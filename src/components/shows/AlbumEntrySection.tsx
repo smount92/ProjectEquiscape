@@ -47,6 +47,8 @@ interface AlbumEntrySectionProps {
     myEntries: MyShowEntry[];
     horses: EntrantHorse[];
     authed: boolean;
+    /** Season for the card-gate badges (defaults to Season 1). */
+    showYear?: number | null;
 }
 
 export default function AlbumEntrySection({
@@ -54,6 +56,7 @@ export default function AlbumEntrySection({
     mode,
     status,
     divisions,
+    showYear,
     myEntries,
     horses,
     authed,
@@ -175,6 +178,7 @@ export default function AlbumEntrySection({
                     canEnter={canEnter && effectiveHorses.length > 0}
                     onEnter={openDialog}
                     showId={showId}
+                    showYear={showYear}
                 />
             </section>
 

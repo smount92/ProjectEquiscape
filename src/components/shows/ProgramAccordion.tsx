@@ -30,6 +30,8 @@ interface ProgramAccordionProps {
     /** v4 class rooms: when set (and the flag is on), each class row
      *  grows a "class room" link to /shows/[showId]/class/[classId]. */
     showId?: string;
+    /** Season for the card-gate badges (defaults to the Season 1 gate). */
+    showYear?: number | null;
 }
 
 function divisionEntryCount(division: ConsoleDivision): number {
@@ -49,6 +51,7 @@ export default function ProgramAccordion({
     onEnter,
     defaultOpenIndex = null,
     showId,
+    showYear,
 }: ProgramAccordionProps) {
     const classRooms = !!showId && showsV4Enabled();
     if (divisions.length === 0) {
@@ -112,6 +115,7 @@ export default function ProgramAccordion({
                                                             cls={cls}
                                                             canEnter={canEnter}
                                                             onEnter={onEnter}
+                                                            showYear={showYear}
                                                             classRoomHref={
                                                                 classRooms
                                                                     ? `/shows/${showId}/class/${cls.id}`

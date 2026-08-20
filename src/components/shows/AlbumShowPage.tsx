@@ -112,6 +112,7 @@ export default async function AlbumShowPage({ showId }: { showId: string }) {
                     divisions={divisions}
                     horses={horses}
                     myEntryCount={liveEntryCount}
+                    showYear={show.showYear}
                 />
 
                 {staffRole && <StaffBanner show={show} role={staffRole} />}
@@ -182,6 +183,7 @@ export default async function AlbumShowPage({ showId }: { showId: string }) {
                         myEntries={myEntries}
                         horses={horses}
                         authed={!!user}
+                        showYear={show.showYear}
                     />
                 </div>
 

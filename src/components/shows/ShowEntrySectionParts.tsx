@@ -194,6 +194,9 @@ interface PublicClassRowProps {
     onEnter: (cls: ConsoleClass) => void;
     /** v4: when set, an inline "Class room →" link renders in the row. */
     classRoomHref?: string;
+    /** The show's season — picks the card gate in force (Season 1
+     *  vs permanent). Omitted = Season 1 gate. */
+    showYear?: number | null;
 }
 
 /**
@@ -202,8 +205,8 @@ interface PublicClassRowProps {
  * entrant into a recruiter — the program's best growth mechanic.
  * Uses the Season 1 gate until show pages carry show_year.
  */
-function QualifyingGateBadge({ cls }: { cls: ConsoleClass }) {
-    const gate = cardGateFor(null);
+function QualifyingGateBadge({ cls, showYear }: { cls: ConsoleClass; showYear?: number | null }) {
+    const gate = cardGateFor(showYear ?? null);
     const entriesShort = Math.max(0, gate.entries - cls.entryCount);
     const exhibitorsShort = Math.max(0, gate.exhibitors - cls.exhibitorCount);
     if (cls.entryCount === 0) {
@@ -223,7 +226,7 @@ function QualifyingGateBadge({ cls }: { cls: ConsoleClass }) {
     );
 }
 
-export function PublicClassRow({ cls, canEnter, onEnter, classRoomHref }: PublicClassRowProps) {
+export function PublicClassRow({ cls, canEnter, onEnter, classRoomHref, showYear }: PublicClassRowProps) {
     const cancelled = cls.status === "cancelled";
     const combined = cls.status === "combined";
     return (
@@ -244,7 +247,7 @@ export function PublicClassRow({ cls, canEnter, onEnter, classRoomHref }: Public
                     {friendlyClassStatus(cls.status)}
                 </span>
             )}
-            {cls.isQualifying && <QualifyingGateBadge cls={cls} />}
+            {cls.isQualifying && <QualifyingGateBadge cls={cls} showYear={showYear} />}
             {cls.maxPerEntrant !== null && (
                 <Badge variant="secondary">max {cls.maxPerEntrant}/entrant</Badge>
             )}

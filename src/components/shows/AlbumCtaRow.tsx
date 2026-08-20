@@ -43,6 +43,8 @@ interface AlbumCtaRowProps {
     horses: EntrantHorse[];
     /** The viewer's LIVE entries (scratched excluded) — the pill. */
     myEntryCount: number;
+    /** Season for the card-gate badges (defaults to Season 1). */
+    showYear?: number | null;
 }
 
 export default function AlbumCtaRow({
@@ -54,6 +56,7 @@ export default function AlbumCtaRow({
     divisions,
     horses,
     myEntryCount,
+    showYear,
 }: AlbumCtaRowProps) {
     const router = useRouter();
     const { showToast, toastNode } = useShowToast();
@@ -150,6 +153,7 @@ export default function AlbumCtaRow({
                         canEnter={authed && entriesOpen && effectiveHorses.length > 0}
                         onEnter={handlePickClass}
                         defaultOpenIndex={0}
+                        showYear={showYear}
                     />
                 </DialogContent>
             </Dialog>
