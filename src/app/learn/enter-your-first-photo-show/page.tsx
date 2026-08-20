@@ -154,9 +154,14 @@ export default function FirstPhotoShowPage() {
                                 matters; after it, the show moves to judging.
                             </li>
                             <li>
-                                <strong>MHH Qualifying</strong> — in qualifying classes at these
-                                shows, 1st and 2nd place earn a permanent qualification card for the
-                                horse. A lovely bonus, not a requirement to care about yet.
+                                <strong>🏅 MHH Sanctioned</strong> — placings at these shows earn
+                                Championship Series season points, and 1st and 2nd in qualifying
+                                classes earn a permanent qualification card for the horse. A lovely
+                                bonus, not a requirement to care about yet — the{" "}
+                                <Link href="/shows/rules" className="text-forest hover:underline">
+                                    showing rules
+                                </Link>{" "}
+                                explain it all when you&apos;re curious.
                             </li>
                         </ul>
                         <p className="m-0">

@@ -401,9 +401,11 @@ export default function ShowSettingsForm({ show }: { show: ConsoleShow }) {
                                 onChange={(e) => set("isMhhQualifying", e.target.checked)}
                                 className="size-5 min-h-6 min-w-6 accent-forest"
                             />
-                            MHH qualifying show
+                            MHH Sanctioned
                             <span className="font-normal text-muted-foreground">
-                                (1st and 2nd in each qualifying class earn digital cards.)
+                                (Counts for the Championship Series: season points, cards,
+                                titles. Season 1 sanctioning is granted by MHH — non-admin
+                                changes here file a request.)
                             </span>
                         </label>
                         <Field label="Sanctioning note">
