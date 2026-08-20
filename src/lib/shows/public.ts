@@ -44,6 +44,8 @@ export interface PublicShowSummary {
     entriesCloseAt: string | null;
     judgingEndsAt: string | null;
     isMhhQualifying: boolean;
+    /** The season this show scores into (May 1 – Apr 30), null = undated. */
+    showYear: number | null;
     /** Enterable classlist size (cancelled/combined excluded). */
     classCount: number;
     /** Live entries (scratched excluded). */
@@ -72,6 +74,8 @@ export interface PublicShow {
     capacity: number | null;
     isMhhQualifying: boolean;
     sanctioningNote: string | null;
+    /** The season this show scores into (May 1 – Apr 30), null = undated. */
+    showYear: number | null;
 }
 
 // ── Entrant-side shapes ──

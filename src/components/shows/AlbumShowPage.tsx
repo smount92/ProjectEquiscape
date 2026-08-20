@@ -20,6 +20,7 @@
  * reads — this page consumes exactly what the legacy page fetches.
  */
 
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import {
@@ -154,8 +155,18 @@ export default async function AlbumShowPage({ showId }: { showId: string }) {
 
                 {show.isMhhQualifying && (
                     <p className="text-sm text-muted-foreground">
-                        Classes marked &ldquo;qualifying&rdquo; earn digital cards for 1st and
-                        2nd place.
+                        🏅 This show is <b>MHH Sanctioned</b> — placings here earn{" "}
+                        <b>Championship Series season points</b>, and 1st &amp; 2nd in
+                        qualifying classes with enough competition mint{" "}
+                        <b>qualification cards</b> that travel with the horse and count toward
+                        permanent titles.{" "}
+                        <Link
+                            href="/shows/rules"
+                            className="text-forest underline decoration-dotted hover:decoration-solid"
+                        >
+                            Full rules
+                        </Link>
+                        .
                     </p>
                 )}
 

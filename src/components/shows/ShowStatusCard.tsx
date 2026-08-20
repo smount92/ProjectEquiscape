@@ -402,7 +402,7 @@ export default function ShowStatusCard({ show, entryCount, canManage }: ShowStat
                         label="Qualifying"
                         value={
                             show.isMhhQualifying ? (
-                                <Badge>MHH Qualifying</Badge>
+                                <Badge>🏅 MHH Sanctioned</Badge>
                             ) : (
                                 <Badge variant="outline">Not qualifying</Badge>
                             )

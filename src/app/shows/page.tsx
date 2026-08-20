@@ -80,7 +80,7 @@ function V2ShowsSection({ title, shows }: { title: string; shows: PublicShowSumm
        <span className="stamp">{formatStatus(show.status)}</span>
        <Badge variant="secondary">{show.mode ==="live" ?"Live" :"Online"}</Badge>
        {show.judging ==="community_vote" && <Badge variant="secondary">Community vote</Badge>}
-       {show.isMhhQualifying && <Badge>MHH Qualifying</Badge>}
+       {show.isMhhQualifying && <Badge>🏅 MHH Sanctioned</Badge>}
       </div>
       {/* Findability for votable shows: community-vote shows in their
           judging window are open to EVERY voter — say so on the card. */}

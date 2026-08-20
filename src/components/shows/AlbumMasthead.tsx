@@ -20,6 +20,7 @@ import Link from "next/link";
 import type { PublicShow } from "@/lib/shows/public";
 import type { ShowStatus } from "@/lib/shows/types";
 import { feeText, friendlyShowStatus } from "@/lib/shows/plainWords";
+import { showYearLabel } from "@/lib/shows/showYear";
 import LocalTime from "./LocalTime";
 import ShowCountdown from "./ShowCountdown";
 
@@ -128,7 +129,8 @@ export default function AlbumMasthead({
                     </Link>{" "}
                     · {show.mode === "live" ? "Live show" : "Online photo show"}
                     {show.judging === "community_vote" && " · Community vote"}
-                    {show.isMhhQualifying && " · MHH Qualifying"}
+                    {show.isMhhQualifying &&
+                        ` · 🏅 MHH Sanctioned${show.showYear !== null ? ` · ${showYearLabel(show.showYear)} season` : ""}`}
                 </p>
             </div>
 

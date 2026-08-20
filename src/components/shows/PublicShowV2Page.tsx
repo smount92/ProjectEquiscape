@@ -15,6 +15,7 @@
  */
 
 import Link from "next/link";
+import { showYearLabel } from "@/lib/shows/showYear";
 import { notFound } from "next/navigation";
 
 import {
@@ -81,7 +82,12 @@ function ShowMasthead({ show, entryCount }: { show: PublicShow; entryCount: numb
                 {show.judging === "community_vote" && (
                     <Badge variant="secondary">Community vote</Badge>
                 )}
-                {show.isMhhQualifying && <Badge>MHH Qualifying</Badge>}
+                {show.isMhhQualifying && (
+                    <Badge>
+                        🏅 MHH Sanctioned
+                        {show.showYear !== null ? ` · ${showYearLabel(show.showYear)}` : ""}
+                    </Badge>
+                )}
                 <span className="ml-auto text-(--leather-text)">
                     <ShareButton
                         title={show.title}
@@ -296,8 +302,18 @@ export default async function PublicShowV2Page({ showId }: { showId: string }) {
 
                 {show.isMhhQualifying && (
                     <p className="text-sm text-muted-foreground">
-                        Classes marked &ldquo;qualifying&rdquo; earn digital cards for 1st and 2nd
-                        place.
+                        🏅 This show is <b>MHH Sanctioned</b> — placings here earn{" "}
+                        <b>Championship Series season points</b>, and 1st &amp; 2nd in
+                        qualifying classes with enough competition mint{" "}
+                        <b>qualification cards</b> that travel with the horse and count toward
+                        permanent titles.{" "}
+                        <Link
+                            href="/shows/rules"
+                            className="text-forest underline decoration-dotted hover:decoration-solid"
+                        >
+                            Full rules
+                        </Link>
+                        .
                     </p>
                 )}
 

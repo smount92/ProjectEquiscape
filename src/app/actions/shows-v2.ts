@@ -1651,7 +1651,7 @@ export async function getPublicShows(): Promise<ActionResult<{ shows: PublicShow
     const { data: showRows, error: showsError } = await supabase
         .from("shows")
         .select(
-            "id, host_id, title, mode, judging, status, venue_name, show_date, entries_open_at, entries_close_at, judging_ends_at, is_mhh_qualifying, created_at",
+            "id, host_id, title, mode, judging, status, venue_name, show_date, entries_open_at, entries_close_at, judging_ends_at, is_mhh_qualifying, show_year, created_at",
         )
         .in("status", PUBLIC_BROWSE_STATUSES)
         .order("created_at", { ascending: false })
@@ -1730,6 +1730,7 @@ export async function getPublicShows(): Promise<ActionResult<{ shows: PublicShow
             entriesCloseAt: (s.entries_close_at as string | null) ?? null,
             judgingEndsAt: (s.judging_ends_at as string | null) ?? null,
             isMhhQualifying: s.is_mhh_qualifying as boolean,
+            showYear: (s.show_year as number | null) ?? null,
             classCount: classCounts.get(s.id as string) ?? 0,
             entryCount: entryCounts.get(s.id as string) ?? 0,
             createdAt: s.created_at as string,
@@ -1756,7 +1757,7 @@ export async function getPublicShow(
     const { data: show, error: showError } = await supabase
         .from("shows")
         .select(
-            "id, host_id, title, mode, judging, status, venue_name, venue_address, show_date, entries_open_at, entries_close_at, judging_ends_at, about_md, rules_md, fee_info, capacity, is_mhh_qualifying, sanctioning_note",
+            "id, host_id, title, mode, judging, status, venue_name, venue_address, show_date, entries_open_at, entries_close_at, judging_ends_at, about_md, rules_md, fee_info, capacity, is_mhh_qualifying, sanctioning_note, show_year",
         )
         .eq("id", showId)
         .maybeSingle();
@@ -1891,6 +1892,7 @@ export async function getPublicShow(
             capacity: (show.capacity as number | null) ?? null,
             isMhhQualifying: show.is_mhh_qualifying as boolean,
             sanctioningNote: (show.sanctioning_note as string | null) ?? null,
+            showYear: (show.show_year as number | null) ?? null,
         },
         divisions,
         entryCount: liveEntries.length,
