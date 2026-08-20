@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { getStandings, type GetStandingsResult } from "@/app/actions/standings";
 import {
     BEST_RESULTS_CAP,
+    FALLBACK_HORSE_NAME,
     MIN_EXHIBITORS_FOR_POINTS,
     POINTS_CAP,
 } from "@/lib/shows/points";
@@ -133,17 +134,23 @@ function StandingsTable({
                                   <RankCell rank={row.rank} />
                               </TableCell>
                               <TableCell className="font-semibold">
-                                  <Link
-                                      href={`/stable/${row.horseId}`}
-                                      className="text-foreground no-underline hover:underline"
-                                  >
-                                      {titlePrefixByHorse.get(row.horseId) && (
-                                          <span className="mr-1.5 text-[0.7em] font-bold tracking-[0.15em] text-forest">
-                                              {titlePrefixByHorse.get(row.horseId)}
-                                          </span>
-                                      )}
-                                      {row.horseName}
-                                  </Link>
+                                  {/* Hidden horses (RLS fallback name) stay in the
+                                      public record but never link to a 404 passport. */}
+                                  {row.horseName === FALLBACK_HORSE_NAME ? (
+                                      <span className="text-muted-foreground">{row.horseName}</span>
+                                  ) : (
+                                      <Link
+                                          href={`/stable/${row.horseId}`}
+                                          className="text-foreground no-underline hover:underline"
+                                      >
+                                          {titlePrefixByHorse.get(row.horseId) && (
+                                              <span className="mr-1.5 text-[0.7em] font-bold tracking-[0.15em] text-forest">
+                                                  {titlePrefixByHorse.get(row.horseId)}
+                                              </span>
+                                          )}
+                                          {row.horseName}
+                                      </Link>
+                                  )}
                               </TableCell>
                               <TableCell>
                                   <Link

@@ -2321,6 +2321,53 @@ export async function removeSelfAsHandler(input: {
     return { success: true };
 }
 
+/** The viewer's live entries at this show where THEY are the named
+ *  handler (proxy showing) — feeds the "you're listed as handler"
+ *  banner with its one-click removal. */
+export async function getMyHandlerEntries(input: {
+    showId: string;
+}): Promise<
+    | { success: true; entries: { id: string; horseName: string; className: string }[] }
+    | { success: false; error: string }
+> {
+    const showId = z.uuid().safeParse(input.showId);
+    if (!showId.success) return { success: false, error: "Invalid show." };
+    try {
+        const { supabase, user } = await requireAuth();
+        const { data: rows, error } = await supabase
+            .from("show_class_entries")
+            .select("id, class_id, horse_id")
+            .eq("show_id", showId.data)
+            .eq("handler_id", user.id)
+            .neq("status", "scratched");
+        if (error) return { success: false, error: error.message };
+        const entries = (rows ?? []) as { id: string; class_id: string; horse_id: string }[];
+        if (entries.length === 0) return { success: true, entries: [] };
+        const [horseNames, classRes] = await Promise.all([
+            getHorseNames(supabase, entries.map((e) => e.horse_id)),
+            supabase
+                .from("show_classes")
+                .select("id, name")
+                .in("id", [...new Set(entries.map((e) => e.class_id))]),
+        ]);
+        const classNames = new Map(
+            ((classRes.data ?? []) as { id: string; name: string }[]).map((c) => [c.id, c.name]),
+        );
+        return {
+            success: true,
+            entries: entries.map((e) => ({
+                id: e.id,
+                horseName:
+                    (horseNames instanceof Map ? horseNames.get(e.horse_id) : null) ??
+                    "Unnamed horse",
+                className: classNames.get(e.class_id) ?? "a class",
+            })),
+        };
+    } catch {
+        return { success: false, error: "Sign in to see handler assignments." };
+    }
+}
+
 /** Staff who may scratch someone else's live entry (judges place, they don't manage entries — matches the 118 UPDATE policy). */
 const SCRATCH_STAFF_ROLES: StaffRole[] = ["host", "co_host", "steward"];
 

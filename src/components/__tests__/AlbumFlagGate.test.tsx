@@ -76,6 +76,8 @@ const actions = vi.hoisted(() => ({
     getPublicShow: vi.fn(),
     getMyShowEntries: vi.fn().mockResolvedValue({ success: true, entries: [] }),
     getMyEntrantHorses: vi.fn().mockResolvedValue({ success: true, horses: [] }),
+    getMyHandlerEntries: vi.fn().mockResolvedValue({ success: true, entries: [] }),
+    removeSelfAsHandler: vi.fn().mockResolvedValue({ success: true }),
     getShowGallery: vi.fn().mockResolvedValue({
         success: true,
         gallery: {

@@ -21,6 +21,7 @@
  */
 
 import Link from "next/link";
+import HandlerBanner from "@/components/shows/HandlerBanner";
 import { notFound } from "next/navigation";
 
 import {
@@ -154,6 +155,7 @@ export default async function AlbumShowPage({ showId }: { showId: string }) {
                     </div>
                 )}
 
+                <HandlerBanner showId={showId} />
                 {show.isMhhQualifying && (
                     <p className="text-sm text-muted-foreground">
                         🏅 This show is <b>MHH Sanctioned</b> — placings here earn{" "}

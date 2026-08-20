@@ -16,6 +16,7 @@
 
 import Link from "next/link";
 import { showYearLabel } from "@/lib/shows/showYear";
+import HandlerBanner from "@/components/shows/HandlerBanner";
 import { notFound } from "next/navigation";
 
 import {
@@ -300,6 +301,7 @@ export default async function PublicShowV2Page({ showId }: { showId: string }) {
                     </p>
                 </section>
 
+                <HandlerBanner showId={showId} />
                 {show.isMhhQualifying && (
                     <p className="text-sm text-muted-foreground">
                         🏅 This show is <b>MHH Sanctioned</b> — placings here earn{" "}

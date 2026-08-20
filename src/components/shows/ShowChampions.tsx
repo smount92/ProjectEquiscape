@@ -38,12 +38,17 @@ function AwardLine({
                     #{entry.entryNumber}
                 </span>
             )}
-            <Link
-                href={`/community/${entry.horseId}`}
-                className="text-sm font-medium text-foreground hover:underline"
-            >
-                {entry.horseName}
-            </Link>
+            {entry.horseName === "Unnamed horse" ? (
+                /* Hidden horse: on the record, never a 404 link. */
+                <span className="text-sm font-medium text-muted-foreground">{entry.horseName}</span>
+            ) : (
+                <Link
+                    href={`/community/${entry.horseId}`}
+                    className="text-sm font-medium text-foreground hover:underline"
+                >
+                    {entry.horseName}
+                </Link>
+            )}
             {entry.ownerAlias && (
                 <Link
                     href={`/profile/${encodeURIComponent(entry.ownerAlias)}`}
