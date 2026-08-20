@@ -6,13 +6,18 @@
  * error returns [] and the sections render nothing.
  */
 
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 import { createAnonClient } from "@/lib/supabase/anon";
 import {
     EXHIBITOR_DISTINCTION_LABELS,
     HORSE_TITLE_LABELS,
     highestStar,
+    horseTitleProgress,
     type ExhibitorDistinctionCode,
     type HorseTitleCode,
+    type TitleCardInput,
+    type TitleProgress,
 } from "./titles";
 
 export interface HorseTitleRow {
@@ -58,6 +63,80 @@ export async function getHorseTitles(horseId: string): Promise<HorseTitleRow[]> 
         return rows;
     } catch {
         return [];
+    }
+}
+
+/**
+ * The OWNER's full title ladder for one of their horses: earned
+ * titles + live progress toward the rest (CH's judge/show counts
+ * derived from the actual placing records, same attribution the
+ * grant engine uses). Owner's own server client — their card reads
+ * ride the card-people RLS branch. Any failure degrades to a
+ * ladder built from what loaded ([] cards / 0 points), never a
+ * crash: this is a decoration, not a gate.
+ */
+export async function getOwnerHorseLadder(
+    supabase: SupabaseClient,
+    horseId: string,
+): Promise<{ progress: TitleProgress[]; careerPoints: number }> {
+    try {
+        const [titlesRes, careerRes, cardsRes] = await Promise.all([
+            supabase.from("horse_titles").select("title_code").eq("horse_id", horseId),
+            supabase
+                .from("horse_career")
+                .select("career_points")
+                .eq("horse_id", horseId)
+                .maybeSingle(),
+            supabase
+                .from("qualification_cards")
+                .select("show_id, class_id, status")
+                .eq("horse_id", horseId),
+        ]);
+        const grantedCodes = (titlesRes.data ?? []).map((r) => r.title_code as string);
+        const careerPoints =
+            (careerRes.data as { career_points: number } | null)?.career_points ?? 0;
+        const rawCards = (cardsRes.data ?? []) as {
+            show_id: string;
+            class_id: string;
+            status: string;
+        }[];
+
+        // Judge attribution per card via its placing recorder — only
+        // fetched when the horse actually holds cards.
+        const judgeByClass = new Map<string, string>();
+        if (rawCards.length > 0) {
+            const classIds = rawCards.map((c) => c.class_id);
+            const { data: entries } = await supabase
+                .from("show_class_entries")
+                .select("id, class_id")
+                .eq("horse_id", horseId)
+                .in("class_id", classIds);
+            const entryIds = (entries ?? []).map((e) => e.id as string);
+            const entryToClass = new Map(
+                (entries ?? []).map((e) => [e.id as string, e.class_id as string]),
+            );
+            if (entryIds.length > 0) {
+                const { data: placings } = await supabase
+                    .from("show_placings")
+                    .select("entry_id, judge_id")
+                    .in("entry_id", entryIds);
+                for (const p of placings ?? []) {
+                    const classId = entryToClass.get(p.entry_id as string);
+                    if (classId && p.judge_id) judgeByClass.set(classId, p.judge_id as string);
+                }
+            }
+        }
+        const cards: TitleCardInput[] = rawCards.map((c) => {
+            const judge = judgeByClass.get(c.class_id);
+            return { showId: c.show_id, status: c.status, judgeIds: judge ? [judge] : [] };
+        });
+
+        return { progress: horseTitleProgress({ cards, careerPoints, grantedCodes }), careerPoints };
+    } catch {
+        return {
+            progress: horseTitleProgress({ cards: [], careerPoints: 0, grantedCodes: [] }),
+            careerPoints: 0,
+        };
     }
 }
 

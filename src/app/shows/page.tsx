@@ -6,6 +6,8 @@ import Link from"next/link";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import PageMasthead from"@/components/layouts/PageMasthead";
 import MyShowLifeSection from"@/components/shows/MyShowLifeSection";
+import MySeasonCard from"@/components/shows/MySeasonCard";
+import { getMySeason } from"@/app/actions/standings";
 import { showStandingsEnabled, showsV2Enabled } from"@/lib/shows/flags";
 import { EMPTY_SHOW_LIFE } from"@/lib/shows/showLife";
 import type { PublicShowSummary } from"@/lib/shows/public";
@@ -128,6 +130,8 @@ export default async function ShowsPage() {
  // the browse shelves. Empty (and hidden) for anon, for members who
  // don't show, and on any data failure.
  const showLife = user && showsV2Enabled() ? await getMyShowLife() : EMPTY_SHOW_LIFE;
+ // My Season (season-felt wave): the exhibitor's championship line.
+ const mySeason = user && showsV2Enabled() ? await getMySeason() : null;
 
  // Batch-check which shows this user is a judge for
  const showIds = shows.map((s) => s.id);
@@ -188,6 +192,7 @@ export default async function ShowsPage() {
     </>
    }
   />
+  {mySeason && <MySeasonCard season={mySeason} standingsLive={showStandingsEnabled()} />}
   <MyShowLifeSection life={showLife} />
 
   {V2_GROUPS.map((group) => (

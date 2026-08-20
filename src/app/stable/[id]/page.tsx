@@ -14,7 +14,7 @@ import ParkedExportPanel from"@/components/ParkedExportPanel";
 import { getHoofprint } from"@/app/actions/hoofprint";
 import QualificationCardsSection, { type PassportQualificationCard } from"@/components/shows/QualificationCardsSection";
 import TitlesSection from"@/components/shows/TitlesSection";
-import { getHorseTitles } from"@/lib/shows/horseTitles";
+import { getHorseTitles, getOwnerHorseLadder } from"@/lib/shows/horseTitles";
 import { titlePrefix } from"@/lib/shows/titles";
 import { showsV2Enabled } from"@/lib/shows/flags";
 import { resolvePlacingHrefs } from"@/lib/shows/placingShare";
@@ -281,7 +281,11 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  }
 
  // ── MHH Titles (159) — permanent, public record; [] until pasted ──
- const horseTitles = showsV2Enabled() ? await getHorseTitles(horseId) : [];
+ // Owner's passport also gets the LADDER: progress toward unearned
+ // titles ("1 more card · a different judge"), career points.
+ const [horseTitles, titleLadder] = showsV2Enabled()
+ ? await Promise.all([getHorseTitles(horseId), getOwnerHorseLadder(supabase, horseId)])
+ : [[], undefined];
  const namePrefix = titlePrefix(horseTitles.map((t) => t.code));
 
  const { data: rawPedigree } = await supabase
@@ -706,8 +710,8 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  {/* Show Records */}
  <ShowRecordTimeline horseId={horseId} records={showRecords} isOwner={true} placingHrefs={placingHrefs} />
 
- {/* MHH Titles (159) — renders nothing when empty */}
- <TitlesSection titles={horseTitles} />
+ {/* MHH Titles (159) — earned plaques + the owner's progress ladder */}
+ <TitlesSection titles={horseTitles} ladder={titleLadder} />
 
  {/* MHH Qualification Cards (Phase F) — renders nothing when empty */}
  <QualificationCardsSection cards={qualificationCards} />

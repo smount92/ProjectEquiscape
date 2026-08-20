@@ -31,6 +31,8 @@ import {
     type StandingsShowRow,
     countedShowIds,
 } from "@/lib/shows/points";
+import { nextStarProgress } from "@/lib/shows/titles";
+import { showYearOf } from "@/lib/shows/showYear";
 
 export type StandingsScope = "horses" | "stables";
 
@@ -65,6 +67,68 @@ export type GetStandingsResult =
 
 const SHOW_YEAR_MIN = 2000;
 const SHOW_YEAR_MAX = 2100;
+
+/** The signed-in exhibitor's season at a glance (season-felt wave). */
+export interface MySeason {
+    showYear: number;
+    /** null until they have any counted result. */
+    rank: number | null;
+    points: number;
+    liveCards: number;
+    stakesCards: number;
+    careerPoints: number;
+    nextStar: { label: string; pointsNeeded: number } | null;
+}
+
+export async function getMySeason(): Promise<MySeason | null> {
+    try {
+        const { supabase, user } = await requireAuth();
+        const showYear = showYearOf(new Date());
+
+        const standings = await getStandings({ showYear, scope: "stables" });
+        const myRow =
+            standings.success && standings.scope === "stables"
+                ? standings.rows.find((r) => r.ownerId === user.id)
+                : undefined;
+
+        const [cardsRes, careerRes, distinctionsRes] = await Promise.all([
+            supabase
+                .from("qualification_cards")
+                .select("id, is_stakes, status")
+                .eq("current_owner_id", user.id)
+                .in("status", ["issued", "transferred"]),
+            supabase
+                .from("exhibitor_career")
+                .select("career_points")
+                .eq("user_id", user.id)
+                .maybeSingle(),
+            supabase
+                .from("exhibitor_distinctions")
+                .select("distinction_code")
+                .eq("user_id", user.id),
+        ]);
+        const cards = cardsRes.data ?? [];
+        const careerPoints =
+            (careerRes.data as { career_points: number } | null)?.career_points ?? 0;
+        const next = nextStarProgress({
+            careerPoints,
+            grantedCodes: (distinctionsRes.data ?? []).map((d) => d.distinction_code as string),
+        });
+
+        return {
+            showYear,
+            rank: myRow?.rank ?? null,
+            points: myRow?.points ?? 0,
+            liveCards: cards.length,
+            stakesCards: cards.filter((c) => (c as { is_stakes: boolean | null }).is_stakes === true)
+                .length,
+            careerPoints,
+            nextStar: next ? { label: next.label, pointsNeeded: next.pointsNeeded } : null,
+        };
+    } catch {
+        return null;
+    }
+}
 
 export async function getStandings(params: GetStandingsParams): Promise<GetStandingsResult> {
     const { showYear, scope } = params;

@@ -8,6 +8,7 @@
 
 import { showYearLabel } from "@/lib/shows/showYear";
 import type { HorseTitleRow } from "@/lib/shows/horseTitles";
+import type { TitleProgress } from "@/lib/shows/titles";
 
 const TITLE_ICONS: Record<string, string> = {
     CH: "🏆",
@@ -15,8 +16,52 @@ const TITLE_ICONS: Record<string, string> = {
     SUP: "🏅",
 };
 
-export default function TitlesSection({ titles }: { titles: HorseTitleRow[] }) {
-    if (titles.length === 0) return null;
+/** The unearned half of the ladder — owner's passport only. */
+function LadderRow({ p }: { p: TitleProgress }) {
+    return (
+        <li>
+            <div className="rounded-md border border-dashed border-border-tan/40 px-4 py-2.5">
+                <div className="flex items-baseline justify-between gap-3">
+                    <span className="text-sm font-semibold text-secondary-foreground">
+                        <span className="mr-1.5 opacity-60" aria-hidden="true">
+                            {TITLE_ICONS[p.code] ?? "🏆"}
+                        </span>
+                        {p.code} — {p.label}
+                    </span>
+                    {p.remaining && (
+                        <span className="text-right text-xs text-muted-foreground">
+                            {p.remaining}
+                        </span>
+                    )}
+                </div>
+                <div
+                    className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted"
+                    role="progressbar"
+                    aria-valuenow={Math.round(p.fraction * 100)}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-label={`Progress toward ${p.label}`}
+                >
+                    <div
+                        className="h-full rounded-full bg-forest"
+                        style={{ width: `${Math.max(2, Math.round(p.fraction * 100))}%` }}
+                    />
+                </div>
+            </div>
+        </li>
+    );
+}
+
+export default function TitlesSection({
+    titles,
+    ladder,
+}: {
+    titles: HorseTitleRow[];
+    /** Owner's passport passes progress; public passports omit it. */
+    ladder?: { progress: TitleProgress[]; careerPoints: number };
+}) {
+    const unearned = ladder?.progress.filter((p) => !p.earned) ?? [];
+    if (titles.length === 0 && unearned.length === 0) return null;
 
     return (
         <div className="rounded-lg border border-border-tan/30 bg-card/20 p-5">
@@ -26,6 +71,13 @@ export default function TitlesSection({ titles }: { titles: HorseTitleRow[] }) {
             <p className="mb-4 text-xs text-secondary-foreground/80">
                 Permanent titles earned in MHH-sanctioned showing. Titles stay with the
                 horse for life, whoever owns it.
+                {ladder && (
+                    <>
+                        {" "}
+                        Career points:{" "}
+                        <b className="text-secondary-foreground">{ladder.careerPoints}</b>.
+                    </>
+                )}
             </p>
 
             <ul className="flex list-none flex-col gap-3 p-0">
@@ -50,6 +102,9 @@ export default function TitlesSection({ titles }: { titles: HorseTitleRow[] }) {
                             </div>
                         </div>
                     </li>
+                ))}
+                {unearned.map((p) => (
+                    <LadderRow key={p.code} p={p} />
                 ))}
             </ul>
         </div>
