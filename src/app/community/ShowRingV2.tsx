@@ -1,5 +1,5 @@
 /**
- * Show Ring v2 (NEXT_PUBLIC_SHOWRING_V2) — the filter-engine rebuild
+ * The Show Ring — the filter-engine rebuild
  * of the community showcase. Ledger filter bar → server-filtered grid
  * fed by getShowRingPage (one shared query core; blocked users
  * excluded in SQL; facets across ALL public horses). The URL is the

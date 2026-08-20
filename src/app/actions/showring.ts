@@ -1,7 +1,7 @@
 "use server";
 
 /**
- * Show Ring v2 server actions (NEXT_PUBLIC_SHOWRING_V2).
+ * Show Ring server actions.
  *
  * Ports the Digital Stable filter engine (src/app/actions/stable.ts)
  * to the community showcase: the URL is the single source of truth,
