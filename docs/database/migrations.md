@@ -187,4 +187,4 @@ See [Adding a Migration](../guides/adding-a-migration.md) for the full guide.
 
 ---
 
-**Next:** [Schema Overview](schema-overview.md) · [Tables](tables.md)
+**Next:** [Schema Overview](schema-overview.md) · [Full schema reference](../../.agents/MASTER_SUPABASE.md)
