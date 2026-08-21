@@ -3,7 +3,8 @@
 **Purpose:** self-contained execution guide. Everything needed to run the
 growth strategy and work on this codebase WITHOUT re-researching. Written
 for any operator — human or AI assistant — picking up a task cold.
-**Written:** July 2026. Re-verify facts marked (verify) if it's now 2027+.
+**Written:** July 2026. **Revised August 21, 2026** for the launch
+release. Re-verify facts marked (verify) if it's now 2027+.
 
 ---
 
@@ -12,19 +13,54 @@ for any operator — human or AI assistant — picking up a task cold.
 ### The product
 Model Horse Hub (modelhorsehub.com, repo `model-horse-hub`, Vercel +
 Supabase). ~100 users, ~1,800 cataloged horses. Owner: smount92 (+ wife
-as design lead). Features ALREADY BUILT AND LIVE: digital stable with
-faceted filtering + saved views; Hoofprint provenance (permanent
-per-horse history); Safe-Trade marketplace (hardened, state-machine-guarded trades; payment
-off-platform — escrow is a planned future layer, not yet live); Blue Book price data; photo AND live show hosting (unique in the
-hobby: classlist builder w/ NAMHSA template, entry flow with proxy
-handlers, blind entry galleries, community voting, judge queue, live ring
-console with leg-tag placing recorder + champion callback ladder + offline
-retry, results → trophy cases, NAMHSA-format CSV export); qualification
-cards that auto-transfer with the horse on sale + public /cards/[code]
-verification; forum-style groups ("notice board"); DMs; art studio;
-CSV import; PWA; Stripe Pro tier. Design language: "leather at the
-landmarks, parchment for the work" (leather/brass/ledger materials,
-Lamplight dark mode).
+as design lead). Design language: "leather at the landmarks, parchment
+for the work" (leather/brass/ledger materials, Lamplight dark mode).
+
+**The site is FIVE ROOMS** — Stable · Shows · Market · The Paddock ·
+Registry — and the nav bar holds exactly those at any width. Everything
+else (Art Studio, Show Ring, Barns, Events, Help ID, Members) is under
+More. Use the room names in any copy you write: `/catalog` is the
+*Registry*, `/feed` is *The Paddock*, groups are *Barns*, `/discover` is
+*Members*.
+
+BUILT AND LIVE:
+- **Stable** — faceted filtering + saved views, condition ledger,
+  Recently Deleted with restore, Hoofprint provenance (permanent
+  per-horse history), financial vault.
+- **Shows** — photo AND live show hosting, still unique in the hobby:
+  classlist builder w/ NAMHSA template, entry flow with proxy handlers,
+  blind entry galleries, community voting, judge queue, live ring console
+  with leg-tag placing recorder + champion callback ladder + offline
+  retry, results → trophy cases, NAMHSA-format CSV export, titles and
+  career ledgers. Qualification cards auto-transfer with the horse on sale
+  + public `/cards/[code]` verification.
+- **Market** — provenance-first listing cards where the passport *is* the
+  listing page; browsable logged-out; Blue Book at `/market/guide`.
+- **The Deal Room** — a DM thread that grows into a deal: offers and
+  counter-offers, contract boxes both parties sign, an **installment
+  ledger for time payments** (the headline), and an evidence pack at
+  `/inbox/[id]/record`. Plain DMs are unchanged.
+- **The Paddock** — one community stream with structured @mentions,
+  per-post Public/Followers visibility, admin pinning, and the door to
+  the Show Ring.
+- **Barns** — notice board, private barns with a join-request queue,
+  shared files.
+- **Art Studio** — rebuilt on researched commission practice: structured
+  comparable terms, a real quote→work→approval→delivery pipeline, and a
+  receipts wall of finished horses shown with the ribbons they won.
+- **Members**, **Events** (for happenings outside MHH), CSV import, PWA,
+  Stripe tiers, an admin console (Part 4), and object metrics.
+
+### ⚠️ Commerce rulings (owner, August 2026) — these settle old questions
+1. **The platform NEVER holds money.** No escrow — not now, not planned.
+   Any older doc or copy promising escrow is wrong; do not revive it.
+2. **No selling fees.** Show-entry fees are a maybe, someday. Nothing
+   else.
+3. **We are the record, not the referee.** A dispute produces the
+   evidence pack. The platform does not adjudicate.
+4. **Time-payment tracking is the differentiator** — the parties author
+   their own terms; we record what they agreed.
+5. Trust features are never paywalled.
 
 ### The hobby (research-verified July 2026)
 - Community lives in **Facebook B/S/T groups** (7+ major ones; sizes
@@ -38,10 +74,13 @@ Lamplight dark mode).
   cards; their own site admits ~1/3 of submitted NAN cards are
   invalid/expired/misfilled; cards are irreplaceable; transfer-on-sale is
   handwritten. No tech partner. Public cost pressure on NAN 2026.
-- **Nobody has ever offered escrow in this hobby** (verified absence).
-  Scam anxiety is encoded in group rules ("NO Pre-Sales Allowed" is in a
-  major group's NAME). PayPal friends-&-family pressure is the documented
-  scam vector.
+- **Nobody has ever offered escrow in this hobby** (verified absence) —
+  and per the ruling above, MHH will not either. The anxiety is real
+  (scam fear is encoded in group rules; "NO Pre-Sales Allowed" is in a
+  major group's NAME, and PayPal friends-&-family pressure is the
+  documented scam vector), but our answer is **the record, not the
+  vault**: an immutable transcript, terms both parties signed, a payment
+  ledger, and an evidence pack either side can produce.
 - Competitors are single-purpose volunteer projects: OMHPS (photo shows),
   MYMHDB (inventory), breyervalueguide.com (paid, ~6,700 values),
   identifyyourbreyer.com (static ID), ModelHorses.com (legacy registry —
@@ -56,40 +95,67 @@ Lamplight dark mode).
   was structured-data UTILITY, not "a better forum." Cautionary: Discogs'
   2023 fee hike caused community revolt — never squeeze the community.
 
-### House engineering rules (from 130+ commits of precedent)
+### House engineering rules (from 200+ commits of precedent)
 1. **Small branches → merge to main** (main auto-deploys prod via Vercel).
-   Husky pre-commit runs the full vitest suite (~1,031 tests, keep green).
-   Check exit codes DIRECTLY — never pipe test output through grep.
-2. **User-visible rebuilds ship dark behind env flags**
+   Husky pre-commit runs the full vitest suite (155 test files, keep
+   green). Check exit codes DIRECTLY — never pipe test output through
+   grep.
+2. **Ship dark behind an env flag, THEN DELETE THE FLAG**
    (`NEXT_PUBLIC_<X>=1`): preview locally in `.env.local`, owner approves,
-   then set in Vercel + redeploy. Live flags: SHOWS_V2, GROUPS_FORUM,
-   STABLE_V2, SHOWRING_V2.
+   set in Vercel + redeploy — and once the owner is confident, a
+   follow-up PR removes the flag *and its fallback branch*. That last
+   step is not optional; nine v1 flags accumulated into nine untested
+   fallback paths before Phase 0 deleted them all.
+   **Flags that exist today:** `NEXT_PUBLIC_FORM_ENGINE` (dark),
+   `NEXT_PUBLIC_SHOW_STANDINGS` (dark), `NEXT_PUBLIC_REFERENCE_PAGES`
+   (SEO kill-switch, ON), `NEXT_PUBLIC_WANTED_NUDGE` (off). All are
+   visible live in the admin console's Ops tab.
 3. **Migrations are FILES ONLY** (`supabase/migrations/NNN_*.sql`,
-   additive, RLS in the house `(SELECT auth.uid())` idiom, SET search_path
-   on functions). THE OWNER pastes them into the Supabase SQL editor
-   personally. Next number: check the folder (129+ as of this writing).
-   After apply: `npm run gen-types`, replace any interim types.
-4. **New code standard:** zod at every action boundary → requireAuth →
+   additive, re-runnable, RLS in the house `(SELECT auth.uid())` idiom,
+   SET search_path on functions). THE OWNER pastes them into the Supabase
+   SQL editor personally. **Next number: 176** (175 is the latest; 174 is
+   a deliberate gap). After apply: `npm run gen-types`, replace any
+   interim types.
+   Two traps that have bitten: a guard trigger must return early when
+   `auth.uid() IS NULL` or the migration's own backfill trips it, and
+   never edit migration SQL with a plain-string `String.replace()` — JS
+   turns `$$` into `$` and destroys the dollar quotes.
+4. **App code must feature-detect the schema.** Because the paste is
+   manual, deployed code has to work before *and* after it. Probe once
+   per process behind a 60s TTL (`src/lib/*/columnSupport.ts`); absent is
+   the safe shape.
+5. **New code standard:** zod at every action boundary → requireAuth →
    explicit ownership/role checks → RLS-first (admin client only with a
    justification comment); pure tested domain libs in `src/lib/<domain>/`;
    shadcn primitives + design tokens ONLY (no raw hex, no bg-white/*,
    text on leather uses the --leather-text ramp — dark-on-leather is
-   invisible in day mode); Simple Mode + Lamplight must both work.
-5. **Money/schema changes get adversarial review before merge.**
-6. Agents build in a git worktree, never the owner's checkout; push
+   invisible in day mode); Simple Mode + Lamplight must both work, and
+   **night paper carries no ruling**.
+6. **Money/schema changes get adversarial review before merge.**
+7. Agents build in a git worktree, never the owner's checkout; push
    branches, never main (the main session merges after review).
+8. **Don't remove `experimental.cpus: 6` from `next.config.ts`.** Vercel's
+   build machine otherwise spawns 29 static-gen workers, stampedes the
+   Supabase pool, and fails the build.
 
 ### Known follow-ups (check before starting adjacent work)
-Commerce: 5 documented atomicity holes (need cancel/verify atomic RPCs —
-migration), review-item S2 (stale competing offers after ownership
-change), manual two-account buy-flow test still owed. Site-wide: anon
-users see "Unknown" aliases on public pages (RLS on users reads); 18→
-partially-consolidated bespoke toasts; ~208 raw <button>s; add-horse/edit
-mega-form duplication (~1,700 lines each, shared HorseForm wanted); zod
-missing outside the 5 rebuilt domains; zero tests in events/art-studio/
-messaging/competition/posts/market; legacy photo-show engine deletable
-only AFTER a data migration moves old shows into v2; competition.ts/
-packer cluster is NOT dead (serves real-world-show entrants — keep).
+**Closed since July:** anon users seeing "Unknown" aliases (fixed by the
+public-alias RPCs); the commerce decline bug and the trade-status CHECK
+(172); the buyer/seller role confusion in DMs (173); the permanently
+empty trusted-seller view (169); the legacy suggestion queue (a phantom
+`reviewed_at` column was the root cause).
+
+**Still open:** manual two-account buy-flow test still owed;
+partially-consolidated bespoke toasts; a large number of raw `<button>`s;
+add-horse/edit mega-form duplication — the **form engine is built but
+dark**, and retiring the legacy forms is what closes this; zod still
+missing on the pre-rebuild actions (`horse.ts`, `market.ts`, `posts.ts`);
+the legacy photo-show engine is deletable only AFTER a data migration
+moves old shows into v2 — `competition.ts` and the Show Packer are NOT
+dead (they serve real-world-show entrants; `LegacyShowPage` renders
+them). Moderation gap: there is **suspend** (`users.is_suspended`, admin
+Members tab) and a per-show **bar** (`show_barred_entrants`), but no
+account-level ban.
 
 ---
 
@@ -98,11 +164,16 @@ packer cluster is NOT dead (serves real-world-show entrants — keep).
 Audience priority: **showholders → high-value sellers (resins) → casual
 collectors.** Do moves in order unless the owner says otherwise.
 
-### MOVE 1 — Public reference database + Blue Book pages (SEO wedge)
+### MOVE 1 — Public reference database + Blue Book pages (SEO wedge) ✅ SHIPPED
 WHY: Discogs/TCGplayer won their niches with free indexed catalog pages;
 "what's my Breyer worth" has no good answer on the open web; MHH has
-10,500+ releases and real sales data but ~1 indexed page.
-STEPS:
+10,900+ releases and real sales data but ~1 indexed page.
+STATUS: built and live — `/reference`, `/reference/[maker]`,
+`/reference/[maker]/[slug]`, sitemap entries, and anon-readable market
+data. `NEXT_PUBLIC_REFERENCE_PAGES` remains as an SEO kill-switch over
+URL emission and sitemap listing. What's left is the *measurement* half:
+watch Search Console for indexing and organic impressions.
+ORIGINAL STEPS (kept for the reasoning):
 1. Build public route per catalog release: `/reference/[maker]/[slug]`
    (server-rendered, anon-accessible — add subtree to src/proxy.ts public
    paths). Content: photos, specs (maker/scale/mold/years), "N collectors
@@ -167,13 +238,24 @@ STEPS:
 4. Migration concierge for 2-3 SMALL clubs/breed circles into Groups
    (owner does the setup + invites). Megagroups: not yet.
 
-### MOVE 6 — Portable reputation + escrow marketing
+### MOVE 6 — Portable reputation + "the record" marketing
+> ⚠️ **Rewritten August 2026.** This move used to lead with escrow. The
+> owner has ruled the platform will never hold money, so that copy is
+> retired — do not revive it, in marketing or in product.
 1. Public per-seller reference page: completed Safe-Trades, reviews,
-   member-since — linkable in any FB thread.
-2. Copy angle everywhere (valid ONLY once escrow actually ships — not yet built): "the only place in the hobby with real escrow.
-   No friends-&-family roulette." (Verified: literally nobody else has
-   it.)
-3. Target resin sellers first (highest anxiety, highest value).
+   member-since — linkable in any FB thread. (The trusted-seller badge
+   works now; the view backing it was broken from migration 101 until
+   169, so treat any pre-August impression that "nobody is trusted" as
+   stale.)
+2. Copy angle: **"Every deal leaves a record."** A thread with signed
+   terms, a payment ledger both parties can see, and an evidence pack
+   either side can produce — instead of a screenshot argument in a
+   Facebook comment thread. And the honest second half: we never touch
+   your money, and we don't charge you to sell.
+3. Lead with **time payments**. Payment plans are how expensive resins
+   actually change hands in this hobby, and they are currently tracked in
+   DMs and memory. Nobody else offers a ledger for them.
+4. Target resin sellers first (highest anxiety, highest value).
 
 ### MOVE 7 — Presence & liveness
 1. Play Store TWA wrapper of the PWA (PWABuilder), Apple later.
@@ -183,13 +265,57 @@ STEPS:
    haul tonight" campaign, virtual show that weekend.
 
 ### MOVE 8 — Pro monetization spine
-Estate/insurance PDF reports, packet PDFs, multi-ring, Stripe fee
-collection for shows. Converts existing users; does NOT acquire. Never
-paywall: hosting a basic show, browsing, cataloging, the reference pages.
+Estate/insurance PDF reports, packet PDFs, multi-ring, Studio Pro.
+Converts existing users; does NOT acquire.
+
+**Never paywall:** hosting a basic show, browsing, cataloging, the
+reference pages, or **any trust feature** (the evidence pack, condition
+grades, provenance, the payment ledger). Precedent: flaws are free.
+
+**Off the table by ruling:** selling fees of any kind, and anything that
+requires the platform to hold or move money. Show-entry fee collection is
+the one maybe, someday — and only as a convenience for hosts, never as a
+cut of a sale.
 
 ---
 
-## PART 3 — STANDING RULES FOR ANY OPERATOR
+## PART 3 — THE ADMIN CONSOLE (`/admin`)
+
+Auth-gated to `ADMIN_EMAIL`. Layout: a **pulse strip** across the top
+(`AdminPulseStrip` — at-a-glance counts, with badges that go alarming
+when a queue is backing up), then **ten tabs** (`AdminTabs.tsx`, last
+tab remembered):
+
+| Tab | What lives there |
+|---|---|
+| 📬 **Mailbox** | Contact-form messages; mark read, reply, delete |
+| 🚩 **Reports** | User reports — dismiss or action |
+| 📚 **Catalog** | Legacy suggestion queue, the **duplicate sweeper**, and catalog merges. Approvals write a `catalog_changelog` row |
+| 🗓️ **Calendar** | Community-submitted `external_shows` — approve or reject |
+| 🏅 **Sanctioning** | NAMHSA sanctioning requests |
+| 📸 **Shows** | Show management + the **overdue shows queue** (with a nudge-the-host action) |
+| 👤 **Members** | Member search, and **suspend / unsuspend** (by id or alias) |
+| 💡 **Content** | Announcements composer (the site-wide banner), Feature-a-Horse, feed pinning |
+| 📈 **Insights** | Object metrics — DAU lines, 7-day totals per type, most-viewed per type with names resolved. Links out to Vercel Analytics for the half it does better |
+| 🛠️ **Ops** | Migration probes (which migrations the live DB actually has) and the **env/flags panel** — the live state of all four `NEXT_PUBLIC_*` flags |
+
+Things worth knowing:
+- **The legacy suggestion queue used to be jammed.** Root cause was a
+  phantom `reviewed_at` column; `resolveLegacySuggestion` now works and
+  has a Dismiss path.
+- **Insights shows a DAU series and a "7-day member-days" sum, not WAU.**
+  A true WAU would require keeping viewer tokens for a week, which the
+  privacy rule forbids. The label says what it is rather than passing it
+  off.
+- **Anon dedupe is IP+UA**, which collapses a household and splits a
+  phone. That limitation is stated on `/privacy` rather than implied to
+  be exact.
+- Announcements are written with the service role after an `ADMIN_EMAIL`
+  check — the table deliberately has no write policies.
+
+---
+
+## PART 4 — STANDING RULES FOR ANY OPERATOR
 
 - The owner approves: design changes (with wife), anything touching
   money, migrations, prod flag flips, external comms. Draft, don't send.
@@ -200,6 +326,11 @@ paywall: hosting a basic show, browsing, cataloging, the reference pages.
   fixing; check whether the same pattern exists elsewhere and sweep it.
 - Update docs/SHOWS_V2_TESTING.md-style checklists when shipping flows
   that only humans can verify.
+- Say the room name, not the route: the *Registry*, *The Paddock*, the
+  *Show Ring*, *Barns*, *Members*. Copy that says "the catalog" or "your
+  groups" is wrong even though the URL says so.
+- Never describe a dark feature as live. The form engine and season
+  standings are merged but invisible to members.
 - The community is small and burned-out on platform failures: every
   outage, data loss, or paywall surprise costs trust we cannot buy back.
   When in doubt, choose boring reliability.
