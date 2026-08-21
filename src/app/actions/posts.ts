@@ -397,10 +397,24 @@ export async function getPosts(context: {
         query = query.lt("created_at", options.cursor);
     }
 
-    const { data: posts } = await query;
-    if (!posts || posts.length === 0) return [];
+    const { data: rawPosts } = await query;
+    if (!rawPosts || rawPosts.length === 0) return [];
 
-    const postIds = (posts as { id: string }[]).map(p => p.id);
+    // Hide blocked users' posts (house pattern: my blocks hide their
+    // content from me — same one-directional filter the Show Ring
+    // applies). Filtered before the id list so their replies and
+    // media never load either.
+    const { data: myBlocks } = await supabase
+        .from("user_blocks")
+        .select("blocked_id")
+        .eq("blocker_id", user.id);
+    const blockedIds = new Set((myBlocks ?? []).map((b: { blocked_id: string }) => b.blocked_id));
+    const posts = (rawPosts as Record<string, unknown>[]).filter(
+        (p) => !blockedIds.has(p.author_id as string),
+    );
+    if (posts.length === 0) return [];
+
+    const postIds = posts.map(p => p.id as string);
 
     // Fetch media for all posts in one query
     const { data: media } = await supabase
@@ -431,6 +445,7 @@ export async function getPosts(context: {
             .limit(100); // Global cap: ~5 replies × 20 posts = 100 max
 
         for (const r of (replies ?? []) as Record<string, unknown>[]) {
+            if (blockedIds.has(r.author_id as string)) continue;
             const parentKey = r.parent_id as string;
             if (!repliesMap.has(parentKey)) repliesMap.set(parentKey, []);
             const replyUser = r.users as { alias_name: string; avatar_url: string | null } | null;
@@ -454,7 +469,7 @@ export async function getPosts(context: {
         }
     }
 
-    const mapped = (posts as Record<string, unknown>[]).map(p => {
+    const mapped = posts.map(p => {
         const postUser = p.users as { alias_name: string; avatar_url: string | null } | null;
         return {
             id: p.id as string,

@@ -432,20 +432,21 @@ export async function deleteEvent(eventId: string): Promise<{ success: boolean; 
 
     if (!event) return { success: false, error: "Event not found or not yours." };
 
-    // Clean up event photos from storage
+    // Clean up event photos from storage. Both tables store
+    // bucket-relative paths (event_photos.image_path,
+    // media_attachments.storage_path) — the old selects asked for a
+    // nonexistent image_url column, errored silently, and leaked
+    // every file (same bug class deletePost fixed).
     try {
         const { data: photos } = await supabase
             .from("event_photos")
-            .select("image_url")
+            .select("image_path")
             .eq("event_id", eventId);
 
         if (photos && photos.length > 0) {
-            const paths = (photos as { image_url: string }[])
-                .map(p => {
-                    const match = p.image_url.match(/horse-images\/(.+?)(\?|$)/);
-                    return match ? match[1] : null;
-                })
-                .filter(Boolean) as string[];
+            const paths = (photos as { image_path: string }[])
+                .map(p => p.image_path)
+                .filter(Boolean);
 
             if (paths.length > 0) {
                 await supabase.storage.from("horse-images").remove(paths);
@@ -462,16 +463,13 @@ export async function deleteEvent(eventId: string): Promise<{ success: boolean; 
             const postIds = (eventPosts as { id: string }[]).map(p => p.id);
             const { data: media } = await supabase
                 .from("media_attachments")
-                .select("image_url")
+                .select("storage_path")
                 .in("post_id", postIds);
 
             if (media && media.length > 0) {
-                const mediaPaths = (media as { image_url: string }[])
-                    .map(m => {
-                        const match = m.image_url.match(/horse-images\/(.+?)(\?|$)/);
-                        return match ? match[1] : null;
-                    })
-                    .filter(Boolean) as string[];
+                const mediaPaths = (media as { storage_path: string }[])
+                    .map(m => m.storage_path)
+                    .filter(Boolean);
 
                 if (mediaPaths.length > 0) {
                     await supabase.storage.from("horse-images").remove(mediaPaths);
@@ -872,19 +870,19 @@ export async function deleteEventPhoto(
 ): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
-    // Fetch the photo URL before deleting
+    // Fetch the bucket-relative path before deleting (image_path —
+    // the old image_url select errored silently and leaked the file).
     try {
         const { data: photo } = await supabase
             .from("event_photos")
-            .select("image_url")
+            .select("image_path")
             .eq("id", photoId)
             .maybeSingle();
 
         if (photo) {
-            const url = (photo as { image_url: string }).image_url;
-            const match = url.match(/horse-images\/(.+?)(\?|$)/);
-            if (match) {
-                await supabase.storage.from("horse-images").remove([match[1]]);
+            const path = (photo as { image_path: string }).image_path;
+            if (path) {
+                await supabase.storage.from("horse-images").remove([path]);
             }
         }
     } catch (err) { logger.error("Events", "Background task failed", err); }

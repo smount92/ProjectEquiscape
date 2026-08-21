@@ -17,7 +17,21 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
  .eq("id", id)
  .single();
 
- const p = post as Record<string, unknown> | null;
+ let p = post as Record<string, unknown> | null;
+ if (!p) {
+ // Activity-feed text posts live in activity_events (the feed links
+ // /feed/<event id>) — fall back so their permalinks resolve too.
+ const { data: event } = await supabase
+ .from("activity_events")
+ .select("metadata, users!actor_id(alias_name)")
+ .eq("id", id)
+ .eq("event_type","text_post")
+ .maybeSingle();
+ if (event) {
+ const e = event as Record<string, unknown>;
+ p = { content: (e.metadata as { text?: string } | null)?.text ??"", users: e.users };
+ }
+ }
  const content = (p?.content as string) ||"";
  const alias = (p?.users as { alias_name: string } | null)?.alias_name ??"Unknown";
 
@@ -39,9 +53,67 @@ export default async function FeedPostPage({ params }: { params: Promise<{ id: s
  .from("posts")
  .select("id, author_id, content, likes_count, created_at, users!posts_author_id_fkey(alias_name)")
  .eq("id", id)
- .single();
+ .maybeSingle();
 
- if (!post) notFound();
+ // The activity feed links its text posts as /feed/<activity_events id>
+ // — those ids aren't in posts, and this page 404'd every one of them.
+ // Render the event read-only (its likes use the activity like system,
+ // not post likes, so no toggle here).
+ if (!post) {
+ const { data: event } = await supabase
+ .from("activity_events")
+ .select("id, actor_id, metadata, image_urls, created_at, users!actor_id(alias_name)")
+ .eq("id", id)
+ .eq("event_type","text_post")
+ .maybeSingle();
+ if (!event) notFound();
+
+ const e = event as Record<string, unknown>;
+ const eventAlias = (e.users as { alias_name: string } | null)?.alias_name ??"Unknown";
+ const eventText = (e.metadata as { text?: string } | null)?.text ??"";
+ const eventImages = (e.image_urls as string[] | null) ?? [];
+
+ return (
+  <ExplorerLayout title="Post" description="View this post.">
+ <div className="mx-auto max-w-6xl px-6 max-w-[640px]">
+ <Button asChild variant="outline" size="wide"><Link
+ href="/feed"
+ >
+ ← Back to Feed
+ </Link></Button>
+
+ <div className="bg-card border-input rounded-lg border p-6 shadow-md transition-all">
+ <div className="flex flex-wrap items-center justify-between gap-1">
+ <Link href={`/profile/${encodeURIComponent(eventAlias)}`} className="truncate font-semibold max-w-[200px]">
+ @{eventAlias}
+ </Link>
+ <span className="text-muted-foreground text-sm">
+ {new Date(e.created_at as string).toLocaleString()}
+ </span>
+ </div>
+
+ {eventText && (
+ <div className="mt-4">
+ <RichText content={eventText} />
+ </div>
+ )}
+
+ {eventImages.length > 0 && (
+ <div
+ className="mt-4 grid gap-[4px] overflow-hidden rounded-md"
+ data-count={Math.min(eventImages.length, 4)}
+ >
+ {eventImages.slice(0, 4).map((url, i) => (
+ // eslint-disable-next-line @next/next/no-img-element
+ <img key={i} src={url} alt={`Image ${i + 1}`} loading="lazy" />
+ ))}
+ </div>
+ )}
+ </div>
+ </div>
+ </ExplorerLayout>
+ );
+ }
 
  const p = post as Record<string, unknown>;
  const actorAlias = (p.users as { alias_name: string } | null)?.alias_name ??"Unknown";
