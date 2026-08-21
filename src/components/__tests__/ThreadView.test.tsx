@@ -13,7 +13,7 @@ const { replyToThread, getThread, togglePostLike, togglePinPost } = vi.hoisted((
 }));
 vi.mock("@/app/actions/groups-forum", () => ({ replyToThread, getThread }));
 vi.mock("@/app/actions/posts", () => ({ togglePostLike }));
-// GroupAdminPanel (PinPostButton's home) imports the full groups action set.
+// PinPostButton pulls in the groups action module.
 vi.mock("@/app/actions/groups", () => ({
     togglePinPost,
     getGroupMembers: vi.fn().mockResolvedValue([]),

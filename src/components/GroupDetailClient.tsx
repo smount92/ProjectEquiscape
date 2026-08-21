@@ -1,118 +1,103 @@
 "use client";
 
-import { useState } from"react";
-import UniversalFeed from"@/components/UniversalFeed";
-import GroupRegistry from"@/components/GroupRegistry";
-import GroupFiles from"@/components/GroupFiles";
-import GroupAdminPanel from"@/components/GroupAdminPanel";
-import GroupBoard from"@/components/groups/GroupBoard";
-import type { Group, GroupChannel } from"@/app/actions/groups";
-import type { BoardThread } from"@/lib/groups/types";
+import { useState } from "react";
+import UniversalFeed from "@/components/UniversalFeed";
+import GroupRegistry from "@/components/GroupRegistry";
+import GroupFiles from "@/components/GroupFiles";
+import GroupBoard from "@/components/groups/GroupBoard";
+import type { Group, GroupChannel } from "@/app/actions/groups";
+import type { BoardThread } from "@/lib/groups/types";
+
+// ============================================================
+// BARN INTERIOR — what a member sees once they're through the
+// door. The Notice Board is the room; Latest / Files / Registry
+// are the tack room shelves beside it.
+//
+// The barn's ONE header is the leather masthead rendered by the
+// page above this component (ExplorerLayout runs with `noHeader`).
+// Do not add another heading here.
+// ============================================================
 
 interface Props {
- group: Group;
- initialPosts: Parameters<typeof UniversalFeed>[0]["initialPosts"];
- channels: GroupChannel[];
- currentUserId: string;
- /**
-  * Notice-board data — non-null only when NEXT_PUBLIC_GROUPS_FORUM
-  * is on and the server fetched the board. Null renders today's UI
-  * untouched, so the forum merges to prod invisibly.
-  */
- board?: { threads: BoardThread[]; hasMore: boolean } | null;
+    group: Group;
+    initialPosts: Parameters<typeof UniversalFeed>[0]["initialPosts"];
+    channels: GroupChannel[];
+    currentUserId: string;
+    /**
+     * Notice-board data. Null means the board fetch FAILED (e.g.
+     * migration 122 not applied) — the barn then falls back to the
+     * flat feed so the room is still usable.
+     */
+    board?: { threads: BoardThread[]; hasMore: boolean } | null;
 }
 
 export default function GroupDetailClient({ group, initialPosts, channels, currentUserId, board = null }: Props) {
- const forumOn = board !== null;
- const [activeTab, setActiveTab] = useState<"board" |"feed" |"files" |"registry">(forumOn ?"board" :"feed");
- const [activeChannel, setActiveChannel] = useState<string | null>(null);
+    const boardOk = board !== null;
+    const [activeTab, setActiveTab] = useState<"board" | "feed" | "files" | "registry">(
+        boardOk ? "board" : "feed",
+    );
 
- const isAdmin = group.memberRole ==="owner" || group.memberRole ==="admin";
- const isMod = isAdmin || group.memberRole ==="moderator";
+    const isAdmin = group.memberRole === "owner" || group.memberRole === "admin";
+    const isMod = isAdmin || group.memberRole === "moderator";
 
- const tabClass = (tab: string) =>
- `text-muted-foreground hover:text-foreground flex-1 cursor-pointer rounded-md border-none bg-transparent px-4 py-2 text-sm font-semibold transition-all hover:bg-black/[0.05] ${activeTab === tab ?"text-foreground border border-emerald-300 bg-emerald-100/70" :""}`;
+    const tabClass = (tab: string) =>
+        `min-h-[44px] cursor-pointer border-none bg-transparent px-3 py-1.5 text-xs font-semibold tracking-[0.14em] uppercase sm:min-h-0 ${
+            activeTab === tab ? "ledger-tab !mb-0" : "text-muted-foreground hover:text-foreground"
+        }`;
 
- return (
- <>
- {/* Tab Bar */}
- <div className="border-input my-6 flex gap-[2px] rounded-lg border bg-black/[0.03] p-1">
- {forumOn && (
- <button className={tabClass("board")} onClick={() => setActiveTab("board")}>
- 📌 Board
- </button>
- )}
- <button className={tabClass("feed")} onClick={() => setActiveTab("feed")}>
- {forumOn ?"💬 Latest" :"💬 Feed"}
- </button>
- <button className={tabClass("files")} onClick={() => setActiveTab("files")}>
- 📁 Files
- </button>
- <button className={tabClass("registry")} onClick={() => setActiveTab("registry")}>
- 📋 Registry
- </button>
- </div>
+    return (
+        <>
+            {/* Room tabs */}
+            <div className="mb-4 flex flex-wrap gap-1.5" role="tablist" aria-label="Barn sections">
+                {boardOk && (
+                    <button role="tab" aria-selected={activeTab === "board"} className={tabClass("board")} onClick={() => setActiveTab("board")}>
+                        📌 Notice Board
+                    </button>
+                )}
+                <button role="tab" aria-selected={activeTab === "feed"} className={tabClass("feed")} onClick={() => setActiveTab("feed")}>
+                    {boardOk ? "💬 Latest" : "💬 Feed"}
+                </button>
+                <button role="tab" aria-selected={activeTab === "files"} className={tabClass("files")} onClick={() => setActiveTab("files")}>
+                    📁 Files
+                </button>
+                <button role="tab" aria-selected={activeTab === "registry"} className={tabClass("registry")} onClick={() => setActiveTab("registry")}>
+                    📋 Registry
+                </button>
+            </div>
 
- {/* Channel Pills (only on the legacy Feed tab — the Board has its own channel tabs) */}
- {!forumOn && activeTab ==="feed" && channels.length > 1 && (
- <div className="scrollbar-none mb-6 flex gap-1 overflow-x-auto pb-1">
- <button
- className={`border-input text-secondary-foreground hover:text-foreground cursor-pointer rounded-full border bg-black/[0.04] px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-all hover:bg-black/[0.06] ${activeChannel === null ?"text-forest border-emerald-400 bg-emerald-100" :""}`}
- onClick={() => setActiveChannel(null)}
- >
- # all
- </button>
- {channels.map((ch) => (
- <button
- key={ch.id}
- className={`border-input text-secondary-foreground hover:text-foreground cursor-pointer rounded-full border bg-black/[0.04] px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-all hover:bg-black/[0.06] ${activeChannel === ch.id ?"text-forest border-emerald-400 bg-emerald-100" :""}`}
- onClick={() => setActiveChannel(ch.id)}
- >
- # {ch.name.toLowerCase()}
- </button>
- ))}
- </div>
- )}
+            {/* Board-fetch failure is not silent — members should know why
+                the notice board is missing rather than assume it's empty. */}
+            {!boardOk && (
+                <p className="text-muted-foreground mb-4 text-xs italic">
+                    The notice board is unavailable right now — showing the barn&apos;s latest posts instead.
+                </p>
+            )}
 
- {/* Tab Content */}
- {forumOn && activeTab ==="board" && board && (
- <GroupBoard
- groupId={group.id}
- slug={group.slug}
- channels={channels}
- initialThreads={board.threads}
- initialHasMore={board.hasMore}
- isAdmin={isAdmin}
- />
- )}
+            {boardOk && activeTab === "board" && board && (
+                <GroupBoard
+                    groupId={group.id}
+                    slug={group.slug}
+                    channels={channels}
+                    initialThreads={board.threads}
+                    initialHasMore={board.hasMore}
+                    isAdmin={isAdmin}
+                />
+            )}
 
- {activeTab ==="feed" && (
- <UniversalFeed
- initialPosts={initialPosts}
- context={{ groupId: group.id }}
- currentUserId={currentUserId}
- showComposer={true}
- composerPlaceholder={
- activeChannel
- ? `Post to #${channels.find((c) => c.id === activeChannel)?.name ||"channel"}…`
- :"Share with the group…"
- }
- label="Group Posts"
- />
- )}
+            {activeTab === "feed" && (
+                <UniversalFeed
+                    initialPosts={initialPosts}
+                    context={{ groupId: group.id }}
+                    currentUserId={currentUserId}
+                    showComposer={true}
+                    composerPlaceholder="Share with the barn…"
+                    label="Barn Posts"
+                />
+            )}
 
- {activeTab ==="files" && <GroupFiles groupId={group.id} canUpload={isMod} canDelete={isAdmin} />}
+            {activeTab === "files" && <GroupFiles groupId={group.id} canUpload={isMod} canDelete={isAdmin} />}
 
- {activeTab ==="registry" && <GroupRegistry groupId={group.id} isMember={group.isMember} />}
-
- {/* Admin Panel (always visible for admins below content) */}
- {isAdmin && (
- <GroupAdminPanel
- groupId={group.id}
- currentUserId={currentUserId}
- memberRole={group.memberRole ||"member"}
- />
- )}
- </>
- );
+            {activeTab === "registry" && <GroupRegistry groupId={group.id} isMember={group.isMember} />}
+        </>
+    );
 }

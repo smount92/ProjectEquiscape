@@ -1,13 +1,14 @@
 "use server";
 
 /**
- * Groups forum ("Notice Board") server actions.
+ * Barn Notice Board server actions (tables keep the historic
+ * `group*` names; the room is called a Barn).
  *
  * RLS-first: every query runs on the user's client; there is no
  * admin-client use in this file. Each action:
  *   1. zod-parses its input (src/lib/groups/schemas.ts),
  *   2. requireAuth(),
- *   3. explicit group-membership check,
+ *   3. explicit barn-membership check,
  *   4. returns { success, error? } — never throws for domain errors.
  *
  * NOTE: these actions read posts.title / posts.bumped_at and the
@@ -78,7 +79,7 @@ export async function getGroupBoard(
     const { groupId, channelId, offset } = parsed.data;
 
     const role = await getMemberRole(supabase, groupId, user.id);
-    if (!role) return { success: false, error: "Join this group to see its board." };
+    if (!role) return { success: false, error: "Join this barn to see its board." };
 
     let query = supabase
         .from("posts")
@@ -174,7 +175,7 @@ export async function markGroupRead(
     const { groupId } = parsed.data;
 
     const role = await getMemberRole(supabase, groupId, user.id);
-    if (!role) return { success: false, error: "Not a member of this group." };
+    if (!role) return { success: false, error: "Not a member of this barn." };
 
     const { error } = await supabase
         .from("group_last_read")
@@ -212,7 +213,7 @@ export async function getThread(
     if (r.parent_id || !r.group_id) return { success: false, error: "Thread not found." };
 
     const role = await getMemberRole(supabase, r.group_id as string, user.id);
-    if (!role) return { success: false, error: "Join this group to read its threads." };
+    if (!role) return { success: false, error: "Join this barn to read its threads." };
 
     // ALL replies, paginated per-thread — this view is not subject to
     // the global 100-reply cap the flat feed uses across posts.
@@ -300,7 +301,7 @@ export async function createThread(
     const { groupId, channelId, title, content } = parsed.data;
 
     const role = await getMemberRole(supabase, groupId, user.id);
-    if (!role) return { success: false, error: "Join this group to start a thread." };
+    if (!role) return { success: false, error: "Join this barn to start a thread." };
 
     // A channel, if given, must belong to this group.
     if (channelId) {
@@ -310,7 +311,7 @@ export async function createThread(
             .eq("id", channelId)
             .maybeSingle();
         if (!channel || (channel as { group_id: string }).group_id !== groupId) {
-            return { success: false, error: "Channel not found in this group." };
+            return { success: false, error: "Channel not found in this barn." };
         }
     }
 
@@ -377,7 +378,7 @@ export async function replyToThread(
     if (p.parent_id || !p.group_id) return { success: false, error: "Thread not found." };
 
     const role = await getMemberRole(supabase, p.group_id, user.id);
-    if (!role) return { success: false, error: "Join this group to reply." };
+    if (!role) return { success: false, error: "Join this barn to reply." };
 
     // The RPC also bumps the parent's bumped_at (migration 122).
     const { data: replyId, error } = await supabase.rpc("add_post_reply", {

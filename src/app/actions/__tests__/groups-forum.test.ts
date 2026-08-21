@@ -87,7 +87,7 @@ describe("groups-forum — getGroupBoard", () => {
     it("refuses non-members", async () => {
         mockClient._mockQuery.maybeSingle.mockResolvedValueOnce({ data: null, error: null });
         const result = await getGroupBoard({ groupId: GROUP_ID });
-        expect(result).toEqual({ success: false, error: "Join this group to see its board." });
+        expect(result).toEqual({ success: false, error: "Join this barn to see its board." });
     });
 
     it("returns threads pinned-first with unread derived against last-read", async () => {
@@ -168,7 +168,7 @@ describe("groups-forum — getThread", () => {
             }) // root post
             .mockResolvedValueOnce({ data: null, error: null }); // membership
         const result = await getThread({ postId: THREAD_ID });
-        expect(result).toEqual({ success: false, error: "Join this group to read its threads." });
+        expect(result).toEqual({ success: false, error: "Join this barn to read its threads." });
     });
 
     it("rejects replies and non-group posts as thread roots", async () => {
@@ -185,7 +185,7 @@ describe("groups-forum — createThread", () => {
     it("refuses non-members", async () => {
         mockClient._mockQuery.maybeSingle.mockResolvedValueOnce({ data: null, error: null });
         const result = await createThread({ groupId: GROUP_ID, title: "A ride share", content: "Anyone?" });
-        expect(result).toEqual({ success: false, error: "Join this group to start a thread." });
+        expect(result).toEqual({ success: false, error: "Join this barn to start a thread." });
     });
 
     it("rejects a channel from a different group", async () => {
@@ -198,7 +198,7 @@ describe("groups-forum — createThread", () => {
             title: "A ride share",
             content: "Anyone?",
         });
-        expect(result).toEqual({ success: false, error: "Channel not found in this group." });
+        expect(result).toEqual({ success: false, error: "Channel not found in this barn." });
     });
 
     it("inserts a titled root post in the channel", async () => {
@@ -257,7 +257,7 @@ describe("groups-forum — replyToThread", () => {
     it("refuses non-members", async () => {
         primeParentAndMembership(null);
         const result = await replyToThread({ postId: THREAD_ID, content: "count me in" });
-        expect(result).toEqual({ success: false, error: "Join this group to reply." });
+        expect(result).toEqual({ success: false, error: "Join this barn to reply." });
     });
 
     it("refuses replying to a reply", async () => {
@@ -343,7 +343,7 @@ describe("groups — togglePinPost authz (surfaced by the forum UI)", () => {
             .mockResolvedValueOnce({ data: { group_id: GROUP_ID, is_pinned: false }, error: null })
             .mockResolvedValueOnce({ data: { role: "member" }, error: null });
         const result = await togglePinPost(THREAD_ID);
-        expect(result).toEqual({ success: false, error: "Only admins can pin posts." });
+        expect(result).toEqual({ success: false, error: "Only barn admins can pin posts." });
         expect(mockClient._mockQuery.update).not.toHaveBeenCalled();
     });
 

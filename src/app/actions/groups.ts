@@ -1,5 +1,7 @@
 "use server";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
+
 import { logger } from "@/lib/logger";
 
 import { requireAuth } from "@/lib/auth";
@@ -11,7 +13,18 @@ import { sanitizeText } from "@/lib/utils/validation";
 import { sanitizeForOr } from "@/lib/utils/search";
 
 // ============================================================
-// GROUPS — Server Actions
+// BARNS — Server Actions
+//
+// The user-facing name for a group is a **Barn**. The tables keep
+// their historic names (`groups`, `group_memberships`, …) and every
+// existing row survives; only the copy changed. New code should say
+// "barn" in anything a member reads.
+//
+// PRIVACY MODEL (migration 167) — `groups.is_private` is CANONICAL.
+// The legacy three-state `groups.visibility` column is derived from
+// it by a trigger and kept only for compatibility. Until 167 is
+// applied, every read below falls back to `visibility === "private"`
+// and every write degrades to writing `visibility`, so nothing 500s.
 // ============================================================
 
 // ── Types ──
@@ -24,6 +37,9 @@ export interface Group {
     groupType: string;
     region: string | null;
     visibility: string;
+    /** Canonical privacy flag. Falls back to `visibility === "private"`
+     *  when migration 167 has not been applied yet. */
+    isPrivate: boolean;
     bannerUrl: string | null;
     iconUrl: string | null;
     memberCount: number;
@@ -32,11 +48,41 @@ export interface Group {
     creatorAlias: string;
     isMember: boolean;
     memberRole: string | null;
+    /** For a private barn the viewer is not in: their pending/denied
+     *  join request, if any. Null everywhere else. */
+    joinRequestStatus: "pending" | "approved" | "denied" | null;
+}
+
+/** Postgres "column does not exist" — migration 167 not applied yet. */
+const UNDEFINED_COLUMN = "42703";
+/** Postgres "relation does not exist" — barn_join_requests missing. */
+const UNDEFINED_TABLE = "42P01";
+
+/**
+ * Untyped view of the Supabase client for the schema migration 167
+ * adds (`groups.is_private`, `barn_join_requests`). The generated
+ * Database types are regenerated only after the owner pastes the
+ * migration, so until then TypeScript does not know these exist.
+ * Every call site behind this cast handles the missing-schema error
+ * codes above, so a pre-167 database degrades instead of throwing.
+ */
+function barnDb(client: unknown): SupabaseClient {
+    return client as SupabaseClient;
+}
+
+function isMissingSchema(error: { code?: string } | null | undefined): boolean {
+    return error?.code === UNDEFINED_COLUMN || error?.code === UNDEFINED_TABLE;
+}
+
+/** Read privacy off a raw `groups` row, tolerating a pre-167 schema. */
+function readIsPrivate(g: Record<string, unknown>): boolean {
+    if (typeof g.is_private === "boolean") return g.is_private;
+    return g.visibility === "private";
 }
 
 // ── CRUD ──
 
-/** Create a group and auto-add creator as owner */
+/** Create a barn and auto-add the creator as owner */
 export async function createGroup(data: {
     name: string;
     slug: string;
@@ -44,10 +90,11 @@ export async function createGroup(data: {
     groupType: string;
     region?: string;
     visibility?: string;
+    isPrivate?: boolean;
 }): Promise<{ success: boolean; slug?: string; error?: string }> {
     const { supabase, user } = await requireAuth();
 
-    if (!data.name.trim()) return { success: false, error: "Group name is required." };
+    if (!data.name.trim()) return { success: false, error: "Barn name is required." };
 
     const slug = data.slug.trim().toLowerCase()
         .replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
@@ -62,23 +109,36 @@ export async function createGroup(data: {
         .maybeSingle();
     if (existing) return { success: false, error: `Slug "${slug}" is already taken.` };
 
-    // Create group
-    const { data: group, error } = await supabase
+    // isPrivate is canonical; visibility is written too so a pre-167
+    // database (no trigger, no column) still records the choice.
+    const isPrivate = data.isPrivate ?? data.visibility === "private";
+    const base = {
+        name: sanitizeText(data.name),
+        slug,
+        description: data.description?.trim() || null,
+        group_type: data.groupType,
+        region: data.region?.trim() || null,
+        visibility: isPrivate ? "private" : (data.visibility === "private" ? "public" : data.visibility || "public"),
+        created_by: user.id,
+        member_count: 1,
+    };
+
+    let { data: group, error } = await barnDb(supabase)
         .from("groups")
-        .insert({
-            name: sanitizeText(data.name),
-            slug,
-            description: data.description?.trim() || null,
-            group_type: data.groupType,
-            region: data.region?.trim() || null,
-            visibility: data.visibility || "public",
-            created_by: user.id,
-            member_count: 1,
-        })
+        .insert({ ...base, is_private: isPrivate })
         .select("id")
         .single();
 
-    if (error) return { success: false, error: error.message };
+    // Pre-167 fallback: no is_private column — visibility carries it.
+    if (error && isMissingSchema(error)) {
+        ({ data: group, error } = await barnDb(supabase)
+            .from("groups")
+            .insert(base)
+            .select("id")
+            .single());
+    }
+
+    if (error || !group) return { success: false, error: error?.message ?? "Failed to create barn." };
 
     // Auto-add creator as owner
     await supabase.from("group_memberships").insert({
@@ -92,7 +152,53 @@ export async function createGroup(data: {
     return { success: true, slug };
 }
 
-/** Get group by slug */
+/** Update a barn's settings (owner/admin only) */
+export async function updateBarnSettings(
+    groupId: string,
+    data: { name?: string; description?: string | null; isPrivate?: boolean },
+): Promise<{ success: boolean; error?: string }> {
+    const { supabase, user } = await requireAuth();
+
+    const { data: membership } = await supabase
+        .from("group_memberships")
+        .select("role")
+        .eq("group_id", groupId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+    const role = (membership as { role: string } | null)?.role;
+    if (!role || !["owner", "admin"].includes(role)) {
+        return { success: false, error: "Only the barn owner or an admin can change settings." };
+    }
+
+    const update: Record<string, unknown> = {};
+    if (data.name !== undefined) {
+        if (!data.name.trim()) return { success: false, error: "Barn name is required." };
+        update.name = sanitizeText(data.name);
+    }
+    if (data.description !== undefined) update.description = data.description?.trim() || null;
+    if (data.isPrivate !== undefined) {
+        update.is_private = data.isPrivate;
+        update.visibility = data.isPrivate ? "private" : "public";
+    }
+    if (Object.keys(update).length === 0) return { success: true };
+
+    let { error } = await barnDb(supabase).from("groups").update(update).eq("id", groupId);
+
+    // Pre-167 fallback: drop is_private, keep the visibility write.
+    if (error && isMissingSchema(error)) {
+        delete update.is_private;
+        ({ error } = await barnDb(supabase).from("groups").update(update).eq("id", groupId));
+    }
+
+    if (error) return { success: false, error: error.message };
+
+    revalidatePath("/community/groups");
+    revalidateTag("groups", "max");
+    return { success: true };
+}
+
+/** Get a barn by slug */
 export async function getGroup(slug: string): Promise<Group | null> {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -130,11 +236,28 @@ export async function getGroup(slug: string): Promise<Group | null> {
         }
     }
 
-    // Get actual member count from group_memberships
+    // Get actual member count from group_memberships. A private barn's
+    // roster is members-only under 167, so a non-member's count query
+    // comes back 0 — fall back to the denormalised member_count so the
+    // directory card still shows a believable size.
     const { count: actualMemberCount } = await supabase
         .from("group_memberships")
         .select("*", { count: "exact", head: true })
         .eq("group_id", g.id as string);
+
+    const isPrivate = readIsPrivate(g);
+
+    // Pending/denied join request for a private barn the viewer is outside of.
+    let joinRequestStatus: Group["joinRequestStatus"] = null;
+    if (user && !isMember && isPrivate) {
+        const { data: req } = await barnDb(supabase)
+            .from("barn_join_requests")
+            .select("status")
+            .eq("group_id", g.id as string)
+            .eq("user_id", user.id)
+            .maybeSingle();
+        joinRequestStatus = (req as { status: Group["joinRequestStatus"] } | null)?.status ?? null;
+    }
 
     return {
         id: g.id as string,
@@ -144,18 +267,20 @@ export async function getGroup(slug: string): Promise<Group | null> {
         groupType: g.group_type as string,
         region: g.region as string | null,
         visibility: g.visibility as string,
+        isPrivate,
         bannerUrl: g.banner_url as string | null,
         iconUrl: g.icon_url as string | null,
-        memberCount: actualMemberCount ?? (g.member_count as number) ?? 0,
+        memberCount: actualMemberCount || (g.member_count as number) || 0,
         createdBy: g.created_by as string,
         createdAt: g.created_at as string,
         creatorAlias: (creator as { alias_name: string } | null)?.alias_name || "Unknown",
         isMember,
         memberRole,
+        joinRequestStatus,
     };
 }
 
-/** Browse/search groups */
+/** Browse/search barns */
 export async function getGroups(filters?: {
     groupType?: string;
     region?: string;
@@ -211,6 +336,18 @@ export async function getGroups(filters?: {
         }
     }
 
+    // Which private barns has the viewer already asked to join?
+    const pendingRequests = new Set<string>();
+    if (user) {
+        const { data: requests } = await barnDb(supabase)
+            .from("barn_join_requests")
+            .select("group_id")
+            .eq("user_id", user.id)
+            .eq("status", "pending")
+            .in("group_id", groupIds);
+        for (const r of (requests || []) as { group_id: string }[]) pendingRequests.add(r.group_id);
+    }
+
     return (data as Record<string, unknown>[]).map(g => ({
         id: g.id as string,
         name: g.name as string,
@@ -219,6 +356,7 @@ export async function getGroups(filters?: {
         groupType: g.group_type as string,
         region: g.region as string | null,
         visibility: g.visibility as string,
+        isPrivate: readIsPrivate(g),
         bannerUrl: g.banner_url as string | null,
         iconUrl: g.icon_url as string | null,
         memberCount: memberCountMap.get(g.id as string) || (g.member_count as number) || 0,
@@ -227,12 +365,32 @@ export async function getGroups(filters?: {
         creatorAlias: (g as { users?: { alias_name: string } | null }).users?.alias_name || "Unknown",
         isMember: membershipMap.has(g.id as string),
         memberRole: membershipMap.get(g.id as string) || null,
+        joinRequestStatus: pendingRequests.has(g.id as string) ? "pending" : null,
     }));
 }
 
-/** Join a group */
-export async function joinGroup(groupId: string): Promise<{ success: boolean; error?: string }> {
+/**
+ * Join a barn.
+ *
+ * Public barns join instantly. A **private** barn instead files a
+ * request for the owner/admin/moderator to approve — the resolved
+ * value carries `pending: true` so the UI can say so.
+ */
+export async function joinGroup(
+    groupId: string,
+): Promise<{ success: boolean; pending?: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
+
+    const { data: barn } = await supabase
+        .from("groups")
+        .select("*")
+        .eq("id", groupId)
+        .maybeSingle();
+    if (!barn) return { success: false, error: "Barn not found." };
+
+    if (readIsPrivate(barn as Record<string, unknown>)) {
+        return requestToJoinBarn(groupId);
+    }
 
     const { error } = await supabase.from("group_memberships").insert({
         group_id: groupId,
@@ -272,7 +430,7 @@ export async function leaveGroup(groupId: string): Promise<{ success: boolean; e
         .single();
 
     if ((membership as { role: string } | null)?.role === "owner") {
-        return { success: false, error: "Owners cannot leave. Transfer ownership first." };
+        return { success: false, error: "Barn owners cannot leave. Transfer ownership first." };
     }
 
     const { error } = await supabase
@@ -293,7 +451,7 @@ export async function leaveGroup(groupId: string): Promise<{ success: boolean; e
     return { success: true };
 }
 
-/** Get groups the current user belongs to */
+/** Get barns the current user belongs to */
 export async function getMyGroups(): Promise<Group[]> {
     const { supabase, user } = await requireAuth();
 
@@ -338,6 +496,7 @@ export async function getMyGroups(): Promise<Group[]> {
         groupType: g.group_type as string,
         region: g.region as string | null,
         visibility: g.visibility as string,
+        isPrivate: readIsPrivate(g),
         bannerUrl: g.banner_url as string | null,
         iconUrl: g.icon_url as string | null,
         memberCount: memberCountMap2.get(g.id as string) || (g.member_count as number) || 0,
@@ -346,7 +505,203 @@ export async function getMyGroups(): Promise<Group[]> {
         creatorAlias: "",
         isMember: true,
         memberRole: roleMap.get(g.id as string) || "member",
+        joinRequestStatus: null,
     }));
+}
+
+// ── Private barns: request / approve ──
+
+export interface BarnJoinRequest {
+    userId: string;
+    alias: string;
+    message: string | null;
+    createdAt: string;
+}
+
+const BARN_STAFF_ROLES = ["owner", "admin", "moderator"];
+
+/** The caller's role in a barn, or null when not a member. */
+async function callerRole(
+    supabase: Awaited<ReturnType<typeof createClient>>,
+    groupId: string,
+    userId: string,
+): Promise<string | null> {
+    const { data } = await supabase
+        .from("group_memberships")
+        .select("role")
+        .eq("group_id", groupId)
+        .eq("user_id", userId)
+        .maybeSingle();
+    return (data as { role: string } | null)?.role ?? null;
+}
+
+/**
+ * Ask the barn's staff to let you in. Idempotent — asking twice
+ * leaves one pending row.
+ */
+export async function requestToJoinBarn(
+    groupId: string,
+    message?: string,
+): Promise<{ success: boolean; pending?: boolean; error?: string }> {
+    const { supabase, user } = await requireAuth();
+
+    if (await callerRole(supabase, groupId, user.id)) {
+        return { success: false, error: "You are already in this barn." };
+    }
+
+    const { error } = await barnDb(supabase)
+        .from("barn_join_requests")
+        .upsert(
+            {
+                group_id: groupId,
+                user_id: user.id,
+                message: message?.trim() ? sanitizeText(message) : null,
+                status: "pending",
+                decided_at: null,
+                decided_by: null,
+            },
+            { onConflict: "group_id,user_id" },
+        );
+
+    // Pre-167 database: no requests table. Private barns cannot be
+    // joined at all yet rather than silently letting anyone in.
+    if (error && isMissingSchema(error)) {
+        return { success: false, error: "Private barns aren't open for requests yet. Check back soon." };
+    }
+    if (error) return { success: false, error: error.message };
+
+    // Best effort: tell the barn's staff someone is at the gate.
+    try {
+        const [{ data: staff }, { data: actor }, { data: barn }] = await Promise.all([
+            supabase.from("group_memberships").select("user_id").eq("group_id", groupId).in("role", BARN_STAFF_ROLES),
+            supabase.from("users").select("alias_name").eq("id", user.id).maybeSingle(),
+            supabase.from("groups").select("slug, name").eq("id", groupId).maybeSingle(),
+        ]);
+        const alias = (actor as { alias_name: string } | null)?.alias_name || "Someone";
+        const b = barn as { slug: string; name: string } | null;
+        const { createNotification } = await import("@/lib/notifications/createNotification");
+        for (const s of ((staff || []) as { user_id: string }[]).slice(0, 25)) {
+            await createNotification({
+                userId: s.user_id,
+                type: "system",
+                actorId: user.id,
+                content: `@${alias} asked to join ${b?.name ?? "your barn"}`,
+                linkUrl: b?.slug ? `/community/groups/${b.slug}` : "/community/groups",
+            });
+        }
+    } catch (err) {
+        logger.error("Barns", "Join-request notification failed", err);
+    }
+
+    revalidatePath("/community/groups");
+    return { success: true, pending: true };
+}
+
+/** Withdraw your own pending request. */
+export async function cancelBarnJoinRequest(
+    groupId: string,
+): Promise<{ success: boolean; error?: string }> {
+    const { supabase, user } = await requireAuth();
+
+    const { error } = await barnDb(supabase)
+        .from("barn_join_requests")
+        .delete()
+        .eq("group_id", groupId)
+        .eq("user_id", user.id);
+
+    if (error && isMissingSchema(error)) return { success: true };
+    if (error) return { success: false, error: error.message };
+
+    revalidatePath("/community/groups");
+    return { success: true };
+}
+
+/** Pending requests for a barn (staff only). Empty pre-167. */
+export async function getBarnJoinRequests(groupId: string): Promise<BarnJoinRequest[]> {
+    const { supabase, user } = await requireAuth();
+
+    const role = await callerRole(supabase, groupId, user.id);
+    if (!role || !BARN_STAFF_ROLES.includes(role)) return [];
+
+    const { data, error } = await barnDb(supabase)
+        .from("barn_join_requests")
+        .select("user_id, message, created_at, users!barn_join_requests_user_id_fkey(alias_name)")
+        .eq("group_id", groupId)
+        .eq("status", "pending")
+        .order("created_at", { ascending: true });
+
+    if (error || !data) return [];
+
+    return (data as Record<string, unknown>[]).map(r => ({
+        userId: r.user_id as string,
+        alias: (r as { users?: { alias_name: string } | null }).users?.alias_name || "Unknown",
+        message: (r.message as string | null) ?? null,
+        createdAt: r.created_at as string,
+    }));
+}
+
+/** Approve or deny a pending request (owner/admin/moderator). */
+export async function decideBarnJoinRequest(
+    groupId: string,
+    targetUserId: string,
+    decision: "approved" | "denied",
+): Promise<{ success: boolean; error?: string }> {
+    const { supabase, user } = await requireAuth();
+
+    const role = await callerRole(supabase, groupId, user.id);
+    if (!role || !BARN_STAFF_ROLES.includes(role)) {
+        return { success: false, error: "Only barn staff can answer join requests." };
+    }
+
+    const { error: updateError } = await barnDb(supabase)
+        .from("barn_join_requests")
+        .update({ status: decision, decided_at: new Date().toISOString(), decided_by: user.id })
+        .eq("group_id", groupId)
+        .eq("user_id", targetUserId)
+        .eq("status", "pending");
+
+    if (updateError && isMissingSchema(updateError)) {
+        return { success: false, error: "Join requests aren't available yet." };
+    }
+    if (updateError) return { success: false, error: updateError.message };
+
+    if (decision === "approved") {
+        const { error: memberError } = await supabase.from("group_memberships").insert({
+            group_id: groupId,
+            user_id: targetUserId,
+            role: "member",
+        });
+        // 23505 = already a member; treat the approval as done.
+        if (memberError && memberError.code !== "23505") {
+            return { success: false, error: memberError.message };
+        }
+
+        try {
+            const { data: g } = await supabase.from("groups").select("member_count").eq("id", groupId).single();
+            if (g) await supabase.from("groups").update({ member_count: ((g as { member_count: number }).member_count || 0) + 1 }).eq("id", groupId);
+        } catch (err) { logger.error("Barns", "Member count update failed", err); }
+    }
+
+    // Best effort: tell the requester either way.
+    try {
+        const { data: barn } = await supabase.from("groups").select("slug, name").eq("id", groupId).maybeSingle();
+        const b = barn as { slug: string; name: string } | null;
+        const { createNotification } = await import("@/lib/notifications/createNotification");
+        await createNotification({
+            userId: targetUserId,
+            type: "system",
+            actorId: user.id,
+            content: decision === "approved"
+                ? `You're in — welcome to ${b?.name ?? "the barn"}!`
+                : `Your request to join ${b?.name ?? "that barn"} wasn't accepted.`,
+            linkUrl: b?.slug && decision === "approved" ? `/community/groups/${b.slug}` : "/community/groups",
+        });
+    } catch (err) {
+        logger.error("Barns", "Join-decision notification failed", err);
+    }
+
+    revalidatePath("/community/groups");
+    return { success: true };
 }
 
 // ── Group Registry ──
@@ -359,7 +714,7 @@ export interface RegistryEntry {
     addedAt: string;
 }
 
-/** Get the shared horse registry for a group */
+/** Get the shared horse registry for a barn */
 export async function getGroupRegistry(groupId: string): Promise<RegistryEntry[]> {
     const supabase = await createClient();
 
@@ -419,7 +774,7 @@ export interface GroupFile {
     createdAt: string;
 }
 
-/** Get files uploaded to a group */
+/** Get files uploaded to a barn */
 export async function getGroupFiles(groupId: string): Promise<GroupFile[]> {
     const supabase = await createClient();
 
@@ -490,7 +845,7 @@ export async function uploadGroupFile(
 
     const role = (membership as { role: string } | null)?.role;
     if (!role || !["owner", "admin", "moderator"].includes(role)) {
-        return { success: false, error: "Only admins and moderators can upload files." };
+        return { success: false, error: "Only barn admins and moderators can upload files." };
     }
 
     // The path must point into the caller's own folder for this group —
@@ -527,7 +882,7 @@ export async function uploadGroupFile(
     return { success: true };
 }
 
-/** Delete a group file */
+/** Delete a barn file */
 export async function deleteGroupFile(
     fileId: string
 ): Promise<{ success: boolean; error?: string }> {
@@ -570,7 +925,7 @@ export interface GroupMember {
     joinedAt: string;
 }
 
-/** Get all members of a group with roles */
+/** Get all members of a barn with roles */
 export async function getGroupMembers(groupId: string): Promise<GroupMember[]> {
     const supabase = await createClient();
 
@@ -613,7 +968,7 @@ export async function updateMemberRole(
         .maybeSingle();
 
     if ((callerMembership as { role: string } | null)?.role !== "owner") {
-        return { success: false, error: "Only the group owner can change roles." };
+        return { success: false, error: "Only the barn owner can change roles." };
     }
 
     const { error } = await supabase
@@ -627,7 +982,7 @@ export async function updateMemberRole(
     return { success: true };
 }
 
-/** Remove a member from a group (admin/owner) */
+/** Remove a member from a barn (admin/owner) */
 export async function removeMember(
     groupId: string,
     targetUserId: string
@@ -679,7 +1034,7 @@ export async function removeMember(
     return { success: true };
 }
 
-/** Toggle pin on a group post */
+/** Toggle pin on a barn post */
 export async function togglePinPost(
     postId: string
 ): Promise<{ success: boolean; error?: string }> {
@@ -694,7 +1049,7 @@ export async function togglePinPost(
 
     if (!post) return { success: false, error: "Post not found." };
     const p = post as { group_id: string | null; is_pinned: boolean };
-    if (!p.group_id) return { success: false, error: "Not a group post." };
+    if (!p.group_id) return { success: false, error: "Not a barn post." };
 
     // Verify admin/owner/mod role
     const { data: membership } = await supabase
@@ -706,7 +1061,7 @@ export async function togglePinPost(
 
     const role = (membership as { role: string } | null)?.role;
     if (!role || !["owner", "admin", "moderator"].includes(role)) {
-        return { success: false, error: "Only admins can pin posts." };
+        return { success: false, error: "Only barn admins can pin posts." };
     }
 
     const { error } = await supabase
@@ -729,7 +1084,7 @@ export interface GroupChannel {
     sortOrder: number;
 }
 
-/** Get channels for a group */
+/** Get channels for a barn */
 export async function getGroupChannels(groupId: string): Promise<GroupChannel[]> {
     const supabase = await createClient();
 
@@ -751,7 +1106,7 @@ export async function getGroupChannels(groupId: string): Promise<GroupChannel[]>
     }));
 }
 
-/** Create a channel in a group (admin/owner only) */
+/** Create a channel in a barn (admin/owner only) */
 export async function createGroupChannel(
     groupId: string,
     name: string,
@@ -771,7 +1126,7 @@ export async function createGroupChannel(
 
     const role = (membership as { role: string } | null)?.role;
     if (!role || !["owner", "admin"].includes(role)) {
-        return { success: false, error: "Only admins can create channels." };
+        return { success: false, error: "Only barn admins can create channels." };
     }
 
     const slug = name.trim().toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
@@ -811,6 +1166,13 @@ export async function deleteGroupChannel(
 
     if (!channel) return { success: false, error: "Channel not found." };
     const groupId = (channel as { group_id: string }).group_id;
+
+    // The doc comment always claimed "admin/owner only" but nothing
+    // enforced it — `user` was destructured and never read.
+    const role = await callerRole(supabase, groupId, user.id);
+    if (!role || !["owner", "admin"].includes(role)) {
+        return { success: false, error: "Only barn admins can delete channels." };
+    }
 
     const { count } = await supabase
         .from("group_channels")

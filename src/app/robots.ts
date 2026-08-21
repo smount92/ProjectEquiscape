@@ -47,6 +47,10 @@ export default function robots(): MetadataRoute.Robots {
                     "/community$",
                     "/community/groups",
                     "/community/groups/*",
+                    // /community/barns/* is the Barns-name alias that
+                    // 307s into /community/groups/* — equally walled.
+                    "/community/barns",
+                    "/community/barns/*",
                     "/community/events",
                     "/community/events/*",
                     "/community/help-id",
