@@ -9,7 +9,7 @@ import ExplorerLayout from "@/components/layouts/ExplorerLayout";
 export async function generateMetadata({ params }: { params: Promise<{ slug: string; postId: string }> }) {
     const { slug } = await params;
     const group = await getGroup(slug);
-    return { title: group ? `Thread — ${group.name}` : "Thread" };
+    return { title: group ? `Thread — ${group.name}` : "Barn Thread" };
 }
 
 export default async function GroupThreadPage({
@@ -48,8 +48,10 @@ export default async function GroupThreadPage({
     const canPin = ["owner", "admin", "moderator"].includes(group.memberRole || "");
 
     return (
-        <ExplorerLayout title={result.thread.displayTitle} description={group.name}>
-            <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6">
+        // noHeader: ThreadView brings its own forest header (breadcrumb +
+        // title). Letting the layout render one too gave the page two.
+        <ExplorerLayout noHeader frameless>
+            <div className="mx-auto max-w-3xl">
                 <ThreadView
                     thread={result.thread}
                     groupName={group.name}

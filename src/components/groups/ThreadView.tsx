@@ -4,16 +4,17 @@ import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import RichText from "@/components/RichText";
 import { PostHeader, ReactionBar, UserAvatar } from "@/components/social";
-import { PinPostButton } from "@/components/GroupAdminPanel";
+import { PinPostButton } from "@/components/groups/PinPostButton";
 import { togglePostLike } from "@/app/actions/posts";
 import { getThread, replyToThread } from "@/app/actions/groups-forum";
 import type { ThreadPost, ThreadViewData } from "@/lib/groups/types";
 import { Button } from "@/components/ui/button";
 
 // ============================================================
-// THREAD VIEW — inside one notice-board thread. Forest header
-// with breadcrumbs, subtly-highlighted OP, replies via the
-// social primitives, auto-growing 2000-char composer.
+// THREAD VIEW — inside one barn notice-board thread. Forest header
+// with breadcrumbs (this is the page's ONE header — the route runs
+// ExplorerLayout with `noHeader`), subtly-highlighted OP, replies
+// via the social primitives, auto-growing 2000-char composer.
 // ============================================================
 
 interface ThreadViewProps {
@@ -121,7 +122,7 @@ export default function ThreadView({
                     href={`/community/groups/${groupSlug}`}
                     className="text-muted-foreground hover:text-foreground text-sm no-underline"
                 >
-                    ← Back to board
+                    ← Back to the notice board
                 </Link>
                 {canPin && <PinPostButton postId={thread.id} isPinned={thread.isPinned} />}
             </div>

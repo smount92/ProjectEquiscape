@@ -10,7 +10,9 @@ import { createThread, getGroupBoard, markGroupRead } from "@/app/actions/groups
 import type { BoardThread } from "@/lib/groups/types";
 
 // ============================================================
-// GROUP BOARD — the club notice board (NEXT_PUBLIC_GROUPS_FORUM).
+// BARN NOTICE BOARD — the crown jewel of a barn. These channel
+// tabs are the real, working ones (the dead "channel pills" that
+// used to sit above the feed are gone).
 // Channel tabs + green-ruled ledger thread list: brass unread dot,
 // 📌 stickies with a warm tint, reply counts in forest numerals,
 // bump-ordered rows. Clicking a row navigates into the thread.
