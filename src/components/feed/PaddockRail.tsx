@@ -94,9 +94,12 @@ function UpcomingEvents({ events }: { events: MHHEvent[] }) {
                     </li>
                 ))}
             </ul>
-            <div className="mt-3">
+            <div className="mt-3 flex flex-col gap-1">
                 <Link href="/community/events" className={RAIL_LINK}>
                     All events →
+                </Link>
+                <Link href="/calendar" className={RAIL_LINK}>
+                    Open the calendar →
                 </Link>
             </div>
         </aside>

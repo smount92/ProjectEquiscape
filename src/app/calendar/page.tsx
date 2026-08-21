@@ -1,18 +1,33 @@
 /**
- * /calendar — the model horse hobby's calendar of record (Wave 3).
+ * /calendar — the model horse hobby's calendar of record.
  *
- * ONE chronological list of every upcoming show we know about:
- * MHH-hosted shows (linking internally, with an "enter online"
- * brass affordance) merged with community-submitted external
- * listings — OMHPS, MEPSA, Facebook group shows, club sites, live
- * halls — each stamped with where it lives. External listings are
- * curated (admin-approved) before they appear.
+ * ONE chronological view of every dated thing we know about:
+ *   · MHH-hosted shows (linking internally, with an "enter online"
+ *     brass affordance),
+ *   · community-submitted external listings — OMHPS, MEPSA, Facebook
+ *     group shows, club sites, live halls — each stamped with where it
+ *     lives, curated (admin-approved) before they appear,
+ *   · community events — the off-platform gatherings on the events
+ *     board: meetups, club days, swap meets, studio openings.
  *
- * Public, anon-safe SSR: reads are the anon-legal getPublicShows()
- * + the approved-only external_shows RLS policy. Degrades
- * gracefully pre-migration (the external layer just isn't there).
+ * ANON-SAFE SSR. The show layers are the anon-legal getPublicShows()
+ * plus the approved-only external_shows RLS policy. The events layer is
+ * NOT anon-legal — `events_select` is granted `TO authenticated` only
+ * (migration 031) — so it is fetched for signed-in viewers ONLY and the
+ * anonymous page renders exactly what it rendered before. No migration
+ * is involved either way. Each source failing degrades to the others;
+ * a public SEO page never 500s over a half-missing data layer.
+ *
+ * Two views over the same entries: the LIST (default — chronological,
+ * crawlable, the honest mobile answer) and the month GRID (`?view=grid`
+ * — the shape of a month). Both are server-rendered; the view and the
+ * month live in the URL rather than in localStorage so every state is
+ * linkable, back-button-honest, and works with JS off.
+ *
  * This page is THE landing target for "model horse show calendar"
- * searches — metadata and JSON-LD are tuned accordingly.
+ * searches — metadata and JSON-LD are tuned accordingly, and the
+ * non-default views are noindexed so the paginated month space never
+ * competes with the canonical list.
  */
 
 import type { Metadata } from "next";
@@ -21,37 +36,31 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getPublicShows } from "@/app/actions/shows-v2";
 import { listApprovedExternalShows } from "@/app/actions/external-shows";
+import { getEvents } from "@/app/actions/events";
 import {
     buildCalendarMonths,
+    buildMonthGrid,
     closesSoon,
     filterByVenue,
+    fromCommunityEvent,
     fromExternalShow,
     fromMhhShow,
+    isMonthKey,
+    monthKeyOf,
     shortDate,
     todayIso,
-    VENUE_LABELS,
     type CalendarEntry,
 } from "@/lib/external-shows/calendar";
 import type { ExternalVenueType } from "@/lib/external-shows/schemas";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
 import PageMasthead from "@/components/layouts/PageMasthead";
+import CalendarMonthGrid from "@/components/calendar/CalendarMonthGrid";
 import ListShowCta from "@/components/calendar/ListShowCta";
 import { Button } from "@/components/ui/button";
 
 const TITLE = "Model Horse Show Calendar — Every Upcoming Show in One Place";
 const DESCRIPTION =
     "The hobby's one calendar of record: upcoming model horse shows across Model Horse Hub, OMHPS, MEPSA, Facebook groups, and live halls — online photo shows, live shows, and mail-in shows, in date order.";
-
-export const metadata: Metadata = {
-    title: TITLE,
-    description: DESCRIPTION,
-    openGraph: {
-        title: TITLE,
-        description: DESCRIPTION,
-        type: "website",
-        siteName: "Model Horse Hub",
-    },
-};
 
 /** URL param → venue filter. "All" is the absent param. */
 const VENUE_PARAM: Record<string, ExternalVenueType> = {
@@ -66,6 +75,53 @@ const FILTERS: { label: string; param: string | null }[] = [
     { label: "Live", param: "live" },
     { label: "Mail-in", param: "mail-in" },
 ];
+
+type CalendarSearchParams = { venue?: string; view?: string; month?: string };
+
+/** How many community events to pull for a calendar page. */
+const EVENT_FETCH_LIMIT = 100;
+
+/** Build a /calendar URL, carrying the params that should survive. */
+function calendarHref(params: {
+    venue?: string | null;
+    view?: string | null;
+    month?: string | null;
+}): string {
+    const query = new URLSearchParams();
+    if (params.venue) query.set("venue", params.venue);
+    if (params.view) query.set("view", params.view);
+    if (params.month) query.set("month", params.month);
+    const qs = query.toString();
+    return qs ? `/calendar?${qs}` : "/calendar";
+}
+
+export async function generateMetadata({
+    searchParams,
+}: {
+    searchParams: Promise<CalendarSearchParams>;
+}): Promise<Metadata> {
+    const params = await searchParams;
+    // The month grid is a paginated view over the same entries the list
+    // already publishes — crawl it, but index the one canonical list.
+    const isPaginatedView = params.view === "grid" || Boolean(params.month);
+
+    return {
+        title: TITLE,
+        description: DESCRIPTION,
+        openGraph: {
+            title: TITLE,
+            description: DESCRIPTION,
+            type: "website",
+            siteName: "Model Horse Hub",
+        },
+        ...(isPaginatedView
+            ? {
+                  robots: { index: false, follow: true },
+                  alternates: { canonical: "/calendar" },
+              }
+            : {}),
+    };
+}
 
 function eventJsonLd(entry: CalendarEntry, baseUrl: string) {
     const url = entry.outbound ? entry.href : `${baseUrl}${entry.href}`;
@@ -118,6 +174,17 @@ function EntryRow({ entry, today }: { entry: CalendarEntry; today: string }) {
                 <div className="flex flex-wrap items-center gap-2">
                     {titleEl}
                     <span className="stamp">{entry.platformLabel}</span>
+                    {/* A meetup is not a show. Gatherings carry a second,
+                        plain-words chip so nothing on this page reads as a
+                        show that isn't one. */}
+                    {entry.kind === "event" && (
+                        <span
+                            className="border-input text-secondary-foreground inline-flex items-center rounded-full border px-2 py-[2px] text-[0.7rem] font-semibold"
+                            title="A community event — not a show entry"
+                        >
+                            {entry.icon} Community event
+                        </span>
+                    )}
                     {entry.statusLabel && (
                         <span className="text-xs text-muted-foreground">{entry.statusLabel}</span>
                     )}
@@ -131,7 +198,7 @@ function EntryRow({ entry, today }: { entry: CalendarEntry; today: string }) {
                     )}
                 </div>
                 <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
-                    <span>{VENUE_LABELS[entry.venue]}</span>
+                    <span>{entry.venueLabel}</span>
                     <span>Hosted by {entry.hostLabel}</span>
                     {entry.location && <span>{entry.location}</span>}
                     {entry.entriesCloseOn && entry.entriesCloseOn !== entry.date && (
@@ -160,36 +227,73 @@ function EntryRow({ entry, today }: { entry: CalendarEntry; today: string }) {
 export default async function CalendarPage({
     searchParams,
 }: {
-    searchParams: Promise<{ venue?: string }>;
+    searchParams: Promise<CalendarSearchParams>;
 }) {
     const params = await searchParams;
     const activeParam = params.venue && VENUE_PARAM[params.venue] ? params.venue : null;
     const venueFilter = activeParam ? VENUE_PARAM[activeParam] : undefined;
+    const isGrid = params.view === "grid";
 
     const supabase = await createClient();
     const {
         data: { user },
     } = await supabase.auth.getUser();
 
-    // MHH-hosted shows + approved external listings. Either source
-    // failing degrades to the other — a public SEO page never 500s
-    // over a half-missing data layer.
+    // Three sources, three independent failures. Any one of them
+    // falling over degrades to the others rather than to a 500.
     let entries: CalendarEntry[] = [];
-    const mhh = await getPublicShows();
-    if (mhh.success) {
-        entries = mhh.shows
-            .map(fromMhhShow)
-            .filter((e): e is CalendarEntry => e !== null);
+
+    try {
+        const mhh = await getPublicShows();
+        if (mhh.success) {
+            entries = entries.concat(
+                mhh.shows.map(fromMhhShow).filter((e): e is CalendarEntry => e !== null),
+            );
+        }
+    } catch {
+        /* the MHH layer is out — the rest of the calendar still stands */
     }
-    const external = await listApprovedExternalShows();
-    if (external.success) {
-        entries = entries.concat(external.shows.map(fromExternalShow));
+
+    try {
+        const external = await listApprovedExternalShows();
+        if (external.success) {
+            entries = entries.concat(external.shows.map(fromExternalShow));
+        }
+    } catch {
+        /* the external layer is out (or pre-migration) */
+    }
+
+    // Community events are authenticated-only at the RLS layer, so this
+    // read never runs for an anonymous visitor and the anon page keeps
+    // exactly the output it had before events joined the calendar.
+    if (user) {
+        try {
+            const events = await getEvents({ upcoming: true, limit: EVENT_FETCH_LIMIT });
+            entries = entries.concat(
+                events
+                    .map(fromCommunityEvent)
+                    .filter((e): e is CalendarEntry => e !== null),
+            );
+        } catch {
+            /* the events board is out — shows still fill the calendar */
+        }
     }
 
     const today = todayIso();
-    const months = buildCalendarMonths(filterByVenue(entries, venueFilter), today);
-    const upcomingAll = buildCalendarMonths(entries, today);
-    const upcomingCount = upcomingAll.reduce((n, m) => n + m.entries.length, 0);
+    const filtered = filterByVenue(entries, venueFilter);
+    const months = buildCalendarMonths(filtered, today);
+    const thisMonth = monthKeyOf(today);
+    const monthKey = isMonthKey(params.month) ? params.month : thisMonth;
+    const grid = isGrid ? buildMonthGrid(filtered, monthKey, today) : null;
+
+    // Structured data describes the PUBLIC calendar only: community
+    // events are visible to members, so a crawler could never verify
+    // them and they have no business in the page's ItemList.
+    const publicUpcoming = buildCalendarMonths(
+        entries.filter((e) => e.kind !== "event"),
+        today,
+    );
+    const upcomingCount = publicUpcoming.reduce((n, m) => n + m.entries.length, 0);
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://modelhorsehub.com";
     const jsonLd = {
@@ -198,7 +302,7 @@ export default async function CalendarPage({
         name: "Model Horse Show Calendar",
         description: DESCRIPTION,
         numberOfItems: upcomingCount,
-        itemListElement: upcomingAll
+        itemListElement: publicUpcoming
             .flatMap((m) => m.entries)
             .slice(0, 50)
             .map((entry, i) => ({
@@ -227,33 +331,90 @@ export default async function CalendarPage({
                     MEPSA, Facebook groups, and club sites. This calendar is the one place
                     they all appear: shows hosted on Model Horse Hub link straight to their
                     entry page, and community-submitted listings link out to wherever the
-                    show lives. Listings are curated before they appear.
+                    show lives. Listings are curated before they appear.{" "}
+                    {user ? (
+                        <>
+                            Gatherings from the{" "}
+                            <Link
+                                href="/community/events"
+                                className="font-semibold text-forest underline decoration-2 underline-offset-2"
+                            >
+                                events board
+                            </Link>{" "}
+                            — meetups, club days, swap meets — sit alongside them.
+                        </>
+                    ) : (
+                        <>
+                            <Link
+                                href="/login?redirectTo=%2Fcalendar"
+                                className="font-semibold text-forest underline decoration-2 underline-offset-2"
+                            >
+                                Sign in
+                            </Link>{" "}
+                            to see the community events board&rsquo;s gatherings here too.
+                        </>
+                    )}
                 </p>
 
-                {/* Venue filter — plain links so the page stays fully
-                    server-rendered and crawlable. */}
-                <nav aria-label="Filter by show type" className="mb-6 flex flex-wrap gap-2">
-                    {FILTERS.map((f) => {
-                        const active = f.param === activeParam;
-                        return (
-                            <Button
-                                key={f.label}
-                                asChild
-                                size="sm"
-                                variant={active ? "default" : "outline"}
-                            >
-                                <Link
-                                    href={f.param ? `/calendar?venue=${f.param}` : "/calendar"}
-                                    aria-current={active ? "page" : undefined}
+                {/* Venue filter + view switch — plain links so the page
+                    stays fully server-rendered and crawlable. */}
+                <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+                    <nav aria-label="Filter by show type" className="flex flex-wrap gap-2">
+                        {FILTERS.map((f) => {
+                            const active = f.param === activeParam;
+                            return (
+                                <Button
+                                    key={f.label}
+                                    asChild
+                                    size="sm"
+                                    variant={active ? "default" : "outline"}
                                 >
-                                    {f.label}
-                                </Link>
-                            </Button>
-                        );
-                    })}
-                </nav>
+                                    <Link
+                                        href={calendarHref({
+                                            venue: f.param,
+                                            view: isGrid ? "grid" : null,
+                                            month: isGrid && monthKey !== thisMonth ? monthKey : null,
+                                        })}
+                                        aria-current={active ? "page" : undefined}
+                                    >
+                                        {f.label}
+                                    </Link>
+                                </Button>
+                            );
+                        })}
+                    </nav>
 
-                {months.length === 0 ? (
+                    <Link
+                        href={calendarHref({
+                            venue: activeParam,
+                            view: isGrid ? null : "grid",
+                            month: null,
+                        })}
+                        id="calendar-view-toggle"
+                        aria-label={isGrid ? "Switch to the list view" : "Switch to the month grid"}
+                        className="inline-flex min-h-[32px] items-center gap-1.5 rounded-md border border-input bg-transparent px-2.5 py-1 font-serif text-xs tracking-wide text-secondary-foreground no-underline transition-colors hover:border-forest hover:text-forest"
+                    >
+                        <span aria-hidden="true">{isGrid ? "☰" : "🗓️"}</span>
+                        {isGrid ? "List" : "Month grid"}
+                    </Link>
+                </div>
+
+                {isGrid && grid ? (
+                    <CalendarMonthGrid
+                        grid={grid}
+                        prevHref={calendarHref({
+                            venue: activeParam,
+                            view: "grid",
+                            month: grid.prevKey,
+                        })}
+                        nextHref={calendarHref({
+                            venue: activeParam,
+                            view: "grid",
+                            month: grid.nextKey,
+                        })}
+                        todayHref={calendarHref({ venue: activeParam, view: "grid" })}
+                    />
+                ) : months.length === 0 ? (
                     <div className="px-4 py-12 text-center">
                         <div className="mb-3 text-4xl" aria-hidden="true">
                             🗓️
@@ -291,8 +452,15 @@ export default async function CalendarPage({
                     approves it. MHH-hosted shows join the calendar automatically. Browse{" "}
                     <Link href="/shows" className="font-semibold text-forest underline decoration-2 underline-offset-2">
                         shows hosted here
-                    </Link>{" "}
-                    or read the{" "}
+                    </Link>
+                    , post a meetup or club day on the{" "}
+                    <Link
+                        href="/community/events"
+                        className="font-semibold text-forest underline decoration-2 underline-offset-2"
+                    >
+                        events board
+                    </Link>
+                    , or read the{" "}
                     <Link
                         href="/learn/enter-your-first-photo-show"
                         className="font-semibold text-forest underline decoration-2 underline-offset-2"
