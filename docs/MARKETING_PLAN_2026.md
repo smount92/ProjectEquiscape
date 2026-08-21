@@ -27,8 +27,13 @@ one part of the trust story that survives scrutiny. **Lead with the cards.**
 Summerween closes Aug 31 and publishes around Sep 6. Its results page, its winner rosette
 pages and its verifiable cards are the first real proof this platform works. They are also
 the entire pitch deck for showholder recruitment, which is the highest-leverage growth move
-available to a two-person team, because **one showholder delivers 20–50 exhibitors and no
-other software in this hobby exists to serve them.**
+available to a two-person team, because **one showholder delivers their whole entrant list.**
+
+Be accurate about the gap, though: photo showing *is* served — OMHPS runs online shows and
+tracks placings, and MEPSA runs roughly 48 shows a year by post. What is genuinely absent is
+**software for live shows** (nothing exists anywhere), **a placing a stranger can verify**, and
+**a record that survives the sale**. Free hosting against OMHPS's $3–15 per show is a second,
+checkable line.
 
 **Top three channels, in order:**
 
@@ -95,7 +100,7 @@ Not marketing copy. These were read out of the code and the docs.
 | **Public show results** | `/shows/[id]/results` | No auth. The link a host drops back into their group. |
 | **The Registry** | `/reference/[maker]/[slug]` × ~10,900 | Live. `Product` JSON-LD, canonical tags, OG images, per-page collector counts, Blue Book teaser, active listings, glossary links, mold→release→custom interlinking. Listed in `sitemap.ts`. |
 | **The calendar of record** | `/calendar` | Lists **everyone else's shows too** — OMHPS, MEPSA, Facebook group shows, live halls. Tools-as-marketing in its purest form, already shipped. |
-| **The Blue Book** | `/market/guide` | Free real-sale price data. "What's my Breyer worth" has no good answer on the open web. |
+| **The Blue Book** | `/market/guide` | Free price data drawn from real completed sales. The nearest paid alternative charges **$65/yr** for ~6,600 *asserted* original-finish Breyer values — no Stone, no resins, no customs — and a 12,000-member Facebook group exists because people still can't get a good answer. |
 | **Provenance marketplace** | `/market` | The listing *is* the passport: record, condition, ownership history. No fees, no money held. |
 | **The Deal Room** | `/inbox/[id]`, `payment_installments`, `/inbox/[id]/record` | Time payments — hobby-routine, tracked nowhere else — plus signed terms and a PDF evidence pack designed to be handed to a third party. |
 | **Art Studios** | `/studio/[slug]` (anon-readable since migration 170) | Portfolios that prove work with the horses' actual ribbons. Free for 3 active commissions. |
@@ -877,6 +882,15 @@ winners is one post and costs ten minutes.
    the horse, the owner (with permission), and the field they beat.
 3. Establish one repeatable format: **"1st of N."** One horse, one placing, one field line.
    It's a format nobody else in the hobby can post, because nobody else has the number.
+
+**Tags.** Instagram stopped publishing hashtag counts, so the figures below are aggregator
+estimates — useful as *relative magnitudes only*, not as data. Roughly: `#schleich` and
+`#breyer` are the biggest doors (300–430k), then `#modelhorse` (~330k),
+`#modelhorsephotography` (~212k) and `#modelhorses` (~205k). The ones that actually match what
+MHH posts are much smaller and much better targeted — **`#modelhorseshow` (~29k),
+`#modelhorsecustom` (~23k), `#modelhorseartist` (~13k), `#modelhorsecollector` (~100k)**. Use
+four or five specific ones, not twenty broad ones; for scale, `#horse` is 37M and putting a
+rosette in it achieves nothing.
 
 **What success looks like:** it is a *credibility* surface, not an acquisition surface, at this
 stage. The win is that a showholder who Googles you finds a live account.

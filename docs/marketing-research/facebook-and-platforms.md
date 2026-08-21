@@ -11,17 +11,18 @@ Research date: **2026-08-21**. All member counts and activity figures were obser
 1. **MH$P is gone — it is now Model Horse Connection**, rebranded under duress after a **ransomware attack** on the old server. Any marketing copy referencing "MH$P" is out of date. `[HIGH]` §4.1
 2. **The venue of record disclaims all trust responsibility in writing** and refers disputes to *"local law enforcement, postmaster general, or a certified mediation or arbitration entity."* `[HIGH]` §4.1
 3. **Its own References page recommends four reference boards; three are dead Yahoo Groups.** Its own "What's My Model Worth?" page recommends mail-order books that stop at 1995. `[HIGH]` §4.1.1
-3b. **MHC's User Agreement bans posting "ANY information about a bad transaction"** — citing slander/libel exposure. It tells buyers to check references, points at dead lists, then forbids making new ones. `[HIGH]` §8.1
-3c. **MHC's fraud FAQ has six questions and every answer is the literal placeholder `Xxxxx`** — including *"How can I prevent fraud?"* and *"Don't you care that I lost money?"* `[HIGH]` §8.1
-3d. **A NAN show record is a non-replaceable paper card** — *"the SOLE proof of a model's NAN qualification"*, mailed physically, *"discarded at the end of each NAN"*, and linked to the horse only by a handwritten name. NAMHSA publishes eight incidents of voided/counterfeit/lost records. `[HIGH]` §8.6–8.7
-4. **The hobby's real reputation system is a Facebook group** — the Model Horse Transaction Board, 13,071 members, red/yellow/green "lights", cited by other groups' rules. Unsearchable, unstructured, private, and one moderator-burnout away from gone. `[HIGH]` §3
-5. **Facebook begins deleting listings 2+ years old on 2026-08-30** — nine days after this research. `[HIGH]` §7.1
-6. **Willingness to pay is proven and mispriced:** hobbyists pay **$65/yr** for a paywalled OF-Breyer-only value guide, while the entire marketplace of record costs **$10/yr**. Records/valuation data is priced ~6.5× the marketplace. `[HIGH]` §4.2
-7. **11,962 people are in a group whose sole purpose is manually answering "what's it worth"**, with a rule in caps forbidding members from telling askers to look it up. `[HIGH]` §4.2
-8. **Don't build another marketplace.** Star Dapple tried in 2024; **its domain has now expired.** `[HIGH]` §4.4
-9. **The biggest rooms ban self-promotion and outside links**; one customizing group bans *"directing members to any outside page, group, or platform"* outright. One group permits advertising once a month. Read rules before outreach. `[HIGH]` §2
-10. **OMHPS is the real incumbent for online showing** and is prior art for horse-as-entity records — but awards are printable certificates you must ask the host for, rules live in Google Docs, and entry fees are collected by **PayPal Friends & Family**. `[HIGH]` §4.6, §7.0
-11. **Discord is negligible (~1,100 people total).** Blab is a large dead archive. Reddit could not be measured. `[HIGH]` / `[UNVERIFIED]` §6
+4. **MHC's User Agreement bans posting "ANY information about a bad transaction"** — citing slander/libel exposure. It tells buyers to check references, points at dead lists, then forbids making new ones. `[HIGH]` §8.1
+5. **MHC's fraud FAQ has six questions and every answer is the literal placeholder `Xxxxx`** — including *"How can I prevent fraud?"* and *"Don't you care that I lost money?"* `[HIGH]` §8.1
+6. **A NAN show record is a non-replaceable paper card** — *"the SOLE proof of a model's NAN qualification"*, mailed physically, *"discarded at the end of each NAN"*, and linked to the horse only by a handwritten name. NAMHSA publishes eight incidents of voided/counterfeit/lost records. `[HIGH]` §8.6–8.7
+7. **The hobby's real reputation system is a Facebook group** — the Model Horse Transaction Board, 13,071 members, red/yellow/green "lights", cited by other groups' rules. Unsearchable, unstructured, private, and one moderator-burnout away from gone. `[HIGH]` §3
+8. **Facebook begins deleting listings 2+ years old on 2026-08-30** — nine days after this research. `[HIGH]` §7.1
+9. **Willingness to pay is proven and mispriced:** hobbyists pay **$65/yr** for a paywalled OF-Breyer-only value guide, while the entire marketplace of record costs **$10/yr**. Records/valuation data is priced ~6.5× the marketplace. `[HIGH]` §4.2
+10. **11,962 people are in a group whose sole purpose is manually answering "what's it worth"**, with a rule in caps forbidding members from telling askers to look it up. `[HIGH]` §4.2
+11. **Don't build another marketplace.** Star Dapple tried in 2024; **its domain has now expired.** `[HIGH]` §4.4
+12. **The biggest rooms ban self-promotion and outside links**; one customizing group bans *"directing members to any outside page, group, or platform"* outright. One group permits advertising once a month. Read rules before outreach. `[HIGH]` §2
+13. **OMHPS is the real incumbent for online showing** and is prior art for horse-as-entity records — but awards are printable certificates you must ask the host for, rules live in Google Docs, and entry fees are collected by **PayPal Friends & Family**. `[HIGH]` §4.6, §7.0
+14. **Discord is negligible (~1,100 people total).** Blab is a large dead archive. Reddit could not be measured. `[HIGH]` / `[UNVERIFIED]` §6
+15. **Unverified premises to NOT build messaging on:** the scale of recasting, peer-to-peer layaway disputes, and Reddit's size. See §9.
 
 ---
 
@@ -547,3 +548,15 @@ https://namhsa.org/invalid-nan-cards/ lists **eight incidents, 2009–2018** `[H
 8. **Whether MHC's ransomware incident exposed user data.** The site mentions the attack and "security upgrades" but I found no breach-notification. `[UNVERIFIED]`
 9. **Member-count accuracy.** Facebook self-reported; inactive accounts included. `[LOW]`
 10. **modelhorselove.proboards.com** size/activity. `[UNVERIFIED]`
+11. **Scale of model-horse recasting.** Rule-level and artist-level evidence exists; **no blacklist, registry, or recent incident reports were found.** The brief's premise that recasts are "a big deal" is **not substantiated** — flag before using it in messaging. `[UNVERIFIED]` §8.5
+12. **Peer-to-peer time-payment / layaway disputes.** Dealer terms are documented; hobbyist-to-hobbyist dispute accounts are not indexed (they live in closed groups). `[UNVERIFIED]` §8.3
+13. **Stated rationale for group presale bans.** The bans are in group names; no group published reasoning. `[UNVERIFIED]` §8.3
+14. **How long MHC's `Xxxxx` FAQ has been live.** Confirmed present 2026-08-21; no way to date it from the page. `[UNVERIFIED]`
+
+---
+
+## 10. Source list
+
+Primary pages read directly: modelhorseconnection.com (`/`, `/register.asp`, `/faq.asp`, `/references.asp`, `/values.asp`, `/user_agreement.asp`) · modelhorseblab.com (`/`, `/forums/`, `/forums/show-announcements.57/`, `/whats-new/posts/`, `/forums/the-transactions-board.32/`) · groups.io/g/ModelHorseHobbyReferences · omhps.com (`/`, `/About`) · modelhorseplace.com · breyervalueguide.com (`/`, `/amember/signup`) · stardapple.com · namhsa.org (`/entrants-tickets/`, `/merit-awards/`, `/invalid-nan-cards/`, `/member-show-requirements/`, `/results/`, `/nan-archives/`, `/show-results-archives/`) · nanprogram.com (`/enter/`, `/results/`) · mepsa.club (`/about/`, `/faqs/`) · identifyyourbreyer.com (`/buying.htm`, `/glossary.htm`, `/photo.html`) · triplemountain.com (`/pages/hobby-terms`, `/pages/refund-policy`) · modelhorse.gallery (`/PR/PScalendar.html`, `/library/holdingphotoshow.html`, `/library/resinregistryxref.htm`) · disboard.org server pages · 16 Facebook group About panels (URLs in §1).
+
+Secondary: martha.net/2024/09/where-to-sell-model-horses-and-props/ · threads.com post on FB listing deletion · breyerhorses.com/pages/special-runs-breyerfest-2026 · resinhorseeditions.blogspot.com · equineresindirectory.com/about.htm
