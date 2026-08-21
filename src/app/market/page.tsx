@@ -53,7 +53,7 @@ function SellerPointer() {
                 all — and it appears here.
             </p>
             <Button asChild variant="outline" size="wide">
-                <Link href="/stable">Open your stable →</Link>
+                <Link href="/dashboard">Open your stable →</Link>
             </Button>
         </div>
     );
