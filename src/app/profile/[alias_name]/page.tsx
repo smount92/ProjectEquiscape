@@ -18,6 +18,7 @@ import TrophyCase from "@/components/TrophyCase";
 import ProfileLoadMore from "@/components/ProfileLoadMore";
 import { Button } from "@/components/ui/button";
 import AnonProfile from "@/components/profile/AnonProfile";
+import ViewBeacon from "@/components/metrics/ViewBeacon";
 import SupporterPlaque from "@/components/profile/SupporterPlaque";
 import ProfileMasthead from "@/components/profile/ProfileMasthead";
 import ChampionshipLine from "@/components/profile/ChampionshipLine";
@@ -624,6 +625,7 @@ export default async function ProfilePage({
             className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 md:py-10 lg:px-8"
             style={rootStyle}
         >
+            <ViewBeacon entityType="profile" entityId={profileUser.id} />
             <ProfileMasthead
                 alias={profileUser.alias_name}
                 avatarUrl={profileUser.avatar_url}

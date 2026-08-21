@@ -17,6 +17,7 @@ import AdminCatalogMergeCard from"@/components/AdminCatalogMergeCard";
 import AdminSanctioningCard from"@/components/AdminSanctioningCard";
 import AdminMembersTab from"@/components/AdminMembersTab";
 import AdminOpsTab from"@/components/AdminOpsTab";
+import AdminInsightsTab from"@/components/AdminInsightsTab";
 import AdminPulseStrip from"@/components/AdminPulseStrip";
 import type { PendingExternalShow } from"@/app/actions/external-shows";
 import type {
@@ -117,6 +118,7 @@ type TabKey =
  |"shows"
  |"members"
  |"content"
+ |"insights"
  |"ops";
 
 const TABS: { key: TabKey; emoji: string; label: string }[] = [
@@ -128,6 +130,7 @@ const TABS: { key: TabKey; emoji: string; label: string }[] = [
  { key:"shows", emoji:"📸", label:"Shows" },
  { key:"members", emoji:"👤", label:"Members" },
  { key:"content", emoji:"💡", label:"Content" },
+ { key:"insights", emoji:"📈", label:"Insights" },
  { key:"ops", emoji:"🛠️", label:"Ops" },
 ];
 
@@ -287,6 +290,7 @@ export default function AdminTabs({
  {activeTab ==="calendar" && <CalendarQueueTab shows={externalShows} />}
  {activeTab ==="sanctioning" && <AdminSanctioningCard showEmptyState />}
  {activeTab ==="members" && <AdminMembersTab />}
+ {activeTab ==="insights" && <AdminInsightsTab />}
  {activeTab ==="ops" && <AdminOpsTab migrations={migrations} />}
  </div>
  </>

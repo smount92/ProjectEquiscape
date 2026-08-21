@@ -76,6 +76,19 @@ export default function PrivacyPage() {
  We use Google Analytics to understand aggregate usage patterns (page views, feature adoption).
  This data is anonymized and never linked to your collection or financial information.
  </p>
+
+ <h3>View Counts</h3>
+ <p>
+ We count views of <strong>things</strong>, not of people. When you open a horse passport, a
+ show, a barn, a studio, a reference page or a profile, we add one to that item&rsquo;s tally for
+ the day &mdash; and that daily tally is all we keep. To avoid counting the same person twice in
+ a day, we hold a one-way hash of your account (or, if you are signed out, of your network
+ address and browser) for the rest of that day only; the hash is scrambled with a secret that
+ changes every day, and our nightly cleanup deletes it. Once that runs, nothing in our systems
+ could reconstruct what any particular person looked at, because the only record left is a
+ number attached to the item. Owners can see the view count on their own horses; nobody else
+ can, and we never publish view counts publicly.
+ </p>
  </section>
 
  {/* How We Use It */}

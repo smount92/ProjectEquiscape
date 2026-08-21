@@ -14,6 +14,7 @@ import GroupMasthead from "@/components/groups/GroupMasthead";
 import BarnJoinButton from "@/components/groups/BarnJoinButton";
 import BarnMembersPanel from "@/components/groups/BarnMembersPanel";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
+import ViewBeacon from "@/components/metrics/ViewBeacon";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
@@ -55,6 +56,7 @@ export default async function GroupDetailPage({ params }: { params: Promise<{ sl
         // noHeader: the leather masthead below IS this page's header.
         // Without it the page rendered two mastheads stacked.
         <ExplorerLayout noHeader frameless>
+            <ViewBeacon entityType="barn" entityId={group.id} />
             <div className="mx-auto max-w-6xl">
                 <GroupMasthead
                     name={group.name}
