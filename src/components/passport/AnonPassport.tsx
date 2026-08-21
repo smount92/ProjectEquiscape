@@ -28,6 +28,8 @@ import AssetDetailRenderer from "@/components/AssetDetailRenderer";
 import { getAssetConfig } from "@/lib/config/assetFields";
 import type { AssetCategory } from "@/lib/types/database";
 import { getPublicFavoriteCount } from "@/lib/favorites/publicCount";
+import HoofprintTimeline from "@/components/HoofprintTimeline";
+import { getPublicHoofprint } from "@/lib/hoofprint/publicHoofprint";
 
 // Read-only public passport for logged-OUT visitors (FUNNEL-4). The full
 // interactive passport (favorite/comment/message/hoofprint) stays in
@@ -230,10 +232,13 @@ export default async function AnonPassport({
     // Independent anon-safe reads — one round trip, not four.
     //  · titles           horse_titles is SELECT TO authenticated, anon (159)
     //  · favorite count    NO anon read path today → null (see publicCount.ts)
-    const [publicCardsForCount, publicTitles, favoriteCount] = await Promise.all([
+    //  · hoofprint         get_public_hoofprint DEFINER RPC (177) → null
+    //                      pre-migration, and null for a non-public horse
+    const [publicCardsForCount, publicTitles, favoriteCount, hoofprint] = await Promise.all([
         forSale ? getPublicHorseCards(horseId) : Promise.resolve([]),
         getHorseTitles(horseId),
         getPublicFavoriteCount(horseId),
+        getPublicHoofprint(horseId),
     ]);
     const cardsCount = publicCardsForCount.length;
     const publicNamePrefix = titlePrefix(publicTitles.map((t) => t.code));
@@ -558,6 +563,40 @@ export default async function AnonPassport({
                 anon-safe RPC path as the rest of this page (migration
                 141). Renders nothing pre-migration or with no cards. */}
             <PublicCardsSection horseId={horseId} />
+
+            {/* Hoofprint — the provenance timeline and chain of custody.
+                This section rendered NOTHING for logged-out visitors
+                until migration 177: v_horse_hoofprint is granted TO
+                authenticated only, so the read came back empty and the
+                buyer this whole page is aimed at saw a passport with no
+                history on it (MARKETING_PLAN_2026 §1.3).
+
+                The MEMBER component, not a copy of it. isOwner={false}
+                with no currentUserId is the read-only mode it already
+                supports — no stage selector, no note form, no delete
+                buttons — so a stranger sees the same rail a member does,
+                built from the same markup, with no second implementation
+                to drift. Renders nothing pre-migration, for a non-public
+                horse, or for a horse with no events. */}
+            {hoofprint && hoofprint.timeline.length > 0 && (
+                <section className="animate-fade-in-up" aria-label="Provenance" id="passport-hoofprint">
+                    <HoofprintTimeline
+                        horseId={horseId}
+                        timeline={hoofprint.timeline}
+                        ownershipChain={hoofprint.ownershipChain}
+                        lifeStage={hoofprint.lifeStage}
+                        isOwner={false}
+                    />
+                    <p className="mt-3 mb-0 text-xs text-muted-foreground italic">
+                        Every entry above is a record the Hub wrote itself — a transfer, a show
+                        result, a title, or a note from the owner.{" "}
+                        <Link href={loginHref} className="text-forest hover:underline">
+                            Log in
+                        </Link>{" "}
+                        to see condition history and to message the owner.
+                    </p>
+                </section>
+            )}
         </ExplorerLayout>
     );
 }
