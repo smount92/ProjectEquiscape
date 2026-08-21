@@ -6,6 +6,17 @@
  * the canonical entry, logs to the changelog, deletes the duplicate.
  * Accepts UUIDs or slugs. Born from the North Light incident (two
  * suggestion batches, same 20 sculpts, two owner-SQL repairs).
+ *
+ * `prefill` is the handoff from the duplicate sweeper above: it seeds
+ * the two boxes and nothing else. The confirm dialog and the button
+ * press are still the admin's — a sweeper that could merge on its own
+ * would be a sweeper that can delete the wrong catalog entry on its
+ * own. Standalone (no prop) the card behaves exactly as it always has.
+ *
+ * The prefill lands as INITIAL state, not through an effect: the
+ * caller remounts this card with a fresh `key` per handoff, which is
+ * both the idiomatic reset and the reason picking the same pair twice
+ * still refills boxes a previous merge had cleared.
  */
 
 import { useState } from "react";
@@ -14,9 +25,14 @@ import { mergeCatalogItems } from "@/app/actions/admin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-export default function AdminCatalogMergeCard() {
-    const [duplicate, setDuplicate] = useState("");
-    const [canonical, setCanonical] = useState("");
+export interface MergePrefill {
+    duplicate: string;
+    canonical: string;
+}
+
+export default function AdminCatalogMergeCard({ prefill }: { prefill?: MergePrefill | null } = {}) {
+    const [duplicate, setDuplicate] = useState(prefill?.duplicate ?? "");
+    const [canonical, setCanonical] = useState(prefill?.canonical ?? "");
     const [pending, setPending] = useState(false);
     const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null);
 

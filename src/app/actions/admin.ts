@@ -7,6 +7,33 @@ import { createClient as createAuthClient } from "@/lib/supabase/server";
 import { Resend } from "resend";
 
 import { escapeEmailHtml, renderBrandedEmail, renderEmailQuote } from "@/lib/email/layout";
+import { formEngineEnabled } from "@/lib/forms/flag";
+import { showStandingsEnabled } from "@/lib/shows/flags";
+import {
+  attachLoad,
+  groupDuplicates,
+  MAX_DUPLICATE_GROUPS,
+  type DuplicateCandidate,
+  type DuplicateGroup,
+  type ItemLoad,
+} from "@/lib/admin/catalogDuplicates";
+import {
+  buildNudgeContent,
+  canNudgeAgain,
+  classifyOverdueShow,
+  cutoffDate,
+  cutoffIso,
+  nudgeLinkFor,
+  sortOverdue,
+  ENTRIES_CLOSED_STALLED_DAYS,
+  JUDGING_NO_DEADLINE_DAYS,
+  NUDGE_COOLDOWN_DAYS,
+  RESULTS_REVIEW_STALLED_DAYS,
+  RUNNING_IDLE_DAYS,
+  RUNNING_PAST_DATE_DAYS,
+  type OverdueReason,
+  type OverdueShowInput,
+} from "@/lib/admin/overdueShows";
 
 async function verifyAdmin() {
   const authClient = await createAuthClient();
@@ -1157,4 +1184,622 @@ export async function getMigrationStatus(): Promise<
       };
     }),
   };
+}
+
+// ══════════════════════════════════════════════════════════════
+// Ops corner — what the SERVER actually sees for the launch switches
+//
+// Every flag on this site ships dark and its surfaces degrade quietly,
+// which is correct and also means nothing on the site ever tells you
+// which shape you are running. Same telltale idea as the migration
+// probes, one layer up: the env.
+//
+// TWO HARD RULES, both about not leaking:
+//   1. Secrets are reported as SET / NOT SET. Never the value, never a
+//      prefix, never a length — a length is a fingerprint.
+//   2. NEXT_PUBLIC_* is read through the SAME predicate the feature
+//      uses (formEngineEnabled / showStandingsEnabled), not a
+//      re-implementation, so this panel cannot drift from the gate it
+//      is describing. Those values are inlined at BUILD time, so a
+//      Vercel env var changed after the last deploy will still read
+//      here as its old value until a rebuild — the card says so.
+// ══════════════════════════════════════════════════════════════
+
+export interface EnvFlagRow {
+  key: string;
+  /** Public switch value, never a secret. Truncated defensively. */
+  value: string | null;
+  /** What the app's own gate resolves to right now. */
+  on: boolean;
+  label: string;
+  /** What being off actually costs a visitor. */
+  effect: string;
+}
+
+export interface EnvSecretRow {
+  key: string;
+  /** Presence ONLY. The value never leaves the server. */
+  present: boolean;
+  label: string;
+  /** What breaks when it is missing. */
+  impact: string;
+}
+
+export interface EnvFlagStatus {
+  flags: EnvFlagRow[];
+  secrets: EnvSecretRow[];
+  nodeEnv: string;
+  /** Vercel's environment name (production / preview / development), when deployed. */
+  vercelEnv: string | null;
+  /** Short SHA of the running build, when Vercel provides it. */
+  commitSha: string | null;
+}
+
+/** Set AND non-blank. An empty string is not configuration. */
+function isSet(value: string | undefined): boolean {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+/** Public values only. Caps length so a mis-pasted blob can't spill into the page. */
+function publicValue(value: string | undefined): string | null {
+  if (!isSet(value)) return null;
+  const clean = value!.trim();
+  return clean.length > 24 ? `${clean.slice(0, 24)}…` : clean;
+}
+
+export async function getEnvFlagStatus(): Promise<
+  { success: true; status: EnvFlagStatus } | { success: false; error: string }
+> {
+  const user = await verifyAdmin();
+  if (!user) return { success: false, error: "Unauthorized" };
+
+  // Static property access, deliberately: Next.js inlines
+  // `process.env.NEXT_PUBLIC_X` at build time and a computed lookup
+  // (`process.env[key]`) would read undefined in the bundle.
+  const flags: EnvFlagRow[] = [
+    {
+      key: "NEXT_PUBLIC_FORM_ENGINE",
+      value: publicValue(process.env.NEXT_PUBLIC_FORM_ENGINE),
+      on: formEngineEnabled(),
+      label: "Premium form engine",
+      effect: "Off = the three legacy add/edit forms serve every route.",
+    },
+    {
+      key: "NEXT_PUBLIC_SHOW_STANDINGS",
+      value: publicValue(process.env.NEXT_PUBLIC_SHOW_STANDINGS),
+      on: showStandingsEnabled(),
+      label: "Season standings",
+      effect: "Off = /standings 404s and its links stay hidden.",
+    },
+    {
+      key: "NEXT_PUBLIC_WANTED_NUDGE",
+      // No shared helper for this one — actions/wishlist.ts compares the
+      // literal "1" inline. Mirrored exactly rather than loosened.
+      value: publicValue(process.env.NEXT_PUBLIC_WANTED_NUDGE),
+      on: process.env.NEXT_PUBLIC_WANTED_NUDGE === "1",
+      label: "Wanted nudge",
+      effect: "Off = wishlist adds stay passive counts and notify nobody.",
+    },
+  ];
+
+  const secrets: EnvSecretRow[] = [
+    {
+      key: "SUPABASE_SERVICE_ROLE_KEY",
+      present: isSet(process.env.SUPABASE_SERVICE_ROLE_KEY),
+      label: "Supabase service role",
+      impact: "Missing = this whole console, every cron, and all admin reads fail.",
+    },
+    {
+      key: "STRIPE_SECRET_KEY",
+      present: isSet(process.env.STRIPE_SECRET_KEY),
+      label: "Stripe",
+      impact: "Missing = supporter checkout and every billing call fail.",
+    },
+    {
+      key: "RESEND_API_KEY",
+      present: isSet(process.env.RESEND_API_KEY),
+      label: "Resend",
+      impact: "Missing = no transactional mail: replies, deadline emails, results.",
+    },
+    {
+      key: "ADMIN_EMAIL",
+      present: isSet(process.env.ADMIN_EMAIL),
+      label: "Admin identity",
+      impact: "Missing = verifyAdmin refuses everyone, including you.",
+    },
+  ];
+
+  return {
+    success: true,
+    status: {
+      flags,
+      secrets,
+      nodeEnv: process.env.NODE_ENV ?? "unknown",
+      vercelEnv: process.env.VERCEL_ENV ?? null,
+      commitSha: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? null,
+    },
+  };
+}
+
+// ══════════════════════════════════════════════════════════════
+// Catalog sweeper — finding what the broken approve path minted
+//
+// resolveLegacySuggestion's ancestor ran its catalog INSERT before a
+// status UPDATE that could never succeed, so every press of Approve on
+// the same suggestion minted another catalog_items row. The fix stops
+// new ones; it cannot find the ones already in the table. This does.
+//
+// READ-ONLY. It proposes groups and a suggested keeper; the only write
+// available from here is the EXISTING mergeCatalogItems action, run by
+// hand from the merge card with the pair pre-filled.
+//
+// Cost discipline: one scan query, then exactly one `in` per
+// referencing table — six more, whatever the group count is. Never a
+// count per row.
+// ══════════════════════════════════════════════════════════════
+
+/** Newest N catalog rows examined per sweep. Beyond this the report says it stopped. */
+const CATALOG_SWEEP_ROW_LIMIT = 2000;
+
+/** Rows one reference tally reads before it stops being exact. */
+const REFERENCE_ROW_LIMIT = 5000;
+
+const REFERENCE_TABLES: { table: string; column: string; bucket: keyof ItemLoad }[] = [
+  { table: "user_horses", column: "catalog_id", bucket: "horses" },
+  { table: "user_wishlists", column: "catalog_id", bucket: "wishlists" },
+  { table: "id_suggestions", column: "catalog_id", bucket: "otherRefs" },
+  { table: "catalog_suggestions", column: "catalog_item_id", bucket: "otherRefs" },
+  { table: "catalog_changelog", column: "catalog_item_id", bucket: "otherRefs" },
+  { table: "catalog_items", column: "parent_id", bucket: "otherRefs" },
+];
+
+export interface CatalogDuplicateReport {
+  groups: DuplicateGroup[];
+  /** Catalog rows actually examined. */
+  scanned: number;
+  /** true = the scan hit its row cap; older entries were NOT looked at. */
+  scanCapped: boolean;
+  /** Groups found in total — `groups` may be a capped slice of this. */
+  totalGroups: number;
+  /** Set when the reference counts are incomplete. Null = every count is exact. */
+  loadNote: string | null;
+}
+
+export async function findCatalogDuplicates(): Promise<
+  { success: true; report: CatalogDuplicateReport } | { success: false; error: string }
+> {
+  const user = await verifyAdmin();
+  if (!user) return { success: false, error: "Unauthorized" };
+
+  const admin = getAdminSupabase();
+  const { data, error } = await admin
+    .from("catalog_items")
+    .select("id, title, maker, item_type, slug, created_at")
+    .order("created_at", { ascending: false })
+    .limit(CATALOG_SWEEP_ROW_LIMIT);
+  if (error) return { success: false, error: error.message };
+
+  const rows = (data ?? []) as {
+    id: string;
+    title: string | null;
+    maker: string | null;
+    item_type: string | null;
+    slug: string | null;
+    created_at: string;
+  }[];
+
+  const candidates: DuplicateCandidate[] = rows.map((r) => ({
+    id: r.id,
+    title: r.title ?? "",
+    maker: r.maker,
+    itemType: r.item_type ?? "",
+    slug: r.slug,
+    createdAt: r.created_at,
+  }));
+
+  const { groups, totalGroups } = groupDuplicates(candidates, MAX_DUPLICATE_GROUPS);
+  const scanned = rows.length;
+  const scanCapped = scanned >= CATALOG_SWEEP_ROW_LIMIT;
+
+  const ids = groups.flatMap((g) => g.members.map((m) => m.id));
+  if (ids.length === 0) {
+    return {
+      success: true,
+      report: { groups: [], scanned, scanCapped, totalGroups, loadNote: null },
+    };
+  }
+
+  const tallies = await Promise.all(
+    REFERENCE_TABLES.map(async (ref) => {
+      const { data: refRows, error: refError } = await admin
+        .from(ref.table)
+        .select(ref.column)
+        .in(ref.column, ids)
+        .limit(REFERENCE_ROW_LIMIT);
+      if (refError) {
+        logger.error("Admin", `Duplicate sweep could not read ${ref.table}.${ref.column}`, refError);
+        return { ref, counts: null, capped: false };
+      }
+      // The column name is dynamic, so PostgREST's generated types
+      // can't narrow the row shape — read it as the string map it is.
+      const list = (refRows ?? []) as unknown as Record<string, string | null>[];
+      const counts = new Map<string, number>();
+      for (const row of list) {
+        const key = row[ref.column];
+        if (key) counts.set(key, (counts.get(key) ?? 0) + 1);
+      }
+      return { ref, counts, capped: list.length >= REFERENCE_ROW_LIMIT };
+    })
+  );
+
+  const load = new Map<string, ItemLoad>();
+  for (const id of ids) load.set(id, { horses: 0, wishlists: 0, otherRefs: 0 });
+
+  const unreadable: string[] = [];
+  let tallyCapped = false;
+  for (const tally of tallies) {
+    if (!tally.counts) {
+      unreadable.push(tally.ref.table);
+      continue;
+    }
+    if (tally.capped) tallyCapped = true;
+    for (const [id, n] of tally.counts) {
+      const entry = load.get(id);
+      if (entry) entry[tally.ref.bucket] = entry[tally.ref.bucket] + n;
+    }
+  }
+
+  // Counts drive the suggested merge direction, so a partial count has
+  // to say so rather than let a "0 references" row look safe to delete.
+  const notes: string[] = [];
+  if (unreadable.length > 0) {
+    notes.push(`counts exclude ${unreadable.join(", ")} (unreadable this load)`);
+  }
+  if (tallyCapped) {
+    notes.push(`a tally hit its ${REFERENCE_ROW_LIMIT}-row cap, so some counts are a floor`);
+  }
+
+  return {
+    success: true,
+    report: {
+      groups: attachLoad(groups, load),
+      scanned,
+      scanCapped,
+      totalGroups,
+      loadNote: notes.length > 0 ? `Reference ${notes.join("; ")}.` : null,
+    },
+  };
+}
+
+// ══════════════════════════════════════════════════════════════
+// Overdue shows — the queue nothing else owns
+//
+// The hourly cron flips published → entries_open and entries_open →
+// entries_closed, and nudges shows past judging_ends_at. It never
+// force-flips out of judging (a community-vote show has no placings
+// until the host finalizes the tally — audit S11) and it has no opinion
+// at all about entries_closed, running, or results_review.
+//
+// So this queue reads, and it nudges. It NEVER writes shows.status:
+// the state machine is the single authority on the lifecycle and a
+// forced flip here would mint or destroy results. The predicates and
+// their thresholds live in lib/admin/overdueShows.ts, shared with the
+// nudge so a show can never be nudged for a reason it no longer has.
+//
+// Cost: five status queries (one per predicate, each capped) plus three
+// batched `in` lookups — aliases, entry counts, prior nudges.
+// ══════════════════════════════════════════════════════════════
+
+/** Rows per predicate. Hitting it marks the queue capped. */
+const OVERDUE_PER_PREDICATE_LIMIT = 50;
+
+const OVERDUE_SHOW_COLUMNS =
+  "id, title, host_id, status, judging_ends_at, entries_close_at, show_date, updated_at";
+
+export interface OverdueShowRow {
+  showId: string;
+  title: string;
+  hostAlias: string;
+  status: string;
+  reason: OverdueReason;
+  /** The deadline (or last-touched stamp) the overdue count is measured from. */
+  since: string;
+  overdueDays: number;
+  /** Live entries — scratched ones are history and are not counted. */
+  entryCount: number;
+  /** When the host was last nudged about THIS reason, cron or console. */
+  nudgedAt: string | null;
+  /** True while the cooldown is still running. */
+  nudgeOnCooldown: boolean;
+  hostConsoleUrl: string;
+}
+
+export interface OverdueShowsReport {
+  rows: OverdueShowRow[];
+  /** true = at least one predicate filled its slot; there may be more. */
+  capped: boolean;
+}
+
+type OverdueShowRecord = {
+  id: string;
+  title: string | null;
+  host_id: string;
+  status: string;
+  judging_ends_at: string | null;
+  entries_close_at: string | null;
+  show_date: string | null;
+  updated_at: string;
+};
+
+export async function listOverdueShows(): Promise<
+  { success: true; report: OverdueShowsReport } | { success: false; error: string }
+> {
+  const user = await verifyAdmin();
+  if (!user) return { success: false, error: "Unauthorized" };
+
+  const admin = getAdminSupabase();
+  const now = new Date();
+  const nowIso = now.toISOString();
+  const base = () => admin.from("shows").select(OVERDUE_SHOW_COLUMNS);
+
+  const settled = await Promise.allSettled([
+    // 1. Past its judging deadline — the cron's own predicate, verbatim.
+    base()
+      .eq("status", "judging")
+      .not("judging_ends_at", "is", null)
+      .lte("judging_ends_at", nowIso)
+      .order("judging_ends_at", { ascending: true })
+      .limit(OVERDUE_PER_PREDICATE_LIMIT),
+    // 2. Judging with NO deadline — the cron's `.not(... is null)` filter
+    //    means these can never be nudged by the clock.
+    base()
+      .eq("status", "judging")
+      .is("judging_ends_at", null)
+      .lte("updated_at", cutoffIso(now, JUDGING_NO_DEADLINE_DAYS))
+      .order("updated_at", { ascending: true })
+      .limit(OVERDUE_PER_PREDICATE_LIMIT),
+    // 3. Entries closed and never advanced. `or` because a hand-closed
+    //    show can have no entries_close_at on file at all.
+    base()
+      .eq("status", "entries_closed")
+      .or(
+        `entries_close_at.lte.${cutoffIso(now, ENTRIES_CLOSED_STALLED_DAYS)},updated_at.lte.${cutoffIso(now, ENTRIES_CLOSED_STALLED_DAYS)}`
+      )
+      .order("updated_at", { ascending: true })
+      .limit(OVERDUE_PER_PREDICATE_LIMIT),
+    // 4. Live show still running. show_date is a DATE, updated_at a
+    //    timestamp — two cutoffs, two shapes.
+    base()
+      .eq("status", "running")
+      .or(
+        `show_date.lte.${cutoffDate(now, RUNNING_PAST_DATE_DAYS)},updated_at.lte.${cutoffIso(now, RUNNING_IDLE_DAYS)}`
+      )
+      .order("updated_at", { ascending: true })
+      .limit(OVERDUE_PER_PREDICATE_LIMIT),
+    // 5. Results sitting in review, unpublished.
+    base()
+      .eq("status", "results_review")
+      .lte("updated_at", cutoffIso(now, RESULTS_REVIEW_STALLED_DAYS))
+      .order("updated_at", { ascending: true })
+      .limit(OVERDUE_PER_PREDICATE_LIMIT),
+  ]);
+
+  let capped = false;
+  const byId = new Map<string, OverdueShowRecord>();
+  for (const result of settled) {
+    if (result.status !== "fulfilled") continue;
+    const { data, error } = result.value as { data: unknown; error: unknown };
+    if (error) continue; // a predicate that can't run must not blank the queue
+    const rows = (Array.isArray(data) ? data : []) as OverdueShowRecord[];
+    if (rows.length >= OVERDUE_PER_PREDICATE_LIMIT) capped = true;
+    for (const row of rows) byId.set(row.id, row);
+  }
+
+  // Re-check every row through the shared classifier: `or` filters are
+  // broader than the real predicate (a running show edited yesterday
+  // with a stale show_date matches the query but may not be stalled).
+  const classified: { record: OverdueShowRecord; input: OverdueShowInput; reason: OverdueReason; since: string; overdueDays: number }[] = [];
+  for (const record of byId.values()) {
+    const input: OverdueShowInput = {
+      id: record.id,
+      title: record.title ?? "Untitled show",
+      hostId: record.host_id,
+      status: record.status,
+      judgingEndsAt: record.judging_ends_at,
+      entriesCloseAt: record.entries_close_at,
+      showDate: record.show_date,
+      updatedAt: record.updated_at,
+    };
+    const verdict = classifyOverdueShow(input, now);
+    if (!verdict) continue;
+    classified.push({ record, input, ...verdict });
+  }
+
+  if (classified.length === 0) {
+    return { success: true, report: { rows: [], capped } };
+  }
+
+  const showIds = classified.map((c) => c.record.id);
+  const hostIds = [...new Set(classified.map((c) => c.record.host_id))];
+  const links = classified.map((c) => nudgeLinkFor(c.record.id, c.reason));
+
+  const [hosts, entries, nudges] = await Promise.allSettled([
+    admin.from("users").select("id, alias_name").in("id", hostIds),
+    admin.from("show_class_entries").select("show_id, status").in("show_id", showIds),
+    admin
+      .from("notifications")
+      .select("user_id, link_url, created_at")
+      .eq("type", "show_deadline")
+      .in("link_url", links)
+      .order("created_at", { ascending: false }),
+  ]);
+
+  const aliasById = new Map<string, string>();
+  if (hosts.status === "fulfilled") {
+    const rows = ((hosts.value as { data: unknown }).data ?? []) as {
+      id: string;
+      alias_name: string | null;
+    }[];
+    for (const h of rows) {
+      if (h.alias_name) aliasById.set(h.id, h.alias_name);
+    }
+  }
+
+  const entryCounts = new Map<string, number>();
+  if (entries.status === "fulfilled") {
+    const rows = ((entries.value as { data: unknown }).data ?? []) as {
+      show_id: string;
+      status: string;
+    }[];
+    for (const e of rows) {
+      if (e.status === "scratched") continue;
+      entryCounts.set(e.show_id, (entryCounts.get(e.show_id) ?? 0) + 1);
+    }
+  }
+
+  // Newest-first from the query, so the first hit per key is the latest.
+  const nudgedAtByKey = new Map<string, string>();
+  if (nudges.status === "fulfilled") {
+    const rows = ((nudges.value as { data: unknown }).data ?? []) as {
+      user_id: string;
+      link_url: string | null;
+      created_at: string;
+    }[];
+    for (const n of rows) {
+      if (!n.link_url) continue;
+      const key = `${n.user_id}|${n.link_url}`;
+      if (!nudgedAtByKey.has(key)) nudgedAtByKey.set(key, n.created_at);
+    }
+  }
+
+  const rows: OverdueShowRow[] = classified.map((c) => {
+    const link = nudgeLinkFor(c.record.id, c.reason);
+    const nudgedAt = nudgedAtByKey.get(`${c.record.host_id}|${link}`) ?? null;
+    return {
+      showId: c.record.id,
+      title: c.input.title,
+      hostAlias: aliasById.get(c.record.host_id) ?? "Unknown host",
+      status: c.record.status,
+      reason: c.reason,
+      since: c.since,
+      overdueDays: c.overdueDays,
+      entryCount: entryCounts.get(c.record.id) ?? 0,
+      nudgedAt,
+      nudgeOnCooldown: !canNudgeAgain(nudgedAt, now),
+      hostConsoleUrl: `/shows/host/${c.record.id}`,
+    };
+  });
+
+  return { success: true, report: { rows: sortOverdue(rows), capped } };
+}
+
+export interface NudgeHostResult {
+  success: boolean;
+  error?: string;
+  /** true = a notification row was written. */
+  sent?: boolean;
+  /** Human-readable outcome when nothing was sent but nothing failed either. */
+  note?: string;
+}
+
+/**
+ * Nudge one overdue host. The ONLY write this queue offers.
+ *
+ * It reuses the cron's notification type ('show_deadline') and, for
+ * judging shows, the cron's exact link — so the two dedupe against each
+ * other and a host is never pinged twice for the same stall.
+ *
+ * Anti-spam is a real cooldown, not a disabled button: a matching
+ * notification inside NUDGE_COOLDOWN_DAYS refuses politely and names
+ * the date. (A host who has muted show_deadline notifications produces
+ * no row for the cooldown to see; that path reports "muted, nothing
+ * sent" rather than pretending it worked.)
+ *
+ * Never flips shows.status. Results integrity belongs to the state
+ * machine and to the host, not to this console.
+ */
+export async function nudgeOverdueShowHost(showId: string): Promise<NudgeHostResult> {
+  const user = await verifyAdmin();
+  if (!user) return { success: false, error: "Unauthorized" };
+
+  const admin = getAdminSupabase();
+  const { data, error } = await admin
+    .from("shows")
+    .select(OVERDUE_SHOW_COLUMNS)
+    .eq("id", showId)
+    .maybeSingle();
+  if (error) return { success: false, error: error.message };
+  if (!data) return { success: false, error: "Show not found." };
+
+  const record = data as OverdueShowRecord;
+  const now = new Date();
+  const input: OverdueShowInput = {
+    id: record.id,
+    title: record.title ?? "Untitled show",
+    hostId: record.host_id,
+    status: record.status,
+    judgingEndsAt: record.judging_ends_at,
+    entriesCloseAt: record.entries_close_at,
+    showDate: record.show_date,
+    updatedAt: record.updated_at,
+  };
+
+  const verdict = classifyOverdueShow(input, now);
+  if (!verdict) {
+    return {
+      success: true,
+      sent: false,
+      note: "That show is no longer overdue — the host has moved it on. Nothing sent.",
+    };
+  }
+
+  const link = nudgeLinkFor(record.id, verdict.reason);
+  const { data: priorRows } = await admin
+    .from("notifications")
+    .select("created_at")
+    .eq("type", "show_deadline")
+    .eq("user_id", record.host_id)
+    .eq("link_url", link)
+    .order("created_at", { ascending: false })
+    .limit(1);
+  const lastNudgedAt = ((priorRows ?? [])[0] as { created_at: string } | undefined)?.created_at ?? null;
+
+  if (!canNudgeAgain(lastNudgedAt, now)) {
+    return {
+      success: true,
+      sent: false,
+      note: `Already nudged ${new Date(lastNudgedAt!).toLocaleDateString()} — the cooldown is ${NUDGE_COOLDOWN_DAYS} days.`,
+    };
+  }
+
+  // House pattern: dynamic import + try/catch. A notification sink must
+  // never take an admin action down with it.
+  let delivered = 0;
+  try {
+    const { createNotificationsBulk } = await import("@/lib/notifications/createNotification");
+    delivered = await createNotificationsBulk([
+      {
+        userId: record.host_id,
+        type: "show_deadline",
+        // System event, not the admin poking a member: the self-guard
+        // must not fire if the admin happens to host the show.
+        actorId: null,
+        content: buildNudgeContent(input.title, verdict),
+        linkUrl: link,
+      },
+    ]);
+  } catch (err) {
+    logger.error("Admin", "Overdue-show nudge failed", err);
+    return { success: false, error: "Could not send the nudge — check the logs." };
+  }
+
+  if (delivered === 0) {
+    return {
+      success: true,
+      sent: false,
+      note: "Nothing sent — the host has show-deadline notifications muted.",
+    };
+  }
+
+  return { success: true, sent: true };
 }
