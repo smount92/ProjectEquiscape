@@ -6,6 +6,8 @@ import { getEvents } from "@/app/actions/events";
 import { resolveAvatarUrls } from "@/lib/utils/avatars.server";
 import FeedStream from "@/components/feed/FeedStream";
 import PaddockRail from "@/components/feed/PaddockRail";
+import ShowRingDoor, { type ShowRingPreviewHorse } from "@/components/feed/ShowRingDoor";
+import { getPublicImageUrls } from "@/lib/utils/storage";
 import Link from "next/link";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
 import PageMasthead from "@/components/layouts/PageMasthead";
@@ -51,7 +53,7 @@ export default async function FeedPage({
     const { tab } = await searchParams;
     const scope = tab === "following" ? "following" : "everyone";
 
-    const [page, capabilities, profile, barns, upcoming] = await Promise.all([
+    const [page, capabilities, profile, barns, upcoming, ringRows, myBlocks] = await Promise.all([
         getFeedStream({ scope, limit: 25 }),
         getFeedCapabilities(),
         supabase.from("users").select("alias_name, avatar_url").eq("id", user.id).maybeSingle(),
@@ -59,7 +61,49 @@ export default async function FeedPage({
         // that fails must not take the feed down with it.
         getMyGroups().catch(() => []),
         getEvents({ upcoming: true, limit: 4 }).catch(() => []),
+        // Show Ring preview: the latest public horses WITH photos
+        // (!inner requires at least one image — a strip of 🐴
+        // placeholders sells nothing). Same failure rule as the rail.
+        supabase
+            .from("user_horses")
+            .select("id, owner_id, custom_name, created_at, horse_images!inner(image_url, angle_profile)")
+            .eq("visibility", "public")
+            .is("deleted_at", null)
+            .order("created_at", { ascending: false })
+            .limit(8)
+            .then((r) => r.data ?? [])
+            .catch(() => []),
+        supabase
+            .from("user_blocks")
+            .select("blocked_id")
+            .eq("blocker_id", user.id)
+            .then((r) => r.data ?? [])
+            .catch(() => []),
     ]);
+
+    // Collector-designated main shot, else the first photo — then one
+    // batched signing pass for the whole strip. Blocked users' horses
+    // are hidden here like everywhere else (fetched 8, shown ≤6).
+    const blockedOwnerIds = new Set(
+        (myBlocks as { blocked_id: string }[]).map((b) => b.blocked_id),
+    );
+    const ringRaw = (ringRows as unknown as {
+        id: string;
+        owner_id: string;
+        custom_name: string | null;
+        horse_images: { image_url: string; angle_profile: string | null }[] | null;
+    }[])
+        .filter((h) => !blockedOwnerIds.has(h.owner_id))
+        .slice(0, 6)
+        .map((h) => {
+            const imgs = h.horse_images ?? [];
+            const primary = imgs.find((i) => i.angle_profile === "Primary_Thumbnail") ?? imgs[0];
+            return { id: h.id, name: h.custom_name || "Unnamed horse", raw: primary?.image_url ?? null };
+        });
+    const ringUrlMap = getPublicImageUrls(ringRaw.flatMap((h) => (h.raw ? [h.raw] : [])));
+    const ringHorses: ShowRingPreviewHorse[] = ringRaw
+        .filter((h) => h.raw)
+        .map((h) => ({ id: h.id, name: h.name, thumbnailUrl: ringUrlMap.get(h.raw!) ?? h.raw! }));
 
     const me = (profile.data as { alias_name: string; avatar_url: string | null } | null) ?? null;
     const avatarMap = await resolveAvatarUrls([me?.avatar_url ?? null]);
@@ -83,27 +127,9 @@ export default async function FeedPage({
                 />
 
                 {/* THE SHOW RING DOOR — the room people actually walk to
-                    first (owner, 2026-08-21), so it is the first thing on
-                    the Paddock: a full leather band, not a rail line. */}
-                <Link
-                    href="/community"
-                    className="leather-band stitched mb-8 flex flex-wrap items-center gap-x-5 gap-y-2 rounded-xl px-6 py-5 no-underline transition-all hover:shadow-lg"
-                    id="paddock-show-ring-door"
-                >
-                    <span aria-hidden="true" className="text-[2.2rem] leading-none">🏆</span>
-                    <span className="min-w-0 flex-1">
-                        <span className="text-engraved-light block font-serif text-xl font-bold tracking-[0.02em]">
-                            The Show Ring
-                        </span>
-                        <span className="block text-sm" style={{ color: "var(--leather-text-soft)" }}>
-                            The community&rsquo;s horses on show — browse, favorite, and find your
-                            next obsession.
-                        </span>
-                    </span>
-                    <span className="btn-brass inline-flex shrink-0 items-center gap-1.5">
-                        Step into the ring →
-                    </span>
-                </Link>
+                    first (owner), with a preview strip of the latest
+                    horses so the door shows what's inside. */}
+                <ShowRingDoor horses={ringHorses} />
 
                 <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[1.5fr_1fr] lg:gap-10">
                     {/* ── The stream ── */}
