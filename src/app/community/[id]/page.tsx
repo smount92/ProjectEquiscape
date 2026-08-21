@@ -120,8 +120,18 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
  };
 }
 
-export default async function PublicPassportPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function PublicPassportPage({
+ params,
+ searchParams,
+}: {
+ params: Promise<{ id: string }>;
+ searchParams: Promise<{ from?: string }>;
+}) {
  const { id: horseId } = await params;
+ const { from } = await searchParams;
+ // Arrived from the marketplace browse → the back breadcrumb returns
+ // there instead of the Show Ring (the card link carries ?from=market).
+ const cameFromMarket = from ==="market";
  const supabase = await createClient();
 
  // Auth check — needed for RLS (we redirect to login, not block)
@@ -132,7 +142,7 @@ export default async function PublicPassportPage({ params }: { params: Promise<{
  // Logged-out visitors get a read-only public passport (get_public_passport
  // RPC); the full interactive passport below is unchanged for members.
  if (!user) {
- return <AnonPassport horseId={horseId} />;
+ return <AnonPassport horseId={horseId} backToMarket={cameFromMarket} />;
  }
 
  // ================================================================
@@ -366,8 +376,8 @@ editionSize: rawPedigree.edition_size,
  ownerAlias={ownerAlias}
  referenceName={refName}
  referenceHref={refHref}
- backHref="/community"
- backLabel="Show Ring"
+ backHref={cameFromMarket ?"/market" :"/community"}
+ backLabel={cameFromMarket ?"Marketplace" :"Show Ring"}
  />
 
  {/* Two-column layout: Gallery | Ledger Card */}

@@ -40,7 +40,7 @@ export default function MarketListingCard({ listing }: { listing: MarketListing 
     return (
         <div className="flex flex-col">
             <Link
-                href={`/community/${listing.id}`}
+                href={`/community/${listing.id}?from=market`}
                 className="group block no-underline"
                 aria-label={`${listing.customName} — ${priceLabel}`}
             >

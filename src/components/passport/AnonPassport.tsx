@@ -142,7 +142,14 @@ function AnonRecordRow({ record }: { record: MarketRecordDetailRow }) {
     );
 }
 
-export default async function AnonPassport({ horseId }: { horseId: string }) {
+export default async function AnonPassport({
+    horseId,
+    backToMarket = false,
+}: {
+    horseId: string;
+    /** Arrived from the marketplace browse — back breadcrumb returns there. */
+    backToMarket?: boolean;
+}) {
     const supabase = createAnonClient();
     // get_public_passport ships in migration 135 (not yet in generated types → cast).
     const rpc = supabase.rpc.bind(supabase) as unknown as (
@@ -206,8 +213,8 @@ export default async function AnonPassport({ horseId }: { horseId: string }) {
                 ownerAlias={ownerAlias}
                 referenceName={cat ? `${cat.maker} — ${cat.title}` : null}
                 referenceHref={refHref}
-                backHref="/community"
-                backLabel="Show Ring"
+                backHref={backToMarket ? "/market" : "/community"}
+                backLabel={backToMarket ? "Marketplace" : "Show Ring"}
             />
             <div className="animate-fade-in-up grid grid-cols-1 gap-8 lg:grid-cols-[1.5fr_1fr] lg:gap-12">
                 {/* Gallery */}

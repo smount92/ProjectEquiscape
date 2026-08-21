@@ -255,10 +255,16 @@ export async function updateHorseAction(horseId: string, data: {
                             if (newItem) newName = catalogDisplayName((newItem as { maker: string }).maker, (newItem as { title: string }).title);
                         }
 
+                        // kind='audit' keeps this provenance note off the
+                        // feed once 166 lands; pre-166 the feed matches
+                        // its prefix instead (lib/feed/stream.ts).
+                        const { getPostColumnSupport } = await import("@/lib/feed/columnSupport");
+                        const support = await getPostColumnSupport(supabase as never);
                         await supabase.from("posts").insert({
                             author_id: user.id,
                             horse_id: horseId,
                             content: `📋 Reference identity updated from "${oldName}" to "${newName}".`,
+                            ...(support.kind ? { kind: "audit" } : {}),
                         });
                     }
                 } catch (err) { Sentry.captureException(err, { tags: { domain: "horse" } }); logger.error("Horse", "Catalog identity audit log failed", err); }

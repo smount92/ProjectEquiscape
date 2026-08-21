@@ -74,6 +74,23 @@ export interface ContextualRow {
     channelId: string | null;
 }
 
+/**
+ * System/audit notes written onto passport threads (reference-identity
+ * changes, transfer expirations) are provenance lines, not shareable
+ * content — they stay on the passport but never reach the feed.
+ * Matched by their writer's fixed prefixes until migration 166's
+ * posts.kind='audit' tag covers them; rows the migration backfills
+ * carry the kind and skip the prefix scan entirely.
+ */
+const AUDIT_PREFIXES = ["📋 Reference identity updated", "⏰ Parked transfer expired"];
+
+export function isAuditNote(content: string | null | undefined, kind?: string | null): boolean {
+    if (kind === "audit") return true;
+    if (kind && kind !== "user") return false; // tagged non-audit kinds pass
+    const text = content ?? "";
+    return AUDIT_PREFIXES.some((p) => text.startsWith(p));
+}
+
 export function isGloballyVisible(
     row: ContextualRow,
     publicHorseIds: ReadonlySet<string>,

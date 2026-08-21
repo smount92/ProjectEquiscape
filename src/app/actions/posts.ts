@@ -14,6 +14,7 @@ import { getPostColumnSupport } from "@/lib/feed/columnSupport";
 import {
     mergeByCreatedAtDesc,
     takePage,
+    isAuditNote,
     isGloballyVisible,
     type ContextualRow,
 } from "@/lib/feed/stream";
@@ -979,19 +980,21 @@ async function filterToGloballyVisible(
         }
     }
 
-    return rows.filter((r) =>
-        isGloballyVisible(
-            {
-                horseId: (r.horse_id as string | null) ?? null,
-                groupId: (r.group_id as string | null) ?? null,
-                eventId: (r.event_id as string | null) ?? null,
-                studioId: (r.studio_id as string | null) ?? null,
-                helpRequestId: (r.help_request_id as string | null) ?? null,
-                channelId: (r.channel_id as string | null) ?? null,
-            } satisfies ContextualRow,
-            publicHorseIds,
-            publicGroupIds,
-        ),
+    return rows.filter(
+        (r) =>
+            !isAuditNote(r.content as string | null, (r.kind as string | null) ?? null) &&
+            isGloballyVisible(
+                {
+                    horseId: (r.horse_id as string | null) ?? null,
+                    groupId: (r.group_id as string | null) ?? null,
+                    eventId: (r.event_id as string | null) ?? null,
+                    studioId: (r.studio_id as string | null) ?? null,
+                    helpRequestId: (r.help_request_id as string | null) ?? null,
+                    channelId: (r.channel_id as string | null) ?? null,
+                } satisfies ContextualRow,
+                publicHorseIds,
+                publicGroupIds,
+            ),
     );
 }
 

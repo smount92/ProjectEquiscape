@@ -205,10 +205,13 @@ export async function getParkedHorseByPin(pin: string): Promise<{
 
             // System note about expired transfer
             try {
+                const { getPostColumnSupport } = await import("@/lib/feed/columnSupport");
+                const support = await getPostColumnSupport(admin as never);
                 await admin.from("posts").insert({
                     author_id: t.sender_id,
                     horse_id: t.horse_id,
                     content: "⏰ Parked transfer expired. Horse has been automatically unparked and returned to your stable.",
+                    ...(support.kind ? { kind: "audit" } : {}),
                 });
             } catch (err) { logger.error("Transfer", "Background task failed", err); }
 

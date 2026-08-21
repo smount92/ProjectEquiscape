@@ -41,12 +41,20 @@ BEGIN
   ) THEN
     ALTER TABLE posts
       ADD CONSTRAINT posts_kind_check
-      CHECK (kind IN ('user', 'show_results'));
+      CHECK (kind IN ('user', 'show_results', 'audit'));
   END IF;
 END $$;
 
 COMMENT ON COLUMN posts.kind IS
-  'What produced this post. user = composed by a person; show_results = auto-emitted when a show publishes results.';
+  'What produced this post. user = composed by a person; show_results = auto-emitted when a show publishes results; audit = system provenance note on a passport thread (never surfaces in the feed).';
+
+-- Tag the system/audit notes already written onto passport threads
+-- (reference-identity changes, parked-transfer expirations) so the
+-- feed can exclude them by kind instead of by content prefix.
+UPDATE posts SET kind = 'audit'
+WHERE kind = 'user'
+  AND (content LIKE '📋 Reference identity updated%'
+    OR content LIKE '⏰ Parked transfer expired%');
 
 -- ── 2. visibility ────────────────────────────────────────────
 ALTER TABLE posts
