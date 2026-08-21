@@ -7,16 +7,24 @@
  * competitive record shows a compact 🏆 chip on its market card
  * (data batched server-side — see buildShowRingCards). Clicking the
  * chip opens a quick-look dialog fetched ON DEMAND for that one horse
- * (getMarketHorseRecord): best results first, verification tiers, MHH
- * card count, and the road to the full trophy case on the public
- * passport. Horses without records render nothing — never "0
+ * (getPublicMarketHorseRecord): best results first, verification
+ * tiers, MHH card count, and the road to the full trophy case on the
+ * public passport. Horses without records render nothing — never "0
  * placings".
+ *
+ * The fetch goes through the ANON-SAFE action, not the requireAuth()
+ * one it used to call: this chip sits on the marketplace front door,
+ * whose whole job is converting logged-out buyers, and a dialog that
+ * says "Could not load the show record" to every visitor without an
+ * account is worse than no chip at all. Signed-in viewers lose
+ * nothing — see src/app/actions/marketPublicRecord.ts.
  */
 
 import { useState } from "react";
 import Link from "next/link";
 
-import { getMarketHorseRecord, type MarketHorseRecord } from "@/app/actions/market";
+import { getPublicMarketHorseRecord } from "@/app/actions/marketPublicRecord";
+import type { MarketHorseRecord } from "@/app/actions/market";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -139,7 +147,7 @@ export default function HorseRecordChip({
         if (!next || state === "loaded" || state === "loading") return;
         setState("loading");
         try {
-            const result = await getMarketHorseRecord({ horseId });
+            const result = await getPublicMarketHorseRecord({ horseId });
             if (result.success) {
                 setRecord(result.record);
                 setState("loaded");

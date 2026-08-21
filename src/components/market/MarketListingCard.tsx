@@ -11,21 +11,24 @@
  * cards, ownership history and the BuyerPanel. Nothing here duplicates
  * that; the card's whole job is to make the passport worth opening.
  *
- * Deliberately a server component with no interactive parts: the Show
- * Ring's HorseRecordChip opens a dialog through getMarketHorseRecord,
- * which calls requireAuth() and would fail for exactly the logged-out
- * buyer this front door exists to convert. The record here is a static
- * chip; one click reaches the real thing.
+ * The record chip is the one interactive part, and it sits OUTSIDE the
+ * card link so opening the quick-look doesn't navigate. It used to be
+ * a static badge here because HorseRecordChip fetched through
+ * getMarketHorseRecord, which called requireAuth() and failed for
+ * exactly the logged-out buyer this front door exists to convert; it
+ * now reads the anon-safe path (marketPublicRecord.ts), so a visitor
+ * with no account can open a horse's record right in the grid.
  */
 
 import Link from "next/link";
 
+import HorseRecordChip from "@/components/market/HorseRecordChip";
 import TrustedBadge from "@/components/TrustedBadge";
 import { Badge } from "@/components/ui/badge";
 import { finishBadgeClass } from "@/lib/stable/badges";
 import { getThumbUrl } from "@/lib/utils/imageUrl";
 import { listingPriceLabel } from "@/lib/market/listingFilters";
-import { recordChipLabel, verifiedChipLabel } from "@/lib/market/recordSummary";
+import { recordChipLabel } from "@/lib/market/recordSummary";
 import type { MarketListing } from "@/app/market/listings";
 
 const NOTES_PREVIEW_CHARS = 72;
@@ -33,8 +36,8 @@ const NOTES_PREVIEW_CHARS = 72;
 export default function MarketListingCard({ listing }: { listing: MarketListing }) {
     const priceLabel = listingPriceLabel(listing.tradeStatus, listing.listingPrice);
     const isForSale = listing.tradeStatus === "For Sale";
-    const recordLabel = recordChipLabel(listing.recordSummary);
-    const verifiedLabel = verifiedChipLabel(listing.recordSummary);
+    // Empty-state honesty: no record, no chip, no noise.
+    const hasRecord = recordChipLabel(listing.recordSummary) !== null;
     const notes = listing.marketplaceNotes?.trim();
 
     return (
@@ -95,17 +98,6 @@ export default function MarketListingCard({ listing }: { listing: MarketListing 
                         )}
                     </div>
 
-                    {/* The differentiator. Absent when the horse has no
-                        record — never a hollow "0 placings". */}
-                    {recordLabel && (
-                        <div className="mt-2 inline-flex flex-wrap items-center gap-1.5 rounded-full border border-warning bg-warning/10 px-2.5 py-1 text-xs font-semibold text-warning">
-                            <span>🏆 {recordLabel}</span>
-                            {verifiedLabel && (
-                                <span className="text-success">· ✅ {verifiedLabel}</span>
-                            )}
-                        </div>
-                    )}
-
                     {notes && (
                         <p
                             className="mt-2 truncate rounded-md bg-muted px-2 py-1 text-xs text-secondary-foreground"
@@ -119,6 +111,20 @@ export default function MarketListingCard({ listing }: { listing: MarketListing 
                     )}
                 </div>
             </Link>
+
+            {/* The differentiator: a verified competitive record beside
+                the asking price, one click from the full detail. Outside
+                the Link so the dialog opens instead of navigating, and
+                absent entirely when the horse has no record. */}
+            {hasRecord && listing.recordSummary && (
+                <div className="mt-2 px-1">
+                    <HorseRecordChip
+                        horseId={listing.id}
+                        horseName={listing.customName}
+                        summary={listing.recordSummary}
+                    />
+                </div>
+            )}
 
             {/* Seller line — outside the card link so the profile link
                 and the trust badge are their own targets. */}

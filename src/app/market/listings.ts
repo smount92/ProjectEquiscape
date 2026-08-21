@@ -6,6 +6,20 @@
  * the thing no other marketplace can show — the horse's verified
  * competitive record, right where it commands a price premium.
  *
+ * ── The anon read path (migration 169) ──
+ *
+ * A logged-out viewer is served by get_market_listings /
+ * get_market_listings_total — anon-granted SECURITY DEFINER functions
+ * that return one page of public-safe listing columns (alias_name,
+ * catalog identity, thumbnail, trusted-seller flag, a bounded show-
+ * record aggregate) plus a window total. No service-role key, no
+ * replicated RLS predicate, no users/show_records exposure.
+ *
+ * The code feature-detects: until the owner pastes 169 the RPC does
+ * not exist, the call fails, and everything below — the original
+ * service-role stopgap — still runs. Read on for why that stopgap
+ * exists at all; it is now the FALLBACK, not the primary.
+ *
  * ── The anon-RLS reality (read this before changing the client) ──
  *
  * Checked against supabase/migrations:
@@ -35,18 +49,21 @@
  * full_name or email. Net data exposure versus the existing anon RPCs
  * is zero; only the transport differs.
  *
- * If SUPABASE_SERVICE_ROLE_KEY is absent the page neither crashes nor
- * silently degrades: it returns { gated: true } and /market renders
- * the members teaser instead of a hollow grid.
+ * If SUPABASE_SERVICE_ROLE_KEY is absent AND the RPC is not there
+ * either, the page neither crashes nor silently degrades: it returns
+ * { gated: true } and /market renders the members teaser instead of a
+ * hollow grid.
  *
- * Follow-up that removes the service-role dependency — an anon-granted
- * DEFINER RPC mirroring 132 (sketched in the workstream report). Once
- * it exists, swap the client selection for a single rpc() call.
+ * AUTHENTICATED viewers keep the RLS-scoped query below in every case
+ * — it is the path that applies the viewer's block list, which a
+ * DEFINER function serving anonymous traffic has no business knowing
+ * about.
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import { createAnonClient } from "@/lib/supabase/anon";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { getPublicImageUrls } from "@/lib/utils/storage";
 import { sanitizeForOr } from "@/lib/utils/search";
@@ -55,6 +72,10 @@ import {
     type HorseRecordSummary,
     type RecordSummaryInputRow,
 } from "@/lib/market/recordSummary";
+import {
+    buildMarketListingRpcArgs,
+    mapMarketListingRpcRows,
+} from "@/lib/market/rpcListings";
 import {
     findPriceBand,
     LISTINGS_PAGE_SIZE,
@@ -196,6 +217,81 @@ async function fetchTotalListings(supabase: SupabaseClient): Promise<number> {
     }
 }
 
+/** A BIGINT scalar from PostgREST — number, or defensively a string. */
+function parseCount(value: unknown): number {
+    if (typeof value === "number" && Number.isFinite(value)) return value;
+    if (typeof value === "string") {
+        const parsed = Number.parseInt(value, 10);
+        if (Number.isFinite(parsed)) return parsed;
+    }
+    return 0;
+}
+
+/**
+ * The logged-out page, through the anon-granted DEFINER RPCs of
+ * migration 169. Returns null when that path is unavailable for ANY
+ * reason — the function missing (42883 / PGRST202 before the owner
+ * pastes 169), a malformed response, no anon key — so the caller can
+ * fall back to the service-role stopgap without the page ever noticing.
+ *
+ * Cookie-less anon client: no session to read, and the function is
+ * visibility-guarded server-side.
+ */
+async function fetchListingsViaRpc(
+    filters: ListingFilters,
+    page: number,
+): Promise<MarketListingsPage | null> {
+    try {
+        const supabase = createAnonClient();
+        // get_market_listings ships in migration 169 (not yet in the
+        // generated types → cast, same idiom as get_public_passport
+        // in AnonPassport.tsx and get_public_horse_records in
+        // publicRecords.ts).
+        const rpc = supabase.rpc.bind(supabase) as unknown as (
+            fn: string,
+            args?: Record<string, unknown>,
+        ) => Promise<{ data: unknown; error: unknown }>;
+
+        const [pageResult, totalResult] = await Promise.all([
+            rpc(
+                "get_market_listings",
+                buildMarketListingRpcArgs(filters, page) as unknown as Record<string, unknown>,
+            ),
+            rpc("get_market_listings_total", {}),
+        ]);
+
+        if (pageResult.error || !Array.isArray(pageResult.data)) return null;
+
+        const { listings, total } = mapMarketListingRpcRows(pageResult.data);
+
+        // The mapper leaves raw storage paths on the cards; resolving
+        // them to public URLs is the one batched, non-pure step.
+        const paths = listings
+            .map((l) => l.thumbnailUrl)
+            .filter((u): u is string => typeof u === "string" && u.length > 0);
+        const urlMap = getPublicImageUrls(paths);
+        for (const listing of listings) {
+            if (listing.thumbnailUrl) {
+                listing.thumbnailUrl = urlMap.get(listing.thumbnailUrl) ?? listing.thumbnailUrl;
+            }
+        }
+
+        // The headline number is a nicety; if only that call failed,
+        // the filtered total is an honest floor rather than a zero.
+        const headline = totalResult.error ? 0 : parseCount(totalResult.data);
+
+        return {
+            gated: false,
+            listings,
+            total,
+            totalListings: Math.max(headline, total),
+            viewerIsAuthenticated: false,
+        };
+    } catch {
+        return null;
+    }
+}
+
 /**
  * Fetch one page of listings plus everything the cards need.
  *
@@ -224,12 +320,21 @@ export async function getMarketListingsPage(
 
     let supabase: SupabaseClient;
     if (user) {
+        // Authenticated: the viewer's own RLS-scoped client, so their
+        // block list applies (see the header).
         supabase = authed as unknown as SupabaseClient;
-    } else if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
-        supabase = getAdminClient() as unknown as SupabaseClient;
     } else {
-        // No batch anon read path for aliases/records → members teaser.
-        return empty(true);
+        // Logged out: the anon DEFINER RPC (169) is the real path.
+        const viaRpc = await fetchListingsViaRpc(filters, page);
+        if (viaRpc) return viaRpc;
+        if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+            // 169 not pasted yet — the documented stopgap still works.
+            supabase = getAdminClient() as unknown as SupabaseClient;
+        } else {
+            // No RPC and no service key → no batch anon read path for
+            // aliases/records at all → members teaser.
+            return empty(true);
+        }
     }
 
     const blockedOwnerIds = user

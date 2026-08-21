@@ -48,11 +48,11 @@ vi.mock("@/app/actions/wishlist", () => ({
 // The record chip's quick-look dialog fetches on demand — stub the
 // server action ("use server" module: importing the real one drags the
 // supabase server chain into jsdom).
-const { getMarketHorseRecord } = vi.hoisted(() => ({
-    getMarketHorseRecord: vi.fn(),
+const { getPublicMarketHorseRecord } = vi.hoisted(() => ({
+    getPublicMarketHorseRecord: vi.fn(),
 }));
-vi.mock("@/app/actions/market", () => ({
-    getMarketHorseRecord,
+vi.mock("@/app/actions/marketPublicRecord", () => ({
+    getPublicMarketHorseRecord,
 }));
 
 function card(overrides: Partial<ShowRingCard> = {}): ShowRingCard {
@@ -105,7 +105,7 @@ beforeEach(() => {
         cards: [card({ id: "h-3", customName: "Oberon" })],
         hasMore: false,
     });
-    getMarketHorseRecord.mockResolvedValue({
+    getPublicMarketHorseRecord.mockResolvedValue({
         success: true,
         record: {
             summary: { total: 3, placings: 2, championships: 1, verified: 2 },
@@ -249,7 +249,7 @@ describe("ShowRingBrowser", () => {
         });
         await user.click(document.getElementById("record-chip-h-1")!);
         await waitFor(() => {
-            expect(getMarketHorseRecord).toHaveBeenCalledWith({ horseId: "h-1" });
+            expect(getPublicMarketHorseRecord).toHaveBeenCalledWith({ horseId: "h-1" });
         });
         expect(await screen.findByText(/Grand Champion/)).toBeInTheDocument();
         expect(screen.getByText(/2 MHH qualification cards/)).toBeInTheDocument();
