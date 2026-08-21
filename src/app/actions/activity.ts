@@ -9,7 +9,6 @@ import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { getPublicImageUrls } from "@/lib/utils/storage";
 import { revalidatePath } from "next/cache";
-import { after } from "next/server";
 
 interface FeedItem {
     id: string;
@@ -64,45 +63,28 @@ export async function createActivityEvent(data: {
 
 /**
  * Create a text post on the activity feed.
- * Supports optional image URLs for casual image posts.
+ *
+ * KEPT AS A SHIM. This used to be the ONLY writer of feed text and it
+ * wrote to `activity_events` — a store the rest of the social system
+ * (replies, likes, permalinks, media attachments, moderation) knows
+ * nothing about. The feed composer now writes to `posts`, so this
+ * forwards there too: same signature, same return shape, one store.
+ *
+ * `imageUrls` here are already-uploaded storage paths, which is what
+ * createPost's `imagePaths` wants — the old column name was the lie.
  */
 export async function createTextPost(text: string, imageUrls?: string[]): Promise<{ success: boolean; error?: string }> {
-    const { supabase, user } = await requireAuth();
-
     const trimmed = text.trim();
     if (!trimmed && (!imageUrls || imageUrls.length === 0)) return { success: false, error: "Post cannot be empty." };
     if (trimmed.length > 500) return { success: false, error: "Post must be 500 characters or less." };
 
-    const supabaseAdmin = getAdminClient();
-
-    // Fetch actor alias for mention notifications
-    const { data: profile } = await supabase.from("users").select("alias_name").eq("id", user.id).single();
-    const actorAlias = (profile as { alias_name: string } | null)?.alias_name || "Someone";
-
-    const { error } = await supabaseAdmin.from("activity_events").insert({
-        actor_id: user.id,
-        event_type: "text_post",
-        horse_id: null,
-        target_id: null,
-        metadata: { text: trimmed },
-        image_urls: imageUrls && imageUrls.length > 0 ? imageUrls : [],
+    const { createPost } = await import("@/app/actions/posts");
+    const result = await createPost({
+        content: trimmed,
+        imagePaths: imageUrls && imageUrls.length > 0 ? imageUrls : undefined,
     });
 
-    if (error) return { success: false, error: error.message };
-
-    // Deferred: notify mentions after response is sent
-    if (trimmed) {
-        const userId = user.id;
-        const actorName = actorAlias;
-        after(async () => {
-            try {
-                const { parseAndNotifyMentions } = await import("@/app/actions/mentions");
-                await parseAndNotifyMentions(trimmed, userId, actorName, "/feed");
-            } catch (err) { Sentry.captureException(err, { tags: { domain: "activity" } }); logger.error("Activity", "Background task failed", err); }
-        });
-    }
-
-    return { success: true };
+    return result.success ? { success: true } : { success: false, error: result.error };
 }
 
 /**

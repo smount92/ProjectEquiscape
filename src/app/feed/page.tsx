@@ -1,96 +1,105 @@
-import { createClient } from"@/lib/supabase/server";
-import { redirect } from"next/navigation";
-import { getFollowingFeed } from"@/app/actions/activity";
-import { getPosts } from"@/app/actions/posts";
-import UniversalFeed from"@/components/UniversalFeed";
-import LoadMoreFeed from"@/components/LoadMoreFeed";
-import Link from"next/link";
-import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+import { getFeedStream, getFeedCapabilities } from "@/app/actions/posts";
+import { resolveAvatarUrls } from "@/lib/utils/avatars.server";
+import FeedStream from "@/components/feed/FeedStream";
+import Link from "next/link";
+import ExplorerLayout from "@/components/layouts/ExplorerLayout";
 import { Globe, Users } from "lucide-react";
 
 export const metadata = {
- title:"Activity Feed",
- description:"See the latest activity from the Model Horse Hub community.",
+    title: "Activity Feed",
+    description: "See the latest activity from the Model Horse Hub community.",
 };
 
+/**
+ * ONE FEED.
+ *
+ * This page used to be two feeds pretending to be tabs: a "Global"
+ * tab reading `posts` with every contextual post deliberately
+ * excluded, and a "Following" tab reading the entirely separate
+ * legacy `activity_events` table. A comment on a horse, a post in a
+ * group, a show publishing its results — none of it reached either.
+ *
+ * Now both tabs are the same stream with a different author filter,
+ * and the stream includes public contextual posts. Private and
+ * unlisted horses, and private/restricted groups, never appear:
+ * see isGloballyVisible in lib/feed/stream.ts.
+ */
+export default async function FeedPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ tab?: string }>;
+}) {
+    const supabase = await createClient();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
 
-export default async function FeedPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
- const supabase = await createClient();
- const {
- data: { user },
- } = await supabase.auth.getUser();
+    if (!user) redirect("/login?redirectTo=" + encodeURIComponent("/feed"));
 
- if (!user) redirect("/login?redirectTo=" + encodeURIComponent("/feed"));
+    const { tab } = await searchParams;
+    const scope = tab === "following" ? "following" : "everyone";
 
- const { tab } = await searchParams;
- const activeTab = tab ==="following" ?"following" :"global";
+    const [page, capabilities, profile] = await Promise.all([
+        getFeedStream({ scope, limit: 25 }),
+        getFeedCapabilities(),
+        supabase.from("users").select("alias_name, avatar_url").eq("id", user.id).maybeSingle(),
+    ]);
 
- // Global tab → unified posts table
- // Following tab → legacy activity_events (system events from followed users)
- let followingData: {
- items: Awaited<ReturnType<typeof getFollowingFeed>>["items"];
- nextCursor: string | null;
- } | null = null;
- let globalPosts: Awaited<ReturnType<typeof getPosts>> = [];
+    const me = (profile.data as { alias_name: string; avatar_url: string | null } | null) ?? null;
+    const avatarMap = await resolveAvatarUrls([me?.avatar_url ?? null]);
+    const myAvatar = me?.avatar_url ? avatarMap.get(me.avatar_url) || me.avatar_url : null;
 
- if (activeTab ==="following") {
- followingData = await getFollowingFeed(30);
- } else {
- globalPosts = await getPosts({ globalFeed: true }, { includeReplies: true, limit: 30 });
- }
+    const tabClass = (active: boolean) =>
+        `inline-flex items-center gap-2 rounded-md px-5 py-2 text-sm whitespace-nowrap no-underline transition-all ${
+            active
+                ? "bg-forest font-semibold text-white shadow-sm"
+                : "text-secondary-foreground hover:bg-card hover:text-foreground"
+        }`;
 
- return (
- <ExplorerLayout
-  title={<span className="text-forest">Activity Feed</span>}
-  description="Stay up to date with what's happening in the community."
-  /* Global tab brings its own leather panel — skip the archetype's
-     ledger surface so leather sits directly on the page background
-     (fixes the double-framing artifact). */
-  frameless={activeTab ==="global"}
-  controls={
-  <div className="flex w-fit gap-1 rounded-lg border border-input bg-muted/60 p-1">
-   <Link
-   href="/feed"
-   className={`inline-flex items-center gap-2 rounded-md px-5 py-2 text-sm whitespace-nowrap no-underline transition-all ${activeTab ==="global" ?"bg-forest font-semibold text-white shadow-sm" :"text-secondary-foreground hover:bg-card hover:text-foreground"}`}
-   >
-   <Globe className="h-4 w-4" /> Global
-   </Link>
-   <Link
-   href="/feed?tab=following"
-   className={`inline-flex items-center gap-2 rounded-md px-5 py-2 text-sm whitespace-nowrap no-underline transition-all ${activeTab ==="following" ?"bg-forest font-semibold text-white shadow-sm" :"text-secondary-foreground hover:bg-card hover:text-foreground"}`}
-   >
-   <Users className="h-4 w-4" /> Following
-   </Link>
-  </div>
-  }
- >
-  {activeTab ==="global" ? (
-  /* ── Global Tab: UniversalFeed (posts table) ──
-     Wrapped in the leather stable-feed panel (approved prototype:
-     /design/feed). .feed-leather scopes the spine/dot/hero treatment
-     to this page only — other UniversalFeed contexts stay plain. */
-  <div className="feed-leather leather-panel stitched mt-6">
-   <h2 className="feed-leather-title">Stable Activity Feed</h2>
-   <UniversalFeed
-    initialPosts={globalPosts}
-    context={{ globalFeed: true }}
-    currentUserId={user.id}
-    showComposer={true}
-    composerPlaceholder="Share an update with the community… (supports @mentions)"
-    label="Community Posts"
-    variant="leather"
-   />
-  </div>
-  ) : (
-  /* ── Following Tab: Legacy system events feed ── */
-  <LoadMoreFeed
-   initialItems={followingData?.items ?? []}
-   initialCursor={followingData?.nextCursor ?? null}
-   feedType="following"
-   currentUserId={user.id}
-   emptyMessage="Follow collectors on the Discover page to see their activity!"
-  />
-  )}
- </ExplorerLayout>
- );
+    return (
+        <ExplorerLayout
+            title={<span className="text-forest">Activity Feed</span>}
+            description="Stay up to date with what's happening in the community."
+            /* The feed brings its own leather panel — skip the archetype's
+               ledger surface so leather sits directly on the page
+               background (fixes the double-framing artifact). */
+            frameless
+            controls={
+                <div className="flex w-fit gap-1 rounded-lg border border-input bg-muted/60 p-1">
+                    <Link href="/feed" className={tabClass(scope === "everyone")}>
+                        <Globe className="h-4 w-4" /> Everyone
+                    </Link>
+                    <Link href="/feed?tab=following" className={tabClass(scope === "following")}>
+                        <Users className="h-4 w-4" /> Following
+                    </Link>
+                </div>
+            }
+        >
+            <div className="feed-leather leather-panel stitched mt-6">
+                <h2 className="feed-leather-title">Stable Activity Feed</h2>
+                <FeedStream
+                    initialItems={page.items}
+                    initialCursor={page.nextCursor}
+                    initialAliases={page.knownAliases}
+                    scope={scope}
+                    currentUserId={user.id}
+                    currentUserAlias={me?.alias_name ?? "You"}
+                    currentUserAvatar={myAvatar}
+                    visibilityEnabled={capabilities.visibility}
+                    /* Following is a lens on the same stream, not a place to
+                       write to — composing always posts to the one feed. */
+                    showComposer={scope === "everyone"}
+                    label={scope === "following" ? "From People You Follow" : "Community Posts"}
+                    variant="leather"
+                    emptyMessage={
+                        scope === "following"
+                            ? "Follow collectors on the Discover page to see their posts here!"
+                            : "Nothing here yet — be the first to post!"
+                    }
+                />
+            </div>
+        </ExplorerLayout>
+    );
 }

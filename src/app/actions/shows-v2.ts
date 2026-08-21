@@ -489,6 +489,21 @@ export async function transitionShowStatus(
                 console.error(`Title grants for show ${showId} failed: ${granted.error}`);
             }
         });
+        // Social spine: a published show is the single biggest thing
+        // that happens on this site and it used to emit NOTHING —
+        // results existed only for people who already knew to look.
+        // One post, authored by the host, into the one feed. Its own
+        // after() block and its own try/catch: the feed is the least
+        // important thing in this transition and must never be able
+        // to disturb records, cards, titles or the fan-out.
+        after(async () => {
+            try {
+                const { emitShowResultsPost } = await import("@/lib/feed/showResultsPost");
+                await emitShowResultsPost(getAdminClient(), showId);
+            } catch (err) {
+                console.error(`Results feed post for show ${showId} failed: ${String(err)}`);
+            }
+        });
     }
     if (to === "judging" && ctx.show.judging === "community_vote") {
         after(async () => {
