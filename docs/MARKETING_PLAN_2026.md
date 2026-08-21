@@ -121,7 +121,7 @@ the product cannot currently honour is the single most expensive mistake availab
 
 | Claim | Why it's blocked |
 |---|---|
-| **"A stranger can check the Hoofprint"** | `/community/[id]/hoofprint` reads `user_horses` through the RLS-honouring client, and that table is `SELECT TO authenticated` since migration 109. **A logged-out buyer gets a 404 or a blank report** — the exact skeptical-Facebook-buyer the feature exists for. The *passport* (`/community/[id]`, via `get_public_passport`) and the *card verify* page are fine. Say "the card is checkable," not "the Hoofprint is checkable," until this is fixed. |
+| **"A stranger can check the Hoofprint"** | Two separate failures, both verified in the tree. The standalone report `/community/[id]/hoofprint` reads `user_horses` through the RLS-honouring client, and that table is `SELECT TO authenticated` (migration 109) — **anon gets a 404**. And on the public passport, `getHoofprint()` reads `v_horse_hoofprint`, granted `TO authenticated` only, so it returns empty and the section **silently renders nothing** for logged-out visitors. A skeptical Facebook buyer following your link sees a passport with no provenance on it and no explanation why. The *card verify* page (`/cards/[code]`) and the cards/titles sections of the passport are genuinely anon-safe. **Say "the card is checkable," not "the Hoofprint is checkable," until this is fixed.** It is the single highest-value marketing unblock on the list. |
 | **Full ownership chains / "CarFax for model horses"** | F3: `horse_ownership_history` has no INSERT policy, so genesis rows were silently never written. Every never-transferred horse has an empty chain; transferred horses start at the *second* owner. |
 | **Seller reputation / reviews** | F2: reviews are forgeable and review-bombable — a caller can mint a fake completed transaction per review. |
 | **"Verified Artist" badges** | F1: `finishing_artist_verified` is in the owner-editable whitelist. Any owner can self-set it. |
@@ -146,7 +146,8 @@ the product cannot currently honour is the single most expensive mistake availab
 
 ## 2.1 The wedge
 
-> **Anyone can type "NAN qualified." We're the only place a buyer can look it up.**
+> **Anyone can type "NAN qualified." Nobody can check it. Here, a placing exists because the
+> show was run here — so anyone can.**
 
 That is the whole pitch, and the landing page already carries it (`TheRecord.tsx`). Everything
 else the site does — the Stable, the Market, the Registry, the Paddock, the Studios — is the
@@ -166,6 +167,14 @@ reason people *stay*. The record is the reason they *arrive*.
    in group names and rules, and NAMHSA's own documentation reports roughly a third of
    submitted NAN cards arrive invalid, expired or misfilled. The hobby has a verification
    problem it already knows about.
+
+> **The NAN line, and how not to cross it.** MHH cards are **not** NAN cards — `/cards/[code]`
+> says so on the page, deliberately and correctly. So NAN is the *contrast* in our copy, never
+> the claim. Say: *"anyone can type 'NAN qualified' and nobody can check it — here's a record
+> that can be."* Never say, or let anyone infer, that MHH verifies NAN qualifications, that an
+> MHH card qualifies a horse for NAN, or that we're NAMHSA-affiliated. NAMHSA is a future
+> partner (playbook MOVE 3); implying an endorsement you don't have is how you lose that
+> permanently, and showholders will spot it immediately.
 
 **Positioning statement, long form** (for the About page, the FB page bio, a host pitch):
 
@@ -308,10 +317,12 @@ Facebook sales post: *"Show record verifiable here: modelhorsehub.com/cards/XXXX
 
 **Nudges worth building:**
 - A **"copy the verification line"** button on the passport for sellers listing off-platform.
-  This is Trojan-horse marketing at its most legitimate: the seller wants it, the buyer wants
-  it, and it puts an MHH link in a group where you're not allowed to advertise.
-- Fix card discovery (audit D3: cards only render on for-sale or v2 passports today, so a
-  non-selling owner's cards are invisible to outsiders — which kills exactly this loop).
+  No such feature exists today (checked). This is the most legitimate Trojan horse available:
+  the seller wants it, the buyer wants it, and it puts an MHH link into a group where you are
+  not allowed to advertise — carried by a member, in answer to a real question.
+- Card discovery looks **already fixed** — `PublicCardsSection` now renders on every passport
+  through the anon-safe RPC from migration 141, not just for-sale ones. Worth confirming
+  against a real logged-out passport before relying on it; the audit's D3 predates it.
 
 ## Loop 4 — The Matchmaker pulls lurkers back
 
@@ -357,9 +368,14 @@ Effort-ranked. The budget is **65 hours across 90 days.** Anything not on this l
 
 **The play.** Every other channel buys you *individuals*. This one buys you *groups*. A
 showholder who runs their show on MHH delivers their whole entrant list, and the public results
-page they post afterwards is an acquisition surface aimed at exactly the right people. No
-live-show or photo-show hosting software exists anywhere in this hobby, so there is nothing to
-displace — only a vacuum to fill.
+page they post afterwards is an acquisition surface aimed at exactly the right people.
+
+Be precise about the vacuum, because a host will correct you if you aren't: **photo showing is
+already served** — by volunteer-run single-purpose sites (OMHPS and similar) and by Facebook
+groups and email. What has *never* existed is software for **live** shows, and what nobody
+offers at all is **results that become a permanent, checkable record on the horse**. So the
+pitch to a photo-show host is "less paperwork, and your placings mean something afterwards,"
+not "there's nothing else out there."
 
 **Cadence.** One named target per week, worked properly. Not a blast.
 
@@ -453,11 +469,15 @@ work is *measurement*, *interlinking*, and *query targeting* — not building.
    no idea whether 10,900 pages are indexed, blocked, or classified as thin. **You cannot manage
    this channel until you can see it.** Add Bing Webmaster Tools while you're there.
 2. **Fix the internal-link starvation.** Google discovers and values pages through links, and
-   10,900 pages hanging off one `/reference` index is a shallow, weak structure. Cheap wins,
-   in order: a "more from this maker" module on every reference page; a "similar releases"
-   module (same mold, same year); year hub pages (`/reference/breyer/1995`) and mold hub pages;
-   and links *from* the high-traffic pages (`/calendar`, `/market/guide`, `/learn/glossary`)
-   *into* the Registry. The mold→child-release links already exist — extend the pattern.
+   ~10,900 pages hanging off one `/reference` index is a shallow structure. The good
+   interlinking that exists — "Releases on this mold" and "Customs of this mold" — is gated
+   behind `isMold`, so **the mold pages are richly linked and the thousands of individual
+   release pages are near-orphans**, each linking up to its maker hub and nowhere else.
+   Cheapest wins, in order: (a) on a release page, link *back to its mold* and sideways to its
+   sibling releases — the query already exists, it just isn't called for non-molds; (b) a "more
+   from this maker" module; (c) year hub pages (`/reference/breyer/1995`); (d) links *from* the
+   pages that will get traffic (`/calendar`, `/market/guide`, `/learn/glossary`) *into* the
+   Registry. This is the highest-return SEO work available and none of it needs new data.
 3. **Target the queries the hobby actually types.** The page title format is already right
    (*"[Maker] [Name] — value & collector info"*). The gaps are the *other* intents:
    - *"what is my breyer worth"* → the Blue Book needs a landing page written for that phrase,
@@ -479,6 +499,21 @@ first organic signup. Impressions move before clicks; don't panic in month one.
 text to bulk out thin pages; a page whose only unique content is a spec table is fine, a page
 padded with AI-written prose is a doorway page and a liability. Don't chase "Breyer" as a head
 term — you will not outrank Breyer.
+
+### The content you have already written and aren't using
+
+Before commissioning a single new word, note that five anon-readable, well-written pages
+already exist and are doing nothing for you because nobody links to them:
+
+| Page | What it is | Use it as |
+|---|---|---|
+| `/about` | The named-founders story plus the continuity statement that names Blab and MH$P | **The answer to "will this die too?"** Link it every time the question comes up, then stop arguing. |
+| `/shows/rules` | The whole Championship Series — scoring, card gates, titles — with numbers read out of the same code that scores the shows | **The host pitch's proof of seriousness.** The championship doc is right that the rules *are* marketing: a published, self-consistent rulebook is what separates a real program from a fun show. |
+| `/learn/glossary` | The hobby's shorthand, defined | An SEO surface and a genuine newcomer on-ramp. Only two guides exist — this is where new written content should go, not a blog. |
+| `/learn/enter-your-first-photo-show` | Exactly what a nervous first-timer needs | **The reply to every "how do I start showing?" post on Facebook.** That question is asked constantly and answering it is unambiguously welcome. |
+| `/market/guide` | The Blue Book | Retitle for intent — it's "Model Horse Price Guide — The Blue Book" today, which doesn't reach *"what is my breyer worth"*, the query people actually type. |
+
+None of this is a content-marketing programme. It's linking to what you already own.
 
 ## 4.4 Instagram — ~8 hrs · the show-off surface
 
