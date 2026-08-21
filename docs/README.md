@@ -36,6 +36,7 @@
 | **Manually verify a Shows v2 flow** | [SHOWS_V2_TESTING.md](SHOWS_V2_TESTING.md) |
 | **See what's next after the rebuild program** | [NEXT_SYSTEMS_ROADMAP.md](NEXT_SYSTEMS_ROADMAP.md) |
 | **Understand the growth strategy / house rules** | [OPERATOR_PLAYBOOK.md](OPERATOR_PLAYBOOK.md) |
+| **Know what the site can earn / what break-even needs** | [BUSINESS_MODEL_2026.md](BUSINESS_MODEL_2026.md) |
 
 ---
 
@@ -45,6 +46,12 @@
 docs/
 ├── README.md                          ← YOU ARE HERE (navigation index)
 ├── OPERATOR_PLAYBOOK.md               # Self-contained strategy + house rules
+├── BUSINESS_MODEL_2026.md             # Income targets, break-even, the hobby's ceiling
+├── business-research/                 # Working notes behind BUSINESS_MODEL_2026.md
+│   ├── infra-cost-curve.md            #   what hosting costs at 100 → 10,000 members
+│   ├── repo-ground-truth.md           #   prices, tiers and rulings verified in the tree
+│   ├── hobby-size.md                  #   how big the model horse hobby actually is
+│   └── conversion-benchmarks.md       #   freemium conversion, churn, comparable platforms
 ├── NEXT_SYSTEMS_ROADMAP.md            # Post-rebuild priority order
 ├── SHOWS_V2_TESTING.md                # Manual testing checklist for Shows v2
 ├── studio/COMMISSION_RESEARCH.md      # Researched commission practice (the Studio rebuild's basis)
