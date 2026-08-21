@@ -5,6 +5,7 @@ import { getPublicImageUrls } from "@/lib/utils/storage";
 import { Button } from "@/components/ui/button";
 import SupporterPlaque from "@/components/profile/SupporterPlaque";
 import { fetchSupporterBadge } from "@/lib/supporter";
+import ViewBeacon from "@/components/metrics/ViewBeacon";
 
 // Read-only public profile for logged-OUT visitors (FUNNEL-4 / MOVE-6). The full
 // interactive profile (follow/message/block/rate/edit) stays in
@@ -123,6 +124,18 @@ export default async function AnonProfile({
 
     return (
         <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 md:py-10 lg:px-8">
+            {/* A logged-out look at a profile is still a look at that
+                profile. Without this, the profile view count was the
+                members-only half of the traffic — and for a page that is
+                mostly reached from outside links, that is the smaller
+                half. The member page mounts the identical beacon
+                (profile/[alias_name]/page.tsx).
+
+                entityId is the resolved UUID, never the alias: a profile
+                must not split into two rows because someone renamed
+                themselves, and the alias is a display name, not a key. */}
+            <ViewBeacon entityType="profile" entityId={profileUser.id} />
+
             <header className="leather-panel stitched animate-fade-in-up relative rounded-[14px] px-6 pt-8 pb-9 text-center">
                 <div className="brass-medallion mx-auto mb-3">
                     {avatarUrl ? (
