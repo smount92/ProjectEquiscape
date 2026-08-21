@@ -71,14 +71,20 @@ export default async function FeedPage({
             .is("deleted_at", null)
             .order("created_at", { ascending: false })
             .limit(8)
-            .then((r) => r.data ?? [])
-            .catch(() => []),
+            // Supabase's builder is a PromiseLike without .catch — the
+            // two-arg .then covers both settle paths.
+            .then(
+                (r) => r.data ?? [],
+                () => [],
+            ),
         supabase
             .from("user_blocks")
             .select("blocked_id")
             .eq("blocker_id", user.id)
-            .then((r) => r.data ?? [])
-            .catch(() => []),
+            .then(
+                (r) => r.data ?? [],
+                () => [],
+            ),
     ]);
 
     // Collector-designated main shot, else the first photo — then one
