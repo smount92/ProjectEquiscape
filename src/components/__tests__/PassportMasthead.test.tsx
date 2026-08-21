@@ -92,4 +92,51 @@ describe("PassportMasthead", () => {
             "/community",
         );
     });
+
+    // Favorites = public likes (owner ruling): the tally rides the
+    // masthead on BOTH passport surfaces, but a horse with no likes
+    // must not announce a zero.
+    describe("favorite tally", () => {
+        it("shows the count when the horse has likes", () => {
+            render(
+                <PassportMasthead horseName="Ledger Lines" ownerAlias="maggie" favoriteCount={12} />,
+            );
+            expect(screen.getByTestId("passport-favorite-count")).toHaveTextContent("12 favorites");
+        });
+
+        it("says 'favorite' singular at one", () => {
+            render(
+                <PassportMasthead horseName="Ledger Lines" ownerAlias="maggie" favoriteCount={1} />,
+            );
+            expect(screen.getByTestId("passport-favorite-count")).toHaveTextContent("1 favorite");
+        });
+
+        it("renders nothing at zero, null, or omitted", () => {
+            const { rerender } = render(
+                <PassportMasthead horseName="Ledger Lines" ownerAlias="maggie" favoriteCount={0} />,
+            );
+            expect(screen.queryByTestId("passport-favorite-count")).not.toBeInTheDocument();
+
+            rerender(
+                <PassportMasthead
+                    horseName="Ledger Lines"
+                    ownerAlias="maggie"
+                    favoriteCount={null}
+                />,
+            );
+            expect(screen.queryByTestId("passport-favorite-count")).not.toBeInTheDocument();
+
+            rerender(<PassportMasthead horseName="Ledger Lines" ownerAlias="maggie" />);
+            expect(screen.queryByTestId("passport-favorite-count")).not.toBeInTheDocument();
+        });
+
+        it("still leaves exactly one h1 — the horse's name", () => {
+            render(
+                <PassportMasthead horseName="Ledger Lines" ownerAlias="maggie" favoriteCount={4} />,
+            );
+            const h1s = screen.getAllByRole("heading", { level: 1 });
+            expect(h1s).toHaveLength(1);
+            expect(h1s[0]).toHaveTextContent("Ledger Lines");
+        });
+    });
 });

@@ -13,6 +13,8 @@
 
 import Link from "next/link";
 
+import { favoriteCountLabel } from "@/lib/favorites/publicCount";
+
 export default function PassportMasthead({
     horseName,
     ownerAlias,
@@ -20,6 +22,7 @@ export default function PassportMasthead({
     referenceHref,
     backHref = "/community",
     backLabel = "Show Ring",
+    favoriteCount = null,
 }: {
     horseName: string;
     ownerAlias: string;
@@ -29,7 +32,15 @@ export default function PassportMasthead({
     referenceHref?: string | null;
     backHref?: string;
     backLabel?: string;
+    /**
+     * Favorites = public likes (owner ruling). Read-only tally on the
+     * band so the owner watches it climb from either passport surface.
+     * null / 0 renders nothing — a horse with no likes says nothing
+     * rather than announcing a zero.
+     */
+    favoriteCount?: number | null;
 }) {
+    const likes = typeof favoriteCount === "number" && favoriteCount > 0 ? favoriteCount : null;
     return (
         <div className="leather-band stitched relative mb-6 rounded-xl px-6 py-5" data-testid="passport-masthead">
             {backHref && (
@@ -47,9 +58,24 @@ export default function PassportMasthead({
             >
                 Public Passport · Model Horse Hub
             </p>
-            <h1 className="text-engraved-light m-0 mt-1 font-serif text-3xl font-bold break-words tracking-[0.02em] md:text-4xl">
-                {horseName}
-            </h1>
+            <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-2">
+                <h1 className="text-engraved-light m-0 font-serif text-3xl font-bold break-words tracking-[0.02em] md:text-4xl">
+                    {horseName}
+                </h1>
+                {likes !== null && (
+                    <span
+                        data-testid="passport-favorite-count"
+                        className="relative z-[1] inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm font-semibold"
+                        style={{
+                            borderColor: "var(--leather-text-muted)",
+                            color: "var(--leather-text)",
+                        }}
+                    >
+                        <span aria-hidden="true">♥</span>
+                        {favoriteCountLabel(likes)}
+                    </span>
+                )}
+            </div>
             <p className="m-0 mt-1.5 text-sm" style={{ color: "var(--leather-text-soft)" }}>
                 Owned by{" "}
                 <Link

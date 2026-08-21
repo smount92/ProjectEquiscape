@@ -19,7 +19,15 @@ import {
 } from "@/lib/market/recordSummary";
 import PassportMasthead from "@/components/passport/PassportMasthead";
 import BuyerPanel from "@/components/passport/BuyerPanel";
+import { DetailRow, LedgerBlock } from "@/components/passport/PassportDetails";
 import { getPublicHorseCards } from "@/lib/shows/publicCards";
+import { getHorseTitles } from "@/lib/shows/horseTitles";
+import { titlePrefix } from "@/lib/shows/titles";
+import TitlesSection from "@/components/shows/TitlesSection";
+import AssetDetailRenderer from "@/components/AssetDetailRenderer";
+import { getAssetConfig } from "@/lib/config/assetFields";
+import type { AssetCategory } from "@/lib/types/database";
+import { getPublicFavoriteCount } from "@/lib/favorites/publicCount";
 
 // Read-only public passport for logged-OUT visitors (FUNNEL-4). The full
 // interactive passport (favorite/comment/message/hoofprint) stays in
@@ -36,6 +44,10 @@ const ANGLE_LABELS: Record<string, string> = {
     Detail: "Detail",
 };
 
+// get_public_passport (135) already returns every field below — the
+// anon card used to declare (and render) only a handful of them, which
+// is what left the tan panel half empty. Declaring the rest costs no
+// extra read.
 interface PassportHorse {
     id: string;
     custom_name: string;
@@ -47,6 +59,16 @@ interface PassportHorse {
     edition_number: number | null;
     edition_size: number | null;
     public_notes: string | null;
+    asset_category: string | null;
+    attributes: Record<string, unknown> | null;
+    created_at: string | null;
+    finishing_artist: string | null;
+    finishing_artist_verified: boolean | null;
+    finish_details: string | null;
+    assigned_breed: string | null;
+    assigned_gender: string | null;
+    assigned_age: string | null;
+    regional_id: string | null;
 }
 
 interface PassportCatalog {
@@ -56,6 +78,7 @@ interface PassportCatalog {
     slug: string | null;
     scale: string | null;
     item_type: string;
+    attributes: Record<string, unknown> | null;
 }
 
 interface PassportRow {
@@ -204,27 +227,76 @@ export default async function AnonPassport({
     const forSale = horse.trade_status === "For Sale" || horse.trade_status === "Open to Offers";
     const loginHref = `/login?redirectTo=${encodeURIComponent(`/community/${horseId}`)}`;
 
-    const cardsCount = forSale ? (await getPublicHorseCards(horseId)).length : 0;
+    // Independent anon-safe reads — one round trip, not four.
+    //  · titles           horse_titles is SELECT TO authenticated, anon (159)
+    //  · favorite count    NO anon read path today → null (see publicCount.ts)
+    const [publicCardsForCount, publicTitles, favoriteCount] = await Promise.all([
+        forSale ? getPublicHorseCards(horseId) : Promise.resolve([]),
+        getHorseTitles(horseId),
+        getPublicFavoriteCount(horseId),
+    ]);
+    const cardsCount = publicCardsForCount.length;
+    const publicNamePrefix = titlePrefix(publicTitles.map((t) => t.code));
+
+    // Same reference framing the member card uses.
+    const catAttrs = (cat?.attributes ?? {}) as Record<string, unknown>;
+    const refInfo = cat
+        ? {
+              type: cat.item_type === "artist_resin" ? "Artist Resin" : "Mold",
+              name: cat.title,
+              maker: cat.maker,
+              scale: cat.scale || "Unknown",
+              extra:
+                  cat.item_type === "artist_resin"
+                      ? (catAttrs.cast_medium as string | null)
+                      : catAttrs.release_year_start
+                        ? `First released ${catAttrs.release_year_start}`
+                        : null,
+          }
+        : null;
+    const releaseInfo =
+        cat && cat.item_type === "plastic_release"
+            ? {
+                  name: cat.title,
+                  modelNumber: catAttrs.model_number as string | null,
+                  color: catAttrs.color_description as string | null,
+                  yearStart: catAttrs.release_year_start as number | null,
+                  yearEnd: catAttrs.release_year_end as number | null,
+              }
+            : null;
+
+    const assetCat = (horse.asset_category || "model") as AssetCategory;
+    const assetConfig = getAssetConfig(assetCat);
+    const horseAttributes = (horse.attributes ?? {}) as Record<string, unknown>;
+    const hasShowIdentity =
+        assetConfig.showShowBio &&
+        !!(horse.assigned_breed || horse.assigned_gender || horse.assigned_age || horse.regional_id);
 
     return (
         <ExplorerLayout noHeader>
             <PassportMasthead
-                horseName={horse.custom_name}
+                horseName={
+                    publicNamePrefix ? `${publicNamePrefix} ${horse.custom_name}` : horse.custom_name
+                }
                 ownerAlias={ownerAlias}
                 referenceName={cat ? `${cat.maker} — ${cat.title}` : null}
                 referenceHref={refHref}
                 backHref={backToMarket ? "/market" : "/community"}
                 backLabel={backToMarket ? "Marketplace" : "Show Ring"}
+                favoriteCount={favoriteCount}
             />
             <div className="animate-fade-in-up grid grid-cols-1 gap-8 lg:grid-cols-[1.5fr_1fr] lg:gap-12">
                 {/* Gallery */}
-                <div className="overflow-hidden rounded-2xl shadow-md" id="passport-photos">
+                <div className="self-start overflow-hidden rounded-2xl shadow-md" id="passport-photos">
                     <PassportGallery images={galleryImages} />
                 </div>
 
-                {/* Ledger card (read-only) */}
+                {/* Ledger card (read-only). `self-start`, NOT min-h-[100%]:
+                    the card used to stretch to the gallery's height and
+                    push its login CTA to the bottom of a field of empty
+                    tan. It now ends where its content ends. */}
                 <div
-                    className="flex min-h-[100%] flex-col gap-4 rounded-3xl border border-input bg-[#C8B596] px-6 py-8 shadow-sm md:px-10"
+                    className="flex flex-col gap-3 self-start rounded-3xl border border-input bg-[#C8B596] px-6 py-8 shadow-sm md:px-10"
                     style={PARCHMENT_INK}
                 >
                     {/* Buyer panel — the masthead carries the name +
@@ -246,41 +318,180 @@ export default async function AnonPassport({
                         />
                     )}
 
-                    <dl className="grid grid-cols-2 gap-3 text-sm">
+                    {/* Owner pill — the anon card's one identity anchor;
+                        /profile/[alias] is a public page. */}
+                    <Link
+                        href={`/profile/${encodeURIComponent(ownerAlias)}`}
+                        className="inline-flex w-fit items-center gap-1 rounded-full border border-input bg-card py-1.5 pr-3.5 pl-1.5 text-sm font-semibold text-foreground no-underline shadow-md"
+                    >
+                        <span className="flex h-[28px] w-[28px] shrink-0 items-center justify-center rounded-full border border-input bg-muted text-muted-foreground">
+                            <svg
+                                width="14"
+                                height="14"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                aria-hidden="true"
+                            >
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                <circle cx="12" cy="7" r="4" />
+                            </svg>
+                        </span>
+                        <span>@{ownerAlias}</span>
+                    </Link>
+                    <Link
+                        href={`/profile/${encodeURIComponent(ownerAlias)}`}
+                        className="text-sm text-muted-foreground no-underline"
+                        id="see-more-seller"
+                    >
+                        See all models from @{ownerAlias} →
+                    </Link>
+
+                    {/* Model Details — same rows, same rhythm as the member
+                        ledger; every value comes from get_public_passport. */}
+                    <LedgerBlock
+                        icon="📋"
+                        title={
+                            assetCat === "model"
+                                ? "Model Details"
+                                : `${assetCat.charAt(0).toUpperCase()}${assetCat.slice(1)} Details`
+                        }
+                        testId="anon-model-details"
+                    >
+                        {assetCat !== "model" && (
+                            <DetailRow label="Category">
+                                {assetCat === "tack"
+                                    ? "🏇 Tack & Gear"
+                                    : assetCat === "prop"
+                                      ? "🌲 Prop"
+                                      : assetCat === "diorama"
+                                        ? "🎭 Diorama"
+                                        : "🐄 Other Model"}
+                            </DetailRow>
+                        )}
                         {horse.finish_type && (
-                            <div>
-                                <dt className="text-muted-foreground">Finish</dt>
-                                <dd className="font-semibold text-foreground">{horse.finish_type}</dd>
-                            </div>
+                            <DetailRow label="Finish Type">{horse.finish_type}</DetailRow>
                         )}
                         {horse.condition_grade && (
-                            <div>
-                                <dt className="text-muted-foreground">Condition</dt>
-                                <dd className="font-semibold text-foreground">{horse.condition_grade}</dd>
-                            </div>
+                            <DetailRow label="Condition">
+                                <span className="inline-flex items-center gap-[4px] rounded-full border border-success/30 bg-success/10 px-[10px] py-[2px] text-sm font-semibold text-success">
+                                    {horse.condition_grade}
+                                </span>
+                            </DetailRow>
                         )}
-                        {cat?.scale && (
-                            <div>
-                                <dt className="text-muted-foreground">Scale</dt>
-                                <dd className="font-semibold text-foreground">{cat.scale}</dd>
-                            </div>
+                        {refInfo ? (
+                            <>
+                                <DetailRow label={refInfo.type}>{refInfo.name}</DetailRow>
+                                <DetailRow
+                                    label={refInfo.type === "Mold" ? "Manufacturer" : "Sculptor"}
+                                >
+                                    {refInfo.maker}
+                                </DetailRow>
+                                <DetailRow label="Scale">{refInfo.scale}</DetailRow>
+                                {refInfo.extra && (
+                                    <DetailRow
+                                        label={refInfo.type === "Mold" ? "Released" : "Medium"}
+                                    >
+                                        {refInfo.extra}
+                                    </DetailRow>
+                                )}
+                            </>
+                        ) : (
+                            <DetailRow label="Reference">
+                                <span className="italic opacity-60">
+                                    Not linked to database — Custom Entry
+                                </span>
+                            </DetailRow>
                         )}
-                        {horse.edition_number != null && (
-                            <div>
-                                <dt className="text-muted-foreground">Edition</dt>
-                                <dd className="font-semibold text-foreground">
-                                    #{horse.edition_number}
-                                    {horse.edition_size ? ` / ${horse.edition_size}` : ""}
-                                </dd>
-                            </div>
+                        {releaseInfo && (
+                            <>
+                                <DetailRow label="Release">{releaseInfo.name}</DetailRow>
+                                {releaseInfo.modelNumber && (
+                                    <DetailRow label="Model #">#{releaseInfo.modelNumber}</DetailRow>
+                                )}
+                                {releaseInfo.color && (
+                                    <DetailRow label="Color">{releaseInfo.color}</DetailRow>
+                                )}
+                                {releaseInfo.yearStart && (
+                                    <DetailRow label="Release Years">
+                                        {releaseInfo.yearStart}
+                                        {releaseInfo.yearEnd &&
+                                        releaseInfo.yearEnd !== releaseInfo.yearStart
+                                            ? `–${releaseInfo.yearEnd}`
+                                            : ""}
+                                    </DetailRow>
+                                )}
+                            </>
                         )}
-                    </dl>
+                        {horse.finishing_artist && (
+                            <DetailRow label="🎨 Finished by">
+                                {horse.finishing_artist}
+                                {horse.finishing_artist_verified && (
+                                    <span className="ml-1.5 inline-flex items-center gap-1 rounded-full bg-forest/10 px-2 py-0.5 text-xs font-semibold text-success">
+                                        ✅ Verified
+                                    </span>
+                                )}
+                            </DetailRow>
+                        )}
+                        {(horse.edition_number || horse.edition_size) && (
+                            <DetailRow label="📋 Edition">
+                                {horse.edition_number && horse.edition_size
+                                    ? `${horse.edition_number} of ${horse.edition_size}`
+                                    : horse.edition_size
+                                      ? `Limited to ${horse.edition_size}`
+                                      : `#${horse.edition_number}`}
+                            </DetailRow>
+                        )}
+                        {horse.created_at && (
+                            <DetailRow label="Added">
+                                {new Date(horse.created_at).toLocaleDateString("en-US", {
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                })}
+                            </DetailRow>
+                        )}
+                    </LedgerBlock>
 
-                    {horse.public_notes && (
-                        <p className="whitespace-pre-line text-sm text-secondary-foreground">{horse.public_notes}</p>
+                    {assetCat !== "model" && Object.keys(horseAttributes).length > 0 && (
+                        <AssetDetailRenderer category={assetCat} attributes={horseAttributes} />
                     )}
 
-                    <div className="mt-auto rounded-lg border border-input bg-card/60 p-4 text-center">
+                    {horse.finish_details && (
+                        <LedgerBlock icon="✨" title="Finish">
+                            <DetailRow label="Finish Details">{horse.finish_details}</DetailRow>
+                        </LedgerBlock>
+                    )}
+
+                    {hasShowIdentity && (
+                        <LedgerBlock icon="🏅" title="Show Identity" testId="anon-show-identity">
+                            {horse.assigned_breed && (
+                                <DetailRow label="Breed">{horse.assigned_breed}</DetailRow>
+                            )}
+                            {horse.assigned_gender && (
+                                <DetailRow label="Gender">{horse.assigned_gender}</DetailRow>
+                            )}
+                            {horse.assigned_age && (
+                                <DetailRow label="Age">{horse.assigned_age}</DetailRow>
+                            )}
+                            {horse.regional_id && (
+                                <DetailRow label="Regional ID">{horse.regional_id}</DetailRow>
+                            )}
+                        </LedgerBlock>
+                    )}
+
+                    {horse.public_notes && (
+                        <LedgerBlock icon="📝" title="Notes">
+                            <p className="m-0 leading-[1.6] whitespace-pre-wrap text-secondary-foreground">
+                                {horse.public_notes}
+                            </p>
+                        </LedgerBlock>
+                    )}
+
+                    <div className="rounded-lg border border-input bg-card/60 p-4 text-center">
                         <p className="mb-3 text-sm text-secondary-foreground">
                             {forSale
                                 ? "Log in to message the owner and make an offer."
@@ -331,6 +542,16 @@ export default async function AnonPassport({
                         )}
                     </div>
                 </section>
+            )}
+
+            {/* MHH Titles (159) — public record (horse_titles is SELECT
+                TO authenticated, anon), so the logged-out passport shows
+                the same permanent titles the member one does. Renders
+                nothing when the horse holds none. */}
+            {publicTitles.length > 0 && (
+                <div className="animate-fade-in-up mt-8">
+                    <TitlesSection titles={publicTitles} />
+                </div>
             )}
 
             {/* MHH Qualification Cards — the buyer trust section, same
