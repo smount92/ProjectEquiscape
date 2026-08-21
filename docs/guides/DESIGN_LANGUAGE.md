@@ -89,7 +89,7 @@ utilities (`bg-card`, `text-foreground`, `border-input`, `text-forest`…).
 | `.ledger-tile` | Stat tile with double-forest left border | KPI/stat rows |
 | `.stamp` / `.stamp-red` | Rubber-stamp status chip (rotated, noise-masked) | statuses, placings |
 | `.stats-strap` | Green webbing stat bar with engraved brass numerals | profile stats |
-| `.leather-frame` | 6px leather border via `::before`, cream `--paper-lit` face | feed post cards |
+| `.paddock-post` / `.thread-post` | ledger-leaf paper at feed/comment rhythm (retired `.leather-frame` — the white-block look) | feed posts, discussion threads |
 | `.workcard-stitched` | Parchment card with 1.5px dashed saddle inset (light stitch accent) | working cards |
 | `.text-engraved-light` | Light-on-leather embossed text (drop+highlight shadow) | leather titles |
 | `.btn-brass` | Brass button (primary CTA on leather) | Host a Show, Follow, etc. |
