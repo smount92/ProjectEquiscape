@@ -974,6 +974,9 @@ export async function bulkDeleteHorses(
         if (paths.length > 0) {
             await supabase.storage.from("horse-images").remove(paths);
         }
+        // The storage objects are gone — drop the rows too (mirrors
+        // deleteHorse), or the surviving rows serve dead image URLs.
+        await supabase.from("horse_images").delete().in("horse_id", horseIds);
     }
 
     // Stash each row's name for the Recently Deleted shelf BEFORE the scrub

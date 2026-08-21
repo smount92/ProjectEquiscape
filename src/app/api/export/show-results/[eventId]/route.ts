@@ -66,12 +66,17 @@ export async function GET(
         });
     }
 
-    // Batch-fetch horse names
+    // Batch-fetch horse names — admin client, so filter what RLS
+    // would (audit S2): horses that went private or were deleted
+    // after competing must not leak names into the CSV. Mirrors the
+    // hardened twin in actions/shows.ts.
     const horseIds = [...new Set((entries as { horse_id: string }[]).map(e => e.horse_id))];
     const { data: horses } = await admin
         .from("user_horses")
         .select("id, custom_name")
-        .in("id", horseIds);
+        .in("id", horseIds)
+        .in("visibility", ["public", "unlisted"])
+        .is("deleted_at", null);
     const horseNameMap = new Map<string, string>();
     (horses ?? []).forEach((h: { id: string; custom_name: string }) => horseNameMap.set(h.id, h.custom_name));
 
