@@ -84,7 +84,7 @@ export default async function MyReportsPage() {
                                 <Link href="/market/guide">Open the Blue Book →</Link>
                             </Button>
                             <Button asChild variant="outline" size="wide">
-                                <Link href="/settings">Insurance report in Settings →</Link>
+                                <Link href="/settings#insurance">Insurance report in Settings →</Link>
                             </Button>
                         </div>
                     </div>
@@ -176,7 +176,7 @@ export default async function MyReportsPage() {
                     </p>
                     <div className="mt-4">
                         <Button asChild variant="outline" size="wide">
-                            <Link href="/settings">Generate an insurance PDF →</Link>
+                            <Link href="/settings#insurance">Generate an insurance PDF →</Link>
                         </Button>
                     </div>
                 </div>
