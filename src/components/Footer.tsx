@@ -24,16 +24,17 @@ export default function Footer() {
                         {/* Show Ring lives at /community (matches the header nav —
                             this previously pointed at /discover by mistake). */}
                         <Link href="/community">Show Ring</Link>
-                        <Link href="/market">Price Guide</Link>
-                        <Link href="/studio">Art Studio</Link>
-                        <Link href="/shows">Photo Shows</Link>
+                        <Link href="/market">Market</Link>
+                        <Link href="/catalog">Registry</Link>
+                        <Link href="/shows">Shows</Link>
                         <Link href="/shows/rules">Showing Rules</Link>
+                        <Link href="/studio">Art Studio</Link>
                     </div>
                     <div className="flex flex-col gap-2 max-md:min-w-[120px] max-md:items-center max-md:text-center [&_a]:text-sm [&_a]:text-secondary-foreground [&_a]:no-underline [&_a]:transition-colors [&_a:hover]:text-forest">
-                        <h4 className="mb-1 text-xs font-bold tracking-wider text-secondary-foreground/70 uppercase">Community</h4>
-                        <Link href="/community/groups">Groups</Link>
+                        <h4 className="mb-1 text-xs font-bold tracking-wider text-secondary-foreground/70 uppercase">The Paddock</h4>
+                        <Link href="/feed">The Paddock</Link>
+                        <Link href="/community/groups">Barns</Link>
                         <Link href="/community/events">Events</Link>
-                        <Link href="/feed">Activity Feed</Link>
                         <Link href="/community/help-id">Help ID</Link>
                         <Link href="/learn/glossary">Showing Glossary</Link>
                         <Link href="/learn/enter-your-first-photo-show">Your First Photo Show</Link>

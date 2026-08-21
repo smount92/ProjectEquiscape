@@ -37,18 +37,21 @@ import {
 } from"lucide-react";
 import { Button } from "@/components/ui/button";
 
-// Priority-ordered nav links — highest priority first
+// Priority-ordered nav links — highest priority first. The first five
+// are THE five rooms (ratified): Stable · Registry · Shows · Market ·
+// The Paddock; the rest are rooms inside the Paddock and collapse
+// into "More" first as the viewport narrows.
 const NAV_LINKS = [
  { href:"/dashboard", label:"Stable", Icon: Home, id:"nav-stable" },
- { href:"/community", label:"Show Ring", Icon: Trophy, id:"nav-community" },
- { href:"/feed", label:"Feed", Icon: Newspaper, id:"nav-feed" },
- { href:"/discover", label:"Discover", Icon: Users, id:"nav-discover" },
  { href:"/shows", label:"Shows", Icon: Camera, id:"nav-shows" },
  { href:"/market", label:"Market", Icon: TrendingUp, id:"nav-market" },
- { href:"/community/groups", label:"Groups", Icon: Building2, id:"nav-groups" },
+ { href:"/feed", label:"The Paddock", Icon: Newspaper, id:"nav-feed" },
+ { href:"/catalog", label:"Registry", Icon: BookOpen, id:"nav-catalog" },
+ { href:"/community", label:"Show Ring", Icon: Trophy, id:"nav-community" },
+ { href:"/community/groups", label:"Barns", Icon: Building2, id:"nav-groups" },
  { href:"/community/events", label:"Events", Icon: Calendar, id:"nav-events" },
  { href:"/community/help-id", label:"Help ID", Icon: Search, id:"nav-helpid" },
- { href:"/catalog", label:"Catalog", Icon: BookOpen, id:"nav-catalog" },
+ { href:"/discover", label:"Discover", Icon: Users, id:"nav-discover" },
 ];
 
 // Dynamic link that depends on artist slug
@@ -581,7 +584,7 @@ export default function Header() {
  id="nav-feed-m"
  onClick={closeMobileMenu}
  >
- <Newspaper size={16} strokeWidth={1.5} /> Feed
+ <Newspaper size={16} strokeWidth={1.5} /> The Paddock
  </Link>
  <Link
  href="/shows"
@@ -613,7 +616,7 @@ export default function Header() {
  id="nav-groups-m"
  onClick={closeMobileMenu}
  >
- <Building2 size={16} strokeWidth={1.5} /> Groups
+ <Building2 size={16} strokeWidth={1.5} /> Barns
  </Link>
  <Link
  href="/community/events"
@@ -629,7 +632,7 @@ export default function Header() {
  id="nav-catalog-m"
  onClick={closeMobileMenu}
  >
- <BookOpen size={16} strokeWidth={1.5} /> Catalog
+ <BookOpen size={16} strokeWidth={1.5} /> Registry
  </Link>
  <Link
  href="/market"
@@ -637,7 +640,7 @@ export default function Header() {
  id="nav-market-m"
  onClick={closeMobileMenu}
  >
- <TrendingUp size={16} strokeWidth={1.5} /> Price Guide
+ <TrendingUp size={16} strokeWidth={1.5} /> Market
  </Link>
  <Link
  href="/wishlist"
@@ -751,7 +754,7 @@ export default function Header() {
  className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
  id="nav-catalog-public"
  >
- <BookOpen size={16} strokeWidth={1.5} /> Catalog
+ <BookOpen size={16} strokeWidth={1.5} /> Registry
  </Link>
  <Link
  href="/about"
@@ -784,7 +787,7 @@ export default function Header() {
  id="nav-catalog-public-m"
  onClick={closeMobileMenu}
  >
- <BookOpen size={16} strokeWidth={1.5} /> Catalog
+ <BookOpen size={16} strokeWidth={1.5} /> Registry
  </Link>
  <Link
  href="/about"
