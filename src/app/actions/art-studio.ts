@@ -2,9 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 
-import { requireAuth } from "@/lib/auth";
+import { requireAuth, getUserTier } from "@/lib/auth";
 import { logger } from "@/lib/logger";
 import { createClient } from "@/lib/supabase/server";
+import { getAdminClient } from "@/lib/supabase/admin";
 import { getStudioColumnSupport } from "@/lib/studio/columnSupport";
 import {
     ACTIVE_STATUSES,
@@ -1157,6 +1158,51 @@ export async function createCommission(data: {
  * A quote may be revised while it is still outstanding — the commissioner
  * has not agreed to anything yet, so nothing is being rewritten.
  */
+/**
+ * The free-tier workload cap (owner ruling 2026-08-21): a free studio
+ * carries up to THREE active commissions at once; Studio Pro is
+ * unlimited. "Active" = accepted through awaiting_approval (raw legacy
+ * spellings included) — requests and quotes queue freely, the cap bites
+ * when work is actually taken on. Enforced at both commitment points:
+ * the artist quoting (their commitment) and the commissioner accepting
+ * (which would put the work on the bench).
+ */
+const FREE_ACTIVE_COMMISSION_CAP = 3;
+const ACTIVE_WORKLOAD_STATUSES = [
+    "accepted",
+    "in_progress",
+    "awaiting_approval",
+    // legacy v1 spellings that normalize into the two above
+    "review",
+    "revision",
+];
+
+async function countActiveWorkload(artistUserId: string): Promise<number> {
+    // Admin client: the commissioner-side check must see the artist's
+    // whole bench, not just rows RLS shows the caller.
+    const admin = getAdminClient();
+    const { count } = await admin
+        .from("commissions")
+        .select("id", { count: "exact", head: true })
+        .eq("artist_id", artistUserId)
+        .in("status", ACTIVE_WORKLOAD_STATUSES);
+    return count ?? 0;
+}
+
+/** The artist's tier when the artist isn't the caller — app_metadata
+ *  is only reachable through the auth admin API. Fails open to
+ *  "studio" (never block a deal over a tier lookup hiccup). */
+async function artistTier(artistUserId: string): Promise<string> {
+    try {
+        const admin = getAdminClient();
+        const { data } = await admin.auth.admin.getUserById(artistUserId);
+        const tier = data.user?.app_metadata?.tier;
+        return tier === "studio" || tier === "pro" ? tier : "free";
+    } catch {
+        return "studio";
+    }
+}
+
 export async function sendQuote(
     commissionId: string,
     quote: {
@@ -1174,6 +1220,19 @@ export async function sendQuote(
 
     const check = canTransition(status, "quoted", party);
     if (!check.ok) return { success: false, error: check.error };
+
+    // Free-tier cap: quoting is the artist's commitment to take the
+    // work on if accepted — a full free bench can't extend new quotes.
+    const tier = await getUserTier();
+    if (tier !== "studio") {
+        const active = await countActiveWorkload(user.id);
+        if (active >= FREE_ACTIVE_COMMISSION_CAP) {
+            return {
+                success: false,
+                error: `Your bench is full — free studios carry ${FREE_ACTIVE_COMMISSION_CAP} active commissions at a time. Finish or deliver one, or upgrade to Studio Pro for an unlimited bench.`,
+            };
+        }
+    }
 
     const price = num(quote.price);
     if (price == null || price <= 0) {
@@ -1257,6 +1316,22 @@ export async function transitionCommission(
     const today = now.slice(0, 10);
 
     const patch: Patch = { status: to, last_update_at: now, updated_at: now };
+
+    if (to === "accepted") {
+        // Free-tier cap, commissioner side: accepting a quote puts the
+        // work on the artist's bench — a full free bench refuses with
+        // an honest explanation rather than overbooking the artist.
+        const tier = await artistTier(row.artist_id as string);
+        if (tier !== "studio") {
+            const active = await countActiveWorkload(row.artist_id as string);
+            if (active >= FREE_ACTIVE_COMMISSION_CAP) {
+                return {
+                    success: false,
+                    error: "This studio's bench is full (free studios carry 3 active commissions at a time). The artist needs to finish a piece — or upgrade to Studio Pro — before this one can be accepted.",
+                };
+            }
+        }
+    }
 
     if (to === "accepted") {
         // FREEZE THE AGREEMENT. The artist's terms as they stand right now

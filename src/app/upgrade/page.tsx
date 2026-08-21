@@ -107,14 +107,10 @@ const PRO_FEATURES: { icon: LucideIcon; title: string; description: string }[] =
 
 const STUDIO_FEATURES: { icon: LucideIcon; title: string; description: string }[] = [
     {
-        icon: Palette,
-        title: "Artist Profile & Portfolio",
-        description: "Public portfolio page showcasing your work and commission availability",
-    },
-    {
         icon: ClipboardList,
-        title: "Commission Queue Manager",
-        description: "Track commissions from inquiry to delivery with status workflows",
+        title: "Unlimited Commission Bench",
+        description:
+            "Every studio is free to open, with up to 3 active commissions at a time — Studio Pro removes the cap entirely",
     },
     {
         icon: Camera,
@@ -185,9 +181,10 @@ const TIER_MATRIX: {
         group: "Studio tools",
         note: "For the artists who make the horses everyone else collects.",
         rows: [
-            { feature: "Public artist profile & portfolio", free: false, pro: false, studio: true },
-            { feature: "Commission queue manager", free: false, pro: false, studio: true },
-            { feature: "WIP photo portal for clients", free: false, pro: false, studio: true },
+            { feature: "Public artist profile & portfolio", free: true, pro: true, studio: true },
+            { feature: "Commission queue manager (3 active free)", free: true, pro: true, studio: true },
+            { feature: "Unlimited active commissions", free: false, pro: false, studio: true },
+            { feature: "WIP photo portal for clients", free: true, pro: true, studio: true },
             { feature: "Hoofprint artist credit on every custom", free: false, pro: false, studio: true },
         ],
     },
@@ -552,7 +549,7 @@ export default async function UpgradePage({
                     <div className="ledger-card">
                         <h3 className="font-serif font-bold">What&apos;s the difference between Pro and Studio Pro?</h3>
                         <p className="mt-1 text-sm text-secondary-foreground">
-                            Pro is for collectors — sales-history charts, extra detail photos, market-valued insurance reports and the monthly Stablemaster ledger. Studio Pro includes all of that and adds artist tools: commission management, WIP portals, and permanent Hoofprint credit on every custom you create.
+                            Pro is for collectors — sales-history charts, extra detail photos, market-valued insurance reports and the monthly Stablemaster ledger. Studio Pro includes all of that and lifts the studio bench cap: every studio is free to open and carries up to three active commissions, Studio Pro carries as many as you can paint.
                         </p>
                     </div>
                     {supporterPriceLabel && (

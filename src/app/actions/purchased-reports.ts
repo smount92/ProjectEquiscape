@@ -8,7 +8,8 @@ import { catalogDisplayName } from "@/lib/catalog/displayName";
  * writer.
  *
  * A collector can buy a one-off Insurance Report for a single horse
- * ($1.99, `/api/checkout/insurance-report`); the Stripe webhook writes a
+ * ($1.99 — checkout route RETIRED 2026-08-21, owner decision: the
+ * whole-stable insurance PDF in Settings is free); the Stripe webhook kept its
  * row into `purchased_reports`. Until now nothing in the app ever read
  * that table back, so a paid purchase left no trace the buyer could see
  * — the audit's "reports you paid for have no page".
