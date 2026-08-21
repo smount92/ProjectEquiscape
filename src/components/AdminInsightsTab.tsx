@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
     getAdminInsights,
+    getRevenueInsights,
     type ActivityDay,
     type AdminInsights,
+    type RevenueInsights,
     type TopObject,
 } from "@/app/actions/admin-insights";
 import { ENTITY_LABELS, ENTITY_TYPES, type EntityType } from "@/lib/metrics/entities";
@@ -41,6 +43,100 @@ function Stat({ value, label, sub }: { value: string; label: string; sub?: strin
                 {label}
             </div>
             {sub && <div className="text-muted-foreground mt-0.5 text-xs">{sub}</div>}
+        </div>
+    );
+}
+
+/** Whole dollars and cents, because MRR at this scale is a two-figure number. */
+function money(n: number): string {
+    return `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+/**
+ * The revenue band — the four numbers docs/BUSINESS_MODEL_2026.md opens
+ * by saying the schema cannot answer.
+ *
+ * Self-fetching and separately schema-gated from the rest of this tab:
+ * migrations 175 and 176 land independently, so "the view rollups are
+ * live" and "the revenue mirror is live" are two different facts and
+ * each renders its own "—".
+ *
+ * Every caveat is ON the card rather than in a doc. An MRR figure that
+ * quietly counts six-months-free beta subscribers at list price is worse
+ * than no MRR figure, because someone will plan against it.
+ */
+function RevenueBand() {
+    const [data, setData] = useState<RevenueInsights | null>(null);
+    const [failed, setFailed] = useState(false);
+
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            const result = await getRevenueInsights();
+            if (cancelled) return;
+            if (result.success) setData(result.insights);
+            else setFailed(true);
+        })();
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
+    const ready = !!data?.schemaReady;
+    const pro = data?.revenue.tiers.find((t) => t.tier === "pro") ?? null;
+    const studio = data?.revenue.tiers.find((t) => t.tier === "studio") ?? null;
+
+    return (
+        <div>
+            <h3 className="mt-0 mb-2 flex flex-wrap items-baseline gap-2 text-base font-bold">
+                💰 Revenue &amp; reach
+                {!ready && (
+                    <span className="text-muted-foreground text-xs font-normal">
+                        {failed
+                            ? "could not be read this load"
+                            : "waiting on migration 176 — paste supabase/migrations/176_revenue_measurability.sql"}
+                    </span>
+                )}
+            </h3>
+            <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(150px,1fr))]">
+                <Stat
+                    value={ready ? money(data!.revenue.mrr) : "—"}
+                    label="Net MRR"
+                    sub="After Stripe fees · list price, not cash"
+                />
+                <Stat
+                    value={ready ? fmt(pro?.paying ?? 0) : "—"}
+                    label="🐴 Pro subscribers"
+                    sub="$4.555 net each"
+                />
+                <Stat
+                    value={ready ? fmt(studio?.paying ?? 0) : "—"}
+                    label="🎨 Studio subscribers"
+                    sub="$9.41 net each"
+                />
+                <Stat
+                    value={ready ? fmt(data!.revenue.atRiskTotal) : "—"}
+                    label="Payment failing"
+                    sub="Stripe still retrying"
+                />
+                <Stat
+                    value={ready ? fmt(data!.revenue.lapsedTotal) : "—"}
+                    label="Lapsed"
+                    sub="Paid once, not paying now"
+                />
+                <Stat
+                    value={ready ? fmt(data!.activeMembers) : "—"}
+                    label={`${data?.mauDays ?? 30}-day active members`}
+                    sub="Exact MAU, not an estimate"
+                />
+            </div>
+            <p className="text-muted-foreground mt-2 mb-0 text-xs">
+                MRR is subscriber count × net price — what the subscriptions are worth, not what
+                cleared. Beta members redeeming the six-months-free promo code show as active and
+                contribute $0 until it expires. Supporters are not counted here at all: it is not a
+                tier and its price lives only in Stripe. Active members means &quot;viewed at least
+                one tracked page&quot; — a member who only read their dashboard is not in it.
+            </p>
         </div>
     );
 }
@@ -210,21 +306,27 @@ export default function AdminInsightsTab() {
 
     if (error || !insights) {
         return (
-            <div className="border-input bg-card rounded-lg border px-8 py-12 text-center">
-                <div className="mb-3 text-4xl">📈</div>
-                <h2 className="m-0 text-base font-bold">Insights unavailable</h2>
-                <p className="text-muted-foreground m-0 mt-1 text-sm">
-                    {error ?? "The rollups could not be read this load."} Nothing is broken by
-                    this — it is a read-only view.
-                </p>
-                {vercelLink}
+            <div className="flex flex-col gap-6">
+                {/* The revenue reader is independent of the view rollups —
+                    one failing says nothing about the other. */}
+                <RevenueBand />
+                <div className="border-input bg-card rounded-lg border px-8 py-12 text-center">
+                    <div className="mb-3 text-4xl">📈</div>
+                    <h2 className="m-0 text-base font-bold">Insights unavailable</h2>
+                    <p className="text-muted-foreground m-0 mt-1 text-sm">
+                        {error ?? "The rollups could not be read this load."} Nothing is broken by
+                        this — it is a read-only view.
+                    </p>
+                    {vercelLink}
+                </div>
             </div>
         );
     }
 
     if (!insights.schemaReady) {
         return (
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-6">
+                <RevenueBand />
                 <div className="border-input bg-card rounded-lg border px-8 py-12 text-center">
                     <div className="mb-3 text-4xl">📈</div>
                     <h2 className="m-0 text-base font-bold">Waiting on migration 175</h2>
@@ -258,6 +360,9 @@ export default function AdminInsightsTab() {
 
     return (
         <div className="flex flex-col gap-6">
+            {/* Band 0 — what the place earns, and who is actually here */}
+            <RevenueBand />
+
             {/* Band 1 — how busy is the place */}
             <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(150px,1fr))]">
                 <Stat value={fmt(today?.memberDau ?? 0)} label="Members today" sub="UTC day" />

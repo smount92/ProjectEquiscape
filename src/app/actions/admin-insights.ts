@@ -22,6 +22,12 @@ import { requireAdmin } from "@/lib/auth";
 import { isMissingMetricsSchema, metricsDb } from "@/lib/metrics/db";
 import { ENTITY_TYPES, type EntityType } from "@/lib/metrics/entities";
 import { entityKey, resolveEntityNames, type ResolvedEntity } from "@/lib/metrics/resolve";
+import {
+    computeRevenue,
+    isMissingRevenueSchema,
+    type RevenueSummary,
+    type SubscriptionCount,
+} from "@/lib/metrics/revenue";
 
 /** Days of DAU history the chart shows. */
 const SERIES_DAYS = 14;
@@ -189,6 +195,90 @@ export async function getAdminInsights(): Promise<
                 schemaReady: true,
                 windowDays: WINDOW_DAYS,
                 seriesDays: SERIES_DAYS,
+            },
+        };
+    } catch (err) {
+        return { success: false, error: err instanceof Error ? err.message : String(err) };
+    }
+}
+
+// ============================================================
+// Revenue (migration 176)
+// ============================================================
+//
+// A separate action from getAdminInsights, and separately schema-gated,
+// because the two migrations land independently: the owner pastes SQL by
+// hand, so 175 may be live while 176 is not, or the reverse. Folding
+// these numbers into AdminInsights would have hidden them behind that
+// tab's "waiting on migration 175" early return.
+//
+// Everything here is an aggregate. metrics_subscription_summary returns
+// (tier, status, count) and metrics_active_members returns one integer —
+// neither can name a member, which is the same posture the object
+// leaderboards take.
+
+/** Days of presence that count as "monthly active". */
+const MAU_DAYS = 30;
+
+export interface RevenueInsights {
+    revenue: RevenueSummary;
+    /** Distinct members with a last_seen_on inside the window. */
+    activeMembers: number;
+    mauDays: number;
+    /** True when 176 is live. False means every number above is empty. */
+    schemaReady: boolean;
+}
+
+const EMPTY_REVENUE: RevenueInsights = {
+    revenue: computeRevenue([]),
+    activeMembers: 0,
+    mauDays: MAU_DAYS,
+    schemaReady: false,
+};
+
+export async function getRevenueInsights(): Promise<
+    { success: true; insights: RevenueInsights } | { success: false; error: string }
+> {
+    try {
+        await requireAdmin();
+    } catch {
+        return { success: false, error: "Unauthorized" };
+    }
+
+    try {
+        const admin = metricsDb(serviceClient());
+
+        const [subsRes, mauRes] = await Promise.all([
+            admin.rpc("metrics_subscription_summary"),
+            admin.rpc("metrics_active_members", { p_days: MAU_DAYS }),
+        ]);
+
+        // Either function missing means 176 is not in yet — a "—", not
+        // a failure. Same convention as the metrics tab above.
+        if (isMissingRevenueSchema(subsRes.error) || isMissingRevenueSchema(mauRes.error)) {
+            return { success: true, insights: EMPTY_REVENUE };
+        }
+
+        const firstError = subsRes.error || mauRes.error;
+        if (firstError) {
+            return { success: false, error: firstError.message };
+        }
+
+        const rows: SubscriptionCount[] = ((subsRes.data ?? []) as Record<string, unknown>[]).map(
+            (r) => ({
+                tier: String(r.tier ?? ""),
+                status: String(r.status ?? ""),
+                subscribers: num(r.subscribers),
+            }),
+        );
+
+        return {
+            success: true,
+            insights: {
+                revenue: computeRevenue(rows),
+                activeMembers: num(mauRes.data),
+                mauDays: MAU_DAYS,
+                schemaReady: true,
             },
         };
     } catch (err) {
