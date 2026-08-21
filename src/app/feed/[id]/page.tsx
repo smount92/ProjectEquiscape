@@ -3,8 +3,11 @@ import { redirect, notFound } from"next/navigation";
 import Link from"next/link";
 import RichText from"@/components/RichText";
 import LikeToggle from"@/components/LikeToggle";
-import { togglePostLike } from"@/app/actions/posts";
+import { togglePostLike, getFeedPost } from"@/app/actions/posts";
+import { resolveAvatarUrls } from"@/lib/utils/avatars.server";
+import FeedPostPermalink from"@/components/feed/FeedPostPermalink";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import { Button } from "@/components/ui/button";
 import PageMasthead from "@/components/layouts/PageMasthead";
 
 
@@ -63,6 +66,45 @@ export default async function FeedPostPage({ params }: { params: Promise<{ id: s
  data: { user },
  } = await supabase.auth.getUser();
  if (!user) redirect("/login");
+
+ // Posts render the SAME interactive card the feed uses — replies,
+ // likes, media, mentions — so a banner link lands somewhere people
+ // can actually comment. Legacy activity rows keep the read-only
+ // fallback below.
+ const hydrated = await getFeedPost(id).catch(() => null);
+ if (hydrated) {
+ const { data: me } = await supabase
+ .from("users")
+ .select("alias_name, avatar_url")
+ .eq("id", user.id)
+ .maybeSingle();
+ const viewer = me as { alias_name: string; avatar_url: string | null } | null;
+ let viewerAvatar = viewer?.avatar_url ?? null;
+ if (viewerAvatar) {
+ const avatarMap = await resolveAvatarUrls([viewerAvatar]);
+ viewerAvatar = avatarMap.get(viewerAvatar) || viewerAvatar;
+ }
+ return (
+  <ExplorerLayout title="Post" description="View and join the conversation.">
+ <div className="mx-auto max-w-6xl px-6 max-w-[640px]">
+ <Button asChild variant="outline" size="wide"><Link
+ href="/feed"
+ >
+ ← Back to The Paddock
+ </Link></Button>
+
+ <FeedPostPermalink
+ item={hydrated.item}
+ knownAliases={hydrated.knownAliases}
+ currentUserId={user.id}
+ currentUserAlias={viewer?.alias_name ?? "You"}
+ currentUserAvatar={viewerAvatar}
+ viewerIsAdmin={user.email?.toLowerCase() === process.env.ADMIN_EMAIL?.toLowerCase()}
+ />
+ </div>
+ </ExplorerLayout>
+ );
+ }
 
  const { data: post } = await supabase
  .from("posts")

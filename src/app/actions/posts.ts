@@ -1292,3 +1292,56 @@ export async function searchAliases(
         return [];
     }
 }
+
+/**
+ * One post, hydrated exactly like a feed page item — the permalink
+ * page renders the same interactive card the feed does (replies,
+ * likes, media, mentions) instead of a read-only copy. Returns null
+ * for replies, blocked authors, and rows RLS hides; the permalink
+ * page falls back to its legacy/notFound handling.
+ */
+export async function getFeedPost(
+    postId: string,
+): Promise<{ item: FeedStreamItem; knownAliases: string[] } | null> {
+    const { supabase, user } = await requireAuth();
+
+    const support = await getPostColumnSupport(supabase);
+    let selectColumns = FEED_POST_COLUMNS;
+    if (support.kind) selectColumns += ", kind";
+    if (support.visibility) selectColumns += ", visibility";
+
+    const { data: row } = await supabase
+        .from("posts")
+        .select(selectColumns)
+        .eq("id", postId)
+        .maybeSingle();
+    if (!row) return null;
+    const post = row as unknown as Record<string, unknown>;
+    if (post.parent_id) return null;
+
+    const { data: myBlocks } = await supabase
+        .from("user_blocks")
+        .select("blocked_id")
+        .eq("blocker_id", user.id);
+    const blockedIds = new Set((myBlocks ?? []).map((b: { blocked_id: string }) => b.blocked_id));
+    if (blockedIds.has(post.author_id as string)) return null;
+
+    const [items, knownAliases] = await Promise.all([
+        hydratePostItems(supabase, user.id, [post], blockedIds),
+        resolvePageAliases([(post.content as string) || ""]),
+    ]);
+    const item = items[0];
+    if (!item) return null;
+
+    if (item.authorAvatarUrl) {
+        const avatarMap = await resolveAvatarUrls([item.authorAvatarUrl]);
+        item.authorAvatarUrl = avatarMap.get(item.authorAvatarUrl) || item.authorAvatarUrl;
+    }
+    for (const reply of item.replies) {
+        if (reply.authorAvatarUrl) {
+            const avatarMap = await resolveAvatarUrls([reply.authorAvatarUrl]);
+            reply.authorAvatarUrl = avatarMap.get(reply.authorAvatarUrl) || reply.authorAvatarUrl;
+        }
+    }
+    return { item, knownAliases };
+}
