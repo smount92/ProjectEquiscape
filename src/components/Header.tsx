@@ -19,6 +19,7 @@ import {
  Search,
  Building2,
  Calendar,
+ CalendarDays,
  TrendingUp,
  Package,
  Settings,
@@ -50,6 +51,7 @@ const NAV_LINKS = [
  { href:"/community", label:"Show Ring", Icon: Trophy, id:"nav-community" },
  { href:"/community/groups", label:"Barns", Icon: Building2, id:"nav-groups" },
  { href:"/community/events", label:"Events", Icon: Calendar, id:"nav-events" },
+ { href:"/calendar", label:"Calendar", Icon: CalendarDays, id:"nav-calendar" },
  { href:"/community/help-id", label:"Help ID", Icon: Search, id:"nav-helpid" },
  { href:"/discover", label:"Members", Icon: Users, id:"nav-discover" },
 ];
@@ -630,6 +632,14 @@ export default function Header() {
  onClick={closeMobileMenu}
  >
  <Calendar size={16} strokeWidth={1.5} /> Events
+ </Link>
+ <Link
+ href="/calendar"
+ className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+ id="nav-calendar-m"
+ onClick={closeMobileMenu}
+ >
+ <CalendarDays size={16} strokeWidth={1.5} /> Calendar
  </Link>
  <Link
  href="/catalog"

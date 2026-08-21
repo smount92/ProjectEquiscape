@@ -37,9 +37,16 @@ export default async function EventsPage() {
                     title="Events"
                     subtitle="Out in the hobby — shows, meetups, club days"
                     actions={
-                        <Button asChild>
-                            <Link href="/community/events/create">+ Post Event</Link>
-                        </Button>
+                        <>
+                            {/* The board is what the hobby is doing off-platform;
+                                the calendar is everything dated in one place. */}
+                            <Button asChild variant="outline">
+                                <Link href="/calendar">🗓️ Full calendar →</Link>
+                            </Button>
+                            <Button asChild>
+                                <Link href="/community/events/create">+ Post Event</Link>
+                            </Button>
+                        </>
                     }
                 />
                 <EventsIndex upcoming={upcoming} past={past} />

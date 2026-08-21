@@ -1,4 +1,20 @@
 import Link from "next/link";
+import { Facebook, Instagram } from "lucide-react";
+
+/** The house's official accounts. Quiet icon links, never a call to
+ *  action — the footer points at them, it doesn't sell them. */
+const SOCIALS = [
+    {
+        href: "https://www.facebook.com/profile.php?id=61584897216932",
+        label: "Model Horse Hub on Facebook",
+        Icon: Facebook,
+    },
+    {
+        href: "https://www.instagram.com/modelhorsehub/",
+        label: "Model Horse Hub on Instagram",
+        Icon: Instagram,
+    },
+] as const;
 
 export default function Footer() {
     const currentYear = new Date().getFullYear();
@@ -27,6 +43,7 @@ export default function Footer() {
                         <Link href="/market">Market</Link>
                         <Link href="/catalog">Registry</Link>
                         <Link href="/shows">Shows</Link>
+                        <Link href="/calendar">Calendar</Link>
                         <Link href="/shows/rules">Showing Rules</Link>
                         <Link href="/studio">Art Studio</Link>
                     </div>
@@ -53,6 +70,20 @@ export default function Footer() {
             <div className="mx-auto flex max-w-[var(--max-width)] items-center justify-between border-t border-[rgba(232,200,120,0.25)] py-6 text-xs text-secondary-foreground max-md:flex-col max-md:gap-2 max-md:text-center">
                 <span>© {currentYear} Model Horse Hub. All rights reserved.</span>
                 <span className="flex items-center gap-1 [&_a]:text-secondary-foreground [&_a]:no-underline [&_a]:transition-colors [&_a:hover]:text-forest">
+                    {SOCIALS.map(({ href, label, Icon }) => (
+                        <a
+                            key={href}
+                            href={href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label={label}
+                            title={label}
+                            className="inline-flex h-6 w-6 items-center justify-center"
+                        >
+                            <Icon size={15} strokeWidth={1.5} aria-hidden="true" />
+                        </a>
+                    ))}
+                    <span className="opacity-40">·</span>
                     <Link href="/privacy">Privacy</Link>
                     <span className="opacity-40">·</span>
                     <Link href="/terms">Terms</Link>
