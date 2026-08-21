@@ -1,8 +1,29 @@
 # Model Horse Hub — Design Language ("Leather Edition")
 
 The authoritative reference for the site's visual language, shipped July
-2026. Any new page, component, or agent MUST follow this. All class names
-and token values below are real — verified against `src/app/globals.css`.
+2026 and current through the August 2026 launch release. Any new page,
+component, or agent MUST follow this. All class names and token values
+below are real — verified against `src/app/globals.css`.
+
+---
+
+## 0. The five rooms
+
+The site is five rooms, and `Header.tsx` enforces it with a hard
+`Math.min(visibleCount, 5)`: the bar shows **Stable · Shows · Market ·
+The Paddock · Registry** at any screen width, and the ResizeObserver may
+only shrink it *below* five on narrow viewports, never grow past.
+Everything else — Art Studio, Show Ring, Barns, Events, Help ID, Members
+— lives under **More**.
+
+This is a design rule, not an implementation detail. A sixth room does
+not get added to the bar; it goes under More, or it displaces one.
+
+**Say the room name, not the route.** `/catalog` is the *Registry*.
+`/feed` is *The Paddock*. `/community` is the *Show Ring* (which lives
+inside the Paddock). Groups are *Barns*. `/discover` is *Members*. The
+routes were never renamed — only the words the reader sees. Copy that
+says "the catalog" or "your groups" is wrong even though the URL says so.
 
 ---
 
@@ -89,12 +110,27 @@ utilities (`bg-card`, `text-foreground`, `border-input`, `text-forest`…).
 | `.ledger-tile` | Stat tile with double-forest left border | KPI/stat rows |
 | `.stamp` / `.stamp-red` | Rubber-stamp status chip (rotated, noise-masked) | statuses, placings |
 | `.stats-strap` | Green webbing stat bar with engraved brass numerals | profile stats |
-| `.paddock-post` / `.thread-post` | ledger-leaf paper at feed/comment rhythm (retired `.leather-frame` — the white-block look) | feed posts, discussion threads |
+| `.paddock-post` / `.thread-post` | ledger leaf at feed / comment rhythm. Both are `.ledger-card` plus tighter padding that clears the 30px margin gutter | The Paddock stream, `UniversalFeed` threads |
+| `.paddock-post-system` / `.thread-post-pinned` | Brass down the fore-edge and across the head — the platform speaking (show results) or a pinned post | announcements, pinned threads |
 | `.workcard-stitched` | Parchment card with 1.5px dashed saddle inset (light stitch accent) | working cards |
 | `.text-engraved-light` | Light-on-leather embossed text (drop+highlight shadow) | leather titles |
 | `.btn-brass` | Brass button (primary CTA on leather) | Host a Show, Follow, etc. |
 | `.btn-ghostleather` | Outline "ghost" button on leather (thread border, light text) | secondary leather actions |
 | `.leather-icon-btn`, `.leather-nav-link`, `.leather-menu`, `.leather-footer` | Header/footer leather chrome pieces | Header.tsx, Footer.tsx |
+
+### Ledger leaf — the one post surface
+
+A post on The Paddock, a comment on a passport, a reply on a barn's
+notice board and a thread on an event page are all **the same kind of
+thing**, so they all wear the same paper: `.ledger-card` plus
+`.paddock-post` or `.thread-post`.
+
+**`.leather-frame` and `.feed-leather` are RETIRED** — do not
+reintroduce them. They rendered a cream face inside a 6px leather
+border, which on the site's parchment pages read as white blocks
+floating in a brown mat. That is the look the owner rejected on `/feed`.
+Neither class exists in `globals.css` any more; only a comment marking
+the grave.
 
 ### The masthead pattern (copy this for any new landmark header)
 `ShowRingMasthead.tsx`, `StableMasthead.tsx`, `GroupMasthead.tsx` are the
@@ -125,12 +161,26 @@ green ledger ruling, embered red margin. Cream objects (polaroids, post
 frames, plaques via `--paper-lit`) stay lit.
 
 Implementation: one `html[data-theme="night"]` block redefines the ~18
-semantic tokens + ledger night variants (66 night rules in globals.css).
-Because everything routes through tokens, **any surface using `bg-card`,
-`text-foreground`, `.ledger-paper`, etc. flips automatically**. The toggle
-is a brass disc in the Header (`ThemeToggle.tsx`), persisted to
+semantic tokens + ledger night variants. Because everything routes
+through tokens, **any surface using `bg-card`, `text-foreground`,
+`.ledger-paper`, etc. flips automatically**. The toggle is a brass disc
+in the Header (`ThemeToggle.tsx`), persisted to
 `localStorage("mhh-theme")`, stamped pre-paint by an inline script in
 `layout.tsx` (no flash).
+
+### House rule (owner, 2026-08-21): night paper is PLAIN
+
+**In Lamplight there is NO green ruling and NO red margin line behind
+text.** Ruled paper is a day-mode material; at night it costs legibility
+and buys nothing. The night `.ledger-card` override already strips both,
+so a new post-style class should paint **no background of its own** and
+inherit whichever paper the theme chose — that is exactly why
+`.thread-post` defines only padding.
+
+If a class *must* repaint (because it adds a brass edge, like
+`.paddock-post-system` and `.thread-post-pinned`), it needs its own
+matching `html[data-theme="night"]` rule that keeps the brass and drops
+the ruling. No exceptions: a ruled dark card is the bug.
 
 ## 6. Simple Mode (`[data-simple-mode="true"]`) — accessibility
 
@@ -163,10 +213,19 @@ usable — never encode meaning in texture alone.
 
 ---
 
-## 8. Known design debt (July 2026 — being cleaned up)
+## 8. Known design debt (as of August 2026)
 
-Older, pre-leather surfaces still carry violations: the **settings** page
-(raw `#ef4444`, duplicate `<h1>`, ad-hoc cards, no `.ledger-card`), the
-**admin** console (raw hex, no leather/ledger language at all — reads as
-plain shadcn), and the **catalog-suggestion** surfaces (`bg-white`,
-hardcoded hex). See the current work-orders doc for the cleanup batch.
+The July batch is **done**: settings was rebuilt into ledger sections,
+the admin console was given a shape (pulse strip + tabs), and neither
+page carries raw hex any more. The catalog-suggestion surfaces were
+swept in the same pass.
+
+What remains is small and mostly deliberate — about 18 `bg-white` /
+`bg-stone-*` / `text-stone-*` occurrences across five files
+(`AnnouncementBar`, `BlueBookProCharts`, `ExpertJudgingPanel`,
+`Header`, `PhotoLightbox`), some of which are legitimate (white ink on
+the lightbox's black overlay), and ~37 arbitrary-hex utilities. Before
+"fixing" one, check whether it is a fixed-material surface that
+deliberately does not flip — see the `--paper-lit` constants in §2.
+
+The rule for **new** code is unchanged and absolute: tokens only.

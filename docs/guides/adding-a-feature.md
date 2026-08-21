@@ -69,6 +69,55 @@ CREATE INDEX IF NOT EXISTS idx_my_feature_user_id ON my_feature(user_id);
 
 See [Adding a Migration](adding-a-migration.md) for the full guide.
 
+### 2a. Feature-detect the schema
+
+Migrations are **pasted by hand** by the owner, which means your app code will be deployed and
+running against a database that does not have the new columns yet. Every read and write path for
+a new migration must work on **both** shapes of the schema — the old one behaving exactly as it
+does today, the new one lighting up the feature.
+
+Probe once per process, memoise behind a short TTL, and degrade rather than throw:
+
+```typescript
+// src/lib/<domain>/columnSupport.ts
+const TTL_MS = 60_000;   // after the paste, a running instance picks it up
+                         // within a minute rather than needing a redeploy
+
+export async function getColumnSupport(supabase: SupabaseClient) {
+    if (cached && Date.now() - cachedAt < TTL_MS) return cached;
+    try {
+        const [kinds, participants] = await Promise.all([
+            supabase.from("messages").select("kind").limit(1),
+            supabase.from("conversation_participants").select("conversation_id").limit(1),
+        ]);
+        cached = { messageKinds: !kinds.error, participants: !participants.error };
+    } catch {
+        // Never let a probe failure take the surface down —
+        // "columns absent" is the always-safe shape.
+        cached = NONE;
+    }
+    cachedAt = Date.now();
+    return cached;
+}
+```
+
+| Symptom | PostgREST code |
+|---|---|
+| Column does not exist | `42703` |
+| Relation/table does not exist | `42P01` |
+| Function does not exist | `42883` |
+
+Rules:
+
+- **Absent is the safe shape.** A missing panel is fine; a thrown error on the inbox is not.
+- **Hide, don't half-render.** Pre-migration, the terms panel and the payment ledger are absent
+  rather than broken, and the metrics cards read "—".
+- **TypeScript doesn't know yet either.** The generated types are regenerated only *after* the
+  paste, so call sites use a narrow untyped escape hatch (`dealDb(client)`, `barnDb`,
+  `metricsDb`) and every one of them handles the missing-schema codes above.
+- Reference implementations: `src/lib/deals/columnSupport.ts`, `src/lib/studio/columnSupport.ts`,
+  `src/lib/feed/columnSupport.ts`, `src/lib/metrics/db.ts`.
+
 ### 3. Update TypeScript Types
 
 After creating a migration, regenerate the TypeScript types:
@@ -134,10 +183,13 @@ export async function getMyFeatures() {
 ```
 
 **Key rules:**
+- Validate with **zod first**, before `requireAuth()` and before any side effect (Iron Law 7)
 - Always use `requireAuth()` for mutations
 - Always return `{ success, error?, data? }`
 - Use `revalidatePath()` after mutations
 - Put notifications/events in `after()` blocks
+- Keep the action thin — business logic belongs in a pure, tested `src/lib/<domain>/` module that
+  both the action (to enforce) and the UI (to render available moves) import, so they cannot drift
 - **Never** use `as unknown as` casts on query results — let TypeScript infer types from the typed Supabase client
 - For nullable fields, coerce with `?? "default"` when passing to components
 
@@ -264,14 +316,19 @@ npm run test:e2e
 
 - [ ] Migration has RLS policies on all new tables
 - [ ] Migration has indexes on FK columns
+- [ ] Migration is re-runnable, and any guard trigger bypasses the service context
+- [ ] **Every path feature-detects** — the feature is absent, not broken, before the paste
 - [ ] Ran `npm run gen-types` to regenerate TypeScript types
-- [ ] Server actions use `requireAuth()` for mutations
+- [ ] Server actions validate with zod before `requireAuth()`
 - [ ] Server actions return `{ success, error?, data? }`
+- [ ] Business logic lives in `src/lib/<domain>/` with unit tests, not inline in the action
 - [ ] No `as unknown as` casts on Supabase query results
 - [ ] Nullable fields coerced with `?? default` when needed
 - [ ] `revalidatePath()` called after mutations
 - [ ] Side effects in `after()` blocks
-- [ ] Uses Tailwind utility classes (not new CSS Module files)
+- [ ] Semantic tokens only — no raw hex, no `bg-white`, no `stone-*`
+- [ ] **Lamplight and Simple Mode both work** (and night paper carries no ruling)
+- [ ] Copy uses the room names — Registry, The Paddock, Show Ring, Barns, Members
 - [ ] Build passes (`npm run build`)
 - [ ] No sensitive data exposed in public-facing pages
 

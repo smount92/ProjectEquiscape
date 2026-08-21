@@ -4,16 +4,22 @@ All database changes go through SQL migration files in `supabase/migrations/`.
 
 ## Creating a Migration
 
+> **Migrations are files only.** The owner pastes them into the Supabase SQL Editor personally —
+> nobody runs `supabase db push`. Two consequences shape everything below: the whole file must be
+> **re-runnable** (a half-applied paste has to be fixable by pasting the same file again), and
+> the app must **feature-detect** so it works both before and after the paste. See
+> [Adding a Feature](adding-a-feature.md#feature-detect-the-schema).
+
 ### 1. Choose the Next Number
 
-Check the latest migration file in `supabase/migrations/`. As of July 2026, the latest is `128_catalog_material_facet.sql`, so the next number is **129**.
+Check the latest migration file in `supabase/migrations/`. As of the August 2026 launch release the latest is `175_object_metrics.sql`, so the next number is **176**.
 
-> **Note:** Numbers 045, 047, 049, and 051 are intentionally skipped (consolidated into adjacent migrations during early development).
+> **Note:** Numbers 045, 047, 049 and 051 were consolidated into adjacent migrations during early development, and **174 is an intentional gap** — no such file exists and none should be written.
 
 ### 2. Create the File
 
 ```
-supabase/migrations/129_your_feature_name.sql
+supabase/migrations/176_your_feature_name.sql
 ```
 
 **Naming conventions:**
@@ -86,6 +92,56 @@ CREATE INDEX IF NOT EXISTS idx_my_new_table_user_id ON my_new_table(user_id);
 | Don't hard-code user IDs | Use `(SELECT auth.uid())` |
 | Don't skip FK indexes | Causes slow JOINs under load |
 | Don't modify old migration files | Always create a new migration |
+| Don't write a guard trigger without the service-context bypass | The migration's own backfill will trip it — see below |
+| Don't edit migration SQL with a plain-string `String.replace()` | It silently mangles `$$` dollar quotes — see below |
+| Don't trust a CHECK constraint you didn't read | Two shipped features wrote values their column's CHECK forbade (079 → 172), and a matview joined on a status the CHECK made impossible (101 → 169) |
+
+## Two Ways a Paste Fails
+
+Both of these cost a hotfix on migration 173. They are not hypothetical.
+
+### Guard triggers must bypass the service context
+
+A `BEFORE UPDATE` trigger enforcing per-user rules will fire on **the migration's own backfill**.
+The SQL Editor has no user session, so `auth.uid()` is NULL, the "you cannot edit someone else's
+row" branch raises, and the paste aborts halfway through.
+
+```sql
+CREATE OR REPLACE FUNCTION public.my_guard()
+RETURNS TRIGGER LANGUAGE plpgsql SECURITY INVOKER SET search_path = public
+AS $$
+BEGIN
+  -- Service context (SQL editor, service role, crons): no user session,
+  -- so the per-user rules below do not apply — this is how the migration
+  -- backfill itself runs. RLS keeps clients out.
+  IF (SELECT auth.uid()) IS NULL THEN RETURN NEW; END IF;
+
+  -- ... per-user rules ...
+  RETURN NEW;
+END;
+$$;
+```
+
+That context is the SQL Editor, the service role and crons — trusted server code that RLS already
+distinguishes from clients. The alternative is to order the file so every backfill runs *before*
+the triggers are created, but the bypass is more robust because the file stays re-runnable.
+
+### `String.replace()` eats dollar quotes
+
+JavaScript treats `$$` in a **replacement string** as an escape meaning "a literal `$`". So an
+automated edit that rewrites a function body will silently collapse every `AS $$` opener it
+touches into `AS $` — which is a syntax error the *next* paste discovers, in a file that looks
+fine in review.
+
+- Use the **Edit tool** (or a replacement *function*, where `$$` has no special meaning) for
+  migration SQL.
+- After any scripted edit, **count the dollar-quote tokens** and confirm they are balanced.
+
+### Adding a materialized view? Assert on its row count
+
+`mv_trusted_sellers` refreshed cleanly and produced zero rows for 68 migrations because it joined
+on a transfer status the CHECK constraint had never allowed. Nothing errored. Nobody noticed.
+A materialized view that refreshes without error is not a view that is working.
 
 ## Common Patterns
 
@@ -141,21 +197,23 @@ CREATE POLICY "participant_access" ON my_table FOR SELECT
 
 1. **Open Supabase Dashboard** → SQL Editor
 2. **Paste the migration SQL** and run it
-3. **Verify** the table/columns appear correctly
-4. **Test RLS** by querying as different users
-5. **Regenerate TypeScript types:**
+3. **Paste it a second time** — it must succeed unchanged. If it doesn't, it isn't re-runnable
+4. **Verify** the tables/columns appear correctly, and that any new view returns rows
+5. **Test RLS** by querying as different users, including anon
+6. **Regenerate TypeScript types:**
    ```bash
    npm run gen-types
    ```
 
 ## After Writing the Migration
 
-1. ☐ Test the SQL in Supabase Dashboard
-2. ☐ Run `npm run gen-types` to regenerate TypeScript types
-3. ☐ Update `docs/database/migrations.md` with the new entry
-4. ☐ If new table, add to `docs/database/schema-overview.md`
-5. ☐ If new RLS policies, add to `docs/database/rls-policies.md`
-6. ☐ Build passes (`npm run build`)
+1. ☐ Ship app code that **feature-detects** the new schema, so the deploy is safe before the paste
+2. ☐ Owner pastes the SQL in the Supabase Dashboard (AI never runs `db push`)
+3. ☐ Run `npm run gen-types` to regenerate TypeScript types, and replace any interim hand-written types
+4. ☐ Update `docs/database/migrations.md` with the new entry
+5. ☐ If new table, add to `docs/database/schema-overview.md` **and** `.agents/MASTER_SUPABASE.md`
+6. ☐ If new RLS policies, add to `docs/database/rls-policies.md`
+7. ☐ Build passes (`npm run build`)
 
 ---
 

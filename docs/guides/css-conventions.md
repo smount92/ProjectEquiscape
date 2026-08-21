@@ -2,6 +2,10 @@
 
 Model Horse Hub uses **Tailwind CSS v4** as its primary styling approach, with design tokens defined via `@theme` in `globals.css`.
 
+> **[DESIGN_LANGUAGE.md](DESIGN_LANGUAGE.md) is the authority on how surfaces should look** —
+> materials, tokens, the leather/ledger doctrine, Lamplight, the five-room nav. This page covers
+> the mechanical conventions only. Where the two disagree, DESIGN_LANGUAGE wins.
+
 See [ADR 002](../architecture/adrs/002-vanilla-css-over-tailwind.md) for the migration rationale.
 
 ## Current Stack
@@ -13,21 +17,27 @@ See [ADR 002](../architecture/adrs/002-vanilla-css-over-tailwind.md) for the mig
 
 ## Rules
 
-### 1. Prefer Tailwind Utility Classes
+### 1. Tokens only — never raw hex, never the cold palette
 
 ```tsx
-// ✅ Use Warm Parchment themes & tokens
-<div className="flex items-center gap-4 rounded-lg border border-edge bg-[#FEFCF8] p-6 shadow-md">
-  <h2 className="text-lg font-bold text-ink">Title</h2>
-  <p className="text-sm text-ink-light">Description</p>
+// ✅ Semantic tokens. These are the only colours that flip correctly.
+<div className="flex items-center gap-4 rounded-lg border border-input bg-card p-6 shadow-md">
+  <h2 className="text-lg font-bold text-foreground">Title</h2>
+  <p className="text-sm text-muted-foreground">Description</p>
 </div>
 ```
 
 ```tsx
-// ❌ Don't use cold default Tailwind gray/stone palettes
-<div className="border-stone-200 bg-white text-stone-900">    // BANNED
-<div className="text-stone-500 bg-stone-50">  // BANNED
+// ❌ Cold default Tailwind palettes — BANNED
+<div className="border-stone-200 bg-white text-stone-900">
+<div className="text-stone-500 bg-stone-50">
+
+// ❌ Arbitrary hex — BANNED, and worse than it looks
+<div className="bg-[#FEFCF8] text-[#ef4444]">
 ```
+
+Arbitrary hex is **invisible to the Lamplight override selectors**, so a hardcoded colour simply
+does not flip at night. That is why the ban is absolute rather than stylistic.
 
 ```tsx
 // ❌ Don't use inline styles for static values
@@ -36,39 +46,43 @@ See [ADR 002](../architecture/adrs/002-vanilla-css-over-tailwind.md) for the mig
 
 ### 2. Color Token Reference
 
-The "Cozy Scrapbook" palette uses custom `@theme` variables heavily tuned to warm parchment:
+Semantic tokens (the shadcn base) plus the brand extensions, all defined in `globals.css`:
 
-| Usage | Semantic Tailwind Class / Hex | Notes |
-|-------|---------------|-------|
-| Page background | `bg-[#F4EFE6]` | Warm parchment |
-| Card surface | `bg-[#FEFCF8]` | Warm alabaster cards |
-| Sticky headers | `bg-[#EAE1CD]/90 backdrop-blur-md` | Semi-transparent blur |
-| Primary text | `text-ink` | Deep Espresso (no pure black) |
-| Secondary text | `text-ink-light` | Descriptions |
-| Muted text | `text-muted` | Hints, metadata |
-| Primary accent | `text-forest` / `bg-forest` | Hunter green CTA |
-| Borders | `border-edge` | Warm almond borders |
-| Success surface | `bg-emerald-50` | Green tint |
-| Warning surface | `bg-amber-50` | Amber tint |
-| Error surface | `bg-red-50` | Red tint |
-| Error text | `text-red-700` | Destructive actions |
+| Usage | Class | Notes |
+|-------|-------|-------|
+| Page background | `bg-background` | |
+| Card surface | `bg-card` | Flips under Lamplight |
+| Primary text | `text-foreground` | Never pure black |
+| Muted text | `text-muted-foreground` | Hints, metadata, timestamps |
+| Primary accent | `text-primary` / `bg-primary` / `text-forest` | `#2C5545` forest |
+| Borders | `border-input` / `border-border` | |
+| Success / warning / info | `bg-success/10`, `bg-warning/10`, `bg-info/10` | Brand extensions |
+| Destructive | `text-destructive` / `bg-destructive` | |
+| Text on leather or wood | `--leather-text*` or `.text-engraved-light` | **Required** — default ink is dark and vanishes on leather in day mode |
+| Surfaces that must not darken | `--paper-lit`, `--paper-lit-ink` | Polaroids, post frames, brass plaques: a photograph is white in a dark room |
+
+For the material classes (`.leather-band`, `.ledger-card`, `.brass-heading`, `.paddock-post`,
+`.thread-post`, …) see [DESIGN_LANGUAGE.md §3](DESIGN_LANGUAGE.md).
 
 ### 3. Inline Styles — Only for Dynamic Values
 
 Use `style={{}}` only when the value depends on runtime data:
 
 ```tsx
-// ✅ Dynamic runtime value — must be inline
+// ✅ Dynamic runtime value — must be inline, and still uses a token
 <div style={{ borderLeft: `3px solid var(--podium-${ribbon})` }}>
 
-// ✅ Dynamic conditional — must be inline
+// ✅ Dynamic conditional — inline, both branches tokenised
 <button style={{
-  background: isActive ? "#ef4444" : "var(--color-surface-elevated)",
+  background: isActive ? "var(--destructive)" : "var(--color-surface-elevated)",
 }}>
 
 // ❌ Static value — use Tailwind instead
 <div style={{ display: "flex", gap: "8px" }}> // → className="flex gap-2"
 ```
+
+Being inline does not exempt a value from the token rule — `"#ef4444"` in a `style` object is
+just as invisible to the night-mode override as `text-[#ef4444]` is.
 
 ### 4. Shared Primitives Stay in globals.css
 
@@ -84,15 +98,22 @@ All modals use **shadcn/ui `<Dialog>`** (Radix-based). Legacy `.modal-*` CSS cla
 
 > **Exception:** `PhotoLightbox.tsx` retains `createPortal` for custom keyboard navigation.
 
-### 6. Simple Mode Compatibility
+### 6. Simple Mode and Lamplight must both work
 
-Simple Mode (`[data-simple-mode="true"]`) overrides theme tokens for accessibility:
-- All backgrounds → white
-- All text → black/dark gray
-- Buttons → 60px min height
-- Fonts → +30% larger
+Simple Mode (`[data-simple-mode="true"]`) bumps the font scale ~1.3×, enlarges touch targets, and
+**strips every texture to flat high-contrast tokens**. Lamplight (`html[data-theme="night"]`)
+redefines the semantic tokens for the dark theme.
 
-This works automatically via CSS custom properties — no Tailwind changes needed.
+Both work automatically for any surface built from tokens — which is the whole reason for the
+token rule. Two obligations when you add a new class:
+
+1. If it paints a background or a colour, give it a matching `html[data-theme="night"]` rule (and
+   a Simple Mode rule if it carries texture). Order them Simple Mode first, then Lamplight, the
+   way `.ledger-card`, `.paddock-post` and `.thread-post` are patched in `globals.css`.
+2. **Never encode meaning in texture alone** — Simple Mode removes it.
+
+Prefer painting nothing: a class that only sets padding inherits whichever paper the theme chose
+and can never be wrong in either mode.
 
 ### 7. Responsive Design
 
@@ -129,12 +150,13 @@ Shadows use warm brown tint (defined in theme):
 
 ```
 src/app/
-├── globals.css              # @theme tokens + shared primitives (~1,750 lines)
-├── layout.tsx               # Imports globals.css
+├── globals.css              # @theme tokens + material classes + night/Simple Mode
+│                            #   overrides (~3,980 lines — the only stylesheet)
+├── layout.tsx               # Imports globals.css; stamps the theme pre-paint
 └── [page]/page.tsx          # Styling via Tailwind className
 
 src/components/
-├── ui/                      # 10 shadcn/ui primitives (Button, Input, Dialog, etc.)
+├── ui/                      # shadcn/ui primitives (Button, Input, Dialog, etc.)
 ├── layouts/                 # 4 Page Archetypes (Explorer, Scrapbook, CommandCenter, Focus)
 └── *.tsx                    # Styling via Tailwind className
 ```
@@ -143,13 +165,16 @@ src/components/
 
 | Scenario | Approach |
 |----------|----------|
-| New styling | Tailwind utility classes (`stone` palette) |
+| New styling | Tailwind utilities with **semantic tokens** — never `stone`/`white`/raw hex |
+| A landmark surface (masthead, showcase, results) | Material classes — see [DESIGN_LANGUAGE.md](DESIGN_LANGUAGE.md) |
+| A working surface (form, table, dashboard) | `.ledger-card` + `.brass-heading` |
+| A post or comment | `.ledger-card` + `.paddock-post` / `.thread-post` |
 | Shared primitives (`.btn`) | `globals.css` |
 | Form inputs | shadcn/ui (`<Input>`, `<Select>`, `<Textarea>`) |
-| Modals | shadcn/ui `<Dialog>` |
-| Truly dynamic values (runtime colors, coordinates) | Inline `style={{}}` |
+| Modals | shadcn/ui `<Dialog>` (exception: `PhotoLightbox.tsx`) |
+| Truly dynamic values (runtime colors, coordinates) | Inline `style={{}}`, still using `var(--token)` |
 | React-PDF components | Inline style objects (required by library) |
 
 ---
 
-**Next:** [Design System](../components/design-system.md) · [Adding a Feature](adding-a-feature.md)
+**Next:** [Design Language](DESIGN_LANGUAGE.md) · [Adding a Feature](adding-a-feature.md)
