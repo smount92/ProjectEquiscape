@@ -32,6 +32,8 @@ import DioramaFormFields from "@/components/forms/DioramaFormFields";
 import OtherModelFormFields from "@/components/forms/OtherModelFormFields";
 import { Button } from "@/components/ui/button";
 import { track } from "@/lib/analytics";
+import { formEngineEnabled } from "@/lib/forms/flag";
+import EditHorseEngine from "@/components/forms/engine/EditHorseEngine";
 
 // ---- Types ----
 
@@ -65,7 +67,12 @@ interface ExistingImage {
 // button that could never enable.
 
 // ---- Component ----
-export default function EditHorsePage() {
+/**
+ * The hand-written edit form. Unchanged, and still what every visitor gets
+ * while NEXT_PUBLIC_FORM_ENGINE is dark. Its replacement is
+ * @/components/forms/engine/EditHorseEngine; dispatcher at the bottom.
+ */
+function LegacyEditHorsePage() {
  const router = useRouter();
  const params = useParams();
  const horseId = params.id as string;
@@ -2067,4 +2074,9 @@ export default function EditHorsePage() {
  )}
  </FocusLayout>
  );
+}
+
+/** Flag dispatcher — see the note on LegacyEditHorsePage. */
+export default function EditHorsePage() {
+ return formEngineEnabled() ? <EditHorseEngine /> : <LegacyEditHorsePage />;
 }

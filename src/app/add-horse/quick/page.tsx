@@ -22,6 +22,8 @@ import PageMasthead from"@/components/layouts/PageMasthead";
 import { Button } from "@/components/ui/button";
 import { track } from "@/lib/analytics";
 import { CONDITION_GRADES } from "@/lib/conditionGrades";
+import { formEngineEnabled } from "@/lib/forms/flag";
+import QuickAddEngine from "@/components/forms/engine/QuickAddEngine";
 
 const FINISH_TYPES = ["OF","Custom","Artist Resin"];
 // Grade values come from the shared module (single source of truth with
@@ -38,7 +40,12 @@ interface RecentAdd {
  hasPhoto: boolean;
 }
 
-export default function QuickAddPage() {
+/**
+ * The hand-written quick form. Unchanged, and still what every visitor
+ * gets while NEXT_PUBLIC_FORM_ENGINE is dark. Its replacement is
+ * @/components/forms/engine/QuickAddEngine; dispatcher at the bottom.
+ */
+function LegacyQuickAddPage() {
  const router = useRouter();
  const [selectedCatalog, setSelectedCatalog] = useState<CatalogItem | null>(null);
  const [customName, setCustomName] = useState("");
@@ -527,4 +534,9 @@ export default function QuickAddPage() {
  </div>
  </FocusLayout>
  );
+}
+
+/** Flag dispatcher — see the note on LegacyQuickAddPage. */
+export default function QuickAddPage() {
+ return formEngineEnabled() ? <QuickAddEngine /> : <LegacyQuickAddPage />;
 }

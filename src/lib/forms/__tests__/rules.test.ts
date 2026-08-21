@@ -21,7 +21,6 @@ import {
     getVisibleFields,
     hasValue,
     isFieldDisabled,
-    isFieldRequired,
     isFieldVisible,
 } from "@/lib/forms/rules";
 import type { AssetCategory } from "@/lib/types/database";

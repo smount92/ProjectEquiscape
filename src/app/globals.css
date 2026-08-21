@@ -3620,3 +3620,360 @@ html[data-theme="night"] .thread-post-pinned {
     border-top-color: var(--brass);
     border-left-color: var(--brass);
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   FORM ENGINE — the premium add-horse surfaces.
+   Scoped to .fe-* so nothing here can reach the legacy forms while
+   NEXT_PUBLIC_FORM_ENGINE is dark. Everything else the engine needs
+   (.ledger-card, .ledger-tab, .stamp, .leather-band, .brass-*) is
+   reused from the vocabulary above rather than reinvented.
+
+   House rules honoured throughout:
+     • Lamplight (html[data-theme="night"]) — NO ruled lines.
+     • Simple Mode — no rotation, no texture, no gradients.
+   ══════════════════════════════════════════════════════════════════ */
+@layer components {
+
+/* ── The ledger leaf a form section is written on ──────────────────
+   .ledger-card's paper, with the left gutter widened so a CONTROL
+   (not just a line of text) clears the red margin rule. */
+.fe-leaf {
+    position: relative;
+    border-radius: 6px;
+    padding: 22px 22px 22px 34px;
+    background:
+        linear-gradient(90deg, transparent 0 24px, rgba(155, 48, 40, 0.26) 24px 25.5px, transparent 25.5px),
+        repeating-linear-gradient(0deg, transparent 0 27px, rgba(44, 85, 69, 0.09) 27px 28px),
+        linear-gradient(180deg, #FDFAF2, #F6F1E2);
+    border: 1px solid #CBC3A4;
+    border-top: 3px solid var(--color-forest, #2C5545);
+    box-shadow: 0 2px 5px rgba(90, 70, 40, 0.15), 0 8px 14px -10px rgba(90, 70, 40, 0.25);
+}
+
+/* Section heading inside a leaf — engraved forest smallcaps with a
+   hairline rule running out to the right margin. */
+.fe-leaf-heading {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+.fe-leaf-heading > h2,
+.fe-leaf-heading > h3 {
+    margin: 0;
+    font-family: var(--serif-display);
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-forest, #2C5545);
+    white-space: nowrap;
+}
+.fe-leaf-heading::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(44, 85, 69, 0.42), transparent);
+}
+
+/* ── The step rail ────────────────────────────────────────────────
+   Index tabs across the top of the ledger, each a kraft tab that
+   turns forest as it is completed. */
+.fe-rail {
+    display: flex;
+    gap: 6px;
+}
+.fe-rail-tab {
+    position: relative;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 12px 7px;
+    border: 0;
+    border-radius: 3px 10px 3px 3px;
+    background: linear-gradient(180deg, #EFE7D2, #E3D9BF);
+    box-shadow: inset 0 1px 0 rgba(255, 250, 235, 0.6), 0 1px 2px rgba(90, 70, 40, 0.18);
+    font-family: var(--serif-display);
+    font-size: 0.8125rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #6B5B3E;
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+.fe-rail-tab:hover:not(:disabled) {
+    background: linear-gradient(180deg, #F5EEDC, #E9E0C8);
+}
+.fe-rail-tab:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+/* Done: forest kraft, stamped with a tick. */
+.fe-rail-tab[data-state="done"] {
+    background: linear-gradient(180deg, #37664F, var(--color-forest-dark, #1E3D31));
+    color: #EDE4CC;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 245, 220, 0.25);
+}
+/* Current: brass fore-edge — the leaf you are writing on. */
+.fe-rail-tab[data-state="current"] {
+    background: linear-gradient(180deg, #FDFAF2, #F2EBD8);
+    color: var(--color-forest, #2C5545);
+    box-shadow: inset 0 2px 0 var(--brass), 0 2px 4px rgba(90, 70, 40, 0.24);
+    font-weight: 700;
+}
+.fe-rail-num {
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    flex: none;
+    border-radius: 50%;
+    border: 1.5px solid currentColor;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0;
+}
+
+/* ── Photo slots: prints waiting to be mounted ────────────────────
+   An empty slot is a paper mount with corner tabs; a filled one is
+   the print seated in it. */
+.fe-mount {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    border-radius: 4px;
+    background: linear-gradient(180deg, #FBF6E9, #F1EAD6);
+    border: 1px solid #CBC3A4;
+    box-shadow: inset 0 0 0 1px rgba(255, 253, 246, 0.7), 0 1px 3px rgba(90, 70, 40, 0.16);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    overflow: hidden;
+}
+/* the four photo-corner tabs */
+.fe-mount::before,
+.fe-mount::after,
+.fe-mount-corners::before,
+.fe-mount-corners::after {
+    content: "";
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    border: 0 solid rgba(120, 96, 58, 0.5);
+    pointer-events: none;
+    z-index: 2;
+}
+.fe-mount::before {
+    top: 8px; left: 8px;
+    border-top-width: 2px; border-left-width: 2px;
+}
+.fe-mount::after {
+    top: 8px; right: 8px;
+    border-top-width: 2px; border-right-width: 2px;
+}
+.fe-mount-corners::before {
+    bottom: 8px; left: 8px;
+    border-bottom-width: 2px; border-left-width: 2px;
+}
+.fe-mount-corners::after {
+    bottom: 8px; right: 8px;
+    border-bottom-width: 2px; border-right-width: 2px;
+}
+.fe-mount:hover,
+.fe-mount:focus-within {
+    border-color: var(--color-forest, #2C5545);
+    box-shadow: inset 0 0 0 1px rgba(255, 253, 246, 0.7), 0 3px 8px rgba(90, 70, 40, 0.24);
+}
+.fe-mount[data-filled="true"] {
+    background: #2A2118;
+    border-color: var(--color-forest, #2C5545);
+}
+.fe-mount[data-filled="true"] img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+/* The primary slot wears a brass fore-edge. */
+.fe-mount[data-primary="true"] {
+    border-top: 3px solid var(--brass);
+}
+
+/* Slot caption — the pencilled label under a mount. */
+.fe-mount-label {
+    font-family: var(--serif-display);
+    font-size: 0.8125rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #6B5B3E;
+}
+
+/* ── Reference picker result row ──────────────────────────────────*/
+.fe-ref-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+    transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+.fe-ref-row:hover,
+.fe-ref-row[aria-selected="true"] {
+    background: rgba(44, 85, 69, 0.07);
+    border-color: rgba(44, 85, 69, 0.3);
+}
+.fe-ref-thumb {
+    width: 46px;
+    height: 46px;
+    flex: none;
+    border-radius: 3px;
+    object-fit: cover;
+    background: #E3D9BF;
+    border: 1px solid #CBC3A4;
+}
+
+/* ── The passport review leaf ─────────────────────────────────────
+   Label against value with a dotted leader, the way a printed
+   passport sets an entry. */
+.fe-passport-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 3px 0;
+}
+.fe-passport-row dt {
+    font-family: var(--serif-display);
+    font-size: 0.8125rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+    white-space: nowrap;
+}
+.fe-passport-leader {
+    flex: 1;
+    border-bottom: 1px dotted rgba(44, 85, 69, 0.35);
+    transform: translateY(-3px);
+    min-width: 12px;
+}
+.fe-passport-row dd {
+    margin: 0;
+    font-weight: 600;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Completion: the stamp lands rather than fades ────────────────*/
+@keyframes fe-stamp-down {
+    0%   { opacity: 0; transform: scale(2.1) rotate(-14deg); }
+    62%  { opacity: 1; transform: scale(0.94) rotate(-3deg); }
+    100% { opacity: 1; transform: scale(1) rotate(-2deg); }
+}
+.fe-stamp-land {
+    animation: fe-stamp-down 480ms cubic-bezier(0.2, 0.9, 0.3, 1.4) both;
+}
+
+} /* end @layer components (form engine) */
+
+/* ── Lamplight: dark paper, and the house rule — NO ruled lines ── */
+html[data-theme="night"] .fe-leaf {
+    background: linear-gradient(180deg, #2B2218, #241B12);
+    border-color: #453723;
+    border-top-color: #3A6B55;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4), 0 8px 14px -10px rgba(0, 0, 0, 0.55);
+}
+html[data-theme="night"] .fe-leaf-heading > h2,
+html[data-theme="night"] .fe-leaf-heading > h3 {
+    color: #9FC3AD;
+}
+html[data-theme="night"] .fe-leaf-heading::after {
+    background: linear-gradient(90deg, rgba(159, 195, 173, 0.35), transparent);
+}
+html[data-theme="night"] .fe-rail-tab {
+    background: linear-gradient(180deg, #3A2F20, #2E2417);
+    color: #C9BA9C;
+    box-shadow: inset 0 1px 0 rgba(255, 245, 220, 0.09), 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+html[data-theme="night"] .fe-rail-tab:hover:not(:disabled) {
+    background: linear-gradient(180deg, #443728, #362B1C);
+}
+html[data-theme="night"] .fe-rail-tab[data-state="current"] {
+    background: linear-gradient(180deg, #35452F, #2A3826);
+    color: #DCEBDF;
+}
+html[data-theme="night"] .fe-mount {
+    background: linear-gradient(180deg, #322718, #2A2114);
+    border-color: #453723;
+}
+html[data-theme="night"] .fe-mount::before,
+html[data-theme="night"] .fe-mount::after,
+html[data-theme="night"] .fe-mount-corners::before,
+html[data-theme="night"] .fe-mount-corners::after {
+    border-color: rgba(201, 154, 99, 0.55);
+}
+html[data-theme="night"] .fe-mount-label {
+    color: #C9BA9C;
+}
+html[data-theme="night"] .fe-mount:hover,
+html[data-theme="night"] .fe-mount:focus-within {
+    border-color: #3A6B55;
+}
+html[data-theme="night"] .fe-ref-row:hover,
+html[data-theme="night"] .fe-ref-row[aria-selected="true"] {
+    background: rgba(159, 195, 173, 0.1);
+    border-color: rgba(159, 195, 173, 0.3);
+}
+html[data-theme="night"] .fe-ref-thumb {
+    background: #3A2F20;
+    border-color: #453723;
+}
+html[data-theme="night"] .fe-passport-leader {
+    border-bottom-color: rgba(159, 195, 173, 0.3);
+}
+
+/* ── Simple Mode: flat card, no ruling, no rotation, no texture ── */
+[data-simple-mode="true"] .fe-leaf {
+    background: var(--card);
+    padding: 20px;
+    border-top-width: 3px;
+}
+[data-simple-mode="true"] .fe-leaf-heading::after {
+    display: none;
+}
+[data-simple-mode="true"] .fe-rail-tab {
+    border-radius: 4px;
+    background: var(--muted);
+    box-shadow: none;
+}
+[data-simple-mode="true"] .fe-rail-tab[data-state="done"],
+[data-simple-mode="true"] .fe-rail-tab[data-state="current"] {
+    background: var(--card);
+    box-shadow: inset 0 0 0 2px var(--color-forest, #2C5545);
+    color: var(--color-forest, #2C5545);
+}
+[data-simple-mode="true"] .fe-mount {
+    background: var(--card);
+    box-shadow: none;
+}
+[data-simple-mode="true"] .fe-mount::before,
+[data-simple-mode="true"] .fe-mount::after,
+[data-simple-mode="true"] .fe-mount-corners::before,
+[data-simple-mode="true"] .fe-mount-corners::after {
+    display: none;
+}
+[data-simple-mode="true"] .fe-passport-leader {
+    border-bottom-style: solid;
+    border-bottom-color: var(--input);
+}
+[data-simple-mode="true"] .fe-stamp-land {
+    animation: none;
+}
+
+/* Reduced motion: the stamp still arrives, it just does not travel. */
+@media (prefers-reduced-motion: reduce) {
+    .fe-stamp-land {
+        animation: none;
+    }
+}

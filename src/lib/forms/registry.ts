@@ -61,7 +61,6 @@ export const ALL_CATEGORIES: readonly AssetCategory[] = [
 ] as const;
 
 const MODEL_ONLY: readonly AssetCategory[] = ["model"] as const;
-const MODEL_LIKE: readonly AssetCategory[] = ["model", "other_model"] as const;
 /** Everything with a human maker credit — `other_model` is factory output. */
 const MAKER_CATEGORIES: readonly AssetCategory[] = ["model", "tack", "prop", "diorama"] as const;
 

@@ -40,6 +40,8 @@ import { track } from "@/lib/analytics";
 import { Camera, Link2, Tag } from "lucide-react";
 import { CONDITION_GRADES, conditionOptionLabel, conditionToneVar, getConditionGrade } from "@/lib/conditionGrades";
 import GlossaryLink from "@/components/GlossaryLink";
+import { formEngineEnabled } from "@/lib/forms/flag";
+import AddHorseEngine from "@/components/forms/engine/AddHorseEngine";
 
 // ---- Types ----
 
@@ -63,7 +65,14 @@ function safeReturnToPath(value: string | null): string | null {
 
 // ---- Component ----
 
-export default function AddHorsePage() {
+/**
+ * The hand-written wizard. Left exactly as it was: while
+ * NEXT_PUBLIC_FORM_ENGINE is dark this is what every visitor gets, and it
+ * must keep rendering byte-for-byte what it rendered yesterday. The engine
+ * replacement lives in @/components/forms/engine/AddHorseEngine; see the
+ * dispatcher at the bottom of this file.
+ */
+function LegacyAddHorsePage() {
  const router = useRouter();
  const searchParams = useSearchParams();
  const supabase = createClient();
@@ -1919,4 +1928,16 @@ export default function AddHorsePage() {
  )}
  </FocusLayout>
  );
+}
+
+/**
+ * Flag dispatcher. `formEngineEnabled()` reads NEXT_PUBLIC_FORM_ENGINE,
+ * which Next inlines at build time, so this costs nothing at runtime and
+ * flips with a redeploy — instant rollback, both paths live.
+ *
+ * The legacy component above stays until the engine has soaked. Deleting
+ * it is a separate, deliberate change.
+ */
+export default function AddHorsePage() {
+ return formEngineEnabled() ? <AddHorseEngine /> : <LegacyAddHorsePage />;
 }
