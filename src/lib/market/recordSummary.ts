@@ -6,7 +6,7 @@
  * sees on a market card, and rank full records "best first" for the
  * quick-look dialog. Pure, no I/O — the batched fetch lives in
  * buildShowRingCards (src/app/actions/showring.ts) and
- * getMarketHorseRecord (src/app/actions/market.ts).
+ * getPublicMarketHorseRecord (src/app/actions/marketPublicRecord.ts).
  *
  * Vocabulary notes (see src/lib/shows/placings.ts + ShowRecordTimeline):
  *  - v2 engine writes placings "1st"…"6th" and championship rows whose
@@ -155,8 +155,9 @@ export interface RankableRecord {
 
 /**
  * One row of the market quick-look dialog (view model returned by
- * getMarketHorseRecord in src/app/actions/market.ts — typed here
- * because "use server" files may only export async functions).
+ * getPublicMarketHorseRecord in src/app/actions/marketPublicRecord.ts
+ * — typed here because "use server" files may only export async
+ * functions).
  */
 export interface MarketRecordDetailRow extends RankableRecord {
     id: string;
