@@ -126,13 +126,59 @@ All SQL migrations are located in `supabase/migrations/` and are applied sequent
 | 126 | `126_market_prices_public_rpc.sql` | Public anon-safe read path for `mv_market_prices` (`get_market_rows`) |
 | 127 | `127_watermark_custom_text.sql` | Watermark: `users.watermark_text` column + `watermark_photos` default → `true` (on by default) |
 | 128 | `128_catalog_material_facet.sql` | Catalog `material` facet: backfill `attributes.material` (Plastic/Resin), `get_catalog_facets()` now returns `materials` |
+| 129 | `129_catalog_item_slugs.sql` | `catalog_items.maker_slug`/`slug` + `catalog_slugify()` and a self-slug trigger for `/reference/[maker]/[slug]` |
+| 130 | `130_reference_wanted_rpcs.sql` | `count_catalog_collectors()`, `count_catalog_wanters()`, `notify_catalog_owners_of_demand()` — Wanted demand engine |
+| 131 | `131_reference_photo_optout.sql` | `users.show_photos_on_reference` opt-out + `get_catalog_reference_photos()` gallery RPC |
+| 132 | `132_catalog_listings_rpc.sql` | `get_catalog_listings()` — anon-safe "for sale now" horses plus seller alias |
+| 133 | `133_security_hardening.sql` | `users` column-level grants (table SELECT revoked), `auth.uid()` binding in offer/vote/post RPCs, demand-nudge rate limit |
+| 134 | `134_catalog_stats_rpc.sql` | `get_catalog_stats()` — batched owner / want / for-sale counts for a catalog page |
+| 135 | `135_public_passport_rpc.sql` | `get_public_passport()` — anon-safe public/unlisted horse passport with owner alias |
+| 136 | `136_public_aliases_rpc.sql` | `get_public_aliases()` — batch `alias_name` lookup so anon show pages stop rendering "@unknown" |
+| 137 | `137_reference_photos_horse_id.sql` | `get_catalog_reference_photos()` recreated with `horse_id` so gallery photos link to passports |
+| 138 | `138_show_records_show_id.sql` | `show_records.show_id` FK + partial index linking trophy-case rows to their originating show |
+| 139 | `139_show_hosting_ux.sql` | `shows.about_md` + new `show_fee_payments` table (host-marked entry-fee checklist) |
+| 140 | `140_show_photo_angle.sql` | Adds `'Show_Photo'` to the `angle_profile` enum for in-dialog class entry photos |
+| 141 | `141_public_horse_cards_rpc.sql` | `get_public_horse_cards()` — live qualification cards on the anon public passport |
+| 142 | `142_supporter_tier.sql` | `users.is_supporter`/`supporter_since`/`show_in_supporters_ledger` + write guard + `get_supporters_ledger()` |
+| 143 | `143_external_shows.sql` | New `external_shows` table with submit/approve RLS + moderation guard trigger for `/calendar` |
+| 144 | `144_batch_import_v2.sql` | `batch_import_horses_v2()` — per-row exception handling, Notes column, honest `is_public` |
+| 145 | `145_collector_counts_public_only.sql` | `count_catalog_collectors()` and `get_catalog_stats.owner_count` now count public horses only |
+| 146 | `146_public_horse_records_rpc.sql` | `get_public_horse_records()` — public-only show record lines for the anon passport |
+| 147 | `147_catalog_browse_thumbs.sql` | `get_catalog_browse_thumbs()` — batched community-photo thumbnail per catalog item |
+| 148 | `148_shows_v4_domain.sql` | Shows v4: `show_barred_entrants`, `horse_documents`, `users.is_suspended`, `results_published_at`, entry critiques, card void columns |
+| 149 | `149_security_sweep.sql` | Storage size/MIME caps, service-role-only rate-limit RPCs, revoked PUBLIC grants, pinned `search_path` |
+| 150 | `150_unlisted_visibility.sql` | Rewrites `user_horses_select` to gate on `visibility` so unlisted horses are link-viewable |
+| 151 | `151_fix_entry_permission.sql` | Hotfix: `is_caller_suspended()` DEFINER helper replaces the `users.is_suspended` read in the entry INSERT policy |
+| 152 | `152_market_history_rpc.sql` | `get_market_history()` — anon-safe completed-sale date/price/finish points for the Blue Book |
+| 153 | `153_card_gates_stakes.sql` | `qualification_cards.class_entry_count`/`class_exhibitor_count`/`is_stakes` + recreated verify/public-card RPCs |
+| 154 | `154_taxonomy_v2.sql` | Scale normalization across `catalog_items`/`allowed_scales`; `item_type` CHECK gains `factory_resin`+`china`; `get_mold_customs()` |
+| 155 | `155_scale_cleanup.sql` | Second-round `catalog_items.scale` value cleanup (Pebble, Micro Mini, Unknown → NULL) |
+| 156 | `156_attribution_split.sql` | `catalog_items.artist` + `catalog_items.manufacturer` columns with mechanical backfill; `maker` untouched |
+| 157 | `157_browse_facets_v2.sql` | `get_catalog_facets()` gains manufacturers/artists; unifies "Stone" → "Peter Stone" for display |
+| 158 | `158_scale_unknowns.sql` | Clears nine non-scale `catalog_items.scale` values (pose words, size adjectives) to NULL |
+| 159 | `159_titles_engine.sql` | New `horse_titles` + `exhibitor_distinctions` tables; `v_horse_hoofprint` gains a titles UNION branch |
+| 160 | `160_bulletproof_sweep.sql` | Audit sweep: fixes `soft_delete_account()`, sticky scratches, `placings_announced()` reveal gating, title/image visibility |
+| 161 | `161_manufacturer_cleanup.sql` | Moves person-named `manufacturer` values to `artist`, clears placeholders, refreshes planner stats |
+| 162 | `162_card_void_reissue.sql` | Replaces the `qualification_cards` unique key with `uq_qualification_cards_live` (one live card per horse/class) |
+| 163 | `163_career_ledgers.sql` | New `horse_career` + `exhibitor_career` point-total ledgers with visibility-matched RLS |
+| 164 | `164_class_cards_rpc.sql` | `get_class_cards()` and `get_exhibitor_card_count()` — anon-safe card reads gated on announced results |
+| 165 | `165_banner_and_atomic_placings.sql` | New `announcements` table (public read of live rows, service-role writes) + `record_class_placings_atomic()` replacing delete-then-insert placing writes |
+| 166 | `166_social_spine.sql` | The Paddock spine: `posts.kind` (`user`/`show_results`/`audit`) + `posts.visibility` (`public`/`followers`), `posts_select` rewritten with the audience conjunct, feed indexes, unique one-announcement-per-show index |
+| 167 | `167_barns.sql` | Barns: `groups.is_private` (canonical, synced to legacy `visibility` by trigger), new `barn_join_requests` table, `barn_member_role()`/`barn_is_private()`/`barn_created_by()` helpers, membership + roster RLS rewrite |
+| 168 | `168_events_rework.sql` | Events become listings for off-platform happenings — `events_event_type_check` widened (adds `external_show`, `club`; `live_show`/`photo_show` legacy read-only) + two date indexes |
+| 169 | `169_market_completion.sql` | `get_market_listings()`/`get_market_listings_total()`/`get_public_favorite_count()` for anon market browse; `mv_trusted_sellers` **rebuilt** (joined `horse_transfers.status='completed'`, a value the CHECK forbids — now `'claimed'`); `discover_users_view` excludes suspended members |
+| 170 | `170_art_studio.sql` | Art Studio rebuild: structured artist terms + `services` JSONB on `artist_profiles`; commission state machine columns + `commissions_status_check` (`requested→quoted→accepted→in_progress→awaiting_approval→completed→delivered`); agreement-freeze trigger; `customization_logs.commission_id`/`artist_user_id`; `financial_vault.commission_cost`; `v_artist_finished_horses` view; `stamp_finishing_artist()`, `studio_slot_usage()` |
+| 171 | `171_profile_customization.sql` | `users.profile_customization` JSONB (theme, tagline, banner path, featured horses) + column grant to `anon`/`authenticated` |
+| 172 | `172_commerce_bugfixes.sql` | `chk_trade_status` finally allows `'Pending Sale'` and `'Stolen/Missing'` (079 shipped the feature with no schema change); `respond_to_offer_atomic()` stops writing the phantom `transactions.updated_at` that broke declines since 099 |
+| 173 | `173_deal_room.sql` | The Deal Room: `messages.kind`+`payload` mixed transcript, new `conversation_participants` (roles, unread, mute, archive) and `payment_installments` tables, `conversations.deal_terms` contract boxes + dispute columns, `deal_offer_move_atomic()`, bidirectional `are_blocked()` + block-on-send trigger, missing `WITH CHECK` repairs, lossless DM backfill |
+| 175 | `175_object_metrics.sql` | Object metrics: `object_view_daily` + `site_activity_daily` rollups and the salted `object_view_scratch` (purged nightly by `cleanup_system_garbage()`); `record_object_view()`, `get_horse_view_stats()`, `metrics_entity_totals()`, `metrics_top_objects()` |
 
-> **Note:** Migration numbers 045, 047, 049, 051, 090 are intentionally skipped (consolidated into adjacent migrations during development).
+> **Note:** Migration numbers 045, 047, 049 and 051 were consolidated into adjacent migrations during the Grand Unification, and **174 is an intentional gap** — no such file exists and none should be written. Numbers run 001–175; 170 files are on disk.
 
 ## Adding New Migrations
 
 1. Create a new file: `supabase/migrations/NNN_description.sql`
-2. Use the next sequential number (currently: **129**)
+2. Use the next sequential number (currently: **176**)
 3. Always include RLS policies for new tables
 4. Add foreign key indexes for new FK columns
 5. Test by running the SQL in Supabase Dashboard → SQL Editor

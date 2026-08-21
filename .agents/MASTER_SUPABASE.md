@@ -2,11 +2,11 @@
 
 > **Single Source of Truth for all database schema, RLS policies, and RPCs.**
 > Update this file whenever a new migration is deployed.
-> Last updated: 2026-07-11 | Migration count: 128 (001–128) | SQL files: 124 (045/047/049/051/090 skipped)
-> Source: Live production data via `npx supabase inspect db table-sizes --linked` (row-count
-> snapshot below predates migrations 117–128 — the Shows v2/Groups Forum/Stable v2 tables plus
-> catalog anon-read (124), facets RPC (125/128), market read path (126), and watermark custom
-> text (127) aren't reflected in row counts; re-run the inspect command for current sizes)
+> Last updated: 2026-08-21 | Migrations 001–175, **174 is an intentional gap** | SQL files: 170 (045/047/049/051/174 skipped)
+> Everything through 175 is applied in production (the launch release applied 165–173 and 175).
+> Source: Live production data via `npx supabase inspect db table-sizes --linked` (the row-count
+> snapshot below is from April 2026 and predates everything from migration 117 onward — treat it
+> as relative scale only, and re-run the inspect command for current sizes)
 
 **Environment:** Supabase Pro (PostgreSQL 15, East US / North Virginia) | Project ref: `bdmwubihwinsxfykjqfe` | Extensions: `pg_trgm` (in `extensions` schema), `uuid-ossp`
 
@@ -59,10 +59,12 @@
 | `commissions` | 2 | 96 kB | Art commissions |
 | `id_requests` | 2 | 64 kB | Help ID |
 
-**Total active tables:** 61 in the last live snapshot **+ 13 added by migrations 117–123**
-(see "Shows v2 / Groups Forum / Stable v2 Domain" below) = 74, including legacy retained for
-FK integrity
-**Total database size:** ~16 MB as of the last snapshot (compact — Supabase Pro well within limits; re-check after the new domain accumulates data)
+**Total active tables:** 61 in the April snapshot, plus the domains added since — Shows v2
+(117–123), Shows v4 + titles + careers (148/159/163), external shows (143), and the launch
+release's `announcements` (165), `barn_join_requests` (167), `conversation_participants` /
+`payment_installments` (173) and the three metrics tables (175). Includes legacy tables retained
+for FK integrity.
+**Total database size:** ~16 MB as of the last snapshot (compact — Supabase Pro well within limits; re-check after the new domains accumulate data)
 
 ---
 
@@ -70,7 +72,7 @@ FK integrity
 
 ### 🐴 Core Inventory
 
-- **`users`** *(84 rows, 128 kB)* — User profiles linked to Supabase Auth via `id` (UUID matches `auth.users.id`). Key columns: `alias_name` (unique slug for public URLs), `display_name`, `avatar_url`, `bio`, `tier` (free/pro), `show_badges` (toggle badge display), `watermark_photos` (photo watermarking — **on by default / opt-out** since migration 127), `watermark_text` (optional custom watermark string; blank ⇒ default `© @alias — ModelHorseHub`, migration 127), `currency_preference`, `is_test_account` (hidden from Discover). Updated via profile settings.
+- **`users`** *(84 rows, 128 kB)* — User profiles linked to Supabase Auth via `id` (UUID matches `auth.users.id`). Key columns: `alias_name` (unique slug for public URLs), `display_name`, `avatar_url`, `bio`, `tier` (free/pro), `show_badges` (toggle badge display), `watermark_photos` (photo watermarking — **on by default / opt-out** since migration 127), `watermark_text` (optional custom watermark string; blank ⇒ default `© @alias — ModelHorseHub`, migration 127), `currency_preference`, `is_test_account` (hidden from Members), `is_suspended` (migration 148 — read in policies only through the `is_caller_suspended()` DEFINER helper, see 151), and **`profile_customization` JSONB** (migration 171 — curated `theme` enum, `tagline`, `pronouns`, `bannerPath` in the existing `avatars` bucket, up to 6 `featured` horse ids, `hidden` section ids). Every field in that bag is validated app-side in `sanitizeCustomization`; there is no SQL-side shape check. Note that migration 133 revoked table-level SELECT on `users` in favour of **column grants** — a new publicly-readable column needs its own `GRANT SELECT (col) ... TO anon, authenticated` (171 does exactly this).
 
 - **`user_horses`** *(903 rows, 584 kB)* — Model horse inventory. FK `owner_id → users(id)`, FK `catalog_id → catalog_items(id)`. Soft delete via `deleted_at` timestamp (never hard-deleted — preserves provenance). `visibility` column (`public`/`private`/`unlisted`) is authoritative; `is_public` boolean is kept in sync via `trg_sync_visibility` trigger (migration 109). Key columns: `custom_name`, `life_stage`, `horse_condition`, `trade_status`, `scale`, `medium`, `body_quality_grade`, `is_promoted_until`, `purchase_date_fuzzy`.
 
@@ -102,7 +104,9 @@ FK integrity
 
 ### 💬 Social & Content
 
-- **`posts`** — Universal text content replacing legacy comment/post tables. Exclusive arc FKs: `horse_id`, `group_id`, `event_id`, `studio_id`, `help_request_id` with `CHECK (num_nonnulls(...) <= 1)`. `parent_id` for 1-level threading. Atomic counters: `likes_count`, `replies_count`. `content` supports `@mentions`. `is_pinned` for group pinned posts. Migration 122 (Notice Board / Groups Forum) added `title` (thread subject) and `bumped_at` (bumps on new reply via the reworked `add_post_reply()` RPC — powers "recently active thread" sort).
+- **`posts`** — Universal text content replacing legacy comment/post tables, and since migration 166 **the spine of The Paddock (`/feed`)**. Exclusive arc FKs: `horse_id`, `group_id`, `event_id`, `studio_id`, `help_request_id` with `CHECK (num_nonnulls(...) <= 1)`. `parent_id` for 1-level threading. Atomic counters: `likes_count`, `replies_count`. `content` supports `@mentions`. `is_pinned` — group pinned posts, and (launch release) admin-pinned feed posts held atop the first page of the stream via `setFeedPostPinned`. Migration 122 (Notice Board) added `title` (thread subject) and `bumped_at` (bumps on new reply via the reworked `add_post_reply()` RPC — powers "recently active thread" sort). Migration 166 added:
+  - `kind` — `user` | `show_results` | `audit` (CHECK `posts_kind_check`). Audit notes (reference-identity updates, expired parked transfers) were retagged in place; a unique partial index `posts_show_results_once_idx` on `(show_id) WHERE kind = 'show_results'` makes the results announcement idempotent.
+  - `visibility` — `public` | `followers` (lowercase values, CHECK `posts_visibility_check`). The `posts_select` policy keeps 042's context gate **and** ANDs an audience conjunct: public, or you are the author, or you follow the author.
 
 - **`media_attachments`** — File references for casual uploads (feed photos, event photos, **DM chat photos**). Exclusive arc FKs: `post_id`, `event_id`, `message_id`. Storage paths to `horse-images` bucket (public) or `chat-attachments` bucket (private, signed URLs). FK `uploader_id → users(id)`. DM attachments added via Migration 111.
 
@@ -116,9 +120,13 @@ FK integrity
 
 ### 🤝 Commerce & Trust
 
-- **`conversations`** — DM threads between two users. `buyer_id` + `seller_id` FKs. `horse_id` for horse-specific negotiations. Unique constraint on participant pair.
+- **`conversations`** — DM threads between two users. `buyer_id` + `seller_id` FKs (historical names — they mean "the two parties", see `conversation_participants`). `horse_id` for horse-specific negotiations. Unique constraint on participant pair. Migration 173 (Deal Room) added the thread-summary columns `last_message_at` / `last_message_preview` / `last_message_kind` / `last_message_sender` (maintained by the `trg_messages_touch_conversation` AFTER INSERT trigger), the contract itself in **`deal_terms` JSONB** (`{ boxes[], agreedByAAt, agreedByBAt, revision }` — 7 box types; once both sides have signed, `boxes` is frozen by trigger), `deal_kind` (`sale`/`commission`/`trade`), `commission_id`, and the dispute trio `disputed_at` / `dispute_reason` / `disputed_by`.
 
-- **`messages`** — Chat messages within conversations. FK `conversation_id → conversations(id)`. `is_read` for unread tracking. `sender_id → users(id)`.
+- **`messages`** — Chat messages within conversations. FK `conversation_id → conversations(id)`. `is_read` for unread tracking. `sender_id → users(id)`. Migration 173 turned this into the **mixed transcript**: `kind` (CHECK: `chat`, `photo`, `offer`, `counter_offer`, `offer_response`, `terms_proposed`, `terms_agreed`, `plan_created`, `payment_sent`, `payment_confirmed`, `handover`, `dispute`, `completed`, `system`), `payload` JSONB, `edited_at`, `deleted_at`, an 8,000-char content cap, and `trg_messages_guard` — identity is fixed, non-`chat` kinds are fully immutable (that immutability is what makes the evidence pack worth anything), and a `chat` row is editable only by its author. `trg_messages_block_guard` refuses the insert outright when `are_blocked()` says either party has blocked the other.
+
+- **`conversation_participants`** *(migration 173)* — The fix for the buyer_id-means-clicker role bug: one row per person per thread rather than inferring roles from who started it. PK `(conversation_id, user_id)`. `role` (`member`/`buyer`/`seller`/`artist`/`client`/`trader`/`moderator`), `party` (`a`/`b`, matching `transactions.party_a_id`/`party_b_id`), `last_read_at` (unread state — monotonic, the guard trigger will not let it move backwards), `muted`, `archived`. `trg_conversation_participants_guard` also pins `role`/`party` against user edits and refuses to re-home a row.
+
+- **`payment_installments`** *(migration 173)* — The time-payment ledger; the parties author their own terms and the platform only records them. FK `conversation_id`, optional `transaction_id`. `seq` (UNIQUE per conversation), `amount`, `due_date`, `marked_sent_at`/`marked_sent_by`, `confirmed_at`/`confirmed_by`, `note`. `trg_payment_installments_guard`: rows cannot be re-homed or renumbered, a confirmed row is final, and nobody can sign under another person's name. DELETE is allowed only while a row is neither sent nor confirmed.
 
 - **`transactions`** — Formal commerce state machine. `status` enum: `offer_made → pending_payment → funds_verified → completed` (+ `pending`, `cancelled`). `party_a_id` (seller), `party_b_id` (buyer). FK `horse_id → user_horses(id)`, `conversation_id → conversations(id)`. `offer_amount`, `currency`. Managed by `make_offer_atomic()` and `respond_to_offer_atomic()` RPCs with `FOR UPDATE` locks.
 
@@ -231,11 +239,17 @@ Also in this domain: migration 120 adds `show_string_entries.v2_class_id` (nulla
 `show_classes`, packer→v2 classlist link — schema-only so far, no UI writes yet) and
 `shows.blind_browsing` (migration 119, default true).
 
-### 👥 Community
+### 👥 Community — "Barns"
 
-- **`groups`** — User-created communities. FK `created_by → users(id)`. `group_type` enum, `region`, `slug` (unique URL path). `is_private` boolean.
+> Groups are called **Barns** in all user-facing copy since the launch release (migration 167).
+> The tables kept their names; the data was preserved in place. Routes live at both
+> `/community/groups/*` and the `/community/barns/*` aliases.
 
-- **`group_memberships`** — Join tracking. FK `group_id → groups(id)`, `user_id → users(id)`. `role` enum: `member`, `admin`, `moderator`.
+- **`groups`** — User-created communities ("Barns"). FK `created_by → users(id)`. `group_type` enum, `region`, `slug` (unique URL path). **`is_private` boolean is canonical** since migration 167; the legacy three-state `visibility` column is kept in sync bidirectionally by `trg_sync_barn_privacy` (`is_private` wins when both move). `groups_select` is now `USING (true)` — a private barn is *listed* so people can ask to join; its roster and notice board are members-only.
+
+- **`barn_join_requests`** *(migration 167)* — The "At the Gate" queue for private barns. PK `(group_id, user_id)`. `message`, `status` (`pending`/`approved`/`denied`), `decided_at`, `decided_by`. Partial index on pending rows per barn. RLS: the requester sees and withdraws their own; owner/admin/moderator see and decide. INSERT requires `status = 'pending'` and non-membership.
+
+- **`group_memberships`** — Join tracking. FK `group_id → groups(id)`, `user_id → users(id)`. `role` enum: `member`, `admin`, `moderator`. Migration 167 rewrote the policies: self-join is INSERT-able only for public barns (or by the founder), staff may add anyone, owner/admin may DELETE, and owner-only UPDATE was added (031 shipped with no UPDATE policy at all).
 
 - **`group_files`** — Shared documents/files per group. FK `group_id → groups(id)`, `uploaded_by → users(id)`. Migration 058. Backing storage is the private `group-files` bucket (migration 121, 10MB limit, PDF/Word/image MIME allowlist) — user uploads are RLS-scoped to their own folder; other group members read via server-generated signed URLs (service role, gated by this table's own RLS), not directly via storage policy.
 
@@ -247,13 +261,21 @@ Also in this domain: migration 120 adds `show_string_entries.v2_class_id` (nulla
 
 - **`featured_horses`** — Curated spotlight models. FK `horse_id → user_horses(id)`.
 
-### 🎨 Art Studio
+### 🎨 Art Studio (rebuilt in migration 170)
 
-- **`artist_profiles`** — Studio metadata. FK `user_id → users(id)`. `studio_slug` (unique URL), `studio_name`, commission settings (`accepts_commissions`, `commission_types`, `price_range`), `portfolio_urls`, `verified_artist` boolean.
+> The Studio was torn down and rebuilt on researched commission practice — see
+> `docs/studio/COMMISSION_RESEARCH.md`. No new tables: 170 extends the three that already
+> existed (028/089) with structured terms, a real state machine, and provenance that joins back
+> to the artist. Pure pipeline logic lives in `src/lib/studio/pipeline.ts`.
 
-- **`commissions`** — Art commission workflow. FK `artist_id → users(id)`, `client_id → users(id)`. `status` tracking (requested/accepted/in_progress/completed/cancelled). Pricing and description.
+- **`artist_profiles`** — Studio metadata. FK `user_id → users(id)`. `studio_slug` (unique URL), `studio_name`, `portfolio_urls`, `verified_artist`. Migration 170 added the **8 structured terms fields** — `deposit_percent`, `deposit_refundable_before_start`, `revisions_included`, `extra_revision_fee`, `kill_fee_percent`, `accepts_rush`, `client_ships_model`, `shipping_note` (plus `terms_updated_at`) — so studios can be compared rather than read as prose. Also `services` JSONB (`[{id,type,scale,priceMin,priceMax,note,open}]`, GIN-indexed), `waitlist_open`, `status_note`. Anon may SELECT rows with `portfolio_visible = true`.
+
+- **`commissions`** — The commission pipeline. FK `artist_id → users(id)`, `client_id → users(id)`. `status` CHECK is now the ladder **`requested → quoted → accepted → in_progress → awaiting_approval → completed → delivered`** plus terminal `declined`/`cancelled` (legacy `review`/`revision`/`shipping` stay readable). Migration 170 added `budget_amount`, `agreed_price`, `quote_note`, **`terms_snapshot` JSONB** (the studio's terms frozen at acceptance), `service_scale`, `revisions_used`/`revisions_included`, `model_received`(`_at`), `shipped_at`, `tracking_note`, `is_waitlist`, `queue_position`, the stage timestamps `quoted_at`/`accepted_at`/`started_at`/`completed_at`/`closed_at`, `closed_by`/`close_reason`, and the payment marks `deposit_paid_at`/`final_paid_at`/`payment_note`/`vault_recorded_at`. `trg_commissions_freeze_agreement`: parties are immutable, and once `accepted_at` is set the `agreed_price`, `terms_snapshot` and `accepted_at` are frozen and `revisions_used` can never decrease. A client-side UPDATE policy was added so the client can actually respond.
+  **Tier gate:** free studios may hold 3 active commissions; Studio Pro is unlimited. Enforced in `sendQuote` and on the `accept` transition (not in SQL) — see `studio_slot_usage()`.
 
 - **`commission_updates`** — WIP progress posts on commissions. FK `commission_id → commissions(id)`. Photos stored via `media_attachments` or direct storage paths.
+
+- **`customization_logs`** *(extended by 170)* — gains `commission_id` (UNIQUE where non-null), `artist_user_id` and `created_at`, which is what lets a finished horse be joined back to the artist who finished it. Backs the `v_artist_finished_horses` receipts wall and the vault's `commission_cost` / `commission_notes` columns on `financial_vault`.
 
 ### 💰 Monetization
 
@@ -276,6 +298,20 @@ Also in this domain: migration 120 adds `show_string_entries.v2_class_id` (nulla
 - **`id_suggestions`** — Community suggestions for ID requests. FK `request_id → id_requests(id)`, `user_id → users(id)`.
 
 - **`user_wishlists`** — ISO (In Search Of) wishlist items. FK `user_id → users(id)`. `title`, `description`, `is_boosted_until` for promoted ISO entries.
+
+- **`announcements`** *(migration 165)* — The site-wide banner. `message` (1–300 chars), `link_url`, `placement` (`site`/`stable`/`shows`), `starts_at`/`ends_at`, `created_by`. One RLS policy only: **live rows are world-readable** (to `authenticated, anon`) while inside their window. There are deliberately **no INSERT/UPDATE/DELETE policies** — writes go through the service role after an `ADMIN_EMAIL` check in the admin action. Composed from the admin console.
+
+### 📊 Object Metrics (migration 175)
+
+> House rule, ratified with the feature: **track objects, never people.** There is no viewer
+> column in the permanent tables, so "what did member X look at" is a question the schema
+> cannot answer — not one we merely promise not to ask. All three tables have RLS enabled with
+> **zero policies** and `REVOKE ALL FROM anon, authenticated`; everything goes through the RPCs
+> below. Every read path feature-detects, so a pre-175 database simply shows no numbers.
+
+- **`object_view_daily`** — The permanent rollup. PK `(entity_type, entity_id, day)`. `entity_type` CHECK is a 7-value allow-list: `horse`, `listing`, `show`, `barn`, `studio`, `reference`, `profile`. Columns `views`, `unique_viewers`.
+- **`site_activity_daily`** — PK `day`. `member_dau`, `anon_dau`, `views`. Written under a reserved `'_site'` sentinel entity id.
+- **`object_view_scratch`** — The dedupe scratch, and the only place a per-viewer marker exists. PK `(viewer_hash, entity_type, entity_id, day)`. `viewer_hash` is a sha256 of the user id (or IP+UA) salted with the `METRICS_VIEWER_SALT` env secret **and the UTC date**, so the same person hashes differently tomorrow. `cleanup_system_garbage()` deletes every past-day row on the 06:00 cron and reports the count as `purged_view_scratch`.
 
 ### 🪦 Legacy Tables (Retained for FK integrity)
 
@@ -312,7 +348,13 @@ Also in this domain: migration 120 adds `show_string_entries.v2_class_id` (nulla
 | `notifications` | User can only see/update their own |
 | `transactions` | Both `party_a` and `party_b` can read. Status transitions restricted |
 | `catalog_items` | Public read (authenticated). Insert/update restricted to admins + trusted curators |
-| `posts` | Public read. Author can insert/update/delete. Group context checks membership |
+| `posts` | Context gate (no context, or public horse, or group membership) **AND** audience gate (`visibility='public'`, or author, or follower) — migration 166. Author can insert/update/delete |
+| `conversation_participants` | Your own row, or a row in a thread you are in. `role`/`party` are trigger-pinned |
+| `payment_installments` | Thread participants; DELETE only while neither sent nor confirmed |
+| `barn_join_requests` | Requester sees/withdraws own; barn owner/admin/moderator see and decide |
+| `announcements` | Live rows world-readable (`authenticated, anon`). **No write policies at all** — service role only |
+| `object_view_daily`, `site_activity_daily`, `object_view_scratch` | RLS on with **zero policies**, `REVOKE ALL FROM anon, authenticated`. Reached only via SECURITY DEFINER RPCs |
+| `users` | **No table-level SELECT grant** since migration 133 — public columns are granted individually. Adding a publicly-readable column means adding its `GRANT SELECT (col)` |
 | `event_entries` | Entrant can manage own. Judge can update placings. Host can manage all |
 | `mv_market_prices` | Authenticated only (no `anon` role access) |
 
@@ -322,15 +364,25 @@ Also in this domain: migration 120 adds `show_string_entries.v2_class_id` (nulla
 
 | View | Type | Purpose | Refresh |
 |------|------|---------|---------|
-| `v_horse_hoofprint` | Regular VIEW | UNION ALL across 6 tables (user_horses, horse_ownership_history, condition_history, show_records, posts, commission_updates) for horse timeline. `security_invoker = true` | Real-time (view) |
-| `discover_users_view` | Regular VIEW | Public user directory with `public_horse_count`, `total_horse_count`, filtered to exclude test accounts and deleted accounts | Real-time (view) |
+| `v_horse_hoofprint` | Regular VIEW | UNION ALL across the provenance source tables (user_horses, horse_ownership_history, condition_history, show_records, posts, commission_updates) for the horse timeline; migration 159 added a 7th branch for `horse_titles`. `security_invoker = true` | Real-time (view) |
+| `discover_users_view` | Regular VIEW | Backs **Members** (`/discover`). Public user directory with `public_horse_count`, `total_horse_count`, `avg_rating`, `rating_count`, `has_studio`. Excludes test accounts, non-active accounts, and — since migration 169 — **suspended members** (`is_suspended IS NOT TRUE`) | Real-time (view) |
+| `v_artist_finished_horses` | Regular VIEW *(migration 170)* | The Art Studio **receipts wall**: `customization_logs` (where `artist_user_id IS NOT NULL`) joined to `user_horses`, with LATERALs for `show_count`, `nan_qualifying_count`, `best_placing`, `latest_show_date` and `titles`. Finished horses *with their ribbons* — the point is that the artist's work is shown alongside what it went on to win. `security_invoker = true` | Real-time (view) |
 
 ## Materialized Views
 
 | View | Purpose | Refresh |
 |------|---------|---------|
 | `mv_market_prices` | Blue Book price aggregation from completed transactions + catalog_items. Median, avg, min, max prices. Finish-type split | Cron: `refresh_market_prices()` via `/api/cron/refresh-market` |
-| `mv_trusted_sellers` | Sellers with ≥3 completed transactions to distinct buyers AND ≥4.5 avg review rating | Cron: `refresh_mv_trusted_sellers()` via same cron route |
+| `mv_trusted_sellers` | **Rebuilt in migration 169.** Sellers past 60 days old with ≥5 distinct buyers and ≥3 reviews averaging ≥4.8. Columns: `user_id`, `alias_name`, `account_created`, `distinct_buyers`, `avg_rating`, `review_count`; granted to `authenticated, anon` | Cron: `refresh_mv_trusted_sellers()` via same cron route |
+
+> ### ⚠️ Why `mv_trusted_sellers` was empty from migration 101 until 169
+> The original definition counted distinct buyers from `horse_transfers` where
+> `status = 'completed'` — a value the table's own CHECK constraint (from 018) has never
+> allowed (`pending`/`claimed`/`expired`/`cancelled`). The join matched nothing, so the view
+> refreshed cleanly to zero rows for 68 migrations and nobody was ever a trusted seller. 169
+> corrects it to `'claimed'`, splits the old INNER/LEFT cartesian into two independent
+> `CROSS JOIN LATERAL`s, and excludes self-dealing (`claimed_by <> u.id`). **Lesson: a
+> materialized view that refreshes without error is not a view that is working.**
 
 ## Key RPCs (Postgres Functions)
 
@@ -338,7 +390,9 @@ Also in this domain: migration 120 adds `show_string_entries.v2_class_id` (nulla
 | Function | Purpose | Security |
 |----------|---------|----------|
 | `make_offer_atomic(...)` | Create offer with `FOR UPDATE` lock on horse + transaction check | SECURITY INVOKER |
-| `respond_to_offer_atomic(...)` | Accept/reject offer with row lock, auto-generates transfer on accept | SECURITY INVOKER |
+| `respond_to_offer_atomic(txn, seller, action)` | Accept/reject offer with row lock, auto-generates transfer on accept. **Replaced in 172** — 099's version set a phantom `transactions.updated_at` on the decline branch, so every decline errored from 099 until 172 | SECURITY DEFINER |
+| `deal_offer_move_atomic(txn, actor, move, amount?, message?)` | *(173)* Counter-offers. Row-locks the transaction, derives the actor's side from `party_a_id`/`party_b_id`, requires `status = 'offer_made'`, and applies `counter` / `accept` / `decline`. You cannot accept or decline your own standing offer. `respond_to_offer_atomic` was deliberately left alone | SECURITY DEFINER |
+| `are_blocked(user_a, user_b)` | *(173)* Bidirectional block check — used by RLS and by `trg_messages_block_guard` to refuse a send | SECURITY DEFINER, STABLE |
 | `claim_transfer_atomic(code, claimant_id)` | Claim horse via transfer code — atomic ownership swap | SECURITY INVOKER |
 | `claim_parked_horse_atomic(pin, claimant_id)` | Claim parked horse with PIN verification — atomic ownership swap | SECURITY INVOKER |
 | `trg_transaction_complete_price()` | Trigger: copies sale price to `mv_market_prices` input on completion | TRIGGER |
@@ -383,6 +437,20 @@ fires on `user_horses` owner change, re-points card `current_owner_id`).
 | `get_stable_summary(p_owner)` | One-round-trip sidebar aggregate: horse count, vault total, for-sale count, per-collection breakdown | SECURITY INVOKER |
 | `get_stable_facets(p_owner)` | Distinct maker/scale/finish/category values across an owner's collection, as one JSONB blob — powers Stable v2 facet filters | SECURITY INVOKER |
 
+### Launch release (migrations 165–175)
+| Function | Purpose | Security |
+|----------|---------|----------|
+| `record_class_placings_atomic(class_id, placings JSONB)` | *(165)* One transaction replaces the old delete-then-insert placing write. Re-checks `show_role_check(...)` and `is_caller_suspended()` server-side before touching `show_placings` | SECURITY DEFINER |
+| `barn_member_role(group_id, user_id)` / `barn_is_private(group_id)` / `barn_created_by(group_id)` | *(167)* RLS-support helpers for the Barn policies | SECURITY DEFINER, STABLE |
+| `get_market_listings(q, finish, min_price, max_price, has_records, trade, sort, limit, offset)` | *(169)* The anon Market front door. Public + non-deleted + `For Sale`/`Open to Offers` only (never `unlisted`), ILIKE metachars escaped, limit clamped to 50, thumbnail preferring `Primary_Thumbnail`, `records` aggregated as JSONB, `total_count` returned inline | SECURITY DEFINER, STABLE |
+| `get_market_listings_total()` | *(169)* Unfiltered live-listing count | SECURITY DEFINER |
+| `get_public_favorite_count(horse_id)` | *(169)* Favourite count for a public, non-deleted horse | SECURITY DEFINER |
+| `stamp_finishing_artist(commission_id)` | *(170)* Sets exactly `user_horses.finishing_artist` + `finishing_artist_verified`, and only for the artist on a `completed`/`delivered` commission with a linked horse | SECURITY DEFINER |
+| `studio_slot_usage(artist_ids[])` | *(170)* Active-commission counts per artist — backs the free-tier 3-slot cap | SECURITY DEFINER |
+| `record_object_view(entity_types[], entity_id, viewer_hash, is_member)` | *(175)* The only write path into the metrics tables (no role holds INSERT on them, and a public INSERT policy would let anyone type a number into a seller's view count). Validates rather than raises, re-enforces the 7-type allow-list, max 2 entity types per call, caps counted views at 10 per viewer/object/UTC day | SECURITY DEFINER |
+| `get_horse_view_stats(horse_id)` | *(175)* Week/all-time views for a horse — returns **no rows** unless the caller owns it | SECURITY DEFINER, STABLE |
+| `metrics_entity_totals(days)` / `metrics_top_objects(days, per_type)` | *(175)* Admin Insights aggregates. Granted to **`service_role` only** | SECURITY DEFINER |
+
 ### Catalog & Search
 | Function | Purpose | Security |
 |----------|---------|----------|
@@ -421,6 +489,24 @@ fires on `user_horses` owner change, re-points card `current_owner_id`).
 | `sync_is_public_from_visibility()` | `user_horses` INSERT/UPDATE | Keeps `is_public` ↔ `visibility` in sync bidirectionally |
 | `log_condition_change()` | `user_horses` UPDATE (condition changes) | Auto-inserts `condition_history` row |
 | `trg_horse_images_slug()` | `horse_images` BEFORE INSERT | Auto-assigns 8-char URL-safe `short_slug` if null (Migration 112) |
+| `sync_barn_privacy()` | `groups` BEFORE INSERT/UPDATE | Keeps `is_private` ↔ legacy `visibility` in sync; `is_private` wins (167) |
+| `commissions_freeze_agreement()` | `commissions` BEFORE UPDATE | Parties immutable; `agreed_price`/`terms_snapshot`/`accepted_at` frozen once accepted; `revisions_used` never decreases (170) |
+| `conversation_participants_guard()` / `payment_installments_guard()` / `messages_guard()` / `conversations_guard()` | Deal Room tables, BEFORE UPDATE | Immutability + authorship rules that make the transcript evidence (173) |
+| `messages_block_guard()` | `messages` BEFORE INSERT | Refuses the send when `are_blocked()` is true in either direction (173) |
+| `messages_touch_conversation()` | `messages` AFTER INSERT | Maintains the four `conversations.last_message_*` columns + `updated_at` (173) |
+
+> ### ⚠️ SECURITY-INVOKER guard triggers need a service-context bypass
+> A `BEFORE UPDATE` guard that enforces per-user rules will fire on the migration's **own
+> backfill**. The SQL editor has no user session, so `auth.uid()` is NULL, the "you cannot edit
+> someone else's row" branch raises, and the paste aborts halfway. Every guard trigger must open
+> with:
+> ```sql
+> IF (SELECT auth.uid()) IS NULL THEN RETURN NEW; END IF;
+> ```
+> That context is the SQL editor, the service role and crons — trusted server code that RLS
+> already distinguishes from clients. All four 173 guards needed this hotfix after the first
+> paste failed. Alternatively, order the migration so the backfill runs *before* the triggers
+> are created.
 
 ---
 
@@ -465,6 +551,8 @@ erDiagram
     posts ||--o{ posts : "parent_id replies"
 
     conversations ||--o{ messages : "contains"
+    conversations ||--o{ conversation_participants : "has parties"
+    conversations ||--o{ payment_installments : "time payments"
     transactions ||--o{ reviews : "reviewed via"
 
     events ||--o{ event_divisions : "has divisions"
@@ -476,6 +564,7 @@ erDiagram
     events ||--o{ posts : "event comments"
 
     groups ||--o{ group_memberships : "has members"
+    groups ||--o{ barn_join_requests : "at the gate"
     groups ||--o{ posts : "group posts"
     groups ||--o{ group_files : "shared files"
     groups ||--o{ group_channels : "sub-channels"
@@ -493,22 +582,25 @@ erDiagram
 ## Migration Policy
 
 1. **CLI-only** — Migrations are created via `supabase migration new <name>` or manually in `supabase/migrations/`
-2. **Sequential numbering** — Files named `NNN_description.sql` (currently at 123, 119 files — 045/047/049/051 skipped during Grand Unification, plus earlier gaps)
+2. **Sequential numbering** — Files named `NNN_description.sql` (currently at 175, 170 files — 045/047/049/051 skipped during Grand Unification, and **174 is an intentional gap**; next number is 176)
 3. **Dry-run required** — Review SQL output before pushing
 4. **Human approval** — AI must NEVER run `supabase db push` or `supabase migration up` directly
 5. **Rollback plan** — Destructive changes (`DROP`, `ALTER ... DROP COLUMN`) must include a rollback script or `IF EXISTS` guards
 6. **`SECURITY DEFINER` functions** must use `SET search_path = ''` with `public.` prefix on all table references
 7. **Extensions** — `pg_trgm` lives in `extensions` schema (not `public`)
 8. **When >50 users** — Never run destructive SQL without human approval and a verified backup
-9. **`IF NOT EXISTS` guards** — All `CREATE TABLE` and `CREATE INDEX` must use `IF NOT EXISTS`
+9. **`IF NOT EXISTS` guards** — All `CREATE TABLE` and `CREATE INDEX` must use `IF NOT EXISTS`. The whole file should be re-runnable: the owner pastes it by hand, and a half-applied migration has to be fixable by pasting the same file again.
+10. **Guard triggers need the service-context bypass** — see the warning under Triggers above.
+11. **Never edit migration SQL with a plain-string `String.replace()`** — JavaScript treats `$$` in a *replacement* string as a literal `$`, which silently collapses every `AS $$` dollar-quote opener it touches into `AS $`. This mangled 173 and cost a second hotfix. Use the Edit tool (or a replacement *function*), and count the dollar-quote tokens afterwards.
 
 ---
 
 ## Cron Jobs
 
-| Route | Schedule | Actions |
+| Route | Schedule (`vercel.json`) | Actions |
 |-------|----------|---------|
-| `/api/cron/refresh-market` | Daily | `refresh_market_prices()` + `refresh_mv_trusted_sellers()` + `cleanup_system_garbage()` + `auto_unpark_expired_transfers()` + `cleanup_rate_limits()` |
-| `/api/cron/stablemaster-agent` | Monthly | Pro-only AI collection analysis via Google Gemini → email via Resend |
+| `/api/cron/refresh-market` | `0 6 * * *` (daily 06:00 UTC) | `refresh_market_prices()` + `refresh_mv_trusted_sellers()` + `cleanup_system_garbage()` (which since 175 also empties `object_view_scratch` of every past-day row) + `auto_unpark_expired_transfers()` + `cleanup_rate_limits()` |
+| `/api/cron/transition-shows` | `0 * * * *` (hourly) | Auto-transitions shows whose entry/judging windows have elapsed |
+| `/api/cron/stablemaster-agent` | `0 9 1 * *` (monthly, 1st) | Pro-only AI collection analysis via Google Gemini → email via Resend |
 
-Both secured via `CRON_SECRET` header validation.
+All three secured via `CRON_SECRET` header validation.
