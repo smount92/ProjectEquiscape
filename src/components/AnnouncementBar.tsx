@@ -61,7 +61,10 @@ export default function AnnouncementBar({ announcements }: { announcements: Anno
                     role="status"
                 >
                     <span aria-hidden="true">📣</span>
-                    <p className="m-0 min-w-0 flex-1">
+                    {/* Explicit color: the global `p { color: var(--secondary-foreground) }`
+                        rule out-specifies inheritance and rendered this
+                        brown-on-forest (unreadable, esp. under Lamplight). */}
+                    <p className="m-0 min-w-0 flex-1 text-primary-foreground">
                         {a.message}
                         {a.linkUrl && (
                             <>
