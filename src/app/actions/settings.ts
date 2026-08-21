@@ -310,12 +310,112 @@ export async function uploadAvatar(
 
 import { getAdminClient } from "@/lib/supabase/admin";
 
+/** Show statuses a departing host can leave behind without harm once
+ *  handled: draft is deleted, these two are archived + entrants told. */
+const PRE_JUDGING_STATUSES = ["published", "entries_open"];
+/** Mid-flight statuses — entries/judging in progress. Left untouched
+ *  and flagged to the admin so results can be salvaged by hand. */
+const MID_FLIGHT_STATUSES = ["entries_closed", "running", "judging", "results_review"];
+
+/**
+ * A deleted host must not leave ghost shows behind (audit S10):
+ * drafts vanish, pre-judging shows are archived with their entrants
+ * notified, and mid-flight shows are flagged to the admin untouched.
+ * Every step is non-fatal — the user's right to delete their account
+ * never hangs on cleanup, so failures log and continue.
+ */
+async function windDownHostedShows(hostId: string): Promise<void> {
+    const admin = getAdminClient();
+    try {
+        const { data: shows, error } = await admin
+            .from("shows")
+            .select("id, title, status")
+            .eq("host_id", hostId)
+            .not("status", "in", "(completed,archived)");
+        if (error || !shows || shows.length === 0) return;
+
+        const drafts = shows.filter((s) => s.status === "draft");
+        const preJudging = shows.filter((s) => PRE_JUDGING_STATUSES.includes(s.status as string));
+        const midFlight = shows.filter((s) => MID_FLIGHT_STATUSES.includes(s.status as string));
+
+        if (drafts.length > 0) {
+            await admin.from("shows").delete().in("id", drafts.map((s) => s.id));
+        }
+
+        // House pattern: createNotification is server-only — dynamic
+        // import + try/catch so it can never take deletion down.
+        let notify: typeof import("@/lib/notifications/createNotification") | null = null;
+        try {
+            notify = await import("@/lib/notifications/createNotification");
+        } catch {
+            notify = null;
+        }
+
+        for (const show of preJudging) {
+            const { data: entryRows } = await admin
+                .from("show_class_entries")
+                .select("owner_id")
+                .eq("show_id", show.id)
+                .neq("status", "scratched");
+            const entrantIds = [...new Set((entryRows ?? []).map((e) => e.owner_id as string))];
+
+            await admin.from("shows").update({ status: "archived" }).eq("id", show.id);
+
+            if (notify && entrantIds.length > 0) {
+                try {
+                    await notify.createNotificationsBulk(
+                        entrantIds.map((userId) => ({
+                            userId,
+                            type: "show_moderation",
+                            content: `"${show.title}" has been cancelled — the host's account was closed. Your entries there no longer count.`,
+                            linkUrl: "/shows",
+                        })),
+                    );
+                } catch (err) {
+                    logger.error("DeleteAccount", "Entrant cancel notify failed (continuing)", err);
+                }
+            }
+        }
+
+        if (midFlight.length > 0 && notify) {
+            const adminEmail = process.env.ADMIN_EMAIL;
+            if (adminEmail) {
+                const { data: adminUser } = await admin
+                    .from("users")
+                    .select("id")
+                    .ilike("email", adminEmail)
+                    .maybeSingle();
+                if (adminUser) {
+                    try {
+                        await notify.createNotificationsBulk(
+                            midFlight.map((show) => ({
+                                userId: adminUser.id as string,
+                                type: "show_moderation",
+                                content: `⚠️ Host account deleted mid-show: "${show.title}" is ${show.status} with no host. Salvage or archive it from the console.`,
+                                linkUrl: `/shows/host/${show.id}`,
+                            })),
+                        );
+                    } catch (err) {
+                        logger.error("DeleteAccount", "Admin mid-flight flag failed (continuing)", err);
+                    }
+                }
+            }
+        }
+    } catch (err) {
+        logger.error("DeleteAccount", "Hosted-show wind-down failed (continuing)", err);
+    }
+}
+
 /**
  * Permanently delete the current user's account and all data.
  * Uses admin client for cascade deletion.
  */
 export async function deleteAccount(): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
+
+    // Wind down any shows they host BEFORE the account row is
+    // scrubbed (audit S10 — no ghost shows).
+    await windDownHostedShows(user.id);
 
     // Call the soft delete RPC
     const adminClient = getAdminClient();

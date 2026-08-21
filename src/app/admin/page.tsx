@@ -7,6 +7,7 @@ import { getOpenReports } from"@/app/actions/moderation";
 import { listPendingExternalShows } from"@/app/actions/external-shows";
 import AdminCatalogMergeCard from"@/components/AdminCatalogMergeCard";
 import AdminAnnouncementsCard from"@/components/AdminAnnouncementsCard";
+import AdminSanctioningCard from"@/components/AdminSanctioningCard";
 import AdminModerationCard from"@/components/AdminModerationCard";
 import AdminTabs from"@/components/AdminTabs";
 import CommandCenterLayout from"@/components/layouts/CommandCenterLayout";
@@ -129,6 +130,7 @@ export default async function AdminPage() {
    <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
     <AdminModerationCard />
     <AdminAnnouncementsCard />
+    <AdminSanctioningCard />
     <AdminCatalogMergeCard />
    </div>
    <AdminTabs

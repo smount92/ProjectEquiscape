@@ -479,3 +479,122 @@ export async function mergeCatalogItems(
     summary: `Merged "${dup.title}" into "${canonical.title}" — ${moved} reference${moved === 1 ? "" : "s"} repointed.`,
   };
 }
+
+// ── MHH sanctioning requests (Season 1 manual approval) ──
+// createShow tags a non-admin host's request by appending
+// "[Host requested MHH sanctioning]" to sanctioning_note and forcing
+// is_mhh_qualifying=false. These actions surface that queue on /admin
+// and grant (or dismiss) the request via the service role.
+
+const SANCTIONING_REQUEST_MARKER = "[Host requested MHH sanctioning]";
+
+export interface SanctioningRequestRow {
+  showId: string;
+  title: string;
+  status: string;
+  showYear: number | null;
+  hostAlias: string;
+  createdAt: string;
+  /** The host's own note text, marker stripped. */
+  note: string | null;
+}
+
+export async function listSanctioningRequests(): Promise<
+  { success: true; requests: SanctioningRequestRow[] } | { success: false; error: string }
+> {
+  const user = await verifyAdmin();
+  if (!user) return { success: false, error: "Unauthorized" };
+
+  const admin = getAdminSupabase();
+  const { data, error } = await admin
+    .from("shows")
+    .select("id, title, status, show_year, host_id, sanctioning_note, created_at")
+    .eq("is_mhh_qualifying", false)
+    .ilike("sanctioning_note", `%${SANCTIONING_REQUEST_MARKER}%`)
+    .order("created_at", { ascending: true });
+  if (error) return { success: false, error: error.message };
+
+  const rows = data ?? [];
+  const hostIds = [...new Set(rows.map((s) => s.host_id as string))];
+  const aliasById = new Map<string, string>();
+  if (hostIds.length > 0) {
+    const { data: hosts } = await admin.from("users").select("id, alias_name").in("id", hostIds);
+    for (const h of hosts ?? []) {
+      if (h.alias_name) aliasById.set(h.id as string, h.alias_name as string);
+    }
+  }
+
+  return {
+    success: true,
+    requests: rows.map((s) => ({
+      showId: s.id as string,
+      title: (s.title as string) ?? "Untitled show",
+      status: (s.status as string) ?? "draft",
+      showYear: (s.show_year as number | null) ?? null,
+      hostAlias: aliasById.get(s.host_id as string) ?? "Unknown host",
+      createdAt: s.created_at as string,
+      note:
+        ((s.sanctioning_note as string | null) ?? "")
+          .replace(SANCTIONING_REQUEST_MARKER, "")
+          .trim() || null,
+    })),
+  };
+}
+
+/**
+ * Resolve a sanctioning request: grant flips is_mhh_qualifying on and
+ * notifies the host; dismiss just clears the request marker (the host
+ * can ask again via show settings). Both strip the marker so the show
+ * leaves the queue either way.
+ */
+export async function resolveSanctioningRequest(
+  showId: string,
+  decision: "grant" | "dismiss"
+): Promise<{ success: boolean; error?: string }> {
+  const user = await verifyAdmin();
+  if (!user) return { success: false, error: "Unauthorized" };
+  if (decision !== "grant" && decision !== "dismiss") {
+    return { success: false, error: "Unknown decision." };
+  }
+
+  const admin = getAdminSupabase();
+  const { data: show, error: readError } = await admin
+    .from("shows")
+    .select("id, title, host_id, sanctioning_note, is_mhh_qualifying")
+    .eq("id", showId)
+    .maybeSingle();
+  if (readError) return { success: false, error: readError.message };
+  if (!show) return { success: false, error: "Show not found." };
+
+  const strippedNote =
+    ((show.sanctioning_note as string | null) ?? "")
+      .replace(SANCTIONING_REQUEST_MARKER, "")
+      .trim() || null;
+
+  const { error: updateError } = await admin
+    .from("shows")
+    .update({
+      sanctioning_note: strippedNote,
+      ...(decision === "grant" ? { is_mhh_qualifying: true } : {}),
+    })
+    .eq("id", showId);
+  if (updateError) return { success: false, error: updateError.message };
+
+  if (decision === "grant") {
+    // House pattern: dynamic import + try/catch — createNotification is
+    // server-only and must never take the action down with it.
+    try {
+      const { createNotification } = await import("@/lib/notifications/createNotification");
+      await createNotification({
+        userId: show.host_id as string,
+        type: "show_moderation",
+        content: `🏅 "${show.title}" is now MHH Sanctioned — placings there earn Championship Series points and can mint qualification cards.`,
+        linkUrl: `/shows/host/${showId}`,
+      });
+    } catch (err) {
+      logger.error("Admin", "Sanctioning grant notification failed (continuing)", err);
+    }
+  }
+
+  return { success: true };
+}

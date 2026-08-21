@@ -68,6 +68,19 @@ export type GetStandingsResult =
 const SHOW_YEAR_MIN = 2000;
 const SHOW_YEAR_MAX = 2100;
 
+/** PostgREST caps a response at 1000 rows — page past it. */
+const PAGE = 1000;
+/** Hard ceiling so a runaway season can't loop forever (50 pages). */
+const ENTRY_CAP = 50_000;
+/** Same .in() chunk size grantTitles uses — keeps URLs sane. */
+const IN_CHUNK = 150;
+
+function chunks<T>(items: T[], size: number): T[][] {
+    const out: T[][] = [];
+    for (let i = 0; i < items.length; i += size) out.push(items.slice(i, i + size));
+    return out;
+}
+
 /** The signed-in exhibitor's season at a glance (season-felt wave). */
 export interface MySeason {
     showYear: number;
@@ -177,47 +190,78 @@ export async function getStandings(params: GetStandingsParams): Promise<GetStand
 
         // 2. Live entries across all counted shows, oldest → newest
         //    (the points model reads "latest entry" as current owner).
-        const { data: rawEntries, error: entriesError } = await supabase
-            .from("show_class_entries")
-            .select("id, show_id, class_id, horse_id, owner_id")
-            .in("show_id", [...counted])
-            .neq("status", "scratched")
-            .order("created_at", { ascending: true });
-        if (entriesError) return { success: false, error: entriesError.message };
-        const entries = (rawEntries ?? []) as unknown as StandingsEntryRow[];
+        //    Paged past PostgREST's 1000-row cap — a busy season must
+        //    not silently drop entries and publish wrong standings.
+        const entries: StandingsEntryRow[] = [];
+        for (let from = 0; from < ENTRY_CAP; from += PAGE) {
+            const { data: rawEntries, error: entriesError } = await supabase
+                .from("show_class_entries")
+                .select("id, show_id, class_id, horse_id, owner_id")
+                .in("show_id", [...counted])
+                .neq("status", "scratched")
+                .order("created_at", { ascending: true })
+                .range(from, from + PAGE - 1);
+            if (entriesError) return { success: false, error: entriesError.message };
+            const batch = (rawEntries ?? []) as unknown as StandingsEntryRow[];
+            entries.push(...batch);
+            if (batch.length < PAGE) break;
+        }
         if (entries.length === 0) return empty();
 
         // 3 + 4. Placings for those entries, and decided championship
-        //    callbacks for those shows — one batched read each.
+        //    callbacks for those shows — chunked .in() lists (an id
+        //    list of thousands breaks the request URL) fetched in
+        //    parallel.
         const entryIds = entries.map((e) => e.id);
-        const [placingsRes, callbacksRes] = await Promise.all([
-            supabase.from("show_placings").select("entry_id, place").in("entry_id", entryIds),
+        const [placingChunks, callbacksRes] = await Promise.all([
+            Promise.all(
+                chunks(entryIds, IN_CHUNK).map((ids) =>
+                    supabase.from("show_placings").select("entry_id, place").in("entry_id", ids),
+                ),
+            ),
             supabase
                 .from("show_callbacks")
                 .select("scope, champion_entry_id")
                 .in("show_id", [...counted])
                 .not("champion_entry_id", "is", null),
         ]);
-        if (placingsRes.error) return { success: false, error: placingsRes.error.message };
+        for (const res of placingChunks) {
+            if (res.error) return { success: false, error: res.error.message };
+        }
         if (callbacksRes.error) return { success: false, error: callbacksRes.error.message };
-        const placings = (placingsRes.data ?? []) as unknown as StandingsPlacingRow[];
+        const placings = placingChunks.flatMap(
+            (res) => (res.data ?? []) as unknown as StandingsPlacingRow[],
+        );
         const callbacks = (callbacksRes.data ?? []) as unknown as StandingsCallbackRow[];
 
         // 5. Display names — RLS may hide private horses; the points
-        //    model degrades those to honest fallbacks.
+        //    model degrades those to honest fallbacks. Chunked like
+        //    the placings read.
         const horseIds = [...new Set(entries.map((e) => e.horse_id))];
         const ownerIds = [...new Set(entries.map((e) => e.owner_id))];
-        const [horsesRes, ownersRes] = await Promise.all([
-            supabase.from("user_horses").select("id, custom_name").in("id", horseIds),
-            supabase.from("users").select("id, alias_name").in("id", ownerIds),
+        const [horseChunks, ownerChunks] = await Promise.all([
+            Promise.all(
+                chunks(horseIds, IN_CHUNK).map((ids) =>
+                    supabase.from("user_horses").select("id, custom_name").in("id", ids),
+                ),
+            ),
+            Promise.all(
+                chunks(ownerIds, IN_CHUNK).map((ids) =>
+                    supabase.from("users").select("id, alias_name").in("id", ids),
+                ),
+            ),
         ]);
         const horseNamesById = new Map<string, string>();
-        for (const row of horsesRes.data ?? []) {
-            if (row.custom_name) horseNamesById.set(row.id as string, row.custom_name as string);
+        for (const res of horseChunks) {
+            for (const row of res.data ?? []) {
+                if (row.custom_name) horseNamesById.set(row.id as string, row.custom_name as string);
+            }
         }
         const ownerAliasById = new Map<string, string>();
-        for (const row of ownersRes.data ?? []) {
-            if (row.alias_name) ownerAliasById.set(row.id as string, row.alias_name as string);
+        for (const res of ownerChunks) {
+            for (const row of res.data ?? []) {
+                if (row.alias_name) ownerAliasById.set(row.id as string, row.alias_name as string);
+            }
         }
 
         const input = {

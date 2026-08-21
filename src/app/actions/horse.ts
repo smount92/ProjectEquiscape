@@ -76,6 +76,9 @@ export async function deleteHorse(horseId: string): Promise<{ success: boolean; 
         if (paths.length > 0) {
             await supabase.storage.from("horse-images").remove(paths);
         }
+        // The storage objects are gone — drop the rows too, or the
+        // surviving provenance row keeps serving dead image URLs.
+        await supabase.from("horse_images").delete().eq("horse_id", horseId);
     }
 
     // Soft-delete: scrub PII but preserve the row for provenance chains
