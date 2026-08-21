@@ -248,11 +248,16 @@ export default function Header() {
 
  // Build full nav list including Art Studio
  const allLinks = [...NAV_LINKS];
- // Insert Art Studio after Shows (index 5)
+ // Art Studio lives with the Paddock's inner rooms, under More.
  allLinks.splice(5, 0, getStudioLink(artistSlug));
  const totalLinks = allLinks.length;
- const hasOverflow = visibleCount < totalLinks;
- const overflowLinks = allLinks.slice(visibleCount);
+ // The bar holds THE FIVE ROOMS and nothing else, however wide the
+ // screen — the inner rooms (Show Ring, Barns, Events, Help ID,
+ // Members, Art Studio) always live under More. The ResizeObserver
+ // still shrinks below five on narrow viewports.
+ const shownCount = Math.min(visibleCount, 5);
+ const hasOverflow = shownCount < totalLinks;
+ const overflowLinks = allLinks.slice(shownCount);
 
  return (
  <header
@@ -333,7 +338,7 @@ export default function Header() {
  aria-current={pathname === link.href ? "page" : undefined}
  data-nav-item="true"
  style={
- i >= visibleCount
+ i >= shownCount
  ? { position:"absolute", visibility:"hidden", pointerEvents:"none" }
  : undefined
  }
