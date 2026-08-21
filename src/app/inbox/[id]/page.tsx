@@ -1,405 +1,357 @@
-import { createClient } from"@/lib/supabase/server";
-import { redirect, notFound } from"next/navigation";
-import Link from"next/link";
-import ChatThread from"@/components/ChatThread";
-import RatingForm from"@/components/RatingForm";
-import TransactionActions from"@/components/TransactionActions";
-import OfferCard from"@/components/OfferCard";
-import BlockButton from"@/components/BlockButton";
-import { isBlocked as checkIsBlocked } from"@/app/actions/blocks";
-import { getTransactionByConversation } from"@/app/actions/transactions";
-import { getConversationAttachments } from"@/app/actions/messaging";
-import { getPublicImageUrls } from"@/lib/utils/storage";
-import { resolveAvatarUrl } from"@/lib/utils/avatars.server";
-import { MessageCircle, Calendar, Package, Star } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
+import { redirect, notFound } from "next/navigation";
+import Link from "next/link";
+import { Calendar, MessageCircle, Package, Star } from "lucide-react";
+
+import DealThread from "@/components/inbox/DealThread";
+import ThreadActions from "@/components/inbox/ThreadActions";
+import DealStrip from "@/components/deals/DealStrip";
+import TermsPanel from "@/components/deals/TermsPanel";
+import PaymentPlanPanel from "@/components/deals/PaymentPlanPanel";
+import DealRecordPanel from "@/components/deals/DealRecordPanel";
+import RatingForm from "@/components/RatingForm";
+import TransactionActions from "@/components/TransactionActions";
+import BlockButton from "@/components/BlockButton";
+
+import { getConversationAttachments } from "@/app/actions/messaging";
+import { loadDealRoom } from "@/app/inbox/reads";
+import { agreedPrice as priceFromTerms, formatMoney } from "@/lib/deals/terms";
+import { ledgerSummary } from "@/lib/deals/ledger";
+import { otherParty, payerParty, roleLabel } from "@/lib/deals/vocabulary";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
- const { id } = await params;
- return {
- title: `Conversation`,
- description: `Private message thread ${id}.`,
- };
+    const { id } = await params;
+    return {
+        title: "Conversation",
+        description: `Private message thread ${id}.`,
+    };
 }
 
-
-interface ConversationData {
- id: string;
- buyer_id: string;
- seller_id: string;
- horse_id: string | null;
-}
-
-interface MessageRow {
- id: string;
- sender_id: string;
- content: string;
- is_read: boolean;
- created_at: string;
-}
-
+/**
+ * THE DEAL ROOM.
+ *
+ * Three layers stacked in one thread, exactly as the plan describes:
+ *
+ *   1. the pinned header — who, and what this is about;
+ *   2. the deal strip — the current state in one line, with the one
+ *      action available now;
+ *   3. the transcript — messages AND events, in one chronological
+ *      stream, where every state change leaves a permanent entry.
+ *
+ * A plain member-to-member DM is this same page with layers 2 and 3's
+ * deal machinery simply absent: no strip, no panels, no clutter. That
+ * is the requirement the owner set — the deal machinery must never make
+ * ordinary chatting worse — and it is why every deal panel below is
+ * behind `isDeal`.
+ */
 export default async function ChatPage({ params }: { params: Promise<{ id: string }> }) {
- const { id: conversationId } = await params;
- const supabase = await createClient();
+    const { id: conversationId } = await params;
+    const supabase = await createClient();
 
- const {
- data: { user },
- } = await supabase.auth.getUser();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) redirect("/login");
 
- if (!user) redirect("/login");
+    const room = await loadDealRoom(conversationId, user.id);
+    if (!room) notFound();
 
- // Fetch conversation (RLS ensures user is buyer or seller)
- const { data: conversation } = await supabase
- .from("conversations")
- .select("id, buyer_id, seller_id, horse_id, transaction_status")
- .eq("id", conversationId)
- .single<ConversationData & { transaction_status: string }>();
+    const attachmentMap = await getConversationAttachments(conversationId);
 
- if (!conversation) notFound();
+    const entries = room.entries.map((e) => ({
+        ...e,
+        isMine: e.senderId === user.id,
+        attachments: attachmentMap[e.id] || undefined,
+    }));
 
- // Get the other user's alias
- const otherId = conversation.buyer_id === user.id ? conversation.seller_id : conversation.buyer_id;
+    const labels = room.kind
+        ? { a: roleLabel(room.kind, "a"), b: roleLabel(room.kind, "b") }
+        : { a: "Them", b: "You" };
 
- const { data: otherUser } = await supabase
- .from("users")
- .select("alias_name, avatar_url")
- .eq("id", otherId)
- .single<{ alias_name: string; avatar_url: string | null }>();
+    const isDeal = !!room.transaction || !!room.subject || room.terms.boxes.length > 0;
+    const frozen = !!room.disputed;
+    const ledger = ledgerSummary(room.installments);
+    const agreed = priceFromTerms(room.terms);
 
- const otherAlias = otherUser?.alias_name ??"Unknown";
- const otherAvatarUrl = await resolveAvatarUrl(otherUser?.avatar_url ?? null);
+    const payer = room.kind ? payerParty(room.kind) : room.transaction ? "b" : null;
+    const memberSince = room.otherMemberSince
+        ? new Date(room.otherMemberSince).toLocaleDateString("en-US", {
+              month: "long",
+              year: "numeric",
+          })
+        : null;
 
- // Fetch current user avatar
- const { data: currentUserData } = await supabase
- .from("users")
- .select("avatar_url")
- .eq("id", user.id)
- .single<{ avatar_url: string | null }>();
- const currentUserAvatar = await resolveAvatarUrl(currentUserData?.avatar_url ?? null);
+    const composerDisabledReason = room.isBlocked
+        ? "You can no longer message this person."
+        : null;
 
- // Check block status for this conversation partner
- const isBlockedUser = await checkIsBlocked(otherId);
+    const vaultMeta = room.transaction?.metadata ?? null;
 
- // ── Trust Signals ──
- // Account age
- const { data: otherProfile } = await supabase
- .from("users")
- .select("created_at")
- .eq("id", otherId)
- .single<{ created_at: string }>();
+    return (
+        <div className="mx-auto flex min-h-[calc(100dvh-var(--header-height))] max-w-6xl flex-col px-4 md:px-8">
+            {/* ── 1. The pinned header ── */}
+            <div className="bg-card border-input animate-fade-in-up mb-2 flex shrink-0 flex-wrap items-center gap-3 rounded-lg border px-4 py-3 sm:mb-4 sm:gap-4 sm:px-6 sm:py-4">
+                <Link
+                    href="/inbox"
+                    className="text-muted-foreground flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-full bg-black/5 no-underline transition-all"
+                    aria-label="Back to inbox"
+                >
+                    <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                    >
+                        <polyline points="15 18 9 12 15 6" />
+                    </svg>
+                </Link>
 
- const memberSince = otherProfile?.created_at
- ? new Date(otherProfile.created_at).toLocaleDateString("en-US", { month:"long", year:"numeric" })
- : null;
+                <div className="flex min-w-0 flex-1 flex-col">
+                    <div className="flex items-center gap-2">
+                        <Link href={`/profile/${encodeURIComponent(room.otherAlias)}`}>
+                            @{room.otherAlias}
+                        </Link>
+                        {/* The role label reads off the TRANSACTION, so a seller
+                            who opened the thread is no longer called the buyer. */}
+                        {room.kind && (
+                            <span className="bg-success/10 text-forest rounded-full px-[8px] py-[2px] text-xs font-medium">
+                                {room.otherLabel}
+                            </span>
+                        )}
+                    </div>
+                    {room.subject ? (
+                        <span className="text-muted-foreground mt-0.5 text-xs">
+                            🐴 Re: {room.subject.title}
+                        </span>
+                    ) : (
+                        <span className="text-muted-foreground mt-0.5 flex items-center gap-1 text-xs opacity-70">
+                            <MessageCircle className="h-3 w-3" /> Direct message
+                        </span>
+                    )}
+                </div>
 
- // Completed transfers count
- const { count: transferCount } = await supabase
- .from("horse_transfers")
- .select("id", { count:"exact", head: true })
- .eq("status","claimed")
- .or(`sender_id.eq.${otherId},claimed_by.eq.${otherId}`);
+                <div className="mt-0.5 hidden flex-wrap gap-1 sm:flex">
+                    {memberSince && (
+                        <TrustChip title="Account age">
+                            <Calendar className="h-3 w-3" /> Member since {memberSince}
+                        </TrustChip>
+                    )}
+                    <TrustChip title="Completed Hoofprint transfers">
+                        <Package className="h-3 w-3" /> {room.otherTransferCount} transfer
+                        {room.otherTransferCount !== 1 ? "s" : ""}
+                    </TrustChip>
+                    {room.otherAvgRating !== null && (
+                        <TrustChip title="Average review score">
+                            <Star className="h-3 w-3 fill-current" /> {room.otherAvgRating} (
+                            {room.otherRatingCount})
+                        </TrustChip>
+                    )}
+                </div>
 
- // Average rating (from universal reviews table)
- const { data: reviewsData } = await supabase.from("reviews").select("stars").eq("target_id", otherId);
- const ratingsArr = (reviewsData ?? []) as { stars: number }[];
- const avgRating =
- ratingsArr.length > 0
- ? Math.round((ratingsArr.reduce((s, r) => s + r.stars, 0) / ratingsArr.length) * 10) / 10
- : null;
+                <ThreadActions
+                    conversationId={conversationId}
+                    muted={room.muted}
+                    archived={room.archived}
+                    enabled={room.support.participants}
+                />
+                <BlockButton
+                    targetId={room.otherId}
+                    targetAlias={room.otherAlias}
+                    initialBlocked={room.isBlocked}
+                />
+            </div>
 
- // Get horse context if present
- let horseContext: {
- id: string;
- name: string;
- tradeStatus: string;
- price: number | null;
- thumbnailUrl: string | null;
- refLine: string | null;
- } | null = null;
+            <div className="flex min-h-0 flex-1 flex-col">
+                {/* The pinned subject */}
+                {room.subject && room.subject.horseId && (
+                    <Link
+                        href={`/community/${room.subject.horseId}`}
+                        className="group border-input bg-card text-foreground animate-fade-in-up mb-2 flex shrink-0 items-center gap-4 rounded-xl border p-3 no-underline shadow-sm transition-all hover:-translate-y-px hover:shadow-md sm:mb-4 sm:p-4"
+                        id="chat-horse-link"
+                    >
+                        {room.subject.thumbUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                                src={room.subject.thumbUrl}
+                                alt={room.subject.title}
+                                className="h-10 w-10 shrink-0 rounded-md object-cover sm:h-14 sm:w-14"
+                            />
+                        ) : (
+                            <div className="bg-card flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-xl sm:h-14 sm:w-14 sm:text-2xl">
+                                🐴
+                            </div>
+                        )}
+                        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                            <span className="overflow-hidden text-sm font-bold text-ellipsis whitespace-nowrap">
+                                {room.subject.title}
+                            </span>
+                            {room.subject.reference && (
+                                <span className="text-muted-foreground overflow-hidden text-xs text-ellipsis whitespace-nowrap">
+                                    {room.subject.reference}
+                                </span>
+                            )}
+                            <div className="flex flex-wrap items-center gap-1.5">
+                                {agreed !== null ? (
+                                    <span className="border-forest/25 bg-forest/5 text-forest inline-flex w-fit items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold">
+                                        Agreed {formatMoney(agreed)}
+                                    </span>
+                                ) : room.subject.listingPrice ? (
+                                    <span className="bg-success/10 text-success inline-flex w-fit items-center rounded-full px-2 py-0.5 text-xs font-bold">
+                                        {formatMoney(room.subject.listingPrice)}
+                                    </span>
+                                ) : null}
+                                {room.subject.tradeStatus === "Pending Sale" && (
+                                    <span className="bg-info/10 text-info inline-flex w-fit items-center rounded-full px-2 py-0.5 text-xs font-bold">
+                                        Pending sale
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                        <span className="text-muted-foreground group-hover:text-forest shrink-0 text-[1.1rem] transition-transform group-hover:translate-x-[3px]">
+                            →
+                        </span>
+                    </Link>
+                )}
 
- if (conversation.horse_id) {
- const { data: horse } = await supabase
- .from("user_horses")
- .select(
- `
- id, custom_name, trade_status, listing_price,
- catalog_items:catalog_id(title, maker),
- horse_images(image_url, angle_profile)
- `,
- )
- .eq("id", conversation.horse_id)
- .single<{
- id: string;
- custom_name: string;
- trade_status: string;
- listing_price: number | null;
- catalog_items: { title: string; maker: string } | null;
- horse_images: { image_url: string; angle_profile: string }[];
- }>();
+                {/* ── 2. The deal strip ── */}
+                {room.transaction && room.stage && (
+                    <DealStrip
+                        conversationId={conversationId}
+                        transaction={room.transaction}
+                        party={room.party}
+                        kind={room.kind}
+                        stage={room.stage}
+                        planComplete={ledger.count > 0 && ledger.allConfirmed}
+                        hasPlan={ledger.count > 0}
+                        frozen={frozen}
+                    />
+                )}
 
- if (horse) {
- // Get thumbnail (Primary_Thumbnail or first image)
- const thumb = horse.horse_images?.find((img) => img.angle_profile ==="Primary_Thumbnail");
- const firstImg = horse.horse_images?.[0];
- const imgPath = thumb?.image_url || firstImg?.image_url;
+                {/* ── 3. The transcript ── */}
+                <div className="min-h-[50dvh]">
+                    <DealThread
+                        conversationId={conversationId}
+                        currentUserId={user.id}
+                        currentUserAvatar={room.myAvatarUrl}
+                        otherAlias={room.otherAlias}
+                        otherAvatarUrl={room.otherAvatarUrl}
+                        initialMessages={entries}
+                        composerDisabledReason={composerDisabledReason}
+                    />
+                </div>
 
- // Sign the URL
- let signedThumb: string | null = null;
- if (imgPath) {
- const urlMap = getPublicImageUrls([imgPath]);
- signedThumb = urlMap.get(imgPath) || null;
- }
+                {/* ── The contract, the ledger, the record ── */}
+                {isDeal && (
+                    <div className="mt-4 flex flex-col gap-4 sm:mt-6 sm:gap-6">
+                        {room.support.conversationDeal ? (
+                            <>
+                                <TermsPanel
+                                    conversationId={conversationId}
+                                    terms={room.terms}
+                                    party={room.party}
+                                    labels={labels}
+                                    readOnly={frozen}
+                                    readOnlyReason={
+                                        frozen
+                                            ? "This deal is disputed — the terms are frozen as they stood."
+                                            : null
+                                    }
+                                />
+                                {room.support.installments && (
+                                    <PaymentPlanPanel
+                                        conversationId={conversationId}
+                                        installments={room.installments}
+                                        party={room.party}
+                                        payer={payer}
+                                        labels={labels}
+                                        agreedPrice={agreed ?? room.transaction?.offerAmount ?? null}
+                                        readOnly={frozen}
+                                        readOnlyReason={
+                                            frozen
+                                                ? "This deal is disputed — the ledger is frozen as it stood."
+                                                : null
+                                        }
+                                    />
+                                )}
+                                <DealRecordPanel
+                                    conversationId={conversationId}
+                                    disputed={room.disputed}
+                                    canDispute={!!room.transaction}
+                                    vault={{
+                                        offered:
+                                            room.party === "b" &&
+                                            room.transaction?.status === "completed" &&
+                                            !!room.subject?.horseId,
+                                        alreadyFiled: !!vaultMeta?.vault_recorded_at,
+                                        amount:
+                                            agreed ??
+                                            (typeof vaultMeta?.agreed_price === "number"
+                                                ? (vaultMeta.agreed_price as number)
+                                                : null) ??
+                                            room.transaction?.offerAmount ??
+                                            null,
+                                        horseId: room.subject?.horseId ?? null,
+                                        horseName: room.subject?.title ?? null,
+                                    }}
+                                />
+                            </>
+                        ) : (
+                            <div className="border-input bg-muted/40 text-muted-foreground rounded-lg border p-4 text-sm leading-relaxed">
+                                Agreed terms, payment plans and the exportable deal record arrive
+                                with the next database update. Offers and Safe-Trade work exactly as
+                                they do today until then.
+                            </div>
+                        )}
+                    </div>
+                )}
 
- horseContext = {
- id: horse.id,
- name: horse.custom_name,
- tradeStatus: horse.trade_status,
- price: horse.listing_price,
- thumbnailUrl: signedThumb,
- refLine: horse.catalog_items ? `${horse.catalog_items.maker} — ${horse.catalog_items.title}` : null,
- };
- }
- }
+                {/* Legacy conversation-completion flow, only when no Safe-Trade row */}
+                {!room.transaction && (
+                    <div className="mt-4 shrink-0">
+                        <TransactionActions
+                            conversationId={conversationId}
+                            initialStatus={room.legacyStatus}
+                            hasRating={!!room.existingReview}
+                        />
+                    </div>
+                )}
 
- // Fetch all messages
- const { data: rawMessages } = await supabase
- .from("messages")
- .select("id, sender_id, content, is_read, created_at")
- .eq("conversation_id", conversationId)
- .order("created_at", { ascending: true });
+                {room.transaction && (
+                    <div className="mt-4 shrink-0">
+                        <RatingForm
+                            transactionId={room.transaction.id}
+                            targetId={room.otherId}
+                            targetAlias={room.otherAlias}
+                            existingRating={room.existingReview}
+                            hasVerifiedTransfer={room.mutualTransfers > 0}
+                        />
+                    </div>
+                )}
 
- const messages = (rawMessages as MessageRow[]) ?? [];
+                <div className="text-muted-foreground mt-6 mb-8 text-center text-[0.65rem]">
+                    Private between you and @{room.otherAlias}
+                    {room.kind ? ` · you are the ${roleLabel(room.kind, room.party)}` : ""} ·{" "}
+                    {room.kind
+                        ? `they are the ${roleLabel(room.kind, otherParty(room.party))}`
+                        : "Model Horse Hub never holds funds"}
+                </div>
+            </div>
+        </div>
+    );
+}
 
- // Mark unread messages as read (server-side)
- const unreadIds = messages.filter((m) => m.sender_id !== user.id && !m.is_read).map((m) => m.id);
-
- if (unreadIds.length > 0) {
- await supabase.from("messages").update({ is_read: true }).in("id", unreadIds);
- }
-
- // Fetch photo attachments for this conversation
- const attachmentMap = await getConversationAttachments(conversationId);
-
- const isBuyer = conversation.buyer_id === user.id;
-
- const txn = await getTransactionByConversation(conversationId);
- const transactionId = txn?.transactionId ?? null;
- const hasCommerceTransaction = !!txn; // Any Safe-Trade transaction exists
-
- // Check if user has already reviewed via the new reviews table
- let existingRating: { id: string; stars: number; reviewText: string | null; createdAt: string } | null = null;
- if (transactionId) {
- const { data: rawReview } = await supabase
- .from("reviews")
- .select("id, stars, content, created_at")
- .eq("transaction_id", transactionId)
- .eq("reviewer_id", user.id)
- .maybeSingle();
-
- if (rawReview) {
- const rv = rawReview as { id: string; stars: number; content: string | null; created_at: string };
- existingRating = {
- id: rv.id,
- stars: rv.stars,
- reviewText: rv.content,
- createdAt: rv.created_at,
- };
- }
- }
-
- // Check for completed transfer between these two users (trust signal)
- const { count: mutualTransfers } = await supabase
- .from("horse_transfers")
- .select("id", { count:"exact", head: true })
- .eq("status","claimed")
- .or(
- `and(sender_id.eq.${user.id},claimed_by.eq.${otherId}),and(sender_id.eq.${otherId},claimed_by.eq.${user.id})`,
- );
-
- return (
- <div className="mx-auto flex min-h-[calc(100dvh-var(--header-height))] max-w-6xl flex-col px-4 md:px-8">
- {/* Header — compact on mobile */}
- <div className="bg-card border-input animate-fade-in-up mb-2 flex shrink-0 flex-wrap items-center gap-3 rounded-lg border px-4 py-3 sm:mb-4 sm:gap-4 sm:py-4 sm:px-6">
- <Link
- href="/inbox"
- className="bg-black/5 text-muted-foreground flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-full no-underline transition-all"
- aria-label="Back to inbox"
- >
- <svg
- width="20"
- height="20"
- viewBox="0 0 24 24"
- fill="none"
- stroke="currentColor"
- strokeWidth="2"
- strokeLinecap="round"
- strokeLinejoin="round"
- aria-hidden="true"
- >
- <polyline points="15 18 9 12 15 6" />
- </svg>
- </Link>
- <div className="flex min-w-0 flex-1 flex-col">
- <div className="flex items-center gap-2">
- <Link href={`/profile/${encodeURIComponent(otherAlias)}`}>@{otherAlias}</Link>
- <span className="bg-success/10 rounded-full px-[8px] py-[2px] text-xs font-medium text-forest">
- {isBuyer ?"Seller" :"Buyer"}
- </span>
- </div>
- {horseContext ? (
- <span className="text-muted-foreground mt-0.5 text-xs">🐴 Re: {horseContext.name}</span>
- ) : (
- <span className="text-muted-foreground mt-0.5 flex items-center gap-1 text-xs opacity-70"><MessageCircle className="h-3 w-3" /> Direct Message</span>
- )}
- </div>
-
- {/* Trust Signals — hidden on mobile to save space */}
- <div className="mt-0.5 hidden flex-wrap gap-1 sm:flex">
- {memberSince && (
- <span
- className="border-input text-muted-foreground inline-flex items-center gap-[3px] rounded-sm border bg-card px-2 py-0.5 text-xs whitespace-nowrap"
- title="Account age"
- >
- <Calendar className="h-3 w-3" /> Member since {memberSince}
- </span>
- )}
- <span
- className="border-input text-muted-foreground inline-flex items-center gap-[3px] rounded-sm border bg-card px-2 py-0.5 text-xs whitespace-nowrap"
- title="Completed Hoofprint transfers"
- >
- <Package className="h-3 w-3" /> {transferCount || 0} transfer{transferCount !== 1 ?"s" :""}
- </span>
- {avgRating !== null && (
- <span
- className="border-input text-muted-foreground inline-flex items-center gap-[3px] rounded-sm border bg-card px-2 py-0.5 text-xs whitespace-nowrap"
- title="Average user rating"
- >
- <Star className="h-3 w-3 fill-current" /> {avgRating} ({ratingsArr.length})
- </span>
- )}
- </div>
- <div className="hidden items-center gap-1 text-xs text-muted-foreground sm:inline-flex">
- <svg
- width="12"
- height="12"
- viewBox="0 0 24 24"
- fill="none"
- stroke="currentColor"
- strokeWidth="2"
- strokeLinecap="round"
- strokeLinejoin="round"
- aria-hidden="true"
- >
- <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
- <path d="M7 11V7a5 5 0 0 1 10 0v4" />
- </svg>
- Private &amp; Secure
- </div>
- <BlockButton targetId={otherId} targetAlias={otherAlias} initialBlocked={isBlockedUser} />
- </div>
-
- {/* Scrollable content area — everything below the header scrolls together */}
- <div className="flex min-h-0 flex-1 flex-col">
-
- {/* Horse Context Card — visual banner for horse-linked conversations */}
- {horseContext && (
- <Link
- href={`/community/${horseContext.id}`}
- className="group animate-fade-in-up mb-2 flex shrink-0 items-center gap-4 rounded-xl border border-input bg-card p-3 text-foreground no-underline shadow-sm transition-all hover:-translate-y-px hover:shadow-md sm:mb-4 sm:p-4"
- id="chat-horse-link"
- >
- {horseContext.thumbnailUrl ? (
- // eslint-disable-next-line @next/next/no-img-element
- <img
- src={horseContext.thumbnailUrl}
- alt={horseContext.name}
- className="h-10 w-10 shrink-0 rounded-md object-cover sm:h-14 sm:w-14"
- />
- ) : (
- <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-card text-xl sm:h-14 sm:w-14 sm:text-2xl">
- 🐴
- </div>
- )}
- <div className="flex min-w-0 flex-1 flex-col gap-0.5">
- <span className="overflow-hidden text-sm font-bold text-ellipsis whitespace-nowrap">
- {horseContext.name}
- </span>
- {horseContext.refLine && (
- <span className="overflow-hidden text-xs text-muted-foreground text-ellipsis whitespace-nowrap">
- {horseContext.refLine}
- </span>
- )}
- {horseContext.tradeStatus !=="Not for Sale" && (
- <span
- className={`inline-flex w-fit items-center gap-[3px] rounded-full px-2 py-0.5 text-xs font-bold ${
- horseContext.tradeStatus ==="For Sale"
- ?"bg-success/10 text-success"
- :"bg-info/10 text-info"
- }`}
- >
- {horseContext.tradeStatus ==="For Sale" ?"💲" :"🤝"}{""}
- {horseContext.price
- ? `$${horseContext.price.toLocaleString("en-US")}`
- : horseContext.tradeStatus}
- </span>
- )}
- </div>
- <span className="shrink-0 text-[1.1rem] text-muted-foreground transition-transform group-hover:text-forest group-hover:translate-x-[3px]">
- →
- </span>
- </Link>
- )}
-
- {/* Offer Card — Commerce State Machine (scrolls with content) */}
- {txn && (
- <div className="mb-2 shrink-0 sm:mb-4">
- <OfferCard transaction={txn} currentUserId={user.id} />
- </div>
- )}
-
- <div className="min-h-[60dvh]">
- {/* Chat Thread (Client Component) — takes remaining space */}
- <ChatThread
- conversationId={conversationId}
- currentUserId={user.id}
- currentUserAvatar={currentUserAvatar}
- otherAlias={otherAlias}
- otherAvatarUrl={otherAvatarUrl}
- initialMessages={messages.map((m) => ({
- id: m.id,
- senderId: m.sender_id,
- content: m.content,
- createdAt: m.created_at,
- isMe: m.sender_id === user.id,
- attachments: attachmentMap[m.id] || undefined,
- }))}
- />
-
- </div>
-
- {/* Transaction Actions — only show legacy flow if NO Safe-Trade transaction exists */}
- {!hasCommerceTransaction && (
- <div className="shrink-0">
- <TransactionActions
- conversationId={conversationId}
- initialStatus={conversation.transaction_status ||"open"}
- hasRating={!!existingRating}
- />
- </div>
- )}
-
- {/* Rating Form — only show if a transaction exists (conversation marked complete) */}
- {transactionId && (
- <div className="shrink-0">
- <RatingForm
- transactionId={transactionId}
- targetId={otherId}
- targetAlias={otherAlias}
- existingRating={existingRating}
- hasVerifiedTransfer={(mutualTransfers || 0) > 0}
- />
- </div>
- )}
- </div>
- </div>
- );
+function TrustChip({ children, title }: { children: React.ReactNode; title: string }) {
+    return (
+        <span
+            className="border-input text-muted-foreground bg-card inline-flex items-center gap-[3px] rounded-sm border px-2 py-0.5 text-xs whitespace-nowrap"
+            title={title}
+        >
+            {children}
+        </span>
+    );
 }
