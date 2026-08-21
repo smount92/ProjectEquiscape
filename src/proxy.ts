@@ -91,6 +91,16 @@ export async function proxy(request: NextRequest) {
         // (approved-only external_shows RLS + the public shows
         // read); submitting a listing gates itself in the action.
         "/calendar",
+        // PWA plumbing: the service worker script, the app manifest,
+        // and the offline fallback the worker precaches. The browser
+        // refuses a worker script served through a redirect, so an
+        // auth bounce here doesn't just 404 the PWA — it permanently
+        // freezes the installed worker for anyone whose session
+        // lapsed, since update checks fail forever. None of these
+        // serve user data.
+        "/serwist",
+        "/manifest.json",
+        "/~offline",
     ];
 
     const isPublicRoute =
