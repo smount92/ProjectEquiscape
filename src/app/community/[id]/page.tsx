@@ -28,6 +28,7 @@ import { referenceHref } from"@/lib/catalog/referenceUrl";
 import AnonPassport from"@/components/passport/AnonPassport";
 import PublicCardsSection from"@/components/shows/PublicCardsSection";
 import { PARCHMENT_INK } from"@/lib/theme/parchment";
+import ViewBeacon from"@/components/metrics/ViewBeacon";
 import PassportMasthead from"@/components/passport/PassportMasthead";
 import BuyerPanel from"@/components/passport/BuyerPanel";
 import { summarizeShowRecords } from"@/lib/market/recordSummary";
@@ -142,7 +143,12 @@ export default async function PublicPassportPage({
  // Logged-out visitors get a read-only public passport (get_public_passport
  // RPC); the full interactive passport below is unchanged for members.
  if (!user) {
- return <AnonPassport horseId={horseId} backToMarket={cameFromMarket} />;
+ return (
+ <>
+ <ViewBeacon entityType="horse" entityId={horseId} secondaryType={cameFromMarket ?"listing" : undefined} />
+ <AnonPassport horseId={horseId} backToMarket={cameFromMarket} />
+ </>
+ );
  }
 
  // ================================================================
@@ -357,6 +363,7 @@ editionSize: rawPedigree.edition_size,
 
  return (
  <ExplorerLayout noHeader>
+ <ViewBeacon entityType="horse" entityId={horseId} secondaryType={cameFromMarket && isForSale ?"listing" : undefined} />
  {/* The stolen/missing banner stays above EVERYTHING */}
  {horse.trade_status ==="Stolen/Missing" && (
  <div className="mb-4 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 p-4">

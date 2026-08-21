@@ -27,6 +27,7 @@ import {
 import GlossaryLink from "@/components/GlossaryLink";
 import { getMoldCustoms } from "@/lib/catalog/moldCustoms";
 import { deriveAttribution } from "@/lib/catalog/taxonomy";
+import ViewBeacon from "@/components/metrics/ViewBeacon";
 
 interface Props {
     params: Promise<{ maker: string; slug: string }>;
@@ -251,6 +252,7 @@ export default async function ReferencePage({ params }: Props) {
 
     return (
         <FocusLayout noHeader>
+            <ViewBeacon entityType="reference" entityId={item.id} />
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}

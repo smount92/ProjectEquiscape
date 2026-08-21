@@ -28,6 +28,7 @@ import { getAssetConfig } from"@/lib/config/assetFields";
 import type { AssetCategory } from"@/lib/types/database";
 import { Button } from "@/components/ui/button";
 import { PARCHMENT_INK } from"@/lib/theme/parchment";
+import { getHorseViewStats, viewStatsLabel } from"@/lib/metrics/sellerViews";
 
 
 // Types
@@ -353,6 +354,12 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  }
  : null;
 
+ // Owner-only, and enforced in the RPC rather than here — the page has
+ // already notFound()ed a non-owner, but get_horse_view_stats checks
+ // ownership again because it is the read policy for a table that grants
+ // SELECT to nobody. Null when 175 has not been pasted: the line vanishes.
+ const viewStats = viewStatsLabel(await getHorseViewStats(supabase, horseId));
+
  const releaseInfo =
  cat && cat.item_type ==="plastic_release"
  ? {
@@ -367,6 +374,13 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  return (
  <ExplorerLayout noHeader>
  <PageMasthead compact icon="🐴" title="Digital Stable" subtitle="Horse passport & provenance" backHref="/dashboard" backLabel="Stable" />
+
+ {/* Quiet, and only you can see it — see lib/metrics/sellerViews.ts */}
+ {viewStats && (
+ <p className="text-muted-foreground mt-3 mb-0 text-xs" title="Only you can see this. Counts are per-object and anonymous.">
+ 👁 {viewStats}
+ </p>
+ )}
 
  {/* Wishlist demand banner */}
  {wishlistDemand > 0 && (

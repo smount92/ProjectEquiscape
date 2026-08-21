@@ -19,6 +19,7 @@ import { resolveShowRoute } from "@/lib/shows/resolver";
 import { getAliases } from "@/lib/shows/queries";
 import LegacyShowPage from "./LegacyShowPage";
 import AlbumShowPage from "@/components/shows/AlbumShowPage";
+import ViewBeacon from "@/components/metrics/ViewBeacon";
 
 // force-dynamic stays: AlbumShowPage itself reads the viewer's session
 // (supabase.auth.getUser() — see src/components/shows/AlbumShowPage.tsx)
@@ -125,6 +126,10 @@ export default async function ShowDetailPage({
     const supabase = await createClient();
 
     const target = await resolveShowRoute(supabase, id);
-    if (target === "v2") return <AlbumShowPage showId={id} />;
-    return <LegacyShowPage showId={id} />;
+    return (
+        <>
+            <ViewBeacon entityType="show" entityId={id} />
+            {target === "v2" ? <AlbumShowPage showId={id} /> : <LegacyShowPage showId={id} />}
+        </>
+    );
 }

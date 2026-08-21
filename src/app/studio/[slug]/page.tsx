@@ -9,6 +9,7 @@ import {
 } from "@/app/actions/art-studio";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
 import PageMasthead from "@/components/layouts/PageMasthead";
+import ViewBeacon from "@/components/metrics/ViewBeacon";
 import ShareButton from "@/components/ShareButton";
 import ReceiptsWall from "@/components/studio/ReceiptsWall";
 import {
@@ -89,6 +90,7 @@ export default async function StudioPage({
 
     return (
         <ExplorerLayout noHeader>
+            <ViewBeacon entityType="studio" entityId={profile.userId} />
             <PageMasthead
                 icon="🎨"
                 title={profile.studioName}
