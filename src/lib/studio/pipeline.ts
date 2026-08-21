@@ -395,8 +395,16 @@ export const STUDIO_STATUS_LABELS: Record<StudioStatus, string> = {
  * A request may be sent unless the studio is closed. When the bench is full
  * the request is flagged as a WAITLIST request rather than refused — refusing
  * outright throws away exactly the demand the artist wants to see.
+ *
+ * `waitlistOpen` is the artist's opt-out: some artists genuinely do not want
+ * a queue behind the queue, and forcing one on them is worse than a closed
+ * sign. It only applies once the bench is actually full — an artist who
+ * declared WAITLIST as their status has already said yes to a waitlist.
  */
-export function intakeFor(slots: SlotState): {
+export function intakeFor(
+    slots: SlotState,
+    waitlistOpen = true,
+): {
     accepting: boolean;
     asWaitlist: boolean;
     reason: string;
@@ -409,6 +417,13 @@ export function intakeFor(slots: SlotState): {
         };
     }
     if (slots.effectiveStatus === "waitlist") {
+        if (slots.full && !waitlistOpen) {
+            return {
+                accepting: false,
+                asWaitlist: false,
+                reason: "This studio's bench is full and it isn't keeping a waitlist.",
+            };
+        }
         return {
             accepting: true,
             asWaitlist: true,

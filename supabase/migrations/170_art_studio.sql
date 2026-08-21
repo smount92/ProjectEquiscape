@@ -463,6 +463,43 @@ CREATE POLICY "Public views visible studios"
   USING (portfolio_visible = true);
 
 
+-- ══════════════════════════════════════════════════════════════
+-- 9. SLOT COUNTS FOR LOGGED-OUT VISITORS
+-- ══════════════════════════════════════════════════════════════
+-- Now that studio pages are public, "3 of 5 slots filled" has to be
+-- true for a visitor with no account. It cannot be counted from
+-- `commissions` directly: the public-queue SELECT leg is TO
+-- authenticated, and widening it would expose descriptions and prices
+-- to anyone. So: an RPC that returns nothing but the number.
+--
+-- Bulk-shaped because the directory needs a count for every studio on
+-- the page and N round-trips is not a plan.
+
+CREATE OR REPLACE FUNCTION public.studio_slot_usage(p_artist_ids UUID[])
+RETURNS TABLE (artist_id UUID, slots_used BIGINT)
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT c.artist_id, COUNT(*)::BIGINT
+  FROM commissions c
+  WHERE c.artist_id = ANY(p_artist_ids)
+    AND c.status IN (
+      'accepted', 'in_progress', 'awaiting_approval',
+      -- legacy statuses still occupy a slot
+      'review', 'revision', 'shipping'
+    )
+  GROUP BY c.artist_id;
+$$;
+
+REVOKE ALL ON FUNCTION public.studio_slot_usage(UUID[]) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.studio_slot_usage(UUID[]) TO authenticated, anon;
+
+COMMENT ON FUNCTION public.studio_slot_usage(UUID[]) IS
+  'How full each artist''s bench is. SECURITY DEFINER so logged-out visitors get an accurate slot count without any commission row becoming readable.';
+
+
 -- ============================================================
 -- Migration 170 complete.
 --

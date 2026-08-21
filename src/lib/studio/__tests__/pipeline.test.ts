@@ -274,9 +274,29 @@ describe("intakeFor", () => {
         expect(intake.asWaitlist).toBe(true);
     });
 
-    it("refuses only a closed studio, and says so plainly", () => {
+    it("refuses a closed studio, and says so plainly", () => {
         const intake = intakeFor(slotState(0, 5, "closed"));
         expect(intake.accepting).toBe(false);
         expect(intake.reason).toMatch(/isn't taking commissions/i);
+    });
+
+    it("honours an artist who has turned the waitlist off, once full", () => {
+        const intake = intakeFor(slotState(5, 5, "open"), false);
+        expect(intake.accepting).toBe(false);
+        expect(intake.reason).toMatch(/isn't keeping a waitlist/i);
+    });
+
+    it("still takes requests with the waitlist off while there is room", () => {
+        const intake = intakeFor(slotState(2, 5, "open"), false);
+        expect(intake.accepting).toBe(true);
+        expect(intake.asWaitlist).toBe(false);
+    });
+
+    it("keeps taking waitlist requests from a studio that declared waitlist", () => {
+        // Declaring WAITLIST is already consent to a waitlist; the opt-out
+        // is about what happens when an OPEN studio fills up.
+        const intake = intakeFor(slotState(0, 5, "waitlist"), false);
+        expect(intake.accepting).toBe(true);
+        expect(intake.asWaitlist).toBe(true);
     });
 });
