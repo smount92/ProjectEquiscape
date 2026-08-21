@@ -1,11 +1,17 @@
-import type { Metadata } from"next";
+import type { Metadata } from "next";
 
+/**
+ * Segment-level metadata for the market. Each page below overrides it
+ * with its own title/description/canonical — /market (the marketplace
+ * front door) and /market/guide (the Blue Book price guide) are two
+ * distinct search results, not one.
+ */
 export const metadata: Metadata = {
- title:"Model Horse Price Guide — The Blue Book",
- description:
-"Real sale prices for 10,500+ model horses. Search Breyer, Stone, and artist resin values based on actual completed transactions. Free.",
+    title: "Model Horse Marketplace — Buy Model Horses With Verified Show Records",
+    description:
+        "Browse model horses for sale from collectors, each with its full passport: verified show records, condition grade, and ownership history. Plus the Blue Book price guide of real completed sales.",
 };
 
 export default function MarketLayout({ children }: { children: React.ReactNode }) {
- return children;
+    return children;
 }
