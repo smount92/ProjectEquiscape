@@ -9,6 +9,7 @@ import { NotificationProvider } from"@/lib/context/NotificationProvider";
 import Header from"@/components/Header";
 import AnnouncementSlot from"@/components/AnnouncementSlot";
 import Footer from"@/components/Footer";
+import { Analytics } from"@vercel/analytics/next";
 import BackToTop from"@/components/BackToTop";
 import CookieConsent from"@/components/CookieConsent";
 import OfflineIndicator from"@/components/OfflineIndicator";
@@ -112,6 +113,10 @@ export default function RootLayout({
  <BackToTop />
  <CookieConsent />
  <OfflineIndicator />
+ {/* Vercel Web Analytics — first-party, cookieless, no consent
+     needed. Runs alongside GA for now; retire GA once the Vercel
+     data satisfies (owner decision). */}
+ <Analytics />
  </NotificationProvider>
  </ToastProvider>
  </SimpleModeProvider>
