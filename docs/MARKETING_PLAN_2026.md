@@ -32,19 +32,37 @@ other software in this hobby exists to serve them.**
 
 **Top three channels, in order:**
 
-1. **Showholder / club partnership (direct outreach).** Uncontested. Each host is a
-   multiplier, not an impression. ~15 hrs of the 65-hour budget.
-2. **Facebook, as participants — not advertisers.** The hobby lives there. Amanda is already
-   a member of these rooms; the plan is value-first participation plus *shareable objects*
-   (results pages, rosette pages, card verify links) that other people drop into threads.
-   ~7 hrs.
-3. **The Registry as an SEO engine.** 10,900+ reference pages are already live, indexed-ready,
-   with `Product` JSON-LD and canonical tags. This is the only channel that compounds while
-   you sleep. What's left is mostly measurement and interlinking. ~8 hrs.
+1. **Showholder / club partnership (direct outreach).** Uncontested, and smaller than it looks:
+   NAN 2024 had **126 human entrants** managing 4,521 models between them. The competitive core
+   of this hobby is a list you can work through by hand. Each host is a multiplier, not an
+   impression. ~15 hrs of the 65-hour budget.
+2. **Facebook, as participants — not advertisers.** The hobby lives there: 28,610 members in the
+   largest sales group, 22,750 in the busiest show-and-tell room. Amanda is already a member of
+   these rooms. The plan is value-first participation plus *shareable objects* (results pages,
+   rosette pages, card verify links) that **other people** drop into threads — because a cold
+   link-drop is against the posted rules in all four of the biggest groups. ~7 hrs.
+3. **The Registry as an SEO engine.** ~10,900 reference pages, already live, with `Product`
+   JSON-LD and canonical tags. The only channel that compounds while you sleep — and the one
+   carrying an unexamined risk: pages for models nobody owns yet are spec tables with no photo,
+   no owner and no price, which is what Google's scaled-content policy is written about. Gate
+   indexing on a minimum-value bar. ~8 hrs.
+
+**The calendar of record (`/calendar`) may deserve to outrank Instagram** once you see the
+evidence: Blab's Show Announcements forum is empty, and the page still ranking for model horse
+photo shows is advertising a championship in **June 2010**. Show discovery has no neutral home.
 
 **Instagram is fourth** (the show-off surface, cheap because the content is a by-product of
-running shows). **TikTok and YouTube are partnerships, not a posting job.** **Paid ads are
-off the table** — not on principle, on arithmetic.
+running shows). **TikTok and YouTube are partnerships, not a posting job** — and 5,000 followers
+is a big account in this niche, so the target is breadth across the 3K–10K band, who *are* the
+showers and judges anyway. **Paid ads are off the table** — not on principle, on arithmetic.
+
+**The sharpest single insight in the research.** The hobby already runs a reputation system —
+the Model Horse Transaction Board, 13,071 members, where people post red/yellow/green "lights"
+about counterparties. Its rules say: *"Details must be provided for negative posts. **Screenshots
+are encouraged.**"* Thirteen thousand people are being told to produce evidence of a deal, using
+screenshots, because screenshots are all they have. **MHH generates that document properly, as a
+PDF.** So the play is not to replace the boards — it's *"posting a light? Print the record."*
+See [Loop 6](#loop-6--the-evidence-pack-and-the-single-best-fit-found-in-the-whole-research).
 
 **The single highest-leverage action in week one:** Amanda personally fills Summerween's thin
 classes before Aug 31, using the product's own recruiting line — *"this class needs one more
@@ -101,6 +119,41 @@ Not marketing copy. These were read out of the code and the docs.
   thin. That is a Search Console question and it is Week 1.
 - **Social presence:** none. No Facebook page, no Instagram, no links in the footer. In a
   Facebook-native hobby this reads as "not real."
+
+### The landscape, finally sized
+
+Everything below was observed 2026-08-21; sources and caveats in
+[`marketing-research/`](marketing-research/).
+
+| | Scale | Condition |
+|---|---|---|
+| **Facebook, sales** | Largest group **28,610** members / 1,819 posts a month | Healthy, concentrated, and rule-bound (§4.2) |
+| **Facebook, show-and-tell** | **22,750** members / **2,361** posts a month — the busiest room in the hobby | Pure show-and-tell, no commerce |
+| **Facebook, reputation** | The lights board: **13,071** members / 1,364 posts a month | Load-bearing, and structurally fragile (Loop 6) |
+| **Model Horse Connection** (ex-MH$P, est. 1996) | **1,114 active vendors**, 9,274 live ads, $1.96M listed value | Post-ransomware, run by one person working weekends around a day job — and **serving an expired TLS certificate today**, so visitors meet a browser security warning before the marketplace |
+| **Model Horse Blab** | 182,769 threads / 3.4M messages / 6,960 members | Partially restored, "What's New" empty, Show Announcements empty, front page still advertising BreyerFest 2025 |
+| **OMHPS** | ~1,996 forum users | The real photo-show competitor — freemium, hosts pay $3–15 per show |
+| **The competitive showing core** | **126 human entrants at NAN 2024**, managing 4,521 models | Small enough to contact individually |
+| **BreyerFest** | 30–35,000 attendees | The annual peak, mid-July, Lexington KY |
+| **Discord** | ~1,144 across the four largest public servers | Not a channel |
+| **Reddit** | Could not be measured | **Unverified — do not assume** |
+
+**Three read-throughs that shape everything downstream.**
+
+1. **The hobby's commerce layer is about 1,100 active sellers and roughly $2M of live listings.**
+   That is the honest size of the prize. It is a Ravelry-scale niche, not a market — which is
+   exactly the right size for two people, and completely wrong for anyone who needs it to be
+   bigger.
+2. **The incumbents are fragile, not dominant.** The venue of record is one exhausted volunteer
+   with an expired certificate. The forum is a stalled archive. A recent paid competitor,
+   Star Dapple, **let its domain lapse entirely** — which is also the warning: paid-marketplace-
+   versus-incumbent is a wedge that has been tried and failed. The unmet need is records, trust
+   and valuation, not another listings board.
+3. **The trust layer is the opening.** The venue of record's own disclaimer tells buyers to
+   *"join MHHR or Blab"* and to take disputes to *"local law enforcement, postmaster general, or
+   a certified mediation or arbitration entity."* Two of the three references it names are now
+   dead or invisible. **The hobby's canonical trust advice points at broken infrastructure** —
+   in the incumbent's own words, on its own page.
 
 ## 1.3 Claims you may make, and claims you may not — yet
 
@@ -171,13 +224,28 @@ reason people *stay*. The record is the reason they *arrive*.
    submitted NAN cards arrive invalid, expired or misfilled. The hobby has a verification
    problem it already knows about.
 
-> **The NAN line, and how not to cross it.** MHH cards are **not** NAN cards — `/cards/[code]`
-> says so on the page, deliberately and correctly. So NAN is the *contrast* in our copy, never
-> the claim. Say: *"anyone can type 'NAN qualified' and nobody can check it — here's a record
-> that can be."* Never say, or let anyone infer, that MHH verifies NAN qualifications, that an
-> MHH card qualifies a horse for NAN, or that we're NAMHSA-affiliated. NAMHSA is a future
-> partner (playbook MOVE 3); implying an endorsement you don't have is how you lose that
-> permanently, and showholders will spot it immediately.
+> ### ⛔ The NAN line. Get this wrong once and the competitive core writes you off.
+>
+> **NAMHSA's rule, verbatim: *"Any **live** model horse show shall be eligible for
+> NAN-Qualifying Show status."*** Photo shows — including every online show MHH has run or will
+> run, Summerween included — **cannot award NAN cards. Ever. Not partially, not by exception.**
+>
+> So the rules are absolute:
+>
+> - MHH cards are **not** NAN cards. `/cards/[code]` already says so on the page, correctly.
+> - Never say or imply that MHH verifies NAN qualifications, that an MHH card qualifies a horse
+>   for NAN, or that MHH is NAMHSA-affiliated.
+> - For classlists built on the NAMHSA structure, say **"NAMHSA-style classes."** Never
+>   "NAN-qualifying."
+> - NAN is the **contrast** in our copy, never the claim: *"anyone can type 'NAN qualified' and
+>   nobody can check it — here's a record that can be."*
+>
+> The people this matters to most — the competitive showing core — will catch a slip instantly,
+> and they are precisely the audience with the most to gain from MHH. NAMHSA is also a future
+> partner (playbook MOVE 3), and their own documentation admits **nearly a third of NAN cards
+> submitted arrive incomplete, incorrect or expired** — a one-in-three failure rate they have
+> published themselves. That is an opening for a partnership conversation later. Implying an
+> endorsement you don't have closes it permanently.
 
 **Positioning statement, long form** (for the About page, the FB page bio, a host pitch):
 
@@ -227,6 +295,17 @@ The most valuable person on this list. Nobody serves them at all.
 > once. Look it up, add it to your stable in one tap, and never chase that answer again.
 >
 > Free. No account needed to look.
+
+> **A pricing note that belongs in the strategy, not the copy.** The nearest thing to a paid
+> values resource in this hobby charges **$65 a year** for roughly 6,600 original-finish Breyer
+> values that are *asserted by its operator*, not derived from published sales — no Stone, no
+> resins, no customs, no tack. The hobby's entire sales venue of record costs around $10 a year.
+> **Hobbyists are paying roughly six times more for opinions about value than for the
+> marketplace itself.** That is the clearest willingness-to-pay signal in all of this research,
+> and MHH's Blue Book — free, drawn from real completed sales, with condition grades attached —
+> is a straightforwardly better product. It is also, by the trust iron law, one of the things
+> that must never be paywalled. The right read is not "charge for it." It is: **this is how much
+> the hobby values the thing you're giving away, so lead with it.**
 
 ### The artist — *"Your portfolio, with the ribbons attached."*
 
@@ -347,14 +426,58 @@ own work constantly. A portfolio URL that proves the work is a link an artist wa
 
 **How to activate:** [§4.6 — founding artists](#46-artist-seeding--founding-studios).
 
-## Loop 6 — The evidence pack gets shown to third parties by design
+## Loop 6 — The evidence pack, and the single best fit found in the whole research
 
 **The mechanic:** `/inbox/[id]/record` produces a PDF and a plain-text record of a deal,
 intended to be handed to PayPal or to a group admin. Every time someone does that, a
 non-member reads a document with your name on it in the moment they most want what you offer.
 
-**How to activate:** nothing to build. Just make sure the PDF header says what the site is and
-where to find it, and lead the time-payments message at resin sellers (§2.2).
+**And now the discovery that makes this the sharpest play available.** The hobby already
+operates a reputation system, and it is a Facebook group:
+
+> **The Model Horse Transaction Board** — 13,071 members, ~1,364 posts a month. Members post
+> red / yellow / green **"lights"** about people they've traded with. Other groups' rules point
+> members at it before transacting. A sister board defines the colours precisely: yellow for
+> resolved bumps, red for *"transactions that are NOT resolved, and you've lost a model or
+> money."* Its governance is genuinely mature — first-person accounts only, one post per
+> transaction, no self-lighting, an explicit anti-retaliation rule.
+
+Read its **rule 5**: *"Details must be provided for negative posts. **Screenshots are
+encouraged.**"*
+
+That is a 13,000-member community instructing its members, every day, to produce evidence of a
+deal — using screenshots, because screenshots are all they have. **MHH generates exactly that
+document, properly, as a PDF.**
+
+**So the play is not to replace the lights. It is to become what people bring to them:**
+
+> **Posting a light? Print the record.**
+>
+> Screenshots of a DM thread, out of order, half of them cropped. That's what the boards have
+> to work with. If the deal happened in a Deal Room, you can print the whole thing instead —
+> the terms you both signed, every payment marked sent and confirmed, with dates. One PDF,
+> nothing edited, both sides' words in order.
+
+This is culturally perfect: it is *helpful to the existing institution* rather than competitive
+with it, it respects the platform's own "we are the record, not the referee" ruling exactly, and
+it puts MHH in front of the most trust-anxious people in the hobby at the moment they care most.
+
+**Why the lights system leaves room, stated fairly:** it works, and it's the reason the hobby
+functions at all. But it is not searchable, not structured, not attached to the listing a buyer
+is actually looking at, invisible to non-members (the board is private — the newcomer who most
+needs it cannot read it), maintained by volunteers carrying real defamation exposure, and
+entirely dependent on Facebook. The older parallel system, MHHR, holds **61,540 topics of
+transaction history going back to 2002 — members-only, invisible to search engines**, having
+already been forced to migrate once when Yahoo Groups died.
+
+**How to activate:** nothing to build. Make sure the PDF header says what the site is and where
+to find it. Lead the time-payments message at resin sellers (§2.2). And never, ever position
+this as a replacement for the boards — say "bring this to them."
+
+> **Guardrail.** MHH's own review system is currently forgeable (§1.3, audit F2). Do **not**
+> market MHH reviews or seller reputation as an alternative to lights. Market the *evidence
+> pack*, which is real, and stay out of the adjudication business the boards have earned the
+> right to run.
 
 ## Loop 7 — The Registry is a permanent, compounding front door
 
@@ -444,6 +567,26 @@ piece. Ravelry grew by absorbing exactly that kind of scatter — blogs, Yahoo g
 a magazine — without attacking any of them. Be the connective layer. `/calendar` listing other
 platforms' shows is already that instinct, correctly applied; extend it to how you talk.
 
+### Two findings that make this channel more tractable than it looks
+
+**1. The competitive core is about 126 people.** NAN 2024 had **126 human entrants managing
+4,521 models** between them — roughly 35 models each, every one needing photographs, paperwork,
+class assignments and a card ledger. That is not a market to advertise at. **It is a list you
+could work through by hand**, and every one of them is carrying exactly the record-keeping
+burden the Stable was built for. It also right-sizes the whole plan: this hobby's *serious*
+showing population is small enough that 20 relationships is meaningful coverage.
+
+**2. MEPSA — the establishment photo-show body — is strictly mail-in.** It runs roughly 48
+shows a year on a fixed rhythm (the first four Saturdays of each month) and **takes no online
+entries at all.** That is the largest, most organised, most schedule-disciplined photo-showing
+operation in the hobby, running on post. Whether that's a partnership or simply a demonstration
+of unmet need, it is worth understanding before pitching anyone.
+
+**And know the competitor's pricing.** OMHPS is freemium — a free tier capped around 250 models,
+roughly $20/year for more, and **user-hosted shows charged at $3–15 each.** MHH hosting is free
+and stays free. That's a concrete, checkable line in a host pitch, and it's stronger than any
+adjective.
+
 **Cadence.** One named target per week, worked properly. Not a blast.
 
 **First three actions:**
@@ -496,38 +639,109 @@ in rooms where a promo post would be deleted.
 
 **Cadence.** 20–30 minutes, twice a week. That's it.
 
-**First three actions:**
+### The map — real numbers, observed 2026-08-21
+
+Read from each group's logged-out About panel, which exposes exact member counts, posting
+volume, and the **full admin rules text** even for private groups. Full detail and URLs in
+[`facebook-and-platforms.md`](marketing-research/facebook-and-platforms.md).
+
+| Group | Members | Posts/30d | What it's for | Promo posture |
+|---|---|---|---|---|
+| Breyer Model Horses Buy, Sell, or Trade — NO Pre-Sales | **28,610** | 1,819 | The sales room | ❌ Rule 3 bans self-promo and outside links |
+| Breyer Horse Collectors | **22,750** | **2,361** | **Pure show-and-tell, no commerce** | ❌ Same boilerplate rule 3 |
+| Model Horse Transaction Board | **13,071** | 1,364 | **The lights / reputation board** | Its rules *ask for* evidence — see Loop 6 |
+| What is my Original Finish Breyer Worth? | **11,962** | 141 | Valuation, by humans | ☠️ **Rule 2 explicitly bans telling people to look it up** |
+| Model Horse Customizers | **10,710** | 160 | Customizing / finishwork | ☠️ Rule 2.3: *"No directing members to any outside page, group, or platform"* |
+| Artist Resin Model Horses For Sale | **10,700** | — | Resin sales (public group) | — |
+| Model Horse Sale and Trade (NO PRESALES!) | **9,954** | 789 | Sales | ❌ Boilerplate |
+| Rare Model Horse Sales ($250+ floor) | **9,735** | 411 | High-value sales | Routes value questions elsewhere |
+| British Model Horse Collectors | **2,020** | 58 | UK collectors | ✅ **Rule 2 permits advertising once a month** |
+| USOMHS (Online Model Horse Show) | **1,723** | 96 | Online photo showing | — |
+
+**Four things this table changes about the plan.**
+
+1. **Attention and transaction are in different rooms.** The most active room in the hobby —
+   *Breyer Horse Collectors*, 2,361 posts a month — is pure show-and-tell with no commerce, and
+   posting your own models is exactly what it's for. **That is where a rosette or a card belongs**
+   (posted by the person who won it, not by you). The sales megagroups are busier per-post but
+   they are transactional rooms, and a platform post lands there as an intrusion.
+2. **There is one open door, and it's stated in writing.** *British Model Horse Collectors*
+   permits commercial advertising once a month. That is a legitimate, rule-compliant lane — and
+   the lesson generalises: **the permission is discoverable by reading rule text rather than
+   guessing.** Build the matrix before you post anywhere.
+3. **Two rooms are hard no-link territory.** *Model Horse Customizers* bans directing members
+   anywhere off-platform at all — stricter than a promo ban. And *What is my OF Breyer Worth?*
+   is covered below, because it is the trap this plan nearly walked into.
+4. **Discord is not a channel.** The four largest public model-horse Discords total roughly
+   1,144 members — about 4% of one Facebook group. **Do not build a Discord.** It would consume
+   hours and reach nobody.
+
+### The correction: do not answer value questions with a link
+
+An earlier draft of this plan recommended answering identification and valuation questions with
+a Registry link. **In the largest valuation group that is a rule violation**, stated in capitals:
+
+> *"ABSOLUTELY, POSITIVELY DO NOT TELL THEM TO LOOK IT UP. NO NO NO. DO NOT SEND THEM TO ID YOUR
+> BREYER and tell them to LOOK IT UP. NEVER. This is what our group is FOR — IDing and VALUES."*
+
+Twelve thousand people have decided that *being sent to look it up* is the failure mode, not
+the service. Walking in with a lookup link is the single most likely way for Amanda to get
+removed from a room she needs.
+
+**What to do instead:** *answer the question.* Give the year, the run, the range, in your own
+words, as a hobbyist who knows. That is what the room is for and it is welcomed. Build the
+reputation; the platform can wait. Where a group's rules *do* permit links and the link
+genuinely helps, add it — with the context for why, never bare.
+
+There is a real opportunity underneath the rule, but it isn't a link drop: a community of
+12,000 has concluded that **no existing lookup resource is good enough** — the named one is
+criticised in that group's own rules for showing pristine examples and producing false values
+for worn models. A price guide built on *real completed sales* with *condition grades attached*
+is the answer to that specific complaint. That's a product story to earn over months, not a
+comment to post this week.
+
+### First three actions
+
 1. **Create the official Facebook page** (~30 min) — named founders, the About-page continuity
    language, the wordmark. Then link it in the site footer. Zero presence is disqualifying in a
    Facebook-native hobby; you don't need it to be *active*, you need it to *exist*.
-2. **Read the rules of every group you're in, and write them down.** One row per group: name,
-   rough size, whether links are allowed, whether self-promo is allowed, admin names, and the
-   specific rule text. Keep it in [`marketing-research/`](marketing-research/). This is the
-   single most important compliance artifact in the plan.
-3. **Answer identification and value questions with a Registry link.** These questions are
-   posted daily. A reply that says *"That's the 1995 run — here's the page with the specs and
-   what they've been selling for"* is a helpful answer that happens to contain your URL. Where
-   a group forbids links, answer the question anyway with no link. The reputation is the point.
+2. **Build the per-group rules matrix.** The table above is the start; extend it to every group
+   either of you is in — name, size, the verbatim promo rule, the admins, and a verdict column
+   (no-link / link-with-context / monthly-ad-permitted). Keep it in
+   [`marketing-research/`](marketing-research/). **This is the single most important compliance
+   artifact in the plan** and it takes one evening.
+3. **Answer questions as a hobbyist, without links, for three weeks.** Then re-read the matrix
+   and decide where a link is actually permitted.
 
 **What success looks like:** members other than you posting MHH links. Watch for it in the
-Vercel referrer data.
+Vercel referrer data — that is the leading indicator that the loops in §3 are working.
 
 **The DON'Ts — read these twice.**
 
-- **Never drop a bare promo link.** In most model-horse sales and discussion groups this is a
-  removal-or-ban offence, and admins talk to each other. One incident can close the whole
-  channel permanently.
-- **Ask admins before posting anything promotional**, every single time, in every group. A
-  short private message to an admin — *"I built a show-hosting tool, is a post about it
-  allowed, and would you rather I didn't?"* — costs nothing and converts a rule violation into
-  a relationship. Some admins will say yes and pin it.
-- **Never post the same thing in ten groups.** Cross-posting is the most reliable way to be
-  read as a marketer.
-- **Never argue with a skeptic in public.** "Will this die like Blab?" is a fair question and
-  the honest answer — nightly backups, full export whenever you want, advance notice if we ever
-  wind down — is on the About page already. Answer once, link, and stop.
-- **Never use a second account.** Astroturfing in a community this small is not just wrong,
-  it's detectable.
+- **Never drop a bare promo link.** The boilerplate rule *"No promotions or spam… Self-promotion,
+  spam and irrelevant links aren't allowed"* is adopted verbatim by the four biggest rooms. A
+  cold link-drop is against the posted rules in all four. Admins talk; one incident can close
+  the channel permanently.
+- **Ask admins before posting anything promotional**, every time, in every group. A short private
+  message — *"I built a show-hosting tool, is a post about it allowed, and would you rather I
+  didn't?"* — costs nothing and converts a rule violation into a relationship. Some will say yes
+  and pin it.
+- **Never post the same thing in ten groups.** Cross-posting is the most reliable way to be read
+  as a marketer.
+- **Never use a member's photo.** *"You must use YOUR picture of YOUR model! NO 'borrowing' from
+  IDYB, Instagram, or any other website"* is a bannable rule, and the norm is hobby-wide.
+- **Never comment on someone's asking price.** *Price shaming* is explicitly bannable — one group
+  counts even a laugh reaction on a sales post as an offence. **This is a live hazard for MHH
+  specifically**, because reference pages label listings *"22% over median."* Never carry that
+  number into a group thread, and never let a Blue Book comparison read as a public judgement of
+  someone's price.
+- **No AI-generated imagery, in any post, ever.** This is no longer just good taste — it is now
+  an explicit rule in at least the largest sales group and the transaction board. Getting caught
+  would be terminal in a hobby whose most respected members are artists.
+- **Never argue with a skeptic in public.** *"Will this die like Blab?"* is a fair question and
+  the honest answer is already on the About page. Answer once, link, stop.
+- **Never use a second account.** Two of the biggest groups ban locked and secondary profiles
+  outright, explicitly as an anti-scammer measure.
 - **Don't touch the megagroups yet.** Earn the small rooms first.
 
 ## 4.3 The Registry as an SEO engine — ~8 hrs · **the only channel that compounds**
@@ -683,19 +897,46 @@ enter free, you judge it, and everyone who places gets a card with your name on 
 judge."* That is a video, an event, and a signup wave in one, and it costs you an evening of
 setup.
 
+**Right-size your expectations of "creator."** In this niche **5,000 followers is a big
+account.** The verified picture: one outlier at 233K (and it's a tack business with its own
+store, not a hobbyist), Breyer's own official account at 91.2K, a well-known photography account
+at 19.2K — and then **most respected, named hobby figures sitting between 3K and 10K.**
+
+That band is the opportunity, and not because of reach. **The 3K–10K accounts *are* the
+showers, the judges and the customizers** — the same people §4.1 and §4.6 are trying to reach.
+Creator outreach here is not an influencer campaign; it's the same relationship-building,
+arriving through a different door. Breadth across ten mid-tier people beats one big name.
+
 **First three actions:** identify 3 creators whose audience overlaps (see
 [`marketing-research/creators-and-institutions.md`](marketing-research/creators-and-institutions.md)) ·
 watch enough of their work to write a message that proves you did · make the offer, once,
 in week 8+ when you have two completed shows to point at.
 
 **DON'Ts.** No mass creator outreach. No affiliate-style incentives (this hobby reads paid
-promotion as compromised). Don't offer money you don't have.
+promotion as compromised). Don't offer money you don't have. And note that **YouTube, TikTok and
+Facebook follower figures could not be verified** in this research — treat any number you're
+quoted as unconfirmed, and judge an account by the comments under its posts instead.
 
 ## 4.6 Artist seeding — "founding studios" — ~4 hrs
 
 **The play.** Artists are the hobby's status centre: they have audiences, their work is the
 reason the expensive end of the market exists, and their portfolios are shareable proof-of-work
 (Loop 5). The Studio product is rebuilt and good.
+
+> ### Correct the pitch before you send it
+>
+> The research found that customizers and finish artists in this hobby are **near-universally
+> "commissions closed."** They are supply-constrained, not demand-constrained. **An offer built
+> around "find more clients" will land as noise, or worse, as pressure.**
+>
+> What a booked-solid artist actually needs is the *administrative* half: a queue that isn't a
+> DM thread, structured terms so the same argument doesn't recur, a client-approval step,
+> and — the part only MHH can offer — **a permanent portfolio where each finished horse carries
+> the placings it went on to win, attached to the horse, surviving every resale.** An artist's
+> body of work currently disperses the moment the pieces are sold.
+>
+> So pitch it as: *"somewhere your work stays yours, and your queue stops living in your
+> inbox."* Not "grow your business."
 
 **The recommendation:** offer **Studio Pro free for a year to 5–8 respected artists as founding
 studios**, in exchange for nothing except using it. Not for a post, not for a testimonial —
@@ -730,29 +971,73 @@ a newsletter you can't sustain.
 
 ## 4.8 Live shows and BreyerFest — ~2 hrs now, a real plan later
 
-BreyerFest is the hobby's annual peak (the strategy doc records ≈35,000 attendees, each July).
-The next one is out of this 90-day window, which is a gift: it means you can *plan* it instead
-of scrambling.
+**It is bigger than "BreyerFest is in July."** One week each July, the entire competitive hobby
+physically converges on Lexington, Kentucky. In 2026 that week held NAN (Jul 6–8), Breakables
+Live, Resin Renaissance, the BreyerFest Open Show, BreyerFest itself at the Kentucky Horse Park
+(Jul 10–12, drawing 30–35,000), Stone Horses' Equilocity dinner and show, and a children's and
+youth show. Seven days, one city, containing the national championship and both manufacturers'
+flagship events.
 
-**In this window, do only this:** put the date in the calendar with a note saying what the
-campaign is — *"catalog your haul tonight"* plus a virtual show that weekend — and make sure
-`/calendar` lists every live show you can find (§4.9). Regional live shows are where
-showholders are, and being useful to the whole circuit is how you meet them.
+**The date to build toward: BreyerFest 2027, July 16–18, theme "Italia!"**
+
+**The rhythms worth knowing**, because they are when this hobby is paying attention:
+
+| When | What | Why it matters |
+|---|---|---|
+| **Jan 2** | Breyer New Release Day, pre-orders at 10am | The year's first buying spike |
+| **February** | BreyerFest tickets on sale; All-Access early-buy deadline | First attention spike of four |
+| **Late March** | VIP cutoff | — |
+| **Apr 30** | **NAMHSA show year closes** — and MHH's own season with it | Hard deadline for qualification; a natural annual beat |
+| **May** | NAN registration window (2–3 weeks); Stone Country Fair | — |
+| **Early June** | Special Run preference deadline | — |
+| **Mid-July** | The Lexington week | The year's peak |
+| **Fall** | Halloween and holiday releases | — |
+| **Early December** | Gift season | *"Catalog it before you forget what you paid"* |
+
+**Note that NAN appears to have gone biennial** — 2021, 2023 and 2025 are absent from the
+archive, and the next edition looks like **2028**. Confirm before planning around it.
+
+**In this window, do only this:** put BreyerFest 2027 and the Apr 30 season close in the
+calendar with a note on what each campaign is, and make sure `/calendar` lists every live show
+you can find (§4.9). Regional live shows are where showholders are, and being useful to the
+whole circuit is how you meet them.
+
+**And one underserved market worth a note for later:** Australia has thousands of collectors,
+received mainstream national news coverage in May 2026, and **just lost its flagship live show**
+— Melbourne Live, "not returning for the foreseeable future." A community with fresh attention
+and a fresh hole where its main event used to be is the single most receptive audience a
+show-hosting platform could ask for. Out of scope at five hours a week; worth remembering.
 
 ## 4.9 The calendar of record — ~5 hrs · the sleeper
 
 `/calendar` already merges MHH shows with community-submitted external shows from OMHPS, MEPSA,
-Facebook groups and live halls. **This is the most underrated asset on the site**, because it
-is useful to people who have never heard of you and it makes you a good citizen of the whole
-hobby rather than a competitor to it.
+Facebook groups and live halls. **This is the most underrated asset on the site** — and the
+research upgraded it from "nice" to "there is a hole here shaped exactly like this."
+
+**The hole, evidenced:**
+
+- **Model Horse Blab's Show Announcements forum — the traditional place to publicise a show —
+  currently reads "There are no threads in this forum."** Blab's whole archive (182,769 threads,
+  3.4M messages) is marked private to logged-out visitors, so it is invisible to search engines
+  *and* to newcomers. Its front page still presents BreyerFest 2025 as upcoming.
+- The page that **still ranks in search for model horse photo shows** is a modelhorse.gallery
+  listing advertising the *"MEPSA 2009/2010 show season"* and a championship show in **June
+  2010**. Sixteen-year-old content is the discoverable answer to a live question.
+
+**Show discovery has no neutral home.** That is a vacuum with no incumbent to displace, no
+rules to navigate, and a stale competitor holding the search result.
 
 **The play:** seed it. Spend an evening finding every upcoming show you can and adding it,
-including shows on other platforms. Then the line you get to say in Facebook groups — the one
-that is welcome everywhere — is: *"Is your show on the calendar? It's free and it's not just
-our shows."*
+*including shows on other platforms*. Then the line you get to say in Facebook groups — the one
+that is welcome almost everywhere, because it is a service to the group rather than an ad — is:
 
-That sentence is a legitimate, admin-approved reason to post in a group. It is worth more than
-any ad.
+> *"Is your show on the calendar? It's free, and it's not just our shows — I'm trying to get
+> everything in one place because there's nowhere left to look."*
+
+That sentence is legitimate, admin-approvable, and true. It is worth more than any ad, it is the
+warmest possible first contact with a showholder (§4.1), and it makes MHH the connective layer
+rather than another competitor. **Consider promoting this above Instagram in the effort ranking
+after the first pass** — it is cheaper, it compounds, and it feeds the highest-leverage channel.
 
 ---
 
@@ -818,10 +1103,19 @@ works when the *second* show has a different host's name on it.
 **Aug 21 → Nov 19, 2026. Budget: ≤5 hrs/week combined, 65 hours total.** The 20% that drives
 the 80% is front-loaded: Summerween artifacts (W1–W3) and host recruitment (W3 onward).
 
+> **This window is a quiet stretch in the hobby's year, and that is good news.** The peaks are
+> January (new releases), February–March (BreyerFest tickets), April 30 (season close), May
+> (NAN registration) and mid-July (the Lexington week). Between late August and November the
+> only fixed beats are the fall Halloween/holiday releases and MEPSA's Vintage Specialty on
+> **Oct 31 2026**. Nobody is competing for attention, so **don't spend these 90 days chasing
+> it. Spend them building the things that will work when it returns** — the host relationships,
+> the calendar, the indexed Registry. The first campaign that meets a real attention spike is
+> the December gift season, and the first big one is BreyerFest 2027.
+
 | Week | Dates | Focus | Actions | Hrs |
 |---|---|---|---|---|
 | **1** | Aug 21–27 | **Fill Summerween** | ① Amanda works the thin classes — group posts + named DMs (**the week's one job**) · ② Google Search Console: verify, submit sitemap, read Coverage · ③ create the Facebook page, link it in the footer | 5 |
-| **2** | Aug 28–Sep 3 | Close entries · prep | ① Final 48-hour push before Aug 31 · ② draft the host-pitch message and the shortlist of 8–10 names · ③ claim the Instagram handle, write the bio | 5 |
+| **2** | Aug 28–Sep 3 | Close entries · prep | ① Final 48-hour push before Aug 31 · ② draft the host-pitch message and the shortlist of 8–10 names · ③ claim the Instagram handle, write the bio · ④ **verify the Aug 30 Facebook deletion scope** (see below) | 5 |
 | **3** | Sep 4–10 | **Results week** | ① Watch on judging day (Sentry is dead — be present) · ② individual rosette-page messages to every placing exhibitor · ③ results link into permitted groups · ④ winners carousel on Instagram | 6 |
 | **4** | Sep 11–17 | **The pivot** | ① "Host your own" post + Paddock pin · ② **first host pitch sent** · ③ log every card that minted and every class that didn't | 5 |
 | **5** | Sep 18–24 | Host #1 · calendar seeding | ① Host pitch #2 · ② concierge setup for whoever said yes · ③ seed `/calendar` with every external show you can find (one evening) | 5 |
@@ -833,6 +1127,32 @@ the 80% is front-loaded: Summerween artifacts (W1–W3) and host recruitment (W3
 | **11** | Oct 30–Nov 5 | Content that ranks | ① Write the "what's my Breyer worth" landing page for the Blue Book · ② host pitch #7 · ③ Paddock: Season 1 standings-so-far post (**only if the standings flag is lit**) | 5 |
 | **12** | Nov 6–12 | Holiday runway | ① "Catalog it before you forget what you paid" — the December-buying angle, drafted now · ② host show #2 support · ③ Instagram batch | 4 |
 | **13** | Nov 13–19 | **Day-90 review** | ① Measure everything in §7 · ② write the next 90 days · ③ decide: does the Wanted nudge get turned on? | 4 |
+
+### The one time-sensitive opportunity — verify it before you use it
+
+Observed inside a model-horse sales group on 2026-08-21, posted by Facebook itself:
+
+> *"Older listings will be deleted starting **Aug 30, 2026**. We'll delete inactive listings 2
+> years or older. Access your data before deletion begins."*
+
+**Facebook is telling this hobby's sellers, in their own selling rooms, to export their data
+before it is destroyed — nine days from now.** Whatever informal sales history lives in those
+listings starts disappearing. That is a dated, externally caused, entirely non-adversarial
+reason for a permanent records platform to exist, and it lands in the same fortnight as
+Summerween's close.
+
+**Verify the scope first.** The notice is Facebook-wide and applies to structured *listings*;
+ordinary group *posts* may well persist. **Do not build a campaign on a claim you haven't
+checked** — overstating this would be exactly the kind of trust-spending §8 warns about.
+
+If it holds, the honest version is a statement, not a pitch, and it belongs in one or two
+rooms — not ten:
+
+> Facebook's deleting old listings from the 30th, anything inactive two years or older. If
+> you've been using your own sale posts as a record of what things went for, that's going.
+>
+> Worth exporting. And if you want somewhere it doesn't happen again — the Blue Book here is
+> built from completed sales and it's free to read, no account needed.
 
 **Standing weekly commitments** (inside the hours above, not on top): 30 min of genuine
 Facebook participation, one host pitch, one Search Console glance.
@@ -890,47 +1210,71 @@ went 228 → 2,000 over a full year and its founder considered that fine. **If d
 
 Ranked by how much damage it does.
 
-1. **Don't promise a proof that isn't there.** §1.3 is the list. The anon Hoofprint is blank,
-   ownership chains are missing their origin, reviews are forgeable, "Verified Artist" is
-   self-settable. Market the card — it's the one that holds. A community that has been burned
-   twice by platform failure will not forgive being oversold.
-2. **Don't spam Facebook groups.** No bare promo links, no cross-posting the same message, no
-   posting without checking the rules, no arguing in comments. One ban closes the channel that
-   matters most, permanently, and admins talk.
-3. **Don't run paid ads.** At $0 budget with a hobby this niche, ad targeting can't find your
-   audience and the spend would buy fewer users than one showholder does for free. Revisit only
-   if a specific, measured funnel exists to pour into — and probably not even then.
-4. **No engagement bait.** No "tag a friend," no comment-to-enter giveaways, no
-   follow-for-follow, no reply-farming. This hobby's rooms are moderated by people who have
-   been running them for fifteen years and can spot it instantly.
-5. **No fake or second accounts, ever.** No astroturfed reviews, no seeded testimonials, no
-   sockpuppet entries to pad a class. The whole product is a claim about verifiability. One
+1. **Never imply an MHH card is a NAN card, or that a photo show can be NAN-qualifying.**
+   NAMHSA's rule is that only *live* shows qualify. Every online show MHH runs is outside it,
+   permanently. Say "NAMHSA-style classes." The competitive core will catch a slip instantly,
+   and they are the audience with the most to gain here.
+2. **Don't promise a proof that isn't there.** §1.3 is the list. The anon Hoofprint renders
+   nothing, ownership chains are missing their origin, reviews are forgeable, "Verified Artist"
+   is self-settable. Market the card — it's the one that holds. A community burned twice by
+   platform failure will not forgive being oversold.
+3. **Don't spam Facebook groups.** No bare promo links, no cross-posting, no posting without
+   reading the rules, no arguing in comments. The boilerplate ban on self-promotion and outside
+   links is in force in all four of the biggest rooms; one group bans directing members
+   off-platform at all. One ban closes the channel that matters most, permanently, and admins
+   talk to each other.
+4. **Don't tell anyone to "look it up."** The 12,000-member valuation group bans it in capitals.
+   Answer the question in your own words, as a hobbyist. The link can wait months.
+5. **Never comment on someone's asking price.** Price shaming is bannable — one group counts a
+   laugh reaction as an offence. MHH's own reference pages label listings *"22% over median"*;
+   never carry that number into a group thread.
+6. **No AI-generated imagery or AI-written hobby content. Anywhere.** This is no longer a taste
+   judgement: it is now an **explicit rule** in at least the largest sales group and the
+   transaction board, and the norm is still hardening. The site's own policy is that member
+   photos aren't training data and aren't for sale — publishing AI art would contradict it in
+   public, in a hobby whose most respected members are artists.
+7. **Never use someone else's photo.** *"You must use YOUR picture of YOUR model"* is a bannable
+   rule in the sales groups and a hobby-wide norm. Ask before resharing a member's photo, every
+   time, including on Instagram.
+8. **No fake or second accounts, ever.** Two of the biggest groups ban locked and secondary
+   profiles outright as an anti-scammer measure. No astroturfed reviews, no seeded testimonials,
+   no sockpuppet entries to pad a class. The whole product is a claim about verifiability; one
    incident and the claim is dead.
-6. **No AI-generated horse imagery or AI-written hobby content.** The site's own policy is that
-   member photos aren't training data and aren't for sale. In a hobby whose most respected
-   members are artists, publishing AI art would be both hypocritical and self-destructive.
-7. **Don't paywall a trust feature to create urgency.** Records, provenance, condition grades,
-   the payment ledger and card verification are free permanently. That precedent — flaws are
-   free — is worth more than any conversion you'd win by breaking it.
-8. **Don't attack the incumbents.** Never "better than MH$P," never "Blab is dead." Many of
-   your future users love those places and remember losing them. Position beside them, not
-   against them — the `/calendar` posture (we list *everyone's* shows) is the right instinct
-   applied everywhere.
-9. **Don't chase the megagroups yet.** A 20,000-member sales group will not care and its admins
-   will not budge for a platform with 100 users. Earn the small rooms.
-10. **Don't announce the SEO work,** and don't try to bulk out the Registry to make it look
-    bigger. Publishing thousands of spec-table-only pages, or padding them with generated
-    prose, is what Google's scaled-content and doorway policies are written about — and the
-    Registry is the single asset here that compounds. Risking it to inflate a page count would
-    be the most expensive unforced error available.
-11. **Don't scale email until `List-Unsubscribe` and batching exist.** One spam classification
+9. **Don't run paid ads.** At $0 budget with a hobby this niche — roughly 1,100 active sellers
+   in the whole commerce layer — ad targeting can't find your audience, and the spend would buy
+   fewer users than one showholder does for free. Revisit only if a specific, measured funnel
+   exists to pour into, and probably not even then.
+10. **No engagement bait.** No "tag a friend," no comment-to-enter giveaways, no
+    follow-for-follow, no reply-farming. These rooms are moderated by people who have been
+    running them for over a decade and can spot it instantly.
+11. **Don't paywall a trust feature to create urgency.** Records, provenance, condition grades,
+    the payment ledger and card verification are free permanently. That precedent — flaws are
+    free — is worth more than any conversion you'd win by breaking it. Note the precedent from
+    the closest analogue: Discogs launched paid access to its price-history data in 2007 and
+    **removed it the same year**, making full use of the site free.
+12. **Don't attack the incumbents, and don't gloat over their trouble.** Never "better than
+    MH$P," never "Blab is dead." Model Horse Connection is one volunteer with a day job
+    rebuilding after a ransomware attack, and many of your future users love it and remember
+    losing it once already. Position beside them — the `/calendar` posture of listing
+    *everyone's* shows is the right instinct, applied everywhere.
+13. **Don't chase the megagroups yet.** The 28,610-member sales group will not care, and its
+    admins will not bend a posted rule for a platform with 100 users. Earn the small rooms.
+14. **Don't announce the SEO work,** and don't bulk out the Registry to make it look bigger.
+    Publishing thousands of spec-table-only pages, or padding them with generated prose, is
+    what Google's scaled-content and doorway policies are written about — and the Registry is
+    the single asset here that compounds. Risking it to inflate a page count would be the most
+    expensive unforced error available.
+15. **Don't scale email until `List-Unsubscribe` and batching exist.** One spam classification
     and every transactional email — including show results — stops arriving.
-12. **Don't distribute the results CSV** until the formula-injection guard lands.
-13. **Don't start a channel you can't sustain at five hours a week.** A dead newsletter, an
-    abandoned TikTok and a stale Discord each cost more credibility than never starting.
-14. **Don't let one week's silence panic you into a growth hack.** This is a hobby of a few
-    tens of thousands of people worldwide. A Ravelry-scale win here is a rounding error to a
-    venture fund and a complete success for two people. Pace accordingly.
+16. **Don't distribute the results CSV** until the formula-injection guard lands.
+17. **Don't build a Discord.** The four largest public model-horse servers total roughly 1,144
+    members — about 4% of one Facebook group. More generally: don't start any channel you can't
+    sustain at five hours a week. A dead newsletter, an abandoned TikTok and a stale Discord
+    each cost more credibility than never starting.
+18. **Don't let one quiet week panic you into a growth hack.** MyAnimeList went 228 members to
+    2,000 over a full year and its founder called that fine. A Ravelry-scale win in this hobby
+    is a rounding error to a venture fund and a complete success for two people with day jobs.
+    Pace accordingly.
 
 ---
 
@@ -939,15 +1283,25 @@ Ranked by how much damage it does.
 Working notes, with per-claim URLs and confidence labels, are in
 [`marketing-research/`](marketing-research/):
 
-- [`facebook-and-platforms.md`](marketing-research/facebook-and-platforms.md) — Facebook group
-  landscape, group culture and self-promo rules, incumbent platforms and their gaps, where
-  trust breaks down.
+- [`facebook-and-platforms.md`](marketing-research/facebook-and-platforms.md) — the Facebook
+  group map with exact member counts and verbatim rules text, the lights/reputation system,
+  Model Horse Connection, Blab, OMHPS, the platform graveyard, and where trust breaks down
+  (evidenced from the rules admins wrote against each failure).
 - [`creators-and-institutions.md`](marketing-research/creators-and-institutions.md) — the
-  Instagram/TikTok/YouTube creator landscape, hashtags, BreyerFest, NAMHSA/NAN, live-show
-  circuits, Stone, international scenes, how photo showing works today.
+  creator landscape and its real scale, the July Lexington week, BreyerFest 2027, NAMHSA/NAN
+  and the live-shows-only rule, MEPSA, Stone, international scenes, how photo showing works.
 - [`growth-patterns-and-seo.md`](marketing-research/growth-patterns-and-seo.md) — how
-  comparable niche platforms grew early (BoardGameGeek, Discogs, Ravelry and others), the
-  UGC-catalog SEO playbook, and zero-budget organic patterns.
+  comparable niche platforms grew early (BoardGameGeek, Discogs, Ravelry, MyAnimeList,
+  Letterboxd and others), the UGC-catalog SEO playbook against Google's current policies, and
+  zero-budget organic patterns.
+
+**Read the confidence labels before quoting anything externally.** Each file marks claims
+`[HIGH]` / `[MED]` / `[LOW]` / `[UNVERIFIED]` and lists what could not be confirmed. Notable
+gaps, so they aren't mistaken for zeros: **Reddit could not be measured at all**; Model Horse
+Connection's current pricing tiers are unconfirmed post-rebrand; OMHPS's actual user and show
+volume is unknown; and **no YouTube, TikTok or Facebook follower figure was verifiable**. Several
+widely-circulated SEO statistics are single-source vendor claims and are labelled `[LOW]` —
+don't put them in anything public.
 
 Internal sources read for this plan: `.agents/MASTER_BLUEPRINT.md`,
 [`OPERATOR_PLAYBOOK.md`](OPERATOR_PLAYBOOK.md), [`STRATEGY_2026-07.md`](STRATEGY_2026-07.md),

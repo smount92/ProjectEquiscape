@@ -6,6 +6,25 @@ Research date: **2026-08-21**. All member counts and activity figures were obser
 
 ---
 
+## Top signals (everything below is evidenced in the body)
+
+1. **MH$P is gone — it is now Model Horse Connection**, rebranded under duress after a **ransomware attack** on the old server. Any marketing copy referencing "MH$P" is out of date. `[HIGH]` §4.1
+2. **The venue of record disclaims all trust responsibility in writing** and refers disputes to *"local law enforcement, postmaster general, or a certified mediation or arbitration entity."* `[HIGH]` §4.1
+3. **Its own References page recommends four reference boards; three are dead Yahoo Groups.** Its own "What's My Model Worth?" page recommends mail-order books that stop at 1995. `[HIGH]` §4.1.1
+3b. **MHC's User Agreement bans posting "ANY information about a bad transaction"** — citing slander/libel exposure. It tells buyers to check references, points at dead lists, then forbids making new ones. `[HIGH]` §8.1
+3c. **MHC's fraud FAQ has six questions and every answer is the literal placeholder `Xxxxx`** — including *"How can I prevent fraud?"* and *"Don't you care that I lost money?"* `[HIGH]` §8.1
+3d. **A NAN show record is a non-replaceable paper card** — *"the SOLE proof of a model's NAN qualification"*, mailed physically, *"discarded at the end of each NAN"*, and linked to the horse only by a handwritten name. NAMHSA publishes eight incidents of voided/counterfeit/lost records. `[HIGH]` §8.6–8.7
+4. **The hobby's real reputation system is a Facebook group** — the Model Horse Transaction Board, 13,071 members, red/yellow/green "lights", cited by other groups' rules. Unsearchable, unstructured, private, and one moderator-burnout away from gone. `[HIGH]` §3
+5. **Facebook begins deleting listings 2+ years old on 2026-08-30** — nine days after this research. `[HIGH]` §7.1
+6. **Willingness to pay is proven and mispriced:** hobbyists pay **$65/yr** for a paywalled OF-Breyer-only value guide, while the entire marketplace of record costs **$10/yr**. Records/valuation data is priced ~6.5× the marketplace. `[HIGH]` §4.2
+7. **11,962 people are in a group whose sole purpose is manually answering "what's it worth"**, with a rule in caps forbidding members from telling askers to look it up. `[HIGH]` §4.2
+8. **Don't build another marketplace.** Star Dapple tried in 2024; **its domain has now expired.** `[HIGH]` §4.4
+9. **The biggest rooms ban self-promotion and outside links**; one customizing group bans *"directing members to any outside page, group, or platform"* outright. One group permits advertising once a month. Read rules before outreach. `[HIGH]` §2
+10. **OMHPS is the real incumbent for online showing** and is prior art for horse-as-entity records — but awards are printable certificates you must ask the host for, rules live in Google Docs, and entry fees are collected by **PayPal Friends & Family**. `[HIGH]` §4.6, §7.0
+11. **Discord is negligible (~1,100 people total).** Blab is a large dead archive. Reddit could not be measured. `[HIGH]` / `[UNVERIFIED]` §6
+
+---
+
 ## 0. Method and its limits
 
 - Facebook blocks scripted fetches (curl/mbasic returned HTTP 400). Group data below was read from the **logged-out public "About" panel** of each group via a rendering browser. That panel exposes: exact member count, posts-today, posts-in-last-30-days, creation date, and the **full admin rules text** — even for groups marked "Private". `[HIGH]`
@@ -25,10 +44,10 @@ All rows observed 2026-08-21.
 |---|---|---|---|---|---|
 | Breyer Model Horses Buy, Sell, or Trade – NO Pre-Sales Allowed | **28,610** | 49 | 1,819 | 2013-03-02 | https://www.facebook.com/groups/470615649659273/ |
 | Model Horse Transaction Board *(reputation, not sales)* | **13,071** | 34 | 1,364 | 2013-09-23 | https://www.facebook.com/groups/modelhorsetransactionboard/ |
-| Artist Resin Model Horses For Sale *(public group)* | **10,700** | — | — | — | https://www.facebook.com/groups/ARHorsesForSale/ |
+| Artist Resin Model Horses For Sale *(public group)* | **10,709** | 0 | 252 | 2014-01-30 | https://www.facebook.com/groups/ARHorsesForSale/ |
 | Model Horse Sale and Trade (NO PRESALES!) | **9,954** | 21 | 789 | 2011-09-23 | https://www.facebook.com/groups/213974611999017/ |
 | Rare Model Horse Sales *($250+ floor)* | **9,735** | 7 | 411 | 2019-07-30 | https://www.facebook.com/groups/raremodelhorses/ |
-| Model Horses for Sale or Trade *(public group)* | **7,100** | — | — | — | https://www.facebook.com/groups/modelhorsesforsaleortrade/ |
+| Model Horses for Sale or Trade *(public group)* | **7,116** | 18 | 602 | 2016-03-22 | https://www.facebook.com/groups/modelhorsesforsaleortrade/ |
 | Stablemates Buy and Sell | **3,748** | 10 | 278 | 2017-08-14 | https://www.facebook.com/groups/706189089576912/ |
 | UK/International model horse sales | **1,306** | 3 | 81 | 2016-03-20 | https://www.facebook.com/groups/1125070687533449/ |
 | Model Horses For Sale and Trade **-Presales Allowed-** | **394** | 0 | 16 | 2022-11-10 | https://www.facebook.com/groups/678216863696013/ |
@@ -46,7 +65,7 @@ All rows observed 2026-08-21.
 | Breyer Horse Collectors | **22,750** | 64 | 2,361 | 2019-11-05 | https://www.facebook.com/groups/3127414397329405/ |
 | What is my Original Finish Breyer Worth? | **11,962** | 5 | 141 | 2015-07-07 | https://www.facebook.com/groups/1606242296318847/ |
 | Model Horse Customizers | **10,710** | 10 | 160 | 2015-05-30 | https://www.facebook.com/groups/modelhorsecustomizers/ |
-| Artist Resin Model Horse ID & New Releases *(public)* | **2,800** | — | — | — | https://www.facebook.com/groups/114487019259425/ |
+| Artist Resin Model Horse ID & New Releases *(public)* | **2,762** | 1 | 24 | 2017-09-02 | https://www.facebook.com/groups/114487019259425/ |
 | Reference Board For Model Horse Transactions *(reputation)* | **2,648** | 0 | **3** | 2017-05-06 | https://www.facebook.com/groups/298674680560967/ |
 | British Model Horse Collectors | **2,020** | 1 | 58 | 2010-07-04 | https://www.facebook.com/groups/120976664613170/ |
 | USOMHS (Online Model Horse Show) | **1,723** | 0 | 96 | 2016-11-29 | https://www.facebook.com/groups/USOMHS/ |
@@ -54,6 +73,21 @@ All rows observed 2026-08-21.
 `[HIGH]` — all read from About panels.
 
 **Read-through:** *Breyer Horse Collectors* (22.8K, 2,361 posts/month) is the single most active room in the hobby by post volume — and it is a **pure show-and-tell group with no commerce**. Attention and transaction are in different rooms. `[HIGH]`
+
+### 1.2b Rough audience sizing
+
+Observed 2026-08-21 `[HIGH]` unless noted:
+
+| Layer | Size | Source |
+|---|---|---|
+| Brand-aware (Breyer official FB page followers) | **128,000** | https://www.facebook.com/BreyerModelHorsesOFFICIAL/ |
+| Engaged collectors (largest single group) | **28,610** | Breyer Buy/Sell/Trade |
+| Active transactors (MHC active vendors) | **1,114** | modelhorseconnection.com homepage |
+| People who leave reputation feedback | **13,071** members / ~1,364 posts/mo | Model Horse Transaction Board |
+| Online showing community | **1,723** (USOMHS group) | facebook.com/groups/USOMHS |
+| Discord total | **~1,144** | §6 |
+
+**Read `[LOW]`:** the funnel narrows hard — ~128K brand-aware, ~30K engaged, ~1–2K actually transacting or showing in any given period. Do not model reach off the 128K figure. Group memberships overlap heavily; the sum of all group counts (~130K) is **not** 130K distinct people.
 
 ### 1.3 Groups named but not individually sized
 
@@ -189,7 +223,7 @@ https://modelhorseconnection.com/ `[HIGH]` — from the site's own welcome messa
 | Total vendors ever | 31,274 |
 | Cumulative views | 84,720,373 |
 
-**Pricing.** Free tier = 10 text ads. The commonly-cited **$10/yr** figure is the *Quarter Horse* tier: *"I pay $10 a year for a Quarter Horse level account, which lets me list up to 50 items at once with two photos each"* — https://martha.net/2024/09/where-to-sell-model-horses-and-props/ `[MED]` (2024; tiers not re-verified post-rebrand — the pricing page 404s at the obvious paths). **`[UNVERIFIED]`** for current 2026 tiers.
+**Pricing.** Corroborated independently by a 2024 seller: *"I pay $10 a year for a Quarter Horse level account, which lets me list up to 50 items at once with two photos each"* — https://martha.net/2024/09/where-to-sell-model-horses-and-props/ `[MED]`. Full current tier table verified from the site itself below.
 
 **What MHC explicitly does NOT do** — from its own disclaimer `[HIGH]`:
 > *"The MHC acts as a conduit of information… The MHC is **not involved in the actual transaction**… has **no control over the quality, safety or legality of the items advertised, the truth or accuracy of the listings**… This site cannot ensure that a Shopper or Vendor you are dealing with will actually complete a transaction."*
@@ -199,6 +233,36 @@ https://modelhorseconnection.com/ `[HIGH]` — from the site's own welcome messa
 **This is the thesis in the incumbent's own words:** the venue of record has no reputation system, no dispute process, no escrow, and **outsources trust to a Yahoo-era mailing list and a broken forum**. `[HIGH]`
 
 Also absent, confirmed by browsing the site's category structure `[HIGH]`: no show records, no provenance/chain-of-ownership, no sold-price history (the "$1,959,093 value" is *asking* value of live ads; completed sales are not published).
+
+**Confirmed pricing tiers, read from https://modelhorseconnection.com/register.asp on 2026-08-21** `[HIGH]` — this resolves the ~$10/yr belief as **correct and still current**:
+
+| Tier | Fee | Max concurrent ads | Photos/ad |
+|---|---|---|---|
+| Shetland Pony | **FREE** | 10 | text ads only |
+| Haflinger | **$2.50 / 2 months** | 10 | 2 |
+| **Quarter Horse** | **$6 / 6 months** or **$10 / year** | 50 | 2 |
+| Clydesdale (Premium) | **$25 / year** | 500 | 25 |
+
+*"Maximum # concurrent ads refers to the number of simultaneous ads allowed on the account at any one time. The total number of ads allowed over the duration of the subscription is unlimited."* Refunds only if no ads placed, within 30 days. `[HIGH]`
+
+**The whole business is ~$10–25/vendor/year against 1,114 active vendors** — an order-of-magnitude estimate of roughly **$10–25K/yr gross**, which explains the weekend-maintenance posture. `[LOW]` (arithmetic on observed figures, not disclosed revenue)
+
+#### 4.1.1 MHC's own trust and valuation pages point at dead infrastructure
+
+This is the sharpest single piece of evidence in the research. Both pages were live on 2026-08-21. `[HIGH]`
+
+**https://modelhorseconnection.com/references.asp** — *"The following list of Hobby reference boards is provided for your convenience"* — lists exactly four:
+1. **Model Horse Blab** — *"Please check out the Board of Inquiry for hobby references."* → Blab is stalled (§4.3).
+2. **MHHR** — *"MHHR is a **Yahoo!Group mailing list**."* → Yahoo Groups shut down in 2020; MHHR migrated to Groups.io in 2019. The homepage's link target is still the dead `http://groups.yahoo.com/group/MHHR/`. `[HIGH]`
+3. **MHRCH** (Model Horse Reference Center For Hobbyists) — *"a **Yahoo!Group mailing list**."* → dead.
+4. **Model Horse Cheaters ~~Buyers Beware~~** — a Yahoo group, described as *"The purpose of this group is to post who the CHEATERS ARE!!!!"* → dead.
+
+**Three of the four reference boards the marketplace of record recommends have not existed for six years.** The disclaimer on that same page still calls the site *"The MH$P"* — the pre-rebrand name. `[HIGH]`
+
+**https://modelhorseconnection.com/values.asp** — the page titled *"What's My Model Worth??"* answers with **printed books ordered by postal mail**, several listing a private individual's home address and a cheque amount (addresses not reproduced here). Listed guides include *Breyer Molds & Models: Horses, Riders, & Animals* covering **1950–1995** at $49.95 + $6.00 s/h, a *Breyer Pocket Companion* at $18 + $2.50 s/h, and four other mail-order guides. It closes: `[HIGH]`
+> *"Model horse values can be 'guestimated' from online auctions: eBay… And finally, you can check out the various model horse mailing lists. **The Model Exchange is the predominant model sales list, and can be found at Yahoo Groups.**"*
+
+**In 2026, the venue of record's official answer to "what is my model worth?" is: mail a cheque for a book that stops at 1995, or visit a Yahoo Group that has not existed since 2020.** `[HIGH]`
 
 ### 4.2 There is no public price history — and the hobby pays to work around it
 
@@ -253,7 +317,18 @@ On judging, it names the incumbent pain directly:
 > *"We want judges to look forward to judging rather than dread having to **manually enter placings into a spreadsheet** or in comments after combing through hundreds of photos."*
 Judging is drag-and-drop ordering; top placings auto-advance to sectional judging and section champions auto-advance onward. `[HIGH]`
 
-**`[UNVERIFIED]`:** OMHPS user count, show volume, current activity level, and pricing. Not determinable from the About page. **This is the highest-value follow-up in this document.**
+**OMHPS is alive and busy in 2026** — homepage observed 2026-08-21 showed **5 shows with registration open** and **5+ more announced**, with registration windows running through November 2026. `[HIGH]` It accepts *"Breyer, Stone Horses, Schleich, CollectA, artist resins, customs, and china/porcelain."*
+
+**Legitimacy signal:** manufacturer **Peter Stone** runs its annual *Little Horse Show 2026* on OMHPS — *"the annual event for smaller scale horses and this year, it is fully online"* — https://stonehorses.com/pages/little-horse-show-2026 `[HIGH]`
+
+**But the operational layer around it is entirely manual and amateur** — all quotes from OMHPS show listings, observed 2026-08-21 `[HIGH]`:
+- **Awards are printable files, self-collected:** *"There will be certificates awarded to the top 3 in each class… **The winners must contact me to receive their award.** These certificate like awards can be **saved or printed** to be placed in winning folders!"*
+- **Show rules live in Google Docs**, linked from two different show listings in the SNS series: *"Here is the [Google Doc] to the details for all updates to the SNS Photo Show Series for 2026 — *PLEASE READ BEFORE ENTERING ANY 2026 SHOWS*."*
+- **Hosts are unpaid amateurs and say so:** *"This is my first ever show that I am hosting and judging, so please let me know if you have any questions, concerns, or issues… **It is highly possible I made a mistake!**"* and *"all placings are final, and I will not argue with you about the placing your model received."*
+- **Single-operator fragility:** *"I will be away all of September, and will not be judging that month. Expect judging to continue into October."*
+- **Real money moves, at hobby scale:** entry fees of **$5** and **$20** observed. One host: *"my first ever paid show! This show has a $5 entry fee which I will be using to fund future free OMHPS shows now that I am a stay-at-home mom."*
+
+**`[UNVERIFIED]`:** OMHPS registered-user count and platform revenue model (the shows charge, but whether OMHPS itself takes a cut is not stated).
 
 ---
 
@@ -266,6 +341,8 @@ Judging is drag-and-drop ordering; top placings auto-advance to sectional judgin
 - **IMTBA** — International Model Thoroughbred Association, 4 shows/year (Feb/May/Aug/Nov 15th). `[MED]`
 - MHC has dedicated ad categories for **"Live Shows"** and **"Photo Shows/Clubs"** — showing is commercially adjacent to sales in the incumbent's own taxonomy. `[HIGH]`
 - Blab's dead **Show Announcements** forum (§4.3) was the traditional place to publicise shows. Its emptiness means show discovery has no neutral home. `[HIGH]`
+- **OMHPS is where online showing actually happens in 2026** — 5 open + 5 announced shows observed on one day, including Peter Stone's official event (§4.6). `[HIGH]` Any showing-adjacent product should treat OMHPS as the incumbent, not Blab or the stale gallery calendars.
+- Independent hosts also run shows off their own sites, e.g. **Billakos Model Horses** — https://billakosmodelhorses.com/shows/modelhorseshows — explicitly to fund the blog: *"This is a show to help me maintain my model horse blog/website."* `[HIGH]`
 
 *Deeper findings on NAMHSA/NAN, show-record verification, and showing disputes are in §8 (parallel research strand).*
 
@@ -307,9 +384,20 @@ The most defensible evidence is that **group admins wrote rules against these sp
 | **Buyers backing out** | Stablemates rule 5: *"If you commit to buy a model, please follow through/up. Any conflict will cause a member to be subject to removal."* | `[HIGH]` |
 | **Custom passed off as original finish** | Rare Model Horse Sales rule 4: *"Customs and FAUX OFs MUST BE IDENTIFIED as customs prominently in your post."* | `[HIGH]` |
 | **3D prints sold as resins** | Model Horse Customizers rule 2.4: *"3D printed models must be labeled as a '3D printed model' **without use of the word resin. No misleading.**"* | `[HIGH]` |
+| **Unknown provenance on resale** | Artist Resin Model Horses For Sale rule 2 requires the printing **material** and, for second-hand sales, *"try to find out material used, if unknown, just be sure to state it's a 3D printed model **and from which artist it came from**."* — an explicit, manually-enforced provenance requirement with no system behind it. | `[HIGH]` |
 | **Condition misdescription** | *"'good condition for its age' simply won't cut it if you want to get a decent price"* — https://identifyyourbreyer.com/buying.htm | `[MED]` |
 | **Retaliatory reputation attacks** | MHTB rule 7 exists solely to prevent revenge-lights. | `[HIGH]` |
 | **Valuation manipulation** | "What is my OF Breyer Worth?" rule 5 bans low-balling-then-offering. | `[HIGH]` |
+
+### 7.0 PayPal Friends & Family is normalised — primary evidence
+
+The Presales-Allowed group *advises* Goods & Services (table above). But in the showing world, **Friends & Family is requested outright**. Both quotes are from live show listings on OMHPS, observed 2026-08-21 `[HIGH]`:
+
+> *"The entry fee is $5 (you can pay here: paypal.me/… **via Friends and Family**. (Please add your username when paying)."*
+
+> *"**Send the $5 via F&F** to [host email] with your OMHPS username to be added!"*
+
+F&F transfers carry **no PayPal buyer protection and no chargeback path**. Hobbyists are being routinely asked to send money through the one rail that cannot be reversed — by show hosts, in public, as the default instruction. This is the mechanism that converts an ordinary dispute into a total loss, and it is normalised rather than hidden. `[HIGH]` for the quotes; `[MED]` for how widespread the practice is beyond these examples.
 
 **The generic buying advice that stands in for infrastructure** `[MED]` — https://identifyyourbreyer.com/buying.htm:
 > *"Please check references on any hobbyist you don't know before buying or selling to them. Places to check references include the Yahoo group Model Horse Hobby References (MHHR), Model Horse Blab's Transaction Board and the Model Horse Transaction Board on Facebook."*
@@ -329,17 +417,129 @@ Corroborating `[MED]`: https://www.threads.com/@theahmedghanem/post/Dbc2OK5Dl7S 
 
 ---
 
-## 8. Trust failures and showing records — parallel research strand
+## 8. Trust failures and showing records
 
-*Findings from the second research strand (scams, payment/layaway disputes, recasts, condition and shipping disputes, NAMHSA/NAN and show-record verification) are pending and will be appended here.*
+### 8.1 MHC contractually bans negative feedback — and its fraud FAQ is unwritten
+
+Two findings here are the strongest in the entire research. **I verified both myself against the live pages on 2026-08-21.** `[HIGH]`
+
+**(a) The venue of record forbids the creation of reputation data.** From https://modelhorseconnection.com/user_agreement.asp, in the list of prohibited messages:
+> *"That are negative or offensive by nature — including but not limited to: flames, inappropriate language, personal attacks, **ANY information about a bad transaction (these posts open the site owner up to legal liability for slander or libel suits and won't be tolerated)**."*
+
+Combined with §4.1: **the marketplace tells buyers to check references, points them at three dead Yahoo Groups, and then bans them from generating any new reference data on the site.** That is a closed loop with no exit. The stated reason is defamation liability — the same fear that shapes MHTB rule 9 (§3) and MHHR's CDA §230 disclaimer. `[HIGH]`
+
+The agreement's *"Last update: 8/1/2018"* — eight years stale, and predating the ransomware incident and rebrand. `[HIGH]`
+
+**(b) The fraud FAQ is a placeholder.** https://modelhorseconnection.com/faq.asp has a **"Bad Transactions"** section with six questions. **Every single answer is the literal string `Xxxxx`** `[HIGH]`:
+
+| Question on the live FAQ | Answer |
+|---|---|
+| *"Why don't/won't you help resolve a bad transaction?"* | `Xxxxx` |
+| *"Don't you care that I lost money?"* | `Xxxxx` |
+| *"What can I do about a bad transaction on the MH$P?"* | `Xxxxx` |
+| *"What else can I do about a bad transaction?"* | `Xxxxx` |
+| *"How can I prevent fraud?"* | `Xxxxx` |
+| *"Why can't complaints be submitted about Shoppers?"* | `Xxxxx` |
+
+Page footer reads "Copyright © 1996 - 2026". The hobby's primary marketplace has, for an unknown number of years, shipped a fraud help page where **the questions are written and the answers are not**. `[HIGH]`
+
+Other notable clauses `[HIGH]`: the agreement bans *"unauthorized copies of **VARA-protected**/copyrighted sculptures"* (the Visual Artists Rights Act, named explicitly — see §8.5); warns of *"risks of dealing with **underage persons**"*; and bans *"Asking Shoppers to 'please check out my ads'."*
+
+**Blab's equivalent is closed too:** Model Horse Blab's Transactions Board "TTB Be Aware" section — *"A very few identities with a long, established history of transaction problems"* — is marked **"Info Only. CLOSED to new posts & threads."** `[HIGH]` https://modelhorseblab.com/forums/the-transactions-board.32/
+
+### 8.2 PayPal Friends & Family — normalised by institutions, not just bad actors
+
+Beyond the OMHPS show hosts quoted in §7.0, **MEPSA** (Model Equine Photo Showers Association, founded 1997) lists entry-fee payment as *"PayPal to [address] **(using Friends/Family)**."* `[HIGH]` https://mepsa.club/faqs/
+
+F&F carries no buyer protection. `[HIGH]` The hobby's own guidance contradicts the practice — Identify Your Breyer warns social-media sales groups *"are free to join and use but **have little or no buyer protection**."* `[HIGH]` https://identifyyourbreyer.com/buying.htm
+
+**Read `[MED]`:** this is not a fringe scam vector — it is the default payment instruction from long-established hobby organisations. That makes "use G&S" advice socially awkward rather than obvious, and it is why the Presales-Allowed group had to write it into its rules (§7).
+
+### 8.3 Presales, layaway, and time payments
+
+- **The market split rather than solved it.** Competing groups brand on opposite policies (§1.1). The membership gap (28,610 vs 394) shows which side won. `[HIGH]`
+- **Mechanism:** Breyer gates BreyerFest special runs behind VIP/All-Access ticket tiers — *"all nine special run models are available to VIP and All-Access ticket holders only"* https://www.breyerhorses.com/pages/special-runs-breyerfest-2026 `[MED]` — so presellers are selling an **allocation they may not receive**. Presale listings are visible on eBay for BreyerFest 2026 runs. `[HIGH]`
+- **Dealer-level layaway terms** (Triple Mountain, now retired in favour of Shop Pay Installments after 2024-08-25): 30% down, 1–2 monthly installments, 2.9% fee, and *"refunds cannot be created for lay-buys for any reason, including customer cancellation."* `[MED]` https://triplemountain.com/pages/payment-plan
+- **`[UNVERIFIED]`:** peer-to-peer time-payment disputes. Dedicated Facebook payment-plan groups exist, but no indexed dispute accounts were findable — they live inside closed groups. Do not assert a pattern here without primary access.
+- **`[UNVERIFIED]`:** the stated rationale for group-level presale bans. The bans are in the group *names*; no group published a reasoning paragraph.
+
+### 8.4 Condition vocabulary is rich; enforcement is nil
+
+The hobby has precise shared grading language — and no mechanism attaching it to a transaction. `[HIGH]`
+
+- Grades (Triple Mountain, https://triplemountain.com/pages/hobby-terms): *"Factory Mint… no post-production damage whatsoever"*; *"Near Mint… only the slightest post-production damage"*; *"Very Good… significant post-production damage but generally has no breaks beyond possibly chipped ears."*
+- Hobby-specific defects: **"Shrinky"** — plastic breakdown in late-1980s–mid-1990s models, with *"vinegar smell and deformation"*; **"Sunbathing"** — undisclosed yellowing removal. `[HIGH]`
+- **"T/U"** (touch-up): *"small markings added or rubs/scratches retouched on an otherwise OF model"* — undisclosed restoration that silently changes a model's category. `[HIGH]` https://www.identifyyourbreyer.com/glossary.htm
+- **"LSQ" vs "PSQ"** is a seller claim with a loophole built into its definition: LSQ = *"Live Show Quality; very few or no flaws… will stand up to a close, in-person examination"*; PSQ = *"Photo Show Quality; in good enough condition to do well in photo shows, **which can hide minor or off-side flaws**."* `[HIGH]`
+- Photo manipulation is the classic photo-show cheat: *"using 'Photoshop' techniques to hide or disguise flaws in your model is generally considered a form of cheating."* `[MED]` https://www.identifyyourbreyer.com/photo.html
+
+**Shipping damage: the buyer generally eats it.** Even a reputable dealer's policy has **no returns at all** (*"the unique nature of hand-painted models"*), no returns for condition disagreements, and *"International shipping cannot be insured against transit damage or loss"* with loss *"not the responsibility of"* the seller. A domestic damage procedure is simply **absent**. `[HIGH]` https://triplemountain.com/pages/refund-policy
+
+### 8.5 Recasts and provenance
+
+- **Recasting is recognised at marketplace-rules level** — MHC bans *"unauthorized copies of VARA-protected/copyrighted sculptures"* `[HIGH]`; sculptors assert rights directly (*"I will not allow any recasting of my work, in full or part"*) `[MED]`.
+- Detection lore (bubbles, flash, softened detail, copy-of-copy shrinkage) is documented in adjacent resin hobbies. `[MED]`
+- **`[UNVERIFIED]` — important correction to the brief's premise:** no model-horse-specific recast **blacklist, registry, or 2025–26 community alert** was found. The claim that recasting is currently a *large-scale* model horse problem **could not be substantiated** from indexed sources. Evidence found is rule-level and artist-level, not incident-level. Treat "recasts are a big deal" as an unverified hobby belief until primary evidence surfaces.
+
+**Provenance is weak by design** `[HIGH]`:
+- A **Certificate of Authenticity is not serialised to a model** — *"A piece of paper included with many Limited Edition and Connoisseur Models"* — yet *"Models complete with COA generally sell for more."* A COA is a bearer document, trivially separable from its horse.
+- Reference catalogues are volunteer-run and decaying: the Model Horse Gallery **Resin Registry cross-reference was last modified 2020-06-10** (HTTP header) `[HIGH]`; the Equine Resin Directory still says *"we are in the process of creating a comprehensive website"* `[HIGH]`. Resin Horse Editions is the live exception (last modified 2026-08-16) `[HIGH]` http://resinhorseeditions.blogspot.com/
+- **Cross-venue listing creates double-sale risk** — sellers report *"the issue of a one-of-a-kind piece selling twice."* `[HIGH]` https://martha.net/2024/09/where-to-sell-model-horses-and-props/
+
+### 8.6 NAN cards: the show record is a non-replaceable paper bearer token
+
+**This is the clearest product-shaped hole in the hobby.** All `[HIGH]`, from https://namhsa.org/entrants-tickets/ and https://nanprogram.com/enter/
+
+NAMHSA awards paper "tickets" (NAN cards) to 1st/2nd place in qualifying open classes. The governing language:
+> **"These tickets are now the SOLE proof of a model's NAN qualification."**
+> **"lost or damaged tickets CANNOT BE REPLACED, and NAN cannot be entered without them."**
+
+On resale:
+> *"If a model is sold, you must send any tickets along with the horse to the new owner. Do not cross out the original owner's name as this will be used to verify the card… New owners must write their name on the back."*
+
+Cards are colour-coded by division (green = breed halter; yellow/green = collectibility/workmanship; pink/red = performance).
+
+**In 2026 the process is still hybrid physical:** entry is online, but *"Send your NAN cards and payment"* physically to the NAMHSA Registrar, deadline midnight PDT 2026-05-17, *"Absolutely no late entries."* Verification happens only at that point — *"ALL tickets entered in a NAN will be verified against actual show results"* — and then:
+> **"All submitted tickets and show data/entry numbers will be discarded at the end of each NAN."**
+
+**The Merit Awards Program is the closest thing to a central database** `[HIGH]` https://namhsa.org/merit-awards/ — titles *"recorded in the NAMHSA Merit Award database"*, cards valid from **October 1997 forward with no expiration**; a Register of Merit needs 6 cards in one class, the Ultimate Performance Hall of Fame needs 125. Verification is real: *"The Merit Awards Coordinator will have access to NAMHSA member show results."* Cards transfer on sale — **but only if the model's name is unchanged.**
+
+Note the internal contradiction: **NAN entry treats cards as consumed/discarded; Merit treats them as perpetual.** `[HIGH]`
+
+**Results are published but fragmented** `[HIGH]`: show holders must submit results within 30 days *"in a searchable, single file format"*, and may submit only first/second places. NAN results carry real fields (placing, model name, entry number, points, owner). But archives are scattered: 1995–2013 at https://namhsa.org/results/ (mixed HTML/PDF/DOC; page last updated Dec 30 2012), 2014+ at https://namhsa.org/nan-archives/, member shows at https://namhsa.org/show-results-archives/ where **2003–2006 are marked "Results not archived online at this time."**
+
+### 8.7 NAMHSA publishes its own list of record-keeping failures
+
+https://namhsa.org/invalid-nan-cards/ lists **eight incidents, 2009–2018** `[HIGH]`:
+
+| Year | Failure |
+|---|---|
+| 2009 | *"Cards from this show were **counterfeit**, not issued by NAMHSA"* |
+| 2011 | Entire Artist Resin Halter division voided — judge showed in the division they judged |
+| 2011 | *"Results never submitted within required timeframe"* → all cards void |
+| 2012 | **Records lost**; results recreated — *"Any NAN cards for horses not listed in the results… are NOT valid"* |
+| 2013, 2016 | All cards voided — showholder showing |
+| 2017 | BreyerFest Live OF Mini Division cards rescinded — judge had owned an entry within 6 months |
+| 2018 | All cards voided — person residing with show holder |
+
+**Can a buyer verify a "NAN qualified" claim?** `[MED]` — Partially. They can check nanprogram.com results, check this invalid-cards list, and inspect the physical card. But **the card's link to the physical object is a handwritten model name, not a serial number**, and Merit transfer depends on that name never changing. There is no public model-level registry mapping a specific physical horse to its record. `[LOW]` (inference from the primary rules above, which are `[HIGH]`)
+
+### 8.8 Photo shows: two worlds
+
+- **MEPSA is still postal.** *"MEPSA is strictly a mail-in photo showing organization. **Online entries are not accepted**"* — 4×6 prints preferred, other sizes *"may be disqualified"* — and participants *"keep track of their own qualifiers."* `[HIGH]` https://mepsa.club/about/ , https://mepsa.club/faqs/
+- **OMHPS is the modern platform** (§4.6), but its terms disclaim exactly the failure modes that matter `[HIGH]` https://www.omhps.com/:
+  - *"OMHPS does not hold any responsibility for User and Organization shows being concluded and judged in a timely manner… **We will not step in and conclude/judge a show on their behalf**."*
+  - *"Any paid entry fees do not go through OMHPS and as such, we are not liable of offering refunds or compensation should a… show be canceled, neglected, or otherwise not fulfilled."*
+  - Cheating rules void results for *"a user placing their own models or using a friend/family/alternative account to place their own models, or overwhelming and proven bias"* — records persist but are hidden from horse pages.
+- **Judging load is the binding constraint:** a fifty-class show *"could have thousands of photos… the better part of a week or more to judge."* `[HIGH]` https://modelhorse.gallery/library/holdingphotoshow.html
 
 ---
 
 ## 9. Explicitly unverified — do not guess these
 
-1. **r/modelhorses / Reddit presence and size.** Blocked from this environment. `[UNVERIFIED]`
-2. **MHC's current 2026 subscription tiers.** The $10/yr Quarter Horse figure is from a 2024 blog and predates the rebrand; pricing URLs 404. `[UNVERIFIED]`
-3. **OMHPS scale** — users, shows/year, pricing, whether it is still actively run. Highest-value follow-up. `[UNVERIFIED]`
+1. **r/modelhorses / Reddit presence and size.** Reddit blocked WebFetch, blocked the JSON API, and is **blocked by policy in the browser pane**. Three independent routes failed. Needs a manual human check — do not assume a size. `[UNVERIFIED]`
+2. ~~MHC's current 2026 subscription tiers.~~ **RESOLVED** — read from register.asp on 2026-08-21; the $10/yr Quarter Horse tier is current. See §4.1. `[HIGH]`
+3. **OMHPS registered-user count** and whether the platform itself monetises shows (individual hosts charge $5–$20, but OMHPS's own cut, if any, is not stated). Activity level is now confirmed high — see §4.6. `[UNVERIFIED]`
 4. **Breed- and discipline-specific Facebook groups.** I found scale/brand/finish segmentation but no large breed groups; absence of evidence only. `[UNVERIFIED]`
 5. **EU-mainland and Australian groups.** Only brand pages found, no sized groups. `[UNVERIFIED]`
 6. **Model Horse Place** total listing volume; whether sold prices remain publicly visible. `[UNVERIFIED]`
