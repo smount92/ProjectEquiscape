@@ -218,8 +218,12 @@ RETURNS TRIGGER
 LANGUAGE plpgsql
 SECURITY INVOKER
 SET search_path = public
-AS $$
+AS $
 BEGIN
+  -- Service context (SQL editor, service role, crons): no user
+  -- session, so the per-user rules below do not apply — this is how
+  -- the migration backfill itself runs. RLS keeps clients out.
+  IF (SELECT auth.uid()) IS NULL THEN RETURN NEW; END IF;
   IF NEW.conversation_id IS DISTINCT FROM OLD.conversation_id
      OR NEW.user_id IS DISTINCT FROM OLD.user_id THEN
     RAISE EXCEPTION 'A participant row cannot be moved to another thread or person.';
@@ -395,6 +399,9 @@ AS $$
 DECLARE
   v_uid UUID := (SELECT auth.uid());
 BEGIN
+  -- Service context (SQL editor, service role, crons): no user session,
+  -- so the per-user rules below do not apply. RLS keeps clients out.
+  IF v_uid IS NULL THEN RETURN NEW; END IF;
   IF NEW.conversation_id IS DISTINCT FROM OLD.conversation_id
      OR NEW.seq IS DISTINCT FROM OLD.seq THEN
     RAISE EXCEPTION 'A payment row cannot be moved to another deal or renumbered.';
@@ -485,6 +492,10 @@ AS $$
 DECLARE
   v_uid UUID := (SELECT auth.uid());
 BEGIN
+  -- Service context (SQL editor, service role, crons): no user session,
+  -- so the per-user rules below do not apply — this is how the backfill
+  -- below runs at all. RLS keeps clients out.
+  IF v_uid IS NULL THEN RETURN NEW; END IF;
   -- Identity is fixed. A message cannot change hands or threads.
   IF NEW.id IS DISTINCT FROM OLD.id
      OR NEW.conversation_id IS DISTINCT FROM OLD.conversation_id
@@ -529,8 +540,12 @@ RETURNS TRIGGER
 LANGUAGE plpgsql
 SECURITY INVOKER
 SET search_path = public
-AS $$
+AS $
 BEGIN
+  -- Service context (SQL editor, service role, crons): no user
+  -- session, so the per-user rules below do not apply — this is how
+  -- the migration backfill itself runs. RLS keeps clients out.
+  IF (SELECT auth.uid()) IS NULL THEN RETURN NEW; END IF;
   -- The parties and the subject are what the thread IS. Re-pointing a
   -- thread at a different horse would rewrite the evidence.
   IF NEW.buyer_id IS DISTINCT FROM OLD.buyer_id
