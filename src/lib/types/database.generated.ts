@@ -133,6 +133,61 @@ export type Database = {
           },
         ]
       }
+      announcements: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          ends_at: string | null
+          id: string
+          link_url: string | null
+          message: string
+          placement: string
+          starts_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          id?: string
+          link_url?: string | null
+          message: string
+          placement?: string
+          starts_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          id?: string
+          link_url?: string | null
+          message?: string
+          placement?: string
+          starts_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "announcements_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "announcements_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "announcements_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       artist_profiles: {
         Row: {
           accepting_types: string[] | null
@@ -5101,6 +5156,61 @@ export type Database = {
           },
         ]
       }
+      subscription_state: {
+        Row: {
+          current_period_end: string | null
+          started_at: string
+          status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          tier: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          current_period_end?: string | null
+          started_at?: string
+          status: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          tier: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          current_period_end?: string | null
+          started_at?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          tier?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_state_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_state_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "subscription_state_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transactions: {
         Row: {
           accepted_at: string | null
@@ -5617,6 +5727,7 @@ export type Database = {
           is_test_account: boolean
           is_trusted_curator: boolean
           is_verified: boolean
+          last_seen_on: string | null
           notification_prefs: Json | null
           pref_simple_mode: boolean
           profile_customization: Json | null
@@ -5649,6 +5760,7 @@ export type Database = {
           is_test_account?: boolean
           is_trusted_curator?: boolean
           is_verified?: boolean
+          last_seen_on?: string | null
           notification_prefs?: Json | null
           pref_simple_mode?: boolean
           profile_customization?: Json | null
@@ -5681,6 +5793,7 @@ export type Database = {
           is_test_account?: boolean
           is_trusted_curator?: boolean
           is_verified?: boolean
+          last_seen_on?: string | null
           notification_prefs?: Json | null
           pref_simple_mode?: boolean
           profile_customization?: Json | null
@@ -6095,6 +6208,14 @@ export type Database = {
         Args: { p_horse_id: string }
         Returns: number
       }
+      get_public_hoofprint: {
+        Args: { p_horse_id: string }
+        Returns: {
+          life_stage: string
+          ownership: Json
+          timeline: Json
+        }[]
+      }
       get_public_horse_cards: {
         Args: { p_horse_id: string }
         Returns: {
@@ -6179,12 +6300,21 @@ export type Database = {
         }
         Returns: Json
       }
+      metrics_active_members: { Args: { p_days?: number }; Returns: number }
       metrics_entity_totals: {
         Args: { p_days?: number }
         Returns: {
           etype: string
           total_uniques: number
           total_views: number
+        }[]
+      }
+      metrics_subscription_summary: {
+        Args: never
+        Returns: {
+          status: string
+          subscribers: number
+          tier: string
         }[]
       }
       metrics_top_objects: {
@@ -6201,6 +6331,10 @@ export type Database = {
         Returns: number
       }
       placings_announced: { Args: { p_class_id: string }; Returns: boolean }
+      record_class_placings_atomic: {
+        Args: { p_class_id: string; p_placings: Json }
+        Returns: undefined
+      }
       record_object_view: {
         Args: {
           p_entity_id: string
@@ -6209,6 +6343,17 @@ export type Database = {
           p_viewer_hash: string
         }
         Returns: boolean
+      }
+      record_subscription_state: {
+        Args: {
+          p_current_period_end?: string
+          p_status: string
+          p_stripe_customer_id?: string
+          p_stripe_subscription_id?: string
+          p_tier: string
+          p_user_id: string
+        }
+        Returns: undefined
       }
       refresh_market_prices: { Args: never; Returns: undefined }
       refresh_mv_trusted_sellers: { Args: never; Returns: undefined }
@@ -6279,6 +6424,7 @@ export type Database = {
         Args: { p_entry_id: string; p_user_id: string }
         Returns: Json
       }
+      touch_last_seen: { Args: never; Returns: undefined }
       upvote_suggestion: {
         Args: { p_suggestion_id: string }
         Returns: undefined
