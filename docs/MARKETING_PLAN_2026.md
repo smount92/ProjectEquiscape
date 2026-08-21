@@ -93,9 +93,12 @@ Not marketing copy. These were read out of the code and the docs.
 - **Shows run:** Summerween is effectively the first at any scale, and it is **small** — the
   championship doc records its largest class as **4 entries**, which is why the Season 1 card
   gate was set at 3 entries / 2 exhibitors instead of the permanent 5-and-3.
-- **Search presence:** the reference pages are live and in the sitemap, but the strategy doc's
-  July finding was **~1 indexed page**. Indexing status is unmeasured. That is a five-minute
-  fix (Search Console) and it is in Week 1.
+- **Search presence: better than the last count suggested.** The strategy doc's July finding of
+  "~1 indexed page" is **stale**. As of 2026-08-21 the site is indexed and describing itself in
+  live search results with its own language — "virtual photo shows with NAMHSA templates,"
+  "10,500+ reference releases," "Hoofprint provenance tracking." What is still unknown is *how
+  many* of the ~10,900 reference pages are indexed, and whether any are being classified as
+  thin. That is a Search Console question and it is Week 1.
 - **Social presence:** none. No Facebook page, no Instagram, no links in the footer. In a
   Facebook-native hobby this reads as "not real."
 
@@ -358,6 +361,56 @@ where to find it, and lead the time-payments message at resin sellers (§2.2).
 Covered as a channel in §4.3 — but note it *is* a loop: members correct entries → the pages get
 better → they rank better → strangers arrive → some join and correct entries.
 
+## The loop that isn't built — and the strongest precedent for building it
+
+Across every comparable platform that grew from nothing without money, one move recurs:
+**they asked members to evangelise, and handed them something to do it with.**
+
+- **Ravelry**, on its own blog in May 2007, asked members outright to write about it — and
+  shipped **promotional badges for blog sidebars**.
+- **Goodreads** built embeddable bookshelf widgets for book bloggers with, in the founder's
+  words, *"a little logo at the bottom that was just static HTML to get a link to our
+  homepage."* He also found the invite copy *"Join my reading network"* outperformed the
+  alternative by 3×.
+
+MHH has the *objects* — cards, rosettes, passports, results pages — but no **embeddable,
+paste-able form** of any of them. The single highest-value product recommendation in this
+document is therefore:
+
+> **Give members something to paste into a Facebook post.**
+
+Three versions, cheapest first:
+1. **The copy-line** (Loop 3): a button that yields *"Show record verifiable here: …"*. Pure
+   text. Works in every group, including the ones that ban images and love links, and the ones
+   that ban links where a member can still type the domain.
+2. **A downloadable rosette / card image.** Facebook and Instagram privilege native images over
+   links. A winner posting a rosette PNG with the site's mark in the corner is a better ad than
+   any post you could write, and they *want* to post it.
+3. **A stable badge** — "N horses · M cards · MHH" — for a signature, a blog sidebar, or a
+   profile. This is the Ravelry play verbatim.
+
+None of these is a marketing message. All three are things a member wants for their own reasons
+and which carry your name as a side effect. That is the whole trick.
+
+## Setting expectations: what "working" looks like on this timeline
+
+Worth reading before the first slow month, because two people at five hours a week will
+otherwise mistake normal for failure:
+
+- **MyAnimeList:** 228 members → ~2,000 a year later → ~40,000 the year after. The founder's
+  own words: *"a slow start, but I knew people enjoyed using MAL."*
+- **Letterboxd:** two designers, part-time alongside their day business, **nine years** before
+  the first full-time employee — and they still won the category.
+- **BoardGameGeek:** six years from launch to the founder quitting his day job. He spent the
+  early stretch copy-pasting emailed submissions into hardcoded pages by hand.
+- **Ravelry** is the outlier that grew fast (≈100,000 members in ten months) — and it grew fast
+  because **the founder was already a well-known member of the community**, which is the single
+  most-repeated fact in every account of it. That is Amanda's position, and it is the most
+  valuable asset in this plan.
+
+The shape to expect is slow, then compounding. Plan on a 24-month horizon and treat the 90-day
+targets in §7 as directional.
+
 ---
 
 # 4. The channel plan
@@ -370,12 +423,26 @@ Effort-ranked. The budget is **65 hours across 90 days.** Anything not on this l
 showholder who runs their show on MHH delivers their whole entrant list, and the public results
 page they post afterwards is an acquisition surface aimed at exactly the right people.
 
-Be precise about the vacuum, because a host will correct you if you aren't: **photo showing is
-already served** — by volunteer-run single-purpose sites (OMHPS and similar) and by Facebook
-groups and email. What has *never* existed is software for **live** shows, and what nobody
-offers at all is **results that become a permanent, checkable record on the horse**. So the
-pitch to a photo-show host is "less paperwork, and your placings mean something afterwards,"
-not "there's nothing else out there."
+Be precise about the vacuum, because a host will correct you if you aren't. **Photo showing is
+already served.** OMHPS runs online photo shows and explicitly keeps track of placings, across
+Breyer, Stone, Schleich, CollectA, resins, customs and china. Facebook groups and email do the
+rest. So "there's nothing else out there" is false and a host will know it.
+
+What is genuinely absent is narrower and more defensible:
+
+- **Software for live shows.** Nothing exists, anywhere.
+- **A placing that a stranger can verify** without an account and without asking the host.
+- **A record that survives the sale** — placings, cards and titles that transfer with the horse
+  instead of ending at the shelf they were won on.
+
+So the honest pitch to a photo-show host is *"less paperwork on the night, and your placings
+mean something afterwards"* — not a claim that they have no options.
+
+**And frame the whole landscape as fragmented, not hostile.** OMHPS, Model Horse Blab, NAMHSA,
+the Breyer Collector Club, identifyyourbreyer.com and dozens of Facebook groups each hold one
+piece. Ravelry grew by absorbing exactly that kind of scatter — blogs, Yahoo groups, a forum and
+a magazine — without attacking any of them. Be the connective layer. `/calendar` listing other
+platforms' shows is already that instinct, correctly applied; extend it to how you talk.
 
 **Cadence.** One named target per week, worked properly. Not a blast.
 
@@ -416,7 +483,16 @@ objects other people want to post. Everything above in §3 exists so that the li
 is dropped by a member answering a question, not by you.
 
 Amanda is the front. She is a real, long-standing member of these rooms; Stephen is not. This
-matters more than any tactic on this page.
+matters more than any tactic on this page — **every comparable platform that grew from nothing
+was founded by someone already native to the community**, and it is the one advantage here that
+cannot be bought or copied.
+
+Two rules of thumb the general guidance converges on, and which match how these rooms actually
+behave: **roughly 80% genuinely useful contribution to at most 20% anything promotional**, and
+**never a bare link — always the context for why it helps the person asking.** In a room you're
+new to, spend two to four weeks contributing before you mention the site at all. Prefer
+answering an existing question over starting a post about yourself; a helpful reply is welcome
+in rooms where a promo post would be deleted.
 
 **Cadence.** 20–30 minutes, twice a week. That's it.
 
@@ -463,11 +539,38 @@ work is *measurement*, *interlinking*, and *query targeting* — not building.
 
 **Cadence.** One hour a week, mostly checking.
 
+> ### The risk nobody has looked at yet
+>
+> Google's spam policy on **scaled content abuse** targets "many pages generated for the
+> primary purpose of manipulating search rankings and not helping users," and names *"scraping
+> feeds… to generate many pages… where little value is provided"* as an example. Its **doorway**
+> policy names *"creating substantially similar pages that are closer to search results than a
+> clearly defined, browseable hierarchy."*
+>
+> Read that against what MHH actually has: ~10,900 pages, built by import scripts against
+> public hobby sources, many of which — for a release nobody on the site owns yet — carry no
+> photo, no owner count, no sale price and no discussion. **Those pages are a spec table and
+> nothing else, and they look exactly like the thing the policy describes.** Volume is
+> explicitly *not* the violation; per-page value is. The pages that carry owner counts, real
+> completed-sale prices, member photographs and show results are on the right side of the line
+> and could not be replicated by anyone. The empty ones dilute them.
+>
+> **Recommendation: gate indexing on a minimum-value bar** — a page needs, say, a photo plus one
+> owner or one price before it enters the sitemap; `noindex` until then, then let it in
+> automatically as the community fills it. This makes the Registry *grow into* its index rather
+> than starting at full size and thin, and it converts the catalog from a liability into what
+> Ravelry's yarn database was: **a by-product of members using the tool**, which is the pattern
+> every comparable platform actually followed. Sizing this needs a count of how many pages
+> currently clear the bar — worth running before Week 7.
+
 **First three actions:**
 1. **Google Search Console. This week.** Verify the property, submit `/sitemap.xml`, and read
-   the Coverage report. The strategy doc's last count was ~1 indexed page; you currently have
-   no idea whether 10,900 pages are indexed, blocked, or classified as thin. **You cannot manage
-   this channel until you can see it.** Add Bing Webmaster Tools while you're there.
+   the Coverage report — specifically the *"Crawled – currently not indexed"* and *"Discovered –
+   currently not indexed"* buckets, which are where a thin-page problem shows up first. **You
+   cannot manage this channel until you can see it.** Add Bing Webmaster Tools while you're
+   there. Also check that the `/catalog` browse facets aren't generating crawlable parameter
+   URLs — faceted navigation is the classic way a 10k-page catalog explodes into a near-duplicate
+   set, and the fix (a `robots.txt` parameter block) is cheaper than the cleanup.
 2. **Fix the internal-link starvation.** Google discovers and values pages through links, and
    ~10,900 pages hanging off one `/reference` index is a shallow structure. The good
    interlinking that exists — "Releases on this mold" and "Customs of this mold" — is gated
@@ -492,13 +595,42 @@ work is *measurement*, *interlinking*, and *query targeting* — not building.
    - *"model horse show calendar"* → `/calendar` is already tuned for this. It should be the
      first thing you check in Search Console.
 
-**What success looks like:** indexed page count climbing, then impressions climbing, then a
-first organic signup. Impressions move before clicks; don't panic in month one.
+**Structured data: three corrections to anything written before mid-2026.**
 
-**DON'Ts.** Don't announce this move — it's for crawlers, not the feed. Don't generate filler
-text to bulk out thin pages; a page whose only unique content is a spec table is fine, a page
-padded with AI-written prose is a doorway page and a liability. Don't chase "Breyer" as a head
-term — you will not outrank Breyer.
+- **Do not build FAQPage markup.** The FAQ rich result was deprecated in May 2024 and Google
+  removed the documentation in June 2026; it now shows only for government and health sites.
+  Any hour spent on it is wasted.
+- **`DiscussionForumPosting` is the sleeper type and MHH is uniquely placed for it.** It powers
+  Google's Discussions and Forums feature, needs only an author name, a `datePublished` and one
+  of text/image/video, and is *only* valid on genuinely user-generated posts. Google's own head
+  of Search has said publicly that sites "with forums… where they can hear authentic voices" are
+  gaining traffic in the AI-search shift. **The catch: the Paddock is login-walled and
+  `robots.txt`-disallowed**, so none of it is eligible today. If any part of the community
+  discussion is ever opened to anon reading, this becomes the second SEO engine — and the
+  ranking value of authentic discussion is currently rising, not falling.
+- **Use Product *variant* markup** on releases. Twelve colour runs of the same mold are exactly
+  the near-duplicate set that variant markup exists to disambiguate, and it is the cleanest
+  answer to "these pages look substantially similar."
+
+**A realistic view of what SEO returns in 2026.** Independent browsing data (Pew, 900 US adults,
+March 2025) found users click a traditional result on **8%** of visits where an AI summary
+appears, versus **15%** where it doesn't — and click a link *inside* the summary on 1%. Google
+disputes the aggregate picture and says total click volume is roughly stable. Both can be true:
+head and informational queries get answered in the results page, while **long-tail
+identification and valuation queries — "what year is this," "what's it worth," "is this the
+1995 run" — still require somebody to land on a page that holds the actual data.** That is
+precisely the query class the Registry serves, which is why this channel is still worth eight
+hours. Set expectations accordingly: this is a slow compounding asset, not a tap.
+
+**What success looks like:** indexed page count climbing, then impressions climbing, then a
+first organic signup. Impressions move a month before clicks; don't panic in month one.
+
+**DON'Ts.** Don't announce this move — it's for crawlers, not the feed. **Don't pad thin pages
+with generated prose** — that converts a merely-sparse page into a scaled-content-abuse
+liability, which is a far worse outcome than the sparse page. The fix for a thin page is a real
+photo and a real owner, or `noindex`. Don't chase "Breyer" as a head term — you will not
+outrank Breyer. And don't implement structured data *for* LLMs: Google states plainly that no
+special markup is needed to appear in AI features.
 
 ### The content you have already written and aren't using
 
@@ -746,6 +878,12 @@ move a month before clicks); signups on the day after any show publishes.
 **Vanity metrics to ignore:** Instagram followers, page likes, total pageviews, catalog row
 count.
 
+**A note on the targets above.** They are directional, and the member number is the softest of
+them. The comparable platforms in §3 grew slowly for years before they compounded — MyAnimeList
+went 228 → 2,000 over a full year and its founder considered that fine. **If day 90 lands at
+150 members but three shows ran under other people's names, this plan worked.** If it lands at
+400 members and Amanda hosted every show, it didn't. Judge by the host number.
+
 ---
 
 # 8. What NOT to do
@@ -780,7 +918,11 @@ Ranked by how much damage it does.
    applied everywhere.
 9. **Don't chase the megagroups yet.** A 20,000-member sales group will not care and its admins
    will not budge for a platform with 100 users. Earn the small rooms.
-10. **Don't announce the SEO work.** It's for crawlers.
+10. **Don't announce the SEO work,** and don't try to bulk out the Registry to make it look
+    bigger. Publishing thousands of spec-table-only pages, or padding them with generated
+    prose, is what Google's scaled-content and doorway policies are written about — and the
+    Registry is the single asset here that compounds. Risking it to inflate a page count would
+    be the most expensive unforced error available.
 11. **Don't scale email until `List-Unsubscribe` and batching exist.** One spam classification
     and every transactional email — including show results — stops arriving.
 12. **Don't distribute the results CSV** until the formula-injection guard lands.
