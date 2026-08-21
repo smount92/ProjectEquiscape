@@ -300,19 +300,19 @@ const FAQ_SECTIONS: FaqSection[] = [
         blurb: "The honest list. Better you read it here than find out later.",
         items: [
             {
-                q: "You don't hold money.",
+                q: "We don't hold money.",
                 a: "There is no escrow, no checkout and no buyer protection fund. Money moves directly between buyer and seller by whatever method they agree, and if it goes astray we cannot claw it back. What we can do is show you a seller's rating history and let you verify a horse's record before you commit.",
             },
             {
-                q: "You don't judge disputes.",
+                q: "We don't judge disputes.",
                 a: "If a deal goes wrong we are not the referee, and we will not decide who was right. What we do is mark the deal disputed, freeze the horse so it can't be quietly relisted or transferred while the argument runs, and keep the record: who the parties were, what they agreed, what money moved and when, who confirmed what, and the conversation around it, in order. Either side can export that as one document. If you end up in front of a payment provider, that is a great deal better than forty unsorted screenshots. It states nothing you didn't state yourselves, and it reaches no conclusion about who is right.",
             },
             {
-                q: "You aren't NAMHSA, and MHH cards aren't NAN cards.",
+                q: "We aren't NAMHSA, and MHH cards aren't NAN cards.",
                 a: "Model Horse Hub is not affiliated with NAMHSA and does not issue NAN qualifications. The Championship Series is our own program with its own published rules. It borrows the hobby's familiar class structures because that's what everyone knows, not because it carries anyone else's authority.",
             },
             {
-                q: "You don't guarantee a model is what the seller says it is.",
+                q: "We don't guarantee a model is what the seller says it is.",
                 a: "We verify what happened on this site — that a placing came from a real class, that a card matches a real result, that an owner really transferred a horse. We can't inspect a model in somebody's house. Condition grades and flaw photos are the seller's honest work, and the ratings are how the community keeps that honest.",
             },
         ],

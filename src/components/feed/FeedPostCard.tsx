@@ -196,7 +196,7 @@ export default function FeedPostCard({
                 {isEditing ? (
                     <div className="flex flex-col gap-1">
                         <textarea
-                            className="min-h-[36px] w-full resize-y rounded-md border border-input bg-(--paper-lit)/70 px-4 py-2 text-sm no-underline transition-all focus:border-forest focus:outline-none"
+                            className="min-h-[36px] w-full resize-y rounded-md border border-input bg-(--paper-lit)/70 text-(--paper-lit-ink) px-4 py-2 text-sm no-underline transition-all focus:border-forest focus:outline-none"
                             value={editText}
                             onChange={(e) => setEditText(e.target.value)}
                             rows={3}

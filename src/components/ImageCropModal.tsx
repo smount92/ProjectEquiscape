@@ -297,8 +297,11 @@ export default function ImageCropModal({
  return (
  <Dialog open={true} onOpenChange={(open) => { if (!open) onCancel(); }}>
  <DialogContent className="sm:max-w-2xl">
+ {/* w-full, not w-[95vw]: the dialog is 672px wide on desktop with
+     16px padding — a 700px child overflowed it into a sideways
+     scroll. The crop math reads containerRect, so it adapts. */}
  <div
- className="w-[95vw] max-w-[700px] overflow-hidden rounded-lg border border-input bg-card p-0 shadow-md transition-all"
+ className="w-full overflow-hidden rounded-lg border border-input bg-card p-0 shadow-md transition-all"
  onClick={(e) => e.stopPropagation()}
  >
  {/* Header */}

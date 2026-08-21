@@ -762,11 +762,30 @@ export async function resolveLegacySuggestion(
       .limit(1);
 
     if (!existing || existing.length === 0) {
-      const { error: insertError } = await admin
+      const { data: inserted, error: insertError } = await admin
         .from("catalog_items")
-        .insert({ item_type: itemType, title, maker: makerGuess });
+        .insert({ item_type: itemType, title, maker: makerGuess })
+        .select("id")
+        .single();
       if (insertError) {
         return { success: false, error: `Catalog insert failed: ${insertError.message}` };
+      }
+      // Leave a changelog trail (the old path never did — approvals were
+      // invisible in the Registry's history and weekly counts). Best
+      // effort: a missing id or failed log never blocks the approve.
+      const newId = (inserted as { id: string } | null)?.id ?? null;
+      if (newId) {
+        const { error: logError } = await admin.from("catalog_changelog").insert({
+          catalog_item_id: newId,
+          change_type: "addition",
+          change_summary: `Added "${title}" (${itemType}) from the legacy suggestion queue.`,
+          contributed_by: user.id,
+          contributor_alias: "Admin",
+          approved_by: user.id,
+        });
+        if (logError) {
+          logger.error("Admin", "Legacy-approve changelog write failed (continuing)", logError);
+        }
       }
     }
   }

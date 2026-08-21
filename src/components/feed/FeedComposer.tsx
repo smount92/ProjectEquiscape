@@ -139,7 +139,7 @@ export default function FeedComposer({
                 maxLength={2000}
                 rows={2}
                 /* A lit-paper slip laid on the ledger, not a hole in it. */
-                className="border-input bg-(--paper-lit) focus:border-forest min-h-[76px] w-full resize-y rounded-md border px-4 py-3 text-sm no-underline transition-all focus:outline-none"
+                className="border-input bg-(--paper-lit) text-(--paper-lit-ink) placeholder:text-(--paper-lit-ink-soft)/60 focus:border-forest min-h-[76px] w-full resize-y rounded-md border px-4 py-3 text-sm no-underline transition-all focus:outline-none"
                 aria-label="Write a post"
             />
 

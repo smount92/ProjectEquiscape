@@ -156,7 +156,7 @@ export default function MentionTextarea({
                     aria-label="Mention suggestions"
                     /* Same recipe as the reference search dropdown: lit
                        paper, input border, forest highlight row. */
-                    className="border-input bg-(--paper-lit) absolute top-full left-2 z-30 mt-1 max-h-56 w-64 overflow-y-auto rounded-md border p-1 shadow-lg"
+                    className="border-input bg-(--paper-lit) text-(--paper-lit-ink) absolute top-full left-2 z-30 mt-1 max-h-56 w-64 overflow-y-auto rounded-md border p-1 shadow-lg"
                 >
                     {suggestions.map((s, i) => (
                         <li key={s.alias} role="option" aria-selected={i === highlighted}>

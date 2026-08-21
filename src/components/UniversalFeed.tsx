@@ -215,7 +215,7 @@ export default function UniversalFeed({
  <span className="ledger-tab">Say something</span>
  <textarea
  /* A lit-paper slip laid on the ledger, not a hole in it. */
- className="border-input bg-(--paper-lit) focus:border-forest min-h-[76px] w-full resize-y rounded-md border px-4 py-3 text-sm no-underline transition-all focus:outline-none"
+ className="border-input bg-(--paper-lit) text-(--paper-lit-ink) placeholder:text-(--paper-lit-ink-soft)/60 focus:border-forest min-h-[76px] w-full resize-y rounded-md border px-4 py-3 text-sm no-underline transition-all focus:outline-none"
  placeholder={composerPlaceholder}
  value={composerText}
  onChange={(e) => setComposerText(e.target.value)}
@@ -432,7 +432,7 @@ function PostCard({ post, currentUserId, currentUserAlias, currentUserAvatar }: 
  {isEditing ? (
  <div className="flex flex-col gap-1">
  <textarea
- className="border-input bg-(--paper-lit)/70 focus:border-forest min-h-[36px] w-full resize-y rounded-md border px-4 py-2 text-sm no-underline transition-all focus:outline-none"
+ className="border-input bg-(--paper-lit)/70 text-(--paper-lit-ink) placeholder:text-(--paper-lit-ink-soft)/60 focus:border-forest min-h-[36px] w-full resize-y rounded-md border px-4 py-2 text-sm no-underline transition-all focus:outline-none"
  value={editText}
  onChange={(e) => setEditText(e.target.value)}
  rows={3}
