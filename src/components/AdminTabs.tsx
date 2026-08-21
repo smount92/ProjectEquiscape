@@ -13,14 +13,18 @@ import ReportActions from"@/components/ReportActions";
 import SuggestionAdminActions from"@/components/SuggestionAdminActions";
 import ExternalShowAdminActions from"@/components/calendar/ExternalShowAdminActions";
 import AdminAnnouncementsCard from"@/components/AdminAnnouncementsCard";
-import AdminCatalogMergeCard from"@/components/AdminCatalogMergeCard";
+import AdminCatalogMergeCard, { type MergePrefill } from"@/components/AdminCatalogMergeCard";
+import AdminCatalogDuplicatesCard from"@/components/AdminCatalogDuplicatesCard";
 import AdminSanctioningCard from"@/components/AdminSanctioningCard";
 import AdminMembersTab from"@/components/AdminMembersTab";
 import AdminOpsTab from"@/components/AdminOpsTab";
+import AdminEnvFlagsCard from"@/components/AdminEnvFlagsCard";
+import AdminOverdueShowsCard from"@/components/AdminOverdueShowsCard";
 import AdminPulseStrip from"@/components/AdminPulseStrip";
 import type { PendingExternalShow } from"@/app/actions/external-shows";
 import type {
  AdminPulse,
+ EnvFlagStatus,
  LegacySuggestionRow,
  MigrationStatusRow,
 } from"@/app/actions/admin";
@@ -97,6 +101,8 @@ interface AdminTabsProps {
  pulse?: AdminPulse | null;
  /** Ops corner: which hand-pasted migrations the database actually has. */
  migrations?: MigrationStatusRow[];
+ /** Ops corner: what the server sees for the launch flags. Secrets are booleans only. */
+ envFlags?: EnvFlagStatus | null;
  /** Server-side count so the Sanctioning tab can badge before its card loads. */
  sanctioningCount?: number;
 }
@@ -195,6 +201,7 @@ export default function AdminTabs({
  externalShows = [],
  pulse = null,
  migrations = [],
+ envFlags = null,
  sanctioningCount = 0,
 }: AdminTabsProps) {
  const [activeTab, setActiveTab] = useState<TabKey>("mailbox");
@@ -213,9 +220,13 @@ export default function AdminTabs({
  };
 
  // Every actionable queue carries its count on the tab. `ops` badges
- // the count of migrations the database is MISSING — the one number in
- // this console that is a warning rather than a workload.
+ // the count of migrations the database is MISSING plus any required
+ // key the server does not have — the one number in this console that
+ // is a warning rather than a workload. An unset service-role key is
+ // exactly as alarming as an unpasted migration, so it counts here too.
  const missingMigrations = migrations.filter((m) => m.applied === false).length;
+ const missingKeys = (envFlags?.secrets ?? []).filter((s) => !s.present).length;
+ const opsWarnings = missingMigrations + missingKeys;
 
  const getBadge = (key: TabKey): number | null => {
  switch (key) {
@@ -234,14 +245,14 @@ export default function AdminTabs({
  case"sanctioning":
  return sanctioningCount > 0 ? sanctioningCount : null;
  case"ops":
- return missingMigrations > 0 ? missingMigrations : null;
+ return opsWarnings > 0 ? opsWarnings : null;
  default:
  return null;
  }
  };
 
  const alarming = (key: TabKey) =>
- (key === "reports" && reports.length > 0) || (key === "ops" && missingMigrations > 0);
+ (key === "reports" && reports.length > 0) || (key === "ops" && opsWarnings > 0);
 
  return (
  <>
@@ -287,7 +298,12 @@ export default function AdminTabs({
  {activeTab ==="calendar" && <CalendarQueueTab shows={externalShows} />}
  {activeTab ==="sanctioning" && <AdminSanctioningCard showEmptyState />}
  {activeTab ==="members" && <AdminMembersTab />}
- {activeTab ==="ops" && <AdminOpsTab migrations={migrations} />}
+ {activeTab ==="ops" && (
+ <div className="flex flex-col gap-8">
+  <AdminOpsTab migrations={migrations} />
+  <AdminEnvFlagsCard status={envFlags} />
+ </div>
+ )}
  </div>
  </>
  );
@@ -357,20 +373,29 @@ function MailboxTab({ messages }: { messages: ContactMessage[] }) {
 }
 
 /* ═══════════════════════════════════════════
- Shows Tab — Create + Manage side-by-side
+ Shows Tab — the overdue queue, then Create + Manage
+
+ The queue goes on top because it is the only part of this tab that
+ is waiting on you. Everything below it you go to on purpose.
  ═══════════════════════════════════════════ */
 function ShowsTab({ shows }: { shows: Show[] }) {
  return (
+ <div className="flex flex-col gap-6">
+ <div>
+ <h3 className="mt-0 mb-3 flex items-center gap-2 text-base font-bold">⏰ Overdue &amp; stalled</h3>
+ <AdminOverdueShowsCard />
+ </div>
  <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-6">
  <div>
- <h3 className="mb-4 flex items-center gap-2 text-base font-bold">📸 Create Photo Show</h3>
- <CreateShowForm />
+  <h3 className="mb-4 flex items-center gap-2 text-base font-bold">📸 Create Photo Show</h3>
+  <CreateShowForm />
  </div>
  <div>
- <h3 className="mb-4 flex items-center gap-2 text-base font-bold">
- 🎛️ Manage Shows <span className="mt-6-count">{shows.length}</span>
- </h3>
- <AdminShowManager shows={shows} />
+  <h3 className="mb-4 flex items-center gap-2 text-base font-bold">
+  🎛️ Manage Shows <span className="mt-6-count">{shows.length}</span>
+  </h3>
+  <AdminShowManager shows={shows} />
+ </div>
  </div>
  </div>
  );
@@ -446,14 +471,39 @@ function ReportsTab({ reports }: { reports: Report[] }) {
  catalog surgery, so it belongs under the catalog queue: the duplicate
  you need to merge is usually the thing you just found while reviewing
  a suggestion.
+
+ The sweeper sits between the two and hands pairs DOWN into the merge
+ card — find, then confirm, then merge, in reading order. The handoff
+ is only a pre-fill: the merge card's own confirm dialog still stands
+ between a click here and a deleted catalog row.
  ═══════════════════════════════════════════ */
 function CatalogTab({ suggestions }: { suggestions: CatalogSuggestionAdmin[] }) {
+ // The counter is the merge card's remount `key`. Seeding it as INITIAL
+ // state (rather than syncing through an effect) is what lets the same
+ // pair be handed over twice after a merge cleared the boxes.
+ const [handoffCount, setHandoffCount] = useState(0);
+ const [mergePrefill, setMergePrefill] = useState<MergePrefill | null>(null);
+
+ const handoff = (next: MergePrefill) => {
+ setMergePrefill(next);
+ setHandoffCount((n) => n + 1);
+ // The merge card can be off-screen below a long queue; a pre-fill
+ // you can't see reads as a button that did nothing.
+ document
+  .getElementById("admin-catalog-merge")
+  ?.scrollIntoView({ behavior: "smooth", block: "center" });
+ };
+
  return (
  <div className="flex flex-col gap-6">
  <CatalogQueue suggestions={suggestions} />
  <div>
+ <h3 className="mt-0 mb-3 text-base font-bold">🧹 Possible duplicates</h3>
+ <AdminCatalogDuplicatesCard onHandoff={handoff} />
+ </div>
+ <div id="admin-catalog-merge">
  <h3 className="mt-0 mb-3 text-base font-bold">🔗 Merge duplicate entries</h3>
- <AdminCatalogMergeCard />
+ <AdminCatalogMergeCard key={handoffCount} prefill={mergePrefill} />
  </div>
  </div>
  );

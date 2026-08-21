@@ -6,6 +6,7 @@ import { getOpenReports } from"@/app/actions/moderation";
 import { listPendingExternalShows } from"@/app/actions/external-shows";
 import {
  getAdminPulse,
+ getEnvFlagStatus,
  getMigrationStatus,
  listLegacySuggestions,
  listSanctioningRequests,
@@ -56,6 +57,7 @@ export default async function AdminPage() {
  externalShowsResult,
  pulseResult,
  migrationsResult,
+ envFlagsResult,
  sanctioningResult,
  catalogSuggestionsResult,
  ] = await Promise.all([
@@ -77,6 +79,10 @@ export default async function AdminPage() {
  listPendingExternalShows(),
  getAdminPulse(),
  getMigrationStatus(),
+ // Ops corner, second half: what the SERVER sees for the launch
+ // flags. Read at render so it reflects this deploy's build — and
+ // secrets come back as booleans, never values.
+ getEnvFlagStatus(),
  listSanctioningRequests(),
  supabaseAdmin
   .from("catalog_suggestions")
@@ -92,6 +98,7 @@ export default async function AdminPage() {
  const pendingExternalShows = externalShowsResult.success ? externalShowsResult.shows : [];
  const pulse = pulseResult.success ? pulseResult.pulse : null;
  const migrations = migrationsResult.success ? migrationsResult.migrations : [];
+ const envFlags = envFlagsResult.success ? envFlagsResult.status : null;
  const sanctioningCount = sanctioningResult.success ? sanctioningResult.requests.length : 0;
 
  // Enrich catalog suggestions with their author — one keyed read, not
@@ -156,6 +163,7 @@ export default async function AdminPage() {
    externalShows={pendingExternalShows}
    pulse={pulse}
    migrations={migrations}
+   envFlags={envFlags}
    sanctioningCount={sanctioningCount}
   />
   }
