@@ -436,6 +436,14 @@ function LegacyEditHorsePage() {
  // Save re-entrancy guard (declared up here so the unload guard below
  // can see an in-flight save and stay quiet).
  const isSavingRef = useRef(false);
+ // Set on unmount so the stuck-navigation fallback timer knows the
+ // soft redirect actually landed and must not force a reload.
+ const unmountedRef = useRef(false);
+ useEffect(() => {
+ return () => {
+ unmountedRef.current = true;
+ };
+ }, []);
 
  // ---- Dirty-state guard: warn before a hard unload (refresh / tab
  // close / external nav) discards unsaved edits. Router links are SPA
@@ -870,9 +878,19 @@ function LegacyEditHorsePage() {
  } else if (uploadCount > 0) {
  toastParam ="photos_updated";
  }
- router.push(
- `/stable/${horseId}?toast=${toastParam}&name=${encodeURIComponent(customName.trim())}&photos=${uploadCount}&expected=${hadNewPhotos ? Object.keys(newFiles).length + newExtraFiles.length + newFlawFiles.length : 0}`,
- );
+ const destination = `/stable/${horseId}?toast=${toastParam}&name=${encodeURIComponent(customName.trim())}&photos=${uploadCount}&expected=${hadNewPhotos ? Object.keys(newFiles).length + newExtraFiles.length + newFlawFiles.length : 0}`;
+ router.push(destination);
+ // The soft navigation waits on the destination's server render — a
+ // heavy stable page under DB load can stall it indefinitely, which
+ // reads as "perpetual saving" even though everything saved (member
+ // report, 2026-08-19; their manual refresh showed the data fine).
+ // If we're still mounted after 8s, hard-navigate: same destination,
+ // full reload, guaranteed exit from the spinner.
+ window.setTimeout(() => {
+ if (isSavingRef.current && !unmountedRef.current) {
+ window.location.assign(destination);
+ }
+ }, 8000);
  } catch (err) {
  setSaveError(err instanceof Error ? err.message :"Failed to save changes.");
  // Reset the guard ONLY on error — on success we navigate away, and keeping

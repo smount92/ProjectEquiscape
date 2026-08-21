@@ -195,12 +195,18 @@ export interface Attribution {
 export const KNOWN_MANUFACTURERS = [
     "Animal Artistry",
     "Beswick",
+    // MODEL HORSES INTERNATIONAL's artist-list sweep (2026-08-19)
+    // surfaced five companies missing from this list — they were
+    // classifying as artists. Migration 178 moves the existing rows.
+    "Black Horse Ranch",
     "Border Fine Arts",
     "Breyer",
     "CollectA",
     "Conversation Concepts",
     "Copperfox",
     "Country Artists",
+    "Creata",
+    "Danbury Mint",
     "Grand Champions",
     "Hagen-Renaker",
     "Hartland",
@@ -211,10 +217,23 @@ export const KNOWN_MANUFACTURERS = [
     "Peter Stone",
     "Royal Doulton",
     "Safari Ltd",
+    "Sandicast",
     "Schleich",
     "Stone Critters",
+    "United Design Company",
     "WIA",
 ] as const;
+
+/**
+ * Spelling/abbreviation variants seen in the data, mapped to the
+ * canonical manufacturer name above. Same source as the additions:
+ * "BHR" is Black Horse Ranch; "Creart" is a long-lived misspelling
+ * of Creata.
+ */
+export const MANUFACTURER_ALIASES: Record<string, string> = {
+    BHR: "Black Horse Ranch",
+    Creart: "Creata",
+};
 
 /**
  * Derive artist/manufacturer from legacy fields. This IS migration
@@ -225,6 +244,20 @@ export const KNOWN_MANUFACTURERS = [
  *     credit (attributes.sculptor) is the artist.
  * Real column values (post-156 corrections) always win over this.
  */
+/** Canonicalize a name against the manufacturer alias map. */
+function canonicalName(name: string | null): string | null {
+    if (!name) return null;
+    return MANUFACTURER_ALIASES[name] ?? name;
+}
+
+/** A company in the artist slot is a classification error, not an
+ *  artist — reroute it (the MHI sweep found eleven of these). */
+function isKnownManufacturer(name: string | null): boolean {
+    if (!name) return false;
+    const canon = canonicalName(name);
+    return (KNOWN_MANUFACTURERS as readonly string[]).includes(canon as string);
+}
+
 export function deriveAttribution(row: {
     item_type: string;
     maker: string;
@@ -232,10 +265,17 @@ export function deriveAttribution(row: {
     artist?: string | null;
     manufacturer?: string | null;
 }): Attribution {
-    const explicit = {
-        artist: row.artist?.trim() || null,
-        manufacturer: row.manufacturer?.trim() || null,
-    };
+    let artist = row.artist?.trim() || null;
+    let manufacturer = canonicalName(row.manufacturer?.trim() || null);
+
+    // A manufacturer name sitting in the artist column moves over
+    // (never overwriting a real manufacturer already present).
+    if (isKnownManufacturer(artist)) {
+        manufacturer = manufacturer ?? canonicalName(artist);
+        artist = null;
+    }
+
+    const explicit = { artist, manufacturer };
     if (ARTIST_ATTRIBUTED_CATEGORIES.has(row.item_type)) {
         return {
             artist: explicit.artist ?? (row.maker.trim() || null),
