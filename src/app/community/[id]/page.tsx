@@ -378,6 +378,10 @@ editionSize: rawPedigree.edition_size,
  referenceHref={refHref}
  backHref={cameFromMarket ?"/market" :"/community"}
  backLabel={cameFromMarket ?"Marketplace" :"Show Ring"}
+ // Favorites are public LIKES (owner ruling) — the tally belongs
+ // where everyone sees it, not buried in the action bar. Display
+ // only; FavoriteButton below still owns the toggle + live count.
+ favoriteCount={favoriteCount ?? 0}
  />
 
  {/* Two-column layout: Gallery | Ledger Card */}
