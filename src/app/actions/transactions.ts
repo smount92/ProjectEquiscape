@@ -775,10 +775,23 @@ export async function respondToOffer(
         return { success: true };
     }
 
-    // Accept path: lock horse trade status.
+    // Accept path: lock horse trade status. Pre-172 databases reject
+    // 'Pending Sale' via chk_trade_status (007 was never widened) —
+    // log instead of failing the accept, so behavior is no worse than
+    // the old silent miss until the migration is pasted.
     // USER client (downgraded): the seller owns the horse, so the
     // user_horses_update_own RLS policy permits this write.
-    await supabase.from("user_horses").update({ trade_status: "Pending Sale" }).eq("id", t.horse_id);
+    const { error: lockError } = await supabase
+        .from("user_horses")
+        .update({ trade_status: "Pending Sale" })
+        .eq("id", t.horse_id);
+    if (lockError) {
+        logger.error(
+            "Transactions",
+            "Pending Sale lock failed (migration 172 not applied?) — horse stays listed",
+            lockError,
+        );
+    }
 
     // Notify buyer
     const { data: horse } = await supabase.from("user_horses").select("custom_name").eq("id", t.horse_id).single();
