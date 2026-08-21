@@ -1,28 +1,41 @@
 /**
  * Shared field configuration for asset categories.
- * Single source of truth consumed by add-horse, edit, and display pages.
- * Prevents drift between add/edit forms.
+ *
+ * ── This file is now a VIEW, not a source ─────────────────────────────
+ * The real field spec lives in `src/lib/forms/registry.ts`. Everything
+ * below that describes a field — which categories show it, what it's
+ * called, whether it's required — is DERIVED from that registry, so the
+ * config and the forms can no longer disagree the way they had (the config
+ * promised tack a condition grade for a year while both forms hard-coded
+ * the control to models only).
+ *
+ * The public API is unchanged, so the three legacy forms and the display
+ * pages keep working byte-for-byte while the engine soaks behind
+ * NEXT_PUBLIC_FORM_ENGINE.
+ *
+ * Gallery slots, steps, and the page-title helpers are still authored here
+ * — they describe layout, not fields.
  */
 
 import type { AssetCategory } from "@/lib/types/database";
+import { HORSE_FIELDS, resolveLabel } from "@/lib/forms/registry";
+import { cleanAttributeBag } from "@/lib/forms/attributes";
+import type { FieldSpec } from "@/lib/forms/types";
 
 // ── Dropdown value arrays ──
+// Authored in @/lib/forms/vocab (so the registry can read them without a
+// circular import) and re-exported here — every existing import still works.
 
-export const TACK_TYPES = ["Saddle", "Bridle", "Halter", "Blanket/Sheet", "Boots/Wraps", "Breast Collar", "Girth/Cinch", "Harness Set", "Bit", "Reins", "Pad/Numnah", "Martingale", "Complete Set", "Other"] as const;
-
-export const DISCIPLINES = ["Western", "English", "Dressage", "Jumping/Hunter", "Driving/Harness", "Racing", "Endurance", "Arabian/Native", "Costume", "Multi-Discipline", "Other"] as const;
-
-export const MATERIALS = ["Real Leather", "Faux Leather", "Vinyl", "Metal Hardware", "Fabric", "Nylon", "Wire", "Mixed Media"] as const;
-
-export const PROP_CATEGORIES = ["Fence/Gate", "Jump/Standard", "Arena Obstacle", "Trail Obstacle", "Barrel/Pole", "Building/Barn", "Vegetation/Trees", "Ground Cover/Base", "Water Feature", "Feed/Hay", "Vehicle/Trailer", "Sign/Banner", "Scenery/Backdrop", "Other"] as const;
-
-export const TERRAIN_SETTINGS = ["Arena/Ring", "Pasture/Field", "Trail/Cross-Country", "Barn/Stable", "Ranch/Farm", "Show Grounds", "Other"] as const;
-
-export const SCENE_THEMES = ["Performance Show", "Ranch/Farm", "Trail Ride", "Racing", "Parade/Costume", "Fantasy/Creative", "Historical", "Breeding Farm", "Veterinary/Farrier", "Other"] as const;
-
-export const SPECIES_TYPES = ["Cattle", "Dog", "Cat", "Wildlife", "Rider/Doll", "Bird", "Fantasy Creature", "Other"] as const;
-
-export const WORKING_PARTS = ["Working Buckles", "Removable Bit", "Adjustable Girth", "Working Stirrups"] as const;
+export {
+    TACK_TYPES,
+    DISCIPLINES,
+    MATERIALS,
+    PROP_CATEGORIES,
+    TERRAIN_SETTINGS,
+    SCENE_THEMES,
+    SPECIES_TYPES,
+    WORKING_PARTS,
+} from "@/lib/forms/vocab";
 
 // ── Types ──
 
@@ -53,21 +66,6 @@ export interface AssetConfig {
   showHoofprint: boolean;
   showShowBio: boolean;
 }
-
-// ── Known attribute keys per category ──
-
-const TACK_KEYS = new Set(["tack_type", "discipline", "materials", "fits_molds", "working_parts"]);
-const PROP_KEYS = new Set(["prop_category", "dimensions", "terrain_setting", "materials"]);
-const DIORAMA_KEYS = new Set(["scene_theme", "discipline", "components", "base_dimensions", "documentation_notes"]);
-const OTHER_MODEL_KEYS = new Set(["species", "breed", "manufacturer", "model_number"]);
-
-const CATEGORY_KEYS: Record<AssetCategory, Set<string>> = {
-  model: new Set(),
-  tack: TACK_KEYS,
-  prop: PROP_KEYS,
-  diorama: DIORAMA_KEYS,
-  other_model: OTHER_MODEL_KEYS,
-};
 
 // ── Gallery slots per category ──
 
@@ -122,76 +120,61 @@ const SHORT_STEPS: StepDef[] = [
   { label: "Vault", icon: "🔒" },
 ];
 
-// ── Field definitions per category ──
+// ── Field definitions per category — DERIVED from the registry ──
+
+/**
+ * The ten keys this config has always described, mapped to the registry
+ * field that now backs each one. Two keys have no 1:1 spec:
+ *
+ *   • `edition_info` — one config key covering the registry's
+ *     `edition_number` + `edition_size` pair.
+ *   • `show_bio` — a whole GROUP of registry fields (assigned breed,
+ *     gender, age, regional id), not a field.
+ *
+ * Both resolve through their representative spec, named here.
+ */
+const LEGACY_FIELD_SOURCES: { key: string; from: string; label: string }[] = [
+  { key: "custom_name", from: "custom_name", label: "Custom Name" },
+  { key: "sculptor", from: "sculptor", label: "Sculptor / Artist" },
+  { key: "finishing_artist", from: "finishing_artist", label: "Finishing Artist" },
+  { key: "edition_info", from: "edition_number", label: "Edition Info" },
+  { key: "finish_type", from: "finish_type", label: "Finish Type" },
+  { key: "finish_details", from: "finish_details", label: "Finish Details" },
+  { key: "condition_grade", from: "condition_grade", label: "Condition Grade" },
+  { key: "life_stage", from: "life_stage", label: "Life Stage" },
+  { key: "show_bio", from: "assigned_breed", label: "Show Bio" },
+  { key: "public_notes", from: "public_notes", label: "Public Notes" },
+];
+
+const SPEC_BY_NAME = new Map<string, FieldSpec>(HORSE_FIELDS.map((f) => [f.name, f]));
 
 function makeFields(category: AssetCategory): Record<string, FieldDef> {
-  switch (category) {
-    case "model":
-      return {
-        custom_name: { visible: true, label: "Custom Name", required: true },
-        sculptor: { visible: true, label: "Sculptor / Artist", required: false },
-        finishing_artist: { visible: true, label: "Finishing Artist", required: false },
-        edition_info: { visible: true, label: "Edition Info", required: false },
-        finish_type: { visible: true, label: "Finish Type", required: true },
-        finish_details: { visible: true, label: "Finish Details", required: false },
-        condition_grade: { visible: true, label: "Condition Grade", required: true },
-        life_stage: { visible: true, label: "Life Stage", required: false },
-        show_bio: { visible: true, label: "Show Bio", required: false },
-        public_notes: { visible: true, label: "Public Notes", required: false },
-      };
-    case "tack":
-      return {
-        custom_name: { visible: true, label: "Item Name", required: true },
-        sculptor: { visible: true, label: "Maker / Artist", required: false },
-        finishing_artist: { visible: false, label: "Finishing Artist", required: false },
-        edition_info: { visible: false, label: "Edition Info", required: false },
-        finish_type: { visible: false, label: "Finish Type", required: false },
-        finish_details: { visible: false, label: "Finish Details", required: false },
-        condition_grade: { visible: true, label: "Condition", required: false },
-        life_stage: { visible: false, label: "Life Stage", required: false },
-        show_bio: { visible: false, label: "Show Bio", required: false },
-        public_notes: { visible: true, label: "Public Notes", required: false },
-      };
-    case "prop":
-      return {
-        custom_name: { visible: true, label: "Item Name", required: true },
-        sculptor: { visible: true, label: "Maker / Artist", required: false },
-        finishing_artist: { visible: false, label: "Finishing Artist", required: false },
-        edition_info: { visible: false, label: "Edition Info", required: false },
-        finish_type: { visible: false, label: "Finish Type", required: false },
-        finish_details: { visible: false, label: "Finish Details", required: false },
-        condition_grade: { visible: true, label: "Condition", required: false },
-        life_stage: { visible: false, label: "Life Stage", required: false },
-        show_bio: { visible: false, label: "Show Bio", required: false },
-        public_notes: { visible: true, label: "Public Notes", required: false },
-      };
-    case "diorama":
-      return {
-        custom_name: { visible: true, label: "Scene Name", required: true },
-        sculptor: { visible: true, label: "Maker / Artist", required: false },
-        finishing_artist: { visible: false, label: "Finishing Artist", required: false },
-        edition_info: { visible: false, label: "Edition Info", required: false },
-        finish_type: { visible: false, label: "Finish Type", required: false },
-        finish_details: { visible: false, label: "Finish Details", required: false },
-        condition_grade: { visible: false, label: "Condition", required: false },
-        life_stage: { visible: false, label: "Life Stage", required: false },
-        show_bio: { visible: false, label: "Show Bio", required: false },
-        public_notes: { visible: true, label: "Public Notes", required: false },
-      };
-    case "other_model":
-      return {
-        custom_name: { visible: true, label: "Custom Name", required: true },
-        sculptor: { visible: false, label: "Sculptor", required: false },
-        finishing_artist: { visible: false, label: "Finishing Artist", required: false },
-        edition_info: { visible: false, label: "Edition Info", required: false },
-        finish_type: { visible: true, label: "Finish Type", required: false },
-        finish_details: { visible: false, label: "Finish Details", required: false },
-        condition_grade: { visible: true, label: "Condition Grade", required: false },
-        life_stage: { visible: true, label: "Life Stage", required: false },
-        show_bio: { visible: false, label: "Show Bio", required: false },
-        public_notes: { visible: true, label: "Public Notes", required: false },
-      };
+  const fields: Record<string, FieldDef> = {};
+
+  for (const entry of LEGACY_FIELD_SOURCES) {
+    const spec = SPEC_BY_NAME.get(entry.from);
+    if (!spec) continue;
+
+    const visible = spec.categories.includes(category);
+    // `required` is evaluated in a neutral context — no life stage chosen,
+    // so a model's condition grade reads as required, exactly as the old
+    // literal said. The engine re-evaluates it per keystroke; this static
+    // snapshot is only here to keep the legacy shape honest.
+    const required = visible
+      ? Boolean(spec.requiredWhen?.({ category, mode: "create-full", values: {} }))
+      : false;
+
+    fields[entry.key] = {
+      visible,
+      // The config's own key labels win where they differ from the field's
+      // (an `edition_info` control is labelled "Edition Info", not
+      // "Edition Number"); otherwise the registry's per-category label.
+      label: entry.key === entry.from ? resolveLabel(spec, category) : entry.label,
+      required,
+    };
   }
+
+  return fields;
 }
 
 // ── Config map ──
@@ -276,40 +259,17 @@ export function getFieldLabel(category: AssetCategory, fieldName: string): strin
 /**
  * Validate and clean attributes JSONB for a given category.
  * Strips unknown keys, coerces types (e.g. materials must be string[]).
- * Called in createHorseRecord and updateHorseAction before DB write.
+ *
+ * Now a thin alias for `@/lib/forms/attributes.cleanAttributeBag`, which
+ * derives the allowed keys from the registry. The old docstring claimed
+ * this ran "before every DB write" — it didn't; both call sites were in the
+ * browser. As of the form engine, the server actions call it too.
  */
 export function validateAttributes(
   category: AssetCategory,
   attrs: Record<string, unknown>
 ): { valid: boolean; cleaned: Record<string, unknown> } {
-  const allowedKeys = CATEGORY_KEYS[category];
-  if (!allowedKeys || allowedKeys.size === 0) {
-    return { valid: true, cleaned: {} };
-  }
-
-  const cleaned: Record<string, unknown> = {};
-
-  for (const [key, value] of Object.entries(attrs)) {
-    if (!allowedKeys.has(key)) continue; // strip unknown keys
-    if (value === null || value === undefined || value === "") continue; // strip empty
-
-    // Coerce array fields
-    if (key === "materials" || key === "working_parts") {
-      if (Array.isArray(value)) {
-        cleaned[key] = value.filter((v): v is string => typeof v === "string");
-      } else if (typeof value === "string") {
-        cleaned[key] = [value]; // coerce bare string to array
-      }
-      continue;
-    }
-
-    // All other fields stored as-is (string)
-    if (typeof value === "string") {
-      cleaned[key] = value.trim();
-    }
-  }
-
-  return { valid: true, cleaned };
+  return cleanAttributeBag(category, attrs);
 }
 
 /**
