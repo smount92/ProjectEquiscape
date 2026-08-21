@@ -181,9 +181,54 @@ export const GLOSSARY_SECTIONS: GlossarySection[] = [
         heading: "On Model Horse Hub",
         entries: [
             {
+                id: "five-rooms",
+                term: "The five rooms",
+                def: "How this site is laid out: the Stable (what you own), Shows (the Championship Series), the Market (where horses change hands), the Registry (what the models actually are), and The Paddock (where the hobby talks). The nav is those five doors, in that order.",
+            },
+            {
+                id: "stable",
+                term: "Stable",
+                def: "Your collection on Model Horse Hub — one entry per horse, with its reference, photos, condition and private purchase record. Borrowed from the real-horse word for the barn a string of horses lives in, because “inventory” is a word for warehouses.",
+            },
+            {
+                id: "passport",
+                term: "Passport",
+                def: "A horse's own page: show record, qualification cards, titles, condition grade, ownership chain and photo history in one place. When a horse is for sale, its passport is the listing — there is no separate sale description to write or to doubt.",
+            },
+            {
+                id: "paddock",
+                term: "The Paddock",
+                def: "This site's community room: one feed carrying members' posts, comments on public horses, barn talk, and show results as they publish. Members only, deliberately — a paddock is where the horses and the people actually mingle, which is the idea.",
+            },
+            {
+                id: "barn",
+                term: "Barn",
+                def: "A club inside The Paddock — a breed circle, a regional group, a trading circle. Some barns are open to anyone; private ones take a join request their staff approve. Each has a notice board so the conversation stays in one place. (Barns were called “groups” before, and old links still work.)",
+            },
+            {
                 id: "show-year",
                 term: "Show year",
                 def: "On Model Horse Hub the qualifying year runs May 1 to April 30 — the hobby season's natural rhythm. A card marked show year 2026–27 was earned between May 2026 and April 2027.",
+            },
+            {
+                id: "championship-series",
+                term: "MHH Championship Series",
+                def: "The season-long program every qualifying show on this site runs to: placings pay points, strong placings in real classes mint qualification cards, and cards plus career points earn titles. One published rulebook covers photo shows and live shows alike.",
+            },
+            {
+                id: "sanctioned-show",
+                term: "MHH Sanctioned",
+                def: "A show the platform has approved to run under the Championship Series, marked with a badge on the show card. Hosts request sanctioning rather than granting it to themselves — a card is only worth something if somebody checked the classes behind it. Unsanctioned shows are still real shows; they just don't mint cards or pay points.",
+            },
+            {
+                id: "class-room",
+                term: "Class room",
+                def: "On this site a class is a room you can walk into: the lineup of entries with their photos, the rest of the classlist in run order alongside, and the next class a step away. While a show is blind, no owner names are shown. When that class's results publish, the placings, points, cards and any judge's comments appear in it.",
+            },
+            {
+                id: "season-points",
+                term: "Points",
+                def: "What a placing pays toward the season. First place earns the number of entries in the class, and each place below earns one less — so winning a deep class beats winning a walkover. Points belong to the horse-and-owner pair, so a horse sold mid-season starts fresh for its new owner while the seller keeps what they campaigned.",
             },
             {
                 id: "qualification-card",
@@ -191,9 +236,34 @@ export const GLOSSARY_SECTIONS: GlossarySection[] = [
                 def: "Earned automatically when a horse places 1st or 2nd in a qualifying class at a qualifying Model Horse Hub show. Each card is a permanent record with a short code anyone can verify — and it transfers with the horse when the horse is sold. These are platform qualifications, not NAMHSA/NAN cards.",
             },
             {
+                id: "stakes",
+                term: "STAKES card",
+                def: "The big qualification card, minted only by a 1st or 2nd in a genuinely large class — the entry and exhibitor bar is several times the ordinary one. Rare by design: a STAKES card says the horse beat a full ring, not a quiet one.",
+            },
+            {
+                id: "titles",
+                term: "CH · ROM · SUP",
+                def: "The three permanent titles a horse can earn here. CH (Champion) comes from qualification cards won at different shows under different judges; ROM (Register of Merit) and SUP (Superior) come from career points, which never reset. Titles are granted automatically when results publish and are never revoked — they belong to the horse for the rest of its life, whoever owns it.",
+            },
+            {
                 id: "hoofprint",
                 term: "Hoofprint",
                 def: "This site's provenance record: a horse's ownership chain, show results, and history, traveling with the horse between owners. It's the reason a buyer can trust a show record they never witnessed.",
+            },
+            {
+                id: "want-list",
+                term: "Want List / Matchmaker",
+                def: "Your private list of models you're hunting. Matchmaker watches the marketplace against it and tells you when a collector lists a match. It works off the Registry entry, so a want linked to a catalog item is the one that gets found. Not the same as favouriting a horse, which is a public like on one specific model.",
+            },
+            {
+                id: "deal-room",
+                term: "Deal Room",
+                def: "Where a sale, commission or trade is actually negotiated: one thread per deal, with the agreed terms written down, counter-offers, and a payment ledger both sides mark — sender marks sent, receiver confirms received. The stages are Talking, Offer on the table, Agreed, Payment, On its way, Settled. The site records the terms; it never writes them, and it holds no money.",
+            },
+            {
+                id: "safe-trade",
+                term: "Safe-Trade",
+                def: "The structured hand-off used when a horse changes hands here: the deal is agreed in the Deal Room, then the seller issues a transfer code from the horse's passport and the buyer redeems it, which moves the horse — record, cards, titles and photo history intact — into the buyer's stable. Payment is still settled directly between the two people. Safe-Trade moves the horse and the paperwork, never the money.",
             },
             {
                 id: "blue-book",

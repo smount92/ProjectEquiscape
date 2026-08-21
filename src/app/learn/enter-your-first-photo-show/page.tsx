@@ -22,11 +22,13 @@ export async function generateMetadata(): Promise<Metadata> {
     return {
         title: TITLE,
         description: DESCRIPTION,
+        alternates: { canonical: "/learn/enter-your-first-photo-show" },
         openGraph: {
             title: TITLE,
             description: DESCRIPTION,
             type: "article",
             siteName: "Model Horse Hub",
+            url: "/learn/enter-your-first-photo-show",
         },
     };
 }
@@ -292,9 +294,15 @@ export default function FirstPhotoShowPage() {
                                 no need to refresh all week.
                             </li>
                             <li>
-                                <strong>Results.</strong> When the host publishes results, placings
-                                appear on the show page and you get a notification with how your
-                                horses did.
+                                <strong>Results, class by class.</strong> Every class on this site
+                                is a room you can walk into: the whole lineup with its photos, the
+                                rest of the classlist alongside it, the next class a step away.
+                                While the show is blind, no owner names are shown — you&apos;re
+                                looking at horses, not reputations. When a class&apos;s results
+                                publish, that room fills in with placings, points, cards and,
+                                if the judge left them, comments on your model and on your
+                                photograph. Classes reveal as they&apos;re finished, so you may get
+                                one result before another.
                             </li>
                             <li>
                                 <strong>The permanent record.</strong> Placings flow into each

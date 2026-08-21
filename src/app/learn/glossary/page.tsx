@@ -16,19 +16,26 @@ import { GLOSSARY_ENTRIES, GLOSSARY_SECTIONS } from "./entries";
 
 const TITLE = "Model Horse Glossary — OF, CM, LSQ & Every Showing Term";
 const DESCRIPTION =
-    "What do OF, CM, AR, LSQ, NAN, and NAMHSA actually mean? The model horse hobby's terms — finishes, showing formats, ring vocabulary, and organizations — explained honestly for newcomers.";
+    "What do OF, CM, AR, LSQ, NAN, and NAMHSA actually mean? The model horse hobby's terms — finishes, showing formats, ring vocabulary, and organizations — explained honestly for newcomers, plus the house words used on Model Horse Hub: barns, passports, qualification cards and the Blue Book.";
 
 export async function generateMetadata(): Promise<Metadata> {
     return {
         title: TITLE,
         description: DESCRIPTION,
+        alternates: { canonical: "/learn/glossary" },
         openGraph: {
             title: TITLE,
             description: DESCRIPTION,
             type: "article",
             siteName: "Model Horse Hub",
+            url: "/learn/glossary",
         },
     };
+}
+
+/** Section headings become their own anchors, for the jump nav. */
+function sectionId(heading: string): string {
+    return `section-${heading.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`;
 }
 
 function glossaryJsonLd(baseUrl: string) {
@@ -73,8 +80,24 @@ export default function GlossaryPage() {
                     definition has its own anchor.
                 </p>
 
+                <nav aria-label="Jump to a section" className="mb-8 flex flex-wrap gap-x-4 gap-y-2">
+                    {GLOSSARY_SECTIONS.map((section) => (
+                        <a
+                            key={section.heading}
+                            href={`#${sectionId(section.heading)}`}
+                            className="text-forest text-xs font-semibold tracking-[0.08em] uppercase no-underline hover:underline"
+                        >
+                            {section.heading} →
+                        </a>
+                    ))}
+                </nav>
+
                 {GLOSSARY_SECTIONS.map((section) => (
-                    <section key={section.heading} className="mb-10">
+                    <section
+                        key={section.heading}
+                        id={sectionId(section.heading)}
+                        className="mb-10 scroll-mt-24"
+                    >
                         <div className="brass-heading mb-4">
                             <span className="brass-heading-bar" aria-hidden="true" />
                             <h2 className="m-0 text-lg text-foreground">{section.heading}</h2>

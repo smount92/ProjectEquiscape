@@ -1,276 +1,313 @@
+/**
+ * /getting-started — the new member's first week.
+ *
+ * REWRITTEN FOR THE FIVE-ROOM SITE (August 2026). The old version walked
+ * people through a "Financial Vault", a "Show Ring" browse and a Want
+ * List as if those were the site's spine; it never mentioned the
+ * Championship Series, barns, the Paddock or the Market. This version
+ * follows the actual arc — add a horse → enter a show → join a barn →
+ * browse the market — and every route it links is one that exists.
+ *
+ * STATIC on purpose: no session read, no `createClient()`. This is an
+ * SEO landing surface for "how do I start" traffic and it must render
+ * without a database round trip.
+ *
+ * Do not describe the premium add-horse forms here: they ship dark
+ * behind NEXT_PUBLIC_FORM_ENGINE and the legacy form is what a member
+ * actually sees. The wording below is true of either.
+ */
+
 import Link from "next/link";
 import type { Metadata } from "next";
+
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
 import PageMasthead from "@/components/layouts/PageMasthead";
 import { Button } from "@/components/ui/button";
-import {
-    Camera,
-    Lock,
-    PawPrint,
-    Trophy,
-    Flag,
-    Handshake,
-    Settings,
-    Home,
-    Package,
-    Users,
-    Newspaper,
-    Bookmark,
-    Mail,
-    Lightbulb,
-} from "lucide-react";
+
+const TITLE = "Getting Started — Your First Week on Model Horse Hub";
+const DESCRIPTION =
+    "New here? Add your first model horse, enter your first show in the MHH Championship Series, join a barn in The Paddock, and browse the Market. A step-by-step first week, with nothing you have to pay for.";
 
 export const metadata: Metadata = {
-    title: "Getting Started",
-    description:
-        "Learn how to set up your digital stable on Model Horse Hub. Add your first horse, explore the Show Ring, and discover Hoofprint provenance tracking.",
+    title: TITLE,
+    description: DESCRIPTION,
+    alternates: { canonical: "/getting-started" },
+    openGraph: {
+        title: TITLE,
+        description: DESCRIPTION,
+        type: "article",
+        siteName: "Model Horse Hub",
+        url: "/getting-started",
+    },
 };
+
+function StepHeading({ number, title }: { number: number; title: string }) {
+    return (
+        <div className="brass-heading mb-4">
+            <span className="brass-heading-bar" aria-hidden="true" />
+            <h2 className="text-foreground m-0 font-serif text-lg font-bold">
+                Step {number} — {title}
+            </h2>
+        </div>
+    );
+}
+
+function Card({ children }: { children: React.ReactNode }) {
+    return (
+        <div className="ledger-card text-foreground space-y-4 text-[0.95rem] leading-relaxed">{children}</div>
+    );
+}
+
+function A({ href, children }: { href: string; children: React.ReactNode }) {
+    return (
+        <Link href={href} className="text-forest font-semibold hover:underline">
+            {children}
+        </Link>
+    );
+}
 
 export default function GettingStartedPage() {
     return (
         <ExplorerLayout noHeader>
-            <div className="animate-fade-in-up">
+            <div className="animate-fade-in-up mx-auto max-w-[860px]">
                 <PageMasthead
                     icon="🚀"
                     title="Getting Started"
-                    subtitle="Your digital stable is ready — here's how to make the most of it"
+                    subtitle="Your first week, in the order it actually goes"
                 />
 
+                <div className="text-secondary-foreground mb-8 space-y-4 text-base leading-[1.7]">
+                    <p>
+                        The site is five rooms. The <strong>Stable</strong> holds what you own,{" "}
+                        <strong>Shows</strong> runs the MHH Championship Series, the{" "}
+                        <strong>Market</strong> is where horses change hands, the{" "}
+                        <strong>Registry</strong> says what the models actually are, and{" "}
+                        <strong>The Paddock</strong> is where the hobby talks. You don&apos;t have to
+                        visit them in that order, but this is the order most people find useful.
+                    </p>
+                    <p>
+                        Everything below is on the free tier. No card is asked for at any point.
+                    </p>
+                </div>
+
                 {/* Step 1 */}
-                <section className="mb-12">
-                    <h2 className="flex items-center gap-2">
-                        <Camera size={22} strokeWidth={1.5} className="text-forest" /> Step 1: Add Your First Horse
-                    </h2>
-                    <p>
-                        Click{" "}
-                        <strong className="inline-flex items-center gap-1">
-                            <Home size={15} strokeWidth={1.5} /> &ldquo;Stable&rdquo;
-                        </strong>{" "}
-                        in the navigation, then hit <strong>&ldquo;Add to Stable&rdquo;</strong> (or use{" "}
-                        <strong>Quick Add</strong> for a fast one-tap entry).
-                    </p>
-                    <p>
-                        The form walks you through four short steps: <strong>photos first</strong>, then the{" "}
-                        <strong>reference link</strong> &mdash; our database has{" "}
-                        <strong>10,500+ reference entries</strong>, so search by name, mold, or manufacturer to
-                        auto-fill the details (skip it if your model isn&apos;t listed, or suggest we add it) &mdash;
-                        then <strong>identity</strong> (name, finish type, condition grade) and an optional{" "}
-                        <strong>financial vault</strong> entry.
-                    </p>
-                    <p>
-                        Upload up to <strong>5 LSQ-style photos</strong> (Near-Side, Off-Side, Front, Hindquarters,
-                        Belly/Maker&apos;s Mark) plus <strong>5 flaw-documentation photos</strong> — free on every
-                        tier. Pro members can add up to 30 extra detail shots.
-                    </p>
-                    <div className="border-forest/20 bg-forest/5 mt-4 rounded-lg border px-6 py-4 text-sm leading-relaxed">
-                        <strong className="inline-flex items-center gap-1.5">
-                            <Lightbulb size={16} strokeWidth={1.5} className="text-forest" /> Tip:
-                        </strong>{" "}
-                        Set your horse to <strong>&ldquo;Public&rdquo;</strong> to share it in the Show Ring for the
-                        community to discover. Private horses are visible only to you.
-                    </div>
+                <section className="mb-8">
+                    <StepHeading number={1} title="Put one horse in your Stable" />
+                    <Card>
+                        <p>
+                            Open <A href="/add-horse">Add to Stable</A> and start with the model
+                            you&apos;d grab first in a fire. The form asks for photos, then a{" "}
+                            <strong>reference match</strong> — search the{" "}
+                            <A href="/catalog">Registry</A> by name, mold or maker and it fills in
+                            mold, manufacturer, scale and year for you. If your model isn&apos;t
+                            listed, skip that step and enter it by hand, or suggest it for the
+                            catalog.
+                        </p>
+                        <p>
+                            Then the horse&apos;s <strong>identity</strong> — name, finish type,
+                            condition grade — and, if you want it, what you paid.{" "}
+                            <strong>Purchase prices, values and insurance notes are yours alone.</strong>{" "}
+                            No other member can see them, they never travel with a horse when it
+                            sells, and the database enforces that with row-level security rather
+                            than a promise.
+                        </p>
+                        <p>
+                            Photos: five standard angles on every account — near side, off side,
+                            front, hindquarters, belly and maker&apos;s mark — plus five{" "}
+                            <strong>flaw photos</strong> for rubs and chips, also free on every
+                            tier. Documenting damage honestly is the whole point, so it is never
+                            something you have to pay for. Pro adds up to thirty extra detail shots.
+                        </p>
+                        <p className="m-0">
+                            Already keeping a spreadsheet? <A href="/stable/import">Import it</A> —
+                            each row is matched against the catalog and you confirm the matches
+                            before anything is saved. In a hurry?{" "}
+                            <A href="/add-horse/quick">Quick Add</A> gets a horse in with the bare
+                            minimum; you can fill in the rest later.
+                        </p>
+                    </Card>
                 </section>
 
                 {/* Step 2 */}
-                <section className="mb-12">
-                    <h2 className="flex items-center gap-2">
-                        <Lock size={22} strokeWidth={1.5} className="text-forest" /> Step 2: Track Your Financials
-                        (Private)
-                    </h2>
-                    <p>
-                        During the add-horse process, you&apos;ll see the <strong>Financial Vault</strong> section. This
-                        is where you can record:
-                    </p>
-                    <ul className="my-3 list-none p-0">
-                        <li>Purchase price and date</li>
-                        <li>Estimated current value</li>
-                        <li>Insurance notes</li>
-                    </ul>
-                    <p>
-                        <strong>This data is strictly private.</strong> It&apos;s protected by row-level security
-                        &mdash; even our team cannot access it. Only you can see your financial data, ever.
-                    </p>
+                <section className="mb-8">
+                    <StepHeading number={2} title="Enter a show" />
+                    <Card>
+                        <p>
+                            <A href="/shows">Shows</A> is open to everyone, account or not. Shows are
+                            shelved by stage — the <strong>Open now</strong> shelf is taking entries
+                            right this minute. Photo shows are judged from your photographs; live
+                            shows happen on tables in a hall somewhere.
+                        </p>
+                        <p>
+                            Two things to do before you enter: set the horse to{" "}
+                            <strong>public</strong> (judges and entrants have to be able to see what
+                            placed), and give it a breed, gender and age on its edit page. That breed
+                            assignment is what a breed-halter judge weighs the model against. If
+                            something isn&apos;t eligible for a class, the entry form tells you why —
+                            there is nothing to memorize.
+                        </p>
+                        <p>
+                            A show marked <strong>🏅 MHH Sanctioned</strong> runs to the{" "}
+                            <A href="/shows/rules">Championship Series rulebook</A>: placings pay
+                            season points, first place is worth the size of the class, and a 1st or
+                            2nd in a class with real competition mints a{" "}
+                            <strong>qualification card</strong> stamped with the field it beat.
+                            Cards and career points earn CH, ROM and SUP — titles the horse keeps for
+                            the rest of its life, whoever owns it next.
+                        </p>
+                        <p className="m-0">
+                            Never shown anything before? Read{" "}
+                            <A href="/learn/enter-your-first-photo-show">
+                                Your First Photo Show
+                            </A>{" "}
+                            first — it covers finding a show, taking a photo that can win, and what
+                            happens after results publish.
+                        </p>
+                    </Card>
                 </section>
 
                 {/* Step 3 */}
-                <section className="mb-12">
-                    <h2 className="flex items-center gap-2">
-                        <PawPrint size={22} strokeWidth={1.5} className="text-forest" /> Step 3: Meet Hoofprint
-                    </h2>
-                    <p>
-                        Every horse you add automatically gets a{" "}
-                        <strong>Hoofprint &mdash; a permanent digital identity</strong>. Think of it like a passport
-                        that follows the horse, not the owner.
-                    </p>
-                    <p>Your Hoofprint timeline tracks:</p>
-                    <ul className="my-3 list-none p-0">
-                        <li>
-                            <strong>Life stages</strong> &mdash; from blank resin to work-in-progress to completed
-                            custom
-                        </li>
-                        <li>
-                            <strong>Ownership history</strong> &mdash; a verified chain of custody
-                        </li>
-                        <li>
-                            <strong>Show results</strong> &mdash; placements that follow the horse
-                        </li>
-                        <li>
-                            <strong>Custom notes</strong> &mdash; any events you want to document
-                        </li>
-                    </ul>
-                    <p>
-                        When you sell or trade a horse, you can generate a <strong>6-character transfer code</strong>{" "}
-                        from its passport page. The buyer enters the code at{" "}
-                        <Link href="/claim" className="text-forest inline-flex items-center gap-1.5 font-semibold">
-                            <Package size={16} strokeWidth={1.5} /> Claim
-                        </Link>{" "}
-                        &mdash; and the horse moves to their stable with its entire history intact.
-                    </p>
+                <section className="mb-8">
+                    <StepHeading number={3} title="Walk into The Paddock and join a barn" />
+                    <Card>
+                        <p>
+                            <A href="/feed">The Paddock</A> is the community room: one feed carrying
+                            posts, comments on public horses, barn chatter, and show results as they
+                            publish. It&apos;s members only — a room, not a shop window.
+                        </p>
+                        <p>
+                            <A href="/community/groups">Barns</A> are the clubs inside it: breed
+                            circles, regional groups, trading circles, or whatever a few people
+                            decided to start. Some are open, some are private and take a join
+                            request. Join one or two that match how you collect; that is where the
+                            site stops feeling like a database.
+                        </p>
+                        <p className="m-0">
+                            Also down that hallway: <A href="/community/events">Events</A>, a board
+                            for live shows, meetups and swap meets happening off-site;{" "}
+                            <A href="/community/help-id">Help ID</A>, for when you have a body in
+                            hand and no idea what it is; <A href="/discover">Members</A>, to find
+                            collectors worth following; and the{" "}
+                            <A href="/community">Show Ring</A>, where you can browse every public
+                            horse on the site.
+                        </p>
+                    </Card>
                 </section>
 
                 {/* Step 4 */}
-                <section className="mb-12">
-                    <h2 className="flex items-center gap-2">
-                        <Trophy size={22} strokeWidth={1.5} className="text-forest" /> Step 4: Explore the Community
+                <section className="mb-8">
+                    <StepHeading number={4} title="Browse the Market" />
+                    <Card>
+                        <p>
+                            A listing in <A href="/market">the Market</A> is the horse&apos;s
+                            passport rather than a photo and a paragraph: what it has won, what
+                            condition it&apos;s in, who has owned it, next to the asking price. Every
+                            qualification card has a public verification page, so you can check a
+                            claim yourself before you commit to anything.
+                        </p>
+                        <p>
+                            Wondering what something is worth? The{" "}
+                            <A href="/market/guide">Blue Book</A> gives average, median and range
+                            from completed sales on the site, model by model. It is free for
+                            everyone and it always will be.
+                        </p>
+                        <p className="m-0">
+                            Hunting one specific model? Put it on your{" "}
+                            <A href="/wishlist">Want List</A> and Matchmaker tells you when a
+                            collector lists one, instead of you refreshing this page every morning.
+                            Pick the model out of the Registry when you add it — that&apos;s the link
+                            Matchmaker searches on. Your Want List is private.
+                        </p>
+                    </Card>
+                </section>
+
+                {/* When you're ready */}
+                <section className="mb-8">
+                    <div className="brass-heading mb-4">
+                        <span className="brass-heading-bar" aria-hidden="true" />
+                        <h2 className="text-foreground m-0 font-serif text-lg font-bold">
+                            When you&apos;re ready
+                        </h2>
+                    </div>
+                    <Card>
+                        <p>
+                            <strong>Sell out of your stable.</strong> Open a horse, choose Edit, and
+                            set its trade status to <em>For Sale</em> or <em>Open to Offers</em>. Its
+                            passport becomes the listing — record, condition, ownership history and
+                            all. Offers and negotiation happen in the{" "}
+                            <A href="/inbox">Deal Room</A>: one thread per deal, with the agreed
+                            terms and payments written down rather than scrolled past. We take no
+                            cut and hold no money; you and the buyer settle payment between
+                            yourselves.
+                        </p>
+                        <p>
+                            <strong>Host a show.</strong> Hosting is free and any member can do it.{" "}
+                            <A href="/shows/host">Open a show</A>, pick live or online, and a
+                            one-click template builds the classlist. Live shows run from a phone at
+                            the table: record placings, run champion callbacks, publish when
+                            you&apos;re done. Online shows take photo entries during a window and you
+                            judge them at your kitchen table.
+                        </p>
+                        <p className="m-0">
+                            <strong>Commission something, or take commissions.</strong> The{" "}
+                            <A href="/studio">Art Studio</A> is the directory of customizers,
+                            finishwork artists, china painters and tack makers — rates by scale,
+                            written terms, and whether each one is open right now. Browsing it takes
+                            no account. If you make horses for other people, you can open a studio of
+                            your own in there.
+                        </p>
+                    </Card>
+                </section>
+
+                {/* Settings */}
+                <section className="mb-8">
+                    <div className="brass-heading mb-4">
+                        <span className="brass-heading-bar" aria-hidden="true" />
+                        <h2 className="text-foreground m-0 font-serif text-lg font-bold">
+                            Two minutes in Settings
+                        </h2>
+                    </div>
+                    <Card>
+                        <ul className="m-0 list-disc space-y-2 pl-6">
+                            <li>Add an avatar and a line of bio so people know who they&apos;re talking to.</li>
+                            <li>Set your notification preferences before show results start landing.</li>
+                            <li>
+                                Export your collection to CSV any time you like — your data is never
+                                trapped here.
+                            </li>
+                            <li>
+                                Turn on <strong>Simple Mode</strong> for high-contrast, large text.
+                                It&apos;s in the account menu when you&apos;re signed in, and it is
+                                genuinely useful for judging photo shows.
+                            </li>
+                        </ul>
+                        <p className="m-0">
+                            <A href="/settings">Open Settings →</A>
+                        </p>
+                    </Card>
+                </section>
+
+                <div className="ledger-card mb-12 text-center">
+                    <h2 className="text-foreground mb-2 font-serif text-lg font-bold">
+                        Start with one horse
                     </h2>
-                    <p>Once you&apos;ve added a few horses, explore what other collectors are sharing:</p>
-                    <ul className="my-3 list-none p-0">
-                        <li>
-                            <strong>
-                                <Link href="/community" className="inline-flex items-center gap-1.5">
-                                    <Trophy size={16} strokeWidth={1.5} /> Show Ring
-                                </Link>
-                            </strong>{" "}
-                            &mdash; Browse all public models. Filter by finish type, trade status, manufacturer, and
-                            scale. (In your own Stable you get the full facet set, and you can save the filter
-                            combinations you use most as views to jump back to anytime.)
-                        </li>
-                        <li>
-                            <strong>
-                                <Link href="/discover" className="inline-flex items-center gap-1.5">
-                                    <Users size={16} strokeWidth={1.5} /> Discover
-                                </Link>
-                            </strong>{" "}
-                            &mdash; Find and follow other collectors. See their public herds and show records.
-                        </li>
-                        <li>
-                            <strong>
-                                <Link href="/feed" className="inline-flex items-center gap-1.5">
-                                    <Newspaper size={16} strokeWidth={1.5} /> Feed
-                                </Link>
-                            </strong>{" "}
-                            &mdash; See activity from collectors you follow &mdash; new horses joining their stables,
-                            sales, and show results &mdash; plus community posts in the Global tab.
-                        </li>
-                        <li>
-                            <strong>
-                                <Link href="/shows" className="inline-flex items-center gap-1.5">
-                                    <Camera size={16} strokeWidth={1.5} /> Photo Shows
-                                </Link>
-                            </strong>{" "}
-                            &mdash; Enter your best models in themed virtual photo shows. Vote for your favorites and
-                            compete for ribbon placement.
-                        </li>
-                    </ul>
-                </section>
-
-                {/* Step 5 — Host Your First Show */}
-                <section className="mb-12">
-                    <h2 className="flex items-center gap-2">
-                        <Flag size={22} strokeWidth={1.5} className="text-forest" /> Step 5: Host Your First Show
-                    </h2>
-                    <p>
-                        Ready to run your own show instead of just entering one? Head to{" "}
-                        <Link href="/shows/host" className="text-forest font-semibold">
-                            Show Office
-                        </Link>{" "}
-                        and pick your mode &mdash; live or online. Either way, a one-click NAMHSA-style template builds
-                        your entire classlist for you in seconds.
+                    <p className="text-secondary-foreground mx-auto mb-4 max-w-[520px] text-sm leading-relaxed">
+                        Everything else follows from having something in the Stable. Stuck on a word?
+                        The <A href="/learn/glossary">glossary</A> explains the hobby&apos;s
+                        vocabulary without assuming you already know it.
                     </p>
-                    <p>
-                        Hosting a <strong>live, in-person show</strong>? Run show day from your phone with a ring
-                        console: record leg-tag placings table by table, run champion callbacks, and export
-                        NAMHSA-format results when you&apos;re done.
-                    </p>
-                    <p>
-                        Hosting <strong>online</strong>? Open entries, let entrants submit photos to your classes, then
-                        judge it yourself or open it to community voting.
-                    </p>
-                    <p>
-                        Either way, every result becomes a permanent record &mdash; and a qualification card &mdash; on
-                        the horse&apos;s Hoofprint, with a public verification page anyone can check.
-                    </p>
-                </section>
-
-                {/* Step 6 */}
-                <section className="mb-12">
-                    <h2 className="flex items-center gap-2">
-                        <Handshake size={22} strokeWidth={1.5} className="text-forest" /> Step 6: Buy, Sell &amp;
-                        Connect
-                    </h2>
-                    <p>
-                        Set any horse&apos;s trade status to <strong>&ldquo;For Sale&rdquo;</strong> or{" "}
-                        <strong>&ldquo;Open to Offers&rdquo;</strong> and it becomes visible as a listing in the Show
-                        Ring. Other collectors can message you directly through the built-in inbox.
-                    </p>
-                    <p>
-                        After a transaction, leave a <strong>rating</strong> for the other collector. Ratings build
-                        trust and reputation across the community.
-                    </p>
-                    <p>
-                        Add models to your{" "}
-                        <Link href="/wishlist" className="text-forest inline-flex items-center gap-1.5 font-semibold">
-                            <Bookmark size={16} strokeWidth={1.5} /> Want List
-                        </Link>{" "}
-                        and you&apos;ll get notified when a matching model is listed for sale.
-                    </p>
-                </section>
-
-                {/* Step 7 */}
-                <section className="mb-12">
-                    <h2 className="flex items-center gap-2">
-                        <Settings size={22} strokeWidth={1.5} className="text-forest" /> Step 7: Customize Your
-                        Experience
-                    </h2>
-                    <p>
-                        Visit{" "}
-                        <Link href="/settings" className="text-forest inline-flex items-center gap-1.5 font-semibold">
-                            <Settings size={16} strokeWidth={1.5} /> Settings
-                        </Link>{" "}
-                        to:
-                    </p>
-                    <ul className="my-3 list-none p-0">
-                        <li>Upload a profile avatar</li>
-                        <li>Update your bio and alias</li>
-                        <li>Manage notification preferences</li>
-                        <li>Change your password</li>
-                    </ul>
-                    <p>
-                        You can also toggle <strong>Simple Mode</strong> for high-contrast, large text &mdash; the eye
-                        icon in the header when you&apos;re browsing logged out, or in your account menu once
-                        you&apos;re signed in. Great for accessibility or photo show judging.
-                    </p>
-                </section>
-
-                {/* Feedback */}
-                <section className="mb-12">
-                    <p className="text-secondary-foreground text-base leading-relaxed">
-                        Got an idea, or found something that could work better? We build what collectors ask for &mdash;{" "}
-                        <Link href="/contact" className="text-forest inline-flex items-center gap-1.5 font-semibold">
-                            <Mail size={16} strokeWidth={1.5} /> tell us what you&apos;d love to see
-                        </Link>
-                        .
-                    </p>
-                </section>
-
-                {/* CTA */}
-                <div className="bg-card border-input rounded-lg border text-center">
-                    <p>Ready to start?</p>
-                    <Button asChild variant="outline">
-                        <Link href="/dashboard" id="getting-started-cta">
-                            Go to Your Digital Stable →
-                        </Link>
-                    </Button>
+                    <div className="flex flex-wrap justify-center gap-3">
+                        <Button asChild>
+                            <Link href="/add-horse" id="getting-started-cta-add">
+                                Add your first horse
+                            </Link>
+                        </Button>
+                        <Button asChild variant="outline">
+                            <Link href="/shows" id="getting-started-cta-shows">
+                                See what&apos;s showing →
+                            </Link>
+                        </Button>
+                    </div>
                 </div>
             </div>
         </ExplorerLayout>
