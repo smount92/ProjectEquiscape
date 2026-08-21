@@ -7,9 +7,18 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { after } from "next/server";
 import { sanitizeText } from "@/lib/utils/validation";
+import {
+    EVENT_TYPE_DB_FALLBACK,
+    isCreatableEventType,
+    isLegacyShowEvent,
+} from "@/components/events/eventTypes";
 
 // ============================================================
 // EVENTS — Server Actions
+//
+// Events are FB-style listings for happenings OUTSIDE Model Horse
+// Hub. They award nothing. MHH-hosted shows are created at
+// /shows/host and live in the `shows` table (v2).
 // ============================================================
 
 // ── User Search (for judge assignment autocomplete) ──
@@ -70,7 +79,15 @@ export interface MHHEvent {
 
 // ── CRUD ──
 
-/** Create an event */
+/**
+ * Create an event — a listing for something happening OUTSIDE MHH.
+ *
+ * Refuses `live_show` / `photo_show`. Those two values are wired into
+ * the legacy show system (shows.ts reads `event_type = 'photo_show'`,
+ * the transition-shows cron sweeps both, profile stats count them), so
+ * creating one here would mint a phantom show that can never award a
+ * point, card, or title. MHH-hosted shows are created at /shows/host.
+ */
 export async function createEvent(data: {
     name: string;
     description?: string;
@@ -83,39 +100,68 @@ export async function createEvent(data: {
     locationName?: string;
     locationAddress?: string;
     region?: string;
+    /** Outbound link to wherever the event actually lives. */
     virtualUrl?: string;
     groupId?: string;
-    judgingMethod?: "community_vote" | "expert_judge";
-    templateId?: string;
 }): Promise<{ success: boolean; eventId?: string; error?: string }> {
     const { supabase, user } = await requireAuth();
 
     if (!data.name.trim()) return { success: false, error: "Event name is required." };
+    if (!data.startsAt) return { success: false, error: "Start date/time is required." };
 
-    const { data: event, error } = await supabase
+    if (isLegacyShowEvent(data.eventType)) {
+        return {
+            success: false,
+            error: "Shows aren't created here any more — host yours at /shows/host.",
+        };
+    }
+    if (!isCreatableEventType(data.eventType)) {
+        return { success: false, error: "Pick an event type from the list." };
+    }
+
+    const row = (eventType: string) => ({
+        name: data.name.trim(),
+        description: data.description?.trim() || null,
+        event_type: eventType,
+        starts_at: data.startsAt,
+        ends_at: data.endsAt || null,
+        timezone: data.timezone || "America/New_York",
+        is_all_day: data.isAllDay || false,
+        is_virtual: data.isVirtual || false,
+        location_name: data.locationName?.trim() || null,
+        location_address: data.locationAddress?.trim() || null,
+        region: data.region?.trim() || null,
+        virtual_url: data.virtualUrl?.trim() || null,
+        group_id: data.groupId || null,
+        created_by: user.id,
+        rsvp_count: 1, // Creator auto-RSVPs
+    });
+
+    let { data: event, error } = await supabase
         .from("events")
-        .insert({
-            name: data.name.trim(),
-            description: data.description?.trim() || null,
-            event_type: data.eventType,
-            starts_at: data.startsAt,
-            ends_at: data.endsAt || null,
-            timezone: data.timezone || "America/New_York",
-            is_all_day: data.isAllDay || false,
-            is_virtual: data.isVirtual || false,
-            location_name: data.locationName?.trim() || null,
-            location_address: data.locationAddress?.trim() || null,
-            region: data.region?.trim() || null,
-            virtual_url: data.virtualUrl?.trim() || null,
-            group_id: data.groupId || null,
-            judging_method: data.judgingMethod || "community_vote",
-            created_by: user.id,
-            rsvp_count: 1, // Creator auto-RSVPs
-        })
+        .insert(row(data.eventType))
         .select("id")
         .single();
 
+    // Pre-168 databases reject 'external_show' / 'club' via the
+    // event_type CHECK constraint (23514). Store the nearest legal
+    // value instead of failing the create — the listing reads as a
+    // slightly broader category until the migration is pasted.
+    const fallback = EVENT_TYPE_DB_FALLBACK[data.eventType];
+    if (error?.code === "23514" && fallback) {
+        logger.warn(
+            "Events",
+            `event_type '${data.eventType}' rejected by CHECK constraint — storing '${fallback}' (migration 168 not applied)`,
+        );
+        ({ data: event, error } = await supabase
+            .from("events")
+            .insert(row(fallback))
+            .select("id")
+            .single());
+    }
+
     if (error) return { success: false, error: error.message };
+    if (!event) return { success: false, error: "Failed to create event." };
 
     const eventId = (event as { id: string }).id;
 
@@ -126,65 +172,36 @@ export async function createEvent(data: {
         status: "going",
     });
 
-    // Template injection: auto-populate divisions & classes for show-type events
-    if (data.templateId && data.templateId !== "none") {
-        try {
-            const { SHOW_TEMPLATES } = await import("@/lib/constants/showTemplates");
-            const template = SHOW_TEMPLATES.find(t => t.key === data.templateId);
-
-            if (template) {
-                for (let di = 0; di < template.divisions.length; di++) {
-                    const div = template.divisions[di];
-
-                    const { data: newDiv } = await supabase.from("event_divisions").insert({
-                        event_id: eventId,
-                        name: div.name,
-                        sort_order: di,
-                    }).select("id").single();
-
-                    if (newDiv) {
-                        const classInserts = div.classes.map((cls, ci) => ({
-                            division_id: (newDiv as { id: string }).id,
-                            name: cls.name,
-                            class_number: cls.classNumber || null,
-                            is_nan_qualifying: cls.isNanQualifying || false,
-                            sort_order: ci,
-                        }));
-
-                        await supabase.from("event_classes").insert(classInserts);
-                    }
-                }
-            }
-        } catch (err) {
-            logger.error("Events", "Template injection failed", err);
-        }
-    }
-
-    // Set show_status to 'open' for photo_show and live_show types
-    if (data.eventType === "photo_show" || data.eventType === "live_show") {
-        await supabase.from("events").update({ show_status: "open" }).eq("id", eventId);
-    }
-
     revalidatePath("/community/events");
     revalidateTag("events", "max");
     return { success: true, eventId };
 }
 
-/** Browse events with filters */
+/**
+ * Browse events with filters.
+ *
+ * Default is upcoming-first (soonest first). Pass `past: true` for the
+ * archive instead — most-recently-finished first.
+ */
 export async function getEvents(filters?: {
     eventType?: string;
     region?: string;
     upcoming?: boolean;
+    /** Return finished events (newest first) rather than upcoming ones. */
+    past?: boolean;
     groupId?: string;
+    limit?: number;
 }): Promise<MHHEvent[]> {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
+    const now = new Date().toISOString();
+    const wantsPast = filters?.past === true;
 
     let query = supabase
         .from("events")
         .select("*, users!events_created_by_fkey(alias_name)")
-        .order("starts_at", { ascending: true })
-        .limit(50);
+        .order("starts_at", { ascending: !wantsPast })
+        .limit(filters?.limit ?? 50);
 
     if (filters?.eventType && filters.eventType !== "all") {
         query = query.eq("event_type", filters.eventType);
@@ -192,8 +209,12 @@ export async function getEvents(filters?: {
     if (filters?.region) {
         query = query.ilike("region", `%${filters.region}%`);
     }
-    if (filters?.upcoming !== false) {
-        query = query.or(`ends_at.gte.${new Date().toISOString()},and(ends_at.is.null,starts_at.gte.${new Date().toISOString()})`);
+    if (wantsPast) {
+        // Finished = it has an end that has passed, or no end and the
+        // start has passed. Mirror image of the upcoming clause below.
+        query = query.or(`ends_at.lt.${now},and(ends_at.is.null,starts_at.lt.${now})`);
+    } else if (filters?.upcoming !== false) {
+        query = query.or(`ends_at.gte.${now},and(ends_at.is.null,starts_at.gte.${now})`);
     }
     if (filters?.groupId) {
         query = query.eq("group_id", filters.groupId);
@@ -788,23 +809,35 @@ export async function getEventComments(eventId: string) {
 // EVENT ATTENDEES
 // ============================================================
 
+export interface EventAttendee {
+    userId: string;
+    status: string;
+    alias: string;
+    avatarUrl: string | null;
+}
+
 /**
  * Get list of users who RSVP'd "going" or "interested" to an event.
+ * Avatars come along so the event page can render a face strip.
  */
-export async function getEventAttendees(eventId: string) {
+export async function getEventAttendees(eventId: string): Promise<EventAttendee[]> {
     const supabase = await createClient();
     const { data } = await supabase
         .from("event_rsvps")
-        .select("user_id, status, users!event_rsvps_user_id_fkey(alias_name)")
+        .select("user_id, status, users!event_rsvps_user_id_fkey(alias_name, avatar_url)")
         .eq("event_id", eventId)
         .in("status", ["going", "interested"])
         .order("created_at", { ascending: true });
 
-    return (data ?? []).map((r: Record<string, unknown>) => ({
-        userId: r.user_id as string,
-        status: r.status as string,
-        alias: (r.users as { alias_name: string } | null)?.alias_name ?? "Unknown",
-    }));
+    return (data ?? []).map((r: Record<string, unknown>) => {
+        const u = r.users as { alias_name: string; avatar_url: string | null } | null;
+        return {
+            userId: r.user_id as string,
+            status: r.status as string,
+            alias: u?.alias_name ?? "Unknown",
+            avatarUrl: u?.avatar_url ?? null,
+        };
+    });
 }
 
 // ============================================================
