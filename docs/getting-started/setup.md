@@ -47,16 +47,22 @@ cp .env.local.example .env.local
 
 ### Feature Flags
 
-Four flag-gated rebuilds — set `=1` to enable locally. **All four are LIVE in prod** (flipped
-on in Vercel); set them in `.env.local` too so your local environment matches what real users
-see, rather than accidentally developing against the old code paths.
+The nine v1-fallback flags were deleted in the August 2026 launch (Phase 0) —
+their v2 code paths are unconditional now, so there is nothing to set for them.
+Four flags remain, each with one job:
+
+| Variable | State | Purpose |
+|----------|-------|---------|
+| `NEXT_PUBLIC_SHOW_STANDINGS` | on in prod | /standings and the Standings links that point at it |
+| `NEXT_PUBLIC_REFERENCE_PAGES` | on in prod | SEO kill-switch: gates ONLY the sitemap's /reference entries |
+| `NEXT_PUBLIC_FORM_ENGINE` | dark | The premium add/edit/quick-add form engine (legacy forms render with it off) |
+| `NEXT_PUBLIC_WANTED_NUDGE` | off | Owner demand-nudges on the Want List |
+
+Also required since the metrics launch:
 
 | Variable | Purpose |
 |----------|---------|
-| `NEXT_PUBLIC_SHOWS_V2` | Shows v2 — new competition domain (live + online show hosting, ring console, qualification cards) |
-| `NEXT_PUBLIC_GROUPS_FORUM` | Groups Forum ("Notice Board") — threads, channels, pinned posts |
-| `NEXT_PUBLIC_STABLE_V2` | Stable v2 — faceted filters + saved views |
-| `NEXT_PUBLIC_SHOWRING_V2` | Show Ring v2 — live judging/spectator surface |
+| `METRICS_VIEWER_SALT` | Any long random string — salts the daily viewer hashes for the object-metrics scratch table (migration 175) |
 
 ### Optional Variables (E2E Testing)
 
