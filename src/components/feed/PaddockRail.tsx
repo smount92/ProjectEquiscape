@@ -103,8 +103,9 @@ function UpcomingEvents({ events }: { events: MHHEvent[] }) {
     );
 }
 
+// The Show Ring is NOT here — it gets the full leather door at the
+// top of the Paddock (owner: it's the room everyone walks to first).
 const ROOMS: { href: string; icon: string; label: string; blurb: string }[] = [
-    { href: "/community", icon: "🏆", label: "Show Ring", blurb: "Horses on show" },
     { href: "/community/help-id", icon: "🔍", label: "Help ID", blurb: "Name that model" },
     { href: "/discover", icon: "👥", label: "Members", blurb: "Find collectors" },
 ];

@@ -82,6 +82,29 @@ export default async function FeedPage({
                     subtitle="Where the hobby gathers — barns, events and the show ring"
                 />
 
+                {/* THE SHOW RING DOOR — the room people actually walk to
+                    first (owner, 2026-08-21), so it is the first thing on
+                    the Paddock: a full leather band, not a rail line. */}
+                <Link
+                    href="/community"
+                    className="leather-band stitched mb-8 flex flex-wrap items-center gap-x-5 gap-y-2 rounded-xl px-6 py-5 no-underline transition-all hover:shadow-lg"
+                    id="paddock-show-ring-door"
+                >
+                    <span aria-hidden="true" className="text-[2.2rem] leading-none">🏆</span>
+                    <span className="min-w-0 flex-1">
+                        <span className="text-engraved-light block font-serif text-xl font-bold tracking-[0.02em]">
+                            The Show Ring
+                        </span>
+                        <span className="block text-sm" style={{ color: "var(--leather-text-soft)" }}>
+                            The community&rsquo;s horses on show — browse, favorite, and find your
+                            next obsession.
+                        </span>
+                    </span>
+                    <span className="btn-brass inline-flex shrink-0 items-center gap-1.5">
+                        Step into the ring →
+                    </span>
+                </Link>
+
                 <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[1.5fr_1fr] lg:gap-10">
                     {/* ── The stream ── */}
                     <div className="min-w-0">

@@ -3392,16 +3392,14 @@ html[data-theme="night"] .leather-frame {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
 }
 
-/* ── Night ledger (green-ruled paper under lamplight) ────────────── */
+/* ── Night ledger (plain dark paper under lamplight) ──────────────
+   Owner decision 2026-08-21: NO ruling and NO red margin line at
+   night — light-mode ruling is faint on cream, but the same lines on
+   dark paper sit behind every line of text and wreck legibility. The
+   night ledger keeps the paper gradient + green top edge only. */
 html[data-theme="night"] .ledger-paper,
 html[data-theme="night"] .ledger-card {
-  background:
-    /* red margin line */
-    linear-gradient(90deg, transparent 0 20px, rgba(200, 96, 84, 0.25) 20px 21.5px, transparent 21.5px),
-    /* green ruling, 28px rhythm */
-    repeating-linear-gradient(0deg, transparent 0 27px, rgba(134, 178, 152, 0.13) 27px 28px),
-    /* night ledger paper */
-    linear-gradient(180deg, #2B2218, #241B12);
+  background: linear-gradient(180deg, #2B2218, #241B12);
   border-color: #453723;
   border-top-color: #3A6B55;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4), 0 8px 14px -10px rgba(0, 0, 0, 0.55);
@@ -3685,11 +3683,10 @@ html[data-theme="night"][data-simple-mode="true"] .polaroid {
     border-top: 3px solid #7A5C22;
 }
 
-/* Lamplight: dark paper, brass edge kept. */
+/* Lamplight: dark paper (no ruling at night — legibility), brass
+   edge kept. */
 html[data-theme="night"] .paddock-post-system {
-    background:
-        repeating-linear-gradient(0deg, transparent 0 27px, rgba(134, 178, 152, 0.11) 27px 28px),
-        linear-gradient(180deg, #2E2517, #261D11);
+    background: linear-gradient(180deg, #2E2517, #261D11);
     border-color: #453723;
     border-top-color: var(--brass);
     border-left-color: var(--brass);
