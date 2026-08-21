@@ -12,26 +12,36 @@
  *
  * Pure functions only (no Supabase, no React) — unit-tested in
  * __tests__/validation.test.ts, mirrors src/lib/catalog/corrections.ts.
+ *
+ * The option lists come from the form-engine registry
+ * (`@/lib/forms/registry`) so the importer, the browser and the server
+ * actions can no longer disagree about what a valid value is. The synonym
+ * tables below stay here — they are an importer concern; nothing in the UI
+ * needs to know that a spreadsheet might say "nm".
  */
 
-/** Canonical finish_type enum values (migration 001). */
-export const FINISH_TYPES = ["OF", "Custom", "Artist Resin"] as const;
+import { conditionGradeValues, finishTypeValues } from "@/lib/forms/registry";
 
-/** Known condition grades (add-horse's CONDITION_GRADES + the default). */
-export const CONDITION_GRADES = [
-    "Mint",
-    "Near Mint",
-    "Excellent",
-    "Very Good",
-    "Good",
-    "Body Quality",
-    "Fair",
-    "Poor",
-    "Not Graded",
-] as const;
+/**
+ * Canonical finish_type enum values (migration 001).
+ * Read from the form-engine registry — the importer used to keep its own
+ * copy of this list.
+ */
+export const FINISH_TYPES: readonly string[] = finishTypeValues();
+
+/**
+ * Known condition grades — now the SAME ten the Add and Edit dropdowns
+ * offer, read from the registry.
+ *
+ * This list used to be hand-maintained here and was missing "Play Grade",
+ * so a spreadsheet row saying exactly what the dropdown next to it offered
+ * was rejected as invalid. Reading it from one place deletes that bug by
+ * construction rather than by remembering.
+ */
+export const CONDITION_GRADES: readonly string[] = conditionGradeValues();
 
 // Common spreadsheet spellings → canonical enum value. Lowercased keys.
-const FINISH_SYNONYMS: Record<string, (typeof FINISH_TYPES)[number]> = {
+const FINISH_SYNONYMS: Record<string, string> = {
     of: "OF",
     "original finish": "OF",
     original: "OF",
@@ -45,12 +55,15 @@ const FINISH_SYNONYMS: Record<string, (typeof FINISH_TYPES)[number]> = {
     ar: "Artist Resin",
 };
 
-const CONDITION_SYNONYMS: Record<string, (typeof CONDITION_GRADES)[number]> = {
+const CONDITION_SYNONYMS: Record<string, string> = {
     nm: "Near Mint",
     ex: "Excellent",
     vg: "Very Good",
     body: "Body Quality",
     ungraded: "Not Graded",
+    // Now reachable: "Play Grade" is finally in the canonical list.
+    play: "Play Grade",
+    "play grade": "Play Grade",
 };
 
 /**

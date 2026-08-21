@@ -18,7 +18,7 @@
 import { z } from "zod";
 import type { AssetCategory } from "@/lib/types/database";
 import { HORSE_FIELDS, getFieldSpec, optionValues, resolveLabel } from "./registry";
-import { isFieldRequired, isFieldVisible } from "./rules";
+import { isFieldInMode, isFieldRequired, isFieldVisible } from "./rules";
 import type { FieldContext, FieldProblem, FieldSpec, FormMode, FormValues } from "./types";
 
 // ── Normalisation ─────────────────────────────────────────────────────
@@ -168,7 +168,7 @@ function problemsFromZod(error: z.ZodError, category: AssetCategory): FieldProbl
         const name = String(issue.path[0] ?? "");
         const spec = getFieldSpec(name);
         const label = spec ? resolveLabel(spec, category) : name;
-        return { field: name, label, message: issue.message };
+        return { field: name, label, message: issue.message, kind: "invalid" as const };
     });
 }
 
@@ -188,7 +188,7 @@ export function validateForm(context: FieldContext, values: FormValues): Validat
         if (!isFieldRequired(spec, context)) continue;
         if (normalized[spec.name] === undefined) {
             const label = resolveLabel(spec, context.category);
-            problems.push({ field: spec.name, label, message: `${label} is required.` });
+            problems.push({ field: spec.name, label, message: `${label} is required.`, kind: "missing" });
         }
     }
 
@@ -203,6 +203,20 @@ export function validateForm(context: FieldContext, values: FormValues): Validat
 
     if (problems.length > 0) return { ok: false, problems };
     return { ok: true, data: parsed.success ? (parsed.data as FormValues) : normalized };
+}
+
+/**
+ * Split a problem list into the half a server action must reject and the
+ * half it may log during the flag soak. See `FieldProblem.kind`.
+ */
+export function splitProblems(problems: FieldProblem[]): {
+    invalid: FieldProblem[];
+    missing: FieldProblem[];
+} {
+    return {
+        invalid: problems.filter((p) => p.kind === "invalid"),
+        missing: problems.filter((p) => p.kind === "missing"),
+    };
 }
 
 /** The first problem, phrased for a single-line error banner. */
@@ -262,36 +276,79 @@ export function validateCreateInput(
 }
 
 /**
+ * The category an update applies to. `"any"` is for callers that don't
+ * know it — the legacy edit form doesn't send `asset_category` (it's
+ * immutable after create), and looking it up would cost a query on every
+ * save. In that mode every field the registry knows is validated for
+ * type, enum membership and length, and only the universally-required
+ * name is enforced; per-category requirements can't be judged without the
+ * category, and guessing wrong would reject legitimate edits.
+ */
+export type UpdateCategory = AssetCategory | "any";
+
+/** Categories in which this field can ever be required. */
+function requiredInEveryCategory(spec: FieldSpec): boolean {
+    if (!spec.requiredWhen) return false;
+    return spec.categories.every((category) =>
+        spec.requiredWhen!({ category, mode: "edit", values: {} }),
+    );
+}
+
+/**
  * Validate an `updateHorseAction` payload. Column-keyed, split across two
  * tables, and partial by nature — an edit only sends what changed, so
  * required-ness is checked only for fields the payload actually carries.
  */
 export function validateUpdateInput(
-    category: AssetCategory,
+    category: UpdateCategory,
     horseUpdate: Record<string, unknown> | null,
     vaultData: Record<string, unknown> | null,
 ): ValidationResult {
     const merged: FormValues = { ...(horseUpdate ?? {}), ...(vaultData ?? {}) };
-    const context: FieldContext = { category, mode: "edit", values: merged };
-    const normalized = normalizeValues(context, merged);
-    context.values = normalized;
+    const labelCategory: AssetCategory = category === "any" ? "model" : category;
 
+    // In "any" mode, judge every field the registry knows rather than only
+    // the ones one category happens to show — a field skipped here is a
+    // field written unvalidated.
+    const normalized: FormValues = {};
+    for (const [key, raw] of Object.entries(merged)) {
+        const spec = getFieldSpec(key);
+        if (!spec) continue;
+        if (category !== "any") {
+            if (!spec.categories.includes(category)) continue;
+            if (!isFieldInMode(spec, "edit")) continue;
+        }
+        const value = normalizeValue(spec, raw);
+        if (value !== undefined) normalized[key] = value;
+    }
+
+    const context: FieldContext = { category: labelCategory, mode: "edit", values: normalized };
     const problems: FieldProblem[] = [];
 
     // A partial update may legitimately omit a required field; but if it
     // SENDS one, it may not send it empty.
     for (const spec of HORSE_FIELDS) {
-        if (!isFieldRequired(spec, context)) continue;
         if (!(spec.name in merged)) continue;
+        const required =
+            category === "any" ? requiredInEveryCategory(spec) : isFieldRequired(spec, context);
+        if (!required) continue;
         if (normalized[spec.name] === undefined) {
-            const label = resolveLabel(spec, category);
-            problems.push({ field: spec.name, label, message: `${label} is required.` });
+            const label = resolveLabel(spec, labelCategory);
+            problems.push({ field: spec.name, label, message: `${label} is required.`, kind: "missing" });
         }
     }
 
-    const parsed = buildFormSchema(context).partial().safeParse(normalized);
+    // Build the value schema from every field present, not from the
+    // category's visible set, so nothing sent escapes a type check.
+    const shape: Record<string, z.ZodType> = {};
+    for (const key of Object.keys(normalized)) {
+        const spec = getFieldSpec(key);
+        if (!spec) continue;
+        shape[key] = baseSchema(spec, resolveLabel(spec, labelCategory)).optional();
+    }
+    const parsed = z.object(shape as z.ZodRawShape).safeParse(normalized);
     if (!parsed.success) {
-        for (const p of problemsFromZod(parsed.error, category)) {
+        for (const p of problemsFromZod(parsed.error, labelCategory)) {
             if (problems.some((existing) => existing.field === p.field)) continue;
             problems.push(p);
         }

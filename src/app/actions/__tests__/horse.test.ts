@@ -355,6 +355,230 @@ describe("horse.ts — CRUD", () => {
     });
 });
 
+/**
+ * The form engine's server boundary. Before it, these two actions applied
+ * a column allow-list and nothing else: every rule lived in the browser,
+ * where the caller controls it. A raw action call could write a condition
+ * grade of "Sparkly", a 10,000-character name, or a negative price.
+ *
+ * Rollout is COMMERCE_AND_COMMS_PLAN §4.3 step 6 — impossible VALUES are
+ * refused immediately; missing required fields only warn until the flag
+ * has soaked, so a create path older than the engine keeps working.
+ */
+describe("server-side validation — the boundary that wasn't there", () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        mockClient.auth.getUser.mockResolvedValue({
+            data: { user: { id: "user-1", email: "test@test.com" } },
+        });
+    });
+
+    function willInsert() {
+        mockClient._mockQuery.single.mockResolvedValueOnce({
+            data: { id: "horse-1" },
+            error: null,
+        });
+    }
+
+    describe("createHorseRecord", () => {
+        it("refuses a condition grade that isn't on the ladder", async () => {
+            const result = await createHorseRecord({
+                customName: "Forged",
+                finishType: "OF",
+                conditionGrade: "Sparkly",
+                isPublic: true,
+            });
+            expect(result.success).toBe(false);
+            expect(result.error).toMatch(/Condition Grade must be one of/);
+        });
+
+        it("refuses a finish type outside the enum", async () => {
+            const result = await createHorseRecord({
+                customName: "Forged",
+                finishType: "Original Finish",
+                conditionGrade: "Mint",
+                isPublic: true,
+            });
+            expect(result.success).toBe(false);
+            expect(result.error).toMatch(/Finish Type must be one of/);
+        });
+
+        it("refuses a name past the length cap the browser enforced alone", async () => {
+            const result = await createHorseRecord({
+                customName: "x".repeat(5000),
+                finishType: "OF",
+                conditionGrade: "Mint",
+                isPublic: true,
+            });
+            expect(result.success).toBe(false);
+            expect(result.error).toMatch(/too long/);
+        });
+
+        it("refuses a negative price", async () => {
+            const result = await createHorseRecord({
+                customName: "Star",
+                finishType: "OF",
+                conditionGrade: "Mint",
+                isPublic: true,
+                purchasePrice: -100,
+            });
+            expect(result.success).toBe(false);
+            expect(result.error).toMatch(/cannot be negative/);
+        });
+
+        it("still accepts a model with no condition grade — log-only during the soak", async () => {
+            willInsert();
+            const result = await createHorseRecord({
+                customName: "Ungraded",
+                finishType: "OF",
+                isPublic: true,
+            });
+            expect(result.success).toBe(true);
+        });
+
+        it("accepts a condition grade on tack — owner decision 6", async () => {
+            willInsert();
+            const result = await createHorseRecord({
+                customName: "Show Halter",
+                finishType: "",
+                conditionGrade: "Very Good",
+                assetCategory: "tack",
+                isPublic: true,
+            });
+            expect(result.success).toBe(true);
+            expect(mockClient._mockQuery.insert).toHaveBeenCalledWith(
+                expect.objectContaining({ asset_category: "tack" }),
+            );
+        });
+
+        it("accepts every grade the dropdown offers, Play Grade included", async () => {
+            for (const grade of ["Mint", "Body Quality", "Play Grade", "Not Graded"]) {
+                willInsert();
+                const result = await createHorseRecord({
+                    customName: `Horse ${grade}`,
+                    finishType: "OF",
+                    conditionGrade: grade,
+                    isPublic: true,
+                });
+                expect(result.success, grade).toBe(true);
+            }
+        });
+
+        it("strips attribute keys the category does not own", async () => {
+            willInsert();
+            await createHorseRecord({
+                customName: "Show Halter",
+                finishType: "",
+                assetCategory: "tack",
+                isPublic: true,
+                attributes: { tack_type: "Halter", prop_category: "Fence/Gate", evil: "payload" },
+            });
+            expect(mockClient._mockQuery.insert).toHaveBeenCalledWith(
+                expect.objectContaining({ attributes: { tack_type: "Halter" } }),
+            );
+        });
+
+        it("writes no attributes at all for a model, whatever it is handed", async () => {
+            willInsert();
+            await createHorseRecord({
+                customName: "Star",
+                finishType: "OF",
+                conditionGrade: "Mint",
+                isPublic: true,
+                attributes: { smuggled: "value" },
+            });
+            const insert = mockClient._mockQuery.insert.mock.calls.at(-1)?.[0] as Record<
+                string,
+                unknown
+            >;
+            expect(insert.attributes).toBeUndefined();
+        });
+    });
+
+    describe("updateHorseAction", () => {
+        it("refuses a forged condition grade", async () => {
+            mockClient._setImplicitResolve({ data: {}, error: null });
+            const result = await updateHorseAction("horse-1", {
+                horseUpdate: { condition_grade: "Pristine Platinum" },
+                vaultData: null,
+                hasExistingVault: false,
+                deleteVault: false,
+                conditionChange: null,
+            });
+            expect(result.success).toBe(false);
+            expect(result.error).toMatch(/Condition Grade must be one of/);
+        });
+
+        it("refuses a trade status the database constraint would reject anyway", async () => {
+            mockClient._setImplicitResolve({ data: {}, error: null });
+            const result = await updateHorseAction("horse-1", {
+                horseUpdate: { trade_status: "Auction" },
+                vaultData: null,
+                hasExistingVault: false,
+                deleteVault: false,
+                conditionChange: null,
+            });
+            expect(result.success).toBe(false);
+        });
+
+        it("refuses a negative vault value", async () => {
+            mockClient._setImplicitResolve({ data: {}, error: null });
+            const result = await updateHorseAction("horse-1", {
+                horseUpdate: null,
+                vaultData: { estimated_current_value: -1 },
+                hasExistingVault: true,
+                deleteVault: false,
+                conditionChange: null,
+            });
+            expect(result.success).toBe(false);
+            expect(result.error).toMatch(/cannot be negative/);
+        });
+
+        it("allows a normal partial edit through untouched", async () => {
+            mockClient._setImplicitResolve({ data: {}, error: null });
+            const result = await updateHorseAction("horse-1", {
+                horseUpdate: { public_notes: "Comes with original box" },
+                vaultData: null,
+                hasExistingVault: false,
+                deleteVault: false,
+                conditionChange: null,
+            });
+            expect(result.success).toBe(true);
+        });
+
+        it("does not touch a tack horse's attributes when the category is unknown", async () => {
+            // Guessing "model" here would clean the bag against an empty key
+            // set and silently wipe it.
+            mockClient._setImplicitResolve({ data: {}, error: null });
+            await updateHorseAction("horse-1", {
+                horseUpdate: { attributes: { tack_type: "Saddle" } },
+                vaultData: null,
+                hasExistingVault: false,
+                deleteVault: false,
+                conditionChange: null,
+            });
+            expect(mockClient._mockQuery.update).toHaveBeenCalledWith(
+                expect.objectContaining({ attributes: { tack_type: "Saddle" } }),
+            );
+        });
+
+        it("cleans the bag once the caller names the category", async () => {
+            mockClient._setImplicitResolve({ data: {}, error: null });
+            await updateHorseAction("horse-1", {
+                horseUpdate: { attributes: { tack_type: "Saddle", prop_category: "Fence/Gate" } },
+                vaultData: null,
+                hasExistingVault: false,
+                deleteVault: false,
+                conditionChange: null,
+                assetCategory: "tack",
+            });
+            expect(mockClient._mockQuery.update).toHaveBeenCalledWith(
+                expect.objectContaining({ attributes: { tack_type: "Saddle" } }),
+            );
+        });
+    });
+});
+
 describe("finalizeHorseImages — tier limits never eat the batch", () => {
     const HORSE_ID = "123e4567-e89b-42d3-a456-426614174000";
 

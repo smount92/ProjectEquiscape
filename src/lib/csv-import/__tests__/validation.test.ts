@@ -7,8 +7,14 @@ import {
     matchScoreLabel,
     findDuplicateNames,
     CONDITION_GRADES,
+    FINISH_TYPES,
     type CsvRowInput,
 } from "@/lib/csv-import/validation";
+import {
+    conditionGradeValues,
+    finishTypeValues,
+    matchImportHeader,
+} from "@/lib/forms/registry";
 
 /* ──────────────────────────────────────────────────────
    CSV import pre-validation — pure logic tests.
@@ -192,5 +198,67 @@ describe("findDuplicateNames", () => {
 
     it("ignores empty names on either side", () => {
         expect(findDuplicateNames(["", "  "], ["", "Midnight Dream"]).rowCount).toBe(0);
+    });
+});
+
+/**
+ * The importer used to keep its own condition list and its own finish
+ * list. It kept nine grades where the Add/Edit dropdown offered ten, so a
+ * spreadsheet row saying "Play Grade" — exactly what the control next to
+ * it offered — was rejected as invalid. Both lists now come from the form
+ * engine's registry.
+ */
+describe("one shared vocabulary with the forms", () => {
+    it("knows all ten condition grades, not nine", () => {
+        expect(CONDITION_GRADES).toHaveLength(10);
+        expect(CONDITION_GRADES).toEqual(conditionGradeValues());
+    });
+
+    it("accepts the 'Play Grade' row it used to reject", () => {
+        expect(normalizeCondition("Play Grade")).toBe("Play Grade");
+        expect(normalizeCondition("play grade")).toBe("Play Grade");
+        expect(normalizeCondition("play")).toBe("Play Grade");
+    });
+
+    it("imports a Play Grade row without an error", () => {
+        const errors = validateCsvRows([
+            {
+                name: "Well Loved",
+                finish_type: "OF",
+                condition: "Play Grade",
+                purchase_price: "",
+                estimated_value: "",
+            },
+        ]);
+        expect(errors).toEqual([]);
+    });
+
+    it("reads the finish enum from the same place the dropdown does", () => {
+        expect(FINISH_TYPES).toEqual(finishTypeValues());
+    });
+
+    it("still rejects a grade that is on nobody's list", () => {
+        expect(normalizeCondition("Sparkly")).toBeNull();
+    });
+});
+
+describe("CSV header aliases come off the registry", () => {
+    it("maps the common spreadsheet spellings onto field names", () => {
+        expect(matchImportHeader("Name")).toBe("custom_name");
+        expect(matchImportHeader("horse name")).toBe("custom_name");
+        expect(matchImportHeader("Condition")).toBe("condition_grade");
+        expect(matchImportHeader("grade")).toBe("condition_grade");
+        expect(matchImportHeader("Finish Type")).toBe("finish_type");
+        expect(matchImportHeader("cost")).toBe("purchase_price");
+        expect(matchImportHeader("worth")).toBe("estimated_current_value");
+        expect(matchImportHeader("notes")).toBe("public_notes");
+    });
+
+    it("is case- and whitespace-insensitive", () => {
+        expect(matchImportHeader("  PURCHASE PRICE  ")).toBe("purchase_price");
+    });
+
+    it("returns undefined for a column it doesn't recognise", () => {
+        expect(matchImportHeader("shelf position")).toBeUndefined();
     });
 });

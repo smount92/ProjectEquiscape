@@ -13,6 +13,49 @@ import { after } from "next/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { sanitizeText } from "@/lib/utils/validation";
 import { decodeHtmlEntities } from "@/lib/utils/decodeEntities";
+import { cleanAttributeBag } from "@/lib/forms/attributes";
+import {
+    firstProblemMessage,
+    splitProblems,
+    validateCreateInput,
+    validateUpdateInput,
+    type UpdateCategory,
+} from "@/lib/forms/schema";
+import type { FieldProblem } from "@/lib/forms/types";
+import type { AssetCategory } from "@/lib/types/database";
+
+/**
+ * The server-side half of the form engine.
+ *
+ * `createHorseRecord` and `updateHorseAction` validated NOTHING before
+ * this — just a column allow-list — so a hand-rolled call could write a
+ * condition grade of "Sparkly", a 10,000-character name, or a negative
+ * price. Every rule lived in the browser, where the caller controls it.
+ *
+ * Rollout follows COMMERCE_AND_COMMS_PLAN §4.3 step 6: values that no
+ * rendered control could ever produce are rejected now; missing required
+ * fields are logged, not refused, until the flag has soaked — a create
+ * path older than the engine (Help-ID, for one) may simply not send them.
+ */
+function enforceValidation(
+    where: string,
+    horseId: string | null,
+    problems: FieldProblem[],
+): string | null {
+    const { invalid, missing } = splitProblems(problems);
+    if (missing.length > 0) {
+        logger.warn(where, "Form-engine required-field gap (log-only during soak)", {
+            horseId,
+            fields: missing.map((p) => p.field),
+        });
+    }
+    if (invalid.length === 0) return null;
+    logger.warn(where, "Form-engine rejected an invalid value", {
+        horseId,
+        problems: invalid.map((p) => `${p.field}: ${p.message}`),
+    });
+    return firstProblemMessage(invalid);
+}
 
 type UserHorseInsert = Database["public"]["Tables"]["user_horses"]["Insert"];
 type FinancialVaultInsert = Database["public"]["Tables"]["financial_vault"]["Insert"];
@@ -141,6 +184,15 @@ export async function updateHorseAction(horseId: string, data: {
     hasExistingVault: boolean;
     deleteVault: boolean;
     conditionChange: { newCondition: string; note: string | null } | null;
+    /**
+     * The horse's asset category, so the form engine can apply that
+     * category's rules. Optional: the legacy edit form doesn't know it
+     * (asset_category is immutable after create and never rendered), and
+     * fetching it would cost a query on every save. Absent means "any" —
+     * every value still gets a type, enum and length check; only the
+     * per-category required rules are skipped. See `UpdateCategory`.
+     */
+    assetCategory?: AssetCategory;
 }): Promise<{ success: boolean; error?: string }> {
     try {
         const supabase = await createClient();
@@ -218,6 +270,32 @@ export async function updateHorseAction(horseId: string, data: {
         if (vaultData && vaultData.is_trade) {
             vaultData.purchase_price = null;
             vaultData.estimated_current_value = null;
+        }
+
+        // ── Form-engine validation (the boundary this action never had) ──
+        // Runs after the allow-list so it judges exactly what will be
+        // written, and after the WIP/trade nulling so a deliberate null
+        // isn't misread as a cleared required field.
+        const updateCategory: UpdateCategory = data.assetCategory ?? "any";
+        const check = validateUpdateInput(updateCategory, horseUpdate, vaultData);
+        if (!check.ok) {
+            const refusal = enforceValidation("Horse", horseId, check.problems);
+            if (refusal) return { success: false, error: refusal };
+        }
+
+        // Same JSONB hardening as the create path — but ONLY when the
+        // caller told us the category. Guessing "model" here would clean a
+        // tack horse's bag against an empty key set and wipe it.
+        if (
+            data.assetCategory &&
+            horseUpdate?.attributes &&
+            typeof horseUpdate.attributes === "object"
+        ) {
+            const { cleaned } = cleanAttributeBag(
+                data.assetCategory,
+                horseUpdate.attributes as Record<string, unknown>,
+            );
+            horseUpdate.attributes = cleaned;
         }
 
         if (horseUpdate) {
@@ -353,6 +431,13 @@ export async function createHorseRecord(data: {
         return { success: false, error: "Finish type is required for model horses." };
     }
 
+    // ── Form-engine validation (the boundary this action never had) ──
+    const check = validateCreateInput({ ...data, assetCategory: category });
+    if (!check.ok) {
+        const refusal = enforceValidation("Horse", null, check.problems);
+        if (refusal) return { success: false, error: refusal };
+    }
+
     const isModel = category === 'model';
     const horseInsert: UserHorseInsert = {
         owner_id: user.id,
@@ -383,8 +468,14 @@ export async function createHorseRecord(data: {
     if (data.assignedGender) horseInsert.assigned_gender = data.assignedGender.trim();
     if (data.assignedAge) horseInsert.assigned_age = data.assignedAge.trim();
     if (data.regionalId) horseInsert.regional_id = data.regionalId.trim();
+    // The attributes bag is on the column allow-list, so an unfiltered call
+    // could write arbitrary JSONB. Clean it against the category's own key
+    // set — what assetFields' docstring always claimed happened here.
     if (data.attributes && Object.keys(data.attributes).length > 0) {
-        (horseInsert as Record<string, unknown>).attributes = data.attributes;
+        const { cleaned } = cleanAttributeBag(category as AssetCategory, data.attributes);
+        if (Object.keys(cleaned).length > 0) {
+            (horseInsert as Record<string, unknown>).attributes = cleaned;
+        }
     }
 
     if (data.tradeStatus && data.tradeStatus !== "Not for Sale") {

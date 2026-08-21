@@ -711,3 +711,26 @@ export function conditionGradeValues(): string[] {
 export function finishTypeValues(): string[] {
     return FINISH_TYPE_OPTIONS.map((o) => o.value);
 }
+
+/**
+ * CSV header synonym → field name, lowercased. Moved in from the importer
+ * so a new field declares its own spreadsheet spellings alongside
+ * everything else about it.
+ */
+export function importAliasMap(): Map<string, string> {
+    const map = new Map<string, string>();
+    for (const spec of HORSE_FIELDS) {
+        // The field's own name and label are always accepted.
+        map.set(spec.name.toLowerCase(), spec.name);
+        map.set(spec.label.toLowerCase(), spec.name);
+        for (const alias of spec.importAliases ?? []) {
+            map.set(alias.toLowerCase(), spec.name);
+        }
+    }
+    return map;
+}
+
+/** The field a spreadsheet column header refers to, if any. */
+export function matchImportHeader(header: string): string | undefined {
+    return importAliasMap().get(header.trim().toLowerCase());
+}

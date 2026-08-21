@@ -31,6 +31,8 @@ export {
     getAttributeKeys,
     getColumnFields,
     getFieldSpec,
+    importAliasMap,
+    matchImportHeader,
     optionValues,
     resolveLabel,
 } from "./registry";
@@ -58,12 +60,13 @@ export {
     fromActionInput,
     normalizeValue,
     normalizeValues,
+    splitProblems,
     toActionInput,
     validateCreateInput,
     validateForm,
     validateUpdateInput,
 } from "./schema";
-export type { ValidationResult } from "./schema";
+export type { UpdateCategory, ValidationResult } from "./schema";
 
 export { cleanAttributeBag, packAttributes, unpackAttributes } from "./attributes";
 

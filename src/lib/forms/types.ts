@@ -144,4 +144,17 @@ export interface FieldProblem {
     label: string;
     /** Plain-English, never a zod dump. */
     message: string;
+    /**
+     * `missing` — a required field was left empty.
+     * `invalid` — a value was supplied that the field can never hold
+     *   (outside the enum, over the length cap, negative, not a number).
+     *
+     * The distinction matters at the server boundary: an `invalid` value
+     * cannot come from any legitimate caller, because no rendered control
+     * can produce it, so the actions reject it outright. `missing` is
+     * softer — a create path that predates the engine may simply not send
+     * a field — so it rides in log-only mode during the flag soak, exactly
+     * as COMMERCE_AND_COMMS_PLAN §4.3 step 6 asks.
+     */
+    kind: "missing" | "invalid";
 }
