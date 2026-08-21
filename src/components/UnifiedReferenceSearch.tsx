@@ -335,8 +335,8 @@ export default function UnifiedReferenceSearch({
                       <p className="text-sm text-muted-foreground">No references found for {"\u201C"}{query}{"\u201D"}</p>
                       <p className="text-xs text-muted-foreground">
                         Check the{" "}
-                        <a href="/market" className="text-forest font-medium hover:underline">
-                          {"\u{1F4C8}"} Price Guide
+                        <a href="/market/guide" className="text-forest font-medium hover:underline">
+                          {"\u{1F4C8}"} Blue Book
                         </a>{" "}
                         for market data, or suggest a new entry.
                       </p>

@@ -122,6 +122,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             changeFrequency: "daily",
             priority: 0.8,
         },
+        // The Blue Book price guide — moved out of /market when the
+        // marketplace front door took the URL.
+        {
+            url: `${baseUrl}/market/guide`,
+            lastModified: now,
+            changeFrequency: "daily",
+            priority: 0.7,
+        },
         {
             url: `${baseUrl}/shows`,
             lastModified: now,
