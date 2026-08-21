@@ -521,6 +521,52 @@ export async function updateHorseAction(horseId: string, data: {
         // condition_history INSERT is handled by Postgres trigger (trg_user_horses_condition).
         // v_horse_hoofprint view derives timeline events from condition_history automatically.
         // No manual timeline insert needed.
+        //
+        // The trigger writes horse_id/changed_by/old/new — it cannot see the
+        // note, because the note isn't a column on user_horses. Both edit
+        // forms ask "What happened?" on a grade change and both used to
+        // throw the answer away here. Attach it to the row the trigger just
+        // wrote so the ledger carries the reason, not just the numbers.
+        //
+        // Admin client because condition_history has SELECT and INSERT
+        // policies and no UPDATE policy — RLS denies the write outright to
+        // the authenticated role. Ownership was established above.
+        const conditionNote = data.conditionChange?.note?.trim();
+        if (conditionNote) {
+            try {
+                const admin = getAdminClient();
+                const { data: justLogged } = await admin
+                    .from("condition_history")
+                    .select("id, new_condition, created_at")
+                    .eq("horse_id", horseId)
+                    .is("note", null)
+                    .order("created_at", { ascending: false })
+                    .limit(1)
+                    .maybeSingle();
+
+                const logged = justLogged as
+                    | { id: string; new_condition: string; created_at: string | null }
+                    | null;
+                // Only the row THIS save produced: right grade, and recent
+                // enough that a concurrent edit can't have interleaved.
+                const isOurs =
+                    logged &&
+                    logged.new_condition === data.conditionChange?.newCondition &&
+                    logged.created_at !== null &&
+                    Date.now() - new Date(logged.created_at).getTime() < 60_000;
+
+                if (isOurs) {
+                    await admin
+                        .from("condition_history")
+                        .update({ note: conditionNote.slice(0, 300) })
+                        .eq("id", logged.id);
+                }
+            } catch (err) {
+                // A lost note must never cost the member their save.
+                Sentry.captureException(err, { tags: { domain: "horse" } });
+                logger.error("Horse", "Condition note attach failed", err);
+            }
+        }
 
         revalidatePath(`/stable/${horseId}`);
         return { success: true };

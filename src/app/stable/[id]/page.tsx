@@ -12,6 +12,8 @@ import HoofprintTimeline from"@/components/HoofprintTimeline";
 import TransferModal from"@/components/TransferModal";
 import ParkedExportPanel from"@/components/ParkedExportPanel";
 import { getHoofprint } from"@/app/actions/hoofprint";
+import { getConditionHistory } from"@/app/actions/conditionHistory";
+import ConditionLedger from"@/components/ConditionLedger";
 import QualificationCardsSection, { type PassportQualificationCard } from"@/components/shows/QualificationCardsSection";
 import TitlesSection from"@/components/shows/TitlesSection";
 import { getHorseTitles, getOwnerHorseLadder } from"@/lib/shows/horseTitles";
@@ -308,8 +310,13 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  }
  : null;
 
- // Hoofprint data
- const { timeline, ownershipChain, lifeStage } = await getHoofprint(horseId);
+ // Hoofprint data + the condition ledger (owner-read; see the RLS note
+ // in getConditionHistory — the anon role has no read on this table at
+ // all, so it stays on the owner's passport).
+ const [{ timeline, ownershipChain, lifeStage }, conditionLedger] = await Promise.all([
+ getHoofprint(horseId),
+ getConditionHistory(horseId),
+ ]);
 
  // Check if horse is parked (for Parked Export panel)
  const isParked = lifeStage ==="parked";
@@ -703,6 +710,10 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  <p className="text-secondary-foreground m-0 leading-[1.6] whitespace-pre-wrap">{horse.public_notes}</p>
  </div>
  )}
+
+ {/* Condition Ledger — every grade this model has carried.
+  Renders nothing until the first regrade. */}
+ <ConditionLedger entries={conditionLedger} />
 
  {/* Market Value Badge */}
  {horse.catalog_id && <MarketValueBadge catalogId={horse.catalog_id} />}

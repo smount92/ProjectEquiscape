@@ -576,6 +576,113 @@ describe("server-side validation — the boundary that wasn't there", () => {
                 expect.objectContaining({ attributes: { tack_type: "Saddle" } }),
             );
         });
+
+        // ── The condition note the action used to throw away ──
+        // Both edit forms ask "What happened?" on a grade change; the value
+        // arrived here and was never written anywhere. The Postgres trigger
+        // logs the grades but can't see the note, so the action attaches it
+        // to the row the trigger just wrote.
+        describe("condition note", () => {
+            const NOW = new Date().toISOString();
+
+            /** The active-transaction guard reads the admin client first. */
+            const noActiveTransaction = () =>
+                mockAdmin._mockQuery.maybeSingle.mockResolvedValueOnce({ data: null, error: null });
+
+            it("attaches the note to the row the trigger just logged", async () => {
+                mockClient._setImplicitResolve({ data: {}, error: null });
+                noActiveTransaction();
+                mockAdmin._mockQuery.maybeSingle.mockResolvedValueOnce({
+                    data: { id: "ch-1", new_condition: "Good", created_at: NOW },
+                    error: null,
+                });
+
+                await updateHorseAction("horse-1", {
+                    horseUpdate: { condition_grade: "Good" },
+                    vaultData: null,
+                    hasExistingVault: false,
+                    deleteVault: false,
+                    conditionChange: { newCondition: "Good", note: "  Rub on the near shoulder  " },
+                });
+
+                expect(mockAdmin._mockQuery.update).toHaveBeenCalledWith({
+                    note: "Rub on the near shoulder",
+                });
+            });
+
+            it("writes nothing when no note was given", async () => {
+                mockClient._setImplicitResolve({ data: {}, error: null });
+                noActiveTransaction();
+                await updateHorseAction("horse-1", {
+                    horseUpdate: { condition_grade: "Good" },
+                    vaultData: null,
+                    hasExistingVault: false,
+                    deleteVault: false,
+                    conditionChange: { newCondition: "Good", note: null },
+                });
+                expect(mockAdmin._mockQuery.update).not.toHaveBeenCalled();
+            });
+
+            it("refuses to attach the note to somebody else's log row", async () => {
+                // A different grade means the newest note-less row is not the
+                // one this save produced.
+                mockClient._setImplicitResolve({ data: {}, error: null });
+                noActiveTransaction();
+                mockAdmin._mockQuery.maybeSingle.mockResolvedValueOnce({
+                    data: { id: "ch-old", new_condition: "Fair", created_at: NOW },
+                    error: null,
+                });
+
+                await updateHorseAction("horse-1", {
+                    horseUpdate: { condition_grade: "Good" },
+                    vaultData: null,
+                    hasExistingVault: false,
+                    deleteVault: false,
+                    conditionChange: { newCondition: "Good", note: "Rub" },
+                });
+
+                expect(mockAdmin._mockQuery.update).not.toHaveBeenCalled();
+            });
+
+            it("refuses to attach the note to a stale log row", async () => {
+                mockClient._setImplicitResolve({ data: {}, error: null });
+                noActiveTransaction();
+                mockAdmin._mockQuery.maybeSingle.mockResolvedValueOnce({
+                    data: {
+                        id: "ch-old",
+                        new_condition: "Good",
+                        created_at: new Date(Date.now() - 10 * 60_000).toISOString(),
+                    },
+                    error: null,
+                });
+
+                await updateHorseAction("horse-1", {
+                    horseUpdate: { condition_grade: "Good" },
+                    vaultData: null,
+                    hasExistingVault: false,
+                    deleteVault: false,
+                    conditionChange: { newCondition: "Good", note: "Rub" },
+                });
+
+                expect(mockAdmin._mockQuery.update).not.toHaveBeenCalled();
+            });
+
+            it("still saves the edit when the note can't be attached", async () => {
+                mockClient._setImplicitResolve({ data: {}, error: null });
+                noActiveTransaction();
+                mockAdmin._mockQuery.maybeSingle.mockRejectedValueOnce(new Error("boom"));
+
+                const result = await updateHorseAction("horse-1", {
+                    horseUpdate: { condition_grade: "Good" },
+                    vaultData: null,
+                    hasExistingVault: false,
+                    deleteVault: false,
+                    conditionChange: { newCondition: "Good", note: "Rub" },
+                });
+
+                expect(result.success).toBe(true);
+            });
+        });
     });
 });
 
