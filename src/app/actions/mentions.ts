@@ -2,6 +2,58 @@ import "server-only";
 
 import { getAdminClient } from "@/lib/supabase/admin";
 import { extractMentions } from "@/lib/utils/mentions";
+import { candidateFirstTokens, resolveMentions } from "@/lib/feed/mentionMatch";
+
+/**
+ * Resolve the greedy mention candidates in `content` to the real
+ * aliases they refer to.
+ *
+ * The extractor is deliberately greedy — it hands back "black fox
+ * farm loved this" for "@black fox farm loved this" — because only
+ * the alias table can say where the name ends. This does that half:
+ * pull every alias whose FIRST token matches a candidate's first
+ * token (a narrow, indexable prefix query — not the whole user
+ * directory), then longest-match.
+ *
+ * Server-only, and safe to call with untrusted content: it reads
+ * aliases and returns them, nothing more.
+ */
+export async function resolveMentionedAliases(
+    content: string,
+): Promise<{ alias: string; userId: string }[]> {
+    const candidates = extractMentions(content);
+    if (candidates.length === 0) return [];
+
+    const tokens = candidateFirstTokens(candidates);
+    if (tokens.length === 0) return [];
+
+    const admin = getAdminClient();
+
+    // One prefix query per distinct first token, OR'd together. Tokens
+    // come out of the extractor's \w-only character class, so they can
+    // never contain the comma or dot that would break PostgREST's `or`
+    // grammar.
+    const orFilter = tokens.map((t) => `alias_name.ilike.${t}%`).join(",");
+    const { data: users } = await admin
+        .from("users")
+        .select("id, alias_name")
+        .or(orFilter)
+        .limit(200);
+
+    const rows = (users ?? []) as { id: string; alias_name: string }[];
+    if (rows.length === 0) return [];
+
+    const byAlias = new Map<string, string>();
+    for (const row of rows) {
+        if (row.alias_name) byAlias.set(row.alias_name.toLowerCase(), row.id);
+    }
+
+    const matched = resolveMentions(candidates, rows.map((r) => r.alias_name).filter(Boolean));
+
+    return matched
+        .map((alias) => ({ alias, userId: byAlias.get(alias.toLowerCase())! }))
+        .filter((m) => !!m.userId);
+}
 
 /**
  * Parse @mentions from content and send notifications.
@@ -21,35 +73,14 @@ export async function parseAndNotifyMentions(
     sourceUrl: string
 ): Promise<void> {
     try {
-        const rawAliases = extractMentions(content);
-        if (rawAliases.length === 0) return;
-
-        const admin = getAdminClient();
-
-        // For multi-word mentions, also try progressively shorter substrings
-        // e.g. "@John Smith is cool" → try ["John Smith is cool", "John Smith is", "John Smith", "John"]
-        const candidates = new Set<string>();
-        for (const alias of rawAliases) {
-            const words = alias.split(/\s+/);
-            for (let len = words.length; len >= 1; len--) {
-                const sub = words.slice(0, len).join(" ");
-                if (sub.length >= 3) candidates.add(sub);
-            }
-        }
-
-        // Batch resolve aliases to user IDs
-        const { data: users } = await admin
-            .from("users")
-            .select("id, alias_name")
-            .in("alias_name", [...candidates]);
-
-        if (!users || users.length === 0) return;
+        const mentioned = await resolveMentionedAliases(content);
+        if (mentioned.length === 0) return;
 
         // Build notification inserts (exclude self-mentions)
-        const inserts = users
-            .filter((u: { id: string }) => u.id !== actorId)
-            .map((u: { id: string }) => ({
-                user_id: u.id,
+        const inserts = mentioned
+            .filter((m) => m.userId !== actorId)
+            .map((m) => ({
+                user_id: m.userId,
                 type: "mention",
                 actor_id: actorId,
                 content: `@${actorAlias} mentioned you`,
@@ -60,6 +91,7 @@ export async function parseAndNotifyMentions(
             }));
 
         if (inserts.length > 0) {
+            const admin = getAdminClient();
             await admin.from("notifications").insert(inserts);
         }
     } catch {

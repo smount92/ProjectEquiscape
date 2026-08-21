@@ -41,6 +41,21 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
  };
 }
 
+/**
+ * Resolve the real aliases mentioned in a body so RichText links
+ * "@black fox farm" as one name. Best-effort — a failure here just
+ * means the page falls back to the legacy single-word behaviour.
+ */
+async function aliasesIn(content: string): Promise<string[]> {
+ if (!content.includes("@")) return [];
+ try {
+ const { resolveMentionedAliases } = await import("@/app/actions/mentions");
+ return (await resolveMentionedAliases(content)).map((m) => m.alias);
+ } catch {
+ return [];
+ }
+}
+
 export default async function FeedPostPage({ params }: { params: Promise<{ id: string }> }) {
  const { id } = await params;
  const supabase = await createClient();
@@ -72,6 +87,7 @@ export default async function FeedPostPage({ params }: { params: Promise<{ id: s
  const eventAlias = (e.users as { alias_name: string } | null)?.alias_name ??"Unknown";
  const eventText = (e.metadata as { text?: string } | null)?.text ??"";
  const eventImages = (e.image_urls as string[] | null) ?? [];
+ const eventAliases = await aliasesIn(eventText);
 
  return (
   <ExplorerLayout title="Post" description="View this post.">
@@ -94,7 +110,7 @@ export default async function FeedPostPage({ params }: { params: Promise<{ id: s
 
  {eventText && (
  <div className="mt-4">
- <RichText content={eventText} />
+ <RichText content={eventText} knownAliases={eventAliases} />
  </div>
  )}
 
@@ -118,6 +134,7 @@ export default async function FeedPostPage({ params }: { params: Promise<{ id: s
  const p = post as Record<string, unknown>;
  const actorAlias = (p.users as { alias_name: string } | null)?.alias_name ??"Unknown";
  const content = (p.content as string) ||"";
+ const postAliases = await aliasesIn(content);
 
  // Check if user liked
  const { data: liked } = await supabase
@@ -163,7 +180,7 @@ export default async function FeedPostPage({ params }: { params: Promise<{ id: s
 
  {content && (
  <div className="mt-4">
- <RichText content={content} />
+ <RichText content={content} knownAliases={postAliases} />
  </div>
  )}
 

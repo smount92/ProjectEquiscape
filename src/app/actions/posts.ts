@@ -10,11 +10,20 @@ import { after } from "next/server";
 import { getPublicImageUrls } from "@/lib/utils/storage";
 import { resolveAvatarUrls } from "@/lib/utils/avatars.server";
 import { sanitizeText } from "@/lib/utils/validation";
+import { getPostColumnSupport } from "@/lib/feed/columnSupport";
+import {
+    mergeByCreatedAtDesc,
+    takePage,
+    isGloballyVisible,
+    type ContextualRow,
+} from "@/lib/feed/stream";
 
 // ============================================================
 // UNIVERSAL POSTS — Server Actions
 // A single post system for all text content in the platform.
 // ============================================================
+
+export type PostVisibility = "public" | "followers";
 
 export interface Post {
     id: string;
@@ -52,6 +61,12 @@ export async function createPost(data: {
     studioId?: string;
     helpRequestId?: string;
     imagePaths?: string[];
+    /**
+     * Audience for a top-level post: "public" (default) or "followers".
+     * Silently ignored until migration 166 adds posts.visibility — a
+     * missing column must never turn a compose into a 500.
+     */
+    visibility?: PostVisibility;
 }): Promise<{ success: boolean; postId?: string; error?: string }> {
     const { supabase, user } = await requireAuth();
     if (!data.content.trim() && (!data.imagePaths || data.imagePaths.length === 0)) {
@@ -61,7 +76,7 @@ export async function createPost(data: {
         return { success: false, error: "Post is too long (2000 char max)." };
     }
 
-    const { data: post, error } = await supabase.from("posts").insert({
+    const insertRow: Record<string, unknown> = {
         author_id: user.id,
         content: sanitizeText(data.content),
         horse_id: data.horseId || null,
@@ -69,7 +84,14 @@ export async function createPost(data: {
         event_id: data.eventId || null,
         studio_id: data.studioId || null,
         help_request_id: data.helpRequestId || null,
-    }).select("id").single();
+    };
+
+    if (data.visibility === "followers") {
+        const support = await getPostColumnSupport(supabase);
+        if (support.visibility) insertRow.visibility = "followers";
+    }
+
+    const { data: post, error } = await supabase.from("posts").insert(insertRow).select("id").single();
 
     if (error) return { success: false, error: error.message };
 
@@ -666,4 +688,570 @@ export async function getHorseEmbedData(horseId: string): Promise<{
         thumbnailUrl,
         tradeStatus: h.trade_status,
     };
+}
+
+// ============================================================
+// THE ONE FEED
+//
+// /feed used to be two disconnected halves: a "Global" tab on the
+// `posts` table that deliberately excluded every contextual post,
+// and a "Following" tab on the legacy `activity_events` table.
+// Nothing a horse, a group or a show produced ever reached either.
+//
+// getFeedStream is the single chronological stream that replaces
+// both. It reads `posts` as the spine, interleaves the legacy
+// activity_events text posts read-only (they are never written
+// again, but they must never disappear either), and applies one
+// visibility rule — isGloballyVisible, tested in lib/feed/stream —
+// on top of RLS.
+//
+// The rule that cannot bend: a private or unlisted horse's posts,
+// and a private or restricted group's posts, NEVER appear here.
+// RLS already blocks private horses; it does NOT block a private
+// group from its own members, so the app filter is load-bearing,
+// not belt-and-braces.
+// ============================================================
+
+const FEED_POST_COLUMNS =
+    "id, author_id, content, parent_id, horse_id, group_id, event_id, studio_id, help_request_id, channel_id, show_id, likes_count, replies_count, is_pinned, created_at, updated_at, users!posts_author_id_fkey(alias_name, avatar_url)";
+
+export type FeedScope = "everyone" | "following";
+
+/** A row from either store, reduced to what the merge needs. */
+interface FeedShell {
+    id: string;
+    createdAt: string;
+    row: Record<string, unknown>;
+    source: "post" | "activity";
+}
+
+export interface FeedStreamItem {
+    id: string;
+    /** Which store this row came from. Legacy rows are read-only. */
+    source: "post" | "activity";
+    /** "user" for composed posts, "show_results" for a show's announcement. */
+    kind: string;
+    authorId: string;
+    authorAlias: string;
+    authorAvatarUrl: string | null;
+    content: string;
+    createdAt: string;
+    updatedAt: string | null;
+    likesCount: number;
+    isLikedByMe: boolean;
+    repliesCount: number;
+    replies: Post[];
+    media: { id: string; imageUrl: string; caption: string | null }[];
+    /** "public" | "followers". Always "public" before migration 166. */
+    visibility: PostVisibility;
+    /** Where this post was written, when it wasn't written in the feed. */
+    context: { label: string; href: string } | null;
+    /** Author-only affordances. Legacy rows can be deleted but not edited. */
+    canEdit: boolean;
+    canDelete: boolean;
+}
+
+export interface FeedStreamPage {
+    items: FeedStreamItem[];
+    nextCursor: string | null;
+    /**
+     * Every real alias mentioned anywhere on this page, so RichText can
+     * link "@black fox farm" as one name instead of tagging "@black".
+     */
+    knownAliases: string[];
+}
+
+/**
+ * Read one page of the unified feed.
+ *
+ * @param options.scope   "everyone" (default) or "following" — authors
+ *                        the viewer follows, plus the viewer.
+ * @param options.cursor  created_at of the last row of the previous page.
+ * @param options.limit   page size (default 25, hard-capped at 50).
+ */
+export async function getFeedStream(options?: {
+    scope?: FeedScope;
+    cursor?: string | null;
+    limit?: number;
+}): Promise<FeedStreamPage> {
+    const { supabase, user } = await requireAuth();
+    const scope: FeedScope = options?.scope === "following" ? "following" : "everyone";
+    const limit = Math.min(Math.max(options?.limit ?? 25, 1), 50);
+    const cursor = options?.cursor || null;
+
+    // ── Who is hidden from me ──
+    const { data: myBlocks } = await supabase
+        .from("user_blocks")
+        .select("blocked_id")
+        .eq("blocker_id", user.id);
+    const blockedIds = new Set((myBlocks ?? []).map((b: { blocked_id: string }) => b.blocked_id));
+
+    // ── Who I follow (Following scope only) ──
+    let authorAllowList: string[] | null = null;
+    if (scope === "following") {
+        const { data: follows } = await supabase
+            .from("user_follows")
+            .select("following_id")
+            .eq("follower_id", user.id);
+        const ids = (follows ?? [])
+            .map((f: { following_id: string }) => f.following_id)
+            .filter((id: string) => !blockedIds.has(id));
+        // Your own posts belong in your Following feed — the legacy
+        // activity feed did this too and people expect it.
+        ids.push(user.id);
+        authorAllowList = [...new Set(ids)];
+        if (authorAllowList.length === 0) {
+            return { items: [], nextCursor: null, knownAliases: [] };
+        }
+    }
+
+    const support = await getPostColumnSupport(supabase);
+    let selectColumns = FEED_POST_COLUMNS;
+    if (support.kind) selectColumns += ", kind";
+    if (support.visibility) selectColumns += ", visibility";
+
+    // PostgREST puts `.in()` lists in the query string, so a viewer who
+    // follows hundreds of people would build a URL long enough to be
+    // rejected. Past that size, ask for the unfiltered page and narrow
+    // it here instead.
+    const authorSet = authorAllowList ? new Set(authorAllowList) : null;
+    const useInFilter = !!authorAllowList && authorAllowList.length <= 300;
+
+    // ── Spine: `posts` ────────────────────────────────────────
+    // Visibility filtering happens after the fetch (it needs the
+    // horses'/groups' own visibility), so a batch can come back mostly
+    // empty. Re-fetch a bounded number of times rather than handing the
+    // reader a near-empty page that looks like the end of the feed.
+    const visiblePosts: Record<string, unknown>[] = [];
+    let postCursor = cursor;
+    let postsExhausted = false;
+    const batchSize = Math.min(limit * 3, 100);
+
+    for (let round = 0; round < 3 && visiblePosts.length <= limit && !postsExhausted; round++) {
+        let query = supabase
+            .from("posts")
+            .select(selectColumns)
+            .is("parent_id", null)
+            .order("created_at", { ascending: false })
+            .limit(batchSize);
+        if (useInFilter && authorAllowList) query = query.in("author_id", authorAllowList);
+        if (postCursor) query = query.lt("created_at", postCursor);
+
+        const { data: batch } = await query;
+        const rows = (batch ?? []) as unknown as Record<string, unknown>[];
+        if (rows.length < batchSize) postsExhausted = true;
+        if (rows.length === 0) break;
+
+        postCursor = rows[rows.length - 1].created_at as string;
+
+        const eligible = rows.filter(
+            (r) =>
+                !blockedIds.has(r.author_id as string) &&
+                (useInFilter || !authorSet || authorSet.has(r.author_id as string)),
+        );
+        const kept = await filterToGloballyVisible(supabase, eligible);
+        visiblePosts.push(...kept);
+    }
+
+    // ── Legacy: activity_events text posts, read-only ─────────
+    let legacyQuery = supabase
+        .from("activity_events")
+        .select("id, actor_id, metadata, image_urls, created_at, likes_count, users!actor_id(alias_name, avatar_url)")
+        .eq("event_type", "text_post")
+        .order("created_at", { ascending: false })
+        .limit(limit + 1);
+    if (useInFilter && authorAllowList) legacyQuery = legacyQuery.in("actor_id", authorAllowList);
+    if (cursor) legacyQuery = legacyQuery.lt("created_at", cursor);
+
+    const { data: legacyRows } = await legacyQuery;
+    const legacy = ((legacyRows ?? []) as unknown as Record<string, unknown>[]).filter(
+        (e) =>
+            !blockedIds.has(e.actor_id as string) &&
+            (useInFilter || !authorSet || authorSet.has(e.actor_id as string)),
+    );
+    const legacyExhausted = (legacyRows ?? []).length <= limit;
+
+    // ── Merge, cut to one page ────────────────────────────────
+    const postShells: FeedShell[] = visiblePosts.map((p) => ({
+        id: p.id as string,
+        createdAt: p.created_at as string,
+        row: p,
+        source: "post",
+    }));
+    const legacyShells: FeedShell[] = legacy.map((e) => ({
+        id: e.id as string,
+        createdAt: e.created_at as string,
+        row: e,
+        source: "activity",
+    }));
+
+    const merged = mergeByCreatedAtDesc(postShells, legacyShells);
+    const page = takePage(merged, limit, postsExhausted && legacyExhausted);
+    if (page.items.length === 0) {
+        // Nothing survived the visibility filter, but the stores are not
+        // exhausted — hand back where we got to so "Load more" can keep
+        // walking rather than showing a false end of the feed.
+        const stalled = !postsExhausted && postCursor && postCursor !== cursor ? postCursor : null;
+        return { items: [], nextCursor: stalled, knownAliases: [] };
+    }
+
+    const pagePostRows = page.items.filter((s) => s.source === "post").map((s) => s.row);
+    const pageLegacyRows = page.items.filter((s) => s.source === "activity").map((s) => s.row);
+
+    const [postItems, legacyItems, knownAliases] = await Promise.all([
+        hydratePostItems(supabase, user.id, pagePostRows, blockedIds),
+        hydrateLegacyItems(supabase, user.id, pageLegacyRows),
+        resolvePageAliases(page.items.map((s) => contentOf(s.row, s.source))),
+    ]);
+
+    const byId = new Map<string, FeedStreamItem>();
+    for (const item of [...postItems, ...legacyItems]) byId.set(item.id, item);
+
+    const items = page.items.map((s) => byId.get(s.id)).filter((i): i is FeedStreamItem => !!i);
+
+    // Batch-resolve avatar storage paths → signed URLs (posts + replies).
+    const avatarPaths: (string | null)[] = [];
+    for (const item of items) {
+        avatarPaths.push(item.authorAvatarUrl);
+        for (const reply of item.replies) avatarPaths.push(reply.authorAvatarUrl);
+    }
+    const avatarUrlMap = await resolveAvatarUrls(avatarPaths);
+    for (const item of items) {
+        if (item.authorAvatarUrl) {
+            item.authorAvatarUrl = avatarUrlMap.get(item.authorAvatarUrl) || item.authorAvatarUrl;
+        }
+        for (const reply of item.replies) {
+            if (reply.authorAvatarUrl) {
+                reply.authorAvatarUrl = avatarUrlMap.get(reply.authorAvatarUrl) || reply.authorAvatarUrl;
+            }
+        }
+    }
+
+    return { items, nextCursor: page.nextCursor, knownAliases };
+}
+
+function contentOf(row: Record<string, unknown>, source: "post" | "activity"): string {
+    if (source === "post") return (row.content as string) || "";
+    return ((row.metadata as { text?: string } | null)?.text as string) || "";
+}
+
+/**
+ * Drop every row whose context is not something the whole site can
+ * see. Batches the two visibility lookups (horses, groups) so this
+ * costs at most two extra queries per fetch round.
+ */
+async function filterToGloballyVisible(
+    supabase: Awaited<ReturnType<typeof requireAuth>>["supabase"],
+    rows: Record<string, unknown>[],
+): Promise<Record<string, unknown>[]> {
+    if (rows.length === 0) return [];
+
+    const horseIds = [...new Set(rows.map((r) => r.horse_id as string | null).filter(Boolean))] as string[];
+    const groupIds = [...new Set(rows.map((r) => r.group_id as string | null).filter(Boolean))] as string[];
+
+    const publicHorseIds = new Set<string>();
+    const publicGroupIds = new Set<string>();
+
+    if (horseIds.length > 0) {
+        // `visibility` is the authoritative column (migration 150):
+        // 'public' only — 'unlisted' is link-viewable but listed nowhere,
+        // and a feed is the definition of "listed".
+        const { data } = await supabase
+            .from("user_horses")
+            .select("id, visibility, deleted_at")
+            .in("id", horseIds);
+        for (const h of (data ?? []) as { id: string; visibility: string; deleted_at: string | null }[]) {
+            if (h.visibility === "public" && !h.deleted_at) publicHorseIds.add(h.id);
+        }
+    }
+
+    if (groupIds.length > 0) {
+        // groups.visibility is 'public' | 'restricted' | 'private'.
+        // Only 'public' reaches the global feed; RLS lets a member read
+        // their own private group's posts, so this filter is the only
+        // thing standing between a private group and the world.
+        const { data } = await supabase
+            .from("groups")
+            .select("id, visibility")
+            .in("id", groupIds);
+        for (const g of (data ?? []) as { id: string; visibility: string }[]) {
+            if (g.visibility === "public") publicGroupIds.add(g.id);
+        }
+    }
+
+    return rows.filter((r) =>
+        isGloballyVisible(
+            {
+                horseId: (r.horse_id as string | null) ?? null,
+                groupId: (r.group_id as string | null) ?? null,
+                eventId: (r.event_id as string | null) ?? null,
+                studioId: (r.studio_id as string | null) ?? null,
+                helpRequestId: (r.help_request_id as string | null) ?? null,
+                channelId: (r.channel_id as string | null) ?? null,
+            } satisfies ContextualRow,
+            publicHorseIds,
+            publicGroupIds,
+        ),
+    );
+}
+
+/** Media, likes, replies and context labels for the `posts` half of a page. */
+async function hydratePostItems(
+    supabase: Awaited<ReturnType<typeof requireAuth>>["supabase"],
+    userId: string,
+    rows: Record<string, unknown>[],
+    blockedIds: ReadonlySet<string>,
+): Promise<FeedStreamItem[]> {
+    if (rows.length === 0) return [];
+    const postIds = rows.map((r) => r.id as string);
+
+    const [mediaRes, likedRes, repliesRes] = await Promise.all([
+        supabase.from("media_attachments").select("id, storage_path, post_id, caption").in("post_id", postIds),
+        supabase.from("likes").select("post_id").eq("user_id", userId).in("post_id", postIds),
+        supabase
+            .from("posts")
+            .select("id, author_id, content, parent_id, likes_count, created_at, users!posts_author_id_fkey(alias_name, avatar_url)")
+            .in("parent_id", postIds)
+            .order("created_at", { ascending: true })
+            .limit(150),
+    ]);
+
+    const media = (mediaRes.data ?? []) as { id: string; storage_path: string; post_id: string; caption: string | null }[];
+    const urlMap = getPublicImageUrls(media.map((m) => m.storage_path));
+    const likedSet = new Set(((likedRes.data ?? []) as { post_id: string }[]).map((l) => l.post_id));
+
+    const repliesMap = new Map<string, Post[]>();
+    for (const r of (repliesRes.data ?? []) as unknown as Record<string, unknown>[]) {
+        // Same one-directional block rule getPosts applies: my blocks
+        // hide their content from me, replies included.
+        if (blockedIds.has(r.author_id as string)) continue;
+        const parentKey = r.parent_id as string;
+        if (!repliesMap.has(parentKey)) repliesMap.set(parentKey, []);
+        const replyUser = r.users as { alias_name: string; avatar_url: string | null } | null;
+        repliesMap.get(parentKey)!.push({
+            id: r.id as string,
+            authorId: r.author_id as string,
+            authorAlias: replyUser?.alias_name ?? "Unknown",
+            authorAvatarUrl: replyUser?.avatar_url ?? null,
+            content: r.content as string,
+            parentId: parentKey,
+            horseId: null, groupId: null, eventId: null, studioId: null, helpRequestId: null,
+            likesCount: (r.likes_count as number) || 0,
+            repliesCount: 0,
+            isPinned: false,
+            createdAt: r.created_at as string,
+            updatedAt: null,
+            media: [],
+            isLikedByMe: false,
+            replies: [],
+        });
+    }
+
+    const context = await buildContextLabels(supabase, rows);
+
+    return rows.map((p) => {
+        const postUser = p.users as { alias_name: string; avatar_url: string | null } | null;
+        const isMine = (p.author_id as string) === userId;
+        const kind = (p.kind as string) || "user";
+        return {
+            id: p.id as string,
+            source: "post" as const,
+            kind,
+            authorId: p.author_id as string,
+            authorAlias: postUser?.alias_name ?? "Unknown",
+            authorAvatarUrl: postUser?.avatar_url ?? null,
+            content: (p.content as string) || "",
+            createdAt: p.created_at as string,
+            updatedAt: (p.updated_at as string | null) || null,
+            likesCount: (p.likes_count as number) || 0,
+            isLikedByMe: likedSet.has(p.id as string),
+            repliesCount: (p.replies_count as number) || 0,
+            replies: repliesMap.get(p.id as string) || [],
+            media: media
+                .filter((m) => m.post_id === p.id)
+                .map((m) => ({ id: m.id, imageUrl: urlMap.get(m.storage_path) || "", caption: m.caption })),
+            visibility: (p.visibility as PostVisibility) || "public",
+            context: context.get(p.id as string) ?? null,
+            // A show's own announcement is not the host's to reword.
+            canEdit: isMine && kind === "user",
+            canDelete: isMine,
+        };
+    });
+}
+
+/** "Posted on <horse>" / "in <group>" / "Results" chips. Best-effort. */
+async function buildContextLabels(
+    supabase: Awaited<ReturnType<typeof requireAuth>>["supabase"],
+    rows: Record<string, unknown>[],
+): Promise<Map<string, { label: string; href: string }>> {
+    const out = new Map<string, { label: string; href: string }>();
+    try {
+        const horseIds = [...new Set(rows.map((r) => r.horse_id as string | null).filter(Boolean))] as string[];
+        const groupIds = [...new Set(rows.map((r) => r.group_id as string | null).filter(Boolean))] as string[];
+        const showIds = [...new Set(rows.map((r) => r.show_id as string | null).filter(Boolean))] as string[];
+
+        const horseNames = new Map<string, string>();
+        const groupNames = new Map<string, { name: string; slug: string }>();
+        const showTitles = new Map<string, string>();
+
+        await Promise.all([
+            horseIds.length
+                ? supabase.from("user_horses").select("id, custom_name").in("id", horseIds).then(({ data }) => {
+                    for (const h of (data ?? []) as { id: string; custom_name: string }[]) horseNames.set(h.id, h.custom_name);
+                })
+                : Promise.resolve(),
+            groupIds.length
+                ? supabase.from("groups").select("id, name, slug").in("id", groupIds).then(({ data }) => {
+                    for (const g of (data ?? []) as { id: string; name: string; slug: string }[]) groupNames.set(g.id, { name: g.name, slug: g.slug });
+                })
+                : Promise.resolve(),
+            showIds.length
+                ? supabase.from("shows").select("id, title").in("id", showIds).then(({ data }) => {
+                    for (const s of (data ?? []) as { id: string; title: string }[]) showTitles.set(s.id, s.title);
+                })
+                : Promise.resolve(),
+        ]);
+
+        for (const r of rows) {
+            const id = r.id as string;
+            const horseId = r.horse_id as string | null;
+            const groupId = r.group_id as string | null;
+            const showId = r.show_id as string | null;
+            if (horseId && horseNames.has(horseId)) {
+                out.set(id, { label: `on ${horseNames.get(horseId)}`, href: `/community/${horseId}` });
+            } else if (groupId && groupNames.has(groupId)) {
+                const g = groupNames.get(groupId)!;
+                out.set(id, { label: `in ${g.name}`, href: `/community/groups/${g.slug}` });
+            } else if (showId && showTitles.has(showId)) {
+                out.set(id, { label: showTitles.get(showId)!, href: `/shows/${showId}#results` });
+            }
+        }
+    } catch (err) {
+        logger.error("Posts", "Feed context labels failed", err);
+    }
+    return out;
+}
+
+/**
+ * The legacy half. These rows are rendered but never written: no
+ * replies, no edit, and likes live in the separate activity_likes
+ * system, so the count is shown read-only rather than half-wired.
+ */
+async function hydrateLegacyItems(
+    supabase: Awaited<ReturnType<typeof requireAuth>>["supabase"],
+    userId: string,
+    rows: Record<string, unknown>[],
+): Promise<FeedStreamItem[]> {
+    if (rows.length === 0) return [];
+    const ids = rows.map((r) => r.id as string);
+
+    const { data: myLikes } = await supabase
+        .from("activity_likes")
+        .select("activity_id")
+        .eq("user_id", userId)
+        .in("activity_id", ids);
+    const likedSet = new Set(((myLikes ?? []) as { activity_id: string }[]).map((l) => l.activity_id));
+
+    const allImages = rows.flatMap((r) => ((r.image_urls as string[] | null) ?? []));
+    const imageUrlMap = getPublicImageUrls(allImages);
+
+    return rows.map((e) => {
+        const actor = e.users as { alias_name: string; avatar_url: string | null } | null;
+        return {
+            id: e.id as string,
+            source: "activity" as const,
+            kind: "user",
+            authorId: e.actor_id as string,
+            authorAlias: actor?.alias_name ?? "Unknown",
+            authorAvatarUrl: actor?.avatar_url ?? null,
+            content: ((e.metadata as { text?: string } | null)?.text as string) || "",
+            createdAt: e.created_at as string,
+            updatedAt: null,
+            likesCount: (e.likes_count as number) || 0,
+            isLikedByMe: likedSet.has(e.id as string),
+            repliesCount: 0,
+            replies: [],
+            media: ((e.image_urls as string[] | null) ?? []).map((url, i) => ({
+                id: `${e.id}-img-${i}`,
+                imageUrl: imageUrlMap.get(url) || url,
+                caption: null,
+            })),
+            visibility: "public" as PostVisibility,
+            context: null,
+            canEdit: false,
+            canDelete: (e.actor_id as string) === userId,
+        };
+    });
+}
+
+/**
+ * Every real alias mentioned on this page, resolved once. Best-effort:
+ * if it fails the feed renders with the legacy single-word mention
+ * behaviour rather than not rendering at all.
+ */
+async function resolvePageAliases(contents: string[]): Promise<string[]> {
+    try {
+        const joined = contents.filter(Boolean).join("\n");
+        if (!joined.includes("@")) return [];
+        const { resolveMentionedAliases } = await import("@/app/actions/mentions");
+        const resolved = await resolveMentionedAliases(joined);
+        return resolved.map((m) => m.alias);
+    } catch (err) {
+        logger.error("Posts", "Feed mention resolution failed", err);
+        return [];
+    }
+}
+
+/**
+ * What the feed UI is allowed to offer right now.
+ *
+ * Migration 166 is hand-pasted, so the audience control must not
+ * appear before the column exists — a picker that silently does
+ * nothing is worse than no picker, because the author believes they
+ * limited who can see the post.
+ */
+export async function getFeedCapabilities(): Promise<{ visibility: boolean; kind: boolean }> {
+    try {
+        const { supabase } = await requireAuth();
+        return await getPostColumnSupport(supabase);
+    } catch {
+        return { visibility: false, kind: false };
+    }
+}
+
+/**
+ * Typeahead for the composer's @-autocomplete.
+ *
+ * Returns aliases beginning with `prefix`. Aliases are already public
+ * (every profile page is addressed by one), so this exposes nothing
+ * new — but it still requires auth so it can't be scraped anonymously.
+ */
+export async function searchAliases(
+    prefix: string,
+): Promise<{ alias: string; avatarUrl: string | null }[]> {
+    try {
+        const { supabase } = await requireAuth();
+        const cleaned = prefix.trim().replace(/[%_,.()]/g, "");
+        if (cleaned.length < 1) return [];
+
+        const { data } = await supabase
+            .from("users")
+            .select("alias_name, avatar_url")
+            .ilike("alias_name", `${cleaned}%`)
+            .order("alias_name", { ascending: true })
+            .limit(8);
+
+        const rows = (data ?? []) as { alias_name: string; avatar_url: string | null }[];
+        if (rows.length === 0) return [];
+
+        const avatarMap = await resolveAvatarUrls(rows.map((r) => r.avatar_url));
+        return rows
+            .filter((r) => !!r.alias_name)
+            .map((r) => ({
+                alias: r.alias_name,
+                avatarUrl: r.avatar_url ? avatarMap.get(r.avatar_url) || r.avatar_url : null,
+            }));
+    } catch {
+        return [];
+    }
 }
