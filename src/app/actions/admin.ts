@@ -6,7 +6,13 @@ import { createClient } from "@supabase/supabase-js";
 import { createClient as createAuthClient } from "@/lib/supabase/server";
 import { Resend } from "resend";
 
-import { escapeEmailHtml, renderBrandedEmail, renderEmailQuote } from "@/lib/email/layout";
+import {
+  EMAIL_FROM,
+  escapeEmailHtml,
+  renderBrandedEmail,
+  renderBrandedEmailText,
+  renderEmailQuote,
+} from "@/lib/email/layout";
 import { formEngineEnabled } from "@/lib/forms/flag";
 import { showStandingsEnabled } from "@/lib/shows/flags";
 import {
@@ -110,7 +116,6 @@ export async function replyToContactMessage(
   if (!replyBody.trim()) return { success: false, error: "Reply cannot be empty." };
 
   const resend = new Resend(process.env.RESEND_API_KEY);
-  const fromEmail = process.env.RESEND_FROM_EMAIL || "Model Horse Hub <noreply@modelhorsehub.com>";
   const replyToEmail = user.email || process.env.ADMIN_EMAIL || "";
 
   const subject = `Re: ${originalSubject || "Your message to Model Horse Hub"}`;
@@ -120,7 +125,7 @@ export async function replyToContactMessage(
   // the member replies to this mail, they don't click through — and no
   // "Notification settings" link, because an answer to a message you sent
   // us is not something you can switch off.
-  const html = renderBrandedEmail({
+  const card = {
     title: subject,
     heading: "A reply from Model Horse Hub",
     bodyHtml: `
@@ -129,15 +134,16 @@ export async function replyToContactMessage(
       ${renderEmailQuote(originalMessage, "Your original message")}`,
     footerNote: "You're getting this because you wrote to Model Horse Hub. Just reply to answer.",
     hideSettingsLink: true,
-  });
+  };
 
   try {
     const { error } = await resend.emails.send({
-      from: fromEmail,
+      from: EMAIL_FROM,
       to: recipientEmail,
       replyTo: replyToEmail,
       subject,
-      html,
+      html: renderBrandedEmail(card),
+      text: renderBrandedEmailText(card),
     });
 
     if (error) {

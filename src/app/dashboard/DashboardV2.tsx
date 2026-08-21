@@ -17,6 +17,7 @@ import ExportButton from "@/components/ExportButton";
 import InsuranceReportButton from "@/components/InsuranceReportButton";
 import TransferHistorySection from "@/components/TransferHistorySection";
 import PendingTransfersSection from "@/components/PendingTransfersSection";
+import DealsNeedingAttention from "@/components/dashboard/DealsNeedingAttention";
 import NanDashboardWidget from "@/components/NanDashboardWidget";
 import MhhSeasonWidget from "@/components/shows/MhhSeasonWidget";
 import ShowHistoryWidget from "@/components/ShowHistoryWidget";
@@ -212,6 +213,13 @@ export default async function DashboardV2({
                             </div>
                         </div>
                     )}
+
+                    {/* Deals waiting on THIS member — an offer to answer, a
+                        payment to confirm, a review to leave. Hides itself
+                        when nothing is owed. */}
+                    <Suspense fallback={null}>
+                        <DealsNeedingAttention />
+                    </Suspense>
 
                     {/* Pending Transfers — outgoing codes awaiting claim */}
                     <Suspense fallback={null}>

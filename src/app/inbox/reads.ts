@@ -21,7 +21,9 @@ import {
 } from "@/lib/deals/transcript";
 import {
     inferKind,
+    isTerminalStage,
     stageForTransaction,
+    waitingOn,
     type DealKind,
     type DealParty,
     type DealStage,
@@ -68,6 +70,15 @@ export interface InboxThread {
     /** Null for a plain conversation — which is most of them. */
     dealKind: DealKind | null;
     stage: DealStage | null;
+    /** Which side of the deal the VIEWER is on (party_a = seller/artist). */
+    party: DealParty | null;
+    /**
+     * True when the next move in this deal is the viewer's — an offer of
+     * theirs to answer, money to send, a payment to confirm, a horse to
+     * claim. Computed here because this is the one place that holds the
+     * stage, the kind, the viewer's party AND whose offer is standing.
+     */
+    awaitingMe: boolean;
     /** What this person is in this deal, already de-inverted. */
     roleLabel: string | null;
     preview: string;
@@ -222,12 +233,19 @@ export async function loadInbox(userId: string): Promise<InboxData> {
     // `.or()` chain over transactions.metadata.
     const txnMap = new Map<
         string,
-        { status: string; paidAt: string | null; partyAId: string; partyBId: string | null }
+        {
+            status: string;
+            paidAt: string | null;
+            partyAId: string;
+            partyBId: string | null;
+            /** Whose offer is currently standing — you cannot answer your own. */
+            offerFrom: DealParty;
+        }
     >();
     {
         const { data: txns } = await supabase
             .from("transactions")
-            .select("conversation_id, status, paid_at, party_a_id, party_b_id, created_at")
+            .select("conversation_id, status, paid_at, party_a_id, party_b_id, created_at, metadata")
             .in("conversation_id", convoIds)
             .order("created_at", { ascending: false });
         for (const t of (txns ?? []) as {
@@ -236,13 +254,18 @@ export async function loadInbox(userId: string): Promise<InboxData> {
             paid_at: string | null;
             party_a_id: string;
             party_b_id: string | null;
+            metadata: Record<string, unknown> | null;
         }[]) {
             if (!t.conversation_id || txnMap.has(t.conversation_id)) continue;
+            const from = t.metadata?.offer_from;
             txnMap.set(t.conversation_id, {
                 status: t.status,
                 paidAt: t.paid_at,
                 partyAId: t.party_a_id,
                 partyBId: t.party_b_id,
+                // No recorded counter means the original buyer's offer stands
+                // — the same default deal_offer_move_atomic uses.
+                offerFrom: from === "a" || from === "b" ? from : "b",
             });
         }
     }
@@ -299,12 +322,29 @@ export async function loadInbox(userId: string): Promise<InboxData> {
 
         // The role label is derived from the TRANSACTION, never from
         // buyer_id — the bug that has been labelling sellers as buyers.
+        const party: DealParty | null = txn
+            ? userId === txn.partyAId
+                ? "a"
+                : "b"
+            : (part?.party ?? null);
         let role: string | null = null;
         if (txn && kind) {
-            role = userId === txn.partyAId ? labelA(kind) : labelB(kind);
+            role = party === "a" ? labelA(kind) : labelB(kind);
         } else if (part && part.role !== "member") {
             role = capitalize(part.role);
         }
+
+        // Whose move is it. `waitingOn` answers from the stage alone, which
+        // is right for everything except a standing offer: an offer YOU
+        // countered is waiting on THEM, not on you.
+        const awaitingMe =
+            !!txn &&
+            !!kind &&
+            !!stage &&
+            !isTerminalStage(stage) &&
+            stage !== "disputed" &&
+            waitingOn(stage, kind) === party &&
+            (stage !== "proposed" || txn.offerFrom !== party);
 
         const previewKind = coerceKind(c.last_message_kind ?? "chat");
         const previewSender = (c.last_message_sender as string | null) ?? fallback?.senderId ?? null;
@@ -320,6 +360,8 @@ export async function loadInbox(userId: string): Promise<InboxData> {
             subjectThumbUrl: horse?.thumb ?? null,
             dealKind: kind,
             stage,
+            party,
+            awaitingMe,
             roleLabel: role,
             preview: previewLine(previewKind, null, previewText, {
                 actorName: previewSender === userId ? "You" : `@${other?.alias ?? "them"}`,
@@ -407,6 +449,8 @@ export interface DealRoom {
         status: string;
         offerAmount: number | null;
         offerMessage: string | null;
+        /** When the FIRST offer was made — the expiry clock, not the haggle. */
+        createdAt: string | null;
         paidAt: string | null;
         verifiedAt: string | null;
         metadata: Record<string, unknown> | null;
@@ -455,7 +499,10 @@ export async function loadDealRoom(
         supabase
             .from("transactions")
             .select(
-                "id, status, offer_amount, offer_message, party_a_id, party_b_id, paid_at, verified_at, metadata",
+                // created_at is the offer clock: cleanup_system_garbage()
+                // cancels an 'offer_made' row 7 days after it, and a
+                // counter does not reset it (see lib/deals/offerExpiry).
+                "id, status, offer_amount, offer_message, party_a_id, party_b_id, created_at, paid_at, verified_at, metadata",
             )
             .eq("conversation_id", conversationId)
             .order("created_at", { ascending: false })
@@ -477,6 +524,7 @@ export async function loadDealRoom(
         offer_message: string | null;
         party_a_id: string;
         party_b_id: string | null;
+        created_at: string | null;
         paid_at: string | null;
         verified_at: string | null;
         metadata: Record<string, unknown> | null;
@@ -594,6 +642,7 @@ export async function loadDealRoom(
                   status: txn.status,
                   offerAmount: txn.offer_amount,
                   offerMessage: txn.offer_message,
+                  createdAt: (txn.created_at as string | null) ?? null,
                   paidAt: txn.paid_at,
                   verifiedAt: txn.verified_at,
                   metadata: meta,

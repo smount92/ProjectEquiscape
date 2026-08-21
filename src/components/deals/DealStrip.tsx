@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import { offerCountdown } from "@/lib/deals/offerExpiry";
 import {
     respondToOffer,
     markPaymentSent,
@@ -38,6 +39,8 @@ interface DealStripProps {
         status: string;
         offerAmount: number | null;
         offerMessage: string | null;
+        /** When the first offer was made — the expiry clock. */
+        createdAt: string | null;
         paidAt: string | null;
         verifiedAt: string | null;
         offerFrom: DealParty;
@@ -148,6 +151,7 @@ export default function DealStrip({
                     {/* ── An offer is on the table ── */}
                     {transaction.status === "offer_made" && (
                         <div className="mt-4">
+                            <OfferExpiry createdAt={transaction.createdAt} />
                             {mineIsStanding ? (
                                 <div className="flex flex-wrap items-center gap-2">
                                     <p className="text-muted-foreground m-0 text-sm">
@@ -365,6 +369,41 @@ export default function DealStrip({
 
             {error && <p className="text-destructive mt-3 mb-0 text-sm">{error}</p>}
         </div>
+    );
+}
+
+/**
+ * How long the standing offer has left, so neither side has to guess
+ * whether it is still live. The window is the one SQL enforces (see
+ * lib/deals/offerExpiry) — seven days from the FIRST offer, unmoved by
+ * countering — not the 72 hours the growth plan asks for; tightening it
+ * is a migration, and this component would then need no change.
+ *
+ * Renders nothing once the deadline passes: the row is doomed but still
+ * says 'offer_made' until the nightly sweep, and a "0 minutes" ticker
+ * would be theatre. Ticks every minute so an open thread stays honest.
+ */
+function OfferExpiry({ createdAt }: { createdAt: string | null }) {
+    const [, setTick] = useState(0);
+    useEffect(() => {
+        const id = setInterval(() => setTick((t) => t + 1), 60_000);
+        return () => clearInterval(id);
+    }, []);
+
+    const countdown = offerCountdown(createdAt);
+    if (!countdown) return null;
+
+    const lapsing = countdown.hoursLeft < 24;
+    return (
+        <p
+            className={`m-0 mb-3 text-xs font-semibold ${
+                lapsing ? "text-destructive" : "text-muted-foreground"
+            }`}
+            title={`Expires ${new Date(countdown.expiresAt).toLocaleString()}`}
+            suppressHydrationWarning
+        >
+            ⏳ Expires in {countdown.label}
+        </p>
     );
 }
 

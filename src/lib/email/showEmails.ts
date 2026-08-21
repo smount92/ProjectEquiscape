@@ -21,10 +21,12 @@ import { isNotificationTypeEnabled, type NotificationPrefs } from "@/lib/notific
 import type { EntrantResults } from "@/lib/shows/notifications";
 import { placeLabel } from "@/lib/shows/placings";
 import type { Place } from "@/lib/shows/types";
-import { escapeEmailHtml, renderBrandedEmail } from "./layout";
-
-const FROM_EMAIL =
-    process.env.RESEND_FROM_EMAIL || "Model Horse Hub <noreply@modelhorsehub.com>";
+import {
+    EMAIL_FROM,
+    escapeEmailHtml,
+    renderBrandedEmail,
+    renderBrandedEmailText,
+} from "./layout";
 
 /** Resend batch API limit per call. */
 export const EMAIL_BATCH_SIZE = 100;
@@ -136,7 +138,7 @@ async function resolveRecipients(
 }
 
 async function sendBatches(
-    payloads: { from: string; to: string; subject: string; html: string }[],
+    payloads: { from: string; to: string; subject: string; html: string; text: string }[],
     label: string,
 ): Promise<number> {
     if (payloads.length === 0) return 0;
@@ -178,28 +180,30 @@ export async function sendShowResultsEmails(input: {
 
         const payloads = recipients.map((recipient) => {
             const placements = resultsByOwner.get(recipient.userId)?.placements ?? [];
+            const card = {
+                title: `Results — ${input.showTitle}`,
+                heading:
+                    placements.length > 0
+                        ? `Congratulations, ${recipient.alias}!`
+                        : `Results are up, ${recipient.alias}`,
+                bodyHtml: buildResultsEmailBody({
+                    showTitle: input.showTitle,
+                    placements,
+                }),
+                ctaLabel: "See the full results",
+                ctaUrl: `/shows/${input.showId}`,
+                footerNote:
+                    "You entered this show on Model Horse Hub, so we let you know when its results published.",
+            };
             return {
-                from: FROM_EMAIL,
+                from: EMAIL_FROM,
                 to: recipient.email,
                 subject:
                     placements.length > 0
                         ? `🏆 Your results from ${input.showTitle}`
                         : `Results are up for ${input.showTitle}`,
-                html: renderBrandedEmail({
-                    title: `Results — ${input.showTitle}`,
-                    heading:
-                        placements.length > 0
-                            ? `Congratulations, ${recipient.alias}!`
-                            : `Results are up, ${recipient.alias}`,
-                    bodyHtml: buildResultsEmailBody({
-                        showTitle: input.showTitle,
-                        placements,
-                    }),
-                    ctaLabel: "See the full results",
-                    ctaUrl: `/shows/${input.showId}`,
-                    footerNote:
-                        "You entered this show on Model Horse Hub, so we let you know when its results published.",
-                }),
+                html: renderBrandedEmail(card),
+                text: renderBrandedEmailText(card),
             };
         });
 
@@ -230,11 +234,8 @@ export async function sendEntriesClosingEmails(input: {
             showTitle: input.showTitle,
             entriesCloseAt: input.entriesCloseAt,
         });
-        const payloads = recipients.map((recipient) => ({
-            from: FROM_EMAIL,
-            to: recipient.email,
-            subject: `⏰ Entries close soon — ${input.showTitle}`,
-            html: renderBrandedEmail({
+        const payloads = recipients.map((recipient) => {
+            const card = {
                 title: `Entries closing — ${input.showTitle}`,
                 heading: `Last call, ${recipient.alias}`,
                 bodyHtml,
@@ -242,8 +243,15 @@ export async function sendEntriesClosingEmails(input: {
                 ctaUrl: `/shows/${input.showId}`,
                 footerNote:
                     "You have entries at this show on Model Horse Hub, so we reminded you before its deadline.",
-            }),
-        }));
+            };
+            return {
+                from: EMAIL_FROM,
+                to: recipient.email,
+                subject: `⏰ Entries close soon — ${input.showTitle}`,
+                html: renderBrandedEmail(card),
+                text: renderBrandedEmailText(card),
+            };
+        });
 
         const sent = await sendBatches(payloads, "deadline");
         return { sent };

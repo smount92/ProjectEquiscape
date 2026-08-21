@@ -30,6 +30,9 @@ vi.mock("@/components/ExportButton", () => ({ default: () => null }));
 vi.mock("@/components/InsuranceReportButton", () => ({ default: () => null }));
 vi.mock("@/components/TransferHistorySection", () => ({ default: () => null }));
 vi.mock("@/components/PendingTransfersSection", () => ({ default: () => null }));
+// Stubbed like its neighbours, and for one extra reason: it reaches
+// app/inbox/reads.ts, whose `import "server-only"` cannot resolve here.
+vi.mock("@/components/dashboard/DealsNeedingAttention", () => ({ default: () => null }));
 vi.mock("@/components/NanDashboardWidget", () => ({ default: () => null }));
 vi.mock("@/components/ShowHistoryWidget", () => ({ default: () => null }));
 vi.mock("@/components/stable/StableMasthead", () => ({
