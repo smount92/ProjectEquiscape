@@ -67,7 +67,9 @@ describe("contract boxes", () => {
         const price = blankBox("price") as PriceBox;
         expect(price.amount).toBeNull();
         expect(price.method).toBeNull();
-        const plan = blankBox("payment_plan");
+        // Scan everything EXCEPT the random id — its base36 roll can
+        // legitimately contain "50" (it did, once, in CI).
+        const { id: _id, ...plan } = blankBox("payment_plan");
         expect(JSON.stringify(plan)).not.toMatch(/50|default|recommend/i);
     });
 
