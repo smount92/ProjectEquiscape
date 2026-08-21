@@ -69,7 +69,7 @@ export default function MatchmakerMatches({
  </div>
  <div className="min-w-0 flex-1">
  <Link
- href={`/community/${match.id}`}
+ href={`/community/${match.id}?from=market`}
  className="text-forest block text-sm font-semibold no-underline hover:underline"
  >
  {match.custom_name}
@@ -78,7 +78,7 @@ export default function MatchmakerMatches({
  <span
  className={`rounded-full px-2 py-[2px] text-xs font-bold ${match.trade_status ==="For Sale" ?"bg-success/10 text-success" :"bg-info/10 text-info"}`}
  >
- {match.trade_status ==="For Sale" ?"💲" :"🤝"}{""}
+ {match.trade_status ==="For Sale" ?"💲" :"🤝"}{" "}
  {match.listing_price
  ? `$${match.listing_price.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`
  : match.trade_status}
