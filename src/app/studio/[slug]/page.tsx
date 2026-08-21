@@ -1,306 +1,305 @@
-import { createClient } from"@/lib/supabase/server";
-import { notFound, redirect } from"next/navigation";
-import Link from"next/link";
-import { getArtistProfileBySlug } from"@/app/actions/art-studio";
-import ShareButton from"@/components/ShareButton";
-import ExplorerLayout from"@/components/layouts/ExplorerLayout";
-import PageMasthead from"@/components/layouts/PageMasthead";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+
+import {
+    getArtistPortfolio,
+    getArtistProfileBySlug,
+    getSlotUsage,
+} from "@/app/actions/art-studio";
+import ExplorerLayout from "@/components/layouts/ExplorerLayout";
+import PageMasthead from "@/components/layouts/PageMasthead";
+import ShareButton from "@/components/ShareButton";
+import ReceiptsWall from "@/components/studio/ReceiptsWall";
+import {
+    Chip,
+    EmptyNote,
+    LedgerRow,
+    OffPlatformNote,
+    Panel,
+    SlotMeter,
+    StudioStatusPill,
+    TermsList,
+} from "@/components/studio/StudioBits";
 import { Button } from "@/components/ui/button";
-import { DollarSign, FileText, ClipboardList, CheckCircle } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
+import { intakeFor, slotState } from "@/lib/studio/pipeline";
+import { priceRangeLabel, serviceLabel } from "@/lib/studio/services";
+import { turnaroundLabel } from "@/lib/studio/terms";
 
+/**
+ * The artist's page — the portfolio that PROVES the work.
+ *
+ * This is the one URL an artist pastes into a Facebook group, so unlike v1
+ * it is readable WITHOUT an account (migration 170 opens artist_profiles to
+ * anon for studios that opted into portfolio_visible). v1 redirected to
+ * /login, which made the page useless for the only job it has.
+ *
+ * Order is deliberate: status and slots first (can I even commission them),
+ * then the receipts wall (are they any good), then the rate card and terms
+ * (what will it cost and what am I agreeing to). v1 led with a specialty
+ * chip list and showed no work at all.
+ */
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
- const { slug } = await params;
- const profile = await getArtistProfileBySlug(slug);
- return {
- title: profile ? `${profile.studioName} — Art Studio` :"Studio Not Found",
- description: profile
- ? `${profile.studioName} — ${profile.specialties.join(",") ||"Model horse artist"}`
- :"This studio could not be found.",
- };
+export async function generateMetadata({
+    params,
+}: {
+    params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+    const { slug } = await params;
+    const profile = await getArtistProfileBySlug(slug);
+    if (!profile) return { title: "Studio not found" };
+
+    const specialties = profile.specialties.slice(0, 3).join(", ");
+    return {
+        title: `${profile.studioName} — Model Horse Commissions`,
+        description:
+            profile.bioArtist?.slice(0, 155) ||
+            `${profile.studioName}: ${specialties || "model horse commissions"} by @${profile.ownerAlias}. Commission status, rates, terms, and finished work with verified show records.`,
+        alternates: { canonical: `/studio/${profile.studioSlug}` },
+    };
 }
 
-const STATUS_DOT: Record<string, string> = {
- open:"bg-success",
- waitlist:"bg-warning",
- closed:"bg-destructive",
-};
+export default async function StudioPage({
+    params,
+}: {
+    params: Promise<{ slug: string }>;
+}) {
+    const { slug } = await params;
 
-const STATUS_LABEL: Record<string, string> = {
- open:"Open for Commissions",
- waitlist:"Waitlist Open",
- closed:"Commissions Closed",
-};
+    const profile = await getArtistProfileBySlug(slug);
+    if (!profile) notFound();
 
-export default async function PublicStudioPage({ params }: { params: Promise<{ slug: string }> }) {
- const { slug } = await params;
- const supabase = await createClient();
- const {
- data: { user },
- } = await supabase.auth.getUser();
- if (!user) redirect("/login");
+    const supabase = await createClient();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+    const isOwner = user?.id === profile.userId;
 
- const profile = await getArtistProfileBySlug(slug);
- if (!profile) notFound();
+    if (!profile.portfolioVisible && !isOwner) notFound();
 
- const isOwner = user.id === profile.userId;
+    const [slotsUsed, portfolio] = await Promise.all([
+        getSlotUsage(profile.userId),
+        getArtistPortfolio(profile.userId, profile.ownerAlias),
+    ]);
 
- // Fetch public queue (active commissions)
- const { data: rawQueue } = await supabase
- .from("commissions")
- .select("id, commission_type, status, slot_number, is_public_in_queue")
- .eq("artist_id", profile.userId)
- .eq("is_public_in_queue", true)
- .in("status", ["accepted","in_progress","review"])
- .order("slot_number", { ascending: true });
+    const slots = slotState(slotsUsed, profile.maxSlots, profile.status);
+    const intake = intakeFor(slots, profile.waitlistOpen);
+    const openServices = profile.services.filter((s) => s.open);
 
- const queue = (rawQueue ?? []) as {
- id: string;
- commission_type: string;
- status: string;
- slot_number: number | null;
- is_public_in_queue: boolean;
- }[];
+    return (
+        <ExplorerLayout noHeader>
+            <PageMasthead
+                icon="🎨"
+                title={profile.studioName}
+                subtitle={`Commissions by @${profile.ownerAlias}`}
+                backHref="/studio"
+                backLabel="All studios"
+                actions={
+                    <ShareButton
+                        title={profile.studioName}
+                        text={`${profile.studioName} — model horse commissions on Model Horse Hub`}
+                        label="Share"
+                        variant="full"
+                    />
+                }
+            />
 
- // Count active commissions for slots info
- const { count: activeCount } = await supabase
- .from("commissions")
- .select("id", { count:"exact", head: true })
- .eq("artist_id", profile.userId)
- .in("status", ["accepted","in_progress","review"]);
+            {/* ── The decision bar: can I commission them, and how do I start ── */}
+            <div className="border-input bg-card mb-6 rounded-lg border p-6 shadow-md">
+                <div className="flex flex-wrap items-start justify-between gap-6">
+                    <div className="min-w-[240px] flex-1">
+                        <div className="mb-3 flex flex-wrap items-center gap-2">
+                            <StudioStatusPill status={slots.effectiveStatus} />
+                            {slots.effectiveStatus === "waitlist" && slots.full && (
+                                <span className="text-muted-foreground text-xs">
+                                    bench is full
+                                </span>
+                            )}
+                        </div>
 
- const slotsUsed = activeCount || 0;
+                        {profile.statusNote && (
+                            <p className="text-secondary-foreground mb-3 text-sm">
+                                {profile.statusNote}
+                            </p>
+                        )}
 
- const COMMISSION_STATUS_LABELS: Record<string, { label: string; emoji: string }> = {
- accepted: { label:"Queued", emoji:"📋" },
- in_progress: { label:"In Progress", emoji:"🎨" },
- review: { label:"Review", emoji:"👁️" },
- };
+                        {profile.bioArtist && (
+                            <p className="text-secondary-foreground max-w-[60ch] text-sm leading-relaxed">
+                                {profile.bioArtist}
+                            </p>
+                        )}
 
- return (
- <ExplorerLayout noHeader>
- <PageMasthead compact icon="🎨" title="Art Studio" subtitle="Commission studio" backHref="/studio" backLabel="Studios" />
+                        {profile.specialties.length > 0 && (
+                            <div className="mt-4 flex flex-wrap gap-1.5">
+                                {profile.specialties.map((s) => (
+                                    <Chip key={s}>{s}</Chip>
+                                ))}
+                            </div>
+                        )}
+                    </div>
 
- {/* Hero */}
- <div className="animate-fade-in-up rounded-lg border border-studio/40 bg-studio/10 px-6 py-8">
- <div className="max-w-[800px]">
- <div className="flex flex-wrap items-center gap-4">
- <h1 className="m-0 text-2xl">
- <span className="text-forest">{profile.studioName}</span>
- </h1>
- <span className={`studio-status-badge status-${profile.status} inline-flex items-center gap-1.5`}>
- <span className={`inline-block h-2 w-2 rounded-full ${STATUS_DOT[profile.status]}`} /> {STATUS_LABEL[profile.status]}
- </span>
- </div>
- <p className="text-secondary-foreground mt-1 text-sm">
- by{""}
- <Link href={`/profile/${encodeURIComponent(profile.ownerAlias)}`} className="text-forest">
- @{profile.ownerAlias}
- </Link>
- </p>
+                    <div className="min-w-[200px]">
+                        <SlotMeter used={slots.used} max={slots.max} label={slots.label} />
 
- {profile.bioArtist && (
- <p className="text-secondary-foreground mt-4 max-w-[600] leading-[1.6]">{profile.bioArtist}</p>
- )}
+                        <div className="mt-4 flex flex-col gap-2">
+                            {isOwner ? (
+                                <>
+                                    <Button asChild size="wide">
+                                        <Link href="/studio/dashboard">Open your dashboard</Link>
+                                    </Button>
+                                    <Button asChild variant="outline" size="wide">
+                                        <Link href="/studio/setup">Edit this studio</Link>
+                                    </Button>
+                                </>
+                            ) : intake.accepting ? (
+                                <>
+                                    <Button asChild size="wide">
+                                        <Link href={`/studio/${profile.studioSlug}/request`}>
+                                            {intake.asWaitlist
+                                                ? "Join the waitlist"
+                                                : "Request a commission"}
+                                        </Link>
+                                    </Button>
+                                    <span className="text-muted-foreground text-xs">
+                                        {intake.reason}
+                                    </span>
+                                </>
+                            ) : (
+                                <div className="border-input bg-muted rounded-md border px-4 py-3">
+                                    <p className="text-muted-foreground m-0 text-xs leading-relaxed">
+                                        {intake.reason} Follow @{profile.ownerAlias} to hear when
+                                        slots open.
+                                    </p>
+                                </div>
+                            )}
+                            <Link
+                                href={`/profile/${encodeURIComponent(profile.ownerAlias)}`}
+                                className="text-muted-foreground text-center text-xs hover:underline"
+                            >
+                                @{profile.ownerAlias}&rsquo;s profile →
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
- {profile.specialties.length > 0 && (
- <div className="mt-4 flex flex-wrap gap-1">
- {profile.specialties.map((s) => (
- <span
- key={s}
- className="inline-block rounded-full border border-studio/40 bg-studio/15 px-[10px] py-[3px] text-xs font-semibold text-studio"
- >
- {s}
- </span>
- ))}
- </div>
- )}
+            {/* ── The receipts: what they've actually finished ── */}
+            <div className="mb-6">
+                <ReceiptsWall
+                    horses={portfolio}
+                    studioName={profile.studioName}
+                    isOwner={isOwner}
+                />
+            </div>
 
- <div className="mt-6 flex flex-wrap gap-2">
- {profile.status !=="closed" && !isOwner && (
- <Button asChild><Link
- href={`/studio/${slug}/request`}
- id="request-commission-btn"
- >
- 🎨 Request a Commission
- </Link></Button>
- )}
- {isOwner && (
- <>
- <Button asChild><Link
- href="/studio/dashboard"
- >
- 📊 Dashboard
- </Link></Button>
- <Button asChild variant="outline" size="wide"><Link
- href="/studio/setup"
- >
- ✏️ Edit Studio
- </Link></Button>
- </>
- )}
- <ShareButton
- title={`${profile.studioName}`}
- text={`Check out ${profile.studioName} on Model Horse Hub!`}
- label="Share"
- variant="full"
- />
- </div>
- </div>
- </div>
+            <div className="grid gap-6 lg:grid-cols-2">
+                {/* ── The rate card ── */}
+                <Panel
+                    title="Services & rates"
+                    icon="🧾"
+                    actions={
+                        profile.priceLabel !== "Ask" ? (
+                            <span className="text-muted-foreground text-xs">
+                                {profile.priceLabel}
+                            </span>
+                        ) : null
+                    }
+                >
+                    {openServices.length === 0 ? (
+                        <EmptyNote>
+                            {isOwner
+                                ? "You haven't listed any services yet. Add them in your studio settings so commissioners know what you offer and roughly what it costs."
+                                : "This studio hasn't published a rate card. Ask when you send a request."}
+                        </EmptyNote>
+                    ) : (
+                        <div className="grid">
+                            {openServices.map((service) => (
+                                <LedgerRow
+                                    key={service.id}
+                                    label={
+                                        <>
+                                            {serviceLabel(service)}
+                                            {service.note && (
+                                                <span className="text-muted-foreground block text-xs">
+                                                    {service.note}
+                                                </span>
+                                            )}
+                                        </>
+                                    }
+                                    value={priceRangeLabel(service.priceMin, service.priceMax)}
+                                />
+                            ))}
+                        </div>
+                    )}
 
- <div className="animate-fade-in-up mt-8 grid grid-cols-2 gap-8 max-md:grid-cols-1">
- {/* Left: Details */}
- <div>
- {/* Pricing & Turnaround */}
- <div className="bg-card border-input mb-6 rounded-lg border p-6 shadow-md transition-all">
- <h2 className="mb-4 flex items-center gap-2 text-lg"><DollarSign className="h-5 w-5" /> Pricing & Timeline</h2>
- <div className="grid gap-2">
- {(profile.priceRangeMin || profile.priceRangeMax) && (
- <div className="flex items-center justify-between py-1">
- <span className="text-muted-foreground text-sm">
- Price Range
- </span>
- <span className="text-sm font-bold">
- {profile.priceRangeMin && profile.priceRangeMax
- ? `$${profile.priceRangeMin} – $${profile.priceRangeMax}`
- : profile.priceRangeMin
- ? `From $${profile.priceRangeMin}`
- : `Up to $${profile.priceRangeMax}`}
- </span>
- </div>
- )}
- {(profile.turnaroundMinDays || profile.turnaroundMaxDays) && (
- <div className="flex items-center justify-between py-1">
- <span className="text-muted-foreground text-sm">Turnaround</span>
- <span className="text-sm font-bold">
- {profile.turnaroundMinDays && profile.turnaroundMaxDays
- ? `${profile.turnaroundMinDays}–${profile.turnaroundMaxDays} days`
- : profile.turnaroundMinDays
- ? `Min ${profile.turnaroundMinDays} days`
- : `Up to ${profile.turnaroundMaxDays} days`}
- </span>
- </div>
- )}
- <div className="flex items-center justify-between py-1">
- <span className="text-muted-foreground text-sm">
- Commission Slots
- </span>
- <span className="text-sm font-bold">
- {slotsUsed} / {profile.maxSlots} filled
- </span>
- </div>
- </div>
+                    <div className="mt-4 grid">
+                        <LedgerRow
+                            label="Turnaround"
+                            value={turnaroundLabel(profile.terms)}
+                        />
+                        {profile.mediums.length > 0 && (
+                            <LedgerRow
+                                label="Mediums"
+                                value={profile.mediums.join(", ")}
+                            />
+                        )}
+                        {profile.scalesOffered.length > 0 && (
+                            <LedgerRow
+                                label="Scales"
+                                value={profile.scalesOffered.join(", ")}
+                            />
+                        )}
+                    </div>
 
- {profile.mediums.length > 0 && (
- <div className="mt-4">
- <span
- className="mb-1 block text-sm text-muted-foreground"
- >
- Mediums
- </span>
- <div className="flex flex-wrap gap-1">
- {profile.mediums.map((m) => (
- <span
- key={m}
- className="inline-block rounded-full border border-success/30 bg-success/10 px-[10px] py-[3px] text-xs font-semibold text-success"
- >
- {m}
- </span>
- ))}
- </div>
- </div>
- )}
+                    <p className="text-muted-foreground mt-4 text-xs leading-relaxed">
+                        Ranges are a starting point. Coat complexity — pintos, appaloosa spots,
+                        dapples, roaning — and prep work move the final quote, which the artist
+                        sends after seeing your references.
+                    </p>
+                </Panel>
 
- {profile.scalesOffered.length > 0 && (
- <div className="mt-4">
- <span
- className="mb-1 block text-sm text-muted-foreground"
- >
- Scales
- </span>
- <div className="flex flex-wrap gap-1">
- {profile.scalesOffered.map((s) => (
- <span
- key={s}
- className="inline-block rounded-full border border-success/30 bg-success/10 px-[10px] py-[3px] text-xs font-semibold text-success"
- >
- {s}
- </span>
- ))}
- </div>
- </div>
- )}
- </div>
+                {/* ── The terms, structured ── */}
+                <Panel title="Commission terms" icon="📜">
+                    <TermsList terms={profile.terms} />
+                    <div className="border-input mt-4 border-t pt-4">
+                        <OffPlatformNote />
+                    </div>
+                </Panel>
+            </div>
 
- {/* Terms */}
- {profile.termsText && (
- <div className="bg-card border-input rounded-lg border p-6 shadow-md transition-all">
- <h2 className="mb-4 flex items-center gap-2 text-lg"><FileText className="h-5 w-5" /> Terms & Conditions</h2>
- <p className="text-secondary-foreground text-sm leading-[1.6] whitespace-pre-wrap">
- {profile.termsText}
- </p>
- </div>
- )}
- </div>
+            {/* ── The queue, when the artist publishes it ── */}
+            {profile.acceptingTypes.length > 0 && (
+                <div className="mt-6">
+                    <Panel title="Currently accepting" icon="✅">
+                        <div className="flex flex-wrap gap-1.5">
+                            {profile.acceptingTypes.map((t) => (
+                                <Chip key={t}>{t}</Chip>
+                            ))}
+                        </div>
+                    </Panel>
+                </div>
+            )}
 
- {/* Right: Commission Queue */}
- <div>
- <div className="bg-card border-input rounded-lg border p-6 shadow-md transition-all">
- <h2 className="mb-4 flex items-center gap-2 text-lg"><ClipboardList className="h-5 w-5" /> Commission Queue</h2>
- {queue.length === 0 ? (
- <p className="text-muted-foreground text-sm">
- No active commissions in the queue.
- </p>
- ) : (
- <div className="grid gap-2">
- {queue.map((item, i) => {
- const st = COMMISSION_STATUS_LABELS[item.status] || {
- label: item.status,
- emoji:"📋",
- };
- return (
- <div
- key={item.id}
- className="flex items-center gap-2 rounded-md bg-muted px-4 py-2"
- >
- <span className="text-forest min-w-[50px] text-xs font-bold">
- Slot {item.slot_number || i + 1}
- </span>
- <span className="flex-1 text-sm font-semibold">
- {item.commission_type}
- </span>
- <span
- className={`commission-status-badge status-${item.status.replace("_","-")}`}
- >
- {st.emoji} {st.label}
- </span>
- </div>
- );
- })}
- </div>
- )}
- </div>
+            {!user && (
+                <div className="border-input bg-card/60 mt-8 flex flex-wrap items-center justify-between gap-4 rounded-lg border p-6 backdrop-blur-sm">
+                    <div>
+                        <h3 className="font-serif text-lg font-bold">
+                            Commission {profile.studioName}
+                        </h3>
+                        <p className="text-secondary-foreground text-sm">
+                            A free account lets you send a request, agree terms in writing, and
+                            follow the work in progress.
+                        </p>
+                    </div>
+                    <Button asChild size="wide">
+                        <Link href={`/signup?redirectTo=%2Fstudio%2F${profile.studioSlug}`}>
+                            Create a free account
+                        </Link>
+                    </Button>
+                </div>
+            )}
 
- {/* Accepting */}
- {profile.acceptingTypes.length > 0 && (
- <div className="bg-card border-input mt-6 rounded-lg border p-6 shadow-md transition-all">
- <h2 className="mb-4 flex items-center gap-2 text-lg"><CheckCircle className="h-5 w-5" /> Currently Accepting</h2>
- <div className="grid gap-1">
- {profile.acceptingTypes.map((t) => (
- <div
- key={t}
- className="flex items-center gap-2 py-1"
- >
- <span className="text-success">✓</span>
- <span className="text-sm">{t}</span>
- </div>
- ))}
- </div>
- </div>
- )}
- </div>
- </div>
- </ExplorerLayout>
- );
+        </ExplorerLayout>
+    );
 }

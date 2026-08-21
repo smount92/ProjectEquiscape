@@ -1,103 +1,155 @@
-import { createClient } from"@/lib/supabase/server";
-import { redirect } from"next/navigation";
-import Link from"next/link";
-import { getClientCommissions } from"@/app/actions/art-studio";
-import ExplorerLayout from"@/components/layouts/ExplorerLayout";
-import { Button } from "@/components/ui/button";
-import { STATUS_STYLES } from "@/lib/studio/statusStyles";
-import { Palette, CheckCircle, Ban, DollarSign, type LucideIcon } from "lucide-react";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 
-export const metadata = {
- title:"My Commissions",
+import { getClientCommissions, type Commission } from "@/app/actions/art-studio";
+import ExplorerLayout from "@/components/layouts/ExplorerLayout";
+import PageMasthead from "@/components/layouts/PageMasthead";
+import { CommissionPill } from "@/components/studio/StudioBits";
+import { Button } from "@/components/ui/button";
+import { createClient } from "@/lib/supabase/server";
+import { ballIsWith, isTerminal, statusBlurb } from "@/lib/studio/pipeline";
+import { formatMoney } from "@/lib/studio/terms";
+
+export const metadata: Metadata = {
+    title: "My commissions",
+    robots: { index: false },
 };
 
+/**
+ * The commissioner's side. Grouped by whether it needs them, because
+ * "which of these is waiting on me" is the only question this page is
+ * opened to answer.
+ */
 export default async function MyCommissionsPage() {
- const supabase = await createClient();
- const {
- data: { user },
- } = await supabase.auth.getUser();
- if (!user) redirect("/login");
+    const supabase = await createClient();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) redirect("/login?redirectTo=%2Fstudio%2Fmy-commissions");
 
- const commissions = await getClientCommissions();
+    const commissions = await getClientCommissions();
 
- // Group by status
- const active = commissions.filter((c) =>
- ["requested","accepted","in_progress","review","revision"].includes(c.status),
- );
- const completed = commissions.filter((c) => ["completed","delivered"].includes(c.status));
- const closed = commissions.filter((c) => ["declined","cancelled"].includes(c.status));
+    const needsYou = commissions.filter(
+        (c) => !isTerminal(c.status) && ballIsWith(c.status) === "client",
+    );
+    const inFlight = commissions.filter(
+        (c) => !isTerminal(c.status) && ballIsWith(c.status) !== "client",
+    );
+    const finished = commissions.filter(
+        (c) => c.status === "completed" || c.status === "delivered",
+    );
+    const closed = commissions.filter(
+        (c) => c.status === "declined" || c.status === "cancelled",
+    );
 
- const renderGroup = (title: string, items: typeof commissions, Icon: LucideIcon) => {
- if (items.length === 0) return null;
- return (
-  <div className="mb-8">
-  <h2 className="mb-4 flex items-center gap-2 text-lg">
-   <Icon className="h-5 w-5" /> {title} ({items.length})
-  </h2>
-  <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-4 max-md:grid-cols-1">
-   {items.map((c) => (
-   <Link
-    key={c.id}
-    href={`/studio/commission/${c.id}`}
-    className="border-input flex flex-col rounded-lg border bg-muted p-6 text-inherit no-underline transition-all hover:-translate-y-[1px] hover:border-studio/50"
-   >
-    <div className="mb-2 flex items-center justify-between gap-2">
-    <span className="text-base font-bold">
-     {c.commissionType}
-    </span>
-    <span
-     className={`inline-flex items-center rounded-full px-[10px] py-[3px] text-xs font-semibold whitespace-nowrap border ${STATUS_STYLES[c.status] || "bg-muted text-muted-foreground border-input"}`}
-    >
-     {c.statusLabel}
-    </span>
-    </div>
-    <div className="text-muted-foreground mb-2 flex gap-4 text-sm">
-    <span className="inline-flex items-center gap-1"><Palette className="h-4 w-4" /> @{c.artistAlias}</span>
-    {c.priceQuoted && <span className="inline-flex items-center gap-1"><DollarSign className="h-4 w-4" /> {c.priceQuoted}</span>}
-    </div>
-    <p className="text-secondary-foreground mb-2 text-sm leading-normal">
-    {c.description.length > 100 ? c.description.substring(0, 100) +"…" : c.description}
-    </p>
-    <div
-    className="text-muted-foreground mt-auto pt-2 text-xs"
-    >
-    Last updated{" "}
-    {new Date(c.lastUpdateAt).toLocaleDateString("en-US", {
-     month:"short",
-     day:"numeric",
-    })}
-    </div>
-   </Link>
-   ))}
-  </div>
-  </div>
- );
- };
+    return (
+        <ExplorerLayout noHeader>
+            <PageMasthead
+                icon="📜"
+                title="My commissions"
+                subtitle={
+                    needsYou.length > 0
+                        ? `${needsYou.length} waiting on you`
+                        : `${commissions.length} commission${commissions.length === 1 ? "" : "s"}`
+                }
+                actions={
+                    <Button asChild variant="outline" size="sm">
+                        <Link href="/studio">Find an artist</Link>
+                    </Button>
+                }
+            />
 
- return (
- <ExplorerLayout
-  title={<span className="text-forest">My Commissions</span>}
-  description="Track commissions you've requested from artists."
- >
-  {commissions.length === 0 ? (
-  <div
-   className="bg-card border-input animate-fade-in-up rounded-lg border text-center shadow-md transition-all"
-  >
-   <Palette className="mx-auto mb-4 h-8 w-8 text-muted-foreground" />
-   <p className="text-muted-foreground">You haven&apos;t requested any commissions yet.</p>
-   <Button asChild><Link
-   href="/discover"
-   >
-   Browse Artists →
-   </Link></Button>
-  </div>
-  ) : (
-  <div className="animate-fade-in-up">
-   {renderGroup("Active", active, Palette)}
-   {renderGroup("Completed", completed, CheckCircle)}
-   {renderGroup("Closed", closed, Ban)}
-  </div>
-  )}
- </ExplorerLayout>
- );
+            {commissions.length === 0 ? (
+                <div className="border-input bg-card rounded-lg border p-12 text-center shadow-md">
+                    <div className="mb-4 text-[3rem]">🎨</div>
+                    <h2 className="mb-2 font-serif text-xl font-bold">
+                        You haven&rsquo;t commissioned anyone yet
+                    </h2>
+                    <p className="text-secondary-foreground mx-auto mb-6 max-w-[460px] text-sm leading-relaxed">
+                        Browse the studio directory to find customizers, finishwork artists and
+                        tack makers taking work. Sending a request costs nothing — you get a
+                        written quote with the terms attached, and only then decide.
+                    </p>
+                    <Button asChild size="wide">
+                        <Link href="/studio">Browse the Art Studio →</Link>
+                    </Button>
+                </div>
+            ) : (
+                <>
+                    <Group
+                        title="Waiting on you"
+                        items={needsYou}
+                        emphasis
+                        blurb="These need a decision from you before they can move."
+                    />
+                    <Group title="In progress" items={inFlight} />
+                    <Group title="Finished" items={finished} />
+                    <Group title="Closed" items={closed} />
+                </>
+            )}
+        </ExplorerLayout>
+    );
+}
+
+function Group({
+    title,
+    items,
+    emphasis,
+    blurb,
+}: {
+    title: string;
+    items: Commission[];
+    emphasis?: boolean;
+    blurb?: string;
+}) {
+    if (items.length === 0) return null;
+
+    return (
+        <section className="mb-8">
+            <h2 className="mb-1 font-serif text-lg font-bold">
+                {title}{" "}
+                <span className="text-muted-foreground text-sm font-normal">
+                    ({items.length})
+                </span>
+            </h2>
+            {blurb && <p className="text-muted-foreground mb-4 text-sm">{blurb}</p>}
+
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {items.map((c) => (
+                    <Link
+                        key={c.id}
+                        href={`/studio/commission/${c.id}`}
+                        className={`bg-card flex flex-col rounded-lg border p-5 no-underline shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${
+                            emphasis ? "border-studio/50" : "border-input"
+                        }`}
+                    >
+                        <div className="mb-2 flex flex-wrap items-start justify-between gap-2">
+                            <span className="font-serif text-sm font-bold">
+                                {c.commissionType}
+                            </span>
+                            <CommissionPill status={c.status} />
+                        </div>
+
+                        <div className="text-muted-foreground mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                            <span>@{c.artistAlias}</span>
+                            {c.agreedPrice != null && (
+                                <span className="font-serif tabular-nums">
+                                    {formatMoney(c.agreedPrice)}
+                                </span>
+                            )}
+                        </div>
+
+                        <p className="text-secondary-foreground mb-3 line-clamp-2 text-sm leading-relaxed">
+                            {c.description}
+                        </p>
+
+                        <span className="border-input text-muted-foreground mt-auto border-t pt-2 text-xs">
+                            {statusBlurb(c.status, "client")}
+                        </span>
+                    </Link>
+                ))}
+            </div>
+        </section>
+    );
 }

@@ -1,104 +1,127 @@
-import { createClient } from"@/lib/supabase/server";
-import { redirect } from"next/navigation";
-import Link from"next/link";
-import { getArtistProfile, getArtistCommissions } from"@/app/actions/art-studio";
-import CommissionBoard from"@/components/CommissionBoard";
-import CommandCenterLayout from"@/components/layouts/CommandCenterLayout";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+
+import {
+    getArtistCommissions,
+    getArtistProfile,
+    getSlotUsage,
+} from "@/app/actions/art-studio";
+import ExplorerLayout from "@/components/layouts/ExplorerLayout";
+import PageMasthead from "@/components/layouts/PageMasthead";
+import IncomePanel from "@/components/studio/IncomePanel";
+import IntakeControls from "@/components/studio/IntakeControls";
+import PipelineBoard from "@/components/studio/PipelineBoard";
+import { Panel, StudioStatusPill } from "@/components/studio/StudioBits";
 import { Button } from "@/components/ui/button";
-import { Eye, Pencil } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
+import { summarizeIncome, type IncomeRow } from "@/lib/studio/income";
+import { ballIsWith, slotState } from "@/lib/studio/pipeline";
 
-
-export const metadata = {
- title:"Studio Dashboard",
+export const metadata: Metadata = {
+    title: "Studio dashboard",
+    robots: { index: false },
 };
 
+/**
+ * THE BUSINESS TRACKER.
+ *
+ * Three things an artist currently keeps in a spreadsheet: the pipeline
+ * (what's on the bench and who owes the next move), the books (what did I
+ * earn, which months were good, what's still owed), and intake (am I open,
+ * how many slots).
+ *
+ * v1's dashboard was three counters and a tab strip.
+ */
 export default async function StudioDashboardPage() {
- const supabase = await createClient();
- const {
- data: { user },
- } = await supabase.auth.getUser();
- if (!user) redirect("/login");
+    const supabase = await createClient();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) redirect("/login?redirectTo=%2Fstudio%2Fdashboard");
 
- const profile = await getArtistProfile(user.id);
- if (!profile) redirect("/studio/setup");
+    const profile = await getArtistProfile(user.id);
+    if (!profile) redirect("/studio/setup");
 
- const commissions = await getArtistCommissions();
+    const [commissions, slotsUsed] = await Promise.all([
+        getArtistCommissions(),
+        getSlotUsage(user.id),
+    ]);
 
- // Stats
- const activeStatuses = ["accepted","in_progress","review","revision"];
- const activeCommissions = commissions.filter((c) => activeStatuses.includes(c.status));
- const pendingRequests = commissions.filter((c) => c.status ==="requested");
- const completedTotal = commissions.filter((c) => c.status ==="completed" || c.status ==="delivered");
+    const slots = slotState(slotsUsed, profile.maxSlots, profile.status);
 
- return (
- <CommandCenterLayout
-  title={<><span className="text-forest">{profile.studioName}</span></>}
-  description="Studio Dashboard"
-  headerActions={
-  <>
-   <Button asChild variant="outline" size="wide"><Link
-   href={`/studio/${profile.studioSlug}`}
-   className="inline-flex items-center gap-2"
-   >
-   <Eye className="h-4 w-4" /> Public Page
-   </Link></Button>
-   <Button asChild variant="outline" size="wide"><Link
-   href="/studio/setup"
-   className="inline-flex items-center gap-2"
-   >
-   <Pencil className="h-4 w-4" /> Edit Studio
-   </Link></Button>
-  </>
-  }
-  mainContent={
-  <>
-   {/* Stats Bar */}
-   <div className="rounded-lg border border-input bg-muted px-6 py-6">
-   <div className="flex flex-wrap gap-6">
-    <div className="flex flex-col items-center gap-[2px]">
-    <span className="text-forest text-xl font-extrabold">
-     {activeCommissions.length}/{profile.maxSlots}
-    </span>
-    <span className="text-muted-foreground text-xs tracking-wider uppercase">
-     Slots Filled
-    </span>
-    </div>
-    <div className="flex flex-col items-center gap-[2px]">
-    <span
-     className={`text-xl font-extrabold ${pendingRequests.length > 0 ? "text-warning" : "text-forest"}`}
-    >
-     {pendingRequests.length}
-    </span>
-    <span className="text-muted-foreground text-xs tracking-wider uppercase">
-     Pending Requests
-    </span>
-    </div>
-    <div className="flex flex-col items-center gap-[2px]">
-    <span className="text-forest text-xl font-extrabold">
-     {completedTotal.length}
-    </span>
-    <span className="text-muted-foreground text-xs tracking-wider uppercase">
-     Completed
-    </span>
-    </div>
-    <div className="flex flex-col items-center gap-[2px]">
-    <span
-     className={`studio-status-badge status-${profile.status} inline-flex items-center gap-1.5 text-xs`}
-    >
-     <span className={`inline-block h-2 w-2 rounded-full ${profile.status ==="open" ?"bg-success" : profile.status ==="waitlist" ?"bg-warning" :"bg-destructive"}`} />
-     {profile.status.charAt(0).toUpperCase() + profile.status.slice(1)}
-    </span>
-    <span className="text-muted-foreground text-xs tracking-wider uppercase">
-     Status
-    </span>
-    </div>
-   </div>
-   </div>
+    const summary = summarizeIncome(
+        commissions.map(
+            (c): IncomeRow => ({
+                id: c.id,
+                status: c.status,
+                agreedPrice: c.agreedPrice,
+                depositAmount: c.depositAmount,
+                depositPaid: c.depositPaid,
+                finalPaid: c.finalPaid,
+                completedAt: c.completedAt,
+                createdAt: c.createdAt,
+            }),
+        ),
+    );
 
-   {/* Commission Board */}
-   <CommissionBoard commissions={commissions} />
-  </>
-  }
- />
- );
+    const waitingOnYou = commissions.filter((c) => ballIsWith(c.status) === "artist").length;
+
+    return (
+        <ExplorerLayout noHeader>
+            <PageMasthead
+                icon="🎨"
+                title={profile.studioName}
+                subtitle={
+                    waitingOnYou > 0
+                        ? `${waitingOnYou} commission${waitingOnYou === 1 ? "" : "s"} waiting on you`
+                        : "Nothing waiting on you"
+                }
+                actions={
+                    <>
+                        <Button asChild variant="outline" size="sm">
+                            <Link href={`/studio/${profile.studioSlug}`}>View your page</Link>
+                        </Button>
+                        <Button asChild variant="outline" size="sm">
+                            <Link href="/studio/setup">Settings</Link>
+                        </Button>
+                    </>
+                }
+            />
+
+            <div className="grid gap-6 xl:grid-cols-[1fr_340px]">
+                <div className="grid gap-6">
+                    <PipelineBoard commissions={commissions} />
+                    <IncomePanel summary={summary} />
+                </div>
+
+                <div className="grid gap-6 self-start">
+                    <Panel
+                        title="Intake"
+                        icon="🚪"
+                        actions={<StudioStatusPill status={slots.effectiveStatus} />}
+                    >
+                        <IntakeControls
+                            status={profile.status}
+                            maxSlots={profile.maxSlots}
+                            waitlistOpen={profile.waitlistOpen}
+                            statusNote={profile.statusNote}
+                            slotsUsed={slotsUsed}
+                        />
+                    </Panel>
+
+                    <Panel title="Your terms" icon="📜">
+                        <p className="text-secondary-foreground mb-4 text-sm leading-relaxed">
+                            These attach to every quote you send, and the version a commissioner
+                            accepts is frozen onto their commission — so changing them here never
+                            rewrites an agreement you already made.
+                        </p>
+                        <Button asChild variant="outline" size="wide">
+                            <Link href="/studio/setup#terms">Edit terms & rates →</Link>
+                        </Button>
+                    </Panel>
+                </div>
+            </div>
+        </ExplorerLayout>
+    );
 }
