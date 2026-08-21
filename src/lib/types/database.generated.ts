@@ -77,6 +77,13 @@ export type Database = {
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "activity_events_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: false
+            referencedRelation: "v_artist_finished_horses"
+            referencedColumns: ["horse_id"]
+          },
         ]
       }
       activity_likes: {
@@ -129,66 +136,102 @@ export type Database = {
       artist_profiles: {
         Row: {
           accepting_types: string[] | null
+          accepts_rush: boolean | null
           bio_artist: string | null
+          client_ships_model: boolean | null
           created_at: string | null
+          deposit_percent: number | null
+          deposit_refundable_before_start: boolean | null
+          extra_revision_fee: number | null
+          kill_fee_percent: number | null
           max_slots: number | null
           mediums: string[] | null
           paypal_me_link: string | null
           portfolio_visible: boolean | null
           price_range_max: number | null
           price_range_min: number | null
+          revisions_included: number | null
           scales_offered: string[] | null
+          services: Json
+          shipping_note: string | null
           specialties: string[] | null
           status: string
+          status_note: string | null
           studio_name: string
           studio_slug: string
           terms_text: string | null
+          terms_updated_at: string | null
           turnaround_max_days: number | null
           turnaround_min_days: number | null
           updated_at: string | null
           user_id: string
+          waitlist_open: boolean
         }
         Insert: {
           accepting_types?: string[] | null
+          accepts_rush?: boolean | null
           bio_artist?: string | null
+          client_ships_model?: boolean | null
           created_at?: string | null
+          deposit_percent?: number | null
+          deposit_refundable_before_start?: boolean | null
+          extra_revision_fee?: number | null
+          kill_fee_percent?: number | null
           max_slots?: number | null
           mediums?: string[] | null
           paypal_me_link?: string | null
           portfolio_visible?: boolean | null
           price_range_max?: number | null
           price_range_min?: number | null
+          revisions_included?: number | null
           scales_offered?: string[] | null
+          services?: Json
+          shipping_note?: string | null
           specialties?: string[] | null
           status?: string
+          status_note?: string | null
           studio_name: string
           studio_slug: string
           terms_text?: string | null
+          terms_updated_at?: string | null
           turnaround_max_days?: number | null
           turnaround_min_days?: number | null
           updated_at?: string | null
           user_id: string
+          waitlist_open?: boolean
         }
         Update: {
           accepting_types?: string[] | null
+          accepts_rush?: boolean | null
           bio_artist?: string | null
+          client_ships_model?: boolean | null
           created_at?: string | null
+          deposit_percent?: number | null
+          deposit_refundable_before_start?: boolean | null
+          extra_revision_fee?: number | null
+          kill_fee_percent?: number | null
           max_slots?: number | null
           mediums?: string[] | null
           paypal_me_link?: string | null
           portfolio_visible?: boolean | null
           price_range_max?: number | null
           price_range_min?: number | null
+          revisions_included?: number | null
           scales_offered?: string[] | null
+          services?: Json
+          shipping_note?: string | null
           specialties?: string[] | null
           status?: string
+          status_note?: string | null
           studio_name?: string
           studio_slug?: string
           terms_text?: string | null
+          terms_updated_at?: string | null
           turnaround_max_days?: number | null
           turnaround_min_days?: number | null
           updated_at?: string | null
           user_id?: string
+          waitlist_open?: boolean
         }
         Relationships: [
           {
@@ -246,6 +289,86 @@ export type Database = {
           tier?: number | null
         }
         Relationships: []
+      }
+      barn_join_requests: {
+        Row: {
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          group_id: string
+          message: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          group_id: string
+          message?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          group_id?: string
+          message?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "barn_join_requests_decided_by_fkey"
+            columns: ["decided_by"]
+            isOneToOne: false
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "barn_join_requests_decided_by_fkey"
+            columns: ["decided_by"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "barn_join_requests_decided_by_fkey"
+            columns: ["decided_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "barn_join_requests_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "barn_join_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "barn_join_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "barn_join_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       catalog_changelog: {
         Row: {
@@ -553,79 +676,151 @@ export type Database = {
       }
       commissions: {
         Row: {
+          accepted_at: string | null
           actual_completion: string | null
           actual_start: string | null
+          agreed_price: number | null
           artist_id: string
+          budget_amount: number | null
           client_email: string | null
           client_id: string | null
+          close_reason: string | null
+          closed_at: string | null
+          closed_by: string | null
           commission_type: string
+          completed_at: string | null
           created_at: string | null
           deposit_amount: number | null
           deposit_paid: boolean | null
+          deposit_paid_at: string | null
           description: string
           estimated_completion: string | null
           estimated_start: string | null
           final_paid: boolean | null
+          final_paid_at: string | null
           guest_token: string | null
           horse_id: string | null
           id: string
           is_public_in_queue: boolean | null
+          is_waitlist: boolean
           last_update_at: string | null
+          model_received: boolean
+          model_received_at: string | null
+          payment_note: string | null
           price_quoted: number | null
+          queue_position: number | null
+          quote_note: string | null
+          quoted_at: string | null
           reference_images: string[] | null
+          revisions_included: number | null
+          revisions_used: number
+          service_scale: string | null
+          shipped_at: string | null
           slot_number: number | null
+          started_at: string | null
           status: string
+          terms_snapshot: Json | null
+          tracking_note: string | null
           updated_at: string | null
+          vault_recorded_at: string | null
         }
         Insert: {
+          accepted_at?: string | null
           actual_completion?: string | null
           actual_start?: string | null
+          agreed_price?: number | null
           artist_id: string
+          budget_amount?: number | null
           client_email?: string | null
           client_id?: string | null
+          close_reason?: string | null
+          closed_at?: string | null
+          closed_by?: string | null
           commission_type: string
+          completed_at?: string | null
           created_at?: string | null
           deposit_amount?: number | null
           deposit_paid?: boolean | null
+          deposit_paid_at?: string | null
           description: string
           estimated_completion?: string | null
           estimated_start?: string | null
           final_paid?: boolean | null
+          final_paid_at?: string | null
           guest_token?: string | null
           horse_id?: string | null
           id?: string
           is_public_in_queue?: boolean | null
+          is_waitlist?: boolean
           last_update_at?: string | null
+          model_received?: boolean
+          model_received_at?: string | null
+          payment_note?: string | null
           price_quoted?: number | null
+          queue_position?: number | null
+          quote_note?: string | null
+          quoted_at?: string | null
           reference_images?: string[] | null
+          revisions_included?: number | null
+          revisions_used?: number
+          service_scale?: string | null
+          shipped_at?: string | null
           slot_number?: number | null
+          started_at?: string | null
           status?: string
+          terms_snapshot?: Json | null
+          tracking_note?: string | null
           updated_at?: string | null
+          vault_recorded_at?: string | null
         }
         Update: {
+          accepted_at?: string | null
           actual_completion?: string | null
           actual_start?: string | null
+          agreed_price?: number | null
           artist_id?: string
+          budget_amount?: number | null
           client_email?: string | null
           client_id?: string | null
+          close_reason?: string | null
+          closed_at?: string | null
+          closed_by?: string | null
           commission_type?: string
+          completed_at?: string | null
           created_at?: string | null
           deposit_amount?: number | null
           deposit_paid?: boolean | null
+          deposit_paid_at?: string | null
           description?: string
           estimated_completion?: string | null
           estimated_start?: string | null
           final_paid?: boolean | null
+          final_paid_at?: string | null
           guest_token?: string | null
           horse_id?: string | null
           id?: string
           is_public_in_queue?: boolean | null
+          is_waitlist?: boolean
           last_update_at?: string | null
+          model_received?: boolean
+          model_received_at?: string | null
+          payment_note?: string | null
           price_quoted?: number | null
+          queue_position?: number | null
+          quote_note?: string | null
+          quoted_at?: string | null
           reference_images?: string[] | null
+          revisions_included?: number | null
+          revisions_used?: number
+          service_scale?: string | null
+          shipped_at?: string | null
           slot_number?: number | null
+          started_at?: string | null
           status?: string
+          terms_snapshot?: Json | null
+          tracking_note?: string | null
           updated_at?: string | null
+          vault_recorded_at?: string | null
         }
         Relationships: [
           {
@@ -671,11 +866,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "commissions_closed_by_fkey"
+            columns: ["closed_by"]
+            isOneToOne: false
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commissions_closed_by_fkey"
+            columns: ["closed_by"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "commissions_closed_by_fkey"
+            columns: ["closed_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "commissions_horse_id_fkey"
             columns: ["horse_id"]
             isOneToOne: false
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commissions_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: false
+            referencedRelation: "v_artist_finished_horses"
+            referencedColumns: ["horse_id"]
           },
         ]
       }
@@ -715,6 +938,13 @@ export type Database = {
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "condition_history_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: false
+            referencedRelation: "v_artist_finished_horses"
+            referencedColumns: ["horse_id"]
+          },
         ]
       }
       contact_messages: {
@@ -747,35 +977,113 @@ export type Database = {
         }
         Relationships: []
       }
+      conversation_participants: {
+        Row: {
+          archived: boolean
+          conversation_id: string
+          joined_at: string
+          last_read_at: string | null
+          muted: boolean
+          party: string | null
+          role: string
+          user_id: string
+        }
+        Insert: {
+          archived?: boolean
+          conversation_id: string
+          joined_at?: string
+          last_read_at?: string | null
+          muted?: boolean
+          party?: string | null
+          role?: string
+          user_id: string
+        }
+        Update: {
+          archived?: boolean
+          conversation_id?: string
+          joined_at?: string
+          last_read_at?: string | null
+          muted?: boolean
+          party?: string | null
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_participants_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conversations: {
         Row: {
           buyer_id: string
+          commission_id: string | null
           created_at: string
+          deal_kind: string | null
+          deal_terms: Json | null
+          dispute_reason: string | null
+          disputed_at: string | null
+          disputed_by: string | null
           horse_id: string | null
           id: string
+          last_message_at: string | null
+          last_message_kind: string | null
+          last_message_preview: string | null
+          last_message_sender: string | null
           seller_id: string
           transaction_status: string
           updated_at: string
         }
         Insert: {
           buyer_id: string
+          commission_id?: string | null
           created_at?: string
+          deal_kind?: string | null
+          deal_terms?: Json | null
+          dispute_reason?: string | null
+          disputed_at?: string | null
+          disputed_by?: string | null
           horse_id?: string | null
           id?: string
+          last_message_at?: string | null
+          last_message_kind?: string | null
+          last_message_preview?: string | null
+          last_message_sender?: string | null
           seller_id: string
           transaction_status?: string
           updated_at?: string
         }
         Update: {
           buyer_id?: string
+          commission_id?: string | null
           created_at?: string
+          deal_kind?: string | null
+          deal_terms?: Json | null
+          dispute_reason?: string | null
+          disputed_at?: string | null
+          disputed_by?: string | null
           horse_id?: string | null
           id?: string
+          last_message_at?: string | null
+          last_message_kind?: string | null
+          last_message_preview?: string | null
+          last_message_sender?: string | null
           seller_id?: string
           transaction_status?: string
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "conversations_commission_id_fkey"
+            columns: ["commission_id"]
+            isOneToOne: false
+            referencedRelation: "commissions"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "conversations_horse_id_fkey"
             columns: ["horse_id"]
@@ -783,11 +1091,21 @@ export type Database = {
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "conversations_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: false
+            referencedRelation: "v_artist_finished_horses"
+            referencedColumns: ["horse_id"]
+          },
         ]
       }
       customization_logs: {
         Row: {
           artist_alias: string | null
+          artist_user_id: string | null
+          commission_id: string | null
+          created_at: string
           date_completed: string | null
           horse_id: string
           id: string
@@ -797,6 +1115,9 @@ export type Database = {
         }
         Insert: {
           artist_alias?: string | null
+          artist_user_id?: string | null
+          commission_id?: string | null
+          created_at?: string
           date_completed?: string | null
           horse_id: string
           id?: string
@@ -806,6 +1127,9 @@ export type Database = {
         }
         Update: {
           artist_alias?: string | null
+          artist_user_id?: string | null
+          commission_id?: string | null
+          created_at?: string
           date_completed?: string | null
           horse_id?: string
           id?: string
@@ -815,11 +1139,46 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "customization_logs_artist_user_id_fkey"
+            columns: ["artist_user_id"]
+            isOneToOne: false
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customization_logs_artist_user_id_fkey"
+            columns: ["artist_user_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "customization_logs_artist_user_id_fkey"
+            columns: ["artist_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customization_logs_commission_id_fkey"
+            columns: ["commission_id"]
+            isOneToOne: false
+            referencedRelation: "commissions"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "customization_logs_horse_id_fkey"
             columns: ["horse_id"]
             isOneToOne: false
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customization_logs_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: false
+            referencedRelation: "v_artist_finished_horses"
+            referencedColumns: ["horse_id"]
           },
         ]
       }
@@ -1076,6 +1435,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_entries_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: false
+            referencedRelation: "v_artist_finished_horses"
+            referencedColumns: ["horse_id"]
           },
           {
             foreignKeyName: "event_entries_show_string_id_fkey"
@@ -1642,10 +2008,19 @@ export type Database = {
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "featured_horses_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: false
+            referencedRelation: "v_artist_finished_horses"
+            referencedColumns: ["horse_id"]
+          },
         ]
       }
       financial_vault: {
         Row: {
+          commission_cost: number | null
+          commission_notes: string | null
           estimated_current_value: number | null
           horse_id: string
           id: string
@@ -1656,6 +2031,8 @@ export type Database = {
           purchase_price: number | null
         }
         Insert: {
+          commission_cost?: number | null
+          commission_notes?: string | null
           estimated_current_value?: number | null
           horse_id: string
           id?: string
@@ -1666,6 +2043,8 @@ export type Database = {
           purchase_price?: number | null
         }
         Update: {
+          commission_cost?: number | null
+          commission_notes?: string | null
           estimated_current_value?: number | null
           horse_id?: string
           id?: string
@@ -1682,6 +2061,13 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_vault_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: true
+            referencedRelation: "v_artist_finished_horses"
+            referencedColumns: ["horse_id"]
           },
         ]
       }
@@ -1973,6 +2359,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "group_posts_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: false
+            referencedRelation: "v_artist_finished_horses"
+            referencedColumns: ["horse_id"]
+          },
+          {
             foreignKeyName: "group_posts_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -2004,6 +2397,7 @@ export type Database = {
           group_type: string
           icon_url: string | null
           id: string
+          is_private: boolean
           member_count: number | null
           name: string
           region: string | null
@@ -2019,6 +2413,7 @@ export type Database = {
           group_type: string
           icon_url?: string | null
           id?: string
+          is_private?: boolean
           member_count?: number | null
           name: string
           region?: string | null
@@ -2034,6 +2429,7 @@ export type Database = {
           group_type?: string
           icon_url?: string | null
           id?: string
+          is_private?: boolean
           member_count?: number | null
           name?: string
           region?: string | null
@@ -2089,6 +2485,13 @@ export type Database = {
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "horse_career_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: true
+            referencedRelation: "v_artist_finished_horses"
+            referencedColumns: ["horse_id"]
+          },
         ]
       }
       horse_collections: {
@@ -2124,6 +2527,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "horse_collections_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: false
+            referencedRelation: "v_artist_finished_horses"
+            referencedColumns: ["horse_id"]
           },
         ]
       }
@@ -2165,6 +2575,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "horse_documents_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: false
+            referencedRelation: "v_artist_finished_horses"
+            referencedColumns: ["horse_id"]
           },
           {
             foreignKeyName: "horse_documents_owner_id_fkey"
@@ -2216,6 +2633,13 @@ export type Database = {
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "horse_favorites_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: false
+            referencedRelation: "v_artist_finished_horses"
+            referencedColumns: ["horse_id"]
+          },
         ]
       }
       horse_images: {
@@ -2253,6 +2677,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "horse_images_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: false
+            referencedRelation: "v_artist_finished_horses"
+            referencedColumns: ["horse_id"]
           },
         ]
       }
@@ -2309,6 +2740,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "horse_ownership_history_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: false
+            referencedRelation: "v_artist_finished_horses"
+            referencedColumns: ["horse_id"]
           },
           {
             foreignKeyName: "horse_ownership_history_owner_id_fkey"
@@ -2388,8 +2826,29 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "horse_pedigrees_dam_id_fkey"
+            columns: ["dam_id"]
+            isOneToOne: false
+            referencedRelation: "v_artist_finished_horses"
+            referencedColumns: ["horse_id"]
+          },
+          {
             foreignKeyName: "horse_pedigrees_horse_id_fkey"
             columns: ["horse_id"]
+            isOneToOne: false
+            referencedRelation: "user_horses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "horse_pedigrees_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: false
+            referencedRelation: "v_artist_finished_horses"
+            referencedColumns: ["horse_id"]
+          },
+          {
+            foreignKeyName: "horse_pedigrees_sire_id_fkey"
+            columns: ["sire_id"]
             isOneToOne: false
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
@@ -2398,8 +2857,8 @@ export type Database = {
             foreignKeyName: "horse_pedigrees_sire_id_fkey"
             columns: ["sire_id"]
             isOneToOne: false
-            referencedRelation: "user_horses"
-            referencedColumns: ["id"]
+            referencedRelation: "v_artist_finished_horses"
+            referencedColumns: ["horse_id"]
           },
         ]
       }
@@ -2435,6 +2894,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "horse_photo_stages_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: false
+            referencedRelation: "v_artist_finished_horses"
+            referencedColumns: ["horse_id"]
           },
           {
             foreignKeyName: "horse_photo_stages_image_id_fkey"
@@ -2477,6 +2943,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "horse_titles_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: false
+            referencedRelation: "v_artist_finished_horses"
+            referencedColumns: ["horse_id"]
           },
         ]
       }
@@ -2536,6 +3009,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "horse_transfers_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: false
+            referencedRelation: "v_artist_finished_horses"
+            referencedColumns: ["horse_id"]
           },
         ]
       }
@@ -2762,24 +3242,36 @@ export type Database = {
           content: string
           conversation_id: string
           created_at: string
+          deleted_at: string | null
+          edited_at: string | null
           id: string
           is_read: boolean
+          kind: string
+          payload: Json | null
           sender_id: string
         }
         Insert: {
           content: string
           conversation_id: string
           created_at?: string
+          deleted_at?: string | null
+          edited_at?: string | null
           id?: string
           is_read?: boolean
+          kind?: string
+          payload?: Json | null
           sender_id: string
         }
         Update: {
           content?: string
           conversation_id?: string
           created_at?: string
+          deleted_at?: string | null
+          edited_at?: string | null
           id?: string
           is_read?: boolean
+          kind?: string
+          payload?: Json | null
           sender_id?: string
         }
         Relationships: [
@@ -2865,6 +3357,121 @@ export type Database = {
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "notifications_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: false
+            referencedRelation: "v_artist_finished_horses"
+            referencedColumns: ["horse_id"]
+          },
+        ]
+      }
+      object_view_daily: {
+        Row: {
+          day: string
+          entity_id: string
+          entity_type: string
+          unique_viewers: number
+          views: number
+        }
+        Insert: {
+          day: string
+          entity_id: string
+          entity_type: string
+          unique_viewers?: number
+          views?: number
+        }
+        Update: {
+          day?: string
+          entity_id?: string
+          entity_type?: string
+          unique_viewers?: number
+          views?: number
+        }
+        Relationships: []
+      }
+      object_view_scratch: {
+        Row: {
+          day: string
+          entity_id: string
+          entity_type: string
+          hits: number
+          viewer_hash: string
+        }
+        Insert: {
+          day: string
+          entity_id: string
+          entity_type: string
+          hits?: number
+          viewer_hash: string
+        }
+        Update: {
+          day?: string
+          entity_id?: string
+          entity_type?: string
+          hits?: number
+          viewer_hash?: string
+        }
+        Relationships: []
+      }
+      payment_installments: {
+        Row: {
+          amount: number
+          confirmed_at: string | null
+          confirmed_by: string | null
+          conversation_id: string
+          created_at: string
+          due_date: string | null
+          id: string
+          marked_sent_at: string | null
+          marked_sent_by: string | null
+          note: string | null
+          seq: number
+          transaction_id: string | null
+        }
+        Insert: {
+          amount: number
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          conversation_id: string
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          marked_sent_at?: string | null
+          marked_sent_by?: string | null
+          note?: string | null
+          seq: number
+          transaction_id?: string | null
+        }
+        Update: {
+          amount?: number
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          conversation_id?: string
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          marked_sent_at?: string | null
+          marked_sent_by?: string | null
+          note?: string | null
+          seq?: number
+          transaction_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_installments_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_installments_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
         ]
       }
       posts: {
@@ -2880,6 +3487,7 @@ export type Database = {
           horse_id: string | null
           id: string
           is_pinned: boolean
+          kind: string
           likes_count: number
           parent_id: string | null
           replies_count: number
@@ -2887,6 +3495,7 @@ export type Database = {
           studio_id: string | null
           title: string | null
           updated_at: string
+          visibility: string
         }
         Insert: {
           author_id: string
@@ -2900,6 +3509,7 @@ export type Database = {
           horse_id?: string | null
           id?: string
           is_pinned?: boolean
+          kind?: string
           likes_count?: number
           parent_id?: string | null
           replies_count?: number
@@ -2907,6 +3517,7 @@ export type Database = {
           studio_id?: string | null
           title?: string | null
           updated_at?: string
+          visibility?: string
         }
         Update: {
           author_id?: string
@@ -2920,6 +3531,7 @@ export type Database = {
           horse_id?: string | null
           id?: string
           is_pinned?: boolean
+          kind?: string
           likes_count?: number
           parent_id?: string | null
           replies_count?: number
@@ -2927,6 +3539,7 @@ export type Database = {
           studio_id?: string | null
           title?: string | null
           updated_at?: string
+          visibility?: string
         }
         Relationships: [
           {
@@ -2986,6 +3599,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "posts_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: false
+            referencedRelation: "v_artist_finished_horses"
+            referencedColumns: ["horse_id"]
+          },
+          {
             foreignKeyName: "posts_parent_id_fkey"
             columns: ["parent_id"]
             isOneToOne: false
@@ -3030,6 +3650,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchased_reports_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: false
+            referencedRelation: "v_artist_finished_horses"
+            referencedColumns: ["horse_id"]
           },
         ]
       }
@@ -3144,6 +3771,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "qualification_cards_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: false
+            referencedRelation: "v_artist_finished_horses"
+            referencedColumns: ["horse_id"]
           },
           {
             foreignKeyName: "qualification_cards_show_id_fkey"
@@ -3547,6 +4181,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "show_class_entries_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: false
+            referencedRelation: "v_artist_finished_horses"
+            referencedColumns: ["horse_id"]
           },
           {
             foreignKeyName: "show_class_entries_owner_id_fkey"
@@ -3989,6 +4630,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "show_records_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: false
+            referencedRelation: "v_artist_finished_horses"
+            referencedColumns: ["horse_id"]
+          },
+          {
             foreignKeyName: "show_records_show_id_fkey"
             columns: ["show_id"]
             isOneToOne: false
@@ -4215,6 +4863,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "show_string_entries_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: false
+            referencedRelation: "v_artist_finished_horses"
+            referencedColumns: ["horse_id"]
+          },
+          {
             foreignKeyName: "show_string_entries_show_string_id_fkey"
             columns: ["show_string_id"]
             isOneToOne: false
@@ -4379,6 +5034,27 @@ export type Database = {
           },
         ]
       }
+      site_activity_daily: {
+        Row: {
+          anon_dau: number
+          day: string
+          member_dau: number
+          views: number
+        }
+        Insert: {
+          anon_dau?: number
+          day: string
+          member_dau?: number
+          views?: number
+        }
+        Update: {
+          anon_dau?: number
+          day?: string
+          member_dau?: number
+          views?: number
+        }
+        Relationships: []
+      }
       stable_saved_views: {
         Row: {
           created_at: string
@@ -4501,6 +5177,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: false
+            referencedRelation: "v_artist_finished_horses"
+            referencedColumns: ["horse_id"]
           },
           {
             foreignKeyName: "transactions_party_a_id_fkey"
@@ -4936,6 +5619,7 @@ export type Database = {
           is_verified: boolean
           notification_prefs: Json | null
           pref_simple_mode: boolean
+          profile_customization: Json | null
           role: string | null
           show_badges: boolean
           show_in_supporters_ledger: boolean
@@ -4967,6 +5651,7 @@ export type Database = {
           is_verified?: boolean
           notification_prefs?: Json | null
           pref_simple_mode?: boolean
+          profile_customization?: Json | null
           role?: string | null
           show_badges?: boolean
           show_in_supporters_ledger?: boolean
@@ -4998,6 +5683,7 @@ export type Database = {
           is_verified?: boolean
           notification_prefs?: Json | null
           pref_simple_mode?: boolean
+          profile_customization?: Json | null
           role?: string | null
           show_badges?: boolean
           show_in_supporters_ledger?: boolean
@@ -5084,6 +5770,87 @@ export type Database = {
         }
         Relationships: []
       }
+      v_artist_finished_horses: {
+        Row: {
+          artist_user_id: string | null
+          best_placing: number | null
+          catalog_id: string | null
+          commission_id: string | null
+          date_completed: string | null
+          finishing_artist: string | null
+          finishing_artist_verified: boolean | null
+          horse_created_at: string | null
+          horse_id: string | null
+          horse_name: string | null
+          image_urls: string[] | null
+          is_public: boolean | null
+          latest_show_date: string | null
+          log_id: string | null
+          nan_qualifying_count: number | null
+          owner_id: string | null
+          show_count: number | null
+          titles: string[] | null
+          work_type: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customization_logs_artist_user_id_fkey"
+            columns: ["artist_user_id"]
+            isOneToOne: false
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customization_logs_artist_user_id_fkey"
+            columns: ["artist_user_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "customization_logs_artist_user_id_fkey"
+            columns: ["artist_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customization_logs_commission_id_fkey"
+            columns: ["commission_id"]
+            isOneToOne: false
+            referencedRelation: "commissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_horses_catalog_id_fkey"
+            columns: ["catalog_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_horses_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_horses_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "user_horses_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_horse_hoofprint: {
         Row: {
           created_at: string | null
@@ -5113,8 +5880,18 @@ export type Database = {
         }
         Returns: string
       }
+      are_blocked: {
+        Args: { p_user_a: string; p_user_b: string }
+        Returns: boolean
+      }
       auto_unpark_expired_transfers: { Args: never; Returns: undefined }
       backfill_photo_short_slugs: { Args: never; Returns: number }
+      barn_created_by: { Args: { p_group_id: string }; Returns: string }
+      barn_is_private: { Args: { p_group_id: string }; Returns: boolean }
+      barn_member_role: {
+        Args: { p_group_id: string; p_user_id: string }
+        Returns: string
+      }
       batch_import_horses: {
         Args: { p_horses: Json; p_user_id: string }
         Returns: Json
@@ -5162,6 +5939,16 @@ export type Database = {
       count_catalog_wanters: { Args: { p_catalog_id: string }; Returns: number }
       count_user_horses_public: { Args: { p_user_id: string }; Returns: number }
       count_user_horses_total: { Args: { p_user_id: string }; Returns: number }
+      deal_offer_move_atomic: {
+        Args: {
+          p_actor_id: string
+          p_amount?: number
+          p_message?: string
+          p_move: string
+          p_transaction_id: string
+        }
+        Returns: Json
+      }
       entry_owner_of: { Args: { p_entry_id: string }; Returns: string }
       entry_vote_open: { Args: { p_entry_id: string }; Returns: boolean }
       get_catalog_browse_thumbs: {
@@ -5217,6 +6004,14 @@ export type Database = {
         }[]
       }
       get_extra_photo_count: { Args: { p_horse_id: string }; Returns: number }
+      get_horse_view_stats: {
+        Args: { p_horse_id: string }
+        Returns: {
+          all_time_views: number
+          week_viewers: number
+          week_views: number
+        }[]
+      }
       get_market_history: {
         Args: { p_catalog_id: string }
         Returns: {
@@ -5225,6 +6020,40 @@ export type Database = {
           sale_date: string
         }[]
       }
+      get_market_listings: {
+        Args: {
+          p_finish?: string
+          p_has_records?: boolean
+          p_limit?: number
+          p_max_price?: number
+          p_min_price?: number
+          p_offset?: number
+          p_q?: string
+          p_sort?: string
+          p_trade?: string
+        }
+        Returns: {
+          catalog_id: string
+          catalog_maker: string
+          catalog_scale: string
+          catalog_title: string
+          condition_grade: string
+          created_at: string
+          custom_name: string
+          finish_type: string
+          id: string
+          is_trusted_seller: boolean
+          listing_price: number
+          marketplace_notes: string
+          owner_alias: string
+          owner_id: string
+          records: Json
+          thumbnail_url: string
+          total_count: number
+          trade_status: string
+        }[]
+      }
+      get_market_listings_total: { Args: never; Returns: number }
       get_market_rows: {
         Args: {
           p_catalog_id?: string
@@ -5261,6 +6090,10 @@ export type Database = {
           alias_name: string
           id: string
         }[]
+      }
+      get_public_favorite_count: {
+        Args: { p_horse_id: string }
+        Returns: number
       }
       get_public_horse_cards: {
         Args: { p_horse_id: string }
@@ -5346,11 +6179,37 @@ export type Database = {
         }
         Returns: Json
       }
+      metrics_entity_totals: {
+        Args: { p_days?: number }
+        Returns: {
+          etype: string
+          total_uniques: number
+          total_views: number
+        }[]
+      }
+      metrics_top_objects: {
+        Args: { p_days?: number; p_per_type?: number }
+        Returns: {
+          eid: string
+          etype: string
+          total_uniques: number
+          total_views: number
+        }[]
+      }
       notify_catalog_owners_of_demand: {
         Args: { p_catalog_id: string; p_wanter_id: string }
         Returns: number
       }
       placings_announced: { Args: { p_class_id: string }; Returns: boolean }
+      record_object_view: {
+        Args: {
+          p_entity_id: string
+          p_entity_types: string[]
+          p_is_member?: boolean
+          p_viewer_hash: string
+        }
+        Returns: boolean
+      }
       refresh_market_prices: { Args: never; Returns: undefined }
       refresh_mv_trusted_sellers: { Args: never; Returns: undefined }
       reorder_show_nodes: {
@@ -5396,6 +6255,17 @@ export type Database = {
           p_new_name: string
         }
         Returns: string
+      }
+      stamp_finishing_artist: {
+        Args: { p_commission_id: string }
+        Returns: boolean
+      }
+      studio_slot_usage: {
+        Args: { p_artist_ids: string[] }
+        Returns: {
+          artist_id: string
+          slots_used: number
+        }[]
       }
       toggle_activity_like: {
         Args: { p_activity_id: string; p_user_id: string }
