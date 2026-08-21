@@ -1,129 +1,177 @@
-import { createClient } from"@/lib/supabase/server";
-import { redirect } from"next/navigation";
-import Link from"next/link";
-import DiscoverGrid from"@/components/DiscoverGrid";
-import ExplorerLayout from"@/components/layouts/ExplorerLayout";
-import PageMasthead from"@/components/layouts/PageMasthead";
-import { resolveAvatarUrls } from"@/lib/utils/avatars.server";
+/**
+ * The Members room — the directory where collectors find each other.
+ *
+ * The URL stays /discover (nav ids, robots rules and old links all point
+ * there); everything a human reads says "Members", which is what the
+ * Paddock rail has called this door for a while.
+ *
+ * What changed from the old Discover page: the roster is searched and
+ * ordered on the SERVER (it used to fetch a page and filter it in the
+ * browser), the default order is "recently active" rather than "whoever
+ * signed up last", and a card now says who somebody IS — badges, studio,
+ * rating, public shelf size, last seen — instead of just their name.
+ *
+ * Safety and prefs honoured here:
+ *   • deleted / tombstoned and test accounts — excluded by
+ *     discover_users_view (`account_status = 'active'`, `is_test_account`).
+ *   • people this viewer has blocked — excluded (user_blocks RLS only
+ *     exposes your own outgoing blocks, which is exactly this case).
+ *   • `users.show_badges` — a member who hid their badges shows none.
+ *   • NOT honoured, and it cannot be from a client key: `is_suspended`.
+ *     Migration 148 added the column but 133/142's column-level GRANT
+ *     list was never extended, so it is neither selectable nor
+ *     filterable here. Excluding suspended members needs
+ *     discover_users_view to add the predicate.
+ *
+ * There is no `is_discoverable` / profile-visibility preference in the
+ * schema — being an active, non-test account is what makes you listed.
+ */
+
+import { redirect } from "next/navigation";
+import Link from "next/link";
+
+import ExplorerLayout from "@/components/layouts/ExplorerLayout";
+import PageMasthead from "@/components/layouts/PageMasthead";
+import CollectorCard from "@/components/members/CollectorCard";
+import MembersFilterBar from "@/components/members/MembersFilterBar";
+import { createClient } from "@/lib/supabase/server";
+import { membersHref, parseMemberSearchParams } from "@/lib/members/directory";
+
+import { getMembersDirectoryPage } from "./queries";
 
 export const metadata = {
- title:"Discover Collectors",
- description:"Browse active collectors in the Model Horse Hub community. Find stables to follow and admire.",
+    title: "Members",
+    description:
+        "Find collectors in the Model Horse Hub community — search the roster, see who's been around lately, and follow the stables you like.",
 };
 
-// Mirrors /catalog's page-param pagination (src/lib/catalog/filterParams.ts).
-const PAGE_SIZE = 48;
-
-function parsePage(params: Record<string, string | string[] | undefined>): number {
- const raw = Array.isArray(params.page) ? params.page[0] : params.page;
- const n = Number.parseInt(raw ?? "", 10);
- if (!Number.isFinite(n) || n < 1) return 1;
- return Math.min(n, 10_000);
-}
-
-function pageHref(page: number): string {
- return page > 1 ? `/discover?page=${page}` : "/discover";
-}
-
-export default async function DiscoverPage({
- searchParams,
+export default async function MembersPage({
+    searchParams,
 }: {
- searchParams: Promise<Record<string, string | string[] | undefined>>;
+    searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
- const supabase = await createClient();
- const {
- data: { user },
- } = await supabase.auth.getUser();
+    const supabase = await createClient();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
 
- if (!user) redirect("/login?redirectTo=" + encodeURIComponent("/discover"));
+    if (!user) redirect("/login?redirectTo=" + encodeURIComponent("/discover"));
 
- const page = parsePage(await searchParams);
- const from = (page - 1) * PAGE_SIZE;
- const to = from + PAGE_SIZE - 1;
+    const filters = parseMemberSearchParams(await searchParams);
+    const { members, total, page, totalPages, rosterTruncated } = await getMembersDirectoryPage(
+        filters,
+        user.id,
+    );
 
- // Fetch aggregated data from the PostgreSQL View (now includes bio + has_studio).
- // Explicit columns (not "*") + estimated count + range(): bounds the query to
- // one page instead of an unbounded select capped silently at 1000 rows.
- const { data: activeUsersView, count } = await supabase
- .from("discover_users_view")
- .select(
- "id, alias_name, created_at, avatar_url, bio, public_horse_count, total_horse_count, avg_rating, rating_count, has_studio",
- { count: "estimated" },
- )
- .order("created_at", { ascending: false })
- .range(from, to);
+    const countLabel = filters.q
+        ? `${total.toLocaleString()} ${total === 1 ? "match" : "matches"} for “${filters.q}”`
+        : `${total.toLocaleString()} ${total === 1 ? "member" : "members"}`;
 
- const activeUsers = (activeUsersView || []) as {
- id: string;
- alias_name: string;
- created_at: string;
- avatar_url: string | null;
- bio: string | null;
- public_horse_count: number;
- total_horse_count: number;
- avg_rating: number;
- rating_count: number;
- has_studio: boolean;
- }[];
+    return (
+        <ExplorerLayout noHeader>
+            <PageMasthead
+                icon="👥"
+                title="Members"
+                subtitle="Find collectors — who's here, what they keep, and who's been around lately"
+            />
 
- const total = count ?? activeUsers.length;
- const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+            <div className="mb-4">
+                <MembersFilterBar q={filters.q ?? ""} sort={filters.sort} />
+            </div>
 
- // Resolve avatar storage paths to signed URLs (batch) — only for this page's rows.
- const avatarUrlMap = await resolveAvatarUrls(activeUsers.map(u => u.avatar_url));
- for (const u of activeUsers) {
- if (u.avatar_url) {
- u.avatar_url = avatarUrlMap.get(u.avatar_url) || u.avatar_url;
- }
- }
+            <div className="mb-4 flex flex-wrap items-baseline gap-2">
+                <span className="text-forest font-serif text-2xl font-bold tabular-nums">
+                    {countLabel}
+                </span>
+                {page > 1 && (
+                    <span className="text-muted-foreground text-sm">
+                        · page {page} of {totalPages.toLocaleString()}
+                    </span>
+                )}
+            </div>
 
- // Batch-fetch which users the current user follows
- const userIds = activeUsers.map((u) => u.id).filter((id) => id !== user.id);
- const { data: followRows } =
- userIds.length > 0
- ? await supabase
- .from("user_follows")
- .select("following_id")
- .eq("follower_id", user.id)
- .in("following_id", userIds)
- : { data: [] };
- const followedIds = new Set((followRows ?? []).map((r: { following_id: string }) => r.following_id));
+            {members.length === 0 ? (
+                <div className="ledger-card py-12 text-center">
+                    <div className="mb-3 text-4xl" aria-hidden="true">
+                        👥
+                    </div>
+                    <h2 className="mb-2 font-serif text-lg font-bold">
+                        {filters.q ? "Nobody by that name" : "Nobody here yet"}
+                    </h2>
+                    <p className="text-muted-foreground m-0 text-sm">
+                        {filters.q ? (
+                            <>
+                                No collector&rsquo;s name matches &ldquo;{filters.q}&rdquo;.{" "}
+                                <Link
+                                    href={membersHref({ sort: filters.sort })}
+                                    className="text-forest font-semibold"
+                                >
+                                    Clear the search
+                                </Link>{" "}
+                                to see the whole roster.
+                            </>
+                        ) : (
+                            "The directory is empty — that shouldn't happen. Try again in a moment."
+                        )}
+                    </p>
+                </div>
+            ) : (
+                <ul className="m-0 grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
+                    {members.map((member) => (
+                        <li key={member.id} className="flex">
+                            <CollectorCard member={member} />
+                        </li>
+                    ))}
+                </ul>
+            )}
 
- return (
- <ExplorerLayout noHeader>
-  <PageMasthead
-   icon="👥"
-   title="Discover Collectors"
-   subtitle="Find fellow collectors and browse their stables"
-  />
-  <div className="mb-6 flex items-baseline gap-2">
-  <span className="text-2xl font-bold text-forest">{total}</span>
-  <span className="text-sm font-medium text-secondary-foreground">Active Collectors</span>
-  </div>
-  <DiscoverGrid users={activeUsers} currentUserId={user.id} followedIds={Array.from(followedIds)} />
+            {rosterTruncated && (
+                <p className="text-muted-foreground mt-4 text-center text-xs">
+                    The community outgrew what &ldquo;recently active&rdquo; can rank in one pass —
+                    the tail of this list is ordered by join date.{" "}
+                    <Link href={membersHref({ q: filters.q, sort: "az" })} className="text-forest">
+                        Browse A&ndash;Z
+                    </Link>{" "}
+                    for the complete roster.
+                </p>
+            )}
 
-  {/* Pagination — plain anchor links (SEO-crawlable, no client JS), mirrors /catalog */}
-  {totalPages > 1 && (
-  <nav className="mt-6 flex items-center justify-center gap-4" aria-label="Discover pagination">
-   {page > 1 ? (
-   <Link href={pageHref(page - 1)} className="btn-ghostleather !px-4 !py-2 !text-xs" rel="prev">
-    ← Previous
-   </Link>
-   ) : (
-   <span className="px-4 py-2 text-xs text-muted-foreground opacity-40">← Previous</span>
-   )}
-   <span className="text-sm text-muted-foreground">
-   Page {page} of {totalPages.toLocaleString()}
-   </span>
-   {page < totalPages ? (
-   <Link href={pageHref(page + 1)} className="btn-ghostleather !px-4 !py-2 !text-xs" rel="next">
-    Next →
-   </Link>
-   ) : (
-   <span className="px-4 py-2 text-xs text-muted-foreground opacity-40">Next →</span>
-   )}
-  </nav>
-  )}
- </ExplorerLayout>
- );
+            {totalPages > 1 && (
+                <nav
+                    className="mt-6 flex items-center justify-center gap-4"
+                    aria-label="Members pagination"
+                >
+                    {page > 1 ? (
+                        <Link
+                            href={membersHref({ ...filters, page: page - 1 })}
+                            className="btn-ghostleather !px-4 !py-2 !text-xs"
+                            rel="prev"
+                        >
+                            ← Previous
+                        </Link>
+                    ) : (
+                        <span className="text-muted-foreground px-4 py-2 text-xs opacity-40">
+                            ← Previous
+                        </span>
+                    )}
+                    <span className="text-muted-foreground text-sm">
+                        Page {page} of {totalPages.toLocaleString()}
+                    </span>
+                    {page < totalPages ? (
+                        <Link
+                            href={membersHref({ ...filters, page: page + 1 })}
+                            className="btn-ghostleather !px-4 !py-2 !text-xs"
+                            rel="next"
+                        >
+                            Next →
+                        </Link>
+                    ) : (
+                        <span className="text-muted-foreground px-4 py-2 text-xs opacity-40">
+                            Next →
+                        </span>
+                    )}
+                </nav>
+            )}
+        </ExplorerLayout>
+    );
 }
