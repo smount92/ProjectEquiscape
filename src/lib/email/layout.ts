@@ -26,11 +26,18 @@ export interface BrandedEmailInput {
     heading: string;
     /** Pre-built card body — MUST already be escaped by the caller. */
     bodyHtml: string;
-    ctaLabel: string;
+    /** Omit for a card with no button (e.g. a reply the member just reads). */
+    ctaLabel?: string;
     /** Absolute or site-relative URL; relative gets APP_URL prefixed. */
-    ctaUrl: string;
+    ctaUrl?: string;
     /** One-liner above the fine print, e.g. why the user got this. Escaped here. */
     footerNote: string;
+    /**
+     * Suppress the "Notification settings" footer link. Not every email is a
+     * preference-gated notification — an admin replying to a contact message
+     * must not imply the member can switch replies off.
+     */
+    hideSettingsLink?: boolean;
 }
 
 /** Absolute URL for links in emails (deep-links arrive site-relative). */
@@ -38,12 +45,64 @@ export function absoluteUrl(url: string): string {
     return url.startsWith("http") ? url : `${APP_URL}${url.startsWith("/") ? "" : "/"}${url}`;
 }
 
+/**
+ * A quoted block — a message snippet, or the original message an admin is
+ * replying to. Escapes its own text, unlike `bodyHtml`.
+ */
+export function renderEmailQuote(text: string, label?: string): string {
+    const quoted = escapeEmailHtml(text).replace(/\r?\n/g, "<br />");
+    const heading = label
+        ? `<p style="color:#6B5E48;font-size:12px;font-weight:700;margin:0 0 6px 0;">${escapeEmailHtml(label)}</p>`
+        : "";
+    return `${heading}<div style="background-color:#F5EFDF;border-left:3px solid #2F5E40;border-radius:0 6px 6px 0;padding:14px 16px;margin:0 0 18px 0;">
+      <p style="color:#4A4030;font-size:14px;line-height:1.6;margin:0;font-style:italic;">${quoted}</p>
+    </div>`;
+}
+
+/**
+ * A row of headline figures.
+ *
+ * A `<table>`, deliberately: the monthly report used `display:flex`, which
+ * Outlook on Windows ignores, so its three tiles stacked into a column for
+ * every desktop Outlook subscriber. Tables are the one layout every mail
+ * client still agrees on.
+ */
+export function renderEmailStats(stats: { label: string; value: string }[]): string {
+    if (stats.length === 0) return "";
+    const width = Math.floor(100 / stats.length);
+    const cells = stats
+        .map(
+            (s) => `<td width="${width}%" style="padding:4px;" valign="top">
+          <div style="background-color:#F5EFDF;border:1px solid #E4D9BF;border-radius:6px;padding:12px 8px;text-align:center;">
+            <div style="color:#6B5E48;font-size:10px;text-transform:uppercase;letter-spacing:1px;">${escapeEmailHtml(s.label)}</div>
+            <div style="color:#2B2418;font-size:20px;font-weight:700;padding-top:2px;">${escapeEmailHtml(s.value)}</div>
+          </div>
+        </td>`,
+        )
+        .join("");
+    return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px 0;"><tr>${cells}</tr></table>`;
+}
+
 export function renderBrandedEmail(input: BrandedEmailInput): string {
     const title = escapeEmailHtml(input.title);
     const heading = escapeEmailHtml(input.heading);
     const footerNote = escapeEmailHtml(input.footerNote);
-    const ctaLabel = escapeEmailHtml(input.ctaLabel);
-    const ctaUrl = absoluteUrl(input.ctaUrl);
+    const cta =
+        input.ctaLabel && input.ctaUrl
+            ? `
+      <!-- CTA -->
+      <div style="text-align:center;margin-top:28px;">
+        <a href="${absoluteUrl(input.ctaUrl)}"
+           style="display:inline-block;padding:13px 32px;background-color:#B8860B;color:#FFFDF6;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;letter-spacing:0.3px;">
+          ${escapeEmailHtml(input.ctaLabel)}
+        </a>
+      </div>`
+            : "";
+    const settingsLink = input.hideSettingsLink
+        ? ""
+        : `<a href="${APP_URL}/settings" style="color:#2F5E40;text-decoration:none;">Notification settings</a>
+        &nbsp;&middot;&nbsp;
+        `;
 
     return `
 <!DOCTYPE html>
@@ -73,14 +132,7 @@ export function renderBrandedEmail(input: BrandedEmailInput): string {
       <div style="color:#2B2418;font-size:15px;line-height:1.7;">
         ${input.bodyHtml}
       </div>
-
-      <!-- CTA -->
-      <div style="text-align:center;margin-top:28px;">
-        <a href="${ctaUrl}"
-           style="display:inline-block;padding:13px 32px;background-color:#B8860B;color:#FFFDF6;text-decoration:none;border-radius:8px;font-weight:700;font-size:15px;letter-spacing:0.3px;">
-          ${ctaLabel}
-        </a>
-      </div>
+${cta}
     </div>
 
     <!-- Footer -->
@@ -89,9 +141,7 @@ export function renderBrandedEmail(input: BrandedEmailInput): string {
         ${footerNote}
       </p>
       <p style="color:#8A7C63;font-size:11px;margin:0;">
-        <a href="${APP_URL}/settings" style="color:#2F5E40;text-decoration:none;">Notification settings</a>
-        &nbsp;&middot;&nbsp;
-        <a href="${APP_URL}" style="color:#2F5E40;text-decoration:none;">modelhorsehub.com</a>
+        ${settingsLink}<a href="${APP_URL}" style="color:#2F5E40;text-decoration:none;">modelhorsehub.com</a>
       </p>
     </div>
 

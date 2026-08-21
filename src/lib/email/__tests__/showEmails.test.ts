@@ -3,7 +3,13 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 vi.mock("@sentry/nextjs", () => ({ captureException: vi.fn() }));
 
-import { absoluteUrl, escapeEmailHtml, renderBrandedEmail } from "../layout";
+import {
+    absoluteUrl,
+    escapeEmailHtml,
+    renderBrandedEmail,
+    renderEmailQuote,
+    renderEmailStats,
+} from "../layout";
 import {
     buildDeadlineEmailBody,
     buildResultsEmailBody,
@@ -51,6 +57,73 @@ describe("renderBrandedEmail", () => {
         // No trace of the old indigo DM branding.
         expect(html).not.toContain("#0f0f23");
         expect(html).not.toContain("#818cf8");
+    });
+
+    it("drops the CTA block entirely when no button is wanted", () => {
+        // The admin reply is read, not clicked — a button pointing at the
+        // site would be noise.
+        const html = renderBrandedEmail({
+            title: "Re: your message",
+            heading: "A reply",
+            bodyHtml: "<p>body</p>",
+            footerNote: "You wrote to us.",
+        });
+        expect(html).not.toContain("#B8860B");
+        expect(html).toContain("<p>body</p>");
+    });
+
+    it("can hide the notification-settings link", () => {
+        // An answer to a message you sent us is not a preference you can
+        // switch off, so offering the toggle would be a lie.
+        const input = {
+            title: "Re: your message",
+            heading: "A reply",
+            bodyHtml: "<p>body</p>",
+            footerNote: "You wrote to us.",
+        };
+        expect(renderBrandedEmail(input)).toContain("Notification settings");
+        expect(renderBrandedEmail({ ...input, hideSettingsLink: true })).not.toContain(
+            "Notification settings",
+        );
+    });
+});
+
+describe("renderEmailQuote", () => {
+    it("escapes the quoted text and keeps line breaks", () => {
+        const html = renderEmailQuote('Line one\nLine <two> & "three"');
+        expect(html).not.toContain("<two>");
+        expect(html).toContain("&lt;two&gt;");
+        expect(html).toContain("&amp;");
+        expect(html).toContain("<br />");
+    });
+
+    it("escapes the optional label too", () => {
+        expect(renderEmailQuote("body", "Your <original> message")).toContain("&lt;original&gt;");
+    });
+});
+
+describe("renderEmailStats", () => {
+    it("lays the figures out as a table, not flex", () => {
+        // display:flex is ignored by Outlook on Windows, which stacked the
+        // monthly report's three tiles into a column.
+        const html = renderEmailStats([
+            { label: "Models", value: "12" },
+            { label: "Est. Value", value: "$3,400" },
+        ]);
+        expect(html).toContain("<table");
+        expect(html).not.toContain("display:flex");
+        expect(html).toContain("Models");
+        expect(html).toContain("$3,400");
+        // Two cells split the row evenly.
+        expect(html).toContain('width="50%"');
+    });
+
+    it("escapes labels and values", () => {
+        expect(renderEmailStats([{ label: "A & B", value: "<b>1</b>" }])).not.toContain("<b>1</b>");
+    });
+
+    it("renders nothing for an empty set", () => {
+        expect(renderEmailStats([])).toBe("");
     });
 });
 

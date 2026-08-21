@@ -60,8 +60,9 @@ export default function DeleteHorseModal({ horseId, horseName }: DeleteHorseModa
  Delete &ldquo;{horseName}&rdquo;?
  </DialogTitle>
  <DialogDescription className="text-center">
- <strong>This cannot be undone.</strong> All photos, financial vault data, and catalog
- information for this model will be permanently deleted from your stable.
+ <strong>The photos are gone for good</strong> — deleting erases them from storage and no
+ restore brings them back. Everything else lands in <strong>Recently Deleted</strong>, where
+ you can put this model back in your stable.
  </DialogDescription>
  </DialogHeader>
 

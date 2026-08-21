@@ -19,6 +19,7 @@ import { getAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/logger";
 import { Resend } from "resend";
 import * as Sentry from "@sentry/nextjs";
+import { escapeEmailHtml, renderBrandedEmail, renderEmailStats } from "@/lib/email/layout";
 
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "Model Horse Hub <noreply@modelhorsehub.com>";
 
@@ -126,8 +127,7 @@ export async function GET(request: NextRequest) {
                     .filter((m) => Math.abs(m.diff) >= 5)
                     .sort((a, b) => Math.abs(b.diff) - Math.abs(a.diff))
                     .slice(0, 3);
-                const escapeHtml = (s: string) =>
-                    s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                const escapeHtml = escapeEmailHtml;
                 const moversHtml = movers.length
                     ? `<p><strong>Worth a look:</strong> ${movers
                           .map(
@@ -141,67 +141,26 @@ export async function GET(request: NextRequest) {
 ${moversHtml}
 <p>Tip: keeping purchase prices and estimates current in each horse's vault makes this report — and your insurance export — sharper every month.</p>`;
 
-                // Send email via Resend
-                const emailHtml = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Your Monthly Stablemaster Report</title>
-</head>
-<body style="margin:0;padding:0;background-color:#0f0f23;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-  <div style="max-width:600px;margin:0 auto;padding:40px 20px;">
-    
-    <div style="text-align:center;margin-bottom:32px;">
-      <h1 style="margin:0;font-size:24px;font-weight:700;">
-        <span style="color:#f59e0b;">🐴</span>
-        <span style="color:#e2e8f0;"> Stablemaster Report</span>
-      </h1>
-      <p style="color:#64748b;font-size:13px;margin:8px 0 0;">
-        Monthly Collection Analysis · ${new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}
-      </p>
-    </div>
-
-    <div style="background:linear-gradient(135deg,rgba(30,30,60,0.9),rgba(20,20,50,0.95));border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:32px;margin-bottom:24px;">
-      
-      <div style="display:flex;gap:16px;margin-bottom:24px;text-align:center;">
-        <div style="flex:1;background:rgba(255,255,255,0.04);border-radius:8px;padding:12px;">
-          <div style="color:#64748b;font-size:10px;text-transform:uppercase;letter-spacing:1px;">Models</div>
-          <div style="color:#e2e8f0;font-size:20px;font-weight:700;">${horses.length}</div>
-        </div>
-        <div style="flex:1;background:rgba(255,255,255,0.04);border-radius:8px;padding:12px;">
-          <div style="color:#64748b;font-size:10px;text-transform:uppercase;letter-spacing:1px;">Est. Value</div>
-          <div style="color:#10b981;font-size:20px;font-weight:700;">$${totalEstimated.toLocaleString()}</div>
-        </div>
-        <div style="flex:1;background:rgba(255,255,255,0.04);border-radius:8px;padding:12px;">
-          <div style="color:#64748b;font-size:10px;text-transform:uppercase;letter-spacing:1px;">Market</div>
-          <div style="color:#f59e0b;font-size:20px;font-weight:700;">$${totalMarket.toLocaleString()}</div>
-        </div>
-      </div>
-
-      <div style="color:#cbd5e1;font-size:14px;line-height:1.7;">
-        ${analysisHtml}
-      </div>
-    </div>
-
-    <div style="text-align:center;">
-      <a href="https://modelhorsehub.com/dashboard" 
-         style="display:inline-block;padding:14px 32px;background:linear-gradient(135deg,#f59e0b,#d97706);color:white;text-decoration:none;border-radius:999px;font-weight:600;font-size:15px;">
-        View My Stable →
-      </a>
-    </div>
-
-    <div style="text-align:center;margin-top:24px;">
-      <p style="color:#475569;font-size:11px;margin:0;">
-        You're receiving this because you're an MHH Pro subscriber.
-        <br />
-        <a href="https://modelhorsehub.com/settings" style="color:#818cf8;text-decoration:none;">Manage preferences</a>
-      </p>
-    </div>
-  </div>
-</body>
-</html>`.trim();
+                // Send email via Resend, through the shared branded shell.
+                // The stat row is now a <table>: it used display:flex, which
+                // Outlook on Windows ignores, so the three tiles stacked into
+                // a column for every desktop Outlook subscriber.
+                const reportMonth = new Date().toLocaleDateString("en-US", {
+                    month: "long",
+                    year: "numeric",
+                });
+                const emailHtml = renderBrandedEmail({
+                    title: `Your Monthly Stablemaster Report — ${reportMonth}`,
+                    heading: `Stablemaster Report · ${reportMonth}`,
+                    bodyHtml: `${renderEmailStats([
+                        { label: "Models", value: String(horses.length) },
+                        { label: "Est. Value", value: `$${totalEstimated.toLocaleString()}` },
+                        { label: "Market", value: `$${totalMarket.toLocaleString()}` },
+                    ])}${analysisHtml}`,
+                    ctaLabel: "View my stable",
+                    ctaUrl: "/dashboard",
+                    footerNote: "You're getting this because you're an MHH Pro subscriber.",
+                });
 
                 const { error: emailError } = await resend.emails.send({
                     from: FROM_EMAIL,

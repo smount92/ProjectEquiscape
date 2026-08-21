@@ -6,6 +6,8 @@ import { createClient } from "@supabase/supabase-js";
 import { createClient as createAuthClient } from "@/lib/supabase/server";
 import { Resend } from "resend";
 
+import { escapeEmailHtml, renderBrandedEmail, renderEmailQuote } from "@/lib/email/layout";
+
 async function verifyAdmin() {
   const authClient = await createAuthClient();
   const {
@@ -86,48 +88,21 @@ export async function replyToContactMessage(
 
   const subject = `Re: ${originalSubject || "Your message to Model Horse Hub"}`;
 
-  const html = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-</head>
-<body style="margin:0;padding:0;background-color:#0f0f23;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
-  <div style="max-width:560px;margin:0 auto;padding:40px 20px;">
-    
-    <div style="text-align:center;margin-bottom:32px;">
-      <h1 style="margin:0;font-size:24px;font-weight:700;">
-        <span style="color:#818cf8;">🐴</span>
-        <span style="color:#e2e8f0;"> Model Horse Hub</span>
-      </h1>
-    </div>
-
-    <div style="background:linear-gradient(135deg,rgba(30,30,60,0.9),rgba(20,20,50,0.95));border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:32px;margin-bottom:24px;">
-      
-      <p style="color:#94a3b8;font-size:14px;margin:0 0 8px 0;">
-        Hi ${escapeHtml(recipientName)},
-      </p>
-
-      <div style="color:#e2e8f0;font-size:15px;line-height:1.7;margin:0 0 24px 0;white-space:pre-wrap;">${escapeHtml(replyBody.trim())}</div>
-
-      <div style="border-top:1px solid rgba(255,255,255,0.08);padding-top:20px;margin-top:20px;">
-        <p style="color:#64748b;font-size:12px;margin:0 0 8px 0;font-weight:600;">Your original message:</p>
-        <div style="background:rgba(255,255,255,0.04);border-left:3px solid #475569;border-radius:0 8px 8px 0;padding:12px 16px;">
-          <p style="color:#94a3b8;font-size:13px;line-height:1.5;margin:0;font-style:italic;">${escapeHtml(originalMessage)}</p>
-        </div>
-      </div>
-    </div>
-
-    <div style="text-align:center;">
-      <p style="color:#64748b;font-size:12px;margin:0;">
-        Model Horse Hub · 
-        <a href="https://modelhorsehub.com" style="color:#818cf8;text-decoration:none;">modelhorsehub.com</a>
-      </p>
-    </div>
-  </div>
-</body>
-</html>`.trim();
+  // Shared branded shell. This template predated lib/email/layout.ts and
+  // carried the retired indigo palette plus its own escapeHtml. No CTA —
+  // the member replies to this mail, they don't click through — and no
+  // "Notification settings" link, because an answer to a message you sent
+  // us is not something you can switch off.
+  const html = renderBrandedEmail({
+    title: subject,
+    heading: "A reply from Model Horse Hub",
+    bodyHtml: `
+      <p style="margin:0 0 14px 0;">Hi ${escapeEmailHtml(recipientName)},</p>
+      <div style="white-space:pre-wrap;margin:0 0 22px 0;">${escapeEmailHtml(replyBody.trim())}</div>
+      ${renderEmailQuote(originalMessage, "Your original message")}`,
+    footerNote: "You're getting this because you wrote to Model Horse Hub. Just reply to answer.",
+    hideSettingsLink: true,
+  });
 
   try {
     const { error } = await resend.emails.send({
@@ -198,14 +173,6 @@ export async function featureHorse(data: {
 
   if (error) return { success: false, error: error.message };
   return { success: true };
-}
-
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
 }
 
 /**
