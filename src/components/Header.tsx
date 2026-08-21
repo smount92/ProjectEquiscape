@@ -51,7 +51,7 @@ const NAV_LINKS = [
  { href:"/community/groups", label:"Barns", Icon: Building2, id:"nav-groups" },
  { href:"/community/events", label:"Events", Icon: Calendar, id:"nav-events" },
  { href:"/community/help-id", label:"Help ID", Icon: Search, id:"nav-helpid" },
- { href:"/discover", label:"Discover", Icon: Users, id:"nav-discover" },
+ { href:"/discover", label:"Members", Icon: Users, id:"nav-discover" },
 ];
 
 // Dynamic link that depends on artist slug
@@ -576,7 +576,7 @@ export default function Header() {
  id="nav-discover-m"
  onClick={closeMobileMenu}
  >
- <Users size={16} strokeWidth={1.5} /> Discover
+ <Users size={16} strokeWidth={1.5} /> Members
  </Link>
  <Link
  href="/feed"
