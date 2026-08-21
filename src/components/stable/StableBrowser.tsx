@@ -416,9 +416,9 @@ export default function StableBrowser({
                     <DialogContent className="sm:max-w-md">
                         <h3 className="mb-4">🗑️ Confirm Delete</h3>
                         <p className="mb-6 text-secondary-foreground">
-                            Are you sure you want to delete <strong>{selectedIds.size}</strong> item
-                            {selectedIds.size !== 1 ? "s" : ""}? This cannot be undone. All photos and associated
-                            data will be permanently removed.
+                            Delete <strong>{selectedIds.size}</strong> item
+                            {selectedIds.size !== 1 ? "s" : ""}? The photos are erased from storage for good.
+                            Everything else lands in Recently Deleted, where you can put them back.
                         </p>
                         <div className="flex justify-end gap-4">
                             <Button variant="outline" size="wide" onClick={() => setShowDeleteConfirm(false)}>

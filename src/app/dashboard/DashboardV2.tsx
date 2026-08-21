@@ -9,7 +9,7 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { Suspense } from "react";
-import { BarChart3, DollarSign, FolderOpen, Mail, Plus, Award } from "lucide-react";
+import { BarChart3, DollarSign, FolderOpen, Mail, Plus, Award, Trash2 } from "lucide-react";
 
 import StableMasthead from "@/components/stable/StableMasthead";
 import StableBrowser from "@/components/stable/StableBrowser";
@@ -217,6 +217,20 @@ export default async function DashboardV2({
                     <Suspense fallback={null}>
                         <PendingTransfersSection />
                     </Suspense>
+
+                    {/* Recently Deleted — the door to the undo. Deliberately
+                        quiet and always present: someone who just deleted the
+                        wrong horse needs to find it without knowing it exists. */}
+                    <Link
+                        href="/stable/deleted"
+                        id="recently-deleted-link"
+                        className="bg-card border-input flex items-center justify-between rounded-lg border px-6 py-4 no-underline shadow-md transition-all hover:bg-black/[0.03] hover:no-underline"
+                    >
+                        <span className="flex items-center gap-2 text-xs font-semibold tracking-widest text-secondary-foreground uppercase">
+                            <Trash2 size={14} strokeWidth={1.5} /> Recently Deleted
+                        </span>
+                        <span className="text-muted-foreground text-xs">Restore →</span>
+                    </Link>
 
                     <Suspense fallback={null}>
                         {/* MHH first — the NAN widget stays below for

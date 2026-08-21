@@ -15,6 +15,12 @@ import { sanitizeText } from "@/lib/utils/validation";
 import { decodeHtmlEntities } from "@/lib/utils/decodeEntities";
 import { cleanAttributeBag } from "@/lib/forms/attributes";
 import {
+    DELETED_NAME_PLACEHOLDER,
+    clearStashedName,
+    readStashedName,
+    stashDeletedName,
+} from "@/lib/stable/softDelete";
+import {
     firstProblemMessage,
     splitProblems,
     validateCreateInput,
@@ -83,15 +89,21 @@ async function checkActiveTransaction(horseId: string): Promise<string | null> {
  * Soft-delete a horse — scrubs PII and hides it, but preserves the row for provenance chains.
  * Guards against deletion while an active Safe-Trade transaction is pending.
  * Cleans up Supabase Storage files to free storage costs.
+ *
+ * The row lands on the Recently Deleted shelf (/stable/deleted) and stays
+ * restorable: the pre-scrub name rides along in `attributes` under a
+ * namespaced key so `restoreHorse` can put it back. The name scrub itself
+ * is unchanged — nothing about what a stranger can see moved.
  * @param horseId - UUID of the horse to delete (must be owned by caller)
  */
 export async function deleteHorse(horseId: string): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
-    // Verify ownership
+    // Verify ownership. custom_name/attributes ride along so the scrub can
+    // stash the name in the same UPDATE that overwrites it.
     const { data: horse } = await supabase
         .from("user_horses")
-        .select("id, owner_id")
+        .select("id, owner_id, custom_name, attributes")
         .eq("id", horseId)
         .eq("owner_id", user.id)
         .single();
@@ -125,23 +137,165 @@ export async function deleteHorse(horseId: string): Promise<{ success: boolean; 
     }
 
     // Soft-delete: scrub PII but preserve the row for provenance chains
+    const scrubbed = horse as { custom_name: string | null; attributes: Record<string, unknown> | null };
     const { error } = await supabase
         .from("user_horses")
         .update({
             deleted_at: new Date().toISOString(),
             life_stage: "orphaned",
             visibility: "private",
-            custom_name: "[Deleted]",
+            custom_name: DELETED_NAME_PLACEHOLDER,
             trade_status: "Not for Sale",
+            attributes: stashDeletedName(scrubbed.attributes, scrubbed.custom_name),
         })
         .eq("id", horseId);
 
     if (error) return { success: false, error: error.message };
 
     revalidatePath("/dashboard");
+    revalidatePath("/stable/deleted");
     revalidatePath(`/stable/${horseId}`);
     revalidateTag("public_horses", "max");
     return { success: true };
+}
+
+// ============================================================
+// RECENTLY DELETED — the shelf soft-delete never had
+// ============================================================
+
+/** One row on /stable/deleted. */
+export interface DeletedHorseRow {
+    id: string;
+    /** The pre-scrub name, or null for horses deleted before the stash shipped. */
+    recoveredName: string | null;
+    /** The catalog reference, which the scrub never touched — often the only clue left. */
+    referenceName: string | null;
+    assetCategory: string | null;
+    deletedAt: string;
+}
+
+/**
+ * List the caller's soft-deleted horses, newest first.
+ *
+ * Owner-scoped by both RLS and an explicit `owner_id` filter. Deleting an
+ * account is a different path (`soft_delete_account`) that also lands rows
+ * here — that is fine, they belong to the caller either way.
+ */
+export async function listDeletedHorses(): Promise<DeletedHorseRow[]> {
+    const { supabase, user } = await requireAuth();
+
+    const { data, error } = await supabase
+        .from("user_horses")
+        .select("id, custom_name, attributes, asset_category, deleted_at, catalog_items:catalog_id(title, maker)")
+        .eq("owner_id", user.id)
+        .not("deleted_at", "is", null)
+        .order("deleted_at", { ascending: false })
+        .limit(200);
+
+    if (error) {
+        Sentry.captureException(error, { tags: { domain: "horse" } });
+        logger.error("Horse", "Listing deleted horses failed", error);
+        return [];
+    }
+
+    return (data ?? []).map((row) => {
+        const r = row as {
+            id: string;
+            attributes: Record<string, unknown> | null;
+            asset_category: string | null;
+            deleted_at: string;
+            catalog_items: { title: string; maker: string } | { title: string; maker: string }[] | null;
+        };
+        const cat = Array.isArray(r.catalog_items) ? r.catalog_items[0] : r.catalog_items;
+        return {
+            id: r.id,
+            recoveredName: readStashedName(r.attributes),
+            referenceName: cat ? catalogDisplayName(cat.maker, cat.title) : null,
+            assetCategory: r.asset_category,
+            deletedAt: r.deleted_at,
+        };
+    });
+}
+
+/**
+ * Undo a soft delete.
+ *
+ * What comes back and what does not:
+ *  - `deleted_at` cleared, so every "not deleted" filter sees the row again.
+ *  - `visibility` lands on **private**, never the pre-delete value — that
+ *    value was overwritten at delete time and is genuinely gone. Private is
+ *    the safe landing; re-publishing is the owner's deliberate next click.
+ *  - `life_stage` lands on **completed**, which is what the hoofprint view
+ *    already treats a null stage as (`COALESCE(life_stage, 'completed')`)
+ *    and what auto-unpark restores a stuck 'parked' horse to. The real
+ *    pre-delete stage is gone the same way visibility is.
+ *  - `trade_status` stays "Not for Sale". A restore must never relist.
+ *  - The name comes back from the `attributes` stash. Horses deleted before
+ *    that shipped have nothing stashed, so `newName` lets the caller supply
+ *    one in the same write rather than landing on "[Deleted]".
+ *  - **Photos do not come back.** `deleteHorse` removes the storage objects
+ *    and the `horse_images` rows for real. Nothing here can undo that.
+ *
+ * Show records, ownership history and condition history were never touched
+ * by the delete and are untouched here.
+ *
+ * @param horseId - UUID of the soft-deleted horse (must be owned by caller)
+ * @param newName - Optional replacement name, for rows with no stash
+ */
+export async function restoreHorse(
+    horseId: string,
+    newName?: string,
+): Promise<{ success: boolean; name?: string; error?: string }> {
+    const { supabase, user } = await requireAuth();
+
+    const { data: horse } = await supabase
+        .from("user_horses")
+        .select("id, owner_id, custom_name, attributes, deleted_at")
+        .eq("id", horseId)
+        .eq("owner_id", user.id)
+        .maybeSingle();
+
+    if (!horse) return { success: false, error: "Horse not found or not yours." };
+
+    const row = horse as {
+        custom_name: string | null;
+        attributes: Record<string, unknown> | null;
+        deleted_at: string | null;
+    };
+    if (!row.deleted_at) return { success: false, error: "That horse isn't deleted." };
+
+    // Same rug-pull guard the delete path uses. A deleted horse shouldn't
+    // have a live transaction, but restoring one mid-deal would resurrect a
+    // listing under a buyer's feet, so the guard runs both ways.
+    const txnError = await checkActiveTransaction(horseId);
+    if (txnError) return { success: false, error: txnError };
+
+    const supplied = decodeHtmlEntities(sanitizeText(newName ?? "")).trim();
+    if (supplied.length > 100) {
+        return { success: false, error: "That name is too long (100 characters max)." };
+    }
+    const restoredName = supplied || readStashedName(row.attributes) || row.custom_name || DELETED_NAME_PLACEHOLDER;
+
+    const { error } = await supabase
+        .from("user_horses")
+        .update({
+            deleted_at: null,
+            life_stage: "completed",
+            visibility: "private",
+            trade_status: "Not for Sale",
+            custom_name: restoredName,
+            attributes: clearStashedName(row.attributes),
+        })
+        .eq("id", horseId)
+        .eq("owner_id", user.id);
+
+    if (error) return { success: false, error: error.message };
+
+    revalidatePath("/dashboard");
+    revalidatePath("/stable/deleted");
+    revalidatePath(`/stable/${horseId}`);
+    revalidateTag("public_horses", "max");
+    return { success: true, name: restoredName };
 }
 
 /**
@@ -731,11 +885,16 @@ export async function bulkDeleteHorses(
     // Verify ownership
     const { data: owned } = await supabase
         .from("user_horses")
-        .select("id")
+        .select("id, custom_name, attributes")
         .eq("owner_id", user.id)
         .in("id", horseIds);
 
-    const ownedIds = (owned ?? []).map((h: { id: string }) => h.id);
+    const ownedRows = (owned ?? []) as {
+        id: string;
+        custom_name: string | null;
+        attributes: Record<string, unknown> | null;
+    }[];
+    const ownedIds = ownedRows.map((h) => h.id);
     if (ownedIds.length !== horseIds.length) {
         return { success: false, error: "Some horses not found or not yours." };
     }
@@ -771,6 +930,29 @@ export async function bulkDeleteHorses(
         }
     }
 
+    // Stash each row's name for the Recently Deleted shelf BEFORE the scrub
+    // overwrites it. Per-row because the value differs per row and the scrub
+    // below is deliberately one statement. Best-effort in every sense: if
+    // this pass fails the delete still happens, those rows just restore
+    // without their names — the same position every pre-shelf delete is in.
+    try {
+        const CHUNK = 20;
+        for (let i = 0; i < ownedRows.length; i += CHUNK) {
+            await Promise.all(
+                ownedRows.slice(i, i + CHUNK).map((row) =>
+                    supabase
+                        .from("user_horses")
+                        .update({ attributes: stashDeletedName(row.attributes, row.custom_name) })
+                        .eq("id", row.id)
+                        .eq("owner_id", user.id),
+                ),
+            );
+        }
+    } catch (err) {
+        Sentry.captureException(err, { tags: { domain: "horse" } });
+        logger.error("Horse", "Bulk delete name stash failed", err);
+    }
+
     // Soft-delete: scrub PII but preserve rows for provenance chains
     const { error } = await supabase
         .from("user_horses")
@@ -778,7 +960,7 @@ export async function bulkDeleteHorses(
             deleted_at: new Date().toISOString(),
             life_stage: "orphaned",
             visibility: "private",
-            custom_name: "[Deleted]",
+            custom_name: DELETED_NAME_PLACEHOLDER,
             trade_status: "Not for Sale",
         })
         .in("id", horseIds)
@@ -787,6 +969,7 @@ export async function bulkDeleteHorses(
     if (error) return { success: false, error: error.message };
 
     revalidatePath("/dashboard");
+    revalidatePath("/stable/deleted");
     return { success: true, count: horseIds.length };
 }
 
