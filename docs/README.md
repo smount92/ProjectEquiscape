@@ -1,7 +1,9 @@
 # Model Horse Hub — Documentation Index
 
-> **Last Updated:** July 11, 2026
+> **Last Updated:** August 21, 2026 (the launch release — five rooms, migrations 165–175)
 > **For AI Agents:** This file is the navigation hub. Use it to find the right document for any topic. Each section links to the canonical reference. For architecture rules and Iron Laws, start at `.agents/MASTER_BLUEPRINT.md` instead — this index covers `docs/`.
+>
+> **Dated documents are history, not status.** Anything with a date in its filename — audits, work orders, strategy notes, launch plans — is a point-in-time record and is not maintained. The undated documents below are the ones kept current.
 
 ---
 
@@ -28,11 +30,12 @@
 | **Find a page route** | [Routes → Route Map](routes/route-map.md) |
 | **Understand catalog curation** | [Guides → Catalog Curation](guides/catalog-curation.md) |
 | **Understand an architecture decision** | [Architecture → ADRs](architecture/adrs/) |
+| **Know what the rooms are called** | [`.agents/MASTER_BLUEPRINT.md`](../.agents/MASTER_BLUEPRINT.md) → "The Five Rooms" |
+| **Style a new surface** | [Guides → Design Language](guides/DESIGN_LANGUAGE.md) |
+| **Understand commission practice** | [studio/COMMISSION_RESEARCH.md](studio/COMMISSION_RESEARCH.md) |
 | **Manually verify a Shows v2 flow** | [SHOWS_V2_TESTING.md](SHOWS_V2_TESTING.md) |
 | **See what's next after the rebuild program** | [NEXT_SYSTEMS_ROADMAP.md](NEXT_SYSTEMS_ROADMAP.md) |
 | **Understand the growth strategy / house rules** | [OPERATOR_PLAYBOOK.md](OPERATOR_PLAYBOOK.md) |
-| **Read the July 2026 growth-moves strategy** | [STRATEGY_2026-07.md](STRATEGY_2026-07.md) |
-| **Pick up the current public-pages/docs work order** | [WORK_ORDERS_2026-07-11.md](WORK_ORDERS_2026-07-11.md) |
 
 ---
 
@@ -42,10 +45,11 @@
 docs/
 ├── README.md                          ← YOU ARE HERE (navigation index)
 ├── OPERATOR_PLAYBOOK.md               # Self-contained strategy + house rules
-├── STRATEGY_2026-07.md                # July 2026 growth-moves strategy
 ├── NEXT_SYSTEMS_ROADMAP.md            # Post-rebuild priority order
 ├── SHOWS_V2_TESTING.md                # Manual testing checklist for Shows v2
-├── WORK_ORDERS_2026-07-11.md          # Current batch work orders (public pages + docs)
+├── studio/COMMISSION_RESEARCH.md      # Researched commission practice (the Studio rebuild's basis)
+├── *_2026-*.md                        # HISTORY — dated audits, work orders, strategy notes,
+│                                      #   launch plans. Point-in-time records, not maintained.
 ├── getting-started/
 │   ├── setup.md                       # Local dev environment setup
 │   ├── project-structure.md           # Annotated directory tree
@@ -68,25 +72,26 @@ docs/
 │   ├── schema-overview.md             # Visual ERD + table groups
 │   ├── rls-policies.md                # Row Level Security inventory
 │   ├── materialized-views.md          # Computed views and refresh schedules
-│   ├── migrations.md                   # Migration index (001—137)
+│   ├── migrations.md                   # Migration index (001—175; 174 is a deliberate gap)
 │   └── seed-data.md                   # Reference catalog seeding
 ├── api/
-│   ├── server-actions.md              # Index of all 44 server action files
+│   ├── server-actions.md              # Index of the 58 server action files
 │   └── routes.md                      # API route reference (18 routes + /auth/callback)
 ├── components/
-│   ├── catalog.md                     # ~175-component index by domain
+│   ├── catalog.md                     # Component index by domain
 │   ├── patterns.md                    # 8 common component patterns
 │   └── design-system.md              # Tokens, colors, typography, primitives
 ├── guides/
+│   ├── DESIGN_LANGUAGE.md             # ★ Authoritative visual language (leather/ledger/brass)
 │   ├── adding-a-feature.md            # End-to-end feature workflow
 │   ├── adding-a-migration.md          # SQL migration guide
-│   ├── css-conventions.md             # CSS architecture rules (Tailwind stone palette, banned tokens)
-│   ├── design-system.md               # Leather/ledger design system + 4 page archetypes
+│   ├── css-conventions.md             # CSS architecture rules — defers to DESIGN_LANGUAGE.md
+│   ├── design-system.md               # 4 page archetypes
 │   ├── testing.md                     # Test strategy and commands
 │   ├── catalog-curation.md            # Catalog curation guide (V32)
 │   └── deployment.md                  # Vercel + Supabase deployment
 └── routes/
-    └── route-map.md                   # Complete URL → page mapping (76 routes)
+    └── route-map.md                   # Complete URL → page mapping (94 page routes)
 ```
 
 

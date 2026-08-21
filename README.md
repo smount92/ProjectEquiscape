@@ -6,23 +6,38 @@ Model Horse Hub is a privacy-first platform purpose-built for the model horse co
 
 > *"Does this feature help a collector **manage**, **show**, **sell**, or **admire** their collection?"*
 
+## 🏠 The Five Rooms
+
+The site is five rooms. The nav bar holds exactly these, at any screen width; everything else lives under **More**.
+
+| Room | Route | What it is |
+|------|-------|------------|
+| **Stable** | `/dashboard` | Your herd — inventory, filters, saved views, the vault |
+| **Shows** | `/shows` | Hosting, entering, judging, results, qualification cards |
+| **Market** | `/market` | The marketplace front door — listings, Blue Book, deals |
+| **The Paddock** | `/feed` | The community room — one stream, plus the door to the Show Ring |
+| **Registry** | `/catalog` | The 10,900+ entry reference catalog |
+
+Under More: Art Studio, Show Ring, Barns, Events, Help ID, Members.
+
 ## ✨ Key Features
 
 | Feature | Description |
 |---------|-------------|
-| **Digital Stable** | Catalog your herd with 10,900+ reference database entries (Breyer, Stone, Artist Resins, pewter micro-minis) filterable by maker, scale, and material |
-| **Hoofprint Provenance** | Permanent digital identity for every model — transfers, show records, and customization history follow the horse |
+| **Digital Stable** | Catalog your herd against 10,900+ Registry entries (Breyer, Stone, Artist Resins, pewter micro-minis) filterable by maker, scale, and material. Faceted search with reusable saved views, a condition ledger, and `/stable/deleted` to undo a soft delete |
+| **Hoofprint Provenance** | Permanent digital identity for every model — transfers, show records, titles, and customization history follow the horse |
 | **LSQ Photo Suite** | 5 standardized photo angles (Near-Side, Off-Side, Front, Hind, Belly) + unlimited extras, with automatic (opt-out) photo watermarking and optional custom watermark text |
-| **Financial Vault** | Private purchase prices and estimated values — never exposed on public pages |
-| **Safe-Trade Commerce** | Formal offer → accept → pay → verify → transfer workflow (payment settled off-platform — no in-app escrow yet) |
-| **Art Studio** | Artist profiles, commission management, WIP photo portal |
+| **Financial Vault** | Private purchase prices, estimated values, and commission costs — never exposed on public pages |
+| **The Market** | Provenance-first listing cards where the passport *is* the listing page. Browsable logged-out. Blocked sellers are excluded at the query level |
+| **The Deal Room** | A DM thread that grows into a deal: offers and counter-offers, contract boxes both parties sign, an installment ledger for time payments, and an evidence pack (PDF + plain text) at `/inbox/[id]/record`. **The platform never holds money and charges no selling fees** — it keeps the record, it does not referee |
+| **Art Studio** | Studio pages with structured, comparable terms; a commission pipeline from request through quote, work, approval and delivery; a receipts wall of finished horses shown with the ribbons they went on to win |
 | **Show Hosting (live + online)** | One-click NAMHSA classlist builder, entry + proxy handling, phone-based live ring console with leg-tag placing and champion callbacks, expert or community-vote judging, results that file to permanent Hoofprint records |
 | **Qualification Cards** | Auto-issued on 1st/2nd, transfer with the horse on sale, public `/cards/[code]` verification page |
-| **Notice Board (Groups)** | Forum-style threads, channels, pinned posts, shared files |
-| **Stable Filters & Saved Views** | Faceted search across your herd with reusable saved filter sets |
-| **Events** | Community clubs, event calendars, RSVP, shared files |
-| **Social Feed** | Posts, comments, likes, follows, @mentions, DMs, notifications |
-| **Blue Book** | Market price guide aggregated from completed transactions |
+| **The Paddock** | One stream: posts, public-horse comments, barn posts and show results, with @mentions, per-post Public/Followers visibility, and an Everyone/Following toggle |
+| **Barns** | Community barns with a notice board, private barns with a join-request queue, shared files, and per-user unread state |
+| **Events** | Listing pages for happenings *outside* MHH — RSVP, attendees, discussion, photos |
+| **Blue Book** | Market price guide at `/market/guide`, aggregated from completed transactions |
+| **Members** | Server-side member directory with search and three sorts |
 
 ## 🛠️ Tech Stack
 
@@ -32,11 +47,14 @@ Model Horse Hub is a privacy-first platform purpose-built for the model horse co
 | Language | TypeScript 5, React 19 |
 | Database | Supabase (PostgreSQL + Row Level Security) |
 | Auth | Supabase Auth (PKCE flow, cookie-based SSR) |
-| Storage | Supabase Storage (private bucket, signed URLs) |
+| Storage | Supabase Storage — public `horse-images` bucket (CDN-cacheable), private `chat-attachments` and `group-files` buckets (signed URLs) |
 | Hosting | Vercel (serverless) |
 | CSS | Tailwind CSS v4 + shadcn/ui primitives (single `globals.css` token system) |
+| PWA | Serwist (`src/app/sw.ts` → `public/sw.js`) — offline barn mode for live shows |
+| Payments | Stripe Checkout Sessions + webhooks |
 | Email | Resend |
 | PDF | @react-pdf/renderer |
+| Monitoring | Sentry + Vercel Web Analytics (first-party, cookieless) |
 
 ## 📦 Quick Start
 
@@ -82,13 +100,13 @@ npm run test:e2e           # Playwright E2E (requires dev server running)
 npm run test:devices       # Device matrix (Desktop, iPhone, Pixel, iPad)
 ```
 
-**1,076 tests across 75 test files:**
+**155 unit/integration/component test files** (~2,400 tests at the launch release):
 - Utility functions at 100% coverage (mentions, validation, storage, rateLimit)
-- Server action integration tests (transactions, horse, provenance, collections, hoofprint, shows-v2, shows-v2-ring, groups-forum, stable, showring, catalog-suggestions)
-- Domain-lib unit tests for the pure, tested `src/lib/{shows,groups,stable,showring,commerce}/` modules (state machines, card issuance, callback ladders, filter params, schemas)
-- API route tests (auth, export, cron, reference-dictionary, identify-mold)
-- Component tests (PhotoLightbox, TrophyCase, MarketFilters, MakeOfferModal, HoofprintTimeline, SuggestionVoteButtons, CallbackLadder) — React Testing Library
-- 9 E2E specs: smoke, auth, inventory, safe-trade, hoofprint-transfer, show-entry, accessibility (axe-core WCAG 2.0 AA), device-layout (60 viewport tests), visual-qa-mobile
+- Server action integration tests (transactions, deals, horse, provenance, collections, hoofprint, shows-v2, shows-v2-ring, shows-v4, groups, groups-forum, stable, showring, admin, catalog-suggestions)
+- Domain-lib unit tests for the pure `src/lib/<domain>/` modules — state machines, the commission pipeline, deal vocabulary, card issuance, callback ladders, mention matching, filter params, metrics hashing, schemas
+- API route tests (auth, export, cron, beacon, reference-dictionary)
+- Component tests (React Testing Library)
+- 10 E2E specs including accessibility (axe-core WCAG 2.0 AA) and a device matrix
 
 **Test Accounts (E2E):** Two test accounts configured in `.env.local` (TestBotA/TestBotB).
 
@@ -100,21 +118,26 @@ npm run test:devices       # Device matrix (Desktop, iPhone, Pixel, iPad)
 
 | Metric | Count |
 |--------|-------|
-| Page routes | 73 pages |
-| Client components | ~175 |
-| Server action files | 42 |
-| Database migrations | 124 files (numbered 001–128; a handful of numbers skipped) |
+| Page routes | 94 |
+| API routes | 18 (plus `/auth/callback` and the Serwist handler, both outside `/api`) |
+| Server action files | 58 |
+| Database migrations | 170 files (numbered 001–175; 045/047/049/051/174 skipped) |
 | Reference catalog entries | 10,900+ |
-| CSS files | 1 (`globals.css` — Tailwind v4 design tokens) |
-| Unit/integration/component tests | 1,076 (75 test files) |
-| E2E specs | 9 (Playwright + axe-core) |
+| CSS files | 1 (`globals.css` — Tailwind v4 design tokens, ~3,980 lines) |
+| Test files | 155 unit/integration/component + 10 Playwright E2E specs |
+| Live feature flags | 4 (2 of them dark — see `.agents/MASTER_BLUEPRINT.md`) |
 | CI | GitHub Actions + Husky pre-commit |
 
 ## 🚀 Deployment
 
 - **Git push to `main`** → Vercel auto-deploys
-- **Supabase migrations** → Run via `npx supabase db push` or SQL Editor
-- **Cron:** Daily 6 AM UTC → `/api/cron/refresh-market` (Blue Book price refresh)
+- **Supabase migrations** → files only; the owner pastes them into the Supabase SQL Editor by hand. App code must feature-detect so it works both before and after the paste
+- **Cron** (`vercel.json`):
+  - `0 6 * * *` → `/api/cron/refresh-market` (Blue Book refresh, trusted sellers, garbage collection)
+  - `0 * * * *` → `/api/cron/transition-shows`
+  - `0 9 1 * *` → `/api/cron/stablemaster-agent`
+
+> **Build note:** `next.config.ts` pins `experimental.cpus: 6`. Do not remove it — Vercel's build machine otherwise spawns 29 static-generation workers, which stampedes the Supabase connection pool and fails the build.
 
 ## 📄 License
 

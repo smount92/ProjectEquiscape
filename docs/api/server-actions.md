@@ -1,6 +1,10 @@
 # Server Actions Reference
 
-All backend logic lives in 37 `"use server"` files under `src/app/actions/`. This document is the master index with function counts and domain groupings.
+All backend logic lives in **58 `"use server"` files** under `src/app/actions/`, plus one outside
+it (`src/app/auth/actions.ts`). This document is the master index by domain.
+
+> Some `src/lib/**` and `src/app/*/reads.ts` files contain the string `"use server"` inside
+> comments explaining why the module is deliberately *not* an action file. Those are not actions.
 
 ## How Server Actions Work
 
@@ -11,102 +15,164 @@ All backend logic lives in 37 `"use server"` files under `src/app/actions/`. Thi
 
 For the full request lifecycle, see [Data Flow](../architecture/data-flow.md).
 
+## The Order (Iron Law 7)
+
+```
+zod parse → requireAuth() → explicit ownership/role check → RLS-first write
+```
+
+The admin client is used only with a code comment justifying why RLS can't do the job. Business
+logic belongs in a pure `src/lib/<domain>/` module, not inline in the action — actions stay thin.
+
 ## Domain Index
 
-### 🐴 Inventory & Horses
+### 🐴 Inventory & Stable
 
-| File | Functions | Purpose |
-|------|-----------|---------|
-| [`horse.ts`](actions/horse.md#horse) | `createHorse`, `updateHorse`, `deleteHorse`, `getHorse`, `getMyHorses`, `getPublicHorses`, `toggleVisibility` + more | Core CRUD for horses |
-| [`collections.ts`](actions/inventory.md#collections) | `createCollection`, `updateCollection`, `deleteCollection`, `addToCollection`, `removeFromCollection`, `getCollections` | Collection management |
-| [`csv-import.ts`](actions/inventory.md#csv-import) | `importHorsesFromCsv`, `previewCsvImport` | Batch CSV import |
-| [`reference.ts`](actions/inventory.md#reference) | `searchCatalogAction`, `getCatalogItem`, `getReleasesForMold` | Reference catalog search |
-| [`suggestions.ts`](actions/inventory.md#suggestions) | `submitSuggestion`, `getPendingSuggestions`, `reviewSuggestion` | Catalog suggestions |
+| File | Functions |
+|------|-----------|
+| [`horse.ts`](../../src/app/actions/horse.ts) | `createHorseRecord`, `updateHorseAction`, `quickAddHorse`, `deleteHorse`, `listDeletedHorses`, `restoreHorse`, `finalizeHorseImages`, `deleteHorseImageAction`, `reorderHorseImages`, `bulkUpdateHorses`, `bulkDeleteHorses`, `searchPublicHorses`, `getMyTier` |
+| [`stable.ts`](../../src/app/actions/stable.ts) | `getStablePage`, `loadMoreStable`, `getMatchingHorseIds`, `getStableSummary`, `listStableViews`, `saveStableView`, `deleteStableView` |
+| [`collections.ts`](../../src/app/actions/collections.ts) | `getCollectionsAction`, `createCollectionAction`, `updateCollectionAction`, `deleteCollectionAction`, `getHorseCollections`, `setHorseCollections` |
+| [`csv-import.ts`](../../src/app/actions/csv-import.ts) | `executeBatchImport`, `getExistingHorseNames` |
+| [`favorites.ts`](../../src/app/actions/favorites.ts) | `getFavoritesPage`, `loadMoreFavorites` |
+| [`wishlist.ts`](../../src/app/actions/wishlist.ts) | `addToWishlist`, `removeFromWishlist`, `getWishlistState` |
+
+> **Recently Deleted:** `deleteHorse` stashes the horse's name in `attributes` under the
+> `mhh:deleted_name` key so `restoreHorse` can put it back. `/stable/deleted` is the undo surface.
 
 ### 🔐 Provenance (Hoofprint)
 
-| File | Functions | Purpose |
-|------|-----------|---------|
-| [`hoofprint.ts`](actions/provenance.md#hoofprint) | `getHoofprint`, `addTimelineEvent`, `deleteTimelineEvent`, `updateLifeStage`, `initializeHoofprint`, `generateTransferCode`, `claimTransfer`, `cancelTransfer`, `getMyPendingTransfers`, `getTransferHistory` | Timeline, transfers |
-| [`provenance.ts`](actions/provenance.md#provenance) | `addShowRecord`, `updateShowRecord`, `deleteShowRecord`, `savePedigree`, `deletePedigree` | Show records, pedigrees |
-| [`parked-export.ts`](actions/provenance.md#parked-export) | `parkHorse`, `unparkHorse`, `getParkedStatus`, `generateCoA` | Horse parking, CoA export |
-| [`insurance-report.ts`](actions/provenance.md#insurance-report) | `generateInsuranceReport` | PDF insurance reports |
+| File | Functions |
+|------|-----------|
+| [`hoofprint.ts`](../../src/app/actions/hoofprint.ts) | `getHoofprint`, `addTimelineEvent`, `deleteTimelineEvent`, `updateLifeStage`, `initializeHoofprint`, `generateTransferCode`, `claimTransfer`, `cancelTransfer`, `getMyPendingTransfers`, `getTransferHistory` |
+| [`provenance.ts`](../../src/app/actions/provenance.ts) | `addShowRecord`, `updateShowRecord`, `deleteShowRecord`, `savePedigree`, `deletePedigree` |
+| [`conditionHistory.ts`](../../src/app/actions/conditionHistory.ts) | `getConditionHistory` — the condition ledger, reading the history written since migration 026 |
+| [`parked-export.ts`](../../src/app/actions/parked-export.ts) | `parkHorse`, `unparkHorse`, `getParkedHorseByPin`, `claimParkedHorse`, `getCoaData` |
+| [`insurance-report.ts`](../../src/app/actions/insurance-report.ts) | `getInsuranceReportData` |
+| [`photos.ts`](../../src/app/actions/photos.ts) | `getPhotoBySlug` |
 
-### 💰 Commerce
+### 💰 Commerce, Market & the Deal Room
 
-| File | Functions | Purpose |
-|------|-----------|---------|
-| [`transactions.ts`](actions/commerce.md#transactions) | `createTransaction`, `completeTransaction`, `makeOffer`, `respondToOffer`, `markPaymentSent`, `verifyFundsAndRelease`, `cancelTransaction`, `retractOffer`, `getTransactionsForUser`, `getTransactionByConversation`, `getReviewableTransactions` | Safe-Trade state machine |
-| [`ratings.ts`](actions/commerce.md#ratings) | `leaveRating`, `deleteRating`, `getUserRatingSummary` | Legacy ratings |
-| [`transactions.ts`](actions/commerce.md#reviews) | `leaveReview`, `deleteReview`, `getUserReviewSummary` | Post-transaction reviews |
-| [`market.ts`](actions/commerce.md#market) | `getMarketPrices`, `refreshMarketPrices` | Blue Book price guide |
-| [`wishlist.ts`](actions/commerce.md#wishlist) | `addToWishlist`, `removeFromWishlist` | Wishlist management |
+| File | Functions |
+|------|-----------|
+| [`deals.ts`](../../src/app/actions/deals.ts) | `proposeTerms`, `agreeToTerms`, `withdrawTermsAgreement`, `clearTerms`, `savePaymentPlan`, `markInstallmentSent`, `confirmInstallmentReceived`, `counterOffer`, `respondToCounter`, `raiseDispute`, `standDownDispute`, `recordSaleInVault`, `attachCommissionToThread`, `getDealStage`, `markThreadRead`, `setThreadMuted`, `setThreadArchived` |
+| [`transactions.ts`](../../src/app/actions/transactions.ts) | `createTransaction`, `makeOffer`, `respondToOffer`, `retractOffer`, `markPaymentSent`, `verifyFundsAndRelease`, `completeTransaction`, `cancelTransaction`, `getTransactionsForUser`, `getTransactionByConversation`, `leaveReview`, `deleteReview`, `getUserReviewSummary`, `getReviewableTransactions` |
+| [`messaging.ts`](../../src/app/actions/messaging.ts) | `createOrFindConversation`, `sendMessage`, `getConversationAttachments`, `markConversationRead`, `getUnreadCount`, `markTransactionComplete` |
+| [`market.ts`](../../src/app/actions/market.ts) | `getMarketPrice`, `searchMarketPrices`, `getTopTraded`, `refreshMarketPrices`, `getMarketHorseRecord` |
+| [`marketPublicRecord.ts`](../../src/app/actions/marketPublicRecord.ts) | `getPublicMarketHorseRecord` — the anon record quick-look on a listing card |
+| [`purchased-reports.ts`](../../src/app/actions/purchased-reports.ts) | `getMyPurchasedReports` — backs `/market/reports` |
+| [`supporter.ts`](../../src/app/actions/supporter.ts) | `setSupporterLedgerListing` |
+| [`ratings.ts`](../../src/app/actions/ratings.ts) | `leaveRating`, `deleteRating`, `getUserRatingSummary` (legacy) |
+
+> **Anon market browse** goes through the `get_market_listings` RPC (migration 169) with a
+> service-role fallback — see `src/lib/market/rpcListings.ts`. Blocked sellers are excluded at
+> the query level, not in the UI.
+>
+> **Deal vocabulary** is centralised in [`src/lib/deals/vocabulary.ts`](../../src/lib/deals/vocabulary.ts):
+> 8 stages — `talking`, `proposed`, `agreed`, `paying`, `fulfilling`, `settled`, `closed`,
+> `disputed` — with parties A/B derived from `transactions`. The evidence pack is assembled in
+> [`src/lib/deals/evidence.ts`](../../src/lib/deals/evidence.ts) and rendered at `/inbox/[id]/record`.
 
 ### 🎨 Art Studio
 
-| File | Functions | Purpose |
-|------|-----------|---------|
-| [`art-studio.ts`](actions/art-studio.md) | `getArtistProfile`, `getArtistProfileBySlug`, `createArtistProfile`, `updateArtistProfile`, `getArtistCommissions`, `getClientCommissions`, `createCommission`, `updateCommissionStatus`, `addCommissionUpdate`, `getCommissionUpdates`, `getCommission`, `browseArtists`, `linkHorseToCommission` + more | Full commission workflow |
+| File | Functions |
+|------|-----------|
+| [`art-studio.ts`](../../src/app/actions/art-studio.ts) | `getArtistProfile`, `getArtistProfileBySlug`, `createArtistProfile`, `updateArtistProfile`, `updateStudioTerms`, `updateStudioServices`, `setStudioIntake`, `getSlotUsage`, `browseArtists`, `getArtistPortfolio`, `getArtistCommissions`, `getClientCommissions`, `getCommission`, `getCommissionUpdates`, `createCommission`, `sendQuote`, `transitionCommission`, `addCommissionUpdate`, `markModelReceived`, `recordPayment`, `linkHorseToCommission`, `recordCommissionInVault` |
 
-### 👥 Social
+> Pipeline rules live in [`src/lib/studio/pipeline.ts`](../../src/lib/studio/pipeline.ts). The
+> free-tier cap of 3 active commissions is enforced in `sendQuote` and on the `accept`
+> transition — not in SQL.
 
-| File | Functions | Purpose |
-|------|-----------|---------|
-| [`posts.ts`](actions/social.md#posts) | `createPost`, `replyToPost`, `deletePost`, `updatePost`, `togglePostLike`, `getPosts` | Posts, replies, likes — with notifications for replies, likes, and @mentions (V33) |
-| [`likes.ts`](actions/social.md#likes) | `toggleLike`, `getLikeCount`, `isLiked` | Like toggling |
-| [`follows.ts`](actions/social.md#follows) | `toggleFollow`, `getFollowers`, `getFollowing`, `isFollowing` | Follow system |
-| [`social.ts`](actions/social.md#favorites) | `toggleFavorite` | Horse favorites |
-| [`activity.ts`](actions/social.md#activity) | `createActivityEvent`, `getActivityFeed` | Activity feed events |
-| [`mentions.ts`](actions/social.md#mentions) | `searchMentions` | @mention search |
-| [`blocks.ts`](actions/social.md#blocks) | `blockUser`, `unblockUser`, `isBlocked`, `getBlockedUsers` | Block system |
+### 🏆 Shows & Competition
 
-### 💬 Messaging
+Four generations coexist. Know which you are in before you edit.
 
-| File | Functions | Purpose |
-|------|-----------|---------|
-| [`messaging.ts`](actions/social.md#messaging) | `sendMessage`, `getConversations`, `getMessages`, `startConversation`, `getOrCreateConversation`, `markConversationRead` | DM system |
-| [`notifications.ts`](actions/social.md#notifications) | `getNotifications`, `markAsRead`, `markAllRead`, `getUnreadCount` | Notification system |
+| File | Functions |
+|------|-----------|
+| [`shows-v2.ts`](../../src/app/actions/shows-v2.ts) | Host + entrant surface: `createShow`, `updateShowSettings`, `deleteShow`, `transitionShowStatus`, `addDivision`/`addSection`/`addClass` (+ `update*`), `reorderClasslist`, `splitClass`, `combineClasses`, `loadNamhsaTemplate`, `addShowStaff`, `removeShowStaff`, `setFeePaid`, `getHostedShows`, `getShowConsole`, `getPublicShows`, `getPublicShow`, `enterClass`, `scratchEntry`, `getMyShowEntries`, `getMyEntrantHorses`, `getMyHandlerEntries`, `removeSelfAsHandler`, `getShowGallery`, `castVote`, `removeVote`, `getJudgeQueue`, `recordPlacings`, `finalizeCommunityVotes`, `findUserByAlias` |
+| [`shows-v2-ring.ts`](../../src/app/actions/shows-v2-ring.ts) | `getRingConsole`, `recordCallback`, `getRingBoard`, `getShowChampions` |
+| [`shows-v4.ts`](../../src/app/actions/shows-v4.ts) | `barEntrant`, `liftBar`, `listBarredEntrants`, `voidCard`, `strikeEntryFromResults`, `writeCritique`, `publishClassResults`, `unpublishClassResults`, `getClassRoom`, `createHorseDocument`, `updateHorseDocument`, `deleteHorseDocument`, `attachDocumentToEntry` |
+| [`shows.ts`](../../src/app/actions/shows.ts) | Legacy v1 photo shows — `getPhotoShows`, `enterShow`, `voteForEntry`, `createPhotoShow`, `updateShowStatus`, `withdrawEntry`, `batchRecordResults`, `saveExpertPlacings`, `overrideFinalPlacings`, `getShowHistory`, `getPublicShowResults` |
+| [`competition.ts`](../../src/app/actions/competition.ts) | Legacy engine + Show Packer + NAN dashboard — `getNanQualifications`, `getNanDashboard`, `exportNanCards`, `checkJudgeCOI`, `addShowRecord`, `verifyShowRecord`, the `show_strings` CRUD, `convertShowStringToResults`, `detectConflicts`, and the `event_divisions`/`event_classes` CRUD |
+| [`showring.ts`](../../src/app/actions/showring.ts) | `getShowRingPage`, `loadMoreShowRing` |
+| [`show-life.ts`](../../src/app/actions/show-life.ts) · [`show-readiness.ts`](../../src/app/actions/show-readiness.ts) | `getMyShowLife`; `getMyShowReadiness`, `listMyEntrantHorses` |
+| [`show-announcements.ts`](../../src/app/actions/show-announcements.ts) | `announceToEntrants` |
+| [`entry-photo.ts`](../../src/app/actions/entry-photo.ts) | `addShowPhotoToHorse` |
+| [`external-shows.ts`](../../src/app/actions/external-shows.ts) | `submitExternalShow`, `listApprovedExternalShows`, `listPendingExternalShows`, `reviewExternalShow` — the `/calendar` surface |
+| [`standings.ts`](../../src/app/actions/standings.ts) | `getMySeason`, `getStandings` — **dark** behind `NEXT_PUBLIC_SHOW_STANDINGS` |
+| [`horse-events.ts`](../../src/app/actions/horse-events.ts) | `notifyHorsePublic` |
 
-### 🏆 Competition
+> `competition.ts` and the Show Packer are **not** dead code — they serve real-world show
+> entrants today, and `LegacyShowPage` renders their shows. They become deletable only after a
+> data migration moves historical shows into the v2 tables.
 
-| File | Functions | Purpose |
-|------|-----------|---------|
-| [`shows.ts`](actions/competition.md#shows) | `getPhotoShows`, `getShowEntries`, `enterShow`, `voteForEntry`, `createPhotoShow`, `updateShowStatus`, `deleteShow`, `withdrawEntry`, `batchRecordResults`, `saveExpertPlacings` | Photo show system — show results notification to entrants (V33), admin client for judge show_records (V33) |
-| [`competition.ts`](actions/competition.md#competition) | `getCompetitions`, `getCompetition`, `createCompetition`, `updateCompetition`, `enterCompetition`, `getMyEntries` | Live competition engine |
-| [`events.ts`](actions/competition.md#events) | `createEvent`, `updateEvent`, `deleteEvent`, `getEvents`, `getEvent`, `rsvpToEvent`, `addEventJudge`, `removeEventJudge` | Community events — judge assignment with notification (V33) |
-| [`horse-events.ts`](actions/competition.md#horse-events) | `getHorseShowHistory`, `getHorseNanProgress` | Horse show history |
+### 📰 The Paddock & Social
 
-### 👤 User & Settings
+| File | Functions |
+|------|-----------|
+| [`posts.ts`](../../src/app/actions/posts.ts) | `getFeedStream` (the Paddock spine), `getFeedCapabilities`, `getFeedPost`, `createPost`, `replyToPost`, `updatePost`, `deletePost`, `togglePostLike`, `getPosts`, `getHorseEmbedData`, `searchAliases`, `getEventMedia`, `addEventMedia`, `deleteEventMedia` |
+| [`activity.ts`](../../src/app/actions/activity.ts) | `createActivityEvent`, `createTextPost`, `deleteTextPost`, `getActivityFeed`, `getFollowingFeed` |
+| [`mentions.ts`](../../src/app/actions/mentions.ts) | `resolveMentionedAliases`, `parseAndNotifyMentions` |
+| [`follows.ts`](../../src/app/actions/follows.ts) | `toggleFollow`, `getFollowStats` |
+| [`likes.ts`](../../src/app/actions/likes.ts) | `toggleActivityLike`, `toggleGroupPostLike`, `toggleCommentLike` |
+| [`social.ts`](../../src/app/actions/social.ts) | `toggleFavorite` |
+| [`blocks.ts`](../../src/app/actions/blocks.ts) | `blockUser`, `unblockUser`, `getBlockedUserIds`, `isBlocked` |
+| [`community.ts`](../../src/app/actions/community.ts) | `loadMoreShowRing` |
 
-| File | Functions | Purpose |
-|------|-----------|---------|
-| [`profile.ts`](actions/user.md#profile) | `updateBio` | Profile bio editing |
-| [`settings.ts`](actions/user.md#settings) | `getProfile`, `updateProfile`, `updateNotificationPrefs`, `changePassword`, `uploadAvatar`, `deleteAccount` | User settings |
-| [`header.ts`](actions/user.md#header) | `getHeaderData` | Header nav data (alias, avatar, unread count) |
+> The stream merges `posts` with legacy `activity_events` **read-only** — see
+> [`src/lib/feed/stream.ts`](../../src/lib/feed/stream.ts). Mention resolution uses
+> longest-alias matching in [`src/lib/feed/mentionMatch.ts`](../../src/lib/feed/mentionMatch.ts),
+> shared by the `MentionTextarea` autocomplete and `RichText`'s `knownAliases`.
 
-### 🏘️ Community
+### 🏘️ Barns, Events & Community
 
-| File | Functions | Purpose |
-|------|-----------|---------|
-| [`groups.ts`](actions/community.md) | `createGroup`, `getGroups`, `getGroup`, `joinGroup`, `leaveGroup`, `updateGroup`, `deleteGroup`, `uploadGroupFile`, `getGroupFiles` + more | Group system |
-| [`help-id.ts`](actions/community.md#help-id) | `createIdRequest`, `createSuggestion`, `upvoteSuggestion`, `acceptSuggestion`, `addIdentifiedHorse`, `deleteIdRequest` | Help ID requests — delete fixed with RLS policy (V33), suggestion notification to request author (V33) |
-| [`moderation.ts`](actions/community.md#moderation) | `submitReport`, `getReports`, `resolveReport` | Content moderation |
-| [`contact.ts`](actions/community.md#contact) | `submitContactMessage` | Contact form |
+| File | Functions |
+|------|-----------|
+| [`groups.ts`](../../src/app/actions/groups.ts) | `createGroup`, `updateBarnSettings`, `getGroup`, `getGroups`, `getMyGroups`, `joinGroup`, `leaveGroup`, `requestToJoinBarn`, `cancelBarnJoinRequest`, `getBarnJoinRequests`, `decideBarnJoinRequest`, `getGroupRegistry`, `getGroupMembers`, `updateMemberRole`, `removeMember`, `togglePinPost`, `getGroupFiles`, `uploadGroupFile`, `deleteGroupFile`, `getGroupChannels`, `createGroupChannel`, `deleteGroupChannel` |
+| [`groups-forum.ts`](../../src/app/actions/groups-forum.ts) | `getGroupBoard`, `markGroupRead`, `getThread`, `createThread`, `replyToThread` |
+| [`events.ts`](../../src/app/actions/events.ts) | `createEvent`, `updateEvent`, `deleteEvent`, `getEvents`, `getEvent`, `getUpcomingEvents`, `rsvpEvent`, `getEventAttendees`, `addEventComment`, `deleteEventComment`, `getEventComments`, `addEventPhoto`, `getEventPhotos`, `deleteEventPhoto`, `getEventJudges`, `addEventJudge`, `removeEventJudge`, `searchUsers` |
+| [`help-id.ts`](../../src/app/actions/help-id.ts) | `createIdRequest`, `createSuggestion`, `upvoteSuggestion`, `acceptSuggestion`, `addIdentifiedHorse`, `deleteIdRequest` |
+| [`contact.ts`](../../src/app/actions/contact.ts) | `submitContactForm` |
+| [`moderation.ts`](../../src/app/actions/moderation.ts) | `getReportReasons`, `submitReport`, `getOpenReports`, `dismissReport`, `actionReport` |
+
+> **Creating `live_show` / `photo_show` events is removed and server-guarded.** Events are now
+> listing pages for happenings outside MHH. Existing legacy shows still render.
+
+### 📚 Registry (Catalog) & Reference
+
+| File | Functions |
+|------|-----------|
+| [`reference.ts`](../../src/app/actions/reference.ts) | `searchCatalogAction`, `searchCatalogFuzzy`, `getCatalogItem`, `getReleasesForMold`, `matchCsvRowsBatch` |
+| [`reference-pages.ts`](../../src/app/actions/reference-pages.ts) | `unstable_cache` readers for the public `/reference` pages: `resolveReferenceItem`, `getActiveListingsForCatalog`, `getCatalogPhotos`, `getChildReleases`, `getCatalogCounts`, `getReferenceMarket`, `getReferenceMarketHistory` (+ `REFERENCE_PAGES_CACHE_TAG`) |
+| [`maker-hubs.ts`](../../src/app/actions/maker-hubs.ts) | `getMakerIndex`, `getMakerMolds`, `getMakerRecent` |
+| [`catalog-suggestions.ts`](../../src/app/actions/catalog-suggestions.ts) | `getCatalogItems`, `getCatalogItem`, `createSuggestion`, `getSuggestions`, `getSuggestion`, `voteSuggestion`, `removeVote`, `getUserVote`, `addSuggestionComment`, `deleteSuggestionComment`, `reviewSuggestion`, `getChangelog`, `getTopCurators` |
+
+> Approved corrections merge into `catalog_items.attributes` JSONB via
+> [`src/lib/catalog/corrections.ts`](../../src/lib/catalog/corrections.ts) — never top-level
+> columns. Filter dropdowns come from `get_catalog_facets()`.
+
+### 👤 Account, Profile & Platform
+
+| File | Functions |
+|------|-----------|
+| [`profile.ts`](../../src/app/actions/profile.ts) | `updateBio`, `loadMoreProfileHorses`, `getMyCustomization`, `saveProfileCustomization`, `uploadProfileBanner` |
+| [`settings.ts`](../../src/app/actions/settings.ts) | `getProfile`, `updateProfile`, `updateNotificationPrefs`, `changePassword`, `uploadAvatar`, `deleteAccount` |
+| [`notifications.ts`](../../src/app/actions/notifications.ts) | `getUnreadNotificationCount`, `getNotifications`, `markNotificationRead`, `markAllNotificationsRead`, `clearNotifications` |
+| [`header.ts`](../../src/app/actions/header.ts) | `getHeaderData` |
+| [`src/app/auth/actions.ts`](../../src/app/auth/actions.ts) | `loginAction`, `signupAction`, `resendConfirmationAction`, `forgotPasswordAction` — the only action file outside `src/app/actions/` |
+
+> Profile customization (migration 171) is a single `users.profile_customization` JSONB bag,
+> validated app-side by `sanitizeCustomization`. Notification preference groups have a
+> drift-guard test; `link_url` deep links are checked same-origin before use.
 
 ### 🔧 Admin
 
-| File | Functions | Purpose |
-|------|-----------|---------|
-| [`admin.ts`](actions/user.md#admin) | `getAdminStats`, `getAdminUsers`, `toggleVerified`, `getAdminReports` | Admin dashboard |
+| File | Functions |
+|------|-----------|
+| [`admin.ts`](../../src/app/actions/admin.ts) | `getAdminPulse`, `getMigrationStatus`, `getEnvFlagStatus`, `searchMembers`, `suspendUser`/`unsuspendUser` (+ `*ByAlias`), `listAnnouncements`, `createAnnouncement`, `deleteAnnouncement`, `featureHorse`, `setFeedPostPinned`, `listLegacySuggestions`, `resolveLegacySuggestion`, `findCatalogDuplicates`, `mergeCatalogItems`, `listSanctioningRequests`, `resolveSanctioningRequest`, `listOverdueShows`, `nudgeOverdueShowHost`, `toggleMessageRead`, `replyToContactMessage`, `deleteContactMessage` |
+| [`admin-insights.ts`](../../src/app/actions/admin-insights.ts) | `getAdminInsights` — the object-metrics dashboard |
 
-### 📚 Catalog Curation (V32)
-
-| File | Functions | Purpose |
-|------|-----------|---------|
-| [`catalog-suggestions.ts`](actions/catalog-suggestions.md) | `getCatalogItems`, `getCatalogItem`, `createSuggestion`, `getSuggestions`, `getSuggestion`, `voteSuggestion`, `removeVote`, `getUserVote`, `addSuggestionComment`, `deleteSuggestionComment`, `reviewSuggestion`, `getChangelog`, `getTopCurators` | Community catalog curation — browsing, suggestions, voting, discussion, admin review, trusted curator auto-approve, changelog |
-
-> **Approved corrections** merge attribute changes into the `catalog_items.attributes` JSONB via [`src/lib/catalog/corrections.ts`](../../src/lib/catalog/corrections.ts) — not top-level columns.
-> **Filter dropdowns** (makers / scales / materials) are powered by the `get_catalog_facets()` RPC.
+See [OPERATOR_PLAYBOOK.md](../OPERATOR_PLAYBOOK.md) for the console's shape.
 
 ## Auth Patterns
 
@@ -119,6 +185,10 @@ const { supabase, user } = await requireAuth();
 // Pattern B: createClient() — for read-only or public data
 const supabase = await createClient();
 ```
+
+Anon-readable surfaces use `src/lib/supabase/anon.ts` or a `SECURITY DEFINER` RPC; the
+service-role client (`src/lib/supabase/admin.ts`) is the last resort and always carries a
+justification comment.
 
 See [Auth Flow](../architecture/auth-flow.md) for details.
 
