@@ -27,25 +27,20 @@ interface UniversalFeedProps {
  /** Label override — e.g."Comments" vs"Posts" vs"Discussion" */
  label?: string;
  /**
-  * Visual variant."leather" is ONLY for the global /feed page: the page
-  * wraps the feed in a .feed-leather panel (deep leather + brass spine),
-  * so this component drops its own card chrome and pins each post's
-  * first photo flush to the frame top. Every other context (groups,
-  * events, shows, passports) keeps the default look.
+  * Visual variant.
+  *
+  * Both variants now render the SAME ledger leaves. The thread wears
+  * the site's paper everywhere it appears — passport, barn, event,
+  * show — because that is what the owner approved on /feed, and a
+  * comment on a horse should not look like a different product from
+  * a post in the Paddock.
+  *
+  * "leather" survives only as a layout hint: the one caller that ever
+  * passed it wrapped this component in its own padded panel (the old
+  * global /feed, which now uses FeedStream instead). It therefore
+  * just suppresses the top margin — it no longer switches materials.
   */
  variant?: "default" | "leather";
-}
-
-function timeAgo(dateStr: string): string {
- const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
- if (seconds < 60) return"Just now";
- const minutes = Math.floor(seconds / 60);
- if (minutes < 60) return `${minutes}m ago`;
- const hours = Math.floor(minutes / 60);
- if (hours < 24) return `${hours}h ago`;
- const days = Math.floor(hours / 24);
- if (days < 30) return `${days}d ago`;
- return new Date(dateStr).toLocaleDateString("en-US", { month:"short", day:"numeric" });
 }
 
 export default function UniversalFeed({
@@ -129,7 +124,7 @@ export default function UniversalFeed({
  setError(null);
  try {
  // Upload images first
- let uploadedPaths: string[] = [];
+ const uploadedPaths: string[] = [];
  if (imageFiles.length > 0) {
  const supabase = createClient();
  const {
@@ -201,49 +196,50 @@ export default function UniversalFeed({
  };
 
  return (
- // Leather variant: the surrounding .feed-leather panel provides the
- // background/border, so skip the default card chrome.
- <div className={isLeather ? "relative" : "mt-6 rounded-lg border border-input bg-card p-6 shadow-md transition-all"}>
- {isLeather ? (
- <h3 className="feed-leather-label mb-4">
- {label} ({posts.length}
- {hasMore ?"+" :""})
- </h3>
- ) : (
+ // The thread sits directly on the page's parchment — no card around
+ // the card. Each post below is its own ledger leaf.
+ <div className={isLeather ? "relative" : "relative mt-6"}>
+ {/* Section rule in the site's heading vocabulary (same brass bar
+ the Paddock stream and ExplorerLayout headings use). */}
  <div className="brass-heading mb-4">
  <span className="brass-heading-bar" aria-hidden="true" />
- <h3 className="m-0">
+ <h3 className="text-secondary-foreground m-0 text-sm">
  {label} ({posts.length}
  {hasMore ?"+" :""})
  </h3>
  </div>
- )}
 
  {/* ── Composer ── */}
  {showComposer && (
- <div className="mb-6 rounded-lg border border-input bg-card p-4">
+ <div className="ledger-card mb-6">
+ <span className="ledger-tab">Say something</span>
  <textarea
- className="w-full min-h-[100px] resize-y rounded-md border border-input bg-transparent px-4 py-3 text-sm no-underline transition-all focus:border-forest focus:outline-none"
+ /* A lit-paper slip laid on the ledger, not a hole in it. */
+ className="border-input bg-(--paper-lit) focus:border-forest min-h-[76px] w-full resize-y rounded-md border px-4 py-3 text-sm no-underline transition-all focus:outline-none"
  placeholder={composerPlaceholder}
  value={composerText}
  onChange={(e) => setComposerText(e.target.value)}
  maxLength={2000}
  rows={2}
  id="universal-compose-input"
+ aria-label="Write a post"
  />
  {imagePreviews.length > 0 && (
  <div
- className="mt-2 grid max-h-[150] gap-[4px] overflow-hidden rounded-md"
- data-count={imagePreviews.length}
+ className={`mt-3 grid gap-1.5 ${imagePreviews.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}
  >
  {imagePreviews.map((preview, i) => (
  <div key={i} className="relative">
  {/* eslint-disable-next-line @next/next/no-img-element */}
- <img src={preview} alt={`Preview ${i + 1}`} className="max-h-[150]" />
+ <img
+ src={preview}
+ alt={`Preview ${i + 1}`}
+ className="border-input bg-muted h-[150px] w-full rounded-lg border object-cover"
+ />
  <button
  onClick={() => removeImage(i)}
  className="absolute top-1 right-1 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full border-0 bg-black/60 text-xs leading-5 text-white"
- aria-label="Remove image"
+ aria-label={`Remove image ${i + 1}`}
  >
  ✕
  </button>
@@ -251,16 +247,16 @@ export default function UniversalFeed({
  ))}
  </div>
  )}
- <div className="flex flex-wrap items-center justify-between gap-2">
- <div className="flex items-center gap-2">
+ <div className="border-forest/15 mt-3 flex flex-wrap items-center justify-between gap-2 border-t pt-3">
+ <div className="flex flex-wrap items-center gap-2">
  <button
  type="button"
- className="inline-flex min-h-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-2 py-1 text-sm font-semibold text-muted-foreground no-underline transition-all"
+ className="studio-chip disabled:opacity-50"
  onClick={() => fileInputRef.current?.click()}
  disabled={imageFiles.length >= 4}
  title="Attach images (up to 4)"
  >
- 📷 {imageFiles.length > 0 ? `(${imageFiles.length}/4)` :""}
+ 📷 Photo{imageFiles.length > 0 ? ` (${imageFiles.length}/4)` :""}
  </button>
  <input
  ref={fileInputRef}
@@ -271,14 +267,16 @@ export default function UniversalFeed({
  className="hidden"
  aria-label="Upload images"
  />
- <span className="text-muted-foreground font-medium text-xs">{composerText.length}/2000</span>
+ <span className="text-muted-foreground text-xs font-medium tabular-nums">{composerText.length}/2000</span>
  </div>
- <Button
+ <button
+ type="button"
+ className="btn-brass disabled:cursor-not-allowed disabled:opacity-50"
  onClick={handlePost}
  disabled={isPosting || (!composerText.trim() && imageFiles.length === 0)}
  >
- {isPosting ?"Posting…" :"📝 Post"}
- </Button>
+ {isPosting ?"Posting…" :"Post"}
+ </button>
  </div>
  {error && (
  <p className="text-destructive mt-2 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm">
@@ -290,11 +288,13 @@ export default function UniversalFeed({
 
  {/* ── Post List ── */}
  {posts.length === 0 ? (
- <p className={`font-medium my-4 ${isLeather ? "feed-leather-note text-center" : "text-muted-foreground"}`}>No {label.toLowerCase()} yet — be the first!</p>
+ <p className="ledger-card text-muted-foreground m-0 text-sm italic">
+ No {label.toLowerCase()} yet — be the first!
+ </p>
  ) : (
  <div className="flex flex-col gap-5">
  {posts.map((post) => (
- <PostCard key={post.id} post={post} currentUserId={currentUserId} currentUserAlias={currentUserAlias} currentUserAvatar={currentUserAvatar} variant={variant} />
+ <PostCard key={post.id} post={post} currentUserId={currentUserId} currentUserAlias={currentUserAlias} currentUserAvatar={currentUserAvatar} />
  ))}
  </div>
  )}
@@ -302,9 +302,7 @@ export default function UniversalFeed({
  {/* ── Load More Sentinel ── */}
  {hasMore && <div ref={sentinelRef} className="h-[1]" />}
  {isLoadingMore && (
- <p className={`mt-4 text-center ${isLeather ? "feed-leather-note" : "text-muted-foreground"}`}>
- Loading more…
- </p>
+ <p className="text-muted-foreground mt-4 text-center text-sm italic">Loading more…</p>
  )}
  </div>
  );
@@ -314,7 +312,7 @@ export default function UniversalFeed({
 // POST CARD — renders a single post + replies
 // ============================================================
 
-function PostCard({ post, currentUserId, currentUserAlias, currentUserAvatar, variant = "default" }: { post: Post; currentUserId: string; currentUserAlias: string; currentUserAvatar: string | null; variant?: "default" | "leather" }) {
+function PostCard({ post, currentUserId, currentUserAlias, currentUserAvatar }: { post: Post; currentUserId: string; currentUserAlias: string; currentUserAvatar: string | null }) {
  const router = useRouter();
  const [showReplies, setShowReplies] = useState(false);
  const [showAllReplies, setShowAllReplies] = useState(false);
@@ -386,22 +384,15 @@ function PostCard({ post, currentUserId, currentUserAlias, currentUserAvatar, va
  const visibleReplies = replies.length > 3 && !showAllReplies ? replies.slice(0, 2) : replies;
  const hiddenCount = replies.length - 2;
 
- // Leather feed (global /feed only): the FIRST photo becomes a hero image
- // flush to the frame's top edge (prototype look); the rest stay in the
- // collage grid below. Other contexts keep all photos in the grid.
- const isLeather = variant === "leather";
- const heroMedia = isLeather ? post.media[0] : undefined;
- const gridMedia = post.media.slice(heroMedia ? 1 : 0, 4);
+ // Photos read as prints on the page (the PassportGallery / Paddock
+ // treatment): one big, or a tidy pair-grid. No hero bleed — a thread
+ // post is a page of a ledger, not a magazine spread.
+ const gridMedia = post.media.slice(0, 4);
 
  return (
- <div className={`leather-frame pb-3 ${post.isPinned ? "bg-warning/5" : ""}`}>
- {/* Hero photo — same plain <img> the grid renders (no click handler to preserve) */}
- {heroMedia && (
- // eslint-disable-next-line @next/next/no-img-element
- <img className="feed-leather-hero" src={heroMedia.imageUrl} alt={heroMedia.caption || "Post photo"} loading="lazy" />
- )}
+ <article className={`ledger-card thread-post ${post.isPinned ? "thread-post-pinned" : ""}`}>
  {post.isPinned && (
- <span className="mb-1 block text-xs font-semibold uppercase tracking-wider text-warning">📌 Pinned</span>
+ <span className="stamp mb-2 inline-block">📌 Pinned</span>
  )}
  {/* Header with avatar */}
  <PostHeader
@@ -420,6 +411,7 @@ function PostCard({ post, currentUserId, currentUserAlias, currentUserAvatar, va
  setEditText(displayContent);
  }}
  disabled={isPending}
+ aria-label="Edit post"
  >
  ✏️
  </button>
@@ -427,6 +419,7 @@ function PostCard({ post, currentUserId, currentUserAlias, currentUserAvatar, va
  className="inline-flex min-h-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-1.5 py-0.5 text-xs font-semibold text-muted-foreground no-underline transition-all hover:bg-card"
  onClick={handleDelete}
  disabled={isPending}
+ aria-label="Delete post"
  >
  🗑️
  </button>
@@ -435,11 +428,11 @@ function PostCard({ post, currentUserId, currentUserAlias, currentUserAvatar, va
  />
 
  {/* Content */}
- <div className="mt-1 pl-10">
+ <div className="mt-1.5 pl-10">
  {isEditing ? (
  <div className="flex flex-col gap-1">
  <textarea
- className="min-h-[36px] w-full resize-y rounded-md border border-input bg-transparent px-4 py-2 text-sm no-underline transition-all"
+ className="border-input bg-(--paper-lit)/70 focus:border-forest min-h-[36px] w-full resize-y rounded-md border px-4 py-2 text-sm no-underline transition-all focus:outline-none"
  value={editText}
  onChange={(e) => setEditText(e.target.value)}
  rows={3}
@@ -468,21 +461,26 @@ function PostCard({ post, currentUserId, currentUserAlias, currentUserAvatar, va
  {embedHorseId && <HorseEmbedCard horseId={embedHorseId} />}
  </div>
 
- {/* Media Collage (leather variant: first photo already shown as hero) */}
+ {/* Media: prints on the page, not full-bleed stacks */}
  {gridMedia.length > 0 && (
  <div
- className="mt-2 grid gap-[4px] overflow-hidden rounded-md pl-10"
- data-count={gridMedia.length}
+ className={`mt-3 grid gap-1.5 pl-10 ${gridMedia.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}
  >
  {gridMedia.map((m, i) => (
  // eslint-disable-next-line @next/next/no-img-element
- <img key={m.id || i} src={m.imageUrl} alt={m.caption || `Image ${i + 1}`} loading="lazy" />
+ <img
+ key={m.id || i}
+ src={m.imageUrl}
+ alt={m.caption || `Image ${i + 1}`}
+ loading="lazy"
+ className="border-input bg-muted h-full max-h-[340px] w-full rounded-lg border object-cover"
+ />
  ))}
  </div>
  )}
 
  {/* Actions: Like + Reply toggle */}
- <div className="pl-10">
+ <div className="border-forest/15 mt-2 border-t pt-1 pl-10">
  <ReactionBar
  isLiked={post.isLikedByMe}
  likeCount={post.likesCount}
@@ -495,7 +493,7 @@ function PostCard({ post, currentUserId, currentUserAlias, currentUserAvatar, va
 
  {/* Replies */}
  {showReplies && (
- <div className="mt-3 ml-10 border-l-2 border-border/60 pl-4">
+ <div className="border-forest/25 mt-3 ml-10 border-l-2 pl-4">
  {visibleReplies.map((r) => (
  <div key={r.id} className="mb-3">
  <PostHeader
@@ -515,6 +513,7 @@ function PostCard({ post, currentUserId, currentUserAlias, currentUserAvatar, va
  });
  }}
  disabled={isPending}
+ aria-label="Delete reply"
  >
  🗑️
  </button>
@@ -542,6 +541,6 @@ function PostCard({ post, currentUserId, currentUserAlias, currentUserAvatar, va
  />
  </div>
  )}
- </div>
+ </article>
  );
 }

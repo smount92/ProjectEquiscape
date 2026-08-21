@@ -77,7 +77,7 @@ export default function PostHeader({
                         </span>
                     )}
                     <span className="text-muted-foreground text-xs">·</span>
-                    {/* Semantic <time> also lets material contexts (e.g. .feed-leather) restyle timestamps */}
+                    {/* Semantic <time> so a surrounding material context can restyle timestamps */}
                     {permalink ? (
                         <Link href={permalink} className="text-muted-foreground text-xs no-underline hover:underline">
                             <time dateTime={createdAt}>{timeAgo(createdAt)}</time>

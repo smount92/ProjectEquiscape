@@ -3691,3 +3691,67 @@ html[data-theme="night"] .paddock-post-system {
     border-top-color: var(--brass);
     border-left-color: var(--brass);
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   DISCUSSION THREADS (UniversalFeed) — passports, barns, events, shows
+   ------------------------------------------------------------------
+   UniversalFeed is the one thread component: it hangs off a horse
+   passport, an event page, a legacy show page, and the barn's flat
+   feed when the notice board can't load. It used to render
+   .leather-frame cards — a cream face inside a 6px leather border —
+   which on the site's parchment pages read as white blocks floating
+   in a brown mat. That is the look the owner rejected on /feed.
+
+   It now wears the same ledger leaf as the Paddock stream, so a
+   comment on a passport and a post on /feed are visibly the same
+   kind of thing. Only two classes needed inventing; the rest is
+   .ledger-card plus utilities.
+
+     1. .thread-post — a ledger leaf at comment rhythm. Tighter than
+        a section card, and it must NOT eat .ledger-card's 30px left
+        padding: the text has to clear the red margin line.
+     2. .thread-post-pinned — a pinned post: brass down the fore-edge
+        and across the head, the same way .paddock-post-system marks
+        the platform speaking. Replaces an amber wash over the whole
+        card (bg-warning/5), which fought the paper.
+
+   Both carry Simple Mode then Lamplight overrides, in that order,
+   mirroring how .ledger-card and .paddock-post are patched above.
+
+   Lamplight rule (owner, 2026-08-21): night paper is PLAIN — no
+   ruling and no margin line behind text. The night .ledger-card
+   override already strips both, so .thread-post deliberately paints
+   NO background of its own and inherits whichever paper the theme
+   chose. Only .thread-post-pinned repaints, and it has a matching
+   night rule below.
+   ══════════════════════════════════════════════════════════════════ */
+.thread-post {
+    padding: 14px 16px 12px 30px;
+}
+/* Pinned: brass fore-edge on the ledger leaf. */
+.thread-post-pinned {
+    border-top-color: var(--brass);
+    border-left: 4px solid var(--brass);
+    /* the red margin line would collide with the brass edge */
+    background:
+        repeating-linear-gradient(0deg, transparent 0 27px, rgba(44, 85, 69, 0.09) 27px 28px),
+        linear-gradient(180deg, #FDF9EC, #F6F0DD);
+}
+
+/* Simple Mode: flat card, no ruling, no brass gradient. */
+[data-simple-mode="true"] .thread-post {
+    padding: 16px;
+}
+[data-simple-mode="true"] .thread-post-pinned {
+    background: var(--card);
+    border-left: 4px solid #7A5C22;
+    border-top: 3px solid #7A5C22;
+}
+
+/* Lamplight: dark paper, no ruling behind the text, brass edge kept. */
+html[data-theme="night"] .thread-post-pinned {
+    background: linear-gradient(180deg, #2E2517, #261D11);
+    border-color: #453723;
+    border-top-color: var(--brass);
+    border-left-color: var(--brass);
+}
