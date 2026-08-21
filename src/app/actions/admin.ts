@@ -1822,3 +1822,38 @@ export async function nudgeOverdueShowHost(showId: string): Promise<NudgeHostRes
 
   return { success: true, sent: true };
 }
+
+// ── Feed pinning — admin announcements held above the Paddock stream ──
+
+/**
+ * Pin (or unpin) a top-level feed post. Pinned posts render above the
+ * stream on the Paddock's first page (getFeedStream). Admin-only:
+ * posts RLS has no pin arm, so this goes through the service role —
+ * which is also why an author can't pin themselves to the top.
+ */
+export async function setFeedPostPinned(
+  postId: string,
+  pinned: boolean
+): Promise<{ success: boolean; error?: string }> {
+  const user = await verifyAdmin();
+  if (!user) return { success: false, error: "Unauthorized" };
+
+  const admin = getAdminSupabase();
+  const { data: post, error: readError } = await admin
+    .from("posts")
+    .select("id, parent_id")
+    .eq("id", postId)
+    .maybeSingle();
+  if (readError) return { success: false, error: readError.message };
+  if (!post) return { success: false, error: "Post not found." };
+  if ((post as { parent_id: string | null }).parent_id) {
+    return { success: false, error: "Replies can't be pinned — pin the post itself." };
+  }
+
+  const { error } = await admin
+    .from("posts")
+    .update({ is_pinned: pinned })
+    .eq("id", postId);
+  if (error) return { success: false, error: error.message };
+  return { success: true };
+}

@@ -19,6 +19,8 @@ interface FeedStreamProps {
     showComposer?: boolean;
     label?: string;
     emptyMessage?: string;
+    /** Admin viewer: shows the pin/unpin control on posts. */
+    viewerIsAdmin?: boolean;
 }
 
 /**
@@ -53,6 +55,7 @@ export default function FeedStream({
     showComposer = true,
     label = "Community Posts",
     emptyMessage,
+    viewerIsAdmin = false,
 }: FeedStreamProps) {
     const router = useRouter();
 
@@ -91,6 +94,7 @@ export default function FeedStream({
                                 id: postId || `pending-${Date.now()}`,
                                 source: "post",
                                 kind: "user",
+                                isPinned: false,
                                 authorId: currentUserId,
                                 authorAlias: currentUserAlias,
                                 authorAvatarUrl: currentUserAvatar,
@@ -144,6 +148,7 @@ export default function FeedStream({
                             currentUserAvatar={currentUserAvatar}
                             knownAliases={aliases}
                             onRemoved={handleRemoved}
+                            viewerIsAdmin={viewerIsAdmin}
                         />
                     ))}
                 </div>

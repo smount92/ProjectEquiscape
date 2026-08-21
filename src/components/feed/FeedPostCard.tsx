@@ -26,6 +26,8 @@ interface FeedPostCardProps {
     /** Aliases mentioned anywhere on this page, so spaced names link. */
     knownAliases: readonly string[];
     onRemoved: (id: string) => void;
+    /** Admin viewer: shows the pin/unpin control (setFeedPostPinned). */
+    viewerIsAdmin?: boolean;
 }
 
 /** Quiet forest pill for "where this was written" / audience chips. */
@@ -56,10 +58,13 @@ export default function FeedPostCard({
     currentUserAvatar,
     knownAliases,
     onRemoved,
+    viewerIsAdmin = false,
 }: FeedPostCardProps) {
     const router = useRouter();
     const isLegacy = item.source === "activity";
     const isSystem = item.kind === "show_results";
+    // Pinning is a posts-table feature; legacy activity rows can't carry it.
+    const canPin = viewerIsAdmin && !isLegacy;
 
     const [showReplies, setShowReplies] = useState(false);
     const [showAllReplies, setShowAllReplies] = useState(false);
@@ -141,8 +146,27 @@ export default function FeedPostCard({
                 isEdited={wasEdited}
                 permalink={`/feed/${item.id}`}
                 actions={
-                    item.canEdit || item.canDelete ? (
+                    item.canEdit || item.canDelete || canPin ? (
                         <>
+                            {canPin && (
+                                <button
+                                    className="inline-flex min-h-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-1.5 py-0.5 text-xs font-semibold text-muted-foreground no-underline transition-all hover:bg-card"
+                                    onClick={() =>
+                                        startTransition(async () => {
+                                            const { setFeedPostPinned } = await import(
+                                                "@/app/actions/admin"
+                                            );
+                                            await setFeedPostPinned(item.id, !item.isPinned);
+                                            router.refresh();
+                                        })
+                                    }
+                                    disabled={isPending}
+                                    aria-label={item.isPinned ? "Unpin post" : "Pin post"}
+                                    title={item.isPinned ? "Unpin from the top" : "Pin to the top"}
+                                >
+                                    📌
+                                </button>
+                            )}
                             {item.canEdit && (
                                 <button
                                     className="inline-flex min-h-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-1.5 py-0.5 text-xs font-semibold text-muted-foreground no-underline transition-all hover:bg-card"
@@ -173,8 +197,9 @@ export default function FeedPostCard({
 
             {/* Where this was written, when it wasn't written here — and
                 who it was written for, when that isn't everyone. */}
-            {(item.context || isSystem || item.visibility === "followers") && (
+            {(item.context || isSystem || item.isPinned || item.visibility === "followers") && (
                 <div className="mt-1.5 flex flex-wrap items-center gap-1.5 pl-10">
+                    {item.isPinned && <span className="stamp">📌 Pinned</span>}
                     {isSystem && <span className="stamp">🏆 Show Results</span>}
                     {item.context && (
                         <Link href={item.context.href} className={`${CONTEXT_CHIP} hover:underline`}>

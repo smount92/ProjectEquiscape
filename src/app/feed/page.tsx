@@ -164,6 +164,10 @@ export default async function FeedPage({
                             currentUserAlias={me?.alias_name ?? "You"}
                             currentUserAvatar={myAvatar}
                             visibilityEnabled={capabilities.visibility}
+                            viewerIsAdmin={
+                                user.email?.toLowerCase() ===
+                                process.env.ADMIN_EMAIL?.toLowerCase()
+                            }
                             /* Following is a lens on the same stream, not a place to
                                write to — composing always posts to the one feed. */
                             showComposer={scope === "everyone"}

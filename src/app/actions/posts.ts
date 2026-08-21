@@ -732,6 +732,8 @@ export interface FeedStreamItem {
     source: "post" | "activity";
     /** "user" for composed posts, "show_results" for a show's announcement. */
     kind: string;
+    /** Admin-pinned: held above the stream on the feed's first page. */
+    isPinned: boolean;
     authorId: string;
     authorAlias: string;
     authorAvatarUrl: string | null;
@@ -811,6 +813,26 @@ export async function getFeedStream(options?: {
     if (support.kind) selectColumns += ", kind";
     if (support.visibility) selectColumns += ", visibility";
 
+    // ── Pinned announcements — held above the stream, first page only ──
+    // Admin-pinned, context-free posts (setFeedPostPinned in admin.ts).
+    // They ride the same visibility/block filters as everything else and
+    // are excluded from the regular batches so they never appear twice.
+    let pinnedRows: Record<string, unknown>[] = [];
+    if (!cursor) {
+        const { data: pinnedRaw } = await supabase
+            .from("posts")
+            .select(selectColumns)
+            .is("parent_id", null)
+            .eq("is_pinned", true)
+            .order("created_at", { ascending: false })
+            .limit(3);
+        const eligible = ((pinnedRaw ?? []) as unknown as Record<string, unknown>[]).filter(
+            (r) => !blockedIds.has(r.author_id as string),
+        );
+        pinnedRows = await filterToGloballyVisible(supabase, eligible);
+    }
+    const pinnedIds = new Set(pinnedRows.map((r) => r.id as string));
+
     // PostgREST puts `.in()` lists in the query string, so a viewer who
     // follows hundreds of people would build a URL long enough to be
     // rejected. Past that size, ask for the unfiltered page and narrow
@@ -847,6 +869,7 @@ export async function getFeedStream(options?: {
 
         const eligible = rows.filter(
             (r) =>
+                !pinnedIds.has(r.id as string) &&
                 !blockedIds.has(r.author_id as string) &&
                 (useInFilter || !authorSet || authorSet.has(r.author_id as string)),
         );
@@ -888,7 +911,7 @@ export async function getFeedStream(options?: {
 
     const merged = mergeByCreatedAtDesc(postShells, legacyShells);
     const page = takePage(merged, limit, postsExhausted && legacyExhausted);
-    if (page.items.length === 0) {
+    if (page.items.length === 0 && pinnedRows.length === 0) {
         // Nothing survived the visibility filter, but the stores are not
         // exhausted — hand back where we got to so "Load more" can keep
         // walking rather than showing a false end of the feed.
@@ -900,15 +923,24 @@ export async function getFeedStream(options?: {
     const pageLegacyRows = page.items.filter((s) => s.source === "activity").map((s) => s.row);
 
     const [postItems, legacyItems, knownAliases] = await Promise.all([
-        hydratePostItems(supabase, user.id, pagePostRows, blockedIds),
+        hydratePostItems(supabase, user.id, [...pinnedRows, ...pagePostRows], blockedIds),
         hydrateLegacyItems(supabase, user.id, pageLegacyRows),
-        resolvePageAliases(page.items.map((s) => contentOf(s.row, s.source))),
+        resolvePageAliases([
+            ...pinnedRows.map((r) => (r.content as string) || ""),
+            ...page.items.map((s) => contentOf(s.row, s.source)),
+        ]),
     ]);
 
     const byId = new Map<string, FeedStreamItem>();
     for (const item of [...postItems, ...legacyItems]) byId.set(item.id, item);
 
-    const items = page.items.map((s) => byId.get(s.id)).filter((i): i is FeedStreamItem => !!i);
+    const pinnedItems = pinnedRows
+        .map((r) => byId.get(r.id as string))
+        .filter((i): i is FeedStreamItem => !!i);
+    const items = [
+        ...pinnedItems,
+        ...page.items.map((s) => byId.get(s.id)).filter((i): i is FeedStreamItem => !!i),
+    ];
 
     // Batch-resolve avatar storage paths → signed URLs (posts + replies).
     const avatarPaths: (string | null)[] = [];
@@ -1060,6 +1092,7 @@ async function hydratePostItems(
             id: p.id as string,
             source: "post" as const,
             kind,
+            isPinned: (p.is_pinned as boolean) || false,
             authorId: p.author_id as string,
             authorAlias: postUser?.alias_name ?? "Unknown",
             authorAvatarUrl: postUser?.avatar_url ?? null,
@@ -1164,6 +1197,7 @@ async function hydrateLegacyItems(
             id: e.id as string,
             source: "activity" as const,
             kind: "user",
+            isPinned: false,
             authorId: e.actor_id as string,
             authorAlias: actor?.alias_name ?? "Unknown",
             authorAvatarUrl: actor?.avatar_url ?? null,
