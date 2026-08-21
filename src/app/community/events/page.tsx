@@ -1,39 +1,47 @@
-import { createClient } from"@/lib/supabase/server";
-import { redirect } from"next/navigation";
-import Link from"next/link";
-import { getEvents } from"@/app/actions/events";
-import EventBrowser from"@/components/EventBrowser";
-import { EVENT_TYPE_LABELS } from"@/lib/constants/events";
-import ExplorerLayout from"@/components/layouts/ExplorerLayout";
-import PageMasthead from"@/components/layouts/PageMasthead";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+
+import { getEvents } from "@/app/actions/events";
+import { createClient } from "@/lib/supabase/server";
+import EventsIndex from "@/components/events/EventsIndex";
+import ExplorerLayout from "@/components/layouts/ExplorerLayout";
+import PageMasthead from "@/components/layouts/PageMasthead";
 import { Button } from "@/components/ui/button";
 
-
 export const metadata = {
- title:"Events",
- description:"Discover shows, swap meets, meetups, and more in the model horse community.",
+    title: "Events",
+    description:
+        "What the model horse hobby is doing off-platform — external shows, meetups, club days, swap meets and studio openings.",
 };
 
 export default async function EventsPage() {
- const supabase = await createClient();
- const {
- data: { user },
- } = await supabase.auth.getUser();
- if (!user) redirect("/login");
+    const supabase = await createClient();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) redirect("/login");
 
- const events = await getEvents({ upcoming: true });
+    // Upcoming is the page; the archive is a footnote, so it's capped.
+    const [upcoming, past] = await Promise.all([
+        getEvents({ upcoming: true }),
+        getEvents({ past: true, limit: 20 }),
+    ]);
 
- return (
- <ExplorerLayout noHeader>
-  <PageMasthead
-   icon="📅"
-   title="Events"
-   subtitle="Shows, swap meets, meetups, and more"
-   actions={
-   <Button asChild><Link href="/community/events/create">+ Create Event</Link></Button>
-   }
-  />
-  <EventBrowser events={events} typeLabels={EVENT_TYPE_LABELS} />
- </ExplorerLayout>
- );
+    return (
+        <ExplorerLayout noHeader>
+            <div className="animate-fade-in-up mx-auto max-w-[900px]">
+                <PageMasthead
+                    icon="📅"
+                    title="Events"
+                    subtitle="Out in the hobby — shows, meetups, club days"
+                    actions={
+                        <Button asChild>
+                            <Link href="/community/events/create">+ Post Event</Link>
+                        </Button>
+                    }
+                />
+                <EventsIndex upcoming={upcoming} past={past} />
+            </div>
+        </ExplorerLayout>
+    );
 }

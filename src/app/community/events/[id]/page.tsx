@@ -1,443 +1,266 @@
-import { createClient } from"@/lib/supabase/server";
-import { redirect, notFound } from"next/navigation";
-import Link from"next/link";
-import { getEvent, getEventAttendees } from"@/app/actions/events";
-import { getEventDivisions } from"@/app/actions/competition";
-import { getPosts, getEventMedia } from"@/app/actions/posts";
-import { getShowEntries } from"@/app/actions/shows";
-import EventRsvpButton from"@/components/EventRsvpButton";
-import EventDeleteButton from"@/components/EventDeleteButton";
-import EventPhotoGallery from"@/components/EventPhotoGallery";
-import UniversalFeed from"@/components/UniversalFeed";
-import AssignPlacings from"@/components/AssignPlacings";
-import ShowEntryForm from"@/components/ShowEntryForm";
-import VoteButton from"@/components/VoteButton";
-import WithdrawButton from"@/components/WithdrawButton";
-import ExplorerLayout from"@/components/layouts/ExplorerLayout";
-import PageMasthead from"@/components/layouts/PageMasthead";
-import { ClipboardList, Camera, Users } from"lucide-react";
+import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
 
-import { EVENT_TYPE_LABELS } from"@/lib/constants/events";
-import { getPublicImageUrl } from"@/lib/utils/storage";
+import { getEvent, getEventAttendees } from "@/app/actions/events";
+import { getPosts, getEventMedia } from "@/app/actions/posts";
+import { createClient } from "@/lib/supabase/server";
+import EventAttendeeStrip from "@/components/events/EventAttendeeStrip";
+import EventLinkOut, { safeExternalUrl } from "@/components/events/EventLinkOut";
+import EventRsvpBar from "@/components/events/EventRsvpBar";
+import { eventTypeIcon, eventTypeLabel, isLegacyShowEvent } from "@/components/events/eventTypes";
+import EventDeleteButton from "@/components/EventDeleteButton";
+import EventPhotoGallery from "@/components/EventPhotoGallery";
+import ExplorerLayout from "@/components/layouts/ExplorerLayout";
+import PageMasthead from "@/components/layouts/PageMasthead";
+import UniversalFeed from "@/components/UniversalFeed";
 import { Button } from "@/components/ui/button";
 
+/**
+ * /community/events/[id] — the event page.
+ *
+ * A Facebook-shaped page for an outside-MHH happening: masthead, when
+ * and where, the big link out to wherever it actually lives, RSVP, a
+ * face strip of who's coming, photos, and a discussion thread.
+ *
+ * No show machinery lives here any more. Legacy `live_show` /
+ * `photo_show` rows still render — they just get a banner pointing at
+ * /shows/[id], which is where the legacy entries, classlist, voting
+ * and placings have always been served from (LegacyShowPage).
+ */
+
+function formatWhen(event: {
+    startsAt: string;
+    endsAt: string | null;
+    isAllDay: boolean;
+}): string {
+    const start = new Date(event.startsAt);
+    if (Number.isNaN(start.getTime())) return "Date TBD";
+
+    const day = start.toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+    });
+    if (event.isAllDay) return `${day} · All day`;
+
+    const time = start.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+    const end = event.endsAt ? new Date(event.endsAt) : null;
+    if (!end || Number.isNaN(end.getTime())) return `${day} · ${time}`;
+
+    const sameDay = start.toDateString() === end.toDateString();
+    const endText = sameDay
+        ? end.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })
+        : end.toLocaleString("en-US", {
+              month: "short",
+              day: "numeric",
+              hour: "numeric",
+              minute: "2-digit",
+          });
+    return `${day} · ${time} – ${endText}`;
+}
+
+/**
+ * Has it already happened? An event with no end is over once its start
+ * has passed. Server-rendered, so "now" is request time.
+ */
+function hasFinished(startsAt: string, endsAt: string | null): boolean {
+    const end = new Date(endsAt ?? startsAt);
+    if (Number.isNaN(end.getTime())) return false;
+    return end.getTime() < Date.now();
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
- const { id } = await params;
- const event = await getEvent(id);
- return {
- title: event ? `${event.name}` :"Event Not Found",
- description: event?.description ||"Model Horse Hub event",
- };
+    const { id } = await params;
+    const event = await getEvent(id);
+    return {
+        title: event ? event.name : "Event Not Found",
+        description: event?.description || "A model horse happening, listed on Model Horse Hub",
+    };
 }
 
 export default async function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
- const { id } = await params;
- const supabase = await createClient();
- const {
- data: { user },
- } = await supabase.auth.getUser();
- if (!user) redirect("/login");
+    const { id } = await params;
+    const supabase = await createClient();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) redirect("/login");
 
- const event = await getEvent(id);
- if (!event) notFound();
+    const event = await getEvent(id);
+    if (!event) notFound();
 
- // Is this a show-type event? (live_show or photo_show)
- const isShowEvent = event.eventType ==="live_show" || event.eventType ==="photo_show";
- const isExpertJudged = event.judgingMethod ==="expert_judge";
- const isHost = user.id === event.createdBy;
+    const [attendees, posts, photos] = await Promise.all([
+        getEventAttendees(id),
+        getPosts({ eventId: id }, { includeReplies: true }),
+        getEventMedia(id),
+    ]);
 
- // Parallel data fetches
- const [attendees, comments, photos, divisions, showData] = await Promise.all([
- getEventAttendees(id),
- getPosts({ eventId: id }, { includeReplies: true }),
- getEventMedia(id),
- getEventDivisions(id),
- isShowEvent ? getShowEntries(id) : Promise.resolve({ show: null, entries: [] }),
- ]);
+    const isHost = user.id === event.createdBy;
+    const legacyShow = isLegacyShowEvent(event.eventType);
+    const linkUrl = safeExternalUrl(event.virtualUrl);
+    const start = new Date(event.startsAt);
+    const isPast = hasFinished(event.startsAt, event.endsAt);
 
- const showEntries = [...showData.entries].sort((a, b) => {
- const divA = a.divisionName ||"zzz";
- const divB = b.divisionName ||"zzz";
- if (divA !== divB) return divA.localeCompare(divB);
- const clsA = a.className ||"zzz";
- const clsB = b.className ||"zzz";
- if (clsA !== clsB) return clsA.localeCompare(clsB);
- return 0;
- });
- const showStatus = showData.show?.status ||"open";
- const isShowOpen = showStatus ==="open";
+    const goingCount = attendees.filter((a) => a.status === "going").length;
+    const interestedCount = attendees.filter((a) => a.status === "interested").length;
 
- // Fetch user's public horses for show entry form
- let horseOptions: { id: string; name: string; thumbnailUrl: string | null }[] = [];
- if (isShowEvent && isShowOpen) {
- const { data: userHorses } = await supabase
- .from("user_horses")
- .select("id, custom_name")
- .eq("owner_id", user.id)
- .eq("is_public", true);
+    const monthLabel = Number.isNaN(start.getTime())
+        ? "—"
+        : start.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+    const dayLabel = Number.isNaN(start.getTime()) ? "?" : String(start.getDate());
 
- const horseIds = (userHorses ?? []).map((h: { id: string }) => h.id);
- const thumbMap = new Map<string, string>();
- if (horseIds.length > 0) {
-   const { data: horseThumbs } = await supabase
-     .from("horse_images")
-     .select("horse_id, image_url, angle_profile")
-     .in("horse_id", horseIds);
-   for (const hId of horseIds) {
-     const imgs = (horseThumbs ?? []).filter((r: { horse_id: string }) => r.horse_id === hId);
-     const primary = imgs.find((i: { angle_profile: string }) => i.angle_profile === "Primary_Thumbnail");
-     const url = (primary ?? imgs[0])?.image_url;
-     if (url) thumbMap.set(hId, getPublicImageUrl(url as string));
-   }
- }
+    const where = event.isVirtual
+        ? "Online"
+        : event.locationName || event.region || "Location to be announced";
 
- horseOptions = (userHorses ?? []).map((h: { id: string; custom_name: string }) => ({
- id: h.id,
- name: h.custom_name,
- thumbnailUrl: thumbMap.get(h.id) || null,
- }));
- }
+    return (
+        <ExplorerLayout noHeader>
+            <div className="animate-fade-in-up mx-auto max-w-[860px]">
+                <PageMasthead
+                    icon={eventTypeIcon(event.eventType)}
+                    title={event.name}
+                    subtitle={
+                        <>
+                            {eventTypeLabel(event.eventType)}
+                            {isPast ? " · Already happened" : ""}
+                        </>
+                    }
+                    backHref="/community/events"
+                    backLabel="Events"
+                />
 
- // Build class options for the entry form (from divisions)
- const classOptions = divisions.flatMap((d) =>
- d.classes.map((c) => ({ id: c.id, name: c.name, divisionName: d.name })),
- );
+                {/* ── The masthead card: when, where, who, and the way out ── */}
+                <section className="ledger-card mb-6">
+                    <div className="flex flex-wrap items-start gap-5">
+                        <div
+                            className="flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-md border-2 border-forest/40 bg-forest/5"
+                            aria-hidden="true"
+                        >
+                            <span className="font-serif text-[0.7rem] font-bold tracking-[0.14em] text-forest uppercase">
+                                {monthLabel}
+                            </span>
+                            <span className="font-serif text-2xl leading-none font-bold tabular-nums text-foreground">
+                                {dayLabel}
+                            </span>
+                        </div>
 
- // Expert entries for assign placings panel
- const expertEntries =
- isExpertJudged && isHost
- ? showEntries.map((e) => ({ id: e.id, horseName: e.horseName, ownerAlias: e.ownerAlias }))
- : [];
+                        <div className="min-w-0 flex-1">
+                            <p className="m-0 font-semibold">{formatWhen(event)}</p>
+                            <p className="m-0 mt-1 text-sm text-secondary-foreground">
+                                {where}
+                                {event.locationAddress && !event.isVirtual && (
+                                    <span className="text-muted-foreground">
+                                        {" "}
+                                        — {event.locationAddress}
+                                    </span>
+                                )}
+                            </p>
+                            <p className="m-0 mt-1 text-xs text-muted-foreground">
+                                Listed by{" "}
+                                <Link
+                                    href={`/profile/${encodeURIComponent(event.creatorAlias)}`}
+                                    className="font-semibold text-forest"
+                                >
+                                    @{event.creatorAlias}
+                                </Link>
+                                {event.groupName && <> · {event.groupName}</>}
+                                {event.region && !event.isVirtual && <> · {event.region}</>}
+                            </p>
+                        </div>
+                    </div>
 
- const date = new Date(event.startsAt);
- const endDate = event.endsAt ? new Date(event.endsAt) : null;
+                    {linkUrl && (
+                        <div className="mt-5">
+                            <EventLinkOut
+                                url={linkUrl}
+                                label={event.isVirtual ? "Join online" : "Event page"}
+                            />
+                            <p className="m-0 mt-2 text-xs text-muted-foreground">
+                                This event happens off Model Horse Hub — entering, paying and
+                                results all live at that link.
+                            </p>
+                        </div>
+                    )}
 
- return (
- <ExplorerLayout noHeader>
- <PageMasthead
-  icon="📅"
-  title={event.name}
-  subtitle={<>{EVENT_TYPE_LABELS[event.eventType] || event.eventType} · 👥 {event.rsvpCount} attending</>}
-  backHref="/community/events"
-  backLabel="Events"
- />
- <div className="mx-auto max-w-6xl px-6 max-w-[720]">
+                    <div className="mt-5 border-t border-forest/15 pt-4">
+                        <EventRsvpBar
+                            eventId={event.id}
+                            currentStatus={event.userRsvp}
+                            goingCount={goingCount}
+                            interestedCount={interestedCount}
+                            closed={isPast}
+                        />
+                    </div>
+                </section>
 
- <div className="mb-6 flex items-start gap-6">
- <div className="flex h-[56px] min-w-[56px] shrink-0 flex-col items-center justify-center rounded-md border border-forest/30 bg-gradient-to-br from-forest/15 to-studio/10">
- <span className="text-xs font-bold tracking-wider text-forest uppercase">
- {date.toLocaleDateString("en-US", { month:"short" }).toUpperCase()}
- </span>
- <span className="text-foreground text-xl leading-none font-extrabold">
- {date.getDate()}
- </span>
- </div>
- <div>
- <div className="text-muted-foreground mt-2 flex flex-wrap gap-4">
- <span>{EVENT_TYPE_LABELS[event.eventType] || event.eventType}</span>
- <span>👥 {event.rsvpCount} attending</span>
- {event.isOfficial && <span className="text-warning">⭐ Official</span>}
- {event.judgingMethod ==="expert_judge" && (
- <span className="text-studio">🏅 Expert Judged</span>
- )}
- </div>
- </div>
- </div>
+                {/* ── Legacy show rows: send people where the show lives ── */}
+                {legacyShow && (
+                    <aside className="ledger-card mb-6">
+                        <span className="ledger-tab">Legacy show</span>
+                        <p className="m-0 text-sm leading-relaxed">
+                            This listing was created back when events doubled as shows. Its
+                            entries, classlist and results still live on the show page.
+                            New shows are opened in the Show Office.
+                        </p>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                            <Button asChild variant="outline">
+                                <Link href={`/shows/${event.id}`}>View the show →</Link>
+                            </Button>
+                            <Button asChild variant="ghost">
+                                <Link href="/shows/host">Show Office</Link>
+                            </Button>
+                        </div>
+                    </aside>
+                )}
 
- {/* RSVP */}
- <div className="my-4">
- <EventRsvpButton eventId={event.id} currentStatus={event.userRsvp} />
- </div>
+                {/* ── About ── */}
+                {event.description && (
+                    <section className="ledger-card mb-6">
+                        <span className="ledger-tab">About</span>
+                        <p className="m-0 leading-[1.7] whitespace-pre-line">
+                            {event.description}
+                        </p>
+                    </section>
+                )}
 
- {/* Details */}
- <div className="mb-6 grid gap-2">
- <div className="flex items-center justify-between py-1">
- <span className="text-muted-foreground text-sm">📅 Date</span>
- <span className="text-sm font-bold">
- {event.isAllDay
- ?"All Day"
- : date.toLocaleString("en-US", {
- weekday:"short",
- month:"short",
- day:"numeric",
- hour:"numeric",
- minute:"2-digit",
- })}
- {endDate && (
- <>
- {""}
- —{""}
- {endDate.toLocaleString("en-US", {
- month:"short",
- day:"numeric",
- hour:"numeric",
- minute:"2-digit",
- })}
- </>
- )}
- </span>
- </div>
- {!event.isVirtual && event.locationName && (
- <div className="flex items-center justify-between py-1">
- <span className="text-muted-foreground text-sm">📍 Location</span>
- <span className="text-sm font-bold">
- {event.locationName}
- {event.locationAddress && (
- <>
- <br />
- {event.locationAddress}
- </>
- )}
- </span>
- </div>
- )}
- {event.isVirtual && event.virtualUrl && (
- <div className="flex items-center justify-between py-1">
- <span className="text-muted-foreground text-sm">🌐 Virtual Link</span>
- <a
- href={event.virtualUrl}
- target="_blank"
- rel="noopener noreferrer"
- className="text-forest text-sm font-bold"
- >
- Join Online →
- </a>
- </div>
- )}
- {event.region && (
- <div className="flex items-center justify-between py-1">
- <span className="text-muted-foreground text-sm">🗺️ Region</span>
- <span className="text-sm font-bold">{event.region}</span>
- </div>
- )}
- {event.groupName && (
- <div className="flex items-center justify-between py-1">
- <span className="text-muted-foreground text-sm">🏛️ Hosted by</span>
- <span className="text-sm font-bold">{event.groupName}</span>
- </div>
- )}
- <div className="flex items-center justify-between py-1">
- <span className="text-muted-foreground text-sm">Created by</span>
- <span className="text-sm font-bold">@{event.creatorAlias}</span>
- </div>
- </div>
+                {/* ── Who's coming ── */}
+                <section className="ledger-card mb-6">
+                    <span className="ledger-tab">Who&rsquo;s coming</span>
+                    <EventAttendeeStrip attendees={attendees} />
+                </section>
 
- {/* Description */}
- {event.description && (
- <div className="bg-card border-input rounded-lg border p-6 shadow-md transition-all">
- <h3 className="mb-2">About</h3>
- <p className="leading-[1.7] whitespace-pre-line">
- {event.description}
- </p>
- </div>
- )}
+                {/* ── Host controls ── */}
+                {isHost && (
+                    <div className="mb-6 flex flex-wrap justify-end gap-2">
+                        <Button asChild variant="outline" size="wide">
+                            <Link href={`/community/events/${event.id}/manage`}>
+                                ⚙️ Edit event
+                            </Link>
+                        </Button>
+                        <EventDeleteButton eventId={event.id} />
+                    </div>
+                )}
 
- {/* Creator Actions */}
- {user.id === event.createdBy && (
- <div className="mt-6 flex flex-wrap justify-end gap-2">
- <Button asChild variant="outline" size="wide"><Link
- href={`/community/events/${event.id}/manage`}
- >
- ⚙️ Manage Classes
- </Link></Button>
- <EventDeleteButton eventId={event.id} />
- </div>
- )}
+                {/* ── Photos ── */}
+                <EventPhotoGallery
+                    eventId={event.id}
+                    currentUserId={user.id}
+                    initialPhotos={photos}
+                />
 
- {/* Division / Class Tree */}
- {divisions.length > 0 && (
- <div className="bg-card border-input mt-6 rounded-lg border p-6 shadow-md transition-all">
- <h3 className="mb-4 flex items-center gap-2">
- <ClipboardList className="h-5 w-5" /> Class List ({divisions.reduce((s, d) => s + d.classes.length, 0)} classes)
- </h3>
- {divisions.map((div) => (
- <div key={div.id} className="mb-4">
- <div className="text-foreground mb-1 font-bold">{div.name}</div>
- <div className="pl-6">
- {div.classes.map((cls) => (
- <div
- key={cls.id}
- className="py-1 text-secondary-foreground flex items-center gap-2 text-sm"
- >
- <span className="text-muted-foreground min-w-[40px]">{cls.classNumber ||"—"}</span>
- <span>{cls.name}</span>
- {cls.isNanQualifying && (
- <span title="NAN Qualifying" className="text-warning">
- ⭐
- </span>
- )}
- {(cls.entryCount || 0) > 0 && (
- <span className="text-muted-foreground text-xs">({cls.entryCount})</span>
- )}
- </div>
- ))}
- </div>
- </div>
- ))}
- </div>
- )}
-
- {/* ══════════════════════════════════════ */}
- {/* Show Entry Section (live_show / photo_show) */}
- {/* ══════════════════════════════════════ */}
- {isShowEvent && isShowOpen && (
- <div className="bg-card border-input mt-6 rounded-lg border p-6 shadow-md transition-all">
- <h3 className="mb-2">{event.eventType === "live_show" ? "🐴 Register Your Horse" : "🐴 Enter Your Horse"}</h3>
- <p className="text-muted-foreground mb-4 text-sm">
- Select a public horse to enter. Your horse&apos;s passport photo will be used as the entry
- thumbnail.
- {classOptions.length > 0 &&" Choose which class to enter."}
- </p>
- <ShowEntryForm
- showId={event.id}
- userHorses={horseOptions}
- classes={classOptions.length > 0 ? classOptions : undefined}
- />
- </div>
- )}
-
- {/* Show Entries Grid */}
- {isShowEvent && showEntries.length > 0 && (
- <div className="bg-card border-input mt-6 rounded-lg border p-6 shadow-md transition-all">
- <h3 className="mb-4 flex items-center gap-2"><Camera className="h-5 w-5" /> Entries ({showEntries.length})</h3>
- <div className="border border-input flex flex-col gap-0 overflow-hidden rounded-lg border">
- {showEntries.map((entry, index) => (
- <div
- key={entry.id}
- className="border border-input flex items-center gap-4 border-b px-6 py-4 transition-colors"
- >
- <div className="text-muted-foreground min-w-[32px] text-center text-lg font-bold">
- {isExpertJudged && showStatus ==="closed" && entry.placing
- ? entry.placing
- : `#${index + 1}`}
- </div>
- {entry.thumbnailUrl && (
- <div className="h-[64px] w-[64px] shrink-0 overflow-hidden rounded-md">
- {/* eslint-disable-next-line @next/next/no-img-element */}
- <img src={entry.thumbnailUrl} alt={entry.horseName} loading="lazy" />
- </div>
- )}
- <div className="flex min-w-0 flex-1 flex-col gap-[2px]">
- <Link
- href={`/community/${entry.horseId}`}
- className="hover:text-forest text-base font-semibold text-inherit no-underline"
- >
- 🐴 {entry.horseName}
- </Link>
- <span className="text-forest no-underline">
- by{""}
- {entry.ownerId === "hidden" ? (
- <span className="text-muted-foreground">@{entry.ownerAlias}</span>
- ) : (
- <Link href={`/profile/${encodeURIComponent(entry.ownerAlias)}`}>
- @{entry.ownerAlias}
- </Link>
- )}
- {entry.finishType && `${" ·"} ${entry.finishType}`}
- {entry.className && (
- <span className="text-forest ml-1">
- · {entry.divisionName && `${entry.divisionName} / `}
- {entry.className}
- </span>
- )}
- </span>
- </div>
- <div className="flex items-center gap-1">
- {isExpertJudged ? (
- entry.placing && showStatus ==="closed" ? (
- <span
- className="rounded-sm bg-warning/10 px-2 py-1 text-sm font-semibold text-warning"
- >
- {entry.placing}
- </span>
- ) : null
- ) : (
- <VoteButton
- entryId={entry.id}
- initialVotes={entry.votes}
- initialHasVoted={entry.hasVoted}
- disabled={showStatus !=="open"}
- />
- )}
- {entry.ownerId === user.id && showStatus ==="open" && (
- <WithdrawButton entryId={entry.id} />
- )}
- </div>
- </div>
- ))}
- </div>
- </div>
- )}
-
- {isShowEvent && showEntries.length === 0 && !isShowOpen && (
- <div
- className="bg-card border-input mt-6 rounded-lg border p-6 text-center shadow-md transition-all"
- >
- <p className="text-muted-foreground">No entries were submitted for this show.</p>
- </div>
- )}
-
- {/* Expert Judge — Assign Placings */}
- {isExpertJudged && isHost && expertEntries.length > 0 && (
- <AssignPlacings eventId={event.id} entries={expertEntries} />
- )}
-
- {/* Attendees */}
- {attendees.length > 0 && (
- <div className="bg-card border-input mt-6 rounded-lg border p-6 shadow-md transition-all">
- <h3 className="mb-2 flex items-center gap-2">
- <Users className="h-5 w-5" /> Who&apos;s Going ({attendees.filter((a) => a.status ==="going").length})
- </h3>
- <div className="flex flex-wrap gap-1">
- {attendees
- .filter((a) => a.status ==="going")
- .map((a) => (
- <Link
- key={a.userId}
- href={`/profile/${encodeURIComponent(a.alias)}`}
- className="text-foreground rounded-full bg-[var(--muted)] px-2.5 py-1 text-sm no-underline transition-colors hover:bg-[var(--color-accent)] hover:text-white"
- >
- @{a.alias}
- </Link>
- ))}
- </div>
- {attendees.filter((a) => a.status ==="interested").length > 0 && (
- <>
- <h4 className="text-muted-foreground mt-4">
- ⭐ Interested ({attendees.filter((a) => a.status ==="interested").length})
- </h4>
- <div className="flex flex-wrap gap-1">
- {attendees
- .filter((a) => a.status ==="interested")
- .map((a) => (
- <Link
- key={a.userId}
- href={`/profile/${encodeURIComponent(a.alias)}`}
- className="text-foreground rounded-full bg-[var(--muted)] px-2.5 py-1 text-sm no-underline transition-colors hover:bg-[var(--color-accent)] hover:text-white"
- >
- @{a.alias}
- </Link>
- ))}
- </div>
- </>
- )}
- </div>
- )}
-
- {/* Photo Gallery */}
- <EventPhotoGallery eventId={event.id} currentUserId={user.id} initialPhotos={photos} />
-
- {/* Comments — now via UniversalFeed */}
- <UniversalFeed
- initialPosts={comments}
- context={{ eventId: event.id }}
- currentUserId={user.id}
- showComposer={true}
- composerPlaceholder="Add a comment on this event…"
- label="Comments"
- />
- </div>
-  </ExplorerLayout>
- );
+                {/* ── Discussion ── */}
+                <UniversalFeed
+                    initialPosts={posts}
+                    context={{ eventId: event.id }}
+                    currentUserId={user.id}
+                    showComposer={true}
+                    composerPlaceholder={
+                        isPast ? "How was it?" : "Ask a question, or say you're bringing someone…"
+                    }
+                    label="Discussion"
+                />
+            </div>
+        </ExplorerLayout>
+    );
 }

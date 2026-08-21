@@ -1,267 +1,308 @@
 "use client";
 
-import { useState } from"react";
-import { useRouter } from"next/navigation";
-import { createEvent } from"@/app/actions/events";
+/**
+ * /community/events/create — post something happening OUTSIDE MHH.
+ *
+ * The old form let anyone spin up a `live_show` / `photo_show` event
+ * that could never award a point, card, or title. Those two options
+ * are gone: MHH-hosted shows are created in the Show Office
+ * (/shows/host), and this form says so up top rather than letting
+ * people find out after the fact.
+ *
+ * What's left is honest: a name, when, where, and a link to wherever
+ * the thing actually lives.
+ */
 
-import { EVENT_TYPE_LABELS } from"@/lib/constants/events";
-import { SHOW_TEMPLATES } from"@/lib/constants/showTemplates";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+
+import { createEvent } from "@/app/actions/events";
+import { CREATABLE_EVENT_TYPES, EVENT_TYPE_META } from "@/components/events/eventTypes";
+import FocusLayout from "@/components/layouts/FocusLayout";
+import PageMasthead from "@/components/layouts/PageMasthead";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import FocusLayout from"@/components/layouts/FocusLayout";
-import PageMasthead from"@/components/layouts/PageMasthead";
-import { Button } from "@/components/ui/button";
-import { Vote, Medal } from "lucide-react";
 
 export default function CreateEventPage() {
- const router = useRouter();
- const [name, setName] = useState("");
- const [description, setDescription] = useState("");
- const [eventType, setEventType] = useState("meetup");
- const [startsAt, setStartsAt] = useState("");
- const [endsAt, setEndsAt] = useState("");
- const [isAllDay, setIsAllDay] = useState(false);
- const [isVirtual, setIsVirtual] = useState(false);
- const [locationName, setLocationName] = useState("");
- const [locationAddress, setLocationAddress] = useState("");
- const [region, setRegion] = useState("");
- const [virtualUrl, setVirtualUrl] = useState("");
- const [saving, setSaving] = useState(false);
- const [error, setError] = useState("");
- const [judgingMethod, setJudgingMethod] = useState<"community_vote" |"expert_judge">("community_vote");
- const [templateId, setTemplateId] = useState("");
+    const router = useRouter();
+    const [name, setName] = useState("");
+    const [description, setDescription] = useState("");
+    const [eventType, setEventType] = useState("external_show");
+    const [startsAt, setStartsAt] = useState("");
+    const [endsAt, setEndsAt] = useState("");
+    const [isAllDay, setIsAllDay] = useState(false);
+    const [isVirtual, setIsVirtual] = useState(false);
+    const [locationName, setLocationName] = useState("");
+    const [locationAddress, setLocationAddress] = useState("");
+    const [region, setRegion] = useState("");
+    const [linkUrl, setLinkUrl] = useState("");
+    const [saving, setSaving] = useState(false);
+    const [error, setError] = useState("");
 
- const isShowType = eventType === "photo_show" || eventType === "live_show";
- const selectedTemplate = SHOW_TEMPLATES.find((t) => t.key === templateId);
+    const selected = EVENT_TYPE_META[eventType];
 
- async function handleSubmit(e: React.FormEvent) {
- e.preventDefault();
- if (!startsAt) {
-  setError("Start date/time is required.");
-  return;
- }
- setSaving(true);
- setError("");
+    async function handleSubmit(e: React.FormEvent) {
+        e.preventDefault();
+        if (!startsAt) {
+            setError("Start date/time is required.");
+            return;
+        }
+        setSaving(true);
+        setError("");
 
- const result = await createEvent({
-  name: name.trim(),
-  description: description.trim() || undefined,
-  eventType,
-  startsAt: new Date(startsAt).toISOString(),
-  endsAt: endsAt ? new Date(endsAt).toISOString() : undefined,
-  isAllDay,
-  isVirtual,
-  locationName: locationName.trim() || undefined,
-  locationAddress: locationAddress.trim() || undefined,
-  region: region.trim() || undefined,
-  virtualUrl: virtualUrl.trim() || undefined,
-  judgingMethod,
-  templateId: templateId || undefined,
- });
+        const result = await createEvent({
+            name: name.trim(),
+            description: description.trim() || undefined,
+            eventType,
+            startsAt: new Date(startsAt).toISOString(),
+            endsAt: endsAt ? new Date(endsAt).toISOString() : undefined,
+            isAllDay,
+            isVirtual,
+            locationName: locationName.trim() || undefined,
+            locationAddress: locationAddress.trim() || undefined,
+            region: region.trim() || undefined,
+            virtualUrl: linkUrl.trim() || undefined,
+        });
 
- if (result.success && result.eventId) {
-  router.push(`/community/events/${result.eventId}`);
- } else {
-  setError(result.error ||"Failed to create event");
-  setSaving(false);
- }
- }
+        if (result.success && result.eventId) {
+            router.push(`/community/events/${result.eventId}`);
+        } else {
+            setError(result.error || "Failed to create event");
+            setSaving(false);
+        }
+    }
 
- return (
- <FocusLayout noHeader>
-  <PageMasthead compact icon="📅" title="Create Event" backHref="/community/events" backLabel="Events" />
-  <form onSubmit={handleSubmit}>
-  <div className="mb-6">
-   <label className="text-foreground mb-1 block text-sm font-semibold">Event Name *</label>
-   <Input
-   value={name}
-   onChange={(e) => setName(e.target.value)}
-   placeholder="Spring Fling Live Show 2026"
-   required
-   />
-  </div>
+    return (
+        <FocusLayout noHeader>
+            <PageMasthead
+                compact
+                icon="📅"
+                title="Post an Event"
+                subtitle="Something happening out in the hobby"
+                backHref="/community/events"
+                backLabel="Events"
+            />
 
-  <div className="mb-6">
-   <label className="text-foreground mb-1 block text-sm font-semibold">Event Type *</label>
-   <select className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2" value={eventType} onChange={(e) => setEventType(e.target.value)} title="Event type">
-   {Object.entries(EVENT_TYPE_LABELS).map(([key, label]) => (
-    <option key={key} value={key}>
-    {label}
-    </option>
-   ))}
-   </select>
-   </div>
+            {/* The one thing this form is NOT for. */}
+            <aside className="ledger-card mb-6">
+                <span className="ledger-tab">Hosting a show on MHH?</span>
+                <p className="m-0 text-sm leading-relaxed">
+                    Shows you run <em>here</em> — with entries, judging, results, points,
+                    cards and titles — are created in the Show Office, not on this form.
+                    Events are listings for things happening somewhere else, and they award
+                    nothing.
+                </p>
+                <Button asChild variant="outline" className="mt-3">
+                    <Link href="/shows/host">Go to the Show Office →</Link>
+                </Button>
+            </aside>
 
-   {/* NAMHSA Template Selector — only for show types */}
-   {isShowType && (
-   <div className="mb-6">
-    <label className="text-foreground mb-1 block text-sm font-semibold">
-    Starting Template (optional)
-    </label>
-    <Select value={templateId} onValueChange={setTemplateId}>
-    <SelectTrigger>
-     <SelectValue placeholder="No template — blank show" />
-    </SelectTrigger>
-    <SelectContent>
-     <SelectItem value="none">No template — blank show</SelectItem>
-     {SHOW_TEMPLATES.map((t) => (
-     <SelectItem key={t.key} value={t.key}>
-      {t.label}
-     </SelectItem>
-     ))}
-    </SelectContent>
-    </Select>
-    {selectedTemplate && (
-    <p className="mt-1 text-xs text-muted-foreground">{selectedTemplate.description}</p>
-    )}
-   </div>
-   )}
+            <form onSubmit={handleSubmit} className="ledger-card">
+                <div className="mb-6">
+                    <label
+                        htmlFor="event-name"
+                        className="text-foreground mb-1 block text-sm font-semibold"
+                    >
+                        Event Name *
+                    </label>
+                    <Input
+                        id="event-name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="MEPSA Autumn Championship"
+                        required
+                    />
+                </div>
 
-  <div className="mb-6">
-   <label className="text-foreground mb-1 block text-sm font-semibold">Judging Method</label>
-   <div className="flex gap-4">
-   <label className="flex cursor-pointer items-center gap-1">
-    <input
-    type="radio"
-    name="judgingMethod"
-    value="community_vote"
-    checked={judgingMethod ==="community_vote"}
-    onChange={() => setJudgingMethod("community_vote")}
-    />
-    <Vote className="h-4 w-4" /> Community Vote
-   </label>
-   <label className="flex cursor-pointer items-center gap-1">
-    <input
-    type="radio"
-    name="judgingMethod"
-    value="expert_judge"
-    checked={judgingMethod ==="expert_judge"}
-    onChange={() => setJudgingMethod("expert_judge")}
-    />
-    <Medal className="h-4 w-4" /> Expert Judge
-   </label>
-   </div>
-   <span className="text-muted-foreground mt-1 block text-xs">
-   {judgingMethod ==="community_vote"
-    ?"Attendees can vote on entries."
-    :"Only the event creator (or assigned judge) can assign placings."}
-   </span>
-  </div>
+                <div className="mb-6">
+                    <label
+                        htmlFor="event-type"
+                        className="text-foreground mb-1 block text-sm font-semibold"
+                    >
+                        Event Type *
+                    </label>
+                    <select
+                        id="event-type"
+                        className="border-input bg-card ring-offset-background focus:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-offset-2 focus:outline-none"
+                        value={eventType}
+                        onChange={(e) => setEventType(e.target.value)}
+                    >
+                        {CREATABLE_EVENT_TYPES.map((t) => (
+                            <option key={t.value} value={t.value}>
+                                {t.icon} {t.label}
+                            </option>
+                        ))}
+                    </select>
+                    {selected && (
+                        <p className="text-muted-foreground mt-1 text-xs">{selected.blurb}</p>
+                    )}
+                </div>
 
-  <div className="mb-6">
-   <label className="text-foreground mb-1 block text-sm font-semibold">Description</label>
-   <Textarea
-   className="w-full resize-y"
-   rows={4}
-   value={description}
-   onChange={(e) => setDescription(e.target.value)}
-   placeholder="What's this event about?"
-   />
-  </div>
+                <div className="mb-6">
+                    <label
+                        htmlFor="event-link"
+                        className="text-foreground mb-1 block text-sm font-semibold"
+                    >
+                        Link
+                    </label>
+                    <Input
+                        id="event-link"
+                        type="url"
+                        value={linkUrl}
+                        onChange={(e) => setLinkUrl(e.target.value)}
+                        placeholder="https://facebook.com/events/…"
+                    />
+                    <p className="text-muted-foreground mt-1 text-xs">
+                        Where the event actually lives — the Facebook event, the show
+                        packet, the club page, the sign-up form. This becomes the big button
+                        on the listing.
+                    </p>
+                </div>
 
-  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-   <div className="mb-6">
-   <label className="text-foreground mb-1 block text-sm font-semibold">Start *</label>
-   <Input
-    type="datetime-local"
-    value={startsAt}
-    onChange={(e) => setStartsAt(e.target.value)}
-    required
-   />
-   </div>
-   <div className="mb-6">
-   <label className="text-foreground mb-1 block text-sm font-semibold">End</label>
-   <Input
-    type="datetime-local"
-    value={endsAt}
-    onChange={(e) => setEndsAt(e.target.value)}
-   />
-   </div>
-  </div>
+                <div className="mb-6">
+                    <label
+                        htmlFor="event-description"
+                        className="text-foreground mb-1 block text-sm font-semibold"
+                    >
+                        Description
+                    </label>
+                    <Textarea
+                        id="event-description"
+                        className="w-full resize-y"
+                        rows={4}
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        placeholder="What's happening, who's running it, what people need to know (entry fees, deadlines, what to bring)…"
+                    />
+                </div>
 
-  <div className="my-3 flex gap-6">
-   <label className="flex cursor-pointer items-center gap-1">
-   <input type="checkbox" checked={isAllDay} onChange={(e) => setIsAllDay(e.target.checked)} />
-   All Day
-   </label>
-   <label className="flex cursor-pointer items-center gap-1">
-   <input
-    type="checkbox"
-    checked={isVirtual}
-    onChange={(e) => setIsVirtual(e.target.checked)}
-   />
-   Virtual Event
-   </label>
-  </div>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="mb-6">
+                        <label
+                            htmlFor="event-start"
+                            className="text-foreground mb-1 block text-sm font-semibold"
+                        >
+                            Start *
+                        </label>
+                        <Input
+                            id="event-start"
+                            type="datetime-local"
+                            value={startsAt}
+                            onChange={(e) => setStartsAt(e.target.value)}
+                            required
+                        />
+                    </div>
+                    <div className="mb-6">
+                        <label
+                            htmlFor="event-end"
+                            className="text-foreground mb-1 block text-sm font-semibold"
+                        >
+                            End
+                        </label>
+                        <Input
+                            id="event-end"
+                            type="datetime-local"
+                            value={endsAt}
+                            onChange={(e) => setEndsAt(e.target.value)}
+                        />
+                    </div>
+                </div>
 
-  {isVirtual ? (
-   <div className="mb-6">
-   <label className="text-foreground mb-1 block text-sm font-semibold">Virtual URL</label>
-   <Input
-    type="url"
-    value={virtualUrl}
-    onChange={(e) => setVirtualUrl(e.target.value)}
-    placeholder="https://zoom.us/..."
-   />
-   </div>
-  ) : (
-   <>
-   <div className="mb-6">
-    <label className="text-foreground mb-1 block text-sm font-semibold">Location Name</label>
-    <Input
-    value={locationName}
-    onChange={(e) => setLocationName(e.target.value)}
-    placeholder="Convention Center"
-    />
-   </div>
-   <div className="mb-6">
-    <label className="text-foreground mb-1 block text-sm font-semibold">Address</label>
-    <Input
-    value={locationAddress}
-    onChange={(e) => setLocationAddress(e.target.value)}
-    placeholder="123 Main St, City, State"
-    />
-   </div>
-   </>
-  )}
+                <div className="my-3 flex flex-wrap gap-6">
+                    <label className="flex cursor-pointer items-center gap-2">
+                        <input
+                            type="checkbox"
+                            checked={isAllDay}
+                            onChange={(e) => setIsAllDay(e.target.checked)}
+                        />
+                        All day
+                    </label>
+                    <label className="flex cursor-pointer items-center gap-2">
+                        <input
+                            type="checkbox"
+                            checked={isVirtual}
+                            onChange={(e) => setIsVirtual(e.target.checked)}
+                        />
+                        Online only (no physical venue)
+                    </label>
+                </div>
 
-  <div className="mb-6">
-   <label className="text-foreground mb-1 block text-sm font-semibold">Region</label>
-   <Input
-   value={region}
-   onChange={(e) => setRegion(e.target.value)}
-   placeholder="e.g. Pacific Northwest, Northeast"
-   />
-  </div>
+                {!isVirtual && (
+                    <>
+                        <div className="mb-6">
+                            <label
+                                htmlFor="event-venue"
+                                className="text-foreground mb-1 block text-sm font-semibold"
+                            >
+                                Venue
+                            </label>
+                            <Input
+                                id="event-venue"
+                                value={locationName}
+                                onChange={(e) => setLocationName(e.target.value)}
+                                placeholder="Kentucky Horse Park"
+                            />
+                        </div>
+                        <div className="mb-6">
+                            <label
+                                htmlFor="event-address"
+                                className="text-foreground mb-1 block text-sm font-semibold"
+                            >
+                                Address
+                            </label>
+                            <Input
+                                id="event-address"
+                                value={locationAddress}
+                                onChange={(e) => setLocationAddress(e.target.value)}
+                                placeholder="123 Main St, City, State"
+                            />
+                        </div>
+                    </>
+                )}
 
-  {error && (
-   <p className="text-destructive mt-2 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm">
-   {error}
-   </p>
-  )}
+                <div className="mb-6">
+                    <label
+                        htmlFor="event-region"
+                        className="text-foreground mb-1 block text-sm font-semibold"
+                    >
+                        Region
+                    </label>
+                    <Input
+                        id="event-region"
+                        value={region}
+                        onChange={(e) => setRegion(e.target.value)}
+                        placeholder="e.g. Pacific Northwest, Northeast, UK"
+                    />
+                    <p className="text-muted-foreground mt-1 text-xs">
+                        Helps people find things near them — useful even for online events.
+                    </p>
+                </div>
 
-  <div className="mt-6 flex gap-2">
-   <Button
-   type="submit"
-   disabled={saving || !name.trim()}
-   >
-   {saving ?"Creating..." :"Create Event"}
-   </Button>
-   <Button
-   type="button" variant="outline" size="wide"
-   onClick={() => router.push("/community/events")}
-   >
-   Cancel
-   </Button>
-  </div>
-  </form>
- </FocusLayout>
- );
+                {error && (
+                    <p
+                        role="alert"
+                        className="text-destructive border-destructive/30 bg-destructive/10 mt-2 flex items-center gap-2 rounded-md border px-4 py-2 text-sm"
+                    >
+                        {error}
+                    </p>
+                )}
+
+                <div className="mt-6 flex gap-2">
+                    <Button type="submit" disabled={saving || !name.trim()}>
+                        {saving ? "Posting…" : "Post Event"}
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="wide"
+                        onClick={() => router.push("/community/events")}
+                    >
+                        Cancel
+                    </Button>
+                </div>
+            </form>
+        </FocusLayout>
+    );
 }

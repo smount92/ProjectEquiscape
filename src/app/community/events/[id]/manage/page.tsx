@@ -25,6 +25,7 @@ import {
 } from"@/app/actions/competition";
 import type { Division } from"@/app/actions/competition";
 import { updateEvent, getEventJudges, addEventJudge, removeEventJudge, searchUsers } from"@/app/actions/events";
+import { isLegacyShowEvent } from"@/components/events/eventTypes";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
@@ -72,9 +73,17 @@ export default function ManageEventPage() {
  const eventId = params.id as string;
  const supabase = createClient();
 
- const [activeTab, setActiveTab] = useState<TabId>("classes");
+ const [activeTab, setActiveTab] = useState<TabId>("details");
  const [isLoading, setIsLoading] = useState(true);
  const [eventName, setEventName] = useState("");
+ /**
+  * Classes and judges are LEGACY show machinery. Events are now
+  * listings for outside-MHH happenings, so those tabs only appear for
+  * the `live_show` / `photo_show` rows created before the rework —
+  * pulling them entirely would strand hosts mid-show. New shows are
+  * run from /shows/host.
+  */
+ const [eventType, setEventType] = useState("other");
  const [divisions, setDivisions] = useState<Division[]>([]);
  const [error, setError] = useState<string | null>(null);
  const [isSaving, setIsSaving] = useState(false);
@@ -136,7 +145,7 @@ export default function ManageEventPage() {
  const { data: event } = await supabase
  .from("events")
  .select(
-"id, name, description, starts_at, ends_at, timezone, is_all_day, is_virtual, location_name, location_address, region, virtual_url, judging_method, created_by",
+"id, name, event_type, description, starts_at, ends_at, timezone, is_all_day, is_virtual, location_name, location_address, region, virtual_url, judging_method, created_by",
  )
  .eq("id", eventId)
  .single();
@@ -149,6 +158,7 @@ export default function ManageEventPage() {
 
  const ev = event as Record<string, unknown>;
  setEventName(ev.name as string);
+ setEventType((ev.event_type as string) ||"other");
  setEventData({
  name: (ev.name as string) ||"",
  description: (ev.description as string) ||"",
@@ -164,12 +174,15 @@ export default function ManageEventPage() {
  judgingMethod: (ev.judging_method as"community_vote" |"expert_judge") ||"community_vote",
  });
 
+ // Divisions and judges exist only on legacy show rows — skip the
+ // round-trips entirely for ordinary event listings.
+ if (isLegacyShowEvent((ev.event_type as string) ||"")) {
  const divs = await getEventDivisions(eventId);
  setDivisions(divs);
 
- // Load judges
  const judgeList = await getEventJudges(eventId);
  setJudges(judgeList);
+ }
 
  setIsLoading(false);
  }, [eventId, router, supabase]);
@@ -395,7 +408,7 @@ export default function ManageEventPage() {
 
  if (isLoading) {
  return (
- <ExplorerLayout title="Manage Event" description="Manage your event details, divisions, and classes.">
+ <ExplorerLayout title="Manage Event" description="Update what people see on your event listing.">
  <div
  className="bg-card border-input rounded-lg border p-12 text-center shadow-md transition-all"
  >
@@ -410,7 +423,7 @@ export default function ManageEventPage() {
 
  if (error && !eventName) {
  return (
- <ExplorerLayout title="Manage Event" description="Manage your event details, divisions, and classes.">
+ <ExplorerLayout title="Manage Event" description="Update what people see on your event listing.">
  <div
  className="bg-card border-input rounded-lg border p-12 text-center shadow-md transition-all"
  >
@@ -428,14 +441,16 @@ export default function ManageEventPage() {
  const totalClasses = divisions.reduce((sum, d) => sum + d.classes.length, 0);
  const totalEntries = divisions.reduce((sum, d) => sum + d.classes.reduce((s, c) => s + (c.entryCount || 0), 0), 0);
 
+ const isLegacyShow = isLegacyShowEvent(eventType);
+
  const tabs: { id: TabId; label: string; icon: ReactNode; hidden?: boolean }[] = [
  { id:"details", label:"Edit Details", icon: <FileEdit className="h-4 w-4" /> },
- { id:"classes", label:"Class List", icon: <ClipboardList className="h-4 w-4" /> },
- { id:"judges", label:"Judges", icon: <Gavel className="h-4 w-4" />, hidden: eventData.judgingMethod !=="expert_judge" },
+ { id:"classes", label:"Class List", icon: <ClipboardList className="h-4 w-4" />, hidden: !isLegacyShow },
+ { id:"judges", label:"Judges", icon: <Gavel className="h-4 w-4" />, hidden: !isLegacyShow || eventData.judgingMethod !=="expert_judge" },
  ];
 
  return (
- <ExplorerLayout title="Manage Event" description="Manage your event details, divisions, and classes.">
+ <ExplorerLayout title="Manage Event" description="Update what people see on your event listing.">
  <div className="animate-fade-in-up">
  {/* Header */}
  <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
@@ -446,12 +461,14 @@ export default function ManageEventPage() {
  <h1 className="inline-flex items-center gap-2"><Settings className="h-5 w-5" /> Manage Event</h1>
  <p className="text-secondary-foreground">{eventName}</p>
  </div>
+ {isLegacyShow && (
  <div className="flex gap-2">
  <span className="rounded-md bg-[var(--primary)] px-2 py-0.5 text-xs font-bold text-white">
  {divisions.length} Division{divisions.length !== 1 ?"s" :""} · {totalClasses} Class
  {totalClasses !== 1 ?"es" :""} · {totalEntries} Entr{totalEntries !== 1 ?"ies" :"y"}
  </span>
  </div>
+ )}
  </div>
 
  {/* Tab Bar */}
@@ -624,21 +641,25 @@ export default function ManageEventPage() {
  </div>
  )}
 
- {eventData.isVirtual && (
+ {/* The outbound link — an event points at something that lives
+ elsewhere, so this matters whether or not it's "virtual". */}
  <div className="mb-6">
- <label className="text-foreground mb-1 block text-sm font-semibold">Virtual URL</label>
+ <label className="text-foreground mb-1 block text-sm font-semibold">Link</label>
  <Input
- 
+ type="url"
  value={eventData.virtualUrl}
  onChange={(e) =>
  setEventData((prev) => ({ ...prev, virtualUrl: e.target.value }))
  }
- placeholder="https://..."
+ placeholder="https://facebook.com/events/…"
  />
+ <p className="text-muted-foreground mt-1 text-xs">
+ Where the event actually lives — this becomes the big button on the listing.
+ </p>
  </div>
- )}
 
- {/* Judging Method */}
+ {/* Judging Method — legacy shows only */}
+ {isLegacyShow && (
  <div className="mb-6">
  <label className="text-foreground mb-1 block text-sm font-semibold">Judging Method</label>
  <div className="flex gap-4">
@@ -672,6 +693,7 @@ export default function ManageEventPage() {
  </label>
  </div>
  </div>
+ )}
 
  <div className="flex items-center gap-2">
  <Button
@@ -689,7 +711,7 @@ export default function ManageEventPage() {
  {/* ═══════════════════════════════════════ */}
  {/* TAB: Class List (existing content) */}
  {/* ═══════════════════════════════════════ */}
- {activeTab ==="classes" && (
+ {activeTab ==="classes" && isLegacyShow && (
  <>
  {/* Division Tree */}
  <div className="flex flex-col gap-4">
@@ -963,7 +985,7 @@ export default function ManageEventPage() {
  {/* ═══════════════════════════════════════ */}
  {/* TAB: Judges */}
  {/* ═══════════════════════════════════════ */}
- {activeTab ==="judges" && (
+ {activeTab ==="judges" && isLegacyShow && (
  <div className="bg-card border-input rounded-lg border p-8 shadow-md transition-all">
  <h3 className="mb-4">
  🧑‍⚖️ <span className="text-forest">Assigned Judges</span>
