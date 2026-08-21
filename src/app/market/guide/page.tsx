@@ -273,6 +273,17 @@ export default async function BlueBookPage({
                     </Button>
                 </div>
 
+                {/* Bought a one-off report? It has a home now — purchased
+                    reports were recorded but never listed anywhere (audit). */}
+                <div className="mt-6 text-center">
+                    <Link
+                        href="/market/reports"
+                        className="text-muted-foreground text-xs no-underline hover:underline"
+                    >
+                        📄 My reports — the ones you&rsquo;ve purchased
+                    </Link>
+                </div>
+
                 {/* Disclaimer */}
                 <div className="border-input bg-card/50 mt-6 rounded-lg border p-6 text-xs backdrop-blur-sm">
                     <p>
