@@ -3646,3 +3646,51 @@ html[data-theme="night"][data-simple-mode="true"] .polaroid {
     .entry-ribbon-track { animation: none; }
     .entry-ribbon-dup { display: none; }
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   THE PADDOCK (/feed) — the community room
+   ------------------------------------------------------------------
+   The stream reuses .ledger-card wholesale so a post reads as the
+   same paper as the barn notice board, the event page and the show
+   ring. Only two things needed inventing:
+
+     1. .paddock-post — ledger paper at feed rhythm (tighter than a
+        section card, and it must not eat the 30px margin gutter).
+     2. .paddock-post-system — the platform speaking rather than a
+        member: a brass fore-edge on the ledger leaf, for show results.
+
+   Both carry their own Simple Mode and Lamplight overrides, in that
+   order, mirroring how .ledger-card is patched further up the file.
+   ══════════════════════════════════════════════════════════════════ */
+.paddock-post {
+    padding: 14px 16px 12px 30px;
+}
+/* Show announcements: brass down the fore-edge, brass at the head. */
+.paddock-post-system {
+    border-top-color: var(--brass);
+    border-left: 4px solid var(--brass);
+    /* the red margin line would collide with the brass edge */
+    background:
+        repeating-linear-gradient(0deg, transparent 0 27px, rgba(44, 85, 69, 0.09) 27px 28px),
+        linear-gradient(180deg, #FDF9EC, #F6F0DD);
+}
+
+/* Simple Mode: flat card, no ruling, no brass gradient. */
+[data-simple-mode="true"] .paddock-post {
+    padding: 16px;
+}
+[data-simple-mode="true"] .paddock-post-system {
+    background: var(--card);
+    border-left: 4px solid #7A5C22;
+    border-top: 3px solid #7A5C22;
+}
+
+/* Lamplight: dark paper, brass edge kept. */
+html[data-theme="night"] .paddock-post-system {
+    background:
+        repeating-linear-gradient(0deg, transparent 0 27px, rgba(134, 178, 152, 0.11) 27px 28px),
+        linear-gradient(180deg, #2E2517, #261D11);
+    border-color: #453723;
+    border-top-color: var(--brass);
+    border-left-color: var(--brass);
+}

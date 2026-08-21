@@ -18,7 +18,6 @@ interface FeedStreamProps {
     visibilityEnabled: boolean;
     showComposer?: boolean;
     label?: string;
-    variant?: "default" | "leather";
     emptyMessage?: string;
 }
 
@@ -34,6 +33,13 @@ interface FeedStreamProps {
  * Load-more rather than infinite scroll: at this traffic level a
  * button is honest about where the end is, and it doesn't fight the
  * back button.
+ *
+ * Surface (2026-08): the stream used to sit inside a deep-leather
+ * panel, which turned every post into a bright white block floating
+ * on brown. It now sits on the page's parchment and each post is a
+ * ledger leaf — the same paper as the barn notice board and the
+ * event page, so the Paddock reads as one room rather than a
+ * separate app pasted into the site.
  */
 export default function FeedStream({
     initialItems,
@@ -46,11 +52,9 @@ export default function FeedStream({
     visibilityEnabled,
     showComposer = true,
     label = "Community Posts",
-    variant = "leather",
     emptyMessage,
 }: FeedStreamProps) {
     const router = useRouter();
-    const isLeather = variant === "leather";
 
     const [items, setItems] = useState(initialItems);
     const [cursor, setCursor] = useState(initialCursor);
@@ -77,22 +81,7 @@ export default function FeedStream({
     };
 
     return (
-        <div className={isLeather ? "relative" : "mt-6 rounded-lg border border-input bg-card p-6 shadow-md"}>
-            {isLeather ? (
-                <h3 className="feed-leather-label mb-4">
-                    {label} ({items.length}
-                    {cursor ? "+" : ""})
-                </h3>
-            ) : (
-                <div className="brass-heading mb-4">
-                    <span className="brass-heading-bar" aria-hidden="true" />
-                    <h3 className="m-0">
-                        {label} ({items.length}
-                        {cursor ? "+" : ""})
-                    </h3>
-                </div>
-            )}
-
+        <div className="relative">
             {showComposer && (
                 <FeedComposer
                     visibilityEnabled={visibilityEnabled}
@@ -129,12 +118,19 @@ export default function FeedStream({
                 />
             )}
 
+            {/* Section rule in the site's heading vocabulary — the brass
+                bar reads on parchment the way ExplorerLayout's own
+                headings do. */}
+            <div className="brass-heading mt-8 mb-4">
+                <span className="brass-heading-bar" aria-hidden="true" />
+                <h3 className="text-secondary-foreground m-0 text-sm">
+                    {label} ({items.length}
+                    {cursor ? "+" : ""})
+                </h3>
+            </div>
+
             {items.length === 0 ? (
-                <p
-                    className={`my-4 font-medium ${
-                        isLeather ? "feed-leather-note text-center" : "text-muted-foreground"
-                    }`}
-                >
+                <p className="ledger-card text-muted-foreground m-0 text-sm italic">
                     {emptyMessage ?? "Nothing here yet — be the first to post!"}
                 </p>
             ) : (
@@ -147,7 +143,6 @@ export default function FeedStream({
                             currentUserAlias={currentUserAlias}
                             currentUserAvatar={currentUserAvatar}
                             knownAliases={aliases}
-                            variant={variant}
                             onRemoved={handleRemoved}
                         />
                     ))}

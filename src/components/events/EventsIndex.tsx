@@ -38,6 +38,10 @@ const MONTHS = [
     "July", "August", "September", "October", "November", "December",
 ];
 
+/** Settled-RSVP pill — the house chip shape, toned per status. */
+const RSVP_PILL =
+    "inline-flex items-center rounded-full border px-[10px] py-[3px] text-xs font-semibold whitespace-nowrap";
+
 /** File events onto month shelves, preserving the order handed in. */
 function shelve(events: MHHEvent[]): MonthShelf[] {
     const shelves: MonthShelf[] = [];
@@ -76,27 +80,31 @@ function EventRow({
     busy: boolean;
 }) {
     const date = new Date(event.startsAt);
-    const day = Number.isNaN(date.getTime()) ? "—" : String(date.getDate());
-    const weekday = Number.isNaN(date.getTime())
-        ? ""
-        : date.toLocaleDateString("en-US", { weekday: "short" });
+    const dated = !Number.isNaN(date.getTime());
+    const day = dated ? String(date.getDate()) : "?";
+    const month = dated
+        ? date.toLocaleDateString("en-US", { month: "short" }).toUpperCase()
+        : "—";
+    const weekday = dated ? date.toLocaleDateString("en-US", { weekday: "short" }) : "";
 
     const where = event.isVirtual
         ? "Online"
         : event.locationName || event.region || "Location TBD";
 
     return (
-        <li className="flex flex-wrap items-start gap-x-4 gap-y-2 py-3">
-            {/* Date block */}
+        <li className="flex flex-wrap items-start gap-x-4 gap-y-3 py-4">
+            {/* Date block — the same torn-off calendar leaf the event
+                page uses, at list scale, so a date reads as a date
+                before you've read a word of the row. */}
             <div
-                className="flex w-12 shrink-0 flex-col items-center pt-0.5"
+                className="border-forest/40 bg-forest/5 flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-md border-2"
                 aria-hidden="true"
             >
-                <span className="font-serif text-xl leading-none font-bold tabular-nums text-forest">
-                    {day}
+                <span className="text-forest font-serif text-[0.62rem] font-bold tracking-[0.14em] uppercase">
+                    {month}
                 </span>
-                <span className="text-[0.6rem] tracking-[0.12em] uppercase text-muted-foreground">
-                    {weekday}
+                <span className="text-foreground font-serif text-xl leading-none font-bold tabular-nums">
+                    {day}
                 </span>
             </div>
 
@@ -104,7 +112,7 @@ function EventRow({
                 <div className="flex flex-wrap items-center gap-2">
                     <Link
                         href={`/community/events/${event.id}`}
-                        className="font-semibold text-foreground underline decoration-2 underline-offset-2 hover:text-forest"
+                        className="text-foreground hover:text-forest font-serif text-[1.02rem] font-bold no-underline hover:underline"
                     >
                         {event.name}
                     </Link>
@@ -113,58 +121,83 @@ function EventRow({
                     </span>
                     {event.virtualUrl && (
                         <span
-                            className="text-xs text-muted-foreground"
-                            title="This event has an external link"
+                            className="border-input text-secondary-foreground inline-flex items-center rounded-full border px-2 py-[2px] text-[0.7rem] font-semibold"
+                            title="This event happens off Model Horse Hub"
                         >
-                            ↗ off-site
+                            ↗ Off-site
                         </span>
                     )}
                 </div>
-                <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
-                    <span>{where}</span>
-                    {!event.isAllDay && !Number.isNaN(date.getTime()) && (
-                        <span>
-                            {date.toLocaleTimeString("en-US", {
-                                hour: "numeric",
-                                minute: "2-digit",
-                            })}
-                        </span>
+                <div className="text-muted-foreground mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs">
+                    {weekday && (
+                        <>
+                            <span className="font-serif tracking-[0.1em] uppercase">
+                                {weekday}
+                            </span>
+                            <span aria-hidden="true">·</span>
+                        </>
                     )}
-                    {event.isAllDay && <span>All day</span>}
-                    {event.groupName && <span>{event.groupName}</span>}
-                    <span>
+                    <span>{where}</span>
+                    {!event.isAllDay && dated && (
+                        <>
+                            <span aria-hidden="true">·</span>
+                            <span>
+                                {date.toLocaleTimeString("en-US", {
+                                    hour: "numeric",
+                                    minute: "2-digit",
+                                })}
+                            </span>
+                        </>
+                    )}
+                    {event.isAllDay && (
+                        <>
+                            <span aria-hidden="true">·</span>
+                            <span>All day</span>
+                        </>
+                    )}
+                    {event.groupName && (
+                        <>
+                            <span aria-hidden="true">·</span>
+                            <span>{event.groupName}</span>
+                        </>
+                    )}
+                    <span aria-hidden="true">·</span>
+                    <span className="tabular-nums">
                         {event.rsvpCount} {event.rsvpCount === 1 ? "person" : "people"} in
                     </span>
                 </div>
             </div>
 
-            {/* RSVP */}
-            <div className="flex shrink-0 items-center gap-2">
+            {/* RSVP — chips, not a pair of full-weight buttons. Three
+                heavy green buttons a screen made the board look like a
+                form; the answer is a pill you can already read. */}
+            <div className="flex shrink-0 items-center gap-1.5">
                 {event.userRsvp === "going" ? (
-                    <span className="inline-flex items-center rounded-full border border-success/30 bg-success/10 px-[10px] py-[3px] text-xs font-semibold whitespace-nowrap text-success">
+                    <span className={`${RSVP_PILL} border-success/30 bg-success/10 text-success`}>
                         ✓ Going
                     </span>
                 ) : event.userRsvp === "interested" ? (
-                    <span className="inline-flex items-center rounded-full border border-warning/30 bg-warning/10 px-[10px] py-[3px] text-xs font-semibold whitespace-nowrap text-warning">
+                    <span className={`${RSVP_PILL} border-warning/30 bg-warning/10 text-warning`}>
                         ⭐ Interested
                     </span>
                 ) : (
                     <>
-                        <Button
-                            size="sm"
+                        <button
+                            type="button"
+                            className="studio-chip disabled:opacity-50"
                             onClick={() => onRsvp(event.id, "going")}
                             disabled={busy}
                         >
-                            Going
-                        </Button>
-                        <Button
-                            size="sm"
-                            variant="outline"
+                            ✓ Going
+                        </button>
+                        <button
+                            type="button"
+                            className="studio-chip disabled:opacity-50"
                             onClick={() => onRsvp(event.id, "interested")}
                             disabled={busy}
                         >
-                            Interested
-                        </Button>
+                            ⭐ Interested
+                        </button>
                     </>
                 )}
             </div>
@@ -216,15 +249,17 @@ export default function EventsIndex({ upcoming, past }: Props) {
     const filteredToNothing = !nothingAtAll && visibleUpcoming.length === 0;
 
     return (
-        <div>
-            <p className="mb-6 max-w-2xl text-sm leading-relaxed text-secondary-foreground">
+        <div className="flex flex-col gap-6">
+            {/* What this board IS — a note card, not a wall of prose
+                above the content people came for. */}
+            <p className="border-input bg-card/60 text-secondary-foreground m-0 rounded-lg border p-4 text-sm leading-relaxed backdrop-blur-sm">
                 What the hobby is doing off-platform: shows running on OMHPS, MEPSA,
                 Facebook groups and in live halls, plus meetups, club days, swap meets and
                 studio openings. Post one, and people can RSVP and talk about it here.
                 Hosting a show <em>on</em> Model Horse Hub?{" "}
                 <Link
                     href="/shows/host"
-                    className="font-semibold text-forest underline decoration-2 underline-offset-2"
+                    className="text-forest font-semibold underline decoration-2 underline-offset-2"
                 >
                     Open it in the Show Office
                 </Link>
@@ -232,8 +267,8 @@ export default function EventsIndex({ upcoming, past }: Props) {
             </p>
 
             {!nothingAtAll && (
-                <>
-                    <div className="mb-4">
+                <div className="border-input bg-card/60 flex flex-col gap-3 rounded-lg border p-4 backdrop-blur-sm">
+                    <div>
                         <label htmlFor="event-search" className="sr-only">
                             Search events
                         </label>
@@ -246,7 +281,7 @@ export default function EventsIndex({ upcoming, past }: Props) {
                         />
                     </div>
 
-                    <nav aria-label="Filter by event type" className="mb-6 flex flex-wrap gap-1">
+                    <nav aria-label="Filter by event type" className="flex flex-wrap gap-1">
                         <button
                             type="button"
                             className={`studio-chip ${typeFilter === "all" ? "active" : ""}`}
@@ -267,16 +302,18 @@ export default function EventsIndex({ upcoming, past }: Props) {
                             </button>
                         ))}
                     </nav>
-                </>
+                </div>
             )}
 
             {nothingAtAll ? (
-                <div className="px-4 py-12 text-center">
+                <div className="ledger-card py-12 text-center">
                     <div className="mb-3 text-4xl" aria-hidden="true">
                         📅
                     </div>
-                    <h2 className="mb-2 text-lg font-bold">Nothing on the board yet</h2>
-                    <p className="mx-auto mb-5 max-w-md text-sm leading-relaxed text-secondary-foreground">
+                    <h2 className="mb-2 font-serif text-lg font-bold">
+                        Nothing on the board yet
+                    </h2>
+                    <p className="text-secondary-foreground mx-auto mb-5 max-w-md text-sm leading-relaxed">
                         Events are how the hobby tells each other what&rsquo;s happening
                         elsewhere — a MEPSA show closing on Friday, a club day in March, an
                         artist opening a sales list, a swap meet two towns over. Post it once
@@ -292,23 +329,25 @@ export default function EventsIndex({ upcoming, past }: Props) {
                     </div>
                 </div>
             ) : filteredToNothing ? (
-                <div className="px-4 py-10 text-center">
-                    <p className="m-0 text-sm text-secondary-foreground">
+                <div className="ledger-card py-10 text-center">
+                    <p className="text-secondary-foreground m-0 text-sm">
                         Nothing upcoming matches that.{" "}
                         {visiblePast.length > 0 && "There are past events further down."}
                     </p>
                 </div>
             ) : (
+                /* One ledger shelf per month — the same filing the
+                   calendar and the show ring use. */
                 shelves.map((shelf) => (
                     <section
                         key={shelf.key}
                         aria-labelledby={`events-${shelf.key}`}
-                        className="mb-8"
+                        className="ledger-card"
                     >
                         <span className="ledger-tab" id={`events-${shelf.key}`}>
                             {shelf.label}
                         </span>
-                        <ul className="m-0 list-none divide-y divide-forest/10 p-0">
+                        <ul className="divide-forest/10 m-0 list-none divide-y p-0">
                             {shelf.events.map((e) => (
                                 <EventRow
                                     key={e.id}
@@ -323,17 +362,17 @@ export default function EventsIndex({ upcoming, past }: Props) {
             )}
 
             {visiblePast.length > 0 && (
-                <section className="mt-10 border-t border-forest/15 pt-6">
+                <section className="ledger-card">
                     <button
                         type="button"
-                        className="font-serif text-[0.8125rem] tracking-[0.14em] uppercase text-forest hover:underline"
+                        className="text-forest font-serif text-[0.8125rem] tracking-[0.14em] uppercase hover:underline"
                         aria-expanded={showPast}
                         onClick={() => setShowPast((v) => !v)}
                     >
                         {showPast ? "▾" : "▸"} Already happened ({visiblePast.length})
                     </button>
                     {showPast && (
-                        <ul className="m-0 mt-3 list-none divide-y divide-forest/10 p-0 opacity-80">
+                        <ul className="divide-forest/10 m-0 mt-3 list-none divide-y p-0 opacity-80">
                             {visiblePast.map((e) => (
                                 <EventRow
                                     key={e.id}

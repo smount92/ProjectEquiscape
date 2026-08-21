@@ -5,7 +5,7 @@ import RichText from"@/components/RichText";
 import LikeToggle from"@/components/LikeToggle";
 import { togglePostLike } from"@/app/actions/posts";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
-import { Button } from "@/components/ui/button";
+import PageMasthead from "@/components/layouts/PageMasthead";
 
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
@@ -90,44 +90,57 @@ export default async function FeedPostPage({ params }: { params: Promise<{ id: s
  const eventAliases = await aliasesIn(eventText);
 
  return (
-  <ExplorerLayout title="Post" description="View this post.">
- <div className="mx-auto max-w-6xl px-6 max-w-[640px]">
- <Button asChild variant="outline" size="wide"><Link
- href="/feed"
- >
- ← Back to Feed
- </Link></Button>
+            <ExplorerLayout noHeader frameless>
+                <div className="mx-auto max-w-[680px]">
+                    <PageMasthead
+                        icon="🐴"
+                        title="A post"
+                        subtitle="From the Paddock"
+                        backHref="/feed"
+                        backLabel="The Paddock"
+                        compact
+                    />
 
- <div className="bg-card border-input rounded-lg border p-6 shadow-md transition-all">
- <div className="flex flex-wrap items-center justify-between gap-1">
- <Link href={`/profile/${encodeURIComponent(eventAlias)}`} className="truncate font-semibold max-w-[200px]">
- @{eventAlias}
- </Link>
- <span className="text-muted-foreground text-sm">
- {new Date(e.created_at as string).toLocaleString()}
- </span>
- </div>
+                    <article className="ledger-card paddock-post">
+                        <div className="flex flex-wrap items-center justify-between gap-1">
+                            <Link
+                                href={`/profile/${encodeURIComponent(eventAlias)}`}
+                                className="text-foreground max-w-[200px] truncate font-semibold no-underline hover:underline"
+                            >
+                                @{eventAlias}
+                            </Link>
+                            <span className="text-muted-foreground font-serif text-xs tracking-[0.1em] uppercase">
+                                {new Date(e.created_at as string).toLocaleString()}
+                            </span>
+                        </div>
 
- {eventText && (
- <div className="mt-4">
- <RichText content={eventText} knownAliases={eventAliases} />
- </div>
- )}
+                        {eventText && (
+                            <div className="mt-4">
+                                <RichText content={eventText} knownAliases={eventAliases} />
+                            </div>
+                        )}
 
- {eventImages.length > 0 && (
- <div
- className="mt-4 grid gap-[4px] overflow-hidden rounded-md"
- data-count={Math.min(eventImages.length, 4)}
- >
- {eventImages.slice(0, 4).map((url, i) => (
- // eslint-disable-next-line @next/next/no-img-element
- <img key={i} src={url} alt={`Image ${i + 1}`} loading="lazy" />
- ))}
- </div>
- )}
- </div>
- </div>
- </ExplorerLayout>
+                        {eventImages.length > 0 && (
+                            <div
+                                className={`mt-4 grid gap-1.5 ${
+                                    eventImages.length === 1 ? "grid-cols-1" : "grid-cols-2"
+                                }`}
+                            >
+                                {eventImages.slice(0, 4).map((url, i) => (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img
+                                        key={i}
+                                        src={url}
+                                        alt={`Image ${i + 1}`}
+                                        loading="lazy"
+                                        className="border-input bg-muted h-full max-h-[380px] w-full rounded-lg border object-cover"
+                                    />
+                                ))}
+                            </div>
+                        )}
+                    </article>
+                </div>
+            </ExplorerLayout>
  );
  }
 
@@ -160,51 +173,64 @@ export default async function FeedPostPage({ params }: { params: Promise<{ id: s
  }
 
  return (
-  <ExplorerLayout title="Post" description="View and interact with this post.">
- <div className="mx-auto max-w-6xl px-6 max-w-[640px]">
- <Button asChild variant="outline" size="wide"><Link
- href="/feed"
- >
- ← Back to Feed
- </Link></Button>
+            <ExplorerLayout noHeader frameless>
+                <div className="mx-auto max-w-[680px]">
+                    <PageMasthead
+                        icon="🐴"
+                        title="A post"
+                        subtitle="From the Paddock"
+                        backHref="/feed"
+                        backLabel="The Paddock"
+                        compact
+                    />
 
- <div className="bg-card border-input rounded-lg border p-6 shadow-md transition-all">
- <div className="flex flex-wrap items-center justify-between gap-1">
- <Link href={`/profile/${encodeURIComponent(actorAlias)}`} className="truncate font-semibold max-w-[200px]">
- @{actorAlias}
- </Link>
- <span className="text-muted-foreground text-sm">
- {new Date(p.created_at as string).toLocaleString()}
- </span>
- </div>
+                    <article className="ledger-card paddock-post">
+                        <div className="flex flex-wrap items-center justify-between gap-1">
+                            <Link
+                                href={`/profile/${encodeURIComponent(actorAlias)}`}
+                                className="text-foreground max-w-[200px] truncate font-semibold no-underline hover:underline"
+                            >
+                                @{actorAlias}
+                            </Link>
+                            <span className="text-muted-foreground font-serif text-xs tracking-[0.1em] uppercase">
+                                {new Date(p.created_at as string).toLocaleString()}
+                            </span>
+                        </div>
 
- {content && (
- <div className="mt-4">
- <RichText content={content} knownAliases={postAliases} />
- </div>
- )}
+                        {content && (
+                            <div className="mt-4">
+                                <RichText content={content} knownAliases={postAliases} />
+                            </div>
+                        )}
 
- {signedUrls.length > 0 && (
- <div
- className="mt-2 mt-4 grid gap-[4px] overflow-hidden rounded-md"
- data-count={Math.min(signedUrls.length, 4)}
- >
- {signedUrls.slice(0, 4).map((item, i) => (
- // eslint-disable-next-line @next/next/no-img-element
- <img key={i} src={item.url} alt={item.caption || `Image ${i + 1}`} loading="lazy" />
- ))}
- </div>
- )}
+                        {signedUrls.length > 0 && (
+                            <div
+                                className={`mt-4 grid gap-1.5 ${
+                                    signedUrls.length === 1 ? "grid-cols-1" : "grid-cols-2"
+                                }`}
+                            >
+                                {signedUrls.slice(0, 4).map((item, i) => (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img
+                                        key={i}
+                                        src={item.url}
+                                        alt={item.caption || `Image ${i + 1}`}
+                                        loading="lazy"
+                                        className="border-input bg-muted h-full max-h-[380px] w-full rounded-lg border object-cover"
+                                    />
+                                ))}
+                            </div>
+                        )}
 
- <div className="flex items-center gap-3 mt-4">
- <LikeToggle
- initialLiked={!!liked}
- initialCount={(p.likes_count as number) || 0}
- onToggle={togglePostLike.bind(null, id)}
- />
- </div>
- </div>
- </div>
- </ExplorerLayout>
+                        <div className="border-forest/15 mt-4 flex items-center gap-3 border-t pt-2">
+                            <LikeToggle
+                                initialLiked={!!liked}
+                                initialCount={(p.likes_count as number) || 0}
+                                onToggle={togglePostLike.bind(null, id)}
+                            />
+                        </div>
+                    </article>
+                </div>
+            </ExplorerLayout>
  );
 }

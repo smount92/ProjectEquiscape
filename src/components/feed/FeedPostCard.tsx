@@ -25,10 +25,12 @@ interface FeedPostCardProps {
     currentUserAvatar: string | null;
     /** Aliases mentioned anywhere on this page, so spaced names link. */
     knownAliases: readonly string[];
-    /** Leather chrome — the approved /feed look. */
-    variant?: "default" | "leather";
     onRemoved: (id: string) => void;
 }
+
+/** Quiet forest pill for "where this was written" / audience chips. */
+const CONTEXT_CHIP =
+    "inline-flex max-w-full items-center gap-1 truncate rounded-full border border-forest/25 bg-forest/5 px-2.5 py-[3px] text-xs font-semibold text-forest no-underline";
 
 /**
  * One row of the unified feed.
@@ -40,6 +42,12 @@ interface FeedPostCardProps {
  *   - a legacy `activity_events` text post (read-only apart from
  *     liking and the author's own delete; there is no reply thread to
  *     attach to, and its likes live in the separate activity system)
+ *
+ * All three wear the SAME ledger leaf, deliberately: the point of the
+ * merge was one stream, and three card treatments would undo it in
+ * the eye even though the data is unified underneath. The only visual
+ * fork is the brass fore-edge on a show announcement — that is the
+ * platform speaking, not a member, and it earns a distinct edge.
  */
 export default function FeedPostCard({
     item,
@@ -47,13 +55,11 @@ export default function FeedPostCard({
     currentUserAlias,
     currentUserAvatar,
     knownAliases,
-    variant = "default",
     onRemoved,
 }: FeedPostCardProps) {
     const router = useRouter();
     const isLegacy = item.source === "activity";
     const isSystem = item.kind === "show_results";
-    const isLeather = variant === "leather";
 
     const [showReplies, setShowReplies] = useState(false);
     const [showAllReplies, setShowAllReplies] = useState(false);
@@ -121,21 +127,12 @@ export default function FeedPostCard({
     const visibleReplies = replies.length > 3 && !showAllReplies ? replies.slice(0, 2) : replies;
     const hiddenCount = replies.length - 2;
 
-    const heroMedia = isLeather ? item.media[0] : undefined;
-    const gridMedia = item.media.slice(heroMedia ? 1 : 0, 4);
+    const gridMedia = item.media.slice(0, 4);
 
     return (
-        <div className="leather-frame pb-3">
-            {heroMedia && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                    className="feed-leather-hero"
-                    src={heroMedia.imageUrl}
-                    alt={heroMedia.caption || "Post photo"}
-                    loading="lazy"
-                />
-            )}
-
+        <article
+            className={`ledger-card paddock-post ${isSystem ? "paddock-post-system" : ""}`}
+        >
             <PostHeader
                 avatarUrl={item.authorAvatarUrl}
                 alias={item.authorAlias}
@@ -177,16 +174,16 @@ export default function FeedPostCard({
             {/* Where this was written, when it wasn't written here — and
                 who it was written for, when that isn't everyone. */}
             {(item.context || isSystem || item.visibility === "followers") && (
-                <div className="mt-0.5 flex flex-wrap items-center gap-1.5 pl-10 text-xs text-muted-foreground">
-                    {isSystem && <span className="font-semibold text-forest">🏆 Show results</span>}
+                <div className="mt-1.5 flex flex-wrap items-center gap-1.5 pl-10">
+                    {isSystem && <span className="stamp">🏆 Show Results</span>}
                     {item.context && (
-                        <Link href={item.context.href} className="no-underline hover:underline">
+                        <Link href={item.context.href} className={`${CONTEXT_CHIP} hover:underline`}>
                             {item.context.label}
                         </Link>
                     )}
                     {item.visibility === "followers" && (
                         <span
-                            className="rounded-full bg-muted px-1.5 py-0.5 font-medium"
+                            className="border-input bg-muted text-secondary-foreground inline-flex items-center rounded-full border px-2.5 py-[3px] text-xs font-semibold"
                             title="Only your followers can see this post"
                         >
                             👥 Followers
@@ -195,11 +192,11 @@ export default function FeedPostCard({
                 </div>
             )}
 
-            <div className="mt-1 pl-10">
+            <div className="mt-1.5 pl-10">
                 {isEditing ? (
                     <div className="flex flex-col gap-1">
                         <textarea
-                            className="min-h-[36px] w-full resize-y rounded-md border border-input bg-transparent px-4 py-2 text-sm no-underline transition-all"
+                            className="min-h-[36px] w-full resize-y rounded-md border border-input bg-(--paper-lit)/70 px-4 py-2 text-sm no-underline transition-all focus:border-forest focus:outline-none"
                             value={editText}
                             onChange={(e) => setEditText(e.target.value)}
                             rows={3}
@@ -227,16 +224,29 @@ export default function FeedPostCard({
                 {embedHorseId && <HorseEmbedCard horseId={embedHorseId} />}
             </div>
 
+            {/* Photos read as prints on the page: bordered, rounded, one
+                big or a tidy pair-grid — the PassportGallery treatment,
+                not four full-bleed images stacked down the card. */}
             {gridMedia.length > 0 && (
-                <div className="mt-2 grid gap-[4px] overflow-hidden rounded-md pl-10" data-count={gridMedia.length}>
+                <div
+                    className={`mt-3 grid gap-1.5 pl-10 ${
+                        gridMedia.length === 1 ? "grid-cols-1" : "grid-cols-2"
+                    }`}
+                >
                     {gridMedia.map((m, i) => (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img key={m.id || i} src={m.imageUrl} alt={m.caption || `Image ${i + 1}`} loading="lazy" />
+                        <img
+                            key={m.id || i}
+                            src={m.imageUrl}
+                            alt={m.caption || `Image ${i + 1}`}
+                            loading="lazy"
+                            className="border-input bg-muted h-full max-h-[340px] w-full rounded-lg border object-cover"
+                        />
                     ))}
                 </div>
             )}
 
-            <div className="pl-10">
+            <div className="border-forest/15 mt-2 border-t pt-1 pl-10">
                 <ReactionBar
                     isLiked={item.isLikedByMe}
                     likeCount={item.likesCount}
@@ -251,7 +261,7 @@ export default function FeedPostCard({
             </div>
 
             {showReplies && !isLegacy && (
-                <div className="mt-3 ml-10 border-l-2 border-border/60 pl-4">
+                <div className="border-forest/25 mt-3 ml-10 border-l-2 pl-4">
                     {visibleReplies.map((r) => (
                         <div key={r.id} className="mb-3">
                             <PostHeader
@@ -300,6 +310,6 @@ export default function FeedPostCard({
                     />
                 </div>
             )}
-        </div>
+        </article>
     );
 }

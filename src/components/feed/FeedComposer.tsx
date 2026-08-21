@@ -3,7 +3,6 @@
 import { useRef, useState } from "react";
 import { createPost, type PostVisibility } from "@/app/actions/posts";
 import { createClient } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/button";
 import MentionTextarea from "@/components/feed/MentionTextarea";
 
 interface FeedComposerProps {
@@ -20,6 +19,11 @@ interface FeedComposerProps {
 }
 
 const MAX_IMAGES = 4;
+
+const VISIBILITY_CHOICES: { value: PostVisibility; label: string }[] = [
+    { value: "public", label: "🌍 Public" },
+    { value: "followers", label: "👥 Followers" },
+];
 
 /**
  * The feed's write path.
@@ -125,7 +129,8 @@ export default function FeedComposer({
     };
 
     return (
-        <div className="mb-6 rounded-lg border border-input bg-card p-4">
+        <div className="ledger-card">
+            <span className="ledger-tab">Say something</span>
             <MentionTextarea
                 id="feed-compose-input"
                 value={text}
@@ -133,18 +138,25 @@ export default function FeedComposer({
                 placeholder={placeholder}
                 maxLength={2000}
                 rows={2}
+                /* A lit-paper slip laid on the ledger, not a hole in it. */
+                className="border-input bg-(--paper-lit) focus:border-forest min-h-[76px] w-full resize-y rounded-md border px-4 py-3 text-sm no-underline transition-all focus:outline-none"
                 aria-label="Write a post"
             />
 
             {imagePreviews.length > 0 && (
                 <div
-                    className="mt-2 grid max-h-[150] gap-[4px] overflow-hidden rounded-md"
-                    data-count={imagePreviews.length}
+                    className={`mt-3 grid gap-1.5 ${
+                        imagePreviews.length === 1 ? "grid-cols-1" : "grid-cols-2"
+                    }`}
                 >
                     {imagePreviews.map((preview, i) => (
                         <div key={i} className="relative">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={preview} alt={`Preview ${i + 1}`} className="max-h-[150]" />
+                            <img
+                                src={preview}
+                                alt={`Preview ${i + 1}`}
+                                className="border-input bg-muted h-[150px] w-full rounded-lg border object-cover"
+                            />
                             <button
                                 onClick={() => removeImage(i)}
                                 className="absolute top-1 right-1 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full border-0 bg-black/60 text-xs leading-5 text-white"
@@ -157,16 +169,17 @@ export default function FeedComposer({
                 </div>
             )}
 
-            <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+            <div className="border-forest/15 mt-3 flex flex-wrap items-center justify-between gap-2 border-t pt-3">
                 <div className="flex flex-wrap items-center gap-2">
                     <button
                         type="button"
-                        className="inline-flex min-h-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-2 py-1 text-sm font-semibold text-muted-foreground no-underline transition-all"
+                        className="studio-chip disabled:opacity-50"
                         onClick={() => fileInputRef.current?.click()}
                         disabled={imageFiles.length >= MAX_IMAGES}
                         title={`Attach images (up to ${MAX_IMAGES})`}
                     >
-                        📷 {imageFiles.length > 0 ? `(${imageFiles.length}/${MAX_IMAGES})` : ""}
+                        📷 Photo
+                        {imageFiles.length > 0 ? ` (${imageFiles.length}/${MAX_IMAGES})` : ""}
                     </button>
                     <input
                         ref={fileInputRef}
@@ -178,27 +191,44 @@ export default function FeedComposer({
                         aria-label="Upload images"
                     />
 
+                    {/* Audience: two stamps, not a dropdown. There are
+                        exactly two answers and the current one should be
+                        readable without opening anything. */}
                     {visibilityEnabled && (
-                        <label className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <span className="sr-only">Who can see this post</span>
-                            <select
-                                className="cursor-pointer rounded-md border border-input bg-transparent px-2 py-1 text-xs"
-                                value={visibility}
-                                onChange={(e) => setVisibility(e.target.value as PostVisibility)}
-                                aria-label="Who can see this post"
-                            >
-                                <option value="public">🌍 Public</option>
-                                <option value="followers">👥 Followers</option>
-                            </select>
-                        </label>
+                        <div
+                            role="group"
+                            aria-label="Who can see this post"
+                            className="flex items-center gap-1"
+                        >
+                            {VISIBILITY_CHOICES.map((choice) => (
+                                <button
+                                    key={choice.value}
+                                    type="button"
+                                    aria-pressed={visibility === choice.value}
+                                    className={`studio-chip ${
+                                        visibility === choice.value ? "active" : ""
+                                    }`}
+                                    onClick={() => setVisibility(choice.value)}
+                                >
+                                    {choice.label}
+                                </button>
+                            ))}
+                        </div>
                     )}
 
-                    <span className="text-muted-foreground text-xs font-medium">{text.length}/2000</span>
+                    <span className="text-muted-foreground text-xs font-medium tabular-nums">
+                        {text.length}/2000
+                    </span>
                 </div>
 
-                <Button onClick={handlePost} disabled={isPosting || (!text.trim() && imageFiles.length === 0)}>
-                    {isPosting ? "Posting…" : "📝 Post"}
-                </Button>
+                <button
+                    type="button"
+                    className="btn-brass disabled:cursor-not-allowed disabled:opacity-50"
+                    onClick={handlePost}
+                    disabled={isPosting || (!text.trim() && imageFiles.length === 0)}
+                >
+                    {isPosting ? "Posting…" : "Post"}
+                </button>
             </div>
 
             {error && (

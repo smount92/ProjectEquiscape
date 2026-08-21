@@ -115,7 +115,9 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
         : event.locationName || event.region || "Location to be announced";
 
     return (
-        <ExplorerLayout noHeader>
+        // frameless: every section below is its own ledger card, so the
+        // archetype's ledger sheet underneath was framing a frame.
+        <ExplorerLayout noHeader frameless>
             <div className="animate-fade-in-up mx-auto max-w-[860px]">
                 <PageMasthead
                     icon={eventTypeIcon(event.eventType)}
@@ -132,6 +134,12 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
 
                 {/* ── The masthead card: when, where, who, and the way out ── */}
                 <section className="ledger-card mb-6">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                        <span className="ledger-tab">When &amp; where</span>
+                        <span className="stamp mb-3">
+                            {eventTypeIcon(event.eventType)} {eventTypeLabel(event.eventType)}
+                        </span>
+                    </div>
                     <div className="flex flex-wrap items-start gap-5">
                         <div
                             className="flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-md border-2 border-forest/40 bg-forest/5"
@@ -146,8 +154,10 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                         </div>
 
                         <div className="min-w-0 flex-1">
-                            <p className="m-0 font-semibold">{formatWhen(event)}</p>
-                            <p className="m-0 mt-1 text-sm text-secondary-foreground">
+                            <p className="m-0 font-serif text-[1.05rem] font-bold">
+                                {formatWhen(event)}
+                            </p>
+                            <p className="text-secondary-foreground m-0 mt-1 text-sm">
                                 {where}
                                 {event.locationAddress && !event.isVirtual && (
                                     <span className="text-muted-foreground">

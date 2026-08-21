@@ -28,7 +28,9 @@ export default async function EventsPage() {
     ]);
 
     return (
-        <ExplorerLayout noHeader>
+        // frameless: the board files itself onto ledger month shelves,
+        // so the archetype's own ledger sheet would double-frame them.
+        <ExplorerLayout noHeader frameless>
             <div className="animate-fade-in-up mx-auto max-w-[900px]">
                 <PageMasthead
                     icon="📅"

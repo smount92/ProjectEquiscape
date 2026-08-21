@@ -154,14 +154,18 @@ export default function MentionTextarea({
                     id="mention-suggestions"
                     role="listbox"
                     aria-label="Mention suggestions"
-                    className="absolute left-2 top-full z-30 mt-1 max-h-56 w-64 overflow-y-auto rounded-md border border-input bg-card p-1 shadow-lg"
+                    /* Same recipe as the reference search dropdown: lit
+                       paper, input border, forest highlight row. */
+                    className="border-input bg-(--paper-lit) absolute top-full left-2 z-30 mt-1 max-h-56 w-64 overflow-y-auto rounded-md border p-1 shadow-lg"
                 >
                     {suggestions.map((s, i) => (
                         <li key={s.alias} role="option" aria-selected={i === highlighted}>
                             <button
                                 type="button"
                                 className={`flex w-full cursor-pointer items-center gap-2 rounded-sm border-0 px-2 py-1.5 text-left text-sm ${
-                                    i === highlighted ? "bg-forest text-white" : "bg-transparent text-foreground"
+                                    i === highlighted
+                                        ? "bg-forest font-semibold text-white"
+                                        : "text-foreground bg-transparent"
                                 }`}
                                 onMouseEnter={() => setHighlighted(i)}
                                 onMouseDown={(e) => e.preventDefault()}
