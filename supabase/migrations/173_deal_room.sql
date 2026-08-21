@@ -218,7 +218,7 @@ RETURNS TRIGGER
 LANGUAGE plpgsql
 SECURITY INVOKER
 SET search_path = public
-AS $
+AS $$
 BEGIN
   -- Service context (SQL editor, service role, crons): no user
   -- session, so the per-user rules below do not apply — this is how
@@ -540,7 +540,7 @@ RETURNS TRIGGER
 LANGUAGE plpgsql
 SECURITY INVOKER
 SET search_path = public
-AS $
+AS $$
 BEGIN
   -- Service context (SQL editor, service role, crons): no user
   -- session, so the per-user rules below do not apply — this is how
