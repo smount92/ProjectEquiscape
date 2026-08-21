@@ -15,8 +15,13 @@
  *
  * The contract: `null` means "nothing trustworthy to show" and the
  * chip renders nothing; a positive number means rows were genuinely
- * visible. No migration is added here — the day an anon read path
- * exists, this lights up on its own.
+ * visible.
+ *
+ * Migration 169 added exactly the anon read path this module was
+ * waiting for: get_public_favorite_count (DEFINER, anon-granted,
+ * public-horses-only). The RPC is tried first; pre-169 databases fall
+ * back to the direct count, which under anon RLS resolves to null —
+ * the same honest silence as before.
  */
 
 import { createAnonClient } from "@/lib/supabase/anon";
@@ -48,11 +53,23 @@ export function publicFavoriteCount(
 export async function getPublicFavoriteCount(horseId: string): Promise<number | null> {
     try {
         const supabase = createAnonClient();
-        const { count, error } = await supabase
+
+        // 169's DEFINER RPC (not yet in generated types → cast).
+        const rpc = supabase.rpc.bind(supabase) as unknown as (
+            fn: string,
+            args: { p_horse_id: string },
+        ) => Promise<{ data: number | null; error: unknown }>;
+        const { data, error } = await rpc("get_public_favorite_count", {
+            p_horse_id: horseId,
+        });
+        if (!error) return publicFavoriteCount(data, null);
+
+        // Pre-169: the direct count under anon RLS → null (honest silence).
+        const { count, error: countError } = await supabase
             .from("horse_favorites")
             .select("id", { count: "exact", head: true })
             .eq("horse_id", horseId);
-        return publicFavoriteCount(count, error);
+        return publicFavoriteCount(count, countError);
     } catch {
         return null;
     }

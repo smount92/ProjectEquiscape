@@ -254,7 +254,9 @@ export default async function ShowsPage() {
      🏛️ NAMHSA
     </span>
     )}
-    <span className={`show-status-badge ${badge.className}`}>{badge.label}</span>
+    {/* .show-status-* classes were never defined — the emoji in the
+        label carries the state, the house .stamp carries the look. */}
+    <span className="stamp whitespace-nowrap">{badge.label}</span>
     </div>
     </div>
     {show.theme && (
