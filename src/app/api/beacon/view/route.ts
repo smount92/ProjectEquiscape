@@ -14,7 +14,20 @@
  * entity id. No page URL, no referrer, no title, no session token, no
  * cookie set. The viewer's identity is turned into a daily-salted hash HERE
  * (src/lib/metrics/hash.ts) and only the hash is passed to Postgres, so the
- * database never receives a user id or an IP at all.
+ * counter never receives a user id or an IP at all.
+ *
+ * ONE THING THIS ROUTE ALSO DOES, added with migration 176: for a SIGNED-IN
+ * viewer it calls touch_last_seen(), which writes today's UTC date to that
+ * member's own users row. It rides along here because this route already
+ * resolves the session, and because it makes MAU and DAU the same
+ * measurement (see src/lib/metrics/lastSeen.ts for the full reasoning).
+ *
+ * That is a real, if small, change to the paragraph above, so it is stated
+ * plainly rather than left for someone to discover: the database does now
+ * learn "this member was here today". It does not learn WHAT they looked
+ * at — the entity id goes to the counter, the date goes to the member row,
+ * and no table joins the two. The id is never passed as an argument either;
+ * touch_last_seen reads auth.uid() and can only write the caller's own row.
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -23,6 +36,7 @@ import { isEntityType, isValidEntityId, type EntityType } from "@/lib/metrics/en
 import { hashViewer, utcDay } from "@/lib/metrics/hash";
 import { allowBeacon } from "@/lib/metrics/rateLimit";
 import { isMissingMetricsSchema, metricsDb } from "@/lib/metrics/db";
+import { touchLastSeen } from "@/lib/metrics/lastSeen";
 
 // The viewer hash uses node:crypto, and the session read is cookie-bound.
 export const runtime = "nodejs";
@@ -83,12 +97,18 @@ export async function POST(request: NextRequest) {
         // Called with the caller's own anon/authed key, not the service
         // role: record_object_view is SECURITY DEFINER precisely so that
         // no key on this path needs write access to the counter tables.
-        const { error } = await metricsDb(supabase).rpc("record_object_view", {
-            p_entity_types: types,
-            p_entity_id: payload.id,
-            p_viewer_hash: viewerHash,
-            p_is_member: !!user,
-        });
+        // The presence touch goes alongside it rather than after it, so a
+        // member's beacon costs the same round trip an anonymous one does.
+        const [viewResult] = await Promise.all([
+            metricsDb(supabase).rpc("record_object_view", {
+                p_entity_types: types,
+                p_entity_id: payload.id,
+                p_viewer_hash: viewerHash,
+                p_is_member: !!user,
+            }),
+            user ? touchLastSeen(supabase) : Promise.resolve(),
+        ]);
+        const { error } = viewResult;
 
         if (error && !isMissingMetricsSchema(error)) {
             // A real failure is worth knowing about, but not worth an
