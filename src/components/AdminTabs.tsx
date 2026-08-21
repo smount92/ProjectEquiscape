@@ -12,7 +12,18 @@ import AdminSuggestionsPanel from"@/components/AdminSuggestionsPanel";
 import ReportActions from"@/components/ReportActions";
 import SuggestionAdminActions from"@/components/SuggestionAdminActions";
 import ExternalShowAdminActions from"@/components/calendar/ExternalShowAdminActions";
+import AdminAnnouncementsCard from"@/components/AdminAnnouncementsCard";
+import AdminCatalogMergeCard from"@/components/AdminCatalogMergeCard";
+import AdminSanctioningCard from"@/components/AdminSanctioningCard";
+import AdminMembersTab from"@/components/AdminMembersTab";
+import AdminOpsTab from"@/components/AdminOpsTab";
+import AdminPulseStrip from"@/components/AdminPulseStrip";
 import type { PendingExternalShow } from"@/app/actions/external-shows";
+import type {
+ AdminPulse,
+ LegacySuggestionRow,
+ MigrationStatusRow,
+} from"@/app/actions/admin";
 import { Button } from "@/components/ui/button";
 
 interface ContactMessage {
@@ -31,17 +42,6 @@ interface Show {
  status: string;
  endAt: string | null;
  entryCount: number;
-}
-
-interface Suggestion {
- id: string;
- suggestion_type: string;
- name: string;
- details: string | null;
- status: string;
- created_at: string;
- submitted_by: string;
- admin_notes: string | null;
 }
 
 interface Report {
@@ -89,21 +89,46 @@ interface AdminTabsProps {
  messages: ContactMessage[];
  unreadCount: number;
  shows: Show[];
- suggestions: Suggestion[];
+ suggestions: LegacySuggestionRow[];
  reports: Report[];
  catalogSuggestions?: CatalogSuggestionAdmin[];
  externalShows?: PendingExternalShow[];
+ /** Launch-week numbers for the strip above the tabs. Null = unreadable this load. */
+ pulse?: AdminPulse | null;
+ /** Ops corner: which hand-pasted migrations the database actually has. */
+ migrations?: MigrationStatusRow[];
+ /** Server-side count so the Sanctioning tab can badge before its card loads. */
+ sanctioningCount?: number;
 }
 
-type TabKey ="mailbox" |"shows" |"content" |"reports" |"catalog" |"calendar";
+/**
+ * Tab order is queue-first: the four things that arrive unbidden and
+ * need a decision, then the things you go to on purpose, then the
+ * read-only ops view. `content` sits late deliberately — its only live
+ * job is Feature-a-Horse and announcements now that the legacy
+ * suggestion queue retires itself.
+ */
+type TabKey =
+ |"mailbox"
+ |"reports"
+ |"catalog"
+ |"calendar"
+ |"sanctioning"
+ |"shows"
+ |"members"
+ |"content"
+ |"ops";
 
 const TABS: { key: TabKey; emoji: string; label: string }[] = [
  { key:"mailbox", emoji:"📬", label:"Mailbox" },
- { key:"shows", emoji:"📸", label:"Shows" },
- { key:"content", emoji:"💡", label:"Content" },
  { key:"reports", emoji:"🚩", label:"Reports" },
  { key:"catalog", emoji:"📚", label:"Catalog" },
  { key:"calendar", emoji:"🗓️", label:"Calendar" },
+ { key:"sanctioning", emoji:"🏅", label:"Sanctioning" },
+ { key:"shows", emoji:"📸", label:"Shows" },
+ { key:"members", emoji:"👤", label:"Members" },
+ { key:"content", emoji:"💡", label:"Content" },
+ { key:"ops", emoji:"🛠️", label:"Ops" },
 ];
 
 function formatDate(dateStr: string): string {
@@ -168,6 +193,9 @@ export default function AdminTabs({
  reports,
  catalogSuggestions = [],
  externalShows = [],
+ pulse = null,
+ migrations = [],
+ sanctioningCount = 0,
 }: AdminTabsProps) {
  const [activeTab, setActiveTab] = useState<TabKey>("mailbox");
 
@@ -184,6 +212,11 @@ export default function AdminTabs({
  localStorage.setItem("admin-tab", key);
  };
 
+ // Every actionable queue carries its count on the tab. `ops` badges
+ // the count of migrations the database is MISSING — the one number in
+ // this console that is a warning rather than a workload.
+ const missingMigrations = migrations.filter((m) => m.applied === false).length;
+
  const getBadge = (key: TabKey): number | null => {
  switch (key) {
  case"mailbox":
@@ -198,13 +231,22 @@ export default function AdminTabs({
  return catalogSuggestions.length > 0 ? catalogSuggestions.length : null;
  case"calendar":
  return externalShows.length > 0 ? externalShows.length : null;
+ case"sanctioning":
+ return sanctioningCount > 0 ? sanctioningCount : null;
+ case"ops":
+ return missingMigrations > 0 ? missingMigrations : null;
  default:
  return null;
  }
  };
 
+ const alarming = (key: TabKey) =>
+ (key === "reports" && reports.length > 0) || (key === "ops" && missingMigrations > 0);
+
  return (
  <>
+ <AdminPulseStrip pulse={pulse} onJump={handleTabChange} />
+
  {/* Tab bar */}
  <div className="mb-6 flex gap-1 overflow-x-auto border-b border-border [-webkit-overflow-scrolling:touch] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
  {TABS.map((tab) => {
@@ -224,9 +266,7 @@ export default function AdminTabs({
  {badge !== null && (
  <span
  className={`ml-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[0.65rem] font-bold text-white ${
- tab.key === "reports" && reports.length > 0
- ? "bg-destructive"
- : "bg-forest"
+ alarming(tab.key) ? "bg-destructive" : "bg-forest"
  }`}
  >
  {badge}
@@ -245,6 +285,9 @@ export default function AdminTabs({
  {activeTab ==="reports" && <ReportsTab reports={reports} />}
  {activeTab ==="catalog" && <CatalogTab suggestions={catalogSuggestions} />}
  {activeTab ==="calendar" && <CalendarQueueTab shows={externalShows} />}
+ {activeTab ==="sanctioning" && <AdminSanctioningCard showEmptyState />}
+ {activeTab ==="members" && <AdminMembersTab />}
+ {activeTab ==="ops" && <AdminOpsTab migrations={migrations} />}
  </div>
  </>
  );
@@ -334,28 +377,29 @@ function ShowsTab({ shows }: { shows: Show[] }) {
 }
 
 /* ═══════════════════════════════════════════
- Content Tab — Suggestions + Feature Horse
+ Content Tab — what the house says about itself
+
+ Feature-a-Horse and the announcement banner are the two levers that
+ put the owner's own words on the site, so they live together. The
+ legacy suggestion queue renders itself only while it still has rows
+ (AdminSuggestionsPanel returns null when drained), so this tab gets
+ quietly simpler over time instead of carrying a dead section.
  ═══════════════════════════════════════════ */
-function ContentTab({ suggestions }: { suggestions: Suggestion[] }) {
+function ContentTab({ suggestions }: { suggestions: LegacySuggestionRow[] }) {
  return (
+ <div className="flex flex-col gap-6">
  <div className="admin-content-grid">
  <div>
- <h3 className="mb-4 flex items-center gap-2 text-base font-bold">
- 💡 Database Suggestions{""}
- <span className="text-muted-foreground text-xs font-medium">(legacy queue)</span>{""}
- <span className="mt-6-count">{suggestions.length} pending</span>
- </h3>
- <p className="text-muted-foreground mb-4 text-xs">
- The old database_suggestions pipeline — no new submissions arrive here (the
- add-horse picker now files into Catalog suggestions). Review these until the
- queue drains, then this section retires.
- </p>
- <AdminSuggestionsPanel suggestions={suggestions} />
- </div>
- <div>
- <h3 className="mb-4 flex items-center gap-2 text-base font-bold">🌟 Feature a Horse</h3>
+ <h3 className="mt-0 mb-4 flex items-center gap-2 text-base font-bold">🌟 Feature a Horse</h3>
  <FeatureHorseForm />
  </div>
+ <div>
+ <h3 className="mt-0 mb-4 flex items-center gap-2 text-base font-bold">📣 Announcements</h3>
+ <AdminAnnouncementsCard />
+ </div>
+ </div>
+ {/* Self-retiring — see AdminSuggestionsPanel. */}
+ <AdminSuggestionsPanel suggestions={suggestions} />
  </div>
  );
 }
@@ -396,9 +440,26 @@ function ReportsTab({ reports }: { reports: Report[] }) {
 }
 
 /* ═══════════════════════════════════════════
- Catalog Tab — Catalog Curation Suggestions
+ Catalog Tab — curation queue + the merge tool
+
+ The merge tool used to float above the tabs with no context. It is
+ catalog surgery, so it belongs under the catalog queue: the duplicate
+ you need to merge is usually the thing you just found while reviewing
+ a suggestion.
  ═══════════════════════════════════════════ */
 function CatalogTab({ suggestions }: { suggestions: CatalogSuggestionAdmin[] }) {
+ return (
+ <div className="flex flex-col gap-6">
+ <CatalogQueue suggestions={suggestions} />
+ <div>
+ <h3 className="mt-0 mb-3 text-base font-bold">🔗 Merge duplicate entries</h3>
+ <AdminCatalogMergeCard />
+ </div>
+ </div>
+ );
+}
+
+function CatalogQueue({ suggestions }: { suggestions: CatalogSuggestionAdmin[] }) {
  if (suggestions.length === 0) {
  return (
  <div className="bg-card border-input rounded-lg border px-8 py-12 text-center shadow-md transition-all">

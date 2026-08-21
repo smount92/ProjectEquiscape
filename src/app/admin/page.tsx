@@ -2,16 +2,17 @@ import { createClient } from"@/lib/supabase/server";
 import { getAdminClient } from"@/lib/supabase/admin";
 import { redirect } from"next/navigation";
 import { getPhotoShows } from"@/app/actions/shows";
-import { getPendingSuggestions } from"@/app/actions/suggestions";
 import { getOpenReports } from"@/app/actions/moderation";
 import { listPendingExternalShows } from"@/app/actions/external-shows";
-import AdminCatalogMergeCard from"@/components/AdminCatalogMergeCard";
-import AdminAnnouncementsCard from"@/components/AdminAnnouncementsCard";
-import AdminSanctioningCard from"@/components/AdminSanctioningCard";
-import AdminModerationCard from"@/components/AdminModerationCard";
+import {
+ getAdminPulse,
+ getMigrationStatus,
+ listLegacySuggestions,
+ listSanctioningRequests,
+} from"@/app/actions/admin";
 import AdminTabs from"@/components/AdminTabs";
 import CommandCenterLayout from"@/components/layouts/CommandCenterLayout";
-import { Zap, Shield, Users, Mail } from "lucide-react";
+import { Zap, Shield } from "lucide-react";
 
 export const metadata = {
  title:"Admin Console",
@@ -43,55 +44,82 @@ export default async function AdminPage() {
  // Service role client to bypass RLS
  const supabaseAdmin = getAdminClient();
 
- // Fetch metrics in parallel
- const [usersResult, horsesResult, unreadResult, messagesResult] = await Promise.all([
- supabaseAdmin.auth.admin.listUsers({ perPage: 1000, page: 1 }),
- supabaseAdmin.from("user_horses").select("id", { count:"exact", head: true }),
+ // One batched load. Everything below is either a service-role read or
+ // a server action that re-gates on ADMIN_EMAIL — nothing admin-shaped
+ // is ever fetched with the client key.
+ const [
+ unreadResult,
+ messagesResult,
+ allShows,
+ legacyResult,
+ reports,
+ externalShowsResult,
+ pulseResult,
+ migrationsResult,
+ sanctioningResult,
+ catalogSuggestionsResult,
+ ] = await Promise.all([
  supabaseAdmin.from("contact_messages").select("id", { count:"exact", head: true }).eq("is_read", false),
  supabaseAdmin
   .from("contact_messages")
   .select("id, name, email, subject, message, is_read, created_at")
   .order("created_at", { ascending: false })
   .limit(100),
- ]);
-
- const totalUsers = usersResult.data?.users?.length ?? 0;
- const totalHorses = horsesResult.count ?? 0;
- const unreadMessages = unreadResult.count ?? 0;
- const messages = (messagesResult.data as ContactMessage[]) ?? [];
-
- const allShows = await getPhotoShows();
- const pendingSuggestions = await getPendingSuggestions();
- const reports = await getOpenReports();
-
+ getPhotoShows(),
+ // Legacy database_suggestions queue. Read through the service role
+ // now: migration 020's only SELECT policy is "your own rows", so the
+ // previous RLS-client read hid every other member's submission from
+ // the admin — a queue that looks drained while rows sit in it.
+ listLegacySuggestions(),
+ getOpenReports(),
  // Calendar of record: pending external-show listings. The action
  // re-gates with requireAdmin() and degrades to [] pre-migration.
- const externalShowsResult = await listPendingExternalShows();
+ listPendingExternalShows(),
+ getAdminPulse(),
+ getMigrationStatus(),
+ listSanctioningRequests(),
+ supabaseAdmin
+  .from("catalog_suggestions")
+  .select("id, user_id, catalog_item_id, suggestion_type, field_changes, reason, status, upvotes, downvotes, created_at")
+  .eq("status","pending")
+  .order("created_at", { ascending: true })
+  .limit(50),
+ ]);
+
+ const unreadMessages = unreadResult.count ?? 0;
+ const messages = (messagesResult.data as ContactMessage[]) ?? [];
+ const pendingSuggestions = legacyResult.success ? legacyResult.suggestions : [];
  const pendingExternalShows = externalShowsResult.success ? externalShowsResult.shows : [];
+ const pulse = pulseResult.success ? pulseResult.pulse : null;
+ const migrations = migrationsResult.success ? migrationsResult.migrations : [];
+ const sanctioningCount = sanctioningResult.success ? sanctioningResult.requests.length : 0;
 
- // Fetch pending catalog curation suggestions
- const { data: catalogSuggestionRows } = await supabaseAdmin
- .from("catalog_suggestions")
- .select("id, user_id, catalog_item_id, suggestion_type, field_changes, reason, status, upvotes, downvotes, created_at")
- .eq("status","pending")
- .order("created_at", { ascending: true })
- .limit(50);
-
- // Enrich with author info
- const catalogSuggestions = [];
- for (const row of catalogSuggestionRows ?? []) {
- const { data: author } = await supabaseAdmin
+ // Enrich catalog suggestions with their author — one keyed read, not
+ // one per row.
+ const catalogSuggestionRows = catalogSuggestionsResult.data ?? [];
+ const authorIds = [...new Set(catalogSuggestionRows.map((r) => r.user_id as string))];
+ const authorById = new Map<string, { alias_name: string | null; approved_suggestions_count: number | null }>();
+ if (authorIds.length > 0) {
+ const { data: authors } = await supabaseAdmin
   .from("users")
-  .select("alias_name, approved_suggestions_count")
-  .eq("id", row.user_id)
-  .single();
- catalogSuggestions.push({
+  .select("id, alias_name, approved_suggestions_count")
+  .in("id", authorIds);
+ for (const a of authors ?? []) {
+  authorById.set(a.id as string, {
+  alias_name: a.alias_name as string | null,
+  approved_suggestions_count: a.approved_suggestions_count as number | null,
+  });
+ }
+ }
+ const catalogSuggestions = catalogSuggestionRows.map((row) => {
+ const author = authorById.get(row.user_id as string);
+ return {
   ...row,
   field_changes: (row.field_changes ?? {}) as Record<string, unknown>,
   author_alias: author?.alias_name ?? "Unknown",
   author_approved_count: author?.approved_suggestions_count ?? 0,
+ };
  });
- }
 
  return (
  <CommandCenterLayout
@@ -104,51 +132,32 @@ export default async function AdminPage() {
   </div>
   }
   mainContent={
-  <>
-   {/* Metrics Row */}
-   <div className="grid-cols-[repeat(auto-fit,minmax(200px,1fr))] grid gap-4">
-   <div className="bg-card border-input shadow-sm rounded-lg border p-6 text-center transition-all">
-    <div className="mb-1 flex justify-center"><Users className="h-8 w-8" /></div>
-    <div className="text-foreground text-3xl leading-none font-bold">{totalUsers}</div>
-    <div className="text-muted-foreground mt-1 text-xs font-medium">Registered Users</div>
-   </div>
-   <div className="bg-card border-input shadow-sm rounded-lg border p-6 text-center transition-all">
-    <div className="mb-1 text-[2rem]">🐴</div>
-    <div className="text-foreground text-3xl leading-none font-bold">{totalHorses.toLocaleString()}</div>
-    <div className="text-muted-foreground mt-1 text-xs font-medium">Horses in Database</div>
-   </div>
-   <div className="bg-card border-input shadow-sm rounded-lg border p-6 text-center text-destructive transition-all">
-    <div className="mb-1 flex justify-center"><Mail className="h-8 w-8" /></div>
-    <div className="text-foreground text-3xl leading-none font-bold">{unreadMessages}</div>
-    <div className="text-muted-foreground mt-1 text-xs font-medium">Unread Messages</div>
-   </div>
-   </div>
-
-   {/* Tabbed sections */}
-   {/* Site-wide suspension (v4 safety) — above the tabs so it's
-       reachable regardless of which tab is active. */}
-   <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
-    <AdminModerationCard />
-    <AdminAnnouncementsCard />
-    <AdminSanctioningCard />
-    <AdminCatalogMergeCard />
-   </div>
-   <AdminTabs
+  /*
+   * One console, three layers: the pulse (what the house is doing and
+   * what is waiting on you), the queues (one tab per thing that needs
+   * a decision), and the read-only ops corner. The four cards that used
+   * to float above the tabs with no context now live in the tab that
+   * owns their subject — moderation under Members, sanctioning in its
+   * own tab, catalog merge under Catalog, announcements under Content.
+   */
+  <AdminTabs
    messages={messages}
    unreadCount={unreadMessages}
    shows={allShows.map((s) => ({
-    id: s.id,
-    title: s.title,
-    status: s.status,
-    endAt: s.endAt,
-    entryCount: s.entryCount,
+   id: s.id,
+   title: s.title,
+   status: s.status,
+   endAt: s.endAt,
+   entryCount: s.entryCount,
    }))}
    suggestions={pendingSuggestions}
    reports={reports}
    catalogSuggestions={catalogSuggestions}
    externalShows={pendingExternalShows}
-   />
-  </>
+   pulse={pulse}
+   migrations={migrations}
+   sanctioningCount={sanctioningCount}
+  />
   }
  />
  );

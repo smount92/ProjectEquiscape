@@ -7,6 +7,10 @@
  * is_mhh_qualifying on and notifies the host. The card is
  * admin-page-only (the actions re-verify ADMIN_EMAIL server-side
  * regardless).
+ *
+ * Standalone it self-hides when the queue is empty. Given its own tab
+ * in the console, a blank panel reads as a bug, so `showEmptyState`
+ * asks it to render the house empty-state instead of nothing.
  */
 
 import { useEffect, useState, useTransition } from "react";
@@ -18,7 +22,11 @@ import {
 } from "@/app/actions/admin";
 import { Button } from "@/components/ui/button";
 
-export default function AdminSanctioningCard() {
+export default function AdminSanctioningCard({
+    showEmptyState = false,
+}: {
+    showEmptyState?: boolean;
+} = {}) {
     const [rows, setRows] = useState<SanctioningRequestRow[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [pending, startTransition] = useTransition();
@@ -50,7 +58,19 @@ export default function AdminSanctioningCard() {
         });
     };
 
-    if (rows.length === 0 && !error) return null;
+    if (rows.length === 0 && !error) {
+        if (!showEmptyState) return null;
+        return (
+            <div className="rounded-lg border border-input bg-card px-8 py-12 text-center shadow-md">
+                <div className="mb-4 text-5xl">🏅</div>
+                <h2>No Sanctioning Requests</h2>
+                <p>
+                    Hosts asking for MHH sanctioning on their show will appear here. Granting makes
+                    placings there earn Championship Series points.
+                </p>
+            </div>
+        );
+    }
 
     return (
         <section className="rounded-lg border border-input bg-card p-5">

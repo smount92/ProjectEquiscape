@@ -598,3 +598,596 @@ export async function resolveSanctioningRequest(
 
   return { success: true };
 }
+
+// ══════════════════════════════════════════════════════════════
+// Legacy database_suggestions queue (migration 020)
+//
+// WHY THIS LIVES HERE AND NOT IN actions/suggestions.ts
+// ─────────────────────────────────────────────────────
+// The owner reported a pending row in Admin → Content that would not
+// clear no matter how often Approve or Reject was pressed. The cause is
+// in the legacy `reviewSuggestion` (actions/suggestions.ts): its status
+// UPDATE writes `reviewed_at`, a column `database_suggestions` has
+// NEVER had. Migration 020 creates exactly id / submitted_by /
+// suggestion_type / name / details / status / admin_notes / created_at.
+// `reviewed_at` belongs to the NEWER pipelines (catalog_suggestions,
+// external_shows) and was copied across. PostgREST answers an unknown
+// column with PGRST204 ("Could not find the 'reviewed_at' column … in
+// the schema cache"), the UPDATE affects zero rows, the row stays
+// 'pending' forever — and AdminSuggestionsPanel discarded the error, so
+// the button just blinked. On Approve it was worse than a no-op: the
+// catalog_items INSERT ran and SUCCEEDED first, so every retry minted
+// another duplicate catalog row before failing to clear the queue.
+//
+// These replacements go through verifyAdmin + the service role like the
+// rest of the console, never write reviewed_at, surface their errors,
+// de-duplicate the approve insert, and add a Dismiss that touches
+// nothing but the status.
+// ══════════════════════════════════════════════════════════════
+
+/** Postgres check_violation — the status CHECK refused the value. */
+const CHECK_VIOLATION = "23514";
+
+export interface LegacySuggestionRow {
+  id: string;
+  suggestionType: string;
+  name: string;
+  details: string | null;
+  createdAt: string;
+  submitterAlias: string;
+}
+
+/**
+ * The legacy queue, read with the service role.
+ *
+ * The old reader used the request-scoped (RLS) client, and 020's only
+ * SELECT policy is `submitted_by = auth.uid()` — no admin arm. So the
+ * admin queue never showed anybody's suggestions but the admin's own:
+ * a queue that looks drained while other members' rows sit in it.
+ */
+export async function listLegacySuggestions(): Promise<
+  { success: true; suggestions: LegacySuggestionRow[] } | { success: false; error: string }
+> {
+  const user = await verifyAdmin();
+  if (!user) return { success: false, error: "Unauthorized" };
+
+  const admin = getAdminSupabase();
+  const { data, error } = await admin
+    .from("database_suggestions")
+    .select("id, suggestion_type, name, details, created_at, submitted_by")
+    .eq("status", "pending")
+    .order("created_at", { ascending: true })
+    .limit(200);
+
+  // Feature-detect: if the table was ever dropped the console must not
+  // 500 — the section is meant to retire, after all.
+  if (error) {
+    logger.error("Admin", "Legacy suggestion queue read failed", error);
+    return { success: true, suggestions: [] };
+  }
+
+  const rows = (data ?? []) as {
+    id: string;
+    suggestion_type: string;
+    name: string;
+    details: string | null;
+    created_at: string;
+    submitted_by: string;
+  }[];
+  if (rows.length === 0) return { success: true, suggestions: [] };
+
+  const aliasById = new Map<string, string>();
+  const submitterIds = [...new Set(rows.map((r) => r.submitted_by))];
+  const { data: submitters } = await admin
+    .from("users")
+    .select("id, alias_name")
+    .in("id", submitterIds);
+  for (const s of (submitters ?? []) as { id: string; alias_name: string | null }[]) {
+    if (s.alias_name) aliasById.set(s.id, s.alias_name);
+  }
+
+  return {
+    success: true,
+    suggestions: rows.map((r) => ({
+      id: r.id,
+      suggestionType: r.suggestion_type,
+      name: r.name,
+      details: r.details,
+      createdAt: r.created_at,
+      submitterAlias: aliasById.get(r.submitted_by) ?? "Unknown member",
+    })),
+  };
+}
+
+const LEGACY_ITEM_TYPES: Record<string, string> = {
+  mold: "plastic_mold",
+  release: "plastic_release",
+  resin: "artist_resin",
+};
+
+/**
+ * Clear one legacy suggestion.
+ *
+ * approve  — mints the catalog entry (skipped if an identical
+ *            title + item_type already exists, because the broken
+ *            version could mint one on every failed retry), then
+ *            stamps the row 'approved'.
+ * reject   — stamps 'rejected'. No catalog write.
+ * dismiss  — junk / duplicate / no-longer-relevant. NO side effects at
+ *            all. Prefers a 'dismissed' status and falls back to
+ *            'rejected' + an admin_notes marker when 020's CHECK
+ *            (pending | approved | rejected) refuses it, so the row can
+ *            always be cleared without a migration.
+ */
+export async function resolveLegacySuggestion(
+  id: string,
+  decision: "approve" | "reject" | "dismiss",
+  adminNotes?: string
+): Promise<{ success: boolean; error?: string }> {
+  const user = await verifyAdmin();
+  if (!user) return { success: false, error: "Unauthorized" };
+  if (decision !== "approve" && decision !== "reject" && decision !== "dismiss") {
+    return { success: false, error: "Unknown decision." };
+  }
+
+  const admin = getAdminSupabase();
+  const { data: row, error: readError } = await admin
+    .from("database_suggestions")
+    .select("id, suggestion_type, name, details, status")
+    .eq("id", id)
+    .maybeSingle();
+  if (readError) return { success: false, error: readError.message };
+  if (!row) return { success: false, error: "Suggestion not found — it may already be cleared." };
+
+  const suggestion = row as {
+    suggestion_type: string;
+    name: string;
+    details: string | null;
+    status: string;
+  };
+
+  if (decision === "approve") {
+    const itemType = LEGACY_ITEM_TYPES[suggestion.suggestion_type];
+    if (!itemType) {
+      return {
+        success: false,
+        error: `Unknown suggestion type "${suggestion.suggestion_type}" — use Dismiss to clear it.`,
+      };
+    }
+
+    const title = suggestion.name.trim();
+    // The maker guess is the legacy behaviour, preserved: first line or
+    // first comma-segment of the free-text details.
+    const makerGuess = (suggestion.details ?? "").split(/[,\n]/)[0]?.trim() || "Unknown";
+
+    const { data: existing } = await admin
+      .from("catalog_items")
+      .select("id")
+      .eq("item_type", itemType)
+      .ilike("title", title)
+      .limit(1);
+
+    if (!existing || existing.length === 0) {
+      const { error: insertError } = await admin
+        .from("catalog_items")
+        .insert({ item_type: itemType, title, maker: makerGuess });
+      if (insertError) {
+        return { success: false, error: `Catalog insert failed: ${insertError.message}` };
+      }
+    }
+  }
+
+  const note =
+    adminNotes?.trim() ||
+    (decision === "dismiss" ? "Dismissed from the legacy queue — no catalog change." : null);
+
+  // ROOT-CAUSE FIX: no `reviewed_at`. The column does not exist on this
+  // table and writing it is what jammed the queue.
+  const stamp = async (status: string, notes: string | null) =>
+    admin.from("database_suggestions").update({ status, admin_notes: notes }).eq("id", id);
+
+  const targetStatus =
+    decision === "approve" ? "approved" : decision === "reject" ? "rejected" : "dismissed";
+
+  let { error } = await stamp(targetStatus, note);
+
+  if (error && decision === "dismiss" && (error as { code?: string }).code === CHECK_VIOLATION) {
+    // 020's CHECK predates 'dismissed'. Land the row as 'rejected' with
+    // a marker — same outcome for the queue, no migration required.
+    ({ error } = await stamp("rejected", `[dismissed] ${note ?? ""}`.trim()));
+  }
+
+  if (error) return { success: false, error: error.message };
+  return { success: true };
+}
+
+// ══════════════════════════════════════════════════════════════
+// Members — alias search + suspension state
+//
+// `users.is_suspended` (148) was deliberately never granted to the
+// client key, so this read MUST be service-role; that is exactly why it
+// lives behind verifyAdmin here instead of in a client component.
+// ══════════════════════════════════════════════════════════════
+
+export interface AdminMemberRow {
+  id: string;
+  alias: string;
+  email: string | null;
+  createdAt: string | null;
+  isSuspended: boolean;
+  suspendedAt: string | null;
+  suspendedReason: string | null;
+  isSupporter: boolean;
+  horseCount: number;
+}
+
+/**
+ * Search members by alias (substring, case-insensitive). An empty query
+ * returns the newest members, so the tab is useful before you type.
+ */
+export async function searchMembers(
+  query: string
+): Promise<{ success: true; members: AdminMemberRow[] } | { success: false; error: string }> {
+  const user = await verifyAdmin();
+  if (!user) return { success: false, error: "Unauthorized" };
+
+  const admin = getAdminSupabase();
+  const trimmed = query.trim();
+
+  let request = admin
+    .from("users")
+    .select(
+      "id, alias_name, email, created_at, is_suspended, suspended_at, suspended_reason, is_supporter"
+    );
+  if (trimmed) request = request.ilike("alias_name", `%${trimmed}%`);
+
+  const { data, error } = await request.order("created_at", { ascending: false }).limit(25);
+  if (error) return { success: false, error: error.message };
+
+  const rows = (data ?? []) as {
+    id: string;
+    alias_name: string | null;
+    email: string | null;
+    created_at: string | null;
+    is_suspended: boolean | null;
+    suspended_at: string | null;
+    suspended_reason: string | null;
+    is_supporter: boolean | null;
+  }[];
+  if (rows.length === 0) return { success: true, members: [] };
+
+  // One grouped count instead of N head-counts.
+  const horseCounts = new Map<string, number>();
+  const { data: horses } = await admin
+    .from("user_horses")
+    .select("owner_id")
+    .in(
+      "owner_id",
+      rows.map((r) => r.id)
+    );
+  for (const h of (horses ?? []) as { owner_id: string }[]) {
+    horseCounts.set(h.owner_id, (horseCounts.get(h.owner_id) ?? 0) + 1);
+  }
+
+  return {
+    success: true,
+    members: rows.map((r) => ({
+      id: r.id,
+      alias: r.alias_name ?? "(no alias)",
+      email: r.email,
+      createdAt: r.created_at,
+      isSuspended: r.is_suspended === true,
+      suspendedAt: r.suspended_at,
+      suspendedReason: r.suspended_reason,
+      isSupporter: r.is_supporter === true,
+      horseCount: horseCounts.get(r.id) ?? 0,
+    })),
+  };
+}
+
+// ══════════════════════════════════════════════════════════════
+// The pulse — launch-week numbers, one batched service-role load
+//
+// Honest counts only: no timeseries store, no sampling, no derived
+// "engagement". Every number is a COUNT the admin could run by hand,
+// and every one of them feature-detects to null rather than throwing,
+// because several of the tables behind them arrive with hand-pasted
+// migrations that may not be applied yet.
+// ══════════════════════════════════════════════════════════════
+
+/** Statuses that mean "this show is live business right now". */
+const OPEN_SHOW_STATUSES = [
+  "published",
+  "entries_open",
+  "entries_closed",
+  "running",
+  "judging",
+  "results_review",
+];
+
+export interface AdminPulse {
+  totalMembers: number;
+  newMembers7d: number | null;
+  totalHorses: number;
+  posts7d: number | null;
+  liveListings: number | null;
+  openShows: number | null;
+  openShowEntries: number | null;
+  pending: {
+    reports: number | null;
+    sanctioning: number | null;
+    barnJoinRequests: number | null;
+    catalogSuggestions: number | null;
+    contactMessages: number | null;
+    legacySuggestions: number | null;
+    externalShows: number | null;
+  };
+}
+
+type CountResult = { count: number | null; error: unknown };
+
+/** A head-count that answers null instead of throwing when the shape isn't there. */
+function countOf(result: PromiseSettledResult<CountResult>): number | null {
+  if (result.status !== "fulfilled") return null;
+  if (result.value.error) return null;
+  return result.value.count ?? 0;
+}
+
+export async function getAdminPulse(): Promise<
+  { success: true; pulse: AdminPulse } | { success: false; error: string }
+> {
+  const user = await verifyAdmin();
+  if (!user) return { success: false, error: "Unauthorized" };
+
+  const admin = getAdminSupabase();
+  const since7d = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const head = (table: string) => admin.from(table).select("id", { count: "exact", head: true });
+
+  // Barn join requests waiting on the admin specifically: pending rows
+  // in barns where the admin is staff. Two steps — the barns first,
+  // then the requests — because PostgREST cannot join for a head count.
+  const adminStaffBarns = (async (): Promise<CountResult> => {
+    const { data: memberships, error: mErr } = await admin
+      .from("group_memberships")
+      .select("group_id, role")
+      .eq("user_id", user.id)
+      .in("role", ["owner", "admin", "moderator"]);
+    if (mErr) return { count: null, error: mErr };
+    const groupIds = (memberships ?? []).map((m) => (m as { group_id: string }).group_id);
+    if (groupIds.length === 0) return { count: 0, error: null };
+    const { count, error } = await admin
+      .from("barn_join_requests")
+      .select("user_id", { count: "exact", head: true })
+      .eq("status", "pending")
+      .in("group_id", groupIds);
+    return { count, error };
+  })();
+
+  // Open shows, and the entries sitting in them.
+  const openShowsAndEntries = (async (): Promise<{
+    shows: number | null;
+    entries: number | null;
+  }> => {
+    const { data, error } = await admin
+      .from("shows")
+      .select("id")
+      .in("status", OPEN_SHOW_STATUSES)
+      .limit(500);
+    if (error) return { shows: null, entries: null };
+    const ids = (data ?? []).map((s) => (s as { id: string }).id);
+    if (ids.length === 0) return { shows: 0, entries: 0 };
+    const { count, error: entryError } = await admin
+      .from("show_class_entries")
+      .select("id", { count: "exact", head: true })
+      .in("show_id", ids);
+    return { shows: ids.length, entries: entryError ? null : (count ?? 0) };
+  })();
+
+  const [
+    authUsers,
+    newMembers,
+    horses,
+    posts,
+    listings,
+    reports,
+    catalogSuggestions,
+    contactMessages,
+    legacySuggestions,
+    externalShows,
+    barnRequests,
+    shows,
+    sanctioning,
+  ] = await Promise.allSettled([
+    admin.auth.admin.listUsers({ perPage: 1000, page: 1 }),
+    head("users").gte("created_at", since7d) as unknown as Promise<CountResult>,
+    head("user_horses") as unknown as Promise<CountResult>,
+    head("posts").gte("created_at", since7d) as unknown as Promise<CountResult>,
+    head("user_horses").eq("trade_status", "For Sale") as unknown as Promise<CountResult>,
+    head("user_reports").eq("status", "open") as unknown as Promise<CountResult>,
+    head("catalog_suggestions").eq("status", "pending") as unknown as Promise<CountResult>,
+    head("contact_messages").eq("is_read", false) as unknown as Promise<CountResult>,
+    head("database_suggestions").eq("status", "pending") as unknown as Promise<CountResult>,
+    head("external_shows").eq("status", "pending") as unknown as Promise<CountResult>,
+    adminStaffBarns,
+    openShowsAndEntries,
+    (async (): Promise<CountResult> => {
+      const { count, error } = await admin
+        .from("shows")
+        .select("id", { count: "exact", head: true })
+        .eq("is_mhh_qualifying", false)
+        .ilike("sanctioning_note", `%${SANCTIONING_REQUEST_MARKER}%`);
+      return { count, error };
+    })(),
+  ]);
+
+  const showsValue =
+    shows.status === "fulfilled"
+      ? (shows.value as { shows: number | null; entries: number | null })
+      : { shows: null, entries: null };
+
+  return {
+    success: true,
+    pulse: {
+      totalMembers:
+        authUsers.status === "fulfilled"
+          ? ((authUsers.value as { data?: { users?: unknown[] } }).data?.users?.length ?? 0)
+          : 0,
+      newMembers7d: countOf(newMembers as PromiseSettledResult<CountResult>),
+      totalHorses: countOf(horses as PromiseSettledResult<CountResult>) ?? 0,
+      posts7d: countOf(posts as PromiseSettledResult<CountResult>),
+      liveListings: countOf(listings as PromiseSettledResult<CountResult>),
+      openShows: showsValue.shows,
+      openShowEntries: showsValue.entries,
+      pending: {
+        reports: countOf(reports as PromiseSettledResult<CountResult>),
+        sanctioning: countOf(sanctioning as PromiseSettledResult<CountResult>),
+        barnJoinRequests: countOf(barnRequests as PromiseSettledResult<CountResult>),
+        catalogSuggestions: countOf(catalogSuggestions as PromiseSettledResult<CountResult>),
+        contactMessages: countOf(contactMessages as PromiseSettledResult<CountResult>),
+        legacySuggestions: countOf(legacySuggestions as PromiseSettledResult<CountResult>),
+        externalShows: countOf(externalShows as PromiseSettledResult<CountResult>),
+      },
+    },
+  };
+}
+
+// ══════════════════════════════════════════════════════════════
+// Ops corner — which hand-pasted migrations are actually applied
+//
+// Migrations here are pasted into the Supabase SQL editor by hand, so
+// the running schema and the repo can legitimately disagree. Each entry
+// carries ONE cheap probe: selecting a missing column is a PostgREST
+// 42703 and a missing table 42P01, so a single `limit(1)` per migration
+// answers "is this in?" without a schema-introspection grant.
+//
+// Some migrations only widen a CHECK or replace a function body. Those
+// are honestly reported as "can't tell from here" rather than guessed.
+// ══════════════════════════════════════════════════════════════
+
+type MigrationProbe =
+  | { kind: "column"; table: string; column: string }
+  | { kind: "rpc"; fn: string }
+  | { kind: "none"; why: string };
+
+interface MigrationSpec {
+  id: string;
+  title: string;
+  summary: string;
+  probe: MigrationProbe;
+}
+
+const PENDING_MIGRATIONS: MigrationSpec[] = [
+  {
+    id: "166",
+    title: "Social spine",
+    summary: "posts.kind + posts.visibility — one feed, per-post audience.",
+    probe: { kind: "column", table: "posts", column: "kind" },
+  },
+  {
+    id: "167",
+    title: "Barns",
+    summary: "groups.is_private + barn_join_requests + private-barn RLS.",
+    probe: { kind: "column", table: "groups", column: "is_private" },
+  },
+  {
+    id: "168",
+    title: "Events rework",
+    summary: "Widens the event_type CHECK for external_show + club.",
+    probe: {
+      kind: "none",
+      why: "CHECK-constraint widening — nothing to select. createEvent already degrades to 'other'/'meetup' until it's in.",
+    },
+  },
+  {
+    id: "169",
+    title: "Market completion",
+    summary: "get_market_listings RPC, mv_trusted_sellers, anon favourite counts.",
+    probe: { kind: "rpc", fn: "get_market_listings_total" },
+  },
+  {
+    id: "170",
+    title: "Art studio",
+    summary: "artist_profiles terms/services/waitlist + three RLS gap fixes.",
+    probe: { kind: "column", table: "artist_profiles", column: "services" },
+  },
+  {
+    id: "171",
+    title: "Profile customization",
+    summary: "users.profile_customization jsonb (theme, tagline, featured).",
+    probe: { kind: "column", table: "users", column: "profile_customization" },
+  },
+  {
+    id: "172",
+    title: "Commerce bugfixes",
+    summary: "Widens chk_trade_status; rewrites respond_to_offer_atomic.",
+    probe: {
+      kind: "none",
+      why: "A CHECK widening and a function body — neither is visible to a select. Verify by flagging a horse 'Stolen/Missing' or declining an offer.",
+    },
+  },
+  {
+    id: "173",
+    title: "Deal room",
+    summary: "messages.kind/payload, conversation_participants, deal terms.",
+    probe: { kind: "column", table: "messages", column: "kind" },
+  },
+];
+
+export interface MigrationStatusRow {
+  id: string;
+  title: string;
+  summary: string;
+  /** true = probe found it, false = probe says it's missing, null = not probe-able. */
+  applied: boolean | null;
+  /** Present when applied is null — why the probe can't answer. */
+  note?: string;
+}
+
+export async function getMigrationStatus(): Promise<
+  { success: true; migrations: MigrationStatusRow[] } | { success: false; error: string }
+> {
+  const user = await verifyAdmin();
+  if (!user) return { success: false, error: "Unauthorized" };
+
+  const admin = getAdminSupabase();
+
+  const probes = await Promise.allSettled(
+    PENDING_MIGRATIONS.map(async (m): Promise<boolean | null> => {
+      if (m.probe.kind === "none") return null;
+      if (m.probe.kind === "rpc") {
+        const { error } = await admin.rpc(m.probe.fn);
+        // PGRST202 = "function not found in schema cache". Any other
+        // error means the function EXISTS and simply objected.
+        if (!error) return true;
+        const code = (error as { code?: string }).code;
+        return code === "PGRST202" || code === "42883" ? false : true;
+      }
+      const { error } = await admin.from(m.probe.table).select(m.probe.column).limit(1);
+      if (!error) return true;
+      const code = (error as { code?: string }).code;
+      // 42703 undefined_column, 42P01 undefined_table, PGRST204 schema cache.
+      if (code === "42703" || code === "42P01" || code === "PGRST204") return false;
+      return null;
+    })
+  );
+
+  return {
+    success: true,
+    migrations: PENDING_MIGRATIONS.map((m, i) => {
+      const probe = probes[i];
+      const applied = probe.status === "fulfilled" ? probe.value : null;
+      return {
+        id: m.id,
+        title: m.title,
+        summary: m.summary,
+        applied,
+        note:
+          applied === null
+            ? m.probe.kind === "none"
+              ? m.probe.why
+              : "The probe itself errored — check the schema by hand."
+            : undefined,
+      };
+    }),
+  };
+}
