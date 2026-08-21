@@ -5,8 +5,11 @@ vi.mock("@sentry/nextjs", () => ({ captureException: vi.fn() }));
 
 import {
     absoluteUrl,
+    EMAIL_FROM,
     escapeEmailHtml,
+    htmlToPlainText,
     renderBrandedEmail,
+    renderBrandedEmailText,
     renderEmailQuote,
     renderEmailStats,
 } from "../layout";
@@ -83,6 +86,110 @@ describe("renderBrandedEmail", () => {
         };
         expect(renderBrandedEmail(input)).toContain("Notification settings");
         expect(renderBrandedEmail({ ...input, hideSettingsLink: true })).not.toContain(
+            "Notification settings",
+        );
+    });
+});
+
+describe("EMAIL_FROM", () => {
+    it("is one constant, in RFC 5322 display-name form", () => {
+        // Was copy-pasted into four files, fallback literal and all.
+        expect(EMAIL_FROM).toMatch(/^.+<[^@\s]+@[^@\s]+>$/);
+    });
+});
+
+describe("the branded masthead", () => {
+    it("takes the logo from the app origin, not a hardcoded prod URL", () => {
+        // Staging mail used to pull the production logo.
+        const html = renderBrandedEmail({
+            title: "t",
+            heading: "h",
+            bodyHtml: "<p>b</p>",
+            footerNote: "f",
+        });
+        const origin = absoluteUrl("/");
+        expect(html).toContain(`src="${origin.replace(/\/$/, "")}/logo.png"`);
+    });
+});
+
+describe("htmlToPlainText", () => {
+    it("keeps the structure the body was written with", () => {
+        const text = htmlToPlainText(
+            `<p style="margin:0 0 12px 0;">Ribbons went up at <strong>Summer Classic</strong>:</p>` +
+                `<ul style="margin:0;"><li><strong>Maple</strong> placed <strong>1st</strong> in Halter</li>` +
+                `<li>Ruffian placed 3rd in Collectibility</li></ul>`,
+        );
+        expect(text).toBe(
+            [
+                "Ribbons went up at Summer Classic:",
+                "",
+                "· Maple placed 1st in Halter",
+                "· Ruffian placed 3rd in Collectibility",
+            ].join("\n"),
+        );
+    });
+
+    it("un-escapes entities so the text part reads as the member wrote it", () => {
+        expect(htmlToPlainText(escapeEmailHtml(`Tom & "Jerry" <both>`))).toBe(
+            `Tom & "Jerry" <both>`,
+        );
+    });
+
+    it("turns <br /> into a line break and drops no words", () => {
+        expect(htmlToPlainText("<p>one<br />two</p>")).toBe("one\ntwo");
+    });
+
+    it("renders the stat table as a label/value line each, not a run-on", () => {
+        const text = htmlToPlainText(
+            renderEmailStats([
+                { label: "Models", value: "12" },
+                { label: "Est. Value", value: "$3,400" },
+            ]),
+        );
+        // A blank line separates the tiles, mirroring the HTML row.
+        expect(text).toBe("Models\n12\n\nEst. Value\n$3,400");
+    });
+
+    it("collapses runs of blank lines rather than leaving a hole", () => {
+        expect(htmlToPlainText("<p>a</p><div></div><div></div><p>b</p>")).toBe("a\n\nb");
+    });
+});
+
+describe("renderBrandedEmailText", () => {
+    const card = {
+        title: "Results — Summer Classic",
+        heading: "Congratulations, dapplegrey!",
+        bodyHtml: "<p>Ribbons went up at <strong>Summer Classic</strong>.</p>",
+        ctaLabel: "See the full results",
+        ctaUrl: "/shows/show-1",
+        footerNote: "You entered this show.",
+    };
+
+    it("carries the same words as the HTML part, without the markup", () => {
+        const text = renderBrandedEmailText(card);
+        expect(text).toContain("MODEL HORSE HUB");
+        expect(text).toContain("Congratulations, dapplegrey!");
+        expect(text).toContain("Ribbons went up at Summer Classic.");
+        expect(text).toContain("You entered this show.");
+        expect(text).not.toContain("<");
+        expect(text).not.toContain("style=");
+    });
+
+    it("spells the CTA out as a label and an absolute URL", () => {
+        // A text part whose only link is "/shows/show-1" is unclickable.
+        expect(renderBrandedEmailText(card)).toMatch(
+            /See the full results: https?:\/\/[^\s]+\/shows\/show-1/,
+        );
+    });
+
+    it("omits the CTA line when the card has no button", () => {
+        const { ctaLabel: _l, ctaUrl: _u, ...noCta } = card;
+        expect(renderBrandedEmailText(noCta)).not.toContain("See the full results");
+    });
+
+    it("honours hideSettingsLink, same as the HTML part", () => {
+        expect(renderBrandedEmailText(card)).toContain("Notification settings:");
+        expect(renderBrandedEmailText({ ...card, hideSettingsLink: true })).not.toContain(
             "Notification settings",
         );
     });

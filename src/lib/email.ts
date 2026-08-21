@@ -1,10 +1,14 @@
 import { Resend } from "resend";
 
-import { escapeEmailHtml, renderBrandedEmail, renderEmailQuote } from "@/lib/email/layout";
+import {
+    EMAIL_FROM,
+    escapeEmailHtml,
+    renderBrandedEmail,
+    renderBrandedEmailText,
+    renderEmailQuote,
+} from "@/lib/email/layout";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "Model Horse Hub <noreply@modelhorsehub.com>";
 
 /**
  * Send an email notification when a user receives a new direct message.
@@ -44,7 +48,7 @@ export async function sendNewMessageNotification({
         ? `New message from @${senderName} about ${horseName}`
         : `New message from @${senderName}`;
 
-    const html = renderBrandedEmail({
+    const card = {
         title: subject,
         heading: `You have a new message from @${senderName}`,
         bodyHtml: `
@@ -53,14 +57,15 @@ export async function sendNewMessageNotification({
         ctaLabel: "Reply in your inbox",
         ctaUrl: `/inbox/${conversationId}`,
         footerNote: "You're getting this because someone messaged you on Model Horse Hub.",
-    });
+    };
 
     try {
         const { error } = await resend.emails.send({
-            from: FROM_EMAIL,
+            from: EMAIL_FROM,
             to: toEmail,
             subject,
-            html,
+            html: renderBrandedEmail(card),
+            text: renderBrandedEmailText(card),
         });
 
         if (error) {

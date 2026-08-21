@@ -19,9 +19,13 @@ import { getAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/logger";
 import { Resend } from "resend";
 import * as Sentry from "@sentry/nextjs";
-import { escapeEmailHtml, renderBrandedEmail, renderEmailStats } from "@/lib/email/layout";
-
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "Model Horse Hub <noreply@modelhorsehub.com>";
+import {
+    EMAIL_FROM,
+    escapeEmailHtml,
+    renderBrandedEmail,
+    renderBrandedEmailText,
+    renderEmailStats,
+} from "@/lib/email/layout";
 
 export async function GET(request: NextRequest) {
     // Verify Vercel cron secret
@@ -149,7 +153,7 @@ ${moversHtml}
                     month: "long",
                     year: "numeric",
                 });
-                const emailHtml = renderBrandedEmail({
+                const card = {
                     title: `Your Monthly Stablemaster Report — ${reportMonth}`,
                     heading: `Stablemaster Report · ${reportMonth}`,
                     bodyHtml: `${renderEmailStats([
@@ -160,13 +164,14 @@ ${moversHtml}
                     ctaLabel: "View my stable",
                     ctaUrl: "/dashboard",
                     footerNote: "You're getting this because you're an MHH Pro subscriber.",
-                });
+                };
 
                 const { error: emailError } = await resend.emails.send({
-                    from: FROM_EMAIL,
+                    from: EMAIL_FROM,
                     to: proUser.email!,
                     subject: `🐴 Your Monthly Stablemaster Report — ${new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}`,
-                    html: emailHtml,
+                    html: renderBrandedEmail(card),
+                    text: renderBrandedEmailText(card),
                 });
 
                 if (emailError) {
