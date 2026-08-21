@@ -66,7 +66,7 @@ async function getSupporterPriceLabel(): Promise<string | null> {
 
 export const metadata = {
     title: "Upgrade to MHH Pro",
-    description: "Unlock advanced analytics, expanded photo storage, and AI-powered collection reports.",
+    description: "Sales-history charts, expanded photo storage and market-valued insurance reports — while every trust feature stays free.",
 };
 
 // Ordered by concrete value today (audit 2026-08: lead with what a
@@ -142,6 +142,75 @@ const FREE_FEATURES = [
     "Standard insurance reports",
 ];
 
+// ── The honest feature table ──
+// One matrix, three columns, no asterisks. The first group is the
+// house principle written as a table row: everything a collector or a
+// buyer needs to TRUST a horse — its record, its condition, its
+// provenance, its sale history — is ✓ ✓ ✓ and always will be. Pro buys
+// power tools, not trust. Anything we can't honestly promise today
+// doesn't get a row.
+type MatrixCell = string | boolean;
+const TIER_MATRIX: {
+    group: string;
+    note?: string;
+    rows: { feature: string; free: MatrixCell; pro: MatrixCell; studio: MatrixCell }[];
+}[] = [
+    {
+        group: "Trust & records",
+        note: "Free for everyone, forever — these are the reason the Hub exists.",
+        rows: [
+            { feature: "Horses in your stable", free: "Unlimited", pro: "Unlimited", studio: "Unlimited" },
+            { feature: "Hoofprint provenance & ownership history", free: true, pro: true, studio: true },
+            { feature: "Verified show records & qualification cards", free: true, pro: true, studio: true },
+            { feature: "Condition grades & flaw records", free: true, pro: true, studio: true },
+            { feature: "Blue Book price guide (avg / median / range)", free: true, pro: true, studio: true },
+            { feature: "Marketplace listings & Want List matchmaker", free: true, pro: true, studio: true },
+            { feature: "Standard insurance report PDF", free: true, pro: true, studio: true },
+            { feature: "Show Ring, barns, events & the Paddock", free: true, pro: true, studio: true },
+        ],
+    },
+    {
+        group: "Power tools",
+        note: "What a subscription actually buys.",
+        rows: [
+            { feature: "Detail photos per horse", free: "5 angles", pro: "5 + 30", studio: "5 + 30" },
+            { feature: "Blue Book PRO sales-history charts", free: false, pro: true, studio: true },
+            { feature: "Market Replacement Values on insurance PDFs", free: false, pro: true, studio: true },
+            { feature: "Printable cut-out show tags", free: false, pro: true, studio: true },
+            { feature: "Monthly Stablemaster report by email", free: false, pro: true, studio: true },
+            { feature: "Early access & priority support", free: false, pro: true, studio: true },
+        ],
+    },
+    {
+        group: "Studio tools",
+        note: "For the artists who make the horses everyone else collects.",
+        rows: [
+            { feature: "Public artist profile & portfolio", free: false, pro: false, studio: true },
+            { feature: "Commission queue manager", free: false, pro: false, studio: true },
+            { feature: "WIP photo portal for clients", free: false, pro: false, studio: true },
+            { feature: "Hoofprint artist credit on every custom", free: false, pro: false, studio: true },
+        ],
+    },
+];
+
+function MatrixMark({ value }: { value: MatrixCell }) {
+    if (value === true) {
+        return (
+            <span className="text-forest font-bold" title="Included">
+                ✓<span className="sr-only">Included</span>
+            </span>
+        );
+    }
+    if (value === false) {
+        return (
+            <span className="text-muted-foreground" title="Not included">
+                —<span className="sr-only">Not included</span>
+            </span>
+        );
+    }
+    return <span className="text-foreground text-xs font-semibold">{value}</span>;
+}
+
 export default async function UpgradePage({
     searchParams,
 }: {
@@ -175,43 +244,50 @@ export default async function UpgradePage({
                         : "Take your collection management to the next level"
                 }
             />
-            {/* Success / Cancel banners */}
+            {/* Success / Cancel banners — ledger leaves with a rubber
+                stamp, like every other receipt on the site. */}
             {status === "success" && (
-                <div className="animate-fade-in-up mb-8 rounded-xl border border-success/30 bg-success/10 p-6 text-center shadow-lg">
-                    <PartyPopper className="mx-auto h-8 w-8 text-success" />
-                    <h2 className="mt-2 text-xl font-bold text-success">Welcome to MHH Pro!</h2>
-                    <p className="mt-1 text-sm text-secondary-foreground">
+                <div className="animate-fade-in-up ledger-card mb-8 text-center">
+                    <PartyPopper className="text-forest mx-auto h-8 w-8" />
+                    <h2 className="mt-2 font-serif text-xl font-bold">Welcome to MHH Pro</h2>
+                    <p className="text-secondary-foreground mt-1 text-sm">
                         Your account has been upgraded. Log out and back in to activate all Pro features.
                     </p>
+                    <span className="stamp mt-3 inline-block">Paid</span>
                 </div>
             )}
             {status === "supporter-success" && (
-                <div className="animate-fade-in-up mb-8 rounded-xl border border-(--brass) bg-card p-6 text-center shadow-lg">
-                    <Lamp className="mx-auto h-8 w-8 text-(--brass)" />
-                    <h2 className="mt-2 text-xl font-bold text-foreground">The lights stay on. Thank you.</h2>
-                    <p className="mt-1 text-sm text-secondary-foreground">
+                <div className="animate-fade-in-up ledger-card mb-8 text-center">
+                    <Lamp className="mx-auto h-8 w-8 text-(--brass-dark)" />
+                    <h2 className="mt-2 font-serif text-xl font-bold">The lights stay on. Thank you.</h2>
+                    <p className="text-secondary-foreground mt-1 text-sm">
                         Your brass plaque will appear on your profile within a minute or two. It unlocks
                         nothing — and that&apos;s exactly the point.
                     </p>
+                    <span className="stamp mt-3 inline-block">Supporter</span>
                 </div>
             )}
             {status === "cancelled" && (
-                <div className="animate-fade-in-up mb-8 rounded-xl border border-warning/30 bg-warning/10 p-6 text-center">
-                    <p className="text-sm text-warning">Checkout was cancelled. No charges were made.</p>
+                <div className="animate-fade-in-up ledger-card mb-8 text-center">
+                    <span className="stamp stamp-red inline-block">Cancelled</span>
+                    <p className="text-secondary-foreground mt-3 text-sm">
+                        Checkout was cancelled. No charges were made.
+                    </p>
                 </div>
             )}
 
-            {/* Current plan badge */}
-            <div className="animate-fade-in-up mb-6 text-center">
-                <p className="inline-block rounded-full bg-muted px-3 py-1 text-xs font-medium text-secondary-foreground">
-                    Current plan: <span className={tier === 'pro' ? 'font-bold text-warning' : 'font-bold'}>{tierLabel}</span>
-                </p>
+            {/* Current plan — stamped, not badged */}
+            <div className="animate-fade-in-up mb-6 flex items-center justify-center gap-2 text-center">
+                <span className="text-muted-foreground font-serif text-[0.7rem] tracking-[0.18em] uppercase">
+                    Current plan
+                </span>
+                <span className="stamp">{tierLabel}</span>
             </div>
 
             {/* The honest pitch — this hobby has watched its volunteer-run
                 sites go dark; "keep the lights on" IS the product. */}
             <div className="animate-fade-in-up mx-auto mb-12 max-w-[640px] text-center">
-                <p className="text-sm leading-relaxed text-secondary-foreground">
+                <p className="text-secondary-foreground text-sm leading-relaxed">
                     Pro is how the lights stay on. Everything that keeps this hobby safe and fair —
                     your stable, showing, provenance, condition records — is free for everyone,
                     forever. Pro adds the power-user toolkit, and every subscription pays the
@@ -219,94 +295,124 @@ export default async function UpgradePage({
                 </p>
             </div>
 
-            {/* Pricing cards — 3 columns */}
-            <div className="animate-fade-in-up mx-auto grid max-w-[1100px] gap-6 md:grid-cols-3">
+            {/* Pricing cards — 3 columns. Free and Studio are ledger
+                leaves; Pro is the leather-and-brass panel, because it's
+                the one being sold. The old tier-gold→saddle gradients
+                were the last unconverted surface from the leather
+                rollout. */}
+            <div className="animate-fade-in-up mx-auto grid max-w-[1100px] items-start gap-6 md:grid-cols-3">
                 {/* Free tier */}
-                <div className="rounded-xl border border-input bg-card p-8 shadow-md">
-                    <div className="mb-4">
-                        <span className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Free</span>
-                        <div className="mt-2 flex items-baseline gap-1">
-                            <span className="text-3xl font-bold">$0</span>
-                            <span className="text-sm text-muted-foreground">/forever</span>
-                        </div>
+                <div className="ledger-card h-full">
+                    <span className="ledger-tab">Free</span>
+                    <div className="mb-4 flex items-baseline gap-1">
+                        <span className="text-forest font-serif text-3xl font-bold">$0</span>
+                        <span className="text-muted-foreground text-sm">/forever</span>
                     </div>
                     <ul className="space-y-3">
                         {FREE_FEATURES.map((feature) => (
                             <li key={feature} className="flex items-start gap-2 text-sm">
-                                <span className="mt-0.5 text-muted-foreground">✓</span>
+                                <span className="text-forest mt-0.5 font-bold">✓</span>
                                 <span>{feature}</span>
                             </li>
                         ))}
                     </ul>
                     {tier === "free" && (
-                        <div className="mt-6 rounded-lg bg-muted py-2 text-center text-sm font-semibold text-secondary-foreground">
-                            Current Plan
+                        <div className="mt-6 text-center">
+                            <span className="stamp">Current plan</span>
                         </div>
                     )}
                 </div>
 
-                {/* Pro tier */}
-                <div className="relative rounded-xl border-2 border-tier-gold/60 bg-card bg-gradient-to-br from-tier-gold/10 to-saddle/5 p-8 shadow-xl">
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-tier-gold px-4 py-1 text-xs font-bold text-forest-dark shadow-md">
-                        <Sparkles className="h-3 w-3" /> MOST POPULAR
+                {/* Pro tier — leather panel, brass plaque, engraved ink.
+                    Text here rides the --leather-text ramp; default ink
+                    is invisible on this material. */}
+                <div
+                    className="leather-panel stitched relative h-full p-8"
+                    style={{ color: "var(--leather-text)" }}
+                >
+                    <div className="brass-plaque absolute -top-3 left-1/2 z-[1] inline-flex -translate-x-1/2 items-center gap-1 px-4 py-1 font-serif text-[0.7rem] font-bold tracking-[0.14em] uppercase">
+                        <Sparkles className="h-3 w-3" /> Most popular
                     </div>
-                    <div className="mb-4">
-                        <span className="text-sm font-semibold uppercase tracking-wider text-warning">Pro</span>
-                        <div className="mt-2 flex items-baseline gap-1">
-                            <span className="text-3xl font-bold text-foreground">$5</span>
-                            <span className="text-sm text-secondary-foreground">/month</span>
+                    <div className="relative z-[1] mb-4 pt-2">
+                        <span
+                            className="font-serif text-[0.7rem] font-bold tracking-[0.18em] uppercase"
+                            style={{ color: "var(--leather-text-muted)" }}
+                        >
+                            MHH Pro
+                        </span>
+                        <div className="mt-1 flex items-baseline gap-1">
+                            <span className="text-engraved-light font-serif text-3xl font-bold">$5</span>
+                            <span className="text-sm" style={{ color: "var(--leather-text-soft)" }}>
+                                /month
+                            </span>
                         </div>
                     </div>
-                    <ul className="space-y-3">
+                    <ul className="relative z-[1] space-y-3">
                         {PRO_FEATURES.map((feature) => (
                             <li key={feature.title} className="flex items-start gap-2 text-sm">
-                                <feature.icon className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
+                                <feature.icon className="mt-0.5 h-4 w-4 shrink-0 text-(--brass-hi)" />
                                 <div>
-                                    <span className="font-semibold text-foreground">{feature.title}</span>
-                                    <span className="text-secondary-foreground"> — {feature.description}</span>
+                                    <span className="font-semibold">{feature.title}</span>
+                                    <span style={{ color: "var(--leather-text-soft)" }}>
+                                        {" "}
+                                        — {feature.description}
+                                    </span>
                                 </div>
                             </li>
                         ))}
                     </ul>
 
                     {isPro(tier) ? (
-                        <div className="mt-6 inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-success/10 py-2 text-center text-sm font-bold text-success">
-                            <CheckCircle className="h-4 w-4" /> Active
+                        <div className="relative z-[1] mt-6 text-center">
+                            <span className="brass-plaque inline-flex items-center gap-1.5 px-4 py-1.5 font-serif text-[0.72rem] font-bold tracking-[0.14em] uppercase">
+                                <CheckCircle className="h-3.5 w-3.5" /> Active
+                            </span>
                         </div>
                     ) : (
-                        <div className="mt-6">
+                        <div className="relative z-[1] mt-6">
                             <UpgradeButton />
                         </div>
                     )}
                 </div>
 
-                {/* Studio Pro tier */}
-                <div className="relative rounded-xl border-2 border-studio/60 bg-card bg-gradient-to-br from-studio/15 to-studio/5 p-8 shadow-xl">
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-studio px-4 py-1 text-xs font-bold text-background shadow-md">
-                        <Palette className="h-3 w-3" /> FOR ARTISTS
-                    </div>
-                    <div className="mb-4">
-                        <span className="text-sm font-semibold uppercase tracking-wider text-studio">Studio Pro</span>
-                        <div className="mt-2 flex items-baseline gap-1">
-                            <span className="text-3xl font-bold text-foreground">$10</span>
-                            <span className="text-sm text-secondary-foreground">/month</span>
-                        </div>
+                {/* Studio Pro tier — a ledger leaf with the studio
+                    thread, so the artist tier reads as a specialism
+                    rather than a bigger Pro. */}
+                <div
+                    className="ledger-card h-full"
+                    style={{ borderTopColor: "var(--color-studio)" }}
+                >
+                    <span
+                        className="ledger-tab"
+                        style={{ background: "linear-gradient(180deg, #7E5AB4, var(--color-studio))" }}
+                    >
+                        Studio Pro
+                    </span>
+                    <div className="mb-4 flex items-baseline gap-1">
+                        <span className="text-studio font-serif text-3xl font-bold">$10</span>
+                        <span className="text-muted-foreground text-sm">/month</span>
                     </div>
                     <ul className="space-y-3">
                         {STUDIO_FEATURES.map((feature) => (
                             <li key={feature.title} className="flex items-start gap-2 text-sm">
-                                <feature.icon className="mt-0.5 h-4 w-4 shrink-0 text-studio" />
+                                <feature.icon className="text-studio mt-0.5 h-4 w-4 shrink-0" />
                                 <div>
-                                    <span className="font-semibold text-foreground">{feature.title}</span>
+                                    <span className="text-foreground font-semibold">{feature.title}</span>
                                     <span className="text-secondary-foreground"> — {feature.description}</span>
                                 </div>
                             </li>
                         ))}
                     </ul>
 
-                    <div className="mt-6">
-                        <StudioProButton />
-                    </div>
+                    {tier === "studio" ? (
+                        <div className="mt-6 text-center">
+                            <span className="stamp">Current plan</span>
+                        </div>
+                    ) : (
+                        <div className="mt-6">
+                            <StudioProButton />
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -315,19 +421,19 @@ export default async function UpgradePage({
                 ship). Deliberately quieter than the Pro card. */}
             {supporterPriceLabel && (
                 <div className="animate-fade-in-up mx-auto mt-6 max-w-[1100px]">
-                    <div className="rounded-xl border-2 border-(--brass) bg-card p-6 shadow-lg sm:p-8">
+                    <div className="ledger-card" style={{ borderTopColor: "var(--brass-dark)" }}>
                         <div className="flex flex-col items-center gap-6 md:flex-row">
                             <div
-                                className="brass-plaque flex shrink-0 items-center gap-2 px-4 py-2 text-xs font-bold tracking-[0.14em] uppercase"
+                                className="brass-plaque flex shrink-0 items-center gap-2 px-4 py-2 font-serif text-xs font-bold tracking-[0.14em] uppercase"
                                 aria-hidden="true"
                             >
                                 <Lamp className="h-4 w-4" /> Supporter
                             </div>
                             <div className="flex-1 text-center md:text-left">
-                                <span className="text-sm font-semibold uppercase tracking-wider text-(--brass)">
-                                    Supporter
+                                <span className="font-serif text-[0.7rem] font-bold tracking-[0.18em] text-(--brass-dark) uppercase">
+                                    Supporter — {supporterPriceLabel}
                                 </span>
-                                <p className="mt-1 text-sm text-secondary-foreground">
+                                <p className="text-secondary-foreground mt-1 text-sm">
                                     Keeps the lights on. Unlocks nothing — the Hub stays free. Brass plaque on
                                     your profile, our eternal gratitude, and a line in the ledger if you want
                                     it.
@@ -340,9 +446,11 @@ export default async function UpgradePage({
                             <div className="w-full shrink-0 md:w-[280px]">
                                 {supporterBadge.isSupporter ? (
                                     <div className="space-y-3">
-                                        <div className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-success/10 py-2 text-center text-sm font-bold text-success">
-                                            <CheckCircle className="h-4 w-4" /> Supporter
-                                            {supporterSinceLabel ? ` since ${supporterSinceLabel}` : ""}
+                                        <div className="text-center">
+                                            <span className="stamp inline-flex items-center gap-1.5">
+                                                <CheckCircle className="h-3.5 w-3.5" /> Supporter
+                                                {supporterSinceLabel ? ` since ${supporterSinceLabel}` : ""}
+                                            </span>
                                         </div>
                                         <SupporterLedgerToggle initialListed={supporterBadge.showInLedger} />
                                     </div>
@@ -355,31 +463,101 @@ export default async function UpgradePage({
                 </div>
             )}
 
+            {/* The honest feature table. A price page's job is to let
+                someone work out whether to pay WITHOUT reading three
+                marketing lists and guessing at the overlap — so: one
+                matrix, and the trust rows sit at the top reading ✓ ✓ ✓
+                because that is the house promise, not a tier. */}
+            <div className="animate-fade-in-up mx-auto mt-16 max-w-[900px]">
+                <section className="ledger-card">
+                    <span className="ledger-tab">What each plan includes</span>
+
+                    {/* The matrix scrolls in its own rail on a phone
+                        rather than dragging the ledger leaf sideways. */}
+                    <div className="-mx-2 overflow-x-auto px-2">
+                        <table className="w-full min-w-[560px] border-collapse text-sm">
+                            <thead>
+                                <tr>
+                                    <th className="py-2 pr-3">Feature</th>
+                                    <th className="w-[16%] py-2 text-center">Free</th>
+                                    <th className="w-[16%] py-2 text-center">Pro</th>
+                                    <th className="w-[16%] py-2 text-center">Studio</th>
+                                </tr>
+                            </thead>
+                            {TIER_MATRIX.map((section) => (
+                                <tbody key={section.group}>
+                                    <tr>
+                                        <td colSpan={4} className="pt-5 pb-1">
+                                            <span className="text-forest font-serif text-[0.78rem] font-bold tracking-[0.16em] uppercase">
+                                                {section.group}
+                                            </span>
+                                            {section.note && (
+                                                <span className="text-muted-foreground block text-xs">
+                                                    {section.note}
+                                                </span>
+                                            )}
+                                        </td>
+                                    </tr>
+                                    {section.rows.map((row) => (
+                                        <tr key={row.feature}>
+                                            <td className="py-2 pr-3">{row.feature}</td>
+                                            <td className="py-2 text-center">
+                                                <MatrixMark value={row.free} />
+                                            </td>
+                                            <td className="py-2 text-center">
+                                                <MatrixMark value={row.pro} />
+                                            </td>
+                                            <td className="py-2 text-center">
+                                                <MatrixMark value={row.studio} />
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            ))}
+                        </table>
+                    </div>
+                </section>
+
+                {/* The house principle, said plainly under the table it
+                    describes. */}
+                <div className="border-input bg-card/50 mt-6 rounded-lg border p-6 text-xs backdrop-blur-sm">
+                    <p>
+                        🤝 Trust is never a paid feature. A horse&apos;s show record, its condition and
+                        flaw notes, its Hoofprint provenance and the Blue Book&apos;s real sale history
+                        stay free for every collector — including the ones deciding whether to buy from
+                        you. Paying for Pro must never make anyone else&apos;s horse look more
+                        trustworthy than it is.
+                    </p>
+                </div>
+            </div>
+
             {/* FAQ */}
             <div className="animate-fade-in-up mx-auto mt-16 max-w-[600px]">
-                <h2 className="mb-6 text-center text-lg font-bold">Frequently Asked Questions</h2>
+                <h2 className="mb-6 text-center font-serif text-lg font-bold tracking-[0.08em] uppercase">
+                    Frequently Asked Questions
+                </h2>
                 <div className="space-y-4">
-                    <div className="rounded-lg border border-input bg-card p-4">
-                        <h3 className="font-semibold">Can I cancel anytime?</h3>
+                    <div className="ledger-card">
+                        <h3 className="font-serif font-bold">Can I cancel anytime?</h3>
                         <p className="mt-1 text-sm text-secondary-foreground">
                             Yes! Cancel from your Stripe billing portal anytime. Your Pro features stay active until the end of the billing period.
                         </p>
                     </div>
-                    <div className="rounded-lg border border-input bg-card p-4">
-                        <h3 className="font-semibold">Will I lose my data if I downgrade?</h3>
+                    <div className="ledger-card">
+                        <h3 className="font-serif font-bold">Will I lose my data if I downgrade?</h3>
                         <p className="mt-1 text-sm text-secondary-foreground">
                             Never. All your horses, photos, and provenance data are safe. Extra detail photos become view-only until you re-subscribe.
                         </p>
                     </div>
-                    <div className="rounded-lg border border-input bg-card p-4">
-                        <h3 className="font-semibold">What&apos;s the difference between Pro and Studio Pro?</h3>
+                    <div className="ledger-card">
+                        <h3 className="font-serif font-bold">What&apos;s the difference between Pro and Studio Pro?</h3>
                         <p className="mt-1 text-sm text-secondary-foreground">
-                            Pro is for collectors — analytics, extra photos, insurance reports, and AI insights. Studio Pro adds artist tools: commission management, WIP portals, and permanent Hoofprint credit on every custom you create.
+                            Pro is for collectors — sales-history charts, extra detail photos, market-valued insurance reports and the monthly Stablemaster ledger. Studio Pro includes all of that and adds artist tools: commission management, WIP portals, and permanent Hoofprint credit on every custom you create.
                         </p>
                     </div>
                     {supporterPriceLabel && (
-                        <div className="rounded-lg border border-input bg-card p-4">
-                            <h3 className="font-semibold">What does Supporter unlock?</h3>
+                        <div className="ledger-card">
+                            <h3 className="font-serif font-bold">What does Supporter unlock?</h3>
                             <p className="mt-1 text-sm text-secondary-foreground">
                                 Nothing — on purpose. This hobby has watched platforms paywall their way into
                                 irrelevance or vanish overnight, and we&apos;re not doing either. Supporter is
@@ -390,8 +568,8 @@ export default async function UpgradePage({
                             </p>
                         </div>
                     )}
-                    <div className="rounded-lg border border-input bg-card p-4">
-                        <h3 className="font-semibold">Do you offer beta tester discounts?</h3>
+                    <div className="ledger-card">
+                        <h3 className="font-serif font-bold">Do you offer beta tester discounts?</h3>
                         <p className="mt-1 text-sm text-secondary-foreground">
                             Yes! Early supporters receive a promo code for 6 months free. Enter it at checkout to apply the discount automatically.
                         </p>
