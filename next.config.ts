@@ -10,6 +10,15 @@ const withSerwist = withSerwistInit({
 });
 
 const nextConfig: NextConfig = {
+  experimental: {
+    // Cap static-generation workers. Vercel's Turbo build machine has
+    // 30 cores → 29 workers, and every prebuilt /reference page hits
+    // Supabase with several queries — 29 at once stampedes the
+    // connection pool, queues everything past the 60s per-page cap,
+    // and fails the build (2026-08-21 launch deploy). Six workers
+    // build the same pages comfortably inside the window.
+    cpus: 6,
+  },
   images: {
     remotePatterns: [
       {
