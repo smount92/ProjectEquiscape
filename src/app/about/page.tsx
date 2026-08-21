@@ -1,306 +1,338 @@
+/**
+ * /about — the story, the stance, and the limits.
+ *
+ * REWRITTEN FOR THE FIVE-ROOM SITE (August 2026). The old copy sold a
+ * "digital stable" with a Show Ring, Groups and a Notice Board, and
+ * closed with a roadmap of things that did not exist. All of that is
+ * gone. Every claim on this page is either visible on the landing page,
+ * published in /shows/rules, or enforced in code — nothing here promises
+ * a feature.
+ *
+ * STAYS STATIC. The Supporters' Ledger reads through the cookie-less
+ * anon RPC, so the page keeps its hourly revalidate and never touches
+ * the SSR (cookie) client. Do not add a session read here.
+ *
+ * The #ai-data-policy anchor is linked from the landing page's Plain
+ * Terms panel — AiDataPolicySection owns that id, so keep it mounted.
+ */
+
 import Link from "next/link";
 import type { Metadata } from "next";
+
+import AiDataPolicySection from "@/components/AiDataPolicySection";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
 import PageMasthead from "@/components/layouts/PageMasthead";
-import AiDataPolicySection from "@/components/AiDataPolicySection";
 import { Button } from "@/components/ui/button";
-import { Lock, Sparkles, PawPrint, Gavel, Users, Palette, Package, Smartphone, Handshake, Lamp } from "lucide-react";
+import { Lamp } from "lucide-react";
 import { fetchSupportersLedger, formatSupporterSince } from "@/lib/supporter";
 
+const TITLE = "About Model Horse Hub — Who Builds It, and What It's For";
+const DESCRIPTION =
+    "Model Horse Hub is built by two collectors: a place to catalog your model horses, campaign them in the MHH Championship Series, and sell out of your stable with a show record a buyer can actually verify. Free tier, no cut of sales, trust features never paywalled.";
+
 export const metadata: Metadata = {
-    title: "About",
-    description:
-        "Learn about Model Horse Hub — the first digital stable built by a collector who was tired of notebooks, spreadsheets, and scattered albums. 10,500+ reference entries, Hoofprint provenance, and a privacy-first design.",
+    title: TITLE,
+    description: DESCRIPTION,
+    alternates: { canonical: "/about" },
+    openGraph: {
+        title: TITLE,
+        description: DESCRIPTION,
+        type: "website",
+        siteName: "Model Horse Hub",
+        url: "/about",
+    },
 };
 
-// The Supporters' Ledger reads via the cookie-less anon client, so the page
-// stays cacheable — refresh it hourly (opt-ins also revalidate it on save).
 export const revalidate = 3600;
+
+function Section({ id, tab, title, children }: { id: string; tab: string; title: string; children: React.ReactNode }) {
+    return (
+        <section className="ledger-card" aria-labelledby={`about-${id}`}>
+            <span className="ledger-tab" id={`about-${id}`}>
+                {tab}
+            </span>
+            <div className="brass-heading mb-4">
+                <span className="brass-heading-bar" aria-hidden="true" />
+                <h2 className="text-foreground m-0 font-serif text-xl font-bold">{title}</h2>
+            </div>
+            <div className="text-foreground flex flex-col gap-3 text-[0.95rem] leading-relaxed">{children}</div>
+        </section>
+    );
+}
 
 export default async function AboutPage() {
     // Only supporters who opted IN, via DEFINER RPC (migration 142).
     // Empty / RPC-not-deployed → the section renders nothing at all.
     const supporters = await fetchSupportersLedger();
+
     return (
         <ExplorerLayout noHeader>
-            <div className="animate-fade-in-up">
+            <div className="animate-fade-in-up mx-auto max-w-[860px]">
                 <PageMasthead
                     icon="🐎"
                     title="About Model Horse Hub"
-                    subtitle="Built by a collector who was tired of the status quo"
+                    subtitle="Who builds it, and what it's for"
                 />
 
-                {/* Founders */}
-                <section className="mb-12">
-                    <h2>A Husband-and-Wife Team</h2>
-                    <div className="text-secondary-foreground space-y-4 text-base leading-relaxed">
-                        <p>
-                            Model Horse Hub is built by <strong>Amanda</strong> and <strong>Stephen Mount</strong> — a
-                            husband-and-wife team, and yes, that&apos;s really it. No boardroom, no investors, no growth
-                            team. Just two people who love this hobby and got tired of watching it get let down by tools
-                            that weren&apos;t built for it.
-                        </p>
-                        <p>
-                            Amanda is the collector. She&apos;s the one who&apos;s lived inside spreadsheets, notebooks,
-                            and Facebook albums trying to keep track of a growing herd, and she knows this hobby from
-                            the inside — what LSQ means, why OF and CM aren&apos;t the same thing, what a showholder
-                            actually needs on class day. Every feature on this platform starts as an idea from Amanda,
-                            usually phrased as &ldquo;I wish this existed.&rdquo;
-                        </p>
-                        <p>
-                            Stephen builds them. He turns &ldquo;I wish this existed&rdquo; into working software — the
-                            database that holds 10,500+ reference releases, the ring console that has to work from a
-                            phone at a fairgrounds with one bar of signal, the row-level security that keeps your
-                            financial vault actually private. If something on this site works well, Amanda probably
-                            asked for it and Stephen probably lost a weekend making it real.
-                        </p>
-                    </div>
-                </section>
+                <div className="text-secondary-foreground mb-8 space-y-4 text-base leading-[1.7]">
+                    <p>
+                        Model Horse Hub is one place to keep the herd, campaign it, and sell out of
+                        it. The site is laid out in five rooms: the <strong>Stable</strong> holds
+                        what you own, <strong>Shows</strong> runs the MHH Championship Series, the{" "}
+                        <strong>Market</strong> is where horses change hands, the{" "}
+                        <strong>Registry</strong> says what the models actually are, and{" "}
+                        <strong>The Paddock</strong> is where the hobby talks.
+                    </p>
+                    <p>
+                        What&apos;s different here is the record. A placing exists because a show was
+                        run on this site, so every card on a horse links back to the class it came out
+                        of — the judge, the date, the size of the field. And it belongs to the horse.
+                        When the horse changes hands, the record goes with it.
+                    </p>
+                </div>
 
-                {/* Our Story */}
-                <section className="mb-12">
-                    <h2>Our Story</h2>
-                    <div className="text-secondary-foreground space-y-4 text-base leading-relaxed">
+                <div className="flex flex-col gap-6">
+                    <Section id="people" tab="The people" title="Two collectors, no boardroom">
                         <p>
-                            It started the way it starts for most of us: a notebook. Then a spreadsheet. Then another
-                            spreadsheet because the first one got too messy. Then Facebook albums and mental notes about
-                            &ldquo;that palomino I sold in 2019 — what was her name?&rdquo;
+                            Model Horse Hub is <strong>Amanda</strong> and <strong>Stephen Mount</strong>,
+                            a husband and wife. That is the whole company. No investors, no growth
+                            team, nobody upstairs asking what the engagement numbers look like.
                         </p>
                         <p>
-                            The model horse hobby has exploded in size and sophistication, but the tools for managing a
-                            collection haven&apos;t kept up. There was no single platform where you could catalog your
-                            herd with proper multi-angle photos, track what you paid and what it&apos;s worth, and
-                            connect with other collectors — all in one place, with real privacy protections.
+                            Amanda is the collector. She has spent years inside spreadsheets,
+                            notebooks and Facebook albums trying to keep track of a growing herd, and
+                            she knows the hobby from the inside — what LSQ means, why OF and CM
+                            aren&apos;t the same thing, what a showholder actually needs at seven in
+                            the morning on class day. Most of what&apos;s on this site started as
+                            Amanda saying &ldquo;I wish this existed.&rdquo;
                         </p>
                         <p>
-                            So we built one. Model Horse Hub is a purpose-built digital stable backed by a{" "}
-                            <strong>10,500+ entry reference database</strong> — 7,000+ Breyer and Stone releases
-                            hand-verified from official catalogs, plus 3,500+ artist resins sourced from the Equine
-                            Resin Directory. When you add a horse, you&apos;re not typing in data from scratch.
-                            You&apos;re selecting from real reference data with mold, manufacturer, scale, and year
-                            already filled in.
+                            Stephen builds them: the catalog behind the Registry, the ring console
+                            that has to work from a fairgrounds with one bar of signal, the
+                            row-level security that keeps your purchase prices actually private.
                         </p>
-                        <p>
-                            Whether you collect Breyer Traditionals, Stone Artist Resins, or anything in between, Model
-                            Horse Hub is designed to grow with your herd — from a handful of childhood favorites to a
-                            serious collection of hundreds.
-                        </p>
-                    </div>
-                </section>
+                    </Section>
 
-                {/* What Makes Us Different */}
-                <section className="mb-12">
-                    <h2>What Makes Us Different</h2>
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                        <div className="ledger-paper [&_p]:text-secondary-foreground p-8 text-center transition-transform duration-300 hover:-translate-y-1 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
-                            <div className="text-forest mb-4 flex justify-center">
-                                <Lock size={32} strokeWidth={1.5} />
-                            </div>
-                            <h3>Your Data is YOURS</h3>
-                            <p>
-                                Row-level security means even our team can&apos;t see your financial vault. No ads, no
-                                selling your collection data, no &ldquo;we may share with partners&rdquo; clauses. Your
-                                purchase prices, estimated values, and insurance notes stay locked behind cryptographic
-                                access controls. Period.
-                            </p>
-                        </div>
-                        <div className="ledger-paper [&_p]:text-secondary-foreground p-8 text-center transition-transform duration-300 hover:-translate-y-1 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
-                            <div className="text-forest mb-4 flex justify-center">
-                                <Sparkles size={32} strokeWidth={1.5} />
-                            </div>
-                            <h3>Built for the Hobby&apos;s Nuances</h3>
-                            <p>
-                                We know what LSQ means. We know the difference between OF and CM. We know that a Breyer
-                                #5 is fundamentally different from a Beswick #5. Every feature was designed around how
-                                collectors actually work — not how a generic inventory app thinks you should.
-                            </p>
-                        </div>
-                        <div className="ledger-paper [&_p]:text-secondary-foreground p-8 text-center transition-transform duration-300 hover:-translate-y-1 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
-                            <div className="text-forest mb-4 flex justify-center">
-                                <PawPrint size={32} strokeWidth={1.5} />
-                            </div>
-                            <h3>Hoofprint — A First for the Hobby</h3>
-                            <p>
-                                No platform has ever built provenance tracking for model horses. Hoofprint creates a
-                                permanent digital identity for every horse — ownership history, customization records,
-                                show results, and photos that follow the horse, not the owner. The CarFax of model
-                                horses.
-                            </p>
-                        </div>
-                    </div>
-                </section>
+                    <Section id="why" tab="Why bother" title="The notebook, then the spreadsheet">
+                        <p>
+                            It starts the way it starts for everyone. A notebook. Then a spreadsheet.
+                            Then a second spreadsheet because the first one got messy. Then Facebook
+                            albums, and a vague memory of that palomino you sold in 2019 — what was
+                            her name?
+                        </p>
+                        <p>
+                            The bigger problem is that nothing in this hobby could be checked. Anyone
+                            can type &ldquo;NAN qualified&rdquo; into a sale post, and a buyer has
+                            never had a way to look it up. Condition grades meant whatever the seller
+                            wanted them to mean. Show results lived in one host&apos;s spreadsheet
+                            and died there when the laptop did.
+                        </p>
+                        <p>
+                            So: one place for the herd, one published rulebook for the shows, and a
+                            record a stranger can verify without asking anyone&apos;s permission.
+                        </p>
+                    </Section>
 
-                {/* Continuity */}
-                <section className="mb-12">
-                    <h2>Will This Still Be Here Next Year?</h2>
-                    <div className="text-secondary-foreground space-y-4 text-base leading-relaxed">
+                    <Section id="rooms" tab="What’s here" title="What you can actually do today">
+                        <ul className="m-0 list-disc space-y-2 pl-6">
+                            <li>
+                                <strong>Catalog the herd.</strong> One entry per horse — the
+                                reference it came from, photos from every angle, condition, and what
+                                you paid, that last part visible to you and nobody else. Filter by
+                                mold, maker, finish or status, save the views you use, and print the
+                                report when your insurer asks. Already keeping a spreadsheet?{" "}
+                                <Link href="/stable/import" className="text-forest font-semibold hover:underline">
+                                    Import it
+                                </Link>
+                                .
+                            </li>
+                            <li>
+                                <strong>Show, and host shows.</strong> Photo shows and live shows,
+                                run to one{" "}
+                                <Link href="/shows/rules" className="text-forest font-semibold hover:underline">
+                                    published rulebook
+                                </Link>
+                                . Placings pay points toward season standings, a 1st or 2nd in a
+                                deep enough class mints a qualification card stamped with the field
+                                it beat, and cards plus career points earn titles the horse keeps for
+                                life. Hosting is free, and the ring console runs off a phone at the
+                                table.
+                            </li>
+                            <li>
+                                <strong>Buy and sell.</strong> A listing in{" "}
+                                <Link href="/market" className="text-forest font-semibold hover:underline">
+                                    the Market
+                                </Link>{" "}
+                                is the horse&apos;s passport, not a photo and a paragraph: what it
+                                has won, what condition it&apos;s in, who has owned it. The{" "}
+                                <Link href="/market/guide" className="text-forest font-semibold hover:underline">
+                                    Blue Book
+                                </Link>{" "}
+                                sits alongside it with average, median and range from completed
+                                sales.
+                            </li>
+                            <li>
+                                <strong>Look a model up.</strong> The{" "}
+                                <Link href="/catalog" className="text-forest font-semibold hover:underline">
+                                    Registry
+                                </Link>{" "}
+                                holds OF releases, the molds under them, and artist resins, with
+                                maker, sculptor, scale, finish and year. Collectors correct and
+                                extend it, and a correction lands for everybody at once.
+                            </li>
+                            <li>
+                                <strong>Talk to people.</strong>{" "}
+                                <Link href="/feed" className="text-forest font-semibold hover:underline">
+                                    The Paddock
+                                </Link>{" "}
+                                is the feed, plus barns for breed circles, regional clubs and trading
+                                groups, an events board for what&apos;s happening off-site, and Help
+                                ID for when you have a body in hand and no idea what it is.
+                            </li>
+                        </ul>
+                    </Section>
+
+                    <Section id="cost" tab="Money" title="What it costs">
                         <p>
-                            It&apos;s a fair question, and this hobby has earned the right to ask it. Model Horse Blab,
-                            the hobby&apos;s longtime forum, went dark for almost two years. MH$P — the sales hub this
-                            hobby relied on since 1996 — was hit by ransomware and never fully came back. We built Model
-                            Horse Hub knowing that history, not despite it.
+                            The free tier covers the hobby: catalog the herd, enter shows, host
+                            shows, list horses, read the Blue Book. Pro buys conveniences — extra
+                            photo slots, price-history charts, printable show tags, a monthly ledger
+                            of what the collection has been doing.
                         </p>
                         <p>
-                            So here&apos;s our commitment, in plain English: your data is backed up automatically, every
-                            single night. You can export your entire collection — every horse, every Hoofprint record,
-                            every qualification card — as a CSV, plus a PDF insurance report, anytime you want,
-                            straight from your settings. You don&apos;t have to ask us, and you don&apos;t have to wait.
+                            Nothing that makes a record worth believing is in it. Show results,
+                            condition grades, ownership history and card verification are free
+                            permanently. A proof behind a paywall is not a proof.
                         </p>
                         <p>
-                            And if we ever have to wind Model Horse Hub down — we hope we never do, but we&apos;re not
-                            going to promise you &ldquo;never&rdquo; — we commit to giving every user real advance
-                            notice and a full export window before anything shuts off. Your herd&apos;s history belongs
-                            to you, not to us.
+                            We take no cut of a sale. There is no listing fee, no selling fee, and no
+                            commission —{" "}
+                            <Link href="/upgrade" className="text-forest font-semibold hover:underline">
+                                subscriptions
+                            </Link>{" "}
+                            are how this gets paid for.
                         </p>
-                    </div>
-                </section>
+                    </Section>
+
+                    <Section id="limits" tab="The limits" title="What this site doesn't do">
+                        <ul className="m-0 list-disc space-y-2 pl-6">
+                            <li>
+                                <strong>We don&apos;t hold your money.</strong> There is no escrow
+                                and no checkout. Buyer and seller agree terms here and settle payment
+                                between themselves, the way the hobby already does.
+                            </li>
+                            <li>
+                                <strong>We don&apos;t judge disputes.</strong> If a deal goes wrong
+                                we are not the referee. What we can do is keep the record — the
+                                offer, the agreed terms, what was marked sent and received — so
+                                whoever does referee has something to read.
+                            </li>
+                            <li>
+                                <strong>We don&apos;t issue NAN cards.</strong> MHH qualification
+                                cards are this platform&apos;s own program. They are not NAMHSA or
+                                NAN paperwork, and we don&apos;t claim otherwise.
+                            </li>
+                            <li>
+                                <strong>We don&apos;t train on your photos.</strong> They are not
+                                training data and they are not for sale — see the policy below.
+                            </li>
+                        </ul>
+                    </Section>
+
+                    <Section id="continuity" tab="Continuity" title="Will this still be here next year?">
+                        <p>
+                            Fair question, and this hobby has earned the right to ask it. Model Horse
+                            Blab, the hobby&apos;s longtime forum, went dark for almost two years.
+                            MH$P — the sales hub this hobby leaned on since 1996 — was hit by
+                            ransomware and never fully came back. We built this knowing that history,
+                            not despite it.
+                        </p>
+                        <p>
+                            So, plainly: your data is backed up automatically, every night. You can
+                            export your whole collection — every horse, every record, every
+                            qualification card — as a CSV, plus a PDF report, from your{" "}
+                            <Link href="/settings" className="text-forest font-semibold hover:underline">
+                                settings
+                            </Link>
+                            , whenever you want. You don&apos;t have to ask us and you don&apos;t
+                            have to wait.
+                        </p>
+                        <p>
+                            And if we ever have to wind Model Horse Hub down — we hope not, but
+                            we&apos;re not going to promise you &ldquo;never&rdquo; — every member
+                            gets real advance notice and a full export window before anything shuts
+                            off. Your herd&apos;s history belongs to you.
+                        </p>
+                    </Section>
+                </div>
 
                 {/* Supporters' Ledger — only renders when someone has opted in.
                     Cosmetic recognition for "keep the lights on" contributions;
                     supporters get nothing else, deliberately. */}
                 {supporters.length > 0 && (
-                    <section className="mb-12">
-                        <h2>The Supporters&apos; Ledger</h2>
-                        <div className="text-secondary-foreground space-y-4 text-base leading-relaxed">
-                            <p>
-                                These collectors chip in a little each year to keep the lights on. It buys
-                                them nothing — no features, no priority, no fine print — because the Hub
-                                stays free for everyone. Just this line, a brass plaque on their profile,
-                                and our lasting gratitude.
-                            </p>
-                        </div>
-                        <div className="ledger-paper mt-6 p-6 sm:p-8">
-                            <ul className="m-0 grid list-none grid-cols-1 gap-x-8 gap-y-2 p-0 sm:grid-cols-2">
-                                {supporters.map((supporter) => {
-                                    const sinceLabel = formatSupporterSince(supporter.supporter_since);
-                                    return (
-                                        <li
-                                            key={supporter.alias_name}
-                                            className="flex items-baseline justify-between gap-3 border-b border-dotted border-(--brass) pb-1 text-sm"
+                    <section className="ledger-card mt-6" aria-labelledby="about-supporters">
+                        <span className="ledger-tab" id="about-supporters">
+                            The Supporters&rsquo; Ledger
+                        </span>
+                        <p className="text-foreground mb-4 text-[0.95rem] leading-relaxed">
+                            These collectors chip in a little each year to keep the lights on. It
+                            buys them nothing — no features, no priority, no fine print — because
+                            the parts that matter stay free for everyone. Just this line, a brass
+                            plaque on their profile, and our lasting gratitude.
+                        </p>
+                        <ul className="m-0 grid list-none grid-cols-1 gap-x-8 gap-y-2 p-0 sm:grid-cols-2">
+                            {supporters.map((supporter) => {
+                                const sinceLabel = formatSupporterSince(supporter.supporter_since);
+                                return (
+                                    <li
+                                        key={supporter.alias_name}
+                                        className="flex items-baseline justify-between gap-3 border-b border-dotted border-(--brass) pb-1 text-sm"
+                                    >
+                                        <Link
+                                            href={`/profile/${encodeURIComponent(supporter.alias_name)}`}
+                                            className="inline-flex items-center gap-1.5 font-semibold no-underline"
                                         >
-                                            <Link
-                                                href={`/profile/${encodeURIComponent(supporter.alias_name)}`}
-                                                className="inline-flex items-center gap-1.5 font-semibold no-underline"
-                                            >
-                                                <Lamp className="h-3.5 w-3.5 shrink-0 text-(--brass)" aria-hidden="true" />
-                                                @{supporter.alias_name}
-                                            </Link>
-                                            {sinceLabel && (
-                                                <span className="shrink-0 text-xs text-muted-foreground">
-                                                    since {sinceLabel}
-                                                </span>
-                                            )}
-                                        </li>
-                                    );
-                                })}
-                            </ul>
-                        </div>
+                                            <Lamp className="h-3.5 w-3.5 shrink-0 text-(--brass)" aria-hidden="true" />
+                                            @{supporter.alias_name}
+                                        </Link>
+                                        {sinceLabel && (
+                                            <span className="text-muted-foreground shrink-0 text-xs">
+                                                since {sinceLabel}
+                                            </span>
+                                        )}
+                                    </li>
+                                );
+                            })}
+                        </ul>
                     </section>
                 )}
 
-                {/* What's Live Now */}
-                <section className="mb-12">
-                    <h2>What&apos;s Live Now</h2>
-                    <div className="text-secondary-foreground space-y-4 text-base leading-relaxed">
-                        <p>Not someday — these are running right now, and you can use them today.</p>
-                    </div>
-                    <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
-                        <div className="ledger-paper [&_p]:text-secondary-foreground p-8 text-center transition-transform duration-300 hover:-translate-y-1 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
-                            <div className="text-forest mb-4 flex justify-center">
-                                <Gavel size={32} strokeWidth={1.5} />
-                            </div>
-                            <h3>Live &amp; Online Show Hosting</h3>
-                            <p>
-                                Host a show your way — in the ring or online. One-click NAMHSA-style classlists build
-                                your entire show structure in seconds. Run live shows from a phone-based ring console
-                                with table-side placings and champion callbacks, or host an online photo show with judge
-                                or community voting. Every result becomes a qualification card on the horse&apos;s
-                                Hoofprint — publicly verifiable, so a buyer can check a card before they buy.
-                            </p>
-                        </div>
-                        <div className="ledger-paper [&_p]:text-secondary-foreground p-8 text-center transition-transform duration-300 hover:-translate-y-1 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
-                            <div className="text-forest mb-4 flex justify-center">
-                                <Users size={32} strokeWidth={1.5} />
-                            </div>
-                            <h3>Notice Board — Groups &amp; Community</h3>
-                            <p>
-                                Join or create groups for your region, your collecting focus, or any shared interest.
-                                Every group gets its own Notice Board — threaded discussions, channels, and pinned posts
-                                — so conversations stay organized instead of scattered across Facebook and Discord.
-                            </p>
-                        </div>
-                        <div className="ledger-paper [&_p]:text-secondary-foreground p-8 text-center transition-transform duration-300 hover:-translate-y-1 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
-                            <div className="text-forest mb-4 flex justify-center">
-                                <Palette size={32} strokeWidth={1.5} />
-                            </div>
-                            <h3>Art Studio &amp; Commission Tracking</h3>
-                            <p>
-                                Artists manage their commission queue, share WIP photos with clients, and build a
-                                portfolio that speaks for itself. When a custom is delivered, the creation story flows
-                                into the horse&apos;s Hoofprint — permanently.
-                            </p>
-                        </div>
-                        <div className="ledger-paper [&_p]:text-secondary-foreground p-8 text-center transition-transform duration-300 hover:-translate-y-1 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
-                            <div className="text-forest mb-4 flex justify-center">
-                                <Package size={32} strokeWidth={1.5} />
-                            </div>
-                            <h3>Bulk Import &amp; Insurance Reports</h3>
-                            <p>
-                                Upload your spreadsheet and we&apos;ll fuzzy-match every row against 10,500+ references.
-                                Generate insurance PDF reports with photos, values, and condition grades, ready whenever
-                                your insurer asks.
-                            </p>
-                        </div>
-                    </div>
-                </section>
+                {/* AI, Data Collection, and Copyright Policy — owns #ai-data-policy */}
+                <div className="mt-10">
+                    <AiDataPolicySection />
+                </div>
 
-                {/* The Vision */}
-                <section className="mb-12">
-                    <h2>Where We&apos;re Going</h2>
-                    <div className="text-secondary-foreground space-y-4 text-base leading-relaxed">
-                        <p>
-                            Model Horse Hub isn&apos;t just a collection manager &mdash; it&apos;s becoming the
-                            operating system for the hobby. Every feature on this platform exists because a real
-                            collector said &ldquo;I wish this existed.&rdquo;
-                        </p>
-                        <p>And here&apos;s what&apos;s still ahead:</p>
+                <div className="ledger-card mb-12 text-center">
+                    <h2 className="text-foreground mb-2 font-serif text-lg font-bold">
+                        Bring the herd over
+                    </h2>
+                    <p className="text-secondary-foreground mx-auto mb-4 max-w-[520px] text-sm leading-relaxed">
+                        Start with one horse, or import the whole spreadsheet in an afternoon. No card
+                        asked for. And you can look around first — the shows, the Market, the Blue
+                        Book and the Registry are all open without an account.
+                    </p>
+                    <div className="flex flex-wrap justify-center gap-3">
+                        <Button asChild>
+                            <Link href="/signup" id="about-cta-signup">
+                                Create a free account
+                            </Link>
+                        </Button>
+                        <Button asChild variant="outline">
+                            <Link href="/getting-started" id="about-cta-getting-started">
+                                Read Getting Started →
+                            </Link>
+                        </Button>
                     </div>
-                    <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
-                        <div className="ledger-paper [&_p]:text-secondary-foreground p-8 text-center transition-transform duration-300 hover:-translate-y-1 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
-                            <div className="text-forest mb-4 flex justify-center">
-                                <Smartphone size={32} strokeWidth={1.5} />
-                            </div>
-                            <h3>Deeper Mobile Tools</h3>
-                            <p>
-                                A camera-first upload flow for adding a horse straight from the show floor, and push
-                                notifications for offers, messages, and show results &mdash; so you&apos;re never stuck
-                                refreshing a tab.
-                            </p>
-                        </div>
-                        <div className="ledger-paper [&_p]:text-secondary-foreground p-8 text-center transition-transform duration-300 hover:-translate-y-1 [&_h3]:mb-2 [&_h3]:text-lg [&_p]:text-sm">
-                            <div className="text-forest mb-4 flex justify-center">
-                                <Handshake size={32} strokeWidth={1.5} />
-                            </div>
-                            <h3>Your Ideas</h3>
-                            <p>
-                                We build what you ask for. Every feature request from the community gets heard,
-                                prioritized, and built. This is your platform.
-                            </p>
-                        </div>
-                    </div>
-                </section>
-
-                {/* AI, Data Collection, and Copyright Policy */}
-                <AiDataPolicySection />
-
-                {/* CTA */}
-                <div className="ledger-paper mx-auto max-w-[720px] px-8 py-10 text-center">
-                    <p>Your herd is waiting. Give it the home it deserves.</p>
-                    <Button asChild variant="outline">
-                        <Link href="/signup" id="about-cta-signup">
-                            Start Your Digital Stable — Free
-                        </Link>
-                    </Button>
                 </div>
             </div>
         </ExplorerLayout>

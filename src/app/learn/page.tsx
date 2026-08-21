@@ -12,17 +12,19 @@ import PageMasthead from "@/components/layouts/PageMasthead";
 
 const TITLE = "Learn the Model Horse Hobby";
 const DESCRIPTION =
-    "New to model horses or model horse showing? Start here: a plain-spoken glossary of the hobby's terms and a step-by-step guide to entering your first photo show.";
+    "New to model horses or model horse showing? Start here: a plain-spoken glossary of the hobby's terms and a step-by-step guide to entering your first photo show — both free to read, with or without an account.";
 
 export async function generateMetadata(): Promise<Metadata> {
     return {
         title: TITLE,
         description: DESCRIPTION,
+        alternates: { canonical: "/learn" },
         openGraph: {
             title: TITLE,
             description: DESCRIPTION,
             type: "website",
             siteName: "Model Horse Hub",
+            url: "/learn",
         },
     };
 }
@@ -32,7 +34,7 @@ const GUIDES = [
         href: "/learn/glossary",
         icon: "📖",
         title: "The Glossary",
-        blurb: "OF, CM, LSQ, NAN, body-box… the hobby's language, explained honestly for outsiders — every term anchor-linkable.",
+        blurb: "OF, CM, LSQ, NAN, body-box… the hobby's language, explained honestly for outsiders — plus the house words used here, like barns, passports and qualification cards. Every term anchor-linkable.",
     },
     {
         href: "/learn/enter-your-first-photo-show",
@@ -88,7 +90,12 @@ export default function LearnPage() {
                     <Link href="/faq" className="font-semibold text-forest underline decoration-2 underline-offset-2">
                         FAQ
                     </Link>
-                    .
+                    . For how points, qualification cards and titles are scored, the{" "}
+                    <Link href="/shows/rules" className="font-semibold text-forest underline decoration-2 underline-offset-2">
+                        showing rules
+                    </Link>{" "}
+                    are the published source — their numbers are read out of the same code that
+                    scores the shows.
                 </p>
             </div>
         </ExplorerLayout>
