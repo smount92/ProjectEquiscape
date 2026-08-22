@@ -27,9 +27,11 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { unstable_cache } from "next/cache";
 import { z } from "zod";
 
 import { requireAuth } from "@/lib/auth";
+import { createAnonClient } from "@/lib/supabase/anon";
 import { getPublicImageUrls } from "@/lib/utils/storage";
 import { sanitizeForOr } from "@/lib/utils/search";
 import { summarizeShowRecords, type RecordSummaryInputRow } from "@/lib/market/recordSummary";
@@ -275,6 +277,28 @@ async function fetchShowRingFacets(supabase: SupabaseClient): Promise<ShowRingFa
     };
 }
 
+/**
+ * The same facet options, computed at most once every 5 minutes.
+ *
+ * This scan is site-wide and viewer-INDEPENDENT — it reads only
+ * `visibility = 'public' AND deleted_at IS NULL` rows, which anon and
+ * authed see identically under user_horses_select (150), joined to
+ * anon-readable catalog_items (124). Nothing about the caller narrows
+ * it, yet it shipped ~2,000 joined rows to the server on EVERY
+ * /community render. Built on the COOKIE-LESS anon client so a member's
+ * session can never seed the shared entry.
+ *
+ * (The bounded scan is still a scan without an ORDER BY; which rows it
+ * sees past FACET_SCAN_CAP was already unspecified. The get_showring_facets
+ * RPC noted above remains the real fix.)
+ */
+const getShowRingFacetsCached = unstable_cache(
+    async (): Promise<ShowRingFacetOptions> =>
+        fetchShowRingFacets(createAnonClient() as unknown as SupabaseClient),
+    ["showring-facets"],
+    { revalidate: 300 },
+);
+
 // ══════════════════════════════════════════════════════════════
 // Reading the Show Ring
 // ══════════════════════════════════════════════════════════════
@@ -301,7 +325,7 @@ export async function getShowRingPage(
     try {
         const [{ rows, count }, facetOptions] = await Promise.all([
             queryShowRing(supabase, user.id, filters, offset, limit),
-            fetchShowRingFacets(supabase),
+            getShowRingFacetsCached(),
         ]);
         const cards = await buildShowRingCards(supabase, user.id, rows);
         return {

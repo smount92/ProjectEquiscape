@@ -21,6 +21,14 @@ import {
 // /shows/host and live in the `shows` table (v2).
 // ============================================================
 
+/**
+ * Exactly the columns the MHHEvent mapper reads. The list surfaces used
+ * to `select("*")`, dragging every wide column (and any future one)
+ * across the wire for rows that only ever render this much.
+ */
+const EVENT_LIST_COLUMNS =
+    "id, name, description, event_type, starts_at, ends_at, timezone, is_all_day, is_virtual, location_name, location_address, region, virtual_url, group_id, show_id, created_by, is_official, rsvp_count, created_at, judging_method";
+
 // ── User Search (for judge assignment autocomplete) ──
 
 /**
@@ -199,7 +207,7 @@ export async function getEvents(filters?: {
 
     let query = supabase
         .from("events")
-        .select("*, users!events_created_by_fkey(alias_name)")
+        .select(`${EVENT_LIST_COLUMNS}, users!events_created_by_fkey(alias_name)`)
         .order("starts_at", { ascending: !wantsPast })
         .limit(filters?.limit ?? 50);
 
@@ -405,7 +413,7 @@ export async function getUpcomingEvents(): Promise<MHHEvent[]> {
 
     const { data: events } = await supabase
         .from("events")
-        .select("*")
+        .select(EVENT_LIST_COLUMNS)
         .in("id", eventIds)
         .gte("starts_at", new Date().toISOString())
         .order("starts_at", { ascending: true })

@@ -782,22 +782,24 @@ export async function getFeedStream(options?: {
     const limit = Math.min(Math.max(options?.limit ?? 25, 1), 50);
     const cursor = options?.cursor || null;
 
-    // ── Who is hidden from me ──
-    const { data: myBlocks } = await supabase
-        .from("user_blocks")
-        .select("blocked_id")
-        .eq("blocker_id", user.id);
+    // ── Prologue: blocks, follows and column support are independent of
+    //    each other, and the feed used to await all three in a row before
+    //    it could even ask for a post. One wave. ──
+    const [{ data: myBlocks }, followsResult, support] = await Promise.all([
+        // Who is hidden from me
+        supabase.from("user_blocks").select("blocked_id").eq("blocker_id", user.id),
+        // Who I follow (Following scope only)
+        scope === "following"
+            ? supabase.from("user_follows").select("following_id").eq("follower_id", user.id)
+            : null,
+        getPostColumnSupport(supabase),
+    ]);
     const blockedIds = new Set((myBlocks ?? []).map((b: { blocked_id: string }) => b.blocked_id));
 
-    // ── Who I follow (Following scope only) ──
     let authorAllowList: string[] | null = null;
     if (scope === "following") {
-        const { data: follows } = await supabase
-            .from("user_follows")
-            .select("following_id")
-            .eq("follower_id", user.id);
-        const ids = (follows ?? [])
-            .map((f: { following_id: string }) => f.following_id)
+        const ids = ((followsResult?.data ?? []) as { following_id: string }[])
+            .map((f) => f.following_id)
             .filter((id: string) => !blockedIds.has(id));
         // Your own posts belong in your Following feed — the legacy
         // activity feed did this too and people expect it.
@@ -808,7 +810,6 @@ export async function getFeedStream(options?: {
         }
     }
 
-    const support = await getPostColumnSupport(supabase);
     let selectColumns = FEED_POST_COLUMNS;
     if (support.kind) selectColumns += ", kind";
     if (support.visibility) selectColumns += ", visibility";

@@ -14,6 +14,8 @@ vi.mock("@/lib/supabase/admin", () => ({
 vi.mock("next/cache", () => ({
     revalidatePath: vi.fn(),
     revalidateTag: vi.fn(),
+    // Pass-through: the cache wrapper is Next's job, not this suite's.
+    unstable_cache: <T>(fn: T) => fn,
 }));
 vi.mock("next/server", () => ({
     after: vi.fn((fn: () => void) => { fn(); /* execute immediately in tests */ }),

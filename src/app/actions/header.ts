@@ -17,12 +17,22 @@ export async function getHeaderData() {
         return { user: null, aliasName: null, avatarUrl: null, unreadCount: 0 };
     }
 
-    // Fetch alias_name
-    const { data: profile } = await supabase
-        .from("users")
-        .select("alias_name, avatar_url")
-        .eq("id", user.id)
-        .single();
+    // Both rows key off user.id — one wave. (The signed-URL storage call
+    // below genuinely depends on the profile row, so it stays a second
+    // hop; it only fires for members who have an avatar.)
+    const [{ data: profile }, { data: artistProfile }] = await Promise.all([
+        supabase
+            .from("users")
+            .select("alias_name, avatar_url")
+            .eq("id", user.id)
+            .single(),
+        // Does the user have an artist profile? (for the nav link)
+        supabase
+            .from("artist_profiles")
+            .select("studio_slug")
+            .eq("user_id", user.id)
+            .maybeSingle(),
+    ]);
 
     const aliasName = profile?.alias_name ?? null;
     let avatarUrl = profile?.avatar_url ?? null;
@@ -41,13 +51,6 @@ export async function getHeaderData() {
     // Check admin status server-side (never expose admin email to client)
     const isAdmin = !!user.email && !!process.env.ADMIN_EMAIL &&
         user.email.toLowerCase() === process.env.ADMIN_EMAIL.toLowerCase();
-
-    // Check if user has an artist profile (for nav link)
-    const { data: artistProfile } = await supabase
-        .from("artist_profiles")
-        .select("studio_slug")
-        .eq("user_id", user.id)
-        .maybeSingle();
 
     return {
         user: { id: user.id, email: user.email },

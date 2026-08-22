@@ -7,6 +7,17 @@ const mockClient = createMockSupabaseClient();
 vi.mock("@/lib/supabase/server", () => ({
     createClient: vi.fn(() => Promise.resolve(mockClient)),
 }));
+// The facet scan is viewer-independent and now reads through a
+// COOKIE-LESS anon client behind unstable_cache.
+vi.mock("@/lib/supabase/anon", () => ({
+    createAnonClient: vi.fn(() => mockClient),
+}));
+vi.mock("next/cache", () => ({
+    revalidatePath: vi.fn(),
+    revalidateTag: vi.fn(),
+    // Pass-through: the cache wrapper is Next's job, not this suite's.
+    unstable_cache: <T>(fn: T) => fn,
+}));
 
 import { getShowRingPage, loadMoreShowRing } from "@/app/actions/showring";
 

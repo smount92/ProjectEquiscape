@@ -24,6 +24,7 @@ import ShowHistoryWidget from "@/components/ShowHistoryWidget";
 import ShowLifeRail from "@/components/shows/ShowLifeRail";
 import { getShowHistory } from "@/app/actions/shows";
 import { getStablePage, getStableSummary, listStableViews } from "@/app/actions/stable";
+import { countUnreadMessages } from "@/lib/messaging/unreadCount";
 import { parseStableSearchParams } from "@/lib/stable/filterParams";
 import type { StableSummary } from "@/lib/stable/types";
 
@@ -63,25 +64,17 @@ export default async function DashboardV2({
 
     // Filtered page + aggregates + saved views in parallel, alongside
     // the cheap sidebar extras (show placings, unread messages).
-    const [pageResult, summaryResult, viewsResult, showRecordsResult, convosResult] =
+    // The unread badge used to be an unbounded "all my conversation ids,
+    // then .in(...)" pair that had to await AFTER this wave; one embedded
+    // count folds it in and removes the only dependent hop.
+    const [pageResult, summaryResult, viewsResult, showRecordsResult, unreadMsgCount] =
         await Promise.all([
             getStablePage(filters),
             getStableSummary(),
             listStableViews(),
             supabase.from("show_records").select("id", { count: "exact", head: true }).eq("user_id", userId),
-            supabase.from("conversations").select("id").or(`buyer_id.eq.${userId},seller_id.eq.${userId}`),
+            countUnreadMessages(supabase, userId),
         ]);
-
-    const convoIds = (convosResult.data ?? []).map((c: { id: string }) => c.id);
-    const { count: unreadMsgCount } =
-        convoIds.length > 0
-            ? await supabase
-                  .from("messages")
-                  .select("id", { count: "exact", head: true })
-                  .neq("sender_id", userId)
-                  .eq("is_read", false)
-                  .in("conversation_id", convoIds)
-            : { count: 0 };
 
     const summary: StableSummary = summaryResult.success
         ? summaryResult.summary

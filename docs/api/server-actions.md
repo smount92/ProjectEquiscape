@@ -57,7 +57,7 @@ logic belongs in a pure `src/lib/<domain>/` module, not inline in the action —
 |------|-----------|
 | [`deals.ts`](../../src/app/actions/deals.ts) | `proposeTerms`, `agreeToTerms`, `withdrawTermsAgreement`, `clearTerms`, `savePaymentPlan`, `markInstallmentSent`, `confirmInstallmentReceived`, `counterOffer`, `respondToCounter`, `raiseDispute`, `standDownDispute`, `recordSaleInVault`, `attachCommissionToThread`, `getDealStage`, `markThreadRead`, `setThreadMuted`, `setThreadArchived` |
 | [`transactions.ts`](../../src/app/actions/transactions.ts) | `createTransaction`, `makeOffer`, `respondToOffer`, `retractOffer`, `markPaymentSent`, `verifyFundsAndRelease`, `completeTransaction`, `cancelTransaction`, `getTransactionsForUser`, `getTransactionByConversation`, `leaveReview`, `deleteReview`, `getUserReviewSummary`, `getReviewableTransactions` |
-| [`messaging.ts`](../../src/app/actions/messaging.ts) | `createOrFindConversation`, `sendMessage`, `getConversationAttachments`, `markConversationRead`, `getUnreadCount`, `markTransactionComplete` |
+| [`messaging.ts`](../../src/app/actions/messaging.ts) | `createOrFindConversation`, `sendMessage`, `getConversationAttachments`, `markConversationRead`, `markTransactionComplete` |
 | [`market.ts`](../../src/app/actions/market.ts) | `getMarketPrice`, `searchMarketPrices`, `getTopTraded`, `refreshMarketPrices` |
 | [`marketPublicRecord.ts`](../../src/app/actions/marketPublicRecord.ts) | `getPublicMarketHorseRecord` — the anon record quick-look on a listing card |
 | [`purchased-reports.ts`](../../src/app/actions/purchased-reports.ts) | `getMyPurchasedReports` — backs `/market/reports` |

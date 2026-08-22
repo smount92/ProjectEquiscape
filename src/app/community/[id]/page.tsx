@@ -71,12 +71,22 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
  const { id } = await params;
  const supabase = await createClient();
 
- const { data: horse } = await supabase
+ // Both reads key off `id` alone — one wave, not two round trips.
+ const [{ data: horse }, { data: img }] = await Promise.all([
+ supabase
  .from("user_horses")
  .select("custom_name, finish_type, condition_grade, catalog_items:catalog_id(title, maker)")
  .eq("id", id)
  .in("visibility", ["public","unlisted"])
- .single();
+ .single(),
+ // Primary thumbnail for the OG image.
+ supabase
+ .from("horse_images")
+ .select("image_url")
+ .eq("horse_id", id)
+ .eq("angle_profile","Primary_Thumbnail")
+ .single(),
+ ]);
 
  if (!horse) {
  return {
@@ -84,14 +94,6 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
  description:"This horse could not be found.",
  };
  }
-
- // Get primary thumbnail for OG image
- const { data: img } = await supabase
- .from("horse_images")
- .select("image_url")
- .eq("horse_id", id)
- .eq("angle_profile","Primary_Thumbnail")
- .single();
 
  const h = horse;
 
@@ -179,12 +181,75 @@ export default async function PublicPassportPage({
  // eslint-disable-next-line @typescript-eslint/no-explicit-any
  const horse = rawHorse as any;
 
- // Fetch all images
- const { data: rawImages } = await supabase
+ const isForSale = horse.trade_status === "For Sale" || horse.trade_status === "Open to Offers";
+
+ // ================================================================
+ // ONE WAVE. Everything below the horse row depends only on
+ // horseId / user.id / columns we already hold, so it must not
+ // stack round trips: this page used to serialize ~11 of them and
+ // every hop multiplies queue time under pool contention.
+ // ================================================================
+ const [
+ { data: rawImages },
+ { count: favoriteCount },
+ { data: userFav },
+ comments,
+ { data: rawRecords },
+ { data: rawPedigree },
+ { data: trustedData },
+ publicCardsForCount,
+ publicTitles,
+ marketEstimate,
+ hoofprint,
+ ] = await Promise.all([
+ // All images
+ supabase
  .from("horse_images")
  .select("id, image_url, angle_profile, uploaded_at, short_slug")
  .eq("horse_id", horseId)
- .order("uploaded_at");
+ .order("uploaded_at"),
+ // Favorite count
+ supabase
+ .from("horse_favorites")
+ .select("id", { count:"exact", head: true })
+ .eq("horse_id", horseId),
+ // Current user's favorite status
+ supabase
+ .from("horse_favorites")
+ .select("id")
+ .eq("horse_id", horseId)
+ .eq("user_id", user.id)
+ .maybeSingle(),
+ // Comments — now via universal posts table
+ getPosts({ horseId }, { includeReplies: true, limit: 50 }),
+ // Show records
+ supabase
+ .from("show_records")
+ .select(
+ 'id, show_name, show_date, show_id, division, class_name,"placing", ribbon_color, judge_name, is_nan, notes, show_location, section_name, award_category, competition_level, show_date_text, verification_tier',
+ )
+ .eq("horse_id", horseId)
+ .order("show_date", { ascending: false, nullsFirst: false }),
+ // Pedigree
+ supabase
+ .from("horse_pedigrees")
+ .select("id, sire_name, dam_name, sire_id, dam_id, sculptor, cast_number, edition_size, lineage_notes")
+ .eq("horse_id", horseId)
+ .maybeSingle(),
+ // Is the owner a Community Trusted seller?
+ supabase
+ .from("mv_trusted_sellers")
+ .select("user_id")
+ .eq("user_id", horse.owner_id)
+ .maybeSingle(),
+ isForSale ? getPublicHorseCards(horseId) : Promise.resolve([]),
+ getHorseTitles(horseId),
+ // The estimate caption must never render orphaned: MarketValueBadge
+ // hides itself client-side when the mold has no sales, so check the
+ // volume server-side before rendering the adjacent-estimate block.
+ isForSale && horse.catalog_id ? getMarketPrice(horse.catalog_id) : Promise.resolve(null),
+ getHoofprint(horseId),
+ ]);
 
  const images = rawImages ?? [];
 
@@ -207,37 +272,8 @@ export default async function PublicPassportPage({
  }));
 
  // ================================================================
- // SOCIAL: Favorites + Comments
- // ================================================================
-
- // Favorite count
- const { count: favoriteCount } = await supabase
- .from("horse_favorites")
- .select("id", { count:"exact", head: true })
- .eq("horse_id", horseId);
-
- // Current user's favorite status
- const { data: userFav } = await supabase
- .from("horse_favorites")
- .select("id")
- .eq("horse_id", horseId)
- .eq("user_id", user.id)
- .maybeSingle();
-
- // Comments — now via universal posts table
- const comments = await getPosts({ horseId }, { includeReplies: true, limit: 50 });
-
- // ================================================================
  // PROVENANCE: Show Records + Pedigree (read-only)
  // ================================================================
-
- const { data: rawRecords } = await supabase
- .from("show_records")
- .select(
- 'id, show_name, show_date, show_id, division, class_name,"placing", ribbon_color, judge_name, is_nan, notes, show_location, section_name, award_category, competition_level, show_date_text, verification_tier',
- )
- .eq("horse_id", horseId)
- .order("show_date", { ascending: false, nullsFirst: false });
 
  const showRecords = (rawRecords ?? []).map(
  (r) => ({
@@ -260,12 +296,6 @@ export default async function PublicPassportPage({
  verificationTier: r.verification_tier,
  }),
  );
-
- const { data: rawPedigree } = await supabase
- .from("horse_pedigrees")
- .select("id, sire_name, dam_name, sire_id, dam_id, sculptor, cast_number, edition_size, lineage_notes")
- .eq("horse_id", horseId)
- .maybeSingle();
 
  const pedigree = rawPedigree
  ? {
@@ -328,15 +358,8 @@ editionSize: rawPedigree.edition_size,
   const assetConfig = getAssetConfig(assetCat);
   const horseAttributes = (horse.attributes ?? {}) as Record<string, unknown>;
 
- // Check if owner is a Community Trusted seller
- const { data: trustedData } = await supabase
- .from("mv_trusted_sellers")
- .select("user_id")
- .eq("user_id", horse.owner_id)
- .maybeSingle();
  const isTrustedSeller = !!trustedData;
 
- const isForSale = horse.trade_status === "For Sale" || horse.trade_status === "Open to Offers";
  const recordSummary =
  summarizeShowRecords(
  (rawRecords ?? []).map((r) => ({
@@ -346,19 +369,9 @@ editionSize: rawPedigree.edition_size,
  verification_tier: r.verification_tier,
  })),
  ).get(horseId) ?? null;
- // Parallel: independent reads must not stack round trips (perf).
- const [publicCardsForCount, publicTitles] = await Promise.all([
- isForSale ? getPublicHorseCards(horseId) : Promise.resolve([]),
- getHorseTitles(horseId),
- ]);
  const cardsCount = publicCardsForCount.length;
  const refName = refInfo ? `${refInfo.maker} — ${refInfo.name}` : null;
  const publicNamePrefix = titlePrefix(publicTitles.map((t) => t.code));
- // The estimate caption must never render orphaned: MarketValueBadge
- // hides itself client-side when the mold has no sales, so check the
- // volume server-side before rendering the adjacent-estimate block.
- const marketEstimate =
- isForSale && horse.catalog_id ? await getMarketPrice(horse.catalog_id) : null;
  const hasMarketEstimate = !!marketEstimate && marketEstimate.transactionVolume > 0;
 
  return (
@@ -814,26 +827,19 @@ editionSize: rawPedigree.edition_size,
      or when the horse holds no live cards. */}
  <PublicCardsSection horseId={horseId} />
 
- {/* 🐾 Hoofprint — Public Read-Only */}
- {await (async () => {
- const {
- timeline: hfTimeline,
- ownershipChain: hfChain,
- lifeStage: hfStage,
- } = await getHoofprint(horseId);
- if (hfTimeline.length === 0 && hfChain.length === 0) return null;
- return (
+ {/* 🐾 Hoofprint — Public Read-Only (fetched in the wave above;
+     awaiting it here used to add a 12th serialized round trip) */}
+ {(hoofprint.timeline.length > 0 || hoofprint.ownershipChain.length > 0) && (
  <div className="animate-fade-in-up mt-8" id="passport-hoofprint">
  <HoofprintTimeline
  horseId={horseId}
- timeline={hfTimeline}
- ownershipChain={hfChain}
- lifeStage={hfStage}
+ timeline={hoofprint.timeline}
+ ownershipChain={hoofprint.ownershipChain}
+ lifeStage={hoofprint.lifeStage}
  isOwner={false}
  />
  </div>
- );
- })()}
+ )}
 
  {/* Comments */}
  <div className="animate-fade-in-up mt-8">
