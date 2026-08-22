@@ -127,6 +127,16 @@ export default async function CardVerifyPage({
     const card = result && !("error" in result) ? result : null;
     const failed = result !== null && typeof result === "object" && "error" in result;
 
+    // Cards minted before the gates (migration 153) carry no field counts,
+    // so they can only state the place.
+    const earnedLine = card
+        ? card.classEntryCount !== null && card.classExhibitorCount !== null
+            ? `${card.earnedPlace === 1 ? "1st" : "2nd"} of ${card.classEntryCount} — ${card.classExhibitorCount} exhibitor${card.classExhibitorCount === 1 ? "" : "s"}`
+            : card.earnedPlace === 1
+              ? "1st place"
+              : "2nd place"
+        : "";
+
     return (
         <main className="mx-auto flex min-h-[70vh] w-full max-w-lg flex-col justify-center px-4 py-12">
             <div className="brass-heading mb-6">
@@ -136,39 +146,40 @@ export default async function CardVerifyPage({
 
             {card ? (
                 <div className="brass-plaque px-6 py-5" data-testid="card-verified">
-                    <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-                        <span className="text-engraved-brass font-mono text-2xl font-bold tracking-[0.2em]">
-                            {card.code}
-                        </span>
+                    {/* The plaque leads with what was WON. The code is a
+                        random uniqueness string — it belongs at the bottom
+                        as a reference, not as the headline. */}
+                    <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
+                        <div className="min-w-0">
+                            <p className="text-engraved-brass m-0 text-sm font-semibold tracking-wide uppercase">
+                                {card.isStakes
+                                    ? "MHH Qualification Card — STAKES"
+                                    : "MHH Qualification Card"}
+                            </p>
+                            {card.horseName && (
+                                <p className="text-engraved-brass mt-0.5 mb-0 font-serif text-2xl leading-tight font-bold">
+                                    {card.horseName}
+                                </p>
+                            )}
+                            <p className="text-engraved-brass mt-0.5 mb-0 text-base font-semibold">
+                                {earnedLine} · {card.className}
+                            </p>
+                        </div>
                         <span
-                            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-bold tracking-wide uppercase ${
+                            className={`inline-flex shrink-0 items-center rounded-full px-2.5 py-0.5 text-xs font-bold tracking-wide uppercase ${
                                 STATUS_COPY[card.status].valid
                                     ? "bg-forest text-primary-foreground"
-                                    : "bg-destructive/15 text-destructive"
+                                    : "bg-destructive text-primary-foreground"
                             }`}
                         >
                             {STATUS_COPY[card.status].label}
                         </span>
                     </div>
-                    <p className="text-engraved-brass mt-1 mb-4 text-sm font-semibold">
-                        {card.isStakes ? "MHH Qualification Card — STAKES" : "MHH Qualification Card"}
-                    </p>
+                    <div className="mb-4" />
 
                     <div className="rounded-md bg-[color:var(--paper-lit)] px-4 py-2 text-[color:var(--paper-lit-ink)]">
-                        {card.horseName && <Row label="Horse" value={card.horseName} />}
-                        <Row
-                            label="Earned"
-                            value={
-                                // Cards minted before the gates (migration
-                                // 153) carry no field counts — plain place.
-                                card.classEntryCount !== null && card.classExhibitorCount !== null
-                                    ? `${card.earnedPlace === 1 ? "1st" : "2nd"} of ${card.classEntryCount} — ${card.classExhibitorCount} exhibitor${card.classExhibitorCount === 1 ? "" : "s"}`
-                                    : card.earnedPlace === 1
-                                      ? "1st place"
-                                      : "2nd place"
-                            }
-                        />
-                        <Row label="Class" value={card.className} />
+                        {/* Horse, placing and class are the headline above —
+                            these rows carry the rest of the provenance. */}
                         <Row label="Show" value={card.showTitle} />
                         {card.showYear !== null && (
                             <Row label="Show year" value={showYearLabel(card.showYear)} />
@@ -183,9 +194,23 @@ export default async function CardVerifyPage({
                         />
                     </div>
 
-                    <p className="mt-4 mb-0 text-xs text-[color:var(--brass-ink)] opacity-80">
-                        {STATUS_COPY[card.status].detail}
-                    </p>
+                    {/* Authenticity line and the reference code both used to
+                        sit in dark ink on the darkest end of the brass
+                        gradient, which is where the plaque stopped being
+                        readable. They ride the lit-paper panel instead. */}
+                    <div className="mt-3 rounded-md bg-[color:var(--paper-lit)] px-4 py-3 text-[color:var(--paper-lit-ink)]">
+                        <p className="m-0 text-xs leading-relaxed">
+                            {STATUS_COPY[card.status].detail}
+                        </p>
+                        <p className="mt-2 mb-0 flex items-baseline gap-2 text-xs">
+                            <span className="font-semibold tracking-widest uppercase opacity-70">
+                                Card
+                            </span>
+                            <span className="font-mono tracking-[0.15em] select-all">
+                                {card.code}
+                            </span>
+                        </p>
+                    </div>
                 </div>
             ) : (
                 <div
