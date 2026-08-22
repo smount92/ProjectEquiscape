@@ -16,6 +16,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { catalogDisplayName } from "@/lib/catalog/displayName";
 import { getAdminClient } from "@/lib/supabase/admin";
+import { entitledTier } from "@/lib/entitlement/clock";
+import { isPro } from "@/lib/auth";
 import { logger } from "@/lib/logger";
 import { Resend } from "resend";
 import * as Sentry from "@sentry/nextjs";
@@ -47,10 +49,14 @@ export async function GET(request: NextRequest) {
     let errors = 0;
 
     try {
-        // Find all Pro users
+        // Find all Pro users. entitledTier applies the entitlement
+        // clock, so a prepaid or fixed term that has run out stops the
+        // report — nothing rewrites app_metadata.tier when a term simply
+        // expires, so reading the raw flag here would keep delivering a
+        // Pro-only feature to someone who is no longer Pro.
         const { data: users } = await admin.auth.admin.listUsers({ perPage: 1000 });
         const proUsers = users?.users?.filter(
-            (u) => (u.app_metadata?.tier === "pro" || u.app_metadata?.tier === "studio") && u.email
+            (u) => isPro(entitledTier(u.app_metadata)) && u.email
         ) || [];
 
         for (const proUser of proUsers) {

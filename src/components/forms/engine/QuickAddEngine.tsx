@@ -29,6 +29,7 @@ import UnifiedReferenceSearch from "@/components/UnifiedReferenceSearch";
 import CollectionPicker from "@/components/CollectionPicker";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
+import { entitledTier } from "@/lib/entitlement/clock";
 import { createHorseRecord } from "@/app/actions/horse";
 import { getProfile } from "@/app/actions/settings";
 import { setHorseCollections } from "@/app/actions/collections";
@@ -101,7 +102,8 @@ export default function QuickAddEngine() {
             })
             .catch(() => {});
         supabase.auth.getUser().then(({ data: { user } }) => {
-            if (user?.app_metadata?.tier) setTier(user.app_metadata.tier as UserTier);
+            // Minus the entitlement clock — an expired term is not Pro.
+            if (user?.app_metadata?.tier) setTier(entitledTier(user.app_metadata) as UserTier);
         });
     }, [supabase]);
 

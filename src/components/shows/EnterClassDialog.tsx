@@ -35,6 +35,7 @@ import { filterAndRankHorses } from "@/lib/shows/horsePicker";
 import type { EntrantHorse } from "@/lib/shows/public";
 import type { ShowMode } from "@/lib/shows/types";
 import { createClient } from "@/lib/supabase/client";
+import { entitledTier } from "@/lib/entitlement/clock";
 import { getPublicImageUrl } from "@/lib/utils/storage";
 import {
     compressImage,
@@ -239,7 +240,9 @@ export default function EnterClassDialog({
             const {
                 data: { user },
             } = await supabase.auth.getUser();
-            const tier = ((user?.app_metadata?.tier as UserTier | undefined) ?? "free") as UserTier;
+            // entitledTier applies the clock, so an expired term does
+            // not buy the Pro watermark path.
+            const tier = entitledTier(user?.app_metadata) as UserTier;
 
             // Honor the account watermark preference — entry photos are
             // public gallery photos too. Fetched once per dialog.

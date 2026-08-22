@@ -29,6 +29,7 @@ import UnifiedReferenceSearch from "@/components/UnifiedReferenceSearch";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { createClient } from "@/lib/supabase/client";
+import { entitledTier } from "@/lib/entitlement/clock";
 import { getCatalogItem, type CatalogItem } from "@/app/actions/reference";
 import {
     deleteHorseImageAction,
@@ -135,7 +136,8 @@ export default function EditHorseEngine() {
                 router.push("/login");
                 return;
             }
-            if (user.app_metadata?.tier) setTier(user.app_metadata.tier as UserTier);
+            // Minus the entitlement clock — an expired term is not Pro.
+            if (user.app_metadata?.tier) setTier(entitledTier(user.app_metadata) as UserTier);
 
             const { data: horse, error } = await supabase
                 .from("user_horses")

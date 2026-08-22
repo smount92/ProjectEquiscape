@@ -56,13 +56,86 @@ export interface PaypalSale {
     amount?: { total?: string; currency?: string };
 }
 
+// ── Orders v2: the one-time, non-recurring half ────────────────────
+//
+// A prepaid term is an ORDER, not a subscription, and the two APIs share
+// almost no vocabulary. The differences that matter:
+//
+//   · our Supabase user id rides on purchase_units[].custom_id, one level
+//     deeper than a subscription's top-level custom_id;
+//   · an order is not money until WE capture it. Approval alone charges
+//     nobody — see orders.ts;
+//   · the link to send the payer to is `payer-action`, not `approve`,
+//     whenever payment_source.paypal is specified on create.
+
+/** One purchase_unit. We only ever send exactly one. */
+export interface PaypalPurchaseUnit {
+    reference_id?: string;
+    /** OUR Supabase user id. The order-shaped custom_id. */
+    custom_id?: string;
+    description?: string;
+    amount?: { currency_code?: string; value?: string };
+    payments?: {
+        captures?: PaypalCapture[];
+        refunds?: Array<{ id?: string; status?: string }>;
+    };
+}
+
+/**
+ * Orders v2 lifecycle.
+ *
+ * PAYER_ACTION_REQUIRED is the one that surprises people: it is what a
+ * create returns when payment_source.paypal is present, in place of the
+ * CREATED you get without it.
+ */
+export type PaypalOrderStatus =
+    | "CREATED"
+    | "SAVED"
+    | "APPROVED"
+    | "PAYER_ACTION_REQUIRED"
+    | "VOIDED"
+    | "COMPLETED";
+
+export interface PaypalOrder {
+    id?: string;
+    status?: string;
+    intent?: string;
+    purchase_units?: PaypalPurchaseUnit[];
+    links?: PaypalLink[];
+}
+
+/** A capture — the moment money actually moves. */
+export interface PaypalCapture {
+    id?: string;
+    status?: string;
+    /** Copied down from the purchase unit by PayPal. Our user id. */
+    custom_id?: string;
+    amount?: { currency_code?: string; value?: string };
+    /** Present on capture webhooks; carries the order this capture is for. */
+    supplementary_data?: {
+        related_ids?: { order_id?: string; capture_id?: string; authorization_id?: string };
+    };
+    links?: PaypalLink[];
+    seller_receivable_breakdown?: { net_amount?: { value?: string; currency_code?: string } };
+}
+
+/** A refund resource (PAYMENT.CAPTURE.REFUNDED). */
+export interface PaypalRefund {
+    id?: string;
+    status?: string;
+    custom_id?: string;
+    amount?: { currency_code?: string; value?: string };
+    supplementary_data?: { related_ids?: { order_id?: string; capture_id?: string } };
+    links?: PaypalLink[];
+}
+
 /** The webhook envelope PayPal POSTs to us. */
 export interface PaypalWebhookEvent {
     id?: string;
     event_type?: string;
     resource_type?: string;
     summary?: string;
-    resource?: PaypalSubscription & PaypalSale;
+    resource?: PaypalSubscription & PaypalSale & PaypalOrder & PaypalCapture & PaypalRefund;
 }
 
 /** Every event type this integration acts on. Anything else is a no-op. */
@@ -73,6 +146,16 @@ export const HANDLED_EVENT_TYPES = [
     "BILLING.SUBSCRIPTION.SUSPENDED",
     "BILLING.SUBSCRIPTION.PAYMENT.FAILED",
     "PAYMENT.SALE.COMPLETED",
+    // ── Prepaid terms (Orders v2) ──
+    // APPROVED is the server-side backstop for a member who approved and
+    // then closed the tab: without a capture there is no money, so we
+    // capture it ourselves rather than leave a term paid for by nobody.
+    "CHECKOUT.ORDER.APPROVED",
+    "PAYMENT.CAPTURE.COMPLETED",
+    // A term that has been given back is a term that has ended.
+    "PAYMENT.CAPTURE.REFUNDED",
+    "PAYMENT.CAPTURE.REVERSED",
+    "PAYMENT.CAPTURE.DENIED",
 ] as const;
 
 export type HandledEventType = (typeof HANDLED_EVENT_TYPES)[number];

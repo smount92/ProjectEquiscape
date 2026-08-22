@@ -36,12 +36,29 @@ export function paypalBaseUrl(): string {
 export class PaypalApiError extends Error {
     readonly status: number;
     readonly debugId: string | null;
+    /**
+     * PayPal's machine-readable `details[0].issue`, when it sent one.
+     *
+     * Needed because some of PayPal's most important outcomes are not
+     * distinguishable by status code alone: capturing an order that has
+     * ALREADY been captured is a 422 whose `name` is the generic
+     * UNPROCESSABLE_ENTITY, and only `issue` says ORDER_ALREADY_CAPTURED
+     * — which is a success we arrived at twice, not a failure. It is an
+     * enum string like that one, never member data, so it is safe to log.
+     */
+    readonly issue: string | null;
 
-    constructor(message: string, status: number, debugId: string | null = null) {
+    constructor(
+        message: string,
+        status: number,
+        debugId: string | null = null,
+        issue: string | null = null,
+    ) {
         super(message);
         this.name = "PaypalApiError";
         this.status = status;
         this.debugId = debugId;
+        this.issue = issue;
     }
 }
 
@@ -182,18 +199,33 @@ export async function paypalFetch<T>(
         // body is not logged — it echoes the request.
         let name: string | null = null;
         let debugId: string | null = null;
+        let issue: string | null = null;
         try {
-            const errBody = (await response.json()) as { name?: string; debug_id?: string };
+            const errBody = (await response.json()) as {
+                name?: string;
+                debug_id?: string;
+                details?: Array<{ issue?: string }>;
+            };
             name = errBody?.name ?? null;
             debugId = errBody?.debug_id ?? null;
+            // Only the issue ENUM is lifted out of details — the sibling
+            // `description` and `value` fields echo the request back.
+            const firstIssue = errBody?.details?.[0]?.issue;
+            issue = typeof firstIssue === "string" ? firstIssue : null;
         } catch {
             // Non-JSON error body — nothing safe to extract.
         }
         logger.error("PayPal", `${init.method ?? "GET"} ${path} → ${response.status}`, {
             name,
+            issue,
             debugId,
         });
-        throw new PaypalApiError(name ?? `PayPal returned ${response.status}`, response.status, debugId);
+        throw new PaypalApiError(
+            name ?? `PayPal returned ${response.status}`,
+            response.status,
+            debugId,
+            issue,
+        );
     }
 
     // 204s carry no body; callers that expect nothing get undefined.

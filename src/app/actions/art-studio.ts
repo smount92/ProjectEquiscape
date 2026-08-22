@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { requireAuth, getUserTier } from "@/lib/auth";
+import { entitledTier } from "@/lib/entitlement/clock";
 import { logger } from "@/lib/logger";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
@@ -1196,8 +1197,9 @@ async function artistTier(artistUserId: string): Promise<string> {
     try {
         const admin = getAdminClient();
         const { data } = await admin.auth.admin.getUserById(artistUserId);
-        const tier = data.user?.app_metadata?.tier;
-        return tier === "studio" || tier === "pro" ? tier : "free";
+        // entitledTier applies the clock, so a Studio term that has run
+        // out puts the bench cap back exactly as getUserTier would.
+        return entitledTier(data.user?.app_metadata);
     } catch {
         return "studio";
     }

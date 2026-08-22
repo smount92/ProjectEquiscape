@@ -5,6 +5,7 @@ import { GENDER_GROUPS } from"@/lib/config/genders";
 import { useRouter, useParams } from"next/navigation";
 import Link from"next/link";
 import { createClient } from"@/lib/supabase/client";
+import { entitledTier } from"@/lib/entitlement/clock";
 import type { FinishType, AngleProfile, AssetCategory } from"@/lib/types/database";
 import UnifiedReferenceSearch from"@/components/UnifiedReferenceSearch";
 import type { CatalogItem } from"@/app/actions/reference";
@@ -217,9 +218,9 @@ function LegacyEditHorsePage() {
  return;
  }
 
- // Read user tier from JWT
+ // Read user tier from JWT, minus the entitlement clock.
  if (user.app_metadata?.tier) {
- setUserTier(user.app_metadata.tier as UserTier);
+ setUserTier(entitledTier(user.app_metadata) as UserTier);
  }
 
  const { data: horse, error: horseErr } = await supabase

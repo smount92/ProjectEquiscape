@@ -6,9 +6,23 @@ import { metricsDb } from "@/lib/metrics/db";
 import { isMissingRevenueSchema } from "@/lib/metrics/revenue";
 import { paypalPathLive } from "@/lib/paypal/flag";
 import { readSignatureHeaders, verifyWebhookSignature } from "@/lib/paypal/webhook";
-import { getSubscription, isEntitlingStatus, planKeyForPlanId, PLAN_TIER } from "@/lib/paypal/subscriptions";
-import { grantPaypalTier, revokePaypalTier } from "@/lib/paypal/entitlement";
-import type { PaypalSubscription, PaypalWebhookEvent } from "@/lib/paypal/types";
+import {
+    fixedTermPaidThrough,
+    getSubscription,
+    isEntitlingStatus,
+    resolvePlan,
+} from "@/lib/paypal/subscriptions";
+import { grantPaypalTier, revokePaypalTier, grantPrepaidTerm, endPrepaidTerm } from "@/lib/paypal/entitlement";
+import {
+    captureMatchesPrice,
+    captureOrder,
+    decodePrepaidCustomId,
+    getCapture,
+    getOrder,
+    orderCustomId,
+} from "@/lib/paypal/orders";
+import { termByKey, TERM_CURRENCY, type MembershipTerm } from "@/lib/billing/terms";
+import type { PaypalCapture, PaypalSubscription, PaypalWebhookEvent } from "@/lib/paypal/types";
 
 // ============================================================
 // PayPal Webhook Handler
@@ -103,7 +117,16 @@ async function resolveSubscription(
     return getSubscription(subscriptionId);
 }
 
-/** The subscription id an event refers to, whichever shape it arrives in. */
+/**
+ * The subscription id an event refers to, whichever shape it arrives in.
+ *
+ * ONLY MEANINGFUL FOR SUBSCRIPTION EVENTS. An order or a capture has no
+ * subscription and no billing_agreement_id, so this returns null for
+ * them — which is why the prepaid events below get a dispatch branch of
+ * their own rather than another case label on the subscription switch.
+ * A capture routed through here would look exactly like a one-off sale
+ * with no agreement: silently ignored, member charged, no tier.
+ */
 function subscriptionIdOf(event: PaypalWebhookEvent): string | null {
     const resource = event.resource;
     // BILLING.SUBSCRIPTION.* → resource.id is the subscription.
@@ -203,6 +226,40 @@ export async function POST(request: NextRequest) {
                 break;
             }
 
+            // ══ PREPAID TERMS — a different API, a different branch ══
+            //
+            // These carry an ORDER or a CAPTURE. Neither has a
+            // subscription id, so none of the handlers above can be
+            // reused for them; routing one through applyStatusFromPaypal
+            // would end in "no subscription reference — ignored" with the
+            // member's money already taken.
+
+            // The backstop for someone who approved and closed the tab.
+            // Approval moves no money; only a capture does, and only we
+            // can make one. Without this, that member is never charged
+            // and never gets what they clicked to buy.
+            case "CHECKOUT.ORDER.APPROVED": {
+                const result = await applyOrderApproved(admin, event);
+                if (!result.ok) return NextResponse.json({ error: result.error }, { status: 500 });
+                break;
+            }
+
+            // The money moved. This is the grant.
+            case "PAYMENT.CAPTURE.COMPLETED": {
+                const result = await applyCaptureCompleted(admin, event);
+                if (!result.ok) return NextResponse.json({ error: result.error }, { status: 500 });
+                break;
+            }
+
+            // The money went back. So does the term.
+            case "PAYMENT.CAPTURE.REFUNDED":
+            case "PAYMENT.CAPTURE.REVERSED":
+            case "PAYMENT.CAPTURE.DENIED": {
+                const result = await applyCaptureReversal(admin, event);
+                if (!result.ok) return NextResponse.json({ error: result.error }, { status: 500 });
+                break;
+            }
+
             default:
                 // Unhandled event type — log but don't error. PayPal
                 // sends a great deal we have no opinion about.
@@ -240,11 +297,13 @@ async function applyActivation(admin: AdminClient, event: PaypalWebhookEvent): P
         return { ok: true };
     }
 
-    // Which tier did they actually buy? An unrecognised plan grants
-    // nothing — this is the PayPal analogue of the studio-priced
-    // subscription that silently granted `pro` (audit Part 2, M1).
-    const planKey = planKeyForPlanId(subscription.plan_id);
-    if (!planKey) {
+    // Which tier did they actually buy, and does it END? An unrecognised
+    // plan grants nothing — this is the PayPal analogue of the
+    // studio-priced subscription that silently granted `pro` (audit
+    // Part 2, M1), and it now also covers "is this one of the fixed-term
+    // plans", because nothing on the event itself says so.
+    const plan = resolvePlan(subscription.plan_id);
+    if (!plan) {
         logger.error("PayPalWebhook", `Subscription ${subscriptionId} has an unrecognised plan id — granting nothing`);
         Sentry.captureMessage("PayPal subscription activated on an unrecognised plan", {
             level: "error",
@@ -256,10 +315,13 @@ async function applyActivation(admin: AdminClient, event: PaypalWebhookEvent): P
 
     const outcome = await grantPaypalTier(admin, {
         userId,
-        tier: PLAN_TIER[planKey],
+        tier: plan.tier,
         subscriptionId,
         paypalStatus: subscription.status ?? "ACTIVE",
         currentPeriodEnd: subscription.billing_info?.next_billing_time ?? null,
+        // Open-ended plans get NO clock; fixed-term plans get one that
+        // outlives the agreement. See fixedTermPaidThrough.
+        paidThrough: plan.termMonths === null ? null : fixedTermPaidThrough(subscription),
     });
 
     return outcome.action === "failed" ? { ok: false, error: outcome.error } : { ok: true };
@@ -328,17 +390,21 @@ async function applyStatusFromPaypal(admin: AdminClient, event: PaypalWebhookEve
     });
 
     if (isEntitlingStatus(subscription.status)) {
-        const planKey = planKeyForPlanId(subscription.plan_id);
-        if (!planKey) {
+        const plan = resolvePlan(subscription.plan_id);
+        if (!plan) {
             logger.error("PayPalWebhook", `Subscription ${subscriptionId} has an unrecognised plan id — granting nothing`);
             return { ok: true };
         }
         const outcome = await grantPaypalTier(admin, {
             userId,
-            tier: PLAN_TIER[planKey],
+            tier: plan.tier,
             subscriptionId,
             paypalStatus: subscription.status,
             currentPeriodEnd: subscription.billing_info?.next_billing_time ?? null,
+            // A renewal on a fixed-term plan pushes the clock forward by
+            // the cycle it just paid for. This is the line that makes the
+            // final charge survive the EXPIRED that arrives beside it.
+            paidThrough: plan.termMonths === null ? null : fixedTermPaidThrough(subscription),
         });
         return outcome.action === "failed" ? { ok: false, error: outcome.error } : { ok: true };
     }
@@ -349,6 +415,235 @@ async function applyStatusFromPaypal(admin: AdminClient, event: PaypalWebhookEve
         paypalStatus: subscription.status,
         currentPeriodEnd: subscription.billing_info?.next_billing_time ?? null,
     });
+    return outcome.action === "failed" ? { ok: false, error: outcome.error } : { ok: true };
+}
+
+// ══════════════════════════════════════════════════════════════════
+// PREPAID TERM HANDLERS
+//
+// Deliberately NOT gated on NEXT_PUBLIC_PREPAID_TERMS. The flag governs
+// whether a term can be BOUGHT; these run after somebody already has.
+// A flag flipped off between a member approving and PayPal delivering
+// must not turn a completed payment into nothing — so the gate that
+// makes this dark is the one upstream, at checkout, where no order can
+// be created in the first place and therefore no capture can exist.
+// ══════════════════════════════════════════════════════════════════
+
+/** Everything a capture has to establish before it may buy anything. */
+interface PrepaidClaim {
+    userId: string;
+    term: MembershipTerm;
+}
+
+/**
+ * Work out who this capture is for and what it bought — or refuse.
+ *
+ * Three things must all line up, and every one of them can only fail
+ * closed:
+ *
+ *   · a Supabase user id, from custom_id. The only mapping there is.
+ *   · a term we actually sell. An unknown key is not guessed at from the
+ *     amount: two terms could share a price and the guess would hand out
+ *     the longer one.
+ *   · the RIGHT amount for that term, to the cent. A stale order or a
+ *     partial capture must not buy twelve months.
+ *
+ * `orderId` is used to fetch the order when a capture arrives carrying
+ * only a bare user id, which is what an order created before the term
+ * was encoded into custom_id looks like.
+ */
+async function resolvePrepaidClaim(
+    capture: PaypalCapture | null | undefined,
+    orderId: string | null,
+    context: string,
+): Promise<PrepaidClaim | null> {
+    const decoded = decodePrepaidCustomId(capture?.custom_id);
+    let userId = decoded?.userId ?? null;
+    let termKey = decoded?.termKey ?? null;
+
+    if ((!userId || !termKey) && orderId) {
+        const order = await getOrder(orderId);
+        const fromOrder = orderCustomId(order);
+        userId = userId ?? fromOrder?.userId ?? null;
+        termKey = termKey ?? fromOrder?.termKey ?? null;
+    }
+
+    if (!userId) {
+        logger.error("PayPalWebhook", `${context}: no custom_id — cannot map this capture to a member`);
+        return null;
+    }
+    const term = termByKey(termKey);
+    if (!term) {
+        logger.error("PayPalWebhook", `${context}: unrecognised term "${String(termKey)}" — granting nothing`);
+        Sentry.captureMessage("PayPal capture for an unrecognised membership term", {
+            level: "error",
+            tags: { domain: "billing", provider: "paypal" },
+            extra: { orderId, termKey },
+        });
+        return null;
+    }
+    if (!captureMatchesPrice(capture, term.prepaidPrice, TERM_CURRENCY)) {
+        logger.error("PayPalWebhook", `${context}: amount does not match ${term.key} — granting nothing`, {
+            expected: term.prepaidPrice,
+            currency: TERM_CURRENCY,
+        });
+        Sentry.captureMessage("PayPal capture amount did not match the term price", {
+            level: "error",
+            tags: { domain: "billing", provider: "paypal" },
+            extra: { orderId, termKey: term.key, expected: term.prepaidPrice },
+        });
+        return null;
+    }
+
+    return { userId, term };
+}
+
+/** Grant a term for a capture we have in hand. Shared by both entrances. */
+async function grantFromCapture(
+    admin: AdminClient,
+    capture: PaypalCapture,
+    orderId: string | null,
+    context: string,
+): Promise<HandlerResult> {
+    const claim = await resolvePrepaidClaim(capture, orderId, context);
+    if (!claim) return { ok: true };
+    if (!capture.id) {
+        logger.error("PayPalWebhook", `${context}: capture has no id — refusing an ungovernable grant`);
+        return { ok: true };
+    }
+
+    const outcome = await grantPrepaidTerm(admin, {
+        userId: claim.userId,
+        tier: claim.term.tier,
+        months: claim.term.months,
+        captureId: capture.id,
+        orderId,
+    });
+
+    return outcome.action === "failed" ? { ok: false, error: outcome.error } : { ok: true };
+}
+
+/**
+ * CHECKOUT.ORDER.APPROVED → capture it ourselves, then grant.
+ *
+ * The member approved. Nothing has been charged. If we stop here they
+ * are never charged and never get their term, and the order simply
+ * expires — which is the single most expensive way this feature can
+ * fail, because it looks exactly like success to the person who clicked.
+ */
+async function applyOrderApproved(admin: AdminClient, event: PaypalWebhookEvent): Promise<HandlerResult> {
+    const orderId = event.resource?.id ?? null;
+    if (!orderId) {
+        logger.error("PayPalWebhook", "ORDER.APPROVED with no order id", { eventId: event.id });
+        return { ok: true };
+    }
+
+    // Check the order is one of ours BEFORE taking anyone's money.
+    const fromEvent = orderCustomId(event.resource);
+    if (!fromEvent?.userId) {
+        const order = await getOrder(orderId);
+        if (!orderCustomId(order)?.userId) {
+            logger.error("PayPalWebhook", `Order ${orderId} carries no custom_id — not ours, capturing nothing`);
+            return { ok: true };
+        }
+    }
+
+    // Idempotent at PayPal AND here: if the return leg already captured,
+    // this reads that capture back rather than making a second one, and
+    // grantPrepaidTerm then recognises it as already applied.
+    const capture = await captureOrder(orderId);
+    if (!capture) {
+        // We could not establish whether money moved. Grant nothing and
+        // let PayPal redeliver — the alternative is guessing about a
+        // payment, which is the one thing money code may never do.
+        logger.error("PayPalWebhook", `Could not capture or read back order ${orderId}`);
+        return { ok: false, error: "capture-unresolved" };
+    }
+
+    return grantFromCapture(admin, capture, orderId, `ORDER.APPROVED ${orderId}`);
+}
+
+/** PAYMENT.CAPTURE.COMPLETED → the money is real. Grant the term. */
+async function applyCaptureCompleted(admin: AdminClient, event: PaypalWebhookEvent): Promise<HandlerResult> {
+    const capture = event.resource as PaypalCapture | undefined;
+    const captureId = capture?.id ?? null;
+    if (!captureId) {
+        logger.error("PayPalWebhook", "CAPTURE.COMPLETED with no capture id", { eventId: event.id });
+        return { ok: true };
+    }
+
+    const orderId = capture?.supplementary_data?.related_ids?.order_id ?? null;
+    return grantFromCapture(admin, capture as PaypalCapture, orderId, `CAPTURE.COMPLETED ${captureId}`);
+}
+
+/**
+ * The capture id a refund/reversal/denial is about.
+ *
+ * REVERSED and DENIED carry the capture itself, so `id` is the capture.
+ * REFUNDED carries a REFUND, whose own `id` is the refund — using it
+ * would look up a capture that does not exist and quietly end nothing.
+ * PayPal points back at the capture in two places and neither is
+ * guaranteed, so both are tried before giving up.
+ */
+function reversedCaptureIdOf(event: PaypalWebhookEvent): string | null {
+    const resource = event.resource;
+    if (event.event_type !== "PAYMENT.CAPTURE.REFUNDED") {
+        return resource?.id ?? null;
+    }
+    const related = resource?.supplementary_data?.related_ids?.capture_id;
+    if (typeof related === "string" && related.trim()) return related.trim();
+
+    // The `up` link on a refund is the capture it refunds:
+    //   .../v2/payments/captures/<capture id>
+    const up = (resource?.links ?? []).find((link) => link?.rel?.toLowerCase() === "up")?.href;
+    if (typeof up === "string") {
+        const match = up.match(/\/captures\/([^/?#]+)/);
+        if (match?.[1]) return decodeURIComponent(match[1]);
+    }
+    return null;
+}
+
+/**
+ * A refund, reversal or denial ends the term it bought.
+ *
+ * This is the one path that may end a membership whose `paid_through` is
+ * still in the future, because a refunded member has not, in the end,
+ * paid. endPrepaidTerm keeps every other guard: it will only act on a
+ * capture that actually bought the tier currently in force.
+ *
+ * If we cannot establish who or what, we change NOTHING and say so
+ * loudly. Revoking on a guess is how a paying member gets downgraded by
+ * an unrelated refund.
+ */
+async function applyCaptureReversal(admin: AdminClient, event: PaypalWebhookEvent): Promise<HandlerResult> {
+    const captureId = reversedCaptureIdOf(event);
+    const reason = (event.event_type ?? "PAYMENT.CAPTURE.REFUNDED").split(".").pop() ?? "REFUNDED";
+
+    if (!captureId) {
+        logger.error("PayPalWebhook", `${event.event_type} names no capture — ending nothing`, {
+            eventId: event.id,
+        });
+        Sentry.captureMessage("PayPal refund event could not be traced to a capture", {
+            level: "warning",
+            tags: { domain: "billing", provider: "paypal" },
+            extra: { eventId: event.id, eventType: event.event_type },
+        });
+        return { ok: true };
+    }
+
+    let userId = decodePrepaidCustomId(event.resource?.custom_id)?.userId ?? null;
+    if (!userId) {
+        // A refund does not always carry the capture's custom_id, so ask
+        // PayPal for the capture itself.
+        const capture = await getCapture(captureId);
+        userId = decodePrepaidCustomId(capture?.custom_id)?.userId ?? null;
+    }
+    if (!userId) {
+        logger.error("PayPalWebhook", `${reason} of ${captureId} has no custom_id — ending nothing`);
+        return { ok: true };
+    }
+
+    const outcome = await endPrepaidTerm(admin, { userId, captureId, reason });
     return outcome.action === "failed" ? { ok: false, error: outcome.error } : { ok: true };
 }
 

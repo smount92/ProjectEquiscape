@@ -9,6 +9,8 @@
  */
 
 import { paypalFetch } from "./client";
+import { addMonthsUtc } from "@/lib/entitlement/clock";
+import { termByKey, termForPlanId, termPlanId, type MembershipTerm } from "@/lib/billing/terms";
 import type { PaypalPlanKey, PaypalSubscription } from "./types";
 
 /**
@@ -53,6 +55,103 @@ export function planKeyForPlanId(planId: string | null | undefined): PaypalPlanK
     return null;
 }
 
+// ── Fixed-term plans (3 / 6 / 12 monthly cycles, then stop) ────────
+//
+// A second family of plans alongside the two open-ended ones. Same API,
+// same webhook, same grant path — the ONLY thing that distinguishes them
+// is `total_cycles`, which PayPal holds and we never see on an event. So
+// the distinction has to come from the plan id, which is why every plan
+// id on the site resolves through resolvePlan() below and why an
+// unrecognised one grants nothing.
+//
+// Getting this wrong in either direction is a real failure:
+//   · a fixed-term plan mistaken for open-ended gets no clock, so it
+//     never ends and the member has a free membership for life;
+//   · an open-ended plan mistaken for fixed-term gets a one-month clock
+//     and a paying subscriber loses access the moment a renewal webhook
+//     is late.
+// Hence: exact id match, both directions, no inference.
+
+/** What a plan id resolves to. `termMonths: null` means open-ended. */
+export interface ResolvedPlan {
+    tier: "pro" | "studio";
+    /** Months per full term, or null when the plan bills until cancelled. */
+    termMonths: number | null;
+    /** The membership-terms.json key, for fixed-term plans only. */
+    term: MembershipTerm | null;
+}
+
+/**
+ * Which plan is this, open-ended or fixed-term? Null for "not ours".
+ *
+ * Open-ended is checked first so the two existing live plans keep
+ * resolving exactly as they did before fixed terms existed, even in the
+ * pathological case of the same id being pasted into two env vars.
+ */
+export function resolvePlan(planId: string | null | undefined): ResolvedPlan | null {
+    const openEnded = planKeyForPlanId(planId);
+    if (openEnded) {
+        return { tier: PLAN_TIER[openEnded], termMonths: null, term: null };
+    }
+    const term = termForPlanId(planId);
+    if (term) {
+        return { tier: term.tier, termMonths: term.months, term };
+    }
+    return null;
+}
+
+/**
+ * Grace added to a fixed-term subscription's clock.
+ *
+ * PayPal's renewal charge and its webhook are not simultaneous, and a
+ * clock set to the exact billing instant would drop a paying member for
+ * however long the delivery took. Three days is longer than any delivery
+ * and shorter than a billing cycle, so it can never let one missed
+ * renewal look like a paid one.
+ *
+ * It also makes the fixed-term path self-healing: if PayPal goes quiet
+ * altogether, the clock runs out on its own three days after the last
+ * confirmed payment. No cron, no reconciliation, no orphaned membership.
+ */
+const RENEWAL_GRACE_MS = 3 * 24 * 60 * 60 * 1000;
+
+/**
+ * How far a fixed-term subscription is paid through, after the cycle we
+ * have just been told about.
+ *
+ * `next_billing_time` is PayPal's own answer to "when does the paid-for
+ * period end", so it is used when it makes sense. Two cases where it
+ * does not:
+ *
+ *   · THE FINAL CYCLE. There is no next billing, so PayPal sends no
+ *     next_billing_time — and this is the exact moment PayPal also fires
+ *     BILLING.SUBSCRIPTION.EXPIRED. Falling back to one month is what
+ *     gives the member the month that final charge actually bought, and
+ *     is what makes the EXPIRED arriving alongside it harmless.
+ *   · A DATE ALREADY IN THE PAST, from a delayed delivery. We have just
+ *     been told a payment succeeded; treating that as buying zero time
+ *     would be absurd, so it falls back to a month as well.
+ */
+export function fixedTermPaidThrough(
+    subscription: PaypalSubscription | null | undefined,
+    now: number = Date.now(),
+): string {
+    const nextBilling = subscription?.billing_info?.next_billing_time;
+    if (typeof nextBilling === "string" && nextBilling.trim()) {
+        const parsed = Date.parse(nextBilling);
+        if (Number.isFinite(parsed) && parsed > now) {
+            return new Date(parsed + RENEWAL_GRACE_MS).toISOString();
+        }
+    }
+    return new Date(addMonthsUtc(now, 1) + RENEWAL_GRACE_MS).toISOString();
+}
+
+/** The configured plan id for a fixed term, or null if unset. */
+export function fixedTermPlanId(termKey: string): string | null {
+    const term = termByKey(termKey);
+    return term ? termPlanId(term) : null;
+}
+
 export interface CreateSubscriptionArgs {
     plan: PaypalPlanKey;
     /** Supabase user id — rides along as custom_id. */
@@ -60,6 +159,12 @@ export interface CreateSubscriptionArgs {
     userEmail?: string;
     returnUrl: string;
     cancelUrl: string;
+    /**
+     * A fixed-term plan id to use INSTEAD of the open-ended plan for
+     * `plan`. The tier still comes from `plan`; only the billing shape
+     * differs, which is what keeps one create path for both families.
+     */
+    planIdOverride?: string | null;
 }
 
 /**
@@ -74,7 +179,7 @@ export interface CreateSubscriptionArgs {
 export async function createSubscription(
     args: CreateSubscriptionArgs,
 ): Promise<{ id: string; approveUrl: string }> {
-    const planId = planIdFor(args.plan);
+    const planId = args.planIdOverride?.trim() || planIdFor(args.plan);
     if (!planId) {
         throw new Error(`PayPal plan id missing for ${args.plan}`);
     }

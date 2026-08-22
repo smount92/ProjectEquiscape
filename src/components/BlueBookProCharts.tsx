@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 import { createClient } from "@/lib/supabase/client";
+import { entitledTier } from "@/lib/entitlement/clock";
 
 /**
  * BlueBookProCharts — Premium analytics overlay
@@ -47,8 +48,10 @@ export default function BlueBookProCharts({
         createClient()
             .auth.getUser()
             .then(({ data }) => {
-                const t = data.user?.app_metadata?.tier;
-                setResolvedTier(t === "pro" || t === "studio" ? t : "free");
+                // entitledTier applies the clock: a prepaid term that
+                // has run out reads as free here, exactly as it does on
+                // the server gate behind these charts.
+                setResolvedTier(entitledTier(data.user?.app_metadata));
             })
             .catch(() => setResolvedTier("free"));
     }, [tierProp]);

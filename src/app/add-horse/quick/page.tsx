@@ -8,6 +8,7 @@ import { getProfile } from"@/app/actions/settings";
 import UnifiedReferenceSearch from"@/components/UnifiedReferenceSearch";
 import type { CatalogItem } from"@/app/actions/reference";
 import { createClient } from"@/lib/supabase/client";
+import { entitledTier } from"@/lib/entitlement/clock";
 import {
  compressImage,
  compressImageWithWatermark,
@@ -80,7 +81,8 @@ function LegacyQuickAddPage() {
  data: { user },
  } = await supabase.auth.getUser();
  if (!user) return;
- if (user.app_metadata?.tier) setUserTier(user.app_metadata.tier as UserTier);
+ // Minus the entitlement clock — an expired term is not Pro.
+ if (user.app_metadata?.tier) setUserTier(entitledTier(user.app_metadata) as UserTier);
  const { data } = await supabase
  .from("user_collections")
  .select("id, name")

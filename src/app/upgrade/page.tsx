@@ -6,7 +6,16 @@ import Link from "next/link";
 import UpgradeButton from "@/components/UpgradeButton";
 import StudioProButton from "@/components/StudioProButton";
 import PayPalButton from "@/components/PayPalButton";
+import PrepaidTermButtons, { type TermOption } from "@/components/PrepaidTermButtons";
 import { paypalPathLive } from "@/lib/paypal/flag";
+import { formatPaidThrough } from "@/lib/entitlement/clock";
+import {
+    fixedTermTotal,
+    prepaidTermsEnabled,
+    termPlanId,
+    termsForTier,
+    type TermTier,
+} from "@/lib/billing/terms";
 import SupporterButton from "@/components/SupporterButton";
 import SupporterLedgerToggle from "@/components/SupporterLedgerToggle";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
@@ -193,6 +202,25 @@ const TIER_MATRIX: {
     },
 ];
 
+/**
+ * The time-boxed options for one tier, shaped for the client.
+ *
+ * Built on the SERVER because whether a spread-payment option exists
+ * depends on PAYPAL_*_PLAN_ID, which are not NEXT_PUBLIC vars and must
+ * never reach a bundle. The client is told the answer, never the reason.
+ */
+function termOptionsFor(tier: TermTier): TermOption[] {
+    return termsForTier(tier).map((term) => ({
+        key: term.key,
+        label: term.label,
+        months: term.months,
+        prepaidPrice: term.prepaidPrice,
+        monthlyPrice: term.monthlyPrice,
+        fixedTotal: fixedTermTotal(term),
+        spreadAvailable: termPlanId(term) !== null,
+    }));
+}
+
 function MatrixMark({ value }: { value: MatrixCell }) {
     if (value === true) {
         return (
@@ -231,6 +259,19 @@ export default async function UpgradePage({
     // credentials exist, so the cards render exactly as they do today
     // until both are true.
     const paypalLive = paypalPathLive();
+
+    // Time-boxed memberships ride on the PayPal path and need their own
+    // switch on top of it, so this merges dark twice over: no
+    // NEXT_PUBLIC_PREPAID_TERMS, no change to this page at all.
+    const termsLive = paypalLive && prepaidTermsEnabled();
+    const proTerms = termsLive ? termOptionsFor("pro") : [];
+    const studioTerms = termsLive ? termOptionsFor("studio") : [];
+
+    // When a time-boxed membership runs out. Null for everyone else,
+    // which today is everyone: absent means no expiry, always.
+    const paidThroughLabel = formatPaidThrough(
+        (user.app_metadata as Record<string, unknown> | undefined)?.paid_through as string | undefined,
+    );
 
     // Supporter is orthogonal to tier — cosmetic recognition, gates nothing.
     const supporterPriceLabel = await getSupporterPriceLabel();
@@ -273,6 +314,24 @@ export default async function UpgradePage({
                     <span className="stamp mt-3 inline-block">Supporter</span>
                 </div>
             )}
+            {/* A prepaid term deserves its own receipt, and it has to say
+                the thing she bought it for: nothing renews. Reusing the
+                subscription banner here would be the one place on the
+                whole site where the wrong word actually matters. */}
+            {status === "term-success" && (
+                <div className="animate-fade-in-up ledger-card mb-8 text-center">
+                    <PartyPopper className="text-forest mx-auto h-8 w-8" />
+                    <h2 className="mt-2 font-serif text-xl font-bold">Paid up. Nothing renews.</h2>
+                    <p className="text-secondary-foreground mt-1 text-sm">
+                        {paidThroughLabel
+                            ? `Your membership runs through ${paidThroughLabel}.`
+                            : "Your membership is active."}{" "}
+                        That was a one-off payment — there is no subscription, nothing to cancel, and
+                        you will not be charged again. Log out and back in to activate everything.
+                    </p>
+                    <span className="stamp mt-3 inline-block">Paid</span>
+                </div>
+            )}
             {status === "cancelled" && (
                 <div className="animate-fade-in-up ledger-card mb-8 text-center">
                     <span className="stamp stamp-red inline-block">Cancelled</span>
@@ -303,6 +362,19 @@ export default async function UpgradePage({
                 </span>
                 <span className="stamp">{tierLabel}</span>
             </div>
+
+            {/* A term holder's most likely question about this page is
+                "when does mine run out". Answering it before they ask is
+                cheaper than the support ticket, and it is the honest
+                counterpart of selling something that ends. */}
+            {isPro(tier) && paidThroughLabel && (
+                <div className="animate-fade-in-up -mt-4 mb-6 text-center">
+                    <p className="text-muted-foreground text-xs">
+                        Paid through {paidThroughLabel} — nothing renews. Buy another term any time
+                        and the months are added on.
+                    </p>
+                </div>
+            )}
 
             {/* The honest pitch — this hobby has watched its volunteer-run
                 sites go dark; "keep the lights on" IS the product. */}
@@ -392,6 +464,12 @@ export default async function UpgradePage({
                         <div className="relative z-[1] mt-6">
                             <UpgradeButton />
                             <PayPalButton plan="pro" enabled={paypalLive} variant="leather" />
+                            <PrepaidTermButtons
+                                tier="pro"
+                                enabled={termsLive}
+                                terms={proTerms}
+                                variant="leather"
+                            />
                         </div>
                     )}
                 </div>
@@ -433,6 +511,12 @@ export default async function UpgradePage({
                         <div className="mt-6">
                             <StudioProButton />
                             <PayPalButton plan="studio" enabled={paypalLive} variant="ledger" />
+                            <PrepaidTermButtons
+                                tier="studio"
+                                enabled={termsLive}
+                                terms={studioTerms}
+                                variant="ledger"
+                            />
                         </div>
                     )}
                 </div>
@@ -565,6 +649,22 @@ export default async function UpgradePage({
                             Yes! Cancel from your Stripe billing portal anytime. Your Pro features stay active until the end of the billing period.
                         </p>
                     </div>
+                    {termsLive && (
+                        <div className="ledger-card">
+                            <h3 className="font-serif font-bold">
+                                Do I have to sign up for a recurring payment?
+                            </h3>
+                            <p className="mt-1 text-sm text-secondary-foreground">
+                                No. You can buy 3, 6 or 12 months with a single PayPal payment. There
+                                is no subscription behind it, nothing stored to charge you later and
+                                nothing to remember to cancel — when the months run out, your account
+                                goes back to Free and every horse, photo and record stays exactly
+                                where it is. If you buy another term before the first one ends, the
+                                new months are added on to the time you have left rather than
+                                replacing it.
+                            </p>
+                        </div>
+                    )}
                     <div className="ledger-card">
                         <h3 className="font-serif font-bold">Will I lose my data if I downgrade?</h3>
                         <p className="mt-1 text-sm text-secondary-foreground">

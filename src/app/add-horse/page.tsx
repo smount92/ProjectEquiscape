@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from"react";
 import { useRouter, useSearchParams } from"next/navigation";
 import Link from"next/link";
 import { createClient } from"@/lib/supabase/client";
+import { entitledTier } from"@/lib/entitlement/clock";
 import {
  compressImage,
  compressImageWithWatermark,
@@ -236,10 +237,11 @@ function LegacyAddHorsePage() {
  setUserWatermarkText(profile.watermarkText);
  }
  });
- // Read tier from JWT app_metadata
+ // Read tier from JWT app_metadata, minus the entitlement clock — a
+ // term that has run out must not still be showing Pro controls.
  supabase.auth.getUser().then(({ data: { user: u } }) => {
  if (u?.app_metadata?.tier) {
- setUserTier(u.app_metadata.tier as UserTier);
+ setUserTier(entitledTier(u.app_metadata) as UserTier);
  }
  });
  // eslint-disable-next-line react-hooks/exhaustive-deps

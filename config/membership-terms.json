@@ -1,0 +1,93 @@
+{
+  "_README": [
+    "THE ONE FILE TO EDIT WHEN PRICES CHANGE.",
+    "",
+    "Two different products are priced here, and they are not the same thing:",
+    "",
+    "  prepaidPrice — ONE charge, buys `months` of access, nothing renews.",
+    "                 Charged by us through PayPal Orders v2 at exactly this",
+    "                 value, so this number IS what the member pays.",
+    "",
+    "  monthlyPrice — the per-cycle price of the matching FIXED-TERM PayPal",
+    "                 subscription (bills monthly, stops after `months`",
+    "                 cycles). PayPal charges whatever is stored in the PLAN,",
+    "                 not what is written here, so changing this number only",
+    "                 changes the price the site DISPLAYS. To change what is",
+    "                 actually billed you must create a new plan:",
+    "                 `node scripts/paypal-setup-plans.mjs --terms --live`",
+    "                 and paste the new id into planEnvVar.",
+    "",
+    "PRICES BELOW ARE PROPOSALS, not owner-approved. The 12-month numbers",
+    "match the documented $50/yr Pro and $100/yr Studio targets. The 3- and",
+    "6-month prepaid numbers are a guess at the shape of the discount",
+    "(3mo = no discount, 6mo = 10% off, 12mo = ~17% off).",
+    "",
+    "monthlyPrice deliberately carries NO discount: the discount is what you",
+    "get for handing over the money up front. It must also be exactly",
+    "representable in two decimal places, which a discounted 12-cycle price",
+    "would not be ($50 / 12 = $4.1666...).",
+    "",
+    "A term is only sellable when it appears here. A FIXED-TERM SUBSCRIPTION",
+    "is additionally only offered once its planEnvVar is set in the",
+    "environment — until then the site shows the prepaid option alone."
+  ],
+
+  "currency": "USD",
+
+  "terms": [
+    {
+      "key": "pro-3",
+      "tier": "pro",
+      "months": 3,
+      "label": "3 months",
+      "prepaidPrice": "15.00",
+      "monthlyPrice": "5.00",
+      "planEnvVar": "PAYPAL_PRO_3MO_PLAN_ID"
+    },
+    {
+      "key": "pro-6",
+      "tier": "pro",
+      "months": 6,
+      "label": "6 months",
+      "prepaidPrice": "27.00",
+      "monthlyPrice": "5.00",
+      "planEnvVar": "PAYPAL_PRO_6MO_PLAN_ID"
+    },
+    {
+      "key": "pro-12",
+      "tier": "pro",
+      "months": 12,
+      "label": "12 months",
+      "prepaidPrice": "50.00",
+      "monthlyPrice": "5.00",
+      "planEnvVar": "PAYPAL_PRO_12MO_PLAN_ID"
+    },
+    {
+      "key": "studio-3",
+      "tier": "studio",
+      "months": 3,
+      "label": "3 months",
+      "prepaidPrice": "30.00",
+      "monthlyPrice": "10.00",
+      "planEnvVar": "PAYPAL_STUDIO_3MO_PLAN_ID"
+    },
+    {
+      "key": "studio-6",
+      "tier": "studio",
+      "months": 6,
+      "label": "6 months",
+      "prepaidPrice": "54.00",
+      "monthlyPrice": "10.00",
+      "planEnvVar": "PAYPAL_STUDIO_6MO_PLAN_ID"
+    },
+    {
+      "key": "studio-12",
+      "tier": "studio",
+      "months": 12,
+      "label": "12 months",
+      "prepaidPrice": "100.00",
+      "monthlyPrice": "10.00",
+      "planEnvVar": "PAYPAL_STUDIO_12MO_PLAN_ID"
+    }
+  ]
+}

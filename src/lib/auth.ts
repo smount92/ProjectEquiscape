@@ -3,6 +3,7 @@
 import { cache } from "react";
 
 import { createClient } from "@/lib/supabase/server";
+import { entitledTier } from "@/lib/entitlement/clock";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export class AuthError extends Error {
@@ -97,14 +98,23 @@ export type UserTier = "studio" | "pro" | "free";
  * (The old signature claimed 'pro' | 'free' — studio passed through the
  * value untyped and then failed every `=== "pro"` gate, denying paying
  * Studio subscribers the Pro benefits their tier includes. Use isPro().)
+ *
+ * THE CLOCK IS APPLIED HERE, and this is the only place it has to be
+ * applied for the site to be correct. A prepaid or fixed term whose
+ * `paid_through` has passed reads as `free` on the very next request —
+ * no cron has to run, and there is no window in which an ended term
+ * still opens a door. See src/lib/entitlement/clock.ts.
+ *
+ * Members with no `paid_through` — which today is all of them, and every
+ * open-ended Stripe or PayPal subscriber forever — are completely
+ * unaffected: absent means "no expiry", never "expired".
  */
 export async function getUserTier(): Promise<UserTier> {
     const { user } = await resolveViewer();
     if (!user) return "free";
     // Admin always gets Pro
     if (user.email?.toLowerCase() === process.env.ADMIN_EMAIL?.toLowerCase()) return "pro";
-    const tier = user.app_metadata?.tier;
-    return tier === "studio" || tier === "pro" ? tier : "free";
+    return entitledTier(user.app_metadata);
 }
 
 /** Studio includes everything in Pro — every Pro gate must use this. */
