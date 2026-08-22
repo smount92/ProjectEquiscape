@@ -320,5 +320,32 @@ export async function revokePaypalTier(
         subscriptionId: args.subscriptionId,
         status: args.paypalStatus,
     });
+
+    // Tell them WHY, and say the useful thing.
+    //
+    // The members this path exists for are the ones paying from a PayPal
+    // balance built up selling horses. PayPal's Subscriptions API does not
+    // fall back to another instrument when a renewal comes up short — it
+    // retries, then suspends. So a balance that dips below the price is a
+    // silent churn: the member simply stops having Pro and never learns
+    // that topping up a few dollars would have kept it. A suspension is
+    // reversible, so this is worth an explanation.
+    try {
+        // createNotification is server-only: dynamic import inside
+        // try/catch so a notify failure can never break billing.
+        const { createNotification } = await import("@/lib/notifications/createNotification");
+        const suspended = (args.paypalStatus ?? "").toUpperCase() === "SUSPENDED";
+        await createNotification({
+            userId: args.userId,
+            type: "billing_subscription_ended",
+            content: suspended
+                ? "PayPal couldn't collect your Model Horse Hub subscription, so it's paused. This usually means the PayPal balance or card behind it came up short — top it up and the subscription picks up where it left off."
+                : "Your PayPal subscription to Model Horse Hub has ended. Your horses, photos and records are all still here, and you can resubscribe any time.",
+            linkUrl: "/upgrade",
+        });
+    } catch (err) {
+        logger.error("PayPalWebhook", "Subscription-ended notice failed to send", err);
+    }
+
     return { action: "revoked", userId: args.userId };
 }
