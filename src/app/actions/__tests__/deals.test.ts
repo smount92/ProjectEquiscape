@@ -18,6 +18,16 @@ vi.mock("@/lib/utils/rateLimit", () => ({ checkRateLimit: vi.fn().mockResolvedVa
 vi.mock("@/lib/notifications/createNotification", () => ({
     createNotification: vi.fn().mockResolvedValue(undefined),
 }));
+// One horse, one sale (audit C3) — unit-tested in
+// src/lib/commerce/__tests__/horseLock.test.ts. Here we assert only that
+// the counter-accept path consults it and closes the losing offers,
+// which it never did before.
+const mockAssertHorseAvailable = vi.fn().mockResolvedValue({ ok: true });
+const mockCancelSiblingOffers = vi.fn().mockResolvedValue({ cancelled: 0 });
+vi.mock("@/lib/commerce/horseLock", () => ({
+    assertHorseAvailable: (...args: unknown[]) => mockAssertHorseAvailable(...args),
+    cancelSiblingOffers: (...args: unknown[]) => mockCancelSiblingOffers(...args),
+}));
 // The probe is the seam between "173 pasted" and "not yet". Every test
 // below runs against a pasted database except the ones that say
 // otherwise, which flip this.
@@ -37,8 +47,10 @@ import {
     proposeTerms,
     raiseDispute,
     recordSaleInVault,
+    respondToCounter,
     savePaymentPlan,
     standDownDispute,
+    withdrawTermsAgreement,
 } from "@/app/actions/deals";
 
 // Real v4 UUIDs — the transaction paths validate ids before anything runs.
@@ -126,6 +138,10 @@ describe("Deal room — deals.ts", () => {
         support = { ...ALL_SUPPORTED };
         mockClient = createMockSupabaseClient();
         mockClient._setImplicitResolve({ data: [], error: null });
+        mockAssertHorseAvailable.mockReset();
+        mockAssertHorseAvailable.mockResolvedValue({ ok: true });
+        mockCancelSiblingOffers.mockReset();
+        mockCancelSiblingOffers.mockResolvedValue({ cancelled: 0 });
         authAs(BUYER);
     });
 
@@ -326,6 +342,164 @@ describe("Deal room — deals.ts", () => {
         const result = await confirmInstallmentReceived(INSTALLMENT);
         expect(result.success).toBe(false);
         expect(result.error).toMatch(/already confirmed/i);
+    });
+
+    // ── audit C2: a fully-paid plan has to reach the release path ──
+
+    it("stamps the transaction paid when the last installment is confirmed", async () => {
+        authAs(SELLER);
+        // The ledger read that follows the confirmation: one row, confirmed.
+        mockClient._setImplicitResolve({
+            data: [
+                {
+                    id: INSTALLMENT,
+                    seq: 1,
+                    amount: 100,
+                    due_date: "2026-09-01",
+                    marked_sent_at: "2026-09-01T00:00:00Z",
+                    confirmed_at: "2026-09-02T00:00:00Z",
+                    note: null,
+                },
+            ],
+            error: null,
+        });
+        mockClient._mockQuery.maybeSingle
+            .mockResolvedValueOnce({
+                data: installmentRow({ marked_sent_at: "2026-09-01T00:00:00Z" }),
+                error: null,
+            })
+            .mockResolvedValueOnce({ data: convoRow(), error: null })
+            .mockResolvedValueOnce({ data: txnRow(), error: null })
+            .mockResolvedValue({ data: { alias_name: "amanda" }, error: null });
+
+        const result = await confirmInstallmentReceived(INSTALLMENT);
+
+        expect(result.success).toBe(true);
+        expect(result.allConfirmed).toBe(true);
+        // Without this the seller's "Confirm payment & release" answered
+        // "Buyer has not yet marked payment as sent" — for ever.
+        expect(mockClient._mockQuery.update).toHaveBeenCalledWith(
+            expect.objectContaining({ paid_at: expect.any(String) }),
+        );
+    });
+
+    it("does not stamp the transaction paid while payments are outstanding", async () => {
+        authAs(SELLER);
+        mockClient._setImplicitResolve({
+            data: [
+                {
+                    id: INSTALLMENT,
+                    seq: 1,
+                    amount: 100,
+                    due_date: "2026-09-01",
+                    marked_sent_at: "2026-09-01T00:00:00Z",
+                    confirmed_at: "2026-09-02T00:00:00Z",
+                    note: null,
+                },
+                {
+                    id: "second",
+                    seq: 2,
+                    amount: 100,
+                    due_date: "2026-10-01",
+                    marked_sent_at: null,
+                    confirmed_at: null,
+                    note: null,
+                },
+            ],
+            error: null,
+        });
+        mockClient._mockQuery.maybeSingle
+            .mockResolvedValueOnce({
+                data: installmentRow({ marked_sent_at: "2026-09-01T00:00:00Z" }),
+                error: null,
+            })
+            .mockResolvedValueOnce({ data: convoRow(), error: null })
+            .mockResolvedValueOnce({ data: txnRow(), error: null })
+            .mockResolvedValue({ data: { alias_name: "amanda" }, error: null });
+
+        const result = await confirmInstallmentReceived(INSTALLMENT);
+
+        expect(result.success).toBe(true);
+        expect(result.allConfirmed).toBe(false);
+        expect(mockClient._mockQuery.update).not.toHaveBeenCalledWith(
+            expect.objectContaining({ paid_at: expect.any(String) }),
+        );
+    });
+
+    // ── audit C3: accepting a counter is still a sale ──
+
+    const counterTxn = (patch: Record<string, unknown> = {}) => ({
+        id: TXN,
+        status: "offer_made",
+        party_a_id: SELLER,
+        party_b_id: BUYER,
+        conversation_id: CONVO,
+        horse_id: HORSE,
+        offer_amount: 320,
+        ...patch,
+    });
+
+    it("refuses to accept a counter on a horse that is already selling", async () => {
+        mockClient._mockQuery.maybeSingle.mockResolvedValueOnce({
+            data: counterTxn(),
+            error: null,
+        });
+        mockAssertHorseAvailable.mockResolvedValueOnce({
+            ok: false,
+            reason: "This horse is already marked Pending Sale.",
+        });
+
+        const result = await respondToCounter(TXN, "accept");
+
+        expect(result.success).toBe(false);
+        expect(result.error).toMatch(/pending sale/i);
+        expect(mockClient.rpc).not.toHaveBeenCalled();
+    });
+
+    it("closes the losing offers when a counter is accepted", async () => {
+        mockClient._mockQuery.maybeSingle
+            .mockResolvedValueOnce({ data: counterTxn(), error: null })
+            .mockResolvedValue({ data: { alias_name: "sam", custom_name: "Trigger" }, error: null });
+        mockClient.rpc.mockResolvedValueOnce({ data: { success: true }, error: null });
+
+        const result = await respondToCounter(TXN, "accept");
+
+        expect(result.success).toBe(true);
+        expect(mockCancelSiblingOffers).toHaveBeenCalledWith(
+            expect.objectContaining({ horseId: HORSE, keepTransactionId: TXN, actorId: BUYER }),
+        );
+    });
+
+    it("leaves the horse alone when a counter is declined", async () => {
+        mockClient._mockQuery.maybeSingle
+            .mockResolvedValueOnce({ data: counterTxn(), error: null })
+            .mockResolvedValue({ data: { alias_name: "sam" }, error: null });
+        mockClient.rpc.mockResolvedValueOnce({ data: { success: true }, error: null });
+
+        await respondToCounter(TXN, "decline");
+
+        expect(mockAssertHorseAvailable).not.toHaveBeenCalled();
+        expect(mockCancelSiblingOffers).not.toHaveBeenCalled();
+    });
+
+    // ── audit C8: transitions that used to happen in silence ──
+
+    it("writes a transcript entry when an agreement is withdrawn", async () => {
+        queueLoad(
+            convoRow({
+                deal_terms: terms({ boxes: [priceBox(400)], agreedByBAt: "2026-09-01T00:00:00Z" }),
+            }),
+        );
+
+        const result = await withdrawTermsAgreement(CONVO);
+
+        expect(result.success).toBe(true);
+        expect(mockClient._mockQuery.insert).toHaveBeenCalledWith(
+            expect.objectContaining({
+                kind: "terms_agreed",
+                payload: expect.objectContaining({ withdrawn: true }),
+            }),
+        );
     });
 
     // ── Disputes freeze everything ──

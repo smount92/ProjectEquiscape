@@ -34,6 +34,15 @@ const mockParkHorse = vi.fn();
 vi.mock("@/app/actions/parked-export", () => ({
     parkHorse: (...args: unknown[]) => mockParkHorse(...args),
 }));
+// One horse, one sale (audit C3). The helper itself is unit-tested in
+// src/lib/commerce/__tests__/horseLock.test.ts; here we only care that
+// the accept path consults it and honours a refusal.
+const mockAssertHorseAvailable = vi.fn().mockResolvedValue({ ok: true });
+const mockCancelSiblingOffers = vi.fn().mockResolvedValue({ cancelled: 0 });
+vi.mock("@/lib/commerce/horseLock", () => ({
+    assertHorseAvailable: (...args: unknown[]) => mockAssertHorseAvailable(...args),
+    cancelSiblingOffers: (...args: unknown[]) => mockCancelSiblingOffers(...args),
+}));
 
 import {
     createTransaction,
@@ -83,6 +92,10 @@ describe("Commerce State Machine — transactions.ts", () => {
         mockAdmin = createMockSupabaseClient();
         mockParkHorse.mockReset();
         mockParkHorse.mockResolvedValue({ success: true, pin: "ABC234", transferId: "tr-1" });
+        mockAssertHorseAvailable.mockReset();
+        mockAssertHorseAvailable.mockResolvedValue({ ok: true });
+        mockCancelSiblingOffers.mockReset();
+        mockCancelSiblingOffers.mockResolvedValue({ cancelled: 0 });
 
         // Default: authenticated as buyer
         authAs(BUYER);
@@ -266,6 +279,47 @@ describe("Commerce State Machine — transactions.ts", () => {
             const result = await respondToOffer(TXN, "accept");
             expect(result.success).toBe(true);
         });
+
+        // ── audit C3: one horse, one sale ──
+
+        it("refuses to accept a horse that is already selling, before the RPC", async () => {
+            mockClient._mockQuery.single.mockResolvedValueOnce({ data: txnRow("offer_made"), error: null });
+            mockAssertHorseAvailable.mockResolvedValueOnce({
+                ok: false,
+                reason: "Another sale on this horse is already under way.",
+            });
+
+            const result = await respondToOffer(TXN, "accept");
+
+            expect(result.success).toBe(false);
+            expect(result.error).toMatch(/already under way/i);
+            expect(mockClient.rpc).not.toHaveBeenCalled();
+        });
+
+        it("checks the horse on accept but not on decline", async () => {
+            mockClient._mockQuery.single.mockResolvedValueOnce({ data: txnRow("offer_made"), error: null });
+            mockClient.rpc.mockResolvedValueOnce({ data: { success: true }, error: null });
+            mockClient._mockQuery.single.mockResolvedValueOnce({ data: { alias_name: "SellerAlias" }, error: null });
+
+            await respondToOffer(TXN, "decline");
+
+            expect(mockAssertHorseAvailable).not.toHaveBeenCalled();
+        });
+
+        it("closes the losing offers once one is accepted", async () => {
+            mockClient._mockQuery.single.mockResolvedValueOnce({ data: txnRow("offer_made"), error: null });
+            mockClient.rpc.mockResolvedValueOnce({ data: { success: true }, error: null });
+            mockClient._mockQuery.single.mockResolvedValueOnce({ data: { custom_name: "Trigger" }, error: null });
+
+            await respondToOffer(TXN, "accept");
+
+            expect(mockCancelSiblingOffers).toHaveBeenCalledWith({
+                horseId: HORSE,
+                keepTransactionId: TXN,
+                actorId: SELLER,
+                horseName: "Trigger",
+            });
+        });
     });
 
     // ── markPaymentSent ──
@@ -388,6 +442,81 @@ describe("Commerce State Machine — transactions.ts", () => {
             expect(result.success).toBe(true);
             expect(result.pin).toBe("ABC234");
             expect(mockParkHorse).toHaveBeenCalledWith(HORSE);
+        });
+
+        // ── audit C2: a fully-paid plan could never be released ──
+
+        it("releases a plan whose every payment is confirmed, though paid_at was never stamped", async () => {
+            // The ledger read: six of six confirmed. This is the state the
+            // headline time-payment feature dead-ended in — the buyer's
+            // one-shot "payment sent" button is hidden once a plan exists,
+            // so paid_at stayed null and the seller could never release.
+            mockClient._setImplicitResolve({
+                data: [
+                    {
+                        id: "i1",
+                        seq: 1,
+                        amount: 100,
+                        due_date: "2026-07-01",
+                        marked_sent_at: "2026-07-01T00:00:00Z",
+                        confirmed_at: "2026-07-02T00:00:00Z",
+                        note: null,
+                    },
+                ],
+                error: null,
+            });
+            mockClient._mockQuery.single
+                .mockResolvedValueOnce({
+                    data: txnRow("pending_payment", { paid_at: null }),
+                    error: null,
+                })
+                .mockResolvedValueOnce({ data: { custom_name: "Trigger" }, error: null });
+
+            const result = await verifyFundsAndRelease(TXN);
+
+            expect(result.success).toBe(true);
+            expect(result.pin).toBe("ABC234");
+            // …and the ledger's conclusion is written where the rest of
+            // the commerce stack reads it.
+            expect(mockClient._mockQuery.update).toHaveBeenCalledWith(
+                expect.objectContaining({ paid_at: expect.any(String) }),
+            );
+        });
+
+        it("still refuses when the plan is only part-paid", async () => {
+            mockClient._setImplicitResolve({
+                data: [
+                    {
+                        id: "i1",
+                        seq: 1,
+                        amount: 100,
+                        due_date: "2026-07-01",
+                        marked_sent_at: "2026-07-01T00:00:00Z",
+                        confirmed_at: "2026-07-02T00:00:00Z",
+                        note: null,
+                    },
+                    {
+                        id: "i2",
+                        seq: 2,
+                        amount: 100,
+                        due_date: "2026-08-01",
+                        marked_sent_at: null,
+                        confirmed_at: null,
+                        note: null,
+                    },
+                ],
+                error: null,
+            });
+            mockClient._mockQuery.single.mockResolvedValueOnce({
+                data: txnRow("pending_payment", { paid_at: null }),
+                error: null,
+            });
+
+            const result = await verifyFundsAndRelease(TXN);
+
+            expect(result.success).toBe(false);
+            expect(result.error).toMatch(/not yet marked payment/i);
+            expect(mockParkHorse).not.toHaveBeenCalled();
         });
     });
 
@@ -539,6 +668,66 @@ describe("Commerce State Machine — transactions.ts", () => {
             expect(result.success).toBe(true);
             expect(result.transactionId).toBe(TXN);
             expect(mockAdmin.from).toHaveBeenCalledWith("transactions");
+        });
+
+        // ── audit C4: the marketplace_sale guard used to be circular ──
+
+        const saleTxn = {
+            type: "marketplace_sale" as const,
+            partyAId: SELLER,
+            partyBId: BUYER,
+            conversationId: CONV,
+            horseId: HORSE,
+            status: "completed" as const,
+        };
+
+        it("refuses a marketplace sale only one side has confirmed", async () => {
+            authAs(BUYER);
+            mockAdmin._mockQuery.maybeSingle.mockResolvedValueOnce({
+                data: {
+                    completion_confirmed_by_buyer_at: "2026-08-01T00:00:00Z",
+                    completion_confirmed_by_seller_at: null,
+                },
+                error: null,
+            });
+
+            const result = await createTransaction(saleTxn);
+
+            expect(result.success).toBe(false);
+            if (!result.success) expect(result.error).toMatch(/verifiable completed trade/i);
+            expect(mockAdmin._mockQuery.insert).not.toHaveBeenCalled();
+        });
+
+        it("accepts a marketplace sale both sides confirmed", async () => {
+            authAs(BUYER);
+            mockAdmin._mockQuery.maybeSingle.mockResolvedValueOnce({
+                data: {
+                    completion_confirmed_by_buyer_at: "2026-08-01T00:00:00Z",
+                    completion_confirmed_by_seller_at: "2026-08-02T00:00:00Z",
+                },
+                error: null,
+            });
+            mockAdmin._mockQuery.single.mockResolvedValueOnce({ data: { id: TXN }, error: null });
+
+            const result = await createTransaction(saleTxn);
+
+            expect(result.success).toBe(true);
+        });
+
+        it("fails CLOSED before migration 180 rather than trusting the old flag", async () => {
+            authAs(BUYER);
+            mockAdmin._mockQuery.maybeSingle.mockResolvedValueOnce({
+                data: null,
+                error: { code: "42703", message: "column ... does not exist" },
+            });
+
+            const result = await createTransaction(saleTxn);
+
+            expect(result.success).toBe(false);
+            if (!result.success) {
+                expect(result.error).toMatch(/database update that hasn't been applied/i);
+            }
+            expect(mockAdmin._mockQuery.insert).not.toHaveBeenCalled();
         });
     });
 

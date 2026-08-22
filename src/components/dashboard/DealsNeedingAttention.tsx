@@ -34,6 +34,18 @@ const MAX_ROWS = 5;
 /** The sentence for a stage, addressed to the person who has to act. */
 function moveFor(thread: InboxThread): string {
     const noun = thread.dealKind ? dealNoun(thread.dealKind) : "deal";
+
+    // A running installment plan outranks the stage: plan payments never
+    // move the transaction off pending_payment, so the stage still reads
+    // "agreed" while the real move is the seller confirming money that
+    // has already arrived (audit C7).
+    if (thread.planState === "awaiting_confirmation") {
+        return "A payment is marked sent — confirm it arrived";
+    }
+    if (thread.planState === "awaiting_payment") {
+        return "The next payment on the plan is yours";
+    }
+
     switch (thread.stage) {
         case "proposed":
             return "An offer is waiting on your answer";

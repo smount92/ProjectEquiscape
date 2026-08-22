@@ -263,6 +263,34 @@ export function waitingOn(stage: DealStage, kind: DealKind): DealParty | null {
     }
 }
 
+/**
+ * What the LEDGER says is outstanding on a thread running an installment
+ * plan. Null means there is no plan, or every row is confirmed.
+ */
+export type PlanState = "awaiting_confirmation" | "awaiting_payment" | null;
+
+/**
+ * Whose move is it while a plan is running?
+ *
+ * `waitingOn` cannot answer this, because plan payments never move the
+ * transaction: it sits at pending_payment with paid_at null for the
+ * whole life of a six-month plan, which reads as stage `agreed` — "the
+ * buyer owes money" — even while three payments the buyer has marked
+ * sent sit in the SELLER's queue waiting to be confirmed. The dashboard
+ * nudged the wrong person for months (audit C7).
+ *
+ * Returns null when the kind does not name a payer (a trade may involve
+ * no money at all), in which case the stage-derived answer stands.
+ */
+export function waitingOnPlan(planState: PlanState, kind: DealKind): DealParty | null {
+    if (!planState) return null;
+    const payer = payerParty(kind);
+    if (payer === null) return null;
+    // Money in flight is the payee's to confirm; otherwise the next
+    // payment is the payer's to make.
+    return planState === "awaiting_confirmation" ? otherParty(payer) : payer;
+}
+
 // ── Deal kinds from what the thread is attached to ────────────────────
 
 /**

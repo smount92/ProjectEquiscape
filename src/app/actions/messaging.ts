@@ -621,12 +621,41 @@ export async function getUnreadCount(): Promise<number> {
 }
 
 /**
- * Mark a conversation's transaction as completed.
- * Either buyer or seller can mark it.
+ * Mark a conversation's deal complete — BOTH sides, not one.
+ *
+ * This is the legacy completion path, and it is only rendered for a
+ * thread that carries no Safe-Trade transaction (inbox/[id]/page.tsx).
+ * It used to be self-authorizing (audit C4): it verified the caller was
+ * a party, flipped `conversations.transaction_status` to 'completed',
+ * and then minted a COMPLETED marketplace_sale — whose forgery guard
+ * checked the very flag the same call had just set. One member could
+ * open a thread with anyone, click once, and mint a "verified" sale that
+ * unlocked a review on a deal that never happened. Nothing about the
+ * exchange was ever confirmed by the other side.
+ *
+ * A completed sale now needs both parties to say so:
+ *
+ *   first click   stamps only the caller's own confirmation and asks the
+ *                 other side to confirm.
+ *   second click  (the other party) stamps theirs, flips the flag, and
+ *                 mints the transaction that opens reviews.
+ *
+ * The two stamps live on the conversation and are trigger-enforced by
+ * migration 180 — a party may only stamp their own, and the flag may
+ * only reach 'completed' when both exist — because the conversations
+ * UPDATE policy (173) otherwise lets either party write that row
+ * directly through PostgREST, which is what made the old flag worthless
+ * as evidence.
+ *
+ * PRODUCT NOTE: whether this legacy path should exist at all is the
+ * owner's call — a bare conversation with no offer, no price and no
+ * transfer is the weakest provenance on the site, and the Safe-Trade /
+ * deal-room path records all three. It is kept and secured here rather
+ * than deleted.
  */
 export async function markTransactionComplete(
     conversationId: string
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; error?: string; awaitingOther?: boolean }> {
     const supabase = await createClient();
     const {
         data: { user },
@@ -634,27 +663,91 @@ export async function markTransactionComplete(
 
     if (!user) return { success: false, error: "You must be logged in." };
 
-    // Verify user is part of this conversation
-    const { data: convo } = await supabase
+    // Verify user is part of this conversation.
+    // dealDb: the two confirmation columns arrive with migration 180, so
+    // the generated Database types do not know them yet — the untyped
+    // view is the house seam for a not-yet-pasted migration, and the
+    // missing-column error is handled immediately below.
+    const { data: convo, error: readError } = await dealDb(supabase)
         .from("conversations")
-        .select("buyer_id, seller_id, horse_id")
+        .select(
+            "buyer_id, seller_id, horse_id, transaction_status, completion_confirmed_by_buyer_at, completion_confirmed_by_seller_at",
+        )
         .eq("id", conversationId)
-        .single();
+        .maybeSingle();
 
+    if (readError && isMissingSchema(readError)) {
+        // Pre-180 there is nowhere to record one side's confirmation, so
+        // there is no way to tell a mutual completion from a forged one.
+        // Fail closed: the hole stays shut, the path comes back when the
+        // migration is pasted.
+        return {
+            success: false,
+            error: "Completing a deal needs a database update that hasn't been applied yet.",
+        };
+    }
+    if (readError) return { success: false, error: readError.message };
     if (!convo) return { success: false, error: "Conversation not found." };
-    const c = convo as { buyer_id: string; seller_id: string; horse_id: string | null };
+
+    const c = convo as {
+        buyer_id: string;
+        seller_id: string;
+        horse_id: string | null;
+        transaction_status: string | null;
+        completion_confirmed_by_buyer_at: string | null;
+        completion_confirmed_by_seller_at: string | null;
+    };
     if (c.buyer_id !== user.id && c.seller_id !== user.id) {
         return { success: false, error: "Unauthorized." };
     }
 
-    const { error } = await supabase
+    if (c.transaction_status === "completed") {
+        return { success: true };
+    }
+
+    const iAmBuyer = c.buyer_id === user.id;
+    const otherId = iAmBuyer ? c.seller_id : c.buyer_id;
+    const myStamp = iAmBuyer
+        ? c.completion_confirmed_by_buyer_at
+        : c.completion_confirmed_by_seller_at;
+    const theirStamp = iAmBuyer
+        ? c.completion_confirmed_by_seller_at
+        : c.completion_confirmed_by_buyer_at;
+
+    if (myStamp && !theirStamp) {
+        return { success: true, awaitingOther: true };
+    }
+
+    const now = new Date().toISOString();
+    const bothConfirmed = !!theirStamp;
+    const patch: Record<string, string> = {
+        [iAmBuyer ? "completion_confirmed_by_buyer_at" : "completion_confirmed_by_seller_at"]:
+            myStamp ?? now,
+    };
+    if (bothConfirmed) patch.transaction_status = "completed";
+
+    const { error } = await dealDb(supabase)
         .from("conversations")
-        .update({ transaction_status: "completed" })
+        .update(patch)
         .eq("id", conversationId);
 
     if (error) return { success: false, error: error.message };
 
-    // Create a completed transaction for this marketplace sale (enables reviews)
+    const alias = await aliasOfUser(supabase, user.id);
+
+    if (!bothConfirmed) {
+        // Audit C8: this transition told the other party nothing at all.
+        notifyCounterparty(
+            otherId,
+            user.id,
+            conversationId,
+            `@${alias} says your deal is complete — confirm it to close the record and open reviews`,
+        );
+        return { success: true, awaitingOther: true };
+    }
+
+    // Both sides have now said so: mint the completed marketplace sale
+    // (this is what enables reviews).
     try {
         const { createTransaction } = await import("@/app/actions/transactions");
         await createTransaction({
@@ -667,5 +760,55 @@ export async function markTransactionComplete(
         });
     } catch (err) { logger.error("Messaging", "Background task failed", err); }
 
+    notifyCounterparty(
+        otherId,
+        user.id,
+        conversationId,
+        `@${alias} confirmed your deal is complete — you can leave a review now`,
+    );
+
     return { success: true };
+}
+
+/** The name a notification uses for the actor. */
+async function aliasOfUser(
+    supabase: Awaited<ReturnType<typeof createClient>>,
+    userId: string,
+): Promise<string> {
+    const { data } = await supabase
+        .from("users")
+        .select("alias_name")
+        .eq("id", userId)
+        .maybeSingle();
+    return (data as { alias_name: string } | null)?.alias_name ?? "Someone";
+}
+
+/**
+ * Bell notification, deferred and never fatal — createNotification is
+ * server-only, so it is imported dynamically inside the try/catch.
+ */
+function notifyCounterparty(
+    userId: string,
+    actorId: string,
+    conversationId: string,
+    content: string,
+): void {
+    after(async () => {
+        try {
+            const { createNotification } = await import(
+                "@/lib/notifications/createNotification"
+            );
+            await createNotification({
+                userId,
+                type: "offer",
+                actorId,
+                content,
+                conversationId,
+                linkUrl: `/inbox/${conversationId}`,
+            });
+        } catch (err) {
+            Sentry.captureException(err, { tags: { domain: "messaging" }, level: "warning" });
+            logger.error("Messaging", "Deferred notification failed", err);
+        }
+    });
 }
