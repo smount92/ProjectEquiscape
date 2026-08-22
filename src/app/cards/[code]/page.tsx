@@ -14,20 +14,71 @@
  * imply NAMHSA/NAN.
  */
 
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { createClient } from "@/lib/supabase/server";
+import { createAnonClient } from "@/lib/supabase/anon";
 import { verifyCard } from "@/lib/shows/verifyCard";
 import { showYearLabel } from "@/lib/shows/showYear";
 import type { CardStatus } from "@/lib/shows/types";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = {
-    title: "Verify a Qualification Card",
-    description:
-        "Check the authenticity of a Model Horse Hub qualification card by its short code.",
-};
+/**
+ * Per-card link preview text.
+ *
+ * A card link is the thing a seller pastes into a sale thread, so the
+ * preview should say what was won, not "Verify a Qualification Card"
+ * over and over. Follows the same rule as the image beside it: state
+ * the card's CLAIMS, never its verdict — scrapers cache previews, and
+ * a card can be voided after the cache is written. Valid/Void lives on
+ * the live page only.
+ */
+export async function generateMetadata({
+    params,
+}: {
+    params: Promise<{ code: string }>;
+}): Promise<Metadata> {
+    const fallback: Metadata = {
+        title: "Verify a Qualification Card",
+        description:
+            "Check the authenticity of a Model Horse Hub qualification card by its short code.",
+    };
+
+    try {
+        const { code } = await params;
+        const card = await verifyCard(createAnonClient(), code);
+        if (!card || "error" in card) return fallback;
+
+        const place = card.earnedPlace === 1 ? "1st" : "2nd";
+        const horse = card.horseName?.trim();
+        const year = card.showYear === null ? null : showYearLabel(card.showYear);
+
+        // "1st of 12" when we know the field, plain "1st" on older cards.
+        const against = card.classEntryCount ? `${place} of ${card.classEntryCount}` : place;
+        const title = horse
+            ? `${horse} — ${against} in ${card.className}`
+            : `${against} in ${card.className}`;
+
+        const description = [
+            `${card.showTitle}${year ? ` (${year})` : ""}.`,
+            card.isStakes ? "Stakes class." : null,
+            "Qualification card issued by Model Horse Hub — check it here.",
+        ]
+            .filter(Boolean)
+            .join(" ");
+
+        return {
+            title,
+            description,
+            openGraph: { title, description },
+            twitter: { card: "summary_large_image", title, description },
+        };
+    } catch {
+        return fallback;
+    }
+}
 
 const STATUS_COPY: Record<CardStatus, { label: string; valid: boolean; detail: string }> = {
     issued: {
