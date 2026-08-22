@@ -49,8 +49,16 @@ export interface MembershipTerm {
     prepaidPrice: string;
     /** Per-cycle price of the matching fixed-term subscription. */
     monthlyPrice: string;
-    /** Env var holding that subscription's PayPal plan id. */
-    planEnvVar: string;
+    /**
+     * Env var holding that subscription's PayPal plan id.
+     *
+     * OPTIONAL, because not every term has a subscription worth offering.
+     * A one-month "subscription" would charge once and then leave a dead
+     * agreement in the member's PayPal account — all of the standing
+     * authorization they were trying to avoid, none of the benefit. A term
+     * with no planEnvVar is sold prepaid only.
+     */
+    planEnvVar?: string;
 }
 
 interface RawConfig {
@@ -86,7 +94,10 @@ function parseTerm(row: unknown): MembershipTerm | null {
     }
     if (typeof r.prepaidPrice !== "string" || !MONEY.test(r.prepaidPrice)) return null;
     if (typeof r.monthlyPrice !== "string" || !MONEY.test(r.monthlyPrice)) return null;
-    if (typeof r.planEnvVar !== "string" || !r.planEnvVar.trim()) return null;
+    // Absent is legitimate (prepaid-only term). Present-but-not-a-string
+    // is a typo in the config, and dropping the row is how this file says so.
+    const hasPlanVar = r.planEnvVar !== undefined && r.planEnvVar !== null;
+    if (hasPlanVar && (typeof r.planEnvVar !== "string" || !r.planEnvVar.trim())) return null;
 
     return {
         key: r.key.trim(),
@@ -95,7 +106,7 @@ function parseTerm(row: unknown): MembershipTerm | null {
         label: typeof r.label === "string" && r.label.trim() ? r.label.trim() : `${r.months} months`,
         prepaidPrice: r.prepaidPrice,
         monthlyPrice: r.monthlyPrice,
-        planEnvVar: r.planEnvVar.trim(),
+        ...(hasPlanVar ? { planEnvVar: (r.planEnvVar as string).trim() } : {}),
     };
 }
 
@@ -133,6 +144,7 @@ export function termsForTier(tier: TermTier): readonly MembershipTerm[] {
  * component always sees null and must be told by its server parent.
  */
 export function termPlanId(term: MembershipTerm): string | null {
+    if (!term.planEnvVar) return null; // prepaid-only term
     const value = process.env[term.planEnvVar];
     return value && value.trim() ? value.trim() : null;
 }

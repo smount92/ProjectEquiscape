@@ -24,9 +24,15 @@ afterEach(() => {
 });
 
 describe("the shipped catalogue", () => {
-    it("offers three terms per tier", () => {
-        expect(termsForTier("pro").map((t) => t.key)).toEqual(["pro-3", "pro-6", "pro-12"]);
+    it("offers four terms per tier, shortest first", () => {
+        expect(termsForTier("pro").map((t) => t.key)).toEqual([
+            "pro-1",
+            "pro-3",
+            "pro-6",
+            "pro-12",
+        ]);
         expect(termsForTier("studio").map((t) => t.key)).toEqual([
+            "studio-1",
             "studio-3",
             "studio-6",
             "studio-12",
@@ -99,6 +105,25 @@ describe("fixed-term plan ids — dark until the owner creates the plans", () =>
         expect(termForPlanId("P-WHO-KNOWS")).toBeNull();
         expect(termForPlanId(null)).toBeNull();
         expect(termForPlanId("")).toBeNull();
+    });
+
+    // A one-month term is sold prepaid ONLY. Billing it as a subscription
+    // would charge once and leave a dead agreement sitting in the member's
+    // PayPal account — the standing authorization they came here to avoid,
+    // with nothing gained. No planEnvVar is the mechanism.
+    it("offers no spread option for a one-month term", () => {
+        for (const key of ["pro-1", "studio-1"]) {
+            const term = termByKey(key);
+            expect(term, `${key} should be sellable`).not.toBeNull();
+            expect(term!.months).toBe(1);
+            expect(term!.planEnvVar).toBeUndefined();
+            expect(termPlanId(term!)).toBeNull();
+        }
+    });
+
+    it("prices a one-month term at the plain monthly rate", () => {
+        expect(termByKey("pro-1")!.prepaidPrice).toBe("5.00");
+        expect(termByKey("studio-1")!.prepaidPrice).toBe("10.00");
     });
 });
 
