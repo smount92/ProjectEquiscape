@@ -45,6 +45,8 @@ interface AlbumCtaRowProps {
     myEntryCount: number;
     /** Season for the card-gate badges (defaults to Season 1). */
     showYear?: number | null;
+    /** Whether the show is MHH-sanctioned; gates the card-gate badge. */
+    showIsQualifying?: boolean;
 }
 
 export default function AlbumCtaRow({
@@ -57,6 +59,8 @@ export default function AlbumCtaRow({
     horses,
     myEntryCount,
     showYear,
+
+    showIsQualifying,
 }: AlbumCtaRowProps) {
     const router = useRouter();
     const { showToast, toastNode } = useShowToast();
@@ -154,6 +158,8 @@ export default function AlbumCtaRow({
                         onEnter={handlePickClass}
                         defaultOpenIndex={0}
                         showYear={showYear}
+
+                        showIsQualifying={showIsQualifying}
                     />
                 </DialogContent>
             </Dialog>

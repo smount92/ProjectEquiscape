@@ -197,6 +197,16 @@ interface PublicClassRowProps {
     /** The show's season — picks the card gate in force (Season 1
      *  vs permanent). Omitted = Season 1 gate. */
     showYear?: number | null;
+    /**
+     * Whether the SHOW is MHH-sanctioned. A class can be marked
+     * qualifying in the classlist while the show it belongs to is not
+     * sanctioned — a host requests sanctioning and MHH grants it, so
+     * every show sits un-granted for a while. Card issuance stops dead
+     * on the show flag (cardIssuance.ts), so without this the class row
+     * promises "cards for 1st & 2nd" on a show that will mint none.
+     * Omitted = assume sanctioned, preserving existing callers.
+     */
+    showIsQualifying?: boolean;
 }
 
 /**
@@ -226,7 +236,14 @@ function QualifyingGateBadge({ cls, showYear }: { cls: ConsoleClass; showYear?: 
     );
 }
 
-export function PublicClassRow({ cls, canEnter, onEnter, classRoomHref, showYear }: PublicClassRowProps) {
+export function PublicClassRow({
+    cls,
+    canEnter,
+    onEnter,
+    classRoomHref,
+    showYear,
+    showIsQualifying = true,
+}: PublicClassRowProps) {
     const cancelled = cls.status === "cancelled";
     const combined = cls.status === "combined";
     return (
@@ -247,7 +264,9 @@ export function PublicClassRow({ cls, canEnter, onEnter, classRoomHref, showYear
                     {friendlyClassStatus(cls.status)}
                 </span>
             )}
-            {cls.isQualifying && <QualifyingGateBadge cls={cls} showYear={showYear} />}
+            {cls.isQualifying && showIsQualifying && (
+                <QualifyingGateBadge cls={cls} showYear={showYear} />
+            )}
             {cls.maxPerEntrant !== null && (
                 <Badge variant="secondary">max {cls.maxPerEntrant}/entrant</Badge>
             )}

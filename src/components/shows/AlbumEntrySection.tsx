@@ -49,6 +49,8 @@ interface AlbumEntrySectionProps {
     authed: boolean;
     /** Season for the card-gate badges (defaults to Season 1). */
     showYear?: number | null;
+    /** Whether the show is MHH-sanctioned; gates the card-gate badge. */
+    showIsQualifying?: boolean;
 }
 
 export default function AlbumEntrySection({
@@ -57,6 +59,8 @@ export default function AlbumEntrySection({
     status,
     divisions,
     showYear,
+
+    showIsQualifying,
     myEntries,
     horses,
     authed,
@@ -179,6 +183,8 @@ export default function AlbumEntrySection({
                     onEnter={openDialog}
                     showId={showId}
                     showYear={showYear}
+
+                    showIsQualifying={showIsQualifying}
                 />
             </section>
 

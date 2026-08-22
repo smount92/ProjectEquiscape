@@ -31,6 +31,9 @@ interface ProgramAccordionProps {
     showId?: string;
     /** Season for the card-gate badges (defaults to the Season 1 gate). */
     showYear?: number | null;
+    /** Whether the show itself is MHH-sanctioned — a class marked
+     *  qualifying at an un-sanctioned show mints nothing. */
+    showIsQualifying?: boolean;
 }
 
 function divisionEntryCount(division: ConsoleDivision): number {
@@ -51,6 +54,7 @@ export default function ProgramAccordion({
     defaultOpenIndex = null,
     showId,
     showYear,
+    showIsQualifying,
 }: ProgramAccordionProps) {
     const classRooms = !!showId;
     if (divisions.length === 0) {
@@ -115,6 +119,7 @@ export default function ProgramAccordion({
                                                             canEnter={canEnter}
                                                             onEnter={onEnter}
                                                             showYear={showYear}
+                                                            showIsQualifying={showIsQualifying}
                                                             classRoomHref={
                                                                 classRooms
                                                                     ? `/shows/${showId}/class/${cls.id}`
