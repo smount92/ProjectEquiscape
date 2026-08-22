@@ -15,6 +15,7 @@ import {
 } from "@/lib/email/layout";
 import { formEngineEnabled } from "@/lib/forms/flag";
 import { showStandingsEnabled } from "@/lib/shows/flags";
+import { paypalBillingEnabled } from "@/lib/paypal/flag";
 import {
   attachLoad,
   groupDuplicates,
@@ -1305,6 +1306,14 @@ export async function getEnvFlagStatus(): Promise<
       label: "Wanted nudge",
       effect: "Off = wishlist adds stay passive counts and notify nobody.",
     },
+    {
+      key: "NEXT_PUBLIC_PAYPAL_BILLING",
+      value: publicValue(process.env.NEXT_PUBLIC_PAYPAL_BILLING),
+      on: paypalBillingEnabled(),
+      label: "PayPal billing",
+      effect:
+        "Off = card checkout only; the PayPal buttons, routes and webhook all behave as if absent.",
+    },
   ];
 
   const secrets: EnvSecretRow[] = [
@@ -1319,6 +1328,20 @@ export async function getEnvFlagStatus(): Promise<
       present: isSet(process.env.STRIPE_SECRET_KEY),
       label: "Stripe",
       impact: "Missing = supporter checkout and every billing call fail.",
+    },
+    {
+      key: "PAYPAL_CLIENT_SECRET",
+      present: isSet(process.env.PAYPAL_CLIENT_SECRET),
+      label: "PayPal REST app",
+      impact:
+        "Missing = the PayPal path stays dark even with the flag on: checkout 404s and the webhook refuses every delivery.",
+    },
+    {
+      key: "PAYPAL_WEBHOOK_ID",
+      present: isSet(process.env.PAYPAL_WEBHOOK_ID),
+      label: "PayPal webhook id",
+      impact:
+        "Missing = no PayPal delivery can be verified, so no PayPal subscription ever grants or loses a tier.",
     },
     {
       key: "RESEND_API_KEY",

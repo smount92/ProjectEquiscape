@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import UpgradeButton from "@/components/UpgradeButton";
 import StudioProButton from "@/components/StudioProButton";
+import PayPalButton from "@/components/PayPalButton";
+import { paypalPathLive } from "@/lib/paypal/flag";
 import SupporterButton from "@/components/SupporterButton";
 import SupporterLedgerToggle from "@/components/SupporterLedgerToggle";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
@@ -16,6 +18,7 @@ import {
     CheckCircle,
     ClipboardList,
     FileText,
+    Hourglass,
     Lamp,
     Link2,
     Palette,
@@ -223,6 +226,12 @@ export default async function UpgradePage({
 
     const tierLabel = tier === "studio" ? "Studio Pro" : tier === "pro" ? "Pro" : "Free";
 
+    // PayPal is a second billing path, not a second product — same tiers,
+    // same prices. Dark until NEXT_PUBLIC_PAYPAL_BILLING=1 AND the server
+    // credentials exist, so the cards render exactly as they do today
+    // until both are true.
+    const paypalLive = paypalPathLive();
+
     // Supporter is orthogonal to tier — cosmetic recognition, gates nothing.
     const supporterPriceLabel = await getSupporterPriceLabel();
     const supporterBadge = supporterPriceLabel
@@ -269,6 +278,20 @@ export default async function UpgradePage({
                     <span className="stamp stamp-red inline-block">Cancelled</span>
                     <p className="text-secondary-foreground mt-3 text-sm">
                         Checkout was cancelled. No charges were made.
+                    </p>
+                </div>
+            )}
+            {/* PayPal approves and activates in two separate steps, and the
+                second one can lag the redirect by a few seconds. Saying so
+                plainly beats showing a success page that isn't true yet. */}
+            {status === "paypal-pending" && (
+                <div className="animate-fade-in-up ledger-card mb-8 text-center">
+                    <Hourglass className="text-muted-foreground mx-auto h-8 w-8" />
+                    <h2 className="mt-2 font-serif text-xl font-bold">PayPal is still confirming</h2>
+                    <p className="text-secondary-foreground mt-1 text-sm">
+                        Your subscription hasn&apos;t come back as active yet. This usually takes a few
+                        seconds — refresh this page shortly. If it hasn&apos;t changed within an hour,
+                        contact support and we&apos;ll sort it out. You will not be charged twice.
                     </p>
                 </div>
             )}
@@ -368,6 +391,7 @@ export default async function UpgradePage({
                     ) : (
                         <div className="relative z-[1] mt-6">
                             <UpgradeButton />
+                            <PayPalButton plan="pro" enabled={paypalLive} variant="leather" />
                         </div>
                     )}
                 </div>
@@ -408,6 +432,7 @@ export default async function UpgradePage({
                     ) : (
                         <div className="mt-6">
                             <StudioProButton />
+                            <PayPalButton plan="studio" enabled={paypalLive} variant="ledger" />
                         </div>
                     )}
                 </div>
