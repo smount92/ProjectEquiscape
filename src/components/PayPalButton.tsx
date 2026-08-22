@@ -9,10 +9,13 @@ import { track } from "@/lib/analytics";
  * The sibling of UpgradeButton / StudioProButton: POST for a URL, then
  * hand the browser over. Same price, same tier, different rails.
  *
- * Deliberately the QUIETER of the two options on each card. Card checkout
- * stays the primary button; this sits under it as a plain alternative,
- * because most members will use a card and the ones who want PayPal
- * already know they do.
+ * Wears PayPal's own gold. It shipped as a quiet outline button and the
+ * first real customer missed it entirely — "didn't even see it." The
+ * people this path exists for are scanning FOR PayPal, and what their
+ * eye knows is the gold button and the two-tone mark, so that is what
+ * this is. Card checkout keeps the top slot; this sits under it, but
+ * unmistakably itself. Brand colors are fixed values on purpose — the
+ * button must look the same on leather, ledger, day and lamplight.
  *
  * Renders nothing at all unless the caller passes `enabled` — the flag is
  * read on the server (src/lib/paypal/flag.ts) and passed down, so the
@@ -66,16 +69,14 @@ export default function PayPalButton({
             <button
                 onClick={handleClick}
                 disabled={loading}
-                className="w-full cursor-pointer rounded-lg border py-2.5 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-50"
-                style={
-                    leather
-                        ? {
-                              borderColor: "var(--leather-text-soft)",
-                              color: "var(--leather-text)",
-                              background: "transparent",
-                          }
-                        : undefined
-                }
+                className="w-full cursor-pointer rounded-lg py-2.5 text-sm font-bold transition-all hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
+                style={{
+                    // PayPal's gold — their standard checkout button color,
+                    // and the thing a PayPal-first buyer's eye scans for.
+                    background: "#FFC439",
+                    color: "#003087",
+                    border: "1px solid #E3AC28",
+                }}
             >
                 {loading ? (
                     <span className="flex items-center justify-center gap-2">
@@ -84,17 +85,19 @@ export default function PayPalButton({
                     </span>
                 ) : (
                     <span className="flex items-center justify-center gap-2">
-                        {/* PayPal's mark, drawn rather than loaded — the site
-                            ships no third-party image hosts. */}
-                        <svg
-                            aria-hidden="true"
-                            viewBox="0 0 24 24"
-                            className="h-4 w-4 shrink-0"
-                            fill="currentColor"
-                        >
-                            <path d="M7.08 21.3h3.2l.72-4.55h2.2c3.7 0 6.16-1.9 6.76-5.5.28-1.66-.05-2.95-.94-3.83-.2-.2-.44-.38-.7-.53.02-.13.05-.26.07-.4.35-2.23-.02-3.75-1.2-5.02C15.87.05 13.9 0 11.5 0H5.1a.9.9 0 0 0-.9.77L1.5 20.2a.6.6 0 0 0 .6.7h3.9l.5-3.1zM9.1 4.6h3.1c1.53 0 2.6.2 3.1.75.36.4.5.95.4 1.7-.4 2.5-1.85 3.35-4.2 3.35H9.9a.9.9 0 0 0-.9.77l-.6 3.8-.9 5.7H5.4L8.2 4.6h.9z" />
+                        {/* PayPal's two-tone mark, drawn rather than loaded —
+                            the site ships no third-party image hosts. */}
+                        <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 shrink-0">
+                            <path
+                                fill="#003087"
+                                d="M7.08 21.3h3.2l.72-4.55h2.2c3.7 0 6.16-1.9 6.76-5.5.28-1.66-.05-2.95-.94-3.83-.2-.2-.44-.38-.7-.53.02-.13.05-.26.07-.4.35-2.23-.02-3.75-1.2-5.02C15.87.05 13.9 0 11.5 0H5.1a.9.9 0 0 0-.9.77L1.5 20.2a.6.6 0 0 0 .6.7h3.9l.5-3.1z"
+                            />
+                            <path
+                                fill="#009CDE"
+                                d="M18.4 6.9c-.02.13-.04.26-.07.4-.6 3.6-3.06 5.5-6.76 5.5h-2.2l-.72 4.55h-3.2l-.5 3.1h3.55a.8.8 0 0 0 .8-.68l.03-.17.63-3.96.04-.22a.8.8 0 0 1 .79-.68h.5c3.24 0 5.78-1.32 6.52-5.13.3-1.59.15-2.92-.67-3.85a3.2 3.2 0 0 0-.74-.86z"
+                            />
                         </svg>
-                        Pay with PayPal instead
+                        Pay with PayPal
                     </span>
                 )}
             </button>
@@ -105,7 +108,7 @@ export default function PayPalButton({
                     style={leather ? { color: "var(--leather-text-soft)" } : undefined}
                 >
                     <span className={leather ? undefined : "text-muted-foreground"}>
-                        Same price. Uses your PayPal balance or a card on file.
+                        Same price. Your PayPal balance is used first.
                     </span>
                 </p>
             )}
