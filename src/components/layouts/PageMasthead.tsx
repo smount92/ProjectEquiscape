@@ -79,7 +79,20 @@ export default function PageMasthead({
                         </span>
                     )}
                 </div>
-                {actions && <div className="z-[1] ml-auto flex flex-wrap gap-2">{actions}</div>}
+                {/* Buttons here sit on dark leather, but the shared variants
+                    are painted for light paper — `outline` uses the brown
+                    body ink, which on this band reads as a disabled control
+                    rather than a live link. Re-bind those colours to the
+                    leather palette here, once, instead of asking every
+                    masthead to remember. Same class of bug as the banner
+                    that inherited paper ink onto the forest band. */}
+                {actions && (
+                    <div
+                        className="z-[1] ml-auto flex flex-wrap gap-2 [&_a]:no-underline [&_button]:border-(--brass)/55 [&_a]:border-(--brass)/55 [&_button]:text-(--leather-text) [&_a]:text-(--leather-text) [&_button:hover]:bg-white/10 [&_a:hover]:bg-white/10 [&_button:hover]:text-(--brass-hi) [&_a:hover]:text-(--brass-hi)"
+                    >
+                        {actions}
+                    </div>
+                )}
             </div>
         </div>
     );
