@@ -156,10 +156,38 @@ export async function deleteShowRecord(
 
     if (!user) return { success: false, error: "You must be logged in." };
 
+    // A member owns what they typed in, not what the site awarded them.
+    // Records minted by an MHH show (verification_tier platform_generated,
+    // or anything carrying a show_id) are the reason a stranger can trust
+    // a placing at all — if a bad day could be deleted from the record,
+    // the record only ever shows good days and means nothing. Voiding one
+    // of those is the host's call, through the strike/void path.
+    const { data: record } = await supabase
+        .from("show_records")
+        .select("id, verification_tier, show_id")
+        .eq("id", recordId)
+        .eq("user_id", user.id)
+        .maybeSingle<{
+            id: string;
+            verification_tier: string | null;
+            show_id: string | null;
+        }>();
+
+    if (!record) return { success: false, error: "Record not found." };
+
+    if (record.verification_tier === "platform_generated" || record.show_id) {
+        return {
+            success: false,
+            error:
+                "This placing was awarded in a show on Model Horse Hub, so it stays on the record. Ask the show's host if you think it's wrong.",
+        };
+    }
+
     const { error } = await supabase
         .from("show_records")
         .delete()
-        .eq("id", recordId);
+        .eq("id", recordId)
+        .eq("user_id", user.id);
 
     if (error) return { success: false, error: error.message };
     return { success: true };

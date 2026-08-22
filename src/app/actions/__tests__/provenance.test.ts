@@ -14,7 +14,12 @@ vi.mock("@/app/actions/activity", () => ({
     createActivityEvent: vi.fn().mockResolvedValue(undefined),
 }));
 
-import { addShowRecord, updateShowRecord, savePedigree } from "@/app/actions/provenance";
+import {
+    addShowRecord,
+    updateShowRecord,
+    savePedigree,
+    deleteShowRecord,
+} from "@/app/actions/provenance";
 
 describe("provenance.ts — Show Records & Pedigree", () => {
     beforeEach(() => {
@@ -78,6 +83,70 @@ describe("provenance.ts — Show Records & Pedigree", () => {
     });
 
     // ── updateShowRecord ──
+    // ── deleteShowRecord ──
+    //
+    // A member owns what they typed in. A placing the site awarded them
+    // in an MHH show is the thing a stranger trusts, so it cannot be
+    // quietly removed after a bad day.
+    describe("deleteShowRecord", () => {
+        it("rejects unauthenticated users", async () => {
+            mockClient.auth.getUser.mockResolvedValueOnce({ data: { user: null } });
+            const result = await deleteShowRecord("rec-1");
+            expect(result.success).toBe(false);
+        });
+
+        it("deletes a self-reported record", async () => {
+            mockClient._mockQuery.maybeSingle.mockResolvedValueOnce({
+                data: { id: "rec-1", verification_tier: "self_reported", show_id: null },
+                error: null,
+            });
+
+            const result = await deleteShowRecord("rec-1");
+
+            expect(result.success).toBe(true);
+            expect(mockClient._mockQuery.delete).toHaveBeenCalled();
+        });
+
+        it("refuses to delete a placing awarded by an MHH show", async () => {
+            mockClient._mockQuery.maybeSingle.mockResolvedValueOnce({
+                data: {
+                    id: "rec-1",
+                    verification_tier: "platform_generated",
+                    show_id: "show-1",
+                },
+                error: null,
+            });
+
+            const result = await deleteShowRecord("rec-1");
+
+            expect(result.success).toBe(false);
+            expect(result.error).toMatch(/show on Model Horse Hub/i);
+            expect(mockClient._mockQuery.delete).not.toHaveBeenCalled();
+        });
+
+        it("refuses a record carrying a show_id even on an older tier", async () => {
+            mockClient._mockQuery.maybeSingle.mockResolvedValueOnce({
+                data: { id: "rec-1", verification_tier: "host_verified", show_id: "show-1" },
+                error: null,
+            });
+
+            const result = await deleteShowRecord("rec-1");
+
+            expect(result.success).toBe(false);
+            expect(mockClient._mockQuery.delete).not.toHaveBeenCalled();
+        });
+
+        it("does not delete someone else's record", async () => {
+            // Scoped by user_id, so another member's row simply isn't found.
+            mockClient._mockQuery.maybeSingle.mockResolvedValueOnce({ data: null, error: null });
+
+            const result = await deleteShowRecord("rec-1");
+
+            expect(result.success).toBe(false);
+            expect(mockClient._mockQuery.delete).not.toHaveBeenCalled();
+        });
+    });
+
     describe("updateShowRecord", () => {
         it("rejects unauthenticated users", async () => {
             mockClient.auth.getUser.mockResolvedValueOnce({ data: { user: null } });
