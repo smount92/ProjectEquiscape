@@ -44,6 +44,8 @@ import {
     type DealKind,
     type DealParty,
 } from "@/lib/deals/vocabulary";
+import { assertHorseAvailable, cancelSiblingOffers } from "@/lib/commerce/horseLock";
+import { stampTransactionPaid } from "@/lib/commerce/planRelease";
 import type { MessageKind } from "@/lib/deals/transcript";
 
 /**
@@ -465,6 +467,24 @@ export async function withdrawTermsAgreement(
         .eq("id", conversationId);
     if (error) return { success: false, error: error.message };
 
+    // Audit C8: this left no entry and sent no notification, so the other
+    // side could go on believing the terms were agreed on both sides.
+    const alias = await aliasOf(supabase, user.id);
+    await writeDealEvent(
+        supabase,
+        conversationId,
+        user.id,
+        "terms_agreed",
+        `@${alias} took their agreement back — the terms are open again`,
+        { revision: applied.terms.revision, withdrawn: true, complete: false },
+    );
+    notifyOther(
+        deal.otherId,
+        user.id,
+        conversationId,
+        `@${alias} withdrew their agreement to your deal terms`,
+    );
+
     revalidateThread(conversationId);
     return { success: true };
 }
@@ -702,6 +722,16 @@ export async function confirmInstallmentReceived(
     const summary = ledgerSummary(remainingRows);
     const alias = await aliasOf(supabase, user.id);
 
+    // ── C2: the plan has to reach the release path ──
+    // The ledger and the Safe-Trade transaction were keeping two records
+    // of the same money and never speaking, so a plan confirmed in full
+    // dead-ended at "Buyer has not yet marked payment as sent" and the
+    // horse could never be handed over. The last confirmation IS the
+    // buyer having paid; stamp it where verifyFundsAndRelease reads.
+    if (summary.allConfirmed && deal.txn && !deal.txn.paidAt) {
+        await stampTransactionPaid(supabase, deal.txn.id);
+    }
+
     await writeDealEvent(
         supabase,
         row.conversationId,
@@ -887,6 +917,20 @@ export async function respondToCounter(
     if (!txn) return { success: false, error: "Transaction not found." };
     if (!txn.conversation_id) return { success: false, error: "This deal has no thread." };
 
+    // ── C3: one horse, one sale ──
+    // This path set 'Pending Sale' and stopped there: it never cancelled
+    // the rival offers (unlike the seller's accept in transactions.ts),
+    // and neither accept RPC asks whether the horse is still free. Accept
+    // a counter on one offer, accept a second offer through the other
+    // path, and two buyers are both in pending_payment for one model.
+    if (action === "accept") {
+        const available = await assertHorseAvailable({
+            horseId: txn.horse_id,
+            transactionId,
+        });
+        if (!available.ok) return { success: false, error: available.reason };
+    }
+
     const { data: rpcResult, error: rpcError } = await dealDb(supabase).rpc("deal_offer_move_atomic", {
         p_transaction_id: transactionId,
         p_actor_id: user.id,
@@ -931,6 +975,22 @@ export async function respondToCounter(
                 lockError,
             );
         }
+
+        // …and closes every other standing offer on it, which this path
+        // never did. Same helper the seller's accept uses, so the two
+        // cannot drift apart again.
+        const { data: horseRow } = await supabase
+            .from("user_horses")
+            .select("custom_name")
+            .eq("id", txn.horse_id)
+            .maybeSingle();
+        await cancelSiblingOffers({
+            horseId: txn.horse_id,
+            keepTransactionId: transactionId,
+            actorId: user.id,
+            horseName:
+                (horseRow as { custom_name: string } | null)?.custom_name || "the horse",
+        });
     }
 
     if (otherId) {
@@ -1061,6 +1121,17 @@ export async function standDownDispute(
         "dispute",
         `@${alias} stood the dispute down`,
         { resolved: true },
+    );
+
+    // Audit C8: raising a dispute notified; lifting the freeze did not,
+    // so the other side had no way to learn their terms and ledger were
+    // editable again.
+    const otherId = user.id === c.buyer_id ? c.seller_id : c.buyer_id;
+    notifyOther(
+        otherId,
+        user.id,
+        conversationId,
+        `@${alias} stood the dispute down — your deal is no longer frozen`,
     );
 
     revalidateThread(conversationId);
@@ -1354,6 +1425,16 @@ export async function clearTerms(conversationId: string): Promise<ActionResult> 
         .update({ deal_terms: emptyTerms() })
         .eq("id", conversationId);
     if (error) return { success: false, error: error.message };
+
+    // Audit C8: wiping the boxes the other side may have already read (and
+    // half-agreed to) went out in silence.
+    const alias = await aliasOf(supabase, user.id);
+    notifyOther(
+        loaded.deal.otherId,
+        user.id,
+        conversationId,
+        `@${alias} cleared the terms of your deal — they are starting again`,
+    );
 
     revalidateThread(conversationId);
     return { success: true };

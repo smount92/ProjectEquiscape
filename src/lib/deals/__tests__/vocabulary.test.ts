@@ -17,6 +17,7 @@ import {
     stageIndex,
     stageLabel,
     waitingOn,
+    waitingOnPlan,
     type DealStage,
 } from "../vocabulary";
 import { TRANSACTION_STATUSES } from "@/lib/commerce/stateMachine";
@@ -172,6 +173,32 @@ describe("deal vocabulary", () => {
         const done: DealStage[] = ["settled", "closed", "disputed", "talking"];
         for (const stage of done) {
             expect(waitingOn(stage, "sale")).toBeNull();
+        }
+    });
+
+    // ── Whose move while a plan is running (audit C7) ──
+
+    it("waits on the PAYEE while marked-sent payments are unconfirmed", () => {
+        // The bug: the transaction still says 'agreed', so the dashboard
+        // told the buyer "your payment is next" and never nudged the
+        // seller to confirm the three payments already in their queue.
+        expect(waitingOnPlan("awaiting_confirmation", "sale")).toBe("a");
+        expect(waitingOnPlan("awaiting_confirmation", "commission")).toBe("a");
+    });
+
+    it("waits on the payer when nothing is in flight", () => {
+        expect(waitingOnPlan("awaiting_payment", "sale")).toBe("b");
+        expect(waitingOnPlan("awaiting_payment", "commission")).toBe("b");
+    });
+
+    it("declines to guess for a trade, where the kind names no payer", () => {
+        expect(waitingOnPlan("awaiting_confirmation", "trade")).toBeNull();
+        expect(waitingOnPlan("awaiting_payment", "trade")).toBeNull();
+    });
+
+    it("answers nothing when there is no running plan", () => {
+        for (const kind of DEAL_KINDS) {
+            expect(waitingOnPlan(null, kind)).toBeNull();
         }
     });
 

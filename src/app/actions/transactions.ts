@@ -17,6 +17,9 @@ import {
     requirePaidAt,
     type TransactionStatus,
 } from "@/lib/commerce/stateMachine";
+import { assertHorseAvailable, cancelSiblingOffers } from "@/lib/commerce/horseLock";
+import { stampPaidAtFromLedger } from "@/lib/commerce/planRelease";
+import { isMissingSchema } from "@/lib/deals/columnSupport";
 import {
     conversationIdSchema,
     createTransactionSchema,
@@ -131,15 +134,54 @@ export async function createTransaction(data: {
             }
         } else if (input.type === "marketplace_sale") {
             if (input.conversationId) {
-                const { data: conv } = await admin
+                // ── C4: the guard used to be CIRCULAR ──
+                // It checked `conversations.transaction_status = 'completed'`
+                // — a flag markTransactionComplete had just set on the same
+                // call, on the say-so of ONE party. Worse, the conversations
+                // UPDATE policy (173) lets either party write their own
+                // conversation row directly through PostgREST, so the flag
+                // was never evidence of anything: one member could mint a
+                // "completed sale" against another and leave a verified
+                // review on a deal that never happened.
+                //
+                // The event this row records is "both of us say this deal
+                // completed", so both confirmations are what we check.
+                // Migration 180 adds the two stamps and makes them
+                // trigger-enforced (a party may only stamp their own, and
+                // transaction_status may only reach 'completed' when both
+                // exist), which is what makes them evidence rather than
+                // another writable flag.
+                const { data: conv, error: convError } = await admin
                     .from("conversations")
-                    .select("id")
+                    .select(
+                        "id, completion_confirmed_by_buyer_at, completion_confirmed_by_seller_at",
+                    )
                     .eq("id", input.conversationId)
                     .eq("seller_id", input.partyAId)
                     .eq("buyer_id", input.partyBId)
                     .eq("transaction_status", "completed")
                     .maybeSingle();
-                eventVerified = !!conv;
+
+                if (convError && isMissingSchema(convError)) {
+                    // Pre-180: the stamps do not exist, so there is no way
+                    // to tell a mutual completion from a forged one. FAIL
+                    // CLOSED — the legacy path stays blocked until the
+                    // migration is pasted rather than staying exploitable.
+                    return {
+                        success: false,
+                        error:
+                            "Completing a conversation needs a database update that hasn't been applied yet.",
+                    };
+                }
+
+                const row = conv as {
+                    completion_confirmed_by_buyer_at: string | null;
+                    completion_confirmed_by_seller_at: string | null;
+                } | null;
+                eventVerified =
+                    !!row &&
+                    !!row.completion_confirmed_by_buyer_at &&
+                    !!row.completion_confirmed_by_seller_at;
             }
         }
         if (!eventVerified) {
@@ -225,6 +267,24 @@ export async function completeTransaction(
         // Non-blocking — cron will catch it within 6 hours
         Sentry.captureException(err, { tags: { domain: "commerce" }, level: "warning" });
         logger.warn("completeTransaction", "Market price refresh failed (non-blocking)");
+    }
+
+    // Tell the other side (audit C8): completion ends the deal and opens
+    // reviews, and until now it happened in silence.
+    const otherPartyId = user.id === t.party_a_id ? t.party_b_id : t.party_a_id;
+    if (otherPartyId) {
+        const { data: actorProfile } = await supabase
+            .from("users")
+            .select("alias_name")
+            .eq("id", user.id)
+            .maybeSingle();
+        const actorAlias = (actorProfile as { alias_name: string } | null)?.alias_name ?? "They";
+        await createNotification({
+            userId: otherPartyId,
+            type: "offer",
+            actorId: user.id,
+            content: `@${actorAlias} marked your deal complete. You can leave a review now.`,
+        });
     }
 
     // Deferred: evaluate commerce achievements
@@ -746,6 +806,18 @@ export async function respondToOffer(
     );
     if (!gate.ok) return { success: false, error: gate.reason };
 
+    // One horse, one sale (audit C3). Neither accept RPC looked at the
+    // horse, so a sale already under way — typically one accepted through
+    // the counter path — did not stop this one. Checked before the RPC so
+    // the seller gets a sentence rather than a second live buyer.
+    if (parsed.data.action === "accept") {
+        const available = await assertHorseAvailable({
+            horseId: t.horse_id,
+            transactionId: parsed.data.transactionId,
+        });
+        if (!available.ok) return { success: false, error: available.reason };
+    }
+
     // Atomic RPC for the state transition (row-locked in Postgres).
     // USER client (downgraded): respond_to_offer_atomic is SECURITY DEFINER
     // with EXECUTE granted to authenticated (migration 099).
@@ -804,30 +876,15 @@ export async function respondToOffer(
         conversationId: t.conversation_id,
     });
 
-    // Auto-cancel all other active offers on this horse.
-    // USER client (downgraded): the caller is party_a (seller) of every
-    // offer on their own horse, so txn_select/txn_update RLS permits both
-    // the read and the status write.
-    const { data: otherOffers } = await supabase
-        .from("transactions")
-        .select("id, party_b_id, conversation_id")
-        .eq("horse_id", t.horse_id)
-        .eq("status", "offer_made")
-        .neq("id", parsed.data.transactionId);
-
-    if (otherOffers && otherOffers.length > 0) {
-        for (const other of otherOffers as { id: string; party_b_id: string; conversation_id: string }[]) {
-            await supabase.from("transactions").update({ status: "cancelled" }).eq("id", other.id);
-            // Notify the losing buyer
-            await createNotification({
-                userId: other.party_b_id,
-                type: "offer",
-                actorId: user.id,
-                content: `Another offer on ${horseName} was accepted. Your offer has been cancelled.`,
-                conversationId: other.conversation_id,
-            });
-        }
-    }
+    // Auto-cancel all other active offers on this horse. Shared with the
+    // counter-accept path (deals.ts respondToCounter), which had no such
+    // loop at all — the other half of audit C3.
+    await cancelSiblingOffers({
+        horseId: t.horse_id,
+        keepTransactionId: parsed.data.transactionId,
+        actorId: user.id,
+        horseName,
+    });
 
     revalidatePath(`/inbox/${t.conversation_id}`);
     revalidatePath(`/community/${t.horse_id}`);
@@ -929,7 +986,24 @@ export async function verifyFundsAndRelease(
     });
     if (!gate.ok) return { success: false, error: gate.reason };
 
-    const paidGate = requirePaidAt(t.paid_at ?? null);
+    // ── C2: a fully-paid installment plan could never be released ──
+    // The ledger never stamped paid_at, and the buyer's single "payment
+    // sent" button is hidden once a plan exists — so a 6-of-6 confirmed
+    // plan dead-ended here on "Buyer has not yet marked payment as sent."
+    // confirmInstallmentReceived now stamps paid_at when the last row is
+    // confirmed; this is the same question asked from the other side, so
+    // plans that completed BEFORE that fix (and any plan whose stamp
+    // failed) are released rather than stranded.
+    let paidAt = t.paid_at ?? null;
+    if (!paidAt) {
+        const stamped = await stampPaidAtFromLedger(supabase, {
+            transactionId: parsedId.data,
+            conversationId: t.conversation_id,
+        });
+        if (stamped) paidAt = stamped;
+    }
+
+    const paidGate = requirePaidAt(paidAt);
     if (!paidGate.ok) return { success: false, error: paidGate.reason };
 
     // Park horse and generate claim PIN

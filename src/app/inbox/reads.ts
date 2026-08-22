@@ -12,7 +12,7 @@ import {
     type DealColumnSupport,
 } from "@/lib/deals/columnSupport";
 import { coerceTerms, type DealTerms } from "@/lib/deals/terms";
-import { coerceInstallments, type Installment } from "@/lib/deals/ledger";
+import { coerceInstallments, ledgerSummary, type Installment } from "@/lib/deals/ledger";
 import {
     coerceKind,
     coercePayload,
@@ -24,6 +24,7 @@ import {
     isTerminalStage,
     stageForTransaction,
     waitingOn,
+    waitingOnPlan,
     type DealKind,
     type DealParty,
     type DealStage,
@@ -76,9 +77,24 @@ export interface InboxThread {
      * True when the next move in this deal is the viewer's — an offer of
      * theirs to answer, money to send, a payment to confirm, a horse to
      * claim. Computed here because this is the one place that holds the
-     * stage, the kind, the viewer's party AND whose offer is standing.
+     * stage, the kind, the viewer's party, whose offer is standing AND
+     * the payment ledger.
      */
     awaitingMe: boolean;
+    /**
+     * For a thread running an installment plan, what the LEDGER says is
+     * outstanding — which the transaction status cannot express, because
+     * plan payments never move it off pending_payment.
+     *
+     *   awaiting_confirmation  the payer marked rows sent; the payee has
+     *                          to confirm they arrived.
+     *   awaiting_payment       nothing is in flight; the next payment is
+     *                          the payer's move.
+     *
+     * Null when there is no plan, or when every row is confirmed (at
+     * which point the transaction speaks for itself again).
+     */
+    planState: "awaiting_confirmation" | "awaiting_payment" | null;
     /** What this person is in this deal, already de-inverted. */
     roleLabel: string | null;
     preview: string;
@@ -270,6 +286,35 @@ export async function loadInbox(userId: string): Promise<InboxData> {
         }
     }
 
+    // ── The payment ledger ───────────────────────────────────
+    // Plan payments never move the transaction off pending_payment, so
+    // the status alone reports "agreed — the buyer owes money" for the
+    // whole life of a plan, including while three marked-sent payments
+    // sit in the SELLER's queue waiting to be confirmed (audit C7). One
+    // indexed query over the same conversation ids answers it properly.
+    const ledgerMap = new Map<string, { awaitingConfirmation: number; allConfirmed: boolean }>();
+    if (support.installments) {
+        const { data: rows } = await dealDb(supabase)
+            .from("payment_installments")
+            .select("conversation_id, id, seq, amount, due_date, marked_sent_at, confirmed_at, note")
+            .in("conversation_id", convoIds)
+            .limit(2000);
+        const byConvo = new Map<string, unknown[]>();
+        for (const row of (rows ?? []) as { conversation_id: string }[]) {
+            const list = byConvo.get(row.conversation_id);
+            if (list) list.push(row);
+            else byConvo.set(row.conversation_id, [row]);
+        }
+        for (const [convoId, raw] of byConvo) {
+            const summary = ledgerSummary(coerceInstallments(raw));
+            if (summary.count === 0) continue;
+            ledgerMap.set(convoId, {
+                awaitingConfirmation: summary.awaitingConfirmation.length,
+                allConfirmed: summary.allConfirmed,
+            });
+        }
+    }
+
     // ── Preview fallback for a pre-173 database ──────────────
     const previewMap = new Map<string, { content: string; senderId: string; createdAt: string }>();
     if (!support.conversationDeal) {
@@ -337,7 +382,7 @@ export async function loadInbox(userId: string): Promise<InboxData> {
         // Whose move is it. `waitingOn` answers from the stage alone, which
         // is right for everything except a standing offer: an offer YOU
         // countered is waiting on THEM, not on you.
-        const awaitingMe =
+        let awaitingMe =
             !!txn &&
             !!kind &&
             !!stage &&
@@ -345,6 +390,23 @@ export async function loadInbox(userId: string): Promise<InboxData> {
             stage !== "disputed" &&
             waitingOn(stage, kind) === party &&
             (stage !== "proposed" || txn.offerFrom !== party);
+
+        // …except while an installment plan is running, where the ledger
+        // is the finer-grained truth and the transaction status is stuck
+        // at "agreed". A plan with rows marked sent is waiting on the
+        // PAYEE to confirm receipt, not on the payer to pay again.
+        const plan = ledgerMap.get(id) ?? null;
+        const planState: InboxThread["planState"] =
+            plan && !plan.allConfirmed
+                ? plan.awaitingConfirmation > 0
+                    ? "awaiting_confirmation"
+                    : "awaiting_payment"
+                : null;
+
+        if (planState && kind && party && !disputed && (!stage || !isTerminalStage(stage))) {
+            const owed = waitingOnPlan(planState, kind);
+            if (owed) awaitingMe = party === owed;
+        }
 
         const previewKind = coerceKind(c.last_message_kind ?? "chat");
         const previewSender = (c.last_message_sender as string | null) ?? fallback?.senderId ?? null;
@@ -362,6 +424,7 @@ export async function loadInbox(userId: string): Promise<InboxData> {
             stage,
             party,
             awaitingMe,
+            planState,
             roleLabel: role,
             preview: previewLine(previewKind, null, previewText, {
                 actorName: previewSender === userId ? "You" : `@${other?.alias ?? "them"}`,

@@ -13,15 +13,22 @@ interface TransactionActionsProps {
 
 export default function TransactionActions({ conversationId, initialStatus, hasRating }: TransactionActionsProps) {
  const [status, setStatus] = useState(initialStatus);
+ const [awaitingOther, setAwaitingOther] = useState(false);
  const [saving, setSaving] = useState(false);
  const [error, setError] = useState("");
  const router = useRouter();
 
+ // Completion takes BOTH sides now (audit C4): one member could
+ // previously close a deal alone and mint a reviewable "sale" the other
+ // person never agreed had happened. The first click records only the
+ // clicker's confirmation; the deal closes when the other one answers.
  const handleComplete = async () => {
  setSaving(true);
  setError("");
  const result = await markTransactionComplete(conversationId);
- if (result.success) {
+ if (result.success && result.awaitingOther) {
+ setAwaitingOther(true);
+ } else if (result.success) {
  setStatus("completed");
  router.refresh(); // Re-renders page so RatingForm appears
  } else {
@@ -54,13 +61,19 @@ export default function TransactionActions({ conversationId, initialStatus, hasR
  id="transaction-status"
  >
  <div className="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start">
- <span className="text-muted-foreground text-sm">Transaction is open</span>
+ <span className="text-muted-foreground text-sm">
+ {awaitingOther
+ ?"You've said this deal is complete — waiting for the other side to confirm."
+ :"Transaction is open"}
+ </span>
+ {!awaitingOther && (
  <Button
  onClick={handleComplete}
  disabled={saving}
  >
  {saving ?"Completing…" :"✅ Mark as Complete"}
  </Button>
+ )}
  </div>
  {error && <div className="mt-2 text-sm text-red-700 mt-2">{error}</div>}
  </div>

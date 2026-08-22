@@ -256,6 +256,17 @@ export function describeEvent(
         }
         case "terms_agreed": {
             const price = num(p.agreedPrice);
+            // A withdrawal is the same event running backwards, and it
+            // used to leave no entry at all — so the other side could go
+            // on believing the terms were still agreed (audit C8).
+            if (p.withdrawn === true) {
+                return {
+                    icon: "↩️",
+                    tone: "warn",
+                    headline: `${who} withdrew their agreement — the terms are open again`,
+                    lines: [],
+                };
+            }
             return {
                 icon: "✍️",
                 tone: "good",
