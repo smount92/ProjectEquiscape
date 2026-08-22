@@ -88,7 +88,11 @@ export default function DeleteHorseModal({ horseId, horseName }: DeleteHorseModa
  disabled={isDeleting}
  id="delete-confirm"
  >
- {isDeleting ? "Deleting…" : "🗑️ Yes, Delete Permanently"}
+ {/* Not "Permanently": the body just promised the model lands in
+     Recently Deleted and can be restored. Only the photos are
+     permanent, and the body says so — the button should not
+     contradict the sentence above it. */}
+ {isDeleting ? "Deleting…" : "🗑️ Delete Model"}
  </Button>
  </div>
  </DialogContent>
