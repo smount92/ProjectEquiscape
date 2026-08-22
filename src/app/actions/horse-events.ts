@@ -54,13 +54,26 @@ export async function notifyHorsePublic(data: {
         }>();
     if (!horse || horse.owner_id !== user.id || !horse.is_public) return;
 
-    // Log the activity event
-    await createActivityEvent({
-        actorId: user.id,
-        eventType: "new_horse",
-        horseId: horse.id,
-        metadata: { horseName: horse.custom_name, finishType: horse.finish_type ?? "OF" },
-    });
+    // Rule B: a horse is announced ONCE. The edit form calls this on every
+    // save of a public horse, not only when it first becomes public, so
+    // without this a member who fixes a typo re-announces the horse to the
+    // whole feed — and does it again on the next save.
+    const { data: alreadyAnnounced } = await supabase
+        .from("activity_events")
+        .select("id")
+        .eq("horse_id", horse.id)
+        .eq("event_type", "new_horse")
+        .limit(1)
+        .maybeSingle();
+
+    if (!alreadyAnnounced) {
+        await createActivityEvent({
+            actorId: user.id,
+            eventType: "new_horse",
+            horseId: horse.id,
+            metadata: { horseName: horse.custom_name, finishType: horse.finish_type ?? "OF" },
+        });
+    }
 
     // Check for wishlist matches if horse is listed for sale
     if (
@@ -110,16 +123,30 @@ async function checkWishlistMatches(data: {
         // Deduplicate user IDs
         const uniqueUserIds = [...new Set(wishlistMatches.map((m: { user_id: string }) => m.user_id))];
 
-        // Create a notification for each matching user
-        for (const matchUserId of uniqueUserIds) {
-            await supabaseAdmin.from("notifications").insert({
+        // ...and deduplicate against watchers already told about THIS horse.
+        // Every save of a for-sale horse used to re-notify the whole want
+        // list, so a seller adjusting a price four times sent four alerts to
+        // each watcher — the fastest way to get notifications muted.
+        const { data: alreadyTold } = await supabaseAdmin
+            .from("notifications")
+            .select("user_id")
+            .eq("horse_id", data.horseId)
+            .eq("type", "wishlist_match");
+
+        const told = new Set((alreadyTold ?? []).map((n: { user_id: string }) => n.user_id));
+        const targets = uniqueUserIds.filter((id) => !told.has(id));
+        if (targets.length === 0) return;
+
+        // One insert, not one per watcher.
+        await supabaseAdmin.from("notifications").insert(
+            targets.map((matchUserId) => ({
                 user_id: matchUserId,
                 type: "wishlist_match",
                 actor_id: data.userId,
                 content: `A ${data.horseName} matching your Want List is now ${data.tradeStatus}!`,
                 horse_id: data.horseId,
-            });
-        }
+            }))
+        );
     } catch {
         logger.error("WishlistMatch", "Failed to check matches");
     }
