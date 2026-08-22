@@ -177,7 +177,7 @@ export default async function CardVerifyPage({
                     </div>
                     <div className="mb-4" />
 
-                    <div className="rounded-md bg-[color:var(--paper-lit)] px-4 py-2 text-[color:var(--paper-lit-ink)]">
+                    <div className="lit-paper rounded-md bg-[color:var(--paper-lit)] px-4 py-2 text-[color:var(--paper-lit-ink)]">
                         {/* Horse, placing and class are the headline above —
                             these rows carry the rest of the provenance. */}
                         <Row label="Show" value={card.showTitle} />
@@ -198,7 +198,7 @@ export default async function CardVerifyPage({
                         sit in dark ink on the darkest end of the brass
                         gradient, which is where the plaque stopped being
                         readable. They ride the lit-paper panel instead. */}
-                    <div className="mt-3 rounded-md bg-[color:var(--paper-lit)] px-4 py-3 text-[color:var(--paper-lit-ink)]">
+                    <div className="mt-3 lit-paper rounded-md bg-[color:var(--paper-lit)] px-4 py-3 text-[color:var(--paper-lit-ink)]">
                         <p className="m-0 text-xs leading-relaxed">
                             {STATUS_COPY[card.status].detail}
                         </p>

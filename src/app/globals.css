@@ -3227,8 +3227,16 @@ html[data-theme="night"] {
    The face backgrounds already use the constant --paper-lit tokens;
    re-bind the semantic tokens for everything rendered ON the face
    (Tailwind token utilities inherit custom properties), so post text,
-   badges and inputs keep their daylight ink. */
-html[data-theme="night"] .polaroid {
+   badges and inputs keep their daylight ink.
+
+   `.lit-paper` is the general-purpose hook: put it on ANY panel whose
+   background is --paper-lit. Without it a panel keeps its light paper
+   at night while the text inside flips to the night palette's cream —
+   cream ink on near-white paper, which measured 1.36:1 on the card
+   verification plaque. Painting a light surface is only half the job;
+   the ink on it has to be re-bound too. */
+html[data-theme="night"] .polaroid,
+html[data-theme="night"] .lit-paper {
   --background: var(--paper-lit);
   --foreground: var(--paper-lit-ink);
   --card: var(--paper-lit);
