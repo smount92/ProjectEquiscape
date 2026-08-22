@@ -1077,6 +1077,8 @@ export type Database = {
         Row: {
           buyer_id: string
           commission_id: string | null
+          completion_confirmed_by_buyer_at: string | null
+          completion_confirmed_by_seller_at: string | null
           created_at: string
           deal_kind: string | null
           deal_terms: Json | null
@@ -1096,6 +1098,8 @@ export type Database = {
         Insert: {
           buyer_id: string
           commission_id?: string | null
+          completion_confirmed_by_buyer_at?: string | null
+          completion_confirmed_by_seller_at?: string | null
           created_at?: string
           deal_kind?: string | null
           deal_terms?: Json | null
@@ -1115,6 +1119,8 @@ export type Database = {
         Update: {
           buyer_id?: string
           commission_id?: string | null
+          completion_confirmed_by_buyer_at?: string | null
+          completion_confirmed_by_seller_at?: string | null
           created_at?: string
           deal_kind?: string | null
           deal_terms?: Json | null
@@ -6285,6 +6291,10 @@ export type Database = {
       increment_approved_suggestions: {
         Args: { target_user_id: string }
         Returns: undefined
+      }
+      initialize_hoofprint_genesis: {
+        Args: { p_horse_id: string; p_notes?: string }
+        Returns: Json
       }
       is_caller_suspended: { Args: never; Returns: boolean }
       is_trusted_seller: { Args: { p_user_id: string }; Returns: boolean }
