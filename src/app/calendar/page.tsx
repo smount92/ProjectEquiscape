@@ -240,43 +240,42 @@ export default async function CalendarPage({
     } = await supabase.auth.getUser();
 
     // Three sources, three independent failures. Any one of them
-    // falling over degrades to the others rather than to a 500.
-    let entries: CalendarEntry[] = [];
-
-    try {
-        const mhh = await getPublicShows();
-        if (mhh.success) {
-            entries = entries.concat(
-                mhh.shows.map(fromMhhShow).filter((e): e is CalendarEntry => e !== null),
-            );
-        }
-    } catch {
-        /* the MHH layer is out — the rest of the calendar still stands */
-    }
-
-    try {
-        const external = await listApprovedExternalShows();
-        if (external.success) {
-            entries = entries.concat(external.shows.map(fromExternalShow));
-        }
-    } catch {
-        /* the external layer is out (or pre-migration) */
-    }
-
-    // Community events are authenticated-only at the RLS layer, so this
+    // falling over degrades to the others rather than to a 500 — which
+    // is why this is allSettled and not Promise.all. They used to be
+    // awaited one after another; nothing here depends on anything else.
+    //
+    // Community events are authenticated-only at the RLS layer, so that
     // read never runs for an anonymous visitor and the anon page keeps
     // exactly the output it had before events joined the calendar.
-    if (user) {
-        try {
-            const events = await getEvents({ upcoming: true, limit: EVENT_FETCH_LIMIT });
-            entries = entries.concat(
-                events
-                    .map(fromCommunityEvent)
-                    .filter((e): e is CalendarEntry => e !== null),
-            );
-        } catch {
-            /* the events board is out — shows still fill the calendar */
-        }
+    const [mhhSettled, externalSettled, eventsSettled] = await Promise.allSettled([
+        getPublicShows(),
+        listApprovedExternalShows(),
+        user
+            ? getEvents({ upcoming: true, limit: EVENT_FETCH_LIMIT })
+            : Promise.resolve([] as Awaited<ReturnType<typeof getEvents>>),
+    ]);
+
+    let entries: CalendarEntry[] = [];
+
+    /* the MHH layer is out — the rest of the calendar still stands */
+    if (mhhSettled.status === "fulfilled" && mhhSettled.value.success) {
+        entries = entries.concat(
+            mhhSettled.value.shows.map(fromMhhShow).filter((e): e is CalendarEntry => e !== null),
+        );
+    }
+
+    /* the external layer is out (or pre-migration) */
+    if (externalSettled.status === "fulfilled" && externalSettled.value.success) {
+        entries = entries.concat(externalSettled.value.shows.map(fromExternalShow));
+    }
+
+    /* the events board is out — shows still fill the calendar */
+    if (eventsSettled.status === "fulfilled") {
+        entries = entries.concat(
+            eventsSettled.value
+                .map(fromCommunityEvent)
+                .filter((e): e is CalendarEntry => e !== null),
+        );
     }
 
     const today = todayIso();

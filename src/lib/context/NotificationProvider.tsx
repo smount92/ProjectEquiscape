@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, useCallback, useRef, type ReactNode } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { countUnreadMessages } from "@/lib/messaging/unreadCount";
 
 interface NotificationContextType {
     unreadNotifications: number;
@@ -52,25 +53,10 @@ export function NotificationProvider({
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        const { data: convos } = await supabase
-            .from("conversations")
-            .select("id")
-            .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`);
-
-        if (!convos || convos.length === 0) {
-            setUnreadMessages(0);
-            return;
-        }
-
-        const convoIds = convos.map(c => c.id);
-        const { count } = await supabase
-            .from("messages")
-            .select("id", { count: "exact", head: true })
-            .neq("sender_id", user.id)
-            .eq("is_read", false)
-            .in("conversation_id", convoIds);
-
-        setUnreadMessages(count ?? 0);
+        // One embedded-filter count. This runs on mount for EVERY signed-in
+        // visitor and again on tab refocus; the old two-step fetched every
+        // conversation id the member has ever had, then `.in()`-ed them.
+        setUnreadMessages(await countUnreadMessages(supabase, user.id));
     }, [supabase]);
 
     useEffect(() => {

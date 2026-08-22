@@ -44,49 +44,51 @@ import { buildShowJsonLd } from "@/lib/shows/showJsonLd";
 import ShowChampions from "@/components/shows/ShowChampions";
 
 export default async function AlbumShowPage({ showId }: { showId: string }) {
-    const result = await getPublicShow({ showId });
+    // Auth is OPTIONAL — anon browsers read everything, authed
+    // viewers additionally get their entries + the entry flow.
+    // WAVE 1: the show tree and "who is asking" are independent.
+    const supabase = await createClient();
+    const [result, { data: { user } }] = await Promise.all([
+        getPublicShow({ showId }),
+        supabase.auth.getUser(),
+    ]);
+
     // Bad id, missing show, and drafts all land here.
     if (!result.success) notFound();
     const { show, divisions, entryCount } = result;
     const showJsonLd = buildShowJsonLd(show);
 
-    // Auth is OPTIONAL — anon browsers read everything, authed
-    // viewers additionally get their entries + the entry flow.
-    const supabase = await createClient();
-    const {
-        data: { user },
-    } = await supabase.auth.getUser();
-
-    let myEntries: MyShowEntry[] = [];
-    let horses: EntrantHorse[] = [];
-    let staffRole: StaffRole | null = null;
-    if (user) {
-        const entriesResult = await getMyShowEntries({ showId });
-        if (entriesResult.success) myEntries = entriesResult.entries;
-        if (show.status === "entries_open") {
-            const horsesResult = await getMyEntrantHorses();
-            if (horsesResult.success) horses = horsesResult.horses;
-        }
-        const roleResult = await getShowRole(supabase, showId, user.id);
-        if (!("error" in roleResult)) staffRole = roleResult.role;
-    }
-
+    // WAVE 2: five independent reads that used to run one after another
+    // on a page anon visitors are hitting right now. Every gate below is
+    // the one that used to guard its await, so a skipped read is still
+    // never issued.
+    //
     // THE WALL's feed — online shows only, from entries_open onward
     // (live shows have no entry photos by design). The blind rule
     // lives in getShowGallery: a blind payload carries no owner
     // identities, and the wall never re-derives them.
-    let gallery: ShowGalleryData | null = null;
-    if (show.mode === "online" && GALLERY_STATUSES.includes(show.status)) {
-        const galleryResult = await getShowGallery({ showId });
-        if (galleryResult.success) gallery = galleryResult.gallery;
-    }
-
     // Champions — published results only, both modes.
+    const [entriesResult, horsesResult, roleResult, galleryResult, championsResult] =
+        await Promise.all([
+            user ? getMyShowEntries({ showId }) : null,
+            user && show.status === "entries_open" ? getMyEntrantHorses() : null,
+            user ? getShowRole(supabase, showId, user.id) : null,
+            show.mode === "online" && GALLERY_STATUSES.includes(show.status)
+                ? getShowGallery({ showId })
+                : null,
+            RESULTS_STATUSES.includes(show.status) ? getShowChampions({ showId }) : null,
+        ]);
+
+    let myEntries: MyShowEntry[] = [];
+    if (entriesResult?.success) myEntries = entriesResult.entries;
+    let horses: EntrantHorse[] = [];
+    if (horsesResult?.success) horses = horsesResult.horses;
+    let staffRole: StaffRole | null = null;
+    if (roleResult && !("error" in roleResult)) staffRole = roleResult.role;
+    let gallery: ShowGalleryData | null = null;
+    if (galleryResult?.success) gallery = galleryResult.gallery;
     let champions: ShowChampionsData | null = null;
-    if (RESULTS_STATUSES.includes(show.status)) {
-        const championsResult = await getShowChampions({ showId });
-        if (championsResult.success) champions = championsResult.champions;
-    }
+    if (championsResult?.success) champions = championsResult.champions;
 
     const liveEntryCount = myEntries.filter((e) => e.status !== "scratched").length;
 

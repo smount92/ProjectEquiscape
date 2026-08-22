@@ -14,8 +14,15 @@ vi.mock("@/lib/supabase/server", () => ({
 vi.mock("@/lib/supabase/admin", () => ({
     getAdminClient: vi.fn(() => mockAdmin),
 }));
+// The public list reads through a COOKIE-LESS anon client now.
+vi.mock("@/lib/supabase/anon", () => ({
+    createAnonClient: vi.fn(() => mockClient),
+}));
 vi.mock("next/cache", () => ({
     revalidatePath: vi.fn(),
+    revalidateTag: vi.fn(),
+    // Pass-through: the cache wrapper is Next's job, not this suite's.
+    unstable_cache: <T>(fn: T) => fn,
 }));
 
 import {

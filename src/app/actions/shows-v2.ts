@@ -15,11 +15,12 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, unstable_cache } from "next/cache";
 import { after } from "next/server";
 import { z } from "zod";
 
 import { requireAuth } from "@/lib/auth";
+import { createAnonClient } from "@/lib/supabase/anon";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import {
@@ -1657,10 +1658,51 @@ export async function findUserByAlias(
  * Non-draft v2 shows for the /shows browse ledger, newest first.
  * Completed/archived shows drop off the browse list (their pages
  * stay reachable); draft is invisible by RLS and by the filter.
+ *
+ * CACHED.
+ *
+ * Every read below is anon-legal and viewer-INDEPENDENT: the status
+ * filter excludes draft, so RLS (118) hands anon and authed the exact
+ * same shows/divisions/sections/classes/entries, and host aliases come
+ * from get_public_aliases (a DEFINER RPC granted to anon, 136). Built on
+ * the COOKIE-LESS anon client so no member's session can ever seed a
+ * shared cache entry.
+ *
+ * It was 6 chained queries per request — including pulling EVERY
+ * show_class_entries row for 100 shows just to count them — on a public
+ * SEO landing page that also feeds /calendar. 60 s is short enough that
+ * a newly published show still appears promptly.
+ *
+ * Errors are thrown, never returned, so a transient failure is not what
+ * gets cached for the next minute; getPublicShows converts them back to
+ * the ActionResult contract.
  */
-export async function getPublicShows(): Promise<ActionResult<{ shows: PublicShowSummary[] }>> {
-    const supabase = await createClient();
+const loadPublicShowsCore = unstable_cache(
+    async (): Promise<PublicShowSummary[]> => {
+        const result = await readPublicShows(createAnonClient() as unknown as SupabaseClient);
+        if (!result.success) throw new Error(result.error);
+        return result.shows;
+    },
+    ["public-shows-core"],
+    { revalidate: 60 },
+);
 
+export async function getPublicShows(): Promise<ActionResult<{ shows: PublicShowSummary[] }>> {
+    try {
+        return { success: true, shows: await loadPublicShowsCore() };
+    } catch (err) {
+        return {
+            success: false,
+            error: err instanceof Error ? err.message : "Could not load shows.",
+        };
+    }
+}
+
+/** The read itself, unchanged — takes its client so the cache can hand
+ *  it the anon one. */
+async function readPublicShows(
+    supabase: SupabaseClient,
+): Promise<ActionResult<{ shows: PublicShowSummary[] }>> {
     const { data: showRows, error: showsError } = await supabase
         .from("shows")
         .select(

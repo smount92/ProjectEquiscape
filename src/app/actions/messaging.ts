@@ -552,73 +552,11 @@ export async function markConversationRead(
     return { success: true };
 }
 
-/**
- * Total unread messages for the current user — the header badge.
- *
- * ONE implementation. There were three, two of them dead, and
- * src/app/actions/header.ts still returned 0 "for backwards
- * compatibility". With migration 173 this counts messages newer than
- * each thread's last_read_at; without it, it falls back to the is_read
- * boolean so the badge never regresses.
- */
-export async function getUnreadCount(): Promise<number> {
-    const supabase = await createClient();
-    const {
-        data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) return 0;
-
-    const support = await getDealColumnSupport(supabase);
-    if (support.participants) {
-        const { data: rows, error } = await dealDb(supabase)
-            .from("conversation_participants")
-            .select("conversation_id, last_read_at")
-            .eq("user_id", user.id)
-            .eq("archived", false);
-
-        if (!error && rows && rows.length > 0) {
-            const parts = rows as { conversation_id: string; last_read_at: string | null }[];
-            let total = 0;
-            // One count per thread, but each is an indexed COUNT rather
-            // than the old "load every message you have ever received".
-            const counts = await Promise.all(
-                parts.map(async (p) => {
-                    let q = supabase
-                        .from("messages")
-                        .select("id", { count: "exact", head: true })
-                        .eq("conversation_id", p.conversation_id)
-                        .neq("sender_id", user.id);
-                    if (p.last_read_at) q = q.gt("created_at", p.last_read_at);
-                    const { count } = await q;
-                    return count ?? 0;
-                }),
-            );
-            for (const c of counts) total += c;
-            return total;
-        }
-        if (!error) return 0;
-    }
-
-    // Pre-173 fallback — unchanged behaviour.
-    const { data: convos } = await supabase
-        .from("conversations")
-        .select("id")
-        .or(`buyer_id.eq.${user.id},seller_id.eq.${user.id}`);
-
-    if (!convos || convos.length === 0) return 0;
-
-    const convoIds = convos.map((c: { id: string }) => c.id);
-
-    const { count } = await supabase
-        .from("messages")
-        .select("id", { count: "exact", head: true })
-        .in("conversation_id", convoIds)
-        .neq("sender_id", user.id)
-        .eq("is_read", false);
-
-    return count ?? 0;
-}
+// getUnreadCount() lived here: a per-conversation COUNT fan-out with a
+// "fetch all conversation ids, then .in()" fallback — and ZERO callers.
+// Every badge on the site now goes through countUnreadMessages()
+// (src/lib/messaging/unreadCount.ts), one index-backed embedded count.
+// Deleted rather than fixed so nothing adopts the slow shape by accident.
 
 /**
  * Mark a conversation's deal complete — BOTH sides, not one.

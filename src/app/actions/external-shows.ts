@@ -24,11 +24,11 @@
  * friendly error — the app never hard-fails on a missing relation.
  */
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 
 import { requireAdmin, requireAuth } from "@/lib/auth";
+import { createAnonClient } from "@/lib/supabase/anon";
 import { getAdminClient } from "@/lib/supabase/admin";
-import { createClient } from "@/lib/supabase/server";
 import { sanitizeText } from "@/lib/utils/validation";
 import {
     firstZodError,
@@ -72,6 +72,9 @@ function isMissingRelation(error: { code?: string; message?: string } | null): b
 
 const DISPLAY_COLUMNS =
     "id, title, url, venue_type, host_name, platform, starts_on, entries_close_on, location, description";
+
+/** Busted by reviewExternalShow so a moderated listing appears at once. */
+const EXTERNAL_SHOWS_CACHE_TAG = "external-shows";
 
 // ── Submit (any member; always lands pending) ──
 
@@ -119,25 +122,49 @@ export async function submitExternalShow(
 
 // ── Public read (anon-safe; RLS shows approved rows only) ──
 
+/**
+ * Up to 500 approved listings, cached for a minute.
+ *
+ * `status = 'approved'` is pinned in the query, so the submitter's
+ * own-rows policy can never widen the result: anon and authed get byte-
+ * identical rows. Built on the COOKIE-LESS anon client so no session can
+ * seed the shared entry. Real read failures throw (never cached); only
+ * the pre-migration "relation is missing" case caches its empty result,
+ * which is exactly as stable as the migration state itself.
+ */
+const loadApprovedExternalShows = unstable_cache(
+    async (): Promise<ApprovedExternalShow[]> => {
+        const supabase = createAnonClient();
+        const { data, error } = await supabase
+            .from("external_shows")
+            .select(DISPLAY_COLUMNS)
+            .eq("status", "approved")
+            .order("starts_on", { ascending: true })
+            .limit(500);
+
+        if (error) {
+            if (isMissingRelation(error)) return [];
+            throw new Error(error.message);
+        }
+        return (data ?? []) as unknown as ApprovedExternalShow[];
+    },
+    ["approved-external-shows"],
+    { revalidate: 60, tags: [EXTERNAL_SHOWS_CACHE_TAG] },
+);
+
 export async function listApprovedExternalShows(): Promise<
     ActionResult<{ shows: ApprovedExternalShow[] }>
 > {
-    const supabase = await createClient();
-    const { data, error } = await supabase
-        .from("external_shows")
-        .select(DISPLAY_COLUMNS)
-        .eq("status", "approved")
-        .order("starts_on", { ascending: true })
-        .limit(500);
-
-    if (error) {
-        // Pre-migration (or any read failure): the calendar simply
-        // renders without the external layer rather than 500ing a
-        // public SEO page.
-        if (isMissingRelation(error)) return { success: true, shows: [] };
-        return { success: false, error: error.message };
+    try {
+        return { success: true, shows: await loadApprovedExternalShows() };
+    } catch (err) {
+        // Any read failure: the calendar simply renders without the
+        // external layer rather than 500ing a public SEO page.
+        return {
+            success: false,
+            error: err instanceof Error ? err.message : "Could not load listings.",
+        };
     }
-    return { success: true, shows: (data ?? []) as unknown as ApprovedExternalShow[] };
 }
 
 // ── Admin: moderation queue ──
@@ -222,6 +249,8 @@ export async function reviewExternalShow(
 
     if (error) return { success: false, error: error.message };
 
+    // An approval must not sit behind the 60 s data cache.
+    revalidateTag(EXTERNAL_SHOWS_CACHE_TAG, "max");
     revalidatePath("/calendar");
     revalidatePath("/admin");
     return { success: true };

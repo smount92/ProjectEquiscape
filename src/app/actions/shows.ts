@@ -6,7 +6,7 @@ import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { getPublicImageUrls } from "@/lib/utils/storage";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { after } from "next/server";
 import type { Database } from "@/lib/types/database.generated";
 
@@ -1020,6 +1020,11 @@ export async function getShowHistory(): Promise<{
     const { user } = await requireAuth();
     const supabase = await createClient();
 
+    // NOTE (perf): this is unbounded on purpose for now. ShowHistoryWidget
+    // renders EVERY record of the expanded year and prints exact totals
+    // ("N ribbons · M shows", the latter a DISTINCT over show_name), so a
+    // LIMIT here would silently under-report a prolific shower. The real
+    // fix is a grouped aggregate RPC (migration), not a cap.
     const { data, error } = await supabase
         .from("show_records")
         .select("horse_id, show_name, placing, ribbon_color, show_date")
@@ -1105,6 +1110,207 @@ export interface PublicShowResults {
     totalClasses: number;
 }
 
+/** Placement ranking for the public results ledger. */
+const PUBLIC_RESULT_PLACE_ORDER: Record<string, number> = {
+    "Grand Champion": 0, "Reserve Grand Champion": 1,
+    Champion: 2, "Reserve Champion": 3,
+    "1st": 4, "2nd": 5, "3rd": 6,
+    "4th": 7, "5th": 8, "6th": 9, HM: 10,
+};
+
+type PublicResultEntryRow = {
+    horse_id: string;
+    class_id: string | null;
+    placing: string;
+    users: { alias_name: string } | { alias_name: string }[] | null;
+};
+
+const aliasOf = (u: PublicResultEntryRow["users"]): string =>
+    (Array.isArray(u) ? u[0]?.alias_name : u?.alias_name) || "Unknown";
+
+/**
+ * The heavy half of the public results page, batched and cached.
+ *
+ * This used to be a nested N+1: divisions → per-division classes →
+ * per-class entries + horses + thumbnails. A 10-division × 8-class show
+ * was ~250 SEQUENTIAL queries on an unauthenticated, crawlable,
+ * shareable page — the exact shape that saturated the connection pool
+ * once already. It is now 5 batched queries grouped in JS.
+ *
+ * Cached because the caller only ever invokes it for CLOSED shows, whose
+ * results are immutable. eventId is the only input — there is no viewer
+ * dimension at all, so a shared cache key cannot leak anyone's rows
+ * (the admin client stays, with the same hand-applied visibility filter
+ * RLS would impose; anon has no read path on this legacy domain).
+ */
+const loadPublicShowResultsBody = unstable_cache(
+    async (
+        eventId: string,
+    ): Promise<{
+        divisions: PublicResultDivision[];
+        totalEntries: number;
+        totalClasses: number;
+    }> => {
+        const admin = getAdminClient();
+
+        // 1 + 2: the division/class skeleton, then every placed entry in
+        // the show in ONE read (was one query per class).
+        const [{ data: divRows }, { data: entryRows }, { count: totalEntries }] =
+            await Promise.all([
+                admin
+                    .from("event_divisions")
+                    .select("id, name, sort_order")
+                    .eq("event_id", eventId)
+                    .order("sort_order"),
+                admin
+                    .from("event_entries")
+                    .select("id, horse_id, class_id, user_id, placing, users!user_id(alias_name)")
+                    .eq("event_id", eventId)
+                    .eq("entry_type", "entered")
+                    .not("placing", "is", null)
+                    .order("placing"),
+                admin
+                    .from("event_entries")
+                    .select("id", { count: "exact", head: true })
+                    .eq("event_id", eventId)
+                    .eq("entry_type", "entered"),
+            ]);
+
+        const entries = (entryRows ?? []) as unknown as PublicResultEntryRow[];
+
+        // 3: classes for every division at once.
+        const divisionIds = ((divRows ?? []) as { id: string }[]).map((d) => d.id);
+        const { data: classRows } = divisionIds.length > 0
+            ? await admin
+                  .from("event_classes")
+                  .select("id, name, class_number, division_id, sort_order")
+                  .in("division_id", divisionIds)
+                  .order("sort_order")
+            : { data: [] };
+
+        // 4 + 5: horse names (admin client, so filter what RLS would —
+        // audit S2: horses that went private or were deleted after
+        // competing must not leak name/photo here) and the thumbnails of
+        // the ones that survived that filter.
+        const horseIds = [...new Set(entries.map((e) => e.horse_id))];
+        const { data: horses } = horseIds.length > 0
+            ? await admin
+                  .from("user_horses")
+                  .select("id, custom_name")
+                  .in("id", horseIds)
+                  .in("visibility", ["public", "unlisted"])
+                  .is("deleted_at", null)
+            : { data: [] };
+        const horseNameMap = new Map<string, string>();
+        (horses ?? []).forEach((h: { id: string; custom_name: string }) =>
+            horseNameMap.set(h.id, h.custom_name),
+        );
+        const visibleHorseIds = (horses ?? []).map((h: { id: string }) => h.id);
+
+        const { data: thumbRows } = visibleHorseIds.length > 0
+            ? await admin
+                  .from("horse_images")
+                  .select("horse_id, image_url, angle_profile")
+                  .in("horse_id", visibleHorseIds)
+            : { data: [] };
+
+        const imagesByHorse = new Map<string, { image_url: string; angle_profile: string }[]>();
+        for (const r of (thumbRows ?? []) as { horse_id: string; image_url: string; angle_profile: string }[]) {
+            const bucket = imagesByHorse.get(r.horse_id);
+            if (bucket) bucket.push(r);
+            else imagesByHorse.set(r.horse_id, [r]);
+        }
+        const thumbMap = new Map<string, string>();
+        for (const hId of horseIds) {
+            const imgs = imagesByHorse.get(hId) ?? [];
+            const primary = imgs.find((i) => i.angle_profile === "Primary_Thumbnail");
+            const url = (primary ?? imgs[0])?.image_url;
+            if (url) thumbMap.set(hId, url);
+        }
+        const signedUrls = getPublicImageUrls(Array.from(thumbMap.values()));
+
+        const toResult = (e: PublicResultEntryRow, withThumb: boolean): PublicResultEntry => {
+            const rawUrl = withThumb ? thumbMap.get(e.horse_id) : undefined;
+            return {
+                placement: e.placing,
+                horseName: horseNameMap.get(e.horse_id) || "Unknown",
+                ownerAlias: aliasOf(e.users),
+                thumbnailUrl: rawUrl ? (signedUrls.get(rawUrl) ?? null) : null,
+            };
+        };
+
+        const divisions: PublicResultDivision[] = [];
+        let totalClasses = 0;
+
+        if (divRows && divRows.length > 0) {
+            const entriesByClass = new Map<string, PublicResultEntryRow[]>();
+            for (const e of entries) {
+                if (!e.class_id) continue;
+                const bucket = entriesByClass.get(e.class_id);
+                if (bucket) bucket.push(e);
+                else entriesByClass.set(e.class_id, [e]);
+            }
+            const classesByDivision = new Map<
+                string,
+                { id: string; name: string; class_number: string | null }[]
+            >();
+            for (const c of (classRows ?? []) as unknown as {
+                id: string; name: string; class_number: string | null; division_id: string;
+            }[]) {
+                const bucket = classesByDivision.get(c.division_id);
+                if (bucket) bucket.push(c);
+                else classesByDivision.set(c.division_id, [c]);
+            }
+
+            for (const div of divRows as { id: string; name: string }[]) {
+                const classes: PublicResultClass[] = [];
+                for (const cls of classesByDivision.get(div.id) ?? []) {
+                    totalClasses++;
+                    const classEntries = entriesByClass.get(cls.id) ?? [];
+                    classes.push({
+                        name: cls.name,
+                        classNumber: cls.class_number,
+                        results: classEntries
+                            .slice()
+                            .sort(
+                                (a, b) =>
+                                    (PUBLIC_RESULT_PLACE_ORDER[a.placing] ?? 99) -
+                                    (PUBLIC_RESULT_PLACE_ORDER[b.placing] ?? 99),
+                            )
+                            .map((e) => toResult(e, true)),
+                    });
+                }
+                divisions.push({ name: div.name, classes });
+            }
+        } else if (entries.length > 0) {
+            // No divisions — one "General / Overall" bucket. Unchanged from
+            // the old build: this branch never rendered thumbnails.
+            totalClasses = 1;
+            divisions.push({
+                name: "General",
+                classes: [
+                    {
+                        name: "Overall",
+                        classNumber: null,
+                        results: entries
+                            .slice()
+                            .sort(
+                                (a, b) =>
+                                    (PUBLIC_RESULT_PLACE_ORDER[a.placing] ?? 99) -
+                                    (PUBLIC_RESULT_PLACE_ORDER[b.placing] ?? 99),
+                            )
+                            .map((e) => toResult(e, false)),
+                    },
+                ],
+            });
+        }
+
+        return { divisions, totalEntries: totalEntries ?? 0, totalClasses };
+    },
+    ["public-show-results"],
+    { revalidate: 300 },
+);
+
 /**
  * Get show results for a public-facing page.
  * NO AUTH REQUIRED — this is a public page for social sharing.
@@ -1113,7 +1319,9 @@ export interface PublicShowResults {
 export async function getPublicShowResults(eventId: string): Promise<PublicShowResults | null> {
     const admin = getAdminClient();
 
-    // Fetch event details
+    // The status gate stays UNCACHED — one indexed row — so a show that
+    // has just closed publishes immediately instead of waiting out a
+    // cached null.
     const { data: eventData } = await admin
         .from("events")
         .select("id, name, event_type, show_status, starts_at, ends_at, created_by, sanctioning_body, users!created_by(alias_name)")
@@ -1134,148 +1342,7 @@ export async function getPublicShowResults(eventId: string): Promise<PublicShowR
 
     const hostAlias = Array.isArray(ev.users) ? ev.users[0]?.alias_name : ev.users?.alias_name;
 
-    // Fetch divisions
-    const { data: divRows } = await admin
-        .from("event_divisions")
-        .select("id, name, sort_order")
-        .eq("event_id", eventId)
-        .order("sort_order");
-
-    const divisions: PublicResultDivision[] = [];
-    let totalClasses = 0;
-
-    if (divRows && divRows.length > 0) {
-        for (const div of divRows as { id: string; name: string }[]) {
-            // Fetch classes for this division
-            const { data: classRows } = await admin
-                .from("event_classes")
-                .select("id, name, class_number, sort_order")
-                .eq("division_id", div.id)
-                .order("sort_order");
-
-            const classes: PublicResultClass[] = [];
-
-            for (const cls of (classRows ?? []) as { id: string; name: string; class_number: string | null }[]) {
-                totalClasses++;
-
-                // Fetch placed entries for this class
-                const { data: entryRows } = await admin
-                    .from("event_entries")
-                    .select("id, horse_id, user_id, placing, users!user_id(alias_name)")
-                    .eq("event_id", eventId)
-                    .eq("class_id", cls.id)
-                    .eq("entry_type", "entered")
-                    .not("placing", "is", null)
-                    .order("placing");
-
-                if (!entryRows || entryRows.length === 0) {
-                    classes.push({ name: cls.name, classNumber: cls.class_number, results: [] });
-                    continue;
-                }
-
-                // Batch-fetch horse names — admin client, so filter what
-                // RLS would (audit S2): horses that went private or were
-                // deleted after competing must not leak name/photo here.
-                const horseIds = [...new Set((entryRows as { horse_id: string }[]).map(e => e.horse_id))];
-                const { data: horses } = await admin
-                    .from("user_horses")
-                    .select("id, custom_name")
-                    .in("id", horseIds)
-                    .in("visibility", ["public", "unlisted"])
-                    .is("deleted_at", null);
-                const horseNameMap = new Map<string, string>();
-                (horses ?? []).forEach((h: { id: string; custom_name: string }) => horseNameMap.set(h.id, h.custom_name));
-                const visibleHorseIds = (horses ?? []).map((h: { id: string }) => h.id);
-
-                // Batch-fetch thumbnails (visible horses only)
-                const { data: thumbRows } = await admin
-                    .from("horse_images")
-                    .select("horse_id, image_url, angle_profile")
-                    .in("horse_id", visibleHorseIds);
-
-                const thumbMap = new Map<string, string>();
-                for (const hId of horseIds) {
-                    const imgs = (thumbRows ?? []).filter((r: { horse_id: string }) => r.horse_id === hId);
-                    const primary = imgs.find((i: { angle_profile: string }) => i.angle_profile === "Primary_Thumbnail");
-                    const url = (primary ?? imgs[0])?.image_url;
-                    if (url) thumbMap.set(hId, url);
-                }
-                const signedUrls = getPublicImageUrls(Array.from(thumbMap.values()));
-
-                // Sort by placing
-                const PLACE_ORDER: Record<string, number> = {
-                    "Grand Champion": 0, "Reserve Grand Champion": 1,
-                    Champion: 2, "Reserve Champion": 3,
-                    "1st": 4, "2nd": 5, "3rd": 6,
-                    "4th": 7, "5th": 8, "6th": 9, HM: 10,
-                };
-
-                const sortedResults = (entryRows as { horse_id: string; placing: string; users: { alias_name: string } | { alias_name: string }[] | null }[])
-                    .sort((a, b) => (PLACE_ORDER[a.placing] ?? 99) - (PLACE_ORDER[b.placing] ?? 99))
-                    .map(e => {
-                        const rawUrl = thumbMap.get(e.horse_id);
-                        return {
-                            placement: e.placing,
-                            horseName: horseNameMap.get(e.horse_id) || "Unknown",
-                            ownerAlias: Array.isArray(e.users) ? (e.users[0]?.alias_name || "Unknown") : (e.users?.alias_name || "Unknown"),
-                            thumbnailUrl: rawUrl ? (signedUrls.get(rawUrl) ?? null) : null,
-                        };
-                    });
-
-                classes.push({ name: cls.name, classNumber: cls.class_number, results: sortedResults });
-            }
-
-            divisions.push({ name: div.name, classes });
-        }
-    } else {
-        // No divisions — fetch all placed entries directly
-        const { data: allEntries } = await admin
-            .from("event_entries")
-            .select("id, horse_id, user_id, placing, users!user_id(alias_name)")
-            .eq("event_id", eventId)
-            .eq("entry_type", "entered")
-            .not("placing", "is", null);
-
-        if (allEntries && allEntries.length > 0) {
-            const horseIds = [...new Set((allEntries as { horse_id: string }[]).map(e => e.horse_id))];
-            // Admin client — apply the visibility filter RLS would (audit S2).
-            const { data: horses } = await admin
-                .from("user_horses")
-                .select("id, custom_name")
-                .in("id", horseIds)
-                .in("visibility", ["public", "unlisted"])
-                .is("deleted_at", null);
-            const horseNameMap = new Map<string, string>();
-            (horses ?? []).forEach((h: { id: string; custom_name: string }) => horseNameMap.set(h.id, h.custom_name));
-
-            const PLACE_ORDER: Record<string, number> = {
-                "Grand Champion": 0, "Reserve Grand Champion": 1, Champion: 2, "Reserve Champion": 3,
-                "1st": 4, "2nd": 5, "3rd": 6, "4th": 7, "5th": 8, "6th": 9, HM: 10,
-            };
-
-            const results = (allEntries as { horse_id: string; placing: string; users: { alias_name: string } | { alias_name: string }[] | null }[])
-                .sort((a, b) => (PLACE_ORDER[a.placing] ?? 99) - (PLACE_ORDER[b.placing] ?? 99))
-                .map(e => ({
-                    placement: e.placing,
-                    horseName: horseNameMap.get(e.horse_id) || "Unknown",
-                    ownerAlias: Array.isArray(e.users) ? (e.users[0]?.alias_name || "Unknown") : (e.users?.alias_name || "Unknown"),
-                    thumbnailUrl: null,
-                }));
-
-            totalClasses = 1;
-            divisions.push({
-                name: "General",
-                classes: [{ name: "Overall", classNumber: null, results }],
-            });
-        }
-    }
-
-    // Count total entries
-    const { count: totalEntries } = await admin
-        .from("event_entries")
-        .select("id", { count: "exact", head: true })
-        .eq("event_id", eventId)
-        .eq("entry_type", "entered");
+    const { divisions, totalEntries, totalClasses } = await loadPublicShowResultsBody(eventId);
 
     return {
         event: {
