@@ -1,5 +1,7 @@
 // Server-only auth utility — imported by server actions and API routes
 
+import { cache } from "react";
+
 import { createClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -9,6 +11,26 @@ export class AuthError extends Error {
         this.name = "AuthError";
     }
 }
+
+/**
+ * getUser() is a network call to the auth server every time, and the
+ * auth server sits on the same Postgres as everything else. A single
+ * page render used to ask "who is this?" three to eight times through
+ * the four helpers below; `cache()` makes it once per request.
+ *
+ * Deliberately memoizes the whole `{ supabase, user }` pair so callers
+ * keep getting a client alongside the user, as they always have.
+ */
+const resolveViewer = cache(async function resolveViewer(): Promise<{
+    supabase: SupabaseClient;
+    user: { id: string; email?: string; app_metadata?: Record<string, unknown> } | null;
+}> {
+    const supabase = await createClient();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+    return { supabase, user };
+});
 
 /**
  * Require an authenticated user. Returns Supabase client + user.
@@ -21,10 +43,7 @@ export async function requireAuth(): Promise<{
     supabase: SupabaseClient;
     user: { id: string; email?: string };
 }> {
-    const supabase = await createClient();
-    const {
-        data: { user },
-    } = await supabase.auth.getUser();
+    const { supabase, user } = await resolveViewer();
     if (!user) throw new AuthError();
     // Suspension gate (v4 safety): suspendUser() stamps app_metadata
     // via the auth admin API, so this costs no extra query — getUser()
@@ -44,11 +63,7 @@ export async function optionalAuth(): Promise<{
     supabase: SupabaseClient;
     user: { id: string; email?: string } | null;
 }> {
-    const supabase = await createClient();
-    const {
-        data: { user },
-    } = await supabase.auth.getUser();
-    return { supabase, user };
+    return resolveViewer();
 }
 
 /**
@@ -64,10 +79,7 @@ export async function requireAdmin(): Promise<{
     supabase: SupabaseClient;
     user: { id: string; email?: string };
 }> {
-    const supabase = await createClient();
-    const {
-        data: { user },
-    } = await supabase.auth.getUser();
+    const { supabase, user } = await resolveViewer();
     const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase();
     if (!user || !adminEmail || user.email?.toLowerCase() !== adminEmail) {
         throw new AuthError("Admin access required.");
@@ -87,10 +99,7 @@ export type UserTier = "studio" | "pro" | "free";
  * Studio subscribers the Pro benefits their tier includes. Use isPro().)
  */
 export async function getUserTier(): Promise<UserTier> {
-    const supabase = await createClient();
-    const {
-        data: { user },
-    } = await supabase.auth.getUser();
+    const { user } = await resolveViewer();
     if (!user) return "free";
     // Admin always gets Pro
     if (user.email?.toLowerCase() === process.env.ADMIN_EMAIL?.toLowerCase()) return "pro";

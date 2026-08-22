@@ -7,7 +7,7 @@
  * window + judging deadline.
  */
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { createShow } from "@/app/actions/shows-v2";
@@ -70,6 +70,18 @@ export default function CreateShowV2Form() {
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    // The show is created before we navigate, so a stalled destination
+    // render must not look like a failed submit — the host would click
+    // again and open a second show. Same fallback the horse edit form
+    // uses: if the soft navigation hasn't torn this form down in time,
+    // go there the hard way.
+    const unmountedRef = useRef(false);
+    useEffect(() => {
+        return () => {
+            unmountedRef.current = true;
+        };
+    }, []);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setSubmitting(true);
@@ -104,8 +116,14 @@ export default function CreateShowV2Form() {
 
         if (result.success) {
             // ?created=1 → the console greets the new show with a toast.
-            router.push(`/shows/host/${result.showId}?created=1`);
+            const destination = `/shows/host/${result.showId}?created=1`;
+            router.push(destination);
             router.refresh();
+            window.setTimeout(() => {
+                if (!unmountedRef.current) {
+                    window.location.assign(destination);
+                }
+            }, 8000);
             return;
         }
         setError(result.error);

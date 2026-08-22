@@ -1,8 +1,17 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { cache } from "react";
 import type { Database } from "@/lib/types/database.generated";
 
-export async function createClient() {
+/**
+ * One client per request, not per call site.
+ *
+ * `cache()` is request-scoped: a page that calls createClient() in the
+ * page body, three server actions and two widgets used to build six
+ * clients and hand six connections to a pool we have already saturated
+ * once. Callers are unchanged — they still `await createClient()`.
+ */
+export const createClient = cache(async function createClient() {
   const cookieStore = await cookies();
 
   return createServerClient<Database>(
@@ -27,4 +36,4 @@ export async function createClient() {
       },
     }
   );
-}
+});
