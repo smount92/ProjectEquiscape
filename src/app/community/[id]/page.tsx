@@ -1,4 +1,5 @@
 import { createClient } from"@/lib/supabase/server";
+import LinkifiedText from "@/components/LinkifiedText";
 import { notFound } from"next/navigation";
 import Link from"next/link";
 import { getPublicImageUrls } from"@/lib/utils/storage";
@@ -758,7 +759,7 @@ editionSize: rawPedigree.edition_size,
  <h3>
  <span aria-hidden="true">📝</span> Notes
  </h3>
- <p className="text-secondary-foreground m-0 leading-[1.6] whitespace-pre-wrap">{horse.public_notes}</p>
+ <p className="text-secondary-foreground m-0 leading-[1.6] whitespace-pre-wrap"><LinkifiedText text={horse.public_notes} /></p>
  </div>
  )}
 

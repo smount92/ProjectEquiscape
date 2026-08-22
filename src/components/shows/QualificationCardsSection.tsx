@@ -63,42 +63,56 @@ export default function QualificationCardsSection({
             <ul className="flex list-none flex-col gap-3 p-0">
                 {cards.map((card) => (
                     <li key={card.code}>
+                        {/* Lead with what the horse won. The code is a random
+                            uniqueness string — it belongs in the footer as the
+                            reference you quote, not as the headline. */}
                         <div className="brass-plaque px-4 py-3">
                             <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                                <p className="text-engraved-brass m-0 text-base font-bold">
+                                    {card.isStakes && (
+                                        <span className="mr-1.5 tracking-widest">STAKES</span>
+                                    )}
+                                    {card.earnedPlace === 1 ? "1st" : "2nd"}
+                                    {typeof card.classEntryCount === "number" &&
+                                    typeof card.classExhibitorCount === "number"
+                                        ? ` of ${card.classEntryCount} (${card.classExhibitorCount} exhibitors)`
+                                        : ""}{" "}
+                                    — {card.className}
+                                </p>
                                 <span
-                                    className="text-engraved-brass font-mono text-lg font-bold tracking-[0.18em]"
-                                    data-testid={`card-code-${card.code}`}
-                                >
-                                    {card.code}
-                                </span>
-                                <span
-                                    className={`inline-flex items-center rounded-full px-2 py-0.5 text-[0.65rem] font-bold tracking-wide uppercase ${STATUS_CLASSES[card.status]}`}
+                                    className={`inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-[0.65rem] font-bold tracking-wide uppercase ${STATUS_CLASSES[card.status]}`}
                                 >
                                     {STATUS_LABELS[card.status]}
                                 </span>
                             </div>
-                            <p className="text-engraved-brass mt-1 mb-0 text-sm font-semibold">
-                                {card.isStakes && (
-                                    <span className="mr-1.5 tracking-widest">STAKES</span>
-                                )}
-                                {card.earnedPlace === 1 ? "1st" : "2nd"}
-                                {typeof card.classEntryCount === "number" &&
-                                typeof card.classExhibitorCount === "number"
-                                    ? ` of ${card.classEntryCount} (${card.classExhibitorCount} exhibitors)`
-                                    : ""}{" "}
-                                — {card.className}
-                            </p>
-                            <p className="mt-0.5 mb-0 text-xs text-[color:var(--brass-ink)] opacity-80">
+                            <p className="text-engraved-brass mt-0.5 mb-0 text-sm font-semibold">
                                 {card.showTitle}
                                 {card.showYear !== null &&
                                     ` · Show year ${showYearLabel(card.showYear)}`}
                             </p>
-                            <a
-                                href={`/cards/${card.code}`}
-                                className="mt-1 inline-block text-xs font-semibold text-[color:var(--brass-ink)] underline"
-                            >
-                                Verify this card →
-                            </a>
+                            {/* The code and the verify link used to sit in dark
+                                ink on the dark end of the brass gradient. They
+                                ride lit paper instead so they stay readable in
+                                daylight and under lamplight alike. */}
+                            <div className="lit-paper mt-2 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 rounded-md bg-[color:var(--paper-lit)] px-3 py-1.5 text-[color:var(--paper-lit-ink)]">
+                                <span className="text-xs">
+                                    <span className="font-semibold tracking-widest uppercase opacity-70">
+                                        Card
+                                    </span>{" "}
+                                    <span
+                                        className="font-mono tracking-[0.12em] select-all"
+                                        data-testid={`card-code-${card.code}`}
+                                    >
+                                        {card.code}
+                                    </span>
+                                </span>
+                                <a
+                                    href={`/cards/${card.code}`}
+                                    className="text-xs font-semibold text-[color:var(--paper-lit-ink)] underline"
+                                >
+                                    Verify this card →
+                                </a>
+                            </div>
                         </div>
                     </li>
                 ))}

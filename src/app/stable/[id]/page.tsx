@@ -1,4 +1,5 @@
 import { createClient } from"@/lib/supabase/server";
+import LinkifiedText from "@/components/LinkifiedText";
 import { redirect, notFound } from"next/navigation";
 import Link from"next/link";
 import MarketValueBadge from"@/components/MarketValueBadge";
@@ -721,7 +722,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
               <h3 className="mb-3 flex items-center gap-2 text-xs font-semibold tracking-widest text-secondary-foreground uppercase">
                 <span aria-hidden="true">📝</span> Notes
               </h3>
- <p className="text-secondary-foreground m-0 leading-[1.6] whitespace-pre-wrap">{horse.public_notes}</p>
+ <p className="text-secondary-foreground m-0 leading-[1.6] whitespace-pre-wrap"><LinkifiedText text={horse.public_notes} /></p>
  </div>
  )}
 

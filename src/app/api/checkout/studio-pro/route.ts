@@ -21,6 +21,20 @@ export async function POST() {
         );
     }
 
+    // A tier bought through PayPal is billed by PayPal. Starting a Stripe
+    // subscription on top of it would charge the member twice, in two
+    // systems, with no way for either side to know about the other — and
+    // the tier field can only record one of them. Send them to cancel the
+    // PayPal one first rather than quietly taking a second payment.
+    if ((user.app_metadata as Record<string, unknown> | undefined)?.paypal_subscription_id) {
+        return NextResponse.json(
+            {
+                error: "Your subscription is currently billed through PayPal. Cancel that one first, then you can subscribe here — otherwise you'd be charged twice.",
+            },
+            { status: 400 }
+        );
+    }
+
     const priceId = process.env.STRIPE_STUDIO_PRO_PRICE_ID;
     if (!priceId || !process.env.STRIPE_SECRET_KEY) {
         return NextResponse.json(
