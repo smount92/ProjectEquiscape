@@ -42,7 +42,8 @@ const TABS: { key: TabKey; label: string }[] = [
 const TAB_KEYS = TABS.map((t) => t.key);
 
 export default function ShowConsole({ data }: { data: ShowConsoleData }) {
-    const { show, viewerId, viewerRole, divisions, staff, entries, feePaidUserIds } = data;
+    const { show, viewerId, viewerRole, divisions, staff, entries, feePaidUserIds, followerCount } =
+        data;
     const searchParams = useSearchParams();
     const { showToast, toastNode } = useShowToast();
 
@@ -167,6 +168,7 @@ export default function ShowConsole({ data }: { data: ShowConsoleData }) {
                             show={show}
                             entryCount={entries.length}
                             canManage={canManage}
+                            followerCount={followerCount}
                         />
                         {canManage && (
                             <ShowAnnounceDialog

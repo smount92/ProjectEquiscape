@@ -111,9 +111,16 @@ interface ShowStatusCardProps {
     show: ConsoleShow;
     entryCount: number;
     canManage: boolean;
+    /** Members following this show (184). 0 pre-migration or non-manager. */
+    followerCount?: number;
 }
 
-export default function ShowStatusCard({ show, entryCount, canManage }: ShowStatusCardProps) {
+export default function ShowStatusCard({
+    show,
+    entryCount,
+    canManage,
+    followerCount = 0,
+}: ShowStatusCardProps) {
     const router = useRouter();
     const { showToast, toastNode } = useShowToast();
     const [pending, setPending] = useState<ShowStatus | null>(null);
@@ -476,6 +483,28 @@ export default function ShowStatusCard({ show, entryCount, canManage }: ShowStat
                                 : "None yet"
                         }
                     />
+                    {/* Interest beyond the entry list (184). A COUNT and
+                        only a count — who follows a show is private, and
+                        no console payload carries the identities. Hidden
+                        at zero so a quiet show isn't scored on it. */}
+                    {followerCount > 0 && (
+                        <SummaryRow
+                            label="Followers"
+                            value={
+                                <span className="flex flex-col gap-0.5">
+                                    <span>
+                                        {followerCount} member
+                                        {followerCount === 1 ? "" : "s"} following
+                                    </span>
+                                    <span className="text-xs text-muted-foreground">
+                                        They get told when entries close, judging starts and
+                                        results publish. Only you see this count, and never
+                                        who they are.
+                                    </span>
+                                </span>
+                            }
+                        />
+                    )}
                     <SummaryRow label="Sanctioning" value={show.sanctioningNote} />
                 </dl>
             </section>

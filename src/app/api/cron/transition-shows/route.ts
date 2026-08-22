@@ -7,6 +7,8 @@ import {
     buildDeadlinePlans,
     isClosingWithin24h,
 } from "@/lib/shows/notifications";
+import { runEntriesClosedFanout } from "@/lib/shows/notifications";
+import { loadShowAudience } from "@/lib/shows/followers";
 import { createNotificationsBulk } from "@/lib/notifications/createNotification";
 import { sendEntriesClosingEmails } from "@/lib/email/showEmails";
 import type { ShowMode, ShowStatus } from "@/lib/shows/types";
@@ -17,10 +19,14 @@ import type { ShowMode, ShowStatus } from "@/lib/shows/types";
  *   2. V2 auto-open: published shows whose entries_open_at has
  *      passed → entries_open.
  *   3. V2 auto-close: entries_open shows whose entries_close_at has
- *      passed → entries_closed.
+ *      passed → entries_closed, each one announced to its audience
+ *      (this is how MOST online shows close — see 3a).
  *   4. V2 deadline nudges: entries_open shows closing within 24h →
- *      notify + email each live entrant once (deduped on an existing
- *      show_deadline notification for that user+show).
+ *      notify each member of the show's AUDIENCE once — live entrants
+ *      plus followers (migration 184), deduped so a member who both
+ *      follows and entered is nudged exactly once, and deduped again
+ *      against an existing show_deadline notification for that
+ *      user+show. The EMAIL half stays entrant-only (see note below).
  *
  * Schedule: 0 * * * * (hourly)
  * Auth: Bearer CRON_SECRET header
@@ -66,11 +72,16 @@ export async function GET(request: NextRequest) {
         }
 
         // ── 2+3. V2 lifecycle flips, via the state machine ──
+        // Returns the ids that ACTUALLY flipped. `.select("id")` makes
+        // the CAS self-verifying: an update that matches zero rows (a
+        // racing host action won) is not an error in PostgREST, so
+        // without the select this counted — and would now NOTIFY —
+        // transitions that never happened.
         const flipV2 = async (
             from: ShowStatus,
             to: ShowStatus,
             deadlineColumn: "entries_open_at" | "entries_close_at",
-        ): Promise<number> => {
+        ): Promise<string[]> => {
             const { data: dueRows, error: dueError } = await admin
                 .from("shows")
                 .select("id, mode, status")
@@ -79,22 +90,46 @@ export async function GET(request: NextRequest) {
                 .lte(deadlineColumn, nowIso);
             if (dueError) throw dueError;
 
-            let flipped = 0;
+            const flipped: string[] = [];
             for (const show of dueRows ?? []) {
                 const legal = canTransition(from, to, show.mode as ShowMode);
                 if (!legal.ok) continue; // never bypass the machine
-                const { error: flipError } = await admin
+                const { data: updated, error: flipError } = await admin
                     .from("shows")
                     .update({ status: to })
                     .eq("id", show.id)
-                    .eq("status", from); // CAS: a racing host action wins
-                if (!flipError) flipped++;
+                    .eq("status", from) // CAS: a racing host action wins
+                    .select("id");
+                if (!flipError && updated && updated.length > 0) {
+                    flipped.push(show.id as string);
+                }
             }
             return flipped;
         };
 
-        const opened = await flipV2("published", "entries_open", "entries_open_at");
-        const closed = await flipV2("entries_open", "entries_closed", "entries_close_at");
+        const openedIds = await flipV2("published", "entries_open", "entries_open_at");
+        const closedIds = await flipV2("entries_open", "entries_closed", "entries_close_at");
+        const opened = openedIds.length;
+        const closed = closedIds.length;
+
+        // ── 3a. Auto-close is the COMMON close ──
+        // Most online shows close on the clock, not on a host clicking
+        // "Close entries" — so without this the entries-closed notice
+        // would only ever reach the minority of shows closed by hand.
+        // Fires only for ids whose CAS actually matched above, so a
+        // show already closed by its host is never announced twice.
+        // Each is awaited and self-swallowing: a notify failure must
+        // never abort the rest of the cron's work.
+        for (const showId of closedIds) {
+            try {
+                await runEntriesClosedFanout(admin, showId);
+            } catch (err) {
+                Sentry.captureException(err, {
+                    tags: { domain: "cron" },
+                    level: "warning",
+                });
+            }
+        }
 
         // ── 3b. Judging deadline: nudge the host, never force-flip ──
         // (Audit S11: judging_ends_at had no enforcer — shows sat in
@@ -148,18 +183,15 @@ export async function GET(request: NextRequest) {
             const entriesCloseAt = (show.entries_close_at as string | null) ?? null;
             if (!isClosingWithin24h(entriesCloseAt, now)) continue;
 
-            const { data: entryRows, error: entriesError } = await admin
-                .from("show_class_entries")
-                .select("owner_id, status")
-                .eq("show_id", showId);
-            if (entriesError) throw entriesError;
-            const owners = [
-                ...new Set(
-                    (entryRows ?? [])
-                        .filter((e) => e.status !== "scratched")
-                        .map((e) => e.owner_id as string),
-                ),
-            ];
+            // The audience, not just the entrants: a member who FOLLOWED
+            // this show but has not entered is precisely the person a
+            // last-call nudge can still change the mind of — that was
+            // the growth leak. loadShowAudience dedupes the union, so an
+            // entrant who also follows is nudged exactly once, and it
+            // feature-detects 184 (pre-migration the follower half is
+            // empty and this stays today's entrant-only nudge).
+            const audience = await loadShowAudience(admin, showId);
+            const owners = audience.audienceIds;
             if (owners.length === 0) continue;
 
             // Dedupe: one nudge per user per show, keyed on an existing
@@ -186,12 +218,23 @@ export async function GET(request: NextRequest) {
                     recipientIds: toNudge,
                 }),
             );
-            await sendEntriesClosingEmails({
-                showId,
-                showTitle: show.title as string,
-                entriesCloseAt,
-                recipientIds: toNudge,
-            });
+            // EMAIL STAYS ENTRANT-ONLY. The deadline email says "You
+            // have entries at this show" and its CTA is "Review your
+            // entries" — both untrue for a follower who has not
+            // entered, and an inbox is a higher bar than a bell anyway.
+            // Followers get the in-app nudge above; widening the email
+            // would need its own copy and its own consent question.
+            const entrantsToNudge = toNudge.filter((id) =>
+                audience.entrantIds.includes(id),
+            );
+            if (entrantsToNudge.length > 0) {
+                await sendEntriesClosingEmails({
+                    showId,
+                    showTitle: show.title as string,
+                    entriesCloseAt,
+                    recipientIds: entrantsToNudge,
+                });
+            }
             reminded += toNudge.length;
         }
 

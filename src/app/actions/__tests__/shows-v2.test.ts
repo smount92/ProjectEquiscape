@@ -19,7 +19,11 @@ vi.mock("next/server", () => ({
 }));
 vi.mock("@/lib/shows/notifications", () => ({
     runClassChangeFanout: vi.fn().mockResolvedValue(undefined),
+    runEntriesClosedFanout: vi.fn().mockResolvedValue(undefined),
     runEntryScratchedNotification: vi.fn().mockResolvedValue(undefined),
+    runJudgingOpenedFanout: vi.fn().mockResolvedValue(undefined),
+    runJudgingStartedFanout: vi.fn().mockResolvedValue(undefined),
+    runResultsFollowersFanout: vi.fn().mockResolvedValue(undefined),
     runResultsPublishedFanout: vi.fn().mockResolvedValue(undefined),
     runStaffAddedNotification: vi.fn().mockResolvedValue(undefined),
     runVotingOpenedFanout: vi.fn().mockResolvedValue(undefined),

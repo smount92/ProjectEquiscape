@@ -28,6 +28,7 @@ import {
     type NotificationInput,
 } from "@/lib/notifications/createNotification";
 import { sendShowResultsEmails } from "@/lib/email/showEmails";
+import { loadShowAudience } from "./followers";
 import { placeLabel } from "./placings";
 import { getAliases, getHorseNames, loadClassContexts } from "./queries";
 import type { PlannedCard } from "./cardIssuance";
@@ -353,7 +354,12 @@ export function buildAnnouncementPlans(input: {
     }));
 }
 
-/** Entries close within 24h → nudge every live entrant (cron dedupes). */
+/**
+ * Entries close within 24h → nudge the audience (cron dedupes).
+ * Recipients are the deduped entrant ∪ follower union — for a follower
+ * who has not entered this is the whole point of following, and it is
+ * the last moment the nudge can still change what they do.
+ */
 export function buildDeadlinePlans(input: {
     showId: string;
     showTitle: string;
@@ -366,6 +372,70 @@ export function buildDeadlinePlans(input: {
         content: `⏰ Entries for ${input.showTitle} close in less than 24 hours.`,
         // #entries — the last-call landing spot.
         linkUrl: `/shows/${input.showId}#entries`,
+    }));
+}
+
+// ── Lifecycle fan-outs (follow-a-show wave) ──────────────────
+// The three transitions below used to be SILENT. A host closed
+// entries and began judging on a real show and neither the entrants
+// nor the host heard anything, which reads exactly like a show that
+// stalled. Each of these goes to the deduped entrant ∪ follower
+// audience — one person, one notification, whether they entered,
+// followed, or both.
+
+/** Entries closed → the field is set; tell the audience. */
+export function buildEntriesClosedPlans(input: {
+    showId: string;
+    showTitle: string;
+    recipientIds: string[];
+}): NotificationInput[] {
+    return input.recipientIds.map((userId) => ({
+        userId,
+        type: "show_entries_closed",
+        actorId: null,
+        content: `🔒 Entries are closed at ${input.showTitle} — the field is set.`,
+        // #entries — "did mine make it in?" is the immediate question.
+        linkUrl: `/shows/${input.showId}#entries`,
+    }));
+}
+
+/**
+ * Judging has begun → the confirmed gap. Entrants were left wondering
+ * whether anything was happening at all; followers get the same beat.
+ */
+export function buildJudgingStartedPlans(input: {
+    showId: string;
+    showTitle: string;
+    recipientIds: string[];
+}): NotificationInput[] {
+    return input.recipientIds.map((userId) => ({
+        userId,
+        type: "show_judging_started",
+        actorId: null,
+        content: `⚖️ Judging has begun at ${input.showTitle} — results are on their way.`,
+        linkUrl: `/shows/${input.showId}`,
+    }));
+}
+
+/**
+ * Results published → for FOLLOWERS WHO DID NOT ENTER only.
+ *
+ * Entrants are served by buildResultsNotificationPlans (their placings,
+ * their cards) and must never appear here — being told "results are up"
+ * one row below "your horse placed 2nd" is the duplicate this whole
+ * dedupe exists to prevent. The caller passes followerOnlyIds.
+ */
+export function buildResultsFollowerPlans(input: {
+    showId: string;
+    showTitle: string;
+    recipientIds: string[];
+}): NotificationInput[] {
+    return input.recipientIds.map((userId) => ({
+        userId,
+        type: "show_results_posted",
+        actorId: null,
+        content: `🏆 Results are up for ${input.showTitle} — see who took the ribbons.`,
+        linkUrl: `/shows/${input.showId}#results`,
     }));
 }
 
@@ -676,6 +746,126 @@ export async function runStaffAddedNotification(
     } catch (err) {
         logger.error("ShowNotifications", "Staff-added notification failed", err);
     }
+}
+
+/**
+ * Show title, or null. The lifecycle fan-outs below need nothing else
+ * from the row, and every one of them is fire-and-forget.
+ */
+async function loadShowTitle(
+    client: SupabaseClient,
+    showId: string,
+): Promise<string | null> {
+    const { data: show, error } = await client
+        .from("shows")
+        .select("id, title")
+        .eq("id", showId)
+        .maybeSingle();
+    if (error || !show) return null;
+    return (show.title as string) ?? null;
+}
+
+/**
+ * The lifecycle fan-outs — entries closed, judging started, results
+ * posted-to-followers. All three share one shape:
+ *
+ *   load the deduped audience → build one plan per recipient → ONE
+ *   batched insert via createNotificationsBulk.
+ *
+ * VOLUME: createNotificationsBulk issues exactly two queries
+ * regardless of audience size (one prefs read over all recipients,
+ * one multi-row insert) and caps at BULK_NOTIFICATION_CAP. A show
+ * with 200 followers costs the same two round-trips as a show with
+ * two — there is no per-recipient loop anywhere in this path.
+ *
+ * Every one swallows its own errors: a broken ping must never break a
+ * status transition.
+ */
+async function runLifecycleFanout(
+    client: SupabaseClient,
+    showId: string,
+    label: string,
+    plan: (input: {
+        showId: string;
+        showTitle: string;
+        recipientIds: string[];
+    }) => NotificationInput[],
+    pickRecipients: (audience: Awaited<ReturnType<typeof loadShowAudience>>) => string[],
+): Promise<void> {
+    try {
+        const [showTitle, audience] = await Promise.all([
+            loadShowTitle(client, showId),
+            loadShowAudience(client, showId),
+        ]);
+        if (!showTitle) {
+            logger.error("ShowNotifications", `${label} fan-out: show ${showId} not found`);
+            return;
+        }
+        const recipientIds = pickRecipients(audience);
+        if (recipientIds.length === 0) return;
+        await createNotificationsBulk(plan({ showId, showTitle, recipientIds }));
+    } catch (err) {
+        logger.error("ShowNotifications", `${label} fan-out failed`, err);
+    }
+}
+
+/** Entries closed → the whole audience, deduped. */
+export async function runEntriesClosedFanout(
+    client: SupabaseClient,
+    showId: string,
+): Promise<void> {
+    await runLifecycleFanout(
+        client,
+        showId,
+        "Entries-closed",
+        buildEntriesClosedPlans,
+        (audience) => audience.audienceIds,
+    );
+}
+
+/**
+ * Judging began → the whole audience, deduped.
+ *
+ * `excludeEntrants` is set for COMMUNITY-VOTE shows, where entrants
+ * have just received the louder, more actionable "voting is open —
+ * your entries are on the ring" from runVotingOpenedFanout. Sending
+ * both would be two notifications about one transition. Followers who
+ * did not enter still hear that the show is moving.
+ */
+export async function runJudgingStartedFanout(
+    client: SupabaseClient,
+    showId: string,
+    options: { excludeEntrants?: boolean } = {},
+): Promise<void> {
+    await runLifecycleFanout(
+        client,
+        showId,
+        "Judging-started",
+        buildJudgingStartedPlans,
+        (audience) =>
+            options.excludeEntrants ? audience.followerOnlyIds : audience.audienceIds,
+    );
+}
+
+/**
+ * Results published → FOLLOWERS WHO DID NOT ENTER.
+ *
+ * Entrants are deliberately excluded: runResultsPublishedFanout has
+ * already told each of them how their own horses did (and minted-card
+ * notices on top). This is the half of the room that was never told
+ * anything — someone who followed a show to see how it turned out.
+ */
+export async function runResultsFollowersFanout(
+    client: SupabaseClient,
+    showId: string,
+): Promise<void> {
+    await runLifecycleFanout(
+        client,
+        showId,
+        "Results-followers",
+        buildResultsFollowerPlans,
+        (audience) => audience.followerOnlyIds,
+    );
 }
 
 /** Staff scratch → single targeted notification to the entry owner. */

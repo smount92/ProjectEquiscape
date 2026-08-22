@@ -24,6 +24,7 @@ import type { ShowMode, ShowStatus } from "@/lib/shows/types";
 import ShareButton from "@/components/ShareButton";
 import EnterClassDialog from "@/components/shows/EnterClassDialog";
 import ProgramAccordion from "@/components/shows/ProgramAccordion";
+import ShowFollowButton from "@/components/shows/ShowFollowButton";
 import { useShowToast } from "@/components/shows/useShowToast";
 import {
     Dialog,
@@ -47,6 +48,10 @@ interface AlbumCtaRowProps {
     showYear?: number | null;
     /** Whether the show is MHH-sanctioned; gates the card-gate badge. */
     showIsQualifying?: boolean;
+    /** False = migration 184 unapplied; the Follow control is hidden. */
+    followSupported?: boolean;
+    /** The viewer's current follow state (false for anon). */
+    isFollowing?: boolean;
 }
 
 export default function AlbumCtaRow({
@@ -61,6 +66,8 @@ export default function AlbumCtaRow({
     showYear,
 
     showIsQualifying,
+    followSupported = false,
+    isFollowing = false,
 }: AlbumCtaRowProps) {
     const router = useRouter();
     const { showToast, toastNode } = useShowToast();
@@ -111,6 +118,15 @@ export default function AlbumCtaRow({
                         Sign in to enter
                     </Link>
                 ))}
+            {/* Follow sits beside Enter, not inside it: the visitor
+                who is still deciding is exactly who this is for. */}
+            <ShowFollowButton
+                showId={showId}
+                showTitle={showTitle}
+                authed={authed}
+                supported={followSupported}
+                initialIsFollowing={isFollowing}
+            />
             <span className="text-foreground">
                 <ShareButton
                     title={showTitle}

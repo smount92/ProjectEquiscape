@@ -122,4 +122,12 @@ export interface ShowConsoleData {
     /** Entrants marked paid on the manual fee checklist (139).
      *  RLS scopes the read to managers; stewards/judges see []. */
     feePaidUserIds: string[];
+    /**
+     * How many members follow this show — a soft signal of interest for
+     * the host (184). A COUNT and never a list: the follower identities
+     * are private and no console payload carries them. 0 pre-184, and 0
+     * for stewards/judges (the SECURITY DEFINER function is gated to
+     * host/co_host).
+     */
+    followerCount: number;
 }

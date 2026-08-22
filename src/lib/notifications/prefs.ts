@@ -45,6 +45,15 @@ export const NOTIFICATION_TYPE_PREF_KEYS: Record<string, string> = {
     show_moderation: "show_updates",
     show_handler: "show_updates",
     show_title: "show_results",
+    // ── Shows (follow-a-show lifecycle) ──
+    // These reach FOLLOWERS as well as entrants, so they deliberately
+    // reuse the keys a member already understands rather than adding a
+    // fourth show toggle: closing/closed is one "entry deadlines"
+    // story, judging starting is a change to the show you are in, and
+    // "results are up" belongs with results.
+    show_entries_closed: "show_deadlines",
+    show_judging_started: "show_updates",
+    show_results_posted: "show_results",
 };
 
 /**

@@ -68,8 +68,11 @@ import { issueQualificationCardsForShow, type PlannedCard } from "@/lib/shows/ca
 import { grantTitlesForShow } from "@/lib/shows/grantTitles";
 import {
     runClassChangeFanout,
+    runEntriesClosedFanout,
     runEntryScratchedNotification,
     runJudgingOpenedFanout,
+    runJudgingStartedFanout,
+    runResultsFollowersFanout,
     runResultsPublishedFanout,
     runStaffAddedNotification,
     runVotingOpenedFanout,
@@ -517,6 +520,55 @@ export async function transitionShowStatus(
     if (to === "judging" && ctx.show.judging === "judged") {
         after(async () => {
             await runJudgingOpenedFanout(getAdminClient(), showId);
+        });
+    }
+
+    // ── The lifecycle fan-outs (follow-a-show wave) ──
+    // These reach the deduped entrant ∪ FOLLOWER audience, and they
+    // exist because these transitions used to be silent: a live dress
+    // rehearsal closed entries and began judging and NOBODY — host or
+    // entrant — was told anything, which reads like a show that
+    // stalled. Each gets its own after() block so one failing fan-out
+    // cannot eat another, and each swallows its own errors internally
+    // (a notification must never block a host from running their show).
+    //
+    // Placed AFTER the CAS above: a losing double-click has already
+    // returned, so a no-op transition fires nothing.
+    // Each orchestrator already swallows its own errors, but the
+    // try/catch here makes the guarantee LOCAL rather than a promise
+    // some other module keeps: whatever a future fan-out does, the
+    // transition above has already committed and must stand.
+    if (to === "entries_closed") {
+        after(async () => {
+            try {
+                await runEntriesClosedFanout(getAdminClient(), showId);
+            } catch (err) {
+                console.error(`Entries-closed fan-out for show ${showId} failed: ${String(err)}`);
+            }
+        });
+    }
+    if (to === "judging") {
+        // Community-vote entrants just got the louder "voting is open"
+        // above; only their followers-who-did-not-enter need this one.
+        const excludeEntrants = ctx.show.judging === "community_vote";
+        after(async () => {
+            try {
+                await runJudgingStartedFanout(getAdminClient(), showId, { excludeEntrants });
+            } catch (err) {
+                console.error(`Judging-started fan-out for show ${showId} failed: ${String(err)}`);
+            }
+        });
+    }
+    if (to === "completed") {
+        // Entrants get placings + cards from runResultsPublishedFanout;
+        // this is strictly the followers who never entered, who until
+        // now had no way to learn the show they were watching finished.
+        after(async () => {
+            try {
+                await runResultsFollowersFanout(getAdminClient(), showId);
+            } catch (err) {
+                console.error(`Results-followers fan-out for show ${showId} failed: ${String(err)}`);
+            }
         });
     }
     return { success: true };
@@ -1540,6 +1592,24 @@ export async function getShowConsole(
         .eq("show_id", parsed.data.showId);
     const feePaidUserIds = (feeRows ?? []).map((r) => r.user_id as string);
 
+    // ── Follower count (184) — the host's soft signal of interest.
+    // A COUNT, never a list: show_follower_count is SECURITY DEFINER
+    // and gated to host/co_host, and returns 0 for everyone else.
+    // Any error here (most often "function does not exist" — 184 not
+    // pasted yet) degrades to 0, which renders as no follower line.
+    let followerCount = 0;
+    try {
+        const { data: followerData, error: followerError } = await supabase.rpc(
+            "show_follower_count",
+            { p_show_id: parsed.data.showId },
+        );
+        if (!followerError && typeof followerData === "number") {
+            followerCount = followerData;
+        }
+    } catch {
+        // Pre-184, or an RPC hiccup — the console must still open.
+    }
+
     return {
         success: true,
         console: {
@@ -1570,6 +1640,7 @@ export async function getShowConsole(
             staff: staffMembers,
             entries: consoleEntries,
             feePaidUserIds,
+            followerCount,
         },
     };
 }
@@ -2316,6 +2387,39 @@ export async function enterClass(
                     : (insertError?.message ?? "Failed to enter the class.");
         return { success: false, error: friendly };
     }
+
+    // IMPLICIT FOLLOW: entering is the loudest possible statement of
+    // interest, so an entrant is subscribed to the show's lifecycle
+    // without having to also find the Follow button. Idempotent upsert
+    // on the (show_id, user_id) key — a second entry, or an entrant who
+    // already tapped Follow, is a no-op rather than a duplicate.
+    //
+    // This creates NO duplicate notifications: every lifecycle fan-out
+    // sends to the deduped union of followers and entrants
+    // (mergeAudience in src/lib/shows/followers.ts), so being in both
+    // sets is still exactly one notification per event.
+    //
+    // Fire-and-forget and feature-detected: pre-184 the table is
+    // missing, the upsert errors, and the entry is unaffected.
+    const followerId = user.id;
+    after(async () => {
+        try {
+            const { followDb, isMissingSchema } = await import("@/lib/shows/followSupport");
+            const { error: followError } = await followDb(supabase)
+                .from("show_followers")
+                .upsert(
+                    { show_id: showId, user_id: followerId },
+                    { onConflict: "show_id,user_id" },
+                );
+            if (followError && !isMissingSchema(followError)) {
+                console.error(
+                    `Implicit follow on entry for show ${showId} failed: ${followError.message}`,
+                );
+            }
+        } catch {
+            // Best-effort — an entry must never fail over a follow row.
+        }
+    });
 
     // Named handler gets told (owner decision 2026-08-19, audit M4:
     // proxy handling was silent and non-consensual — the notice pairs

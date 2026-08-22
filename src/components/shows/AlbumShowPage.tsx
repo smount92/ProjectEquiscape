@@ -27,6 +27,7 @@ import {
     getShowGallery,
 } from "@/app/actions/shows-v2";
 import { getShowChampions } from "@/app/actions/shows-v2-ring";
+import { getShowFollowState } from "@/app/actions/show-follow";
 import { GALLERY_STATUSES, RESULTS_STATUSES, type ShowGalleryData } from "@/lib/shows/gallery";
 import type { EntrantHorse, MyShowEntry } from "@/lib/shows/public";
 import { getShowRole } from "@/lib/shows/queries";
@@ -68,16 +69,26 @@ export default async function AlbumShowPage({ showId }: { showId: string }) {
     // lives in getShowGallery: a blind payload carries no owner
     // identities, and the wall never re-derives them.
     // Champions — published results only, both modes.
-    const [entriesResult, horsesResult, roleResult, galleryResult, championsResult] =
-        await Promise.all([
-            user ? getMyShowEntries({ showId }) : null,
-            user && show.status === "entries_open" ? getMyEntrantHorses() : null,
-            user ? getShowRole(supabase, showId, user.id) : null,
-            show.mode === "online" && GALLERY_STATUSES.includes(show.status)
-                ? getShowGallery({ showId })
-                : null,
-            RESULTS_STATUSES.includes(show.status) ? getShowChampions({ showId }) : null,
-        ]);
+    const [
+        entriesResult,
+        horsesResult,
+        roleResult,
+        galleryResult,
+        championsResult,
+        followState,
+    ] = await Promise.all([
+        user ? getMyShowEntries({ showId }) : null,
+        user && show.status === "entries_open" ? getMyEntrantHorses() : null,
+        user ? getShowRole(supabase, showId, user.id) : null,
+        show.mode === "online" && GALLERY_STATUSES.includes(show.status)
+            ? getShowGallery({ showId })
+            : null,
+        RESULTS_STATUSES.includes(show.status) ? getShowChampions({ showId }) : null,
+        // Runs for anon too: the answer decides whether the Follow
+        // control renders at all (migration 184 feature detection), and
+        // an anon visitor gets the sign-in-to-follow affordance.
+        getShowFollowState(showId),
+    ]);
 
     let myEntries: MyShowEntry[] = [];
     if (entriesResult?.success) myEntries = entriesResult.entries;
@@ -112,6 +123,8 @@ export default async function AlbumShowPage({ showId }: { showId: string }) {
                     myEntryCount={liveEntryCount}
                     showYear={show.showYear}
                     showIsQualifying={show.isMhhQualifying}
+                    followSupported={followState.supported}
+                    isFollowing={followState.isFollowing}
                 />
 
                 {staffRole && <StaffBanner show={show} role={staffRole} />}
