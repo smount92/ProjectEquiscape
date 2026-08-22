@@ -386,8 +386,13 @@ export async function updateHorseAction(horseId: string, data: {
         } catch (err) { Sentry.captureException(err, { tags: { domain: "horse" } }); logger.error("Horse", "Auto-unpark expired transfer failed", err); }
 
         // ── Security: whitelist allowed fields to prevent column injection ──
+        // finishing_artist_verified is DELIBERATELY not here: it's a trust
+        // badge shown on the passport, and letting an owner set it through
+        // their own edit form makes it self-forgeable (any resin becomes
+        // "Verified Artist"). It stays writable only by a future gated
+        // verification path, never by updateHorse.
         const HORSE_ALLOWED = [
-            'custom_name', 'sculptor', 'finishing_artist', 'finishing_artist_verified', 'finish_type',
+            'custom_name', 'sculptor', 'finishing_artist', 'finish_type',
             'condition_grade', 'is_public', 'visibility', 'trade_status', 'listing_price',
             'marketplace_notes', 'collection_id', 'catalog_id', 'life_stage',
             'edition_number', 'edition_size', 'asset_category',

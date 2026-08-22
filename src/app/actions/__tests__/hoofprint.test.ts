@@ -294,9 +294,53 @@ describe("Hoofprint — Transfer & Provenance System", () => {
     });
 
     // ── initializeHoofprint ──
+    //
+    // The genesis row goes through the 182 DEFINER function, not a
+    // direct insert: horse_ownership_history has RLS on with no INSERT
+    // policy, so the old insert was silently refused on every add. The
+    // owner id, alias and acquisition_type are decided server-side, so
+    // the client cannot name a previous owner it invented.
     describe("initializeHoofprint", () => {
-        it("creates ownership record with user alias", async () => {
-            // Profile lookup
+        it("opens the chain through the genesis RPC, not a client insert", async () => {
+            mockClient.rpc.mockResolvedValueOnce({
+                data: { success: true, action: "created" },
+                error: null,
+            });
+
+            await initializeHoofprint({
+                horseId: "h1",
+                horseName: "Silver Charm",
+                acquisitionNotes: "Won at auction",
+            });
+
+            expect(mockClient.rpc).toHaveBeenCalledWith("initialize_hoofprint_genesis", {
+                p_horse_id: "h1",
+                p_notes: "Won at auction",
+            });
+            // No client-side insert: the caller never gets to choose the
+            // owner alias or the acquisition type.
+            expect(mockClient._mockQuery.insert).not.toHaveBeenCalled();
+        });
+
+        it("passes null notes through when none were given", async () => {
+            mockClient.rpc.mockResolvedValueOnce({
+                data: { success: true, action: "created" },
+                error: null,
+            });
+
+            await initializeHoofprint({ horseId: "h1", horseName: "Test Horse" });
+
+            expect(mockClient.rpc).toHaveBeenCalledWith("initialize_hoofprint_genesis", {
+                p_horse_id: "h1",
+                p_notes: null,
+            });
+        });
+
+        it("falls back to the legacy insert until migration 182 is applied", async () => {
+            mockClient.rpc.mockResolvedValueOnce({
+                data: null,
+                error: { code: "PGRST202", message: "function ... does not exist" },
+            });
             mockClient._mockQuery.single.mockResolvedValueOnce({
                 data: { alias_name: "HorseCollector42" },
                 error: null,
@@ -320,23 +364,15 @@ describe("Hoofprint — Transfer & Provenance System", () => {
             );
         });
 
-        it("uses Unknown alias when profile missing", async () => {
-            mockClient._mockQuery.single.mockResolvedValueOnce({
+        it("does not fall back when the RPC fails for a real reason", async () => {
+            mockClient.rpc.mockResolvedValueOnce({
                 data: null,
-                error: null,
+                error: { code: "42501", message: "Unauthorized" },
             });
 
-            await initializeHoofprint({
-                horseId: "h1",
-                horseName: "Test Horse",
-            });
+            await initializeHoofprint({ horseId: "h1", horseName: "Not Mine" });
 
-            expect(mockClient._mockQuery.insert).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    owner_alias: "Unknown",
-                    notes: null,
-                })
-            );
+            expect(mockClient._mockQuery.insert).not.toHaveBeenCalled();
         });
     });
 

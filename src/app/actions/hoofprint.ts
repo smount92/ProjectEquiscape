@@ -249,7 +249,30 @@ export async function initializeHoofprint(data: {
 }): Promise<void> {
     const { supabase, user } = await requireAuth();
 
-    // Get user alias
+    // The genesis row goes through a SECURITY DEFINER function (182).
+    // horse_ownership_history has RLS on with no INSERT policy, so the
+    // direct insert this used to do was silently rejected every time —
+    // which is why chains on transferred horses began at owner #2. The
+    // function pins owner_id, alias and acquisition_type server-side so
+    // this path can claim "I am the first owner" and nothing else.
+    const { error } = await supabase.rpc("initialize_hoofprint_genesis", {
+        p_horse_id: data.horseId,
+        p_notes: data.acquisitionNotes || null,
+    });
+
+    if (!error) return;
+
+    // Feature-detect: until 182 is applied the function does not exist.
+    // Fall back to the legacy insert so behaviour is unchanged (it will
+    // still be refused by RLS, exactly as before — no worse, no better),
+    // and say so in the log rather than failing the add.
+    const missingFunction =
+        error.code === "PGRST202" || /function .* does not exist/i.test(error.message ?? "");
+    if (!missingFunction) {
+        logger.error("Hoofprint", "Genesis ownership row failed", error);
+        return;
+    }
+
     const { data: profile } = await supabase
         .from("users")
         .select("alias_name")
@@ -257,14 +280,20 @@ export async function initializeHoofprint(data: {
         .single();
     const alias = (profile as { alias_name: string } | null)?.alias_name || "Unknown";
 
-    // Create initial ownership record (the only real insert needed)
-    await supabase.from("horse_ownership_history").insert({
+    const { error: legacyError } = await supabase.from("horse_ownership_history").insert({
         horse_id: data.horseId,
         owner_id: user.id,
         owner_alias: alias,
         acquisition_type: "original",
         notes: data.acquisitionNotes || null,
     });
+    if (legacyError) {
+        logger.error(
+            "Hoofprint",
+            "Genesis ownership row rejected (migration 182 not yet applied)",
+            legacyError
+        );
+    }
 
     // ⚡ REMOVED: horse_timeline INSERT — now derived from v_horse_hoofprint view
 }

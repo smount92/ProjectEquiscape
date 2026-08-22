@@ -219,6 +219,7 @@ export async function updateNotificationPrefs(
  * @param newPassword - The new password (min 6 characters)
  */
 export async function changePassword(data: {
+    currentPassword: string;
     newPassword: string;
     confirmPassword: string;
 }): Promise<{ success: boolean; error?: string }> {
@@ -228,8 +229,31 @@ export async function changePassword(data: {
     if (data.newPassword.length < 8) {
         return { success: false, error: "Password must be at least 8 characters." };
     }
+    if (!data.currentPassword) {
+        return { success: false, error: "Enter your current password." };
+    }
 
     const supabase = await createClient();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+    if (!user?.email) {
+        return { success: false, error: "You must be logged in." };
+    }
+
+    // Prove the caller knows the CURRENT password before letting them set a
+    // new one. Without this, a session left open on a shared machine — or
+    // briefly hijacked — is a silent, permanent account takeover, since email
+    // change is disabled and the real owner has no way back in. A failed
+    // sign-in attempt does not disturb the existing session.
+    const { error: reauthError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: data.currentPassword,
+    });
+    if (reauthError) {
+        return { success: false, error: "Current password is incorrect." };
+    }
+
     const { error } = await supabase.auth.updateUser({
         password: data.newPassword,
     });

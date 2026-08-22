@@ -175,6 +175,7 @@ export default function SettingsClient() {
     const [notifPrefs, setNotifPrefs] = useState<Record<string, boolean>>({});
 
     // Password
+    const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [passwordMsg, setPasswordMsg] = useState<{ type: "success" | "error"; text: string } | null>(
@@ -277,9 +278,10 @@ export default function SettingsClient() {
     const handleChangePassword = async () => {
         setIsSavingPassword(true);
         setPasswordMsg(null);
-        const result = await changePassword({ newPassword, confirmPassword });
+        const result = await changePassword({ currentPassword, newPassword, confirmPassword });
         if (result.success) {
             setPasswordMsg({ type: "success", text: "Password changed!" });
+            setCurrentPassword("");
             setNewPassword("");
             setConfirmPassword("");
         } else {
@@ -720,6 +722,23 @@ export default function SettingsClient() {
                     </span>
 
                     <LeafHeading>Password</LeafHeading>
+                    <div className="mb-4">
+                        <label
+                            htmlFor="settings-current-password"
+                            className="text-foreground mb-1 block text-sm font-semibold"
+                        >
+                            Current password
+                        </label>
+                        <Input
+                            id="settings-current-password"
+                            type="password"
+                            autoComplete="current-password"
+                            value={currentPassword}
+                            onChange={(e) => setCurrentPassword(e.target.value)}
+                            placeholder="The one you sign in with now"
+                            className="sm:max-w-[calc(50%-0.5rem)]"
+                        />
+                    </div>
                     <div className="mb-4 grid gap-4 sm:grid-cols-2">
                         <div>
                             <label
@@ -731,6 +750,7 @@ export default function SettingsClient() {
                             <Input
                                 id="settings-new-password"
                                 type="password"
+                                autoComplete="new-password"
                                 value={newPassword}
                                 onChange={(e) => setNewPassword(e.target.value)}
                                 placeholder="At least 8 characters"
@@ -755,7 +775,9 @@ export default function SettingsClient() {
                     </div>
                     <Button
                         onClick={handleChangePassword}
-                        disabled={isSavingPassword || !newPassword || !confirmPassword}
+                        disabled={
+                            isSavingPassword || !currentPassword || !newPassword || !confirmPassword
+                        }
                     >
                         {isSavingPassword ? "Changing…" : "Change Password"}
                     </Button>

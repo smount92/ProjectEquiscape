@@ -116,6 +116,26 @@ describe("horse.ts — CRUD", () => {
                 condition_grade: null,
             }));
         });
+
+        it("refuses to let an owner set their own Verified Artist badge", async () => {
+            mockClient._setImplicitResolve({ data: {}, error: null });
+            await updateHorseAction("horse-1", {
+                horseUpdate: {
+                    custom_name: "My Resin",
+                    finishing_artist: "Someone Famous",
+                    finishing_artist_verified: true,
+                } as Record<string, unknown>,
+            });
+
+            // The name and artist are the owner's to state; the badge that
+            // says a human checked the claim is not.
+            const written = mockClient._mockQuery.update.mock.calls.at(-1)?.[0] as Record<
+                string,
+                unknown
+            >;
+            expect(written).toMatchObject({ custom_name: "My Resin" });
+            expect(written).not.toHaveProperty("finishing_artist_verified");
+        });
     });
 
     // ── deleteHorse ──
