@@ -90,10 +90,15 @@ export async function createSubscription(
             shipping_preference: "NO_SHIPPING",
             payment_method: {
                 payer_selected: "PAYPAL",
-                // Accept a PayPal balance or any funding source the payer
-                // has. The whole reason this path exists is members who
-                // want to spend a balance, so we must not force instant
-                // funding only.
+                // UNRESTRICTED governs INSTANT vs DELAYED funding — it does
+                // not control whether a balance is offered, and no merchant
+                // setting does. It still matters: the alternative,
+                // IMMEDIATE_PAYMENT_REQUIRED, forbids delayed bank funding
+                // and would shut out bank-only members, so leave this as is.
+                // (An earlier comment here claimed this existed to let
+                // members spend a balance. It doesn't; PayPal decides the
+                // funding source, and its published order draws an
+                // available balance first regardless of this field.)
                 payee_preferred: "UNRESTRICTED",
             },
             return_url: args.returnUrl,
