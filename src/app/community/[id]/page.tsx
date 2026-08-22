@@ -484,6 +484,19 @@ editionSize: rawPedigree.edition_size,
  </Link>
  )}
 
+ {/* The way back to the owner view. Same horse, two pages: this is
+     what everyone else sees, the stable page is where it gets
+     edited. Only the owner is offered the door. */}
+ {isOwnHorse && (
+ <Link
+ href={`/stable/${horseId}`}
+ className="text-muted-foreground text-sm no-underline transition-all"
+ id="back-to-private-passport"
+ >
+ ← Back to your stable copy (edit, vault, transfer)
+ </Link>
+ )}
+
  {/* Model Details Card */}
  <div className="bg-card/40 p-4 border-input rounded-lg border shadow-md transition-all">
  <h3>

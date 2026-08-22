@@ -92,7 +92,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  .select(
  `
   id, owner_id, custom_name, finish_type, condition_grade, asset_category, attributes,
-  is_for_sale, is_public, created_at, sculptor, finishing_artist, finishing_artist_verified, edition_number, edition_size, catalog_id, trade_status,
+  is_for_sale, is_public, visibility, created_at, sculptor, finishing_artist, finishing_artist_verified, edition_number, edition_size, catalog_id, trade_status,
  finish_details, public_notes, assigned_breed, assigned_gender, assigned_age, regional_id,
  catalog_items:catalog_id(title, maker, scale, item_type, attributes)
  `,
@@ -769,6 +769,24 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  >
  ← Back to Stable
  </Link></Button>
+ {/* The same horse has two pages — this owner view and the public
+     passport a buyer or judge sees — and nothing connected them, so
+     checking "what does everyone else see?" meant guessing a URL.
+     Private horses have no public page, so the link only appears when
+     there is somewhere to go. */}
+ {(horse.visibility === "public" || horse.visibility === "unlisted") && (
+ <Button asChild variant="outline" size="wide"><Link
+ href={`/community/${horseId}`}
+ id="view-public-passport"
+ title={
+ horse.visibility === "unlisted"
+ ? "Unlisted — anyone with the link can see this page"
+ : "The passport everyone else sees"
+ }
+ >
+ 👁️ View public passport
+ </Link></Button>
+ )}
  <Button asChild><Link
  href={`/stable/${horseId}/edit`}
  id="edit-horse-button"
