@@ -748,6 +748,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  {/* 🐾 Hoofprint Timeline — model + other_model only */}
  {assetConfig.showHoofprint && (
  <HoofprintTimeline
+ showRecordsListedElsewhere
  horseId={horseId}
  timeline={timeline}
  ownershipChain={ownershipChain}

@@ -833,6 +833,7 @@ editionSize: rawPedigree.edition_size,
  {(hoofprint.timeline.length > 0 || hoofprint.ownershipChain.length > 0) && (
  <div className="animate-fade-in-up mt-8" id="passport-hoofprint">
  <HoofprintTimeline
+ showRecordsListedElsewhere
  horseId={horseId}
  timeline={hoofprint.timeline}
  ownershipChain={hoofprint.ownershipChain}

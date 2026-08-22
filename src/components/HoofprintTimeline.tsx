@@ -5,6 +5,7 @@ import { useRouter } from"next/navigation";
 import Link from"next/link";
 import { motion } from"framer-motion";
 import { addTimelineEvent, deleteTimelineEvent, updateLifeStage } from"@/app/actions/hoofprint";
+import { formatEventDate } from "@/lib/utils/eventDate";
 import type { TimelineEvent, OwnershipRecord } from"@/app/actions/hoofprint";
 import HorseshoeIcon from"@/components/icons/HorseshoeIcon";
 import GlossaryLink from"@/components/GlossaryLink";
@@ -19,6 +20,13 @@ interface HoofprintTimelineProps {
  lifeStage: string;
  isOwner: boolean;
  currentUserId?: string;
+ /**
+  * True when the page also renders the show-record trophy case. A show
+  * result then appears twice on one passport, so the timeline keeps the
+  * event (the chronology is the point) and drops the detail line the
+  * trophy case already carries in full.
+  */
+ showRecordsListedElsewhere?: boolean;
 }
 
 const EVENT_ICONS: Record<string, string> = {
@@ -61,6 +69,7 @@ export default function HoofprintTimeline({
  lifeStage,
  isOwner,
  currentUserId,
+ showRecordsListedElsewhere = false,
 }: HoofprintTimelineProps) {
  const router = useRouter();
  const [showForm, setShowForm] = useState(false);
@@ -251,17 +260,13 @@ export default function HoofprintTimeline({
  <div className="text-muted-foreground mt-0.5 text-xs">
  {event.eventDate && (
  <>
- {new Date(event.eventDate).toLocaleDateString("en-US", {
- month:"short",
- day:"numeric",
- year:"numeric",
- })}
+ {formatEventDate(event.eventDate)}
  {" · "}
  </>
  )}
  by @{event.userAlias}
  </div>
- {event.description && (
+ {event.description && !(showRecordsListedElsewhere && event.eventType === "show_result") && (
  <div className="text-secondary-foreground mt-1 text-sm leading-relaxed">{event.description}</div>
  )}
  </div>
