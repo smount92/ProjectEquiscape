@@ -12,6 +12,8 @@
  * stored rows and both classlists' allowed_scales in lockstep.
  */
 
+import { GENDER_GROUPS } from "@/lib/config/genders";
+
 /**
  * Canonical scales in DISPLAY ORDER: largest physical model first
  * (by ratio where one exists), then the small china/artist lines,
@@ -286,4 +288,86 @@ export function deriveAttribution(row: {
         artist: explicit.artist ?? (row.sculptor?.trim() || null),
         manufacturer: explicit.manufacturer ?? (row.maker.trim() || null),
     };
+}
+
+// ── Tier 1 attribute vocabularies (owner-approved 2026-08-23) ──
+// These four keys already exist on imported rows (run_type 74,
+// run_count 74, sculptor 24) — they live in the attributes JSONB, so
+// none of this needs a migration. What was missing was a vocabulary:
+// free-text "web special" / "Web Special" / "WEB" never filters.
+
+/**
+ * How a FACTORY piece was released — the hobby's real release
+ * channels. Fixed list on purpose: the whole value of the field is
+ * that "Web Special" means the same thing on every row, so the browse
+ * filter can actually group them.
+ *
+ * Artist pieces have no "run" (a one-off resin isn't a Regular Run),
+ * so the suggestion form hides this for ARTIST_ATTRIBUTED_CATEGORIES.
+ */
+export const RUN_TYPES = [
+    "Regular Run",
+    "Special Run",
+    "BreyerFest",
+    "Collector's Club",
+    "Web Special",
+    "Store Special",
+    "Test Run",
+    "One of a Kind",
+    "Other",
+] as const;
+
+export type RunType = (typeof RUN_TYPES)[number];
+
+/**
+ * Approval guard: anything outside the vocabulary is dropped rather
+ * than stored. A rejected value is silent by design — a suggestion is
+ * community input, and half-typed garbage in a filterable key costs
+ * more than a missing field does.
+ */
+export function isRunType(v: unknown): v is RunType {
+    return typeof v === "string" && (RUN_TYPES as readonly string[]).includes(v);
+}
+
+/**
+ * Pieces made. Stored as a plain integer STRING to match the imported
+ * rows (attributes values are strings there) — "2500", never "2,500"
+ * or "~2500", so the value stays sortable and comparable later.
+ * Returns undefined for anything that isn't a positive integer.
+ */
+export function normalizeRunCount(v: unknown): string | undefined {
+    if (typeof v !== "string" && typeof v !== "number") return undefined;
+    const s = String(v).trim();
+    // 7 digits is comfortably above any real production run and keeps
+    // the value inside safe-integer territory.
+    if (!/^\d{1,7}$/.test(s)) return undefined;
+    const n = Number(s);
+    return n > 0 ? String(n) : undefined;
+}
+
+/**
+ * Assigned gender, reusing the horse forms' vocabulary verbatim
+ * (GENDER_GROUPS — including the longears terms) so a catalog row and
+ * a user's horse never disagree about what "Jenny" means. Flattened
+ * here because the catalog stores one plain value.
+ */
+export const CATALOG_GENDERS: readonly string[] = GENDER_GROUPS.flatMap((g) => g.options);
+
+export function isCatalogGender(v: unknown): boolean {
+    return typeof v === "string" && CATALOG_GENDERS.includes(v);
+}
+
+/**
+ * Breed is FREE TEXT, deliberately: this codebase has no breed
+ * vocabulary to reuse. `assigned_breed` on user horses is free text
+ * (registry.ts) and the only breed-name cluster in the repo is the
+ * NAMHSA halter CLASS list, which is not a breed list — it contains
+ * "Other Light/Gaited", "Thoroughbred/Standardbred" and "Foals".
+ * Inventing a closed list here would be a product decision, and a
+ * wrong one would lock contributors out of real breeds. Trim + cap.
+ */
+export function normalizeCatalogBreed(v: unknown): string | undefined {
+    if (typeof v !== "string") return undefined;
+    const s = v.trim().slice(0, 100);
+    return s || undefined;
 }

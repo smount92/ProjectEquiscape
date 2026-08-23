@@ -3,7 +3,8 @@
 import { useState, useTransition } from"react";
 import { useRouter } from"next/navigation";
 import { createSuggestion } from"@/app/actions/catalog-suggestions";
-import { ARTIST_ATTRIBUTED_CATEGORIES, CANONICAL_SCALES, KNOWN_MANUFACTURERS } from "@/lib/catalog/taxonomy";
+import { ARTIST_ATTRIBUTED_CATEGORIES, CANONICAL_SCALES, KNOWN_MANUFACTURERS, RUN_TYPES } from "@/lib/catalog/taxonomy";
+import { GENDER_GROUPS } from "@/lib/config/genders";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -66,6 +67,12 @@ export default function SuggestNewEntryForm({
  const [material, setMaterial] = useState("");
  const [year, setYear] = useState("");
  const [retailPrice, setRetailPrice] = useState("");
+ // Tier 1 (2026-08-23). Run type/count describe a FACTORY release, so
+ // they are only collected for factory categories (see the payload).
+ const [runType, setRunType] = useState("");
+ const [runCount, setRunCount] = useState("");
+ const [breed, setBreed] = useState("");
+ const [gender, setGender] = useState("");
  const [moldName, setMoldName] = useState("");
  const [reason, setReason] = useState("");
  // Duplicate speed bump: candidates from the server's title match.
@@ -105,7 +112,12 @@ export default function SuggestNewEntryForm({
  color: color || undefined,
  material: material || undefined,
  year: year ? parseInt(year, 10) : undefined,
- retail_price: /^d{1,5}([.]d{1,2})?$/.test(retailPrice.trim()) ? retailPrice.trim() : undefined,
+ retail_price: /^\d{1,5}([.]\d{1,2})?$/.test(retailPrice.trim()) ? retailPrice.trim() : undefined,
+ // Run fields are factory-only — an artist piece has no "run".
+ run_type: isArtistPiece ? undefined : runType || undefined,
+ run_count: isArtistPiece ? undefined : (/^\d{1,7}$/.test(runCount.trim()) ? runCount.trim() : undefined),
+ breed: breed.trim() || undefined,
+ gender: gender || undefined,
  mold_name: moldName || undefined,
  },
  reason: reason.trim(),
@@ -288,6 +300,43 @@ export default function SuggestNewEntryForm({
  artist who sculpted it — worth crediting even on factory pieces.
  </p>
  </div>
+
+ {/* Run type + pieces made — factory-only. A one-off artist resin
+     has no release channel and no run size, so these never render
+     for the artist-attributed categories above. */}
+ <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+ <div className="mb-6">
+ <label className="text-foreground mb-1 block text-sm font-semibold" htmlFor="new-entry-run-type">
+ Run <span className="font-normal text-muted-foreground">(optional)</span>
+ </label>
+ <select
+ id="new-entry-run-type"
+ className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ value={runType}
+ onChange={(e) => setRunType(e.target.value)}
+ >
+ <option value="">— Select —</option>
+ {RUN_TYPES.map((r) => (
+ <option key={r} value={r}>{r}</option>
+ ))}
+ </select>
+ </div>
+ <div className="mb-6">
+ <label className="text-foreground mb-1 block text-sm font-semibold" htmlFor="new-entry-run-count">
+ Pieces made <span className="font-normal text-muted-foreground">(optional)</span>
+ </label>
+ <Input
+ id="new-entry-run-count"
+ type="number"
+ inputMode="numeric"
+ value={runCount}
+ onChange={(e) => setRunCount(e.target.value)}
+ placeholder="e.g. 2500"
+ min={1}
+ />
+ <p className="text-muted-foreground mt-1 text-xs">Whole number only, if the run size is documented.</p>
+ </div>
+ </div>
  </>
  )}
 
@@ -391,6 +440,49 @@ export default function SuggestNewEntryForm({
  <option value="Other">Other</option>
  </select>
  </div>
+
+ {/* Breed + gender — what the model DEPICTS, so they apply to any
+     horse entry but never to tack. Gender reuses GENDER_GROUPS (the
+     horse forms' vocabulary, longears terms included) so a catalog
+     row and a user's horse can't disagree about "Jenny". Breed is
+     free text: the codebase has no breed vocabulary to reuse and
+     inventing a closed list would lock out real breeds. */}
+ {itemType !=="tack" && (
+ <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+ <div className="mb-6">
+ <label className="text-foreground mb-1 block text-sm font-semibold" htmlFor="new-entry-breed">
+ Breed <span className="font-normal text-muted-foreground">(optional)</span>
+ </label>
+ <Input
+ id="new-entry-breed"
+ value={breed}
+ onChange={(e) => setBreed(e.target.value)}
+ placeholder="e.g. Andalusian, Arabian, Quarter Horse"
+ maxLength={100}
+ />
+ </div>
+ <div className="mb-6">
+ <label className="text-foreground mb-1 block text-sm font-semibold" htmlFor="new-entry-gender">
+ Gender <span className="font-normal text-muted-foreground">(optional)</span>
+ </label>
+ <select
+ id="new-entry-gender"
+ className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ value={gender}
+ onChange={(e) => setGender(e.target.value)}
+ >
+ <option value="">— Select —</option>
+ {GENDER_GROUPS.map((g) => (
+ <optgroup key={g.label} label={g.label}>
+ {g.options.map((o) => (
+ <option key={o} value={o}>{o}</option>
+ ))}
+ </optgroup>
+ ))}
+ </select>
+ </div>
+ </div>
+ )}
 
  {/* Reason */}
  <div className="mb-6">

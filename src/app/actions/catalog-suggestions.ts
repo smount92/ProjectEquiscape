@@ -13,7 +13,15 @@ import {
     correctionTouchesAttributes,
 } from "@/lib/catalog/corrections";
 import { referenceHref } from "@/lib/catalog/referenceUrl";
-import { deriveAttribution, normalizeScale, suggestionItemTypeToDb } from "@/lib/catalog/taxonomy";
+import {
+    deriveAttribution,
+    isCatalogGender,
+    isRunType,
+    normalizeCatalogBreed,
+    normalizeRunCount,
+    normalizeScale,
+    suggestionItemTypeToDb,
+} from "@/lib/catalog/taxonomy";
 import { REFERENCE_PAGES_CACHE_TAG } from "@/app/actions/reference-pages";
 import type { Database } from "@/lib/types/database.generated";
 
@@ -38,6 +46,7 @@ interface CatalogFilters {
     model?: string;
     medium?: string;
     material?: string;
+    runType?: string;
     page?: number;
     pageSize?: number;
     sortBy?: string;
@@ -189,6 +198,10 @@ export async function getCatalogItems(filters: CatalogFilters) {
         query = query.ilike("attributes->>cast_medium", `%${filters.medium}%`);
     if (filters.material)
         query = query.eq("attributes->>material", filters.material);
+    // Run type is a closed vocabulary, so exact-match (not ilike): the
+    // point of the fixed list is that every "Web Special" row matches.
+    if (filters.runType)
+        query = query.eq("attributes->>run_type", filters.runType);
     if (filters.sortBy)
         query = query.order(filters.sortBy, {
             ascending: filters.sortDir === "asc",
@@ -770,6 +783,12 @@ async function applyApprovedSuggestion(
             sculptor: (fc.sculptor as string | undefined) ?? null,
             manufacturer: (fc.manufacturer as string | undefined) ?? null,
         });
+        // Tier 1 attributes (2026-08-23) — validated BEFORE the literal so
+        // each normalizer runs once. Every one of these returns undefined
+        // for a value it doesn't recognize, and the spreads below drop
+        // undefined: a bad value costs the field, never the whole approval.
+        const runCount = normalizeRunCount(fc.run_count);
+        const breed = normalizeCatalogBreed(fc.breed);
         const insertPayload = {
             item_type: itemType,
             title: (fc.title ?? fc.mold_name ?? "Untitled") as string,
@@ -788,6 +807,17 @@ async function applyApprovedSuggestion(
                 // charged at release. Pairs with the Blue Book on reference
                 // pages — original price beside today's market range.
                 ...(fc.retail_price ? { retail_price: fc.retail_price } : {}),
+                // Run type must be one of RUN_TYPES — free text here would
+                // defeat the whole point (the browse filter groups on the
+                // exact string). Anything else is dropped, not stored.
+                ...(isRunType(fc.run_type) ? { run_type: fc.run_type } : {}),
+                // Pieces made: a positive integer as a plain string, matching
+                // the 74 imported rows. "~2500" / "2,500" / "0" are dropped.
+                ...(runCount ? { run_count: runCount } : {}),
+                // What the model depicts. Gender is closed (the horse forms'
+                // GENDER_GROUPS); breed is open — see normalizeCatalogBreed.
+                ...(breed ? { breed } : {}),
+                ...(isCatalogGender(fc.gender) ? { gender: fc.gender } : {}),
                 // Sculptor is credit, not maker — factory pieces have a
                 // company maker AND a named sculpting artist (the North
                 // Light lesson: conflating them misfiled 20 sculpts as

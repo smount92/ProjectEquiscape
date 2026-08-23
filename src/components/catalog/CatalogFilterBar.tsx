@@ -38,6 +38,7 @@ import {
     type CatalogFilters,
     type CatalogSort,
 } from "@/lib/catalog/filterParams";
+import { RUN_TYPES } from "@/lib/catalog/taxonomy";
 
 const SORT_LABELS: Record<CatalogSort, string> = {
     "name-az": "Name A→Z",
@@ -124,6 +125,7 @@ export default function CatalogFilterBar({
     const [model, setModel] = useState(filters.model ?? "");
     const [medium, setMedium] = useState(filters.medium ?? "");
     const [material, setMaterial] = useState(filters.material ?? "");
+    const [runType, setRunType] = useState(filters.runType ?? "");
 
     // Keep local inputs in sync when the URL changes underneath us (back
     // button, chip ✕, clear-all) — adjust-state-during-render, not an effect.
@@ -132,7 +134,7 @@ export default function CatalogFilterBar({
         setLastQ(filters.q);
         setSearchInput(filters.q ?? "");
     }
-    const advKey = [filters.yearFrom, filters.yearTo, filters.color, filters.model, filters.medium, filters.material].join("|");
+    const advKey = [filters.yearFrom, filters.yearTo, filters.color, filters.model, filters.medium, filters.material, filters.runType].join("|");
     const [lastAdvKey, setLastAdvKey] = useState(advKey);
     if (lastAdvKey !== advKey) {
         setLastAdvKey(advKey);
@@ -142,6 +144,7 @@ export default function CatalogFilterBar({
         setModel(filters.model ?? "");
         setMedium(filters.medium ?? "");
         setMaterial(filters.material ?? "");
+        setRunType(filters.runType ?? "");
         if (hasAdvancedCatalogFilters(filters)) setAdvOpen(true);
     }
 
@@ -196,6 +199,8 @@ export default function CatalogFilterBar({
         const mat = material.trim();
         if (mat) next.material = mat;
         else delete next.material;
+        if (runType) next.runType = runType;
+        else delete next.runType;
         push(next);
     };
 
@@ -473,6 +478,34 @@ export default function CatalogFilterBar({
                             </Select>
                         </div>
                     )}
+                    {/* Run — a fixed vocabulary (RUN_TYPES), so unlike Material
+                        this needs no facet query: the options are the list. */}
+                    <div className="flex flex-col gap-1">
+                        <label htmlFor="catalog-run-type" className="font-serif text-[0.65rem] tracking-widest text-muted-foreground uppercase">
+                            Run
+                        </label>
+                        <Select
+                            value={runType || ALL}
+                            onValueChange={(v) => setRunType(v === ALL ? "" : v)}
+                        >
+                            <SelectTrigger
+                                id="catalog-run-type"
+                                size="sm"
+                                className="w-40 font-serif text-xs tracking-wide"
+                                aria-label="Filter by run type"
+                            >
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value={ALL}>All runs</SelectItem>
+                                {RUN_TYPES.map((r) => (
+                                    <SelectItem key={r} value={r}>
+                                        {r}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
                     <Button size="sm" onClick={applyAdvanced} id="catalog-advanced-apply">
                         Apply
                     </Button>

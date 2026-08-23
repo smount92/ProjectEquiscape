@@ -1,5 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { SILVER_AUTO_FIELDS } from "@/lib/catalog/corrections";
+import {
+    CATALOG_GENDERS,
+    RUN_TYPES,
+    isCatalogGender,
+    isRunType,
+    normalizeCatalogBreed,
+    normalizeRunCount,
+} from "@/lib/catalog/taxonomy";
 
 /* ──────────────────────────────────────────────────────
    catalog-suggestions.ts — Server Action Unit Tests
@@ -204,5 +212,137 @@ describe("Vote count denormalization", () => {
         if (currentVote === "up") upvotes--;
         downvotes++;
         expect(upvotes - downvotes).toBe(1);
+    });
+});
+
+/* ──────────────────────────────────────────────────────
+   Tier 1 attribute guards (2026-08-23)
+
+   applyApprovedSuggestion() maps an approved addition's field_changes
+   into the attributes JSONB. These are the guards it runs on the way
+   in — imported from taxonomy.ts, never mirrored here, so the tests
+   cannot drift from what approval actually stores.
+
+   The contract everywhere below: a value the guard doesn't recognize
+   yields undefined/false, and the caller's `...(x ? {k:x} : {})`
+   spread drops it. A bad value costs its own field and nothing else —
+   approval still succeeds, the attribute is simply absent.
+   ────────────────────────────────────────────────────── */
+
+describe("run_type approval guard", () => {
+    it("accepts every value the suggestion form can emit", () => {
+        for (const rt of RUN_TYPES) expect(isRunType(rt)).toBe(true);
+    });
+
+    it("holds the nine owner-approved release channels", () => {
+        expect(RUN_TYPES).toHaveLength(9);
+        expect(RUN_TYPES).toContain("Regular Run");
+        expect(RUN_TYPES).toContain("BreyerFest");
+        expect(RUN_TYPES).toContain("One of a Kind");
+    });
+
+    it("rejects near-misses in case and spacing", () => {
+        // The filter matches on the exact stored string, so these are
+        // the failures that would silently split a facet in two.
+        expect(isRunType("web special")).toBe(false);
+        expect(isRunType("WEB SPECIAL")).toBe(false);
+        expect(isRunType(" Web Special ")).toBe(false);
+        expect(isRunType("Web  Special")).toBe(false);
+    });
+
+    it("rejects free text and non-strings", () => {
+        expect(isRunType("Limited Edition")).toBe(false);
+        expect(isRunType("")).toBe(false);
+        expect(isRunType(undefined)).toBe(false);
+        expect(isRunType(null)).toBe(false);
+        expect(isRunType(42)).toBe(false);
+        expect(isRunType(["Regular Run"])).toBe(false);
+    });
+});
+
+describe("run_count approval guard", () => {
+    it("stores a positive integer as a plain string", () => {
+        expect(normalizeRunCount("2500")).toBe("2500");
+        expect(normalizeRunCount("1")).toBe("1");
+        expect(normalizeRunCount(2500)).toBe("2500");
+    });
+
+    it("trims surrounding whitespace and drops leading zeros", () => {
+        expect(normalizeRunCount("  2500  ")).toBe("2500");
+        expect(normalizeRunCount("0250")).toBe("250");
+    });
+
+    it("rejects zero and negatives — a run of none is not a run", () => {
+        expect(normalizeRunCount("0")).toBeUndefined();
+        expect(normalizeRunCount("00")).toBeUndefined();
+        expect(normalizeRunCount("-5")).toBeUndefined();
+        expect(normalizeRunCount(-5)).toBeUndefined();
+    });
+
+    it("rejects the formatted and approximate values collectors type", () => {
+        expect(normalizeRunCount("2,500")).toBeUndefined();
+        expect(normalizeRunCount("~2500")).toBeUndefined();
+        expect(normalizeRunCount("2500 pieces")).toBeUndefined();
+        expect(normalizeRunCount("about 2500")).toBeUndefined();
+        expect(normalizeRunCount("2500.0")).toBeUndefined();
+    });
+
+    it("rejects absurd magnitudes and non-values", () => {
+        expect(normalizeRunCount("12345678")).toBeUndefined();
+        expect(normalizeRunCount("")).toBeUndefined();
+        expect(normalizeRunCount("   ")).toBeUndefined();
+        expect(normalizeRunCount(undefined)).toBeUndefined();
+        expect(normalizeRunCount(null)).toBeUndefined();
+        expect(normalizeRunCount({ count: 2500 })).toBeUndefined();
+    });
+});
+
+describe("gender approval guard", () => {
+    it("accepts the horse forms' vocabulary verbatim", () => {
+        for (const g of CATALOG_GENDERS) expect(isCatalogGender(g)).toBe(true);
+        expect(isCatalogGender("Mare")).toBe(true);
+        expect(isCatalogGender("Gelding")).toBe(true);
+    });
+
+    it("includes the longears terms, not just the horse list", () => {
+        // Regression guard: flattening GENDER_GROUPS must keep every
+        // group, or donkey/mule entries silently fail approval.
+        expect(isCatalogGender("Jenny")).toBe(true);
+        expect(isCatalogGender("Jack")).toBe(true);
+        expect(isCatalogGender("John")).toBe(true);
+        expect(isCatalogGender("Molly")).toBe(true);
+    });
+
+    it("rejects synonyms outside the vocabulary", () => {
+        expect(isCatalogGender("mare")).toBe(false);
+        expect(isCatalogGender("Male")).toBe(false);
+        expect(isCatalogGender("Female")).toBe(false);
+        expect(isCatalogGender("Stud")).toBe(false);
+        expect(isCatalogGender("")).toBe(false);
+        expect(isCatalogGender(undefined)).toBe(false);
+        expect(isCatalogGender(7)).toBe(false);
+    });
+});
+
+describe("breed approval guard", () => {
+    it("keeps free text — there is no breed vocabulary to check against", () => {
+        expect(normalizeCatalogBreed("Andalusian")).toBe("Andalusian");
+        expect(normalizeCatalogBreed("Rocky Mountain Horse")).toBe("Rocky Mountain Horse");
+    });
+
+    it("trims, and treats whitespace-only as absent", () => {
+        expect(normalizeCatalogBreed("  Arabian  ")).toBe("Arabian");
+        expect(normalizeCatalogBreed("   ")).toBeUndefined();
+        expect(normalizeCatalogBreed("")).toBeUndefined();
+    });
+
+    it("caps at 100 chars, matching assigned_breed on user horses", () => {
+        expect(normalizeCatalogBreed("x".repeat(150))).toHaveLength(100);
+    });
+
+    it("rejects non-strings", () => {
+        expect(normalizeCatalogBreed(undefined)).toBeUndefined();
+        expect(normalizeCatalogBreed(null)).toBeUndefined();
+        expect(normalizeCatalogBreed(["Arabian"])).toBeUndefined();
     });
 });

@@ -78,8 +78,8 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
   ? Object.entries(attrs)
   .filter(([, v]) => v != null && v !=="")
   .map(([k, v]) => ({
-   label: k === "retail_price" ? "Original retail" : formatLabel(k),
-   value: k === "retail_price" && Number.isFinite(Number(v)) ? `${Number(v).toFixed(2)}` : String(v),
+   label: formatLabel(k),
+   value: formatAttrValue(k, v),
   }))
   : []),
  ];
@@ -199,6 +199,24 @@ function formatItemType(type: string): string {
  return type.replace(/_/g," ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+/* Attribute-key labels. Keys where generic Title Case reads wrong get a
+   name here — kept in step with fmtLabel/fmtAttrValue on the reference
+   page, which is the canonical public view of the same attributes. */
 function formatLabel(key: string): string {
+ if (key ==="retail_price") return"Original retail";
+ if (key ==="run_type") return"Run";
+ if (key ==="run_count") return"Pieces made";
  return key.replace(/_/g," ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function formatAttrValue(key: string, v: unknown): string {
+ if (key ==="retail_price") {
+  const n = Number(v);
+  return Number.isFinite(n) ? `$${n.toFixed(2)}` : String(v);
+ }
+ if (key ==="run_count") {
+  const n = Number(v);
+  return Number.isInteger(n) && n > 0 ? n.toLocaleString("en-US") : String(v);
+ }
+ return String(v);
 }

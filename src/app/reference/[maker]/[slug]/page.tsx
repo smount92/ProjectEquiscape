@@ -144,6 +144,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 function fmtLabel(key: string): string {
     if (key === "retail_price") return "Original retail";
+    // Generic Title Case reads wrong for these two: "Run Type" is
+    // redundant next to its own value ("Run: Web Special" is how the
+    // hobby says it) and "Run Count" sounds like a tally of runs.
+    if (key === "run_type") return "Run";
+    if (key === "run_count") return "Pieces made";
     return key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
@@ -152,6 +157,13 @@ function fmtAttrValue(key: string, v: unknown): string {
     if (key === "retail_price") {
         const n = Number(v);
         return Number.isFinite(n) ? `$${n.toFixed(2)}` : String(v);
+    }
+    // Run sizes are stored as plain digit strings ("2500"); four+ digits
+    // are unreadable without separators. Locale pinned so the server
+    // render and the client hydration can never disagree.
+    if (key === "run_count") {
+        const n = Number(v);
+        return Number.isInteger(n) && n > 0 ? n.toLocaleString("en-US") : String(v);
     }
     return String(v);
 }

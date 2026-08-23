@@ -200,6 +200,27 @@ describe("advanced (attributes) filters", () => {
         expect(removeCatalogFilter(filters, "material").material).toBeUndefined();
     });
 
+    it("round-trips a run chip and removes it cleanly", () => {
+        const filters = parseCatalogSearchParams({ run: "Web Special" });
+        expect(filters.runType).toBe("Web Special");
+        expect(hasAdvancedCatalogFilters(filters)).toBe(true);
+        const chip = activeCatalogChips(filters).find((c) => c.key === "runType");
+        expect(chip?.label).toBe("Web Special");
+        expect(removeCatalogFilter(filters, "runType").runType).toBeUndefined();
+        const back = parseCatalogSearchParams(
+            Object.fromEntries(buildCatalogSearchParams(filters).entries()),
+        );
+        expect(back).toEqual(filters);
+    });
+
+    it("drops a ?run= value outside the RUN_TYPES vocabulary", () => {
+        // The filter is an exact-match on the stored string, so a
+        // hand-typed variant must not become a URL that matches nothing.
+        expect(parseCatalogSearchParams({ run: "web special" }).runType).toBeUndefined();
+        expect(parseCatalogSearchParams({ run: "Limited Edition" }).runType).toBeUndefined();
+        expect(parseCatalogSearchParams({ run: "" }).runType).toBeUndefined();
+    });
+
     it("renders one year chip and removing it clears both bounds", () => {
         const filters = { sort: "name-az" as const, page: 3, yearFrom: 1995, yearTo: 2001, color: "bay" };
         const chips = activeCatalogChips(filters);

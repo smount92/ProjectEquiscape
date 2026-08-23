@@ -10,7 +10,7 @@
  * Mirrors src/lib/showring/filterParams.ts.
  */
 
-import { CATALOG_CATEGORIES } from "./taxonomy";
+import { CATALOG_CATEGORIES, RUN_TYPES } from "./taxonomy";
 
 export const CATALOG_SORTS = ["name-az", "name-za", "maker", "newest"] as const;
 export type CatalogSort = (typeof CATALOG_SORTS)[number];
@@ -23,6 +23,8 @@ export type CatalogSort = (typeof CATALOG_SORTS)[number];
 export const CATALOG_TYPE_OPTIONS = CATALOG_CATEGORIES;
 
 const TYPE_VALUES = CATALOG_TYPE_OPTIONS.map((t) => t.value) as readonly string[];
+/** run_type is a closed vocabulary — an unknown ?run= value is dropped. */
+const RUN_TYPE_VALUES = RUN_TYPES as readonly string[];
 const TYPE_LABELS: Record<string, string> = Object.fromEntries(
     CATALOG_TYPE_OPTIONS.map((t) => [t.value, t.label]),
 );
@@ -50,6 +52,8 @@ export interface CatalogFilters {
     model?: string;
     medium?: string;
     material?: string;
+    /** Tier 1 (2026-08-23): attributes.run_type, a closed vocabulary. */
+    runType?: string;
     sort: CatalogSort;
     page: number;
 }
@@ -121,6 +125,9 @@ export function parseCatalogSearchParams(
     const material = nonEmpty(params.material, 40);
     if (material) filters.material = material;
 
+    const runType = nonEmpty(params.run, 40);
+    if (runType && RUN_TYPE_VALUES.includes(runType)) filters.runType = runType;
+
     const sort = nonEmpty(params.sort, 20);
     if (sort && (CATALOG_SORTS as readonly string[]).includes(sort)) {
         filters.sort = sort as CatalogSort;
@@ -151,6 +158,7 @@ export function buildCatalogSearchParams(filters: Partial<CatalogFilters>): URLS
     if (filters.model) params.set("model", filters.model);
     if (filters.medium) params.set("medium", filters.medium);
     if (filters.material) params.set("material", filters.material);
+    if (filters.runType) params.set("run", filters.runType);
     if (filters.sort && filters.sort !== "name-az") params.set("sort", filters.sort);
     if (filters.page && filters.page > 1) params.set("page", String(filters.page));
     return params;
@@ -182,7 +190,8 @@ export function hasAdvancedCatalogFilters(filters: CatalogFilters): boolean {
         Boolean(filters.color) ||
         Boolean(filters.model) ||
         Boolean(filters.medium) ||
-        Boolean(filters.material)
+        Boolean(filters.material) ||
+        Boolean(filters.runType)
     );
 }
 
@@ -200,7 +209,8 @@ export interface CatalogFilterChip {
         | "color"
         | "model"
         | "medium"
-        | "material";
+        | "material"
+        | "runType";
     label: string;
 }
 
@@ -230,6 +240,7 @@ export function activeCatalogChips(filters: CatalogFilters): CatalogFilterChip[]
     if (filters.model) chips.push({ key: "model", label: `#${filters.model}` });
     if (filters.medium) chips.push({ key: "medium", label: filters.medium });
     if (filters.material) chips.push({ key: "material", label: filters.material });
+    if (filters.runType) chips.push({ key: "runType", label: filters.runType });
     return chips;
 }
 

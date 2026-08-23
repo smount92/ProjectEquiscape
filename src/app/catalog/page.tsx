@@ -89,6 +89,7 @@ export default async function ReferencePage({
             model: filters.model,
             medium: filters.medium,
             material: filters.material,
+            runType: filters.runType,
             sortBy,
             sortDir,
             page: filters.page,
