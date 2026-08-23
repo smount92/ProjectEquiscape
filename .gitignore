@@ -60,3 +60,7 @@ lint_results.txt
 
 # Obsidian vault config (repo lives inside an Obsidian vault)
 .obsidian/  
+
+# Catalog audit working files (regenerate with scripts/catalog-delta/audit_catalog.mjs)
+catalog_snapshot.json
+reality_mech.json
