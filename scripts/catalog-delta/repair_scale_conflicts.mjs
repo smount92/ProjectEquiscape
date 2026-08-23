@@ -32,6 +32,14 @@ import { createClient } from "@supabase/supabase-js";
 const ROOT = process.cwd();
 const APPLY = process.argv.includes("--apply");
 const SHOW_ALL = process.argv.includes("--tier=all");
+/**
+ * --unlinked extends the repair to rows carrying only ONE signal, on the
+ * owner's rule: if no member's horse points at a row, better data wins.
+ * The bar is still evidence, not a guess — a lone anachronism says a field
+ * is wrong without saying WHICH, so those are still skipped unless a
+ * sibling majority names the replacement.
+ */
+const UNLINKED = process.argv.includes("--unlinked");
 
 function loadEnv() {
     const out = {};
@@ -86,15 +94,55 @@ async function main() {
         if (!byNum.has(n)) byNum.set(n, []);
         byNum.get(n).push(r);
     }
+
+    /**
+     * The sibling rule assumes a model number identifies one release. Some
+     * numbers are import placeholders instead: #430040 carries 36 rows with
+     * 35 different titles across 3 scales — Misty, a Clydesdale Foal, a Stud
+     * Spider. Rows sharing a placeholder are not siblings and say nothing
+     * about each other. Assortment numbers legitimately cover ~6 models, so
+     * the line sits well above that.
+     */
+    const PLACEHOLDER_TITLES = 12;
+    const placeholder = new Set();
+    for (const [n, g] of byNum) {
+        if (new Set(g.map((r) => String(r.title))).size > PLACEHOLDER_TITLES) placeholder.add(n);
+    }
+    if (placeholder.size) {
+        console.log(`  ignoring ${placeholder.size} placeholder model number(s): ${[...placeholder].join(", ")}`);
+    }
+
+    /**
+     * A row whose own title names a scale outranks its siblings. #711298
+     * holds two Traditional "Churchill" rows and one "Stablemate Foal
+     * Keychain"; the majority would have made the keychain Traditional,
+     * against the word in its own name.
+     */
+    const TITLE_SCALE = [
+        [/\btraditional\b/i, "Traditional (1:9)"],
+        [/\bstablemates?\b/i, "Stablemate (1:32)"],
+        [/\bclassics?\b/i, "Classic (1:12)"],
+        [/\bpaddock pal|little bits?\b/i, "Paddock Pal (1:24)"],
+    ];
+    const titleSaysScale = (title) => TITLE_SCALE.find(([re]) => re.test(String(title)))?.[1] ?? null;
+
     const siblingSays = new Map();
-    for (const [, g] of byNum) {
-        if (g.length < 2) continue;
+    for (const [num, g] of byNum) {
+        if (g.length < 2 || placeholder.has(num)) continue;
         const tally = new Map();
         for (const r of g) tally.set(r.scale, (tally.get(r.scale) ?? 0) + 1);
         if (tally.size < 2) continue;
         const [[top, n]] = [...tally.entries()].sort((a, b) => b[1] - a[1]);
-        // A real majority, not a tie.
-        for (const r of g) if (r.scale !== top && n >= 2 && n > g.length - n) siblingSays.set(r.id, top);
+        // A real majority, not a tie — and never against the row's own name.
+        for (const r of g) {
+            if (r.scale === top || !(n >= 2 && n > g.length - n)) continue;
+            const own = titleSaysScale(r.title);
+            if (own && own !== top) {
+                console.log(`  held: "${String(r.title).slice(0, 46)}" — its own title says ${own}`);
+                continue;
+            }
+            siblingSays.set(r.id, top);
+        }
     }
 
     const both = rows.filter((r) => anachronistic.has(r.id) && siblingSays.has(r.id));
@@ -138,9 +186,55 @@ async function main() {
         written++;
     }
 
+    // ── Second pass: one signal, but nobody has linked the row ──
+    let unlinkedFixed = 0, ambiguous = 0, linkedHeld = 0;
+    if (UNLINKED) {
+        // Only rows a sibling majority can NAME a replacement for. An
+        // anachronism on its own says something is wrong without saying
+        // what to put instead.
+        const nameable = oneSignal.filter((r) => siblingSays.has(r.id));
+        ambiguous = oneSignal.length - nameable.length;
+
+        // Live reference check — a row anyone points at is off limits.
+        const linked = new Set();
+        const ids = nameable.map((r) => r.id);
+        for (const [table, col] of [["user_horses", "catalog_id"], ["user_wishlists", "catalog_id"],
+                                    ["id_suggestions", "catalog_id"]]) {
+            for (let i = 0; i < ids.length; i += 200) {
+                const chunk = ids.filter((_, j) => j >= i && j < i + 200);
+                if (!chunk.length) continue;
+                const { data, error } = await admin.from(table).select(col).in(col, chunk);
+                if (error) {
+                    console.error(`REFUSING: cannot read ${table}.${col} (${error.message}) — that check is the whole rule.`);
+                    process.exit(1);
+                }
+                for (const row of data ?? []) linked.add(row[col]);
+            }
+        }
+
+        console.log(`\n── one signal, unlinked rows ──`);
+        for (const r of nameable) {
+            if (linked.has(r.id)) { linkedHeld++; continue; }
+            const to = siblingSays.get(r.id);
+            const why = anachronistic.has(r.id)
+                ? `${r.scale} predates its line` : `siblings on #${r.attributes?.model_number} say ${to}`;
+            console.log(`  ${APPLY ? "fixed" : "would fix"} ${String(r.title).slice(0, 42).padEnd(44)} ${r.scale} -> ${to}   (${why})`);
+            if (APPLY) {
+                const { error } = await admin.from("catalog_items").update({ scale: to }).eq("id", r.id);
+                if (error) { console.error(`      x ${error.message}`); continue; }
+            }
+            unlinkedFixed++;
+        }
+    }
+
     console.log(`\n${APPLY ? "APPLIED" : "DRY RUN"}: ${written} scales ${APPLY ? "corrected" : "would be corrected"} (both signals agree)`);
     if (held) console.log(`  ${held} held because a member set the value`);
-    console.log(`  ${oneSignal.length} rows have ONE signal only — reported, never written`);
+    if (UNLINKED) {
+        console.log(`  ${unlinkedFixed} more ${APPLY ? "corrected" : "would be corrected"} — one signal, nobody linked`);
+        console.log(`  ${linkedHeld} held because a member's horse points at them`);
+        console.log(`  ${ambiguous} left alone — a signal says something is wrong but not what to put instead`);
+    }
+    console.log(`  ${oneSignal.length} rows have ONE signal only${UNLINKED ? "" : " — reported, never written"}`);
     if (SHOW_ALL) {
         for (const r of oneSignal) {
             const why = anachronistic.has(r.id)
