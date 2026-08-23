@@ -106,16 +106,26 @@ BUILT AND LIVE:
    follow-up PR removes the flag *and its fallback branch*. That last
    step is not optional; nine v1 flags accumulated into nine untested
    fallback paths before Phase 0 deleted them all.
-   **Flags that exist today:** `NEXT_PUBLIC_FORM_ENGINE` (dark),
-   `NEXT_PUBLIC_SHOW_STANDINGS` (dark), `NEXT_PUBLIC_REFERENCE_PAGES`
-   (SEO kill-switch, ON), `NEXT_PUBLIC_WANTED_NUDGE` (off). All are
-   visible live in the admin console's Ops tab.
+   **Do not trust a hand-kept flag list here** — this one named four when
+   there were more than twice that. Derive it:
+   `grep -rhoE "NEXT_PUBLIC_[A-Z_]+" src/ | sort -u`. Behaviour flags at
+   the time of writing were `NEXT_PUBLIC_FORM_ENGINE`,
+   `NEXT_PUBLIC_SHOW_STANDINGS`, `NEXT_PUBLIC_WANTED_NUDGE`,
+   `NEXT_PUBLIC_PAYPAL_BILLING`, `NEXT_PUBLIC_PREPAID_TERMS`,
+   `NEXT_PUBLIC_EBAY_COMPS`, `NEXT_PUBLIC_GROUPS_FORUM` and
+   `NEXT_PUBLIC_REFERENCE_PAGES` (an SEO kill-switch, ON) — the rest of
+   the matches are config, not switches. Live state is in the admin
+   console's Ops tab, which is authoritative over any doc.
 3. **Migrations are FILES ONLY** (`supabase/migrations/NNN_*.sql`,
    additive, re-runnable, RLS in the house `(SELECT auth.uid())` idiom,
    SET search_path on functions). THE OWNER pastes them into the Supabase
-   SQL editor personally. **Next number: 176** (175 is the latest; 174 is
-   a deliberate gap). After apply: `npm run gen-types`, replace any
-   interim types.
+   SQL editor personally. **DERIVE the next number, never read it from a
+   doc** — `ls supabase/migrations | sort -n | tail -1`, then add one.
+   This line previously named a fixed number and was nine migrations out
+   of date within days; an agent trusting it would have written over an
+   applied migration. Note 174 is a deliberate gap, so the highest file
+   is authoritative rather than the count. After apply:
+   `npm run gen-types`, replace any interim types.
    Two traps that have bitten: a guard trigger must return early when
    `auth.uid() IS NULL` or the migration's own backfill trips it, and
    never edit migration SQL with a plain-string `String.replace()` — JS
