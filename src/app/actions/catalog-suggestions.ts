@@ -125,6 +125,22 @@ export interface SuggestionComment {
  */
 const FUZZY_CANDIDATE_LIMIT = 200;
 
+/**
+ * The column a name sort actually files by. `title` is what a member
+ * reads; `sort_key` (migration 188) is where it belongs on the shelf —
+ * leading punctuation dropped, accented initials folded to their base
+ * letter, non-letter titles pushed to the back.
+ */
+const CATALOG_NAME_SORT_COLUMN = "sort_key";
+
+/** True when the failure is only that migration 188 has not been pasted yet. */
+function isMissingSortKey(error: { code?: string; message?: string }): boolean {
+    return (
+        error.code === "42703" ||
+        Boolean(error.message && error.message.includes(CATALOG_NAME_SORT_COLUMN))
+    );
+}
+
 export async function getCatalogItems(filters: CatalogFilters) {
     const supabase = await createClient();
     const page = filters.page ?? 1;
@@ -163,52 +179,68 @@ export async function getCatalogItems(filters: CatalogFilters) {
     // ≤FUZZY_CANDIDATE_LIMIT rows, so an exact count is cheap AND honest
     // there, while "estimated" (planner stats) stays for whole-catalog
     // browsing where exact counting is the expensive part.
-    let query = supabase
-        .from("catalog_items")
-        .select("id, item_type, parent_id, title, maker, maker_slug, slug, scale, attributes, created_at", {
-            count: searchIds ? "exact" : "estimated",
-        })
-        .range(from, from + pageSize - 1);
+    const build = (nameSortColumn: string) => {
+        let query = supabase
+            .from("catalog_items")
+            .select("id, item_type, parent_id, title, maker, maker_slug, slug, scale, attributes, created_at", {
+                count: searchIds ? "exact" : "estimated",
+            })
+            .range(from, from + pageSize - 1);
 
-    if (filters.maker) query = query.eq("maker", filters.maker);
-    // Attribution split (156): company / person facets.
-    if (filters.manufacturer) query = query.eq("manufacturer", filters.manufacturer);
-    if (filters.artist) query = query.eq("artist", filters.artist);
-    if (filters.scale) query = query.eq("scale", filters.scale);
-    if (filters.type) query = query.eq("item_type", filters.type);
-    if (searchIds) {
-        query = query.in("id", searchIds);
-    } else if (filters.search) {
-        const q = sanitizeForOr(filters.search);
-        if (q) query = query.or(`title.ilike.%${q}%,maker.ilike.%${q}%`);
+        if (filters.maker) query = query.eq("maker", filters.maker);
+        // Attribution split (156): company / person facets.
+        if (filters.manufacturer) query = query.eq("manufacturer", filters.manufacturer);
+        if (filters.artist) query = query.eq("artist", filters.artist);
+        if (filters.scale) query = query.eq("scale", filters.scale);
+        if (filters.type) query = query.eq("item_type", filters.type);
+        if (searchIds) {
+            query = query.in("id", searchIds);
+        } else if (filters.search) {
+            const q = sanitizeForOr(filters.search);
+            if (q) query = query.or(`title.ilike.%${q}%,maker.ilike.%${q}%`);
+        }
+
+        // Advanced filters live in the attributes JSONB. Year is stored as a
+        // 4-digit value, so lexical text comparison on ->> matches numeric order
+        // for the realistic range; rows lacking the key are naturally excluded.
+        if (filters.yearFrom !== undefined)
+            query = query.gte("attributes->>release_year_start", String(filters.yearFrom));
+        if (filters.yearTo !== undefined)
+            query = query.lte("attributes->>release_year_start", String(filters.yearTo));
+        if (filters.color)
+            query = query.ilike("attributes->>color_description", `%${filters.color}%`);
+        if (filters.model)
+            query = query.ilike("attributes->>model_number", `%${filters.model}%`);
+        if (filters.medium)
+            query = query.ilike("attributes->>cast_medium", `%${filters.medium}%`);
+        if (filters.material)
+            query = query.eq("attributes->>material", filters.material);
+        // Run type is a closed vocabulary, so exact-match (not ilike): the
+        // point of the fixed list is that every "Web Special" row matches.
+        if (filters.runType)
+            query = query.eq("attributes->>run_type", filters.runType);
+
+        // A name sort files by sort_key (188), never by the raw title: a
+        // leading quotation mark or an accented initial would otherwise
+        // decide the order, which is what put 72 punctuation-led rows on
+        // page one and left Éclair sorting after Z. Maker and date sorts
+        // are unaffected.
+        const sortBy = filters.sortBy === "title" ? nameSortColumn : filters.sortBy;
+        if (sortBy)
+            query = query.order(sortBy, {
+                ascending: filters.sortDir === "asc",
+            });
+        else query = query.order(nameSortColumn, { ascending: true });
+
+        return query;
+    };
+
+    let { data, count, error } = await build(CATALOG_NAME_SORT_COLUMN);
+    // Migration 188 pending (fresh env, un-pasted)? Browsing must not go
+    // down over a sort refinement, so fall back to the raw title.
+    if (error && isMissingSortKey(error)) {
+        ({ data, count, error } = await build("title"));
     }
-
-    // Advanced filters live in the attributes JSONB. Year is stored as a
-    // 4-digit value, so lexical text comparison on ->> matches numeric order
-    // for the realistic range; rows lacking the key are naturally excluded.
-    if (filters.yearFrom !== undefined)
-        query = query.gte("attributes->>release_year_start", String(filters.yearFrom));
-    if (filters.yearTo !== undefined)
-        query = query.lte("attributes->>release_year_start", String(filters.yearTo));
-    if (filters.color)
-        query = query.ilike("attributes->>color_description", `%${filters.color}%`);
-    if (filters.model)
-        query = query.ilike("attributes->>model_number", `%${filters.model}%`);
-    if (filters.medium)
-        query = query.ilike("attributes->>cast_medium", `%${filters.medium}%`);
-    if (filters.material)
-        query = query.eq("attributes->>material", filters.material);
-    // Run type is a closed vocabulary, so exact-match (not ilike): the
-    // point of the fixed list is that every "Web Special" row matches.
-    if (filters.runType)
-        query = query.eq("attributes->>run_type", filters.runType);
-    if (filters.sortBy)
-        query = query.order(filters.sortBy, {
-            ascending: filters.sortDir === "asc",
-        });
-    else query = query.order("title", { ascending: true });
-
-    const { data, count, error } = await query;
     if (error)
         return { success: false as const, error: error.message };
     return {
