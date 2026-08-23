@@ -69,7 +69,20 @@ async function main() {
         if (data.length < 1000) break;
     }
 
-    const key = (r) => JSON.stringify([r.title, r.maker, r.scale, r.item_type, r.parent_id, r.attributes]);
+    // Attributes are compared by VALUE, not by JSON type. The bulk import
+    // wrote release_year_start as a number 6,029 times and as a string
+    // 1,491 times (same for run_count and release_year_end), so a strict
+    // comparison reports two rows as different when the only difference is
+    // 2003 vs "2003". That hid 5 duplicate rows until an agent noticed the
+    // pattern. Empty and null are dropped so a key present-but-blank does
+    // not read as distinct from a key that is absent.
+    const attrKey = (a) => JSON.stringify(
+        Object.entries(a ?? {})
+            .filter(([, v]) => v != null && v !== "")
+            .map(([k, v]) => [k, String(v)])
+            .sort(([x], [y]) => x.localeCompare(y))
+    );
+    const key = (r) => JSON.stringify([r.title, r.maker, r.scale, r.item_type, r.parent_id, attrKey(r.attributes)]);
     const groups = new Map();
     for (const r of rows) {
         const k = key(r);
