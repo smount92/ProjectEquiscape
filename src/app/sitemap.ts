@@ -108,12 +108,47 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             priority: 0.7,
         },
 
-        // NOTE: /community, /community/groups, /community/events and
-        // /community/help-id are login-walled (each page redirects anon
-        // to /login) — advertising them here just feeds crawlers a wall.
-        // Re-add them if/when they actually render for anon. The PUBLIC
-        // community surface — horse passports at /community/[id] — is
-        // still listed dynamically below.
+        // These four were left out on the belief that each redirected anon
+        // to /login. Fetched as an anonymous client, all four return a full
+        // page — the note was written from an assumption, not a check.
+        //
+        // help-id carries the highest priority of the group on purpose:
+        // "what model horse do I have" is the question a newcomer actually
+        // types into a search engine, and this is the page that answers it.
+        // It had three uses in its lifetime while being hidden from search.
+        {
+            url: `${baseUrl}/community/help-id`,
+            lastModified: now,
+            changeFrequency: "daily",
+            priority: 0.9,
+        },
+        {
+            url: `${baseUrl}/community`,
+            lastModified: now,
+            changeFrequency: "daily",
+            priority: 0.7,
+        },
+        {
+            url: `${baseUrl}/community/groups`,
+            lastModified: now,
+            changeFrequency: "weekly",
+            priority: 0.6,
+        },
+        {
+            url: `${baseUrl}/community/events`,
+            lastModified: now,
+            changeFrequency: "daily",
+            priority: 0.6,
+        },
+        // The members directory. Migration 186 fixed the view that made it
+        // render empty for everyone; before that there was nothing here
+        // worth indexing, which is why it was omitted.
+        {
+            url: `${baseUrl}/discover`,
+            lastModified: now,
+            changeFrequency: "weekly",
+            priority: 0.6,
+        },
 
         // ── Public feature pages ──
         {

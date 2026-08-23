@@ -28,6 +28,7 @@ export default function robots(): MetadataRoute.Robots {
                     // Horse passports (/community/[id]) are genuinely public
                     // (anon RPC) — the login-walled community INDEX pages are
                     // disallowed below until they actually open up.
+                    "/community",
                     "/community/*",
                     "/catalog",
                     "/catalog/*",
@@ -39,22 +40,19 @@ export default function robots(): MetadataRoute.Robots {
                     "/shows/*",
                     "/profile/*",
                     "/getting-started",
+                    // Members directory. Was disallowed on the belief it
+                    // redirected anon to /login; it does not, and migration
+                    // 186 fixed the view that made it look empty.
+                    "/discover",
+                    "/discover/*",
                 ],
                 disallow: [
-                    // Login-walled community surfaces (anon → /login). The $
-                    // anchor keeps exactly /community out while /community/*
-                    // passport pages stay crawlable via the allow above.
-                    "/community$",
-                    "/community/groups",
-                    "/community/groups/*",
-                    // /community/barns/* is the Barns-name alias that
-                    // 307s into /community/groups/* — equally walled.
+                    // /community/barns/* is the Barns-name alias that 307s
+                    // into /community/groups/*. Kept out deliberately: the
+                    // canonical /community/groups pages are crawlable above,
+                    // and indexing both would be duplicate content.
                     "/community/barns",
                     "/community/barns/*",
-                    "/community/events",
-                    "/community/events/*",
-                    "/community/help-id",
-                    "/community/help-id/*",
                     "/dashboard",
                     "/dashboard/*",
                     "/stable",
@@ -78,9 +76,14 @@ export default function robots(): MetadataRoute.Robots {
                     "/api/*",
                     // Redirect anon to /login (personalized / members-only), so
                     // there's nothing for a crawler to index — keep them out.
+                    // VERIFIED by fetching each as an anonymous client rather
+                    // than assumed: only these two actually land on /login.
+                    // Five others sat here on the same assumption and were
+                    // serving full public pages the whole time — including
+                    // /community/help-id, "Help Me ID This Model", which is
+                    // the single page a newcomer is most likely to arrive on
+                    // from a search and had three uses in its lifetime.
                     "/feed",
-                    "/discover",
-                    "/discover/*",
                     "/studio",
                 ],
             },
