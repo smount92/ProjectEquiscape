@@ -11,6 +11,10 @@
         {
             "path": "/api/cron/stablemaster-agent",
             "schedule": "0 9 1 * *"
+        },
+        {
+            "path": "/api/cron/ebay-price-signals",
+            "schedule": "0 7 * * 1"
         }
     ]
 }
