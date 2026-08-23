@@ -553,6 +553,8 @@ export default function Header() {
  className={`leather-menu absolute left-0 top-[var(--header-height)] z-[150] flex w-full flex-col gap-1 border-b border-input bg-secondary px-4 py-3 shadow-lg transition-all md:hidden ${mobileMenuOpen ?"" :"hidden"}`}
  aria-label="Mobile navigation"
  >
+ {/* The five rooms, in the order the desktop bar walks them. */}
+ <span className="mb-0.5 px-2 text-[0.65rem] font-bold tracking-[0.14em] uppercase text-muted-foreground/60" aria-hidden="true">The rooms</span>
  <Link
  href="/dashboard"
  className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
@@ -560,38 +562,6 @@ export default function Header() {
  onClick={closeMobileMenu}
  >
  <Home size={16} strokeWidth={1.5} /> Digital Stable
- </Link>
- <Link
- href={aliasName ? `/profile/${encodeURIComponent(aliasName)}` :"/settings"}
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-profile-m"
- onClick={closeMobileMenu}
- >
- <User size={16} strokeWidth={1.5} /> My Profile
- </Link>
- <Link
- href="/community"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-community-m"
- onClick={closeMobileMenu}
- >
- <Trophy size={16} strokeWidth={1.5} /> Show Ring
- </Link>
- <Link
- href="/discover"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-discover-m"
- onClick={closeMobileMenu}
- >
- <Users size={16} strokeWidth={1.5} /> Members
- </Link>
- <Link
- href="/feed"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-feed-m"
- onClick={closeMobileMenu}
- >
- <Newspaper size={16} strokeWidth={1.5} /> The Paddock
  </Link>
  <Link
  href="/shows"
@@ -602,20 +572,38 @@ export default function Header() {
  <Camera size={16} strokeWidth={1.5} /> Shows
  </Link>
  <Link
- href={artistSlug ?"/studio/dashboard" :"/studio/setup"}
+ href="/market"
  className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-studio-m"
+ id="nav-market-m"
  onClick={closeMobileMenu}
  >
- <Palette size={16} strokeWidth={1.5} /> Art Studio
+ <TrendingUp size={16} strokeWidth={1.5} /> Market
  </Link>
  <Link
- href="/community/help-id"
+ href="/feed"
  className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-helpid-m"
+ id="nav-feed-m"
  onClick={closeMobileMenu}
  >
- <Search size={16} strokeWidth={1.5} /> Help ID
+ <Newspaper size={16} strokeWidth={1.5} /> The Paddock
+ </Link>
+ <Link
+ href="/catalog"
+ className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+ id="nav-catalog-m"
+ onClick={closeMobileMenu}
+ >
+ <BookOpen size={16} strokeWidth={1.5} /> Registry
+ </Link>
+ {/* The inner rooms — what the desktop bar keeps under More. */}
+ <span className="mt-3 mb-0.5 px-2 text-[0.65rem] font-bold tracking-[0.14em] uppercase text-muted-foreground/60" aria-hidden="true">Inside the Paddock</span>
+ <Link
+ href="/community"
+ className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+ id="nav-community-m"
+ onClick={closeMobileMenu}
+ >
+ <Trophy size={16} strokeWidth={1.5} /> Show Ring
  </Link>
  <Link
  href="/community/groups"
@@ -642,20 +630,50 @@ export default function Header() {
  <CalendarDays size={16} strokeWidth={1.5} /> Calendar
  </Link>
  <Link
- href="/catalog"
+ href="/community/help-id"
  className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-catalog-m"
+ id="nav-helpid-m"
  onClick={closeMobileMenu}
  >
- <BookOpen size={16} strokeWidth={1.5} /> Registry
+ <Search size={16} strokeWidth={1.5} /> Help ID
  </Link>
  <Link
- href="/market"
+ href="/discover"
  className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-market-m"
+ id="nav-discover-m"
  onClick={closeMobileMenu}
  >
- <TrendingUp size={16} strokeWidth={1.5} /> Market
+ <Users size={16} strokeWidth={1.5} /> Members
+ </Link>
+ <Link
+ href={artistSlug ?"/studio/dashboard" :"/studio/setup"}
+ className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+ id="nav-studio-m"
+ onClick={closeMobileMenu}
+ >
+ <Palette size={16} strokeWidth={1.5} /> Art Studio
+ </Link>
+ {/* The member's own doors. */}
+ <span className="mt-3 mb-0.5 px-2 text-[0.65rem] font-bold tracking-[0.14em] uppercase text-muted-foreground/60" aria-hidden="true">Yours</span>
+ <Link
+ href={aliasName ? `/profile/${encodeURIComponent(aliasName)}` :"/settings"}
+ className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+ id="nav-profile-m"
+ onClick={closeMobileMenu}
+ >
+ <User size={16} strokeWidth={1.5} /> My Profile
+ </Link>
+ <Link
+ href="/inbox"
+ className="relative flex items-center gap-1 gap-[4px] rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+ id="nav-inbox-m"
+ onClick={closeMobileMenu}
+ >
+ <Mail size={16} strokeWidth={1.5} />
+ Inbox
+ {unreadMessages > 0 && (
+ <span className="inbox-unread-badge">{unreadMessages > 9 ?"9+" : unreadMessages}</span>
+ )}
  </Link>
  <Link
  href="/wishlist"
@@ -688,18 +706,6 @@ export default function Header() {
  onClick={closeMobileMenu}
  >
  <Settings size={16} strokeWidth={1.5} /> Settings
- </Link>
- <Link
- href="/inbox"
- className="relative flex items-center gap-1 gap-[4px] rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-inbox-m"
- onClick={closeMobileMenu}
- >
- <Mail size={16} strokeWidth={1.5} />
- Inbox
- {unreadMessages > 0 && (
- <span className="inbox-unread-badge">{unreadMessages > 9 ?"9+" : unreadMessages}</span>
- )}
  </Link>
  <ThemeToggle />
  <NotificationBell />
