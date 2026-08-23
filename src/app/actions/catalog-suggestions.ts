@@ -784,6 +784,10 @@ async function applyApprovedSuggestion(
                 ...(fc.color ? { color_description: fc.color } : {}),
                 ...(fc.model_number ? { model_number: fc.model_number } : {}),
                 ...(fc.material ? { material: fc.material } : {}),
+                // Original retail price (Amanda, 2026-08-23): what the maker
+                // charged at release. Pairs with the Blue Book on reference
+                // pages — original price beside today's market range.
+                ...(fc.retail_price ? { retail_price: fc.retail_price } : {}),
                 // Sculptor is credit, not maker — factory pieces have a
                 // company maker AND a named sculpting artist (the North
                 // Light lesson: conflating them misfiled 20 sculpts as

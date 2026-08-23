@@ -65,6 +65,7 @@ export default function SuggestNewEntryForm({
  const [color, setColor] = useState("");
  const [material, setMaterial] = useState("");
  const [year, setYear] = useState("");
+ const [retailPrice, setRetailPrice] = useState("");
  const [moldName, setMoldName] = useState("");
  const [reason, setReason] = useState("");
  // Duplicate speed bump: candidates from the server's title match.
@@ -104,6 +105,7 @@ export default function SuggestNewEntryForm({
  color: color || undefined,
  material: material || undefined,
  year: year ? parseInt(year, 10) : undefined,
+ retail_price: /^d{1,5}([.]d{1,2})?$/.test(retailPrice.trim()) ? retailPrice.trim() : undefined,
  mold_name: moldName || undefined,
  },
  reason: reason.trim(),
@@ -351,6 +353,21 @@ export default function SuggestNewEntryForm({
  min={1950}
  max={2030}
  />
+ </div>
+ <div className="mb-6">
+ <label className="text-foreground mb-1 block text-sm font-semibold" htmlFor="new-entry-retail">
+ Original retail price (USD)
+ </label>
+ <Input
+ id="new-entry-retail"
+ type="text"
+ inputMode="decimal"
+ value={retailPrice}
+ onChange={(e) => setRetailPrice(e.target.value)}
+ placeholder="e.g. 59.99"
+ maxLength={9}
+ />
+ <p className="text-muted-foreground mt-1 text-xs">What it sold for new, if you know it — shown beside today's Blue Book range.</p>
  </div>
  </div>
 

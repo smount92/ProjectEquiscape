@@ -143,7 +143,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 function fmtLabel(key: string): string {
+    if (key === "retail_price") return "Original retail";
     return key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+/** Attribute values that deserve more than String(v). */
+function fmtAttrValue(key: string, v: unknown): string {
+    if (key === "retail_price") {
+        const n = Number(v);
+        return Number.isFinite(n) ? `$${n.toFixed(2)}` : String(v);
+    }
+    return String(v);
 }
 
 /** Price tag relative to the Blue Book median. */
@@ -247,7 +257,7 @@ export default async function ReferencePage({ params }: Props) {
                 ([k, v]) =>
                     v != null && v !== "" && k !== "source" && k !== "source_id" && k !== "sculptor",
             )
-            .map(([k, v]) => [fmtLabel(k), String(v)] as [string, string]),
+            .map(([k, v]) => [fmtLabel(k), fmtAttrValue(k, v)] as [string, string]),
     ];
 
     return (

@@ -78,8 +78,8 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
   ? Object.entries(attrs)
   .filter(([, v]) => v != null && v !=="")
   .map(([k, v]) => ({
-   label: formatLabel(k),
-   value: String(v),
+   label: k === "retail_price" ? "Original retail" : formatLabel(k),
+   value: k === "retail_price" && Number.isFinite(Number(v)) ? `${Number(v).toFixed(2)}` : String(v),
   }))
   : []),
  ];
