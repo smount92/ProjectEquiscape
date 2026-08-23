@@ -53,6 +53,7 @@ export default function Footer() {
                         <Link href="/community/groups">Barns</Link>
                         <Link href="/community/events">Events</Link>
                         <Link href="/community/help-id">Help ID</Link>
+                        <Link href="/discover">Members</Link>
                         <Link href="/learn/glossary">Showing Glossary</Link>
                         <Link href="/learn/enter-your-first-photo-show">Your First Photo Show</Link>
                     </div>
