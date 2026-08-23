@@ -185,35 +185,38 @@ function parseReleasesFromPage(html, moldName) {
       const headerCheck = $(cells[4]).text().trim();
       if (headerCheck === "Model Number" || headerCheck === "Photo") return;
 
-      // Determine column layout
-      // Standard layout: 4 photo cols + model# + name + color + dates + notes = 9 cols
-      // Some pages may vary slightly
-      let modelNumIdx, nameIdx, colorIdx, datesIdx;
 
-      if (cells.length >= 9) {
-        // Standard 9-column layout
-        modelNumIdx = 4;
-        nameIdx = 5;
-        colorIdx = 6;
-        datesIdx = 7;
-      } else if (cells.length >= 7) {
-        // Some pages have fewer photo columns
-        // Try to find the model number column (numeric content)
-        modelNumIdx = -1;
-        for (let c = 0; c < cells.length; c++) {
-          const txt = $(cells[c]).text().trim();
-          if (/^\d{1,6}[A-Z]?$/i.test(txt) || /^\d{6}$/.test(txt)) {
-            modelNumIdx = c;
-            break;
-          }
-        }
-        if (modelNumIdx === -1) return; // Can't find model number
-        nameIdx = modelNumIdx + 1;
-        colorIdx = modelNumIdx + 2;
-        datesIdx = modelNumIdx + 3;
-      } else {
-        return; // Too few columns
-      }
+      // RIGHT-ALIGNED COLUMN MAPPING.
+      //
+      // These tables end with a fixed tail — Model# | Name | Color |
+      // Release Dates | Released Through/Notes — while the number of
+      // LEADING photo cells varies per page (4 to 9 seen). So count from
+      // the end, where the layout is stable.
+      //
+      // The previous version sniffed for the model number by content,
+      // matching /^d{1,6}[A-Z]?$/ against each cell left to right. A YEAR
+      // MATCHES THAT PATTERN. On the rows whose Model# cell is blank —
+      // one-of-a-kind auction pieces, test runs, prize models — it walked
+      // past the empty cell, found "1994" in Release Dates, and declared
+      // that the model number, shifting Name/Color/Dates one place right.
+      // 1,489 catalog rows were imported with a year as their model number,
+      // their notes as their title, and their real name and colour dropped.
+      // Anchoring on position instead of content is what makes that
+      // impossible to repeat.
+      const n = cells.length;
+      if (n < 5) return;
+      const notesIdx = n - 1;
+      const datesIdx = n - 2;
+      const colorIdx = n - 3;
+      const nameIdx = n - 4;
+      const modelNumIdx = n - 5;
+
+      // A blank or non-numeric Model# cell is LEGITIMATE (those one-offs
+      // genuinely have no SKU). Record it as empty rather than borrowing a
+      // neighbour's value.
+      const rawNum = $(cells[modelNumIdx]).text().trim();
+      const looksLikeYear = /^(19|20)[0-9]{2}([ ]*[-–][ ]*[0-9]{2,4})?$/.test(rawNum);
+      if (looksLikeYear) return; // misaligned row — skip rather than corrupt
 
       // Safely extract text from each target column
       const modelNumber = modelNumIdx < cells.length ? $(cells[modelNumIdx]).text().trim() : "";

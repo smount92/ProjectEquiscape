@@ -41,7 +41,32 @@ function loadEnv() {
     return out;
 }
 
-const PRICE = /^\d{1,5}(\.\d{1,2})?$/;
+const RUN_TYPES = new Set([
+    "Regular Run", "Special Run", "BreyerFest", "Collector's Club",
+    "Web Special", "Store Special", "Test Run", "One of a Kind", "Other",
+]);
+
+/**
+ * Per-key validators. An unlisted key is REJECTED, not passed through —
+ * a research agent inventing an attribute name should not be able to mint
+ * a catalog field by accident.
+ *
+ * Strict on purpose: a first bulk run admitted 18 prices as "$75" and one
+ * as "$90 for Set" because the price check only ran when the writer
+ * happened to look for it. Now every value is validated at the door, and
+ * a set price has no shape it can pass as.
+ */
+const VALIDATORS = {
+        retail_price: (v) => /^[0-9]{1,5}([.][0-9]{1,2})?$/.test(String(v)),
+    run_type: (v) => RUN_TYPES.has(String(v)),
+        run_count: (v) => /^[0-9]{1,7}$/.test(String(v)) && Number(v) > 0,
+        release_year_start: (v) => /^[0-9]{4}$/.test(String(v)) && Number(v) >= 1950 && Number(v) <= 2030,
+        release_year_end: (v) => /^[0-9]{4}$/.test(String(v)) && Number(v) >= 1950 && Number(v) <= 2030,
+        model_number: (v) => /^[A-Za-z0-9#/-]{1,24}$/.test(String(v)),
+    color_description: (v) => String(v).length > 0 && String(v).length <= 300,
+    sculptor: (v) => String(v).length > 0 && String(v).length <= 120,
+    mold_name: (v) => String(v).length > 0 && String(v).length <= 200,
+};
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 async function main() {
@@ -56,7 +81,15 @@ async function main() {
 
     for (const rec of records) {
         if (!UUID.test(rec.catalogId ?? "") || typeof rec.attributes !== "object") { skippedBad++; continue; }
-        if (rec.attributes.retail_price && !PRICE.test(String(rec.attributes.retail_price))) { skippedBad++; continue; }
+        // Validate EVERY key before anything is written.
+        let recordOk = true;
+        for (const [k, v] of Object.entries(rec.attributes)) {
+            if (v == null || v === "") continue;
+            const check = VALIDATORS[k];
+            if (!check) { console.log(`  ✗ unknown attribute "${k}" — rejected`); recordOk = false; break; }
+            if (!check(v)) { console.log(`  ✗ bad ${k}: ${JSON.stringify(v)} — rejected`); recordOk = false; break; }
+        }
+        if (!recordOk) { skippedBad++; continue; }
 
         const { data: row } = await admin.from("catalog_items")
             .select("id, title, attributes").eq("id", rec.catalogId).maybeSingle();
