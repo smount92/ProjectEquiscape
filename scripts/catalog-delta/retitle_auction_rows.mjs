@@ -68,6 +68,11 @@ function lotNumber(title) {
 function residue(title) {
     return title
         .replace(/\bBreyer(Fest|West)\b/gi, "")
+        // A title this script already wrote reads "BreyerFest 2016 — Live
+        // Auction 07". Without stripping the year and sequence, re-running
+        // it would file "2016" as though it were a note worth keeping.
+        .replace(/\b(19|20)\d{2}\b/g, "")
+        .replace(/\b(Live|Silent)\s+Auction(\s+model)?\s*\d{1,4}\b/gi, "")
         .replace(/\b(Live|Silent)\s+Auction(\s+model)?\b/gi, "")
         .replace(/\(\s*\d[\d,]*\s*(set\s+)?made[^)]*\)/gi, "")
         .replace(/\(\s*sold for[^)]*\)/gi, "")
@@ -97,6 +102,34 @@ async function main() {
     let renamed = 0, noYear = 0, prices = 0, coas = 0, notes = 0, already = 0;
     const kept = [];
 
+    /**
+     * Sequence numbers, so rows within a year stop being interchangeable.
+     *
+     * The sequence is an INDEX WE ASSIGN, not a lot number — the auction's
+     * real lot numbers are not in this data (2 rows of 935 record one).
+     * That is why a real lot reads "Auction Lot 71" and a sequence reads
+     * "Auction 07": the word Lot is what separates a fact from our own
+     * ordering, so nobody reads position 7 as lot 7.
+     *
+     * Ordered by created_at then id — arbitrary but stable, so the same row
+     * keeps the same number on every re-run. Zero-padded because titles now
+     * sort by sort_key, where "Auction 10" would otherwise fall between
+     * "Auction 1" and "Auction 2".
+     */
+    const auctionRows = rows
+        .filter((r) => AUCTION.test(String(r.title ?? "")))
+        .sort((a, b) => String(a.created_at ?? "").localeCompare(String(b.created_at ?? "")) || a.id.localeCompare(b.id));
+    const seqOf = new Map();
+    const perYear = new Map();
+    for (const r of auctionRows) {
+        const y = String(r.attributes?.release_year_start ?? "");
+        const k = /^\d{4}$/.test(y) ? y : "?";
+        const n = (perYear.get(k) ?? 0) + 1;
+        perYear.set(k, n);
+        seqOf.set(r.id, n);
+    }
+    const width = Math.max(2, String(Math.max(...perYear.values(), 0)).length);
+
     for (const r of rows) {
         const title = String(r.title ?? "");
         if (!AUCTION.test(title)) continue;
@@ -109,7 +142,10 @@ async function main() {
         const event = /BreyerWest/i.test(title) ? "BreyerWest" : "BreyerFest";
         const kind = /Silent Auction/i.test(title) ? "Silent Auction" : "Live Auction";
         const lot = lotNumber(title);
-        const next = `${event} ${year} — ${kind}${lot ? ` Lot ${lot}` : ""}`;
+        const seq = String(seqOf.get(r.id) ?? 0).padStart(width, "0");
+        const next = lot
+            ? `${event} ${year} — ${kind} Lot ${lot}`
+            : `${event} ${year} — ${kind} ${seq}`;
         if (title === next) { already++; continue; }
 
         const patch = { ...attrs };

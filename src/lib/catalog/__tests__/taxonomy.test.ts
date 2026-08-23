@@ -101,6 +101,25 @@ describe("categories — the Taxonomy v2 item_type vocabulary", () => {
         expect(CATEGORY_LABELS.plastic_mold).toBe("Mold");
     });
 
+    // The stored values carry a `plastic_` prefix for historical reasons.
+    // It describes where the category came from, not what belongs in it —
+    // North Light resins and Breyer porcelains are both filed under Mold
+    // and Release. Anything that renders item_type must go through these
+    // labels; title-casing the raw value put "Plastic Mold" on a resin,
+    // directly above a Material of Resin, on the live catalog page.
+    it("never shows the storage prefix to a member", () => {
+        for (const { value, label } of CATALOG_CATEGORIES) {
+            expect(label, `${value} leaks its storage prefix`).not.toMatch(/plastic/i);
+            expect(label).not.toMatch(/_/);
+        }
+    });
+
+    it("has a label for every category, so nothing falls back to the raw value", () => {
+        for (const { value } of CATALOG_CATEGORIES) {
+            expect(CATEGORY_LABELS[value], `${value} has no label`).toBeTruthy();
+        }
+    });
+
     it("suggestionItemTypeToDb accepts canonical values and legacy short forms", () => {
         expect(suggestionItemTypeToDb("plastic_release")).toBe("plastic_release");
         expect(suggestionItemTypeToDb("factory_resin")).toBe("factory_resin");

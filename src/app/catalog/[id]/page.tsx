@@ -8,6 +8,7 @@ import CatalogSubMasthead from"@/components/catalog/CatalogSubMasthead";
 import { buildEbaySearchUrl } from"@/lib/utils/ebayAffiliate";
 import { Button } from "@/components/ui/button";
 import { referenceHref } from"@/lib/catalog/referenceUrl";
+import { CATEGORY_LABELS } from"@/lib/catalog/taxonomy";
 import { FileEdit, Plus } from"lucide-react";
 
 interface Props {
@@ -174,7 +175,7 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
        ?"📸"
        :"🗑"}
      </span>
-     <span>{formatItemType(s.suggestion_type)} suggestion</span>
+     <span>{titleCase(s.suggestion_type)} suggestion</span>
      <span className="text-muted-foreground ml-auto text-sm">
       ▲ {s.upvotes}
      </span>
@@ -195,8 +196,20 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
  );
 }
 
+/* Item type has a display name in the taxonomy; use it. Title-casing the
+   raw enum instead printed "Plastic Mold" on North Light resins, directly
+   above a Material of Resin — a contradiction the row did not actually
+   contain. The stored values say `plastic_mold` for historical reasons but
+   the category has always meant simply "a mold", which is why the label is
+   "Mold". */
 function formatItemType(type: string): string {
- return type.replace(/_/g," ").replace(/\b\w/g, (c) => c.toUpperCase());
+ return CATEGORY_LABELS[type] ?? titleCase(type);
+}
+
+/* Suggestion types (correction / addition / photo) have no taxonomy entry
+   and read correctly title-cased. */
+function titleCase(value: string): string {
+ return value.replace(/_/g," ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 /* Attribute-key labels. Keys where generic Title Case reads wrong get a
