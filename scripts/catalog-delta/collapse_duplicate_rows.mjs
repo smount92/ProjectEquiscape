@@ -89,7 +89,28 @@ async function main() {
         if (!groups.has(k)) groups.set(k, []);
         groups.get(k).push(r);
     }
-    const dupes = [...groups.values()].filter((g) => g.length > 1);
+    /**
+     * A one-of-a-kind piece is unique BY DEFINITION, so two such rows are
+     * never the same object no matter how alike the data looks. These rows
+     * are the sparsest in the catalog — typically no model number and no
+     * colour — so once their titles were normalised to "BreyerFest 1997 —
+     * Live Auction" two genuinely different auction models collided on
+     * every field and this script offered to delete one of them.
+     *
+     * Sparse data is not evidence of duplication; it is evidence of a row
+     * nobody has filled in yet.
+     */
+    const oneOfAKind = (r) =>
+        String(r.attributes?.run_count ?? "") === "1" ||
+        String(r.attributes?.run_type ?? "") === "One of a Kind";
+
+    const dupes = [...groups.values()]
+        .filter((g) => g.length > 1)
+        .filter((g) => {
+            if (!g.some(oneOfAKind)) return true;
+            console.log(`  skipped (one-of-a-kind, ${g.length} rows): ${String(g[0].title).slice(0, 56)}`);
+            return false;
+        });
     if (!dupes.length) { console.log("No duplicate rows."); return; }
 
     // Live reference count — never from a snapshot.
@@ -129,13 +150,33 @@ async function main() {
         console.log(`      keep   ${survivor.id}${referenced[0] ? `  (${refCount.get(survivor.id)} member reference(s))` : "  (oldest)"}`);
         for (const d of doomed) console.log(`      ${APPLY ? "DELETE" : "would delete"} ${d.id}`);
 
+        // The owner's condition, enforced per row rather than per group:
+        // a row is deleted ONLY if nothing points at it. The survivor is
+        // already chosen as the referenced row, so this should never fire —
+        // which is exactly why it is worth asserting before a DELETE.
+        for (const d of doomed) {
+            if ((refCount.get(d.id) ?? 0) > 0) {
+                console.error(`REFUSING TO RUN: ${d.id} is referenced but was selected for deletion.`);
+                process.exit(1);
+            }
+        }
+
         if (APPLY) {
             for (const d of doomed) {
-                await admin.from("catalog_changelog").insert({
-                    catalog_item_id: null,
+                // Log BEFORE deleting, and abort this row if the log fails.
+                // change_summary and contributor_alias are both NOT NULL; an
+                // earlier draft wrote `summary` and skipped the alias, which
+                // would have failed silently and deleted rows with no record.
+                const { error: logErr } = await admin.from("catalog_changelog").insert({
+                    catalog_item_id: survivor.id,
                     change_type: "removal",
-                    summary: `Removed a duplicate row for "${d.title}" (identical to ${survivor.id})`,
+                    change_summary: `Removed a duplicate entry for "${d.title}" — identical in every field to the entry kept here.`,
+                    contributor_alias: "Catalog maintenance",
                 });
+                if (logErr) {
+                    console.error(`      x changelog failed (${logErr.message}) — NOT deleting ${d.id}`);
+                    continue;
+                }
                 const { error } = await admin.from("catalog_items").delete().eq("id", d.id);
                 if (error) { console.error(`      x ${error.message}`); continue; }
                 deleted++;
