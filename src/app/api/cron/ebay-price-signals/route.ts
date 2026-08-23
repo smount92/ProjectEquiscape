@@ -50,17 +50,7 @@ export async function GET(request: NextRequest) {
             .limit(4000);
         if (error) throw new Error(`catalog read failed: ${error.message}`);
 
-        // catalog_price_signals is introduced by migration 189. Until that
-        // is pasted and gen-types re-run, the generated Database type has
-        // no entry for it, so this one table is reached through an untyped
-        // client. Narrowed to this file deliberately — widening the cast
-        // would hide real type errors on tables that DO exist.
-        const signals = () => (admin as unknown as {
-            from: (t: string) => {
-                select: (c: string) => Promise<{ data: { catalog_item_id: string; observed_at: string }[] | null }>;
-                upsert: (row: Record<string, unknown>, opts: { onConflict: string }) => Promise<{ error: { message: string } | null }>;
-            };
-        }).from("catalog_price_signals");
+        const signals = () => admin.from("catalog_price_signals");
 
         const { data: seen } = await signals().select("catalog_item_id, observed_at");
         const lastSeen = new Map((seen ?? []).map((s) => [s.catalog_item_id, s.observed_at]));

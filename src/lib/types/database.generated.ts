@@ -489,6 +489,7 @@ export type Database = {
           parent_id: string | null
           scale: string | null
           slug: string | null
+          sort_key: string | null
           title: string
         }
         Insert: {
@@ -503,6 +504,7 @@ export type Database = {
           parent_id?: string | null
           scale?: string | null
           slug?: string | null
+          sort_key?: string | null
           title: string
         }
         Update: {
@@ -517,12 +519,110 @@ export type Database = {
           parent_id?: string | null
           scale?: string | null
           slug?: string | null
+          sort_key?: string | null
           title?: string
         }
         Relationships: [
           {
             foreignKeyName: "catalog_items_parent_id_fkey"
             columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      catalog_price_signals: {
+        Row: {
+          asking_high: number
+          asking_low: number
+          asking_median: number
+          catalog_item_id: string
+          currency: string
+          match_basis: string
+          observed_at: string
+          sample_size: number
+          source: string
+        }
+        Insert: {
+          asking_high: number
+          asking_low: number
+          asking_median: number
+          catalog_item_id: string
+          currency?: string
+          match_basis: string
+          observed_at?: string
+          sample_size: number
+          source?: string
+        }
+        Update: {
+          asking_high?: number
+          asking_low?: number
+          asking_median?: number
+          catalog_item_id?: string
+          currency?: string
+          match_basis?: string
+          observed_at?: string
+          sample_size?: number
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalog_price_signals_catalog_item_id_fkey"
+            columns: ["catalog_item_id"]
+            isOneToOne: true
+            referencedRelation: "catalog_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      catalog_sale_reports: {
+        Row: {
+          catalog_item_id: string
+          created_at: string
+          currency: string
+          id: string
+          note: string | null
+          price: number
+          reporter_id: string
+          self_reported: boolean
+          sold_on: string
+          source_host: string
+          source_url: string
+          status: string
+        }
+        Insert: {
+          catalog_item_id: string
+          created_at?: string
+          currency?: string
+          id?: string
+          note?: string | null
+          price: number
+          reporter_id: string
+          self_reported?: boolean
+          sold_on: string
+          source_host: string
+          source_url: string
+          status?: string
+        }
+        Update: {
+          catalog_item_id?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          note?: string | null
+          price?: number
+          reporter_id?: string
+          self_reported?: boolean
+          sold_on?: string
+          source_host?: string
+          source_url?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalog_sale_reports_catalog_item_id_fkey"
+            columns: ["catalog_item_id"]
             isOneToOne: false
             referencedRelation: "catalog_items"
             referencedColumns: ["id"]
@@ -3535,6 +3635,54 @@ export type Database = {
           },
         ]
       }
+      paypal_prepaid_captures: {
+        Row: {
+          applied_at: string | null
+          capture_id: string
+          claimed_at: string
+          months: number | null
+          order_id: string | null
+          paid_through: string | null
+          user_id: string | null
+        }
+        Insert: {
+          applied_at?: string | null
+          capture_id: string
+          claimed_at?: string
+          months?: number | null
+          order_id?: string | null
+          paid_through?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          applied_at?: string | null
+          capture_id?: string
+          claimed_at?: string
+          months?: number | null
+          order_id?: string | null
+          paid_through?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      paypal_webhook_events: {
+        Row: {
+          event_id: string
+          event_type: string | null
+          received_at: string
+        }
+        Insert: {
+          event_id: string
+          event_type?: string | null
+          received_at?: string
+        }
+        Update: {
+          event_id?: string
+          event_type?: string | null
+          received_at?: string
+        }
+        Relationships: []
+      }
       posts: {
         Row: {
           author_id: string
@@ -4516,6 +4664,53 @@ export type Database = {
           },
         ]
       }
+      show_followers: {
+        Row: {
+          created_at: string
+          show_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          show_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          show_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "show_followers_show_id_fkey"
+            columns: ["show_id"]
+            isOneToOne: false
+            referencedRelation: "shows"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "show_followers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "show_followers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "show_followers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       show_placings: {
         Row: {
           class_id: string
@@ -5165,6 +5360,9 @@ export type Database = {
       subscription_state: {
         Row: {
           current_period_end: string | null
+          paid_through: string | null
+          paypal_subscription_id: string | null
+          provider: string
           started_at: string
           status: string
           stripe_customer_id: string | null
@@ -5175,6 +5373,9 @@ export type Database = {
         }
         Insert: {
           current_period_end?: string | null
+          paid_through?: string | null
+          paypal_subscription_id?: string | null
+          provider?: string
           started_at?: string
           status: string
           stripe_customer_id?: string | null
@@ -5185,6 +5386,9 @@ export type Database = {
         }
         Update: {
           current_period_end?: string | null
+          paid_through?: string | null
+          paypal_subscription_id?: string | null
+          provider?: string
           started_at?: string
           status?: string
           stripe_customer_id?: string | null
@@ -6033,6 +6237,19 @@ export type Database = {
         Args: { p_claimant_id: string; p_pin: string }
         Returns: Json
       }
+      claim_paypal_capture: {
+        Args: {
+          p_capture_id: string
+          p_months?: number
+          p_order_id?: string
+          p_user_id?: string
+        }
+        Returns: boolean
+      }
+      claim_paypal_webhook_event: {
+        Args: { p_event_id: string; p_event_type?: string }
+        Returns: boolean
+      }
       claim_transfer_atomic: {
         Args: { p_claimant_id: string; p_code: string }
         Returns: Json
@@ -6298,6 +6515,7 @@ export type Database = {
       }
       is_caller_suspended: { Args: never; Returns: boolean }
       is_trusted_seller: { Args: { p_user_id: string }; Returns: boolean }
+      is_user_suspended: { Args: { p_user_id: string }; Returns: boolean }
       make_offer_atomic: {
         Args: {
           p_buyer_id: string
@@ -6309,6 +6527,10 @@ export type Database = {
           p_seller_id: string
         }
         Returns: Json
+      }
+      mark_paypal_capture_applied: {
+        Args: { p_capture_id: string; p_paid_through?: string }
+        Returns: undefined
       }
       metrics_active_members: { Args: { p_days?: number }; Returns: number }
       metrics_entity_totals: {
@@ -6354,6 +6576,27 @@ export type Database = {
         }
         Returns: boolean
       }
+      record_paypal_subscription_state: {
+        Args: {
+          p_current_period_end?: string
+          p_paypal_subscription_id?: string
+          p_status: string
+          p_tier: string
+          p_user_id: string
+        }
+        Returns: undefined
+      }
+      record_paypal_term_state: {
+        Args: {
+          p_current_period_end?: string
+          p_paid_through?: string
+          p_paypal_subscription_id?: string
+          p_status: string
+          p_tier: string
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       record_subscription_state: {
         Args: {
           p_current_period_end?: string
@@ -6393,6 +6636,7 @@ export type Database = {
           title: string
         }[]
       }
+      show_follower_count: { Args: { p_show_id: string }; Returns: number }
       show_id_of_class: { Args: { p_class_id: string }; Returns: string }
       show_id_of_entry: { Args: { p_entry_id: string }; Returns: string }
       show_id_of_section: { Args: { p_section_id: string }; Returns: string }
