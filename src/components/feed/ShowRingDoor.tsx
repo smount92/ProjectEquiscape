@@ -7,6 +7,11 @@
  * through. Each thumb opens that horse's passport; the brass CTA
  * opens the ring itself.
  *
+ * On phones the header stacks: the text keeps a real minimum width
+ * (min-w-[13rem]) so flex-wrap sends the brass CTA to its own full-
+ * width row instead of crushing the title into a one-word-per-line
+ * sliver beside it (flex-1 min-w-0 compresses before it wraps).
+ *
  * The strip stays ONE row at every width: 3 thumbs on phones,
  * 4 from sm, 6 from lg (indexes 3+ / 4+ unhide at those points).
  * No horses with photos yet → the band renders without the strip,
@@ -26,7 +31,7 @@ export default function ShowRingDoor({ horses }: { horses: ShowRingPreviewHorse[
         <div className="leather-band stitched mb-8 rounded-xl px-6 py-5" id="paddock-show-ring-door">
             <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
                 <span aria-hidden="true" className="text-[2.2rem] leading-none">🏆</span>
-                <span className="min-w-0 flex-1">
+                <span className="min-w-[13rem] flex-1 basis-52">
                     <Link
                         href="/community"
                         className="text-engraved-light block font-serif text-xl font-bold tracking-[0.02em] no-underline hover:underline"
@@ -38,7 +43,7 @@ export default function ShowRingDoor({ horses }: { horses: ShowRingPreviewHorse[
                         next obsession.
                     </span>
                 </span>
-                <Link href="/community" className="btn-brass inline-flex shrink-0 items-center gap-1.5 no-underline">
+                <Link href="/community" className="btn-brass inline-flex w-full shrink-0 items-center justify-center gap-1.5 no-underline sm:w-auto">
                     Step into the ring →
                 </Link>
             </div>
