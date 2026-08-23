@@ -62,7 +62,7 @@ export default function PageMasthead({
                         {icon}
                     </span>
                 )}
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1 basis-52">
                     <h1
                         className={`text-engraved-light m-0 font-serif font-bold break-words uppercase ${
                             compact ? "text-lg tracking-[0.08em]" : "text-2xl tracking-[0.1em]"

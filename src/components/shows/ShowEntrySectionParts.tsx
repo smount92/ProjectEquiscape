@@ -230,7 +230,7 @@ function QualifyingGateBadge({ cls, showYear }: { cls: ConsoleClass; showYear?: 
     if (exhibitorsShort > 0)
         needs.push(`${exhibitorsShort} more exhibitor${exhibitorsShort === 1 ? "" : "s"}`);
     return (
-        <Badge variant="outline" title="Qualification cards mint when the class has real competition">
+        <Badge variant="outline" className="h-auto max-w-full whitespace-normal" title="Qualification cards mint when the class has real competition">
             🎖️ {needs.join(" & ")} mints cards
         </Badge>
     );

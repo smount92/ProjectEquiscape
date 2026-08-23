@@ -2529,6 +2529,23 @@ p {
   box-shadow: 0 2px 5px rgba(90, 70, 40, 0.15), 0 8px 14px -10px rgba(90, 70, 40, 0.25);
 }
 
+/* Phones: the 48px-per-nesting-level ledger padding was eating the
+   screen — three nested surfaces left 232px of content at 360px wide.
+   Tighter gutters, and the red margin line moves in with the padding
+   so text still clears it. Night/Simple-Mode overrides are unlayered
+   and still win. */
+@media (max-width: 640px) {
+  .ledger-paper,
+  .ledger-card {
+    padding: 14px 12px 14px 20px;
+    background:
+      /* red margin line, tucked in to match the tighter gutter */
+      linear-gradient(90deg, transparent 0 12px, rgba(155, 48, 40, 0.28) 12px 13.5px, transparent 13.5px),
+      repeating-linear-gradient(0deg, transparent 0 27px, rgba(44, 85, 69, 0.11) 27px 28px),
+      linear-gradient(180deg, #FDFAF2, #F6F1E2);
+  }
+}
+
 /* kraft index tab (section label sitting on a ledger surface) */
 .ledger-tab {
   display: inline-block;

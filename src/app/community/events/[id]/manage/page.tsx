@@ -806,17 +806,17 @@ export default function ManageEventPage() {
  {/* Classes */}
  <div className="px-0 py-1">
  {div.classes.map((cls, clsIndex) => (
- <div key={cls.id} className="border-b-0">
+ <div key={cls.id} className="group flex flex-wrap items-center gap-2 border-b-0 py-1">
  <div className="flex flex-col gap-[2px]">
  <button
- className="border-input text-muted-foreground hover:border-success hover:text-forest flex h-[14px] h-[18px] w-[20px] w-[24px] cursor-pointer items-center justify-center rounded-sm border bg-transparent p-0 font-sans text-[0.5rem] text-[0.6rem] transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-[0.3]"
+ className="border-input text-muted-foreground hover:border-success hover:text-forest flex h-[18px] w-[24px] cursor-pointer items-center justify-center rounded-sm border bg-transparent p-0 font-sans text-[0.6rem] transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-[0.3]"
  onClick={() => handleMoveClass(div.id, clsIndex, -1)}
  disabled={clsIndex === 0}
  >
  <ChevronUp className="h-3 w-3" />
  </button>
  <button
- className="border-input text-muted-foreground hover:border-success hover:text-forest flex h-[14px] h-[18px] w-[20px] w-[24px] cursor-pointer items-center justify-center rounded-sm border bg-transparent p-0 font-sans text-[0.5rem] text-[0.6rem] transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-[0.3]"
+ className="border-input text-muted-foreground hover:border-success hover:text-forest flex h-[18px] w-[24px] cursor-pointer items-center justify-center rounded-sm border bg-transparent p-0 font-sans text-[0.6rem] transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-[0.3]"
  onClick={() => handleMoveClass(div.id, clsIndex, 1)}
  disabled={clsIndex === div.classes.length - 1}
  >
@@ -876,9 +876,9 @@ export default function ManageEventPage() {
  {cls.entryCount === 1 ?"y" :"ies"}
  </span>
  )}
- <div className="flex gap-[2px] opacity-0 transition-opacity">
+ <div className="flex gap-[2px] opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100 sm:focus-within:opacity-100">
  <button
- className="cursor-pointer rounded-sm border-0 bg-transparent p-[2px] p-[4px] text-xs text-[0.9rem] transition-colors"
+ className="cursor-pointer rounded-sm border-0 bg-transparent p-[4px] text-[0.9rem] transition-colors"
  onClick={() =>
  handleToggleNan(cls.id, cls.isNanQualifying)
  }
@@ -887,7 +887,7 @@ export default function ManageEventPage() {
  {cls.isNanQualifying ? <Star className="h-3.5 w-3.5 fill-current" /> : <Star className="h-3.5 w-3.5" />}
  </button>
  <button
- className="cursor-pointer rounded-sm border-0 bg-transparent p-[2px] p-[4px] text-xs text-[0.9rem] transition-colors"
+ className="cursor-pointer rounded-sm border-0 bg-transparent p-[4px] text-[0.9rem] transition-colors"
  onClick={() => {
  setEditingClass(cls.id);
  setEditName(cls.name);

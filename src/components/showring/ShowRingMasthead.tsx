@@ -24,7 +24,7 @@ export default function ShowRingMasthead({ totalCount }: { totalCount: number })
                 >
                     🏆
                 </span>
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1 basis-52">
                     <h1 className="text-engraved-light m-0 font-serif text-2xl font-bold tracking-[0.1em] uppercase">
                         The Show Ring
                     </h1>

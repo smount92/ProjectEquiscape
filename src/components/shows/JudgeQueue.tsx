@@ -256,7 +256,7 @@ export default function JudgeQueue({ queue }: { queue: JudgeQueueData }) {
                 {toast && (
                     <span
                         data-testid="judge-toast"
-                        className="stamp bg-(--paper-lit) whitespace-nowrap shadow-lg"
+                        className="stamp bg-(--paper-lit) block max-w-[calc(100vw-2rem)] text-center shadow-lg"
                     >
                         {toast}
                     </span>
@@ -721,7 +721,8 @@ function PublishClassControl({ cls }: { cls: JudgeQueueClass }) {
 
     return (
         <div className="mt-3 flex flex-wrap items-center gap-3 rounded-md border border-input bg-card/60 p-3">
-            <div className="min-w-0 flex-1">
+            {/* min-w keeps the copy readable; flex-wrap sends the button to its own row on phones instead of compressing this column to a sliver. */}
+            <div className="min-w-[13rem] flex-1 basis-52">
                 <p className="m-0 text-sm font-medium">
                     {published ? "Results are live in the class room" : "Class is judged — results not yet public"}
                 </p>
@@ -733,7 +734,7 @@ function PublishClassControl({ cls }: { cls: JudgeQueueClass }) {
             </div>
             <button
                 type="button"
-                className="btn-brass rounded px-3 py-1.5 text-sm"
+                className="btn-brass w-full shrink-0 rounded px-3 py-1.5 text-center text-sm sm:w-auto"
                 disabled={pending}
                 onClick={() => void toggle()}
             >

@@ -65,7 +65,7 @@ function V2ShowsSection({ title, shows }: { title: string; shows: PublicShowSumm
    <span className="ledger-tab" id={headingId}>
     {title}
    </span>
-   <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-4">
+   <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,300px),1fr))] gap-4">
     {shows.map((show) => (
      <Link
       key={show.id}
@@ -228,7 +228,7 @@ export default async function ShowsPage() {
    <p>Check back soon for virtual photo shows!</p>
   </div>
   ) : (
-  <div className="grid-cols-[repeat(auto-fill,minmax(300px,1fr))] animate-fade-in-up grid gap-6">
+  <div className="grid-cols-[repeat(auto-fill,minmax(min(100%,300px),1fr))] animate-fade-in-up grid gap-6">
    {shows.map((show) => {
    const badge = statusBadge(show.status);
    const isUserJudge = judgeShowIds.has(show.id);

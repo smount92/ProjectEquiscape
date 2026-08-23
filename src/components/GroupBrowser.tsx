@@ -126,7 +126,7 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
                     </p>
                 </div>
             ) : (
-                <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-4">
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,320px),1fr))] gap-4">
                     {filtered.map((g) => (
                         <div
                             key={g.id}
