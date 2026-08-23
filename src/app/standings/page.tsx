@@ -111,16 +111,16 @@ function StandingsTable({
     // "You are here": the viewer's own rows read highlighted.
     const mine = "bg-forest/10";
     return (
-        <Table className="min-w-[560px]">
+        <Table className="sm:min-w-[560px]">
             <TableHeader>
                 <TableRow>
                     <TableHead className="w-12">Rank</TableHead>
                     <TableHead>{isHorses ? "Horse" : "Stable"}</TableHead>
-                    {isHorses && <TableHead>Stable</TableHead>}
+                    {isHorses && <TableHead className="hidden sm:table-cell">Stable</TableHead>}
                     <TableHead className="text-right">Points</TableHead>
-                    <TableHead className="text-right">Placings</TableHead>
-                    <TableHead className="text-right">Championships</TableHead>
-                    <TableHead className="text-right">Shows</TableHead>
+                    <TableHead className="hidden text-right sm:table-cell">Placings</TableHead>
+                    <TableHead className="hidden text-right sm:table-cell">Championships</TableHead>
+                    <TableHead className="hidden text-right sm:table-cell">Shows</TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>
@@ -152,7 +152,7 @@ function StandingsTable({
                                       </Link>
                                   )}
                               </TableCell>
-                              <TableCell>
+                              <TableCell className="hidden sm:table-cell">
                                   <Link
                                       href={`/profile/${encodeURIComponent(row.ownerAlias)}`}
                                       className="text-muted-foreground no-underline hover:underline"
@@ -163,13 +163,13 @@ function StandingsTable({
                               <TableCell className="text-right font-bold tabular-nums">
                                   {row.points}
                               </TableCell>
-                              <TableCell className="text-right tabular-nums">
+                              <TableCell className="hidden text-right tabular-nums sm:table-cell">
                                   {row.placings}
                               </TableCell>
-                              <TableCell className="text-right tabular-nums">
+                              <TableCell className="hidden text-right tabular-nums sm:table-cell">
                                   {row.championships}
                               </TableCell>
-                              <TableCell className="text-right tabular-nums">
+                              <TableCell className="hidden text-right tabular-nums sm:table-cell">
                                   {row.showsEntered}
                               </TableCell>
                           </TableRow>
@@ -193,13 +193,13 @@ function StandingsTable({
                               <TableCell className="text-right font-bold tabular-nums">
                                   {row.points}
                               </TableCell>
-                              <TableCell className="text-right tabular-nums">
+                              <TableCell className="hidden text-right tabular-nums sm:table-cell">
                                   {row.placings}
                               </TableCell>
-                              <TableCell className="text-right tabular-nums">
+                              <TableCell className="hidden text-right tabular-nums sm:table-cell">
                                   {row.championships}
                               </TableCell>
-                              <TableCell className="text-right tabular-nums">
+                              <TableCell className="hidden text-right tabular-nums sm:table-cell">
                                   {row.showsEntered}
                               </TableCell>
                           </TableRow>
