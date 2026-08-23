@@ -1,0 +1,94 @@
+#!/usr/bin/env node
+/**
+ * Attribute enricher — the delta importer's sibling for EXISTING rows.
+ *
+ * The importer inserts rows that are missing; this merges attribute
+ * values into rows that exist. First use: seeding original retail
+ * prices (MSRP) researched from primary sources.
+ *
+ *   node scripts/catalog-delta/enrich_attributes.mjs --data ./found.json
+ *   node scripts/catalog-delta/enrich_attributes.mjs --data ./found.json --apply
+ *
+ * Dataset shape: [ { catalogId, attributes: { retail_price: "59.99", ... },
+ *                    source?: "https://..." } ]
+ *
+ * Rules, non-negotiable:
+ *   · MERGE ONLY — a key already present on the row is NEVER overwritten;
+ *     the conflict is reported instead. Community corrections beat imports.
+ *   · DRY RUN by default; --apply writes via the service-role client.
+ *   · Rejects malformed prices (must be 1-5 digits with optional 2dp).
+ */
+
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { createClient } from "@supabase/supabase-js";
+
+const ROOT = process.cwd();
+const APPLY = process.argv.includes("--apply");
+const DATA = (process.argv.find((a) => a.startsWith("--data=")) ?? "").split("=")[1]
+    || process.argv[process.argv.indexOf("--data") + 1];
+
+function loadEnv() {
+    const out = {};
+    const raw = readFileSync(path.join(ROOT, ".env.local"), "utf8");
+    for (const line of raw.split(/\r?\n/)) {
+        const t = line.trim();
+        if (!t || t.startsWith("#")) continue;
+        const i = t.indexOf("=");
+        if (i === -1) continue;
+        out[t.slice(0, i).trim()] = t.slice(i + 1).trim().replace(/^["']|["']$/g, "");
+    }
+    return out;
+}
+
+const PRICE = /^\d{1,5}(\.\d{1,2})?$/;
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+async function main() {
+    if (!DATA) { console.error("Pass --data <file.json>"); process.exit(1); }
+    const env = loadEnv();
+    const admin = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
+    const records = JSON.parse(readFileSync(DATA, "utf8"));
+    if (!Array.isArray(records)) { console.error("Dataset must be an array"); process.exit(1); }
+
+    let merged = 0, skippedConflict = 0, skippedBad = 0, missing = 0;
+    const conflicts = [];
+
+    for (const rec of records) {
+        if (!UUID.test(rec.catalogId ?? "") || typeof rec.attributes !== "object") { skippedBad++; continue; }
+        if (rec.attributes.retail_price && !PRICE.test(String(rec.attributes.retail_price))) { skippedBad++; continue; }
+
+        const { data: row } = await admin.from("catalog_items")
+            .select("id, title, attributes").eq("id", rec.catalogId).maybeSingle();
+        if (!row) { missing++; continue; }
+
+        const current = row.attributes ?? {};
+        const additions = {};
+        for (const [k, v] of Object.entries(rec.attributes)) {
+            if (v == null || v === "") continue;
+            if (current[k] != null && current[k] !== "") {
+                if (String(current[k]) !== String(v)) {
+                    conflicts.push(`${row.title}: ${k} already "${current[k]}", found "${v}"`);
+                    skippedConflict++;
+                }
+                continue; // never overwrite
+            }
+            additions[k] = v;
+        }
+        if (Object.keys(additions).length === 0) continue;
+
+        if (APPLY) {
+            const { error } = await admin.from("catalog_items")
+                .update({ attributes: { ...current, ...additions } }).eq("id", row.id);
+            if (error) { console.error(`  ✗ ${row.title}: ${error.message}`); continue; }
+        }
+        merged++;
+        if (merged <= 5) console.log(`  ${APPLY ? "✓" : "would"} merge ${JSON.stringify(additions)} → ${row.title}`);
+    }
+
+    console.log(`\n${APPLY ? "APPLIED" : "DRY RUN"}: ${merged} rows ${APPLY ? "updated" : "would update"}, ` +
+        `${skippedConflict} conflicts (kept existing), ${skippedBad} malformed, ${missing} ids not found`);
+    for (const c of conflicts.slice(0, 10)) console.log("  conflict:", c);
+}
+
+main().catch((e) => { console.error(e.message); process.exit(1); });
