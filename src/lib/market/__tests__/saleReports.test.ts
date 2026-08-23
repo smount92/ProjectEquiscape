@@ -6,7 +6,10 @@ import {
     MIN_REPORTERS,
     MIN_REPORTS,
     summariseSales,
+    saleReportEligibility,
+    SALE_REPORT_MIN_AGE_DAYS,
     validateSaleReport,
+    type ReporterAccount,
     type StoredReport,
 } from "@/lib/market/saleReports";
 
@@ -248,5 +251,55 @@ describe("outlier rejection", () => {
         ]);
         expect(s?.outliersDropped).toBe(1);
         expect(s?.high).toBe(430);
+    });
+});
+
+describe("who may report a sale", () => {
+    const days = (n: number) => new Date(NOW.getTime() - n * 86_400_000).toISOString();
+    const account = (over: Partial<ReporterAccount> = {}): ReporterAccount => ({
+        createdAt: days(30), accountStatus: "active",
+        isTestAccount: false, isSuspended: false, deletedAt: null, ...over,
+    });
+
+    it("lets an established member report", () => {
+        expect(saleReportEligibility(account(), NOW)).toEqual({ eligible: true });
+    });
+
+    it("turns away an account younger than the gate, and says how long", () => {
+        const out = saleReportEligibility(account({ createdAt: days(2) }), NOW);
+        expect(out).toMatchObject({ eligible: false, reason: "too-new" });
+        if (!out.eligible) expect(out.daysRemaining).toBe(5);
+    });
+
+    it("turns away an account created moments ago", () => {
+        expect(saleReportEligibility(account({ createdAt: days(0) }), NOW).eligible).toBe(false);
+    });
+
+    it("admits an account exactly at the threshold", () => {
+        expect(saleReportEligibility(account({ createdAt: days(SALE_REPORT_MIN_AGE_DAYS) }), NOW).eligible).toBe(true);
+    });
+
+    // A struck member stays struck — suspension has to outrank age.
+    it("turns away a suspended member however old the account", () => {
+        const out = saleReportEligibility(account({ createdAt: days(900), isSuspended: true }), NOW);
+        expect(out).toMatchObject({ eligible: false, reason: "suspended" });
+    });
+
+    it.each([
+        ["a deleted account", { deletedAt: days(1) }],
+        ["a test account", { isTestAccount: true }],
+        ["a non-active status", { accountStatus: "deleted" }],
+    ])("turns away %s", (_label, over) => {
+        expect(saleReportEligibility(account(over), NOW).eligible).toBe(false);
+    });
+
+    // Absence is never permission — the SQL helper COALESCEs to false for
+    // the same reason.
+    it("turns away an account it cannot find", () => {
+        expect(saleReportEligibility(null, NOW)).toMatchObject({ eligible: false });
+    });
+
+    it("turns away an unparseable creation date rather than admitting it", () => {
+        expect(saleReportEligibility(account({ createdAt: "not a date" }), NOW).eligible).toBe(false);
     });
 });

@@ -139,6 +139,58 @@ export function validateSaleReport(
     };
 }
 
+// ── Eligibility ──
+
+/**
+ * Days an account must exist before it may report a sale. Mirrors the
+ * interval in can_report_sales (migration 191).
+ *
+ * THE DATABASE IS AUTHORITATIVE. This copy exists so the UI can say
+ * "you can report sales in 3 days" instead of surfacing a bare
+ * permission error, and so a form can disable itself. It is NOT the
+ * enforcement — RLS is. If the two ever disagree, the database wins and
+ * this is the one that is wrong.
+ */
+export const SALE_REPORT_MIN_AGE_DAYS = 7;
+
+export interface ReporterAccount {
+    createdAt: string | Date;
+    accountStatus?: string | null;
+    isTestAccount?: boolean | null;
+    isSuspended?: boolean | null;
+    deletedAt?: string | null;
+}
+
+export type EligibilityResult =
+    | { eligible: true }
+    | { eligible: false; reason: "suspended" | "inactive-account" | "too-new"; daysRemaining?: number };
+
+export function saleReportEligibility(
+    account: ReporterAccount | null,
+    now: Date = new Date()
+): EligibilityResult {
+    // Absence is never permission.
+    if (!account) return { eligible: false, reason: "inactive-account" };
+    if (account.isSuspended) return { eligible: false, reason: "suspended" };
+    if (account.deletedAt) return { eligible: false, reason: "inactive-account" };
+    if (account.isTestAccount) return { eligible: false, reason: "inactive-account" };
+    if (account.accountStatus && account.accountStatus !== "active") {
+        return { eligible: false, reason: "inactive-account" };
+    }
+
+    const created = new Date(account.createdAt);
+    if (Number.isNaN(created.getTime())) return { eligible: false, reason: "inactive-account" };
+    const ageDays = (now.getTime() - created.getTime()) / 86_400_000;
+    if (ageDays < SALE_REPORT_MIN_AGE_DAYS) {
+        return {
+            eligible: false,
+            reason: "too-new",
+            daysRemaining: Math.max(1, Math.ceil(SALE_REPORT_MIN_AGE_DAYS - ageDays)),
+        };
+    }
+    return { eligible: true };
+}
+
 // ── Aggregation ──
 
 export interface StoredReport {
