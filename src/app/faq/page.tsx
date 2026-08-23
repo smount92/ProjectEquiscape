@@ -100,6 +100,14 @@ const FAQ_SECTIONS: FaqSection[] = [
                 links: [{ href: "/catalog", label: "Search the Registry" }],
             },
             {
+                q: "Where does the Registry's information come from?",
+                a: "From the hobby's own published record and from the makers themselves. Model numbers, release years, run sizes, original retail prices and scales are facts, and we gather them from public reference sites — identifyyourbreyer.com foremost among them — from Breyer's own product pages and archives, and from members who know their models. Descriptions are written here rather than copied, and corrections from members always win over an import. If you spot something wrong, suggest an edit: a catalog is only as good as the people checking it.",
+                links: [
+                    { href: "/catalog/suggestions/new", label: "Suggest a correction" },
+                    { href: "https://www.identifyyourbreyer.com", label: "IdentifyYourBreyer" },
+                ],
+            },
+            {
                 q: "Can I correct something in the Registry?",
                 a: "Yes, and please do. You can suggest a correction, an addition, a removal or a photo, each with a reason attached, and a correction lands for everybody at once — that's the only way a catalog this size stays honest. Additions warn you about likely duplicates before they go in, because the same twenty sculpts once arrived twice under different makers. Curators who have had a lot of suggestions accepted can apply small factual fixes directly, and every change is listed in a public changelog.",
                 links: [

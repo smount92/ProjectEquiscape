@@ -377,6 +377,15 @@ export default async function ReferencePage({
                                     </li>
                                 ))}
                             </ul>
+                        {/* Where this data comes from. A catalog that cites its
+                            sources is easier to trust and easier to correct. */}
+                        <p className="mt-1 text-[0.7rem] leading-relaxed" style={{ color: "var(--leather-text-muted)" }}>
+                            Reference facts come from the hobby's published record and the makers' own
+                            archives.{" "}
+                            <Link href="/faq#collecting" className="underline hover:no-underline" style={{ color: "var(--leather-text-soft)" }}>
+                                Where our information comes from
+                            </Link>
+                        </p>
                         </div>
                     )}
                 </aside>

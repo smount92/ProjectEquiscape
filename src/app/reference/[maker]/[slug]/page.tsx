@@ -671,6 +671,20 @@ export default async function ReferencePage({ params }: Props) {
                             </tbody>
                         </table>
                     </div>
+                    {/* Cite the record. Facts here come from the hobby's published
+                        reference and the makers' own archives; descriptions are
+                        written here. Members correcting an entry beats any import. */}
+                    <p className="mt-2 text-xs text-muted-foreground">
+                        Facts from the hobby's published record and the makers' archives —{" "}
+                        <Link href="/faq#collecting" className="underline hover:no-underline">
+                            where our information comes from
+                        </Link>
+                        . Spot an error?{" "}
+                        <Link href="/catalog/suggestions/new" className="underline hover:no-underline">
+                            Suggest a correction
+                        </Link>
+                        .
+                    </p>
                     <div className="mt-3 flex flex-wrap gap-4 text-sm">
                         <Link href={`/catalog/${item.id}?suggest=true`} className="text-secondary-foreground hover:text-foreground">
                             ✎ Suggest an edit
