@@ -258,6 +258,23 @@ export default async function ReferencePage({ params }: Props) {
         artist: item.artist,
         manufacturer: item.manufacturer,
     });
+    // Original retail sits BESIDE the market figures, never inside them:
+    // MSRP is what the maker charged once, the Blue Book is what collectors
+    // actually paid. Averaging a list price into sale data would corrupt the
+    // median and quietly break the claim that these numbers come from real
+    // completed sales. Shown together, they tell the appreciation story.
+    const retailRaw = Number((attrs as Record<string, unknown>).retail_price);
+    const retailPrice = Number.isFinite(retailRaw) && retailRaw > 0 ? retailRaw : null;
+    const appreciation =
+        retailPrice && market?.medianPrice
+            ? (() => {
+                  const pct = Math.round(((market.medianPrice - retailPrice) / retailPrice) * 100);
+                  if (pct >= 5) return { text: `+${pct.toLocaleString()}% vs today`, up: true };
+                  if (pct <= -5) return { text: `${pct.toLocaleString()}% vs today`, up: false };
+                  return { text: "about the same today", up: false };
+              })()
+            : null;
+
     const specRows: [string, string][] = [
         ...(attribution.manufacturer
             ? [["Manufacturer", attribution.manufacturer] as [string, string]]
@@ -416,6 +433,28 @@ export default async function ReferencePage({ params }: Props) {
                                                 {market.transactionVolume}
                                             </div>
                                         </div>
+                                        {retailPrice !== null && (
+                                            <div className="col-span-2 border-t border-input pt-3">
+                                                <div className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+                                                    Original retail
+                                                </div>
+                                                <div className="flex flex-wrap items-baseline gap-x-2">
+                                                    <span className="text-lg font-bold tabular-nums text-foreground">
+                                                        ${retailPrice.toFixed(2)}
+                                                    </span>
+                                                    {appreciation && (
+                                                        <span
+                                                            className={`text-sm font-semibold ${appreciation.up ? "text-forest" : "text-muted-foreground"}`}
+                                                        >
+                                                            {appreciation.text}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div className="text-xs text-muted-foreground">
+                                                    what it cost new — not part of the sale figures
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3 border-t border-input px-5 py-3">
