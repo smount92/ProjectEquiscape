@@ -109,6 +109,15 @@ export interface ConsoleEntry {
     status: EntryStatus;
 }
 
+/** A row of the show's bar list (migration 148). */
+export interface ConsoleBarredEntrant {
+    userId: string;
+    alias: string;
+    /** Host bookkeeping — staff-only, never shown to the barred member. */
+    reason: string | null;
+    barredAt: string;
+}
+
 export interface ShowConsoleData {
     show: ConsoleShow;
     /** The viewer's own user id — lets client tabs exclude the viewer
@@ -122,6 +131,9 @@ export interface ShowConsoleData {
     /** Entrants marked paid on the manual fee checklist (139).
      *  RLS scopes the read to managers; stewards/judges see []. */
     feePaidUserIds: string[];
+    /** Members barred from this show (148). RLS scopes the read to
+     *  host/co_host/steward; judges see []. */
+    barred: ConsoleBarredEntrant[];
     /**
      * How many members follow this show — a soft signal of interest for
      * the host (184). A COUNT and never a list: the follower identities

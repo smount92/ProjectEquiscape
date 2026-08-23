@@ -96,6 +96,7 @@ import {
     type PublicShowSummary,
 } from "@/lib/shows/public";
 import type {
+    ConsoleBarredEntrant,
     ConsoleClass,
     ConsoleDivision,
     ConsoleEntry,
@@ -1592,6 +1593,39 @@ export async function getShowConsole(
         .eq("show_id", parsed.data.showId);
     const feePaidUserIds = (feeRows ?? []).map((r) => r.user_id as string);
 
+    // ── Bar list (migration 148) — who may not enter this show. RLS
+    // scopes it to host/co_host/steward (plus each barred member's own
+    // row), so judges just get []. Aliases resolve in their OWN pass:
+    // a removed entrant has no entries left to have seeded the main
+    // alias map above. Any error degrades to an empty list — a console
+    // that will not open is worse than one missing its bar line.
+    const { data: barredRows } = await supabase
+        .from("show_barred_entrants")
+        .select("user_id, reason, created_at")
+        .eq("show_id", parsed.data.showId)
+        .order("created_at", { ascending: false });
+    const barredList = (barredRows ?? []) as {
+        user_id: string;
+        reason: string | null;
+        created_at: string;
+    }[];
+    const barredAliases =
+        barredList.length > 0
+            ? await getAliases(
+                  supabase,
+                  barredList.map((b) => b.user_id),
+              )
+            : new Map<string, string>();
+    const barred: ConsoleBarredEntrant[] = barredList.map((b) => ({
+        userId: b.user_id,
+        alias:
+            ("error" in barredAliases ? undefined : barredAliases.get(b.user_id)) ??
+            aliases.get(b.user_id) ??
+            "unknown",
+        reason: b.reason,
+        barredAt: b.created_at,
+    }));
+
     // ── Follower count (184) — the host's soft signal of interest.
     // A COUNT, never a list: show_follower_count is SECURITY DEFINER
     // and gated to host/co_host, and returns 0 for everyone else.
@@ -1640,6 +1674,7 @@ export async function getShowConsole(
             staff: staffMembers,
             entries: consoleEntries,
             feePaidUserIds,
+            barred,
             followerCount,
         },
     };

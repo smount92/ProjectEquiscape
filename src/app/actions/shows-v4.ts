@@ -48,6 +48,7 @@ import {
     liftBarSchema,
     listBarredEntrantsSchema,
     publishClassResultsSchema,
+    removeEntrantFromShowSchema,
     strikeEntrySchema,
     unpublishClassResultsSchema,
     updateHorseDocumentSchema,
@@ -161,7 +162,190 @@ export async function barEntrant(
     return { success: true };
 }
 
-/** Lift a bar (host/co-host). Does NOT restore scratched entries. */
+export interface RemoveEntrantResult {
+    success: true;
+    /** Entry rows actually deleted (entered AND scratched alike). */
+    removedEntries: number;
+    /** Distinct classes those entries sat in — for the host's receipt. */
+    removedClasses: number;
+    /** False when the bar row was already there (the re-run case). */
+    newlyBarred: boolean;
+}
+
+/**
+ * REMOVE AND BAR — the one-motion troll cleanup (host/co-host, or
+ * the platform admin).
+ *
+ * The two existing tools each do half the job, which is why the
+ * sloptrough incident has twice been cleaned up with hand-written
+ * SQL: Scratch leaves the entry standing on the host's ledger and
+ * does not stop re-entry; Bar stops the next entry but leaves the
+ * ones already in. This deletes every entry the owner holds at this
+ * show — ENTERED AND ALREADY-SCRATCHED ALIKE, because a scratched
+ * joke entry is still a joke entry in the ledger — clears the
+ * placings hanging off them, and lands the bar row that migrations
+ * 148/151 enforce re-entry against.
+ *
+ * NOT an after-publish tool: see the results guard below.
+ */
+export async function removeEntrantFromShow(
+    input: z.input<typeof removeEntrantFromShowSchema>,
+): Promise<RemoveEntrantResult | { success: false; error: string }> {
+    const parsed = removeEntrantFromShowSchema.safeParse(input);
+    if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
+    const { supabase, user } = await requireAuth();
+    const v = parsed.data;
+
+    const roleResult = await getShowRole(supabase, v.showId, user.id);
+    if ("error" in roleResult) return { success: false, error: roleResult.error };
+
+    // A hidden button is not authorization — the gate lives here.
+    const admin = isPlatformAdmin(user.email);
+    const isStaff = roleResult.role === "host" || roleResult.role === "co_host";
+    if (!isStaff && !admin) {
+        return {
+            success: false,
+            error: "Only the host, a co-host, or the site admin can remove an entrant from a show.",
+        };
+    }
+
+    if (v.userId === user.id) {
+        return {
+            success: false,
+            error: "You cannot remove yourself with this tool — scratch your own entries instead.",
+        };
+    }
+    if (v.userId === roleResult.show.host_id) {
+        return {
+            success: false,
+            error: "The host's own entries cannot be removed this way — scratch them instead.",
+        };
+    }
+
+    // RESULTS ARE FINAL (the same rule barEntrant's sweep and Strike
+    // both answer to). Deleting entries after results publish orphans
+    // the placings, cards and trophy-case records hanging off them and
+    // silently recomputes the class sizes the published points were
+    // figured from. After publish the correct tool is per-placing
+    // Strike, which voids the card and cleans the record with it.
+    const status = roleResult.show.status;
+    if (status === "results_review" || status === "completed" || status === "archived") {
+        return {
+            success: false,
+            error:
+                "This show's results are published — entries can no longer be removed. Strike the individual placings instead (Strike voids the card and cleans the record with it); the bar list still governs future shows.",
+        };
+    }
+
+    // The platform admin usually holds no show_staff row, so every RLS
+    // policy on entries/placings/bars (all keyed to show_role_check)
+    // would quietly filter their writes to a no-op. THIRD documented
+    // admin-client use in this file, reached only past the explicit
+    // gate above; show staff keep the RLS backstop on the user client.
+    const db = isStaff ? supabase : getAdminClient();
+
+    const { data: entryRows, error: entriesError } = await db
+        .from("show_class_entries")
+        .select("id, class_id")
+        .eq("show_id", v.showId)
+        .eq("owner_id", v.userId);
+    if (entriesError) return { success: false, error: entriesError.message };
+    const entries = (entryRows ?? []) as { id: string; class_id: string }[];
+    const entryIds = entries.map((e) => e.id);
+    const removedClasses = new Set(entries.map((e) => e.class_id)).size;
+
+    const { data: existingBar, error: barReadError } = await db
+        .from("show_barred_entrants")
+        .select("user_id")
+        .eq("show_id", v.showId)
+        .eq("user_id", v.userId)
+        .maybeSingle();
+    if (barReadError) return { success: false, error: barReadError.message };
+    const alreadyBarred = !!existingBar;
+
+    if (entryIds.length === 0 && alreadyBarred) {
+        return {
+            success: false,
+            error: "That member is already barred from this show and has no entries left to remove.",
+        };
+    }
+
+    // THE BAR LANDS FIRST, deliberately. If the sweep below fails
+    // halfway the show is left in the old Bar-only state — untidy but
+    // safe, and the troll cannot enter again while the host retries.
+    // The other order would delete the entries and leave the door
+    // open. ignoreDuplicates is ON CONFLICT DO NOTHING: a re-run must
+    // never overwrite the original reason or barred_by.
+    const { error: barError } = await db.from("show_barred_entrants").upsert(
+        {
+            show_id: v.showId,
+            user_id: v.userId,
+            barred_by: user.id,
+            reason: v.reason?.length ? v.reason : null,
+        },
+        { onConflict: "show_id,user_id", ignoreDuplicates: true },
+    );
+    if (barError) return { success: false, error: barError.message };
+
+    let removedEntries = 0;
+    if (entryIds.length > 0) {
+        // show_placings.entry_id is ON DELETE CASCADE (117), but the
+        // judge queue and ring console read placings directly — clearing
+        // them first means no window where the tray points at ghosts.
+        const { error: placingsError } = await db
+            .from("show_placings")
+            .delete()
+            .in("entry_id", entryIds);
+        if (placingsError) return { success: false, error: placingsError.message };
+
+        // .select() makes the delete self-verifying — an RLS-filtered
+        // no-op must never report success.
+        const { data: deleted, error: deleteError } = await db
+            .from("show_class_entries")
+            .delete()
+            .eq("show_id", v.showId)
+            .eq("owner_id", v.userId)
+            .select("id");
+        if (deleteError) return { success: false, error: deleteError.message };
+        removedEntries = deleted?.length ?? 0;
+        if (removedEntries === 0) {
+            return {
+                success: false,
+                error: "Those entries could not be removed — please refresh and try again. The bar is already in place.",
+            };
+        }
+    }
+
+    // Plain, non-inflammatory, and deliberately REASON-FREE: the
+    // host's reason is bookkeeping that stays on the bar row for staff
+    // and the site admin. It was never written to be read by the
+    // person it is about.
+    try {
+        const { createNotification } = await import("@/lib/notifications/createNotification");
+        await createNotification({
+            userId: v.userId,
+            type: "show_moderation",
+            actorId: null,
+            content:
+                removedEntries > 0
+                    ? `Your ${removedEntries === 1 ? "entry was" : "entries were"} removed from this show by the host, and you cannot re-enter it. Contact the host with questions.`
+                    : "The host has barred you from entering this show. Contact the host with questions.",
+            linkUrl: `/shows/${v.showId}`,
+        });
+    } catch {
+        // Notification is best-effort — the removal stands either way.
+    }
+
+    revalidatePath(`/shows/${v.showId}`);
+    revalidatePath(`/shows/host/${v.showId}`);
+    return { success: true, removedEntries, removedClasses, newlyBarred: !alreadyBarred };
+}
+
+/**
+ * Lift a bar (host/co-host, or the platform admin — the same trio
+ * that can remove an entrant can undo it). Does NOT restore removed
+ * or scratched entries; the member simply may enter again.
+ */
 export async function liftBar(
     input: z.input<typeof liftBarSchema>,
 ): Promise<ActionResult> {
@@ -172,11 +356,20 @@ export async function liftBar(
 
     const roleResult = await getShowRole(supabase, v.showId, user.id);
     if ("error" in roleResult) return { success: false, error: roleResult.error };
-    if (roleResult.role !== "host" && roleResult.role !== "co_host") {
-        return { success: false, error: "Only the host or a co-host can lift a bar." };
+    const isStaff = roleResult.role === "host" || roleResult.role === "co_host";
+    if (!isStaff && !isPlatformAdmin(user.email)) {
+        return {
+            success: false,
+            error: "Only the host, a co-host, or the site admin can lift a bar.",
+        };
     }
 
-    const { error } = await supabase
+    // Same admin-client rationale as removeEntrantFromShow: the DELETE
+    // policy on show_barred_entrants is show_role_check-keyed, so an
+    // admin who holds no staff row would get a silent no-op.
+    const db = isStaff ? supabase : getAdminClient();
+
+    const { error } = await db
         .from("show_barred_entrants")
         .delete()
         .eq("show_id", v.showId)

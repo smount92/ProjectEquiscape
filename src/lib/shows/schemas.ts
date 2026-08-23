@@ -379,6 +379,17 @@ export const barEntrantSchema = z.object({
     scratchEntries: z.boolean().default(true),
 });
 
+/**
+ * Remove-and-bar in one motion (the sloptrough fix). No `scratchEntries`
+ * switch: removal is the whole point, and the reason is optional because
+ * it is host bookkeeping — it never reaches the removed member.
+ */
+export const removeEntrantFromShowSchema = z.object({
+    showId: uuidSchema,
+    userId: uuidSchema,
+    reason: z.string().trim().max(500).optional(),
+});
+
 export const liftBarSchema = z.object({
     showId: uuidSchema,
     userId: uuidSchema,
