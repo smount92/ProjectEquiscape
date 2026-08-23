@@ -1197,7 +1197,7 @@ function LegacyAddHorsePage() {
 
  </div>
 
- <div className="mt-8 flex items-center justify-between gap-4">
+ <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
  {/* spacer keeps Next right-aligned (no Back on step 1) */}
  <div aria-hidden="true" />
  <Button
@@ -1258,7 +1258,7 @@ function LegacyAddHorsePage() {
  />
  </div>
 
- <div className="mt-8 flex items-center justify-between gap-4">
+ <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
  <Button variant="outline" size="wide"
  onClick={goBack}
  id="step-2-back"
@@ -1701,7 +1701,7 @@ function LegacyAddHorsePage() {
  </div>
  </div>
 
- <div className="mt-8 flex items-center justify-between gap-4">
+ <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
  <Button variant="outline" size="wide"
  onClick={goBack}
  id="step-3-back"
@@ -1862,7 +1862,7 @@ function LegacyAddHorsePage() {
  </div>
  </div>
 
- <div className="mt-8 flex items-center justify-between gap-4">
+ <div className="mt-8 flex flex-wrap items-center justify-between gap-4">
  <Button variant="outline" size="wide"
  onClick={goBack}
  id="step-4-back"

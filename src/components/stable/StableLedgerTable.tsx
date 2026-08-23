@@ -111,7 +111,7 @@ export default function StableLedgerTable({
     return (
         <div className="w-full overflow-hidden rounded-xl border border-input bg-card shadow-sm">
             <div className="-mx-4 w-full overflow-x-auto px-4 sm:mx-0 sm:px-0">
-                <Table className="min-w-[640px]">
+                <Table className="md:min-w-[640px]">
                     <TableHeader>
                         <TableRow className="hover:bg-transparent">
                             {selectMode && <TableHead className="w-[36px]">☑</TableHead>}

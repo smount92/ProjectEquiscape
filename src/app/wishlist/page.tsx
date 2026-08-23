@@ -280,7 +280,7 @@ export default async function WishlistPage() {
                         <span className="ledger-tab" id="list-heading">
                             The list
                         </span>
-                        <ul className="m-0 grid list-none grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-5 p-0">
+                        <ul className="m-0 grid list-none grid-cols-[repeat(auto-fill,minmax(min(100%,320px),1fr))] gap-5 p-0">
                             {items.map((item) => (
                                 <WantCard key={item.id} item={item} />
                             ))}

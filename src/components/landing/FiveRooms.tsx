@@ -131,7 +131,7 @@ export default function FiveRooms() {
                     </p>
                 </div>
 
-                <ul className="m-0 grid list-none grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-6 p-0">
+                <ul className="m-0 grid list-none grid-cols-[repeat(auto-fit,minmax(min(100%,320px),1fr))] gap-6 p-0">
                     {ROOMS.map(({ name, standfirst, Icon, body, links }) => (
                         <li key={name} className="flex">
                             <div className="ledger-paper flex flex-1 flex-col py-6 pr-6 transition-all hover:-translate-y-1 hover:shadow-md">

@@ -487,16 +487,16 @@ export default function CsvImport() {
  {csvHeaders.map((header) => (
  <div
  key={header}
- className="bg-card border-input flex items-center gap-4 rounded-md border px-6 py-4 shadow-md transition-all"
+ className="bg-card border-input flex flex-wrap items-center gap-4 rounded-md border px-6 py-4 shadow-md transition-all"
  >
- <span className="text-foreground min-w-0 flex-1 overflow-hidden text-sm font-semibold text-ellipsis whitespace-nowrap">
+ <span className="text-foreground min-w-[8rem] flex-1 overflow-hidden text-sm font-semibold text-ellipsis whitespace-nowrap">
  {header}
  </span>
  <span className="text-muted-foreground shrink-0 text-base">
  →
  </span>
  <select
- className="bg-input border-input-input text-foreground flex-1 cursor-pointer rounded-sm border px-4 py-2 font-sans text-sm"
+ className="bg-input border-input-input text-foreground min-w-0 flex-1 basis-full cursor-pointer rounded-sm border px-4 py-2 font-sans text-sm sm:basis-auto"
  value={columnMapping[header] ||""}
  onChange={(e) => handleMappingChange(header, e.target.value)}
  aria-label={`Map ${header} to field`}

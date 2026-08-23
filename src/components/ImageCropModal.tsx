@@ -429,15 +429,15 @@ export default function ImageCropModal({
  </div>
 
  {/* Footer actions */}
- <div className="flex items-center justify-between gap-2 border-t border-input px-6 py-4">
- <Button variant="outline" size="wide"
+ <div className="flex flex-wrap items-center justify-between gap-2 border-t border-input px-6 py-4">
+ <Button variant="outline"
  onClick={onCancel}
  disabled={processing}
  >
  Cancel
  </Button>
  <div className="flex gap-2">
- <Button variant="outline" size="wide"
+ <Button variant="outline"
  onClick={handleSkip}
  disabled={processing}
  >

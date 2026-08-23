@@ -111,7 +111,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
                     </svg>
                 </Link>
 
-                <div className="flex min-w-0 flex-1 flex-col">
+                <div className="flex min-w-[13rem] flex-1 basis-52 flex-col">
                     <div className="flex items-center gap-2">
                         <Link href={`/profile/${encodeURIComponent(room.otherAlias)}`}>
                             @{room.otherAlias}

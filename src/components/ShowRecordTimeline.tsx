@@ -226,7 +226,7 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
  )}
 
  {isOwner && (
- <div className="absolute top-2 right-2 flex gap-1 opacity-0 transition-opacity group-hover/record:opacity-100">
+ <div className="absolute top-2 right-2 flex gap-1 opacity-100 transition-opacity pointer-fine:opacity-0 pointer-fine:group-hover/record:opacity-100">
  <button
  className="text-muted-foreground hover:text-forest cursor-pointer rounded-sm border-none bg-transparent px-[6px] py-[2px] text-xs transition-colors"
  onClick={() => handleEdit(record)}

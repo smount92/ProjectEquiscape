@@ -596,7 +596,7 @@ export default async function ReferencePage({ params }: Props) {
                 {/* DETAILS */}
                 <section>
                     <h2 className="mb-3 font-serif text-xl font-bold text-foreground">Details</h2>
-                    <div className="overflow-hidden rounded-xl border border-input bg-card shadow-sm">
+                    <div className="overflow-x-auto rounded-xl border border-input bg-card shadow-sm">
                         <table className="w-full border-collapse text-sm">
                             <tbody>
                                 {specRows.map(([k, v], i) => (

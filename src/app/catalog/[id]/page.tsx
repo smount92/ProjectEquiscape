@@ -120,7 +120,7 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
    </div>
 
    {/* Action Buttons */}
-   <div className="flex gap-2">
+   <div className="flex flex-wrap gap-2">
    <Button asChild>
     <Link href={`/add-horse?catalog=${id}`}>
     <Plus className="h-4 w-4" /> Add to My Stable

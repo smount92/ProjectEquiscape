@@ -84,7 +84,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
 
   {/* 🔒 Collection Stats — PRIVATE analytics */}
   {totalCount > 0 && (
-  <div className="grid-cols-[repeat(3,1fr)] animate-fade-in-up mb-8 grid gap-4">
+  <div className="grid-cols-1 sm:grid-cols-3 animate-fade-in-up mb-8 grid gap-4">
    <div className="bg-card border-input relative flex flex-col items-center gap-1 overflow-hidden rounded-lg border px-4 py-6 text-center shadow-md transition-all">
    <div className="text-2xl leading-none">🐴</div>
    <div className="analytics-value max-[400px]:text-xl">{totalCount}</div>
