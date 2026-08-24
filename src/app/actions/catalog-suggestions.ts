@@ -8,9 +8,13 @@ import { after } from "next/server";
 import { sanitizeText } from "@/lib/utils/validation";
 import { sanitizeForOr } from "@/lib/utils/search";
 import {
-    SILVER_AUTO_FIELDS,
+    BRONZE_THRESHOLD,
+    CONTRIBUTOR_THRESHOLD,
+    GOLD_THRESHOLD,
+    SILVER_THRESHOLD,
     buildCorrectionUpdate,
     correctionTouchesAttributes,
+    silverAutoApprovable,
 } from "@/lib/catalog/corrections";
 import { referenceHref } from "@/lib/catalog/referenceUrl";
 import {
@@ -322,16 +326,17 @@ export async function createSuggestion(input: SuggestionInput) {
 
     let autoApprove = false;
     if (input.suggestionType === "correction" && input.fieldChanges) {
-        const changedFields = Object.keys(input.fieldChanges);
-        const isGoldCurator = approvedCount >= 200;
-        const isSilverCurator = approvedCount >= 50;
+        const isGoldCurator = approvedCount >= GOLD_THRESHOLD;
+        const isSilverCurator = approvedCount >= SILVER_THRESHOLD;
 
         if (isGoldCurator) {
             autoApprove = true;
         } else if (isSilverCurator) {
-            autoApprove = changedFields.every((f) =>
-                SILVER_AUTO_FIELDS.has(f)
-            );
+            // Field AND value: the correction apply path does no vocabulary
+            // validation of its own, so the fast path demands well-formed
+            // values. A miss here is not a rejection — the suggestion files
+            // for human review like anyone else's.
+            autoApprove = silverAutoApprovable(input.fieldChanges);
         }
     }
 
@@ -909,12 +914,13 @@ async function applyApprovedSuggestion(
             } | null
         )?.approved_suggestions_count ?? 0;
 
-    // Award curator badges
+    // Award curator badges — same constants as the auto-approve decision,
+    // so the badge a member sees and the power it confers cannot disagree.
     const badgesToCheck = [
-        { threshold: 1, badgeId: "catalog_contributor" },
-        { threshold: 10, badgeId: "bronze_curator" },
-        { threshold: 50, badgeId: "silver_curator" },
-        { threshold: 200, badgeId: "gold_curator" },
+        { threshold: CONTRIBUTOR_THRESHOLD, badgeId: "catalog_contributor" },
+        { threshold: BRONZE_THRESHOLD, badgeId: "bronze_curator" },
+        { threshold: SILVER_THRESHOLD, badgeId: "silver_curator" },
+        { threshold: GOLD_THRESHOLD, badgeId: "gold_curator" },
     ];
 
     for (const { threshold, badgeId } of badgesToCheck) {
@@ -926,8 +932,9 @@ async function applyApprovedSuggestion(
         }
     }
 
-    // Update trusted curator flag
-    if (count >= 50) {
+    // Update trusted curator flag. Tied to Silver — the same rank that
+    // unlocks auto-approval, so "trusted" means one thing site-wide.
+    if (count >= SILVER_THRESHOLD) {
         await admin
             .from("users")
             .update({ is_trusted_curator: true })

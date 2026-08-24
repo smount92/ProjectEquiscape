@@ -2,6 +2,12 @@
 
 import { useState, useEffect } from"react";
 import { useRouter } from"next/navigation";
+import {
+ BRONZE_THRESHOLD,
+ CONTRIBUTOR_THRESHOLD,
+ GOLD_THRESHOLD,
+ SILVER_THRESHOLD,
+} from"@/lib/catalog/corrections";
 import { deleteContactMessage } from"@/app/actions/admin";
 import MarkReadButton from"@/components/MarkReadButton";
 import AdminReplyForm from"@/components/AdminReplyForm";
@@ -528,13 +534,13 @@ function CatalogQueue({ suggestions }: { suggestions: CatalogSuggestionAdmin[] }
  <div className="flex flex-col gap-2">
  {suggestions.map((s) => {
  const curatorIcon =
- s.author_approved_count >= 200
+ s.author_approved_count >= GOLD_THRESHOLD
  ?"🥇"
- : s.author_approved_count >= 50
+ : s.author_approved_count >= SILVER_THRESHOLD
  ?"🥈"
- : s.author_approved_count >= 10
+ : s.author_approved_count >= BRONZE_THRESHOLD
  ?"🥉"
- : s.author_approved_count >= 1
+ : s.author_approved_count >= CONTRIBUTOR_THRESHOLD
  ?"📘"
  :"";
 

@@ -1,4 +1,5 @@
 import { createClient } from"@/lib/supabase/server";
+import { BRONZE_THRESHOLD, CONTRIBUTOR_THRESHOLD, GOLD_THRESHOLD, SILVER_THRESHOLD } from "@/lib/catalog/corrections";
 import { getAdminClient } from"@/lib/supabase/admin";
 import Link from"next/link";
 import type { Metadata } from"next";
@@ -154,13 +155,13 @@ export default async function SuggestionsPage({ searchParams }: Props) {
 
  const curatorCount = userData?.approved_suggestions_count ?? 0;
  const curatorIcon =
- curatorCount >= 200
+ curatorCount >= GOLD_THRESHOLD
  ?"🥇"
- : curatorCount >= 50
+ : curatorCount >= SILVER_THRESHOLD
  ?"🥈"
- : curatorCount >= 10
+ : curatorCount >= BRONZE_THRESHOLD
  ?"🥉"
- : curatorCount >= 1
+ : curatorCount >= CONTRIBUTOR_THRESHOLD
  ?"📘"
  :"";
 

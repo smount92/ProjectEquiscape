@@ -6,6 +6,12 @@ import SuggestionVoteButtons from"@/components/SuggestionVoteButtons";
 import SuggestionCommentThread from"@/components/SuggestionCommentThread";
 import SuggestionAdminActions from"@/components/SuggestionAdminActions";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import {
+ BRONZE_THRESHOLD,
+ CONTRIBUTOR_THRESHOLD,
+ GOLD_THRESHOLD,
+ SILVER_THRESHOLD,
+} from"@/lib/catalog/corrections";
 import CatalogSubMasthead from"@/components/catalog/CatalogSubMasthead";
 import { referenceHref } from"@/lib/catalog/referenceUrl";
 import { MessageCircle, Shield } from"lucide-react";
@@ -110,26 +116,29 @@ export default async function SuggestionDetailPage({ params }: Props) {
  };
  const st = statusConfig[s.status] ?? statusConfig.pending;
 
- // Curator badge
+ // Curator badge — thresholds come from the same module that decides
+ // auto-approval, so the rank shown here always matches the power it
+ // confers. These ternaries previously hard-coded 200/50/10 and would
+ // have kept showing the old ladder after the 2026-08-23 recalibration.
  const curatorCount = authorInfo?.approved_suggestions_count ?? 0;
  const curatorIcon =
- curatorCount >= 200
+ curatorCount >= GOLD_THRESHOLD
  ?"🥇"
- : curatorCount >= 50
+ : curatorCount >= SILVER_THRESHOLD
  ?"🥈"
- : curatorCount >= 10
+ : curatorCount >= BRONZE_THRESHOLD
  ?"🥉"
- : curatorCount >= 1
+ : curatorCount >= CONTRIBUTOR_THRESHOLD
  ?"📘"
  :"";
  const curatorLabel =
- curatorCount >= 200
+ curatorCount >= GOLD_THRESHOLD
  ?"Gold Curator"
- : curatorCount >= 50
+ : curatorCount >= SILVER_THRESHOLD
  ?"Silver Curator"
- : curatorCount >= 10
+ : curatorCount >= BRONZE_THRESHOLD
  ?"Bronze Curator"
- : curatorCount >= 1
+ : curatorCount >= CONTRIBUTOR_THRESHOLD
  ?"Catalog Contributor"
  :"";
 

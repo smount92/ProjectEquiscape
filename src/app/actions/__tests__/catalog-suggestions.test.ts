@@ -1,5 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { SILVER_AUTO_FIELDS } from "@/lib/catalog/corrections";
+import {
+    BRONZE_THRESHOLD,
+    GOLD_THRESHOLD,
+    SILVER_AUTO_FIELDS,
+    SILVER_THRESHOLD,
+    silverAutoApprovable,
+} from "@/lib/catalog/corrections";
+import { CATALOG_EDITABLE_FIELDS } from "@/lib/catalog/editableFields";
 import {
     CATALOG_GENDERS,
     RUN_TYPES,
@@ -16,14 +23,33 @@ import {
    which are the most critical business rules.
    ────────────────────────────────────────────────────── */
 
-// ── Auto-Approve thresholds (mirror the source of truth) ──
-// SILVER_AUTO_FIELDS is imported from the shared module so this test can never
-// drift from the real allowlist. Note it holds `attributes` JSONB keys (e.g.
-// color_description), the exact keys SuggestEditModal emits — not labels.
-const SILVER_THRESHOLD = 50;
-const GOLD_THRESHOLD = 200;
+// Thresholds and the allowlist are imported from the shared module so this
+// test can never drift from the real values. The previous version mirrored
+// them locally (50/200) — which is how the test kept passing for months
+// while the ladder it described had never fired once in production.
 
 describe("Auto-approve rules (pure logic)", () => {
+    // Well-formed sample values per field, so these tests exercise the
+    // FIELD rules; the value gate has its own describe below.
+    const SAMPLE: Record<string, string> = {
+        color_description: "Bay pinto, blaze, four stockings",
+        model_number: "712053",
+        release_year_start: "1998",
+        release_year_end: "2004",
+        run_type: "Regular Run",
+        run_count: "500",
+        retail_price: "59.99",
+        material: "Plastic",
+        breed: "Arabian",
+        gender: "Mare",
+        maker: "Breyer",
+        mold: "Fighting Stallion",
+        production_run: "500",
+        release_date: "1998",
+        color: "bay",
+        year: "1998",
+        title: "Alborozo",
+    };
     function shouldAutoApprove(
         approvedCount: number,
         suggestionType: string,
@@ -32,93 +58,147 @@ describe("Auto-approve rules (pure logic)", () => {
         if (suggestionType !== "correction") return false;
         if (approvedCount >= GOLD_THRESHOLD) return true;
         if (approvedCount >= SILVER_THRESHOLD) {
-            return changedFields.every((f) => SILVER_AUTO_FIELDS.has(f));
+            return silverAutoApprovable(
+                Object.fromEntries(
+                    changedFields.map((f) => [f, { from: "", to: SAMPLE[f] ?? "x" }])
+                )
+            );
         }
         return false;
     }
 
     it("returns false for regular users regardless of fields", () => {
         expect(shouldAutoApprove(0, "correction", ["color_description"])).toBe(false);
-        expect(shouldAutoApprove(10, "correction", ["color_description"])).toBe(false);
-        expect(shouldAutoApprove(49, "correction", ["color_description"])).toBe(false);
+        expect(shouldAutoApprove(SILVER_THRESHOLD - 1, "correction", ["color_description"])).toBe(false);
     });
 
     it("Silver auto-approves color-only corrections", () => {
-        expect(shouldAutoApprove(50, "correction", ["color_description"])).toBe(true);
+        expect(shouldAutoApprove(SILVER_THRESHOLD, "correction", ["color_description"])).toBe(true);
     });
 
     it("Silver auto-approves year-only corrections", () => {
-        expect(shouldAutoApprove(50, "correction", ["release_year_start"])).toBe(true);
+        expect(shouldAutoApprove(SILVER_THRESHOLD, "correction", ["release_year_start"])).toBe(true);
     });
 
     it("Silver auto-approves color + year combined", () => {
         expect(
-            shouldAutoApprove(50, "correction", [
+            shouldAutoApprove(SILVER_THRESHOLD, "correction", [
                 "color_description",
                 "release_year_start",
             ])
         ).toBe(true);
     });
 
-    it("Silver auto-approves production_run corrections", () => {
-        expect(shouldAutoApprove(75, "correction", ["production_run"])).toBe(true);
+    it("Silver auto-approves the fields that actually exist on rows", () => {
+        expect(shouldAutoApprove(SILVER_THRESHOLD, "correction", ["run_count"])).toBe(true);
+        expect(shouldAutoApprove(SILVER_THRESHOLD, "correction", ["retail_price"])).toBe(true);
+        expect(shouldAutoApprove(SILVER_THRESHOLD, "correction", ["run_type"])).toBe(true);
+        expect(shouldAutoApprove(SILVER_THRESHOLD, "correction", ["material"])).toBe(true);
     });
 
-    it("Silver auto-approves release_date corrections", () => {
-        expect(shouldAutoApprove(99, "correction", ["release_date"])).toBe(true);
+    // The regression this file failed to catch for months: the allowlist
+    // named production_run and release_date, keys that exist on ZERO of
+    // 10,945 rows (the real keys are run_count and release_year_*), so
+    // half the allowlist could never match a real correction. Every entry
+    // must be a field the correction form can actually emit.
+    it("every allowlisted field is one the correction form can emit", () => {
+        const formKeys = new Set(CATALOG_EDITABLE_FIELDS.map((f) => f.key));
+        for (const key of SILVER_AUTO_FIELDS) {
+            expect(formKeys.has(key), key + " is not an editable field").toBe(true);
+        }
+    });
+
+    it("the dead keys stay dead", () => {
+        expect(SILVER_AUTO_FIELDS.has("production_run")).toBe(false);
+        expect(SILVER_AUTO_FIELDS.has("release_date")).toBe(false);
     });
 
     it("Silver does NOT auto-approve maker corrections", () => {
-        expect(shouldAutoApprove(50, "correction", ["maker"])).toBe(false);
+        expect(shouldAutoApprove(SILVER_THRESHOLD, "correction", ["maker"])).toBe(false);
     });
 
     it("Silver does NOT auto-approve mold corrections", () => {
-        expect(shouldAutoApprove(50, "correction", ["mold"])).toBe(false);
+        expect(shouldAutoApprove(SILVER_THRESHOLD, "correction", ["mold"])).toBe(false);
     });
 
     it("Silver does NOT auto-approve mix of allowed + disallowed fields", () => {
         expect(
-            shouldAutoApprove(50, "correction", ["color_description", "maker"])
+            shouldAutoApprove(SILVER_THRESHOLD, "correction", ["color_description", "maker"])
         ).toBe(false);
     });
 
     it("Silver does NOT auto-approve human-label keys (must be attribute keys)", () => {
-        // Guards the pre-existing bug: SuggestEditModal emits attribute keys
-        // like `color_description`, never `color`, so a "color" allowlist
-        // would silently never fire.
-        expect(shouldAutoApprove(50, "correction", ["color"])).toBe(false);
-        expect(shouldAutoApprove(50, "correction", ["year"])).toBe(false);
+        expect(shouldAutoApprove(SILVER_THRESHOLD, "correction", ["color"])).toBe(false);
+        expect(shouldAutoApprove(SILVER_THRESHOLD, "correction", ["year"])).toBe(false);
     });
 
     it("Gold auto-approves ALL correction fields", () => {
-        expect(shouldAutoApprove(200, "correction", ["maker"])).toBe(true);
-        expect(shouldAutoApprove(200, "correction", ["mold"])).toBe(true);
-        expect(
-            shouldAutoApprove(200, "correction", [
-                "color_description",
-                "maker",
-                "mold",
-            ])
-        ).toBe(true);
-    });
-
-    it("Gold with very high count auto-approves", () => {
+        expect(shouldAutoApprove(GOLD_THRESHOLD, "correction", ["maker"])).toBe(true);
+        expect(shouldAutoApprove(GOLD_THRESHOLD, "correction", ["mold"])).toBe(true);
         expect(shouldAutoApprove(999, "correction", ["mold"])).toBe(true);
     });
 
     it("additions NEVER auto-approve, even for Gold", () => {
         expect(shouldAutoApprove(0, "addition", ["title"])).toBe(false);
-        expect(shouldAutoApprove(50, "addition", ["title"])).toBe(false);
-        expect(shouldAutoApprove(200, "addition", ["title"])).toBe(false);
+        expect(shouldAutoApprove(GOLD_THRESHOLD, "addition", ["title"])).toBe(false);
         expect(shouldAutoApprove(999, "addition", ["title"])).toBe(false);
     });
 
     it("removals NEVER auto-approve", () => {
-        expect(shouldAutoApprove(200, "removal", ["id"])).toBe(false);
+        expect(shouldAutoApprove(GOLD_THRESHOLD, "removal", ["id"])).toBe(false);
     });
 
     it("photo suggestions NEVER auto-approve", () => {
-        expect(shouldAutoApprove(200, "photo", ["url"])).toBe(false);
+        expect(shouldAutoApprove(GOLD_THRESHOLD, "photo", ["url"])).toBe(false);
+    });
+});
+
+describe("the Silver value gate", () => {
+    // The correction apply path does no vocabulary validation of its own —
+    // that lives on the addition path. While every correction waited for an
+    // admin, a human was the value check; the fast path replaces the human,
+    // so it must refuse malformed values rather than write them.
+    const change = (key: string, to: unknown) => ({ [key]: { from: "old", to } });
+
+    it("accepts a well-formed value", () => {
+        expect(silverAutoApprovable(change("run_type", "Web Special"))).toBe(true);
+        expect(silverAutoApprovable(change("release_year_start", "1987"))).toBe(true);
+    });
+
+    it("refuses an off-vocabulary run_type instead of minting a facet value", () => {
+        expect(silverAutoApprovable(change("run_type", "whatever"))).toBe(false);
+    });
+
+    it("refuses a year that is not a year", () => {
+        expect(silverAutoApprovable(change("release_year_start", "the 80s"))).toBe(false);
+        expect(silverAutoApprovable(change("release_year_start", "1492"))).toBe(false);
+    });
+
+    it("refuses a price with a currency sign — the field stores bare numbers", () => {
+        expect(silverAutoApprovable(change("retail_price", "$59.99"))).toBe(false);
+        expect(silverAutoApprovable(change("retail_price", "59.99"))).toBe(true);
+    });
+
+    it("refuses an overlong colour description", () => {
+        expect(silverAutoApprovable(change("color_description", "x".repeat(301)))).toBe(false);
+    });
+
+    it("refuses a non-string value outright", () => {
+        expect(silverAutoApprovable(change("run_count", 500))).toBe(false);
+        expect(silverAutoApprovable(change("color_description", null))).toBe(false);
+    });
+
+    it("refuses an empty change set", () => {
+        expect(silverAutoApprovable({})).toBe(false);
+    });
+
+    it("one bad value sinks the whole correction to human review", () => {
+        expect(
+            silverAutoApprovable({
+                color_description: { from: "", to: "Bay pinto" },
+                run_type: { from: "", to: "not-a-run-type" },
+            })
+        ).toBe(false);
     });
 });
 
@@ -126,7 +206,7 @@ describe("Curator tier boundaries", () => {
     function getCuratorTier(approvedCount: number): string {
         if (approvedCount >= GOLD_THRESHOLD) return "gold";
         if (approvedCount >= SILVER_THRESHOLD) return "silver";
-        if (approvedCount >= 10) return "bronze";
+        if (approvedCount >= BRONZE_THRESHOLD) return "bronze";
         if (approvedCount >= 1) return "contributor";
         return "none";
     }
@@ -135,23 +215,23 @@ describe("Curator tier boundaries", () => {
         expect(getCuratorTier(0)).toBe("none");
     });
 
-    it("1–9 = contributor", () => {
+    it("below bronze = contributor", () => {
         expect(getCuratorTier(1)).toBe("contributor");
-        expect(getCuratorTier(9)).toBe("contributor");
+        expect(getCuratorTier(BRONZE_THRESHOLD - 1)).toBe("contributor");
     });
 
-    it("10–49 = bronze", () => {
-        expect(getCuratorTier(10)).toBe("bronze");
-        expect(getCuratorTier(49)).toBe("bronze");
+    it("bronze up to silver", () => {
+        expect(getCuratorTier(BRONZE_THRESHOLD)).toBe("bronze");
+        expect(getCuratorTier(SILVER_THRESHOLD - 1)).toBe("bronze");
     });
 
-    it("50–199 = silver", () => {
-        expect(getCuratorTier(50)).toBe("silver");
-        expect(getCuratorTier(199)).toBe("silver");
+    it("silver up to gold", () => {
+        expect(getCuratorTier(SILVER_THRESHOLD)).toBe("silver");
+        expect(getCuratorTier(GOLD_THRESHOLD - 1)).toBe("silver");
     });
 
-    it("200+ = gold", () => {
-        expect(getCuratorTier(200)).toBe("gold");
+    it("gold and beyond", () => {
+        expect(getCuratorTier(GOLD_THRESHOLD)).toBe("gold");
         expect(getCuratorTier(500)).toBe("gold");
     });
 });
