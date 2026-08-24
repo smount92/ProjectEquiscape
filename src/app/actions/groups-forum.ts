@@ -352,6 +352,39 @@ export async function createThread(
                 : "/community/groups";
             const { parseAndNotifyMentions } = await import("@/app/actions/mentions");
             await parseAndNotifyMentions(trimmed, userId, alias, sourceUrl);
+
+            // Every barn member hears about a NEW thread — replies already
+            // notify participants, but a fresh thread had no audience at
+            // all, so a bug filed in the Help Desk barn could sit unseen
+            // until someone happened to visit. Same cap as reply fan-out.
+            const { data: groupMeta } = await supabaseDeferred
+                .from("groups")
+                .select("name")
+                .eq("id", groupId)
+                .maybeSingle();
+            const barnName = (groupMeta as { name: string } | null)?.name ?? "your barn";
+            const { data: members } = await supabaseDeferred
+                .from("group_memberships")
+                .select("user_id")
+                .eq("group_id", groupId)
+                .neq("user_id", userId)
+                .limit(PARTICIPANT_NOTIFY_CAP);
+            const memberIds = ((members ?? []) as { user_id: string }[]).map((m) => m.user_id);
+            if (memberIds.length > 0) {
+                const { createNotificationsBulk } = await import(
+                    "@/lib/notifications/createNotification"
+                );
+                const threadTitle = deriveThreadTitle(sanitizeText(title), trimmed);
+                await createNotificationsBulk(
+                    memberIds.map((id) => ({
+                        userId: id,
+                        type: "system",
+                        actorId: userId,
+                        content: `🏚️ New thread in ${barnName}: "${threadTitle}" — by @${alias}`,
+                        linkUrl: sourceUrl,
+                    })),
+                );
+            }
         } catch (err) {
             logger.error("GroupsForum", "Background task failed", err);
         }

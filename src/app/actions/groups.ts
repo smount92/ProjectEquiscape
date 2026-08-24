@@ -4,7 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { logger } from "@/lib/logger";
 
-import { requireAuth } from "@/lib/auth";
+import { requireAuth, AuthError } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { GROUP_FILE_MAX_SIZE, GROUP_FILE_ALLOWED_EXTENSIONS } from "@/lib/groupFiles";
@@ -42,6 +42,9 @@ export interface Group {
     isPrivate: boolean;
     bannerUrl: string | null;
     iconUrl: string | null;
+    /** Featured barns sort first and wear the Official stamp (194).
+     *  Tolerant: false until the migration is pasted. */
+    isFeatured: boolean;
     memberCount: number;
     createdBy: string;
     createdAt: string;
@@ -51,6 +54,26 @@ export interface Group {
     /** For a private barn the viewer is not in: their pending/denied
      *  join request, if any. Null everywhere else. */
     joinRequestStatus: "pending" | "approved" | "denied" | null;
+}
+
+/**
+ * Barn banners store a storage PATH in banner_url (the profile-banner
+ * convention: path in the row, signed URL at read). Tolerant of legacy
+ * full URLs and of the avatars bucket being unreachable — a card without
+ * its banner beats a directory that will not load.
+ */
+async function signBarnBanner(
+    supabase: Awaited<ReturnType<typeof createClient>>,
+    stored: string | null,
+): Promise<string | null> {
+    if (!stored) return null;
+    if (stored.startsWith("http")) return stored;
+    try {
+        const { data } = await supabase.storage.from("avatars").createSignedUrl(stored, 3600);
+        return data?.signedUrl ?? null;
+    } catch {
+        return null;
+    }
 }
 
 /** Postgres "column does not exist" — migration 167 not applied yet. */
@@ -91,6 +114,8 @@ export async function createGroup(data: {
     region?: string;
     visibility?: string;
     isPrivate?: boolean;
+    /** Storage path from uploadGroupBanner — stored, signed at read. */
+    bannerPath?: string;
 }): Promise<{ success: boolean; slug?: string; error?: string }> {
     const { supabase, user } = await requireAuth();
 
@@ -121,6 +146,12 @@ export async function createGroup(data: {
         visibility: isPrivate ? "private" : (data.visibility === "private" ? "public" : data.visibility || "public"),
         created_by: user.id,
         member_count: 1,
+        // Only a path the uploader could actually write (their own folder)
+        // is accepted — anything else is dropped rather than stored.
+        banner_url:
+            data.bannerPath && data.bannerPath.startsWith(`${user.id}/`)
+                ? data.bannerPath
+                : null,
     };
 
     let { data: group, error } = await barnDb(supabase)
@@ -268,7 +299,8 @@ export async function getGroup(slug: string): Promise<Group | null> {
         region: g.region as string | null,
         visibility: g.visibility as string,
         isPrivate,
-        bannerUrl: g.banner_url as string | null,
+        bannerUrl: await signBarnBanner(supabase, g.banner_url as string | null),
+        isFeatured: (g as { is_featured?: boolean }).is_featured === true,
         iconUrl: g.icon_url as string | null,
         memberCount: actualMemberCount || (g.member_count as number) || 0,
         createdBy: g.created_by as string,
@@ -348,7 +380,7 @@ export async function getGroups(filters?: {
         for (const r of (requests || []) as { group_id: string }[]) pendingRequests.add(r.group_id);
     }
 
-    return (data as Record<string, unknown>[]).map(g => ({
+    return await Promise.all((data as Record<string, unknown>[]).map(async (g) => ({
         id: g.id as string,
         name: g.name as string,
         slug: g.slug as string,
@@ -357,7 +389,8 @@ export async function getGroups(filters?: {
         region: g.region as string | null,
         visibility: g.visibility as string,
         isPrivate: readIsPrivate(g),
-        bannerUrl: g.banner_url as string | null,
+        bannerUrl: await signBarnBanner(supabase, g.banner_url as string | null),
+        isFeatured: (g as { is_featured?: boolean }).is_featured === true,
         iconUrl: g.icon_url as string | null,
         memberCount: memberCountMap.get(g.id as string) || (g.member_count as number) || 0,
         createdBy: g.created_by as string,
@@ -365,8 +398,15 @@ export async function getGroups(filters?: {
         creatorAlias: (g as { users?: { alias_name: string } | null }).users?.alias_name || "Unknown",
         isMember: membershipMap.has(g.id as string),
         memberRole: membershipMap.get(g.id as string) || null,
-        joinRequestStatus: pendingRequests.has(g.id as string) ? "pending" : null,
-    }));
+        joinRequestStatus: pendingRequests.has(g.id as string) ? ("pending" as const) : null,
+    }))).then((mapped) =>
+        // Featured barns first (194), then the existing size order. On a
+        // pre-194 database isFeatured is false everywhere, so this sorts
+        // exactly as before.
+        mapped.sort(
+            (a, b) => Number(b.isFeatured) - Number(a.isFeatured) || b.memberCount - a.memberCount,
+        ),
+    );
 }
 
 /**
@@ -488,7 +528,7 @@ export async function getMyGroups(): Promise<Group[]> {
         }
     }
 
-    return (groups as Record<string, unknown>[]).map(g => ({
+    return await Promise.all((groups as Record<string, unknown>[]).map(async (g) => ({
         id: g.id as string,
         name: g.name as string,
         slug: g.slug as string,
@@ -497,7 +537,8 @@ export async function getMyGroups(): Promise<Group[]> {
         region: g.region as string | null,
         visibility: g.visibility as string,
         isPrivate: readIsPrivate(g),
-        bannerUrl: g.banner_url as string | null,
+        bannerUrl: await signBarnBanner(supabase, g.banner_url as string | null),
+        isFeatured: (g as { is_featured?: boolean }).is_featured === true,
         iconUrl: g.icon_url as string | null,
         memberCount: memberCountMap2.get(g.id as string) || (g.member_count as number) || 0,
         createdBy: g.created_by as string,
@@ -506,7 +547,7 @@ export async function getMyGroups(): Promise<Group[]> {
         isMember: true,
         memberRole: roleMap.get(g.id as string) || "member",
         joinRequestStatus: null,
-    }));
+    })));
 }
 
 // ── Private barns: request / approve ──
@@ -1186,4 +1227,45 @@ export async function deleteGroupChannel(
 
     revalidatePath("/community/groups");
     return { success: true };
+}
+
+/**
+ * Upload a barn banner image. Mirrors uploadProfileBanner: the file goes
+ * to the avatars bucket under the member's own folder (which is what the
+ * bucket's RLS permits), and the PATH comes back for createGroup to
+ * store — the row holds paths, reads sign them.
+ */
+export async function uploadGroupBanner(
+    formData: FormData,
+): Promise<{ success: boolean; path?: string; url?: string; error?: string }> {
+    try {
+        const { supabase, user } = await requireAuth();
+        const file = formData.get("banner");
+        if (!(file instanceof File) || file.size === 0) {
+            return { success: false, error: "No image selected." };
+        }
+        if (file.size > 3 * 1024 * 1024) {
+            return { success: false, error: "Banner must be under 3MB." };
+        }
+        if (!file.type.startsWith("image/")) {
+            return { success: false, error: "That file isn't an image." };
+        }
+
+        const ext = (file.name.split(".").pop() || "webp").toLowerCase().replace(/[^a-z0-9]/g, "");
+        const path = `${user.id}/barn_banner_${Date.now()}.${ext || "webp"}`;
+
+        const { error: uploadError } = await supabase.storage
+            .from("avatars")
+            .upload(path, file, { upsert: true, contentType: file.type });
+        if (uploadError) return { success: false, error: uploadError.message };
+
+        const { data: signed } = await supabase.storage
+            .from("avatars")
+            .createSignedUrl(path, 3600);
+
+        return { success: true, path, url: signed?.signedUrl };
+    } catch (err) {
+        if (err instanceof AuthError) return { success: false, error: (err as Error).message };
+        return { success: false, error: "Could not upload that image." };
+    }
 }

@@ -130,8 +130,28 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
                     {filtered.map((g) => (
                         <div
                             key={g.id}
-                            className="border-input bg-card flex flex-col rounded-lg border p-5 transition-shadow hover:shadow-md"
+                            className="border-input bg-card flex flex-col overflow-hidden rounded-lg border transition-shadow hover:shadow-md"
                         >
+                            {/* Banner — a barn with a face. The image is a
+                                signed URL from the avatars bucket; cards
+                                without one keep the old all-text layout. */}
+                            {g.bannerUrl && (
+                                <Link
+                                    href={`/community/groups/${g.slug}`}
+                                    className="block"
+                                    aria-hidden="true"
+                                    tabIndex={-1}
+                                >
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img
+                                        src={g.bannerUrl}
+                                        alt=""
+                                        className="h-28 w-full object-cover"
+                                        loading="lazy"
+                                    />
+                                </Link>
+                            )}
+                            <div className="flex flex-1 flex-col p-5">
                             {/* Card Header */}
                             <div className="mb-3 flex items-start gap-3">
                                 <span className="text-2xl">{TYPE_ICONS[g.groupType] || "📂"}</span>
@@ -143,6 +163,14 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
                                         >
                                             {g.name}
                                         </Link>
+                                        {g.isFeatured && (
+                                            <span
+                                                className="stamp !text-[0.62rem]"
+                                                title="An official Model Horse Hub barn"
+                                            >
+                                                📌 Official
+                                            </span>
+                                        )}
                                         {g.isPrivate && (
                                             <span
                                                 className="stamp !text-[0.62rem]"
@@ -199,6 +227,7 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
                                             : (g.isPrivate ? "🔒 Ask to Join" : "+ Join")}
                                     </button>
                                 )}
+                            </div>
                             </div>
                         </div>
                     ))}

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createGroup } from "@/app/actions/groups";
+import { createGroup, uploadGroupBanner } from "@/app/actions/groups";
 
 import { GROUP_TYPE_LABELS } from "@/lib/constants/groups";
 import { Input } from "@/components/ui/input";
@@ -25,6 +25,12 @@ export default function CreateGroupPage() {
     const [region, setRegion] = useState("");
     const [isPrivate, setIsPrivate] = useState(false);
     const [saving, setSaving] = useState(false);
+    // Banner: uploaded on selection, PATH held until submit — an
+    // abandoned form leaves at most one orphaned image, never a half-
+    // configured barn.
+    const [bannerPath, setBannerPath] = useState<string | null>(null);
+    const [bannerPreview, setBannerPreview] = useState<string | null>(null);
+    const [bannerBusy, setBannerBusy] = useState(false);
     const [error, setError] = useState("");
 
     function autoSlug(value: string) {
@@ -50,6 +56,7 @@ export default function CreateGroupPage() {
             groupType,
             region: region.trim() || undefined,
             isPrivate,
+            bannerPath: bannerPath ?? undefined,
         });
 
         if (result.success && result.slug) {
@@ -143,6 +150,47 @@ export default function CreateGroupPage() {
                         {isPrivate
                             ? "Listed in the directory with a Private badge. The notice board and member list stay hidden, and joining needs your approval."
                             : "Anyone can find this barn, read the notice board, and join."}
+                    </small>
+                </div>
+
+                {/* Banner image — the face of the card in the directory. */}
+                <div className="mt-4">
+                    <label className="text-foreground mb-1 block text-sm font-semibold" htmlFor="barn-banner">
+                        Banner image <span className="text-muted-foreground font-normal">(optional)</span>
+                    </label>
+                    {bannerPreview && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                            src={bannerPreview}
+                            alt="Banner preview"
+                            className="border-input mb-2 h-28 w-full rounded-md border object-cover"
+                        />
+                    )}
+                    <input
+                        id="barn-banner"
+                        type="file"
+                        accept="image/*"
+                        disabled={bannerBusy}
+                        className="text-sm"
+                        onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            setBannerBusy(true);
+                            setError("");
+                            const fd = new FormData();
+                            fd.set("banner", file);
+                            const up = await uploadGroupBanner(fd);
+                            if (up.success && up.path) {
+                                setBannerPath(up.path);
+                                setBannerPreview(up.url ?? null);
+                            } else {
+                                setError(up.error || "Could not upload that image.");
+                            }
+                            setBannerBusy(false);
+                        }}
+                    />
+                    <small className="text-muted-foreground mt-1 block">
+                        Shown across the top of your barn&rsquo;s card. Under 3MB.
                     </small>
                 </div>
 
