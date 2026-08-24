@@ -85,8 +85,18 @@ export async function getAppToken(now: number = Date.now()): Promise<string> {
     return cachedToken.value;
 }
 
-/** eBay's model-horse-adjacent category, to keep results in the hobby. */
-const CATEGORY_MODEL_HORSES = "417";
+/**
+ * eBay's model-horse category, to keep results in the hobby.
+ *
+ * 156265 = Toys & Hobbies › Model Horses (verified live: "Breyer
+ * Alborozo" finds 222 listings inside it, Peter Stone 157, and an
+ * unrelated query finds zero). The first sweep shipped with "417",
+ * inherited from the old affiliate URL builder's `_sacat=417` — a dead
+ * id the Browse API answers with total: 0 FOR EVERY QUERY, no warning,
+ * no error. 150 searches came back empty and nothing said why. A wrong
+ * category doesn't fail; it silently filters out the entire market.
+ */
+const CATEGORY_MODEL_HORSES = "156265";
 
 /**
  * Search active listings. `limit` is deliberately small — the point is a
