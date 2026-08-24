@@ -324,7 +324,10 @@ export async function updatePost(
         .eq("author_id", user.id);
 
     if (error) return { success: false, error: error.message };
+    // Barn threads live in the same posts table, so an edit there must
+    // bust that surface too, not just the feed.
     revalidatePath("/feed");
+    revalidatePath("/community/groups");
     return { success: true };
 }
 

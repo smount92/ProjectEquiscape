@@ -53,6 +53,7 @@ function threadData(overrides: Partial<ThreadViewData> = {}): ThreadViewData {
             post({ id: "r-2", authorAlias: "MiniMares", content: "Carpooling yes please." }),
         ],
         hasMoreReplies: false,
+        knownAliases: [],
         ...overrides,
     };
 }

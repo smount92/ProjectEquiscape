@@ -271,6 +271,21 @@ export async function getThread(
         if (p.authorAvatarUrl) p.authorAvatarUrl = avatarMap.get(p.authorAvatarUrl) || p.authorAvatarUrl;
     }
 
+    // Real aliases mentioned anywhere in the thread, so the renderer can
+    // link "@MODEL HORSES INTERNATIONAL" as one name instead of "@MODEL".
+    // Best-effort, same as the feed: failure degrades to single-word
+    // linking rather than failing the thread.
+    let knownAliases: string[] = [];
+    try {
+        const joined = [op.content, ...replies.map((x) => x.content)].filter(Boolean).join("\n");
+        if (joined.includes("@")) {
+            const { resolveMentionedAliases } = await import("@/app/actions/mentions");
+            knownAliases = (await resolveMentionedAliases(joined)).map((m) => m.alias);
+        }
+    } catch (err) {
+        logger.error("GroupsForum", "Thread mention resolution failed", err);
+    }
+
     return {
         success: true,
         thread: {
@@ -284,6 +299,7 @@ export async function getThread(
             op,
             replies,
             hasMoreReplies,
+            knownAliases,
         },
     };
 }

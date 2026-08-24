@@ -73,4 +73,9 @@ export interface ThreadViewData {
     op: ThreadPost;
     replies: ThreadPost[];
     hasMoreReplies: boolean;
+    /** Every real alias @mentioned in this thread, so RichText links
+     *  "@MODEL HORSES INTERNATIONAL" as one name instead of "@MODEL".
+     *  Best-effort: empty on resolution failure, which degrades to the
+     *  legacy single-word linking rather than not rendering. */
+    knownAliases: string[];
 }

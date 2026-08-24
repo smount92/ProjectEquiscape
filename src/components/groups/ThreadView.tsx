@@ -1,11 +1,12 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
 import RichText from "@/components/RichText";
+import MentionTextarea from "@/components/feed/MentionTextarea";
 import { PostHeader, ReactionBar, UserAvatar } from "@/components/social";
 import { PinPostButton } from "@/components/groups/PinPostButton";
-import { togglePostLike } from "@/app/actions/posts";
+import { togglePostLike, updatePost } from "@/app/actions/posts";
 import { getThread, replyToThread } from "@/app/actions/groups-forum";
 import type { ThreadPost, ThreadViewData } from "@/lib/groups/types";
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,42 @@ interface ThreadViewProps {
     canPin: boolean;
 }
 
-function ThreadPostBlock({ post, isOp }: { post: ThreadPost; isOp: boolean }) {
+function ThreadPostBlock({
+    post,
+    isOp,
+    knownAliases,
+    canEdit,
+    onEdited,
+}: {
+    post: ThreadPost;
+    isOp: boolean;
+    /** Real aliases in this thread, so "@MODEL HORSES INTERNATIONAL"
+     *  links as one name instead of "@MODEL". */
+    knownAliases: readonly string[];
+    /** The viewer wrote this post. */
+    canEdit: boolean;
+    onEdited: (postId: string, content: string) => void;
+}) {
+    const [editing, setEditing] = useState(false);
+    const [draft, setDraft] = useState(post.content);
+    const [saving, setSaving] = useState(false);
+    const [editError, setEditError] = useState<string | null>(null);
+
+    const handleSave = async () => {
+        const content = draft.trim();
+        if (!content) { setEditError("A post can't be empty."); return; }
+        setSaving(true);
+        setEditError(null);
+        const result = await updatePost(post.id, content);
+        setSaving(false);
+        if (result.success) {
+            onEdited(post.id, content);
+            setEditing(false);
+        } else {
+            setEditError(result.error ?? "Could not save the edit.");
+        }
+    };
+
     return (
         <div
             className={`border-input border-b px-4 py-3.5 sm:px-5 ${isOp ? "bg-[color-mix(in_srgb,var(--brass,#B08D3E)_6%,transparent)]" : "sm:pl-12"}`}
@@ -40,15 +76,53 @@ function ThreadPostBlock({ post, isOp }: { post: ThreadPost; isOp: boolean }) {
                 createdAt={post.createdAt}
                 avatarSize={isOp ? "sm" : "xs"}
             />
-            <div className="mt-1.5">
-                <RichText content={post.content} />
+            {editing ? (
+                <div className="mt-1.5 flex flex-col gap-2">
+                    <textarea
+                        className="border-input bg-card w-full rounded-md border px-3 py-2 text-sm"
+                        value={draft}
+                        rows={4}
+                        maxLength={10000}
+                        onChange={(e) => setDraft(e.target.value)}
+                        aria-label="Edit your post"
+                    />
+                    {editError && <p className="text-destructive text-xs">{editError}</p>}
+                    <div className="flex gap-2">
+                        <Button size="sm" onClick={handleSave} disabled={saving}>
+                            {saving ? "Saving…" : "Save"}
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={saving}
+                            onClick={() => { setDraft(post.content); setEditing(false); setEditError(null); }}
+                        >
+                            Cancel
+                        </Button>
+                    </div>
+                </div>
+            ) : (
+                <div className="mt-1.5">
+                    <RichText content={post.content} knownAliases={knownAliases} />
+                </div>
+            )}
+            <div className="flex items-center justify-between">
+                <ReactionBar
+                    isLiked={post.isLikedByMe}
+                    likeCount={post.likesCount}
+                    onToggle={() => togglePostLike(post.id)}
+                    variant="compact"
+                />
+                {canEdit && !editing && (
+                    <button
+                        type="button"
+                        className="text-muted-foreground hover:text-foreground text-xs underline"
+                        onClick={() => setEditing(true)}
+                    >
+                        ✏️ Edit
+                    </button>
+                )}
             </div>
-            <ReactionBar
-                isLiked={post.isLikedByMe}
-                likeCount={post.likesCount}
-                onToggle={() => togglePostLike(post.id)}
-                variant="compact"
-            />
         </div>
     );
 }
@@ -64,11 +138,17 @@ export default function ThreadView({
 }: ThreadViewProps) {
     const [replies, setReplies] = useState<ThreadPost[]>(thread.replies);
     const [hasMore, setHasMore] = useState(thread.hasMoreReplies);
+    // OP content is state so an in-place edit shows without a reload.
+    const [opContent, setOpContent] = useState(thread.op.content);
+
+    const handleEdited = (postId: string, content: string) => {
+        if (postId === thread.op.id) setOpContent(content);
+        else setReplies((prev) => prev.map((r) => (r.id === postId ? { ...r, content } : r)));
+    };
     const [isLoadingMore, setIsLoadingMore] = useState(false);
     const [text, setText] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [isPending, startTransition] = useTransition();
-    const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     const loadMoreReplies = async () => {
         setIsLoadingMore(true);
@@ -78,13 +158,6 @@ export default function ThreadView({
             setHasMore(result.thread.hasMoreReplies);
         }
         setIsLoadingMore(false);
-    };
-
-    const autoGrow = () => {
-        const el = textareaRef.current;
-        if (!el) return;
-        el.style.height = "auto";
-        el.style.height = `${Math.min(el.scrollHeight, 320)}px`;
     };
 
     const handleReply = () => {
@@ -108,7 +181,6 @@ export default function ThreadView({
                     },
                 ]);
                 setText("");
-                if (textareaRef.current) textareaRef.current.style.height = "auto";
             } else {
                 setError(result.error);
             }
@@ -144,11 +216,24 @@ export default function ThreadView({
                 </div>
 
                 {/* OP, subtly highlighted */}
-                <ThreadPostBlock post={thread.op} isOp />
+                <ThreadPostBlock
+                    post={{ ...thread.op, content: opContent }}
+                    isOp
+                    knownAliases={thread.knownAliases}
+                    canEdit={thread.op.authorId === currentUserId}
+                    onEdited={handleEdited}
+                />
 
                 {/* Replies */}
                 {replies.map((r) => (
-                    <ThreadPostBlock key={r.id} post={r} isOp={false} />
+                    <ThreadPostBlock
+                        key={r.id}
+                        post={r}
+                        isOp={false}
+                        knownAliases={thread.knownAliases}
+                        canEdit={r.authorId === currentUserId}
+                        onEdited={handleEdited}
+                    />
                 ))}
                 {hasMore && (
                     <div className="border-input flex justify-center border-b px-4 py-3">
@@ -162,13 +247,17 @@ export default function ThreadView({
                 <div className="bg-secondary/40 flex gap-2.5 px-4 py-3 sm:px-5">
                     <UserAvatar src={currentUserAvatar} alias={currentUserAlias} size="xs" />
                     <div className="min-w-0 flex-1">
-                        <textarea
-                            ref={textareaRef}
+                        {/* MentionTextarea completes @names as you type —
+                            the fix for "@MODEL HORSE INTERNATIONAL" silently
+                            missing because one letter differed from the real
+                            alias. Same component the feed composer uses. */}
+                        <MentionTextarea
                             className="border-input bg-card text-foreground min-h-[64px] w-full resize-none rounded-md border px-3 py-2 text-sm"
                             placeholder="Write a reply…"
                             value={text}
                             maxLength={2000}
-                            onChange={(e) => { setText(e.target.value); autoGrow(); }}
+                            rows={3}
+                            onChange={setText}
                             aria-label="Write a reply"
                         />
                         <div className="mt-1.5 flex items-center justify-between gap-2">
