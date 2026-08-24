@@ -55,6 +55,23 @@ export async function GET(request: NextRequest) {
         const { data: seen } = await signals().select("catalog_item_id, observed_at");
         const lastSeen = new Map((seen ?? []).map((s) => [s.catalog_item_id, s.observed_at]));
 
+        // A model a member flagged as wrongly matched is OFF the sweep
+        // until an admin resolves the flag — a wrong price that keeps
+        // coming back after being reported would be worse than none.
+        // Tolerant: before migration 196 the table is missing and the
+        // set stays empty.
+        const flagged = new Set<string>();
+        try {
+            const { data: flags } = await (admin as unknown as {
+                from: (t: string) => {
+                    select: (c: string) => { eq: (k: string, v: string) => Promise<{ data: { catalog_item_id: string }[] | null }> };
+                };
+            }).from("catalog_price_signal_flags").select("catalog_item_id").eq("status", "active");
+            for (const f of flags ?? []) flagged.add(f.catalog_item_id);
+        } catch {
+            /* pre-196 */
+        }
+
         const candidates: SweepTarget[] = (rows ?? [])
             .map((r) => ({
                 id: r.id as string,
@@ -63,7 +80,8 @@ export async function GET(request: NextRequest) {
                 modelNumber: String((r.attributes as Record<string, unknown>)?.model_number ?? ""),
                 scale: (r.scale as string | null) ?? null,
             }))
-            .filter((c) => /^[0-9]{4,6}[A-Za-z]?$/.test(c.modelNumber.trim().toUpperCase()));
+            .filter((c) => /^[0-9]{4,6}[A-Za-z]?$/.test(c.modelNumber.trim().toUpperCase()))
+            .filter((c) => !flagged.has(c.id));
 
         // Never-read models first, then the stalest. New entries get a
         // price before old ones get a fresher one.
@@ -73,23 +91,42 @@ export async function GET(request: NextRequest) {
             return sa.localeCompare(sb);
         });
 
-        const slice = candidates.slice(0, SLICE);
+        // ?limit=N overrides the slice for manual runs (still behind
+        // CRON_SECRET). The weekly cron sends none and gets the default;
+        // an owner-triggered catch-up can cover the whole reachable set
+        // in one pass. Capped well inside the Browse API's daily budget.
+        const requested = Number(request.nextUrl.searchParams.get("limit"));
+        const sliceSize = Number.isFinite(requested) && requested > 0
+            ? Math.min(requested, 900)
+            : SLICE;
+
+        const slice = candidates.slice(0, sliceSize);
         const outcome = await sweep(slice);
 
         let written = 0;
         for (const s of outcome.signals) {
-            const { error: upsertError } = await signals()
-                .upsert({
-                    catalog_item_id: s.catalogItemId,
-                    asking_low: s.askingLow,
-                    asking_median: s.askingMedian,
-                    asking_high: s.askingHigh,
-                    currency: s.currency,
-                    sample_size: s.sampleSize,
-                    match_basis: s.matchBasis,
-                    source: "ebay-browse",
-                    observed_at: new Date().toISOString(),
-                }, { onConflict: "catalog_item_id" });
+            const row = {
+                catalog_item_id: s.catalogItemId,
+                asking_low: s.askingLow,
+                asking_median: s.askingMedian,
+                asking_high: s.askingHigh,
+                currency: s.currency,
+                sample_size: s.sampleSize,
+                match_basis: s.matchBasis,
+                listings: s.listings,
+                source: "ebay-browse",
+                observed_at: new Date().toISOString(),
+            };
+            let { error: upsertError } = await signals()
+                .upsert(row, { onConflict: "catalog_item_id" });
+            // Pre-196 the listings column does not exist; the aggregate is
+            // still worth keeping rather than failing the whole write.
+            if (upsertError && (upsertError.code === "PGRST204" || /listings/.test(upsertError.message ?? ""))) {
+                const { listings: _dropped, ...withoutListings } = row;
+                void _dropped;
+                ({ error: upsertError } = await signals()
+                    .upsert(withoutListings, { onConflict: "catalog_item_id" }));
+            }
             if (upsertError) {
                 Sentry.captureException(upsertError, { tags: { domain: "cron" } });
                 logger.error("CronEbay", "signal upsert failed", upsertError);

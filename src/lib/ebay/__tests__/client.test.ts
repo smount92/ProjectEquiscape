@@ -99,7 +99,7 @@ describe("searching active listings", () => {
     const listing = (over: Record<string, unknown> = {}) => ({
         itemId: "v1|123|0", title: "Breyer Alborozo 712053",
         price: { value: "129.99", currency: "USD" },
-        condition: "Used", itemWebUrl: "https://ebay.com/itm/123", ...over,
+        condition: "Used", itemWebUrl: "https://ebay.com/itm/123", itemAffiliateWebUrl: null, ...over,
     });
 
     async function withResults(items: unknown[]) {

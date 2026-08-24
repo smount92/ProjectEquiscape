@@ -9,7 +9,7 @@ const TARGETS: SweepTarget[] = [
 
 const listing = (price: number, title = "Breyer Alborozo 712053", over: Partial<EbayListing> = {}): EbayListing => ({
     itemId: `v1|${price}|0`, title, price, currency: "USD",
-    condition: "Used", itemWebUrl: null, ...over,
+    condition: "Used", itemWebUrl: `https://ebay.com/itm/${price}`, itemAffiliateWebUrl: null, ...over,
 });
 
 describe("median", () => {

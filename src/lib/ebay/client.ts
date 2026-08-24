@@ -28,6 +28,10 @@ export interface EbayListing {
     currency: string;
     condition: string | null;
     itemWebUrl: string | null;
+    /** EPN-tracked URL, present when the campaign header was sent.
+     *  Prefer this for anything a member clicks — same listing, and the
+     *  click earns the site its affiliate commission. */
+    itemAffiliateWebUrl: string | null;
 }
 
 export class EbayNotConfiguredError extends Error {
@@ -117,11 +121,18 @@ export async function searchActiveListings(
         sort: "price",
     });
 
+    // The affiliate context header makes eBay return itemAffiliateWebUrl
+    // on every listing — the same URL a member would click, with the
+    // site's EPN tracking attached. No URL surgery, no invalid links.
+    const campaignId = (process.env.NEXT_PUBLIC_EBAY_CAMPAIGN_ID ?? "").trim();
     const res = await fetch(`${ebayApiBase()}/buy/browse/v1/item_summary/search?${params}`, {
         headers: {
             Authorization: `Bearer ${token}`,
             "X-EBAY-C-MARKETPLACE-ID": ebayMarketplace(),
             Accept: "application/json",
+            ...(campaignId
+                ? { "X-EBAY-C-ENDUSERCTX": `affiliateCampaignId=${campaignId}` }
+                : {}),
         },
     });
 
@@ -134,6 +145,7 @@ export async function searchActiveListings(
     return items.flatMap((raw) => {
         const it = raw as {
             itemId?: string; title?: string; itemWebUrl?: string;
+            itemAffiliateWebUrl?: string;
             condition?: string;
             price?: { value?: string; currency?: string };
         };
@@ -148,6 +160,7 @@ export async function searchActiveListings(
             currency: String(it.price?.currency ?? "USD"),
             condition: it.condition ? String(it.condition) : null,
             itemWebUrl: it.itemWebUrl ? String(it.itemWebUrl) : null,
+            itemAffiliateWebUrl: it.itemAffiliateWebUrl ? String(it.itemAffiliateWebUrl) : null,
         }];
     });
 }

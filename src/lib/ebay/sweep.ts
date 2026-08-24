@@ -26,6 +26,12 @@ import {
 
 export interface SweepTarget extends MatchCandidate {}
 
+export interface SignalListing {
+    title: string;
+    price: number;
+    url: string;
+}
+
 export interface PriceSignal {
     catalogItemId: string;
     askingLow: number;
@@ -34,6 +40,10 @@ export interface PriceSignal {
     currency: string;
     sampleSize: number;
     matchBasis: string;
+    /** Up to three of the matched listings, cheapest first — the
+     *  receipts the aggregate was computed from, EPN-tracked when the
+     *  campaign header was sent. */
+    listings: SignalListing[];
 }
 
 export interface SweepOutcome {
@@ -74,6 +84,16 @@ export function summarise(
     const sameCurrency = listings.filter((l) => l.currency === currency);
     const prices = sameCurrency.map((l) => l.price).filter((p) => Number.isFinite(p) && p > 0);
     if (prices.length < MIN_SAMPLE) return null;
+    // The receipts: cheapest three of the listings that were actually
+    // priced from. A listing with no usable URL is skipped rather than
+    // rendered as a dead link.
+    const receipts = [...sameCurrency]
+        .sort((a, b) => a.price - b.price)
+        .flatMap((l) => {
+            const url = l.itemAffiliateWebUrl ?? l.itemWebUrl;
+            return url ? [{ title: l.title, price: l.price, url }] : [];
+        })
+        .slice(0, 3);
     return {
         catalogItemId,
         askingLow: Math.min(...prices),
@@ -82,6 +102,7 @@ export function summarise(
         currency,
         sampleSize: prices.length,
         matchBasis,
+        listings: receipts,
     };
 }
 

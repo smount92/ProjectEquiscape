@@ -26,6 +26,7 @@ import {
     EBAY_AFFILIATE_REL,
 } from "@/lib/utils/ebayAffiliate";
 import GlossaryLink from "@/components/GlossaryLink";
+import EbaySignalCard, { type EbaySignalView } from "@/components/reference/EbaySignalCard";
 import { getMoldCustoms } from "@/lib/catalog/moldCustoms";
 import { deriveAttribution } from "@/lib/catalog/taxonomy";
 import ViewBeacon from "@/components/metrics/ViewBeacon";
@@ -143,6 +144,52 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
 }
 
+/**
+ * The eBay asking-price signal for one model, or null. Null when there is
+ * no signal, when migration 196 has not landed, or when a member has an
+ * ACTIVE wrong-model flag on it — a disputed signal is hidden the moment
+ * it is disputed, not after review.
+ */
+async function getEbaySignalForReference(catalogItemId: string): Promise<EbaySignalView | null> {
+    try {
+        const supabase = createAnonClient();
+        const { data: flag } = await supabase
+            .from("catalog_price_signal_flags" as never)
+            .select("id")
+            .eq("catalog_item_id", catalogItemId)
+            .eq("status", "active")
+            .limit(1);
+        if ((flag ?? []).length > 0) return null;
+
+        const { data, error } = await supabase
+            .from("catalog_price_signals" as never)
+            .select("asking_low, asking_median, asking_high, sample_size, observed_at, listings")
+            .eq("catalog_item_id", catalogItemId)
+            .maybeSingle();
+        if (error || !data) return null;
+        const row = data as unknown as {
+            asking_low: number; asking_median: number; asking_high: number;
+            sample_size: number; observed_at: string;
+            listings: { title: string; price: number; url: string }[] | null;
+        };
+        const rawListings = Array.isArray(row.listings) ? row.listings : [];
+        const listings = rawListings.filter(
+            (l) => l && typeof l.url === "string" && l.url.startsWith("http") &&
+                   typeof l.title === "string" && Number.isFinite(Number(l.price)),
+        );
+        return {
+            askingLow: Number(row.asking_low),
+            askingMedian: Number(row.asking_median),
+            askingHigh: Number(row.asking_high),
+            sampleSize: row.sample_size,
+            observedAt: row.observed_at,
+            listings,
+        };
+    } catch {
+        return null;
+    }
+}
+
 function fmtLabel(key: string): string {
     if (key === "retail_price") return "Original retail";
     // Generic Title Case reads wrong for these two: "Run Type" is
@@ -188,7 +235,7 @@ export default async function ReferencePage({ params }: Props) {
     // Everything in parallel — all anon-safe / aggregate-only and cookie-free,
     // so this page statically generates + ISR-caches. Per-user state (the
     // "already wanted?" check) is fetched client-side by WantButton.
-    const [counts, market, marketHistory, listings, photos, childReleases, customs] =
+    const [counts, market, marketHistory, listings, photos, childReleases, customs, ebaySignal] =
         await Promise.all([
             getCatalogCounts(item.id),
             getReferenceMarket(item.id),
@@ -197,6 +244,7 @@ export default async function ReferencePage({ params }: Props) {
             getCatalogPhotos(item.id, 8),
             isMold ? getChildReleases(item.id) : Promise.resolve([]),
             isMold ? getMoldCustoms(item.id) : Promise.resolve([]),
+            getEbaySignalForReference(item.id),
         ]);
 
     // Product JSON-LD — built only from data the page already fetched above
@@ -499,6 +547,20 @@ export default async function ReferencePage({ params }: Props) {
                         )}
                     </div>
                 </section>
+
+                {/* ON EBAY RIGHT NOW — asking prices with receipts. Kept as
+                    its own section, never merged into the Blue Book above:
+                    the Blue Book is (will be) SOLD data; this is what
+                    sellers are ASKING today, and the two must stay
+                    verbally and visually distinct forever. */}
+                {ebaySignal && ebaySignal.listings.length > 0 && (
+                    <section>
+                        <h2 className="mb-3 font-serif text-xl font-bold text-foreground">
+                            On eBay right now
+                        </h2>
+                        <EbaySignalCard catalogItemId={item.id} signal={ebaySignal} />
+                    </section>
+                )}
 
                 {/* FOR SALE NOW */}
                 {listings.length > 0 && (
