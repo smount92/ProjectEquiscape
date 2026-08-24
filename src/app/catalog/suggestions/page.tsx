@@ -116,6 +116,14 @@ export default async function SuggestionsPage({ searchParams }: Props) {
  {/* Results */}
  <p className="text-muted-foreground mb-2 text-sm">{count ?? 0} suggestions</p>
 
+ {/* The medals appear beside every contributor's name; this is the only
+     place they are explained. Numbers come from the same constants that
+     award them. */}
+ <p className="text-muted-foreground mb-3 text-xs">
+ 📘 Contributor · 🥉 Bronze ({BRONZE_THRESHOLD} approved) · 🥈 Silver ({SILVER_THRESHOLD} — factual fixes apply instantly) · 🥇 Gold ({GOLD_THRESHOLD} — all corrections apply instantly) ·{" "}
+ <Link href="/faq#collecting" className="underline hover:no-underline">How ranks work</Link>
+ </p>
+
  <div className="flex flex-col gap-2">
  {(suggestions ?? [])?.map((s) => {
  const userData = userMap[s.user_id];

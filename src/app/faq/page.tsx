@@ -27,6 +27,11 @@
 
 import Link from "next/link";
 import type { Metadata } from "next";
+import {
+    BRONZE_THRESHOLD,
+    GOLD_THRESHOLD,
+    SILVER_THRESHOLD,
+} from "@/lib/catalog/corrections";
 
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
 import PageMasthead from "@/components/layouts/PageMasthead";
@@ -109,10 +114,20 @@ const FAQ_SECTIONS: FaqSection[] = [
             },
             {
                 q: "Can I correct something in the Registry?",
-                a: "Yes, and please do. You can suggest a correction, an addition, a removal or a photo, each with a reason attached, and a correction lands for everybody at once — that's the only way a catalog this size stays honest. Additions warn you about likely duplicates before they go in, because the same twenty sculpts once arrived twice under different makers. Curators who have had a lot of suggestions accepted can apply small factual fixes directly, and every change is listed in a public changelog.",
+                a: "Yes, and please do. You can suggest a correction, an addition, a removal or a photo, each with a reason attached, and a correction lands for everybody at once — that's the only way a catalog this size stays honest. Additions warn you about likely duplicates before they go in, because the same twenty sculpts once arrived twice under different makers. Every change is listed in a public changelog.",
                 links: [
                     { href: "/catalog/suggestions", label: "Suggest a change" },
                     { href: "/catalog/changelog", label: "Read the changelog" },
+                ],
+            },
+            {
+                q: "What are the curator ranks?",
+                // Numbers interpolated from the same constants that make the
+                // decision — prose that hard-codes a threshold goes stale the
+                // day someone recalibrates (the badge table did exactly that).
+                a: `Trust you earn by doing the work, one approved suggestion at a time. Your first approval makes you a Catalog Contributor 📘. ${BRONZE_THRESHOLD} make you a Bronze Curator 🥉. At ${SILVER_THRESHOLD} you reach Silver 🥈, and your factual fixes — colour, years, run details, original prices — start applying instantly instead of waiting for review. At ${GOLD_THRESHOLD} you're a Gold Curator 🥇 and everything you correct applies on the spot. Changes to a model's identity — its name, maker, or mold — always get a human look first, whatever your rank, and every auto-applied change still appears in the public changelog where anyone can challenge it.`,
+                links: [
+                    { href: "/catalog/suggestions", label: "Start contributing" },
                 ],
             },
             {
