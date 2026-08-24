@@ -9,6 +9,7 @@ import { sanitizeText } from "@/lib/utils/validation";
 import { sanitizeForOr } from "@/lib/utils/search";
 import {
     BRONZE_THRESHOLD,
+    CATALOG_REAL_COLUMNS,
     CONTRIBUTOR_THRESHOLD,
     GOLD_THRESHOLD,
     SILVER_THRESHOLD,
@@ -366,9 +367,18 @@ export async function createSuggestion(input: SuggestionInput) {
         );
     }
 
-    // Notify admins for non-auto-approved
-    if (!autoApprove) {
+    // Notify admins on EVERY suggestion — auto-approved ones loudest.
+    // This block used to fire only for the pending path, which meant a
+    // Silver curator's changes applied in complete silence: exactly the
+    // opening for a patient troll who farms ten approvals being helpful
+    // and then vandalises instantly. Auto-applied changes are already live
+    // when this notification lands, so it links straight to the suggestion
+    // page, where the admin has a one-click revert.
+    {
         const userId = user.id;
+        const wasAutoApproved = autoApprove;
+        const suggestionId = data?.id as string | undefined;
+        const changedKeys = input.fieldChanges ? Object.keys(input.fieldChanges).join(", ") : "";
         after(async () => {
             try {
                 const { createNotification } = await import(
@@ -379,12 +389,16 @@ export async function createSuggestion(input: SuggestionInput) {
                     .from("users")
                     .select("id")
                     .eq("role", "admin");
+                const content = wasAutoApproved
+                    ? `⚡ Auto-applied: @${alias} changed ${changedKeys || "an entry"} — already live. Review or revert.`
+                    : `📝 New catalog suggestion from @${alias}: "${reason.slice(0, 80)}${reason.length > 80 ? "…" : ""}"`;
                 for (const a of (admins ?? []) as { id: string }[]) {
                     await createNotification({
                         userId: a.id,
                         type: "system",
                         actorId: userId,
-                        content: `📝 New catalog suggestion from @${alias}: "${reason.slice(0, 80)}${reason.length > 80 ? "…" : ""}"`,
+                        content,
+                        ...(suggestionId ? { linkUrl: `/catalog/suggestions/${suggestionId}` } : {}),
                     });
                 }
             } catch {
@@ -399,6 +413,182 @@ export async function createSuggestion(input: SuggestionInput) {
         id: data?.id as string,
         autoApproved: autoApprove,
     };
+}
+
+/**
+ * Revert an applied correction — the admin's answer to the patient troll.
+ *
+ * Silver auto-approval means a member who farmed ten approvals being
+ * helpful can vandalise instantly. The counterweight is visibility (every
+ * auto-apply now notifies the admins) plus this: one action that puts the
+ * old values back, takes the approval credit back, and tells the author.
+ *
+ * EXPECT-GUARD, like every repair script in this repo: a field is only
+ * reverted while the entry STILL HOLDS the suggestion's `to` value. If
+ * someone corrected it again since, that later value wins and the field
+ * is reported as drifted rather than clobbered.
+ */
+export async function revertSuggestion(input: {
+    suggestionId: string;
+    reason: string;
+}): Promise<{ success: boolean; error?: string; reverted?: string[]; drifted?: string[] }> {
+    const { user } = await requireAuth();
+    const admin = getAdminClient();
+
+    const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase();
+    if (!adminEmail || user.email?.toLowerCase() !== adminEmail) {
+        return { success: false, error: "Admin access required." };
+    }
+    const reason = sanitizeText(input.reason ?? "").slice(0, 500);
+    if (reason.length < 5) {
+        return { success: false, error: "Give a short reason — the author sees it." };
+    }
+
+    const { data: suggestion } = await admin
+        .from("catalog_suggestions")
+        .select("*")
+        .eq("id", input.suggestionId)
+        .single();
+    if (!suggestion) return { success: false, error: "Suggestion not found." };
+    const s = suggestion as CatalogSuggestion;
+
+    if (s.suggestion_type !== "correction" || !s.catalog_item_id) {
+        return { success: false, error: "Only applied corrections can be reverted here. For an addition, use removal." };
+    }
+    if (s.status !== "approved" && s.status !== "auto_approved") {
+        return { success: false, error: "This suggestion was never applied." };
+    }
+
+    const { data: item } = await admin
+        .from("catalog_items")
+        .select("id, title, maker, scale, item_type, attributes")
+        .eq("id", s.catalog_item_id)
+        .single();
+    if (!item) return { success: false, error: "The catalog entry no longer exists." };
+
+    const row = item as {
+        id: string; title: string; maker: string | null; scale: string | null;
+        item_type: string; attributes: Record<string, unknown> | null;
+    };
+    const attrs = { ...(row.attributes ?? {}) };
+    const columnUpdates: Record<string, unknown> = {};
+    let attributesTouched = false;
+    const reverted: string[] = [];
+    const drifted: string[] = [];
+
+    for (const [key, value] of Object.entries(s.field_changes ?? {})) {
+        if (typeof value !== "object" || value === null || !("to" in value)) continue;
+        const { from, to } = value as { from?: unknown; to: unknown };
+        const isColumn = CATALOG_REAL_COLUMNS.has(key);
+        const current = isColumn
+            ? (row as unknown as Record<string, unknown>)[key]
+            : attrs[key];
+
+        // The guard: only revert what the correction actually left behind.
+        if (String(current ?? "") !== String(to ?? "")) {
+            drifted.push(key);
+            continue;
+        }
+
+        const restored = from == null ? "" : String(from);
+        if (isColumn) {
+            // Title and maker cannot be emptied; scale can go back to null.
+            if (restored === "" && (key === "title" || key === "maker")) {
+                drifted.push(key);
+                continue;
+            }
+            columnUpdates[key] = restored === "" ? null : restored;
+        } else if (restored === "") {
+            // The correction ADDED this field; reverting removes it rather
+            // than leaving an empty string that reads as a filled value.
+            delete attrs[key];
+            attributesTouched = true;
+        } else {
+            attrs[key] = restored;
+            attributesTouched = true;
+        }
+        reverted.push(key);
+    }
+
+    if (reverted.length === 0) {
+        return {
+            success: false,
+            error: "Nothing left to revert — every field has been changed again since this correction.",
+            drifted,
+        };
+    }
+
+    const updates: Record<string, unknown> = { ...columnUpdates };
+    if (attributesTouched) updates.attributes = JSON.parse(JSON.stringify(attrs));
+    const { error: updateError } = await admin
+        .from("catalog_items")
+        .update(updates)
+        .eq("id", row.id);
+    if (updateError) return { success: false, error: updateError.message };
+
+    // The revert is itself a change, so it goes in the public changelog —
+    // an admin quietly rewriting history would be worse than the vandalism.
+    await admin.from("catalog_changelog").insert({
+        suggestion_id: s.id,
+        catalog_item_id: row.id,
+        change_type: "correction",
+        change_summary: `↩️ Reverted a correction (${reverted.join(", ")}): ${reason}`,
+        contributed_by: user.id,
+        contributor_alias: "Admin",
+        approved_by: user.id,
+    });
+
+    await admin
+        .from("catalog_suggestions")
+        .update({
+            status: "rejected",
+            admin_notes: `Reverted: ${reason}${drifted.length ? ` (kept, changed since: ${drifted.join(", ")})` : ""}`,
+            reviewed_by: user.id,
+            reviewed_at: new Date().toISOString(),
+        })
+        .eq("id", s.id);
+
+    // The approval credit goes back. A reverted change must not count
+    // toward the curator ladder, or farming rank survives the revert.
+    // Read-then-write rather than an RPC: reverts are rare, admin-only,
+    // and a lost race here costs one badge check, not money.
+    const { data: authorRow } = await admin
+        .from("users")
+        .select("approved_suggestions_count")
+        .eq("id", s.user_id)
+        .single();
+    const currentCount =
+        (authorRow as { approved_suggestions_count: number } | null)
+            ?.approved_suggestions_count ?? 0;
+    await admin
+        .from("users")
+        .update({ approved_suggestions_count: Math.max(0, currentCount - 1) })
+        .eq("id", s.user_id);
+
+    const authorId = s.user_id;
+    const suggestionId = s.id;
+    after(async () => {
+        try {
+            const { createNotification } = await import(
+                "@/lib/notifications/createNotification"
+            );
+            await createNotification({
+                userId: authorId,
+                type: "system",
+                content: `↩️ An admin reverted your catalog correction. Note: "${reason}"`,
+                linkUrl: `/catalog/suggestions/${suggestionId}`,
+            });
+        } catch {
+            /* non-blocking */
+        }
+    });
+
+    revalidateTag(REFERENCE_PAGES_CACHE_TAG, "max");
+    revalidatePath(`/catalog/suggestions/${s.id}`);
+    revalidatePath("/catalog/suggestions");
+    revalidatePath(`/catalog/${row.id}`);
+
+    return { success: true, reverted, drifted };
 }
 
 export async function getSuggestions(

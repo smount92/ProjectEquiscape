@@ -5,6 +5,7 @@ import type { Metadata } from"next";
 import SuggestionVoteButtons from"@/components/SuggestionVoteButtons";
 import SuggestionCommentThread from"@/components/SuggestionCommentThread";
 import SuggestionAdminActions from"@/components/SuggestionAdminActions";
+import SuggestionRevertAction from"@/components/SuggestionRevertAction";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import {
  BRONZE_THRESHOLD,
@@ -325,6 +326,15 @@ export default async function SuggestionDetailPage({ params }: Props) {
  <div className="bg-card rounded-lg border border-warning p-6 shadow-md transition-all">
  <h3 className="flex items-center gap-2"><Shield className="h-5 w-5" /> Admin Actions</h3>
  <SuggestionAdminActions suggestionId={s.id} />
+ </div>
+ )}
+
+ {/* Applied corrections stay revertible — the counterweight to Silver
+     auto-approval landing changes with no human in the loop. */}
+ {isAdmin && s.suggestion_type ==="correction" && (s.status ==="approved" || s.status ==="auto_approved") && (
+ <div className="bg-card rounded-lg border border-warning p-6 shadow-md transition-all">
+ <h3 className="flex items-center gap-2"><Shield className="h-5 w-5" /> Admin Actions</h3>
+ <SuggestionRevertAction suggestionId={s.id} />
  </div>
  )}
  </div>
