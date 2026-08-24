@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import WantButton from "@/components/reference/WantButton";
 import ReferencePhotoGallery from "@/components/reference/ReferencePhotoGallery";
 import { referenceHref } from "@/lib/catalog/referenceUrl";
+import { missingFieldLabels } from "@/lib/catalog/editableFields";
 import { createAnonClient } from "@/lib/supabase/anon";
 import {
     resolveReferenceItem,
@@ -229,6 +230,7 @@ export default async function ReferencePage({ params }: Props) {
     };
 
     const attrs = item.attributes ?? {};
+    const missingLabels = missingFieldLabels(item);
     const chip = (label: string, value: unknown, glossary?: { anchor: string; term: string }) =>
         value != null && value !== "" ? (
             <span className="rounded-full border border-input bg-muted px-3 py-1 text-sm text-secondary-foreground">
@@ -671,6 +673,25 @@ export default async function ReferencePage({ params }: Props) {
                             </tbody>
                         </table>
                     </div>
+                    {/* The gaps, named. A sparse entry used to read as a dead
+                        end; naming what is missing turns it into a request.
+                        The catalog's defect is emptiness — no colour on ~5,000
+                        rows, no year on ~3,600 — and the people who know these
+                        answers are the ones reading this page. */}
+                    {missingLabels.length > 0 && (
+                        <p className="mt-2 text-xs text-muted-foreground">
+                            This entry is missing{" "}
+                            <strong className="font-semibold text-foreground">
+                                {missingLabels.slice(0, 4).join(", ").toLowerCase()}
+                                {missingLabels.length > 4 ? ` and ${missingLabels.length - 4} more` : ""}
+                            </strong>
+                            . Know any of them?{" "}
+                            <Link href={`/catalog/${item.id}?suggest=true`} className="underline hover:no-underline">
+                                Fill in what you know
+                            </Link>
+                            .
+                        </p>
+                    )}
                     {/* Cite the record. Facts here come from the hobby's published
                         reference and the makers' own archives; descriptions are
                         written here. Members correcting an entry beats any import. */}
@@ -680,7 +701,13 @@ export default async function ReferencePage({ params }: Props) {
                             where our information comes from
                         </Link>
                         . Spot an error?{" "}
-                        <Link href="/catalog/suggestions/new" className="underline hover:no-underline">
+                        {/* This pointed at /catalog/suggestions/new — the NEW
+                            ENTRY form — for its first day. A member clicking
+                            "suggest a correction" landed on "Suggest a New
+                            Catalog Entry" with 17 blank fields. The correction
+                            path is the entry's own page with the edit modal
+                            open. */}
+                        <Link href={`/catalog/${item.id}?suggest=true`} className="underline hover:no-underline">
                             Suggest a correction
                         </Link>
                         .

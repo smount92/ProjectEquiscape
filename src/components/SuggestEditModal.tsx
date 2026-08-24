@@ -2,7 +2,12 @@
 
 import { useState, useTransition, useEffect } from "react";
 import { createSuggestion } from "@/app/actions/catalog-suggestions";
-import { CANONICAL_SCALES } from "@/lib/catalog/taxonomy";
+import {
+    buildEditableFields,
+    changedFields as pickChanged,
+    type FieldEdit,
+} from "@/lib/catalog/editableFields";
+import { CATEGORY_LABELS } from "@/lib/catalog/taxonomy";
 import { useToast } from "@/lib/context/ToastContext";
 import {
     Dialog,
@@ -29,13 +34,17 @@ interface SuggestEditModalProps {
  openOnMount?: boolean;
 }
 
-interface FieldEdit {
- key: string;
- label: string;
- original: string;
- current: string;
-}
-
+/**
+ * The correction form.
+ *
+ * The field list comes from buildEditableFields, which offers the WHOLE
+ * curated set whether filled or not. Its predecessor listed only
+ * attributes that already had values — so the emptier an entry was, the
+ * less a member could do about it, and filling a blank required creating
+ * a duplicate entry instead. Of the 51 suggestions ever received, 45 were
+ * whole new entries and 6 were corrections. The catalog's defect is
+ * emptiness, and emptiness was the one thing this form could not express.
+ */
 export default function SuggestEditModal({ catalogItem, openOnMount = false }: SuggestEditModalProps) {
  const [isOpen, setIsOpen] = useState(openOnMount);
  const [isPending, startTransition] = useTransition();
@@ -43,30 +52,11 @@ export default function SuggestEditModal({ catalogItem, openOnMount = false }: S
  const [error, setError] = useState("");
  const { toast } = useToast();
 
- const attrs = catalogItem.attributes ?? {};
- // Pipeline plumbing, not catalog facts: the reference page hides these
- // (reference/[maker]/[slug] filters source/source_id), so offering them
- // as editable fields just invited corrections nobody can see.
- const HIDDEN_ATTRIBUTES = new Set(["source", "source_id"]);
- const initialFields: FieldEdit[] = [
- { key: "title", label: "Title", original: catalogItem.title, current: catalogItem.title },
- { key: "maker", label: "Maker", original: catalogItem.maker, current: catalogItem.maker },
- { key: "scale", label: "Scale", original: catalogItem.scale ?? "", current: catalogItem.scale ?? "" },
- ...Object.entries(attrs)
- .filter(([k, v]) => v != null && !HIDDEN_ATTRIBUTES.has(k))
- .map(([k, v]) => ({
-  key: k,
-  label: k.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-  original: String(v),
-  current: String(v),
- })),
- ];
-
- const [fields, setFields] = useState<FieldEdit[]>(initialFields);
+ const [fields, setFields] = useState<FieldEdit[]>(() => buildEditableFields(catalogItem));
 
  useEffect(() => {
  if (isOpen) {
-  setFields(initialFields);
+  setFields(buildEditableFields(catalogItem));
   setReason("");
   setError("");
  }
@@ -81,12 +71,14 @@ export default function SuggestEditModal({ catalogItem, openOnMount = false }: S
  });
  };
 
- const changedFields = fields.filter((f) => f.current !== f.original);
- const hasChanges = changedFields.length > 0;
+ const changed = pickChanged(fields);
+ const hasChanges = changed.length > 0;
+ const filled = fields.filter((f) => !f.isEmpty);
+ const empty = fields.filter((f) => f.isEmpty);
 
  const handleSubmit = () => {
  if (!hasChanges) {
-  setError("No changes detected. Edit at least one field.");
+  setError("No changes yet — fix a value or fill in a blank.");
   return;
  }
  if (reason.trim().length < 10) {
@@ -95,8 +87,8 @@ export default function SuggestEditModal({ catalogItem, openOnMount = false }: S
  }
 
  const fieldChanges: Record<string, { from: string; to: string }> = {};
- for (const f of changedFields) {
-  fieldChanges[f.key] = { from: f.original, to: f.current };
+ for (const f of changed) {
+  fieldChanges[f.key] = { from: f.original, to: f.current.trim() };
  }
 
  startTransition(async () => {
@@ -121,6 +113,68 @@ export default function SuggestEditModal({ catalogItem, openOnMount = false }: S
  });
  };
 
+ const renderField = (field: FieldEdit) => {
+ const i = fields.indexOf(field);
+ const isDirty = field.current.trim() !== field.original.trim();
+ return (
+  <div key={field.key} className="flex flex-col gap-1.5">
+  <label className="flex items-center gap-2 text-sm font-semibold text-foreground">
+   {field.label}
+   {isDirty && (
+   <span className="rounded-full bg-warning/20 px-2 py-0.5 text-[0.62rem] font-extrabold tracking-wide text-warning uppercase">
+    {field.isEmpty ? "Added" : "Changed"}
+   </span>
+   )}
+  </label>
+  {field.kind === "select" && field.options ? (
+   <select
+   className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+   value={field.current}
+   onChange={(e) => handleFieldChange(i, e.target.value)}
+   aria-label={field.label}
+   >
+   {/* A stored value outside the vocabulary stays selectable so the
+       modal opens without phantom changes; the vocabulary is what new
+       values are drawn from, not a rewrite of history. */}
+   {field.original !== "" && !field.options.includes(field.original) && (
+    <option value={field.original}>{field.original} (current)</option>
+   )}
+   {field.original === "" && <option value="">— Select —</option>}
+   {field.options.map((o) => (
+    <option key={o} value={o}>
+    {field.key === "item_type" ? (CATEGORY_LABELS[o] ?? o) : o}
+    </option>
+   ))}
+   </select>
+  ) : field.kind === "textarea" ? (
+   <Textarea
+   value={field.current}
+   placeholder={field.placeholder}
+   onChange={(e) => handleFieldChange(i, e.target.value)}
+   aria-label={field.label}
+   rows={2}
+   />
+  ) : (
+   <Input
+   type={field.kind === "number" ? "number" : "text"}
+   value={field.current}
+   placeholder={field.placeholder}
+   onChange={(e) => handleFieldChange(i, e.target.value)}
+   aria-label={field.label}
+   />
+  )}
+  {field.help && !isDirty && (
+   <span className="text-muted-foreground text-xs">{field.help}</span>
+  )}
+  {isDirty && !field.isEmpty && (
+   <span className="text-muted-foreground text-xs italic">
+   Was: {field.original}
+   </span>
+  )}
+  </div>
+ );
+ };
+
  return (
  <>
   <Button
@@ -140,54 +194,28 @@ export default function SuggestEditModal({ catalogItem, openOnMount = false }: S
    </DialogHeader>
 
    <div className="flex flex-col gap-5">
-   {/* Editable Fields */}
+   {/* What the entry already says */}
    <div className="flex flex-col gap-4">
-    {fields.map((field, i) => (
-    <div key={field.key} className="flex flex-col gap-1.5">
-     <label className="flex items-center gap-2 text-sm font-semibold text-foreground">
-     {field.label}
-     {field.current !== field.original && (
-      <span className="rounded-full bg-warning/20 px-2 py-0.5 text-[0.62rem] font-extrabold tracking-wide text-warning uppercase">
-      Changed
-      </span>
-     )}
-     </label>
-     {field.key === "scale" ? (
-     /* Taxonomy v2: scale corrections pick from the canonical
-        vocabulary instead of free text. A non-canonical stored
-        value still shows as a selectable "keep" option so the
-        modal opens without phantom changes. */
-     <select
-     className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-     value={field.current}
-     onChange={(e) => handleFieldChange(i, e.target.value)}
-     aria-label={field.label}
-     >
-     {field.original !== "" &&
-      !CANONICAL_SCALES.includes(field.original as (typeof CANONICAL_SCALES)[number]) && (
-      <option value={field.original}>{field.original} (current)</option>
-     )}
-     {field.original === "" && <option value="">— Select —</option>}
-     {CANONICAL_SCALES.map((s) => (
-      <option key={s} value={s}>{s}</option>
-     ))}
-     </select>
-     ) : (
-     <Input
-     type="text"
-     value={field.current}
-     onChange={(e) => handleFieldChange(i, e.target.value)}
-     aria-label={field.label}
-     />
-     )}
-     {field.current !== field.original && (
-     <span className="text-muted-foreground text-xs italic">
-      Was: {field.original}
-     </span>
-     )}
-    </div>
-    ))}
+    {filled.map(renderField)}
    </div>
+
+   {/* What it is missing — the reason most members open this form.
+       Separated and labelled so a sparse entry reads as an invitation
+       rather than a dead end. */}
+   {empty.length > 0 && (
+    <div className="flex flex-col gap-4">
+    <div className="border-t border-input pt-3">
+     <h4 className="text-sm font-bold text-foreground">
+     Missing from this entry
+     </h4>
+     <p className="text-muted-foreground mt-0.5 text-xs">
+     Know any of these? Filling in even one helps every collector
+     who looks this model up after you.
+     </p>
+    </div>
+    {empty.map(renderField)}
+    </div>
+   )}
 
    {/* Reason */}
    <div className="flex flex-col gap-1.5">
@@ -195,57 +223,29 @@ export default function SuggestEditModal({ catalogItem, openOnMount = false }: S
     Reason for change <span className="text-destructive">*</span>
     </label>
     <Textarea
-    placeholder="Explain why this change is needed (e.g., 'The 2019 Breyer catalog lists this as Dark Bay, not Bay')"
+    placeholder="Where does this come from? (e.g. 'The 2019 Breyer catalog lists this as Dark Bay', 'I own one — photo on my stable page')"
     value={reason}
     onChange={(e) => setReason(e.target.value)}
-    rows={3}
-    maxLength={2000}
-    className="min-h-[72px] resize-y"
+    rows={2}
     />
-    <span className="text-muted-foreground block text-right text-xs">
-    {reason.length}/2000
-    </span>
    </div>
 
    {error && (
-    <p className="text-destructive flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm">
+    <p className="text-destructive text-sm font-semibold" role="alert">
     {error}
     </p>
    )}
 
-   {/* Summary */}
-   {hasChanges && (
-    <div className="rounded-lg border border-border bg-background p-4">
-    <strong className="text-sm">
-     {changedFields.length} field{changedFields.length > 1 ? "s" : ""} changed:
-    </strong>
-    <ul className="mt-2 flex flex-col gap-1 pl-4">
-     {changedFields.map((f) => (
-     <li key={f.key} className="text-sm">
-      <span className="font-bold text-foreground">
-      {f.label}:
-      </span>{" "}
-      <span className="text-destructive/70 line-through">{f.original}</span> →{" "}
-      <span className="font-bold text-success">{f.current}</span>
-     </li>
-     ))}
-    </ul>
-    </div>
-   )}
-   </div>
-
-   <div className="flex justify-end gap-2 pt-4">
-   <Button variant="outline"
-    onClick={() => setIsOpen(false)}
-   >
+   <div className="flex justify-end gap-2">
+    <Button variant="outline" onClick={() => setIsOpen(false)}>
     Cancel
-   </Button>
-   <Button
-    onClick={handleSubmit}
-    disabled={isPending || !hasChanges}
-   >
-    {isPending ? "Submitting…" : "Submit Suggestion"}
-   </Button>
+    </Button>
+    <Button onClick={handleSubmit} disabled={isPending || !hasChanges}>
+    {isPending ? "Submitting…" : hasChanges
+     ? `Submit ${changed.length} ${changed.length === 1 ? "change" : "changes"}`
+     : "Submit"}
+    </Button>
+   </div>
    </div>
   </DialogContent>
   </Dialog>
