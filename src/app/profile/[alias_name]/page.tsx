@@ -20,13 +20,14 @@ import { Button } from "@/components/ui/button";
 import AnonProfile from "@/components/profile/AnonProfile";
 import ViewBeacon from "@/components/metrics/ViewBeacon";
 import SupporterPlaque from "@/components/profile/SupporterPlaque";
+import MembershipPlaque from "@/components/profile/MembershipPlaque";
 import ProfileMasthead from "@/components/profile/ProfileMasthead";
 import ChampionshipLine from "@/components/profile/ChampionshipLine";
 import BarnsStrip from "@/components/profile/BarnsStrip";
 import ForSaleStrip from "@/components/profile/ForSaleStrip";
 import RecentPosts from "@/components/profile/RecentPosts";
 import { EmptyNote, SectionHeading } from "@/components/profile/ProfileSection";
-import { fetchSupporterBadge } from "@/lib/supporter";
+import { fetchMembershipDisplay, fetchSupporterBadge } from "@/lib/supporter";
 import { getExhibitorCardCount, getExhibitorStar } from "@/lib/shows/horseTitles";
 import {
     applyFeaturedOrder,
@@ -193,6 +194,8 @@ export default async function ProfilePage({
     // Supporter plaque — separate tolerant read so profiles keep rendering even
     // before migration 142 is applied (main auto-deploys).
     const supporterBadge = await fetchSupporterBadge(supabase, profileUser.id);
+    // Opt-in membership chip (193) — same tolerant shape; false until pasted.
+    const showsMembership = await fetchMembershipDisplay(supabase, profileUser.id);
 
     // The member's own cosmetics. Tolerant: pre-171 this is the default.
     const custom = await fetchProfileCustomization(supabase, profileUser.id);
@@ -636,7 +639,12 @@ export default async function ProfilePage({
                 bio={profileUser.bio}
                 isOwnProfile={isOwnProfile}
                 badges={
-                    supporterBadge.isSupporter ? <SupporterPlaque since={supporterBadge.since} /> : null
+                    supporterBadge.isSupporter || showsMembership ? (
+                        <>
+                            {supporterBadge.isSupporter ? <SupporterPlaque since={supporterBadge.since} /> : null}
+                            {showsMembership ? <MembershipPlaque /> : null}
+                        </>
+                    ) : null
                 }
                 actions={
                     <>

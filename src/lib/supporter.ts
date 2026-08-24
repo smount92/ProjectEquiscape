@@ -79,3 +79,30 @@ export function formatSupporterSince(since: string | null): string | null {
     if (Number.isNaN(d.getTime())) return null;
     return d.toLocaleDateString("en-US", { month: "long", year: "numeric" });
 }
+
+/**
+ * The opt-in membership chip (migration 193). Tolerant in the
+ * fetchSupporterBadge mould: before the migration the RPC does not exist,
+ * and a profile must render anyway — main auto-deploys ahead of the paste.
+ * Returns true only when the DEFINER function says this member both opted
+ * in AND holds an unexpired pro/studio tier; every error is "no chip".
+ */
+export async function fetchMembershipDisplay(
+    client: SupabaseClient<Database>,
+    userId: string,
+): Promise<boolean> {
+    try {
+        // The RPC name is cast because the generated types predate
+        // migration 193; regen after the paste and this cast can go.
+        const { data, error } = await (client.rpc as unknown as (
+            fn: string,
+            args: Record<string, unknown>,
+        ) => Promise<{ data: unknown; error: unknown }>)("public_membership_label", {
+            p_user_id: userId,
+        });
+        if (error) return false;
+        return data === "member";
+    } catch {
+        return false;
+    }
+}

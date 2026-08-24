@@ -36,6 +36,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import SupporterLedgerToggle from "@/components/SupporterLedgerToggle";
+import MembershipDisplayToggle from "@/components/MembershipDisplayToggle";
 import InsuranceReportButton from "@/components/InsuranceReportButton";
 import ExportButton from "@/components/ExportButton";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
@@ -196,6 +197,10 @@ export default function SettingsClient() {
     // to be an active supporter; the toggle stays hidden for everyone else.
     const [supporterLedger, setSupporterLedger] = useState<{ listed: boolean } | null>(null);
 
+    // Membership chip opt-in — null unless the viewer holds pro/studio,
+    // so the toggle stays hidden for everyone else (same shape as above).
+    const [membershipDisplay, setMembershipDisplay] = useState<{ visible: boolean } | null>(null);
+
     useEffect(() => {
         async function load() {
             const profile = await getProfile();
@@ -234,6 +239,22 @@ export default function SettingsClient() {
                         .maybeSingle();
                     if (srow?.is_supporter === true) {
                         setSupporterLedger({ listed: srow.show_in_supporters_ledger === true });
+                    }
+                    // Membership display opt-in (193) — offered only to a
+                    // session whose tier is pro/studio. The read is separate
+                    // and tolerant: before the migration the column is
+                    // missing and the toggle simply stays hidden.
+                    const tier = (user.app_metadata as { tier?: string } | null)?.tier;
+                    if (tier === "pro" || tier === "studio") {
+                        const { data: mrow, error: mErr } = await supabase
+                            .from("users")
+                            .select("show_membership_on_profile" as never)
+                            .eq("id", user.id)
+                            .maybeSingle();
+                        if (!mErr) {
+                            const row = mrow as { show_membership_on_profile?: boolean } | null;
+                            setMembershipDisplay({ visible: row?.show_membership_on_profile === true });
+                        }
                     }
                 }
             } catch {
@@ -701,6 +722,13 @@ export default function SettingsClient() {
                                 initialListed={supporterLedger.listed}
                                 label="List me on the Supporters' Ledger (About page)"
                             />
+                        </div>
+                    )}
+
+                    {/* Pro/Studio members only. */}
+                    {membershipDisplay && (
+                        <div className="border-input mt-6 border-t pt-4">
+                            <MembershipDisplayToggle initialVisible={membershipDisplay.visible} />
                         </div>
                     )}
                 </Leaf>
