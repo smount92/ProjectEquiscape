@@ -1269,3 +1269,55 @@ export async function uploadGroupBanner(
         return { success: false, error: "Could not upload that image." };
     }
 }
+
+/**
+ * Set or clear a barn's banner (owner/admin only). The retroactive path —
+ * the create form covers new barns, but the two official barns existed
+ * before banners did, and "recreate your barn to change its picture" is
+ * not an answer anyone should be given.
+ */
+export async function setGroupBanner(
+    groupId: string,
+    bannerPath: string | null,
+): Promise<{ success: boolean; error?: string }> {
+    const { supabase, user } = await requireAuth();
+
+    const { data: membership } = await supabase
+        .from("group_memberships")
+        .select("role")
+        .eq("group_id", groupId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+    const role = (membership as { role: string } | null)?.role;
+    if (!role || !["owner", "admin"].includes(role)) {
+        return { success: false, error: "Only the barn's owner or admins can change the banner." };
+    }
+
+    // Same rule as createGroup: only a path the uploader could actually
+    // write (their own storage folder) is accepted.
+    if (bannerPath !== null && !bannerPath.startsWith(`${user.id}/`)) {
+        return { success: false, error: "That image path isn't yours." };
+    }
+
+    // Best-effort cleanup of the file being replaced, only when it lives
+    // in this member's own folder — never delete another admin's upload.
+    const { data: current } = await supabase
+        .from("groups")
+        .select("banner_url")
+        .eq("id", groupId)
+        .maybeSingle();
+    const oldPath = (current as { banner_url: string | null } | null)?.banner_url;
+    if (oldPath && !oldPath.startsWith("http") && oldPath.startsWith(`${user.id}/`) && oldPath !== bannerPath) {
+        await supabase.storage.from("avatars").remove([oldPath]);
+    }
+
+    const { error } = await supabase
+        .from("groups")
+        .update({ banner_url: bannerPath })
+        .eq("id", groupId);
+    if (error) return { success: false, error: error.message };
+
+    revalidatePath("/community/groups");
+    revalidateTag("groups", "max");
+    return { success: true };
+}

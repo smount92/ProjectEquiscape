@@ -11,6 +11,7 @@ import { GROUP_TYPE_LABELS } from "@/lib/constants/groups";
 import { getPosts } from "@/app/actions/posts";
 import GroupDetailClient from "@/components/GroupDetailClient";
 import GroupMasthead from "@/components/groups/GroupMasthead";
+import BarnBannerControl from "@/components/groups/BarnBannerControl";
 import BarnJoinButton from "@/components/groups/BarnJoinButton";
 import BarnMembersPanel from "@/components/groups/BarnMembersPanel";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
@@ -58,6 +59,16 @@ export default async function GroupDetailPage({ params }: { params: Promise<{ sl
         <ExplorerLayout noHeader frameless>
             <ViewBeacon entityType="barn" entityId={group.id} />
             <div className="mx-auto max-w-6xl">
+                {/* The barn's banner, when it has one — same image the
+                    directory card wears. */}
+                {group.bannerUrl && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                        src={group.bannerUrl}
+                        alt=""
+                        className="border-input mb-4 h-40 w-full rounded-xl border object-cover shadow-sm"
+                    />
+                )}
                 <GroupMasthead
                     name={group.name}
                     typeLabel={GROUP_TYPE_LABELS[group.groupType] || group.groupType}
@@ -76,6 +87,14 @@ export default async function GroupDetailPage({ params }: { params: Promise<{ sl
                         />
                     }
                 />
+
+                {/* Owner/admin: the retroactive banner path — barns that
+                    predate banners have no other way to get one. */}
+                {["owner", "admin"].includes(group.memberRole || "") && (
+                    <div className="-mt-4 mb-4 text-right">
+                        <BarnBannerControl groupId={group.id} hasBanner={Boolean(group.bannerUrl)} />
+                    </div>
+                )}
 
                 <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start">
                     {/* The room itself — notice board front and centre */}
