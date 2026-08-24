@@ -314,16 +314,28 @@ export async function updatePost(
     if (!newContent.trim()) return { success: false, error: "Content cannot be empty." };
     if (newContent.length > 10000) return { success: false, error: "Content is too long." };
 
-    const { error } = await supabase
+    // .select() makes the row count observable. Under RLS, an update the
+    // caller isn't allowed matches ZERO rows and returns NO error — this
+    // action reported success that way for months while no UPDATE policy
+    // existed on posts at all (added in migration 195). Demanding the
+    // updated row back turns that silent nothing into an honest failure.
+    const { data: updated, error } = await supabase
         .from("posts")
         .update({
             content: newContent.trim(),
             updated_at: new Date().toISOString(),
         })
         .eq("id", postId)
-        .eq("author_id", user.id);
+        .eq("author_id", user.id)
+        .select("id");
 
     if (error) return { success: false, error: error.message };
+    if (!updated || updated.length === 0) {
+        return {
+            success: false,
+            error: "The edit didn't save. If this keeps happening, the site's edit permission may be missing — tell an admin.",
+        };
+    }
     // Barn threads live in the same posts table, so an edit there must
     // bust that surface too, not just the feed.
     revalidatePath("/feed");
