@@ -45,6 +45,11 @@ export interface Group {
     /** Featured barns sort first and wear the Official stamp (194).
      *  Tolerant: false until the migration is pasted. */
     isFeatured: boolean;
+    /** Threads plus their replies — what a member would call "posts". */
+    postCount: number;
+    /** When the notice board last saw a post (thread or reply), or null
+     *  for a board nothing has been written on. */
+    lastPostAt: string | null;
     memberCount: number;
     createdBy: string;
     createdAt: string;
@@ -74,6 +79,40 @@ async function signBarnBanner(
     } catch {
         return null;
     }
+}
+
+/**
+ * Notice-board activity per barn, in one query. Replies carry no
+ * group_id, but every thread carries replies_count and a bumped_at that
+ * replies refresh — so thread rows alone yield both "how many posts" and
+ * "when was the last one".
+ */
+async function fetchBarnPostStats(
+    supabase: Awaited<ReturnType<typeof createClient>>,
+    groupIds: string[],
+): Promise<Map<string, { postCount: number; lastPostAt: string | null }>> {
+    const stats = new Map<string, { postCount: number; lastPostAt: string | null }>();
+    if (groupIds.length === 0) return stats;
+    try {
+        const { data } = await supabase
+            .from("posts")
+            .select("group_id, replies_count, bumped_at, created_at")
+            .is("parent_id", null)
+            .in("group_id", groupIds);
+        for (const row of (data ?? []) as {
+            group_id: string; replies_count: number | null;
+            bumped_at: string | null; created_at: string;
+        }[]) {
+            const cur = stats.get(row.group_id) ?? { postCount: 0, lastPostAt: null };
+            cur.postCount += 1 + (row.replies_count ?? 0);
+            const seen = row.bumped_at ?? row.created_at;
+            if (seen && (!cur.lastPostAt || seen > cur.lastPostAt)) cur.lastPostAt = seen;
+            stats.set(row.group_id, cur);
+        }
+    } catch {
+        // A board with no stats still renders — zeros, not a broken page.
+    }
+    return stats;
 }
 
 /** Postgres "column does not exist" — migration 167 not applied yet. */
@@ -290,6 +329,8 @@ export async function getGroup(slug: string): Promise<Group | null> {
         joinRequestStatus = (req as { status: Group["joinRequestStatus"] } | null)?.status ?? null;
     }
 
+    const postStats = await fetchBarnPostStats(supabase, [g.id as string]);
+
     return {
         id: g.id as string,
         name: g.name as string,
@@ -301,6 +342,8 @@ export async function getGroup(slug: string): Promise<Group | null> {
         isPrivate,
         bannerUrl: await signBarnBanner(supabase, g.banner_url as string | null),
         isFeatured: (g as { is_featured?: boolean }).is_featured === true,
+        postCount: postStats.get(g.id as string)?.postCount ?? 0,
+        lastPostAt: postStats.get(g.id as string)?.lastPostAt ?? null,
         iconUrl: g.icon_url as string | null,
         memberCount: actualMemberCount || (g.member_count as number) || 0,
         createdBy: g.created_by as string,
@@ -380,6 +423,8 @@ export async function getGroups(filters?: {
         for (const r of (requests || []) as { group_id: string }[]) pendingRequests.add(r.group_id);
     }
 
+    const postStats = await fetchBarnPostStats(supabase, groupIds);
+
     return await Promise.all((data as Record<string, unknown>[]).map(async (g) => ({
         id: g.id as string,
         name: g.name as string,
@@ -391,6 +436,8 @@ export async function getGroups(filters?: {
         isPrivate: readIsPrivate(g),
         bannerUrl: await signBarnBanner(supabase, g.banner_url as string | null),
         isFeatured: (g as { is_featured?: boolean }).is_featured === true,
+        postCount: postStats.get(g.id as string)?.postCount ?? 0,
+        lastPostAt: postStats.get(g.id as string)?.lastPostAt ?? null,
         iconUrl: g.icon_url as string | null,
         memberCount: memberCountMap.get(g.id as string) || (g.member_count as number) || 0,
         createdBy: g.created_by as string,
@@ -528,6 +575,8 @@ export async function getMyGroups(): Promise<Group[]> {
         }
     }
 
+    const postStats = await fetchBarnPostStats(supabase, groupIds);
+
     return await Promise.all((groups as Record<string, unknown>[]).map(async (g) => ({
         id: g.id as string,
         name: g.name as string,
@@ -539,6 +588,8 @@ export async function getMyGroups(): Promise<Group[]> {
         isPrivate: readIsPrivate(g),
         bannerUrl: await signBarnBanner(supabase, g.banner_url as string | null),
         isFeatured: (g as { is_featured?: boolean }).is_featured === true,
+        postCount: postStats.get(g.id as string)?.postCount ?? 0,
+        lastPostAt: postStats.get(g.id as string)?.lastPostAt ?? null,
         iconUrl: g.icon_url as string | null,
         memberCount: memberCountMap2.get(g.id as string) || (g.member_count as number) || 0,
         createdBy: g.created_by as string,

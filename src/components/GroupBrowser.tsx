@@ -196,6 +196,16 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
                             <div className="border-input mt-auto flex items-center justify-between border-t pt-3">
                                 <span className="text-secondary-foreground text-xs">
                                     👥 {g.memberCount} member{g.memberCount !== 1 ? "s" : ""}
+                                    {" · "}💬 {g.postCount} post{g.postCount !== 1 ? "s" : ""}
+                                    {g.lastPostAt && (
+                                        <>
+                                            {" · "}last post{" "}
+                                            {new Date(g.lastPostAt).toLocaleDateString("en-US", {
+                                                month: "short",
+                                                day: "numeric",
+                                            })}
+                                        </>
+                                    )}
                                 </span>
                                 {g.isMember ? (
                                     <div className="flex items-center gap-2">
