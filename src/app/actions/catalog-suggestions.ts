@@ -182,57 +182,91 @@ export async function getCatalogItems(filters: CatalogFilters) {
         // null and the title/maker ILIKE fallback below keeps search alive.
     }
 
-    // The eBay-priced filter is an id-set constraint, like text search:
-    // the signal table is small (hundreds), so its ids are fetched and
-    // intersected rather than joined. Flag-aware — a signal a member has
-    // reported as wrongly matched does not count as "priced". Tolerant of
-    // migrations 189/196 being absent (filter simply matches nothing,
-    // with a truthful empty result rather than an error).
+    // The eBay-priced filter takes two shapes on purpose:
+    //  - ALONE it is an inner join to the signals table. The priced set
+    //    is hundreds of rows, and shipping that many UUIDs through a
+    //    .in() URL is exactly the silent-empty failure the first version
+    //    had: PostgREST rejected the oversized URL, the tolerant catch
+    //    swallowed it, and the filter reported zero with 567 signals live.
+    //  - WITH a text search the candidate set is already capped at
+    //    FUZZY_CANDIDATE_LIMIT ids, so intersecting id-sets stays cheap
+    //    and inside URL limits.
+    // Flag-aware both ways — a signal a member has reported as wrongly
+    // matched does not count as "priced". Tolerant of migrations 189/196
+    // being absent: the filter matches nothing rather than erroring.
+    let pricedJoin = false;
+    let flaggedIds: string[] = [];
     if (filters.priced) {
-        try {
-            const sigDb = supabase as unknown as {
-                from: (t: string) => {
-                    select: (c: string) => PromiseLike<{ data: Record<string, unknown>[] | null }> & {
-                        eq: (k: string, v: string) => PromiseLike<{ data: Record<string, unknown>[] | null }>;
-                    };
+        const sigDb = supabase as unknown as {
+            from: (t: string) => {
+                select: (c: string) => {
+                    eq: (k: string, v: string) => PromiseLike<{ data: Record<string, unknown>[] | null }>;
+                    in: (
+                        k: string,
+                        v: string[],
+                    ) => PromiseLike<{
+                        data: Record<string, unknown>[] | null;
+                        error: { message?: string } | null;
+                    }>;
                 };
             };
-            const [{ data: sigs }, { data: flags }] = await Promise.all([
-                sigDb.from("catalog_price_signals").select("catalog_item_id"),
-                sigDb.from("catalog_price_signal_flags").select("catalog_item_id").eq("status", "active"),
-            ]);
-            const flagged = new Set((flags ?? []).map((f) => String(f.catalog_item_id)));
-            const pricedIds = (sigs ?? [])
-                .map((r) => String(r.catalog_item_id))
-                .filter((id) => !flagged.has(id));
-            if (pricedIds.length === 0) {
+        };
+        try {
+            const { data: flags } = await sigDb
+                .from("catalog_price_signal_flags")
+                .select("catalog_item_id")
+                .eq("status", "active");
+            flaggedIds = (flags ?? []).map((f) => String(f.catalog_item_id));
+        } catch {
+            /* pre-196 — nothing is flagged */
+        }
+        if (searchIds) {
+            try {
+                const { data: sigs, error: sigError } = await sigDb
+                    .from("catalog_price_signals")
+                    .select("catalog_item_id")
+                    .in("catalog_item_id", searchIds);
+                if (sigError) throw new Error(sigError.message);
+                const flagged = new Set(flaggedIds);
+                const priced = new Set(
+                    (sigs ?? [])
+                        .map((r) => String(r.catalog_item_id))
+                        .filter((id) => !flagged.has(id)),
+                );
+                searchIds = searchIds.filter((id) => priced.has(id));
+            } catch {
+                searchIds = [];
+            }
+            if (searchIds.length === 0) {
                 return { success: true as const, items: [], total: 0, page, pageSize };
             }
-            if (searchIds) {
-                const keep = new Set(pricedIds);
-                searchIds = searchIds.filter((id) => keep.has(id));
-                if (searchIds.length === 0) {
-                    return { success: true as const, items: [], total: 0, page, pageSize };
-                }
-            } else {
-                searchIds = pricedIds;
-            }
-        } catch {
-            return { success: true as const, items: [], total: 0, page, pageSize };
+        } else {
+            pricedJoin = true;
         }
     }
 
-    // Explicit columns; count mode matches the path: the id-set path is
-    // ≤FUZZY_CANDIDATE_LIMIT rows, so an exact count is cheap AND honest
-    // there, while "estimated" (planner stats) stays for whole-catalog
-    // browsing where exact counting is the expensive part.
+    // Explicit columns; count mode matches the path: the id-set and
+    // priced paths are at most a few hundred rows, so an exact count is
+    // cheap AND honest there, while "estimated" (planner stats) stays
+    // for whole-catalog browsing where exact counting is the expensive
+    // part.
+    const CATALOG_BROWSE_COLUMNS =
+        "id, item_type, parent_id, title, maker, maker_slug, slug, scale, attributes, created_at";
     const build = (nameSortColumn: string) => {
+        // Widened to string on the priced join: the embedded relation is
+        // not in the generated types, and every caller casts rows anyway.
+        const columns: string = pricedJoin
+            ? `${CATALOG_BROWSE_COLUMNS}, catalog_price_signals!inner(catalog_item_id)`
+            : CATALOG_BROWSE_COLUMNS;
         let query = supabase
             .from("catalog_items")
-            .select("id, item_type, parent_id, title, maker, maker_slug, slug, scale, attributes, created_at", {
-                count: searchIds ? "exact" : "estimated",
+            .select(columns, {
+                count: searchIds || pricedJoin ? "exact" : "estimated",
             })
             .range(from, from + pageSize - 1);
+        if (pricedJoin && flaggedIds.length > 0) {
+            query = query.not("id", "in", `(${flaggedIds.join(",")})`);
+        }
 
         if (filters.maker) query = query.eq("maker", filters.maker);
         // Attribution split (156): company / person facets.
@@ -287,6 +321,11 @@ export async function getCatalogItems(filters: CatalogFilters) {
     // down over a sort refinement, so fall back to the raw title.
     if (error && isMissingSortKey(error)) {
         ({ data, count, error } = await build("title"));
+    }
+    // Pre-189 env with the priced toggle on: the signals relation does
+    // not exist, and "no priced entries yet" is the truthful answer.
+    if (error && pricedJoin && /catalog_price_signals/i.test(error.message ?? "")) {
+        return { success: true as const, items: [], total: 0, page, pageSize };
     }
     if (error)
         return { success: false as const, error: error.message };

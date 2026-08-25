@@ -99,7 +99,7 @@ export default async function ReferencePage({
         supabase.rpc("get_catalog_facets"),
     ]);
 
-    const items = (result.success ? result.items : []) as CatalogItemRow[];
+    const items = (result.success ? result.items : []) as unknown as CatalogItemRow[];
     const total = result.success ? result.total : 0;
     const facets = (facetRes.data ?? {}) as {
         makers?: string[];
