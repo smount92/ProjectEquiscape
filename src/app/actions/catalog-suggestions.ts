@@ -52,6 +52,8 @@ interface CatalogFilters {
     medium?: string;
     material?: string;
     runType?: string;
+    /** Only models carrying a live eBay asking-price signal. */
+    priced?: boolean;
     page?: number;
     pageSize?: number;
     sortBy?: string;
@@ -178,6 +180,46 @@ export async function getCatalogItems(filters: CatalogFilters) {
         }
         // RPC unavailable (fresh env, migration pending)? searchIds stays
         // null and the title/maker ILIKE fallback below keeps search alive.
+    }
+
+    // The eBay-priced filter is an id-set constraint, like text search:
+    // the signal table is small (hundreds), so its ids are fetched and
+    // intersected rather than joined. Flag-aware — a signal a member has
+    // reported as wrongly matched does not count as "priced". Tolerant of
+    // migrations 189/196 being absent (filter simply matches nothing,
+    // with a truthful empty result rather than an error).
+    if (filters.priced) {
+        try {
+            const sigDb = supabase as unknown as {
+                from: (t: string) => {
+                    select: (c: string) => PromiseLike<{ data: Record<string, unknown>[] | null }> & {
+                        eq: (k: string, v: string) => PromiseLike<{ data: Record<string, unknown>[] | null }>;
+                    };
+                };
+            };
+            const [{ data: sigs }, { data: flags }] = await Promise.all([
+                sigDb.from("catalog_price_signals").select("catalog_item_id"),
+                sigDb.from("catalog_price_signal_flags").select("catalog_item_id").eq("status", "active"),
+            ]);
+            const flagged = new Set((flags ?? []).map((f) => String(f.catalog_item_id)));
+            const pricedIds = (sigs ?? [])
+                .map((r) => String(r.catalog_item_id))
+                .filter((id) => !flagged.has(id));
+            if (pricedIds.length === 0) {
+                return { success: true as const, items: [], total: 0, page, pageSize };
+            }
+            if (searchIds) {
+                const keep = new Set(pricedIds);
+                searchIds = searchIds.filter((id) => keep.has(id));
+                if (searchIds.length === 0) {
+                    return { success: true as const, items: [], total: 0, page, pageSize };
+                }
+            } else {
+                searchIds = pricedIds;
+            }
+        } catch {
+            return { success: true as const, items: [], total: 0, page, pageSize };
+        }
     }
 
     // Explicit columns; count mode matches the path: the id-set path is

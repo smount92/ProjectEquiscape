@@ -54,6 +54,8 @@ export interface CatalogFilters {
     material?: string;
     /** Tier 1 (2026-08-23): attributes.run_type, a closed vocabulary. */
     runType?: string;
+    /** Only models carrying a live eBay asking-price signal. */
+    priced?: boolean;
     sort: CatalogSort;
     page: number;
 }
@@ -128,6 +130,9 @@ export function parseCatalogSearchParams(
     const runType = nonEmpty(params.run, 40);
     if (runType && RUN_TYPE_VALUES.includes(runType)) filters.runType = runType;
 
+    // Only the literal "1", like every boolean flag on this site.
+    if (params.priced === "1") filters.priced = true;
+
     const sort = nonEmpty(params.sort, 20);
     if (sort && (CATALOG_SORTS as readonly string[]).includes(sort)) {
         filters.sort = sort as CatalogSort;
@@ -159,6 +164,7 @@ export function buildCatalogSearchParams(filters: Partial<CatalogFilters>): URLS
     if (filters.medium) params.set("medium", filters.medium);
     if (filters.material) params.set("material", filters.material);
     if (filters.runType) params.set("run", filters.runType);
+    if (filters.priced) params.set("priced", "1");
     if (filters.sort && filters.sort !== "name-az") params.set("sort", filters.sort);
     if (filters.page && filters.page > 1) params.set("page", String(filters.page));
     return params;
@@ -210,6 +216,7 @@ export interface CatalogFilterChip {
         | "model"
         | "medium"
         | "material"
+        | "priced"
         | "runType";
     label: string;
 }
@@ -241,11 +248,13 @@ export function activeCatalogChips(filters: CatalogFilters): CatalogFilterChip[]
     if (filters.medium) chips.push({ key: "medium", label: filters.medium });
     if (filters.material) chips.push({ key: "material", label: filters.material });
     if (filters.runType) chips.push({ key: "runType", label: filters.runType });
+    if (filters.priced) chips.push({ key: "priced", label: "🏷️ eBay-priced" });
     return chips;
 }
 
 /** How many filters are active (sort/page excluded). */
 export function countActiveCatalogFilters(filters: CatalogFilters): number {
+    // priced counts below via the boolean checks.
     return activeCatalogChips(filters).length;
 }
 

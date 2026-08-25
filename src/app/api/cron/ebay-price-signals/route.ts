@@ -42,13 +42,26 @@ export async function GET(request: NextRequest) {
         // Rows worth asking about: a model number long enough to read out
         // of a listing title. The shorter ones ("85") are matchable only
         // when a seller writes "#85", which is too rare to spend a request
-        // on. Ambiguity is handled inside matching, not here.
-        const { data: rows, error } = await admin
-            .from("catalog_items")
-            .select("id, title, maker, scale, attributes")
-            .not("attributes->>model_number", "is", null)
-            .limit(4000);
-        if (error) throw new Error(`catalog read failed: ${error.message}`);
+        // on.
+        //
+        // PAGINATED, not .limit(4000): PostgREST silently caps a single
+        // request at 1,000 rows, so the first version of this read saw
+        // under a quarter of the catalog and "considered: 812" looked
+        // plausible enough that nobody questioned it. The 1,000-row cap
+        // has now produced a wrong number four separate times in this
+        // codebase's history; paginate every catalog-wide read, always.
+        const rows: { id: string; title: string | null; maker: string | null; scale: string | null; attributes: Record<string, unknown> | null }[] = [];
+        for (let from = 0; from < 20_000; from += 1000) {
+            const { data: page, error } = await admin
+                .from("catalog_items")
+                .select("id, title, maker, scale, attributes")
+                .not("attributes->>model_number", "is", null)
+                .range(from, from + 999);
+            if (error) throw new Error(`catalog read failed: ${error.message}`);
+            if (!page || page.length === 0) break;
+            rows.push(...(page as typeof rows));
+            if (page.length < 1000) break;
+        }
 
         const signals = () => admin.from("catalog_price_signals");
 
@@ -83,9 +96,26 @@ export async function GET(request: NextRequest) {
             .filter((c) => /^[0-9]{4,6}[A-Za-z]?$/.test(c.modelNumber.trim().toUpperCase()))
             .filter((c) => !flagged.has(c.id));
 
+        // CATALOG-WIDE ambiguity, not batch-local. matchListing's own
+        // ambiguity check runs against the index built from the current
+        // batch, so a number shared by several different models across the
+        // catalog looks unique whenever only one sibling is in the batch —
+        // and its prices would silently attribute to whichever sibling got
+        // swept. Same-title groups (glossy/matte variants of one release)
+        // stay: they are one model for pricing purposes.
+        const titlesByNumber = new Map<string, Set<string>>();
+        for (const c of candidates) {
+            const n = (c.modelNumber ?? "").trim().toUpperCase();
+            if (!titlesByNumber.has(n)) titlesByNumber.set(n, new Set());
+            titlesByNumber.get(n)!.add(c.title.trim().toLowerCase());
+        }
+        const unambiguous = candidates.filter(
+            (c) => (titlesByNumber.get((c.modelNumber ?? "").trim().toUpperCase())?.size ?? 0) === 1,
+        );
+
         // Never-read models first, then the stalest. New entries get a
         // price before old ones get a fresher one.
-        candidates.sort((a, b) => {
+        unambiguous.sort((a, b) => {
             const sa = lastSeen.get(a.id) ?? "";
             const sb = lastSeen.get(b.id) ?? "";
             return sa.localeCompare(sb);
@@ -97,10 +127,10 @@ export async function GET(request: NextRequest) {
         // in one pass. Capped well inside the Browse API's daily budget.
         const requested = Number(request.nextUrl.searchParams.get("limit"));
         const sliceSize = Number.isFinite(requested) && requested > 0
-            ? Math.min(requested, 900)
+            ? Math.min(requested, 4500)
             : SLICE;
 
-        const slice = candidates.slice(0, sliceSize);
+        const slice = unambiguous.slice(0, sliceSize);
         const outcome = await sweep(slice);
 
         let written = 0;
@@ -139,7 +169,8 @@ export async function GET(request: NextRequest) {
         // rules — logged every run so "too strict" or "not strict enough"
         // is an observation rather than an argument.
         logger.info("CronEbay", "sweep complete", {
-            considered: candidates.length,
+            considered: unambiguous.length,
+            ambiguousExcluded: candidates.length - unambiguous.length,
             swept: slice.length,
             searched: outcome.searched,
             written,
@@ -148,7 +179,8 @@ export async function GET(request: NextRequest) {
         });
 
         return NextResponse.json({
-            considered: candidates.length,
+            considered: unambiguous.length,
+            ambiguousExcluded: candidates.length - unambiguous.length,
             swept: slice.length,
             written,
             rejections: outcome.rejections,

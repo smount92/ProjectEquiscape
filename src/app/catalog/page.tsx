@@ -112,6 +112,37 @@ export default async function ReferencePage({
     const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
     const activeCount = countActiveCatalogFilters(filters);
 
+    // eBay asking medians for the visible page — one batched read, flag-
+    // aware: a signal a member has reported as wrongly matched shows
+    // nowhere, the browse list included. Tolerant of migrations 189/196
+    // being absent.
+    const ebayMap = new Map<string, number>();
+    if (items.length > 0) {
+        try {
+            const ids = items.map((i) => i.id);
+            const sigDb = supabase as unknown as {
+                from: (t: string) => {
+                    select: (c: string) => {
+                        in: (k: string, v: string[]) => PromiseLike<{ data: Record<string, unknown>[] | null }> & {
+                            eq: (k2: string, v2: string) => PromiseLike<{ data: Record<string, unknown>[] | null }>;
+                        };
+                    };
+                };
+            };
+            const [{ data: sigs }, { data: flags }] = await Promise.all([
+                sigDb.from("catalog_price_signals").select("catalog_item_id, asking_median").in("catalog_item_id", ids),
+                sigDb.from("catalog_price_signal_flags").select("catalog_item_id").in("catalog_item_id", ids).eq("status", "active"),
+            ]);
+            const flagged = new Set((flags ?? []).map((f) => String(f.catalog_item_id)));
+            for (const row of sigs ?? []) {
+                const id = String(row.catalog_item_id);
+                if (!flagged.has(id)) ebayMap.set(id, Number(row.asking_median));
+            }
+        } catch {
+            /* pre-189/196 — no chips */
+        }
+    }
+
     // At-a-glance community stats for the visible page (batch, anon-safe RPC —
     // migration 134). One call for the whole page; degrades to no stats if the
     // RPC isn't deployed yet. Cast until gen-types includes get_catalog_stats.
@@ -229,10 +260,26 @@ export default async function ReferencePage({
                         )}
                     />
 
-                    <p className="mt-3 mb-3 pl-1 text-sm text-muted-foreground italic" id="catalog-result-line">
-                        <b className="text-foreground not-italic">{total.toLocaleString()}</b>{" "}
-                        {activeCount > 0 ? "matching" : ""} entr{total === 1 ? "y" : "ies"}
-                    </p>
+                    <div className="mt-3 mb-3 flex flex-wrap items-center gap-3 pl-1">
+                        <p className="text-sm text-muted-foreground italic" id="catalog-result-line">
+                            <b className="text-foreground not-italic">{total.toLocaleString()}</b>{" "}
+                            {activeCount > 0 ? "matching" : ""} entr{total === 1 ? "y" : "ies"}
+                        </p>
+                        {/* eBay-priced toggle: an id-set filter, so it lives
+                            here by the count rather than in the facet bar —
+                            resets to page 1 either way. */}
+                        <Link
+                            href={pageHref({ ...filters, priced: filters.priced ? undefined : true }, 1)}
+                            title="Only models with a current eBay asking-price signal — asking prices, not sales."
+                            className={
+                                filters.priced
+                                    ? "inline-flex items-center gap-1 rounded-full border border-(--brass)/60 bg-(--brass)/15 px-2.5 py-0.5 text-xs font-medium text-foreground"
+                                    : "inline-flex items-center gap-1 rounded-full border border-input bg-muted/40 px-2.5 py-0.5 text-xs text-muted-foreground hover:border-(--brass)/40 hover:text-foreground"
+                            }
+                        >
+                            🏷️ {filters.priced ? "eBay-priced ✕" : "Has eBay price"}
+                        </Link>
+                    </div>
 
                     {items.length === 0 ? (
                         <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-input bg-muted/40 p-16 text-center">
@@ -262,6 +309,7 @@ export default async function ReferencePage({
                                     statsMap={statsMap}
                                     thumbs={thumbsMap}
                                     releaseCounts={releaseCounts}
+                                    ebayMedians={ebayMap}
                                 />
                             }
                             table={<CatalogResultsTable items={items} statsMap={statsMap} />}

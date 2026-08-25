@@ -35,6 +35,7 @@ export default function CatalogCardsList({
     statsMap,
     thumbs,
     releaseCounts,
+    ebayMedians,
 }: {
     items: CatalogCardItem[];
     statsMap: Map<string, { owner: number; want: number; forSale: number }>;
@@ -42,6 +43,9 @@ export default function CatalogCardsList({
     thumbs: Map<string, string>;
     /** mold catalog_id → number of child releases (may be empty). */
     releaseCounts: Map<string, number>;
+    /** catalog_id → median eBay ASKING price (flag-aware; may be empty).
+     *  Asking, never sold — the label must keep saying so. */
+    ebayMedians?: Map<string, number>;
 }) {
     return (
         <ul className="m-0 flex list-none flex-col gap-2 p-0" data-testid="catalog-cards">
@@ -116,6 +120,14 @@ export default function CatalogCardsList({
                                     {item.scale && (
                                         <span className="inline-flex items-center rounded-full border border-input bg-transparent px-2 py-px font-serif text-[0.7rem] tracking-wide text-secondary-foreground">
                                             {item.scale}
+                                        </span>
+                                    )}
+                                    {ebayMedians?.has(item.id) && (
+                                        <span
+                                            className="inline-flex items-center rounded-full border border-(--brass)/40 bg-(--brass)/10 px-2 py-px font-serif text-[0.7rem] tracking-wide text-foreground tabular-nums"
+                                            title="Median asking price on eBay right now — not a sale price. Details on the model's page."
+                                        >
+                                            🏷️ ~${Math.round(ebayMedians.get(item.id)!).toLocaleString("en-US")} asking
                                         </span>
                                     )}
                                 </span>
