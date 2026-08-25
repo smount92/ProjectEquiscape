@@ -11,6 +11,46 @@ export interface EbaySignalView {
     sampleSize: number;
     observedAt: string;
     listings: { title: string; price: number; url: string }[];
+    /** Daily asking-median ledger (197), oldest first. Optional so the
+     *  card keeps working against a pre-197 database. */
+    history?: { observedOn: string; askingMedian: number }[];
+}
+
+/** Points before the series is a trend rather than noise. Below this the
+ *  card says "tracking since…" — the honest version of a 2-point line. */
+const SPARKLINE_MIN_POINTS = 3;
+
+/**
+ * Inline asking-median sparkline. Ships dormant: the ledger starts with
+ * one point per model and gains one a week, so this renders nothing but
+ * a caption until enough points accrue — no second deploy needed the
+ * week it becomes a real line.
+ */
+function AskingSparkline({ history }: { history: { observedOn: string; askingMedian: number }[] }) {
+    const w = 160;
+    const h = 36;
+    const pad = 3;
+    const values = history.map((p) => p.askingMedian);
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const span = max - min || 1;
+    const x = (i: number) => pad + (i * (w - pad * 2)) / (history.length - 1);
+    const y = (v: number) => h - pad - ((v - min) / span) * (h - pad * 2);
+    const path = values.map((v, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+    const last = values[values.length - 1];
+    return (
+        <svg
+            width={w}
+            height={h}
+            viewBox={`0 0 ${w} ${h}`}
+            role="img"
+            aria-label={`Asking-price trend across ${history.length} readings: $${min.toLocaleString("en-US")} to $${max.toLocaleString("en-US")}`}
+            className="block"
+        >
+            <path d={path} fill="none" stroke="currentColor" strokeWidth="1.5" className="text-forest" strokeLinejoin="round" strokeLinecap="round" />
+            <circle cx={x(values.length - 1)} cy={y(last)} r="2.5" className="fill-current text-forest" />
+        </svg>
+    );
 }
 
 /**
@@ -77,8 +117,36 @@ export default function EbaySignalCard({
                         {money(signal.askingLow)}–{money(signal.askingHigh)} across{" "}
                         {signal.sampleSize} listing{signal.sampleSize !== 1 ? "s" : ""} · checked {observed}
                     </div>
+                    {(signal.history?.length ?? 0) >= SPARKLINE_MIN_POINTS ? (
+                        <div className="mt-3">
+                            <AskingSparkline history={signal.history!} />
+                            <div className="mt-0.5 text-[0.65rem] text-muted-foreground">
+                                Asking trend since{" "}
+                                {new Date(`${signal.history![0].observedOn}T00:00:00Z`).toLocaleDateString("en-US", {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                    timeZone: "UTC",
+                                })}
+                            </div>
+                        </div>
+                    ) : (signal.history?.length ?? 0) > 0 ? (
+                        <div className="mt-3 text-[0.65rem] text-muted-foreground">
+                            📈 Tracking asking history since{" "}
+                            {new Date(`${signal.history![0].observedOn}T00:00:00Z`).toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                                timeZone: "UTC",
+                            })}{" "}
+                            — trend appears after a few weekly readings.
+                        </div>
+                    ) : null}
                 </div>
-                <div className="p-5">
+                {/* min-w-0: a grid child's min-width:auto lets a long
+                    listing title stretch the 1fr track, and the card's
+                    overflow-hidden then chops it with no ellipsis. */}
+                <div className="min-w-0 p-5">
                     <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
                         {signal.listings.map((l) => (
                             <li key={l.url} className="flex items-baseline gap-2 text-sm">

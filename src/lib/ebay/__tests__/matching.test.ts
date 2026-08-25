@@ -148,6 +148,12 @@ describe("listings that are not the original model", () => {
         ["Breyer Alborozo 712053 for parts repair", "not-the-original-model"],
         ["Breyer Alborozo 712053 BOX ONLY no horse", "not-the-original-model"],
         ["Breyer Alborozo 712053 reproduction", "not-the-original-model"],
+        // The paper without the horse — a real $5 COA listing polluted
+        // A Class Act's median the day the feature went live.
+        ["Breyer Horse Certificate of Authenticity COA #700298 A Class Act", "not-the-original-model"],
+        ["Breyer Alborozo 712053 COA only no model", "not-the-original-model"],
+        ["Breyer Alborozo 712053 certificate only", "not-the-original-model"],
+        ["Breyer Alborozo 712053 papers only", "not-the-original-model"],
         ["Lot of 5 Breyer horses 712053 and more", "multi-item-lot"],
         ["Breyer set of 3 horses 712053", "multi-item-lot"],
     ])("refuses %s", (title, reason) => {
@@ -164,6 +170,19 @@ describe("listings that are not the original model", () => {
         const custom = matchListing({ title: "Breyer Alborozo 712053 custom" }, index);
         expect(isMatch(honest)).toBe(true);
         expect(isMatch(custom)).toBe(false);
+    });
+
+    // "w/ COA" is how a seller says the model INCLUDES its papers — that
+    // listing is a fine comp and must keep matching. Only the spelled-out
+    // phrase (the paper as the product) disqualifies.
+    it("keeps a model listed with its COA while refusing the COA alone", () => {
+        const withPapers = matchListing({ title: "Breyer Alborozo 712053 NIB w/ COA" }, index);
+        const paperAlone = matchListing(
+            { title: "Breyer Certificate of Authenticity #712053 Alborozo" },
+            index,
+        );
+        expect(isMatch(withPapers)).toBe(true);
+        expect(isMatch(paperAlone)).toBe(false);
     });
 });
 

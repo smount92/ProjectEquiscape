@@ -130,10 +130,21 @@ export async function GET(request: NextRequest) {
             ? Math.min(requested, 4500)
             : SLICE;
 
-        const slice = unambiguous.slice(0, sliceSize);
+        // ?ids=a,b,c re-sweeps exactly those models (matching-rule fixes,
+        // resolved wrong-model flags) without spending the whole budget.
+        // Ids that aren't in the candidate pool are simply absent from the
+        // result — the response's `swept` count is the receipt.
+        const idsParam = request.nextUrl.searchParams.get("ids");
+        const onlyIds = idsParam
+            ? new Set(idsParam.split(",").map((s) => s.trim()).filter(Boolean))
+            : null;
+        const pool = onlyIds ? unambiguous.filter((c) => onlyIds.has(c.id)) : unambiguous;
+
+        const slice = pool.slice(0, sliceSize);
         const outcome = await sweep(slice);
 
         let written = 0;
+        const wroteIds = new Set<string>();
         for (const s of outcome.signals) {
             const row = {
                 catalog_item_id: s.catalogItemId,
@@ -163,6 +174,52 @@ export async function GET(request: NextRequest) {
                 continue;
             }
             written++;
+            wroteIds.add(s.catalogItemId);
+        }
+
+        // The ledger behind the rolling signal (197): every reading that
+        // landed in the signal table also appends today's aggregates to
+        // catalog_price_history — aggregates only, never the listings.
+        // Same-day re-runs refresh the day's row rather than stacking
+        // duplicates. Tolerant pre-197: the rolling signal alone is still
+        // worth keeping, so a missing table skips quietly.
+        let historyWritten = 0;
+        const today = new Date().toISOString().slice(0, 10);
+        const historyRows = outcome.signals
+            .filter((s) => wroteIds.has(s.catalogItemId))
+            .map((s) => ({
+                catalog_item_id: s.catalogItemId,
+                asking_low: s.askingLow,
+                asking_median: s.askingMedian,
+                asking_high: s.askingHigh,
+                currency: s.currency,
+                sample_size: s.sampleSize,
+                source: "ebay-browse",
+                observed_on: today,
+            }));
+        const history = (admin as unknown as {
+            from: (t: string) => {
+                upsert: (
+                    rows: Record<string, unknown>[],
+                    opts: { onConflict: string },
+                ) => Promise<{ error: { code?: string; message?: string } | null }>;
+            };
+        }).from.bind(admin);
+        for (let i = 0; i < historyRows.length; i += 500) {
+            const chunk = historyRows.slice(i, i + 500);
+            const { error: histError } = await history("catalog_price_history")
+                .upsert(chunk, { onConflict: "catalog_item_id,source,observed_on" });
+            if (histError) {
+                const missingTable =
+                    histError.code === "42P01" ||
+                    /catalog_price_history/.test(histError.message ?? "");
+                if (!missingTable) {
+                    Sentry.captureException(histError, { tags: { domain: "cron" } });
+                    logger.error("CronEbay", "history append failed", histError);
+                }
+                break;
+            }
+            historyWritten += chunk.length;
         }
 
         // The rejection profile is the feedback loop on the matching
@@ -174,6 +231,7 @@ export async function GET(request: NextRequest) {
             swept: slice.length,
             searched: outcome.searched,
             written,
+            historyWritten,
             rejections: outcome.rejections,
             errors: outcome.errors.length,
         });
@@ -183,6 +241,7 @@ export async function GET(request: NextRequest) {
             ambiguousExcluded: candidates.length - unambiguous.length,
             swept: slice.length,
             written,
+            historyWritten,
             rejections: outcome.rejections,
             errors: outcome.errors.slice(0, 5),
         });

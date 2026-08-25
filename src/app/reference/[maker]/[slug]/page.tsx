@@ -177,6 +177,26 @@ async function getEbaySignalForReference(catalogItemId: string): Promise<EbaySig
             (l) => l && typeof l.url === "string" && l.url.startsWith("http") &&
                    typeof l.title === "string" && Number.isFinite(Number(l.price)),
         );
+
+        // The asking-price series (197). Starts as a single point the day
+        // the ledger lands and grows a point a week; the card decides how
+        // much of a trend that is worth showing. Pre-197 the query errors
+        // and the card simply gets no history.
+        let history: { observedOn: string; askingMedian: number }[] = [];
+        try {
+            const { data: hist } = await supabase
+                .from("catalog_price_history" as never)
+                .select("observed_on, asking_median")
+                .eq("catalog_item_id", catalogItemId)
+                .order("observed_on", { ascending: true })
+                .limit(730);
+            history = ((hist ?? []) as unknown as { observed_on: string; asking_median: number }[])
+                .filter((h) => h && typeof h.observed_on === "string" && Number.isFinite(Number(h.asking_median)))
+                .map((h) => ({ observedOn: h.observed_on, askingMedian: Number(h.asking_median) }));
+        } catch {
+            /* pre-197 */
+        }
+
         return {
             askingLow: Number(row.asking_low),
             askingMedian: Number(row.asking_median),
@@ -184,6 +204,7 @@ async function getEbaySignalForReference(catalogItemId: string): Promise<EbaySig
             sampleSize: row.sample_size,
             observedAt: row.observed_at,
             listings,
+            history,
         };
     } catch {
         return null;

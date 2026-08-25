@@ -91,6 +91,17 @@ const DISQUALIFYING = [
     /\brepro(duction)?\b/i,
     /\bfake\b/i,
     /\bhandmade\b/i,
+    // Paperwork sold without the horse. A seller spelling out
+    // "Certificate of Authenticity" is selling the paper itself — a
+    // model that merely includes its papers is listed as "w/ COA", and
+    // bare "COA" stays matchable. Costs the occasional legit listing
+    // that spells it out; a $5 certificate dragged A Class Act's median
+    // down within a day of the feature going live, and precision over
+    // recall is this file's whole contract.
+    /\bcertificate\s+of\s+authenticity\b/i,
+    /\bcoa\s+only\b/i,
+    /\bcertificate\s+only\b/i,
+    /\bpapers?\s+only\b/i,
 ];
 
 /** Multi-item phrasing that a single-model comp must not be drawn from. */
