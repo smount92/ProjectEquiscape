@@ -654,7 +654,11 @@ export async function createHorseRecord(data: {
         // (true only for 'public' — unlisted is link-only by design).
         visibility: data.visibility ?? (data.isPublic ? "public" : "private"),
         is_public: (data.visibility ?? (data.isPublic ? "public" : "private")) === "public",
-        trade_status: (data.tradeStatus || null) as UserHorseInsert["trade_status"],
+        // NOT NULL in the schema, and an explicit null overrides any
+        // column default — Quick Add sent none and every submit died on
+        // the constraint (MHI hit this in production). "Not for Sale"
+        // is the same default the legacy quickAddHorse always used.
+        trade_status: (data.tradeStatus || "Not for Sale") as UserHorseInsert["trade_status"],
         life_stage: data.lifeStage || "completed",
     };
 

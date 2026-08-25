@@ -68,6 +68,24 @@ describe("horse.ts — CRUD", () => {
             expect(result.horseId).toBe("horse-1");
         });
 
+        it("defaults trade_status to Not for Sale when the caller omits it", async () => {
+            // Quick Add sends no tradeStatus; the column is NOT NULL and an
+            // explicit null overrides any column default, so this insert
+            // died on the constraint in production (MHI, 2026-08-26).
+            mockClient._mockQuery.single.mockResolvedValueOnce({
+                data: { id: "horse-1" },
+                error: null,
+            });
+            await createHorseRecord({
+                customName: "Gazal Paris",
+                finishType: "Custom",
+                isPublic: true,
+            });
+            expect(mockClient._mockQuery.insert).toHaveBeenCalledWith(
+                expect.objectContaining({ trade_status: "Not for Sale" }),
+            );
+        });
+
         it("calls sanitizeText on name", async () => {
             const { sanitizeText } = await import("@/lib/utils/validation");
             mockClient._mockQuery.single.mockResolvedValueOnce({
