@@ -74,10 +74,15 @@ export default function RootLayout({
  <html lang="en" data-simple-mode="false" className={`${inter.variable} ${playfair.variable}`} suppressHydrationWarning>
  <head>
  {/* Lamplight night mode: stamp data-theme before first paint so a
-     persisted night preference never flashes daylight (ThemeToggle). */}
+     persisted night preference never flashes daylight (ThemeToggle).
+     With NO stored choice, follow the OS dark-mode preference — the
+     stored choice is per-browser, so without this every new device
+     or profile opened in daylight regardless of the visitor's system
+     setting ("my browser keeps defaulting to light"). An explicit
+     toggle to day still sticks as day on a dark OS. */}
  <script
  dangerouslySetInnerHTML={{
- __html: `try{if(localStorage.getItem("mhh-theme")==="night"){document.documentElement.dataset.theme="night"}}catch(e){}`,
+ __html: `try{var t=localStorage.getItem("mhh-theme");if(t==="night"||(!t&&matchMedia("(prefers-color-scheme: dark)").matches)){document.documentElement.dataset.theme="night"}}catch(e){}`,
  }}
  />
  {/* Consent gate BEFORE the GA loader: a stored decline sets the
