@@ -90,6 +90,7 @@ export default async function ReferencePage({
             medium: filters.medium,
             material: filters.material,
             runType: filters.runType,
+            priced: filters.priced,
             sortBy,
             sortDir,
             page: filters.page,
