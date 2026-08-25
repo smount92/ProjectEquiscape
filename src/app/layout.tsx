@@ -10,6 +10,7 @@ import Header from"@/components/Header";
 import AnnouncementSlot from"@/components/AnnouncementSlot";
 import Footer from"@/components/Footer";
 import { Analytics } from"@vercel/analytics/next";
+import { SpeedInsights } from"@vercel/speed-insights/next";
 import BackToTop from"@/components/BackToTop";
 import CookieConsent from"@/components/CookieConsent";
 import OfflineIndicator from"@/components/OfflineIndicator";
@@ -117,6 +118,7 @@ export default function RootLayout({
      needed. Runs alongside GA for now; retire GA once the Vercel
      data satisfies (owner decision). */}
  <Analytics />
+ <SpeedInsights />
  </NotificationProvider>
  </ToastProvider>
  </SimpleModeProvider>
