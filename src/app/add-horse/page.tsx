@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { useState, useEffect, useRef } from"react";
 import { useRouter, useSearchParams } from"next/navigation";
 import Link from"next/link";
@@ -1940,6 +1941,18 @@ function LegacyAddHorsePage() {
  * The legacy component above stays until the engine has soaked. Deleting
  * it is a separate, deliberate change.
  */
-export default function AddHorsePage() {
+function AddHorseInner() {
  return formEngineEnabled() ? <AddHorseEngine /> : <LegacyAddHorsePage />;
+}
+
+// Suspense wrapper: this page reads useSearchParams(), and without a
+// boundary that bails the whole static build ("missing-suspense-with-
+// csr-bailout"). The root loading.tsx used to mask this site-wide; now
+// the boundary is explicit and local.
+export default function AddHorsePage() {
+    return (
+        <Suspense fallback={null}>
+            <AddHorseInner />
+        </Suspense>
+    );
 }

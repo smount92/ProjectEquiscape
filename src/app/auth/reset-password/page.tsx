@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { useState, useEffect } from"react";
 import { useRouter, useSearchParams } from"next/navigation";
 import { createClient } from"@/lib/supabase/client";
@@ -8,7 +9,7 @@ import FocusLayout from"@/components/layouts/FocusLayout";
 import PageMasthead from"@/components/layouts/PageMasthead";
 import { Button } from "@/components/ui/button";
 
-export default function ResetPasswordPage() {
+function ResetPasswordInner() {
  const router = useRouter();
  const searchParams = useSearchParams();
  const supabase = createClient();
@@ -184,4 +185,16 @@ export default function ResetPasswordPage() {
   </div>
  </FocusLayout>
  );
+}
+
+// Suspense wrapper: this page reads useSearchParams(), and without a
+// boundary that bails the whole static build ("missing-suspense-with-
+// csr-bailout"). The root loading.tsx used to mask this site-wide; now
+// the boundary is explicit and local.
+export default function ResetPasswordPage() {
+    return (
+        <Suspense fallback={null}>
+            <ResetPasswordInner />
+        </Suspense>
+    );
 }
