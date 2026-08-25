@@ -61,13 +61,13 @@ export async function reportWrongModelMatch(input: {
                     .eq("id", catalogItemId)
                     .maybeSingle();
                 const title = (item as { title: string } | null)?.title ?? "a catalog entry";
-                const { data: admins } = await admin
-                    .from("users")
-                    .select("id")
-                    .eq("role", "admin");
-                for (const a of (admins ?? []) as { id: string }[]) {
+                const { adminNotificationTargets } = await import(
+                    "@/lib/notifications/adminTargets"
+                );
+                const adminIds = await adminNotificationTargets(admin);
+                for (const id of adminIds) {
                     await createNotification({
-                        userId: a.id,
+                        userId: id,
                         type: "system",
                         actorId: reporterId,
                         content: `🚩 eBay price signal reported as WRONG MODEL on "${title}"${note ? ` — "${note}"` : ""}. The signal is hidden and the model is off the sweep until resolved.`,

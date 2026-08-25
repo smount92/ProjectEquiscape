@@ -74,7 +74,7 @@ const MODEL_GALLERY: GallerySlot[] = [
   { angle: "Right_Side", label: "Off-Side" },
   { angle: "Front_Chest", label: "Front / Chest" },
   { angle: "Back_Hind", label: "Hindquarters / Tail" },
-  { angle: "Belly_Makers_Mark", label: "Belly / Maker's Mark" },
+  { angle: "Belly_Makers_Mark", label: "Identifying Marks & Logos" },
 ];
 
 const TACK_GALLERY: GallerySlot[] = [

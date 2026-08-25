@@ -113,7 +113,7 @@ export default function GettingStartedPage() {
                         </p>
                         <p>
                             Photos: five standard angles on every account — near side, off side,
-                            front, hindquarters, belly and maker&apos;s mark — plus five{" "}
+                            front, hindquarters, and identifying marks and logos — plus five{" "}
                             <strong>flaw photos</strong> for rubs and chips, also free on every
                             tier. Documenting damage honestly is the whole point, so it is never
                             something you have to pay for. Pro adds up to thirty extra detail shots.

@@ -465,17 +465,16 @@ export async function createSuggestion(input: SuggestionInput) {
                 const { createNotification } = await import(
                     "@/lib/notifications/createNotification"
                 );
-                const adminClient = getAdminClient();
-                const { data: admins } = await adminClient
-                    .from("users")
-                    .select("id")
-                    .eq("role", "admin");
+                const { adminNotificationTargets } = await import(
+                    "@/lib/notifications/adminTargets"
+                );
+                const adminIds = await adminNotificationTargets(getAdminClient());
                 const content = wasAutoApproved
                     ? `⚡ Auto-applied: @${alias} changed ${changedKeys || "an entry"} — already live. Review or revert.`
                     : `📝 New catalog suggestion from @${alias}: "${reason.slice(0, 80)}${reason.length > 80 ? "…" : ""}"`;
-                for (const a of (admins ?? []) as { id: string }[]) {
+                for (const id of adminIds) {
                     await createNotification({
-                        userId: a.id,
+                        userId: id,
                         type: "system",
                         actorId: userId,
                         content,

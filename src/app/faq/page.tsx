@@ -132,7 +132,7 @@ const FAQ_SECTIONS: FaqSection[] = [
             },
             {
                 q: "How many photos can I upload per horse?",
-                a: "Five standard angles on every account — near side, off side, front, hindquarters, and belly or maker's mark — plus five flaw photos for rubs, chips and repairs. Flaw photos are free on every tier and always will be: documenting damage honestly is the point, and charging for it would make condition grades worth less. MHH Pro adds up to thirty extra detail shots per horse for close-ups and markings.",
+                a: "Five standard angles on every account — near side, off side, front, hindquarters, and identifying marks and logos — plus five flaw photos for rubs, chips and repairs. Flaw photos are free on every tier and always will be: documenting damage honestly is the point, and charging for it would make condition grades worth less. MHH Pro adds up to thirty extra detail shots per horse for close-ups and markings.",
             },
             {
                 q: "Can anyone see what I paid for a horse?",

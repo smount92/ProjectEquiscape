@@ -21,7 +21,7 @@ const ANGLE_LABELS: Record<string, string> = {
  Right_Side:"Off-Side",
  Front_Chest:"Front / Chest",
  Back_Hind:"Hindquarters",
- Belly_Makers_Mark:"Belly / Mark",
+ Belly_Makers_Mark:"Marks / Logos",
  Detail_Face_Eyes:"Face & Eyes",
  Detail_Ears:"Ears",
  Detail_Hooves:"Hooves",
