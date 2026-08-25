@@ -112,7 +112,13 @@ export async function generateStaticParams(): Promise<{ maker: string; slug: str
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { maker, slug } = await params;
     const item = await resolveReferenceItem(maker, slug);
-    if (!item) return { title: "Model Not Found" };
+    // notFound() HERE, not just in the page body: metadata resolves
+    // before the response head flushes, so this is what makes a missing
+    // model a real HTTP 404. The page-body notFound() alone produced a
+    // soft-404 (200 + "Model Not Found") on every bad slug in
+    // production — poison for exactly the Google crawl traffic the
+    // reference pages exist to catch.
+    if (!item) notFound();
 
     const attrs = item.attributes ?? {};
     const year = attrs.release_year_start ? ` (${attrs.release_year_start})` : "";

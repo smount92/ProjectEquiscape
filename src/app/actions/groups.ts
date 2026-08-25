@@ -93,12 +93,38 @@ async function fetchBarnPostStats(
 ): Promise<Map<string, { postCount: number; lastPostAt: string | null }>> {
     const stats = new Map<string, { postCount: number; lastPostAt: string | null }>();
     if (groupIds.length === 0) return stats;
+
+    // Public barns first, via the DEFINER aggregate (198): post counts
+    // are not content, and computing them under posts RLS showed every
+    // non-member "0 posts" on every barn — a directory of empty rooms.
+    // Tolerant pre-198: the RPC is simply absent and the RLS-scoped
+    // query below carries everything, which is the old behavior.
+    try {
+        const rpc = supabase.rpc.bind(supabase) as unknown as (
+            fn: string,
+            args: { p_group_ids: string[] },
+        ) => Promise<{ data: { group_id: string; post_count: number; last_post_at: string | null }[] | null }>;
+        const { data: pub } = await rpc("get_barn_post_stats", { p_group_ids: groupIds });
+        for (const row of pub ?? []) {
+            stats.set(row.group_id, {
+                postCount: Number(row.post_count) || 0,
+                lastPostAt: row.last_post_at,
+            });
+        }
+    } catch {
+        /* pre-198 */
+    }
+
+    // Private barns (and everything, pre-198) via the caller's own RLS:
+    // members see their private boards' stats, outsiders don't.
+    const remaining = groupIds.filter((id) => !stats.has(id));
+    if (remaining.length === 0) return stats;
     try {
         const { data } = await supabase
             .from("posts")
             .select("group_id, replies_count, bumped_at, created_at")
             .is("parent_id", null)
-            .in("group_id", groupIds);
+            .in("group_id", remaining);
         for (const row of (data ?? []) as {
             group_id: string; replies_count: number | null;
             bumped_at: string | null; created_at: string;
