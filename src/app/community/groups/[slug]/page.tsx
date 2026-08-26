@@ -66,7 +66,7 @@ export default async function GroupDetailPage({ params }: { params: Promise<{ sl
                     <img
                         src={group.bannerUrl}
                         alt=""
-                        className="border-input mb-4 h-40 w-full rounded-xl border object-cover shadow-sm"
+                        className="border-input mb-4 aspect-[4/1] h-auto w-full rounded-xl border object-cover shadow-sm"
                     />
                 )}
                 <GroupMasthead

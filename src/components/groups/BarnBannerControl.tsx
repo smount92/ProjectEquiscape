@@ -4,6 +4,7 @@ import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { setGroupBanner, uploadGroupBanner } from "@/app/actions/groups";
 import { useToast } from "@/lib/context/ToastContext";
+import BannerCropModal from "@/components/groups/BannerCropModal";
 
 /**
  * BarnBannerControl — owner/admin control to set, change or remove a
@@ -21,6 +22,7 @@ export default function BarnBannerControl({
     const { toast } = useToast();
     const fileRef = useRef<HTMLInputElement>(null);
     const [busy, setBusy] = useState(false);
+    const [pendingFile, setPendingFile] = useState<File | null>(null);
     const [, startTransition] = useTransition();
 
     const handleFile = async (file: File) => {
@@ -64,10 +66,21 @@ export default function BarnBannerControl({
                 className="hidden"
                 onChange={(e) => {
                     const f = e.target.files?.[0];
-                    if (f) void handleFile(f);
+                    // Crop first, upload the framed result (4:1 WYSIWYG).
+                    if (f) setPendingFile(f);
                     e.target.value = "";
                 }}
             />
+            {pendingFile && (
+                <BannerCropModal
+                    file={pendingFile}
+                    onCancel={() => setPendingFile(null)}
+                    onCropped={(cropped) => {
+                        setPendingFile(null);
+                        void handleFile(cropped);
+                    }}
+                />
+            )}
             <button
                 type="button"
                 className="text-muted-foreground hover:text-foreground underline disabled:opacity-50"

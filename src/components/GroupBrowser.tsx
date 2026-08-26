@@ -143,10 +143,13 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
                                     tabIndex={-1}
                                 >
                                     {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    {/* aspect-[4/1] matches the barn page and the
+                                        crop frame: same ratio everywhere = the
+                                        same slice of the image everywhere. */}
                                     <img
                                         src={g.bannerUrl}
                                         alt=""
-                                        className="h-28 w-full object-cover"
+                                        className="aspect-[4/1] h-auto w-full object-cover"
                                         loading="lazy"
                                     />
                                 </Link>

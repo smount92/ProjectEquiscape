@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createGroup, uploadGroupBanner } from "@/app/actions/groups";
+import BannerCropModal from "@/components/groups/BannerCropModal";
 
 import { GROUP_TYPE_LABELS } from "@/lib/constants/groups";
 import { Input } from "@/components/ui/input";
@@ -31,6 +32,7 @@ export default function CreateGroupPage() {
     const [bannerPath, setBannerPath] = useState<string | null>(null);
     const [bannerPreview, setBannerPreview] = useState<string | null>(null);
     const [bannerBusy, setBannerBusy] = useState(false);
+    const [pendingBannerFile, setPendingBannerFile] = useState<File | null>(null);
     const [error, setError] = useState("");
 
     function autoSlug(value: string) {
@@ -163,7 +165,7 @@ export default function CreateGroupPage() {
                         <img
                             src={bannerPreview}
                             alt="Banner preview"
-                            className="border-input mb-2 h-28 w-full rounded-md border object-cover"
+                            className="border-input mb-2 aspect-[4/1] h-auto w-full rounded-md border object-cover"
                         />
                     )}
                     <input
@@ -172,23 +174,36 @@ export default function CreateGroupPage() {
                         accept="image/*"
                         disabled={bannerBusy}
                         className="text-sm"
-                        onChange={async (e) => {
+                        onChange={(e) => {
                             const file = e.target.files?.[0];
-                            if (!file) return;
-                            setBannerBusy(true);
-                            setError("");
-                            const fd = new FormData();
-                            fd.set("banner", file);
-                            const up = await uploadGroupBanner(fd);
-                            if (up.success && up.path) {
-                                setBannerPath(up.path);
-                                setBannerPreview(up.url ?? null);
-                            } else {
-                                setError(up.error || "Could not upload that image.");
-                            }
-                            setBannerBusy(false);
+                            // Crop first — the upload is the framed 4:1 result.
+                            if (file) setPendingBannerFile(file);
+                            e.target.value = "";
                         }}
                     />
+                    {pendingBannerFile && (
+                        <BannerCropModal
+                            file={pendingBannerFile}
+                            onCancel={() => setPendingBannerFile(null)}
+                            onCropped={(cropped) => {
+                                setPendingBannerFile(null);
+                                void (async () => {
+                                    setBannerBusy(true);
+                                    setError("");
+                                    const fd = new FormData();
+                                    fd.set("banner", cropped);
+                                    const up = await uploadGroupBanner(fd);
+                                    if (up.success && up.path) {
+                                        setBannerPath(up.path);
+                                        setBannerPreview(up.url ?? null);
+                                    } else {
+                                        setError(up.error || "Could not upload that image.");
+                                    }
+                                    setBannerBusy(false);
+                                })();
+                            }}
+                        />
+                    )}
                     <small className="text-muted-foreground mt-1 block">
                         Shown across the top of your barn&rsquo;s card. Under 3MB.
                     </small>
