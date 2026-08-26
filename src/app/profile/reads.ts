@@ -65,6 +65,21 @@ export async function fetchProfileCustomization(
     client: SupabaseClient,
     userId: string,
 ): Promise<ProfileCustomization> {
+    // DEFINER read first (199): users has no anon SELECT policy, so the
+    // direct column read below returns nothing for logged-out visitors —
+    // a member's banner and tagline existed only for logged-in viewers
+    // (MHI caught it by signing out). The RPC serves exactly the payload
+    // the member designed for their public page, to everyone.
+    try {
+        const rpc = client.rpc.bind(client) as unknown as (
+            fn: string,
+            args: { p_user_id: string },
+        ) => Promise<{ data: unknown; error: { message?: string } | null }>;
+        const { data, error } = await rpc("get_profile_customization", { p_user_id: userId });
+        if (!error && data) return sanitizeCustomization(data);
+    } catch {
+        /* pre-199 — fall through to the direct read */
+    }
     try {
         const { data, error } = await loose(client)
             .from("users")
