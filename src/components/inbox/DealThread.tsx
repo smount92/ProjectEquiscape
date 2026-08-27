@@ -272,8 +272,12 @@ export default function DealThread({
 
     return (
         <>
-            {/* The stream */}
-            <div className="bg-card border-input mb-4 flex flex-1 flex-col gap-2 overflow-y-auto rounded-lg border p-4">
+            {/* The stream. min-h-[50dvh]: messages arrive client-side, and
+                without a floor this container renders collapsed then snaps
+                open when they land — Vercel measured it as a 0.42 layout
+                shift on mobile (this exact selector). The floor holds the
+                thread's space through the load. */}
+            <div className="bg-card border-input mb-4 flex min-h-[50dvh] flex-1 flex-col gap-2 overflow-y-auto rounded-lg border p-4">
                 {messages.length === 0 ? (
                     <div className="text-muted-foreground flex flex-1 flex-col items-center justify-center gap-2 py-12 text-center">
                         <div className="text-5xl opacity-50">💬</div>
