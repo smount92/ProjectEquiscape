@@ -1228,6 +1228,7 @@ function LegacyAddHorsePage() {
  </div>
 
  <UnifiedReferenceSearch
+ finishType={finishType || null}
  selectedCatalogId={selectedCatalogId}
  onCatalogSelect={(id, item) => {
  setSelectedCatalogId(id);

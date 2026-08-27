@@ -291,6 +291,7 @@ function LegacyQuickAddPage() {
  <div className="mb-6">
  <label className="text-foreground mb-1 block text-sm font-semibold">🔍 Search Catalog</label>
  <UnifiedReferenceSearch
+ finishType={finishType || null}
  selectedCatalogId={selectedCatalog?.id || null}
  onCatalogSelect={(catalogId, item) => {
  setSelectedCatalog(item);

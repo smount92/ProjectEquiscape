@@ -286,6 +286,7 @@ export default function QuickAddEngine() {
                     </LeafHeading>
 
                     <UnifiedReferenceSearch
+                        finishType={String(form.values.finish_type ?? "") || null}
                         selectedCatalogId={reference?.id ?? null}
                         onCatalogSelect={(_id, item) => {
                             setReference(item);

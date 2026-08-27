@@ -455,6 +455,7 @@ export default function EditHorseEngine() {
                             Reference Link
                         </LeafHeading>
                         <UnifiedReferenceSearch
+                            finishType={String(form.values.finish_type ?? "") || null}
                             selectedCatalogId={(form.values.catalog_id as string) ?? null}
                             onCatalogSelect={(id, item) => {
                                 form.setValue("catalog_id", id ?? "");

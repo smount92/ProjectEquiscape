@@ -5,6 +5,7 @@ import Link from"next/link";
 import MarketValueBadge from"@/components/MarketValueBadge";
 import { getPublicImageUrls } from"@/lib/utils/storage";
 import PassportGallery from"@/components/PassportGallery";
+import RegistryLink from "@/components/catalog/RegistryLink";
 import VaultReveal from"@/components/VaultReveal";
 import DeleteHorseModal from"@/components/DeleteHorseModal";
 import ShowRecordTimeline from"@/components/ShowRecordTimeline";
@@ -94,7 +95,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
   id, owner_id, custom_name, finish_type, condition_grade, asset_category, attributes,
   is_for_sale, is_public, visibility, created_at, sculptor, finishing_artist, finishing_artist_verified, edition_number, edition_size, catalog_id, trade_status,
  finish_details, public_notes, assigned_breed, assigned_gender, assigned_age, regional_id,
- catalog_items:catalog_id(title, maker, scale, item_type, attributes)
+ catalog_items:catalog_id(title, maker, scale, item_type, attributes, maker_slug, slug)
  `,
  )
  .eq("id", horseId)
@@ -339,6 +340,17 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
 
  // Reference display info
  const cat = horse.catalog_items;
+ // The registry door: every place this card names the catalog entry
+ // links to its reference page (RegistryLink).
+ const registryItem = cat && horse.catalog_id
+ ? {
+ id: horse.catalog_id as string,
+ maker: cat.maker,
+ title: cat.title,
+ maker_slug: (cat as { maker_slug?: string | null }).maker_slug ?? null,
+ slug: (cat as { slug?: string | null }).slug ?? null,
+ }
+ : null;
  const attrs = (cat?.attributes ?? {}) as Record<string, unknown>;
  const refInfo = cat
  ? {
@@ -418,7 +430,14 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  </h1>
  {refInfo ? (
  <p className="mb-1 text-base text-secondary-foreground">
- {refInfo.maker} — {refInfo.name}
+ {refInfo.maker} —{" "}
+ {registryItem ? (
+ <RegistryLink item={registryItem} className="text-secondary-foreground decoration-border-tan/60 hover:text-foreground underline underline-offset-2">
+ {refInfo.name}
+ </RegistryLink>
+ ) : (
+ refInfo.name
+ )}
  </p>
  ) : (
  <p
@@ -484,7 +503,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  {refInfo.type}
  </span>
  <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
- {refInfo.name}
+ {registryItem ? <RegistryLink item={registryItem}>{refInfo.name}</RegistryLink> : refInfo.name}
  </span>
  </div>
 
@@ -516,6 +535,14 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  </span>
  </div>
  )}
+
+ {registryItem && (
+ <div className="flex items-center justify-end px-0 py-3">
+ <RegistryLink item={registryItem} className="text-forest text-sm font-semibold hover:underline">
+ View in Registry {"→"}
+ </RegistryLink>
+ </div>
+ )}
  </>
  ) : (
               <div className="flex items-center justify-between border-b border-dashed border-border-tan/20 px-0 py-3 last:border-0">
@@ -537,7 +564,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  Release
  </span>
  <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
- {releaseInfo.name}
+ {registryItem ? <RegistryLink item={registryItem}>{releaseInfo.name}</RegistryLink> : releaseInfo.name}
  </span>
  </div>
 

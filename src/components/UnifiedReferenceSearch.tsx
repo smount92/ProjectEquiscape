@@ -3,6 +3,12 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { searchCatalogAction, getReleasesForMold, getCatalogItem, type CatalogItem } from "@/app/actions/reference";
 import MarketValueBadge from "@/components/MarketValueBadge";
+import {
+  applyTypeFilter,
+  rankSearchResults,
+  SEARCH_TYPE_FILTERS,
+  type SearchTypeFilterKey,
+} from "@/lib/catalog/searchRank";
 import SuggestNewEntryForm from "@/components/SuggestNewEntryForm";
 import {
   Dialog,
@@ -23,6 +29,10 @@ interface UnifiedReferenceSearchProps {
   onCustomEntry?: (searchTerm: string) => void;
   externalSearchQuery?: string;
   aiNotice?: React.ReactNode;
+  /** The finish the member has declared for the horse being linked.
+   *  Used to FLOAT matching catalog types (resin horse → resin entries),
+   *  never to hide anything — customs legitimately link to OF plastic. */
+  finishType?: string | null;
 }
 
 /* ------------------------------------------------------------------ */
@@ -33,7 +43,15 @@ const TYPE_BADGES: Record<string, { icon: string; label: string }> = {
   plastic_mold: { icon: "\u{1F3ED}", label: "Mold" },
   plastic_release: { icon: "\u{1F4E6}", label: "Release" },
   artist_resin: { icon: "\u{1F3A8}", label: "Resin" },
+  factory_resin: { icon: "\u{1F3A8}", label: "Factory Resin" },
+  china: { icon: "\u{1F3FA}", label: "China" },
+  micro_mini: { icon: "\u{1F40E}", label: "Micro Mini" },
+  medallion: { icon: "\u{1F947}", label: "Medallion" },
+  tack: { icon: "\u{1F9F5}", label: "Tack" },
+  prop: { icon: "\u{1F9F1}", label: "Prop" },
+  diorama: { icon: "\u{1F3DE}", label: "Diorama" },
 };
+const FALLBACK_BADGE = { icon: "\u{1F4C4}", label: "Entry" };
 
 /* ------------------------------------------------------------------ */
 /* Component                                                          */
@@ -45,6 +63,7 @@ export default function UnifiedReferenceSearch({
   onCustomEntry,
   externalSearchQuery,
   aiNotice,
+  finishType,
 }: UnifiedReferenceSearchProps) {
   const [query, setQuery] = useState("");
   const [showSuggestModal, setShowSuggestModal] = useState(false);
@@ -57,6 +76,7 @@ export default function UnifiedReferenceSearch({
   const [isSearching, setIsSearching] = useState(false);
   const [loadingReleases, setLoadingReleases] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [typeFilter, setTypeFilter] = useState<SearchTypeFilterKey>("all");
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -149,12 +169,15 @@ export default function UnifiedReferenceSearch({
     onCatalogSelect(null, null);
   };
 
-  // Group results by type for display
-  const molds = results.filter((r) => r.itemType === "plastic_mold");
-  const releaseResults = results.filter((r) => r.itemType === "plastic_release");
-  const resins = results.filter((r) => r.itemType === "artist_resin");
-  const hasResults = results.length > 0;
-  const noResults = query.trim().length >= 2 && !isSearching && !hasResults;
+  // ONE relevance-ordered list — never sectioned by type. The old
+  // fixed sections (Molds, Releases, Resins last) buried exact matches
+  // under fuzzy plastic and silently dropped every other item type.
+  // Ranking: exact title > prefix > RPC similarity, with the declared
+  // finish floating its own kind within each tier (searchRank.ts).
+  const ranked = rankSearchResults(results, query, finishType);
+  const visible = applyTypeFilter(ranked, typeFilter);
+  const hasResults = visible.length > 0;
+  const noResults = query.trim().length >= 2 && !isSearching && results.length === 0;
 
   return (
     <div className="relative" ref={containerRef}>
@@ -246,87 +269,74 @@ export default function UnifiedReferenceSearch({
                 </div>
               ) : (
                 <>
-                  {/* Molds */}
-                  {molds.length > 0 && (
-                    <>
-                      <div className="sticky top-0 z-40 flex items-center gap-1.5 border-b border-input bg-muted px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        <span>{"\u{1F3ED}"}</span> Base Molds
-                      </div>
-                      {molds.map((item) => (
+                  {/* Type filter chips — the manual override. Counts
+                      come from the full ranked set so a chip never lies
+                      about what it would show. */}
+                  <div className="sticky top-0 z-40 flex items-center gap-1.5 border-b border-input bg-muted px-3 py-1.5">
+                    {SEARCH_TYPE_FILTERS.map((f) => {
+                      const count = applyTypeFilter(ranked, f.key).length;
+                      return (
                         <button
-                          key={item.id}
-                          className="group flex w-full cursor-pointer items-center gap-3 border-0 border-b border-input bg-transparent px-4 py-2.5 text-left transition-colors last:border-b-0 hover:bg-success/10"
-                          onClick={() => handleMoldClick(item)}
+                          key={f.key}
+                          type="button"
+                          onClick={() => setTypeFilter(f.key)}
+                          className={
+                            typeFilter === f.key
+                              ? "rounded-full bg-forest px-2.5 py-0.5 text-xs font-semibold text-white"
+                              : "rounded-full border border-input bg-transparent px-2.5 py-0.5 text-xs text-muted-foreground hover:text-foreground"
+                          }
                         >
-                          <div className="min-w-0 flex-1">
-                            <div className="text-sm font-semibold text-foreground">{item.title}</div>
-                            <div className="mt-0.5 text-xs text-muted-foreground">
-                              {item.maker}{item.scale ? ` ${"\u00B7"} ${item.scale}` : ""}
-                            </div>
-                          </div>
-                          <span className="shrink-0 rounded-full bg-forest/10 px-2.5 py-1 text-xs font-semibold text-forest transition-colors group-hover:bg-forest group-hover:text-white">
-                            {"\u25B8"} Releases
-                          </span>
+                          {f.label}{f.key === "all" ? "" : ` (${count})`}
                         </button>
-                      ))}
-                    </>
-                  )}
+                      );
+                    })}
+                  </div>
 
-                  {/* Releases */}
-                  {releaseResults.length > 0 && (
-                    <>
-                      <div className="sticky top-0 z-40 flex items-center gap-1.5 border-b border-input bg-muted px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        <span>{"\u{1F4E6}"}</span> Releases
-                      </div>
-                      {releaseResults.map((item) => (
-                        <button
-                          key={item.id}
-                          className="group flex w-full cursor-pointer items-center gap-3 border-0 border-b border-input bg-transparent px-4 py-2.5 text-left transition-colors last:border-b-0 hover:bg-success/10"
-                          onClick={() => handleSelect(item)}
-                        >
-                          <div className="min-w-0 flex-1">
-                            <div className="text-sm font-semibold text-foreground">
-                              {item.title}
-                              {!!item.attributes.model_number && (
-                                <span className="ml-1 font-normal text-muted-foreground">
-                                  #{String(item.attributes.model_number)}
-                                </span>
-                              )}
-                            </div>
-                            <div className="mt-0.5 text-xs text-muted-foreground">{item.maker}</div>
+                  {/* ONE list in relevance order; type is a badge, not a
+                      hierarchy. Exact matches surface first no matter what
+                      kind of model they are. */}
+                  {visible.map((item) => {
+                    const badge = TYPE_BADGES[item.itemType] ?? FALLBACK_BADGE;
+                    const isMold = item.itemType === "plastic_mold";
+                    return (
+                      <button
+                        key={item.id}
+                        className="group flex w-full cursor-pointer items-center gap-3 border-0 border-b border-input bg-transparent px-4 py-2.5 text-left transition-colors last:border-b-0 hover:bg-success/10"
+                        onClick={() => (isMold ? handleMoldClick(item) : handleSelect(item))}
+                      >
+                        <span className="shrink-0 text-base" aria-hidden="true">{badge.icon}</span>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-sm font-semibold text-foreground">
+                            {item.title}
+                            {!!item.attributes.model_number && (
+                              <span className="ml-1 font-normal text-muted-foreground">
+                                #{String(item.attributes.model_number)}
+                              </span>
+                            )}
                           </div>
-                          <span className="shrink-0 rounded-full bg-forest/10 px-2.5 py-1 text-xs font-semibold text-forest opacity-0 transition-all group-hover:opacity-100">
-                            Select
-                          </span>
-                        </button>
-                      ))}
-                    </>
-                  )}
+                          <div className="mt-0.5 text-xs text-muted-foreground">
+                            {badge.label} {"·"} {item.maker}{item.scale ? ` ${"·"} ${item.scale}` : ""}
+                          </div>
+                        </div>
+                        <span className={
+                          isMold
+                            ? "shrink-0 rounded-full bg-forest/10 px-2.5 py-1 text-xs font-semibold text-forest transition-colors group-hover:bg-forest group-hover:text-white"
+                            : "shrink-0 rounded-full bg-forest/10 px-2.5 py-1 text-xs font-semibold text-forest opacity-0 transition-all group-hover:opacity-100"
+                        }>
+                          {isMold ? `${"▸"} Releases` : "Select"}
+                        </span>
+                      </button>
+                    );
+                  })}
 
-                  {/* Resins */}
-                  {resins.length > 0 && (
-                    <>
-                      <div className="sticky top-0 z-40 flex items-center gap-1.5 border-b border-input bg-muted px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        <span>{"\u{1F3A8}"}</span> Artist Resins
-                      </div>
-                      {resins.map((item) => (
-                        <button
-                          key={item.id}
-                          className="group flex w-full cursor-pointer items-center gap-3 border-0 border-b border-input bg-transparent px-4 py-2.5 text-left transition-colors last:border-b-0 hover:bg-success/10"
-                          onClick={() => handleSelect(item)}
-                        >
-                          <div className="min-w-0 flex-1">
-                            <div className="text-sm font-semibold text-foreground">{item.title}</div>
-                            <div className="mt-0.5 text-xs text-muted-foreground">
-                              {item.maker}{item.scale ? ` ${"\u00B7"} ${item.scale}` : ""}
-                            </div>
-                          </div>
-                          <span className="shrink-0 rounded-full bg-forest/10 px-2.5 py-1 text-xs font-semibold text-forest opacity-0 transition-all group-hover:opacity-100">
-                            Select
-                          </span>
-                        </button>
-                      ))}
-                    </>
+                  {/* Filter emptied the list but matches exist elsewhere */}
+                  {!hasResults && results.length > 0 && (
+                    <div className="px-6 py-6 text-center text-sm text-muted-foreground">
+                      No {SEARCH_TYPE_FILTERS.find((f) => f.key === typeFilter)?.label} matches —{" "}
+                      <button type="button" className="text-forest font-medium underline" onClick={() => setTypeFilter("all")}>
+                        show all types
+                      </button>
+                    </div>
                   )}
 
                   {/* No results */}

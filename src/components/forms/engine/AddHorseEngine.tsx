@@ -430,6 +430,7 @@ export default function AddHorseEngine() {
                     {reference && <ReferenceCard item={reference} />}
 
                     <UnifiedReferenceSearch
+                        finishType={String(form.values.finish_type ?? "") || null}
                         selectedCatalogId={(form.values.catalog_id as string) ?? null}
                         onCatalogSelect={(id, item) => {
                             form.setValue("catalog_id", id ?? "");
