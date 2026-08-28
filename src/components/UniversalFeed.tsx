@@ -473,7 +473,15 @@ function PostCard({ post, currentUserId, currentUserAlias, currentUserAvatar }: 
  src={m.imageUrl}
  alt={m.caption || `Image ${i + 1}`}
  loading="lazy"
- className="border-input bg-muted h-full max-h-[340px] w-full rounded-lg border object-cover"
+ // A lone image shows at natural size — never upscaled, never
+ // cropped (MHI's 320px square was stretched to column width and
+ // letterboxed to 340px on desktop). Grids of 2-4 keep uniform
+ // square tiles, where cropping is the expected grammar.
+ className={
+ gridMedia.length === 1
+ ? "border-input bg-muted h-auto max-h-[480px] w-auto max-w-full rounded-lg border object-contain"
+ : "border-input bg-muted aspect-square h-auto w-full rounded-lg border object-cover"
+ }
  />
  ))}
  </div>
