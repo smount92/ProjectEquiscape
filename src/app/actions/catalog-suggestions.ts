@@ -956,11 +956,35 @@ export async function reviewSuggestion(decision: ReviewDecision) {
         .eq("id", decision.suggestionId);
 
     if (decision.decision === "approved") {
-        await applyApprovedSuggestion(
-            decision.suggestionId,
-            s.user_id,
-            contributorAlias
-        );
+        // Artist-targeted suggestions (200) write the artists table;
+        // everything else takes the classic catalog apply path.
+        const artistName = (suggestion as { artist_name?: string | null }).artist_name ?? null;
+        if (artistName) {
+            const change = (s.field_changes as Record<string, { to?: unknown }>)?.registry_notes;
+            const to = typeof change?.to === "string" ? change.to.trim() : "";
+            if (to) {
+                await (admin as unknown as {
+                    from: (t: string) => {
+                        upsert: (
+                            row: Record<string, unknown>,
+                            opts: { onConflict: string },
+                        ) => Promise<{ error: unknown }>;
+                    };
+                })
+                    .from("artists")
+                    .upsert(
+                        { name: artistName, registry_notes: to, updated_at: new Date().toISOString() },
+                        { onConflict: "name" },
+                    );
+                revalidateTag(REFERENCE_PAGES_CACHE_TAG, "max");
+            }
+        } else {
+            await applyApprovedSuggestion(
+                decision.suggestionId,
+                s.user_id,
+                contributorAlias
+            );
+        }
     }
 
     // Notify the suggestion author
@@ -1287,4 +1311,107 @@ export async function getTopCurators(limit: number = 5) {
         avatar_url: string | null;
         approved_suggestions_count: number;
     }[];
+}
+
+// ── Artist notes suggestions (200) ───────────────────────────────
+
+/**
+ * Suggest (or improve) an artist's Registry Notes. Rides the existing
+ * suggestion pipeline: same review queue, admin notifications, and
+ * audit trail — the only difference is that approval writes to the
+ * artists table instead of a catalog row. Pre-200 the artist_name
+ * column is missing and the member gets an honest "not yet" error.
+ */
+export async function suggestArtistNotes(input: {
+    artistName: string;
+    notes: string;
+    reason: string;
+}): Promise<{ success: boolean; error?: string }> {
+    const { supabase, user } = await requireAuth();
+
+    const artistName = sanitizeText(input.artistName ?? "").trim();
+    const notes = sanitizeText(input.notes ?? "").trim();
+    const reason = sanitizeText(input.reason ?? "").trim();
+    if (!artistName || artistName.length > 120) return { success: false, error: "Unknown artist." };
+    if (!notes || notes.length < 20) return { success: false, error: "Notes need at least a couple of sentences." };
+    if (notes.length > 4000) return { success: false, error: "Notes are capped at 4,000 characters." };
+    if (!reason || reason.length < 5) return { success: false, error: "Add a short line on where this knowledge comes from." };
+
+    // The artist must exist as a maker in the catalog — notes hang off
+    // real bodies of work, not arbitrary names.
+    const admin = getAdminClient();
+    const { count } = await admin
+        .from("catalog_items")
+        .select("id", { count: "exact", head: true })
+        .eq("maker", artistName);
+    if (!count) return { success: false, error: "No catalogued works found for that artist." };
+
+    // Current notes become the "from" so the review diff reads honestly.
+    let from = "";
+    try {
+        const { data: existing } = await (admin as unknown as {
+            from: (t: string) => {
+                select: (c: string) => {
+                    eq: (k: string, v: string) => { maybeSingle: () => Promise<{ data: { registry_notes: string | null } | null }> };
+                };
+            };
+        })
+            .from("artists")
+            .select("registry_notes")
+            .eq("name", artistName)
+            .maybeSingle();
+        from = existing?.registry_notes ?? "";
+    } catch {
+        /* pre-200: the insert below will fail with the honest error */
+    }
+
+    const { data, error } = await (supabase as unknown as {
+        from: (t: string) => {
+            insert: (row: Record<string, unknown>) => {
+                select: (c: string) => { single: () => Promise<{ data: { id: string } | null; error: { code?: string; message?: string } | null }> };
+            };
+        };
+    })
+        .from("catalog_suggestions")
+        .insert({
+            user_id: user.id,
+            catalog_item_id: null,
+            suggestion_type: "correction",
+            field_changes: { registry_notes: { from, to: notes } },
+            reason: `Artist notes — ${artistName}: ${reason}`,
+            status: "pending",
+            artist_name: artistName,
+        })
+        .select("id")
+        .single();
+    if (error || !data) {
+        if (error?.code === "PGRST204" || /artist_name/.test(error?.message ?? "")) {
+            return { success: false, error: "Artist notes aren't switched on yet — migration 200 pending." };
+        }
+        return { success: false, error: "Could not file the suggestion." };
+    }
+
+    const suggestionId = data.id;
+    const authorId = user.id;
+    after(async () => {
+        try {
+            const { createNotification } = await import("@/lib/notifications/createNotification");
+            const { adminNotificationTargets } = await import("@/lib/notifications/adminTargets");
+            const ids = await adminNotificationTargets(getAdminClient());
+            for (const id of ids) {
+                await createNotification({
+                    userId: id,
+                    type: "system",
+                    actorId: authorId,
+                    content: `📝 Artist notes suggested for ${artistName}.`,
+                    linkUrl: `/catalog/suggestions/${suggestionId}`,
+                });
+            }
+        } catch {
+            /* non-blocking */
+        }
+    });
+
+    revalidatePath("/catalog/suggestions");
+    return { success: true };
 }

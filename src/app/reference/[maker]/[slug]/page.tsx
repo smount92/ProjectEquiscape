@@ -14,9 +14,9 @@ import { createAnonClient } from "@/lib/supabase/anon";
 import {
     resolveReferenceItem,
     getActiveListingsForCatalog,
+    getMoldTimelineData,
     getCatalogPhotos,
     getCatalogCounts,
-    getChildReleases,
     getReferenceMarket,
     getReferenceMarketHistory,
 } from "@/app/actions/reference-pages";
@@ -27,6 +27,7 @@ import {
 } from "@/lib/utils/ebayAffiliate";
 import GlossaryLink from "@/components/GlossaryLink";
 import EbaySignalCard, { type EbaySignalView } from "@/components/reference/EbaySignalCard";
+import MoldTimeline from "@/components/reference/MoldTimeline";
 import { getMoldCustoms } from "@/lib/catalog/moldCustoms";
 import { deriveAttribution } from "@/lib/catalog/taxonomy";
 import ViewBeacon from "@/components/metrics/ViewBeacon";
@@ -262,14 +263,14 @@ export default async function ReferencePage({ params }: Props) {
     // Everything in parallel — all anon-safe / aggregate-only and cookie-free,
     // so this page statically generates + ISR-caches. Per-user state (the
     // "already wanted?" check) is fetched client-side by WantButton.
-    const [counts, market, marketHistory, listings, photos, childReleases, customs, ebaySignal] =
+    const [counts, market, marketHistory, listings, photos, moldTimeline, customs, ebaySignal] =
         await Promise.all([
             getCatalogCounts(item.id),
             getReferenceMarket(item.id),
             getReferenceMarketHistory(item.id),
             getActiveListingsForCatalog(item.id),
             getCatalogPhotos(item.id, 8),
-            isMold ? getChildReleases(item.id) : Promise.resolve([]),
+            isMold ? getMoldTimelineData(item.id) : Promise.resolve(null),
             isMold ? getMoldCustoms(item.id) : Promise.resolve([]),
             getEbaySignalForReference(item.id),
         ]);
@@ -361,10 +362,35 @@ export default async function ReferencePage({ params }: Props) {
         ...Object.entries(attrs)
             .filter(
                 ([k, v]) =>
-                    v != null && v !== "" && k !== "source" && k !== "source_id" && k !== "sculptor",
+                    v != null &&
+                    v !== "" &&
+                    k !== "source" &&
+                    k !== "source_id" &&
+                    k !== "sculptor" &&
+                    // Prose renders as its own section, never as a spec row.
+                    k !== "registry_notes",
             )
             .map(([k, v]) => [fmtLabel(k), fmtAttrValue(k, v)] as [string, string]),
     ];
+
+    // The annotated registry: curator-reviewed prose. Facts live in the
+    // spec rows; this is the knowledge that doesn't fit a field.
+    const registryNotes =
+        typeof attrs.registry_notes === "string" && attrs.registry_notes.trim()
+            ? attrs.registry_notes.trim()
+            : null;
+
+    // Breadcrumb structured data: Registry → maker → model. Google shows
+    // the hierarchy under the result instead of a bare URL.
+    const breadcrumbJsonLd = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Registry", item: `${APP_URL}/reference` },
+            { "@type": "ListItem", position: 2, name: item.maker, item: `${APP_URL}/reference/${item.maker_slug}` },
+            { "@type": "ListItem", position: 3, name: item.title },
+        ],
+    };
 
     return (
         <FocusLayout noHeader>
@@ -372,6 +398,10 @@ export default async function ReferencePage({ params }: Props) {
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+            />
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
             />
             <CatalogSubMasthead
                 icon={isMold ? "🗿" : "🐴"}
@@ -642,34 +672,31 @@ export default async function ReferencePage({ params }: Props) {
                     </section>
                 )}
 
-                {/* RELEASES ON THIS MOLD (mold → versions, Discogs-style) */}
-                {isMold && childReleases.length > 0 && (
+                {/* REGISTRY NOTES — the annotated registry. Community
+                    prose through the same suggest→review pipeline as every
+                    field; plain text, whitespace preserved, no markup. */}
+                {registryNotes && (
                     <section>
-                        <h2 className="mb-3 font-serif text-xl font-bold text-foreground">
-                            Releases on this mold{" "}
-                            <span className="text-sm font-normal text-muted-foreground">
-                                ({childReleases.length})
-                            </span>
+                        <h2 className="mb-1 font-serif text-xl font-bold text-foreground">
+                            Registry notes
                         </h2>
-                        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                            {childReleases.map((r) => (
-                                <Link
-                                    key={r.id}
-                                    href={referenceHref({
-                                        id: r.id,
-                                        maker: item.maker,
-                                        title: r.title,
-                                        maker_slug: r.makerSlug,
-                                        slug: r.slug,
-                                    })}
-                                    className="flex flex-col rounded-lg border border-input bg-card px-4 py-3 no-underline transition-colors hover:border-forest"
-                                >
-                                    <span className="font-semibold text-foreground">{r.title}</span>
-                                    {r.color && <span className="text-sm text-muted-foreground">{r.color}</span>}
-                                </Link>
-                            ))}
+                        <p className="mb-2 text-xs text-muted-foreground">
+                            Written by the community, reviewed by curators.{" "}
+                            <Link href={`/catalog/${item.id}?suggest=true`} className="text-forest hover:underline">
+                                Improve these notes →
+                            </Link>
+                        </p>
+                        <div className="rounded-xl border border-input bg-card px-5 py-4 text-[0.95rem] leading-relaxed whitespace-pre-line text-secondary-foreground">
+                            {registryNotes}
                         </div>
                     </section>
+                )}
+
+                {/* RELEASES ON THIS MOLD — the Ledger timeline (decade
+                    shelves, variation folds, price chips, undated shelf).
+                    Replaced the alphabetical grid, which capped at 60. */}
+                {isMold && moldTimeline && (
+                    <MoldTimeline data={moldTimeline} maker={item.maker} />
                 )}
 
                 {/* CUSTOMS OF THIS MOLD (Taxonomy v2 — customs are horses,

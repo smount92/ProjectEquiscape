@@ -88,6 +88,12 @@ export const CATALOG_EDITABLE_FIELDS: readonly EditableField[] = [
     { key: "breed", label: "Breed", kind: "text",
       help: "Free text on purpose — there is no closed breed list good enough to lock you into." },
     { key: "gender", label: "Gender", kind: "select", options: CATALOG_GENDERS },
+    // The annotated-registry field: stories live here, facts live in the
+    // fields above. Deliberately NOT in SILVER_AUTO_FIELDS — prose is
+    // always reviewed by a human before it goes live.
+    { key: "registry_notes", label: "Registry notes", kind: "textarea",
+      placeholder: "Identification tips, variations lore, the story of this model…",
+      help: "A few short paragraphs in your own words. Facts like years and numbers belong in the fields above — this is for the knowledge that doesn't fit a field." },
 ];
 
 /**

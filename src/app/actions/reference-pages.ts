@@ -253,3 +253,213 @@ export const getReferenceMarketHistory = unstable_cache(
     ["reference:market-history"],
     { revalidate: REVALIDATE, tags: [REFERENCE_PAGES_CACHE_TAG] },
 );
+
+// ── The Ledger: mold timeline ────────────────────────────────────
+
+import {
+    buildArtistCareer,
+    buildMoldTimeline,
+    type ArtistCareer,
+    type MoldTimeline,
+} from "@/lib/catalog/timeline";
+
+export interface MoldTimelineData {
+    timeline: MoldTimeline;
+    /** catalog id → live asking median (flag-aware). Plain object — this
+     *  return passes through unstable_cache serialization. */
+    medians: Record<string, number>;
+    /** catalog id → community photo thumbnail URL. */
+    thumbs: Record<string, string>;
+}
+
+/**
+ * Everything the Ledger needs for one mold: ALL child releases (the old
+ * releases grid capped at 60 and sorted alphabetically — a timeline
+ * cannot), their price signals, and community thumbs. Shaped by the
+ * pure builder in lib/catalog/timeline.
+ */
+export const getMoldTimelineData = unstable_cache(
+    async (moldId: string): Promise<MoldTimelineData> => {
+        const supabase = createAnonClient();
+        const rows: {
+            id: string;
+            title: string;
+            maker_slug: string | null;
+            slug: string | null;
+            attributes: Record<string, unknown> | null;
+        }[] = [];
+        // Paginated: PostgREST caps one request at 1,000 rows, and this
+        // codebase has been bitten by that cap five separate times.
+        for (let from = 0; from < 5000; from += 1000) {
+            const { data } = await supabase
+                .from("catalog_items")
+                .select("id, title, maker_slug, slug, attributes")
+                .eq("parent_id", moldId)
+                .eq("item_type", "plastic_release")
+                .range(from, from + 999);
+            const page = (data ?? []) as unknown as typeof rows;
+            rows.push(...page);
+            if (page.length < 1000) break;
+        }
+
+        const timeline = buildMoldTimeline(
+            rows.map((r) => ({
+                id: r.id,
+                title: r.title,
+                makerSlug: r.maker_slug,
+                slug: r.slug,
+                attributes: r.attributes,
+            })),
+        );
+
+        const ids = rows.map((r) => r.id);
+        const medians: Record<string, number> = {};
+        const thumbs: Record<string, string> = {};
+        if (ids.length > 0) {
+            try {
+                const sig = supabase as unknown as {
+                    from: (t: string) => {
+                        select: (c: string) => {
+                            in: (k: string, v: string[]) => PromiseLike<{ data: Record<string, unknown>[] | null }> & {
+                                eq: (k2: string, v2: string) => PromiseLike<{ data: Record<string, unknown>[] | null }>;
+                            };
+                        };
+                    };
+                };
+                const [{ data: sigs }, { data: flags }] = await Promise.all([
+                    sig.from("catalog_price_signals").select("catalog_item_id, asking_median").in("catalog_item_id", ids),
+                    sig.from("catalog_price_signal_flags").select("catalog_item_id").in("catalog_item_id", ids).eq("status", "active"),
+                ]);
+                const flagged = new Set((flags ?? []).map((f) => String(f.catalog_item_id)));
+                for (const s of sigs ?? []) {
+                    const id = String(s.catalog_item_id);
+                    if (!flagged.has(id)) medians[id] = Number(s.asking_median);
+                }
+            } catch {
+                /* pre-189/196 — no chips */
+            }
+            try {
+                const rpc = supabase.rpc.bind(supabase) as unknown as (
+                    fn: string,
+                    args: { p_ids: string[] },
+                ) => Promise<{ data: { catalog_id: string; image_url: string }[] | null }>;
+                const { data: t } = await rpc("get_catalog_browse_thumbs", { p_ids: ids });
+                for (const row of t ?? []) if (row.image_url) thumbs[row.catalog_id] = row.image_url;
+            } catch {
+                /* RPC absent — no thumbs */
+            }
+        }
+
+        return { timeline, medians, thumbs };
+    },
+    ["reference:mold-timeline"],
+    { revalidate: REVALIDATE, tags: [REFERENCE_PAGES_CACHE_TAG] },
+);
+
+// ── The Braid: artist career ─────────────────────────────────────
+
+export interface ArtistMeta {
+    studioName: string | null;
+    disciplines: string[];
+    activeFrom: number | null;
+    activeTo: number | null;
+    website: string | null;
+    registryNotes: string | null;
+}
+
+export interface ArtistCareerData {
+    career: ArtistCareer;
+    /** False for manufacturers (Breyer has molds of its own) — the
+     *  career section renders only for artists. */
+    isArtist: boolean;
+    /** Curated facts from the artists table (200); null pre-migration
+     *  or for artists nobody has written up yet. */
+    meta: ArtistMeta | null;
+}
+
+/**
+ * An artist's two-stream body of work: everything released under their
+ * own name, plus factory pieces whose sculptor credit names them.
+ * A maker who owns plastic molds/releases is a manufacturer, not an
+ * artist — Breyer gets no braid.
+ */
+export const getArtistCareerData = unstable_cache(
+    async (makerName: string): Promise<ArtistCareerData> => {
+        const supabase = createAnonClient();
+        const own: {
+            id: string; title: string; maker_slug: string | null; slug: string | null;
+            item_type: string; scale: string | null; attributes: Record<string, unknown> | null;
+        }[] = [];
+        for (let from = 0; from < 5000; from += 1000) {
+            const { data } = await supabase
+                .from("catalog_items")
+                .select("id, title, maker_slug, slug, item_type, scale, attributes")
+                .eq("maker", makerName)
+                .range(from, from + 999);
+            const page = (data ?? []) as unknown as typeof own;
+            own.push(...page);
+            if (page.length < 1000) break;
+        }
+
+        const isArtist =
+            own.length > 0 &&
+            !own.some((r) => r.item_type === "plastic_mold" || r.item_type === "plastic_release");
+
+        const { data: fac } = await supabase
+            .from("catalog_items")
+            .select("id, title, maker, maker_slug, slug, item_type, scale, attributes")
+            .ilike("attributes->>sculptor", `%${makerName}%`)
+            .neq("maker", makerName)
+            .limit(500);
+        const factory = ((fac ?? []) as unknown as {
+            id: string; title: string; maker: string; maker_slug: string | null; slug: string | null;
+            item_type: string; scale: string | null; attributes: Record<string, unknown> | null;
+        }[]);
+
+        // Curated facts (200). Tolerant: pre-migration the table is
+        // missing and the stat block shows computed facts only.
+        let meta: ArtistMeta | null = null;
+        try {
+            const { data: a } = await (supabase as unknown as {
+                from: (t: string) => {
+                    select: (c: string) => {
+                        eq: (k: string, v: string) => {
+                            maybeSingle: () => Promise<{ data: Record<string, unknown> | null }>;
+                        };
+                    };
+                };
+            })
+                .from("artists")
+                .select("studio_name, disciplines, active_from, active_to, website, registry_notes")
+                .eq("name", makerName)
+                .maybeSingle();
+            if (a) {
+                meta = {
+                    studioName: (a.studio_name as string | null) ?? null,
+                    disciplines: Array.isArray(a.disciplines) ? (a.disciplines as string[]) : [],
+                    activeFrom: typeof a.active_from === "number" ? a.active_from : null,
+                    activeTo: typeof a.active_to === "number" ? a.active_to : null,
+                    website: (a.website as string | null) ?? null,
+                    registryNotes: (a.registry_notes as string | null) ?? null,
+                };
+            }
+        } catch {
+            /* pre-200 */
+        }
+
+        const career = buildArtistCareer(
+            own.map((r) => ({
+                id: r.id, title: r.title, makerSlug: r.maker_slug, slug: r.slug,
+                attributes: r.attributes, itemType: r.item_type, scale: r.scale,
+            })),
+            factory.map((r) => ({
+                id: r.id, title: r.title, makerSlug: r.maker_slug, slug: r.slug,
+                attributes: r.attributes, itemType: r.item_type, scale: r.scale, maker: r.maker,
+            })),
+        );
+
+        return { career, isArtist, meta };
+    },
+    ["reference:artist-career"],
+    { revalidate: REVALIDATE, tags: [REFERENCE_PAGES_CACHE_TAG] },
+);

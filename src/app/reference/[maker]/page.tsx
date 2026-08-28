@@ -5,6 +5,8 @@ import FocusLayout from "@/components/layouts/FocusLayout";
 import CatalogSubMasthead from "@/components/catalog/CatalogSubMasthead";
 import { referenceHref } from "@/lib/catalog/referenceUrl";
 import { getMakerIndex, getMakerMolds, getMakerRecent } from "@/app/actions/maker-hubs";
+import { getArtistCareerData } from "@/app/actions/reference-pages";
+import ArtistCareer from "@/components/reference/ArtistCareer";
 
 interface Props {
     params: Promise<{ maker: string }>;
@@ -51,7 +53,11 @@ export default async function MakerHubPage({ params }: Props) {
     const summary = index.find((m) => m.makerSlug === maker);
     if (!summary) notFound();
 
-    const [molds, recent] = await Promise.all([getMakerMolds(maker), getMakerRecent(maker, 12)]);
+    const [molds, recent, careerData] = await Promise.all([
+        getMakerMolds(maker),
+        getMakerRecent(maker, 12),
+        getArtistCareerData(summary.maker),
+    ]);
     const otherMakers = index.filter((m) => m.makerSlug !== maker).slice(0, 12);
     const catalogSearchHref = `/catalog?maker=${encodeURIComponent(summary.maker)}`;
 
@@ -70,11 +76,24 @@ export default async function MakerHubPage({ params }: Props) {
         })),
     };
 
+    const breadcrumbJsonLd = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Registry", item: `${APP_URL}/reference` },
+            { "@type": "ListItem", position: 2, name: summary.maker },
+        ],
+    };
+
     return (
         <FocusLayout noHeader>
             <script
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
+            />
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
             />
             <CatalogSubMasthead
                 icon="🏷️"
@@ -106,6 +125,11 @@ export default async function MakerHubPage({ params }: Props) {
                         Search {summary.maker} in the catalog →
                     </Link>
                 </div>
+
+                {/* THE BRAID — artist career (studio + factory work on one
+                    spine; Facing Pages layout from md: up). Renders only
+                    for artists; manufacturers keep the molds grid below. */}
+                <ArtistCareer data={careerData} artistName={summary.maker} />
 
                 {/* MOLDS */}
                 {molds.length > 0 && (
