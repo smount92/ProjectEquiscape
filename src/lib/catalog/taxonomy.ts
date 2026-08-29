@@ -290,6 +290,25 @@ export function deriveAttribution(row: {
     };
 }
 
+/**
+ * The maker column for a NEW catalog entry. The suggest form submits
+ * "" when Manufacturer is left on "— Select —", and that's legitimate
+ * for artist-attributed pieces (a resin has no manufacturer) — there
+ * the sculptor IS the attribution, and the maker column is what
+ * drives artist reference pages. Never returns "": one empty maker in
+ * a member's stable put "" into their facet dropdown, and Radix
+ * Select throws on empty item values — it crashed their /dashboard.
+ */
+export function resolveNewEntryMaker(
+    itemType: string,
+    maker: unknown,
+    sculptor: unknown,
+): string {
+    const m = typeof maker === "string" ? maker.trim() : "";
+    const s = typeof sculptor === "string" ? sculptor.trim() : "";
+    return m || (ARTIST_ATTRIBUTED_CATEGORIES.has(itemType) ? s : "") || "Unknown";
+}
+
 // ── Tier 1 attribute vocabularies (owner-approved 2026-08-23) ──
 // These four keys already exist on imported rows (run_type 74,
 // run_count 74, sculptor 24) — they live in the attributes JSONB, so

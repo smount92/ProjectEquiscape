@@ -274,11 +274,18 @@ async function fetchFacetOptions(
     const { data, error } = await supabase.rpc("get_stable_facets", { p_owner: userId });
     if (!error && data) {
         const f = data as Partial<StableFacetOptions>;
+        // Radix Select forbids empty-string item values — one "" here
+        // (a catalog row with maker '' slipping through the RPC's
+        // NULL-only guard) crashed /dashboard for the member who owned
+        // a horse linked to it. Facet values are dropdown options; ""
+        // is never one.
+        const clean = (a?: string[]) =>
+            (a ?? []).filter((s) => typeof s === "string" && s.trim() !== "");
         return {
-            makers: f.makers ?? [],
-            scales: f.scales ?? [],
-            finishes: f.finishes ?? [],
-            categories: f.categories ?? [],
+            makers: clean(f.makers),
+            scales: clean(f.scales),
+            finishes: clean(f.finishes),
+            categories: clean(f.categories),
         };
     }
 

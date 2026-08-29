@@ -7,6 +7,7 @@ import {
     attributionLabel,
     deriveAttribution,
     normalizeScale,
+    resolveNewEntryMaker,
     sortScalesBySize,
     suggestionItemTypeToDb,
 } from "@/lib/catalog/taxonomy";
@@ -189,5 +190,31 @@ describe("attribution split — artist vs manufacturer", () => {
         expect(
             deriveAttribution({ item_type: "artist_resin", maker: "  ", sculptor: " " }),
         ).toEqual({ artist: null, manufacturer: null });
+    });
+});
+
+// The /dashboard crash of 2026-08-29: a new-entry approval wrote
+// maker '' (the form's unselected "— Select —" — `??` caught only
+// null), the stable facet RPC passed it through, and Radix Select
+// threw on the empty item value for the one member whose stable
+// linked to the row. The maker column may never be ''.
+describe("resolveNewEntryMaker", () => {
+    it("never returns an empty string — the crash class", () => {
+        expect(resolveNewEntryMaker("plastic_release", "", "")).toBe("Unknown");
+        expect(resolveNewEntryMaker("china", "   ", undefined)).toBe("Unknown");
+        expect(resolveNewEntryMaker("artist_resin", null, null)).toBe("Unknown");
+    });
+
+    it("a given maker wins, trimmed", () => {
+        expect(resolveNewEntryMaker("china", " Pour Horse ", "D'Arry Jone Frank")).toBe("Pour Horse");
+    });
+
+    it("artist categories fall back to the sculptor — the sculptor IS the attribution", () => {
+        expect(resolveNewEntryMaker("artist_resin", "", "D'arry Jone Frank")).toBe("D'arry Jone Frank");
+        expect(resolveNewEntryMaker("medallion", "", "Sarah Rose")).toBe("Sarah Rose");
+    });
+
+    it("factory categories do NOT take the sculptor as maker (the North Light lesson)", () => {
+        expect(resolveNewEntryMaker("plastic_release", "", "Guy Pocock")).toBe("Unknown");
     });
 });

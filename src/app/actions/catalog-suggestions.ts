@@ -25,6 +25,7 @@ import {
     normalizeCatalogBreed,
     normalizeRunCount,
     normalizeScale,
+    resolveNewEntryMaker,
     suggestionItemTypeToDb,
 } from "@/lib/catalog/taxonomy";
 import { REFERENCE_PAGES_CACHE_TAG } from "@/app/actions/reference-pages";
@@ -1105,13 +1106,15 @@ async function applyApprovedSuggestion(
             );
         }
         const itemType = mappedType ?? "plastic_mold";
+        const sculptorIn = typeof fc.sculptor === "string" ? fc.sculptor.trim() : "";
+        const maker = resolveNewEntryMaker(itemType, fc.maker, fc.sculptor);
         // Attribution split (156): artist/manufacturer stamped at insert.
         // No annotation on the literal — the columns enter generated
         // types after the owner applies 156 (cast at the insert call).
         const attribution = deriveAttribution({
             item_type: itemType,
-            maker: (fc.maker ?? "Unknown") as string,
-            sculptor: (fc.sculptor as string | undefined) ?? null,
+            maker,
+            sculptor: sculptorIn || null,
             manufacturer: (fc.manufacturer as string | undefined) ?? null,
         });
         // Tier 1 attributes (2026-08-23) — validated BEFORE the literal so
@@ -1123,7 +1126,7 @@ async function applyApprovedSuggestion(
         const insertPayload = {
             item_type: itemType,
             title: (fc.title ?? fc.mold_name ?? "Untitled") as string,
-            maker: (fc.maker ?? "Unknown") as string,
+            maker,
             artist: attribution.artist,
             manufacturer: attribution.manufacturer,
             // Scales enter in canonical vocabulary; normalize defensively
