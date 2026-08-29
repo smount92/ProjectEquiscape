@@ -43,13 +43,19 @@ export interface EditableField {
 }
 
 /**
- * Material's vocabulary lives in the new-entry form's markup and nowhere
- * else. Repeated here so the correction form offers the same six rather
- * than inventing a seventh, and so there is one obvious place to move it
- * to taxonomy.ts when someone does that properly.
+ * Material's single vocabulary — the new-entry form, the correction
+ * form and the silver-auto validator all read this list, so a change
+ * here IS the change everywhere. Stored values must match these
+ * strings exactly; renaming an option means migrating the rows that
+ * carry the old spelling.
+ *
+ * "China/Ceramic" and "Rubber/PVC/Vinyl" per MHI (2026-08-29): the
+ * ceramic family goes by both names, and the play-brand makes
+ * (CollectA, Schleich, Safari, Pabo, Julip) are vinyl/PVC — a class
+ * the hobby treats as distinct from Breyer's cellulose acetate.
  */
 export const MATERIAL_OPTIONS = [
-    "Plastic", "Resin", "Pewter", "China", "Metal", "Other",
+    "Plastic", "Rubber/PVC/Vinyl", "Resin", "Pewter", "China/Ceramic", "Metal", "Other",
 ] as const;
 
 /**

@@ -4,6 +4,7 @@ import { useState, useTransition } from"react";
 import { useRouter } from"next/navigation";
 import { createSuggestion } from"@/app/actions/catalog-suggestions";
 import { ARTIST_ATTRIBUTED_CATEGORIES, CANONICAL_SCALES, KNOWN_MANUFACTURERS, RUN_TYPES } from "@/lib/catalog/taxonomy";
+import { MATERIAL_OPTIONS } from "@/lib/catalog/editableFields";
 import { GENDER_GROUPS } from "@/lib/config/genders";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -432,12 +433,9 @@ export default function SuggestNewEntryForm({
  onChange={(e) => setMaterial(e.target.value)}
  >
  <option value="">— Select —</option>
- <option value="Plastic">Plastic</option>
- <option value="Resin">Resin</option>
- <option value="Pewter">Pewter</option>
- <option value="China">China</option>
- <option value="Metal">Metal</option>
- <option value="Other">Other</option>
+ {MATERIAL_OPTIONS.map((m) => (
+ <option key={m} value={m}>{m}</option>
+ ))}
  </select>
  </div>
 
