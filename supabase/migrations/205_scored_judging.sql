@@ -19,6 +19,16 @@
 -- judged class was actually scored against. NULL rubric = the class
 -- judges on the plain ribbon tray, exactly as before — scoring is
 -- opt-in per class.
+--
+-- PASTE NOTE (deadlock of 2026-09-01): the first paste of this file
+-- deadlocked — both ALTERs in one transaction take exclusive locks on
+-- two hot tables while live show pages hold shared locks on them
+-- crosswise. lock_timeout makes each attempt fail fast instead of
+-- queueing (the queue IS the deadlock window); if a statement times
+-- out, just run it again. Running the two ALTER sections as two
+-- separate executions removes the cross-table window entirely.
+SET lock_timeout = '4s';
+
 ALTER TABLE show_classes ADD COLUMN IF NOT EXISTS rubric JSONB;
 
 COMMENT ON COLUMN show_classes.rubric IS
