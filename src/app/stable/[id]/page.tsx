@@ -424,6 +424,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  ownerId={horse.owner_id}
  horseId={horseId}
  showControls
+ canAddCredit
  />
  </div>
 

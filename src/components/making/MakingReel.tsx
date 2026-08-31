@@ -1,4 +1,4 @@
-import { STAGE_LABELS, STAGE_ORDER, creditLabel, type WorkStage } from "@/lib/studio/making";
+import { creditLabel, groupByStage, stageLabel } from "@/lib/studio/making";
 import type { WorkRecordView } from "@/app/actions/work-records";
 import WorkRecordControls from "@/components/making/WorkRecordControls";
 
@@ -44,16 +44,10 @@ export default function MakingReel({
                     artistIsOwner: !!rec.artistUserId && rec.artistUserId === ownerId,
                 });
                 const span = recordSpan(rec);
-                // Group public-side moments by stage, stages in work order.
-                const stages = new Map<WorkStage, typeof rec.moments>();
-                for (const m of rec.moments) {
-                    const list = stages.get(m.stage) ?? [];
-                    list.push(m);
-                    stages.set(m.stage, list);
-                }
-                const ordered = [...stages.entries()].sort(
-                    (a, b) => STAGE_ORDER[a[0]] - STAGE_ORDER[b[0]],
-                );
+                // Stages group in the order the ARTIST used them (204) —
+                // a sculptor's ladder and a painter's ladder both read
+                // correctly because neither is imposed.
+                const ordered = groupByStage(rec.moments);
 
                 return (
                     <section key={rec.id} className="border-input bg-card rounded-xl border p-4 md:p-5">
@@ -110,7 +104,7 @@ export default function MakingReel({
                                         <div className="mb-1.5 flex items-baseline gap-2">
                                             <span className="bg-card text-forest -ml-[1.45rem] inline-block h-2.5 w-2.5 rounded-full border-2 border-(--brass)" aria-hidden="true" />
                                             <h4 className="text-foreground m-0 font-serif text-sm font-bold">
-                                                {STAGE_LABELS[stage]}
+                                                {stageLabel(stage)}
                                             </h4>
                                             {moments[0]?.claimedDate && (
                                                 <span className="text-muted-foreground text-xs tabular-nums">
@@ -126,7 +120,7 @@ export default function MakingReel({
                                                             {/* eslint-disable-next-line @next/next/no-img-element */}
                                                             <img
                                                                 src={url}
-                                                                alt={m.caption ?? STAGE_LABELS[stage]}
+                                                                alt={m.caption ?? stageLabel(stage)}
                                                                 loading="lazy"
                                                                 className="aspect-[4/3] w-full object-cover"
                                                             />

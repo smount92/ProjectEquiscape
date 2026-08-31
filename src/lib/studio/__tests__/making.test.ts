@@ -1,28 +1,70 @@
 import { describe, it, expect } from "vitest";
 
 import {
-    STAGE_LABELS,
-    STAGE_ORDER,
-    WORK_STAGES,
+    DISCIPLINE_PRESETS,
+    LEGACY_STAGE_LABELS,
+    MAX_STAGE_LABEL,
     creditLabel,
+    groupByStage,
     isValidMakingPath,
     makingImagePrefix,
+    stageLabel,
 } from "@/lib/studio/making";
 
-describe("the making vocabulary", () => {
-    it("every stage has a label and an order", () => {
-        for (const s of WORK_STAGES) {
-            expect(STAGE_LABELS[s]).toBeTruthy();
-            expect(STAGE_ORDER[s]).toBeGreaterThanOrEqual(0);
+describe("discipline presets — the whole ecosystem, not just painters", () => {
+    it("covers the hobby's relay: sculpt, cast, prep/paint, china, hair, tack, restoration", () => {
+        const keys = DISCIPLINE_PRESETS.map((d) => d.key);
+        for (const k of ["finishwork", "sculpture", "casting", "china", "hair", "tack", "restoration"]) {
+            expect(keys).toContain(k);
         }
     });
 
-    it("stages order the way work actually happens", () => {
-        expect(STAGE_ORDER.blank).toBeLessThan(STAGE_ORDER.prep);
-        expect(STAGE_ORDER.prep).toBeLessThan(STAGE_ORDER.base);
-        expect(STAGE_ORDER.detail).toBeLessThan(STAGE_ORDER.finished);
-        // catch-all floats last so real stages tell the story first
-        expect(STAGE_ORDER.progress).toBeGreaterThan(STAGE_ORDER.finished);
+    it("every preset ladder fits the stage-label cap", () => {
+        for (const d of DISCIPLINE_PRESETS) {
+            expect(d.stages.length).toBeGreaterThan(2);
+            for (const s of d.stages) {
+                expect(s.length).toBeGreaterThan(0);
+                expect(s.length).toBeLessThanOrEqual(MAX_STAGE_LABEL);
+            }
+        }
+    });
+});
+
+describe("stageLabel — legacy keys keep their words, artists keep theirs", () => {
+    it("maps every 202-era enum value", () => {
+        for (const k of ["blank", "prep", "base", "detail", "finished", "progress"]) {
+            expect(stageLabel(k)).toBe(LEGACY_STAGE_LABELS[k]);
+        }
+    });
+    it("passes an artist's own label straight through", () => {
+        expect(stageLabel("Base coat 3 — dappling")).toBe("Base coat 3 — dappling");
+        expect(stageLabel("Greenware")).toBe("Greenware");
+    });
+});
+
+describe("groupByStage — the artist's order, not ours", () => {
+    it("groups in first-appearance order", () => {
+        const groups = groupByStage([
+            { stage: "Armature" },
+            { stage: "Bulked out" },
+            { stage: "Armature" },
+            { stage: "Refining" },
+        ]);
+        expect(groups.map(([s]) => s)).toEqual(["Armature", "Bulked out", "Refining"]);
+        expect(groups[0][1]).toHaveLength(2);
+    });
+
+    it("floats the catch-all 'progress' bucket last", () => {
+        const groups = groupByStage([
+            { stage: "progress" },
+            { stage: "Base coat" },
+            { stage: "Finished" },
+        ]);
+        expect(groups.map(([s]) => s)).toEqual(["Base coat", "Finished", "progress"]);
+    });
+
+    it("leaves a progress-only reel alone", () => {
+        expect(groupByStage([{ stage: "progress" }]).map(([s]) => s)).toEqual(["progress"]);
     });
 });
 
@@ -40,7 +82,7 @@ describe("isValidMakingPath — the D5 lesson", () => {
 });
 
 describe("creditLabel — a claim is labeled a claim", () => {
-    it("owner confirmation verifies any record", () => {
+    it("counterparty confirmation verifies any record", () => {
         expect(
             creditLabel({ recordedBy: "artist", ownerConfirmedAt: "2026-09-01", artistIsOwner: false }),
         ).toEqual({ label: "Confirmed by owner", verified: true });

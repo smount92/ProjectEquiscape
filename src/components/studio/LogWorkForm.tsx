@@ -7,9 +7,16 @@
  *
  * One page, three moves: pick the horse, say what the work was, drop
  * photos into stage buckets. Each non-empty bucket becomes ONE moment
- * (its photos + one caption + one date). Photos ride the SAME
- * compression pipeline as gallery photos — tier-quality WebP, never
- * raw bytes (the WIP thread's raw-upload mistake ends here).
+ * (its photos + one caption + one date).
+ *
+ * STAGES BELONG TO THE ARTIST (204): pick a discipline and its
+ * suggested ladder prefills the buckets — then rename any of them,
+ * add your own ("Base coat 3 — dappling"), or delete what you don't
+ * need. A sculptor, a china painter and a tack maker all get a ladder
+ * in their own words.
+ *
+ * Photos ride the SAME compression pipeline as gallery photos —
+ * tier-quality WebP, never raw bytes.
  */
 
 import { useMemo, useRef, useState } from "react";
@@ -20,11 +27,10 @@ import { uploadImageWithRetry } from "@/lib/utils/uploadWithRetry";
 import { createWorkRecord, addWorkMoments } from "@/app/actions/work-records";
 import { SERVICE_TYPES } from "@/lib/studio/services";
 import {
+    DISCIPLINE_PRESETS,
     MAX_IMAGES_PER_MOMENT,
-    STAGE_LABELS,
-    WORK_STAGES,
+    MAX_STAGE_LABEL,
     makingImagePrefix,
-    type WorkStage,
 } from "@/lib/studio/making";
 import { Button } from "@/components/ui/button";
 
@@ -36,12 +42,17 @@ export interface LogWorkHorse {
 }
 
 interface Bucket {
+    id: number;
+    label: string;
     files: File[];
     caption: string;
     date: string;
 }
 
-const BACKFILL_STAGES: WorkStage[] = ["blank", "prep", "base", "detail", "finished"];
+let nextBucketId = 1;
+function bucketsFromPreset(stages: readonly string[]): Bucket[] {
+    return stages.map((label) => ({ id: nextBucketId++, label, files: [], caption: "", date: "" }));
+}
 
 export default function LogWorkForm({
     horses,
@@ -54,15 +65,14 @@ export default function LogWorkForm({
 }) {
     const [horseId, setHorseId] = useState<string | null>(null);
     const [filter, setFilter] = useState("");
+    const [discipline, setDiscipline] = useState(DISCIPLINE_PRESETS[0].key);
     const [workType, setWorkType] = useState<string>(SERVICE_TYPES[1]);
     const [summary, setSummary] = useState("");
     const [claimedStart, setClaimedStart] = useState("");
     const [dateCompleted, setDateCompleted] = useState("");
-    const [buckets, setBuckets] = useState<Record<WorkStage, Bucket>>(() => {
-        const init = {} as Record<WorkStage, Bucket>;
-        for (const s of WORK_STAGES) init[s] = { files: [], caption: "", date: "" };
-        return init;
-    });
+    const [buckets, setBuckets] = useState<Bucket[]>(() =>
+        bucketsFromPreset(DISCIPLINE_PRESETS[0].stages),
+    );
     const [busy, setBusy] = useState(false);
     const [progress, setProgress] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -76,7 +86,7 @@ export default function LogWorkForm({
     }, [horses, filter]);
 
     const chosen = horses.find((h) => h.id === horseId) ?? null;
-    const totalPhotos = WORK_STAGES.reduce((n, s) => n + buckets[s].files.length, 0);
+    const totalPhotos = buckets.reduce((n, b) => n + b.files.length, 0);
 
     const preview = (f: File) => {
         let u = previewUrls.current.get(f);
@@ -87,22 +97,31 @@ export default function LogWorkForm({
         return u;
     };
 
-    const addFiles = (stage: WorkStage, list: FileList | null) => {
-        if (!list) return;
-        setBuckets((b) => ({
-            ...b,
-            [stage]: {
-                ...b[stage],
-                files: [...b[stage].files, ...Array.from(list)].slice(0, MAX_IMAGES_PER_MOMENT),
-            },
-        }));
+    const switchDiscipline = (key: string) => {
+        const preset = DISCIPLINE_PRESETS.find((d) => d.key === key);
+        if (!preset) return;
+        if (totalPhotos > 0 && !window.confirm("Switch the ladder? Photos already placed stay in their buckets; empty buckets are replaced.")) {
+            return;
+        }
+        setDiscipline(key);
+        setBuckets((prev) => [
+            ...prev.filter((b) => b.files.length > 0),
+            ...bucketsFromPreset(preset.stages),
+        ]);
     };
 
-    const removeFile = (stage: WorkStage, idx: number) => {
-        setBuckets((b) => ({
-            ...b,
-            [stage]: { ...b[stage], files: b[stage].files.filter((_, i) => i !== idx) },
-        }));
+    const patchBucket = (id: number, patch: Partial<Bucket>) =>
+        setBuckets((prev) => prev.map((b) => (b.id === id ? { ...b, ...patch } : b)));
+
+    const addFiles = (id: number, list: FileList | null) => {
+        if (!list) return;
+        setBuckets((prev) =>
+            prev.map((b) =>
+                b.id === id
+                    ? { ...b, files: [...b.files, ...Array.from(list)].slice(0, MAX_IMAGES_PER_MOMENT) }
+                    : b,
+            ),
+        );
     };
 
     const submit = async () => {
@@ -124,20 +143,20 @@ export default function LogWorkForm({
             if (!rec.success || !rec.logId) throw new Error(rec.error ?? "Could not create the record.");
 
             const supabase = createClient();
-            const moments: { images: { path: string; stage: WorkStage; caption?: string; claimedDate?: string | null }[] }[] = [];
+            const moments: { images: { path: string; stage: string; caption?: string; claimedDate?: string | null }[] }[] = [];
             let uploadedCount = 0;
             const failed: string[] = [];
-            for (const stage of WORK_STAGES) {
-                const bucket = buckets[stage];
+            for (const bucket of buckets) {
                 if (bucket.files.length === 0) continue;
-                const images: { path: string; stage: WorkStage; caption?: string; claimedDate?: string | null }[] = [];
+                const stage = bucket.label.trim().slice(0, MAX_STAGE_LABEL) || "In progress";
+                const images: { path: string; stage: string; caption?: string; claimedDate?: string | null }[] = [];
                 for (let i = 0; i < bucket.files.length; i++) {
-                    setProgress(`Uploading ${STAGE_LABELS[stage].toLowerCase()} photo ${i + 1} of ${bucket.files.length}…`);
-                    const path = `${makingImagePrefix(horseId)}${Date.now()}_${stage}_${i}.webp`;
+                    setProgress(`Uploading “${stage}” photo ${i + 1} of ${bucket.files.length}…`);
+                    const path = `${makingImagePrefix(horseId)}${Date.now()}_${bucket.id}_${i}.webp`;
                     const blob = await compressImage(bucket.files[i], tier);
                     const { error: upErr } = await uploadImageWithRetry(supabase, "horse-images", path, blob);
                     if (upErr) {
-                        failed.push(`${STAGE_LABELS[stage]} photo ${i + 1}`);
+                        failed.push(`“${stage}” photo ${i + 1}`);
                         continue;
                     }
                     uploadedCount++;
@@ -194,11 +213,8 @@ export default function LogWorkForm({
                             setSummary("");
                             setClaimedStart("");
                             setDateCompleted("");
-                            setBuckets(() => {
-                                const init = {} as Record<WorkStage, Bucket>;
-                                for (const s of WORK_STAGES) init[s] = { files: [], caption: "", date: "" };
-                                return init;
-                            });
+                            const preset = DISCIPLINE_PRESETS.find((d) => d.key === discipline) ?? DISCIPLINE_PRESETS[0];
+                            setBuckets(bucketsFromPreset(preset.stages));
                         }}
                     >
                         Log another work
@@ -309,76 +325,113 @@ export default function LogWorkForm({
 
             {/* ── 3. The reel ── */}
             <section className="border-input bg-card rounded-2xl border p-5">
-                <h2 className="text-foreground mt-0 mb-1 font-serif text-lg font-bold">3 · The making-of reel</h2>
+                <div className="mb-1 flex flex-wrap items-baseline justify-between gap-2">
+                    <h2 className="text-foreground m-0 font-serif text-lg font-bold">3 · The making-of reel</h2>
+                    <label className="text-sm font-medium">
+                        <span className="text-muted-foreground mr-2 text-xs font-semibold tracking-wide uppercase">Ladder</span>
+                        <select
+                            value={discipline}
+                            onChange={(e) => switchDiscipline(e.target.value)}
+                            className="border-input bg-background rounded-md border px-2 py-1.5 text-sm"
+                        >
+                            {DISCIPLINE_PRESETS.map((d) => (
+                                <option key={d.key} value={d.key}>{d.label}</option>
+                            ))}
+                        </select>
+                    </label>
+                </div>
                 <p className="text-muted-foreground mt-0 mb-3 text-sm">
-                    Drop photos into the stages you have. Each stage takes up to {MAX_IMAGES_PER_MOMENT} photos,
-                    one caption, one date. Skip what you don&rsquo;t have — even two photos tell a story.
+                    The ladder is a suggestion — rename any stage in your own words, add stages,
+                    delete what you don&rsquo;t need. Each stage takes up to {MAX_IMAGES_PER_MOMENT} photos,
+                    one caption, one date. Even two photos tell a story.
                 </p>
                 <div className="grid gap-3 md:grid-cols-2">
-                    {BACKFILL_STAGES.map((stage) => {
-                        const b = buckets[stage];
-                        return (
-                            <div key={stage} className="border-input bg-background rounded-xl border p-3">
-                                <div className="flex items-baseline justify-between">
-                                    <h3 className="text-foreground m-0 font-serif text-sm font-bold">{STAGE_LABELS[stage]}</h3>
-                                    <label className="text-forest cursor-pointer text-sm font-semibold hover:underline">
-                                        + photos
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            multiple
-                                            className="hidden"
-                                            onChange={(e) => {
-                                                addFiles(stage, e.target.files);
-                                                e.target.value = "";
-                                            }}
-                                        />
-                                    </label>
-                                </div>
-                                {b.files.length > 0 && (
-                                    <>
-                                        <div className="mt-2 flex flex-wrap gap-1.5">
-                                            {b.files.map((f, i) => (
-                                                <span key={i} className="relative">
-                                                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                    <img src={preview(f)} alt="" className="h-14 w-14 rounded-md object-cover" />
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => removeFile(stage, i)}
-                                                        aria-label="Remove photo"
-                                                        className="bg-card border-input absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full border text-xs leading-none"
-                                                    >
-                                                        ×
-                                                    </button>
-                                                </span>
-                                            ))}
-                                        </div>
-                                        <div className="mt-2 grid grid-cols-[1fr_auto] gap-2">
-                                            <input
-                                                type="text"
-                                                maxLength={280}
-                                                value={b.caption}
-                                                onChange={(e) =>
-                                                    setBuckets((prev) => ({ ...prev, [stage]: { ...prev[stage], caption: e.target.value } }))
-                                                }
-                                                placeholder="Caption…"
-                                                className="border-input bg-card rounded-md border px-2 py-1.5 text-sm"
-                                            />
-                                            <input
-                                                type="date"
-                                                value={b.date}
-                                                onChange={(e) =>
-                                                    setBuckets((prev) => ({ ...prev, [stage]: { ...prev[stage], date: e.target.value } }))
-                                                }
-                                                className="border-input bg-card rounded-md border px-2 py-1.5 text-sm"
-                                            />
-                                        </div>
-                                    </>
-                                )}
+                    {buckets.map((b) => (
+                        <div key={b.id} className="border-input bg-background rounded-xl border p-3">
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="text"
+                                    value={b.label}
+                                    maxLength={MAX_STAGE_LABEL}
+                                    onChange={(e) => patchBucket(b.id, { label: e.target.value })}
+                                    className="text-foreground min-w-0 flex-1 rounded-md border border-transparent bg-transparent px-1 py-0.5 font-serif text-sm font-bold hover:border-input focus:border-input focus:outline-none"
+                                    aria-label="Stage name"
+                                />
+                                <label className="text-forest shrink-0 cursor-pointer text-sm font-semibold hover:underline">
+                                    + photos
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        multiple
+                                        className="hidden"
+                                        onChange={(e) => {
+                                            addFiles(b.id, e.target.files);
+                                            e.target.value = "";
+                                        }}
+                                    />
+                                </label>
+                                <button
+                                    type="button"
+                                    aria-label={`Remove stage ${b.label}`}
+                                    onClick={() => setBuckets((prev) => prev.filter((x) => x.id !== b.id))}
+                                    className="text-muted-foreground hover:text-destructive shrink-0 px-1 text-sm"
+                                >
+                                    ×
+                                </button>
                             </div>
-                        );
-                    })}
+                            {b.files.length > 0 && (
+                                <>
+                                    <div className="mt-2 flex flex-wrap gap-1.5">
+                                        {b.files.map((f, i) => (
+                                            <span key={i} className="relative">
+                                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                <img src={preview(f)} alt="" className="h-14 w-14 rounded-md object-cover" />
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        patchBucket(b.id, { files: b.files.filter((_, k) => k !== i) })
+                                                    }
+                                                    aria-label="Remove photo"
+                                                    className="bg-card border-input absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full border text-xs leading-none"
+                                                >
+                                                    ×
+                                                </button>
+                                            </span>
+                                        ))}
+                                    </div>
+                                    <div className="mt-2 grid grid-cols-[1fr_auto] gap-2">
+                                        <input
+                                            type="text"
+                                            maxLength={280}
+                                            value={b.caption}
+                                            onChange={(e) => patchBucket(b.id, { caption: e.target.value })}
+                                            placeholder="Caption…"
+                                            className="border-input bg-card rounded-md border px-2 py-1.5 text-sm"
+                                        />
+                                        <input
+                                            type="date"
+                                            value={b.date}
+                                            onChange={(e) => patchBucket(b.id, { date: e.target.value })}
+                                            className="border-input bg-card rounded-md border px-2 py-1.5 text-sm"
+                                        />
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    ))}
                 </div>
+                <button
+                    type="button"
+                    onClick={() =>
+                        setBuckets((prev) => [
+                            ...prev,
+                            { id: nextBucketId++, label: "", files: [], caption: "", date: "" },
+                        ])
+                    }
+                    className="text-forest mt-3 text-sm font-semibold hover:underline"
+                >
+                    + Add a stage of your own
+                </button>
             </section>
 
             {error && <p className="text-destructive m-0 text-sm font-medium">{error}</p>}

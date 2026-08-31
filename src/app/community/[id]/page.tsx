@@ -422,6 +422,7 @@ editionSize: rawPedigree.edition_size,
  ownerId={horse.owner_id}
  horseId={horseId}
  showControls
+ canAddCredit={isOwnHorse}
  />
  </div>
 

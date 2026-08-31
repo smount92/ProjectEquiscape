@@ -32,9 +32,8 @@ import { SERVICE_TYPES } from "@/lib/studio/services";
 import {
     MAX_IMAGES_PER_MOMENT,
     MAX_MOMENTS_PER_RECORD,
-    WORK_STAGES,
+    MAX_STAGE_LABEL,
     isValidMakingPath,
-    type WorkStage,
 } from "@/lib/studio/making";
 
 // ══════════════════════════════════════════════════════════════
@@ -43,7 +42,7 @@ import {
 
 export interface WorkMomentView {
     id: string;
-    stage: WorkStage;
+    stage: string;
     caption: string | null;
     imageUrls: string[];
     claimedDate: string | null;
@@ -218,9 +217,100 @@ export async function createWorkRecord(input: z.input<typeof createSchema>): Pro
     return { success: true, logId: inserted.id };
 }
 
+const ownerCreditSchema = z.object({
+    horseId: z.string().uuid(),
+    workType: z.string().min(2).max(60),
+    artistName: z.string().min(2).max(80),
+    summary: z.string().max(2000).optional(),
+    dateCompleted: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+});
+
+/**
+ * The OWNER records a credit — the missing link for chains. The hobby
+ * works in relays (sculpted by one artist, cast by another, prepped,
+ * painted, restored by others still), and the owner is usually the
+ * only person who knows the whole chain; many links are artists who
+ * will never have an account. recorded_by='owner' + a free-text
+ * artist_alias, honestly labeled "Recorded by owner" until the named
+ * studio (if it's on MHH) confirms — or disavows — it.
+ */
+export async function createOwnerCredit(input: z.input<typeof ownerCreditSchema>): Promise<{
+    success: boolean;
+    logId?: string;
+    error?: string;
+}> {
+    const { supabase, user } = await requireAuth();
+    const parsed = ownerCreditSchema.safeParse(input);
+    if (!parsed.success) return { success: false, error: "Invalid credit." };
+    const data = parsed.data;
+
+    const allowed = await checkRateLimit("owner-credit-create", 30, 60 * 24, user.id);
+    if (!allowed) return { success: false, error: "Daily limit reached — try again tomorrow." };
+
+    // Your horse only — RLS backs this up (092's owner insert policy).
+    const { data: horse } = await supabase
+        .from("user_horses")
+        .select("id, owner_id")
+        .eq("id", data.horseId)
+        .eq("owner_id", user.id)
+        .is("deleted_at", null)
+        .single();
+    if (!horse) return { success: false, error: "Horse not found or not yours." };
+
+    const artistName = sanitizeText(data.artistName).slice(0, 80);
+    // If the name matches an MHH studio, link the account so the
+    // artist can confirm (or disavow) — the false-credit defense
+    // works both directions.
+    const { data: studio } = await supabase
+        .from("artist_profiles")
+        .select("user_id, studio_name")
+        .ilike("studio_name", artistName)
+        .maybeSingle();
+
+    const { data: inserted, error } = (await loose(supabase)
+        .from("customization_logs")
+        .insert({
+            horse_id: data.horseId,
+            work_type: (SERVICE_TYPES as readonly string[]).includes(data.workType)
+                ? data.workType
+                : sanitizeText(data.workType).slice(0, 60),
+            artist_alias: artistName,
+            artist_user_id: studio?.user_id ?? null,
+            recorded_by: "owner",
+            summary: data.summary ? sanitizeText(data.summary) : null,
+            date_completed: data.dateCompleted ?? null,
+        })
+        .select("id")
+        .single()) as { data: { id: string } | null; error: DbError };
+    if (error || !inserted) {
+        if (isMissingSchema(error)) {
+            return { success: false, error: "Work records aren't enabled yet (migration 202 pending)." };
+        }
+        logger.error("WorkRecords", "owner credit failed", { message: error?.message });
+        return { success: false, error: "Could not save the credit." };
+    }
+
+    if (studio?.user_id && studio.user_id !== user.id) {
+        after(async () => {
+            await createNotification({
+                userId: studio.user_id,
+                actorId: user.id,
+                type: "work_record",
+                content: `An owner credited ${studio.studio_name} with work on their horse — confirm it (or flag it) from the passport.`,
+                horseId: data.horseId,
+                linkUrl: `/community/${data.horseId}`,
+            });
+        });
+    }
+
+    revalidatePath(`/stable/${data.horseId}`);
+    revalidatePath(`/community/${data.horseId}`);
+    return { success: true, logId: inserted.id };
+}
+
 const momentImageSchema = z.object({
     path: z.string().min(1).max(400),
-    stage: z.enum(WORK_STAGES),
+    stage: z.string().trim().min(1).max(MAX_STAGE_LABEL),
     caption: z.string().max(280).optional(),
     claimedDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
     isPublic: z.boolean().optional(),
@@ -281,7 +371,7 @@ export async function addWorkMoments(
         rows.push({
             log_id: logId,
             author_id: user.id,
-            stage: first.data.stage,
+            stage: sanitizeText(first.data.stage).slice(0, MAX_STAGE_LABEL) || "progress",
             caption: first.data.caption ? sanitizeText(first.data.caption) : null,
             claimed_date: first.data.claimedDate ?? null,
             is_public: first.data.isPublic ?? true,
@@ -354,7 +444,7 @@ export async function getMakingForHorse(horseId: string): Promise<WorkRecordView
         const list = byLog.get(m.log_id) ?? [];
         list.push({
             id: m.id,
-            stage: (m.stage ?? "progress") as WorkStage,
+            stage: m.stage ?? "progress",
             caption: m.caption,
             imageUrls: m.image_urls ?? [],
             claimedDate: m.claimed_date,
@@ -372,9 +462,18 @@ export async function getMakingForHorse(horseId: string): Promise<WorkRecordView
         const confirmed = l.owner_confirmed_at != null;
 
         if (l.disavowed_at && !viewerIsArtist) continue;
-        // Public display rule: confirmed, or the artist owns the horse.
-        // Parties always see their own records (owner must review).
-        if (!confirmed && !artistIsOwner && !viewerIsArtist && !viewerIsOwner) continue;
+        // Public display rule: confirmed, the artist owns the horse, or
+        // the OWNER recorded it (creating the credit IS their consent —
+        // the stamp protects owners from artist claims, not from their
+        // own entries). Parties always see their own records.
+        if (
+            !confirmed &&
+            !artistIsOwner &&
+            l.recorded_by !== "owner" &&
+            !viewerIsArtist &&
+            !viewerIsOwner
+        )
+            continue;
         if (!(l.reel_public ?? true) && !viewerIsArtist && !viewerIsOwner) continue;
 
         out.push({
@@ -431,7 +530,7 @@ export async function getPublicMaking(horseId: string): Promise<WorkRecordView[]
         commissionId: null,
         moments: (r.moments ?? []).map((m) => ({
             id: m.id,
-            stage: (m.stage ?? "progress") as WorkStage,
+            stage: m.stage ?? "progress",
             caption: m.caption,
             imageUrls: m.image_urls ?? [],
             claimedDate: m.claimed_date,

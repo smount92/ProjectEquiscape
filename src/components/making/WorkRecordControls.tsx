@@ -81,6 +81,23 @@ export default function WorkRecordControls({ record }: { record: WorkRecordView 
                     Withdraw record
                 </button>
             )}
+            {record.viewerIsArtist &&
+                record.recordedBy === "owner" &&
+                !record.ownerConfirmedAt &&
+                !record.disavowedAt && (
+                    <button
+                        type="button"
+                        disabled={pending}
+                        onClick={() =>
+                            run("Confirmed — the credit is now verified.", () =>
+                                confirmWorkRecord(record.id, record.horseId),
+                            )
+                        }
+                        className="bg-forest rounded-md px-3 py-1 text-sm font-semibold text-white disabled:opacity-50"
+                    >
+                        Yes, my work ✓
+                    </button>
+                )}
             {record.viewerIsArtist && record.recordedBy !== "artist" && !record.disavowedAt && (
                 <button
                     type="button"
