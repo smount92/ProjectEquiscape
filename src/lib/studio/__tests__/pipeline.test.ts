@@ -46,11 +46,21 @@ describe("the state machine", () => {
         }
     });
 
-    it("leaves delivered, declined and cancelled with no way out", () => {
-        for (const s of ["delivered", "declined", "cancelled"] as CommissionStatus[]) {
+    it("leaves received, declined and cancelled with no way out", () => {
+        for (const s of ["received", "declined", "cancelled"] as CommissionStatus[]) {
             expect(TRANSITIONS[s]).toEqual([]);
             expect(isTerminal(s)).toBe(true);
         }
+    });
+
+    it("delivered offers exactly one move: the client's received checkbox (203)", () => {
+        // "Delivered" used to be the artist's word alone — the client
+        // confirming arrival is the loop-closer of the workbench thread.
+        expect(TRANSITIONS.delivered.map((t) => t.to)).toEqual(["received"]);
+        expect(canTransition("delivered", "received", "client").ok).toBe(true);
+        expect(canTransition("delivered", "received", "artist").ok).toBe(false);
+        // Off the artist's bench either way.
+        expect(isTerminal("delivered")).toBe(true);
     });
 
     it("requires a quote before an agreement can exist", () => {
@@ -137,7 +147,11 @@ describe("availableTransitions", () => {
 
     it("offers nothing at all once the commission is closed", () => {
         expect(availableTransitions("cancelled", "artist")).toEqual([]);
-        expect(availableTransitions("delivered", "client")).toEqual([]);
+        expect(availableTransitions("received", "client")).toEqual([]);
+        // delivered still holds the client's one last checkbox…
+        expect(availableTransitions("delivered", "client").map((t) => t.to)).toEqual(["received"]);
+        // …and nothing for the artist.
+        expect(availableTransitions("delivered", "artist")).toEqual([]);
     });
 
     it("agrees with canTransition for every status and party", () => {
@@ -162,7 +176,10 @@ describe("ballIsWith", () => {
     });
 
     it("hands it to nobody once the commission is closed", () => {
-        expect(ballIsWith("delivered")).toBeNull();
+        // delivered hands the client their last checkbox (203)…
+        expect(ballIsWith("delivered")).toBe("client");
+        // …and after that, nobody.
+        expect(ballIsWith("received")).toBeNull();
         expect(ballIsWith("declined")).toBeNull();
         expect(ballIsWith("cancelled")).toBeNull();
     });
@@ -186,7 +203,8 @@ describe("statusBlurb", () => {
 describe("progress", () => {
     it("runs from nothing to everything across the live ladder", () => {
         expect(progress("requested")).toBe(0);
-        expect(progress("delivered")).toBe(1);
+        expect(progress("received")).toBe(1);
+        expect(progress("delivered")).toBeLessThan(1);
         expect(progress("in_progress")).toBeGreaterThan(progress("accepted"));
     });
 

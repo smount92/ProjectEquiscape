@@ -69,11 +69,22 @@ const SCALES = [
 
 type Tab = "studio" | "rates" | "terms";
 
-export default function StudioSettings({ profile }: { profile: ArtistProfile | null }) {
+export interface OwnBarn {
+    id: string;
+    name: string;
+}
+
+export default function StudioSettings({
+    profile,
+    ownBarns = [],
+}: {
+    profile: ArtistProfile | null;
+    ownBarns?: OwnBarn[];
+}) {
     const [tab, setTab] = useState<Tab>("studio");
     const isNew = !profile;
 
-    if (isNew) return <StudioForm profile={null} />;
+    if (isNew) return <StudioForm profile={null} ownBarns={ownBarns} />;
 
     return (
         <div>
@@ -96,7 +107,7 @@ export default function StudioSettings({ profile }: { profile: ArtistProfile | n
                 ))}
             </div>
 
-            {tab === "studio" && <StudioForm profile={profile} />}
+            {tab === "studio" && <StudioForm profile={profile} ownBarns={ownBarns} />}
             {tab === "rates" && <ServicesEditor profile={profile} />}
             {tab === "terms" && <TermsEditor profile={profile} />}
         </div>
@@ -105,12 +116,19 @@ export default function StudioSettings({ profile }: { profile: ArtistProfile | n
 
 // ── Identity ──────────────────────────────────────────────────────────
 
-function StudioForm({ profile }: { profile: ArtistProfile | null }) {
+function StudioForm({
+    profile,
+    ownBarns,
+}: {
+    profile: ArtistProfile | null;
+    ownBarns: OwnBarn[];
+}) {
     const router = useRouter();
     const [name, setName] = useState(profile?.studioName ?? "");
     const [slug, setSlug] = useState(profile?.studioSlug ?? "");
     const [bio, setBio] = useState(profile?.bioArtist ?? "");
     const [paypal, setPaypal] = useState(profile?.paypalMeLink ?? "");
+    const [barnId, setBarnId] = useState(profile?.barnGroupId ?? "");
     const [specialties, setSpecialties] = useState<string[]>(profile?.specialties ?? []);
     const [mediums, setMediums] = useState<string[]>(profile?.mediums ?? []);
     const [scales, setScales] = useState<string[]>(profile?.scalesOffered ?? []);
@@ -135,6 +153,7 @@ function StudioForm({ profile }: { profile: ArtistProfile | null }) {
         form.set("mediums", JSON.stringify(mediums));
         form.set("scalesOffered", JSON.stringify(scales));
         form.set("acceptingTypes", JSON.stringify(specialties));
+        form.set("barnGroupId", barnId);
 
         const result = isNew
             ? await createArtistProfile(form)
@@ -209,6 +228,28 @@ function StudioForm({ profile }: { profile: ArtistProfile | null }) {
                         handles the money — you two arrange it directly.
                     </span>
                 </label>
+
+                {ownBarns.length > 0 && (
+                    <label className="mt-4 block">
+                        <span className="mb-1 block text-sm font-semibold">
+                            The studio&rsquo;s barn <span className="text-muted-foreground">(optional)</span>
+                        </span>
+                        <select
+                            className="border-input bg-card flex h-10 w-full rounded-md border px-3 py-2 text-sm"
+                            value={barnId}
+                            onChange={(e) => setBarnId(e.target.value)}
+                        >
+                            <option value="">— none —</option>
+                            {ownBarns.map((b) => (
+                                <option key={b.id} value={b.id}>{b.name}</option>
+                            ))}
+                        </select>
+                        <span className="text-muted-foreground mt-1 block text-xs">
+                            A barn you run, shown on your studio page as its community room —
+                            clients and followers gather there between commissions.
+                        </span>
+                    </label>
+                )}
             </div>
 
             <div className="bg-card border-input rounded-lg border p-6 shadow-md">

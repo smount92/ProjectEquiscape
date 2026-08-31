@@ -28,7 +28,7 @@ const COLUMNS: { key: string; label: string; statuses: CommissionStatus[] }[] = 
     { key: "quoted", label: "Quoted", statuses: ["quoted"] },
     { key: "bench", label: "On the bench", statuses: ["accepted", "in_progress"] },
     { key: "approval", label: "Awaiting approval", statuses: ["awaiting_approval"] },
-    { key: "done", label: "Finished", statuses: ["completed", "delivered"] },
+    { key: "done", label: "Finished", statuses: ["completed", "delivered", "received"] },
     { key: "closed", label: "Closed", statuses: ["declined", "cancelled"] },
 ];
 

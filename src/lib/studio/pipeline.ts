@@ -24,6 +24,7 @@ export const COMMISSION_STATUSES = [
     "awaiting_approval",
     "completed",
     "delivered",
+    "received",
 ] as const;
 
 /** Ways a commission can end early. Not part of the progress ladder. */
@@ -56,7 +57,12 @@ export function normalizeStatus(raw: string | null | undefined): CommissionStatu
 }
 
 export function isTerminal(status: CommissionStatus): boolean {
-    return status === "delivered" || status === "declined" || status === "cancelled";
+    return (
+        status === "delivered" ||
+        status === "received" ||
+        status === "declined" ||
+        status === "cancelled"
+    );
 }
 
 /** Work that counts against an artist's slots — i.e. actually on the bench. */
@@ -67,7 +73,7 @@ export const ACTIVE_STATUSES: CommissionStatus[] = [
 ];
 
 /** Work that counts as earned. Income rollups use exactly this set. */
-export const EARNED_STATUSES: CommissionStatus[] = ["completed", "delivered"];
+export const EARNED_STATUSES: CommissionStatus[] = ["completed", "delivered", "received"];
 
 // ── Who holds the ball ────────────────────────────────────────────────
 
@@ -90,8 +96,10 @@ export function ballIsWith(status: CommissionStatus): Party | null {
             return "client"; // sign off, or spend a revision
         case "completed":
             return "artist"; // hand it over / ship it
+        case "delivered":
+            return "client"; // the last checkbox: confirm it arrived
         default:
-            return null; // delivered, declined, cancelled
+            return null; // received, declined, cancelled
     }
 }
 
@@ -200,7 +208,14 @@ export const TRANSITIONS: Record<CommissionStatus, Transition[]> = {
     completed: [
         { to: "delivered", by: ["artist"], label: "Mark delivered", emoji: "📦" },
     ],
-    delivered: [],
+    // The loop-closer that didn't exist before 203: "delivered" was the
+    // artist's word alone. The client confirming arrival is the last
+    // checkpoint, and the one that makes the workbench thread a full
+    // handshake — every stage above it was checked by somebody too.
+    delivered: [
+        { to: "received", by: ["client"], label: "Confirm received", emoji: "🏠" },
+    ],
+    received: [],
     declined: [],
     cancelled: [],
 };
@@ -270,6 +285,7 @@ export const STATUS_LABELS: Record<CommissionStatus, string> = {
     awaiting_approval: "Awaiting approval",
     completed: "Completed",
     delivered: "Delivered",
+    received: "Received ✓",
     declined: "Declined",
     cancelled: "Cancelled",
 };
@@ -303,7 +319,11 @@ export function statusBlurb(status: CommissionStatus, viewer: Party): string {
                 ? "Approved. Mark it delivered once it's handed over."
                 : "Approved. The artist will hand it over.";
         case "delivered":
-            return "Delivered. This commission is closed.";
+            return yours
+                ? "The artist marked it delivered — confirm it arrived to close the loop."
+                : "Delivered. Waiting on the commissioner to confirm it arrived.";
+        case "received":
+            return "Received and confirmed. This commission is closed.";
         case "declined":
             return "Declined. No agreement was made.";
         case "cancelled":

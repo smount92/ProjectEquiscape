@@ -17,6 +17,7 @@ import {
 } from "@/components/studio/StudioBits";
 import VaultHandoff from "@/components/studio/VaultHandoff";
 import WipThread from "@/components/studio/WipThread";
+import WorkbenchLedger from "@/components/studio/WorkbenchLedger";
 import { createClient } from "@/lib/supabase/server";
 import { progress, revisionState, type Party } from "@/lib/studio/pipeline";
 import { formatMoney, termsLines, turnaroundLabel } from "@/lib/studio/terms";
@@ -52,13 +53,10 @@ export default async function CommissionPage({
     let userId: string | null = null;
 
     if (token) {
-        const { data: guestCheck } = await supabase
-            .from("commissions")
-            .select("id")
-            .eq("id", commissionId)
-            .eq("guest_token", token)
-            .maybeSingle();
-        if (!guestCheck) notFound();
+        // Token validation happens inside getCommission via the admin
+        // client — the old user-client lookup here always came back
+        // empty for logged-out guests (RLS is TO authenticated) and the
+        // share link 404'd for the exact audience it was built for.
         isGuest = true;
     } else {
         const {
@@ -68,7 +66,7 @@ export default async function CommissionPage({
         userId = user.id;
     }
 
-    const commission = await getCommission(commissionId);
+    const commission = await getCommission(commissionId, isGuest ? { guestToken: token } : undefined);
     if (!commission) notFound();
 
     let party: Party | null = null;
@@ -82,7 +80,7 @@ export default async function CommissionPage({
         if (!party) notFound();
     }
 
-    const updates = await getCommissionUpdates(commissionId);
+    const updates = await getCommissionUpdates(commissionId, isGuest ? { guestToken: token } : undefined);
     const isArtist = party === "artist";
     const isClient = party === "client";
     const revisions = revisionState(commission.revisionsUsed, commission.revisionsIncluded);
@@ -102,7 +100,7 @@ export default async function CommissionPage({
         ? (commission.clientAlias ?? "the commissioner")
         : commission.artistAlias;
 
-    if (!isGuest && commission.status === "delivered" && targetId && userId) {
+    if (!isGuest && (commission.status === "delivered" || commission.status === "received") && targetId && userId) {
         const { data: txn } = await supabase
             .from("transactions")
             .select("id")
@@ -204,7 +202,8 @@ export default async function CommissionPage({
                         knows the number and cares about it. */}
                     {isClient &&
                         (commission.status === "completed" ||
-                            commission.status === "delivered") && (
+                            commission.status === "delivered" ||
+                            commission.status === "received") && (
                             <VaultHandoff
                                 commissionId={commission.id}
                                 horseId={commission.horseId}
@@ -213,6 +212,8 @@ export default async function CommissionPage({
                                 alreadyRecorded={commission.vaultRecorded}
                             />
                         )}
+
+                    <WorkbenchLedger commission={commission} updates={updates} />
 
                     <WipThread
                         commissionId={commission.id}

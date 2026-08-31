@@ -79,6 +79,9 @@ export default async function StudioDashboardPage() {
                 }
                 actions={
                     <>
+                        <Button asChild size="sm">
+                            <Link href="/studio/log-work">🖌️ Log past work</Link>
+                        </Button>
                         <Button asChild variant="outline" size="sm">
                             <Link href={`/studio/${profile.studioSlug}`}>View your page</Link>
                         </Button>

@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createAnonClient } from "@/lib/supabase/anon";
+import MakingChapter from "@/components/making/MakingChapter";
+import { getPublicMaking } from "@/app/actions/work-records";
 import { getPublicImageUrls } from "@/lib/utils/storage";
 import PassportGallery from "@/components/PassportGallery";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
@@ -191,6 +193,8 @@ export default async function AnonPassport({
     // section below feature-detects itself away. Best results first,
     // capped, with the summary line the market quick-look uses.
     const showRecords = await getPublicHorseRecords(horseId);
+    // The Making — owner-consented public reels ([] until 202 pastes).
+    const makingRecords = await getPublicMaking(horseId);
     const recordSummary =
         summarizeShowRecords(
             showRecords.map((r) => ({
@@ -291,9 +295,16 @@ export default async function AnonPassport({
                 favoriteCount={favoriteCount}
             />
             <div className="animate-fade-in-up grid grid-cols-1 gap-8 lg:grid-cols-[1.5fr_1fr] lg:gap-12">
-                {/* Gallery */}
-                <div className="self-start overflow-hidden rounded-2xl shadow-md" id="passport-photos">
-                    <PassportGallery images={galleryImages} />
+                {/* Gallery, then The Making (anon-safe RPC subset) */}
+                <div className="self-start">
+                    <div className="overflow-hidden rounded-2xl shadow-md" id="passport-photos">
+                        <PassportGallery images={galleryImages} />
+                    </div>
+                    <MakingChapter
+                        records={makingRecords}
+                        ownerId={null}
+                        horseId={horseId}
+                    />
                 </div>
 
                 {/* Ledger card (read-only). `self-start`, NOT min-h-[100%]:

@@ -3,12 +3,13 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { addCommissionUpdate, type CommissionUpdate } from "@/app/actions/art-studio";
+import { addCommissionUpdate, ackCheckpoint, type CommissionUpdate } from "@/app/actions/art-studio";
 import { UserAvatar } from "@/components/social";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { createClient } from "@/lib/supabase/client";
+import { compressImage } from "@/lib/utils/imageCompression";
 import { STATUS_LABELS, normalizeStatus, type Party } from "@/lib/studio/pipeline";
 
 const ICONS: Record<string, string> = {
@@ -18,6 +19,7 @@ const ICONS: Record<string, string> = {
     revision_request: "✎",
     approval: "✅",
     milestone: "🏆",
+    checkpoint: "☑️",
 };
 
 /**
@@ -80,7 +82,7 @@ export default function WipThread({
                         <Entry
                             key={update.id}
                             update={update}
-                            isArtist={party === "artist"}
+                            party={party}
                             last={i === updates.length - 1}
                         />
                     ))}
@@ -92,13 +94,17 @@ export default function WipThread({
 
 function Entry({
     update,
-    isArtist,
+    party,
     last,
 }: {
     update: CommissionUpdate;
-    isArtist: boolean;
+    party: Party | null;
     last: boolean;
 }) {
+    const isArtist = party === "artist";
+    const router = useRouter();
+    const [acking, setAcking] = useState(false);
+    const [ackError, setAckError] = useState<string | null>(null);
     return (
         <li className="relative grid grid-cols-[2rem_1fr] gap-3 pb-5 last:pb-0">
             {/* The rail. v1 shipped class names from a botched codemod
@@ -141,9 +147,54 @@ function Entry({
                             {!update.isVisibleToClient && isArtist && (
                                 <span className="ml-2">🔒 private note</span>
                             )}
+                            {update.updateType === "wip_photo" && isArtist && (
+                                <span className="ml-2" title={update.isPublic
+                                    ? "Publishes to the horse's Making reel at delivery"
+                                    : "Workbench only — stays between you two"}>
+                                    {update.isPublic ? "🌍 reel" : "🔏 workbench"}
+                                </span>
+                            )}
                         </div>
                     </div>
                 </div>
+
+                {/* Checkpoint: the artist proposes, the client signs off,
+                    both stamps stay. This is the "we've both checked
+                    off" the thread exists for. */}
+                {update.checkpoint && (
+                    <div className="border-input bg-card mt-2 flex flex-wrap items-center gap-2 rounded-md border px-3 py-2 text-sm">
+                        {update.checkpoint.ackedAt ? (
+                            <span className="text-forest font-semibold">
+                                ✓ Signed off by the commissioner ·{" "}
+                                {new Date(update.checkpoint.ackedAt).toLocaleDateString("en-US", {
+                                    month: "short",
+                                    day: "numeric",
+                                })}
+                            </span>
+                        ) : party === "client" ? (
+                            <>
+                                <span className="text-secondary-foreground">Waiting on your sign-off —</span>
+                                <Button
+                                    size="sm"
+                                    disabled={acking}
+                                    onClick={async () => {
+                                        setAcking(true);
+                                        setAckError(null);
+                                        const res = await ackCheckpoint(update.commissionId, update.id);
+                                        setAcking(false);
+                                        if (res.success) router.refresh();
+                                        else setAckError(res.error ?? "That didn't save.");
+                                    }}
+                                >
+                                    {acking ? "Signing…" : "Sign off ✓"}
+                                </Button>
+                                {ackError && <span className="text-destructive text-xs">{ackError}</span>}
+                            </>
+                        ) : (
+                            <span className="text-muted-foreground">Awaiting the commissioner&rsquo;s sign-off…</span>
+                        )}
+                    </div>
+                )}
 
                 {update.body && (
                     <p className="text-secondary-foreground mt-1.5 text-sm leading-relaxed whitespace-pre-wrap">
@@ -195,12 +246,13 @@ function PostForm({
     onClose: () => void;
     onPosted: () => void;
 }) {
-    const [type, setType] = useState<"wip_photo" | "message" | "milestone">(
+    const [type, setType] = useState<"wip_photo" | "message" | "milestone" | "checkpoint">(
         party === "artist" ? "wip_photo" : "message",
     );
     const [title, setTitle] = useState("");
     const [body, setBody] = useState("");
     const [visible, setVisible] = useState(true);
+    const [publish, setPublish] = useState(false);
     const [file, setFile] = useState<File | null>(null);
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -211,33 +263,60 @@ function PostForm({
         supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
     }, []);
 
+    /**
+     * Compressed WebP into the PRIVATE workbench bucket (203) — the
+     * thread's photos are between the two of you until the artist
+     * publishes them at delivery. Returns the bucket PATH; the server
+     * signs it for whoever may see the thread. Falls back to the old
+     * public-bucket upload until 203 is pasted, so posting never breaks.
+     */
     const upload = async (image: File): Promise<string | null> => {
         if (!userId) return null;
         const supabase = createClient();
-        const ext = image.name.split(".").pop()?.toLowerCase() || "webp";
-        // Path must match the storage policy: {userId}/commissions/{name}
-        const path = `${userId}/commissions/${commissionId}_${Date.now()}.${ext}`;
-        const { error: upErr } = await supabase.storage
-            .from("horse-images")
-            .upload(path, image, { contentType: image.type });
-        if (upErr) {
-            setError(`That image didn't upload: ${upErr.message}`);
+        const path = `${userId}/commissions/${commissionId}_${Date.now()}.webp`;
+        let blob: Blob;
+        try {
+            blob = await compressImage(image, "pro");
+        } catch {
+            setError("That file doesn't look like an image this browser can read.");
             return null;
         }
-        return supabase.storage.from("horse-images").getPublicUrl(path).data.publicUrl;
+        const { error: upErr } = await supabase.storage
+            .from("workbench")
+            .upload(path, blob, { contentType: "image/webp" });
+        if (!upErr) return path;
+
+        if (/bucket/i.test(upErr.message)) {
+            // Pre-203: no workbench bucket yet. Old behavior, compressed.
+            const { error: legacyErr } = await supabase.storage
+                .from("horse-images")
+                .upload(path, blob, { contentType: "image/webp" });
+            if (!legacyErr) {
+                return supabase.storage.from("horse-images").getPublicUrl(path).data.publicUrl;
+            }
+            setError(`That image didn't upload: ${legacyErr.message}`);
+            return null;
+        }
+        setError(`That image didn't upload: ${upErr.message}`);
+        return null;
     };
 
     const submit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
-        if (!body.trim() && !file) {
+        if (type === "checkpoint") {
+            if (!title.trim()) {
+                setError("Name the checkpoint — what should the commissioner sign off?");
+                return;
+            }
+        } else if (!body.trim() && !file) {
             setError("Add a note or a photo.");
             return;
         }
 
         setBusy(true);
         let imageUrls: string[] = [];
-        if (file) {
+        if (file && type !== "checkpoint") {
             const url = await upload(file);
             if (!url) {
                 setBusy(false);
@@ -252,6 +331,7 @@ function PostForm({
             body: body.trim() || undefined,
             imageUrls: imageUrls.length ? imageUrls : undefined,
             isVisibleToClient: visible,
+            isPublic: type === "wip_photo" ? publish : false,
         });
         setBusy(false);
 
@@ -275,6 +355,7 @@ function PostForm({
                         <option value="wip_photo">📸 Work-in-progress photo</option>
                         <option value="message">💬 Message</option>
                         <option value="milestone">🏆 Milestone</option>
+                        <option value="checkpoint">☑️ Checkpoint — ask for sign-off</option>
                     </select>
                 </label>
             )}
@@ -321,7 +402,7 @@ function PostForm({
                 )}
             </label>
 
-            {party === "artist" && (
+            {party === "artist" && type !== "checkpoint" && (
                 <label className="mb-4 flex cursor-pointer items-center gap-2 text-sm">
                     <input
                         type="checkbox"
@@ -332,6 +413,21 @@ function PostForm({
                     Visible to the commissioner
                     <span className="text-muted-foreground text-xs">
                         (uncheck for a private note to yourself)
+                    </span>
+                </label>
+            )}
+
+            {party === "artist" && type === "wip_photo" && visible && (
+                <label className="mb-4 flex cursor-pointer items-center gap-2 text-sm">
+                    <input
+                        type="checkbox"
+                        checked={publish}
+                        onChange={(e) => setPublish(e.target.checked)}
+                        className="h-4 w-4"
+                    />
+                    🌍 Publish to the horse&rsquo;s Making reel at delivery
+                    <span className="text-muted-foreground text-xs">
+                        (otherwise it stays on the workbench, between you two)
                     </span>
                 </label>
             )}

@@ -78,6 +78,16 @@ export async function proxy(request: NextRequest) {
         // console, judge queue, ring, planner), so opening the
         // subtree changes nothing for them.
         "/shows",
+        // Studios (workbench rebuild): /studio/[slug] is the artist's
+        // shareable storefront — "the one URL an artist pastes into a
+        // Facebook group" — and /studio/commission/[id]?token= is the
+        // guest share link; BOTH were silently login-walled here while
+        // their own pages were built anon-safe. Every private page
+        // under /studio enforces its own server-side login redirect
+        // (directory is public by design; dashboard, setup, log-work,
+        // my-commissions, request and tokenless commission views all
+        // self-gate), so opening the subtree changes nothing for them.
+        "/studio",
         // Card verification (Phase F): /cards/[code] is the public
         // "anyone can verify a card" trust page — anon must reach it.
         // Reads go through the anon-safe verify_qualification_card RPC.

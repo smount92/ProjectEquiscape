@@ -88,13 +88,60 @@ export default async function StudioPage({
     const intake = intakeFor(slots, profile.waitlistOpen);
     const openServices = profile.services.filter((s) => s.open);
 
+    // ── The identity joins: Registry artist page + the studio's barn ──
+    // Both tolerant — the artists table is 200, barn_group_id is 203.
+    let registryLink: { slug: string; name: string } | null = null;
+    try {
+        const { data: artistRow } = await (supabase as unknown as {
+            from: (t: string) => {
+                select: (c: string) => {
+                    or: (f: string) => {
+                        limit: (n: number) => PromiseLike<{ data: Record<string, unknown>[] | null }>;
+                    };
+                };
+            };
+        })
+            .from("artists")
+            .select("slug, name, verified_user_id")
+            .or(`verified_user_id.eq.${profile.userId},name.eq.${profile.ownerAlias.replace(/,/g, "")}`)
+            .limit(1);
+        const a = artistRow?.[0];
+        if (a?.slug) registryLink = { slug: String(a.slug), name: String(a.name) };
+    } catch {
+        // pre-200 — no registry join to offer
+    }
+
+    let barn: { slug: string; name: string; memberCount: number } | null = null;
+    if (profile.barnGroupId) {
+        const { data: g } = await supabase
+            .from("groups")
+            .select("slug, name, member_count")
+            .eq("id", profile.barnGroupId)
+            .maybeSingle();
+        if (g?.slug) {
+            barn = {
+                slug: String(g.slug),
+                name: String(g.name ?? "The barn"),
+                memberCount: typeof g.member_count === "number" ? g.member_count : 0,
+            };
+        }
+    }
+
+    // The stat strip: computed from the wall, never typed in.
+    const workYears = portfolio
+        .map((h) => (h.dateCompleted ? Number(h.dateCompleted.slice(0, 4)) : NaN))
+        .filter((y) => !isNaN(y));
+    const estYear = profile.createdAt ? Number(profile.createdAt.slice(0, 4)) : null;
+    const sinceYear = workYears.length ? Math.min(...workYears, estYear ?? Infinity) : estYear;
+    const titlesWon = portfolio.reduce((n, h) => n + h.titles.length, 0);
+
     return (
         <ExplorerLayout noHeader>
             <ViewBeacon entityType="studio" entityId={profile.userId} />
             <PageMasthead
                 icon="🎨"
                 title={profile.studioName}
-                subtitle={`Commissions by @${profile.ownerAlias}`}
+                subtitle={`The studio of @${profile.ownerAlias}${sinceYear ? ` · since ${sinceYear}` : ""}`}
                 backHref="/studio"
                 backLabel="All studios"
                 actions={
@@ -186,7 +233,24 @@ export default async function StudioPage({
                 </div>
             </div>
 
-            {/* ── The receipts: what they've actually finished ── */}
+            {/* ── The stat strip: computed from the wall, never typed in ── */}
+            {portfolio.length > 0 && (
+                <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    {[
+                        [String(portfolio.length), "Works documented"],
+                        ...(titlesWon > 0 ? [[String(titlesWon), "Titles won by works"]] : []),
+                        ...(sinceYear ? [[String(sinceYear), "Working since"]] : []),
+                        [turnaroundLabel(profile.terms), "Turnaround"],
+                    ].map(([n, label]) => (
+                        <div key={label} className="border-input bg-card rounded-lg border px-4 py-3 shadow-sm">
+                            <div className="text-foreground font-serif text-xl font-bold tabular-nums">{n}</div>
+                            <div className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">{label}</div>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {/* ── The works: what they've actually finished ── */}
             <div className="mb-6">
                 <ReceiptsWall
                     horses={portfolio}
@@ -194,6 +258,41 @@ export default async function StudioPage({
                     isOwner={isOwner}
                 />
             </div>
+
+            {/* ── The joins: this studio elsewhere on the Hub ── */}
+            {(registryLink || barn) && (
+                <div className="mb-6 grid gap-6 lg:grid-cols-2">
+                    {registryLink && (
+                        <Panel title="In the Registry" icon="📖">
+                            <p className="text-secondary-foreground m-0 text-sm leading-relaxed">
+                                <Link
+                                    href={`/reference/${registryLink.slug}`}
+                                    className="text-forest font-semibold hover:underline"
+                                >
+                                    {registryLink.name} in the Registry →
+                                </Link>{" "}
+                                — the career timeline, and every documented work on its
+                                mold&rsquo;s reference page.
+                            </p>
+                        </Panel>
+                    )}
+                    {barn && (
+                        <Panel title="The barn" icon="🏠">
+                            <p className="text-secondary-foreground m-0 text-sm leading-relaxed">
+                                <Link
+                                    href={`/community/barns/${barn.slug}`}
+                                    className="text-forest font-semibold hover:underline"
+                                >
+                                    {barn.name} →
+                                </Link>{" "}
+                                — {barn.memberCount} member{barn.memberCount === 1 ? "" : "s"}.
+                                The studio&rsquo;s community room: follow along between
+                                commissions.
+                            </p>
+                        </Panel>
+                    )}
+                </div>
+            )}
 
             <div className="grid gap-6 lg:grid-cols-2">
                 {/* ── The rate card ── */}

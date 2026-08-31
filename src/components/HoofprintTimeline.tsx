@@ -269,6 +269,27 @@ export default function HoofprintTimeline({
  {event.description && !(showRecordsListedElsewhere && event.eventType === "show_result") && (
  <div className="text-secondary-foreground mt-1 text-sm leading-relaxed">{event.description}</div>
  )}
+ {/* Customization events carry their WIP photos in metadata —
+     the view delivered them for months while nothing rendered
+     them (audit: "carried to the passport, silently never
+     shown"). A small strip; The Making chapter is the full reel. */}
+ {event.eventType === "customization" &&
+ Array.isArray(event.metadata?.image_urls) &&
+ (event.metadata.image_urls as string[]).length > 0 && (
+ <div className="mt-2 flex gap-1.5 overflow-x-auto">
+ {(event.metadata.image_urls as string[]).slice(0, 6).map((url, i) => (
+ <a key={i} href={url} target="_blank" rel="noopener" className="shrink-0">
+ {/* eslint-disable-next-line @next/next/no-img-element */}
+ <img
+ src={url}
+ alt=""
+ loading="lazy"
+ className="h-14 w-14 rounded-md border border-input object-cover"
+ />
+ </a>
+ ))}
+ </div>
+ )}
  </div>
  {/* Only user-authored notes (from posts) can be deleted */}
  {isOwner &&

@@ -28,6 +28,7 @@ import {
 } from "@/lib/studio/terms";
 import { coerceServices, studioPriceRange, type StudioService } from "@/lib/studio/services";
 import { resolveAvatarUrls } from "@/lib/utils/avatars.server";
+import { getPublicImageUrl } from "@/lib/utils/storage";
 
 /**
  * ART STUDIO — server actions.
@@ -70,6 +71,9 @@ export interface ArtistProfile {
     acceptingTypes: string[];
     ownerAlias: string;
     ownerAvatarUrl: string | null;
+    /** The studio's barn (an ordinary group), when the artist linked one (203). */
+    barnGroupId: string | null;
+    createdAt: string | null;
 }
 
 export interface Commission {
@@ -129,6 +133,10 @@ export interface CommissionUpdate {
     newStatus: string | null;
     requiresPayment: boolean;
     isVisibleToClient: boolean;
+    /** Artist's mark: publish this moment to the Making reel at delivery (203). */
+    isPublic: boolean;
+    /** Present on checkpoint entries: the artist's proposed sign-off + the client's ack. */
+    checkpoint: { title: string; ackedBy: string | null; ackedAt: string | null } | null;
     createdAt: string;
 }
 
@@ -291,6 +299,9 @@ function mapArtistProfile(p: Row, alias: string, avatarUrl: string | null): Arti
         acceptingTypes: (p.accepting_types as string[]) ?? [],
         ownerAlias: alias,
         ownerAvatarUrl: avatarUrl,
+        // 203: the studio's community room. Tolerant — undefined pre-paste.
+        barnGroupId: (p.barn_group_id as string | null) ?? null,
+        createdAt: str(p.created_at),
     };
 }
 
@@ -362,11 +373,22 @@ async function loadOwner(
     supabase: Awaited<ReturnType<typeof createClient>>,
     userId: string,
 ): Promise<{ alias: string; avatarUrl: string | null }> {
-    const { data } = await supabase
+    let { data } = await supabase
         .from("users")
         .select("alias_name, avatar_url")
         .eq("id", userId)
         .maybeSingle();
+    if (!data) {
+        // Anon viewer: users is authenticated-only, so the storefront
+        // read "@Unknown" for the logged-out world it exists to reach.
+        // The 203 DEFINER card serves alias + avatar for
+        // portfolio-visible studios only. Null pre-paste.
+        const { data: card } = await (supabase.rpc as unknown as (
+            fn: string,
+            args: Record<string, unknown>,
+        ) => PromiseLike<{ data: unknown }>)("get_studio_owner_card", { p_user: userId });
+        if (card) data = card as { alias_name: string; avatar_url: string | null };
+    }
     const u = data as { alias_name: string; avatar_url: string | null } | null;
     if (!u) return { alias: "Unknown", avatarUrl: null };
     const resolved = u.avatar_url
@@ -536,10 +558,37 @@ export async function updateArtistProfile(formData: FormData): Promise<ActionRes
     };
     if (newSlug) patch.studio_slug = newSlug;
 
-    const { error } = await supabase
+    // The studio's barn (203). Only a barn the artist actually runs —
+    // linking someone else's barn as "your studio's room" is a
+    // misrepresentation surface.
+    const barnField = formData.get("barnGroupId");
+    if (typeof barnField === "string") {
+        if (barnField === "") {
+            patch.barn_group_id = null;
+        } else {
+            const { data: membership } = await supabase
+                .from("group_memberships")
+                .select("group_id, role")
+                .eq("group_id", barnField)
+                .eq("user_id", user.id)
+                .in("role", ["owner", "admin"])
+                .maybeSingle();
+            if (membership) patch.barn_group_id = barnField;
+        }
+    }
+
+    let { error } = await supabase
         .from("artist_profiles")
         .update(patch as never)
         .eq("user_id", user.id);
+    if (error && (error.code === "42703" || error.code === "PGRST204") && "barn_group_id" in patch) {
+        // Pre-203 — save everything else rather than failing the form.
+        delete patch.barn_group_id;
+        ({ error } = await supabase
+            .from("artist_profiles")
+            .update(patch as never)
+            .eq("user_id", user.id));
+    }
     if (error) return { success: false, error: error.message };
 
     revalidatePath("/studio");
@@ -800,6 +849,35 @@ export async function getArtistPortfolio(
 ): Promise<FinishedHorse[]> {
     const supabase = await createClient();
 
+    // Logged-out viewers can't pass the invoker-rights view's RLS, so
+    // the shareable storefront showed an empty wall to exactly the
+    // audience it was built for. The 203 DEFINER wall serves the
+    // public subset; [] pre-paste falls through to the normal path
+    // (which anon also can't read — honest either way).
+    const { data: auth } = await supabase.auth.getUser();
+    if (!auth?.user) {
+        const { data: wall } = await (supabase.rpc as unknown as (
+            fn: string,
+            args: Record<string, unknown>,
+        ) => PromiseLike<{ data: unknown }>)("get_studio_wall", { p_user: artistUserId });
+        if (Array.isArray(wall) && wall.length > 0) {
+            return (wall as Row[]).map((r) => ({
+                horseId: String(r.horse_id),
+                horseName: String(r.horse_name ?? "Unnamed"),
+                workType: str(r.work_type),
+                dateCompleted: (r.date_completed as string | null) ?? null,
+                imageUrls: (r.image_urls as string[]) ?? [],
+                isPublic: true,
+                verified: r.verified === true,
+                showCount: Number(r.show_count ?? 0),
+                nanQualifyingCount: Number(r.nan_qualifying_count ?? 0),
+                bestPlacing: r.best_placing == null ? null : Number(r.best_placing),
+                titles: (r.titles as string[]) ?? [],
+            }));
+        }
+        return [];
+    }
+
     try {
         const support = await getStudioColumnSupport(supabase as never);
 
@@ -958,8 +1036,25 @@ export async function getClientCommissions(): Promise<Commission[]> {
     return ((data as Row[] | null) ?? []).map(mapCommission);
 }
 
-export async function getCommission(commissionId: string): Promise<Commission | null> {
-    const supabase = await createClient();
+export async function getCommission(
+    commissionId: string,
+    opts?: { guestToken?: string },
+): Promise<Commission | null> {
+    // Token-validated guests read via the admin client — the RLS
+    // policies are TO authenticated, so the anon share-link audience
+    // could never pass them (see getCommissionUpdates).
+    let supabase: Awaited<ReturnType<typeof createClient>> = await createClient();
+    if (opts?.guestToken) {
+        const admin = getAdminClient();
+        const { data: tokenRow } = await admin
+            .from("commissions")
+            .select("id")
+            .eq("id", commissionId)
+            .eq("guest_token", opts.guestToken)
+            .maybeSingle();
+        if (!tokenRow) return null;
+        supabase = admin as unknown as Awaited<ReturnType<typeof createClient>>;
+    }
     const { data } = await supabase
         .from("commissions")
         .select(COMMISSION_SELECT)
@@ -968,19 +1063,43 @@ export async function getCommission(commissionId: string): Promise<Commission | 
     return data ? mapCommission(data as Row) : null;
 }
 
-export async function getCommissionUpdates(commissionId: string): Promise<CommissionUpdate[]> {
-    const supabase = await createClient();
-    const { data } = await supabase
+export async function getCommissionUpdates(
+    commissionId: string,
+    opts?: { guestToken?: string },
+): Promise<CommissionUpdate[]> {
+    // Guest links carry no session, and every commission RLS policy is
+    // TO authenticated — the token lookup under the user client
+    // returned nothing and the share link 404'd for the exact audience
+    // it was built for. Token-validated reads go through the admin
+    // client instead, restricted to the client-visible surface.
+    let db: Awaited<ReturnType<typeof createClient>> = await createClient();
+    let guestView = false;
+    if (opts?.guestToken) {
+        const admin = getAdminClient();
+        const { data: tokenRow } = await admin
+            .from("commissions")
+            .select("id")
+            .eq("id", commissionId)
+            .eq("guest_token", opts.guestToken)
+            .maybeSingle();
+        if (!tokenRow) return [];
+        db = admin as unknown as Awaited<ReturnType<typeof createClient>>;
+        guestView = true;
+    }
+
+    const { data } = await db
         .from("commission_updates")
         .select("*, author:users!author_id(alias_name, avatar_url)")
         .eq("commission_id", commissionId)
         .order("created_at", { ascending: true });
 
-    const rows = (data as Row[] | null) ?? [];
+    let rows = (data as Row[] | null) ?? [];
+    if (guestView) rows = rows.filter((u) => u.is_visible_to_client !== false);
     if (rows.length === 0) return [];
 
     const mapped = rows.map((u) => {
         const author = u.author as { alias_name: string; avatar_url: string | null } | null;
+        const meta = (u.metadata ?? {}) as { checkpoint?: { title?: string; acked_by?: string | null; acked_at?: string | null } };
         return {
             id: String(u.id),
             commissionId: String(u.commission_id),
@@ -995,9 +1114,40 @@ export async function getCommissionUpdates(commissionId: string): Promise<Commis
             newStatus: (u.new_status as string | null) ?? null,
             requiresPayment: u.requires_payment === true,
             isVisibleToClient: u.is_visible_to_client !== false,
+            isPublic: u.is_public === true,
+            checkpoint: meta.checkpoint?.title
+                ? {
+                      title: String(meta.checkpoint.title),
+                      ackedBy: meta.checkpoint.acked_by ? String(meta.checkpoint.acked_by) : null,
+                      ackedAt: meta.checkpoint.acked_at ? String(meta.checkpoint.acked_at) : null,
+                  }
+                : null,
             createdAt: String(u.created_at),
         };
     });
+
+    // Workbench photos (203) are stored as PRIVATE bucket paths, not
+    // URLs. Sign them here — the caller has already proven they may
+    // see this thread (party check or guest token), the chat-attachments
+    // posture. Legacy rows carry full public URLs and pass through.
+    const toSign = [...new Set(mapped.flatMap((u) => u.imageUrls.filter((p) => !p.startsWith("http"))))];
+    if (toSign.length > 0) {
+        try {
+            const admin = getAdminClient();
+            const { data: signed } = await admin.storage
+                .from("workbench")
+                .createSignedUrls(toSign, 60 * 60);
+            const signedMap = new Map(
+                (signed ?? []).filter((s) => s.signedUrl).map((s) => [s.path as string, s.signedUrl]),
+            );
+            for (const u of mapped) {
+                u.imageUrls = u.imageUrls.map((p) => (p.startsWith("http") ? p : (signedMap.get(p) ?? "")))
+                    .filter(Boolean);
+            }
+        } catch (err) {
+            logger.error("ArtStudio", "Workbench signing failed", err);
+        }
+    }
 
     const avatarMap = await resolveAvatarUrls(
         mapped.map((u) => u.authorAvatarUrl).filter((u): u is string => !!u),
@@ -1395,6 +1545,13 @@ export async function transitionCommission(
         }
     }
 
+    // The client's last checkbox (203). Tolerant: the column arrives
+    // with the migration; the status CHECK does too, so pre-203 this
+    // transition simply errors back to the caller harmlessly.
+    if (to === "received") {
+        patch.received_at = now;
+    }
+
     const { error } = await supabase
         .from("commissions")
         .update(patch as never)
@@ -1452,6 +1609,8 @@ function commissionNotice(
             return `Your ${type} commission was approved.`;
         case "delivered":
             return `Your ${type} commission has been marked delivered.`;
+        case "received":
+            return `The commissioner confirmed your ${type} commission arrived safely. ✓`;
         case "declined":
             return `The ${type} commission was declined.`;
         case "cancelled":
@@ -1512,15 +1671,20 @@ async function runDeliveryHooks(
         logger.error("ArtStudio", "Artist stamp failed (continuing)", err);
     }
 
-    // Provenance: one consolidated customization_log carrying the WIP
-    // photos, which surfaces on the horse's Hoofprint and — once 170 is
-    // applied — joins back to the artist for their receipts wall.
+    // Provenance: one consolidated customization_log carrying the
+    // published WIP photos, which surfaces on the horse's Hoofprint and
+    // — once 170 is applied — joins back to the artist for their
+    // receipts wall. Since 203, delivery is also PUBLICATION: the
+    // artist's is_public moments are copied out of the private
+    // workbench bucket into horse-images and become the horse's Making
+    // reel (202's work_moments). Private moments stay private forever.
     try {
         const support = await getStudioColumnSupport(supabase as never);
+        const admin = getAdminClient();
 
         const { data: wipRows } = await supabase
             .from("commission_updates")
-            .select("title, body, image_urls")
+            .select("*")
             .eq("commission_id", commissionId)
             .eq("update_type", "wip_photo")
             .eq("is_visible_to_client", true)
@@ -1528,11 +1692,46 @@ async function runDeliveryHooks(
 
         const images: string[] = [];
         const notes: string[] = [];
+        const momentRows: Patch[] = [];
         for (const wip of ((wipRows as Row[] | null) ?? [])) {
-            const urls = (wip.image_urls as string[]) ?? [];
-            images.push(...urls);
+            const rawUrls = (wip.image_urls as string[]) ?? [];
+            // Legacy rows carry full public URLs (pre-203 uploads went
+            // straight to the public bucket) — those were always
+            // published, keep that. Workbench paths publish only when
+            // the artist marked the moment public.
+            const publishable: string[] = [];
+            for (let i = 0; i < rawUrls.length; i++) {
+                const u = rawUrls[i];
+                if (u.startsWith("http")) {
+                    publishable.push(u);
+                    continue;
+                }
+                if (wip.is_public !== true) continue;
+                try {
+                    const { data: blob } = await admin.storage.from("workbench").download(u);
+                    if (!blob) continue;
+                    const dest = `horses/${horseId}/making_c${Date.now()}_${i}.webp`;
+                    const { error: upErr } = await admin.storage
+                        .from("horse-images")
+                        .upload(dest, blob, { contentType: blob.type || "image/webp" });
+                    if (!upErr) publishable.push(getPublicImageUrl(dest));
+                } catch {
+                    // One failed copy never sinks delivery.
+                }
+            }
+            if (publishable.length === 0) continue;
+            images.push(...publishable);
             const text = str(wip.body) ?? str(wip.title);
             if (text) notes.push(text);
+            momentRows.push({
+                author_id: artistId,
+                stage: "progress",
+                caption: text ? text.slice(0, 280) : null,
+                claimed_date: String(wip.created_at ?? "").slice(0, 10) || null,
+                is_public: true,
+                image_urls: publishable,
+                sort_order: momentRows.length,
+            });
         }
 
         const log: Patch = {
@@ -1550,7 +1749,23 @@ async function runDeliveryHooks(
             log.artist_user_id = artistId;
         }
 
-        await supabase.from("customization_logs").insert(log as never);
+        const { data: insertedLog } = await supabase
+            .from("customization_logs")
+            .insert(log as never)
+            .select("id")
+            .maybeSingle();
+
+        // The Making reel (202). Tolerant: pre-202 the table is
+        // missing and this block simply doesn't happen.
+        const logId = (insertedLog as { id: string } | null)?.id;
+        if (logId && momentRows.length > 0) {
+            const { error: momentsErr } = await admin
+                .from("work_moments" as never)
+                .insert(momentRows.map((m) => ({ ...m, log_id: logId })) as never);
+            if (momentsErr && momentsErr.code !== "42P01" && momentsErr.code !== "PGRST204") {
+                logger.error("ArtStudio", "Reel moments failed (continuing)", momentsErr.message);
+            }
+        }
     } catch (err) {
         logger.error("ArtStudio", "Provenance log failed (continuing)", err);
     }
@@ -1563,11 +1778,13 @@ async function runDeliveryHooks(
 export async function addCommissionUpdate(
     commissionId: string,
     data: {
-        updateType: "wip_photo" | "message" | "milestone";
+        updateType: "wip_photo" | "message" | "milestone" | "checkpoint";
         title?: string;
         body?: string;
         imageUrls?: string[];
         isVisibleToClient?: boolean;
+        /** Artist's mark: publish this moment to the Making reel at delivery (203). */
+        isPublic?: boolean;
     },
 ): Promise<ActionResult> {
     const { supabase, user } = await requireAuth();
@@ -1576,15 +1793,24 @@ export async function addCommissionUpdate(
     if (!loaded.ok) return { success: false, error: loaded.error };
     const { row, party } = loaded;
 
-    if (!str(data.body) && !(data.imageUrls ?? []).length) {
+    if (data.updateType === "checkpoint") {
+        // A checkpoint is the artist proposing a sign-off ("base coat —
+        // approve?"); the client's ack lands via ackCheckpoint. Both
+        // stamps live in metadata, guarded by these actions.
+        if (party !== "artist") return { success: false, error: "Only the artist proposes checkpoints." };
+        if (!str(data.title)) return { success: false, error: "Name the checkpoint." };
+    } else if (!str(data.body) && !(data.imageUrls ?? []).length) {
         return { success: false, error: "Add a note or a photo before posting." };
     }
 
     // Only the artist keeps private notes; a client "private" note would be
     // invisible to the only other person in the conversation.
-    const visible = party === "artist" ? data.isVisibleToClient !== false : true;
+    const visible =
+        party === "artist" && data.updateType !== "checkpoint"
+            ? data.isVisibleToClient !== false
+            : true;
 
-    const { error } = await supabase.from("commission_updates").insert({
+    const insertRow: Patch = {
         commission_id: commissionId,
         author_id: user.id,
         update_type: data.updateType,
@@ -1592,7 +1818,23 @@ export async function addCommissionUpdate(
         body: str(data.body),
         image_urls: (data.imageUrls ?? []).slice(0, 8),
         is_visible_to_client: visible,
-    } as Patch as never);
+    };
+    // 203 columns — retried without them so posting keeps working
+    // until the migration is pasted.
+    const withMeta: Patch = {
+        ...insertRow,
+        is_public: party === "artist" && visible ? data.isPublic === true : false,
+        ...(data.updateType === "checkpoint"
+            ? { metadata: { checkpoint: { title: str(data.title) } } }
+            : {}),
+    };
+    let { error } = await supabase.from("commission_updates").insert(withMeta as never);
+    if (error && (error.code === "42703" || error.code === "PGRST204")) {
+        if (data.updateType === "checkpoint") {
+            return { success: false, error: "Checkpoints arrive with migration 203." };
+        }
+        ({ error } = await supabase.from("commission_updates").insert(insertRow as never));
+    }
     if (error) return { success: false, error: error.message };
 
     await supabase
@@ -1608,7 +1850,9 @@ export async function addCommissionUpdate(
                 ? "posted a work-in-progress photo"
                 : data.updateType === "milestone"
                   ? "marked a milestone"
-                  : "sent a message";
+                  : data.updateType === "checkpoint"
+                    ? `proposed a checkpoint: ${str(data.title) ?? ""}`
+                    : "sent a message";
         if (other) {
             await notify({
                 userId: other,
@@ -1628,6 +1872,61 @@ export async function addCommissionUpdate(
  * is a FLAG, not a pipeline stage — v1 used one `shipping` status for both
  * directions of travel, which made the queue unreadable.
  */
+/**
+ * The client's half of a checkpoint: "yep, checked off." The ack is a
+ * one-way stamp in the entry's metadata — who and when — written via
+ * the admin client after the party check, so neither side can forge
+ * or unwind the other's signature.
+ */
+export async function ackCheckpoint(
+    commissionId: string,
+    updateId: string,
+): Promise<ActionResult> {
+    const { supabase, user } = await requireAuth();
+
+    const loaded = await loadParty(supabase, commissionId, user.id);
+    if (!loaded.ok) return { success: false, error: loaded.error };
+    if (loaded.party !== "client") {
+        return { success: false, error: "Only the commissioner signs off a checkpoint." };
+    }
+
+    const admin = getAdminClient();
+    const { data: entry } = await admin
+        .from("commission_updates")
+        .select("id, update_type, metadata")
+        .eq("id", updateId)
+        .eq("commission_id", commissionId)
+        .maybeSingle();
+    const meta = ((entry as unknown as Row | null)?.metadata ?? {}) as {
+        checkpoint?: { title?: string; acked_by?: string; acked_at?: string };
+    };
+    if (!entry || (entry as unknown as Row).update_type !== "checkpoint" || !meta.checkpoint?.title) {
+        return { success: false, error: "That checkpoint no longer exists." };
+    }
+    if (meta.checkpoint.acked_by) return { success: false, error: "Already signed off." };
+
+    const { error } = await admin
+        .from("commission_updates")
+        .update({
+            metadata: {
+                ...meta,
+                checkpoint: { ...meta.checkpoint, acked_by: user.id, acked_at: new Date().toISOString() },
+            },
+        } as never)
+        .eq("id", updateId);
+    if (error) return { success: false, error: "Could not record the sign-off." };
+
+    const artistId = String(loaded.row.artist_id);
+    await notify({
+        userId: artistId,
+        actorId: user.id,
+        content: `Checkpoint signed off: ${meta.checkpoint.title} ✓`,
+        linkUrl: `/studio/commission/${commissionId}`,
+    });
+    revalidateCommission(commissionId);
+    return { success: true };
+}
+
 export async function markModelReceived(
     commissionId: string,
     received: boolean,

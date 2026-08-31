@@ -387,6 +387,20 @@ export async function claimParkedHorse(pin: string): Promise<{
             }
         } catch (err) { logger.error("Transfer", "Background task failed", err); }
 
+        // Claiming the horse IS accepting it with its story: any work
+        // records by the parker (the artist who parked it) flip to
+        // owner-confirmed, so the credit reads ✓ verified from the
+        // first minute in the new stable. Best-effort; the RPC ships
+        // in migration 203 and no-ops before it is pasted.
+        try {
+            if (result.horse_id && result.sender_id) {
+                await (admin.rpc as unknown as (fn: string, args: Record<string, unknown>) => PromiseLike<unknown>)(
+                    "confirm_work_records_on_claim",
+                    { p_horse: result.horse_id, p_parker: result.sender_id },
+                );
+            }
+        } catch (err) { logger.error("Transfer", "Work-record confirm on claim failed", err); }
+
         revalidatePath("/dashboard");
         revalidatePath(`/stable/${result.horse_id}`);
 

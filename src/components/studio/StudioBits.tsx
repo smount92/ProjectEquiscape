@@ -27,6 +27,7 @@ const COMMISSION_PILL: Record<CommissionStatus, string> = {
     awaiting_approval: "bg-studio/20 text-studio border-studio/40",
     completed: "bg-success/15 text-success border-success/40",
     delivered: "bg-success/15 text-success border-success/40",
+    received: "bg-success/20 text-success border-success/50",
     declined: "bg-destructive/15 text-destructive border-destructive/40",
     cancelled: "bg-destructive/15 text-destructive border-destructive/40",
 };

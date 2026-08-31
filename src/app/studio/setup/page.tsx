@@ -26,6 +26,23 @@ export default async function StudioSetupPage() {
 
     const profile = await getArtistProfile(user.id);
 
+    // Barns the artist RUNS — candidates for the studio's community
+    // room (203). A barn you merely joined isn't yours to hang the
+    // studio shingle on.
+    let ownBarns: { id: string; name: string }[] = [];
+    const { data: memberships } = await supabase
+        .from("group_memberships")
+        .select("group_id, role, groups:group_id(id, name)")
+        .eq("user_id", user.id)
+        .in("role", ["owner", "admin"]);
+    ownBarns = (memberships ?? [])
+        .map((m) => {
+            const g = m.groups as unknown as { id: string; name: string } | null;
+            return g ? { id: g.id, name: g.name } : null;
+        })
+        .filter((g): g is { id: string; name: string } => !!g)
+        .sort((a, b) => a.name.localeCompare(b.name));
+
     return (
         <FocusLayout noHeader>
             <PageMasthead
@@ -40,7 +57,7 @@ export default async function StudioSetupPage() {
                 backHref={profile ? "/studio/dashboard" : "/studio"}
                 backLabel={profile ? "Dashboard" : "The Art Studio"}
             />
-            <StudioSettings profile={profile} />
+            <StudioSettings profile={profile} ownBarns={ownBarns} />
         </FocusLayout>
     );
 }

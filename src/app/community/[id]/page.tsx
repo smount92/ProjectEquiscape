@@ -35,6 +35,8 @@ import BuyerPanel from"@/components/passport/BuyerPanel";
 import { summarizeShowRecords } from"@/lib/market/recordSummary";
 import { getPublicHorseCards } from"@/lib/shows/publicCards";
 import { getMarketPrice } from"@/app/actions/market";
+import MakingChapter from"@/components/making/MakingChapter";
+import { getMakingForHorse } from"@/app/actions/work-records";
 
 // Force fresh data on every request — prevents stale comments/favorites
 
@@ -272,6 +274,9 @@ export default async function PublicPassportPage({
  shortSlug: img.short_slug || null,
  }));
 
+ // The Making — work records + reels (202; [] until pasted)
+ const makingRecords = await getMakingForHorse(horseId);
+
  // ================================================================
  // PROVENANCE: Show Records + Pedigree (read-only)
  // ================================================================
@@ -407,9 +412,17 @@ editionSize: rawPedigree.edition_size,
 
  {/* Two-column layout: Gallery | Ledger Card */}
  <div className="animate-fade-in-up grid grid-cols-1 gap-8 lg:grid-cols-[1.5fr_1fr] lg:gap-12">
- {/* Left: Gallery */}
- <div className="self-start overflow-hidden rounded-2xl shadow-md" id="passport-photos">
+ {/* Left: Gallery, then The Making */}
+ <div className="self-start">
+ <div className="overflow-hidden rounded-2xl shadow-md" id="passport-photos">
  <PassportGallery images={galleryImages} />
+ </div>
+ <MakingChapter
+ records={makingRecords}
+ ownerId={horse.owner_id}
+ horseId={horseId}
+ showControls
+ />
  </div>
 
  {/* Right: The Ledger Card */}

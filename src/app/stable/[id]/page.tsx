@@ -11,6 +11,8 @@ import DeleteHorseModal from"@/components/DeleteHorseModal";
 import ShowRecordTimeline from"@/components/ShowRecordTimeline";
 import PedigreeCard from"@/components/PedigreeCard";
 import HoofprintTimeline from"@/components/HoofprintTimeline";
+import MakingChapter from"@/components/making/MakingChapter";
+import { getMakingForHorse } from"@/app/actions/work-records";
 import TransferModal from"@/components/TransferModal";
 import ParkedExportPanel from"@/components/ParkedExportPanel";
 import { getHoofprint } from"@/app/actions/hoofprint";
@@ -153,6 +155,9 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  label: ANGLE_LABELS[img.angle_profile] || img.angle_profile,
  shortSlug: img.short_slug || null,
  }));
+
+ // The Making — work records + reels (202; [] until pasted)
+ const makingRecords = await getMakingForHorse(horseId);
 
  // Fetch financial vault (owner-only via RLS)
  const { data: rawVault } = await supabase
@@ -408,9 +413,18 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
 
  {/* Two-column layout: Gallery | Ledger Card */}
  <div className="animate-fade-in-up grid grid-cols-1 gap-8 lg:grid-cols-[1.5fr_1fr] lg:gap-12">
- {/* Left: Gallery */}
+ {/* Left: Gallery, then The Making — the visual column reads
+     what she looks like now, then how she came to be. */}
+ <div>
  <div className="overflow-hidden rounded-2xl shadow-md">
  <PassportGallery images={galleryImages} />
+ </div>
+ <MakingChapter
+ records={makingRecords}
+ ownerId={horse.owner_id}
+ horseId={horseId}
+ showControls
+ />
  </div>
 
  {/* Right: The Ledger Card */}
