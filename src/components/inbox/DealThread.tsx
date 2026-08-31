@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
-import { sendMessage } from "@/app/actions/messaging";
+import { editMessage, sendMessage } from "@/app/actions/messaging";
 import { markThreadRead } from "@/app/actions/deals";
 import { createClient } from "@/lib/supabase/client";
 import { UserAvatar } from "@/components/social";
@@ -74,6 +74,9 @@ export default function DealThread({
     const [newMessage, setNewMessage] = useState("");
     const [sending, setSending] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [editingId, setEditingId] = useState<string | null>(null);
+    const [editText, setEditText] = useState("");
+    const [savingEdit, setSavingEdit] = useState(false);
     const [pendingFiles, setPendingFiles] = useState<File[]>([]);
     const [uploadProgress, setUploadProgress] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -90,6 +93,36 @@ export default function DealThread({
         () => RISKY_PAYMENT_REGEX.test(newMessage),
         [newMessage],
     );
+
+    /**
+     * Optimistic edit: the bubble updates instantly (with its honest
+     * "· edited" stamp), then the server confirms — 173's trigger is
+     * the real gatekeeper, so a rejection reverts the bubble and says
+     * why. Born of a real "thanks," that wanted to be "thanks, Steve".
+     */
+    const saveEdit = async (msg: ThreadMessage) => {
+        const next = editText.trim();
+        if (!next || next === msg.content) {
+            setEditingId(null);
+            return;
+        }
+        setSavingEdit(true);
+        const before = messages;
+        setMessages((prev) =>
+            prev.map((m) =>
+                m.id === msg.id ? { ...m, content: next, editedAt: new Date().toISOString() } : m,
+            ),
+        );
+        const res = await editMessage(conversationId, msg.id, next);
+        setSavingEdit(false);
+        setEditingId(null);
+        if (!res.success) {
+            setMessages(before);
+            setError(res.error ?? "Could not edit the message.");
+        } else {
+            setError(null);
+        }
+    };
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -308,6 +341,14 @@ export default function DealThread({
                                         msg={msg}
                                         actorName={msg.isMine ? "You" : `@${otherAlias}`}
                                     />
+                                ) : editingId === msg.id ? (
+                                    <EditBubble
+                                        text={editText}
+                                        onChange={setEditText}
+                                        saving={savingEdit}
+                                        onCancel={() => setEditingId(null)}
+                                        onSave={() => void saveEdit(msg)}
+                                    />
                                 ) : (
                                     <ChatBubble
                                         msg={msg}
@@ -319,6 +360,14 @@ export default function DealThread({
                                         otherAlias={otherAlias}
                                         otherAvatarUrl={otherAvatarUrl}
                                         currentUserAvatar={currentUserAvatar}
+                                        onEdit={
+                                            msg.isMine && msg.kind === "chat" && !composerDisabledReason
+                                                ? () => {
+                                                      setEditingId(msg.id);
+                                                      setEditText(msg.content);
+                                                  }
+                                                : undefined
+                                        }
                                     />
                                 )}
                             </div>
@@ -524,15 +573,18 @@ function ChatBubble({
     otherAlias,
     otherAvatarUrl,
     currentUserAvatar,
+    onEdit,
 }: {
     msg: ThreadMessage;
     showAvatar: boolean;
     otherAlias: string;
     otherAvatarUrl: string | null;
     currentUserAvatar: string | null;
+    /** Present only on the viewer's own chat messages. */
+    onEdit?: () => void;
 }) {
     return (
-        <div className={`flex items-end gap-2 ${msg.isMine ? "flex-row-reverse" : ""}`}>
+        <div className={`group flex items-end gap-2 ${msg.isMine ? "flex-row-reverse" : ""}`}>
             {!msg.isMine &&
                 (showAvatar ? (
                     <UserAvatar
@@ -588,12 +640,85 @@ function ChatBubble({
                     {msg.editedAt ? " · edited" : ""}
                 </div>
             </div>
+            {onEdit && (
+                <button
+                    type="button"
+                    onClick={onEdit}
+                    aria-label="Edit message"
+                    title="Edit message"
+                    className="text-muted-foreground hover:text-foreground shrink-0 self-center rounded p-1 text-xs opacity-60 transition-opacity group-hover:opacity-100"
+                >
+                    ✎
+                </button>
+            )}
             {msg.isMine &&
                 (showAvatar ? (
                     <UserAvatar src={currentUserAvatar} alias="You" size="xs" />
                 ) : (
                     <div className="h-6 w-6 shrink-0" />
                 ))}
+        </div>
+    );
+}
+
+/**
+ * A bubble in edit mode — the message swaps for a textarea in place.
+ * Enter saves, Shift+Enter breaks a line, Escape backs out: the same
+ * grammar as the composer, because it IS the composer, pointed at an
+ * old line.
+ */
+function EditBubble({
+    text,
+    onChange,
+    saving,
+    onSave,
+    onCancel,
+}: {
+    text: string;
+    onChange: (v: string) => void;
+    saving: boolean;
+    onSave: () => void;
+    onCancel: () => void;
+}) {
+    return (
+        <div className="flex flex-row-reverse items-end gap-2">
+            <div className="border-forest bg-card w-full max-w-[75%] rounded-2xl rounded-br-[4px] border-2 p-2 shadow-sm max-md:max-w-[85%]">
+                <textarea
+                    // eslint-disable-next-line jsx-a11y/no-autofocus
+                    autoFocus
+                    rows={Math.min(6, Math.max(2, text.split("\n").length))}
+                    value={text}
+                    maxLength={2000}
+                    onChange={(e) => onChange(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                            e.preventDefault();
+                            onSave();
+                        }
+                        if (e.key === "Escape") onCancel();
+                    }}
+                    className="text-foreground w-full resize-none bg-transparent px-1.5 py-1 text-sm leading-relaxed focus:outline-none"
+                    aria-label="Edit message"
+                />
+                <div className="flex items-center justify-end gap-3 px-1 pb-0.5">
+                    <button
+                        type="button"
+                        onClick={onCancel}
+                        disabled={saving}
+                        className="text-muted-foreground hover:text-foreground text-xs underline"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="button"
+                        onClick={onSave}
+                        disabled={saving}
+                        className="text-forest text-xs font-bold hover:underline disabled:opacity-50"
+                    >
+                        {saving ? "Saving…" : "Save"}
+                    </button>
+                </div>
+            </div>
         </div>
     );
 }

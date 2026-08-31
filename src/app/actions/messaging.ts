@@ -441,6 +441,55 @@ async function isThreadMuted(
 }
 
 /**
+ * Edit your own chat message. The rules live in the DATABASE (173's
+ * messages_guard trigger): only the author, only chat/photo entries —
+ * deal events are the record and stay immutable — and every content
+ * change stamps edited_at so the transcript stays honest ("· edited"
+ * renders in the bubble). This action is the polite front door; the
+ * trigger is the law.
+ */
+export async function editMessage(
+    conversationId: string,
+    messageId: string,
+    content: string,
+): Promise<{ success: boolean; editedAt?: string; error?: string }> {
+    const supabase = await createClient();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "You must be logged in." };
+
+    const trimmed = content.trim();
+    if (!trimmed) return { success: false, error: "A message can't be edited to nothing." };
+    if (trimmed.length > MAX_MESSAGE_LENGTH) {
+        return {
+            success: false,
+            error: `Message is too long (max ${MAX_MESSAGE_LENGTH.toLocaleString("en-US")} characters).`,
+        };
+    }
+
+    const { data, error } = await dealDb(supabase)
+        .from("messages")
+        .update({ content: sanitizeText(trimmed) })
+        .eq("id", messageId)
+        .eq("conversation_id", conversationId)
+        .eq("sender_id", user.id)
+        .select("edited_at")
+        .maybeSingle();
+
+    if (error) {
+        // The trigger raises in plain English; surface its sentence.
+        const msg = /cannot be edited|someone else/.test(error.message)
+            ? error.message.replace(/^.*?: /, "")
+            : "Could not edit the message.";
+        return { success: false, error: msg };
+    }
+    if (!data) return { success: false, error: "Message not found — only your own messages can be edited." };
+
+    return { success: true, editedAt: (data as { edited_at: string | null }).edited_at ?? undefined };
+}
+
+/**
  * Fetch all media attachments for messages in a conversation.
  * Returns a record of messageId → attachment signed URLs.
  * Verifies the requesting user is a conversation participant.
