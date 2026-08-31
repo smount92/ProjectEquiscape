@@ -637,7 +637,15 @@ function ChatBubble({
                     }`}
                 >
                     {formatTime(msg.createdAt)}
-                    {msg.editedAt ? " · edited" : ""}
+                    {msg.editedAt && (
+                        <span className="block">
+                            edited: {new Date(msg.editedAt).toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                            })}{" "}
+                            {formatTime(msg.editedAt)}
+                        </span>
+                    )}
                 </div>
             </div>
             {onEdit && (
