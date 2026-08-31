@@ -133,12 +133,17 @@ export default function LogWorkForm({
     const patchBucket = (id: number, patch: Partial<Bucket>) =>
         setBuckets((prev) => prev.map((b) => (b.id === id ? { ...b, ...patch } : b)));
 
-    const addFiles = (id: number, list: FileList | null) => {
-        if (!list) return;
+    // Takes a SNAPSHOT array, never the input's live FileList: the
+    // state updater runs after the event handler, and by then the
+    // input has been reset — on several browsers that empties the
+    // FileList it handed us, so photos "selected" and then silently
+    // vanished (Amanda's Ukko bug, 2026-09-01).
+    const addFiles = (id: number, picked: File[]) => {
+        if (picked.length === 0) return;
         setBuckets((prev) =>
             prev.map((b) =>
                 b.id === id
-                    ? { ...b, files: [...b.files, ...Array.from(list)].slice(0, MAX_IMAGES_PER_MOMENT) }
+                    ? { ...b, files: [...b.files, ...picked].slice(0, MAX_IMAGES_PER_MOMENT) }
                     : b,
             ),
         );
@@ -449,7 +454,10 @@ export default function LogWorkForm({
                                         multiple
                                         className="hidden"
                                         onChange={(e) => {
-                                            addFiles(b.id, e.target.files);
+                                            // Snapshot BEFORE resetting the input —
+                                            // File objects survive the reset, the
+                                            // live FileList does not.
+                                            addFiles(b.id, Array.from(e.target.files ?? []));
                                             e.target.value = "";
                                         }}
                                     />
