@@ -51,10 +51,13 @@ import {
     removeEntrantFromShowSchema,
     strikeEntrySchema,
     unpublishClassResultsSchema,
+    setClassRubricSchema,
     updateHorseDocumentSchema,
     voidCardSchema,
     writeCritiqueSchema,
+    writeEntryScoreSchema,
 } from "@/lib/shows/schemas";
+import { classAverages, cleanScores, parseRubric, rubricTemplate, weightedTotal } from "@/lib/shows/rubrics";
 import type { CardStatus } from "@/lib/shows/types";
 
 type ActionResult = { success: true } | { success: false; error: string };
@@ -746,6 +749,122 @@ export async function writeCritique(
 }
 
 // ══════════════════════════════════════════════════════════════
+// Scored judging (205) — "graded on a scale, not on a judge's whim"
+// ══════════════════════════════════════════════════════════════
+
+/**
+ * Choose (or clear) a class's rubric. Host, co-host, or judge; any
+ * time before the class publishes results. The template is
+ * DENORMALIZED onto the class row — what a class was judged against
+ * never changes underneath it, even if we edit templates later.
+ */
+export async function setClassRubric(
+    input: z.input<typeof setClassRubricSchema>,
+): Promise<ActionResult> {
+    const parsed = setClassRubricSchema.safeParse(input);
+    if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
+    const { supabase, user } = await requireAuth();
+    const v = parsed.data;
+
+    const { data: cls, error: clsError } = await supabase
+        .from("show_classes")
+        .select("id, status, show_sections!inner(show_divisions!inner(show_id))")
+        .eq("id", v.classId)
+        .maybeSingle();
+    if (clsError) return { success: false, error: clsError.message };
+    if (!cls) return { success: false, error: "Class not found." };
+    const showId = (
+        cls as unknown as { show_sections: { show_divisions: { show_id: string } } }
+    ).show_sections.show_divisions.show_id;
+
+    const roleResult = await getShowRole(supabase, showId, user.id);
+    if ("error" in roleResult) return { success: false, error: roleResult.error };
+    if (!roleResult.role || roleResult.role === "steward") {
+        return { success: false, error: "Only the judge, host, or a co-host can set a rubric." };
+    }
+
+    const rubric = v.templateKey === null ? null : rubricTemplate(v.templateKey);
+    if (v.templateKey !== null && !rubric) {
+        return { success: false, error: "Unknown rubric template." };
+    }
+
+    const { error } = await supabase
+        .from("show_classes")
+        .update({ rubric } as never)
+        .eq("id", v.classId);
+    if (error) {
+        if (error.code === "42703" || error.code === "PGRST204") {
+            return { success: false, error: "Scored judging arrives with migration 205." };
+        }
+        return { success: false, error: error.message };
+    }
+    return { success: true };
+}
+
+/**
+ * The judge's score sheet for one entry — the critique lifecycle,
+ * with numbers: judge/host/co-host writes it during judging or
+ * results review; entrants see it when the class publishes results.
+ * A PARTIAL sheet saves (the judge scores as she looks) but only a
+ * complete one gets a weighted total, so partial sheets never rank.
+ */
+export async function writeEntryScore(
+    input: z.input<typeof writeEntryScoreSchema>,
+): Promise<ActionResult & { total?: number | null }> {
+    const parsed = writeEntryScoreSchema.safeParse(input);
+    if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
+    const { supabase, user } = await requireAuth();
+    const v = parsed.data;
+
+    const { data: entry, error: entryError } = await supabase
+        .from("show_class_entries")
+        .select("id, show_id, class_id, status")
+        .eq("id", v.entryId)
+        .maybeSingle();
+    if (entryError) return { success: false, error: entryError.message };
+    if (!entry) return { success: false, error: "Entry not found." };
+    const e = entry as { id: string; show_id: string; class_id: string; status: string };
+    if (e.status === "scratched") {
+        return { success: false, error: "Scratched entries are not judged — no score to write." };
+    }
+
+    const roleResult = await getShowRole(supabase, e.show_id, user.id);
+    if ("error" in roleResult) return { success: false, error: roleResult.error };
+    if (!roleResult.role || roleResult.role === "steward") {
+        return { success: false, error: "Only the judge, host, or a co-host can score entries." };
+    }
+    const showStatus = roleResult.show.status;
+    if (showStatus !== "judging" && showStatus !== "results_review" && showStatus !== "running") {
+        return { success: false, error: "Scores are written during judging or results review." };
+    }
+
+    const { data: clsRow, error: clsError } = await supabase
+        .from("show_classes")
+        .select("rubric" as never)
+        .eq("id", e.class_id)
+        .maybeSingle();
+    if (clsError) {
+        if (clsError.code === "42703" || clsError.code === "PGRST204") {
+            return { success: false, error: "Scored judging arrives with migration 205." };
+        }
+        return { success: false, error: clsError.message };
+    }
+    const rubric = parseRubric((clsRow as { rubric?: unknown } | null)?.rubric);
+    if (!rubric) return { success: false, error: "This class has no rubric — pick one first." };
+
+    const scores = cleanScores(rubric, v.scores);
+    const total = weightedTotal(rubric, scores);
+
+    const { error: updateError } = await supabase
+        .from("show_class_entries")
+        .update({ score_data: scores, score_total: total } as never)
+        .eq("id", e.id);
+    if (updateError) return { success: false, error: updateError.message };
+
+    return { success: true, total };
+}
+
+// ══════════════════════════════════════════════════════════════
 // Per-class result reveal — judging as cadence, not a dump
 // ══════════════════════════════════════════════════════════════
 
@@ -891,16 +1010,45 @@ export async function getClassRoom(
         clsRow.results_published_at !== null || RESULTS_STATUSES.includes(status);
     const revealed = isOwnerRevealed(status, show.blind_browsing as boolean);
 
+    // Scored judging (205): the class's rubric — tolerant of an
+    // unpasted database (the whole feature simply hides).
+    let rubric: ReturnType<typeof parseRubric> = null;
+    {
+        const { data: rRow, error: rErr } = await supabase
+            .from("show_classes")
+            .select("rubric")
+            .eq("id", clsRow.id)
+            .maybeSingle();
+        if (!rErr) rubric = parseRubric((rRow as { rubric?: unknown } | null)?.rubric);
+    }
+
     // Critique columns are selected ONLY once published — the data
-    // never rides the wire before the reveal.
+    // never rides the wire before the reveal. Scores follow the same
+    // rule (205), with a pre-migration fallback.
+    const baseColumns = "id, horse_id, owner_id, entry_number, photo_id, status, document_id, created_at";
     const entryColumns = resultsPublished
-        ? "id, horse_id, owner_id, entry_number, photo_id, status, document_id, created_at, critique_text, critique_photo_text"
-        : "id, horse_id, owner_id, entry_number, photo_id, status, document_id, created_at";
-    const { data: entryRows, error: eErr } = await supabase
-        .from("show_class_entries")
-        .select(entryColumns)
-        .eq("class_id", clsRow.id)
-        .order("created_at", { ascending: true });
+        ? `${baseColumns}, critique_text, critique_photo_text, score_data, score_total`
+        : baseColumns;
+    let entryRows: Record<string, unknown>[] | null = null;
+    let eErr: { code?: string; message: string } | null = null;
+    {
+        const res = await supabase
+            .from("show_class_entries")
+            .select(entryColumns)
+            .eq("class_id", clsRow.id)
+            .order("created_at", { ascending: true });
+        entryRows = res.data as Record<string, unknown>[] | null;
+        eErr = res.error;
+    }
+    if (eErr && resultsPublished && (eErr.code === "42703" || eErr.code === "PGRST204")) {
+        const res = await supabase
+            .from("show_class_entries")
+            .select(`${baseColumns}, critique_text, critique_photo_text`)
+            .eq("class_id", clsRow.id)
+            .order("created_at", { ascending: true });
+        entryRows = res.data as Record<string, unknown>[] | null;
+        eErr = res.error;
+    }
     if (eErr) return { success: false, error: eErr.message };
     type EntryRow = {
         id: string;
@@ -1084,6 +1232,13 @@ export async function getClassRoom(
             (placeByEntry.get(e.id) ?? 99) <= 2,
         critique: resultsPublished ? (e.critique_text ?? null) : null,
         photoCritique: resultsPublished ? (e.critique_photo_text ?? null) : null,
+        scoreData: resultsPublished
+            ? (((e as Record<string, unknown>).score_data as Record<string, number> | null) ?? null)
+            : null,
+        scoreTotal:
+            resultsPublished && (e as Record<string, unknown>).score_total != null
+                ? Number((e as Record<string, unknown>).score_total)
+                : null,
         document: docByEntry.get(e.id) ?? null,
         voteCount: voteCounts.get(e.id) ?? 0,
         viewerHasVoted: viewerVotes.has(e.id),
@@ -1091,6 +1246,18 @@ export async function getClassRoom(
     if (resultsPublished) {
         roomEntries.sort((a, b) => (a.place ?? 99) - (b.place ?? 99));
     }
+
+    // The dashed polygon: per-criterion class averages, from every
+    // published sheet in the room.
+    const scoreAverages =
+        resultsPublished && rubric
+            ? classAverages(
+                  rubric,
+                  roomEntries
+                      .map((r) => r.scoreData)
+                      .filter((s): s is Record<string, number> => !!s),
+              )
+            : null;
 
     return {
         success: true,
@@ -1114,6 +1281,8 @@ export async function getClassRoom(
                 liveEntryCount: entries.length,
                 distinctExhibitors,
             },
+            rubric,
+            scoreAverages,
             revealed,
             votingEnabled,
             votingOpen,

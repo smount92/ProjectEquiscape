@@ -20,6 +20,8 @@ import { useMemo, useState } from "react";
 
 import { castVote, removeVote } from "@/app/actions/shows-v2";
 import type { ClassRoomEntry, GalleryEntry } from "@/lib/shows/gallery";
+import type { Rubric } from "@/lib/shows/rubrics";
+import ScorecardPanel from "@/components/shows/ScorecardPanel";
 import { placeLabel } from "@/lib/shows/placings";
 import type { Place } from "@/lib/shows/types";
 import PhotoLightbox from "@/components/PhotoLightbox";
@@ -58,6 +60,9 @@ interface ClassRoomLineupProps {
     authed: boolean;
     /** THIS class's results are public — placed entries lead 2-up. */
     resultsPublished: boolean;
+    /** Scored judging (205): rubric + class averages, once published. */
+    rubric?: Rubric | null;
+    scoreAverages?: Record<string, number> | null;
 }
 
 export default function ClassRoomLineup({
@@ -67,6 +72,8 @@ export default function ClassRoomLineup({
     votingOpen,
     authed,
     resultsPublished,
+    rubric = null,
+    scoreAverages = null,
 }: ClassRoomLineupProps) {
     const router = useRouter();
     const { showToast, toastNode } = useShowToast();
@@ -227,6 +234,26 @@ export default function ClassRoomLineup({
                                     <p className="mt-2 text-sm whitespace-pre-wrap text-muted-foreground">
                                         {entry.document.bodyMd}
                                     </p>
+                                </details>
+                            )}
+
+                            {rubric && entry.scoreData && (
+                                <details className="border-input rounded-md border px-3 py-2" open={entry.isOwn}>
+                                    <summary className="cursor-pointer text-sm font-medium">
+                                        🎯 Scorecard
+                                        {entry.scoreTotal != null && (
+                                            <span className="text-muted-foreground"> — {entry.scoreTotal}/100</span>
+                                        )}
+                                    </summary>
+                                    <div className="mt-2">
+                                        <ScorecardPanel
+                                            rubric={rubric}
+                                            scores={entry.scoreData}
+                                            total={entry.scoreTotal}
+                                            averages={scoreAverages}
+                                            horseName={entry.horseName}
+                                        />
+                                    </div>
                                 </details>
                             )}
 

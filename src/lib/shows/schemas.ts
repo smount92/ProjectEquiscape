@@ -428,6 +428,20 @@ export const publishClassResultsSchema = z.object({
     classId: uuidSchema,
 });
 
+/** Scored judging (205): pick a rubric template for a class, or clear it. */
+export const setClassRubricSchema = z.object({
+    classId: uuidSchema,
+    /** A template key from RUBRIC_TEMPLATES, or null to return the class to plain tray judging. */
+    templateKey: z.string().trim().min(2).max(40).nullable(),
+});
+
+/** Scored judging (205): the judge's sheet for one entry. */
+export const writeEntryScoreSchema = z.object({
+    entryId: uuidSchema,
+    /** {criterionKey: 1..10} — keys outside the class rubric are dropped server-side. */
+    scores: z.record(z.string().max(40), z.number().int().min(1).max(10)),
+});
+
 export const unpublishClassResultsSchema = z.object({
     classId: uuidSchema,
 });

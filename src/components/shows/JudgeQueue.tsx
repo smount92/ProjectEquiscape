@@ -27,9 +27,12 @@ import { useRouter } from "next/navigation";
 import { recordPlacings } from "@/app/actions/shows-v2";
 import {
     publishClassResults,
+    setClassRubric,
     unpublishClassResults,
     writeCritique,
 } from "@/app/actions/shows-v4";
+import EntryScorePad from "@/components/shows/EntryScorePad";
+import { RUBRIC_TEMPLATES, orderByScore } from "@/lib/shows/rubrics";
 import type { JudgeQueueClass, JudgeQueueData, JudgeQueueEntry } from "@/lib/shows/gallery";
 import {
     AUTOSAVE_DEBOUNCE_MS,
@@ -296,6 +299,9 @@ function ClassRecorder({
     });
     const [noteOpenFor, setNoteOpenFor] = useState<string | null>(null);
     const [refusal, setRefusal] = useState<string | null>(null);
+    // Scored judging (205): totals reported live by the score pads.
+    const [liveTotals, setLiveTotals] = useState<Record<string, number | null>>({});
+    const [rubricBusy, setRubricBusy] = useState(false);
     const [doneSaving, setDoneSaving] = useState(false);
     const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
     const [autosave, dispatch] = useReducer(autosaveReducer, INITIAL_AUTOSAVE);
@@ -446,6 +452,39 @@ function ClassRecorder({
         [cls.entries],
     );
 
+    // ── Scored judging (205) ─────────────────────────────────────
+    // Fresh totals reported by the score pads override the
+    // server-loaded ones, so "sort tray by scores" is always live.
+    const scoredOrder = cls.rubric
+        ? orderByScore(
+              cls.entries.map((e) => ({
+                  entryId: e.id,
+                  total: liveTotals[e.id] !== undefined ? liveTotals[e.id] : e.scoreTotal,
+              })),
+          )
+        : [];
+    const scoredTies = scoredOrder.slice(0, 6).filter((o) => o.tiedWithPrev).length;
+    const applyScoreOrder = () => {
+        if (!canRecord || scoredOrder.length === 0) return;
+        const next: Partial<Record<Place, string>> = {};
+        scoredOrder.slice(0, 6).forEach((o, i) => {
+            next[(i + 1) as Place] = o.entryId;
+        });
+        setRefusal(null);
+        setSlots(next);
+        markChanged();
+    };
+    const handleRubricPick = async (templateKey: string) => {
+        setRubricBusy(true);
+        const res = await setClassRubric({
+            classId: cls.classId,
+            templateKey: templateKey === "" ? null : templateKey,
+        });
+        setRubricBusy(false);
+        if (!res.success) setRefusal(res.error ?? "Could not set the rubric.");
+        else router.refresh();
+    };
+
     return (
         <section className="flex flex-col gap-3" aria-label={`Judging ${classLabel(cls)}`}>
             <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
@@ -454,6 +493,43 @@ function ClassRecorder({
                 </span>
                 {cls.status === "placed" && <span className="stamp">placed</span>}
             </div>
+
+            {canRecord && !cls.resultsPublishedAt && (
+                <div className="border-input bg-card flex flex-wrap items-center gap-x-3 gap-y-2 rounded-md border px-3 py-2 text-sm">
+                    <label className="flex items-center gap-2">
+                        <span className="font-semibold">🎯 Rubric</span>
+                        <select
+                            value={cls.rubric?.key ?? ""}
+                            disabled={rubricBusy}
+                            onChange={(e) => void handleRubricPick(e.target.value)}
+                            className="border-input bg-background rounded-md border px-2 py-1 text-sm"
+                            aria-label="Scoring rubric for this class"
+                        >
+                            <option value="">None — ribbon tray only</option>
+                            {RUBRIC_TEMPLATES.map((t) => (
+                                <option key={t.key} value={t.key}>{t.name}</option>
+                            ))}
+                        </select>
+                    </label>
+                    {cls.rubric && (
+                        <>
+                            <button
+                                type="button"
+                                onClick={applyScoreOrder}
+                                disabled={scoredOrder.length === 0}
+                                className="text-forest cursor-pointer text-sm font-semibold hover:underline disabled:cursor-default disabled:opacity-45"
+                            >
+                                Sort tray by scores ({scoredOrder.length} scored)
+                            </button>
+                            {scoredTies > 0 && (
+                                <span className="text-(--brass) text-xs font-semibold">
+                                    {scoredTies} tie{scoredTies === 1 ? "" : "s"} — your call stands
+                                </span>
+                            )}
+                        </>
+                    )}
+                </div>
+            )}
 
             {cls.entries.length === 0 && !canRecord && (
                 <p className="text-sm text-muted-foreground">No live entries in this class.</p>
@@ -575,6 +651,15 @@ function ClassRecorder({
                                 </div>
                                 {noteOpenFor === entry.id && (
                                     <div className="flex flex-col gap-2">
+                                        {cls.rubric && (
+                                            <EntryScorePad
+                                                entry={entry}
+                                                rubric={cls.rubric}
+                                                onTotal={(id, total) =>
+                                                    setLiveTotals((prev) => ({ ...prev, [id]: total }))
+                                                }
+                                            />
+                                        )}
                                         <Textarea
                                             value={notes[entry.id] ?? ""}
                                             onChange={(e) => handleNoteChange(entry.id, e.target.value)}

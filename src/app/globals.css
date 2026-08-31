@@ -2170,6 +2170,11 @@ p {
   --brass: #B08D3E;
   --brass-hi: #E8C878;
   --brass-ink: #2A1D08;
+  /* scorecard chart steps (205) — brand hues pushed into the data-color
+     band and validated (dataviz six checks) against both surfaces.
+     The dark values are set in the dark override block below. */
+  --chart-entry: #1f7d4a;
+  --chart-avg: #c07c14;
   --thread: #D9B978;
   /* text-on-leather ramp */
   --leather-text: #EFDDBB;
@@ -3194,6 +3199,9 @@ a.polaroid:focus-visible {
 html[data-theme="night"] {
   --background: #1B140D;
   --foreground: #E6D9BC;
+  /* scorecard chart steps re-picked for the dark surface (205) */
+  --chart-entry: #35a56b;
+  --chart-avg: #c4841f;
   --card: #2A2118;
   --card-foreground: #E6D9BC;
   --popover: #2A2118;

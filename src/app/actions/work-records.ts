@@ -27,6 +27,7 @@ import { after } from "next/server";
 import { createNotification } from "@/lib/notifications/createNotification";
 import { checkRateLimit } from "@/lib/utils/rateLimit";
 import { sanitizeText } from "@/lib/utils/validation";
+import { decodeHtmlEntities } from "@/lib/utils/decodeEntities";
 import { getPublicImageUrl } from "@/lib/utils/storage";
 import { SERVICE_TYPES } from "@/lib/studio/services";
 import {
@@ -154,7 +155,7 @@ export async function createWorkRecord(input: z.input<typeof createSchema>): Pro
     // The vocabulary is the studio services list; free text falls to it.
     const workType = (SERVICE_TYPES as readonly string[]).includes(data.workType)
         ? data.workType
-        : sanitizeText(data.workType).slice(0, 60);
+        : decodeHtmlEntities(sanitizeText(data.workType)).slice(0, 60);
 
     const { data: profile } = await supabase
         .from("artist_profiles")
@@ -183,8 +184,8 @@ export async function createWorkRecord(input: z.input<typeof createSchema>): Pro
             artist_alias: profile.studio_name,
             artist_user_id: user.id,
             recorded_by: "artist",
-            summary: data.summary ? sanitizeText(data.summary) : null,
-            materials_used: data.materialsUsed ? sanitizeText(data.materialsUsed) : null,
+            summary: data.summary ? decodeHtmlEntities(sanitizeText(data.summary)) : null,
+            materials_used: data.materialsUsed ? decodeHtmlEntities(sanitizeText(data.materialsUsed)) : null,
             claimed_start: data.claimedStart ?? null,
             date_completed: data.dateCompleted ?? null,
         })
@@ -257,7 +258,7 @@ export async function createOwnerCredit(input: z.input<typeof ownerCreditSchema>
         .single();
     if (!horse) return { success: false, error: "Horse not found or not yours." };
 
-    const artistName = sanitizeText(data.artistName).slice(0, 80);
+    const artistName = decodeHtmlEntities(sanitizeText(data.artistName)).slice(0, 80);
     // If the name matches an MHH studio, link the account so the
     // artist can confirm (or disavow) — the false-credit defense
     // works both directions.
@@ -273,11 +274,11 @@ export async function createOwnerCredit(input: z.input<typeof ownerCreditSchema>
             horse_id: data.horseId,
             work_type: (SERVICE_TYPES as readonly string[]).includes(data.workType)
                 ? data.workType
-                : sanitizeText(data.workType).slice(0, 60),
+                : decodeHtmlEntities(sanitizeText(data.workType)).slice(0, 60),
             artist_alias: artistName,
             artist_user_id: studio?.user_id ?? null,
             recorded_by: "owner",
-            summary: data.summary ? sanitizeText(data.summary) : null,
+            summary: data.summary ? decodeHtmlEntities(sanitizeText(data.summary)) : null,
             date_completed: data.dateCompleted ?? null,
         })
         .select("id")
@@ -371,8 +372,8 @@ export async function addWorkMoments(
         rows.push({
             log_id: logId,
             author_id: user.id,
-            stage: sanitizeText(first.data.stage).slice(0, MAX_STAGE_LABEL) || "progress",
-            caption: first.data.caption ? sanitizeText(first.data.caption) : null,
+            stage: decodeHtmlEntities(sanitizeText(first.data.stage)).slice(0, MAX_STAGE_LABEL) || "progress",
+            caption: first.data.caption ? decodeHtmlEntities(sanitizeText(first.data.caption)) : null,
             claimed_date: first.data.claimedDate ?? null,
             is_public: first.data.isPublic ?? true,
             image_urls: urls,

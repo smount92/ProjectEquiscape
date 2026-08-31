@@ -114,6 +114,9 @@ export interface ClassRoomEntry {
     critique: string | null;
     /** Judge feedback on the photograph — published classes only. */
     photoCritique: string | null;
+    /** Scored judging (205): the sheet + weighted total — published classes only. */
+    scoreData: Record<string, number> | null;
+    scoreTotal: number | null;
     /** Attached documentation (the show-binder card), if any. */
     document: { kind: string; title: string; bodyMd: string } | null;
     /** Community-vote shows only (0 otherwise). */
@@ -154,6 +157,11 @@ export interface ClassRoomData {
         liveEntryCount: number;
         distinctExhibitors: number;
     };
+    /** Scored judging (205): the class's rubric, when it has one. */
+    rubric: import("./rubrics").Rubric | null;
+    /** Per-criterion class averages — the scorecard's dashed polygon.
+     *  Published classes only; null otherwise. */
+    scoreAverages: Record<string, number> | null;
     /** Owner identities included in this payload. */
     revealed: boolean;
     /** Community-vote show: render hearts in the room. */
@@ -185,6 +193,9 @@ export interface JudgeQueueEntry {
     /** v4 per-entry critique (model / photo), for resume + edit. */
     critiqueText: string | null;
     critiquePhotoText: string | null;
+    /** Scored judging (205): the judge's sheet so far + total (staff surface). */
+    scoreData: Record<string, number> | null;
+    scoreTotal: number | null;
 }
 
 export interface JudgeQueueClass {
@@ -198,6 +209,8 @@ export interface JudgeQueueClass {
     status: ClassStatus;
     /** v4: when this class's results went public (rolling reveal). */
     resultsPublishedAt: string | null;
+    /** Scored judging (205): the class's rubric, when it has one. */
+    rubric: import("./rubrics").Rubric | null;
     entries: JudgeQueueEntry[];
 }
 

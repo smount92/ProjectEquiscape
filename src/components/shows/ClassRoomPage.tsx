@@ -188,6 +188,8 @@ export default function ClassRoomPage({ room }: { room: ClassRoomData }) {
                     votingOpen={room.votingOpen}
                     authed={room.authed}
                     resultsPublished={room.room.resultsPublished}
+                    rubric={room.rubric}
+                    scoreAverages={room.scoreAverages}
                 />
                     </div>
                 </div>

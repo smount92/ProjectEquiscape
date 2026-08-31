@@ -87,6 +87,7 @@ import {
     type JudgeQueueData,
     type ShowGalleryData,
 } from "@/lib/shows/gallery";
+import { parseRubric } from "@/lib/shows/rubrics";
 import { validateEntry } from "@/lib/shows/entryRules";
 import {
     PUBLIC_BROWSE_STATUSES,
@@ -2994,31 +2995,67 @@ export async function getJudgeQueue(
     if ("error" in tree) return { success: false, error: tree.error };
     const { contexts } = tree;
 
-    const { data: entryRows, error: eErr } = await supabase
+    // v4: critique columns ride along — staff-only surface, so
+    // pre-publish visibility is fine here (unlike the public room).
+    // 205: score columns too, with a pre-migration fallback so the
+    // queue never breaks on an unpasted database. Untyped client:
+    // 205's columns aren't in the generated types yet.
+    const loose = supabase as unknown as {
+        from: (t: string) => {
+            select: (c: string) => {
+                eq: (k: string, v: string) => {
+                    order: (
+                        k: string,
+                        o: { ascending: boolean },
+                    ) => PromiseLike<{ data: Record<string, unknown>[] | null; error: { code?: string; message: string } | null }>;
+                    in: (
+                        k: string,
+                        v: string[],
+                    ) => PromiseLike<{ data: Record<string, unknown>[] | null; error: { code?: string; message: string } | null }>;
+                };
+                in: (
+                    k: string,
+                    v: string[],
+                ) => PromiseLike<{ data: Record<string, unknown>[] | null; error: { code?: string; message: string } | null }>;
+            };
+        };
+    };
+    let { data: entryRows, error: eErr } = await loose
         .from("show_class_entries")
-        // v4: critique columns ride along — staff-only surface, so
-        // pre-publish visibility is fine here (unlike the public room).
-        .select("id, class_id, horse_id, owner_id, entry_number, photo_id, status, created_at, critique_text, critique_photo_text")
+        .select("id, class_id, horse_id, owner_id, entry_number, photo_id, status, created_at, critique_text, critique_photo_text, score_data, score_total")
         .eq("show_id", showId)
         .order("created_at", { ascending: true });
+    if (eErr && (eErr.code === "42703" || eErr.code === "PGRST204")) {
+        ({ data: entryRows, error: eErr } = await loose
+            .from("show_class_entries")
+            .select("id, class_id, horse_id, owner_id, entry_number, photo_id, status, created_at, critique_text, critique_photo_text")
+            .eq("show_id", showId)
+            .order("created_at", { ascending: true }));
+    }
     if (eErr) return { success: false, error: eErr.message };
-    const entries = (entryRows ?? []).filter(
-        (e: { status: string }) => e.status !== "scratched",
-    );
+    const entries = (entryRows ?? []).filter((e) => (e.status as string) !== "scratched");
 
     // v4: per-class reveal state for the publish control.
+    // 205: the rubric rides along (pre-migration fallback keeps the
+    // queue alive on an unpasted database).
     const publishedByClass = new Map<string, string | null>();
+    const rubricByClass = new Map<string, ReturnType<typeof parseRubric>>();
     if (contexts.length > 0) {
-        const { data: pubRows, error: pubErr } = await supabase
+        let { data: pubRows, error: pubErr } = await loose
             .from("show_classes")
-            .select("id, results_published_at")
+            .select("id, results_published_at, rubric")
             .in("id", contexts.map((c) => c.classId));
+        if (pubErr && (pubErr.code === "42703" || pubErr.code === "PGRST204")) {
+            ({ data: pubRows, error: pubErr } = await loose
+                .from("show_classes")
+                .select("id, results_published_at")
+                .in("id", contexts.map((c) => c.classId)));
+        }
         if (pubErr) return { success: false, error: pubErr.message };
-        for (const r of pubRows ?? []) {
-            publishedByClass.set(
-                r.id as string,
-                (r.results_published_at as string | null) ?? null,
-            );
+        for (const raw of pubRows ?? []) {
+            const r = raw as { id: string; results_published_at: string | null; rubric?: unknown };
+            publishedByClass.set(r.id, r.results_published_at ?? null);
+            rubricByClass.set(r.id, parseRubric(r.rubric));
         }
     }
 
@@ -3076,6 +3113,11 @@ export async function getJudgeQueue(
             note: recorded?.note ?? null,
             critiqueText: (e.critique_text as string | null) ?? null,
             critiquePhotoText: (e.critique_photo_text as string | null) ?? null,
+            scoreData: ((e as Record<string, unknown>).score_data as Record<string, number> | null) ?? null,
+            scoreTotal:
+                (e as Record<string, unknown>).score_total == null
+                    ? null
+                    : Number((e as Record<string, unknown>).score_total),
         });
         entriesByClass.set(e.class_id as string, list);
     }
@@ -3090,6 +3132,7 @@ export async function getJudgeQueue(
         sectionName: c.sectionName,
         status: c.status,
         resultsPublishedAt: publishedByClass.get(c.classId) ?? null,
+        rubric: rubricByClass.get(c.classId) ?? null,
         entries: entriesByClass.get(c.classId) ?? [],
     }));
 
