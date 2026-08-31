@@ -52,12 +52,34 @@ export async function generateMetadata({
     if (!profile) return { title: "Studio not found" };
 
     const specialties = profile.specialties.slice(0, 3).join(", ");
+    const title = `${profile.studioName} — Model Horse Commissions`;
+    const description =
+        profile.bioArtist?.slice(0, 155) ||
+        `${profile.studioName}: ${specialties || "model horse commissions"} by @${profile.ownerAlias}. Commission status, rates, terms, and finished work with verified show records.`;
+
+    // The share card: the storefront gets pasted into Facebook groups,
+    // and an unfurl with a finished horse on it earns the click a text
+    // stub never will. Hero = the newest work on the wall.
+    const wall = await getArtistPortfolio(profile.userId, profile.ownerAlias);
+    const heroImage = wall.find((w) => w.imageUrls.length > 0)?.imageUrls[0] ?? null;
+
     return {
-        title: `${profile.studioName} — Model Horse Commissions`,
-        description:
-            profile.bioArtist?.slice(0, 155) ||
-            `${profile.studioName}: ${specialties || "model horse commissions"} by @${profile.ownerAlias}. Commission status, rates, terms, and finished work with verified show records.`,
+        title,
+        description,
         alternates: { canonical: `/studio/${profile.studioSlug}` },
+        openGraph: {
+            title: profile.studioName,
+            description,
+            images: heroImage ? [{ url: heroImage, width: 800, height: 600, alt: profile.studioName }] : [],
+            type: "profile" as const,
+            siteName: "Model Horse Hub",
+        },
+        twitter: {
+            card: (heroImage ? "summary_large_image" : "summary") as "summary_large_image" | "summary",
+            title: profile.studioName,
+            description,
+            images: heroImage ? [heroImage] : [],
+        },
     };
 }
 

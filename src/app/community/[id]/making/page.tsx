@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAnonClient } from "@/lib/supabase/anon";
+import { getPublicImageUrl } from "@/lib/utils/storage";
 import MakingReel from "@/components/making/MakingReel";
 import { getMakingForHorse, getPublicMaking, type WorkRecordView } from "@/app/actions/work-records";
 
@@ -24,6 +25,7 @@ async function loadHorseHeader(horseId: string, isMember: boolean): Promise<{
     name: string;
     ownerId: string | null;
     ownerAlias: string | null;
+    primaryImageUrl: string | null;
 } | null> {
     if (isMember) {
         const supabase = await createClient();
@@ -35,26 +37,88 @@ async function loadHorseHeader(horseId: string, isMember: boolean): Promise<{
             .single();
         if (!data) return null;
         const owner = data.owner as unknown as { alias_name: string | null } | null;
-        return { name: data.custom_name, ownerId: data.owner_id, ownerAlias: owner?.alias_name ?? null };
+        return {
+            name: data.custom_name,
+            ownerId: data.owner_id,
+            ownerAlias: owner?.alias_name ?? null,
+            primaryImageUrl: null,
+        };
     }
     const anon = createAnonClient();
     const rpc = anon.rpc.bind(anon) as unknown as (
         fn: string,
         args: { p_horse_id: string },
-    ) => Promise<{ data: Array<{ horse: { custom_name: string } | null; owner_alias: string | null }> | null }>;
+    ) => Promise<{
+        data: Array<{
+            horse: { custom_name: string } | null;
+            owner_alias: string | null;
+            images: Array<{ image_url: string; angle_profile: string }> | null;
+        }> | null;
+    }>;
     const { data } = await rpc("get_public_passport", { p_horse_id: horseId });
     const row = data?.[0];
     if (!row?.horse) return null;
-    return { name: row.horse.custom_name, ownerId: null, ownerAlias: row.owner_alias };
+    const imgs = row.images ?? [];
+    const primary =
+        imgs.find((i) => i.angle_profile === "Primary_Thumbnail")?.image_url ??
+        imgs[0]?.image_url ??
+        null;
+    return {
+        name: row.horse.custom_name,
+        ownerId: null,
+        ownerAlias: row.owner_alias,
+        primaryImageUrl: primary ? (primary.startsWith("http") ? primary : getPublicImageUrl(primary)) : null,
+    };
 }
 
+/**
+ * The share card. This URL is the reel's whole job — it lives or dies
+ * in a Facebook unfurl, so the og:image is the FINISHED shot (the
+ * newest record's last published moment), falling back to the horse's
+ * primary photo. Title and description carry the artist and the arc.
+ */
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
     const { id } = await params;
-    const header = await loadHorseHeader(id, false);
+    const [header, records] = await Promise.all([loadHorseHeader(id, false), getPublicMaking(id)]);
     if (!header) return { title: "The Making — Model Horse Hub" };
+
+    const title = `The Making of ${header.name}`;
+    const momentCount = records.reduce(
+        (n, r) => n + r.moments.reduce((k, m) => k + m.imageUrls.length, 0),
+        0,
+    );
+    const artists = [...new Set(records.map((r) => r.artistAlias).filter(Boolean))] as string[];
+    const description =
+        records.length > 0
+            ? [
+                  records[0].workType,
+                  artists.length ? `by ${artists.join(", ")}` : null,
+                  momentCount ? `${momentCount} moments, start to finished` : null,
+              ]
+                  .filter(Boolean)
+                  .join(" · ")
+            : `How ${header.name} came to be — the artist's making-of reel.`;
+
+    // Newest record, last published moment = the finished shot.
+    const lastMoment = records[0]?.moments.at(-1);
+    const heroImage = lastMoment?.imageUrls.at(-1) ?? header.primaryImageUrl;
+
     return {
-        title: `The Making of ${header.name} — Model Horse Hub`,
-        description: `How ${header.name} came to be — the artist's making-of reel, from blank to finished.`,
+        title: `${title} — Model Horse Hub`,
+        description,
+        openGraph: {
+            title,
+            description,
+            images: heroImage ? [{ url: heroImage, width: 800, height: 600, alt: header.name }] : [],
+            type: "article" as const,
+            siteName: "Model Horse Hub",
+        },
+        twitter: {
+            card: (heroImage ? "summary_large_image" : "summary") as "summary_large_image" | "summary",
+            title,
+            description,
+            images: heroImage ? [heroImage] : [],
+        },
     };
 }
 
