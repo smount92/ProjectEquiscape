@@ -1,12 +1,21 @@
+"use client";
+
+import { useMemo, useState } from "react";
+
 import { creditLabel, groupByStage, stageLabel } from "@/lib/studio/making";
 import type { WorkRecordView } from "@/app/actions/work-records";
 import WorkRecordControls from "@/components/making/WorkRecordControls";
+import PhotoLightbox from "@/components/PhotoLightbox";
 
 /**
  * The Making — a work record's reel, rendered as the chronological
- * story of a piece: stage-grouped moments down a rail, captions and
+ * story of a piece: stage-grouped moments down a rail, notes and
  * artist-claimed dates under each. The gallery above it identifies
  * the horse; this is her biography. Different jobs, different rooms.
+ *
+ * Every photo opens the site's swipe lightbox, threaded through the
+ * WHOLE reel in story order — the owner's ask: read the making like
+ * a book, not one tab per photo.
  */
 
 function fmtDate(d: string | null): string | null {
@@ -33,6 +42,31 @@ export default function MakingReel({
     ownerId: string | null;
     showControls?: boolean;
 }) {
+    const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
+    // The whole reel, flattened in story order — records, then stages
+    // in the artist's order, then moments, then photos.
+    const { flat, indexByKey } = useMemo(() => {
+        const flatImages: { url: string; label?: string }[] = [];
+        const byKey = new Map<string, number>();
+        for (const rec of records) {
+            for (const [stage, moments] of groupByStage(rec.moments)) {
+                for (const m of moments) {
+                    m.imageUrls.forEach((url, i) => {
+                        byKey.set(`${m.id}:${i}`, flatImages.length);
+                        flatImages.push({
+                            url,
+                            label: [stageLabel(stage), m.caption ?? undefined]
+                                .filter(Boolean)
+                                .join(" — "),
+                        });
+                    });
+                }
+            }
+        }
+        return { flat: flatImages, indexByKey: byKey };
+    }, [records]);
+
     if (records.length === 0) return null;
 
     return (
@@ -44,9 +78,7 @@ export default function MakingReel({
                     artistIsOwner: !!rec.artistUserId && rec.artistUserId === ownerId,
                 });
                 const span = recordSpan(rec);
-                // Stages group in the order the ARTIST used them (204) —
-                // a sculptor's ladder and a painter's ladder both read
-                // correctly because neither is imposed.
+                // Stages group in the order the ARTIST used them (204).
                 const ordered = groupByStage(rec.moments);
 
                 return (
@@ -116,7 +148,14 @@ export default function MakingReel({
                                             {moments.map((m) =>
                                                 m.imageUrls.map((url, i) => (
                                                     <figure key={m.id + i} className="border-input bg-background m-0 overflow-hidden rounded-lg border">
-                                                        <a href={url} target="_blank" rel="noopener">
+                                                        <button
+                                                            type="button"
+                                                            className="block w-full cursor-zoom-in p-0"
+                                                            aria-label={`Open ${stageLabel(stage)} photo in the viewer`}
+                                                            onClick={() =>
+                                                                setLightboxIndex(indexByKey.get(`${m.id}:${i}`) ?? 0)
+                                                            }
+                                                        >
                                                             {/* eslint-disable-next-line @next/next/no-img-element */}
                                                             <img
                                                                 src={url}
@@ -124,9 +163,9 @@ export default function MakingReel({
                                                                 loading="lazy"
                                                                 className="aspect-[4/3] w-full object-cover"
                                                             />
-                                                        </a>
+                                                        </button>
                                                         {i === 0 && m.caption && (
-                                                            <figcaption className="text-muted-foreground px-2 py-1 text-xs leading-snug">
+                                                            <figcaption className="text-muted-foreground px-2 py-1 text-xs leading-snug whitespace-pre-line">
                                                                 {m.caption}
                                                                 {!m.isPublic && " 🔒"}
                                                             </figcaption>
@@ -139,10 +178,17 @@ export default function MakingReel({
                                 ))}
                             </div>
                         )}
-
                     </section>
                 );
             })}
+
+            {lightboxIndex !== null && flat.length > 0 && (
+                <PhotoLightbox
+                    images={flat}
+                    initialIndex={Math.min(lightboxIndex, flat.length - 1)}
+                    onClose={() => setLightboxIndex(null)}
+                />
+            )}
         </div>
     );
 }

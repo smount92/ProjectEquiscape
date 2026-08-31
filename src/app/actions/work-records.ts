@@ -33,6 +33,7 @@ import { SERVICE_TYPES } from "@/lib/studio/services";
 import {
     MAX_IMAGES_PER_MOMENT,
     MAX_MOMENTS_PER_RECORD,
+    MAX_MOMENT_NOTES,
     MAX_STAGE_LABEL,
     isValidMakingPath,
 } from "@/lib/studio/making";
@@ -218,6 +219,50 @@ export async function createWorkRecord(input: z.input<typeof createSchema>): Pro
     return { success: true, logId: inserted.id };
 }
 
+/**
+ * Search every stable the artist can SEE for a horse to log work on —
+ * the missing half of "yours or a client's" (Amanda's model lived in
+ * another stable and the picker only listed her own). RLS does the
+ * visibility gating: a stranger's private horse never comes back.
+ */
+export async function searchWorkTargets(query: string): Promise<
+    { id: string; name: string; ownerAlias: string | null; thumbUrl: string | null }[]
+> {
+    const { supabase } = await requireAuth();
+    const q = query.trim();
+    if (q.length < 2) return [];
+    const { data } = await supabase
+        .from("user_horses")
+        .select("id, custom_name, owner_id, owner:users!owner_id(alias_name)")
+        .ilike("custom_name", `%${q.replace(/[%_]/g, "\\$&")}%`)
+        .is("deleted_at", null)
+        .order("custom_name")
+        .limit(20);
+    const rows = data ?? [];
+    if (rows.length === 0) return [];
+
+    const { data: thumbs } = await supabase
+        .from("horse_images")
+        .select("horse_id, image_url")
+        .in("horse_id", rows.map((r) => r.id))
+        .eq("angle_profile", "Primary_Thumbnail");
+    const thumbByHorse = new Map<string, string>();
+    for (const t of thumbs ?? []) {
+        if (!thumbByHorse.has(t.horse_id)) thumbByHorse.set(t.horse_id, t.image_url);
+    }
+
+    return rows.map((r) => {
+        const owner = r.owner as unknown as { alias_name: string | null } | null;
+        const raw = thumbByHorse.get(r.id) ?? null;
+        return {
+            id: r.id,
+            name: r.custom_name,
+            ownerAlias: owner?.alias_name ?? null,
+            thumbUrl: raw ? (raw.startsWith("http") ? raw : getPublicImageUrl(raw)) : null,
+        };
+    });
+}
+
 const ownerCreditSchema = z.object({
     horseId: z.string().uuid(),
     workType: z.string().min(2).max(60),
@@ -312,7 +357,7 @@ export async function createOwnerCredit(input: z.input<typeof ownerCreditSchema>
 const momentImageSchema = z.object({
     path: z.string().min(1).max(400),
     stage: z.string().trim().min(1).max(MAX_STAGE_LABEL),
-    caption: z.string().max(280).optional(),
+    caption: z.string().max(MAX_MOMENT_NOTES).optional(),
     claimedDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
     isPublic: z.boolean().optional(),
 });

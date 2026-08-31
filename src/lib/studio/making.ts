@@ -40,17 +40,17 @@ export const DISCIPLINE_PRESETS: readonly {
     {
         key: "finishwork",
         label: "Finishwork / painting",
-        stages: ["The blank", "Prepped & primed", "Base coat", "Shading", "Details & markings", "Finished"],
+        stages: ["Reference", "The blank", "Prepped & primed", "Base coat", "Shading", "Details & markings", "Finished"],
     },
     {
         key: "custom",
         label: "Customizing (body mods)",
-        stages: ["The blank", "Cut & repositioned", "Resculpted", "Primed", "Painted", "Finished"],
+        stages: ["Reference", "The blank", "Cut & repositioned", "Resculpted", "Primed", "Painted", "Finished"],
     },
     {
         key: "sculpture",
         label: "Original sculpture",
-        stages: ["Armature", "Bulked out", "Refining", "Detailing", "Ready for casting", "Finished"],
+        stages: ["Reference", "Armature", "Bulked out", "Refining", "Detailing", "Ready for casting", "Finished"],
     },
     {
         key: "casting",
@@ -60,17 +60,17 @@ export const DISCIPLINE_PRESETS: readonly {
     {
         key: "china",
         label: "China / glazework",
-        stages: ["Greenware", "Cleaned & bisqued", "Underglaze", "China paint & fires", "Final fire"],
+        stages: ["Reference", "Greenware", "Cleaned & bisqued", "Underglaze", "China paint & fires", "Final fire"],
     },
     {
         key: "hair",
         label: "Hairing",
-        stages: ["Pattern laid out", "Rooting / applying", "Styling", "Finished"],
+        stages: ["Reference", "Pattern laid out", "Rooting / applying", "Styling", "Finished"],
     },
     {
         key: "tack",
         label: "Tack & accessories",
-        stages: ["Design & cutting", "Tooling & dyeing", "Hardware", "Assembly", "Finished"],
+        stages: ["Reference", "Design & cutting", "Tooling & dyeing", "Hardware", "Assembly", "Finished"],
     },
     {
         key: "restoration",
@@ -78,6 +78,9 @@ export const DISCIPLINE_PRESETS: readonly {
         stages: ["As it arrived", "Repair", "Color matching", "Restored"],
     },
 ] as const;
+
+/** Per-moment notes cap — DB column is TEXT; this is the app's rule. */
+export const MAX_MOMENT_NOTES = 1000;
 
 /**
  * The 202-era enum values, kept as display labels so every moment

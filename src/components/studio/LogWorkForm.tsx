@@ -24,11 +24,12 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { compressImage, type UserTier } from "@/lib/utils/imageCompression";
 import { uploadImageWithRetry } from "@/lib/utils/uploadWithRetry";
-import { createWorkRecord, addWorkMoments } from "@/app/actions/work-records";
+import { createWorkRecord, addWorkMoments, searchWorkTargets } from "@/app/actions/work-records";
 import { SERVICE_TYPES } from "@/lib/studio/services";
 import {
     DISCIPLINE_PRESETS,
     MAX_IMAGES_PER_MOMENT,
+    MAX_MOMENT_NOTES,
     MAX_STAGE_LABEL,
     makingImagePrefix,
 } from "@/lib/studio/making";
@@ -79,13 +80,32 @@ export default function LogWorkForm({
     const [doneHorse, setDoneHorse] = useState<{ id: string; name: string } | null>(null);
     const previewUrls = useRef(new Map<File, string>());
 
+    // The other half of "yours or a client's": search every stable the
+    // artist can see (Amanda's model lived in another account and the
+    // own-stable picker simply couldn't show it).
+    const [external, setExternal] = useState<
+        { id: string; name: string; ownerAlias: string | null; thumbUrl: string | null }[] | null
+    >(null);
+    const [searchingAll, setSearchingAll] = useState(false);
+    const [chosenExternal, setChosenExternal] = useState<LogWorkHorse | null>(null);
+
     const shown = useMemo(() => {
         const q = filter.trim().toLowerCase();
         const list = q ? horses.filter((h) => h.name.toLowerCase().includes(q)) : horses;
         return list.slice(0, 60);
     }, [horses, filter]);
 
-    const chosen = horses.find((h) => h.id === horseId) ?? null;
+    const searchEverywhere = async () => {
+        setSearchingAll(true);
+        setExternal(null);
+        const results = await searchWorkTargets(filter);
+        setSearchingAll(false);
+        setExternal(results.filter((r) => !horses.some((h) => h.id === r.id)));
+    };
+
+    const chosen =
+        horses.find((h) => h.id === horseId) ??
+        (chosenExternal?.id === horseId ? chosenExternal : null);
     const totalPhotos = buckets.reduce((n, b) => n + b.files.length, 0);
 
     const preview = (f: File) => {
@@ -153,7 +173,16 @@ export default function LogWorkForm({
                 for (let i = 0; i < bucket.files.length; i++) {
                     setProgress(`Uploading “${stage}” photo ${i + 1} of ${bucket.files.length}…`);
                     const path = `${makingImagePrefix(horseId)}${Date.now()}_${bucket.id}_${i}.webp`;
-                    const blob = await compressImage(bucket.files[i], tier);
+                    // One unreadable file (a HEIC this browser can't
+                    // decode, a stray PDF) skips THAT photo — it must
+                    // never sink the whole record.
+                    let blob: Blob;
+                    try {
+                        blob = await compressImage(bucket.files[i], tier);
+                    } catch {
+                        failed.push(`“${stage}” photo ${i + 1} (couldn't be read as an image — try JPG/PNG)`);
+                        continue;
+                    }
                     const { error: upErr } = await uploadImageWithRetry(supabase, "horse-images", path, blob);
                     if (upErr) {
                         failed.push(`“${stage}” photo ${i + 1}`);
@@ -267,6 +296,61 @@ export default function LogWorkForm({
                         <p className="text-muted-foreground col-span-full m-0 text-sm">No horses match.</p>
                     )}
                 </div>
+
+                {filter.trim().length >= 2 && (
+                    <div className="border-border-tan/30 mt-3 border-t border-dashed pt-3">
+                        <button
+                            type="button"
+                            onClick={() => void searchEverywhere()}
+                            disabled={searchingAll}
+                            className="text-forest text-sm font-semibold hover:underline disabled:opacity-50"
+                        >
+                            {searchingAll ? "Searching…" : `🔎 Search all of MHH for “${filter.trim()}”`}
+                        </button>
+                        {external !== null && (
+                            <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
+                                {external.map((h) => (
+                                    <button
+                                        key={h.id}
+                                        type="button"
+                                        onClick={() => {
+                                            setHorseId(h.id);
+                                            setChosenExternal({
+                                                id: h.id,
+                                                name: h.name,
+                                                thumbUrl: h.thumbUrl,
+                                                ownedByMe: false,
+                                            });
+                                        }}
+                                        className={`flex items-center gap-2 rounded-lg border p-2 text-left text-sm ${
+                                            horseId === h.id
+                                                ? "border-forest bg-forest/10 font-semibold"
+                                                : "border-input bg-background"
+                                        }`}
+                                    >
+                                        {h.thumbUrl ? (
+                                            // eslint-disable-next-line @next/next/no-img-element
+                                            <img src={h.thumbUrl} alt="" className="h-9 w-9 shrink-0 rounded-md object-cover" />
+                                        ) : (
+                                            <span className="bg-muted flex h-9 w-9 shrink-0 items-center justify-center rounded-md">🐴</span>
+                                        )}
+                                        <span className="min-w-0">
+                                            <span className="block truncate">{h.name}</span>
+                                            {h.ownerAlias && (
+                                                <span className="text-muted-foreground block truncate text-xs">@{h.ownerAlias}</span>
+                                            )}
+                                        </span>
+                                    </button>
+                                ))}
+                                {external.length === 0 && (
+                                    <p className="text-muted-foreground col-span-full m-0 text-sm">
+                                        Nothing visible by that name anywhere on MHH.
+                                    </p>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                )}
             </section>
 
             {/* ── 2. The work ── */}
@@ -399,20 +483,22 @@ export default function LogWorkForm({
                                             </span>
                                         ))}
                                     </div>
-                                    <div className="mt-2 grid grid-cols-[1fr_auto] gap-2">
-                                        <input
-                                            type="text"
-                                            maxLength={280}
+                                    <div className="mt-2 flex flex-col gap-2">
+                                        <textarea
+                                            rows={2}
+                                            maxLength={MAX_MOMENT_NOTES}
                                             value={b.caption}
                                             onChange={(e) => patchBucket(b.id, { caption: e.target.value })}
-                                            placeholder="Caption…"
+                                            placeholder="Notes for this stage — what happened, what you'd want the owner to know…"
                                             className="border-input bg-card rounded-md border px-2 py-1.5 text-sm"
+                                            aria-label={`Notes for ${b.label || "this stage"}`}
                                         />
                                         <input
                                             type="date"
                                             value={b.date}
                                             onChange={(e) => patchBucket(b.id, { date: e.target.value })}
-                                            className="border-input bg-card rounded-md border px-2 py-1.5 text-sm"
+                                            className="border-input bg-card self-start rounded-md border px-2 py-1.5 text-sm"
+                                            aria-label={`When ${b.label || "this stage"} happened`}
                                         />
                                     </div>
                                 </>
