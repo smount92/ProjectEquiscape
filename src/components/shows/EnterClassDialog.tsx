@@ -585,6 +585,10 @@ export default function EnterClassDialog({
                                     <li>· Sharp side profile — judges see this photo at full size.</li>
                                     <li>· Plain, discipline-appropriate background.</li>
                                     <li>· Whole horse in frame, level with the camera.</li>
+                                    <li>
+                                        · A watermark shows your name — in a blind-judged show,
+                                        the judge will see it too. Prefer an unwatermarked photo.
+                                    </li>
                                 </ul>
                                 {loadingPhotos ? (
                                     <p className="text-sm text-muted-foreground">Loading photos…</p>

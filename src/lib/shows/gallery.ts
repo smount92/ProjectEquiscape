@@ -162,6 +162,10 @@ export interface ClassRoomData {
     /** Per-criterion class averages — the scorecard's dashed polygon.
      *  Published classes only; null otherwise. */
     scoreAverages: Record<string, number> | null;
+    /** Viewer is show staff seeing the room AS ENTRANTS WILL before
+     *  publish — placings/critiques/scorecards shown, banner rendered,
+     *  points and card codes still publish-only. */
+    staffPreview: boolean;
     /** Owner identities included in this payload. */
     revealed: boolean;
     /** Community-vote show: render hearts in the room. */
@@ -193,6 +197,10 @@ export interface JudgeQueueEntry {
     /** v4 per-entry critique (model / photo), for resume + edit. */
     critiqueText: string | null;
     critiquePhotoText: string | null;
+    /** Show identity — "Mare · Akhal-Teke · dapple grey" — horse fields
+     *  first, registry fallback. Blind-safe (describes the horse, not
+     *  the person). */
+    identity: string | null;
     /** Scored judging (205): the judge's sheet so far + total (staff surface). */
     scoreData: Record<string, number> | null;
     scoreTotal: number | null;

@@ -24,15 +24,20 @@ import {
 export default function EntryScorePad({
     entry,
     rubric,
-    onTotal,
+    initialScores,
+    onSaved,
 }: {
     entry: JudgeQueueEntry;
     rubric: Rubric;
-    /** Reports the fresh total upward so the tray suggestion stays live. */
-    onTotal?: (entryId: string, total: number | null) => void;
+    /** Freshest known sheet (parent cache beats stale server props —
+     *  this pad unmounts whenever its panel closes). */
+    initialScores?: Record<string, number>;
+    /** Reports the saved sheet + total upward so a reopened pad
+     *  re-lights its taps and the tray suggestion stays live. */
+    onSaved?: (entryId: string, scores: Record<string, number>, total: number | null) => void;
 }) {
     const [scores, setScores] = useState<Record<string, number>>(
-        () => entry.scoreData ?? {},
+        () => initialScores ?? entry.scoreData ?? {},
     );
     const [error, setError] = useState<string | null>(null);
     const [saving, setSaving] = useState(false);
@@ -51,7 +56,7 @@ export default function EntryScorePad({
                 setError(res.error ?? "That score didn't save.");
                 return;
             }
-            onTotal?.(entry.id, res.total ?? null);
+            onSaved?.(entry.id, next, res.total ?? null);
         });
     };
 

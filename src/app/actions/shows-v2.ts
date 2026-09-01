@@ -59,6 +59,7 @@ import {
     getAliases,
     getEntryPhotoUrls,
     getHorseNames,
+    getHorseShowIdentities,
     getShowRole,
     loadClassContexts,
 } from "@/lib/shows/queries";
@@ -3123,6 +3124,16 @@ export async function getJudgeQueue(
     );
     if (!(horseNames instanceof Map)) return { success: false, error: horseNames.error };
 
+    // Show identity (sex · breed · color, registry-backed): the judge
+    // needs to know what she's judging without leaving the queue.
+    // Best-effort — a miss never takes the queue down.
+    let identities = new Map<string, string>();
+    const identityResult = await getHorseShowIdentities(
+        supabase,
+        entries.map((e) => e.horse_id as string),
+    );
+    if (identityResult instanceof Map) identities = identityResult;
+
     // Recorded placings (resume / corrections).
     const placingByEntry = new Map<string, { place: Place | null; note: string | null }>();
     if (entries.length > 0) {
@@ -3165,6 +3176,7 @@ export async function getJudgeQueue(
             note: recorded?.note ?? null,
             critiqueText: (e.critique_text as string | null) ?? null,
             critiquePhotoText: (e.critique_photo_text as string | null) ?? null,
+            identity: identities.get(e.horse_id as string) ?? null,
             scoreData: ((e as Record<string, unknown>).score_data as Record<string, number> | null) ?? null,
             scoreTotal:
                 (e as Record<string, unknown>).score_total == null

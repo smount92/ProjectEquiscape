@@ -1054,6 +1054,17 @@ export async function getClassRoom(
         clsRow.results_published_at !== null || RESULTS_STATUSES.includes(status);
     const revealed = isOwnerRevealed(status, show.blind_browsing as boolean);
 
+    // Judge's preview (owner ask, 2026-09-01): staff see the room
+    // EXACTLY as entrants will — placings, critiques, scorecards —
+    // before publishing. Points and card codes stay publish-only
+    // (cards mint at publish; a preview must not imply otherwise).
+    let staffPreview = false;
+    if (user && !resultsPublished) {
+        const roleResult = await getShowRole(supabase, showId, user.id);
+        if (!("error" in roleResult) && roleResult.role) staffPreview = true;
+    }
+    const reveal = resultsPublished || staffPreview;
+
     // Scored judging (205): the class's rubric — tolerant of an
     // unpasted database (the whole feature simply hides).
     let rubric: ReturnType<typeof parseRubric> = null;
@@ -1070,7 +1081,7 @@ export async function getClassRoom(
     // never rides the wire before the reveal. Scores follow the same
     // rule (205), with a pre-migration fallback.
     const baseColumns = "id, horse_id, owner_id, entry_number, photo_id, status, document_id, created_at";
-    const entryColumns = resultsPublished
+    const entryColumns = reveal
         ? `${baseColumns}, critique_text, critique_photo_text, score_data, score_total`
         : baseColumns;
     let entryRows: Record<string, unknown>[] | null = null;
@@ -1084,7 +1095,7 @@ export async function getClassRoom(
         entryRows = res.data as Record<string, unknown>[] | null;
         eErr = res.error;
     }
-    if (eErr && resultsPublished && (eErr.code === "42703" || eErr.code === "PGRST204")) {
+    if (eErr && reveal && (eErr.code === "42703" || eErr.code === "PGRST204")) {
         const res = await supabase
             .from("show_class_entries")
             .select(`${baseColumns}, critique_text, critique_photo_text`)
@@ -1144,7 +1155,7 @@ export async function getClassRoom(
     }
 
     const placeByEntry = new Map<string, number>();
-    if (resultsPublished && entries.length > 0) {
+    if (reveal && entries.length > 0) {
         const { data: placingRows, error: pErr } = await supabase
             .from("show_placings")
             .select("entry_id, place")
@@ -1170,7 +1181,7 @@ export async function getClassRoom(
         payableSize += Math.min(count, MAX_ENTRIES_PER_OWNER_FOR_SIZE);
     }
     const cardByHorse = new Map<string, { code: string; isStakes: boolean }>();
-    if (resultsPublished && entries.length > 0) {
+    if (reveal && entries.length > 0) {
         try {
             const rpc = supabase.rpc.bind(supabase) as unknown as (
                 fn: string,
@@ -1260,7 +1271,7 @@ export async function getClassRoom(
         ownerAlias: revealed ? (aliases.get(e.owner_id) ?? "unknown") : null,
         ownerId: revealed ? e.owner_id : null,
         isOwn: !!user && e.owner_id === user.id,
-        place: resultsPublished
+        place: reveal
             ? ((placeByEntry.get(e.id) as ClassRoomEntry["place"]) ?? null)
             : null,
         pointsEarned:
@@ -1274,27 +1285,27 @@ export async function getClassRoom(
         cardIsStakes:
             resultsPublished && (cardByHorse.get(e.horse_id)?.isStakes ?? false) &&
             (placeByEntry.get(e.id) ?? 99) <= 2,
-        critique: resultsPublished ? (e.critique_text ?? null) : null,
-        photoCritique: resultsPublished ? (e.critique_photo_text ?? null) : null,
-        scoreData: resultsPublished
+        critique: reveal ? (e.critique_text ?? null) : null,
+        photoCritique: reveal ? (e.critique_photo_text ?? null) : null,
+        scoreData: reveal
             ? (((e as Record<string, unknown>).score_data as Record<string, number> | null) ?? null)
             : null,
         scoreTotal:
-            resultsPublished && (e as Record<string, unknown>).score_total != null
+            reveal && (e as Record<string, unknown>).score_total != null
                 ? Number((e as Record<string, unknown>).score_total)
                 : null,
         document: docByEntry.get(e.id) ?? null,
         voteCount: voteCounts.get(e.id) ?? 0,
         viewerHasVoted: viewerVotes.has(e.id),
     }));
-    if (resultsPublished) {
+    if (reveal) {
         roomEntries.sort((a, b) => (a.place ?? 99) - (b.place ?? 99));
     }
 
     // The dashed polygon: per-criterion class averages, from every
     // published sheet in the room.
     const scoreAverages =
-        resultsPublished && rubric
+        reveal && rubric
             ? classAverages(
                   rubric,
                   roomEntries
@@ -1327,6 +1338,7 @@ export async function getClassRoom(
             },
             rubric,
             scoreAverages,
+            staffPreview,
             revealed,
             votingEnabled,
             votingOpen,

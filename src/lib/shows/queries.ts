@@ -91,6 +91,44 @@ export async function getAliases(
 }
 
 /** Horse display names in one query. */
+/**
+ * Show identity for the judge's card: sex · breed · color, from the
+ * HORSE first and the REGISTRY (catalog) as fallback — the judge
+ * needs to know what she's looking at even when the owner never
+ * filled the fields in. Blind-safe: nothing here identifies a person.
+ */
+export async function getHorseShowIdentities(
+    supabase: SupabaseClient,
+    horseIds: string[],
+): Promise<Map<string, string> | { error: string }> {
+    const unique = [...new Set(horseIds)];
+    if (unique.length === 0) return new Map();
+    const { data, error } = await supabase
+        .from("user_horses")
+        .select(
+            "id, assigned_breed, assigned_gender, finish_type, catalog_items:catalog_id(attributes)",
+        )
+        .in("id", unique);
+    if (error) return { error: error.message };
+    const out = new Map<string, string>();
+    for (const raw of data ?? []) {
+        const r = raw as unknown as {
+            id: string;
+            assigned_breed: string | null;
+            assigned_gender: string | null;
+            finish_type: string | null;
+            catalog_items: { attributes: Record<string, unknown> | null } | null;
+        };
+        const cat = r.catalog_items?.attributes ?? {};
+        const sex = r.assigned_gender || (cat.gender as string | undefined) || null;
+        const breed = r.assigned_breed || (cat.breed as string | undefined) || null;
+        const color = (cat.color_description as string | undefined) || r.finish_type || null;
+        const line = [sex, breed, color].filter(Boolean).join(" · ");
+        if (line) out.set(r.id, line);
+    }
+    return out;
+}
+
 export async function getHorseNames(
     supabase: SupabaseClient,
     horseIds: string[],

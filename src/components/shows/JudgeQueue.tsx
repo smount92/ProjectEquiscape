@@ -299,8 +299,12 @@ function ClassRecorder({
     });
     const [noteOpenFor, setNoteOpenFor] = useState<string | null>(null);
     const [refusal, setRefusal] = useState<string | null>(null);
-    // Scored judging (205): totals reported live by the score pads.
+    // Scored judging (205): the freshest sheet + total per entry, held
+    // HERE because the score pad unmounts when its panel closes — a
+    // reopened pad must re-light its taps from this cache, not from
+    // server props that only refresh on navigation.
     const [liveTotals, setLiveTotals] = useState<Record<string, number | null>>({});
+    const [liveScores, setLiveScores] = useState<Record<string, Record<string, number>>>({});
     const [rubricBusy, setRubricBusy] = useState(false);
     const [doneSaving, setDoneSaving] = useState(false);
     const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
@@ -563,7 +567,11 @@ function ClassRecorder({
                                             <img
                                                 src={entry.photoUrl}
                                                 alt=""
-                                                className="aspect-square w-full object-cover"
+                                                // object-CONTAIN: a judge must see the
+                                                // whole model — cropping legs and ears
+                                                // off non-square photos was costing
+                                                // entries their extremities.
+                                                className="aspect-square w-full bg-black/15 object-contain"
                                                 loading="lazy"
                                             />
                                         ) : (
@@ -608,6 +616,14 @@ function ClassRecorder({
                                             {entry.ownerAlias !== null && (
                                                 <span className="block truncate pr-[5.75rem] text-xs text-white/75">
                                                     @{entry.ownerAlias}
+                                                </span>
+                                            )}
+                                            {/* What she's judging: sex · breed · color,
+                                                registry-backed when the owner never set
+                                                them. Blind-safe — describes the horse. */}
+                                            {entry.identity && (
+                                                <span className="block truncate pr-[5.75rem] text-[0.68rem] text-white/70">
+                                                    {entry.identity}
                                                 </span>
                                             )}
                                             {/* Calibration at a glance (205): the running
@@ -668,9 +684,11 @@ function ClassRecorder({
                                             <EntryScorePad
                                                 entry={entry}
                                                 rubric={cls.rubric}
-                                                onTotal={(id, total) =>
-                                                    setLiveTotals((prev) => ({ ...prev, [id]: total }))
-                                                }
+                                                initialScores={liveScores[entry.id] ?? entry.scoreData ?? {}}
+                                                onSaved={(id, scores, total) => {
+                                                    setLiveScores((prev) => ({ ...prev, [id]: scores }));
+                                                    setLiveTotals((prev) => ({ ...prev, [id]: total }));
+                                                }}
                                             />
                                         )}
                                         <Textarea
@@ -688,6 +706,31 @@ function ClassRecorder({
                         );
                     })}
                 </ul>
+            )}
+
+            {/* Judge tools — at the TRAY, where the thumb already is.
+                (The rubric bar at the top has the same sort; a judge
+                who just scored 14 entries is at the bottom.) More
+                class-level buttons land here as they're invented. */}
+            {canRecord && cls.rubric && (
+                <div className="border-input bg-card flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border px-3 py-2 text-sm">
+                    <button
+                        type="button"
+                        onClick={applyScoreOrder}
+                        disabled={scoredOrder.length === 0}
+                        className="text-forest cursor-pointer font-semibold hover:underline disabled:cursor-default disabled:opacity-45"
+                    >
+                        🎯 Place by scores ({scoredOrder.length} of {cls.entries.length} scored)
+                    </button>
+                    {scoredTies > 0 && (
+                        <span className="text-(--brass) text-xs font-semibold">
+                            {scoredTies} tie{scoredTies === 1 ? "" : "s"} — your call stands
+                        </span>
+                    )}
+                    <span className="text-muted-foreground text-xs">
+                        fills the tray from totals; adjust any ribbon after
+                    </span>
+                </div>
             )}
 
             {canRecord && (

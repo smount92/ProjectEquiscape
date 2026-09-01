@@ -181,11 +181,19 @@ export default function ClassRoomPage({ room }: { room: ClassRoomData }) {
                     </aside>
 
                     <div className="flex min-w-0 flex-col gap-5">
+                {/* Staff preview: the judge's "what will they see" pass. */}
+                {room.staffPreview && (
+                    <div className="border-(--brass) bg-(--brass)/10 rounded-lg border border-dashed px-4 py-2.5 text-sm">
+                        👁 <b>Judge&rsquo;s preview</b> — you&rsquo;re seeing this room as entrants
+                        will when you publish. Placings, critiques and scorecards are live-editable
+                        until then; points and qualification cards mint at publish.
+                    </div>
+                )}
                 {/* Scored class, results out: the class recap — computed,
                     never typed. Tells the whole field where the points
                     lived and died, which is the teaching half of scored
                     judging (the scorecards are the personal half). */}
-                {room.room.resultsPublished && room.rubric && room.scoreAverages && (() => {
+                {(room.room.resultsPublished || room.staffPreview) && room.rubric && room.scoreAverages && (() => {
                     const totals = room.entries
                         .map((e) => e.scoreTotal)
                         .filter((t): t is number => t != null);
@@ -223,7 +231,7 @@ export default function ClassRoomPage({ room }: { room: ClassRoomData }) {
                     votingEnabled={room.votingEnabled}
                     votingOpen={room.votingOpen}
                     authed={room.authed}
-                    resultsPublished={room.room.resultsPublished}
+                    resultsPublished={room.room.resultsPublished || room.staffPreview}
                     rubric={room.rubric}
                     scoreAverages={room.scoreAverages}
                 />
