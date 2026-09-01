@@ -75,7 +75,7 @@ export default function MakingReel({
                 const credit = creditLabel({
                     recordedBy: rec.recordedBy,
                     ownerConfirmedAt: rec.ownerConfirmedAt,
-                    artistIsOwner: !!rec.artistUserId && rec.artistUserId === ownerId,
+                    artistIsOwner: rec.artistIsOwner ?? (!!rec.artistUserId && rec.artistUserId === ownerId),
                 });
                 const span = recordSpan(rec);
                 // Stages group in the order the ARTIST used them (204).

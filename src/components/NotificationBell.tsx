@@ -55,7 +55,7 @@ export default function NotificationBell() {
     const [open, setOpen] = useState(false);
     const [items, setItems] = useState<PeekItem[] | null>(null);
     const [loading, setLoading] = useState(false);
-    const [rect, setRect] = useState<{ top: number; right: number } | null>(null);
+    const [rect, setRect] = useState<{ top: number; right: number; width: number } | null>(null);
 
     const triggerRef = useRef<HTMLButtonElement>(null);
     const panelRef = useRef<HTMLDivElement>(null);
@@ -64,7 +64,18 @@ export default function NotificationBell() {
         const el = triggerRef.current;
         if (!el) return;
         const r = el.getBoundingClientRect();
-        setRect({ top: r.bottom + 8, right: Math.max(8, window.innerWidth - r.right) });
+        // Width and position from the SAME pixel numbers, with the
+        // right-offset clamped so the panel's left edge can never
+        // leave the viewport. The old math anchored to the bell's
+        // right edge and let a 22rem panel run off-screen left on
+        // phones (the bell isn't flush right — icons sit after it),
+        // worse still under Simple Mode's larger rem.
+        const width = Math.min(352, window.innerWidth - 16);
+        const right = Math.min(
+            Math.max(8, window.innerWidth - r.right),
+            Math.max(8, window.innerWidth - width - 8),
+        );
+        setRect({ top: r.bottom + 8, right, width });
     }, []);
 
     const load = useCallback(async () => {
@@ -136,8 +147,8 @@ export default function NotificationBell() {
                 ref={panelRef}
                 role="dialog"
                 aria-label="Notifications"
-                className="border-input bg-card fixed z-[100] w-[min(22rem,calc(100vw-1rem))] overflow-hidden rounded-xl border shadow-lg"
-                style={{ top: rect.top, right: rect.right }}
+                className="border-input bg-card fixed z-[100] overflow-hidden rounded-xl border shadow-lg"
+                style={{ top: rect.top, right: rect.right, width: rect.width }}
             >
                 {/* Leather header band — the same material as a page masthead,
                     at dropdown scale. */}

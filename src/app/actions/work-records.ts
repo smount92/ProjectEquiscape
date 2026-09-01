@@ -73,6 +73,9 @@ export interface WorkRecordView {
     viewerIsOwner: boolean;
     /** True when the owner should be prompted to confirm this record. */
     awaitingOwner: boolean;
+    /** The artist owns the horse — no counter-signature needed. Carried
+     *  explicitly because the anon surface has no ownerId to compare. */
+    artistIsOwner?: boolean;
 }
 
 interface LogRow {
@@ -540,6 +543,7 @@ export async function getMakingForHorse(horseId: string): Promise<WorkRecordView
             moments: byLog.get(l.id) ?? [],
             viewerIsArtist,
             viewerIsOwner,
+            artistIsOwner,
             awaitingOwner:
                 viewerIsOwner && !confirmed && !artistIsOwner && l.recorded_by === "artist" && !l.disavowed_at,
         });
@@ -585,6 +589,9 @@ export async function getPublicMaking(horseId: string): Promise<WorkRecordView[]
         })),
         viewerIsArtist: false,
         viewerIsOwner: false,
+        // An unverified artist-recorded row only passes the RPC's
+        // display gate when the artist owns the horse.
+        artistIsOwner: r.recorded_by === "artist" && !r.verified,
         awaitingOwner: false,
     }));
 }

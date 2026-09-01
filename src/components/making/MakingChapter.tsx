@@ -69,7 +69,7 @@ export default function MakingChapter({
             verified: creditLabel({
                 recordedBy: r.recordedBy,
                 ownerConfirmedAt: r.ownerConfirmedAt,
-                artistIsOwner: !!r.artistUserId && r.artistUserId === ownerId,
+                artistIsOwner: r.artistIsOwner ?? (!!r.artistUserId && r.artistUserId === ownerId),
             }).verified,
         }));
 
