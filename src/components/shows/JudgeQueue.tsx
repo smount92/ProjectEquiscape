@@ -519,7 +519,7 @@ function ClassRecorder({
                                 disabled={scoredOrder.length === 0}
                                 className="text-forest cursor-pointer text-sm font-semibold hover:underline disabled:cursor-default disabled:opacity-45"
                             >
-                                Sort tray by scores ({scoredOrder.length} scored)
+                                Sort tray by scores ({scoredOrder.length} of {cls.entries.length} scored)
                             </button>
                             {scoredTies > 0 && (
                                 <span className="text-(--brass) text-xs font-semibold">
@@ -608,6 +608,19 @@ function ClassRecorder({
                                             {entry.ownerAlias !== null && (
                                                 <span className="block truncate pr-[5.75rem] text-xs text-white/75">
                                                     @{entry.ownerAlias}
+                                                </span>
+                                            )}
+                                            {/* Calibration at a glance (205): the running
+                                                total on every scored card, so a judge can
+                                                see the class's spread — and what's still
+                                                unscored — without opening panels. */}
+                                            {cls.rubric && (
+                                                <span className="block text-xs font-semibold text-white/90 tabular-nums">
+                                                    {(liveTotals[entry.id] !== undefined
+                                                        ? liveTotals[entry.id]
+                                                        : entry.scoreTotal) != null
+                                                        ? `🎯 ${liveTotals[entry.id] ?? entry.scoreTotal}`
+                                                        : "🎯 not scored"}
                                                 </span>
                                             )}
                                         </span>

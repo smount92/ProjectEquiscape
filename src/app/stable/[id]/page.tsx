@@ -179,7 +179,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  const { data: rawRecords } = await supabase
  .from("show_records")
  .select(
- 'id, show_name, show_date, show_id, division, class_name,"placing", ribbon_color, judge_name, is_nan, notes, show_location, section_name, award_category, competition_level, show_date_text, verification_tier',
+ '*',
  )
  .eq("horse_id", horseId)
  .order("show_date", { ascending: false, nullsFirst: false });
@@ -203,6 +203,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  competitionLevel: r.competition_level,
  showDateText: r.show_date_text,
  verificationTier: r.verification_tier,
+ scoreTotal: (r as { score_total?: number | string | null }).score_total == null ? null : Number((r as { score_total?: number | string | null }).score_total),
  }),
  );
 

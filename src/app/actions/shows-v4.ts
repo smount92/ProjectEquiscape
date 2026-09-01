@@ -19,6 +19,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+import { logger } from "@/lib/logger";
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
@@ -919,6 +920,49 @@ async function setClassPublished(
         .update({ results_published_at: publishedAt })
         .eq("id", input.classId);
     if (updateError) return { success: false, error: updateError.message };
+
+    // The reveal used to be SILENT — entrants found out by refreshing.
+    // On publish (never on pull-back), every entrant in the class hears
+    // once, deep-linked to the room where their placing, critique and
+    // scorecard live. Best-effort; a notify hiccup never unwinds the
+    // publish.
+    if (publishedAt !== null) {
+        try {
+            const { data: entryOwners } = await supabase
+                .from("show_class_entries")
+                .select("owner_id, status")
+                .eq("class_id", input.classId);
+            const owners = [
+                ...new Set(
+                    (entryOwners ?? [])
+                        .filter((e) => e.status !== "scratched")
+                        .map((e) => e.owner_id as string),
+                ),
+            ];
+            const { data: clsName } = await supabase
+                .from("show_classes")
+                .select("name, class_number")
+                .eq("id", input.classId)
+                .maybeSingle();
+            const label = clsName
+                ? `${clsName.class_number ? `Class ${clsName.class_number} — ` : ""}${clsName.name}`
+                : "your class";
+            const { createNotification } = await import("@/lib/notifications/createNotification");
+            await Promise.all(
+                owners.map((ownerId) =>
+                    createNotification({
+                        userId: ownerId,
+                        actorId: user.id,
+                        type: "show_update",
+                        content: `Results are up for ${label} — see your placing, the judge's notes, and your scorecard.`,
+                        linkUrl: `/shows/${showId}/class/${input.classId}`,
+                    }),
+                ),
+            );
+        } catch (err) {
+            logger.error("ShowsV4", "Publish notify failed (continuing)", err);
+        }
+    }
 
     revalidatePath(`/shows/${showId}`);
     return { success: true };

@@ -51,6 +51,12 @@ export interface ShowRecordInsert {
     total_entries: number | null;
     judge_critique: string | null;
     verification_tier: "platform_generated";
+    /** Scored judging (206): the permanent headline + the frozen
+     *  {rubric, scores} — records outlive classes, so the card is
+     *  denormalized into the row. Absent for unscored classes; the
+     *  caller strips both on a pre-206 database. */
+    score_total?: number | null;
+    scorecard?: { rubric: unknown; scores: Record<string, number> } | null;
 }
 
 export interface PublishShowInput {
@@ -75,8 +81,11 @@ export interface PublishShowInput {
         classId: string;
         horseId: string;
         ownerId: string;
+        /** Scored judging (205/206), when the class had a rubric. */
+        scoreTotal?: number | null;
+        scoreData?: Record<string, number> | null;
     }[];
-    classes: { id: string; name: string; sectionId: string }[];
+    classes: { id: string; name: string; sectionId: string; rubric?: unknown }[];
     sections: { id: string; name: string; divisionId: string }[];
     divisions: { id: string; name: string }[];
     /**
@@ -171,6 +180,14 @@ export function buildShowRecords(input: PublishShowInput): {
             total_entries: liveCountByClass.get(cls.id) ?? null,
             judge_critique: placing.note ?? null,
             verification_tier: "platform_generated",
+            // The scorecard rides the record forever (206) — only a
+            // COMPLETE sheet (a real total) earns permanence.
+            ...(entry.scoreTotal != null && entry.scoreData
+                ? {
+                      score_total: entry.scoreTotal,
+                      scorecard: { rubric: cls.rubric ?? null, scores: entry.scoreData },
+                  }
+                : {}),
         });
     }
 

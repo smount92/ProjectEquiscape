@@ -612,24 +612,63 @@ async function writeShowRecordsForShow(
         if (sErr) return { error: sErr.message };
         sections = sectionRows ?? [];
         if (sections.length > 0) {
-            const { data: classRows, error: cErr } = await supabase
+            // 205: the rubric rides along so the scorecard can be
+            // frozen into show_records (206); tolerant of a pre-205
+            // database.
+            const sb = supabase as unknown as {
+                from: (t: string) => {
+                    select: (c: string) => {
+                        in: (
+                            k: string,
+                            v: string[],
+                        ) => PromiseLike<{ data: Record<string, unknown>[] | null; error: { code?: string; message: string } | null }>;
+                        eq: (
+                            k: string,
+                            v: string,
+                        ) => PromiseLike<{ data: Record<string, unknown>[] | null; error: { code?: string; message: string } | null }>;
+                    };
+                };
+            };
+            let { data: classRows, error: cErr } = await sb
                 .from("show_classes")
-                .select("id, name, section_id")
+                .select("id, name, section_id, rubric")
                 .in("section_id", sections.map((s) => s.id));
+            if (cErr && (cErr.code === "42703" || cErr.code === "PGRST204")) {
+                ({ data: classRows, error: cErr } = await sb
+                    .from("show_classes")
+                    .select("id, name, section_id")
+                    .in("section_id", sections.map((s) => s.id)));
+            }
             if (cErr) return { error: cErr.message };
-            classes = classRows ?? [];
+            classes = (classRows ?? []) as typeof classes;
         }
     }
     if (classes.length === 0) return { written: 0, skipped: 0 };
 
-    // ── Live entries + placings ──
-    const { data: entryRows, error: eErr } = await supabase
+    // ── Live entries + placings (score columns tolerant, 205) ──
+    const sbE = supabase as unknown as {
+        from: (t: string) => {
+            select: (c: string) => {
+                eq: (
+                    k: string,
+                    v: string,
+                ) => PromiseLike<{ data: Record<string, unknown>[] | null; error: { code?: string; message: string } | null }>;
+            };
+        };
+    };
+    let { data: entryRows, error: eErr } = await sbE
         .from("show_class_entries")
-        .select("id, class_id, horse_id, owner_id, status")
+        .select("id, class_id, horse_id, owner_id, status, score_data, score_total")
         .eq("show_id", showId);
+    if (eErr && (eErr.code === "42703" || eErr.code === "PGRST204")) {
+        ({ data: entryRows, error: eErr } = await sbE
+            .from("show_class_entries")
+            .select("id, class_id, horse_id, owner_id, status")
+            .eq("show_id", showId));
+    }
     if (eErr) return { error: eErr.message };
     const liveEntries = (entryRows ?? []).filter(
-        (e: { status: string }) => e.status !== "scratched",
+        (e) => (e.status as string) !== "scratched",
     );
 
     const { data: placingRows, error: pErr } = await supabase
@@ -684,8 +723,15 @@ async function writeShowRecordsForShow(
             classId: e.class_id as string,
             horseId: e.horse_id as string,
             ownerId: e.owner_id as string,
+            scoreTotal: e.score_total == null ? null : Number(e.score_total),
+            scoreData: (e.score_data as Record<string, number> | null) ?? null,
         })),
-        classes: classes.map((c) => ({ id: c.id, name: c.name, sectionId: c.section_id })),
+        classes: classes.map((c) => ({
+            id: c.id,
+            name: c.name,
+            sectionId: c.section_id,
+            rubric: (c as { rubric?: unknown }).rubric ?? null,
+        })),
         sections: sections.map((s) => ({ id: s.id, name: s.name, divisionId: s.division_id })),
         divisions,
         callbacks: (callbackRows ?? []).map((r) => ({
@@ -704,7 +750,13 @@ async function writeShowRecordsForShow(
     });
 
     if (rows.length > 0) {
-        const { error: insertError } = await admin.from("show_records").insert(rows);
+        let { error: insertError } = await admin.from("show_records").insert(rows as never);
+        if (insertError && (insertError.code === "42703" || insertError.code === "PGRST204")) {
+            // Pre-206 database: the record still lands, just without
+            // its scorecard — placings must never wait on a paste.
+            const stripped = rows.map(({ score_total: _st, scorecard: _sc, ...rest }) => rest);
+            ({ error: insertError } = await admin.from("show_records").insert(stripped as never));
+        }
         if (insertError) return { error: insertError.message };
     }
     return { written: rows.length, skipped };

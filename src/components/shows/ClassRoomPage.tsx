@@ -181,6 +181,42 @@ export default function ClassRoomPage({ room }: { room: ClassRoomData }) {
                     </aside>
 
                     <div className="flex min-w-0 flex-col gap-5">
+                {/* Scored class, results out: the class recap — computed,
+                    never typed. Tells the whole field where the points
+                    lived and died, which is the teaching half of scored
+                    judging (the scorecards are the personal half). */}
+                {room.room.resultsPublished && room.rubric && room.scoreAverages && (() => {
+                    const totals = room.entries
+                        .map((e) => e.scoreTotal)
+                        .filter((t): t is number => t != null);
+                    if (totals.length === 0) return null;
+                    const avgTotal =
+                        Math.round((totals.reduce((a, b) => a + b, 0) / totals.length) * 10) / 10;
+                    const ranked = room.rubric.criteria
+                        .map((c) => ({ label: c.label, avg: room.scoreAverages?.[c.key] }))
+                        .filter((c): c is { label: string; avg: number } => c.avg != null)
+                        .sort((a, b) => b.avg - a.avg);
+                    const high = ranked[0];
+                    const low = ranked[ranked.length - 1];
+                    return (
+                        <div className="border-input bg-card rounded-lg border p-4">
+                            <h3 className="text-foreground m-0 font-serif text-base font-bold">
+                                📊 The class, in numbers
+                            </h3>
+                            <p className="text-secondary-foreground mt-1 mb-0 text-sm">
+                                {totals.length} scored {totals.length === 1 ? "entry" : "entries"} ·
+                                class average <b className="tabular-nums">{avgTotal}</b>/100
+                                {high && low && high.label !== low.label && (
+                                    <>
+                                        {" "}· strongest on <b>{high.label.toLowerCase()}</b> ({high.avg}),
+                                        points died on <b>{low.label.toLowerCase()}</b> ({low.avg})
+                                    </>
+                                )}
+                                .
+                            </p>
+                        </div>
+                    );
+                })()}
                 <ClassRoomLineup
                     entries={room.entries}
                     revealed={room.revealed}

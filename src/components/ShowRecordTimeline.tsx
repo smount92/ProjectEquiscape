@@ -25,6 +25,8 @@ interface ShowRecordDisplay {
  competitionLevel: string | null;
  showDateText: string | null;
  verificationTier: string | null;
+ /** Scored judging (206): the weighted total, when the class was scored. */
+ scoreTotal?: number | null;
 }
 
 interface ShowRecordTimelineProps {
@@ -204,6 +206,7 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
  <div className="text-secondary-foreground flex flex-wrap gap-x-6 gap-y-2 text-sm [&_span]:flex [&_span]:items-center [&_span]:gap-1">
  <span>📅 {formatShowDate(record.showDate, record.showDateText)}</span>
  {record.placing && <span>🎖️ {record.placing}</span>}
+ {record.scoreTotal != null && <span title="Scored class — weighted rubric total">🎯 {record.scoreTotal}/100</span>}
  {record.division && <span>📂 {record.division}</span>}
  {record.className && <span>📋 {record.className}</span>}
  {record.judgeName && <span>👤 {record.judgeName}</span>}
