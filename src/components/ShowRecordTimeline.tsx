@@ -27,6 +27,8 @@ interface ShowRecordDisplay {
  verificationTier: string | null;
  /** Scored judging (206): the weighted total, when the class was scored. */
  scoreTotal?: number | null;
+ /** The entry photo AS JUDGED (207) — frozen at publish; galleries change, records don't. */
+ entryPhotoUrl?: string | null;
 }
 
 interface ShowRecordTimelineProps {
@@ -207,6 +209,12 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
  <span>📅 {formatShowDate(record.showDate, record.showDateText)}</span>
  {record.placing && <span>🎖️ {record.placing}</span>}
  {record.scoreTotal != null && <span title="Scored class — weighted rubric total">🎯 {record.scoreTotal}/100</span>}
+ {record.entryPhotoUrl && (
+ <a href={record.entryPhotoUrl} target="_blank" rel="noopener noreferrer" title="The photo as judged" className="shrink-0">
+ {/* eslint-disable-next-line @next/next/no-img-element */}
+ <img src={record.entryPhotoUrl} alt="As judged" loading="lazy" className="h-12 w-12 rounded-md border border-input object-cover" />
+ </a>
+ )}
  {record.division && <span>📂 {record.division}</span>}
  {record.className && <span>📋 {record.className}</span>}
  {record.judgeName && <span>👤 {record.judgeName}</span>}

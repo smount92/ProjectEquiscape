@@ -204,6 +204,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  showDateText: r.show_date_text,
  verificationTier: r.verification_tier,
  scoreTotal: (r as { score_total?: number | string | null }).score_total == null ? null : Number((r as { score_total?: number | string | null }).score_total),
+ entryPhotoUrl: ((r as { entry_photo_url?: string | null }).entry_photo_url) ?? null,
  }),
  );
 

@@ -57,6 +57,8 @@ export interface ShowRecordInsert {
      *  caller strips both on a pre-206 database. */
     score_total?: number | null;
     scorecard?: { rubric: unknown; scores: Record<string, number> } | null;
+    /** The entry photo AS JUDGED (207) — frozen because galleries change. */
+    entry_photo_url?: string | null;
 }
 
 export interface PublishShowInput {
@@ -84,6 +86,8 @@ export interface PublishShowInput {
         /** Scored judging (205/206), when the class had a rubric. */
         scoreTotal?: number | null;
         scoreData?: Record<string, number> | null;
+        /** The judged photo's public URL, frozen onto the record (207). */
+        entryPhotoUrl?: string | null;
     }[];
     classes: { id: string; name: string; sectionId: string; rubric?: unknown }[];
     sections: { id: string; name: string; divisionId: string }[];
@@ -188,6 +192,7 @@ export function buildShowRecords(input: PublishShowInput): {
                       scorecard: { rubric: cls.rubric ?? null, scores: entry.scoreData },
                   }
                 : {}),
+            ...(entry.entryPhotoUrl ? { entry_photo_url: entry.entryPhotoUrl } : {}),
         });
     }
 

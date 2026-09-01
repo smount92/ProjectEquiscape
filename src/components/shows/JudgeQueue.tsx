@@ -79,6 +79,10 @@ export default function JudgeQueue({ queue }: { queue: JudgeQueueData }) {
     // router.refresh(); this keeps progress + advance instant.
     const [locallyDone, setLocallyDone] = useState<ReadonlySet<string>>(() => new Set());
     const [toast, setToast] = useState<string | null>(null);
+    // Watermark mask (owner ask, 2026-09-01): an overlay in the JUDGE'S
+    // VIEW ONLY over the photo's watermark corner — the stored photo is
+    // untouched. Defaults on for blind shows; the judge can toggle it.
+    const [maskWatermarks, setMaskWatermarks] = useState<boolean>(show.blindBrowsing);
     const [celebrating, setCelebrating] = useState(false);
     const ladderRef = useRef<HTMLDivElement | null>(null);
 
@@ -305,6 +309,10 @@ function ClassRecorder({
     // server props that only refresh on navigation.
     const [liveTotals, setLiveTotals] = useState<Record<string, number | null>>({});
     const [liveScores, setLiveScores] = useState<Record<string, Record<string, number>>>({});
+    // Same cache for critiques — their editor unmounts with its panel
+    // too, and stale-empty text on reopen reads as (and can become)
+    // data loss.
+    const [liveCritiques, setLiveCritiques] = useState<Record<string, { model: string; photo: string }>>({});
     const [rubricBusy, setRubricBusy] = useState(false);
     const [doneSaving, setDoneSaving] = useState(false);
     const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
@@ -692,14 +700,27 @@ function ClassRecorder({
                                             />
                                         )}
                                         <Textarea
-                                            value={notes[entry.id] ?? ""}
+                                            value={
+                                                entry.id in notes
+                                                    ? notes[entry.id]
+                                                    : (entry.note ?? "")
+                                            }
                                             onChange={(e) => handleNoteChange(entry.id, e.target.value)}
                                             placeholder="Placing note (rides with the trophy-case record)…"
                                             maxLength={2000}
                                             rows={2}
                                             aria-label={`Placing note for ${entry.horseName}`}
                                         />
-                                        <EntryCritiqueEditor entry={entry} />
+                                        <EntryCritiqueEditor
+                                            entry={entry}
+                                            initial={liveCritiques[entry.id]}
+                                            onSaved={(id, model, photo) =>
+                                                setLiveCritiques((prev) => ({
+                                                    ...prev,
+                                                    [id]: { model, photo },
+                                                }))
+                                            }
+                                        />
                                     </div>
                                 )}
                             </li>
@@ -774,10 +795,24 @@ function ClassRecorder({
  * v4 — per-ENTRY critique (model + photo separated; unplaced entries
  * included: the MEPSA teaching tradition). Saves via writeCritique;
  * hidden from entrants until the class's results publish.
+ *
+ * Initial text prefers the PARENT CACHE over server props: this
+ * editor unmounts with its panel, and props only refresh on
+ * navigation — reopening used to show a saved critique as EMPTY (the
+ * judge read it as data loss), and saving from that empty state
+ * would have made it one.
  */
-function EntryCritiqueEditor({ entry }: { entry: JudgeQueueEntry }) {
-    const [model, setModel] = useState(entry.critiqueText ?? "");
-    const [photo, setPhoto] = useState(entry.critiquePhotoText ?? "");
+function EntryCritiqueEditor({
+    entry,
+    initial,
+    onSaved,
+}: {
+    entry: JudgeQueueEntry;
+    initial?: { model: string; photo: string };
+    onSaved?: (entryId: string, model: string, photo: string) => void;
+}) {
+    const [model, setModel] = useState(initial?.model ?? entry.critiqueText ?? "");
+    const [photo, setPhoto] = useState(initial?.photo ?? entry.critiquePhotoText ?? "");
     const [state, setState] = useState<"idle" | "saving" | "saved" | "error">("idle");
     const [error, setError] = useState<string | null>(null);
 
@@ -791,6 +826,7 @@ function EntryCritiqueEditor({ entry }: { entry: JudgeQueueEntry }) {
         });
         if (result.success) {
             setState("saved");
+            onSaved?.(entry.id, model, photo);
         } else {
             setState("error");
             setError(result.error);
@@ -885,5 +921,60 @@ function PublishClassControl({ cls }: { cls: JudgeQueueClass }) {
                 <p role="alert" className="w-full text-xs text-destructive">{error}</p>
             )}
         </div>
+    );
+}
+
+
+/**
+ * The judge's photo tile: object-CONTAIN in a square frame (a judge
+ * must see the whole model — cropping cost entries their legs and
+ * ears), plus an optional watermark cover — a dark band over the
+ * IMAGE'S bottom-right corner, where the site's watermark pill lives.
+ * The cover exists only in this view; the stored photo is untouched.
+ * Geometry is computed from the natural dimensions so letterboxing
+ * doesn't misplace the band.
+ */
+function MaskedEntryPhoto({ photoUrl, mask }: { photoUrl: string; mask: boolean }) {
+    const [ratio, setRatio] = useState<number | null>(null); // naturalW / naturalH
+
+    // Rendered image rect inside a square, object-contain container
+    // (percentages of the container):
+    const landscape = (ratio ?? 1) >= 1;
+    const rw = landscape ? 100 : (ratio ?? 1) * 100;
+    const rh = landscape ? 100 / (ratio ?? 1) : 100;
+    const offRight = (100 - rw) / 2;
+    const offBottom = (100 - rh) / 2;
+
+    return (
+        <span className="relative block">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+                src={photoUrl}
+                alt=""
+                className="aspect-square w-full bg-black/15 object-contain"
+                loading="lazy"
+                onLoad={(e) => {
+                    const img = e.currentTarget;
+                    if (img.naturalWidth && img.naturalHeight) {
+                        setRatio(img.naturalWidth / img.naturalHeight);
+                    }
+                }}
+            />
+            {mask && ratio !== null && (
+                <span
+                    aria-hidden="true"
+                    title="Watermark hidden for blind judging (your view only)"
+                    className="absolute flex items-end justify-end rounded-sm bg-neutral-900/95 pr-1 text-[0.55rem] text-white/40"
+                    style={{
+                        right: offRight + "%",
+                        bottom: offBottom + "%",
+                        width: rw * 0.6 + "%",
+                        height: Math.max(9, rh * 0.11) + "%",
+                    }}
+                >
+                    🕶
+                </span>
+            )}
+        </span>
     );
 }

@@ -659,17 +659,24 @@ async function writeShowRecordsForShow(
     };
     let { data: entryRows, error: eErr } = await sbE
         .from("show_class_entries")
-        .select("id, class_id, horse_id, owner_id, status, score_data, score_total")
+        .select("id, class_id, horse_id, owner_id, status, photo_id, score_data, score_total")
         .eq("show_id", showId);
     if (eErr && (eErr.code === "42703" || eErr.code === "PGRST204")) {
         ({ data: entryRows, error: eErr } = await sbE
             .from("show_class_entries")
-            .select("id, class_id, horse_id, owner_id, status")
+            .select("id, class_id, horse_id, owner_id, status, photo_id")
             .eq("show_id", showId));
     }
     if (eErr) return { error: eErr.message };
     const liveEntries = (entryRows ?? []).filter(
         (e) => (e.status as string) !== "scratched",
+    );
+
+    // The judged photo, frozen onto the record (207) — galleries
+    // change; records don't.
+    const judgedPhotoUrls = await getEntryPhotoUrls(
+        supabase,
+        liveEntries.flatMap((e) => (e.photo_id ? [e.photo_id as string] : [])),
     );
 
     const { data: placingRows, error: pErr } = await supabase
@@ -726,6 +733,10 @@ async function writeShowRecordsForShow(
             ownerId: e.owner_id as string,
             scoreTotal: e.score_total == null ? null : Number(e.score_total),
             scoreData: (e.score_data as Record<string, number> | null) ?? null,
+            entryPhotoUrl:
+                e.photo_id && judgedPhotoUrls instanceof Map
+                    ? (judgedPhotoUrls.get(e.photo_id as string) ?? null)
+                    : null,
         })),
         classes: classes.map((c) => ({
             id: c.id,
@@ -755,7 +766,9 @@ async function writeShowRecordsForShow(
         if (insertError && (insertError.code === "42703" || insertError.code === "PGRST204")) {
             // Pre-206 database: the record still lands, just without
             // its scorecard — placings must never wait on a paste.
-            const stripped = rows.map(({ score_total: _st, scorecard: _sc, ...rest }) => rest);
+            const stripped = rows.map(
+                ({ score_total: _st, scorecard: _sc, entry_photo_url: _ep, ...rest }) => rest,
+            );
             ({ error: insertError } = await admin.from("show_records").insert(stripped as never));
         }
         if (insertError) return { error: insertError.message };
@@ -3315,6 +3328,22 @@ export async function recordPlacings(
         classStatus = "judging";
     }
 
+    // NOTE-PRESERVE GUARD (Amanda's live-judging data loss,
+    // 2026-09-01): the client's notes state re-initializes when the
+    // judge switches classes, and if the server props hadn't caught
+    // up, the next replace-all rewrote placings WITHOUT the notes it
+    // no longer knew — wiping trophy notes already saved. The DB copy
+    // is the truth: an incoming row with NO note keeps the note the
+    // entry already had. Notes change only when the client sends one.
+    const { data: existingNotes } = await supabase
+        .from("show_placings")
+        .select("entry_id, note")
+        .eq("class_id", v.classId);
+    const noteByEntry = new Map<string, string>();
+    for (const row of existingNotes ?? []) {
+        if (row.note) noteByEntry.set(row.entry_id as string, row.note as string);
+    }
+
     // Replace-all in ONE transaction: record_class_placings_atomic
     // (migration 165, not yet in generated types → cast) deletes the
     // old slate and inserts the new one atomically, so a failed
@@ -3328,7 +3357,7 @@ export async function recordPlacings(
         p_placings: v.placings.map((p) => ({
             entry_id: p.entryId,
             place: p.place,
-            note: p.note?.length ? p.note : null,
+            note: p.note?.length ? p.note : (noteByEntry.get(p.entryId) ?? null),
         })),
     });
     if (swapError) return { success: false, error: swapError.message };
