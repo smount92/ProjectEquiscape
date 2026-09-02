@@ -361,6 +361,12 @@ function ClassRecorder({
         const result = await recordPlacings({
             classId: cls.classId,
             placings: toServerPlacings(currentSlots, currentNotes),
+            // EVERY note she touched rides along, placed or not —
+            // unplaced ones persist server-side as participation rows.
+            // An empty string is an explicit clear.
+            notes: Object.fromEntries(
+                Object.entries(currentNotes).map(([id, text]) => [id, text.trim()]),
+            ),
             markDone,
         });
         inFlightRef.current = false;

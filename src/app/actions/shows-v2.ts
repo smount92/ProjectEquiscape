@@ -3343,6 +3343,29 @@ export async function recordPlacings(
     for (const row of existingNotes ?? []) {
         if (row.note) noteByEntry.set(row.entry_id as string, row.note as string);
     }
+    // Freshest notes win: whatever the client sent this save (for ANY
+    // entry, placed or not) overrides the DB copy it's about to replace.
+    for (const [entryId, note] of Object.entries(v.notes ?? {})) {
+        if (!liveIds.has(entryId)) continue;
+        if (note.length) noteByEntry.set(entryId, note);
+        else noteByEntry.delete(entryId); // an explicit clear IS a clear
+    }
+
+    // The slate: the pinned six, plus a PARTICIPATION row (place NULL,
+    // the 117 vocabulary — repeatable by design) for every other noted
+    // entry. Without these, a judge's note on a horse she evaluated
+    // but didn't pin evaporated on every save — "notes gone on half
+    // the horses."
+    const slotted = new Set(v.placings.map((p) => p.entryId));
+    const slate: { entry_id: string; place: number | null; note: string | null }[] =
+        v.placings.map((p) => ({
+            entry_id: p.entryId,
+            place: p.place,
+            note: p.note?.length ? p.note : (noteByEntry.get(p.entryId) ?? null),
+        }));
+    for (const [entryId, note] of noteByEntry) {
+        if (!slotted.has(entryId)) slate.push({ entry_id: entryId, place: null, note });
+    }
 
     // Replace-all in ONE transaction: record_class_placings_atomic
     // (migration 165, not yet in generated types → cast) deletes the
@@ -3354,11 +3377,7 @@ export async function recordPlacings(
     ) => Promise<{ error: { message: string } | null }>;
     const { error: swapError } = await swapRpc("record_class_placings_atomic", {
         p_class_id: v.classId,
-        p_placings: v.placings.map((p) => ({
-            entry_id: p.entryId,
-            place: p.place,
-            note: p.note?.length ? p.note : (noteByEntry.get(p.entryId) ?? null),
-        })),
+        p_placings: slate,
     });
     if (swapError) return { success: false, error: swapError.message };
 

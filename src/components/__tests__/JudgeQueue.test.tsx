@@ -281,6 +281,7 @@ describe("JudgeQueue — autosave", () => {
                 { entryId: "entry-a", place: 2 },
                 { entryId: "entry-c", place: 3 },
             ],
+            notes: expect.any(Object),
             markDone: false,
         });
         expect(screen.getByTestId("save-whisper")).toHaveTextContent("Saved just now ✓");
@@ -314,6 +315,7 @@ describe("JudgeQueue — autosave", () => {
                 { entryId: "entry-a", place: 2 },
                 { entryId: "entry-c", place: 3 },
             ],
+            notes: expect.any(Object),
             markDone: false,
         });
     });
@@ -349,6 +351,7 @@ describe("JudgeQueue — autosave", () => {
         expect(actions.recordPlacings).toHaveBeenCalledWith({
             classId: "class-1",
             placings: [{ entryId: "entry-b", place: 1, note: "Gorgeous shading." }],
+            notes: expect.any(Object),
             markDone: false,
         });
     });
@@ -383,6 +386,7 @@ describe("JudgeQueue — autosave", () => {
                 { entryId: "entry-b", place: 1 },
                 { entryId: "entry-a", place: 2 },
             ],
+            notes: expect.any(Object),
             markDone: false,
         });
         expect(screen.queryByRole("alert")).not.toBeInTheDocument();
@@ -443,6 +447,7 @@ describe("JudgeQueue — Class done", () => {
             expect(actions.recordPlacings).toHaveBeenCalledWith({
                 classId: "class-1",
                 placings: [{ entryId: "entry-b", place: 1 }],
+                notes: expect.any(Object),
                 markDone: true,
             }),
         );

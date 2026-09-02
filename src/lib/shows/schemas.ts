@@ -325,6 +325,14 @@ export const recordPlacingsSchema = z.object({
             (rows) => new Set(rows.map((r) => r.entryId)).size === rows.length,
             { message: "An entry can only take one place." },
         ),
+    /**
+     * Placing notes for EVERY entry the judge wrote one on — placed or
+     * not. Unplaced entries' notes persist as participation rows
+     * (place NULL, the 117 vocabulary): a judge notes each horse as
+     * she evaluates, BEFORE ribbons exist, and those notes used to
+     * evaporate because the slate only carried the pinned six.
+     */
+    notes: z.record(z.string(), z.string().trim().max(2000)).optional(),
     /** Also mark the class 'placed' (the per-class done tick). */
     markDone: z.boolean().default(false),
 });
