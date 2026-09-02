@@ -25,6 +25,7 @@ import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { recordPlacings } from "@/app/actions/shows-v2";
+
 import {
     publishClassResults,
     setClassRubric,
@@ -208,8 +209,11 @@ export default function JudgeQueue({ queue }: { queue: JudgeQueueData }) {
                 <ClassRecorder
                     key={activeClass.classId}
                     cls={activeClass}
+                    showId={show.id}
                     canRecord={canRecord}
                     canPublish={queue.viewerRole === "host" || queue.viewerRole === "co_host"}
+                    maskWatermarks={maskWatermarks}
+                    onToggleMask={() => setMaskWatermarks((m) => !m)}
                     onEdited={() => handleClassEdited(activeClass)}
                     onDone={() => handleClassDone(activeClass)}
                 />
@@ -281,15 +285,22 @@ export default function JudgeQueue({ queue }: { queue: JudgeQueueData }) {
  */
 function ClassRecorder({
     cls,
+    showId,
     canRecord,
     canPublish,
+    maskWatermarks,
+    onToggleMask,
     onEdited,
     onDone,
 }: {
     cls: JudgeQueueClass;
+    showId: string;
     canRecord: boolean;
     /** v4: host/co-host may publish this class's results (rolling reveal). */
     canPublish: boolean;
+    /** Judge's-view watermark cover (never touches the photo itself). */
+    maskWatermarks: boolean;
+    onToggleMask: () => void;
     /** Fires on every local edit — the parent drops its optimistic ✓. */
     onEdited: () => void;
     onDone: () => void;
@@ -358,7 +369,9 @@ function ClassRecorder({
         if (markDone) setDoneSaving(true);
         dispatch({ type: "saveStart" });
         const { slots: currentSlots, notes: currentNotes } = payloadRef.current;
-        const result = await recordPlacings({
+        let result: Awaited<ReturnType<typeof recordPlacings>>;
+        try {
+            result = await recordPlacings({
             classId: cls.classId,
             placings: toServerPlacings(currentSlots, currentNotes),
             // EVERY note she touched rides along, placed or not —
@@ -368,7 +381,13 @@ function ClassRecorder({
                 Object.entries(currentNotes).map(([id, text]) => [id, text.trim()]),
             ),
             markDone,
-        });
+            });
+        } catch {
+            // Thrown (not returned) failure — network drop or a deploy
+            // mid-session. WITHOUT this catch, inFlightRef stayed true
+            // forever and every later autosave silently no-opped.
+            result = { success: false, error: "Save failed — check your connection and tap retry. If it keeps failing, copy any unsaved notes, then reload." };
+        }
         inFlightRef.current = false;
         if (markDone) setDoneSaving(false);
         if (!result.success) {
@@ -510,6 +529,27 @@ function ClassRecorder({
                     {cls.divisionName} · {cls.sectionName}
                 </span>
                 {cls.status === "placed" && <span className="stamp">placed</span>}
+                {canRecord && (
+                    <span className="ml-auto flex items-center gap-1.5">
+                        <a
+                            href={`/shows/${showId}/class/${cls.classId}`}
+                            target="_blank"
+                            rel="noopener"
+                            className="border-input hover:border-forest rounded-full border px-2.5 py-0.5 text-[0.7rem] font-semibold no-underline"
+                            title="The class room exactly as entrants will see it — dashed banner until you publish"
+                        >
+                            👁 Preview
+                        </a>
+                        <button
+                            type="button"
+                            onClick={onToggleMask}
+                            className="border-input hover:border-forest cursor-pointer rounded-full border px-2.5 py-0.5 text-[0.7rem] font-semibold"
+                            title="Covers the watermark corner in YOUR view only — the photo itself is untouched"
+                        >
+                            {maskWatermarks ? "🕶 watermarks hidden" : "🕶 hide watermarks"}
+                        </button>
+                    </span>
+                )}
             </div>
 
             {canRecord && !cls.resultsPublishedAt && (
@@ -577,16 +617,9 @@ function ClassRecorder({
                                         onClick={() => handleTapEntry(entry.id)}
                                     >
                                         {entry.photoUrl ? (
-                                            // eslint-disable-next-line @next/next/no-img-element
-                                            <img
-                                                src={entry.photoUrl}
-                                                alt=""
-                                                // object-CONTAIN: a judge must see the
-                                                // whole model — cropping legs and ears
-                                                // off non-square photos was costing
-                                                // entries their extremities.
-                                                className="aspect-square w-full bg-black/15 object-contain"
-                                                loading="lazy"
+                                            <MaskedEntryPhoto
+                                                photoUrl={entry.photoUrl}
+                                                mask={maskWatermarks}
                                             />
                                         ) : (
                                             <div
@@ -929,7 +962,6 @@ function PublishClassControl({ cls }: { cls: JudgeQueueClass }) {
         </div>
     );
 }
-
 
 /**
  * The judge's photo tile: object-CONTAIN in a square frame (a judge
