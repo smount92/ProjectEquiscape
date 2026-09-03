@@ -46,6 +46,7 @@ import {
     removeShowStaffSchema,
     removeVoteSchema,
     reorderClasslistSchema,
+    restoreEntrySchema,
     scratchEntrySchema,
     setFeePaidSchema,
     splitClassSchema,
@@ -2735,6 +2736,79 @@ export async function scratchEntry(
         });
     }
 
+    return { success: true };
+}
+
+/**
+ * Un-scratch — the mirror of scratchEntry, STAFF ONLY (owner ask
+ * 2026-09-03: an accidental staff scratch needed hand-written SQL to
+ * undo). Same window as scratching (until the show completes), and
+ * the partial unique index is the referee: if the horse was
+ * legitimately re-entered live in this class meanwhile, the restore
+ * refuses instead of duplicating.
+ */
+export async function restoreEntry(
+    input: z.input<typeof restoreEntrySchema>,
+): Promise<ActionResult> {
+    const parsed = restoreEntrySchema.safeParse(input);
+    if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
+    const { supabase, user } = await requireAuth();
+
+    const { data: entry, error: eErr } = await supabase
+        .from("show_class_entries")
+        .select("id, owner_id, status, show_id, class_id, horse_id")
+        .eq("id", parsed.data.entryId)
+        .maybeSingle();
+    if (eErr) return { success: false, error: eErr.message };
+    if (!entry) return { success: false, error: "Entry not found." };
+    if (entry.status !== "scratched") {
+        return { success: false, error: "This entry isn't scratched." };
+    }
+
+    const ctx = await getShowRole(supabase, entry.show_id as string, user.id);
+    if ("error" in ctx) return { success: false, error: ctx.error };
+    if (!ctx.role || !SCRATCH_STAFF_ROLES.includes(ctx.role)) {
+        return { success: false, error: "Only show staff can restore a scratched entry." };
+    }
+    if (ctx.show.status === "completed" || ctx.show.status === "archived") {
+        return { success: false, error: "This show's results are final — entries can no longer be restored." };
+    }
+
+    const { data: restored, error: uErr } = await supabase
+        .from("show_class_entries")
+        .update({ status: "entered", note: null })
+        .eq("id", parsed.data.entryId)
+        .select("id");
+    if (uErr) {
+        if (uErr.code === "23505") {
+            return {
+                success: false,
+                error: "This horse already has a live entry in the class — nothing to restore.",
+            };
+        }
+        return { success: false, error: uErr.message };
+    }
+    if (!restored || restored.length === 0) {
+        return { success: false, error: "The entry could not be restored — please refresh and try again." };
+    }
+
+    // Tell the owner their horse is back in.
+    if (entry.owner_id !== user.id) {
+        const ownerId = entry.owner_id as string;
+        const showId = entry.show_id as string;
+        after(async () => {
+            const { createNotification } = await import("@/lib/notifications/createNotification");
+            await createNotification({
+                userId: ownerId,
+                actorId: user.id,
+                type: "show_update",
+                content: "Your scratched entry was restored by show staff — it's back in its class.",
+                linkUrl: `/shows/${showId}`,
+            });
+        });
+    }
+
+    revalidatePath(`/shows/${entry.show_id as string}`);
     return { success: true };
 }
 

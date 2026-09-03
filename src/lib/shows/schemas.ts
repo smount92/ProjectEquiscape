@@ -436,6 +436,11 @@ export const publishClassResultsSchema = z.object({
     classId: uuidSchema,
 });
 
+/** Staff undo for an accidental scratch — the mirror of scratchEntry. */
+export const restoreEntrySchema = z.object({
+    entryId: uuidSchema,
+});
+
 /** Scored judging (205): pick a rubric template for a class, or clear it. */
 export const setClassRubricSchema = z.object({
     classId: uuidSchema,

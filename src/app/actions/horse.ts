@@ -310,6 +310,31 @@ export async function deleteHorseImageAction(recordId: string, storagePath: stri
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return { success: false, error: "Not logged in" };
 
+        // ENTRY LOCK (owner ask, 2026-09-03): this photo may be the
+        // one a judge is looking at RIGHT NOW. A live entry in an
+        // active show pins its photo — deleting it would blank the
+        // judge's card mid-class (photo_id is ON DELETE SET NULL).
+        // Admin read: entries/shows RLS isn't shaped for this check.
+        {
+            const admin = getAdminClient();
+            const { data: pinnedBy } = await admin
+                .from("show_class_entries")
+                .select("id, status, shows:show_id(title, status)")
+                .eq("photo_id", recordId)
+                .neq("status", "scratched");
+            const active = (pinnedBy ?? []).find((e) => {
+                const s = e.shows as unknown as { title: string; status: string } | null;
+                return s && !["completed", "archived", "cancelled", "draft"].includes(s.status);
+            });
+            if (active) {
+                const s = active.shows as unknown as { title: string };
+                return {
+                    success: false,
+                    error: `This photo is an entry photo in "${s.title}" — it can't be deleted while the show is running. Scratch the entry or wait for results.`,
+                };
+            }
+        }
+
         if (storagePath) {
             const { error: storageError } = await supabase.storage.from("horse-images").remove([storagePath]);
             if (storageError) logger.error("Horse", "Storage cleanup failed", storageError);

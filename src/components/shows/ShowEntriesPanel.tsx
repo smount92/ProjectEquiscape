@@ -23,7 +23,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { scratchEntry, setFeePaid } from "@/app/actions/shows-v2";
+import { restoreEntry, scratchEntry, setFeePaid } from "@/app/actions/shows-v2";
 import {
     barEntrant,
     liftBar,
@@ -166,6 +166,19 @@ export default function ShowEntriesPanel({
         setScratchReason("");
         setAlsoBar(false);
         setScratchTarget(entry);
+    };
+
+    const [restoring, setRestoring] = useState<string | null>(null);
+    const handleRestore = async (entry: ConsoleEntry) => {
+        setRestoring(entry.id);
+        const result = await restoreEntry({ entryId: entry.id });
+        setRestoring(null);
+        if (result.success) {
+            flash(`${entry.horseName} restored to its class.`);
+            router.refresh();
+        } else {
+            flash(result.error ?? "Restore failed.");
+        }
     };
 
     // The bar door is narrower than the scratch door: host/co-host
@@ -702,6 +715,20 @@ export default function ShowEntriesPanel({
                                                     aria-label={`${strikeMode ? "Strike" : "Scratch"} ${entry.horseName}`}
                                                 >
                                                     {strikeMode ? "Strike" : "Scratch"}
+                                                </Button>
+                                            )}
+                                            {/* The undo for an accidental scratch —
+                                                same staff window, closed once results
+                                                exist (that's Strike territory). */}
+                                            {isScratched && canScratch && !strikeMode && (
+                                                <Button
+                                                    variant="outline"
+                                                    size="xs"
+                                                    disabled={restoring === entry.id}
+                                                    onClick={() => void handleRestore(entry)}
+                                                    aria-label={`Restore ${entry.horseName} to its class`}
+                                                >
+                                                    {restoring === entry.id ? "Restoring…" : "Restore"}
                                                 </Button>
                                             )}
                                         </TableCell>
