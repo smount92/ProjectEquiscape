@@ -262,7 +262,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
   // data on hand, so restrictions are {} and ranking degrades to pure
   // name filtering in the server's order.
   const rankedHorses = filterAndRankHorses(
-    userHorses.map((h) => ({ ...h, scale: null, finish: null })),
+    userHorses.map((h) => ({ ...h, scale: null, finish: null, breed: null, gender: null })),
     {},
     horseSearch,
   );

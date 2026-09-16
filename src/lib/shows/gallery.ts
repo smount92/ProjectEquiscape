@@ -50,6 +50,11 @@ export interface GalleryEntry {
      *  reveal the owner just as surely as ownerAlias/ownerId would. */
     horseId: string | null;
     horseName: string;
+    /** "Mare · Arabian · bay" — what is being judged. Owner-blind:
+     *  it describes the horse, never the exhibitor (MHI feedback,
+     *  2026-09: entries lacked breed/sex). null when the owner set
+     *  nothing and the registry knows nothing. */
+    identity: string | null;
     entryNumber: number | null;
     /** Public storage URL of the entry photo; null = no photo. */
     photoUrl: string | null;
@@ -95,6 +100,11 @@ export interface ClassRoomEntry {
     /** null while the blind rule holds (passport link = identity). */
     horseId: string | null;
     horseName: string;
+    /** "Mare · Arabian · bay" — what is being judged. Owner-blind:
+     *  it describes the horse, never the exhibitor (MHI feedback,
+     *  2026-09: entries lacked breed/sex). null when the owner set
+     *  nothing and the registry knows nothing. */
+    identity: string | null;
     entryNumber: number | null;
     photoUrl: string | null;
     /** null while the blind rule holds. */

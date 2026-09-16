@@ -189,8 +189,12 @@ export default function AlbumCtaRow({
                     horses={effectiveHorses}
                     onRefreshHorses={refreshHorses}
                     onClose={() => setActiveClass(null)}
-                    onEntered={({ horseName }) => {
-                        showToast(`${horseName} is entered — see Your entries below.`);
+                    onEntered={({ horseName, documentationNote }) => {
+                        showToast(
+                            documentationNote
+                                ? `${horseName} is entered, but the documentation didn't save: ${documentationNote}`
+                                : `${horseName} is entered — see Your entries below.`,
+                        );
                         router.refresh();
                     }}
                 />

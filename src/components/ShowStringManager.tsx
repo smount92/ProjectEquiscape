@@ -926,7 +926,10 @@ function HorseSearchPicker({
     }
 
     const matches = horses.filter((h) =>
-        matchesQuery({ ...h, thumbnailUrl: null, scale: null, finish: null }, query),
+        matchesQuery(
+            { ...h, thumbnailUrl: null, scale: null, finish: null, breed: null, gender: null },
+            query,
+        ),
     );
     const shown = matches.slice(0, PICKER_RENDER_CAP);
     const pick = (id: string) => {

@@ -29,6 +29,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 
 import { enterClass, findUserByAlias } from "@/app/actions/shows-v2";
+import { attachDocumentToEntry, createHorseDocument } from "@/app/actions/shows-v4";
 import { addShowPhotoToHorse } from "@/app/actions/entry-photo";
 import { getProfile } from "@/app/actions/settings";
 import { filterAndRankHorses } from "@/lib/shows/horsePicker";
@@ -56,6 +57,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 interface EntryPhoto {
     id: string;
@@ -82,6 +84,24 @@ export interface EnterableClass {
  *  picker switches to the search-first compact list. */
 const GRID_MAX_HORSES = 12;
 
+/** Documentation kinds (horse_documents.kind) — the class room prints
+ *  "<label> documentation" on the card. */
+type DocKind = "breed" | "performance" | "collectibility" | "other";
+const DOC_KINDS: { value: DocKind; label: string }[] = [
+    { value: "breed", label: "Breed" },
+    { value: "performance", label: "Performance" },
+    { value: "collectibility", label: "Collectibility" },
+    { value: "other", label: "Other" },
+];
+/** Mirrors the horse_documents.body_md CHECK. */
+const MAX_DOC_BODY = 4000;
+
+interface ExistingDoc {
+    id: string;
+    kind: string;
+    title: string;
+}
+
 /** Desktop-ish pointer → safe to auto-focus the search box without
  *  popping a mobile keyboard over the list. */
 function hasFinePointer(): boolean {
@@ -101,8 +121,10 @@ interface EnterClassDialogProps {
     onRefreshHorses?: () => Promise<void> | void;
     onClose: () => void;
     /** Fires after a successful entry so the page can re-flow —
-     *  carries the horse name so the parent can toast it. */
-    onEntered: (entered: { horseName: string }) => void;
+     *  carries the horse name so the parent can toast it, and a
+     *  documentation error (the entry is IN; only the write-up
+     *  failed) so the parent can say so. */
+    onEntered: (entered: { horseName: string; documentationNote?: string | null }) => void;
 }
 
 export default function EnterClassDialog({
@@ -172,6 +194,49 @@ export default function EnterClassDialog({
     const [submitting, setSubmitting] = useState(false);
     const [violations, setViolations] = useState<string[]>([]);
 
+    // Documentation (MHI feedback, 2026-09: entries lacked breed/sex
+    // and supporting links). Optional, and attached AFTER the entry
+    // lands, so a documentation hiccup can never cost the entry.
+    //   docMode: "none" | "new" | <an existing document's id>
+    const [existingDocs, setExistingDocs] = useState<ExistingDoc[]>([]);
+    const [docMode, setDocMode] = useState<string>("none");
+    const [docKind, setDocKind] = useState<DocKind>("breed");
+    const [docTitle, setDocTitle] = useState("");
+    const [docBody, setDocBody] = useState("");
+    const docFetchSeq = useRef(0);
+
+    /** This horse's existing write-ups (owner RLS) — one breed doc
+     *  should serve every class the horse enters, not be retyped. */
+    const fetchDocs = (h: EntrantHorse) => {
+        const seq = ++docFetchSeq.current;
+        const supabase = createClient();
+        supabase
+            .from("horse_documents")
+            .select("id, kind, title")
+            .eq("horse_id", h.id)
+            .order("created_at")
+            .then(({ data }) => {
+                if (seq !== docFetchSeq.current) return;
+                const rows = (data ?? []) as { id: string; kind: string; title: unknown }[];
+                setExistingDocs(
+                    rows
+                        .filter((r) => typeof r.title === "string")
+                        .map((r) => ({ id: r.id, kind: r.kind, title: r.title as string })),
+                );
+            });
+    };
+
+    /** What the judge reads under the name: sex · breed (the registry's
+     *  color joins at judging time). Owner-set wins; the registry fills. */
+    const identityPreview = horse
+        ? [horse.gender, horse.breed].filter(Boolean).join(" · ")
+        : "";
+    const identityMissing: string[] = horse
+        ? [horse.gender ? null : "sex", horse.breed ? null : "breed"].filter(
+              (x): x is string => x !== null,
+          )
+        : [];
+
     // Stale-response guard for the photo fetch (fast horse switching).
     const photoFetchSeq = useRef(0);
 
@@ -216,7 +281,12 @@ export default function EnterClassDialog({
         setPhotos([]);
         setPhotoId(null);
         setUploadNote(null);
+        setExistingDocs([]);
+        setDocMode("none");
+        setDocTitle("");
+        setDocBody("");
         fetchPhotos(h);
+        fetchDocs(h);
     };
 
     /**
@@ -321,6 +391,36 @@ export default function EnterClassDialog({
         setHandlerNote(null);
     };
 
+    /**
+     * Documentation rides BEHIND the entry: create (or reuse) the
+     * write-up and attach it. Returns an error string for the parent
+     * to toast, or null when there was nothing to do / it worked.
+     */
+    const attachDocumentation = async (
+        h: EntrantHorse,
+        entryId: string,
+    ): Promise<string | null> => {
+        let documentId: string | null = null;
+        if (docMode === "new") {
+            const body = docBody.trim();
+            if (!body) return null;
+            const kindLabel = DOC_KINDS.find((k) => k.value === docKind)?.label ?? "Documentation";
+            const created = await createHorseDocument({
+                horseId: h.id,
+                kind: docKind,
+                title: docTitle.trim() || `${kindLabel} — ${h.name}`,
+                bodyMd: body,
+            });
+            if (!created.success) return created.error;
+            documentId = created.documentId;
+        } else if (docMode !== "none") {
+            documentId = docMode;
+        }
+        if (!documentId) return null;
+        const attached = await attachDocumentToEntry({ entryId, documentId });
+        return attached.success ? null : attached.error;
+    };
+
     const handleSubmit = async () => {
         if (!horse || submitting) return;
         setSubmitting(true);
@@ -331,14 +431,18 @@ export default function EnterClassDialog({
             photoId: mode === "online" ? photoId : null,
             handlerId: handler?.id ?? null,
         });
-        setSubmitting(false);
-        if (result.success) {
-            track("show_entry", { show_id: showId });
-            onEntered({ horseName: horse.name });
-            onClose();
-        } else {
+        if (!result.success) {
+            setSubmitting(false);
             setViolations(result.violations ?? [result.error]);
+            return;
         }
+        track("show_entry", { show_id: showId });
+        // The entry is in. A documentation failure is reported, never
+        // fatal — the parent toasts it alongside the entry.
+        const documentationNote = await attachDocumentation(horse, result.entryId);
+        setSubmitting(false);
+        onEntered({ horseName: horse.name, documentationNote });
+        onClose();
     };
 
     const classLabel = cls.classNumber ? `${cls.classNumber} · ${cls.name}` : cls.name;
@@ -575,6 +679,34 @@ export default function EnterClassDialog({
                             ← Choose a different horse
                         </Button>
 
+                        {/* The line judges and viewers read under the
+                            name (MHI feedback, 2026-09). A gap gets a
+                            visible nudge — never a block: the host's
+                            rules decide eligibility, not this dialog. */}
+                        <div
+                            className="rounded-md border border-input px-3 py-2 text-sm"
+                            data-testid="identity-preview"
+                        >
+                            <span className="text-muted-foreground">Identity for the judge: </span>
+                            <span className="font-medium">
+                                {identityPreview || "not set"}
+                            </span>
+                            {identityMissing.length > 0 && (
+                                <p className="m-0 mt-1 text-xs text-muted-foreground">
+                                    No {identityMissing.join(" or ")} set for this horse — every entry
+                                    carries sex and breed for the judge. Add it on{" "}
+                                    <Link
+                                        href={`/stable/${horse.id}`}
+                                        target="_blank"
+                                        className="underline"
+                                    >
+                                        the stable page
+                                    </Link>{" "}
+                                    and this entry picks it up automatically.
+                                </p>
+                            )}
+                        </div>
+
                         {needsPhoto && (
                             <div>
                                 <span className="mb-1 block text-sm font-semibold text-foreground">
@@ -694,6 +826,104 @@ export default function EnterClassDialog({
                                 </p>
                             </div>
                         )}
+
+                        {/* Documentation — breed notes and reference
+                            links for the judge (MHI feedback, 2026-09).
+                            Existing write-ups are offered first so one
+                            breed doc serves every class. */}
+                        <div>
+                            <span className="mb-1 block text-sm font-semibold text-foreground">
+                                Documentation{" "}
+                                <span className="font-normal text-muted-foreground">
+                                    (optional — breed notes and reference links for the judge)
+                                </span>
+                            </span>
+                            <div
+                                className="flex flex-wrap gap-1.5"
+                                role="group"
+                                aria-label="Documentation"
+                            >
+                                <Button
+                                    type="button"
+                                    variant={docMode === "none" ? "default" : "outline"}
+                                    size="sm"
+                                    aria-pressed={docMode === "none"}
+                                    onClick={() => setDocMode("none")}
+                                >
+                                    None
+                                </Button>
+                                {existingDocs.map((d) => (
+                                    <Button
+                                        key={d.id}
+                                        type="button"
+                                        variant={docMode === d.id ? "default" : "outline"}
+                                        size="sm"
+                                        aria-pressed={docMode === d.id}
+                                        onClick={() => setDocMode(d.id)}
+                                        title={d.title}
+                                    >
+                                        📎 {d.title}
+                                    </Button>
+                                ))}
+                                <Button
+                                    type="button"
+                                    variant={docMode === "new" ? "default" : "outline"}
+                                    size="sm"
+                                    aria-pressed={docMode === "new"}
+                                    onClick={() => setDocMode("new")}
+                                >
+                                    {existingDocs.length > 0 ? "+ Write new" : "+ Add documentation"}
+                                </Button>
+                            </div>
+                            {docMode === "new" && (
+                                <div className="mt-2 flex flex-col gap-2">
+                                    <div
+                                        className="flex flex-wrap gap-1.5"
+                                        role="radiogroup"
+                                        aria-label="Documentation kind"
+                                    >
+                                        {DOC_KINDS.map((k) => (
+                                            <button
+                                                key={k.value}
+                                                type="button"
+                                                role="radio"
+                                                aria-checked={docKind === k.value}
+                                                onClick={() => setDocKind(k.value)}
+                                                className={`cursor-pointer rounded-full border px-2.5 py-0.5 text-xs ${
+                                                    docKind === k.value
+                                                        ? "border-forest bg-forest/10 font-semibold text-forest"
+                                                        : "border-input text-muted-foreground"
+                                                }`}
+                                            >
+                                                {k.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <Input
+                                        value={docTitle}
+                                        onChange={(e) => setDocTitle(e.target.value)}
+                                        placeholder="Title (optional) — e.g. Breed standard and references"
+                                        maxLength={120}
+                                        aria-label="Documentation title"
+                                        className="h-9"
+                                    />
+                                    <Textarea
+                                        value={docBody}
+                                        onChange={(e) =>
+                                            setDocBody(e.target.value.slice(0, MAX_DOC_BODY))
+                                        }
+                                        placeholder="What should the judge know? Breed standard notes, registry pages, photos of the real horse — paste links (https://…) and they're clickable on the entry card."
+                                        rows={4}
+                                        maxLength={MAX_DOC_BODY}
+                                        aria-label="Documentation body"
+                                    />
+                                    <p className="m-0 text-xs text-muted-foreground">
+                                        {docBody.length}/{MAX_DOC_BODY} · Saved to this horse, so
+                                        it&rsquo;s ready for the next class too.
+                                    </p>
+                                </div>
+                            )}
+                        </div>
 
                         {/* Proxy handler — owner ≠ handler is first-class */}
                         <div>

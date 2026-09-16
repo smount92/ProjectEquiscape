@@ -82,7 +82,15 @@ const DIVISIONS: ConsoleDivision[] = [
 ];
 
 const HORSES: EntrantHorse[] = [
-    { id: "h1", name: "Duns Blazing", thumbnailUrl: null, scale: "Traditional", finish: "OF" },
+    {
+        id: "h1",
+        name: "Duns Blazing",
+        thumbnailUrl: null,
+        scale: "Traditional",
+        finish: "OF",
+        breed: "Quarter Horse",
+        gender: "Mare",
+    },
 ];
 
 function renderRow(overrides: Partial<React.ComponentProps<typeof AlbumCtaRow>> = {}) {

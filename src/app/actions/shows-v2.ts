@@ -2218,7 +2218,9 @@ export async function getMyEntrantHorses(): Promise<ActionResult<{ horses: Entra
 
     const { data: horseRows, error } = await supabase
         .from("user_horses")
-        .select("id, custom_name, finish_type, catalog_items:catalog_id(scale)")
+        .select(
+            "id, custom_name, finish_type, assigned_breed, assigned_gender, catalog_items:catalog_id(scale, attributes)",
+        )
         .eq("owner_id", user.id)
         .eq("is_public", true)
         .is("deleted_at", null)
@@ -2244,18 +2246,33 @@ export async function getMyEntrantHorses(): Promise<ActionResult<{ horses: Entra
 
     return {
         success: true,
-        horses: horses.map((h) => ({
-            id: h.id as string,
-            name: h.custom_name as string,
-            thumbnailUrl: thumbByHorse.get(h.id as string) ?? null,
+        horses: horses.map((h) => {
             // PostgREST returns the to-one catalog join as an object at
             // runtime; the client types it loosely, hence the cast.
-            scale:
-                ((h.catalog_items as unknown as { scale: string | null } | null)?.scale as
-                    | string
-                    | null) ?? null,
-            finish: (h.finish_type as string | null) ?? null,
-        })),
+            const cat = h.catalog_items as unknown as {
+                scale: string | null;
+                attributes: Record<string, unknown> | null;
+            } | null;
+            const attrs = cat?.attributes ?? {};
+            return {
+                id: h.id as string,
+                name: h.custom_name as string,
+                thumbnailUrl: thumbByHorse.get(h.id as string) ?? null,
+                scale: cat?.scale ?? null,
+                finish: (h.finish_type as string | null) ?? null,
+                // Same precedence as getHorseShowIdentities: owner-set,
+                // else the registry's — so the dialog previews exactly
+                // what the judge will read.
+                breed:
+                    (h.assigned_breed as string | null) ||
+                    ((attrs.breed as string | undefined) ?? null) ||
+                    null,
+                gender:
+                    (h.assigned_gender as string | null) ||
+                    ((attrs.gender as string | undefined) ?? null) ||
+                    null,
+            };
+        }),
     };
 }
 
@@ -2882,6 +2899,13 @@ export async function getShowGallery(
         entries.map((e) => e.horse_id as string),
     );
     if (!(horseNames instanceof Map)) return { success: false, error: horseNames.error };
+    // Owner-blind identity line ("Mare · Arabian · bay") — same
+    // helper the judge queue uses; MHI feedback, 2026-09.
+    const identities = await getHorseShowIdentities(
+        supabase,
+        entries.map((e) => e.horse_id as string),
+    );
+    if (!(identities instanceof Map)) return { success: false, error: identities.error };
 
     // ── Votes (community-vote shows only) ──
     const votingEnabled = show.judging === "community_vote";
@@ -2934,6 +2958,7 @@ export async function getShowGallery(
             // would out the owner just as directly as their alias.
             horseId: revealed ? (e.horse_id as string) : null,
             horseName: horseNames.get(e.horse_id as string) ?? "Unnamed horse",
+            identity: identities.get(e.horse_id as string) ?? null,
             entryNumber: (e.entry_number as number | null) ?? null,
             photoUrl: e.photo_id ? (photoUrls.get(e.photo_id as string) ?? null) : null,
             ownerAlias: revealed ? (aliases.get(ownerId) ?? "unknown") : null,

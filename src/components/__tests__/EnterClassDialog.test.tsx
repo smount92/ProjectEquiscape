@@ -17,6 +17,12 @@ const actions = vi.hoisted(() => ({
     findUserByAlias: vi.fn(),
 }));
 vi.mock("@/app/actions/shows-v2", () => actions);
+// Documentation rides behind the entry (v4 actions).
+const v4 = vi.hoisted(() => ({
+    createHorseDocument: vi.fn(),
+    attachDocumentToEntry: vi.fn(),
+}));
+vi.mock("@/app/actions/shows-v4", () => v4);
 
 // The dialog fetches the selected horse's photos client-side
 // (the passport pattern) — mock the chain it uses.
@@ -48,13 +54,31 @@ vi.mock("@/lib/supabase/client", () => ({
 const CLS = { id: "33333333-3333-4333-8333-333333333333", name: "Quarter Horse", classNumber: "110" };
 
 const HORSES: EntrantHorse[] = [
-    { id: "h1", name: "Duns Blazing", thumbnailUrl: null, scale: "Traditional", finish: "OF" },
-    { id: "h2", name: "Silver Aspen", thumbnailUrl: null, scale: "Classic", finish: "Custom" },
+    {
+        id: "h1",
+        name: "Duns Blazing",
+        thumbnailUrl: null,
+        scale: "Traditional",
+        finish: "OF",
+        breed: "Quarter Horse",
+        gender: "Mare",
+    },
+    {
+        id: "h2",
+        name: "Silver Aspen",
+        thumbnailUrl: null,
+        scale: "Classic",
+        finish: "Custom",
+        breed: null,
+        gender: null,
+    },
 ];
 
 beforeEach(() => {
     vi.clearAllMocks();
     actions.enterClass.mockResolvedValue({ success: true, entryId: "e1", entryNumber: 1 });
+    v4.createHorseDocument.mockResolvedValue({ success: true, documentId: "d1" });
+    v4.attachDocumentToEntry.mockResolvedValue({ success: true });
     actions.findUserByAlias.mockResolvedValue({
         success: true,
         user: { id: "44444444-4444-4444-8444-444444444444", alias: "ringsteward" },
@@ -180,6 +204,8 @@ function bigStable(n = 14): EntrantHorse[] {
         thumbnailUrl: null,
         scale: i % 2 === 0 ? "Traditional" : "Stablemate",
         finish: "OF",
+        breed: "Arabian",
+        gender: "Stallion",
     }));
 }
 
@@ -272,5 +298,97 @@ describe("EnterClassDialog — big-stable horse picker (search-first list)", () 
 
         expect(screen.getByLabelText(/search your horses/i)).toHaveValue("star 07");
         expect(screen.getByTestId("horse-picker-count")).toHaveTextContent("1 of 14 horses");
+    });
+});
+
+// ══════════════════════════════════════════════════════════════
+// Identity + documentation at entry (MHI feedback, 2026-09: entries
+// lacked breed/sex and supporting links)
+// ══════════════════════════════════════════════════════════════
+
+describe("EnterClassDialog — identity and documentation (MHI feedback, 2026-09)", () => {
+    it("previews the identity line the judge reads, and nudges when it's missing", async () => {
+        renderDialog("live");
+        fireEvent.click(screen.getByText("Duns Blazing"));
+        const preview = await screen.findByTestId("identity-preview");
+        expect(preview).toHaveTextContent("Mare · Quarter Horse");
+        expect(preview).not.toHaveTextContent(/no sex or breed set/i);
+
+        fireEvent.click(screen.getByText("← Choose a different horse"));
+        fireEvent.click(screen.getByText("Silver Aspen"));
+        const nudge = await screen.findByTestId("identity-preview");
+        expect(nudge).toHaveTextContent("not set");
+        expect(nudge).toHaveTextContent(/no sex or breed set/i);
+        // A nudge, never a block — the host's rules decide eligibility.
+        expect(screen.getByRole("button", { name: /enter silver aspen/i })).toBeEnabled();
+    });
+
+    it("creates and attaches documentation AFTER the entry lands", async () => {
+        const { onEntered } = renderDialog("live");
+        fireEvent.click(screen.getByText("Duns Blazing"));
+        await screen.findByRole("button", { name: /enter duns blazing/i });
+
+        fireEvent.click(screen.getByRole("button", { name: /add documentation/i }));
+        fireEvent.click(screen.getByRole("radio", { name: "Performance" }));
+        fireEvent.change(screen.getByLabelText("Documentation body"), {
+            target: { value: "Reining pattern refs: https://example.org/pattern-7" },
+        });
+        fireEvent.click(screen.getByRole("button", { name: /enter duns blazing/i }));
+
+        await waitFor(() => expect(onEntered).toHaveBeenCalled());
+        expect(actions.enterClass).toHaveBeenCalledTimes(1);
+        // Blank title → "<Kind> — <horse>" so the card still reads.
+        expect(v4.createHorseDocument).toHaveBeenCalledWith({
+            horseId: "h1",
+            kind: "performance",
+            title: "Performance — Duns Blazing",
+            bodyMd: "Reining pattern refs: https://example.org/pattern-7",
+        });
+        expect(v4.attachDocumentToEntry).toHaveBeenCalledWith({
+            entryId: "e1",
+            documentId: "d1",
+        });
+        expect(onEntered).toHaveBeenCalledWith({
+            horseName: "Duns Blazing",
+            documentationNote: null,
+        });
+    });
+
+    it("reports a documentation failure to the parent — never fatal to the entry", async () => {
+        v4.createHorseDocument.mockResolvedValue({
+            success: false,
+            error: "Write the documentation body.",
+        });
+        const { onEntered, onClose } = renderDialog("live");
+        fireEvent.click(screen.getByText("Duns Blazing"));
+        await screen.findByRole("button", { name: /enter duns blazing/i });
+        fireEvent.click(screen.getByRole("button", { name: /add documentation/i }));
+        fireEvent.change(screen.getByLabelText("Documentation body"), {
+            target: { value: "AQHA standard" },
+        });
+        fireEvent.click(screen.getByRole("button", { name: /enter duns blazing/i }));
+
+        await waitFor(() =>
+            expect(onEntered).toHaveBeenCalledWith({
+                horseName: "Duns Blazing",
+                documentationNote: "Write the documentation body.",
+            }),
+        );
+        expect(v4.attachDocumentToEntry).not.toHaveBeenCalled();
+        expect(onClose).toHaveBeenCalled();
+    });
+
+    it("skips documentation entirely when nothing was written", async () => {
+        const { onEntered } = renderDialog("live");
+        fireEvent.click(screen.getByText("Duns Blazing"));
+        fireEvent.click(await screen.findByRole("button", { name: /enter duns blazing/i }));
+        await waitFor(() =>
+            expect(onEntered).toHaveBeenCalledWith({
+                horseName: "Duns Blazing",
+                documentationNote: null,
+            }),
+        );
+        expect(v4.createHorseDocument).not.toHaveBeenCalled();
+        expect(v4.attachDocumentToEntry).not.toHaveBeenCalled();
     });
 });

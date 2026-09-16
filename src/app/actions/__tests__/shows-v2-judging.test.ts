@@ -505,6 +505,16 @@ function queueGalleryLists() {
     ]);
     queueList([{ id: PHOTO_ID, image_url: "horses/h1/photo.webp" }]);
     queueList([{ id: HORSE_ID, custom_name: "Dash of Cash" }]);
+    // Identity line (sex · breed · color) — owner-blind by construction.
+    queueList([
+        {
+            id: HORSE_ID,
+            assigned_breed: "Quarter Horse",
+            assigned_gender: "Mare",
+            finish_type: "OF",
+            catalog_items: null,
+        },
+    ]);
     queueList([{ entry_id: ENTRY_ID, voter_id: "user-1" }]); // the votes
 }
 
@@ -539,8 +549,10 @@ describe("shows-v2 — getShowGallery (blind rule, server-side)", () => {
         expect(entry.ownerId).toBeNull();
         // The aliases table was never even queried.
         expect(mockClient.from).not.toHaveBeenCalledWith("users");
-        // Photos, horse names, and the live tally still flow.
+        // Photos, horse names, the identity line, and the live tally
+        // still flow — the identity describes the HORSE, not the owner.
         expect(entry.horseName).toBe("Dash of Cash");
+        expect(entry.identity).toBe("Mare · Quarter Horse · OF");
         expect(entry.photoUrl).toContain("horses/h1/photo.webp");
         expect(entry.voteCount).toBe(1);
         expect(entry.viewerHasVoted).toBe(true);

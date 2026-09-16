@@ -8,7 +8,7 @@ import {
 import type { EntrantHorse } from "@/lib/shows/public";
 
 function horse(overrides: Partial<EntrantHorse> & { id: string; name: string }): EntrantHorse {
-    return { thumbnailUrl: null, scale: null, finish: null, ...overrides };
+    return { thumbnailUrl: null, scale: null, finish: null, breed: null, gender: null, ...overrides };
 }
 
 const traditionalOF = horse({ id: "h1", name: "Duns Blazing", scale: "Traditional", finish: "OF" });

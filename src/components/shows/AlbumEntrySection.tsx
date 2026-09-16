@@ -197,8 +197,12 @@ export default function AlbumEntrySection({
                     horses={effectiveHorses}
                     onRefreshHorses={refreshHorses}
                     onClose={() => setActiveClass(null)}
-                    onEntered={({ horseName }) => {
-                        showToast(`${horseName} is entered — see My Entries above.`);
+                    onEntered={({ horseName, documentationNote }) => {
+                        showToast(
+                            documentationNote
+                                ? `${horseName} is entered, but the documentation didn't save: ${documentationNote}`
+                                : `${horseName} is entered — see My Entries above.`,
+                        );
                         router.refresh();
                     }}
                 />

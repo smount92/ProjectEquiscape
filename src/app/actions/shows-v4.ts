@@ -37,6 +37,7 @@ import {
     getAliases,
     getEntryPhotoUrls,
     getHorseNames,
+    getHorseShowIdentities,
     getShowRole,
     loadClassContexts,
 } from "@/lib/shows/queries";
@@ -1127,6 +1128,11 @@ export async function getClassRoom(
     if (!(photoUrls instanceof Map)) return { success: false, error: photoUrls.error };
     const horseNames = await getHorseNames(supabase, entries.map((e) => e.horse_id));
     if (!(horseNames instanceof Map)) return { success: false, error: horseNames.error };
+    // The identity line the judge already sees, now on the public
+    // card too (MHI feedback, 2026-09). Blind-safe: describes the
+    // horse, never the exhibitor.
+    const identities = await getHorseShowIdentities(supabase, entries.map((e) => e.horse_id));
+    if (!(identities instanceof Map)) return { success: false, error: identities.error };
 
     let aliases = new Map<string, string>();
     if (revealed) {
@@ -1266,6 +1272,7 @@ export async function getClassRoom(
         id: e.id,
         horseId: revealed ? e.horse_id : null,
         horseName: horseNames.get(e.horse_id) ?? "Unnamed horse",
+        identity: identities.get(e.horse_id) ?? null,
         entryNumber: e.entry_number,
         photoUrl: e.photo_id ? (photoUrls.get(e.photo_id) ?? null) : null,
         ownerAlias: revealed ? (aliases.get(e.owner_id) ?? "unknown") : null,

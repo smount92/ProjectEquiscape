@@ -78,7 +78,9 @@ export async function listMyEntrantHorses(): Promise<ActionResult<{ horses: Entr
 
     const { data: horseRows, error } = await supabase
         .from("user_horses")
-        .select("id, custom_name, finish_type, catalog_items:catalog_id(scale)")
+        .select(
+            "id, custom_name, finish_type, assigned_breed, assigned_gender, catalog_items:catalog_id(scale, attributes)",
+        )
         .eq("owner_id", user.id)
         .eq("is_public", true)
         .is("deleted_at", null)
@@ -104,17 +106,31 @@ export async function listMyEntrantHorses(): Promise<ActionResult<{ horses: Entr
 
     return {
         success: true,
-        horses: horses.map((h) => ({
-            id: h.id as string,
-            name: h.custom_name as string,
-            thumbnailUrl: thumbByHorse.get(h.id as string) ?? null,
+        horses: horses.map((h) => {
             // PostgREST returns the to-one catalog join as an object at
             // runtime; the client types it loosely, hence the cast.
-            scale:
-                ((h.catalog_items as unknown as { scale: string | null } | null)?.scale as
-                    | string
-                    | null) ?? null,
-            finish: (h.finish_type as string | null) ?? null,
-        })),
+            const cat = h.catalog_items as unknown as {
+                scale: string | null;
+                attributes: Record<string, unknown> | null;
+            } | null;
+            const attrs = cat?.attributes ?? {};
+            return {
+                id: h.id as string,
+                name: h.custom_name as string,
+                thumbnailUrl: thumbByHorse.get(h.id as string) ?? null,
+                scale: cat?.scale ?? null,
+                finish: (h.finish_type as string | null) ?? null,
+                // Owner-set, else the registry's — the same precedence
+                // the judge's identity line uses (getHorseShowIdentities).
+                breed:
+                    (h.assigned_breed as string | null) ||
+                    ((attrs.breed as string | undefined) ?? null) ||
+                    null,
+                gender:
+                    (h.assigned_gender as string | null) ||
+                    ((attrs.gender as string | undefined) ?? null) ||
+                    null,
+            };
+        }),
     };
 }

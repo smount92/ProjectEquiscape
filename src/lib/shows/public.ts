@@ -105,4 +105,9 @@ export interface EntrantHorse {
     scale: string | null;
     /** finish_type; null when unknown. */
     finish: string | null;
+    /** Effective breed / sex — owner-set, else the registry's; null
+     *  when neither knows. The entry dialog NUDGES on a gap (judges
+     *  see the identity line on every entry); it never blocks. */
+    breed: string | null;
+    gender: string | null;
 }

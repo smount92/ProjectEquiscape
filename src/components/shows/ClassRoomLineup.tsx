@@ -24,6 +24,7 @@ import type { Rubric } from "@/lib/shows/rubrics";
 import ScorecardPanel from "@/components/shows/ScorecardPanel";
 import { placeLabel } from "@/lib/shows/placings";
 import type { Place } from "@/lib/shows/types";
+import LinkifiedText from "@/components/LinkifiedText";
 import PhotoLightbox from "@/components/PhotoLightbox";
 import VoteButton from "@/components/shows/VoteButton";
 import { useShowToast } from "@/components/shows/useShowToast";
@@ -41,6 +42,7 @@ function asGalleryEntry(entry: ClassRoomEntry): GalleryEntry {
         id: entry.id,
         horseId: entry.horseId,
         horseName: entry.horseName,
+        identity: entry.identity,
         entryNumber: entry.entryNumber,
         photoUrl: entry.photoUrl,
         ownerAlias: entry.ownerAlias,
@@ -208,6 +210,14 @@ export default function ClassRoomLineup({
                                     ) : (
                                         <span className="truncate font-medium">{entry.horseName}</span>
                                     )}
+                                    {/* What's being judged — sex · breed · color.
+                                        Owner-blind (describes the horse), so it
+                                        shows whether or not the room is revealed. */}
+                                    {entry.identity && (
+                                        <span className="truncate text-xs text-muted-foreground">
+                                            {entry.identity}
+                                        </span>
+                                    )}
                                     {revealed && entry.ownerAlias && (
                                         <span className="truncate text-sm text-muted-foreground">
                                             shown by @{entry.ownerAlias}
@@ -231,8 +241,11 @@ export default function ClassRoomLineup({
                                         {DOC_KIND_LABELS[entry.document.kind] ?? "Documentation"}:{" "}
                                         {entry.document.title}
                                     </summary>
+                                    {/* Reference links (registry pages, breed
+                                        standards, the real horse) are the point
+                                        of documentation — make them clickable. */}
                                     <p className="mt-2 text-sm whitespace-pre-wrap text-muted-foreground">
-                                        {entry.document.bodyMd}
+                                        <LinkifiedText text={entry.document.bodyMd} />
                                     </p>
                                 </details>
                             )}

@@ -102,7 +102,10 @@ describe("show-readiness — listMyEntrantHorses", () => {
                     id: "h1",
                     custom_name: "Maple",
                     finish_type: "OF",
-                    catalog_items: { scale: "Traditional" },
+                    // Owner set the sex; the registry supplies the breed.
+                    assigned_breed: null,
+                    assigned_gender: "Mare",
+                    catalog_items: { scale: "Traditional", attributes: { breed: "Morgan" } },
                 },
             ],
         });
@@ -127,6 +130,8 @@ describe("show-readiness — listMyEntrantHorses", () => {
                 thumbnailUrl: "https://x/primary.webp",
                 scale: "Traditional",
                 finish: "OF",
+                breed: "Morgan",
+                gender: "Mare",
             },
         ]);
     });
