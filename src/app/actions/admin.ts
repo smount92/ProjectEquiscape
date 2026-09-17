@@ -15,6 +15,12 @@ import {
 } from "@/lib/email/layout";
 import { formEngineEnabled } from "@/lib/forms/flag";
 import { showStandingsEnabled } from "@/lib/shows/flags";
+import { loadShowProgram } from "@/lib/shows/queries";
+import { hasSanctioningRequest, stripSanctioningMarker } from "@/lib/shows/sanctioning";
+import { buildSanctioningChecks, type SanctioningCheck } from "@/lib/shows/sanctioningReview";
+import type { ConsoleDivision } from "@/lib/shows/console";
+import type { PublicShow } from "@/lib/shows/public";
+import type { ShowJudging, ShowMode, ShowStatus } from "@/lib/shows/types";
 import { paypalBillingEnabled } from "@/lib/paypal/flag";
 import {
   attachLoad,
@@ -539,6 +545,141 @@ export async function listSanctioningRequests(): Promise<
           .replace(SANCTIONING_REQUEST_MARKER, "")
           .trim() || null,
     })),
+  };
+}
+
+// ── Sanctioning review: the show behind a request, drafts included ──
+// The public page refuses drafts and the admin isn't on the show's
+// staff, so RLS hides them from a normal read. This is service-role
+// behind verifyAdmin and returns the SAME shapes the public page
+// renders (PublicShow + ConsoleDivision[] via loadShowProgram), so
+// what the admin reviews is what entrants will see.
+
+export interface SanctioningReview {
+  show: PublicShow;
+  divisions: ConsoleDivision[];
+  entryCount: number;
+  exhibitorCount: number;
+  blindBrowsing: boolean;
+  createdAt: string;
+  /** The queue marker is in the note. */
+  requested: boolean;
+  /** Staff beyond the host. */
+  staff: { alias: string; role: string }[];
+  host: { alias: string; completedShows: number; totalShows: number };
+  /** Observations for the admin to weigh — never gates. */
+  checks: SanctioningCheck[];
+}
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export async function getShowForSanctioningReview(
+  showId: string
+): Promise<{ success: true; review: SanctioningReview } | { success: false; error: string }> {
+  const user = await verifyAdmin();
+  if (!user) return { success: false, error: "Unauthorized" };
+  if (!UUID_RE.test(showId)) return { success: false, error: "Show not found." };
+
+  const admin = getAdminSupabase();
+  const { data: show, error: showError } = await admin
+    .from("shows")
+    .select(
+      "id, host_id, title, mode, judging, status, venue_name, venue_address, show_date, entries_open_at, entries_close_at, judging_ends_at, about_md, rules_md, fee_info, capacity, is_mhh_qualifying, sanctioning_note, show_year, blind_browsing, created_at"
+    )
+    .eq("id", showId)
+    .maybeSingle();
+  if (showError) return { success: false, error: showError.message };
+  if (!show) return { success: false, error: "Show not found." };
+
+  const program = await loadShowProgram(admin, showId);
+  if ("error" in program) return { success: false, error: program.error };
+
+  const hostId = show.host_id as string;
+  const [hostRes, hostShowsRes, staffRes] = await Promise.all([
+    admin.from("users").select("alias_name").eq("id", hostId).maybeSingle(),
+    admin.from("shows").select("id, status").eq("host_id", hostId),
+    admin.from("show_staff").select("user_id, role").eq("show_id", showId),
+  ]);
+  const hostAlias =
+    (hostRes.data as { alias_name: string | null } | null)?.alias_name ?? "unknown";
+  const hostShows = (hostShowsRes.data ?? []) as { id: string; status: string }[];
+  const staffRows = ((staffRes.data ?? []) as { user_id: string; role: string }[]).filter(
+    (m) => m.role !== "host"
+  );
+  const staffAliasById = new Map<string, string>();
+  if (staffRows.length > 0) {
+    const { data: staffUsers } = await admin
+      .from("users")
+      .select("id, alias_name")
+      .in("id", [...new Set(staffRows.map((m) => m.user_id))]);
+    for (const u of (staffUsers ?? []) as { id: string; alias_name: string | null }[]) {
+      if (u.alias_name) staffAliasById.set(u.id, u.alias_name);
+    }
+  }
+  const staff = staffRows.map((m) => ({
+    alias: staffAliasById.get(m.user_id) ?? "unknown",
+    role: m.role,
+  }));
+
+  const publicShow: PublicShow = {
+    id: show.id as string,
+    title: show.title as string,
+    mode: show.mode as ShowMode,
+    judging: show.judging as ShowJudging,
+    status: show.status as ShowStatus,
+    hostAlias,
+    venueName: (show.venue_name as string | null) ?? null,
+    venueAddress: (show.venue_address as string | null) ?? null,
+    showDate: (show.show_date as string | null) ?? null,
+    entriesOpenAt: (show.entries_open_at as string | null) ?? null,
+    entriesCloseAt: (show.entries_close_at as string | null) ?? null,
+    judgingEndsAt: (show.judging_ends_at as string | null) ?? null,
+    aboutMd: (show.about_md as string | null) ?? null,
+    rulesMd: (show.rules_md as string | null) ?? null,
+    feeInfo: (show.fee_info as string | null) ?? null,
+    capacity: (show.capacity as number | null) ?? null,
+    isMhhQualifying: !!show.is_mhh_qualifying,
+    sanctioningNote: stripSanctioningMarker(show.sanctioning_note as string | null),
+    showYear: (show.show_year as number | null) ?? null,
+  };
+
+  const classes = program.divisions.flatMap((d) => d.sections.flatMap((sec) => sec.classes));
+  const checks = buildSanctioningChecks({
+    mode: publicShow.mode,
+    judging: publicShow.judging,
+    status: publicShow.status,
+    showDate: publicShow.showDate,
+    entriesOpenAt: publicShow.entriesOpenAt,
+    entriesCloseAt: publicShow.entriesCloseAt,
+    judgingEndsAt: publicShow.judgingEndsAt,
+    aboutMd: publicShow.aboutMd,
+    rulesMd: publicShow.rulesMd,
+    divisionCount: program.divisions.length,
+    classCount: classes.length,
+    qualifyingClassCount: classes.filter((c) => c.isQualifying).length,
+    judgeCount: staff.filter((m) => m.role === "judge").length,
+    hostCompletedShows: hostShows.filter((h) => h.status === "completed").length,
+    hostTotalShows: hostShows.length,
+  });
+
+  return {
+    success: true,
+    review: {
+      show: publicShow,
+      divisions: program.divisions,
+      entryCount: program.entryCount,
+      exhibitorCount: program.exhibitorCount,
+      blindBrowsing: !!show.blind_browsing,
+      createdAt: show.created_at as string,
+      requested: hasSanctioningRequest(show.sanctioning_note as string | null),
+      staff,
+      host: {
+        alias: hostAlias,
+        completedShows: hostShows.filter((h) => h.status === "completed").length,
+        totalShows: hostShows.length,
+      },
+      checks,
+    },
   };
 }
 

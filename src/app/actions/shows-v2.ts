@@ -62,6 +62,7 @@ import {
     withSanctioningMarker,
 } from "@/lib/shows/sanctioning";
 import {
+    loadShowProgram,
     getAliases,
     getEntryPhotoUrls,
     getHorseNames,
@@ -2022,109 +2023,14 @@ export async function getPublicShow(
     // place for drafts).
     if (!show || show.status === "draft") return { success: false, error: "Show not found." };
 
-    // ── Classlist tree (same three-query walk as the console) ──
-    const { data: divisionRows, error: dErr } = await supabase
-        .from("show_divisions")
-        .select("id, name, axis, sort_order")
-        .eq("show_id", showId)
-        .order("sort_order", { ascending: true });
-    if (dErr) return { success: false, error: dErr.message };
-    const divisionIds = (divisionRows ?? []).map((d) => d.id as string);
-
-    let sectionRows: { id: string; division_id: string; name: string; sort_order: number }[] = [];
-    let classRows: {
-        id: string;
-        section_id: string;
-        name: string;
-        class_number: string | null;
-        status: string;
-        max_per_entrant: number | null;
-        allowed_scales: string[] | null;
-        allowed_finishes: string[] | null;
-        is_qualifying: boolean;
-        sort_order: number;
-    }[] = [];
-    if (divisionIds.length > 0) {
-        const { data: sections, error: sErr } = await supabase
-            .from("show_sections")
-            .select("id, division_id, name, sort_order")
-            .in("division_id", divisionIds)
-            .order("sort_order", { ascending: true });
-        if (sErr) return { success: false, error: sErr.message };
-        sectionRows = sections ?? [];
-
-        const sectionIds = sectionRows.map((s) => s.id);
-        if (sectionIds.length > 0) {
-            const { data: classes, error: cErr } = await supabase
-                .from("show_classes")
-                .select(
-                    "id, section_id, name, class_number, status, max_per_entrant, allowed_scales, allowed_finishes, is_qualifying, sort_order",
-                )
-                .in("section_id", sectionIds)
-                .order("sort_order", { ascending: true });
-            if (cErr) return { success: false, error: cErr.message };
-            classRows = classes ?? [];
-        }
-    }
-
-    // ── Live entry + exhibitor counts per class ──
-    const { data: entryRows, error: eErr } = await supabase
-        .from("show_class_entries")
-        .select("class_id, status, owner_id")
-        .eq("show_id", showId);
-    if (eErr) return { success: false, error: eErr.message };
-    const liveEntries = (entryRows ?? []).filter(
-        (r: { status: string }) => r.status !== "scratched",
-    );
-    const entryCountByClass = countBy(
-        liveEntries.map((r: { class_id: string }) => ({ key: r.class_id })),
-    );
-    const exhibitorsByClass = new Map<string, Set<string>>();
-    for (const r of liveEntries as { class_id: string; owner_id: string }[]) {
-        const set = exhibitorsByClass.get(r.class_id) ?? new Set<string>();
-        set.add(r.owner_id);
-        exhibitorsByClass.set(r.class_id, set);
-    }
+    // ── Classlist tree + live counts — the SAME walk the admin's
+    // sanctioning review uses (lib/shows/queries.loadShowProgram) ──
+    const program = await loadShowProgram(supabase, showId);
+    if ("error" in program) return { success: false, error: program.error };
+    const { divisions } = program;
 
     const aliases = await getAliases(supabase, [show.host_id as string]);
     if (!(aliases instanceof Map)) return { success: false, error: aliases.error };
-
-    const classesBySection = new Map<string, ConsoleClass[]>();
-    for (const c of classRows) {
-        const list = classesBySection.get(c.section_id) ?? [];
-        list.push({
-            id: c.id,
-            name: c.name,
-            classNumber: c.class_number,
-            status: c.status as ClassStatus,
-            maxPerEntrant: c.max_per_entrant,
-            allowedScales: c.allowed_scales,
-            allowedFinishes: c.allowed_finishes,
-            isQualifying: c.is_qualifying,
-            sortOrder: c.sort_order,
-            entryCount: entryCountByClass.get(c.id) ?? 0,
-            exhibitorCount: exhibitorsByClass.get(c.id)?.size ?? 0,
-        });
-        classesBySection.set(c.section_id, list);
-    }
-    const sectionsByDivision = new Map<string, ConsoleSection[]>();
-    for (const s of sectionRows) {
-        const list = sectionsByDivision.get(s.division_id) ?? [];
-        list.push({
-            id: s.id,
-            name: s.name,
-            sortOrder: s.sort_order,
-            classes: classesBySection.get(s.id) ?? [],
-        });
-        sectionsByDivision.set(s.division_id, list);
-    }
-    const divisions: ConsoleDivision[] = (divisionRows ?? []).map((d) => ({
-        id: d.id as string,
-        name: d.name as string,
-        axis: d.axis as DivisionAxis,
-        sortOrder: d.sort_order as number,
-        sections: sectionsByDivision.get(d.id as string) ?? [],
-    }));
 
     return {
         success: true,
@@ -2150,7 +2056,7 @@ export async function getPublicShow(
             showYear: (show.show_year as number | null) ?? null,
         },
         divisions,
-        entryCount: liveEntries.length,
+        entryCount: program.entryCount,
     };
 }
 

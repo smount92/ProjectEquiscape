@@ -12,12 +12,14 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { getPublicImageUrl } from "@/lib/utils/storage";
 import type { HorseDocumentView } from "@/lib/shows/documents";
+import type { ConsoleClass, ConsoleDivision, ConsoleSection } from "@/lib/shows/console";
 import type {
     ClassStatus,
     ShowJudging,
     ShowMode,
     ShowStatus,
     StaffRole,
+    DivisionAxis,
 } from "./types";
 
 export interface ShowCore {
@@ -291,4 +293,124 @@ export async function getHorseDocuments(
         bodyMd: d.body_md,
         updatedAt: d.updated_at,
     }));
+}
+
+/**
+ * The classlist tree with live entry + exhibitor counts per class —
+ * the SAME walk for the public show page and the admin's sanctioning
+ * review, so what the admin reviews is exactly what entrants see.
+ * RLS on the supplied client decides visibility (the review passes
+ * the service-role client behind verifyAdmin).
+ */
+export async function loadShowProgram(
+    supabase: SupabaseClient,
+    showId: string,
+): Promise<
+    | { divisions: ConsoleDivision[]; entryCount: number; exhibitorCount: number }
+    | { error: string }
+> {
+    const { data: divisionRows, error: dErr } = await supabase
+        .from("show_divisions")
+        .select("id, name, axis, sort_order")
+        .eq("show_id", showId)
+        .order("sort_order", { ascending: true });
+    if (dErr) return { error: dErr.message };
+    const divisionIds = (divisionRows ?? []).map((d: { id: string }) => d.id);
+
+    let sectionRows: { id: string; division_id: string; name: string; sort_order: number }[] = [];
+    let classRows: {
+        id: string;
+        section_id: string;
+        name: string;
+        class_number: string | null;
+        status: string;
+        max_per_entrant: number | null;
+        allowed_scales: string[] | null;
+        allowed_finishes: string[] | null;
+        is_qualifying: boolean;
+        sort_order: number;
+    }[] = [];
+    if (divisionIds.length > 0) {
+        const { data: sections, error: sErr } = await supabase
+            .from("show_sections")
+            .select("id, division_id, name, sort_order")
+            .in("division_id", divisionIds)
+            .order("sort_order", { ascending: true });
+        if (sErr) return { error: sErr.message };
+        sectionRows = sections ?? [];
+
+        const sectionIds = sectionRows.map((s) => s.id);
+        if (sectionIds.length > 0) {
+            const { data: classes, error: cErr } = await supabase
+                .from("show_classes")
+                .select(
+                    "id, section_id, name, class_number, status, max_per_entrant, allowed_scales, allowed_finishes, is_qualifying, sort_order",
+                )
+                .in("section_id", sectionIds)
+                .order("sort_order", { ascending: true });
+            if (cErr) return { error: cErr.message };
+            classRows = classes ?? [];
+        }
+    }
+
+    // Live entry + exhibitor counts per class (scratched excluded).
+    const { data: entryRows, error: eErr } = await supabase
+        .from("show_class_entries")
+        .select("class_id, status, owner_id")
+        .eq("show_id", showId);
+    if (eErr) return { error: eErr.message };
+    const liveEntries = ((entryRows ?? []) as { class_id: string; status: string; owner_id: string }[]).filter(
+        (r) => r.status !== "scratched",
+    );
+    const entryCountByClass = new Map<string, number>();
+    const exhibitorsByClass = new Map<string, Set<string>>();
+    const exhibitors = new Set<string>();
+    for (const r of liveEntries) {
+        entryCountByClass.set(r.class_id, (entryCountByClass.get(r.class_id) ?? 0) + 1);
+        const set = exhibitorsByClass.get(r.class_id) ?? new Set<string>();
+        set.add(r.owner_id);
+        exhibitorsByClass.set(r.class_id, set);
+        exhibitors.add(r.owner_id);
+    }
+
+    const classesBySection = new Map<string, ConsoleClass[]>();
+    for (const c of classRows) {
+        const list = classesBySection.get(c.section_id) ?? [];
+        list.push({
+            id: c.id,
+            name: c.name,
+            classNumber: c.class_number,
+            status: c.status as ClassStatus,
+            maxPerEntrant: c.max_per_entrant,
+            allowedScales: c.allowed_scales,
+            allowedFinishes: c.allowed_finishes,
+            isQualifying: c.is_qualifying,
+            sortOrder: c.sort_order,
+            entryCount: entryCountByClass.get(c.id) ?? 0,
+            exhibitorCount: exhibitorsByClass.get(c.id)?.size ?? 0,
+        });
+        classesBySection.set(c.section_id, list);
+    }
+    const sectionsByDivision = new Map<string, ConsoleSection[]>();
+    for (const sec of sectionRows) {
+        const list = sectionsByDivision.get(sec.division_id) ?? [];
+        list.push({
+            id: sec.id,
+            name: sec.name,
+            sortOrder: sec.sort_order,
+            classes: classesBySection.get(sec.id) ?? [],
+        });
+        sectionsByDivision.set(sec.division_id, list);
+    }
+    const divisions: ConsoleDivision[] = (
+        (divisionRows ?? []) as { id: string; name: string; axis: string; sort_order: number }[]
+    ).map((d) => ({
+        id: d.id,
+        name: d.name,
+        axis: d.axis as DivisionAxis,
+        sortOrder: d.sort_order,
+        sections: sectionsByDivision.get(d.id) ?? [],
+    }));
+
+    return { divisions, entryCount: liveEntries.length, exhibitorCount: exhibitors.size };
 }

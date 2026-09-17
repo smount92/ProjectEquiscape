@@ -95,12 +95,26 @@ export default function AdminSanctioningCard({
                         className="flex flex-wrap items-center gap-3 rounded-md border border-input px-3 py-2 text-sm"
                     >
                         <div className="min-w-0 flex-1">
+                            {/* Review first (drafts included — the public
+                                page refuses those); decide there or here. */}
                             <a
-                                href={`/shows/${r.showId}`}
+                                href={`/admin/shows/${r.showId}`}
                                 className="font-semibold text-forest no-underline hover:underline"
+                                title="Review the show before deciding"
                             >
                                 {r.title}
                             </a>
+                            <span className="ml-2 text-xs text-muted-foreground">review →</span>
+                            {r.status !== "draft" && (
+                                <a
+                                    href={`/shows/${r.showId}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="ml-2 text-xs text-muted-foreground underline"
+                                >
+                                    public page ↗
+                                </a>
+                            )}
                             <div className="text-xs text-muted-foreground">
                                 @{r.hostAlias} · {r.status}
                                 {r.showYear && <> · Season {r.showYear}</>}

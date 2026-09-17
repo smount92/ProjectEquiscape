@@ -134,6 +134,7 @@ import {
     nudgeOverdueShowHost,
     resolveLegacySuggestion,
     searchMembers,
+    getShowForSanctioningReview,
 } from "@/app/actions/admin";
 
 const ORIGINAL_ADMIN_EMAIL = process.env.ADMIN_EMAIL;
@@ -896,5 +897,93 @@ describe("nudgeOverdueShowHost", () => {
         const result = await nudgeOverdueShowHost("show-1");
         expect(result.success).toBe(false);
         expect(createNotificationsBulkMock).not.toHaveBeenCalled();
+    });
+});
+
+// ══════════════════════════════════════════════════════════════
+// Sanctioning review — the show behind a request, drafts included
+// ══════════════════════════════════════════════════════════════
+
+describe("getShowForSanctioningReview", () => {
+    const SHOW = "33333333-3333-4333-8333-333333333333";
+
+    it("returns a draft show with the public shapes, host history and the request flag", async () => {
+        queue("shows", {
+            data: {
+                id: SHOW,
+                host_id: "host-1",
+                title: "Misty Meadows Fall Photo Show",
+                mode: "online",
+                judging: "judged",
+                status: "draft",
+                venue_name: null,
+                venue_address: null,
+                show_date: null,
+                entries_open_at: "2026-10-01T00:00:00Z",
+                entries_close_at: "2026-10-15T00:00:00Z",
+                judging_ends_at: "2026-10-31T00:00:00Z",
+                about_md: "Welcome!",
+                rules_md: "One entry per class.",
+                fee_info: null,
+                capacity: null,
+                is_mhh_qualifying: false,
+                sanctioning_note: "Regional club show [Host requested MHH sanctioning]",
+                show_year: 2026,
+                blind_browsing: true,
+                created_at: "2026-09-10T00:00:00Z",
+            },
+            error: null,
+        });
+        queue("show_divisions", { data: [{ id: "d1", name: "Halter", axis: "breed", sort_order: 0 }], error: null });
+        queue("show_sections", { data: [{ id: "s1", division_id: "d1", name: "Stock", sort_order: 0 }], error: null });
+        queue("show_classes", {
+            data: [
+                {
+                    id: "c1",
+                    section_id: "s1",
+                    name: "Quarter Horse",
+                    class_number: "1",
+                    status: "open",
+                    max_per_entrant: null,
+                    allowed_scales: null,
+                    allowed_finishes: null,
+                    is_qualifying: true,
+                    sort_order: 0,
+                },
+            ],
+            error: null,
+        });
+        queue("show_class_entries", { data: [], error: null });
+        queue("users", { data: { alias_name: "mistymeadows" }, error: null });
+        queue("shows", { data: [{ id: SHOW, status: "draft" }, { id: "older", status: "completed" }], error: null });
+        queue("show_staff", { data: [{ user_id: "host-1", role: "host" }], error: null });
+
+        const result = await getShowForSanctioningReview(SHOW);
+        expect(result.success).toBe(true);
+        if (!result.success) return;
+        const r = result.review;
+        expect(r.show.hostAlias).toBe("mistymeadows");
+        expect(r.show.status).toBe("draft");
+        // The host's words only — the queue marker is plumbing.
+        expect(r.show.sanctioningNote).toBe("Regional club show");
+        expect(r.requested).toBe(true);
+        expect(r.host).toEqual({ alias: "mistymeadows", completedShows: 1, totalShows: 2 });
+        expect(r.staff).toEqual([]);
+        expect(r.divisions[0].sections[0].classes[0].name).toBe("Quarter Horse");
+        const classlist = r.checks.find((c) => c.key === "classlist");
+        expect(classlist?.label).toBe("1 class across 1 division");
+        expect(r.checks.find((c) => c.key === "status")?.label).toBe("Still a draft");
+    });
+
+    it("refuses anyone but the admin", async () => {
+        authGetUser.mockResolvedValueOnce({ data: { user: { id: "u-9", email: "host@example.com" } } });
+        const result = await getShowForSanctioningReview(SHOW);
+        expect(result).toEqual({ success: false, error: "Unauthorized" });
+    });
+
+    it("a malformed id never reaches the database", async () => {
+        const result = await getShowForSanctioningReview("not-a-uuid");
+        expect(result).toEqual({ success: false, error: "Show not found." });
+        expect(queriesFor("shows")).toHaveLength(0);
     });
 });
