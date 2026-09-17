@@ -18,7 +18,7 @@ import InsuranceReportButton from "@/components/InsuranceReportButton";
 import TransferHistorySection from "@/components/TransferHistorySection";
 import PendingTransfersSection from "@/components/PendingTransfersSection";
 import DealsNeedingAttention from "@/components/dashboard/DealsNeedingAttention";
-import NanDashboardWidget from "@/components/NanDashboardWidget";
+import QualificationTrackerWidget from "@/components/QualificationTrackerWidget";
 import MhhSeasonWidget from "@/components/shows/MhhSeasonWidget";
 import ShowHistoryWidget from "@/components/ShowHistoryWidget";
 import ShowLifeRail from "@/components/shows/ShowLifeRail";
@@ -234,10 +234,11 @@ export default async function DashboardV2({
                     </Link>
 
                     <Suspense fallback={null}>
-                        {/* MHH first — the NAN widget stays below for
-                            members who track it (owner decision). */}
+                        {/* MHH first — the qualification tracker (NAN +
+                            OMEQ cards) stays below for members who track
+                            them (owner decision). */}
                         <MhhSeasonWidget />
-                        <NanDashboardWidget />
+                        <QualificationTrackerWidget />
                         <ShowHistoryWidgetWrapper />
                     </Suspense>
 

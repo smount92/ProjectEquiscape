@@ -2,6 +2,14 @@
 
 import { useState } from"react";
 import { addShowRecord, updateShowRecord } from"@/app/actions/provenance";
+import {
+ QUALIFIER_PROGRAMS,
+ MAX_CARD_ID,
+ MIN_CARD_YEAR,
+ isQualifierProgram,
+ programInfo,
+ type QualifierProgram,
+} from "@/lib/records/qualifiers";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -48,6 +56,11 @@ interface ShowRecordFormProps {
  awardCategory: string | null;
  competitionLevel: string | null;
  showDateText: string | null;
+ // Qualification card (210)
+ qualifierProgram?: string | null;
+ qualifierCard?: string | null;
+ qualifierYear?: number | null;
+ qualifierCardId?: string | null;
  };
  onSave: () => void;
  onCancel: () => void;
@@ -65,8 +78,18 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  const [judgeName, setJudgeName] = useState(existingRecord?.judgeName ??"");
  const [isNan, setIsNan] = useState(existingRecord?.isNan ?? false);
  const [notes, setNotes] = useState(existingRecord?.notes ??"");
- const [status, setStatus] = useState<"idle" |"saving" |"error">("idle");
+ const [status, setStatus] = useState<"idle" |"saving" |"error" |"saved">("idle");
  const [errorMsg, setErrorMsg] = useState("");
+ /** Saved, but with something the member should know (pre-210 card). */
+ const [savedNote, setSavedNote] = useState<string | null>(null);
+
+ // Qualification card (210): NAN or OMEQ — colour, year, printed ID.
+ const [qProgram, setQProgram] = useState<QualifierProgram |"">(
+ isQualifierProgram(existingRecord?.qualifierProgram) ? existingRecord!.qualifierProgram as QualifierProgram :"",
+ );
+ const [qCard, setQCard] = useState(existingRecord?.qualifierCard ??"");
+ const [qYear, setQYear] = useState(existingRecord?.qualifierYear ? String(existingRecord.qualifierYear) :"");
+ const [qCardId, setQCardId] = useState(existingRecord?.qualifierCardId ??"");
 
  // NEW: Beta feedback state
  const [showLocation, setShowLocation] = useState(existingRecord?.showLocation ??"");
@@ -83,9 +106,26 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  ),
  );
 
+ /** Picking a program keeps a colour only if it belongs to that
+  *  program, and seeds the year from the show date. */
+ const pickProgram = (value: string) => {
+ if (!isQualifierProgram(value)) {
+ setQProgram("");
+ return;
+ }
+ setQProgram(value);
+ if (!programInfo(value).cards.some((c) => c.value === qCard)) setQCard("");
+ if (!qYear) setQYear(showDate ? showDate.slice(0, 4) : String(new Date().getFullYear()));
+ };
+
  const handleSubmit = async (e: React.FormEvent) => {
  e.preventDefault();
  if (!showName.trim() || status ==="saving") return;
+ if (qProgram && !qCard) {
+ setErrorMsg(`Pick the ${programInfo(qProgram).short} card colour.`);
+ setStatus("error");
+ return;
+ }
 
  setStatus("saving");
  setErrorMsg("");
@@ -105,6 +145,11 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  awardCategory: awardCategory.trim() || null,
  competitionLevel: competitionLevel.trim() || null,
  showDateText: showDateText.trim() || null,
+ // The card: always sent, so "No card" clears one on edit.
+ qualifierProgram: qProgram || null,
+ qualifierCard: qProgram ? qCard || null : null,
+ qualifierYear: qProgram ? qYear || null : null,
+ qualifierCardId: qProgram ? qCardId.trim() || null : null,
  };
 
  const result = isEdit
@@ -112,7 +157,13 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  : await addShowRecord({ horseId, ...formData });
 
  if (result.success) {
+ if (result.warning) {
+ // The record is in; the member should still read this.
+ setSavedNote(result.warning);
+ setStatus("saved");
+ } else {
  onSave();
+ }
  } else {
  setErrorMsg(result.error ||"Failed to save.");
  setStatus("error");
@@ -248,8 +299,85 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  className="h-[18px] w-[18px] accent-amber-500"
  />
  <label htmlFor="show-record-nan" className="text-foreground mb-0 mb-1 block text-sm font-semibold">
- ⭐ NAN Achievement
+ ⭐ Placed at NAN itself (the championship)
  </label>
+ </div>
+
+ {/* Qualification card (210): NAN or OMEQ. We track it; the program issued it. */}
+ <div className="mb-6 rounded-md border border-input p-4" data-testid="qualifier-block">
+ <label htmlFor="show-record-qualifier" className="text-foreground mb-1 block text-sm font-semibold">
+ 🎫 Qualification card earned
+ </label>
+ <select
+ className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+ value={qProgram}
+ onChange={(e) => pickProgram(e.target.value)}
+ id="show-record-qualifier"
+ >
+ <option value="">No card</option>
+ {QUALIFIER_PROGRAMS.map((p) => (
+ <option key={p.value} value={p.value}>
+ {p.label}
+ </option>
+ ))}
+ </select>
+ {qProgram && (
+ <>
+ <div className="mt-3 flex flex-wrap gap-1.5" role="radiogroup" aria-label="Card colour">
+ {programInfo(qProgram).cards.map((c) => (
+ <button
+ key={c.value}
+ type="button"
+ role="radio"
+ aria-checked={qCard === c.value}
+ onClick={() => setQCard(c.value)}
+ className={`cursor-pointer rounded-full border px-2.5 py-1 text-xs ${
+ qCard === c.value
+ ?"border-forest bg-forest/10 font-semibold text-forest"
+ :"border-input text-muted-foreground"
+ }`}
+ >
+ {c.glyph} {c.label}
+ </button>
+ ))}
+ </div>
+ <div className="mt-3 grid grid-cols-2 gap-4 max-[600px]:grid-cols-1">
+ <div>
+ <label htmlFor="show-record-qualifier-year" className="text-foreground mb-1 block text-sm font-semibold">
+ Card year
+ </label>
+ <Input
+ type="number"
+ min={MIN_CARD_YEAR}
+ max={new Date().getFullYear() + 1}
+ value={qYear}
+ onChange={(e) => setQYear(e.target.value)}
+ id="show-record-qualifier-year"
+ />
+ </div>
+ <div>
+ <label htmlFor="show-record-qualifier-card-id" className="text-foreground mb-1 block text-sm font-semibold">
+ Card ID{" "}
+ <span className="font-normal text-muted-foreground">
+ (optional{qProgram ==="omeq" ?" — printed on the card" :""})
+ </span>
+ </label>
+ <Input
+ type="text"
+ value={qCardId}
+ onChange={(e) => setQCardId(e.target.value)}
+ maxLength={MAX_CARD_ID}
+ id="show-record-qualifier-card-id"
+ placeholder={qProgram ==="omeq" ?"The ID on your OMEQ card" :"If your card has one"}
+ />
+ </div>
+ </div>
+ <small className="text-muted-foreground text-[var(--font-size-xs)]">
+ {programInfo(qProgram).validity} Official cards are issued by {programInfo(qProgram).issuer}; this is
+ your own record of it.
+ </small>
+ </>
+ )}
  </div>
 
  <div className="mb-6">
@@ -341,8 +469,19 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  )}
 
  {status ==="error" && errorMsg && <div className="mt-2 text-sm text-red-700 mb-4">{errorMsg}</div>}
+ {status ==="saved" && savedNote && (
+ <div role="status" className="mt-2 mb-4 rounded-md border border-input bg-muted px-3 py-2 text-sm">
+ {savedNote}
+ </div>
+ )}
 
  <div className="mt-6 flex justify-end gap-2">
+ {status ==="saved" ? (
+ <Button type="button" onClick={onSave}>
+ Done
+ </Button>
+ ) : (
+ <>
  <Button
  type="button" variant="outline" size="wide"
  onClick={onCancel}
@@ -355,6 +494,8 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  >
  {status ==="saving" ?"Saving…" : isEdit ?"Update" :"Add Record"}
  </Button>
+ </>
+ )}
  </div>
  </form>
  </div>

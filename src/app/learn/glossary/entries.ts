@@ -171,6 +171,11 @@ export const GLOSSARY_SECTIONS: GlossarySection[] = [
                 def: "The hobby's championship live show, run by NAMHSA. Models qualify by placing at NAMHSA-approved shows beforehand. (Model Horse Hub's qualification cards are our platform's own system — they are not NAN cards.)",
             },
             {
+                id: "omeq",
+                term: "OMEQ — Online Model Equine Qualifiers",
+                def: "USOMHS's qualifier program for online photo shows, with a yearly championship. Placing 1st or 2nd in an open class at a sanctioned photo show earns a colour-coded card — blue for breed, orange for collectibility and workmanship, purple for performance — that stays with the horse and counts for two championships. Record yours on the horse's show record and the passport keeps it. (The show host issues the card under USOMHS; Model Horse Hub only tracks it.)",
+            },
+            {
                 id: "mepsa",
                 term: "MEPSA — Model Equine Photo Showers Association",
                 def: "A long-running organization devoted to photo showing, with its own circuit and championship — living proof the mail-in photo show tradition never died, it organized.",

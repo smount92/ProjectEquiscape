@@ -80,6 +80,119 @@ describe("provenance.ts — Show Records & Pedigree", () => {
             // The insert mock was called (chained with the fluent API)
             expect(mockClient._mockQuery.insert).toHaveBeenCalled();
         });
+
+        it("records a qualification card and mirrors NAN into the legacy columns", async () => {
+            const result = await addShowRecord({
+                horseId: "h1",
+                showName: "Fall Classic",
+                qualifierProgram: "nan",
+                qualifierCard: "green",
+                qualifierYear: 2026,
+                qualifierCardId: "  NAN-123 ",
+            });
+            expect(result).toEqual({ success: true, warning: undefined });
+            expect(mockClient._mockQuery.insert).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    qualifier_program: "nan",
+                    qualifier_card: "green",
+                    qualifier_year: 2026,
+                    qualifier_card_id: "NAN-123",
+                    is_nan_qualifying: true,
+                    nan_card_type: "green",
+                    nan_year: 2026,
+                }),
+            );
+        });
+
+        it("an OMEQ card leaves the NAN columns alone", async () => {
+            await addShowRecord({
+                horseId: "h1",
+                showName: "Autumn Online Open",
+                qualifierProgram: "omeq",
+                qualifierCard: "blue",
+                qualifierYear: "2026",
+            });
+            const payload = mockClient._mockQuery.insert.mock.calls[0][0] as Record<string, unknown>;
+            expect(payload.qualifier_program).toBe("omeq");
+            expect(payload.qualifier_card).toBe("blue");
+            expect(payload.qualifier_year).toBe(2026);
+            expect(payload.is_nan_qualifying).toBe(false);
+            expect(payload.nan_card_type).toBeNull();
+        });
+
+        it("refuses a card colour from the wrong program", async () => {
+            const result = await addShowRecord({
+                horseId: "h1",
+                showName: "Autumn Online Open",
+                qualifierProgram: "omeq",
+                qualifierCard: "green",
+                qualifierYear: 2026,
+            });
+            expect(result.success).toBe(false);
+            expect(result.error).toMatch(/OMEQ card colour/);
+            expect(mockClient._mockQuery.insert).not.toHaveBeenCalled();
+        });
+
+        it("before migration 210 the record still saves and the caller hears the card was not kept", async () => {
+            mockClient._mockQuery.then.mockImplementationOnce(((resolve: (v: unknown) => void) =>
+                Promise.resolve({
+                    data: null,
+                    error: { code: "42703", message: 'column "qualifier_program" does not exist' },
+                }).then(resolve)) as never);
+            const result = await addShowRecord({
+                horseId: "h1",
+                showName: "Autumn Online Open",
+                qualifierProgram: "omeq",
+                qualifierCard: "blue",
+                qualifierYear: 2026,
+            });
+            expect(result.success).toBe(true);
+            expect(result.warning).toMatch(/card/i);
+            expect(mockClient._mockQuery.insert).toHaveBeenCalledTimes(2);
+            const retry = mockClient._mockQuery.insert.mock.calls[1][0] as Record<string, unknown>;
+            expect(retry).not.toHaveProperty("qualifier_program");
+            expect(retry.show_name).toBe("Autumn Online Open");
+        });
+    });
+
+    describe("updateShowRecord", () => {
+        it("'no card' clears the card and the NAN mirror together", async () => {
+            const result = await updateShowRecord("rec-1", { qualifierProgram: null });
+            expect(result.success).toBe(true);
+            expect(mockClient._mockQuery.update).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    qualifier_program: null,
+                    qualifier_card: null,
+                    qualifier_year: null,
+                    qualifier_card_id: null,
+                    is_nan_qualifying: false,
+                    nan_card_type: null,
+                    nan_year: null,
+                }),
+            );
+        });
+
+        it("pre-210 the rest of the edit still lands, minus the card, with a warning", async () => {
+            mockClient._mockQuery.then.mockImplementationOnce(((resolve: (v: unknown) => void) =>
+                Promise.resolve({
+                    data: null,
+                    error: { code: "PGRST204", message: "Could not find the 'qualifier_program' column" },
+                }).then(resolve)) as never);
+            const result = await updateShowRecord("rec-1", {
+                placing: "2nd",
+                qualifierProgram: "omeq",
+                qualifierCard: "purple",
+                qualifierYear: 2026,
+            });
+            expect(result.success).toBe(true);
+            expect(result.warning).toMatch(/card/i);
+            expect(mockClient._mockQuery.update).toHaveBeenCalledTimes(2);
+            const retry = mockClient._mockQuery.update.mock.calls[1][0] as Record<string, unknown>;
+            expect(retry.placing).toBe("2nd");
+            expect(retry).not.toHaveProperty("qualifier_program");
+            // The NAN mirror is a 030 column and stays in the retry.
+            expect(retry.is_nan_qualifying).toBe(false);
+        });
     });
 
     // ── updateShowRecord ──

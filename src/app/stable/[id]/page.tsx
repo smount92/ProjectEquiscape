@@ -14,6 +14,7 @@ import HoofprintTimeline from"@/components/HoofprintTimeline";
 import MakingChapter from"@/components/making/MakingChapter";
 import HorseDocuments from"@/components/passport/HorseDocuments";
 import { getHorseDocuments } from"@/lib/shows/queries";
+import { qualifierDisplayFields } from"@/lib/records/qualifiers";
 import { getMakingForHorse } from"@/app/actions/work-records";
 import TransferModal from"@/components/TransferModal";
 import ParkedExportPanel from"@/components/ParkedExportPanel";
@@ -207,6 +208,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  competitionLevel: r.competition_level,
  showDateText: r.show_date_text,
  verificationTier: r.verification_tier,
+ ...qualifierDisplayFields(r as Record<string, unknown>),
  scoreTotal: (r as { score_total?: number | string | null }).score_total == null ? null : Number((r as { score_total?: number | string | null }).score_total),
  entryPhotoUrl: ((r as { entry_photo_url?: string | null }).entry_photo_url) ?? null,
  }),

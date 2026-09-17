@@ -2,6 +2,12 @@
 
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import {
+    QUALIFIER_PROGRAMS,
+    isQualifierExpired,
+    qualifierFromRow,
+    type QualifierProgram,
+} from "@/lib/records/qualifiers";
 import { revalidatePath } from "next/cache";
 
 // ============================================================
@@ -1122,4 +1128,116 @@ export async function updateShowStringEntry(
 
     revalidatePath("/shows/planner");
     return { success: true };
+}
+
+// ── Qualification tracker (210): NAN + OMEQ cards per horse ──
+
+export interface TrackerCard {
+    card: string;
+    year: number;
+    count: number;
+    expired: boolean;
+}
+export interface TrackerHorse {
+    horseId: string;
+    horseName: string;
+    cards: TrackerCard[];
+    activeCards: number;
+    totalCards: number;
+}
+export interface TrackerProgram {
+    horses: TrackerHorse[];
+    activeCards: number;
+    totalCards: number;
+}
+export interface QualificationTracker {
+    programs: Record<QualifierProgram, TrackerProgram>;
+}
+
+/**
+ * Every card the member's horses hold, per program. null when they
+ * have no horses (the widget hides). Reads the 210 columns and falls
+ * back to the 030 NAN columns before the paste.
+ */
+export async function getQualificationTracker(): Promise<QualificationTracker | null> {
+    const { supabase, user } = await requireAuth();
+
+    const { data: horses } = await supabase
+        .from("user_horses")
+        .select("id, custom_name")
+        .eq("owner_id", user.id)
+        .is("deleted_at", null);
+    if (!horses || horses.length === 0) return null;
+    const horseRows = horses as { id: string; custom_name: string }[];
+    const horseIds = horseRows.map((h) => h.id);
+    const nameById = new Map(horseRows.map((h) => [h.id, h.custom_name]));
+
+    let rows: Record<string, unknown>[] = [];
+    const modern = await supabase
+        .from("show_records")
+        .select(
+            "horse_id, qualifier_program, qualifier_card, qualifier_year, is_nan_qualifying, nan_card_type, nan_year",
+        )
+        .in("horse_id", horseIds)
+        .or("qualifier_program.not.is.null,is_nan_qualifying.eq.true");
+    if (!modern.error) {
+        rows = (modern.data ?? []) as unknown as Record<string, unknown>[];
+    } else {
+        const legacy = await supabase
+            .from("show_records")
+            .select("horse_id, is_nan_qualifying, nan_card_type, nan_year")
+            .in("horse_id", horseIds)
+            .eq("is_nan_qualifying", true);
+        rows = (legacy.data ?? []) as unknown as Record<string, unknown>[];
+    }
+
+    const now = new Date();
+    const byProgram: Record<QualifierProgram, Map<string, Map<string, TrackerCard>>> = {
+        nan: new Map(),
+        omeq: new Map(),
+    };
+    for (const r of rows) {
+        const q = qualifierFromRow(r);
+        if (!q.program || !q.card || !q.year) continue;
+        const horseId = r.horse_id as string;
+        const perHorse = byProgram[q.program].get(horseId) ?? new Map<string, TrackerCard>();
+        const key = `${q.year}-${q.card}`;
+        const existing = perHorse.get(key);
+        if (existing) existing.count += 1;
+        else {
+            perHorse.set(key, {
+                card: q.card,
+                year: q.year,
+                count: 1,
+                expired: isQualifierExpired(q.program, q.year, now),
+            });
+        }
+        byProgram[q.program].set(horseId, perHorse);
+    }
+
+    const programs = {} as Record<QualifierProgram, TrackerProgram>;
+    for (const p of QUALIFIER_PROGRAMS) {
+        const out: TrackerHorse[] = [];
+        for (const [horseId, cardMap] of byProgram[p.value]) {
+            const cards = [...cardMap.values()].sort((a, b) =>
+                a.expired !== b.expired ? (a.expired ? 1 : -1) : b.year - a.year,
+            );
+            const activeCards = cards.filter((c) => !c.expired).reduce((n, c) => n + c.count, 0);
+            const totalCards = cards.reduce((n, c) => n + c.count, 0);
+            out.push({
+                horseId,
+                horseName: nameById.get(horseId) ?? "Unknown horse",
+                cards,
+                activeCards,
+                totalCards,
+            });
+        }
+        out.sort((a, b) => b.activeCards - a.activeCards || a.horseName.localeCompare(b.horseName));
+        programs[p.value] = {
+            horses: out,
+            activeCards: out.reduce((n, h) => n + h.activeCards, 0),
+            totalCards: out.reduce((n, h) => n + h.totalCards, 0),
+        };
+    }
+    return { programs };
 }

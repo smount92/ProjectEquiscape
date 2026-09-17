@@ -5,6 +5,7 @@ import Link from"next/link";
 import { deleteShowRecord } from"@/app/actions/provenance";
 import ShowRecordForm from"@/components/ShowRecordForm";
 import { Button } from "@/components/ui/button";
+import { isQualifierProgram, qualifierChip, qualifierTitle } from "@/lib/records/qualifiers";
 
 interface ShowRecordDisplay {
  id: string;
@@ -29,6 +30,11 @@ interface ShowRecordDisplay {
  scoreTotal?: number | null;
  /** The entry photo AS JUDGED (207) — frozen at publish; galleries change, records don't. */
  entryPhotoUrl?: string | null;
+ /** Qualification card (210): "nan" | "omeq"; colour; year; printed ID. */
+ qualifierProgram?: string | null;
+ qualifierCard?: string | null;
+ qualifierYear?: number | null;
+ qualifierCardId?: string | null;
 }
 
 interface ShowRecordTimelineProps {
@@ -176,6 +182,15 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
  {record.isNan && (
  <span className="inline-flex items-center gap-[2px] rounded-sm bg-warning/15 px-2 py-[1px] text-xs font-bold tracking-wider text-warning uppercase">
  ⭐ NAN
+ </span>
+ )}
+ {isQualifierProgram(record.qualifierProgram) && (
+ <span
+ className="inline-flex items-center gap-1 rounded-sm bg-forest/10 px-2 py-[1px] text-xs font-bold text-forest"
+ title={qualifierTitle(record.qualifierProgram, record.qualifierCard ?? null, record.qualifierCardId ?? null)}
+ data-testid="qualifier-chip"
+ >
+ {qualifierChip(record.qualifierProgram, record.qualifierCard ?? null, record.qualifierYear ?? null)}
  </span>
  )}
  {record.verificationTier === "platform_generated" && (

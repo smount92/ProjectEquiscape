@@ -1,6 +1,35 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { validateQualifier, type QualifierValue } from "@/lib/records/qualifiers";
+
+/** Said when a card was entered but migration 210 isn't applied yet. */
+const QUALIFIER_NOT_KEPT =
+    "Saved — but card tracking isn't switched on yet, so the card wasn't kept. Edit the record to add it once it is.";
+
+function isMissingColumn(error: { code?: string } | null): boolean {
+    return error?.code === "42703" || error?.code === "PGRST204";
+}
+
+/** The 210 columns. */
+function qualifierColumns(q: QualifierValue | null): Record<string, unknown> {
+    return q
+        ? {
+              qualifier_program: q.program,
+              qualifier_card: q.card,
+              qualifier_year: q.year,
+              qualifier_card_id: q.cardId,
+          }
+        : { qualifier_program: null, qualifier_card: null, qualifier_year: null, qualifier_card_id: null };
+}
+
+/** The 030 NAN columns, kept in step so the legacy readers (NAN
+ *  export, studio counts) see the same card. */
+function nanMirror(q: QualifierValue | null): Record<string, unknown> {
+    return q?.program === "nan"
+        ? { is_nan_qualifying: true, nan_card_type: q.card, nan_year: q.year }
+        : { is_nan_qualifying: false, nan_card_type: null, nan_year: null };
+}
 import { createActivityEvent } from "@/app/actions/activity";
 import { FEMALE_GENDERS, MALE_GENDERS } from "@/lib/config/genders";
 
@@ -28,7 +57,12 @@ export async function addShowRecord(data: {
     awardCategory?: string | null;
     competitionLevel?: string | null;
     showDateText?: string | null;
-}): Promise<{ success: boolean; error?: string }> {
+    /** Qualification card (210): "nan" | "omeq" | null = no card. */
+    qualifierProgram?: string | null;
+    qualifierCard?: string | null;
+    qualifierYear?: number | string | null;
+    qualifierCardId?: string | null;
+}): Promise<{ success: boolean; error?: string; warning?: string }> {
     const supabase = await createClient();
     const {
         data: { user },
@@ -46,7 +80,17 @@ export async function addShowRecord(data: {
         }
     }
 
-    const { error } = await supabase.from("show_records").insert({
+    // Qualification card (210) — validated once; NAN mirrored into the
+    // 030 columns so the legacy readers keep working.
+    const qualifier = validateQualifier({
+        program: data.qualifierProgram ?? null,
+        card: data.qualifierCard ?? null,
+        year: data.qualifierYear ?? null,
+        cardId: data.qualifierCardId ?? null,
+    });
+    if (!qualifier.ok) return { success: false, error: qualifier.error };
+
+    const base: Record<string, unknown> = {
         horse_id: data.horseId,
         user_id: user.id,
         show_name: data.showName.trim(),
@@ -63,7 +107,19 @@ export async function addShowRecord(data: {
         award_category: data.awardCategory?.trim() || null,
         competition_level: data.competitionLevel?.trim() || null,
         show_date_text: data.showDateText?.trim() || null,
-    });
+        ...nanMirror(qualifier.value),
+    };
+
+    let { error } = await supabase
+        .from("show_records")
+        .insert({ ...base, ...qualifierColumns(qualifier.value) } as never);
+    let warning: string | undefined;
+    // Before 210 is pasted the card columns don't exist: keep the
+    // record, and say plainly that the card wasn't kept.
+    if (error && isMissingColumn(error) && qualifier.value) {
+        warning = QUALIFIER_NOT_KEPT;
+        ({ error } = await supabase.from("show_records").insert(base as never));
+    }
 
     if (error) return { success: false, error: error.message };
 
@@ -78,7 +134,7 @@ export async function addShowRecord(data: {
     // ⚡ REMOVED: addTimelineEvent call — show results are now derived
     // automatically by v_horse_hoofprint from the show_records table.
 
-    return { success: true };
+    return { success: true, warning };
 }
 
 /**
@@ -101,8 +157,13 @@ export async function updateShowRecord(
         awardCategory?: string | null;
         competitionLevel?: string | null;
         showDateText?: string | null;
+        /** Qualification card (210). Sent as null to clear the card. */
+        qualifierProgram?: string | null;
+        qualifierCard?: string | null;
+        qualifierYear?: number | string | null;
+        qualifierCardId?: string | null;
     }
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; error?: string; warning?: string }> {
     const supabase = await createClient();
     const {
         data: { user },
@@ -126,6 +187,23 @@ export async function updateShowRecord(
     if (data.competitionLevel !== undefined) updateData.competition_level = data.competitionLevel?.trim() || null;
     if (data.showDateText !== undefined) updateData.show_date_text = data.showDateText?.trim() || null;
 
+    // Qualification card (210): the form always sends the program, so
+    // "no card" clears it — and the NAN mirror with it.
+    let qualifierTouched = false;
+    let qualifierSet = false;
+    if (data.qualifierProgram !== undefined) {
+        const qualifier = validateQualifier({
+            program: data.qualifierProgram,
+            card: data.qualifierCard ?? null,
+            year: data.qualifierYear ?? null,
+            cardId: data.qualifierCardId ?? null,
+        });
+        if (!qualifier.ok) return { success: false, error: qualifier.error };
+        qualifierTouched = true;
+        qualifierSet = qualifier.value !== null;
+        Object.assign(updateData, qualifierColumns(qualifier.value), nanMirror(qualifier.value));
+    }
+
     // Fuzzy date fallback for updates
     if (data.showDateText !== undefined && !data.showDate) {
         const yearMatch = data.showDateText?.match(/\b(19|20)\d{2}\b/);
@@ -134,13 +212,22 @@ export async function updateShowRecord(
         }
     }
 
-    const { error } = await supabase
+    let { error } = await supabase
         .from("show_records")
         .update(updateData)
         .eq("id", recordId);
+    let warning: string | undefined;
+    // Pre-210: drop the card columns, keep the rest of the edit.
+    if (error && isMissingColumn(error) && qualifierTouched) {
+        for (const k of ["qualifier_program", "qualifier_card", "qualifier_year", "qualifier_card_id"]) {
+            delete updateData[k];
+        }
+        if (qualifierSet) warning = QUALIFIER_NOT_KEPT;
+        ({ error } = await supabase.from("show_records").update(updateData).eq("id", recordId));
+    }
 
     if (error) return { success: false, error: error.message };
-    return { success: true };
+    return { success: true, warning };
 }
 
 /**
