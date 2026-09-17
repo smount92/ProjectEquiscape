@@ -71,6 +71,7 @@ export interface ShowSettingsPatch {
     capacity?: number | null;
     isMhhQualifying?: boolean;
     sanctioningNote?: string | null;
+    sanctioningRequested?: boolean;
 }
 
 /** All inputs as the form holds them (strings for text/date fields). */
@@ -401,12 +402,20 @@ export default function ShowSettingsForm({ show }: { show: ConsoleShow }) {
                                 onChange={(e) => set("isMhhQualifying", e.target.checked)}
                                 className="size-5 min-h-6 min-w-6 accent-forest"
                             />
-                            MHH Sanctioned
+                            {show.isMhhQualifying ? "MHH Sanctioned" : "Request MHH sanctioning"}
                             <span className="font-normal text-muted-foreground">
-                                (Counts for the Championship Series: season points, cards,
-                                titles. Season 1 sanctioning is granted by MHH — non-admin
-                                changes here file a request.)
+                                {show.isMhhQualifying
+                                    ? "(Counts for the Championship Series: season points, cards, titles.)"
+                                    : "(Counts for the Championship Series: season points, cards, titles. Season 1 sanctioning is granted by MHH — checking this, or writing a note, sends a request for review. Your show can stay a draft meanwhile.)"}
                             </span>
+                            {!show.isMhhQualifying && show.sanctioningRequested && (
+                                <span
+                                    className="rounded-full bg-forest/10 px-2 py-0.5 text-xs font-bold text-forest"
+                                    data-testid="sanctioning-requested"
+                                >
+                                    Requested — awaiting MHH review
+                                </span>
+                            )}
                         </label>
                         <Field label="Sanctioning note">
                             <Input

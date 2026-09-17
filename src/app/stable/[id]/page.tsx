@@ -12,6 +12,8 @@ import ShowRecordTimeline from"@/components/ShowRecordTimeline";
 import PedigreeCard from"@/components/PedigreeCard";
 import HoofprintTimeline from"@/components/HoofprintTimeline";
 import MakingChapter from"@/components/making/MakingChapter";
+import HorseDocuments from"@/components/passport/HorseDocuments";
+import { getHorseDocuments } from"@/lib/shows/queries";
 import { getMakingForHorse } from"@/app/actions/work-records";
 import TransferModal from"@/components/TransferModal";
 import ParkedExportPanel from"@/components/ParkedExportPanel";
@@ -158,6 +160,8 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
 
  // The Making — work records + reels (202; [] until pasted)
  const makingRecords = await getMakingForHorse(horseId);
+ // Documentation — the horse's papers (148/209; owner sees all)
+ const horseDocuments = await getHorseDocuments(supabase, horseId);
 
  // Fetch financial vault (owner-only via RLS)
  const { data: rawVault } = await supabase
@@ -428,6 +432,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  showControls
  canAddCredit
  />
+ <HorseDocuments horseId={horseId} documents={horseDocuments} isOwner />
  </div>
 
  {/* Right: The Ledger Card */}

@@ -11,6 +11,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { getPublicImageUrl } from "@/lib/utils/storage";
+import type { HorseDocumentView } from "@/lib/shows/documents";
 import type {
     ClassStatus,
     ShowJudging,
@@ -257,4 +258,37 @@ export async function loadClassContexts(
         })),
         divisions,
     };
+}
+
+/**
+ * A horse's documentation, oldest first. RLS decides who sees what:
+ * the owner sees all of it; a public horse's documents are public
+ * once 209 is applied; before that, non-owners see only documents
+ * attached to a visible show entry. Tolerant — a read error is an
+ * empty list, never a broken passport.
+ */
+export async function getHorseDocuments(
+    supabase: SupabaseClient,
+    horseId: string,
+): Promise<HorseDocumentView[]> {
+    const { data, error } = await supabase
+        .from("horse_documents")
+        .select("id, kind, title, body_md, updated_at")
+        .eq("horse_id", horseId)
+        .order("created_at", { ascending: true });
+    if (error) return [];
+    const rows = (data ?? []) as {
+        id: string;
+        kind: string;
+        title: string;
+        body_md: string;
+        updated_at: string;
+    }[];
+    return rows.map((d) => ({
+        id: d.id,
+        kind: d.kind,
+        title: d.title,
+        bodyMd: d.body_md,
+        updatedAt: d.updated_at,
+    }));
 }

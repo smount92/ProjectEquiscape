@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
 import { castVote, removeVote } from "@/app/actions/shows-v2";
+import { DOC_KIND_LABELS } from "@/lib/shows/documents";
 import type { ClassRoomEntry, GalleryEntry } from "@/lib/shows/gallery";
 import type { Rubric } from "@/lib/shows/rubrics";
 import ScorecardPanel from "@/components/shows/ScorecardPanel";
@@ -28,13 +29,6 @@ import LinkifiedText from "@/components/LinkifiedText";
 import PhotoLightbox from "@/components/PhotoLightbox";
 import VoteButton from "@/components/shows/VoteButton";
 import { useShowToast } from "@/components/shows/useShowToast";
-
-const DOC_KIND_LABELS: Record<string, string> = {
-    breed: "Breed documentation",
-    performance: "Performance documentation",
-    collectibility: "Collectibility documentation",
-    other: "Documentation",
-};
 
 /** VoteButton speaks GalleryEntry; the room entry is a superset. */
 function asGalleryEntry(entry: ClassRoomEntry): GalleryEntry {

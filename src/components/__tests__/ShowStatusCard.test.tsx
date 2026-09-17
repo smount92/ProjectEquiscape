@@ -32,6 +32,7 @@ function consoleShow(overrides: Partial<ConsoleShow> = {}): ConsoleShow {
         capacity: null,
         isMhhQualifying: true,
         sanctioningNote: null,
+        sanctioningRequested: false,
         blindBrowsing: true,
         createdAt: "2026-07-09T00:00:00Z",
         ...overrides,

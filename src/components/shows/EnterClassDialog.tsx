@@ -33,6 +33,7 @@ import { attachDocumentToEntry, createHorseDocument } from "@/app/actions/shows-
 import { addShowPhotoToHorse } from "@/app/actions/entry-photo";
 import { getProfile } from "@/app/actions/settings";
 import { filterAndRankHorses } from "@/lib/shows/horsePicker";
+import { DOC_KINDS, MAX_DOC_BODY, type DocKind } from "@/lib/shows/documents";
 import type { EntrantHorse } from "@/lib/shows/public";
 import type { ShowMode } from "@/lib/shows/types";
 import { createClient } from "@/lib/supabase/client";
@@ -84,18 +85,7 @@ export interface EnterableClass {
  *  picker switches to the search-first compact list. */
 const GRID_MAX_HORSES = 12;
 
-/** Documentation kinds (horse_documents.kind) — the class room prints
- *  "<label> documentation" on the card. */
-type DocKind = "breed" | "performance" | "collectibility" | "other";
-const DOC_KINDS: { value: DocKind; label: string }[] = [
-    { value: "breed", label: "Breed" },
-    { value: "performance", label: "Performance" },
-    { value: "collectibility", label: "Collectibility" },
-    { value: "other", label: "Other" },
-];
-/** Mirrors the horse_documents.body_md CHECK. */
-const MAX_DOC_BODY = 4000;
-
+/** One of the horse's existing write-ups (lib/shows/documents). */
 interface ExistingDoc {
     id: string;
     kind: string;
@@ -918,8 +908,8 @@ export default function EnterClassDialog({
                                         aria-label="Documentation body"
                                     />
                                     <p className="m-0 text-xs text-muted-foreground">
-                                        {docBody.length}/{MAX_DOC_BODY} · Saved to this horse, so
-                                        it&rsquo;s ready for the next class too.
+                                        {docBody.length}/{MAX_DOC_BODY} · Saved to this horse&rsquo;s
+                                        passport, so it&rsquo;s ready for the next class too.
                                     </p>
                                 </div>
                             )}

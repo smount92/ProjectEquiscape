@@ -53,7 +53,10 @@ export interface ConsoleShow {
     feeInfo: string | null;
     capacity: number | null;
     isMhhQualifying: boolean;
+    /** The host's own words — the request marker is stripped. */
     sanctioningNote: string | null;
+    /** A Season 1 sanctioning request is sitting in /admin's queue. */
+    sanctioningRequested: boolean;
     /** Blind entry gallery during judging (migration 119). */
     blindBrowsing: boolean;
     createdAt: string;

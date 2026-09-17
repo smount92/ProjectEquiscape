@@ -36,6 +36,8 @@ import { summarizeShowRecords } from"@/lib/market/recordSummary";
 import { getPublicHorseCards } from"@/lib/shows/publicCards";
 import { getMarketPrice } from"@/app/actions/market";
 import MakingChapter from"@/components/making/MakingChapter";
+import HorseDocuments from"@/components/passport/HorseDocuments";
+import { getHorseDocuments } from"@/lib/shows/queries";
 import { getMakingForHorse } from"@/app/actions/work-records";
 
 // Force fresh data on every request — prevents stale comments/favorites
@@ -276,6 +278,8 @@ export default async function PublicPassportPage({
 
  // The Making — work records + reels (202; [] until pasted)
  const makingRecords = await getMakingForHorse(horseId);
+ // Documentation — the horse's papers (148/209; RLS-gated)
+ const horseDocuments = await getHorseDocuments(supabase, horseId);
 
  // ================================================================
  // PROVENANCE: Show Records + Pedigree (read-only)
@@ -426,6 +430,7 @@ editionSize: rawPedigree.edition_size,
  showControls
  canAddCredit={isOwnHorse}
  />
+ <HorseDocuments horseId={horseId} documents={horseDocuments} isOwner={isOwnHorse} />
  </div>
 
  {/* Right: The Ledger Card */}

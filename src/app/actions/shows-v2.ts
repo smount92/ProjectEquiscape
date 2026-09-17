@@ -57,6 +57,11 @@ import {
     updateShowSettingsSchema,
 } from "@/lib/shows/schemas";
 import {
+    hasSanctioningRequest,
+    stripSanctioningMarker,
+    withSanctioningMarker,
+} from "@/lib/shows/sanctioning";
+import {
     getAliases,
     getEntryPhotoUrls,
     getHorseNames,
@@ -193,9 +198,7 @@ export async function createShow(
     // the request lands in the sanctioning note for review.
     if (v.isMhhQualifying && !callerIsPlatformAdmin(user.email)) {
         v.isMhhQualifying = false;
-        v.sanctioningNote = [v.sanctioningNote, "[Host requested MHH sanctioning]"]
-            .filter(Boolean)
-            .join(" ");
+        v.sanctioningNote = withSanctioningMarker(v.sanctioningNote);
     }
 
     const { data: show, error } = await supabase
@@ -253,16 +256,35 @@ export async function updateShowSettings(
     if (patch.mode && patch.mode !== ctx.show.mode && ctx.show.status !== "draft") {
         return { success: false, error: "A show's mode can only change while it is a draft." };
     }
-    // Sanctioning gate (program §5.1): the flag is admin-set in
-    // Season 1. A host flipping it ON becomes a recorded request.
-    if (patch.isMhhQualifying === true) {
+    // Sanctioning (program §5.1): the flag is admin-set in Season 1.
+    // A non-admin host ticking the box — or writing a sanctioning
+    // note on an unsanctioned show — files a RECORDED request: the
+    // marker lands in sanctioning_note (what /admin's queue lists)
+    // and the flag stays off until MHH grants it. An existing request
+    // survives later note edits. (Until 2026-09-16 this path refused
+    // with "add a note and we'll review", but notes saved here never
+    // carried the marker — requests made from settings silently never
+    // reached the queue. Draft status never mattered.)
+    if (patch.isMhhQualifying === true || patch.sanctioningNote !== undefined) {
         const { data: caller } = await supabase.auth.getUser();
         if (!callerIsPlatformAdmin(caller.user?.email)) {
-            return {
-                success: false,
-                error:
-                    "MHH sanctioning is granted by the platform in Season 1 — add a note in the sanctioning field and we'll review your show.",
-            };
+            const { data: current, error: curErr } = await supabase
+                .from("shows")
+                .select("is_mhh_qualifying, sanctioning_note")
+                .eq("id", showId)
+                .maybeSingle();
+            if (curErr) return { success: false, error: curErr.message };
+            const sanctioned = !!current?.is_mhh_qualifying;
+            const storedNote = (current?.sanctioning_note as string | null) ?? null;
+            const asked = patch.isMhhQualifying === true;
+            if (asked) delete patch.isMhhQualifying; // never self-granted
+            const nextNote =
+                patch.sanctioningNote !== undefined ? patch.sanctioningNote : storedNote;
+            const wantsRequest =
+                asked || hasSanctioningRequest(storedNote) || !!nextNote?.trim();
+            if (!sanctioned && wantsRequest) {
+                patch.sanctioningNote = withSanctioningMarker(nextNote);
+            }
         }
     }
 
@@ -327,6 +349,9 @@ export async function updateShowSettings(
     if (patch.isMhhQualifying !== undefined) update.is_mhh_qualifying = patch.isMhhQualifying;
     if (patch.sanctioningNote !== undefined) update.sanctioning_note = patch.sanctioningNote;
     if (patch.blindBrowsing !== undefined) update.blind_browsing = patch.blindBrowsing;
+    // A non-admin's bare "sanction me" tick collapses into the note
+    // above; nothing else to write is not an error.
+    if (Object.keys(update).length === 0) return { success: true };
 
     const { error } = await supabase.from("shows").update(update).eq("id", showId);
     if (error) return { success: false, error: error.message };
@@ -1732,7 +1757,8 @@ export async function getShowConsole(
                 feeInfo: show.fee_info as string | null,
                 capacity: show.capacity as number | null,
                 isMhhQualifying: show.is_mhh_qualifying as boolean,
-                sanctioningNote: show.sanctioning_note as string | null,
+                sanctioningNote: stripSanctioningMarker(show.sanctioning_note as string | null),
+                sanctioningRequested: hasSanctioningRequest(show.sanctioning_note as string | null),
                 blindBrowsing: show.blind_browsing as boolean,
                 createdAt: show.created_at as string,
             },
@@ -2120,7 +2146,7 @@ export async function getPublicShow(
             feeInfo: (show.fee_info as string | null) ?? null,
             capacity: (show.capacity as number | null) ?? null,
             isMhhQualifying: show.is_mhh_qualifying as boolean,
-            sanctioningNote: (show.sanctioning_note as string | null) ?? null,
+            sanctioningNote: stripSanctioningMarker(show.sanctioning_note as string | null),
             showYear: (show.show_year as number | null) ?? null,
         },
         divisions,

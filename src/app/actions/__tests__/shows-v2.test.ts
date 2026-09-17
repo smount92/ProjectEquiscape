@@ -198,6 +198,64 @@ describe("shows-v2 — updateShowSettings", () => {
         const result = await updateShowSettings({ showId: SHOW_ID, patch: { title: "Co-hosted" } });
         expect(result).toEqual({ success: true });
     });
+
+    it("a non-admin host ticking the sanctioning box files a request — never self-grants", async () => {
+        mockClient._mockQuery.maybeSingle
+            .mockResolvedValueOnce({ data: showRow(), error: null })
+            .mockResolvedValueOnce({
+                data: { is_mhh_qualifying: false, sanctioning_note: "NAMHSA member show" },
+                error: null,
+            });
+        mockClient._setImplicitResolve({ data: null, error: null });
+        const result = await updateShowSettings({
+            showId: SHOW_ID,
+            patch: { isMhhQualifying: true },
+        });
+        expect(result).toEqual({ success: true });
+        // The marker is what /admin's queue lists; the flag never flips.
+        expect(mockClient._mockQuery.update).toHaveBeenCalledWith({
+            sanctioning_note: "NAMHSA member show [Host requested MHH sanctioning]",
+        });
+    });
+
+    it("a note edit keeps an existing request in the admin queue", async () => {
+        mockClient._mockQuery.maybeSingle
+            .mockResolvedValueOnce({ data: showRow(), error: null })
+            .mockResolvedValueOnce({
+                data: {
+                    is_mhh_qualifying: false,
+                    sanctioning_note: "old words [Host requested MHH sanctioning]",
+                },
+                error: null,
+            });
+        mockClient._setImplicitResolve({ data: null, error: null });
+        const result = await updateShowSettings({
+            showId: SHOW_ID,
+            patch: { sanctioningNote: "Regional club show" },
+        });
+        expect(result).toEqual({ success: true });
+        expect(mockClient._mockQuery.update).toHaveBeenCalledWith({
+            sanctioning_note: "Regional club show [Host requested MHH sanctioning]",
+        });
+    });
+
+    it("a sanctioned show's note edit is just a note edit", async () => {
+        mockClient._mockQuery.maybeSingle
+            .mockResolvedValueOnce({ data: showRow(), error: null })
+            .mockResolvedValueOnce({
+                data: { is_mhh_qualifying: true, sanctioning_note: null },
+                error: null,
+            });
+        mockClient._setImplicitResolve({ data: null, error: null });
+        const result = await updateShowSettings({
+            showId: SHOW_ID,
+            patch: { sanctioningNote: "NAMHSA member show" },
+        });
+        expect(result).toEqual({ success: true });
+        expect(mockClient._mockQuery.update).toHaveBeenCalledWith({
+            sanctioning_note: "NAMHSA member show",
+        });
+    });
 });
 
 describe("shows-v2 — transitionShowStatus", () => {
