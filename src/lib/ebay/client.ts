@@ -48,16 +48,27 @@ export class EbayNotConfiguredError extends Error {
  * search endpoint's.
  */
 let cachedToken: { value: string; expiresAt: number } | null = null;
+/** The mint in flight, so four parallel workers on a cold cache share
+ *  one token request instead of racing the token endpoint. */
+let pendingToken: Promise<string> | null = null;
 
 /** Exposed for tests; there is no other reason to reach in. */
 export function __resetTokenCache(): void {
     cachedToken = null;
+    pendingToken = null;
 }
 
 export async function getAppToken(now: number = Date.now()): Promise<string> {
     if (!ebayConfigured()) throw new EbayNotConfiguredError();
     if (cachedToken && cachedToken.expiresAt > now + 60_000) return cachedToken.value;
+    if (pendingToken) return pendingToken;
+    pendingToken = mintToken(now).finally(() => {
+        pendingToken = null;
+    });
+    return pendingToken;
+}
 
+async function mintToken(now: number): Promise<string> {
     const basic = Buffer.from(
         `${process.env.EBAY_CLIENT_ID}:${process.env.EBAY_CLIENT_SECRET}`
     ).toString("base64");

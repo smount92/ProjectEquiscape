@@ -78,6 +78,20 @@ describe("the application token", () => {
         expect(fetch).toHaveBeenCalledTimes(1);
     });
 
+    // Four sweep workers start on a cold cache at the same instant.
+    it("shares one mint between concurrent callers", async () => {
+        let release: (v: unknown) => void = () => {};
+        (fetch as ReturnType<typeof vi.fn>).mockImplementation(
+            () => new Promise((r) => { release = r; }),
+        );
+        const t0 = Date.now();
+        const all = Promise.all([getAppToken(t0), getAppToken(t0), getAppToken(t0), getAppToken(t0)]);
+        await Promise.resolve();
+        expect(fetch).toHaveBeenCalledTimes(1);
+        release(okToken());
+        expect(await all).toEqual(["tok-abc", "tok-abc", "tok-abc", "tok-abc"]);
+    });
+
     it("re-mints once the cached token is near expiry", async () => {
         (fetch as ReturnType<typeof vi.fn>).mockResolvedValue(okToken(120));
         const t0 = Date.now();

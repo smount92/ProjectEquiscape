@@ -114,11 +114,16 @@ export function summarise(
 
 export interface SweepDeps {
     search?: typeof searchActiveListings;
+    /** Parallel searches. 1 (the default) is strictly sequential; the
+     *  daily cron runs 4 — a 1,000-model slice in ~2 minutes instead of
+     *  ~7, inside Vercel's 5-minute function budget. */
+    concurrency?: number;
 }
 
 /**
  * Sweep a slice of catalog rows. `targets` is the slice; choosing it
- * (oldest reading first, matchable only) is the caller's job.
+ * (never-attempted first, stalest attempt after, matchable only) is the
+ * caller's job — lib/ebay/schedule.
  */
 export async function sweep(
     targets: SweepTarget[],
@@ -136,8 +141,15 @@ export async function sweep(
         rejections[reason] = (rejections[reason] ?? 0) + 1;
     };
 
-    for (const target of targets) {
-        if (!target.modelNumber) { note("no-model-number-in-listing"); perTarget[target.id] = "skipped"; continue; }
+    // A rate limit means every subsequent call fails too; stopping keeps
+    // the run's partial results rather than burning through the rest of
+    // the slice generating identical errors. Shared across workers: the
+    // first to see it stops the rest from pulling new targets. The model
+    // that hit it is not marked tried — it was never answered.
+    let stopped = false;
+
+    const processOne = async (target: SweepTarget): Promise<void> => {
+        if (!target.modelNumber) { note("no-model-number-in-listing"); perTarget[target.id] = "skipped"; return; }
         let listings: EbayListing[];
         try {
             listings = await search(buildQuery(target.maker, target.title, target.modelNumber));
@@ -145,13 +157,9 @@ export async function sweep(
         } catch (err) {
             const message = err instanceof Error ? err.message : String(err);
             errors.push(`${target.id}: ${message}`);
-            // A rate limit means every subsequent call fails too; stopping
-            // keeps the run's partial results rather than burning through
-            // the rest of the slice generating identical errors. The model
-            // that hit it is not marked tried — it was never answered.
-            if (/rate limit/i.test(message)) break;
+            if (/rate limit/i.test(message)) { stopped = true; return; }
             perTarget[target.id] = "error";
-            continue;
+            return;
         }
 
         const accepted: EbayListing[] = [];
@@ -173,7 +181,20 @@ export async function sweep(
             if (accepted.length) note("below-min-sample");
             perTarget[target.id] = "no-match";
         }
-    }
+    };
+
+    // Worker pool over a shared cursor: each worker takes the next
+    // target until the slice is exhausted or a rate limit stops the run.
+    let cursor = 0;
+    const worker = async () => {
+        while (!stopped) {
+            const i = cursor++;
+            if (i >= targets.length) return;
+            await processOne(targets[i]);
+        }
+    };
+    const width = Math.max(1, Math.min(Math.floor(deps.concurrency ?? 1), Math.max(targets.length, 1)));
+    await Promise.all(Array.from({ length: width }, worker));
 
     return { signals, rejections, searched, errors, perTarget };
 }

@@ -1,5 +1,5 @@
 /**
- * Which models the weekly sweep asks about, and in what order.
+ * Which models the daily sweep asks about, and in what order.
  *
  * THE BUG THIS REPLACES. The first version ordered the slice by the
  * signals table alone: never-read first, then stalest reading. A model
@@ -11,9 +11,9 @@
  *
  * NOW: attempts are the ledger (catalog_price_sweeps, 211). Never-
  * attempted first, then stalest attempt, whatever the answer was. Until
- * that table exists, a deterministic per-week shuffle of the never-read
- * pool stands in — a different slice each Monday, and the same slice on
- * a same-week re-run so a retry doesn't burn budget on new models.
+ * that table exists, a deterministic per-day shuffle of the never-read
+ * pool stands in — a different slice each daily run, and the same slice
+ * on a same-day re-run so a retry doesn't burn budget on new models.
  *
  * Pure, so the ordering is tested without a database.
  */
@@ -23,22 +23,17 @@ export type SweepResult = "signal" | "no-match" | "error" | "skipped";
 export interface SweepPlan<T> {
     ordered: T[];
     /** How the order was decided — the response says so. */
-    basis: "attempts" | "week-rotation";
+    basis: "attempts" | "day-rotation";
     neverAttempted: number;
 }
 
-/** ISO-8601 week, e.g. "2026-W38". Mondays 07:00 UTC and a same-week
- *  re-run share it. */
-export function isoWeekKey(d: Date): string {
-    const date = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
-    const day = date.getUTCDay() || 7;
-    date.setUTCDate(date.getUTCDate() + 4 - day);
-    const yearStart = Date.UTC(date.getUTCFullYear(), 0, 1);
-    const week = Math.ceil(((date.getTime() - yearStart) / 86_400_000 + 1) / 7);
-    return `${date.getUTCFullYear()}-W${String(week).padStart(2, "0")}`;
+/** The UTC calendar day, e.g. "2026-09-18". The 07:00 UTC run and a
+ *  same-day re-run share it. */
+export function dayKey(d: Date): string {
+    return d.toISOString().slice(0, 10);
 }
 
-/** FNV-1a — small, stable, good enough to spread ids over a week. */
+/** FNV-1a — small, stable, good enough to spread ids over a day. */
 function hash32(s: string): number {
     let h = 0x811c9dc5;
     for (let i = 0; i < s.length; i++) {
@@ -66,17 +61,17 @@ export function planSweep<T extends { id: string }>(input: {
         return { ordered: [...never, ...tried], basis: "attempts", neverAttempted: never.length };
     }
 
-    // Pre-211: rotate the never-read pool by week; stalest reading after.
-    const week = isoWeekKey(now);
+    // Pre-211: rotate the never-read pool by day; stalest reading after.
+    const day = dayKey(now);
     const never = candidates
         .filter((c) => !lastSignal.has(c.id))
-        .map((c) => ({ c, key: hash32(`${week}:${c.id}`) }))
+        .map((c) => ({ c, key: hash32(`${day}:${c.id}`) }))
         .sort((a, b) => a.key - b.key || a.c.id.localeCompare(b.c.id))
         .map((x) => x.c);
     const read = candidates
         .filter((c) => lastSignal.has(c.id))
         .sort((a, b) => lastSignal.get(a.id)!.localeCompare(lastSignal.get(b.id)!));
-    return { ordered: [...never, ...read], basis: "week-rotation", neverAttempted: never.length };
+    return { ordered: [...never, ...read], basis: "day-rotation", neverAttempted: never.length };
 }
 
 export interface AttemptRow {

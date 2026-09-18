@@ -1,20 +1,14 @@
 import { describe, it, expect } from "vitest";
 
-import { attemptRows, isoWeekKey, planSweep, tallyOutcomes } from "@/lib/ebay/schedule";
+import { attemptRows, dayKey, planSweep, tallyOutcomes } from "@/lib/ebay/schedule";
 
 const ids = (n: number) => Array.from({ length: n }, (_, i) => ({ id: `m${String(i).padStart(3, "0")}` }));
 
-describe("isoWeekKey", () => {
-    it("puts a Monday 07:00 UTC run and a same-week retry in the same week", () => {
-        expect(isoWeekKey(new Date("2026-09-14T07:00:00Z"))).toBe("2026-W38");
-        expect(isoWeekKey(new Date("2026-09-17T23:59:59Z"))).toBe("2026-W38");
-        expect(isoWeekKey(new Date("2026-09-21T07:00:00Z"))).toBe("2026-W39");
-    });
-
-    it("follows ISO year boundaries", () => {
-        // 2027-01-01 is a Friday: still week 53 of 2026.
-        expect(isoWeekKey(new Date("2027-01-01T12:00:00Z"))).toBe("2026-W53");
-        expect(isoWeekKey(new Date("2027-01-04T12:00:00Z"))).toBe("2027-W01");
+describe("dayKey", () => {
+    it("puts the 07:00 UTC run and a same-day retry on the same day", () => {
+        expect(dayKey(new Date("2026-09-18T07:00:00Z"))).toBe("2026-09-18");
+        expect(dayKey(new Date("2026-09-18T23:59:59Z"))).toBe("2026-09-18");
+        expect(dayKey(new Date("2026-09-19T07:00:00Z"))).toBe("2026-09-19");
     });
 });
 
@@ -34,14 +28,14 @@ describe("planSweep with the attempt ledger (211)", () => {
     });
 });
 
-describe("planSweep before the ledger exists (week rotation)", () => {
+describe("planSweep before the ledger exists (day rotation)", () => {
     const candidates = ids(40);
     const lastSignal = new Map([["m010", "2026-08-25T00:00:00Z"], ["m011", "2026-09-07T00:00:00Z"]]);
 
-    it("rotates the never-read pool so consecutive Mondays take different slices", () => {
-        const a = planSweep({ candidates, lastSignal, lastAttempt: null, now: new Date("2026-09-14T07:00:00Z") });
-        const b = planSweep({ candidates, lastSignal, lastAttempt: null, now: new Date("2026-09-21T07:00:00Z") });
-        expect(a.basis).toBe("week-rotation");
+    it("rotates the never-read pool so consecutive days take different slices", () => {
+        const a = planSweep({ candidates, lastSignal, lastAttempt: null, now: new Date("2026-09-18T07:00:00Z") });
+        const b = planSweep({ candidates, lastSignal, lastAttempt: null, now: new Date("2026-09-19T07:00:00Z") });
+        expect(a.basis).toBe("day-rotation");
         const sliceA = a.ordered.slice(0, 10).map((c) => c.id);
         const sliceB = b.ordered.slice(0, 10).map((c) => c.id);
         expect(sliceA).not.toEqual(sliceB);
@@ -50,9 +44,9 @@ describe("planSweep before the ledger exists (week rotation)", () => {
         expect(sliceB.some((id) => lastSignal.has(id))).toBe(false);
     });
 
-    it("is stable within a week, so a retry re-covers the same models", () => {
-        const a = planSweep({ candidates, lastSignal, lastAttempt: null, now: new Date("2026-09-14T07:00:00Z") });
-        const b = planSweep({ candidates, lastSignal, lastAttempt: null, now: new Date("2026-09-16T15:00:00Z") });
+    it("is stable within a day, so a retry re-covers the same models", () => {
+        const a = planSweep({ candidates, lastSignal, lastAttempt: null, now: new Date("2026-09-18T07:00:00Z") });
+        const b = planSweep({ candidates, lastSignal, lastAttempt: null, now: new Date("2026-09-18T15:00:00Z") });
         expect(a.ordered.map((c) => c.id)).toEqual(b.ordered.map((c) => c.id));
     });
 
