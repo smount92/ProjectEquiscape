@@ -23,8 +23,9 @@ import {
     type MatchCandidate,
     type RejectReason,
 } from "@/lib/ebay/matching";
+import type { SweepResult } from "@/lib/ebay/schedule";
 
-export interface SweepTarget extends MatchCandidate {}
+export type SweepTarget = MatchCandidate;
 
 export interface SignalListing {
     title: string;
@@ -53,6 +54,11 @@ export interface SweepOutcome {
     rejections: Record<string, number>;
     searched: number;
     errors: string[];
+    /** What happened to each model the run reached — the attempt ledger
+     *  (211) is written from this, so a model that produced nothing is
+     *  still remembered as tried. Models after a rate-limit stop are
+     *  absent: they were never asked about. */
+    perTarget: Record<string, SweepResult>;
 }
 
 export function median(values: number[]): number {
@@ -123,6 +129,7 @@ export async function sweep(
     const signals: PriceSignal[] = [];
     const rejections: Record<string, number> = {};
     const errors: string[] = [];
+    const perTarget: Record<string, SweepResult> = {};
     let searched = 0;
 
     const note = (reason: RejectReason | "below-min-sample") => {
@@ -130,7 +137,7 @@ export async function sweep(
     };
 
     for (const target of targets) {
-        if (!target.modelNumber) { note("no-model-number-in-listing"); continue; }
+        if (!target.modelNumber) { note("no-model-number-in-listing"); perTarget[target.id] = "skipped"; continue; }
         let listings: EbayListing[];
         try {
             listings = await search(buildQuery(target.maker, target.title, target.modelNumber));
@@ -140,8 +147,10 @@ export async function sweep(
             errors.push(`${target.id}: ${message}`);
             // A rate limit means every subsequent call fails too; stopping
             // keeps the run's partial results rather than burning through
-            // the rest of the slice generating identical errors.
+            // the rest of the slice generating identical errors. The model
+            // that hit it is not marked tried — it was never answered.
             if (/rate limit/i.test(message)) break;
+            perTarget[target.id] = "error";
             continue;
         }
 
@@ -157,9 +166,14 @@ export async function sweep(
         }
 
         const signal = summarise(target.id, accepted, "model-number-and-maker");
-        if (signal) signals.push(signal);
-        else if (accepted.length) note("below-min-sample");
+        if (signal) {
+            signals.push(signal);
+            perTarget[target.id] = "signal";
+        } else {
+            if (accepted.length) note("below-min-sample");
+            perTarget[target.id] = "no-match";
+        }
     }
 
-    return { signals, rejections, searched, errors };
+    return { signals, rejections, searched, errors, perTarget };
 }

@@ -6,6 +6,13 @@
 // NEXT_PUBLIC_EBAY_COMPS=1. Without any of those it is a clean no-op,
 // not an error — the route must be safe to schedule before the feature
 // is switched on.
+//
+// WHAT THE RUN LEDGER SAID (2026-09-17). The cron fired every Monday
+// and wrote 5, 7, then 1 signals from a 150-model slice, against 535
+// from the manual catch-up. Ordering was by the signals table alone, so
+// a model swept with no result still sorted as never-read and came up
+// again — the same unproductive slice each week. Ordering now runs on
+// the attempt ledger (catalog_price_sweeps, 211; lib/ebay/schedule).
 // ============================================================
 
 import { NextRequest, NextResponse } from "next/server";
@@ -13,16 +20,64 @@ import { getAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/logger";
 import * as Sentry from "@sentry/nextjs";
 import { ebayCompsLive } from "@/lib/ebay/flag";
+import { attemptRows, planSweep, tallyOutcomes } from "@/lib/ebay/schedule";
 import { sweep, type SweepTarget } from "@/lib/ebay/sweep";
 
 /**
- * How many models one run touches. Deliberately small: eBay's Browse API
- * is rate limited per day, ~2,900 catalog rows are matchable, and a
- * weekly cadence over a few hundred covers the reachable set in a couple
- * of months without ever approaching the ceiling. Raise it only with a
- * real rate-limit number in hand.
+ * The 2026-09-14 run swept 150 models in ~66 s. The slice below takes
+ * roughly twice that; Vercel's default budget is well under it on some
+ * plans, and a run that dies mid-slice writes nothing at all.
  */
-const SLICE = 150;
+export const maxDuration = 300;
+
+/**
+ * How many models one run touches. eBay's Analytics API reports this
+ * keyset's Browse limit as 5,000 calls per day (read 2026-09-18: limit
+ * 5000, window 86,400 s); a weekly 300 is 6% of one day. ~2,480 reachable
+ * models had never been asked about when this was raised from 150 —
+ * at 300 a week the pool gets its first look in about two months.
+ */
+const SLICE = 300;
+
+/** Loose facade for tables not yet in the generated types (211). */
+interface LooseResult<T> {
+    data: T[] | null;
+    error: { code?: string; message?: string } | null;
+}
+interface LooseQuery {
+    select: (cols: string) => LooseQuery;
+    eq: (k: string, v: string) => LooseQuery;
+    range: (from: number, to: number) => Promise<LooseResult<Record<string, unknown>>>;
+    upsert: (
+        rows: Record<string, unknown>[],
+        opts: { onConflict: string },
+    ) => Promise<{ error: { code?: string; message?: string } | null }>;
+}
+
+function missingTable(error: { code?: string; message?: string } | null, table: string): boolean {
+    return !!error && (error.code === "42P01" || (error.message ?? "").includes(table));
+}
+
+/**
+ * PAGINATED, not .limit(N): PostgREST silently caps a single request at
+ * 1,000 rows. That cap has produced a wrong number four separate times
+ * in this codebase's history — paginate every catalog-wide read, always.
+ * Signals passed 600 rows in September; attempts will pass 1,000 by
+ * winter.
+ */
+async function readAll(
+    query: (from: number, to: number) => Promise<LooseResult<Record<string, unknown>>>,
+): Promise<Record<string, unknown>[] | { error: { code?: string; message?: string } }> {
+    const rows: Record<string, unknown>[] = [];
+    for (let from = 0; from < 20_000; from += 1000) {
+        const { data, error } = await query(from, from + 999);
+        if (error) return { error };
+        if (!data || data.length === 0) break;
+        rows.push(...data);
+        if (data.length < 1000) break;
+    }
+    return rows;
+}
 
 export async function GET(request: NextRequest) {
     const authHeader = request.headers.get("authorization");
@@ -38,35 +93,56 @@ export async function GET(request: NextRequest) {
 
     try {
         const admin = getAdminClient();
+        const loose = (admin as unknown as { from: (t: string) => LooseQuery }).from.bind(admin);
+        const now = new Date();
 
         // Rows worth asking about: a model number long enough to read out
         // of a listing title. The shorter ones ("85") are matchable only
         // when a seller writes "#85", which is too rare to spend a request
         // on.
-        //
-        // PAGINATED, not .limit(4000): PostgREST silently caps a single
-        // request at 1,000 rows, so the first version of this read saw
-        // under a quarter of the catalog and "considered: 812" looked
-        // plausible enough that nobody questioned it. The 1,000-row cap
-        // has now produced a wrong number four separate times in this
-        // codebase's history; paginate every catalog-wide read, always.
-        const rows: { id: string; title: string | null; maker: string | null; scale: string | null; attributes: Record<string, unknown> | null }[] = [];
-        for (let from = 0; from < 20_000; from += 1000) {
-            const { data: page, error } = await admin
+        const catalog = await readAll((from, to) =>
+            admin
                 .from("catalog_items")
                 .select("id, title, maker, scale, attributes")
                 .not("attributes->>model_number", "is", null)
-                .range(from, from + 999);
-            if (error) throw new Error(`catalog read failed: ${error.message}`);
-            if (!page || page.length === 0) break;
-            rows.push(...(page as typeof rows));
-            if (page.length < 1000) break;
-        }
+                .range(from, to) as unknown as Promise<LooseResult<Record<string, unknown>>>,
+        );
+        if ("error" in catalog) throw new Error(`catalog read failed: ${catalog.error.message}`);
+        const rows = catalog as {
+            id: string;
+            title: string | null;
+            maker: string | null;
+            scale: string | null;
+            attributes: Record<string, unknown> | null;
+        }[];
 
         const signals = () => admin.from("catalog_price_signals");
 
-        const { data: seen } = await signals().select("catalog_item_id, observed_at");
-        const lastSeen = new Map((seen ?? []).map((s) => [s.catalog_item_id, s.observed_at]));
+        const seen = await readAll((from, to) =>
+            signals().select("catalog_item_id, observed_at").range(from, to) as unknown as Promise<
+                LooseResult<Record<string, unknown>>
+            >,
+        );
+        if ("error" in seen) throw new Error(`signals read failed: ${seen.error.message}`);
+        const lastSignal = new Map(
+            seen.map((s) => [s.catalog_item_id as string, s.observed_at as string]),
+        );
+
+        // The attempt ledger (211). null before the paste: the planner
+        // then rotates the never-read pool by week instead.
+        let lastAttempt: Map<string, string> | null = null;
+        const tried = await readAll((from, to) =>
+            loose("catalog_price_sweeps").select("catalog_item_id, swept_at").range(from, to),
+        );
+        if ("error" in tried) {
+            if (!missingTable(tried.error, "catalog_price_sweeps")) {
+                throw new Error(`sweep ledger read failed: ${tried.error.message}`);
+            }
+        } else {
+            lastAttempt = new Map(
+                tried.map((t) => [t.catalog_item_id as string, t.swept_at as string]),
+            );
+        }
 
         // A model a member flagged as wrongly matched is OFF the sweep
         // until an admin resolves the flag — a wrong price that keeps
@@ -75,23 +151,21 @@ export async function GET(request: NextRequest) {
         // set stays empty.
         const flagged = new Set<string>();
         try {
-            const { data: flags } = await (admin as unknown as {
-                from: (t: string) => {
-                    select: (c: string) => { eq: (k: string, v: string) => Promise<{ data: { catalog_item_id: string }[] | null }> };
-                };
-            }).from("catalog_price_signal_flags").select("catalog_item_id").eq("status", "active");
+            const { data: flags } = await (loose("catalog_price_signal_flags")
+                .select("catalog_item_id")
+                .eq("status", "active") as unknown as Promise<LooseResult<{ catalog_item_id: string }>>);
             for (const f of flags ?? []) flagged.add(f.catalog_item_id);
         } catch {
             /* pre-196 */
         }
 
-        const candidates: SweepTarget[] = (rows ?? [])
+        const candidates: SweepTarget[] = rows
             .map((r) => ({
-                id: r.id as string,
+                id: r.id,
                 title: String(r.title ?? ""),
-                maker: (r.maker as string | null) ?? null,
-                modelNumber: String((r.attributes as Record<string, unknown>)?.model_number ?? ""),
-                scale: (r.scale as string | null) ?? null,
+                maker: r.maker ?? null,
+                modelNumber: String(r.attributes?.model_number ?? ""),
+                scale: r.scale ?? null,
             }))
             .filter((c) => /^[0-9]{4,6}[A-Za-z]?$/.test(c.modelNumber.trim().toUpperCase()))
             .filter((c) => !flagged.has(c.id));
@@ -113,13 +187,8 @@ export async function GET(request: NextRequest) {
             (c) => (titlesByNumber.get((c.modelNumber ?? "").trim().toUpperCase())?.size ?? 0) === 1,
         );
 
-        // Never-read models first, then the stalest. New entries get a
-        // price before old ones get a fresher one.
-        unambiguous.sort((a, b) => {
-            const sa = lastSeen.get(a.id) ?? "";
-            const sb = lastSeen.get(b.id) ?? "";
-            return sa.localeCompare(sb);
-        });
+        // Never-attempted first, then stalest attempt (lib/ebay/schedule).
+        const plan = planSweep({ candidates: unambiguous, lastSignal, lastAttempt, now });
 
         // ?limit=N overrides the slice for manual runs (still behind
         // CRON_SECRET). The weekly cron sends none and gets the default;
@@ -138,7 +207,7 @@ export async function GET(request: NextRequest) {
         const onlyIds = idsParam
             ? new Set(idsParam.split(",").map((s) => s.trim()).filter(Boolean))
             : null;
-        const pool = onlyIds ? unambiguous.filter((c) => onlyIds.has(c.id)) : unambiguous;
+        const pool = onlyIds ? plan.ordered.filter((c) => onlyIds.has(c.id)) : plan.ordered;
 
         const slice = pool.slice(0, sliceSize);
         const outcome = await sweep(slice);
@@ -156,7 +225,7 @@ export async function GET(request: NextRequest) {
                 match_basis: s.matchBasis,
                 listings: s.listings,
                 source: "ebay-browse",
-                observed_at: new Date().toISOString(),
+                observed_at: now.toISOString(),
             };
             let { error: upsertError } = await signals()
                 .upsert(row, { onConflict: "catalog_item_id" });
@@ -184,7 +253,7 @@ export async function GET(request: NextRequest) {
         // duplicates. Tolerant pre-197: the rolling signal alone is still
         // worth keeping, so a missing table skips quietly.
         let historyWritten = 0;
-        const today = new Date().toISOString().slice(0, 10);
+        const today = now.toISOString().slice(0, 10);
         const historyRows = outcome.signals
             .filter((s) => wroteIds.has(s.catalogItemId))
             .map((s) => ({
@@ -197,23 +266,12 @@ export async function GET(request: NextRequest) {
                 source: "ebay-browse",
                 observed_on: today,
             }));
-        const history = (admin as unknown as {
-            from: (t: string) => {
-                upsert: (
-                    rows: Record<string, unknown>[],
-                    opts: { onConflict: string },
-                ) => Promise<{ error: { code?: string; message?: string } | null }>;
-            };
-        }).from.bind(admin);
         for (let i = 0; i < historyRows.length; i += 500) {
             const chunk = historyRows.slice(i, i + 500);
-            const { error: histError } = await history("catalog_price_history")
+            const { error: histError } = await loose("catalog_price_history")
                 .upsert(chunk, { onConflict: "catalog_item_id,source,observed_on" });
             if (histError) {
-                const missingTable =
-                    histError.code === "42P01" ||
-                    /catalog_price_history/.test(histError.message ?? "");
-                if (!missingTable) {
+                if (!missingTable(histError, "catalog_price_history")) {
                     Sentry.captureException(histError, { tags: { domain: "cron" } });
                     logger.error("CronEbay", "history append failed", histError);
                 }
@@ -222,29 +280,46 @@ export async function GET(request: NextRequest) {
             historyWritten += chunk.length;
         }
 
+        // The attempt ledger (211): every model this run asked about,
+        // whatever the answer, so next Monday's slice moves on. Tolerant
+        // pre-211: the week rotation above already keeps the slice moving.
+        const sampleSizes = new Map(outcome.signals.map((s) => [s.catalogItemId, s.sampleSize]));
+        const attempts = attemptRows(outcome.perTarget, sampleSizes, now);
+        let attemptsRecorded = 0;
+        for (let i = 0; i < attempts.length; i += 500) {
+            const chunk = attempts.slice(i, i + 500);
+            const { error: attemptError } = await loose("catalog_price_sweeps")
+                .upsert(chunk as unknown as Record<string, unknown>[], { onConflict: "catalog_item_id" });
+            if (attemptError) {
+                if (!missingTable(attemptError, "catalog_price_sweeps")) {
+                    Sentry.captureException(attemptError, { tags: { domain: "cron" } });
+                    logger.error("CronEbay", "attempt ledger write failed", attemptError);
+                }
+                break;
+            }
+            attemptsRecorded += chunk.length;
+        }
+
         // The rejection profile is the feedback loop on the matching
         // rules — logged every run so "too strict" or "not strict enough"
         // is an observation rather than an argument.
-        logger.info("CronEbay", "sweep complete", {
+        const summary = {
             considered: unambiguous.length,
             ambiguousExcluded: candidates.length - unambiguous.length,
+            neverAttempted: plan.neverAttempted,
+            orderedBy: plan.basis,
             swept: slice.length,
             searched: outcome.searched,
+            outcomes: tallyOutcomes(outcome.perTarget),
             written,
             historyWritten,
+            attemptsRecorded,
             rejections: outcome.rejections,
             errors: outcome.errors.length,
-        });
+        };
+        logger.info("CronEbay", "sweep complete", summary);
 
-        return NextResponse.json({
-            considered: unambiguous.length,
-            ambiguousExcluded: candidates.length - unambiguous.length,
-            swept: slice.length,
-            written,
-            historyWritten,
-            rejections: outcome.rejections,
-            errors: outcome.errors.slice(0, 5),
-        });
+        return NextResponse.json({ ...summary, errors: outcome.errors.slice(0, 5) });
     } catch (err) {
         Sentry.captureException(err, { tags: { domain: "cron" } });
         logger.error("CronEbay", "sweep failed", err);

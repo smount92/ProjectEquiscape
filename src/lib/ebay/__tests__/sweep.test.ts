@@ -56,6 +56,37 @@ describe("sweep", () => {
         expect(out.signals).toHaveLength(1);
         expect(out.signals[0]).toMatchObject({ catalogItemId: "alborozo", askingMedian: 200 });
         expect(out.searched).toBe(1);
+        expect(out.perTarget).toEqual({ alborozo: "signal" });
+    });
+
+    // The attempt ledger: a model that produced nothing is still
+    // remembered as tried, so it stops returning to the front of the
+    // queue every week (the bug behind three Mondays of 5, 7, 1 signals).
+    it("remembers every model it asked about, whatever the answer", async () => {
+        const search = vi.fn(async (q: string) =>
+            /712053/.test(q) ? [listing(100), listing(200), listing(300)] : [listing(50, "Breyer Notoriously Framed 712393")],
+        );
+        const out = await sweep(TARGETS, { search });
+        expect(out.perTarget).toEqual({ alborozo: "signal", notorious: "no-match" });
+    });
+
+    it("a rate-limit stop leaves the unreached models unrecorded", async () => {
+        const search = vi.fn(async (q: string) => {
+            if (/712053/.test(q)) return [listing(100), listing(200), listing(300)];
+            throw new Error("eBay rate limit reached");
+        });
+        const out = await sweep(TARGETS, { search });
+        expect(out.perTarget).toEqual({ alborozo: "signal" });
+        expect(out.errors).toHaveLength(1);
+    });
+
+    it("a plain request failure is recorded as an error and the run continues", async () => {
+        const search = vi.fn(async (q: string) => {
+            if (/712053/.test(q)) throw new Error("boom");
+            return [listing(50, "Breyer Notoriously Framed 712393")];
+        });
+        const out = await sweep(TARGETS, { search });
+        expect(out.perTarget).toEqual({ alborozo: "error", notorious: "no-match" });
     });
 
     // Search is fuzzy; matching is not. eBay happily returns a different
