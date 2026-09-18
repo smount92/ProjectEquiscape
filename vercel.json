@@ -14,7 +14,7 @@
         },
         {
             "path": "/api/cron/ebay-price-signals",
-            "schedule": "0 7 * * *"
+            "schedule": "0 */4 * * *"
         }
     ]
 }

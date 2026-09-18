@@ -1,5 +1,5 @@
 /**
- * Which models the daily sweep asks about, and in what order.
+ * Which models the sweep asks about, and in what order.
  *
  * THE BUG THIS REPLACES. The first version ordered the slice by the
  * signals table alone: never-read first, then stalest reading. A model
@@ -9,26 +9,58 @@
  * week, while thousands of reachable models never got a first look.
  * Three weekly runs wrote 5, 7 and 1 signals.
  *
- * NOW: attempts are the ledger (catalog_price_sweeps, 211). Never-
- * attempted first, then stalest attempt, whatever the answer was. Until
- * that table exists, a deterministic per-day shuffle of the never-read
- * pool stands in — a different slice each daily run, and the same slice
- * on a same-day re-run so a retry doesn't burn budget on new models.
+ * NOW: attempts are the ledger (catalog_price_sweeps, 211), and every
+ * model has a DUE time from its last attempt and what came back. The
+ * cron runs every four hours and sweeps what is due, most overdue
+ * first — never-attempted models before anything else. Nothing is
+ * re-asked just because a run happened to fire; that's how two
+ * back-to-back runs on the same evening would have spent 2,000 calls
+ * re-asking the empty tail thirty minutes later.
+ *
+ * Before the 211 table exists, a deterministic per-day shuffle of the
+ * never-read pool stands in.
  *
  * Pure, so the ordering is tested without a database.
  */
 
 export type SweepResult = "signal" | "no-match" | "error" | "skipped";
 
+/**
+ * How long each answer stays fresh. Sized against this keyset's 5,000
+ * calls/day (eBay Analytics API, 2026-09-18) over ~3,100 reachable
+ * models, of which ~22% have a market at any time:
+ *   signal   8 h  → ~690 models × 3/day ≈ 2,070 calls
+ *   no-match 36 h → ~2,410 models / 1.5 ≈ 1,610 calls
+ *   ≈ 3,700/day, three quarters of the budget, the rest for manual runs.
+ * A model with a market is never more than eight hours stale on its
+ * page; the tail gets a fresh look every day and a half.
+ */
+export const REFRESH_HOURS: Record<SweepResult, number> = {
+    signal: 8,
+    "no-match": 36,
+    /** Transient failures retry on the next run. */
+    error: 0,
+    /** Nothing to ask about; re-checked in case the catalog row changed. */
+    skipped: 36,
+};
+
+export interface AttemptInfo {
+    /** ISO timestamp of the last attempt. */
+    at: string;
+    outcome: SweepResult;
+}
+
 export interface SweepPlan<T> {
+    /** Every candidate: never-attempted, then by due time (most overdue first). */
     ordered: T[];
     /** How the order was decided — the response says so. */
     basis: "attempts" | "day-rotation";
     neverAttempted: number;
+    /** Never-attempted + attempted-and-due. The cron sweeps at most this many. */
+    dueCount: number;
 }
 
-/** The UTC calendar day, e.g. "2026-09-18". The 07:00 UTC run and a
- *  same-day re-run share it. */
+/** The UTC calendar day, e.g. "2026-09-18". */
 export function dayKey(d: Date): string {
     return d.toISOString().slice(0, 10);
 }
@@ -43,12 +75,17 @@ function hash32(s: string): number {
     return h;
 }
 
+/** When an attempt's answer goes stale. */
+export function dueAt(info: AttemptInfo): number {
+    return new Date(info.at).getTime() + REFRESH_HOURS[info.outcome] * 3_600_000;
+}
+
 export function planSweep<T extends { id: string }>(input: {
     candidates: T[];
     /** observed_at per model with a signal (the rolling table). */
     lastSignal: Map<string, string>;
-    /** swept_at per model ever attempted (211); null before the paste. */
-    lastAttempt: Map<string, string> | null;
+    /** Last attempt per model (211); null before the paste. */
+    lastAttempt: Map<string, AttemptInfo> | null;
     now: Date;
 }): SweepPlan<T> {
     const { candidates, lastSignal, lastAttempt, now } = input;
@@ -57,11 +94,19 @@ export function planSweep<T extends { id: string }>(input: {
         const never = candidates.filter((c) => !lastAttempt.has(c.id));
         const tried = candidates
             .filter((c) => lastAttempt.has(c.id))
-            .sort((a, b) => lastAttempt.get(a.id)!.localeCompare(lastAttempt.get(b.id)!));
-        return { ordered: [...never, ...tried], basis: "attempts", neverAttempted: never.length };
+            .map((c) => ({ c, due: dueAt(lastAttempt.get(c.id)!) }))
+            .sort((a, b) => a.due - b.due || a.c.id.localeCompare(b.c.id));
+        const dueNow = tried.filter((x) => x.due <= now.getTime()).length;
+        return {
+            ordered: [...never, ...tried.map((x) => x.c)],
+            basis: "attempts",
+            neverAttempted: never.length,
+            dueCount: never.length + dueNow,
+        };
     }
 
     // Pre-211: rotate the never-read pool by day; stalest reading after.
+    // Everything counts as due — there is no ledger to say otherwise.
     const day = dayKey(now);
     const never = candidates
         .filter((c) => !lastSignal.has(c.id))
@@ -71,7 +116,12 @@ export function planSweep<T extends { id: string }>(input: {
     const read = candidates
         .filter((c) => lastSignal.has(c.id))
         .sort((a, b) => lastSignal.get(a.id)!.localeCompare(lastSignal.get(b.id)!));
-    return { ordered: [...never, ...read], basis: "day-rotation", neverAttempted: never.length };
+    return {
+        ordered: [...never, ...read],
+        basis: "day-rotation",
+        neverAttempted: never.length,
+        dueCount: candidates.length,
+    };
 }
 
 export interface AttemptRow {

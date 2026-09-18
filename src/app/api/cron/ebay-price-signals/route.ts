@@ -1,7 +1,8 @@
 // ============================================================
 // Vercel Cron: eBay price signals
-// Schedule: daily, 07:00 UTC (0 7 * * *) — see vercel.json. That is the
-// minute eBay's daily call budget resets, so every run starts full.
+// Schedule: every four hours (0 */4 * * *) — see vercel.json. Six runs
+// a day, each its own function with its own five-minute budget; eBay's
+// daily call budget resets 07:00 UTC.
 //
 // Requires CRON_SECRET, plus EBAY_CLIENT_ID / EBAY_CLIENT_SECRET and
 // NEXT_PUBLIC_EBAY_COMPS=1. Without any of those it is a clean no-op,
@@ -21,28 +22,25 @@ import { getAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/logger";
 import * as Sentry from "@sentry/nextjs";
 import { ebayCompsLive } from "@/lib/ebay/flag";
-import { attemptRows, planSweep, tallyOutcomes } from "@/lib/ebay/schedule";
+import { attemptRows, planSweep, tallyOutcomes, type AttemptInfo, type SweepResult } from "@/lib/ebay/schedule";
 import { sweep, type SweepTarget } from "@/lib/ebay/sweep";
 
 /**
- * The 2026-09-14 run swept 150 models sequentially in ~66 s (~0.44 s
- * each). The slice below runs four searches at a time: ~1,000 × 0.44 / 4
- * ≈ 2 minutes, inside this 5-minute budget with room for a slow eBay
- * day. A run that dies mid-slice writes nothing at all, so the budget
- * is not optional.
+ * Measured 2026-09-18 with four workers: 1,000 models in 103 s, 1,500
+ * in 137 s. The cap below is ~80 s. A run that dies mid-slice writes
+ * nothing at all, so the budget is not optional.
  */
 export const maxDuration = 300;
 
 /**
- * How many models one daily run touches. eBay's Analytics API reports
- * this keyset's Browse limit as 5,000 calls per day (read 2026-09-18:
- * limit 5000, window 86,400 s, resets 07:00 UTC). 1,000 a day is 20% of
- * that — every reachable model (~3,100) re-priced every three days, and
- * 4,000 calls a day still free for owner-triggered catch-ups. Raised
- * from a weekly 150 on 2026-09-18 when the owner asked why the budget
- * sat unused.
+ * The most one scheduled run touches. eBay's Analytics API reports this
+ * keyset's Browse limit as 5,000 calls per day (read 2026-09-18: limit
+ * 5000, window 86,400 s, resets 07:00 UTC); six runs × 750 is 4,500,
+ * the ceiling. A run sweeps only what is DUE (lib/ebay/schedule
+ * REFRESH_HOURS), so the normal spend is ~3,700/day — the cap is the
+ * catch-up case after an outage, not the steady state.
  */
-const SLICE = 1000;
+const SLICE = 750;
 const WORKERS = 4;
 
 /** Loose facade for tables not yet in the generated types (211). */
@@ -136,9 +134,9 @@ export async function GET(request: NextRequest) {
 
         // The attempt ledger (211). null before the paste: the planner
         // then rotates the never-read pool by day instead.
-        let lastAttempt: Map<string, string> | null = null;
+        let lastAttempt: Map<string, AttemptInfo> | null = null;
         const tried = await readAll((from, to) =>
-            loose("catalog_price_sweeps").select("catalog_item_id, swept_at").range(from, to),
+            loose("catalog_price_sweeps").select("catalog_item_id, swept_at, outcome").range(from, to),
         );
         if ("error" in tried) {
             if (!missingTable(tried.error, "catalog_price_sweeps")) {
@@ -146,7 +144,10 @@ export async function GET(request: NextRequest) {
             }
         } else {
             lastAttempt = new Map(
-                tried.map((t) => [t.catalog_item_id as string, t.swept_at as string]),
+                tried.map((t) => [
+                    t.catalog_item_id as string,
+                    { at: t.swept_at as string, outcome: t.outcome as SweepResult },
+                ]),
             );
         }
 
@@ -193,18 +194,17 @@ export async function GET(request: NextRequest) {
             (c) => (titlesByNumber.get((c.modelNumber ?? "").trim().toUpperCase())?.size ?? 0) === 1,
         );
 
-        // Never-attempted first, then stalest attempt (lib/ebay/schedule).
+        // Never-attempted first, then most overdue (lib/ebay/schedule).
         const plan = planSweep({ candidates: unambiguous, lastSignal, lastAttempt, now });
 
-        // ?limit=N overrides the slice for manual runs (still behind
-        // CRON_SECRET). The weekly cron sends none and gets the default;
-        // an owner-triggered catch-up can cover the whole reachable set
-        // in one pass. Capped inside the Browse API's daily budget AND the
-        // function's: 2,000 × 0.44 s / 4 workers ≈ 4 minutes.
+        // The scheduled run sweeps what is DUE, up to the cap — a quiet
+        // four hours costs nothing. ?limit=N is the owner's override for
+        // manual runs (still behind CRON_SECRET): exactly N, due or not,
+        // capped inside the function's budget (2,000 ≈ 3.5 min measured).
         const requested = Number(request.nextUrl.searchParams.get("limit"));
         const sliceSize = Number.isFinite(requested) && requested > 0
             ? Math.min(requested, 2000)
-            : SLICE;
+            : Math.min(SLICE, plan.dueCount);
 
         // ?ids=a,b,c re-sweeps exactly those models (matching-rule fixes,
         // resolved wrong-model flags) without spending the whole budget.
@@ -314,6 +314,7 @@ export async function GET(request: NextRequest) {
             considered: unambiguous.length,
             ambiguousExcluded: candidates.length - unambiguous.length,
             neverAttempted: plan.neverAttempted,
+            due: plan.dueCount,
             orderedBy: plan.basis,
             swept: slice.length,
             searched: outcome.searched,

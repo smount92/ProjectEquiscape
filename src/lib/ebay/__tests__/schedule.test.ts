@@ -1,6 +1,14 @@
 import { describe, it, expect } from "vitest";
 
-import { attemptRows, dayKey, planSweep, tallyOutcomes } from "@/lib/ebay/schedule";
+import {
+    REFRESH_HOURS,
+    attemptRows,
+    dayKey,
+    dueAt,
+    planSweep,
+    tallyOutcomes,
+    type AttemptInfo,
+} from "@/lib/ebay/schedule";
 
 const ids = (n: number) => Array.from({ length: n }, (_, i) => ({ id: `m${String(i).padStart(3, "0")}` }));
 
@@ -13,18 +21,49 @@ describe("dayKey", () => {
 });
 
 describe("planSweep with the attempt ledger (211)", () => {
-    it("never-attempted first, then stalest attempt — a no-match model does NOT return to the front", () => {
+    const at = (iso: string, outcome: AttemptInfo["outcome"]): AttemptInfo => ({ at: iso, outcome });
+
+    it("never-attempted first, then most overdue — a no-match model does NOT return to the front", () => {
         const candidates = ids(5);
         const lastSignal = new Map([["m001", "2026-08-25T00:00:00Z"]]);
-        const lastAttempt = new Map([
-            ["m000", "2026-09-07T07:00:00Z"], // swept, nothing matched
-            ["m001", "2026-08-25T00:00:00Z"], // swept, signal written
-            ["m003", "2026-09-14T07:00:00Z"], // swept, nothing matched
+        const lastAttempt = new Map<string, AttemptInfo>([
+            ["m000", at("2026-09-07T07:00:00Z", "no-match")],
+            ["m001", at("2026-08-25T00:00:00Z", "signal")],
+            ["m003", at("2026-09-14T07:00:00Z", "no-match")],
         ]);
         const plan = planSweep({ candidates, lastSignal, lastAttempt, now: new Date("2026-09-21T07:00:00Z") });
         expect(plan.basis).toBe("attempts");
         expect(plan.neverAttempted).toBe(2);
         expect(plan.ordered.map((c) => c.id)).toEqual(["m002", "m004", "m001", "m000", "m003"]);
+        // Everything here is weeks old: all five are due.
+        expect(plan.dueCount).toBe(5);
+    });
+
+    // The freshness tiers: a market is re-read every 8 h, the empty tail
+    // every 36 h, an error next run. Two back-to-back runs must not
+    // re-ask what the first one just asked.
+    it("counts only what is due, and orders by how overdue", () => {
+        const now = new Date("2026-09-18T22:00:00Z");
+        const candidates = ids(6);
+        const lastAttempt = new Map<string, AttemptInfo>([
+            ["m000", at("2026-09-18T21:30:00Z", "no-match")], // 30 min ago: not due
+            ["m001", at("2026-09-18T21:30:00Z", "signal")], // 30 min ago: not due
+            ["m002", at("2026-09-18T13:00:00Z", "signal")], // 9 h ago: due (8 h)
+            ["m003", at("2026-09-17T08:00:00Z", "no-match")], // 38 h ago: due (36 h), the most overdue
+            ["m004", at("2026-09-18T21:59:00Z", "error")], // errors retry at once
+        ]);
+        const plan = planSweep({ candidates, lastSignal: new Map(), lastAttempt, now });
+        expect(plan.neverAttempted).toBe(1); // m005
+        expect(plan.dueCount).toBe(4); // m005 + m002 + m003 + m004
+        // Never-attempted first; then by due time, earliest first.
+        expect(plan.ordered.map((c) => c.id)).toEqual(["m005", "m003", "m002", "m004", "m001", "m000"]);
+    });
+
+    it("dueAt applies the tier for the outcome", () => {
+        const base = Date.parse("2026-09-18T12:00:00Z");
+        expect(dueAt({ at: "2026-09-18T12:00:00Z", outcome: "signal" })).toBe(base + REFRESH_HOURS.signal * 3_600_000);
+        expect(dueAt({ at: "2026-09-18T12:00:00Z", outcome: "no-match" })).toBe(base + 36 * 3_600_000);
+        expect(dueAt({ at: "2026-09-18T12:00:00Z", outcome: "error" })).toBe(base);
     });
 });
 
@@ -54,6 +93,8 @@ describe("planSweep before the ledger exists (day rotation)", () => {
         const plan = planSweep({ candidates, lastSignal, lastAttempt: null, now: new Date("2026-09-14T07:00:00Z") });
         expect(plan.ordered.slice(-2).map((c) => c.id)).toEqual(["m010", "m011"]);
         expect(plan.neverAttempted).toBe(38);
+        // No ledger, no notion of due: everything is.
+        expect(plan.dueCount).toBe(40);
     });
 });
 
