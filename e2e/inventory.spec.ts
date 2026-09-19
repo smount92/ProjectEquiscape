@@ -54,6 +54,13 @@ test.describe.serial("Inventory Flow", () => {
 
         // Wait for success state — the overlay appears after submission
         await expect(page.locator(".success-overlay")).toBeVisible({ timeout: 20000 });
+
+        // "Add another" must actually start a new horse. It used to call
+        // router.refresh(), which left the success screen exactly where it
+        // was (2026-09-19).
+        await page.getByRole("button", { name: /add another/i }).click();
+        await expect(page.locator(".success-overlay")).toBeHidden({ timeout: 10000 });
+        await expect(page.locator("#step-1-next")).toBeVisible({ timeout: 15000 });
     });
 
     test("horse appears on dashboard after adding", async ({ page }) => {

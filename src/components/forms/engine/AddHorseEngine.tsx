@@ -311,6 +311,27 @@ export default function AddHorseEngine() {
     };
 
     // ── Completion ────────────────────────────────────────────────
+    // "Add another" used to call router.refresh(), which re-fetches server
+    // data and leaves every piece of client state — including `saved`,
+    // which is what shows this screen — exactly as it was. Nothing
+    // happened (owner's wife, 2026-09-19). A new horse means a clean
+    // engine: same category, first step, empty form and studio.
+    const startAnother = () => {
+        form.reset();
+        form.suppressDirtyGuard(false);
+        setPhotos(EMPTY_STUDIO);
+        setReference(null);
+        setNameAutoFilled(false);
+        setCollectionIds([]);
+        setStep(0);
+        setSubmitting(false);
+        submittingRef.current = false;
+        setSubmitError(null);
+        setPhotoWarning(null);
+        setSaved(null);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+
     if (saved) {
         return (
             <CompletionLeaf
@@ -320,7 +341,7 @@ export default function AddHorseEngine() {
                 categoryLabel={config.label}
                 photoWarning={photoWarning}
                 showReturnTo={showReturnTo}
-                onAddAnother={() => router.refresh()}
+                onAddAnother={startAnother}
             />
         );
     }
