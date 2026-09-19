@@ -12,6 +12,8 @@ import { getPosts } from"@/app/actions/posts";
 import UniversalFeed from"@/components/UniversalFeed";
 import ShowRecordTimeline from"@/components/ShowRecordTimeline";
 import PedigreeCard from"@/components/PedigreeCard";
+import PapersSection from"@/components/passport/PapersSection";
+import { listPapers } from"@/app/actions/papers";
 import HoofprintTimeline from"@/components/HoofprintTimeline";
 import TitlesSection from"@/components/shows/TitlesSection";
 import { getHorseTitles } from"@/lib/shows/horseTitles";
@@ -239,7 +241,7 @@ export default async function PublicPassportPage({
  // Pedigree
  supabase
  .from("horse_pedigrees")
- .select("id, sire_name, dam_name, sire_id, dam_id, sculptor, cast_number, edition_size, lineage_notes")
+ .select("*")
  .eq("horse_id", horseId)
  .maybeSingle(),
  // Is the owner a Community Trusted seller?
@@ -322,8 +324,15 @@ export default async function PublicPassportPage({
  castNumber: rawPedigree.cast_number,
 editionSize: rawPedigree.edition_size,
  lineageNotes: rawPedigree.lineage_notes,
+ // 213 — absent before the paste; the card treats undefined as none.
+ sireUrl: (rawPedigree as { sire_url?: string | null }).sire_url ?? null,
+ damUrl: (rawPedigree as { dam_url?: string | null }).dam_url ?? null,
+ bredBy: (rawPedigree as { bred_by?: string | null }).bred_by ?? null,
  }
  : null;
+
+ // Papers (213): RLS-gated read + server-signed URLs; [] before the paste.
+ const papers = await listPapers(horseId);
 
  // Reference display info
  const cat = horse.catalog_items;
@@ -843,7 +852,7 @@ editionSize: rawPedigree.edition_size,
  </div>
 
  {/* Provenance — Read Only */}
- {(showRecords.length > 0 || pedigree) && (
+ {(showRecords.length > 0 || pedigree || papers.length > 0) && (
  <div className="animate-fade-in-up mt-8" id="passport-show-record">
  {showRecords.length > 0 && (
  <ShowRecordTimeline horseId={horseId} records={showRecords} isOwner={false} />
@@ -851,6 +860,11 @@ editionSize: rawPedigree.edition_size,
  {pedigree && (
  <div className="mt-6">
  <PedigreeCard horseId={horseId} pedigree={pedigree} isOwner={false} />
+ </div>
+ )}
+ {papers.length > 0 && (
+ <div className="mt-6">
+ <PapersSection horseId={horseId} horseName={horse.custom_name} papers={papers} isOwner={false} />
  </div>
  )}
  </div>

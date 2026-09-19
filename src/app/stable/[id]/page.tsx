@@ -10,6 +10,8 @@ import VaultReveal from"@/components/VaultReveal";
 import DeleteHorseModal from"@/components/DeleteHorseModal";
 import ShowRecordTimeline from"@/components/ShowRecordTimeline";
 import PedigreeCard from"@/components/PedigreeCard";
+import PapersSection from"@/components/passport/PapersSection";
+import { listPapers } from"@/app/actions/papers";
 import HoofprintTimeline from"@/components/HoofprintTimeline";
 import MakingChapter from"@/components/making/MakingChapter";
 import HorseDocuments from"@/components/passport/HorseDocuments";
@@ -308,7 +310,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
 
  const { data: rawPedigree } = await supabase
  .from("horse_pedigrees")
- .select("id, sire_name, dam_name, sire_id, dam_id, sculptor, cast_number, edition_size, lineage_notes")
+ .select("*")
  .eq("horse_id", horseId)
  .maybeSingle();
 
@@ -323,8 +325,15 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  castNumber: rawPedigree.cast_number,
  editionSize: rawPedigree.edition_size,
  lineageNotes: rawPedigree.lineage_notes,
+ // 213 — absent before the paste; the card treats undefined as none.
+ sireUrl: (rawPedigree as { sire_url?: string | null }).sire_url ?? null,
+ damUrl: (rawPedigree as { dam_url?: string | null }).dam_url ?? null,
+ bredBy: (rawPedigree as { bred_by?: string | null }).bred_by ?? null,
  }
  : null;
+
+ // Papers (213): RLS-gated read + server-signed URLs; [] before the paste.
+ const papers = await listPapers(horseId);
 
  // Hoofprint data + the condition ledger (owner-read; see the RLS note
  // in getConditionHistory — the anon role has no read on this table at
@@ -795,6 +804,9 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
 
  {/* Pedigree Card */}
  <PedigreeCard horseId={horseId} pedigree={pedigree} isOwner={true} />
+
+ {/* Papers (213) — certificates, framed; the owner files them here */}
+ <PapersSection horseId={horseId} horseName={horse.custom_name} papers={papers} isOwner />
 
  {/* 🐾 Hoofprint Timeline — model + other_model only */}
  {assetConfig.showHoofprint && (

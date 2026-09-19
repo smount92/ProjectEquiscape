@@ -8,6 +8,7 @@ import { searchPublicHorses } from"@/app/actions/horse";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { linkHost } from "@/lib/papers/validate";
 
 interface PedigreeData {
  id: string;
@@ -19,6 +20,11 @@ interface PedigreeData {
  castNumber: string | null;
  editionSize: string | null;
  lineageNotes: string | null;
+ /** The sire's / dam's own page (213) — a sire/dam list, a registry entry. */
+ sireUrl?: string | null;
+ damUrl?: string | null;
+ /** The breeding program named on the certificate (213). */
+ bredBy?: string | null;
 }
 
 interface PedigreeCardProps {
@@ -47,6 +53,10 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  const [castNumber, setCastNumber] = useState(pedigree?.castNumber ??"");
  const [editionSize, setEditionSize] = useState(pedigree?.editionSize ??"");
  const [lineageNotes, setLineageNotes] = useState(pedigree?.lineageNotes ??"");
+ const [sireUrl, setSireUrl] = useState(pedigree?.sireUrl ??"");
+ const [damUrl, setDamUrl] = useState(pedigree?.damUrl ??"");
+ const [bredBy, setBredBy] = useState(pedigree?.bredBy ??"");
+ const [savedNote, setSavedNote] = useState<string | null>(null);
 
  // Search state for sire/dam lookups
  const [sireResults, setSireResults] = useState<HorseSearchResult[]>([]);
@@ -118,9 +128,13 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  castNumber: castNumber || undefined,
  editionSize: editionSize || undefined,
  lineageNotes: lineageNotes || undefined,
+ sireUrl: sireUrl || null,
+ damUrl: damUrl || null,
+ bredBy: bredBy || null,
  });
 
  if (result.success) {
+ setSavedNote(result.warning ?? null);
  setIsEditing(false);
  setStatus("idle");
  router.refresh();
@@ -140,6 +154,9 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  setCastNumber(pedigree?.castNumber ??"");
  setEditionSize(pedigree?.editionSize ??"");
  setLineageNotes(pedigree?.lineageNotes ??"");
+ setSireUrl(pedigree?.sireUrl ??"");
+ setDamUrl(pedigree?.damUrl ??"");
+ setBredBy(pedigree?.bredBy ??"");
  setIsEditing(false);
  setErrorMsg("");
  setStatus("idle");
@@ -227,6 +244,15 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  </button>
  </div>
  )}
+ <Input
+ type="text"
+ value={sireUrl}
+ onChange={(e) => setSireUrl(e.target.value)}
+ placeholder="His page (optional) — a sire list, a registry entry"
+ className="mt-2"
+ aria-label="Sire's page"
+ id="pedigree-sire-url"
+ />
  {showSireDropdown && sireResults.length > 0 && (
  <div className="absolute top-full right-0 left-0 z-50 max-h-[200px] overflow-y-auto rounded-md border border-input bg-card shadow-lg">
 
@@ -271,6 +297,15 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  </button>
  </div>
  )}
+ <Input
+ type="text"
+ value={damUrl}
+ onChange={(e) => setDamUrl(e.target.value)}
+ placeholder="Her page (optional) — a dam list, a registry entry"
+ className="mt-2"
+ aria-label="Dam's page"
+ id="pedigree-dam-url"
+ />
  {showDamDropdown && damResults.length > 0 && (
  <div className="absolute top-full right-0 left-0 z-50 max-h-[200px] overflow-y-auto rounded-md border border-input bg-card shadow-lg">
 
@@ -290,6 +325,18 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  </div>
 
  <div className="mb-6">
+ <label className="text-foreground mb-1 block text-sm font-semibold">
+ Bred by <span className="text-muted-foreground font-normal">(optional)</span>
+ </label>
+ <Input
+ type="text"
+ value={bredBy}
+ onChange={(e) => setBredBy(e.target.value)}
+ placeholder="The breeding program on the certificate, e.g. Starrfyre"
+ maxLength={120}
+ id="pedigree-bred-by"
+ className="mb-4"
+ />
  <label className="text-foreground mb-1 block text-sm font-semibold">Sculptor / Artist</label>
  <Input
  
@@ -370,6 +417,9 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  <h3 className="m-0 flex items-center gap-2 text-lg">
  <span aria-hidden="true">🧬</span> Pedigree
  </h3>
+ {savedNote && (
+ <span role="status" className="text-warning basis-full text-xs">{savedNote}</span>
+ )}
  {isOwner && (
  <Button variant="outline" className="px-4"
  onClick={() => setIsEditing(true)}
@@ -393,6 +443,17 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  ) : (
  pedigree!.sireName
  )}
+ {pedigree!.sireUrl && (
+ <a
+ href={pedigree!.sireUrl}
+ target="_blank"
+ rel="noopener noreferrer nofollow"
+ className="text-forest ml-2 text-xs no-underline hover:underline"
+ title={pedigree!.sireUrl}
+ >
+ his page on {linkHost(pedigree!.sireUrl)} ↗
+ </a>
+ )}
  </span>
  </div>
  )}
@@ -410,7 +471,24 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  ) : (
  pedigree!.damName
  )}
+ {pedigree!.damUrl && (
+ <a
+ href={pedigree!.damUrl}
+ target="_blank"
+ rel="noopener noreferrer nofollow"
+ className="text-forest ml-2 text-xs no-underline hover:underline"
+ title={pedigree!.damUrl}
+ >
+ her page on {linkHost(pedigree!.damUrl)} ↗
+ </a>
+ )}
  </span>
+ </div>
+ )}
+ {pedigree!.bredBy && (
+ <div className="flex justify-between border-b border-[var(--border)] py-2 last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
+ <span className="text-muted-foreground text-sm">Bred by</span>
+ <span className="text-sm font-medium">{pedigree!.bredBy}</span>
  </div>
  )}
  {pedigree!.sculptor && (

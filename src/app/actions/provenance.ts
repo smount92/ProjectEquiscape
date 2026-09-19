@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { safeHttpUrl } from "@/lib/papers/validate";
 import { validateQualifier, type QualifierValue } from "@/lib/records/qualifiers";
 
 /** Said when a card was entered but migration 210 isn't applied yet. */
@@ -297,13 +298,29 @@ export async function savePedigree(data: {
     castNumber?: string;
     editionSize?: string;
     lineageNotes?: string;
-}): Promise<{ success: boolean; error?: string }> {
+    /** The sire's / dam's own page (213) — a sire/dam list, a registry entry. */
+    sireUrl?: string | null;
+    damUrl?: string | null;
+    /** The breeding program named on the certificate (213). */
+    bredBy?: string | null;
+}): Promise<{ success: boolean; error?: string; warning?: string }> {
     const supabase = await createClient();
     const {
         data: { user },
     } = await supabase.auth.getUser();
 
     if (!user) return { success: false, error: "You must be logged in." };
+
+    // Outbound links: https only, or nothing. A typed address that won't
+    // parse is refused with a sentence rather than stored as dead text.
+    const sireUrl = data.sireUrl?.trim() ? safeHttpUrl(data.sireUrl) : null;
+    if (data.sireUrl?.trim() && !sireUrl) {
+        return { success: false, error: "The sire's page should be a web address (https://…)." };
+    }
+    const damUrl = data.damUrl?.trim() ? safeHttpUrl(data.damUrl) : null;
+    if (data.damUrl?.trim() && !damUrl) {
+        return { success: false, error: "The dam's page should be a web address (https://…)." };
+    }
 
     // ── Gender validation for linked parents ──
     if (data.sireId) {
@@ -362,28 +379,48 @@ export async function savePedigree(data: {
         edition_size: data.editionSize?.trim() || null,
         lineage_notes: data.lineageNotes?.trim() || null,
     };
+    // 213 columns — split out so a pre-paste save can drop them and keep the rest.
+    const linkData: Record<string, unknown> = {
+        sire_url: sireUrl,
+        dam_url: damUrl,
+        bred_by: data.bredBy?.trim().slice(0, 120) || null,
+    };
 
+    const missingColumn = (e: { code?: string } | null) => e?.code === "42703" || e?.code === "PGRST204";
+    let warning: string | undefined;
     if (existing) {
-        const { error } = await supabase
+        let { error } = await supabase
             .from("horse_pedigrees")
-            .update({ ...pedigreeData, updated_at: new Date().toISOString() })
+            .update({ ...pedigreeData, ...linkData, updated_at: new Date().toISOString() } as never)
             .eq("id", existing.id);
-
+        if (error && missingColumn(error)) {
+            // Pre-213: keep the pedigree, say the links weren't kept.
+            if (sireUrl || damUrl || linkData.bred_by) warning = LINKS_NOT_KEPT;
+            ({ error } = await supabase
+                .from("horse_pedigrees")
+                .update({ ...pedigreeData, updated_at: new Date().toISOString() })
+                .eq("id", existing.id));
+        }
         if (error) return { success: false, error: error.message };
     } else {
-        const { error } = await supabase
+        let { error } = await supabase
             .from("horse_pedigrees")
-            .insert({
-                horse_id: data.horseId,
-                user_id: user.id,
-                ...pedigreeData,
-            });
-
+            .insert({ horse_id: data.horseId, user_id: user.id, ...pedigreeData, ...linkData } as never);
+        if (error && missingColumn(error)) {
+            if (sireUrl || damUrl || linkData.bred_by) warning = LINKS_NOT_KEPT;
+            ({ error } = await supabase
+                .from("horse_pedigrees")
+                .insert({ horse_id: data.horseId, user_id: user.id, ...pedigreeData }));
+        }
         if (error) return { success: false, error: error.message };
     }
 
-    return { success: true };
+    return { success: true, warning };
 }
+
+/** Said when the sire/dam links were typed but migration 213 isn't in yet. */
+const LINKS_NOT_KEPT =
+    "Saved — but the sire and dam links aren't switched on yet, so they weren't kept. Edit the pedigree to add them once they are.";
 
 /**
  * Delete a pedigree card.
