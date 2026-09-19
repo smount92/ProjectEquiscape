@@ -306,5 +306,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         showEntries = [];
     }
 
-    return [...staticEntries, ...referenceEntries, ...horseEntries, ...showEntries];
+    // ── Public studios (/studio/[slug]) — anon RLS (170) shows
+    // portfolio-visible profiles; the directory itself is a static entry.
+    let studioEntries: MetadataRoute.Sitemap = [];
+    try {
+        const supabase = await createClient();
+        const { data } = await supabase
+            .from("artist_profiles")
+            .select("studio_slug, updated_at")
+            .eq("portfolio_visible", true)
+            .limit(1000);
+        studioEntries = ((data ?? []) as { studio_slug: string; updated_at: string | null }[])
+            .filter((r) => !!r.studio_slug)
+            .map((r): MetadataRoute.Sitemap[number] => ({
+                url: `${baseUrl}/studio/${r.studio_slug}`,
+                lastModified: r.updated_at ?? now,
+                changeFrequency: "weekly",
+                priority: 0.6,
+            }));
+    } catch {
+        studioEntries = [];
+    }
+
+    return [...staticEntries, ...referenceEntries, ...horseEntries, ...showEntries, ...studioEntries];
 }

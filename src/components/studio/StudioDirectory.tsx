@@ -143,6 +143,17 @@ function StudioCard({ studio }: { studio: DirectoryEntry }) {
         >
             <div className="mb-2 flex items-start justify-between gap-2">
                 <span className="font-serif text-base font-bold">{studio.studioName}</span>
+                {studio.ownerAvatarUrl && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                        src={studio.ownerAvatarUrl}
+                        alt=""
+                        width={36}
+                        height={36}
+                        className="border-input h-9 w-9 shrink-0 rounded-full border object-cover"
+                        loading="lazy"
+                    />
+                )}
             </div>
 
             <StudioStatusPill status={studio.effectiveStatus} className="mb-3" />

@@ -21,6 +21,8 @@ import {
     type StudioService,
 } from "@/lib/studio/services";
 import { DEFAULT_TERMS, type StudioTerms } from "@/lib/studio/terms";
+import { LINK_META, type StudioLinks } from "@/lib/studio/links";
+import { slugifyStudio } from "@/lib/studio/slug";
 
 /**
  * Studio settings: identity, rate card, terms.
@@ -30,19 +32,14 @@ import { DEFAULT_TERMS, type StudioTerms } from "@/lib/studio/terms";
  * once a season, terms once and then never again.
  */
 
+// One vocabulary: the pick-lists use the rate card's words (lib/studio/
+// services), plus the few things that are specialties but not billable
+// services. Older stored spellings are folded at render (lib/studio/facets).
 const SPECIALTIES = [
-    "Custom (sculpting)",
-    "Finishwork (repaint)",
-    "Prep work",
-    "Resin prep & finish",
-    "China painting",
-    "Hairing",
-    "Tack making",
-    "Etching / dremel work",
+    ...SERVICE_TYPES.filter((t) => t !== "Other"),
     "Body mods",
     "Glazework",
     "Props",
-    "Dolls & riders",
     "Other animals",
 ];
 
@@ -57,17 +54,16 @@ const MEDIUMS = [
     "Mixed media",
 ];
 
-const SCALES = [
-    "Traditional (1:9)",
-    "Classic (1:12)",
-    "Stablemate (1:32)",
-    "Paddock Pal (1:24)",
-    "Micro mini",
-    "Medallion",
-    "Other",
-];
+const SCALES = [...SERVICE_SCALES];
 
 type Tab = "studio" | "rates" | "terms";
+
+const SITE_HOST = (process.env.NEXT_PUBLIC_APP_URL ?? "https://modelhorsehub.com").replace(/^https?:\/\//, "");
+
+/** ?tab=rates|terms|studio → a Tab; anything else opens the identity tab. */
+export function tabFromParam(value: string | undefined | null): Tab {
+    return value === "rates" || value === "terms" ? value : "studio";
+}
 
 export interface OwnBarn {
     id: string;
@@ -77,11 +73,15 @@ export interface OwnBarn {
 export default function StudioSettings({
     profile,
     ownBarns = [],
+    initialTab = "studio",
 }: {
     profile: ArtistProfile | null;
     ownBarns?: OwnBarn[];
+    /** From /studio/setup?tab=… — the dashboard's "Edit terms & rates →"
+     *  used to land on the identity tab. */
+    initialTab?: Tab;
 }) {
-    const [tab, setTab] = useState<Tab>("studio");
+    const [tab, setTab] = useState<Tab>(initialTab);
     const isNew = !profile;
 
     if (isNew) return <StudioForm profile={null} ownBarns={ownBarns} />;
@@ -137,7 +137,11 @@ function StudioForm({
     const [saved, setSaved] = useState(false);
 
     const isNew = !profile;
-    const autoSlug = slug || slugPreview(name);
+    // What will actually be stored — the preview used to echo the raw
+    // text and promise "/studio/Willow Creek!".
+    const autoSlug = slugifyStudio(slug || name);
+    const slugWillChange = !!profile && !!autoSlug && autoSlug !== profile.studioSlug;
+    const [links, setLinks] = useState<StudioLinks>(profile?.links ?? {});
 
     const submit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -154,6 +158,7 @@ function StudioForm({
         form.set("scalesOffered", JSON.stringify(scales));
         form.set("acceptingTypes", JSON.stringify(specialties));
         form.set("barnGroupId", barnId);
+        form.set("links", JSON.stringify(links));
 
         const result = isNew
             ? await createArtistProfile(form)
@@ -165,7 +170,10 @@ function StudioForm({
             return;
         }
         if (isNew && "slug" in result && result.slug) {
-            router.push("/studio/dashboard");
+            // Straight to rates: a studio with no rate card shows "Ask"
+            // everywhere, and the tabs only appear once the studio exists.
+            router.push("/studio/setup?tab=rates");
+            router.refresh();
             return;
         }
         setSaved(true);
@@ -195,12 +203,18 @@ function StudioForm({
                         type="text"
                         value={slug}
                         onChange={(e) => setSlug(e.target.value)}
-                        placeholder={slugPreview(name) || "willow-creek-studio"}
+                        placeholder={slugifyStudio(name) || "willow-creek-studio"}
                     />
                     <span className="text-muted-foreground mt-1 block text-xs">
-                        modelhorsehub.com/studio/<strong>{autoSlug || "your-studio"}</strong> — this
+                        {SITE_HOST}/studio/<strong>{autoSlug || "your-studio"}</strong> — this
                         is the link you&rsquo;ll paste into groups, so keep it short.
                     </span>
+                    {slugWillChange && (
+                        <span className="text-warning mt-1 block text-xs font-semibold">
+                            Changing this breaks any link to /studio/{profile!.studioSlug} you have
+                            already shared.
+                        </span>
+                    )}
                 </label>
 
                 <label className="mb-4 block">
@@ -228,6 +242,35 @@ function StudioForm({
                         handles the money — you two arrange it directly.
                     </span>
                 </label>
+
+                {/* Where the followers already are (212). */}
+                <div className="mt-4">
+                    <span className="mb-1 block text-sm font-semibold">
+                        Your links <span className="text-muted-foreground">(optional)</span>
+                    </span>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                        {LINK_META.map((meta) => (
+                            <label key={meta.key} className="block">
+                                <span className="text-muted-foreground mb-1 block text-xs">
+                                    {meta.glyph} {meta.label}
+                                </span>
+                                <Input
+                                    type="text"
+                                    value={links[meta.key] ?? ""}
+                                    onChange={(e) =>
+                                        setLinks((prev) => ({ ...prev, [meta.key]: e.target.value }))
+                                    }
+                                    placeholder={meta.placeholder}
+                                    maxLength={200}
+                                />
+                            </label>
+                        ))}
+                    </div>
+                    <span className="text-muted-foreground mt-1 block text-xs">
+                        Shown on your studio page with an icon each. A handle is enough — we build
+                        the link.
+                    </span>
+                </div>
 
                 {ownBarns.length > 0 && (
                     <label className="mt-4 block">
@@ -297,14 +340,6 @@ function StudioForm({
             )}
         </form>
     );
-}
-
-function slugPreview(name: string): string {
-    return name
-        .toLowerCase()
-        .replace(/[^a-z0-9-]/g, "-")
-        .replace(/-+/g, "-")
-        .replace(/^-|-$/g, "");
 }
 
 function PickList({
@@ -600,12 +635,23 @@ function TermsEditor({ profile }: { profile: ArtistProfile }) {
         <div className="grid gap-6">
             <div className="bg-card border-input rounded-lg border p-6 shadow-md">
                 <h2 className="mb-1 font-serif text-lg font-bold">Your commission terms</h2>
-                <p className="text-muted-foreground mb-6 text-sm leading-relaxed">
+                <p className="text-muted-foreground mb-4 text-sm leading-relaxed">
                     Written once, shown to every commissioner before they request, and attached to
                     every quote you send. When someone accepts, this exact version is frozen onto
                     their commission — change these whenever you like without touching agreements
                     you&rsquo;ve already made.
                 </p>
+                {!profile.termsSetAt && (
+                    <p
+                        className="border-warning/40 bg-warning/10 mb-6 rounded-md border px-4 py-3 text-sm"
+                        data-testid="terms-are-defaults"
+                    >
+                        These are the site&rsquo;s <strong>standard terms</strong>, pre-filled from
+                        common practice. Your page labels them as standard until you save your
+                        own — read them through and press Save to make them yours.
+                    </p>
+                )}
+                {profile.termsSetAt && <div className="mb-2" />}
 
                 <Field label="Deposit" hint="Most artists take 30–50% before starting.">
                     <div className="flex flex-wrap items-center gap-3">

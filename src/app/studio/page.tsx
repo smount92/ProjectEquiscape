@@ -77,7 +77,7 @@ export default async function StudioDirectoryPage() {
                         win.
                     </p>
                     <Button asChild variant="outline" size="wide">
-                        <Link href={hasStudio ? "/studio/setup" : "/studio/setup"}>
+                        <Link href={user ? "/studio/setup" : "/signup?redirectTo=%2Fstudio%2Fsetup"}>
                             {hasStudio ? "Edit your studio →" : "Open your studio →"}
                         </Link>
                     </Button>
@@ -94,7 +94,9 @@ export default async function StudioDirectoryPage() {
                         straight into your horse&rsquo;s vault.
                     </p>
                     <Button asChild variant="outline" size="wide">
-                        <Link href="/studio/my-commissions">Your commissions →</Link>
+                        <Link href={user ? "/studio/my-commissions" : "/signup?redirectTo=%2Fstudio"}>
+                            {user ? "Your commissions →" : "Create a free account →"}
+                        </Link>
                     </Button>
                 </div>
             </div>

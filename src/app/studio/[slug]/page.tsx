@@ -28,6 +28,9 @@ import { intakeFor, slotState } from "@/lib/studio/pipeline";
 import { canonicalFacets } from "@/lib/studio/facets";
 import { priceRangeLabel, serviceLabel } from "@/lib/studio/services";
 import { turnaroundLabel } from "@/lib/studio/terms";
+import { linkEntries } from "@/lib/studio/links";
+import { getFollowStats } from "@/app/actions/follows";
+import FollowButton from "@/components/FollowButton";
 
 /**
  * The artist's page — the portfolio that PROVES the work.
@@ -71,12 +74,17 @@ export async function generateMetadata({
         openGraph: {
             title: profile.studioName,
             description,
-            images: heroImage ? [{ url: heroImage, width: 800, height: 600, alt: profile.studioName }] : [],
+            // A brand-new studio (nothing on the wall yet) still unfurls with
+            // the site card — an explicit [] overrode the root default and
+            // gave day-one artists a text-only share.
+            images: heroImage
+                ? [{ url: heroImage, alt: profile.studioName }]
+                : [{ url: "/og-image.png", width: 1200, height: 630, alt: "Model Horse Hub" }],
             type: "profile" as const,
             siteName: "Model Horse Hub",
         },
         twitter: {
-            card: (heroImage ? "summary_large_image" : "summary") as "summary_large_image" | "summary",
+            card: "summary_large_image" as const,
             title: profile.studioName,
             description,
             images: heroImage ? [heroImage] : [],
@@ -110,6 +118,13 @@ export default async function StudioPage({
     const slots = slotState(slotsUsed, profile.maxSlots, profile.status);
     const intake = intakeFor(slots, profile.waitlistOpen);
     const openServices = profile.services.filter((s) => s.open);
+    const links = linkEntries(profile.links);
+    // The follow the page has been asking for in prose ("Follow @alias to
+    // hear when slots open") without offering the button.
+    const followStats = user && !isOwner ? await getFollowStats(profile.userId) : null;
+    // "Currently accepting" = the services she has open, not a second
+    // copy of the specialty chips.
+    const acceptingNow = [...new Set(openServices.map((s) => s.type))];
 
     // ── The identity joins: Registry artist page + the studio's barn ──
     // Both tolerant — the artists table is 200, barn_group_id is 203.
@@ -204,8 +219,24 @@ export default async function StudioPage({
 
                         {profile.specialties.length > 0 && (
                             <div className="mt-4 flex flex-wrap gap-1.5">
-                                {profile.specialties.map((s) => (
+                                {canonicalFacets(profile.specialties).map((s) => (
                                     <Chip key={s}>{s}</Chip>
+                                ))}
+                            </div>
+                        )}
+
+                        {links.length > 0 && (
+                            <div className="mt-4 flex flex-wrap gap-3" data-testid="studio-links">
+                                {links.map((l) => (
+                                    <a
+                                        key={l.key}
+                                        href={l.href}
+                                        target="_blank"
+                                        rel="noopener noreferrer nofollow"
+                                        className="text-forest inline-flex items-center gap-1 text-sm font-semibold hover:underline"
+                                    >
+                                        <span aria-hidden="true">{l.glyph}</span> {l.label}
+                                    </a>
                                 ))}
                             </div>
                         )}
@@ -245,6 +276,16 @@ export default async function StudioPage({
                                     </p>
                                 </div>
                             )}
+                            {followStats && (
+                                <div className="flex justify-center">
+                                    <FollowButton
+                                        targetUserId={profile.userId}
+                                        initialIsFollowing={followStats.isFollowing}
+                                        initialFollowerCount={followStats.followerCount}
+                                        isOwnProfile={false}
+                                    />
+                                </div>
+                            )}
                             <Link
                                 href={`/profile/${encodeURIComponent(profile.ownerAlias)}`}
                                 className="text-muted-foreground text-center text-xs hover:underline"
@@ -256,22 +297,27 @@ export default async function StudioPage({
                 </div>
             </div>
 
-            {/* ── The stat strip: computed from the wall, never typed in ── */}
-            {portfolio.length > 0 && (
+            {/* ── The stat strip: computed from the wall, never typed in.
+                Shown from day one — "working since" and turnaround are
+                facts before the first work is logged. ── */}
+            {(() => {
+                const tiles: [string, string][] = [
+                    ...(portfolio.length > 0 ? [[String(portfolio.length), "Works documented"] as [string, string]] : []),
+                    ...(titlesWon > 0 ? [[String(titlesWon), "Titles won by works"] as [string, string]] : []),
+                    ...(sinceYear ? [[String(sinceYear), "Working since"] as [string, string]] : []),
+                    [turnaroundLabel(profile.terms), "Turnaround"],
+                ];
+                return tiles.length > 0 ? (
                 <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                    {[
-                        [String(portfolio.length), "Works documented"],
-                        ...(titlesWon > 0 ? [[String(titlesWon), "Titles won by works"]] : []),
-                        ...(sinceYear ? [[String(sinceYear), "Working since"]] : []),
-                        [turnaroundLabel(profile.terms), "Turnaround"],
-                    ].map(([n, label]) => (
+                    {tiles.map(([n, label]) => (
                         <div key={label} className="border-input bg-card rounded-lg border px-4 py-3 shadow-sm">
                             <div className="text-foreground font-serif text-xl font-bold tabular-nums">{n}</div>
                             <div className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">{label}</div>
                         </div>
                     ))}
                 </div>
-            )}
+                ) : null;
+            })()}
 
             {/* ── The works: what they've actually finished ── */}
             <div className="mb-6">
@@ -384,7 +430,24 @@ export default async function StudioPage({
                 </Panel>
 
                 {/* ── The terms, structured ── */}
-                <Panel title="Commission terms" icon="📜">
+                <Panel
+                    title="Commission terms"
+                    icon="📜"
+                    actions={
+                        !profile.termsSetAt ? (
+                            <span className="text-muted-foreground text-xs" title="Pre-filled from common practice; this studio hasn't written its own yet">
+                                standard terms
+                            </span>
+                        ) : null
+                    }
+                >
+                    {!profile.termsSetAt && (
+                        <p className="text-muted-foreground mb-3 text-xs leading-relaxed">
+                            {isOwner
+                                ? "These are the site's standard terms. Make them yours in Settings → Terms."
+                                : "This studio hasn't written its own terms yet — these are the site's standard ones. Confirm details when you request."}
+                        </p>
+                    )}
                     <TermsList terms={profile.terms} />
                     <div className="border-input mt-4 border-t pt-4">
                         <OffPlatformNote />
@@ -392,12 +455,12 @@ export default async function StudioPage({
                 </Panel>
             </div>
 
-            {/* ── The queue, when the artist publishes it ── */}
-            {profile.acceptingTypes.length > 0 && (
+            {/* ── What she has open right now (from the rate card) ── */}
+            {acceptingNow.length > 0 && intake.accepting && (
                 <div className="mt-6">
                     <Panel title="Currently accepting" icon="✅">
                         <div className="flex flex-wrap gap-1.5">
-                            {profile.acceptingTypes.map((t) => (
+                            {acceptingNow.map((t) => (
                                 <Chip key={t}>{t}</Chip>
                             ))}
                         </div>

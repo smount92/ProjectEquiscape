@@ -1,10 +1,11 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getPublicImageUrls } from "@/lib/utils/storage";
 import { getMyTier } from "@/app/actions/horse";
 import type { UserTier } from "@/lib/utils/imageCompression";
 import LogWorkForm, { type LogWorkHorse } from "@/components/studio/LogWorkForm";
+import FocusLayout from "@/components/layouts/FocusLayout";
+import PageMasthead from "@/components/layouts/PageMasthead";
 
 /**
  * Log past work — the back-fill door. An artist picks a horse (their
@@ -20,7 +21,7 @@ export default async function LogWorkPage() {
 
     const { data: profile } = await supabase
         .from("artist_profiles")
-        .select("studio_name")
+        .select("studio_name, studio_slug")
         .eq("user_id", auth.user.id)
         .single();
     if (!profile) redirect("/studio/setup");
@@ -69,17 +70,20 @@ export default async function LogWorkPage() {
     const tier = (await getMyTier()) as UserTier;
 
     return (
-        <main className="mx-auto max-w-3xl px-4 py-8">
-            <nav className="text-muted-foreground mb-4 text-sm">
-                <Link href="/studio/dashboard" className="text-forest hover:underline">← Studio dashboard</Link>
-            </nav>
-            <h1 className="text-foreground mb-1 font-serif text-3xl font-bold">Log past work</h1>
+        <FocusLayout noHeader>
+            <PageMasthead
+                compact
+                icon="🖌️"
+                title="Log past work"
+                subtitle="Every piece you've finished belongs on your wall — with its making-of story if you kept the photos"
+                backHref="/studio/dashboard"
+                backLabel="Dashboard"
+            />
             <p className="text-secondary-foreground mt-0 mb-6 max-w-[60ch] text-sm">
-                Every piece you&rsquo;ve finished belongs on your wall — with its making-of story if
-                you kept the photos. Records on your own horses verify when their new owner claims
-                them; records on a client&rsquo;s horse ask that owner to confirm.
+                Records on your own horses verify when their new owner claims them; records on a
+                client&rsquo;s horse ask that owner to confirm.
             </p>
-            <LogWorkForm horses={list} tier={tier} studioName={profile.studio_name} />
-        </main>
+            <LogWorkForm horses={list} tier={tier} studioName={profile.studio_name} studioSlug={profile.studio_slug} />
+        </FocusLayout>
     );
 }

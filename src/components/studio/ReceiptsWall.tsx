@@ -25,15 +25,28 @@ export default function ReceiptsWall({
 }) {
     const decorated = horses.filter((h) => h.showCount > 0 || h.titles.length > 0);
     const totalShows = horses.reduce((sum, h) => sum + h.showCount, 0);
+    // One horse can carry several records (prep, then finishwork); the
+    // count is horses, the cards are records.
+    const distinctHorses = new Set(horses.map((h) => h.horseId)).size;
     const totalNan = horses.reduce((sum, h) => sum + h.nanQualifyingCount, 0);
 
     if (horses.length === 0) {
         return (
             <Panel title="Finished work" icon="🐎">
                 <EmptyNote>
-                    {isOwner
-                        ? "Nothing here yet. When you deliver a commission that's linked to the commissioner's horse, that horse appears here — along with every ribbon it goes on to win."
-                        : `${studioName} hasn't had finished work recorded on Model Horse Hub yet.`}
+                    {isOwner ? (
+                        <>
+                            Nothing here yet.{" "}
+                            <Link href="/studio/log-work" className="text-forest font-semibold hover:underline">
+                                Log past work
+                            </Link>{" "}
+                            to put your finished horses here — and every commission you deliver on
+                            Model Horse Hub lands here on its own, with every ribbon the horse goes
+                            on to win.
+                        </>
+                    ) : (
+                        `${studioName} hasn't had finished work recorded on Model Horse Hub yet.`
+                    )}
                 </EmptyNote>
             </Panel>
         );
@@ -45,7 +58,8 @@ export default function ReceiptsWall({
             icon="🐎"
             actions={
                 <span className="text-muted-foreground text-xs">
-                    {horses.length} horse{horses.length === 1 ? "" : "s"}
+                    {distinctHorses} horse{distinctHorses === 1 ? "" : "s"}
+                    {horses.length !== distinctHorses && ` · ${horses.length} records`}
                     {totalShows > 0 && ` · ${totalShows} show result${totalShows === 1 ? "" : "s"}`}
                 </span>
             }
@@ -66,7 +80,7 @@ export default function ReceiptsWall({
 
             <div className="grid gap-4 sm:grid-cols-2">
                 {horses.map((horse) => (
-                    <HorseCard key={horse.horseId} horse={horse} />
+                    <HorseCard key={horse.logId ?? horse.horseId} horse={horse} />
                 ))}
             </div>
         </Panel>
@@ -120,6 +134,11 @@ function HorseCard({ horse }: { horse: FinishedHorse }) {
                 bestPlacing={horse.bestPlacing}
                 titles={horse.titles}
             />
+            {horse.isPublic && horse.imageUrls.length > 0 && (
+                <span className="text-forest mt-2 block text-xs font-semibold">
+                    The Making →
+                </span>
+            )}
         </>
     );
 
@@ -139,7 +158,7 @@ function HorseCard({ horse }: { horse: FinishedHorse }) {
 
     return (
         <Link
-            href={`/community/${horse.horseId}`}
+            href={horse.imageUrls.length > 0 ? `/community/${horse.horseId}/making` : `/community/${horse.horseId}`}
             className={`${shell} block no-underline hover:-translate-y-0.5 hover:shadow-md`}
         >
             {body}

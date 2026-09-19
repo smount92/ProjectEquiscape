@@ -7,6 +7,8 @@ import { entitledTier } from "@/lib/entitlement/clock";
 import { logger } from "@/lib/logger";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
+import { isReservedStudioSlug, slugifyStudio } from "@/lib/studio/slug";
+import { normalizeStudioLinks, type StudioLinks } from "@/lib/studio/links";
 import { getStudioColumnSupport } from "@/lib/studio/columnSupport";
 import {
     ACTIVE_STATUSES,
@@ -68,6 +70,11 @@ export interface ArtistProfile {
     terms: StudioTerms;
     priceLabel: string;
     paypalMeLink: string | null;
+    /** Outbound links the artist chose to show (212). */
+    links: StudioLinks;
+    /** When the artist last saved their own terms; null = the site's
+     *  standard terms are standing in and the page says so. */
+    termsSetAt: string | null;
     acceptingTypes: string[];
     ownerAlias: string;
     ownerAvatarUrl: string | null;
@@ -143,6 +150,9 @@ export interface CommissionUpdate {
 /** One finished horse on the artist's receipts wall. */
 export interface FinishedHorse {
     horseId: string;
+    /** The work record behind this card — one horse can carry several
+     *  (prep, then finishwork), so this is the key, not the horse. */
+    logId: string | null;
     horseName: string;
     workType: string | null;
     dateCompleted: string | null;
@@ -194,12 +204,20 @@ function num(v: unknown): number | null {
     return Number.isFinite(n) && n >= 0 ? Math.round(n * 100) / 100 : null;
 }
 
+/** One implementation, shared with the form's preview (lib/studio/slug). */
 function slugify(raw: string): string {
-    return raw
-        .toLowerCase()
-        .replace(/[^a-z0-9-]/g, "-")
-        .replace(/-+/g, "-")
-        .replace(/^-|-$/g, "");
+    return slugifyStudio(raw);
+}
+
+/** A form field holding a JSON object; {} when absent or unreadable. */
+function parseJsonField(formData: FormData, field: string): unknown {
+    const raw = formData.get(field);
+    if (typeof raw !== "string" || !raw) return {};
+    try {
+        return JSON.parse(raw);
+    } catch {
+        return {};
+    }
 }
 
 function parseArrayField(formData: FormData, field: string): string[] {
@@ -296,6 +314,8 @@ function mapArtistProfile(p: Row, alias: string, avatarUrl: string | null): Arti
         terms,
         priceLabel: studioPriceRange(services).label,
         paypalMeLink: str(p.paypal_me_link),
+        links: normalizeStudioLinks(p.links),
+        termsSetAt: str(p.terms_updated_at),
         acceptingTypes: (p.accepting_types as string[]) ?? [],
         ownerAlias: alias,
         ownerAvatarUrl: avatarUrl,
@@ -485,6 +505,9 @@ export async function createArtistProfile(
     if (!slug) {
         return { success: false, error: "That studio name can't be turned into a web address — try adding a letter or number." };
     }
+    if (isReservedStudioSlug(slug)) {
+        return { success: false, error: `The address “${slug}” is reserved — pick another web address.` };
+    }
 
     const { data: taken } = await supabase
         .from("artist_profiles")
@@ -502,7 +525,7 @@ export async function createArtistProfile(
         return { success: false, error: "You already have a studio — edit that one instead." };
     }
 
-    const { error } = await supabase.from("artist_profiles").insert({
+    const row: Patch = {
         user_id: user.id,
         studio_name: studioName,
         studio_slug: slug,
@@ -517,7 +540,14 @@ export async function createArtistProfile(
         status: "closed",
         max_slots: Number(formData.get("maxSlots")) || 5,
         paypal_me_link: str(formData.get("paypalMeLink")),
-    } as Patch as never);
+        links: normalizeStudioLinks(parseJsonField(formData, "links")),
+    };
+    let { error } = await supabase.from("artist_profiles").insert(row as never);
+    if (error && (error.code === "42703" || error.code === "PGRST204")) {
+        // Pre-212 — the studio still opens; links land once the column exists.
+        delete row.links;
+        ({ error } = await supabase.from("artist_profiles").insert(row as never));
+    }
 
     if (error) return { success: false, error: error.message };
 
@@ -536,6 +566,9 @@ export async function updateArtistProfile(formData: FormData): Promise<ActionRes
     const requestedSlug = str(formData.get("studioSlug"));
     const newSlug = requestedSlug ? slugify(requestedSlug) : null;
 
+    if (newSlug && isReservedStudioSlug(newSlug)) {
+        return { success: false, error: `The address “${newSlug}” is reserved — pick another web address.` };
+    }
     if (newSlug) {
         const { data: taken } = await supabase
             .from("artist_profiles")
@@ -554,6 +587,7 @@ export async function updateArtistProfile(formData: FormData): Promise<ActionRes
         accepting_types: parseArrayField(formData, "acceptingTypes"),
         bio_artist: str(formData.get("bioArtist")),
         paypal_me_link: str(formData.get("paypalMeLink")),
+        links: normalizeStudioLinks(parseJsonField(formData, "links")),
         updated_at: new Date().toISOString(),
     };
     if (newSlug) patch.studio_slug = newSlug;
@@ -581,9 +615,11 @@ export async function updateArtistProfile(formData: FormData): Promise<ActionRes
         .from("artist_profiles")
         .update(patch as never)
         .eq("user_id", user.id);
-    if (error && (error.code === "42703" || error.code === "PGRST204") && "barn_group_id" in patch) {
-        // Pre-203 — save everything else rather than failing the form.
+    if (error && (error.code === "42703" || error.code === "PGRST204")) {
+        // Pre-203 / pre-212 — save everything else rather than failing
+        // the form; the newer columns land once their migration is in.
         delete patch.barn_group_id;
+        delete patch.links;
         ({ error } = await supabase
             .from("artist_profiles")
             .update(patch as never)
@@ -870,6 +906,7 @@ export async function getArtistPortfolio(
         if (Array.isArray(wall) && wall.length > 0) {
             return (wall as Row[]).map((r) => ({
                 horseId: String(r.horse_id),
+                logId: r.log_id == null ? null : String(r.log_id),
                 horseName: String(r.horse_name ?? "Unnamed"),
                 workType: str(r.work_type),
                 dateCompleted: (r.date_completed as string | null) ?? null,
@@ -885,6 +922,11 @@ export async function getArtistPortfolio(
         return [];
     }
 
+    // Undated back-catalogue LAST (Postgres DESC puts NULLs first). A
+    // variable, not a literal: the untyped facade's order() only knows
+    // `ascending`, and PostgREST accepts nullsFirst at runtime.
+    const wallOrder = { ascending: false, nullsFirst: false } as { ascending?: boolean };
+
     try {
         const support = await getStudioColumnSupport(supabase as never);
 
@@ -893,17 +935,27 @@ export async function getArtistPortfolio(
                 .from("v_artist_finished_horses")
                 .select("*")
                 .eq("artist_user_id", artistUserId)
-                .order("date_completed", { ascending: false })
+                // Undated back-catalogue LAST (Postgres DESC puts NULLs
+                // first); the anon wall already says NULLS LAST.
+                .order("date_completed", wallOrder)
                 .limit(60);
             if (!error && Array.isArray(data)) {
-                return (data as Row[]).map((r) => ({
+                // Same disavowed/deleted filters as the anon wall — in JS
+                // so the read still works before 212 adds the columns.
+                return (data as Row[])
+                    .filter((r) => r.disavowed_at == null && r.horse_deleted_at == null)
+                    .map((r) => ({
                     horseId: String(r.horse_id),
+                    logId: r.log_id == null ? null : String(r.log_id),
                     horseName: String(r.horse_name ?? "Unnamed"),
                     workType: str(r.work_type),
                     dateCompleted: (r.date_completed as string | null) ?? null,
                     imageUrls: (r.image_urls as string[]) ?? [],
                     isPublic: r.is_public !== false,
-                    verified: r.finishing_artist_verified === true,
+                    // 212: one answer — commission stamp, the counterparty's
+                    // confirmation, or the owner's own record. Pre-paste
+                    // the column is absent and the old stamp stands.
+                    verified: r.credit_verified === true || r.finishing_artist_verified === true,
                     showCount: Number(r.show_count ?? 0),
                     nanQualifyingCount: Number(r.nan_qualifying_count ?? 0),
                     bestPlacing: r.best_placing == null ? null : Number(r.best_placing),
@@ -999,6 +1051,7 @@ async function decorateHorses(
             const rec = records.get(id);
             return {
                 horseId: id,
+                logId: log?.id == null ? null : String(log.id),
                 horseName: String(h.custom_name ?? "Unnamed"),
                 workType: log ? str(log.work_type) : null,
                 dateCompleted: (log?.date_completed as string | null) ?? null,

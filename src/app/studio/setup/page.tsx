@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { getArtistProfile } from "@/app/actions/art-studio";
 import FocusLayout from "@/components/layouts/FocusLayout";
 import PageMasthead from "@/components/layouts/PageMasthead";
-import StudioSettings from "@/components/studio/StudioSettings";
+import StudioSettings, { tabFromParam } from "@/components/studio/StudioSettings";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
@@ -17,7 +17,12 @@ export const metadata: Metadata = {
  * fetched its own user id from /api/auth/me before it could do anything,
  * which meant an empty form on every load.
  */
-export default async function StudioSetupPage() {
+export default async function StudioSetupPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ tab?: string }>;
+}) {
+    const { tab } = await searchParams;
     const supabase = await createClient();
     const {
         data: { user },
@@ -57,7 +62,7 @@ export default async function StudioSetupPage() {
                 backHref={profile ? "/studio/dashboard" : "/studio"}
                 backLabel={profile ? "Dashboard" : "The Art Studio"}
             />
-            <StudioSettings profile={profile} ownBarns={ownBarns} />
+            <StudioSettings profile={profile} ownBarns={ownBarns} initialTab={tabFromParam(tab)} />
         </FocusLayout>
     );
 }

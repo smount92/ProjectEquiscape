@@ -56,10 +56,13 @@ function bucketsFromPreset(stages: readonly string[]): Bucket[] {
 }
 
 export default function LogWorkForm({
+    studioSlug,
     horses,
     tier,
     studioName,
 }: {
+    /** For the success panel's "see it on your page" link. */
+    studioSlug?: string;
     horses: LogWorkHorse[];
     tier: UserTier;
     studioName: string;
@@ -238,6 +241,11 @@ export default function LogWorkForm({
                     <Link href={`/community/${doneHorse.id}/making`} className="text-forest font-semibold hover:underline">
                         See The Making →
                     </Link>
+                    {studioSlug && (
+                        <Link href={`/studio/${studioSlug}`} className="text-forest font-semibold hover:underline">
+                            See it on your page →
+                        </Link>
+                    )}
                     <button
                         type="button"
                         className="text-secondary-foreground underline"

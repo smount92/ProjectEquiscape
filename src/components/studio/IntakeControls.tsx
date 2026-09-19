@@ -99,7 +99,9 @@ export default function IntakeControls({
                     />
                     <span className="text-muted-foreground mt-1 block text-xs">
                         How many commissions you&rsquo;ll carry at once. It doesn&rsquo;t force
-                        you to take them in order.
+                        you to take them in order. On the free plan, three can be
+                        <em> active</em> at a time — the rest wait as accepted quotes until one
+                        finishes.
                     </span>
                 </label>
 

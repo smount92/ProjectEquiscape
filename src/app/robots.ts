@@ -84,7 +84,14 @@ export default function robots(): MetadataRoute.Robots {
                     // the single page a newcomer is most likely to arrive on
                     // from a search and had three uses in its lifetime.
                     "/feed",
-                    "/studio",
+                    // The studio subtree went public with migration 170 /
+                    // proxy publicPaths; only the signed-in rooms stay out.
+                    "/studio/dashboard",
+                    "/studio/setup",
+                    "/studio/log-work",
+                    "/studio/my-commissions",
+                    "/studio/commission/",
+                    "/studio/*/request",
                 ],
             },
         ],

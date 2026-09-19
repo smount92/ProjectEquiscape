@@ -4,9 +4,11 @@ import { redirect } from "next/navigation";
 
 import {
     getArtistCommissions,
+    getArtistPortfolio,
     getArtistProfile,
     getSlotUsage,
 } from "@/app/actions/art-studio";
+import { linkEntries } from "@/lib/studio/links";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
 import PageMasthead from "@/components/layouts/PageMasthead";
 import IncomePanel from "@/components/studio/IncomePanel";
@@ -43,10 +45,46 @@ export default async function StudioDashboardPage() {
     const profile = await getArtistProfile(user.id);
     if (!profile) redirect("/studio/setup");
 
-    const [commissions, slotsUsed] = await Promise.all([
+    const [commissions, slotsUsed, portfolio] = await Promise.all([
         getArtistCommissions(),
         getSlotUsage(user.id),
+        getArtistPortfolio(user.id, profile.ownerAlias),
     ]);
+
+    // Day one is five empty boxes unless the page says what to do first.
+    const steps: { done: boolean; label: string; href: string; why: string }[] = [
+        {
+            done: profile.services.length > 0,
+            label: "List your rates",
+            href: "/studio/setup?tab=rates",
+            why: "Until then your page says “Ask” and the directory shows no price.",
+        },
+        {
+            done: !!profile.termsSetAt,
+            label: "Write your terms",
+            href: "/studio/setup?tab=terms",
+            why: "Your page shows the site's standard terms as standard until you save your own.",
+        },
+        {
+            done: portfolio.length > 0,
+            label: "Log past work",
+            href: "/studio/log-work",
+            why: "Your wall is empty until the first finished horse is on it.",
+        },
+        {
+            done: linkEntries(profile.links).length > 0,
+            label: "Add your Instagram, Facebook or website",
+            href: "/studio/setup",
+            why: "So the people who already follow you can find you here, and back.",
+        },
+        {
+            done: profile.status !== "closed",
+            label: "Open intake",
+            href: "#intake",
+            why: "Your studio opened closed on purpose — flip it once the above is in.",
+        },
+    ];
+    const todo = steps.filter((s) => !s.done);
 
     const slots = slotState(slotsUsed, profile.maxSlots, profile.status);
 
@@ -94,11 +132,33 @@ export default async function StudioDashboardPage() {
 
             <div className="grid gap-6 xl:grid-cols-[1fr_340px]">
                 <div className="grid gap-6">
+                    {todo.length > 0 && (
+                        <Panel title="Before you open" icon="✅">
+                            <ol className="m-0 grid list-none gap-3 p-0">
+                                {steps.map((step) => (
+                                    <li key={step.label} className="flex items-start gap-3 text-sm">
+                                        <span aria-hidden="true" className="mt-0.5">
+                                            {step.done ? "☑️" : "⬜"}
+                                        </span>
+                                        <span className={step.done ? "text-muted-foreground line-through" : ""}>
+                                            <Link href={step.href} className="text-forest font-semibold hover:underline">
+                                                {step.label}
+                                            </Link>
+                                            {!step.done && (
+                                                <span className="text-muted-foreground block text-xs">{step.why}</span>
+                                            )}
+                                        </span>
+                                    </li>
+                                ))}
+                            </ol>
+                        </Panel>
+                    )}
                     <PipelineBoard commissions={commissions} />
                     <IncomePanel summary={summary} />
                 </div>
 
                 <div className="grid gap-6 self-start">
+                    <div id="intake" />
                     <Panel
                         title="Intake"
                         icon="🚪"
@@ -120,7 +180,7 @@ export default async function StudioDashboardPage() {
                             rewrites an agreement you already made.
                         </p>
                         <Button asChild variant="outline" size="wide">
-                            <Link href="/studio/setup#terms">Edit terms & rates →</Link>
+                            <Link href="/studio/setup?tab=terms">Edit terms & rates →</Link>
                         </Button>
                     </Panel>
                 </div>
