@@ -30,7 +30,7 @@ export const dynamic = "force-dynamic";
 const LEVEL_GLYPH: Record<CheckLevel, string> = { ok: "✅", warn: "⚠️", info: "ℹ️" };
 const LEVEL_CLASS: Record<CheckLevel, string> = {
     ok: "text-forest",
-    warn: "text-[color:var(--color-warning)]",
+    warn: "text-[color:var(--ink-warning)]",
     info: "text-muted-foreground",
 };
 

@@ -59,7 +59,8 @@ export default function CookieConsent() {
  aria-label="Cookie consent"
  >
  <div className="mx-auto flex max-w-[var(--max-width)] items-center justify-between gap-8 max-md:flex-col max-md:gap-4 max-md:text-center">
- <div className="[&_p]:text-secondary-foreground [&_p:first-child]:text-foreground [&_a]:text-forest min-w-0 flex-1 [&_p]:m-0 [&_p]:text-sm [&_p]:leading-relaxed [&_p:first-child]:mb-1">
+ {/* A near-black strip in every theme, so the inks are the leather ramp, not the page tokens (2026-09-19: page inks read 1.2–2.1:1 here). */}
+ <div className="[&_p]:text-[var(--leather-text-soft)] [&_p:first-child]:text-[var(--leather-text)] [&_a]:text-[var(--brass-hi)] min-w-0 flex-1 [&_p]:m-0 [&_p]:text-sm [&_p]:leading-relaxed [&_p:first-child]:mb-1">
  <p>
  <strong>🍪 Cookies &amp; Privacy</strong>
  </p>
@@ -79,6 +80,7 @@ export default function CookieConsent() {
  <Button variant="outline" size="wide"
  onClick={handleDecline}
  id="cookie-decline"
+ className="border-[var(--leather-text-soft)] text-[var(--leather-text)] hover:bg-[var(--leather-text)]/10 hover:text-[var(--leather-text)]"
  >
  Decline Analytics
  </Button>

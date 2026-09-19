@@ -178,7 +178,7 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  <form onSubmit={handleSubmit}>
  <div className="mb-6">
  <label className="text-foreground mb-1 block text-sm font-semibold">
- Show Name <span className="text-[#e74c6f]">*</span>
+ Show Name <span className="text-destructive">*</span>
  </label>
  <Input
  

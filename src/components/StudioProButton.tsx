@@ -39,7 +39,7 @@ export default function StudioProButton() {
             <button
                 onClick={handleUpgrade}
                 disabled={loading}
-                className="w-full cursor-pointer rounded-lg bg-studio px-6 py-3 text-base font-bold text-background shadow-lg transition-all hover:bg-studio/90 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50"
+                className="w-full cursor-pointer rounded-lg bg-studio px-6 py-3 text-base font-bold text-primary-foreground shadow-lg transition-all hover:bg-studio/90 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50"
             >
                 {loading ? (
                     <span className="flex items-center justify-center gap-2">

@@ -1718,7 +1718,7 @@ function LegacyEditHorsePage() {
  {/* Condition Change Note - shows when condition was changed */}
  {originalCondition && conditionGrade && conditionGrade !== originalCondition && (
  <div className="condition-change-note animate-fade-in-up mt-2">
- <div className="mb-1 text-xs font-semibold text-[var(--color-warning)]">
+ <div className="mb-1 text-xs font-semibold text-warning">
  📝 Condition changed: {originalCondition} → {conditionGrade}
  </div>
  <Textarea

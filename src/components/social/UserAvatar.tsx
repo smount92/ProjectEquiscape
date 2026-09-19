@@ -31,7 +31,8 @@ function hashColor(alias: string): string {
     }
     // Restrict hue to warm ranges: 0-60 (reds/oranges), 120-180 (greens), 280-340 (purples)
     const hue = Math.abs(hash) % 360;
-    return `hsl(${hue}, 40%, 55%)`;
+    // L 32%: white initials read >= 5:1 on every hue (55% failed at 2.3:1 on greens)
+    return `hsl(${hue}, 40%, 32%)`;
 }
 
 export default function UserAvatar({ src, alias, size = "sm", href }: UserAvatarProps) {

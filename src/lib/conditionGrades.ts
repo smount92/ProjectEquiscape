@@ -65,9 +65,9 @@ export function conditionOptionLabel(grade: ConditionGrade): string {
  * custom properties).
  */
 export const CONDITION_TONE_VARS: Record<ConditionTone, string> = {
-    success: "var(--color-success)",
-    info: "var(--color-info)",
-    warning: "var(--color-warning)",
+    success: "var(--ink-success)",
+    info: "var(--ink-info)",
+    warning: "var(--ink-warning)",
     neutral: "var(--muted-foreground)",
 };
 

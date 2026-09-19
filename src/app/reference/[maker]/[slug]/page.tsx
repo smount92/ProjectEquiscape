@@ -754,7 +754,7 @@ export default async function ReferencePage({ params }: Props) {
                 )}
 
                 {/* WANTED BAR */}
-                <div className="flex flex-wrap items-center gap-4 rounded-xl border border-dashed border-[color:var(--color-warning)] bg-[color:var(--color-warning)]/5 px-5 py-4">
+                <div className="flex flex-wrap items-center gap-4 rounded-xl border border-dashed border-[color:var(--ink-warning)] bg-[color:var(--ink-warning)]/5 px-5 py-4">
                     <span className="text-2xl">🎯</span>
                     <div className="min-w-[220px] flex-1">
                         <div className="font-bold text-foreground">

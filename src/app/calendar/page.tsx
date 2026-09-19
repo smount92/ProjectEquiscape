@@ -191,7 +191,7 @@ function EntryRow({ entry, today }: { entry: CalendarEntry; today: string }) {
                     {amber && (
                         <span
                             className="stamp"
-                            style={{ borderColor: "var(--color-warning, #B45309)", color: "var(--color-warning, #B45309)" }}
+                            style={{ borderColor: "var(--color-warning, #B45309)", color: "var(--ink-warning)" }}
                         >
                             Closes soon
                         </span>
@@ -214,7 +214,7 @@ function EntryRow({ entry, today }: { entry: CalendarEntry; today: string }) {
                     <Link
                         href={entry.href}
                         className="mt-1 inline-block font-serif text-[0.68rem] font-bold tracking-[0.14em] uppercase no-underline hover:underline"
-                        style={{ color: "var(--brass-dark, #7A5C22)" }}
+                        style={{ color: "var(--ink-brass, #7A5C22)" }}
                     >
                         Hosted here — enter online →
                     </Link>

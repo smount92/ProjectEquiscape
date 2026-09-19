@@ -59,7 +59,7 @@ export default function CollectorCard({ member }: { member: MemberCard }) {
                     <div className="text-muted-foreground mt-0.5 flex flex-wrap items-center gap-x-2 text-xs">
                         {memberSince && <span>{memberSince}</span>}
                         {memberSince && lastActive && <span aria-hidden="true">·</span>}
-                        {lastActive && <span className="text-forest/80">{lastActive}</span>}
+                        {lastActive && <span className="text-forest">{lastActive}</span>}
                     </div>
                 </div>
                 {member.isSelf ? (

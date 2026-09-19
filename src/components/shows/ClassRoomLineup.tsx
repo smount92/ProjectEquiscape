@@ -147,7 +147,7 @@ export default function ClassRoomLineup({
                                             href={`/cards/${entry.cardCode}`}
                                             className={`rounded-full px-2 py-0.5 text-xs font-bold no-underline ${
                                                 entry.cardIsStakes
-                                                    ? "bg-[color:var(--color-warning)]/20 text-[color:var(--color-warning)]"
+                                                    ? "bg-[color:var(--ink-warning)]/20 text-[color:var(--ink-warning)]"
                                                     : "bg-forest/10 text-forest"
                                             }`}
                                             title="View this qualification card"

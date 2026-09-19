@@ -72,7 +72,7 @@ export default function MarketListingCard({ listing }: { listing: MarketListing 
                     </span>
 
                     {listing.conditionGrade && (
-                        <span className="absolute top-2 right-2 rounded-full bg-(--paper-lit) px-2 py-0.5 text-[0.65rem] font-semibold text-secondary-foreground shadow-sm">
+                        <span className="absolute top-2 right-2 lit-paper rounded-full bg-(--paper-lit) px-2 py-0.5 text-[0.65rem] font-semibold text-secondary-foreground shadow-sm">
                             {listing.conditionGrade}
                         </span>
                     )}
@@ -131,7 +131,7 @@ export default function MarketListingCard({ listing }: { listing: MarketListing 
             <div className="mt-3 flex items-center justify-between gap-2 border-t border-input px-1 pt-2.5 text-xs">
                 <Link
                     href={`/profile/${encodeURIComponent(listing.ownerAlias)}`}
-                    className="truncate text-(--primary) no-underline hover:underline"
+                    className="truncate text-primary no-underline hover:underline"
                 >
                     @{listing.ownerAlias}
                 </Link>

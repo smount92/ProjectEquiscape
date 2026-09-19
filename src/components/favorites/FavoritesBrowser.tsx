@@ -91,7 +91,7 @@ function AvailableCard({
                 <div className="min-w-0">
                     <Link
                         href={`/profile/${encodeURIComponent(entry.ownerAlias)}`}
-                        className="block truncate text-[var(--primary)] no-underline hover:underline"
+                        className="block truncate text-primary no-underline hover:underline"
                     >
                         @{entry.ownerAlias}
                     </Link>

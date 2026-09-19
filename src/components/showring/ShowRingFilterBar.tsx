@@ -179,7 +179,7 @@ export default function ShowRingFilterBar({
                     className={`cursor-pointer rounded-full border px-3 py-1.5 font-serif text-xs tracking-wide transition-colors ${
                         filters.hasRecords
                             ? "border-warning bg-warning/15 font-semibold text-warning"
-                            : "border-warning/50 bg-warning/5 text-warning/90 hover:bg-warning/10"
+                            : "border-warning/50 bg-warning/5 text-warning hover:bg-warning/10"
                     }`}
                     id="showring-has-records"
                 >

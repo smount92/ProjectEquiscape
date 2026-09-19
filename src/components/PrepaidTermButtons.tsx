@@ -160,7 +160,7 @@ export default function PrepaidTermButtons({
                         style={
                             leather
                                 ? {
-                                      borderColor: "var(--brass-dark)",
+                                      borderColor: "var(--ink-brass, #7A5C22)",
                                       color: "var(--leather-text)",
                                       background: "rgba(255,255,255,0.06)",
                                   }

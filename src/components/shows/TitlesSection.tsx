@@ -68,7 +68,7 @@ export default function TitlesSection({
             <h3 className="mb-1 flex items-center gap-2 text-xs font-semibold tracking-widest text-secondary-foreground uppercase">
                 <span aria-hidden="true">🏆</span> MHH Titles
             </h3>
-            <p className="mb-4 text-xs text-secondary-foreground/80">
+            <p className="mb-4 text-xs text-secondary-foreground">
                 Permanent titles earned in MHH-sanctioned showing. Titles stay with the
                 horse for life, whoever owns it.
                 {ladder && (

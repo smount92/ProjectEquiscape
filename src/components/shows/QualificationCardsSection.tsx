@@ -55,7 +55,7 @@ export default function QualificationCardsSection({
             <h3 className="mb-1 flex items-center gap-2 text-xs font-semibold tracking-widest text-secondary-foreground uppercase">
                 <span aria-hidden="true">🏵️</span> MHH Qualification Cards
             </h3>
-            <p className="mb-4 text-xs text-secondary-foreground/80">
+            <p className="mb-4 text-xs text-secondary-foreground">
                 Platform qualifications earned on Model Horse Hub (1st or 2nd in a
                 qualifying class). Not NAMHSA/NAN cards. They transfer with the horse.
             </p>

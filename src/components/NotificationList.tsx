@@ -81,7 +81,7 @@ function FilterTab({
             {label}
             <span className="ml-2 font-sans text-[0.7rem] tracking-normal tabular-nums opacity-80">
                 {count}
-                {unread > 0 && <span className="text-destructive ml-1 font-bold">•{unread}</span>}
+                {unread > 0 && <span className="ml-1 font-bold">•{unread}</span>}
             </span>
         </button>
     );

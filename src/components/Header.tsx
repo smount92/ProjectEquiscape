@@ -425,7 +425,7 @@ export default function Header() {
  aria-expanded={userMenuOpen ? "true" : "false"}
  aria-label="User menu"
  >
- <span className="brass-ring inline-flex h-[32px] w-[32px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-[rgb(245_245_244)] font-bold text-muted-foreground">
+ <span className="brass-ring inline-flex h-[32px] w-[32px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-[rgb(245_245_244)] font-bold text-[var(--paper-lit-ink-soft)]">
  {avatarUrl ? (
  // eslint-disable-next-line @next/next/no-img-element
  <img
@@ -554,7 +554,7 @@ export default function Header() {
  aria-label="Mobile navigation"
  >
  {/* The five rooms, in the order the desktop bar walks them. */}
- <span className="mb-0.5 px-2 text-[0.65rem] font-bold tracking-[0.14em] uppercase text-muted-foreground/60" aria-hidden="true">The rooms</span>
+ <span className="mb-0.5 px-2 text-[0.65rem] font-bold tracking-[0.14em] uppercase text-muted-foreground" aria-hidden="true">The rooms</span>
  <Link
  href="/dashboard"
  className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
@@ -596,7 +596,7 @@ export default function Header() {
  <BookOpen size={16} strokeWidth={1.5} /> Registry
  </Link>
  {/* The inner rooms — what the desktop bar keeps under More. */}
- <span className="mt-3 mb-0.5 px-2 text-[0.65rem] font-bold tracking-[0.14em] uppercase text-muted-foreground/60" aria-hidden="true">Inside the Paddock</span>
+ <span className="mt-3 mb-0.5 px-2 text-[0.65rem] font-bold tracking-[0.14em] uppercase text-muted-foreground" aria-hidden="true">Inside the Paddock</span>
  <Link
  href="/community"
  className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
@@ -654,7 +654,7 @@ export default function Header() {
  <Palette size={16} strokeWidth={1.5} /> Art Studio
  </Link>
  {/* The member's own doors. */}
- <span className="mt-3 mb-0.5 px-2 text-[0.65rem] font-bold tracking-[0.14em] uppercase text-muted-foreground/60" aria-hidden="true">Yours</span>
+ <span className="mt-3 mb-0.5 px-2 text-[0.65rem] font-bold tracking-[0.14em] uppercase text-muted-foreground" aria-hidden="true">Yours</span>
  <Link
  href={aliasName ? `/profile/${encodeURIComponent(aliasName)}` :"/settings"}
  className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"

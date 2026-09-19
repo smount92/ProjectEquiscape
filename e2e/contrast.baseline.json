@@ -1,0 +1,4 @@
+{
+  "_": "Known contrast failures the audit tolerates. Each line is theme|route|kind|path|ink|ground as e2e/contrast.spec.ts prints it. Only ever remove lines; adding one is a decision to ship unreadable text.",
+  "known": []
+}

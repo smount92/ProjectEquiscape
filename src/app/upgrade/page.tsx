@@ -305,7 +305,7 @@ export default async function UpgradePage({
             )}
             {status === "supporter-success" && (
                 <div className="animate-fade-in-up ledger-card mb-8 text-center">
-                    <Lamp className="mx-auto h-8 w-8 text-(--brass-dark)" />
+                    <Lamp className="mx-auto h-8 w-8 text-(--ink-brass)" />
                     <h2 className="mt-2 font-serif text-xl font-bold">The lights stay on. Thank you.</h2>
                     <p className="text-secondary-foreground mt-1 text-sm">
                         Your brass plaque will appear on your profile within a minute or two. It unlocks
@@ -483,7 +483,7 @@ export default async function UpgradePage({
                 >
                     <span
                         className="ledger-tab"
-                        style={{ background: "linear-gradient(180deg, #7E5AB4, var(--color-studio))" }}
+                        style={{ background: "linear-gradient(180deg, #6A4A98, var(--color-studio))" }}
                     >
                         Studio Pro
                     </span>
@@ -527,7 +527,7 @@ export default async function UpgradePage({
                 ship). Deliberately quieter than the Pro card. */}
             {supporterPriceLabel && (
                 <div className="animate-fade-in-up mx-auto mt-6 max-w-[1100px]">
-                    <div className="ledger-card" style={{ borderTopColor: "var(--brass-dark)" }}>
+                    <div className="ledger-card" style={{ borderTopColor: "var(--ink-brass, #7A5C22)" }}>
                         <div className="flex flex-col items-center gap-6 md:flex-row">
                             <div
                                 className="brass-plaque flex shrink-0 items-center gap-2 px-4 py-2 font-serif text-xs font-bold tracking-[0.14em] uppercase"
@@ -536,7 +536,7 @@ export default async function UpgradePage({
                                 <Lamp className="h-4 w-4" /> Supporter
                             </div>
                             <div className="flex-1 text-center md:text-left">
-                                <span className="font-serif text-[0.7rem] font-bold tracking-[0.18em] text-(--brass-dark) uppercase">
+                                <span className="font-serif text-[0.7rem] font-bold tracking-[0.18em] text-(--ink-brass) uppercase">
                                     Supporter — {supporterPriceLabel}
                                 </span>
                                 <p className="text-secondary-foreground mt-1 text-sm">

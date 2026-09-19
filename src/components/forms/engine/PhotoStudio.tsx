@@ -229,7 +229,7 @@ export default function PhotoStudio({
                             <div className="mt-2 flex items-baseline justify-between gap-2">
                                 <span className="fe-mount-label">
                                     {slot.primary && (
-                                        <span className="text-[var(--brass-dark)]" aria-hidden="true">
+                                        <span className="text-(--ink-brass)" aria-hidden="true">
                                             ★{" "}
                                         </span>
                                     )}

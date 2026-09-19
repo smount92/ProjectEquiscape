@@ -70,7 +70,7 @@ function Rosette({ grand }: { grand: boolean }) {
             style={{
                 background:
                     "radial-gradient(circle at 35% 30%, var(--brass-hi), var(--brass-dark))",
-                borderColor: "var(--brass-dark)",
+                borderColor: "var(--ink-brass, #7A5C22)",
             }}
         />
     );

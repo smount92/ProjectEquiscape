@@ -13,6 +13,7 @@
     "test:unit:coverage": "vitest run --coverage",
     "test:components": "vitest run src/components/__tests__",
     "test:e2e": "npx playwright test",
+    "test:contrast": "npx playwright test --config e2e/contrast.config.ts",
     "test:devices": "npx playwright test e2e/device-layout.spec.ts",
     "test:iphone": "npx playwright test e2e/device-layout.spec.ts --project=\"Mobile Safari\"",
     "test:pixel": "npx playwright test e2e/device-layout.spec.ts --project=\"Mobile Chrome\"",

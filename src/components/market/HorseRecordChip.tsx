@@ -171,7 +171,7 @@ export default function HorseRecordChip({
                     <span aria-hidden="true">🏆</span>
                     <span className="truncate">{chipLabel}</span>
                     {verifiedLabel && (
-                        <span className="font-medium text-warning/90">· ✅ {verifiedLabel}</span>
+                        <span className="font-medium text-warning">· ✅ {verifiedLabel}</span>
                     )}
                 </button>
             </DialogTrigger>

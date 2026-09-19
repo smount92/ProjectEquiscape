@@ -17,13 +17,30 @@
   --color-forest-glow: rgba(44, 85, 69, 0.15);
   --color-saddle: #8B5A2B;
   --color-success: #356845;
-  --color-warning: #B8860B;
+  --color-warning: #946B08;  /* 2026-09-19: white on it is 4.8:1 (was #B8860B, 3.3:1) — surfaces are white-safe */
   /* Art Studio accent — the hobby's "artist" identity (violet), tokenized
      so it flips night-safe like the other brand colors. */
   --color-studio: #6D4AA0;
 
   /* Domain tokens (status + collection-tier colors) */
-  --color-info: #3b82f6;
+  --color-info: #2563EB;  /* 2026-09-19: white on it is 5.2:1 (was #3b82f6, 3.7:1) */
+  /* ── Ink vs surface (2026-09-19) ─────────────────────────────────
+     --color-forest / -success / -warning / -info / -destructive are
+     SURFACE colours: buttons, chips, badges. Read as small text they
+     miss AA on the night card (forest 2.6:1) and warning misses it on
+     the day card (3.3:1). The text-* utilities take these inks instead
+     (see the .text-forest rules below the night block); every ink is
+     >= 4.5:1 on its theme's card AND muted ground. Checked by
+     src/__tests__/theme-contrast.test.ts and the runtime audit
+     (npm run test:contrast). */
+  --ink-forest: #2C5545;
+  /* a notch darker than the surfaces: on a 15% chip tint of the surface over the muted ground these still read >= 5:1 */
+  --ink-success: #2B5638;
+  --ink-warning: #6B4E05;
+  --ink-info: #17489C;
+  --ink-studio: #6D4AA0;
+  --ink-destructive: #9B3028;
+  --ink-brass: #7A5C22;
   --color-border-tan: #b8a484;
   --color-tier-gold: #f9a825;
   --color-tier-silver: #c0c0c0;
@@ -633,7 +650,7 @@ p {
   background: rgba(92, 224, 160, 0.12);
   border: 1px solid rgba(92, 224, 160, 0.35);
   border-radius: var(--radius-full);
-  color: var(--color-success);
+  color: var(--ink-success);
   font-size: 0.875rem;
   font-weight: 600;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
@@ -1742,7 +1759,7 @@ p {
 
 .horse-card-badge.of {
   background: rgba(92, 224, 160, 0.2);
-  color: var(--color-success);
+  color: var(--ink-success);
   border: 1px solid rgba(92, 224, 160, 0.3);
 }
 
@@ -1815,19 +1832,19 @@ p {
 .ref-status-pending {
     background: color-mix(in srgb, var(--color-warning) 12%, transparent);
     border-color: color-mix(in srgb, var(--color-warning) 35%, transparent);
-    color: var(--color-warning);
+    color: var(--ink-warning);
 }
 
 .ref-status-approved {
     background: color-mix(in srgb, var(--color-success) 12%, transparent);
     border-color: color-mix(in srgb, var(--color-success) 35%, transparent);
-    color: var(--color-success);
+    color: var(--ink-success);
 }
 
 .ref-status-auto {
     background: color-mix(in srgb, var(--color-info) 12%, transparent);
     border-color: color-mix(in srgb, var(--color-info) 35%, transparent);
-    color: var(--color-info);
+    color: var(--ink-info);
 }
 
 .ref-status-rejected {
@@ -1929,13 +1946,13 @@ p {
 .studio-chip:hover {
     border-color: var(--color-forest, #2C5545);
     background: rgba(44, 85, 69, 0.06);
-    color: var(--color-forest, #2C5545);
+    color: var(--ink-forest, #2C5545);
 }
 
 .studio-chip.active {
     background: rgba(44, 85, 69, 0.12);
     border-color: var(--color-forest, #2C5545);
-    color: var(--color-forest, #2C5545);
+    color: var(--ink-forest, #2C5545);
     font-weight: 600;
 }
 
@@ -1995,7 +2012,7 @@ p {
 .studio-tab.active {
     background: rgba(44, 85, 69, 0.12);
     border-color: var(--color-forest, #2C5545);
-    color: var(--color-forest, #2C5545);
+    color: var(--ink-forest, #2C5545);
     font-weight: 600;
 }
 
@@ -2189,6 +2206,22 @@ p {
   --serif-display: "Palatino Linotype", Palatino, "Book Antiqua", var(--font-family-serif, Georgia), serif;
 }
 
+/* Simple Mode materials: flat forest stands in for every leather / wood
+   surface (see the material strips in the Simple Mode section) and the
+   text on it goes brighter to keep AA. Sits right after the materials
+   :root above, unlayered and more specific, so it wins in every theme. */
+html[data-simple-mode="true"] {
+  --leather-deep: #1E3D31;
+  --leather: #2C5545;
+  --leather-hi: #2C5545;
+  --wood-deep: #1E3D31;
+  --wood: #1E3D31;
+  --leather-text: #FFFFFF;
+  --leather-text-soft: #F3E9D6;
+  --leather-text-muted: #E6D9BC;
+  --brass-hi: #F3E9D6;
+}
+
 /* ══ LAYERING NOTE (Wave 4a) ══════════════════════════════════════
    Material CLASS DEFINITIONS below live in @layer components so that
    authors' Tailwind utilities (@layer utilities) win when specified —
@@ -2296,7 +2329,7 @@ p {
   outline-offset: 3px;
 }
 .strap-nav a.text-engraved-brass {
-  background: linear-gradient(165deg, #F0D494 0%, #C6A253 45%, #96762F 100%);
+  background: linear-gradient(165deg, #F0D494 0%, #C6A253 45%, #A68434 100%);
   border: 0;
   border-top: 1px solid #F6E3AE;
   border-bottom: 2px solid #5C441A;
@@ -2325,7 +2358,7 @@ p {
 /* ── Brass plaque (high-contrast engraving recipe) ───────────────── */
 .brass-plaque {
   position: relative;
-  background: linear-gradient(165deg, #F0D494 0%, #C6A253 45%, #96762F 100%);
+  background: linear-gradient(165deg, #F0D494 0%, #C6A253 45%, #A68434 100%);
   border-radius: 4px;
   border-top: 1px solid #F6E3AE;
   border-left: 1px solid #E3C67E;
@@ -2428,7 +2461,7 @@ p {
 .leather-band #nav-notifications > span,
 .leather-menu .inbox-unread-badge,
 .leather-menu #nav-notifications > span {
-  background: linear-gradient(160deg, var(--brass-hi), var(--brass-dark));
+  background: linear-gradient(160deg, var(--brass-hi), #A68434); /* brass ink on the dark end read 2.7:1 */
   color: var(--brass-ink);
   font-weight: 800;
 }
@@ -2576,7 +2609,7 @@ p {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   text-align: left;
-  color: var(--color-forest, #2C5545);
+  color: var(--ink-forest, #2C5545);
   border-bottom: 2px solid rgba(44, 85, 69, 0.55);
 }
 .ledger-card td,
@@ -2596,7 +2629,7 @@ p {
   font-size: 1.5rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  color: var(--color-forest, #2C5545);
+  color: var(--ink-forest, #2C5545);
 }
 .ledger-tile .tile-label {
   font-family: var(--serif-display);
@@ -2613,7 +2646,7 @@ p {
   rotate: -2deg;
   border: 2px solid var(--color-forest, #2C5545);
   border-radius: 4px;
-  color: var(--color-forest, #2C5545);
+  color: var(--ink-forest, #2C5545);
   font-family: var(--serif-display);
   /* a11y floor: was 0.66rem — status stamps must be legible */
   font-size: 0.8125rem;
@@ -2642,7 +2675,7 @@ p {
   rotate: -2deg;
   border: 2px solid var(--color-forest, #2C5545);
   border-radius: 4px;
-  color: var(--color-forest, #2C5545);
+  color: var(--ink-forest, #2C5545);
   background: color-mix(in srgb, var(--color-forest, #2C5545) 7%, transparent);
   font-family: var(--serif-display);
   /* a11y floor — status stamps must be legible */
@@ -2663,7 +2696,7 @@ p {
 /* parked (off-platform sale) is a caution state */
 .hoofprint-stage-badge.stage-parked {
   border-color: var(--color-warning, #B8860B);
-  color: var(--color-warning, #B8860B);
+  color: var(--ink-warning, #B8860B);
   background: color-mix(in srgb, var(--color-warning, #B8860B) 8%, transparent);
 }
 
@@ -2676,7 +2709,7 @@ p {
   border: 1px solid var(--border);
   border-radius: var(--radius-full);
   background: var(--card);
-  color: var(--color-forest, #2C5545);
+  color: var(--ink-forest, #2C5545);
   font-size: 0.8125rem;
   font-weight: 600;
   text-decoration: none;
@@ -2767,7 +2800,7 @@ html[data-theme="night"] .hoofprint-stage-badge.stage-in_progress {
   font-size: 0.64rem;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: #CFE0D3;
+  color: #E6EFE9; /* 5.2:1 on the night forest (was #CFE0D3, 4.5) */
 }
 
 /* ── Brass-bound avatar medallion (profile masthead) ─────────────── */
@@ -2795,7 +2828,7 @@ html[data-theme="night"] .hoofprint-stage-badge.stage-in_progress {
   padding: 9px 26px;
   border-radius: 5px;
   cursor: pointer;
-  background: linear-gradient(165deg, #F0D494 0%, #C6A253 45%, #96762F 100%);
+  background: linear-gradient(165deg, #F0D494 0%, #C6A253 45%, #A68434 100%);
   border-top: 1px solid #F6E3AE;
   border-bottom: 2px solid #5C441A;
   border-left: 1px solid #E3C67E;
@@ -2849,7 +2882,7 @@ html[data-theme="night"] .hoofprint-stage-badge.stage-in_progress {
    masthead CTA row — restyle, don't rebuild (FollowButton et al.).
    UNLAYERED: must beat those components' own utility classes. */
 .masthead-cta .btn-primary {
-  background: linear-gradient(165deg, #F0D494 0%, #C6A253 45%, #96762F 100%);
+  background: linear-gradient(165deg, #F0D494 0%, #C6A253 45%, #A68434 100%);
   border: 0;
   border-top: 1px solid #F6E3AE;
   border-bottom: 2px solid #5C441A;
@@ -3071,9 +3104,9 @@ a.polaroid:focus-visible {
   background-image: none;
   box-shadow: none;
 }
-[data-simple-mode="true"] .leather-panel {
-  background: var(--color-saddle, #8B5A2B);
-}
+/* 2026-09-19: panels were saddle (#8B5A2B) — leather text on it read
+   3.3:1. Every leather surface is the same flat forest in Simple Mode,
+   and the leather inks are re-bound brighter (token block above). */
 [data-simple-mode="true"] .wood-panel {
   background: var(--color-forest-dark, #1E3D31);
   background-image: none;
@@ -3183,6 +3216,18 @@ a.polaroid:focus-visible {
   border: 2px solid #ffffff !important;
   color: #ffffff !important;
 }
+/* …but on a white ledger surface the ghost button is ink, not white */
+/* the same ghost button on ledger paper in day/night: leather cream on cream paper read 1.2:1 */
+.ledger-paper .btn-ghostleather:not(.leather-band *, .leather-panel *),
+.ledger-card .btn-ghostleather:not(.leather-band *, .leather-panel *) {
+  color: var(--ink-forest);
+  border-color: var(--ink-forest);
+}
+[data-simple-mode="true"] .ledger-paper .btn-ghostleather:not(.leather-band *, .leather-panel *),
+[data-simple-mode="true"] .ledger-card .btn-ghostleather:not(.leather-band *, .leather-panel *) {
+  border-color: #111111 !important;
+  color: #111111 !important;
+}
 
 /* ═══════════════════════════════════════════════════════════════════
    LAMPLIGHT — night mode ("the tack room by lamplight")
@@ -3217,13 +3262,50 @@ html[data-theme="night"] {
   --primary: #3A6B55;
   --primary-foreground: #FFFFFF;
   --ring: #3A6B55;
-  --destructive: #C25B50;
-  --color-success: #7FB893;
-  --color-warning: #D9A93F;
-  --color-info: #6FA3E8;
-  --color-studio: #B79BE0;
+  --destructive: #A63B31;  /* surface; white on it 6.4:1 (was #C25B50, 4.3:1) */
+  /* SURFACES — white text on every one of these is >= 4.5:1. The
+     light night inks that used to live here moved to --ink-* below. */
+  --color-success: #2E6B45;
+  --color-warning: #946B08;
+  --color-info: #2F6FD0;
+  --color-studio: #6D4AA0;
   --color-forest: #3A6B55;
   --color-forest-dark: #2C5545;
+  /* inks for the night card (#2A2118) and muted ground (#33291C) */
+  --ink-forest: #8FC7A5;
+  --ink-success: #7FB893;
+  --ink-warning: #D9A93F;
+  --ink-info: #6FA3E8;
+  --ink-studio: #B79BE0;
+  --ink-destructive: #E08A80;
+  --ink-brass: #C9A24D;
+}
+
+/* ── Ink utilities take the ink token, in every theme ─────────────
+   In @layer utilities AFTER Tailwind's own, so same-specificity
+   utilities lose to these by order while variants (hover:, group-hover:)
+   keep their higher specificity and still win. The surface token stays
+   on bg-* / border-*; the ink token goes on text-*. Lit paper re-binds
+   the inks back to daylight (block below). */
+@layer utilities {
+  .text-forest, .text-forest-dark, .text-primary { color: var(--ink-forest); }
+  .hover\:text-forest:hover { color: var(--ink-forest); }
+  .text-success { color: var(--ink-success); }
+  .text-warning { color: var(--ink-warning); }
+  .text-info { color: var(--ink-info); }
+  .text-studio { color: var(--ink-studio); }
+  .text-destructive { color: var(--ink-destructive); }
+  .hover\:text-destructive:hover { color: var(--ink-destructive); }
+}
+
+/* Placeholders are text. The Tailwind preflight draws them at 50% of
+   the field colour, which measured 3.1:1 on the day card and 1.01:1 on
+   a field whose colour was a ground token. Muted ink at full opacity
+   reads >= 5.8:1 on every theme card, and lit paper re-binds it. */
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted-foreground);
+  opacity: 1;
 }
 
 /* ── Page ground: warm lamplight vignette ────────────────────────── */
@@ -3266,10 +3348,13 @@ html[data-theme="night"] .lit-paper {
   --foreground: var(--paper-lit-ink);
   --card: var(--paper-lit);
   --card-foreground: var(--paper-lit-ink);
+  /* a dropdown opened on lit paper is lit paper too */
+  --popover: var(--paper-lit);
+  --popover-foreground: var(--paper-lit-ink);
   --secondary: #EAE1CD;
   --secondary-foreground: var(--paper-lit-ink-soft);
   --muted: #EAE1CD;
-  --muted-foreground: #7A6A58;
+  --muted-foreground: #6B5C4A;  /* same notch as day (2026-09-19) */
   --accent: #EAE1CD;
   --accent-foreground: var(--paper-lit-ink-soft);
   --border: #E0D5C1;
@@ -3278,13 +3363,26 @@ html[data-theme="night"] .lit-paper {
   --ring: #2C5545;
   --destructive: #9B3028;
   --color-success: #356845;
-  --color-warning: #B8860B;
-  --color-info: #3b82f6;
+  --color-warning: #946B08;
+  --color-info: #2563EB;
   --color-forest: #2C5545;
   --color-forest-dark: #1E3D31;
+  --ink-forest: #2C5545;
+  --ink-success: #2B5638;
+  --ink-warning: #6B4E05;
+  --ink-info: #17489C;
+  --ink-studio: #6D4AA0;
+  --ink-destructive: #9B3028;
+  --ink-brass: #7A5C22;
   /* plain links revert to daylight greens on the cream face */
   --link: #2C5545;
   --link-hover: #1E3D31;
+  /* Restart inherited text colour here. `body { color: var(--foreground) }`
+     resolves on body — to the NIGHT cream — and descendants inherit that
+     resolved colour, not the variable; re-binding --foreground alone only
+     reaches elements that set their own colour. Without this line a show
+     name with no colour utility sat cream-on-cream (1.08:1, 2026-09-19). */
+  color: var(--foreground);
 }
 /* photographs glow a touch harder in the dark */
 html[data-theme="night"] .polaroid {
@@ -3414,16 +3512,16 @@ html[data-theme="night"] :is(.border-red-200, .border-red-300) {
   border-color: color-mix(in srgb, var(--destructive) 45%, transparent);
 }
 html[data-theme="night"] :is(.text-amber-700, .text-amber-800, .text-amber-900) {
-  color: var(--color-warning);
+  color: var(--ink-warning);
 }
 html[data-theme="night"] :is(.text-red-600, .text-red-700, .text-red-800) {
   color: var(--destructive);
 }
 html[data-theme="night"] :is(.text-blue-600, .text-blue-700, .text-blue-800) {
-  color: var(--color-info);
+  color: var(--ink-info);
 }
 html[data-theme="night"] :is(.text-green-600, .text-green-700, .text-green-800) {
-  color: var(--color-success);
+  color: var(--ink-success);
 }
 html[data-theme="night"] :is(.text-stone-500, .text-stone-600) {
   color: var(--muted-foreground);
@@ -3699,7 +3797,7 @@ html[data-theme="night"] .thread-post-pinned {
     font-weight: 700;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--color-forest, #2C5545);
+    color: var(--ink-forest, #2C5545);
     white-space: nowrap;
 }
 .fe-leaf-heading::after {
@@ -3752,7 +3850,7 @@ html[data-theme="night"] .thread-post-pinned {
 /* Current: brass fore-edge — the leaf you are writing on. */
 .fe-rail-tab[data-state="current"] {
     background: linear-gradient(180deg, #FDFAF2, #F2EBD8);
-    color: var(--color-forest, #2C5545);
+    color: var(--ink-forest, #2C5545);
     box-shadow: inset 0 2px 0 var(--brass), 0 2px 4px rgba(90, 70, 40, 0.24);
     font-weight: 700;
 }
@@ -3984,7 +4082,7 @@ html[data-theme="night"] .fe-passport-leader {
 [data-simple-mode="true"] .fe-rail-tab[data-state="current"] {
     background: var(--card);
     box-shadow: inset 0 0 0 2px var(--color-forest, #2C5545);
-    color: var(--color-forest, #2C5545);
+    color: var(--ink-forest, #2C5545);
 }
 [data-simple-mode="true"] .fe-mount {
     background: var(--card);

@@ -132,7 +132,7 @@ export default function CollectionPicker({ selectedCollectionIds, onSelect }: Co
  <div className="mt-2 flex items-center gap-2">
  {selectedNames.length > 0 && (
  <div
- className="text-xs font-medium text-[var(--primary)]"
+ className="text-xs font-medium text-primary"
  >
  ✓ In: {selectedNames.join(",")}
  </div>

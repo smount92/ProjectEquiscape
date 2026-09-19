@@ -183,7 +183,7 @@ function ShowRingHorseCard({ horse }: { horse: ShowRingCard }) {
             <div className="mt-3 flex items-center justify-between border-t border-input px-1 pt-2.5 text-xs">
                 <Link
                     href={`/profile/${encodeURIComponent(horse.ownerAlias)}`}
-                    className="flex items-center gap-1 truncate text-[var(--primary)] no-underline hover:underline"
+                    className="flex items-center gap-1 truncate text-primary no-underline hover:underline"
                 >
                     <svg
                         width="12"

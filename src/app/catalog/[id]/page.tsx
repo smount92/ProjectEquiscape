@@ -142,7 +142,7 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
     rel="noopener noreferrer"
     className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-info/30 bg-info/10 px-4 py-1 text-sm font-semibold text-info no-underline shadow-sm transition-colors hover:bg-info/20"
    >
-    🔎 Find on eBay <span className="text-xs text-info/70">↗</span>
+    🔎 Find on eBay <span className="text-xs text-info">↗</span>
    </a>
    </div>
   </div>
