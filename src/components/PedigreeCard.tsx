@@ -374,6 +374,11 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  </div>
 
  <div className="mb-6">
+ <p className="text-muted-foreground mt-0 mb-4 rounded-md bg-muted px-3 py-2 text-xs leading-relaxed">
+ 📜 Have the breeding certificate itself, or registry papers? They go under{" "}
+ <a href="#passport-papers" className="text-forest font-semibold hover:underline">Papers</a>, just
+ below this card — scans, photos or a PDF, framed on the passport.
+ </p>
  <label className="text-foreground mb-1 block text-sm font-semibold">Lineage Notes</label>
  <Textarea
  

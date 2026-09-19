@@ -130,7 +130,12 @@ export default function PapersSection({ horseId, horseName, papers, isOwner = fa
             </p>
 
             {papers.length === 0 ? (
-                <div className="paper-plate rounded-md p-6 text-center" style={PARCHMENT_INK}>
+                <div
+                    // A ruled note, not a frame: the plate's 4:3 proportion is for
+                    // documents, and an empty folder is two lines, not a poster.
+                    className="paper-plate rounded-md px-6 py-5 text-center"
+                    style={{ ...PARCHMENT_INK, aspectRatio: "auto" }}
+                >
                     <p className="m-0 text-sm font-medium">No papers filed yet.</p>
                     <p className="text-muted-foreground m-0 mt-1 text-xs">
                         The breeding certificate that came with {horseName}, registry papers, the
@@ -144,13 +149,17 @@ export default function PapersSection({ horseId, horseName, papers, isOwner = fa
                         const pdf = isPdf(p.mime);
                         const reelIndex = pdf ? -1 : imagePapers.findIndex((x) => x.id === p.id);
                         return (
-                            <li key={p.id} className="flex flex-col gap-2" style={PARCHMENT_INK}>
+                            <li key={p.id} className="flex flex-col gap-2">
+                                {/* The FRAME is cream in both themes (a document is a
+                                    document), so its ink is pinned; the caption below
+                                    sits on the card and follows the theme. */}
                                 {pdf ? (
                                     <a
                                         href={p.url}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="paper-frame block no-underline"
+                                        style={PARCHMENT_INK}
                                         aria-label={`Open ${p.title} (PDF)`}
                                     >
                                         <div className="paper-plate">
@@ -165,7 +174,8 @@ export default function PapersSection({ horseId, horseName, papers, isOwner = fa
                                     <button
                                         type="button"
                                         onClick={() => setLightbox(reelIndex)}
-                                        className="paper-frame block w-full cursor-zoom-in p-0 text-left"
+                                        className="paper-frame block w-full cursor-zoom-in text-left"
+                                        style={PARCHMENT_INK}
                                         aria-label={`View ${p.title} full size`}
                                     >
                                         <div className="paper-frame-inner">
