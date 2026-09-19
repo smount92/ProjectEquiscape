@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 
 import type { DirectoryEntry } from "@/app/actions/art-studio";
 import { Input } from "@/components/ui/input";
+import { canonicalFacets, sameFacet } from "@/lib/studio/facets";
 import { serviceTypesOffered } from "@/lib/studio/services";
 import { Chip, StudioStatusPill } from "./StudioBits";
 
@@ -22,13 +23,14 @@ export default function StudioDirectory({ studios }: { studios: DirectoryEntry[]
     const [status, setStatus] = useState<"all" | "open" | "waitlist" | "closed">("all");
     const [service, setService] = useState("all");
 
+    // Specialties were free text before the pick-list, so stored values
+    // carry spelling variants of one idea; fold them (lib/studio/facets).
     const allServices = useMemo(() => {
-        const set = new Set<string>();
+        const raw: string[] = [];
         for (const studio of studios) {
-            for (const type of serviceTypesOffered(studio.services)) set.add(type);
-            for (const specialty of studio.specialties) set.add(specialty);
+            raw.push(...serviceTypesOffered(studio.services), ...studio.specialties);
         }
-        return [...set].sort();
+        return canonicalFacets(raw).sort((a, b) => a.localeCompare(b));
     }, [studios]);
 
     const filtered = useMemo(() => {
@@ -38,8 +40,8 @@ export default function StudioDirectory({ studios }: { studios: DirectoryEntry[]
 
             if (service !== "all") {
                 const offers =
-                    studio.services.some((s) => s.open && s.type === service) ||
-                    studio.specialties.includes(service);
+                    studio.services.some((s) => s.open && sameFacet(s.type, service)) ||
+                    studio.specialties.some((s) => sameFacet(s, service));
                 if (!offers) return false;
             }
 

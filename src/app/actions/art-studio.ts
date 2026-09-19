@@ -750,7 +750,14 @@ export interface DirectoryEntry extends ArtistProfile {
  * studios who cannot take work is a list nobody scrolls.
  */
 export async function browseArtists(): Promise<DirectoryEntry[]> {
-    const supabase = await createClient();
+    // The directory is a PUBLIC page and everything on a card is public
+    // information (studio name, artist alias and avatar as shown on their
+    // profile, how many of their slots are taken, how much finished work
+    // is on the platform). Read it as the server, not as the viewer:
+    // the `users` join and the commission/log counts are RLS-gated for
+    // anon, so a visitor arriving from an artist's Instagram saw every
+    // studio as "@Unknown" with "0 of 5 slots filled" (2026-09-18).
+    const supabase = getAdminClient() as unknown as Awaited<ReturnType<typeof createClient>>;
 
     const { data } = await supabase
         .from("artist_profiles")

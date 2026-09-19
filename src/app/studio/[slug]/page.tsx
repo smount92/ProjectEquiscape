@@ -25,6 +25,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import { intakeFor, slotState } from "@/lib/studio/pipeline";
+import { canonicalFacets } from "@/lib/studio/facets";
 import { priceRangeLabel, serviceLabel } from "@/lib/studio/services";
 import { turnaroundLabel } from "@/lib/studio/terms";
 
@@ -364,13 +365,13 @@ export default async function StudioPage({
                         {profile.mediums.length > 0 && (
                             <LedgerRow
                                 label="Mediums"
-                                value={profile.mediums.join(", ")}
+                                value={canonicalFacets(profile.mediums).join(", ")}
                             />
                         )}
                         {profile.scalesOffered.length > 0 && (
                             <LedgerRow
                                 label="Scales"
-                                value={profile.scalesOffered.join(", ")}
+                                value={canonicalFacets(profile.scalesOffered).join(", ")}
                             />
                         )}
                     </div>
