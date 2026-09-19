@@ -88,7 +88,7 @@ export default function MakingChapter({
                             {pending} record{pending === 1 ? "" : "s"} awaiting your review ·{" "}
                         </span>
                     ) : null}
-                    {momentCount > 0 ? `${momentCount} moment${momentCount === 1 ? "" : "s"} · ` : ""}
+                    {momentCount > 0 ? `${momentCount} photo${momentCount === 1 ? "" : "s"} · ` : ""}
                     open ▾
                 </span>
             </summary>

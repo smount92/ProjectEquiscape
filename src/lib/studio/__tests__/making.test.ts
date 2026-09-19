@@ -1,6 +1,9 @@
 import { describe, it, expect } from "vitest";
 
 import {
+    WORK_TYPE_FOR_DISCIPLINE,
+    dateOrderError,
+    parseLooseDate,
     DISCIPLINE_PRESETS,
     LEGACY_STAGE_LABELS,
     MAX_STAGE_LABEL,
@@ -106,5 +109,33 @@ describe("creditLabel — a claim is labeled a claim", () => {
         expect(
             creditLabel({ recordedBy: "owner", ownerConfirmedAt: null, artistIsOwner: false }).verified,
         ).toBe(false);
+    });
+});
+
+describe("parseLooseDate", () => {
+    const today = new Date("2026-09-18T12:00:00Z");
+    it("takes a year, a year-month, or a full date", () => {
+        expect(parseLooseDate("2011", today)).toEqual({ iso: "2011-01-01" });
+        expect(parseLooseDate("2019-3", today)).toEqual({ iso: "2019-03-01" });
+        expect(parseLooseDate("2019-03-14", today)).toEqual({ iso: "2019-03-14" });
+        expect(parseLooseDate("  ", today)).toEqual({ iso: null });
+        expect(parseLooseDate(null, today)).toEqual({ iso: null });
+    });
+    it("refuses nonsense and the future, with a sentence", () => {
+        expect(parseLooseDate("March 2019", today).error).toMatch(/2019-03/);
+        expect(parseLooseDate("2019-13", today).error).toMatch(/look right/);
+        expect(parseLooseDate("2019-02-30", today).error).toMatch(/look right/);
+        expect(parseLooseDate("2027", today).error).toMatch(/future/);
+        expect(parseLooseDate("2026-09-19", today).iso).toBe("2026-09-19"); // tomorrow's date in another zone
+    });
+    it("catches started after finished", () => {
+        expect(dateOrderError("2020-05-01", "2020-04-01")).toMatch(/after finished/);
+        expect(dateOrderError("2020-04-01", "2020-05-01")).toBeNull();
+        expect(dateOrderError(null, "2020-05-01")).toBeNull();
+    });
+    it("maps every ladder with a billable counterpart to a rate-card type", () => {
+        expect(WORK_TYPE_FOR_DISCIPLINE.finishwork).toBe("Finishwork (repaint)");
+        expect(WORK_TYPE_FOR_DISCIPLINE.hair).toBe("Hair / mane & tail");
+        expect(WORK_TYPE_FOR_DISCIPLINE.casting).toBeUndefined();
     });
 });

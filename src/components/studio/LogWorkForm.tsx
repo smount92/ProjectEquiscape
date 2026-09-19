@@ -27,6 +27,9 @@ import { uploadImageWithRetry } from "@/lib/utils/uploadWithRetry";
 import { createWorkRecord, addWorkMoments, searchWorkTargets } from "@/app/actions/work-records";
 import { SERVICE_TYPES } from "@/lib/studio/services";
 import {
+    WORK_TYPE_FOR_DISCIPLINE,
+    dateOrderError,
+    parseLooseDate,
     DISCIPLINE_PRESETS,
     MAX_IMAGES_PER_MOMENT,
     MAX_MOMENT_NOTES,
@@ -80,7 +83,9 @@ export default function LogWorkForm({
     const [busy, setBusy] = useState(false);
     const [progress, setProgress] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [doneHorse, setDoneHorse] = useState<{ id: string; name: string } | null>(null);
+    const [doneHorse, setDoneHorse] = useState<{ id: string; name: string; failed: number; skipped: number } | null>(null);
+    /** Something the member should know that isn't an error: a photo cap hit, a stage left off. */
+    const [notice, setNotice] = useState<string | null>(null);
     const previewUrls = useRef(new Map<File, string>());
 
     // The other half of "yours or a client's": search every stable the
@@ -127,6 +132,9 @@ export default function LogWorkForm({
             return;
         }
         setDiscipline(key);
+        // The ladder says what the work was; the rate-card type follows.
+        const wt = WORK_TYPE_FOR_DISCIPLINE[key];
+        if (wt) setWorkType(wt);
         setBuckets((prev) => [
             ...prev.filter((b) => b.files.length > 0),
             ...bucketsFromPreset(preset.stages),
@@ -143,6 +151,13 @@ export default function LogWorkForm({
     // vanished (Amanda's Ukko bug, 2026-09-01).
     const addFiles = (id: number, picked: File[]) => {
         if (picked.length === 0) return;
+        const have = buckets.find((b) => b.id === id)?.files.length ?? 0;
+        const room = Math.max(0, MAX_IMAGES_PER_MOMENT - have);
+        if (picked.length > room) {
+            setNotice(
+                `Each stage takes ${MAX_IMAGES_PER_MOMENT} photos — ${picked.length - room} of the ones you picked were left off. Add another stage for the rest.`,
+            );
+        }
         setBuckets((prev) =>
             prev.map((b) =>
                 b.id === id
@@ -157,7 +172,14 @@ export default function LogWorkForm({
         if (totalPhotos === 0 && !summary.trim()) {
             return setError("Add at least a photo or a summary — an empty record helps no one.");
         }
+        const started = parseLooseDate(claimedStart);
+        if (started.error) return setError(`Started: ${started.error}`);
+        const finished = parseLooseDate(dateCompleted);
+        if (finished.error) return setError(`Finished: ${finished.error}`);
+        const order = dateOrderError(started.iso, finished.iso);
+        if (order) return setError(order);
         setError(null);
+        setNotice(null);
         setBusy(true);
         try {
             setProgress("Filing the work record…");
@@ -165,8 +187,8 @@ export default function LogWorkForm({
                 horseId,
                 workType,
                 summary: summary.trim() || undefined,
-                claimedStart: claimedStart || null,
-                dateCompleted: dateCompleted || null,
+                claimedStart: started.iso,
+                dateCompleted: finished.iso,
             });
             if (!rec.success || !rec.logId) throw new Error(rec.error ?? "Could not create the record.");
 
@@ -176,7 +198,7 @@ export default function LogWorkForm({
             const failed: string[] = [];
             for (const bucket of buckets) {
                 if (bucket.files.length === 0) continue;
-                const stage = bucket.label.trim().slice(0, MAX_STAGE_LABEL) || "In progress";
+                const stage = bucket.label.trim().slice(0, MAX_STAGE_LABEL) || "progress";
                 const images: { path: string; stage: string; caption?: string; claimedDate?: string | null }[] = [];
                 for (let i = 0; i < bucket.files.length; i++) {
                     setProgress(`Uploading “${stage}” photo ${i + 1} of ${bucket.files.length}…`);
@@ -207,15 +229,17 @@ export default function LogWorkForm({
                 if (images.length > 0) moments.push({ images });
             }
 
+            let skipped = 0;
             if (moments.length > 0) {
                 setProgress("Building the reel…");
                 const res = await addWorkMoments(rec.logId, moments);
                 if (!res.success) throw new Error(res.error ?? "Photos uploaded but the reel failed to save.");
+                skipped = res.skipped ?? 0;
             }
             if (failed.length > 0) {
-                setError(`Saved, but ${failed.length} photo${failed.length === 1 ? "" : "s"} failed to upload: ${failed.join(", ")}.`);
+                setError(`${failed.length} photo${failed.length === 1 ? "" : "s"} failed to upload: ${failed.join(", ")}.`);
             }
-            setDoneHorse({ id: horseId, name: chosen.name });
+            setDoneHorse({ id: horseId, name: chosen.name, failed: failed.length, skipped });
             setProgress(null);
         } catch (e) {
             setProgress(null);
@@ -229,8 +253,22 @@ export default function LogWorkForm({
         return (
             <div className="border-input bg-card rounded-2xl border p-6 text-center">
                 <p className="text-foreground m-0 font-serif text-xl font-bold">
-                    ✓ {doneHorse.name}&rsquo;s work record is on your wall.
+                    {doneHorse.failed > 0
+                        ? `✓ ${doneHorse.name}'s work record is filed — but ${doneHorse.failed} photo${doneHorse.failed === 1 ? "" : "s"} didn't upload.`
+                        : `✓ ${doneHorse.name}'s work record is on your wall.`}
                 </p>
+                {doneHorse.failed > 0 && (
+                    <p className="text-destructive mt-2 text-sm">
+                        The record and its credit are saved without those photos. Try them again
+                        from The Making, or send us a message if it keeps happening.
+                    </p>
+                )}
+                {doneHorse.skipped > 0 && (
+                    <p className="text-muted-foreground mt-2 text-sm">
+                        {doneHorse.skipped} stage{doneHorse.skipped === 1 ? " was" : "s were"} left off
+                        — a reel holds 40 stages at most.
+                    </p>
+                )}
                 <p className="text-secondary-foreground mt-2 text-sm">
                     {studioName} is credited
                     {chosen?.ownedByMe
@@ -386,7 +424,9 @@ export default function LogWorkForm({
                         <label className="text-sm font-medium">
                             Started
                             <input
-                                type="date"
+                                type="text"
+                                inputMode="numeric"
+                                placeholder="2019 or 2019-03"
                                 value={claimedStart}
                                 onChange={(e) => setClaimedStart(e.target.value)}
                                 className="border-input bg-background mt-1 block w-full rounded-md border px-3 py-2 text-sm"
@@ -395,7 +435,9 @@ export default function LogWorkForm({
                         <label className="text-sm font-medium">
                             Finished
                             <input
-                                type="date"
+                                type="text"
+                                inputMode="numeric"
+                                placeholder="2019-11 or 2019-11-04"
                                 value={dateCompleted}
                                 onChange={(e) => setDateCompleted(e.target.value)}
                                 className="border-input bg-background mt-1 block w-full rounded-md border px-3 py-2 text-sm"
@@ -537,6 +579,11 @@ export default function LogWorkForm({
             </section>
 
             {error && <p className="text-destructive m-0 text-sm font-medium">{error}</p>}
+            {notice && (
+                <p className="border-warning/40 bg-warning/10 m-0 rounded-md border px-3 py-2 text-sm" role="status">
+                    {notice}
+                </p>
+            )}
             <div className="flex items-center gap-4">
                 <Button onClick={submit} disabled={busy || !horseId}>
                     {busy ? (progress ?? "Saving…") : `File the work record${totalPhotos ? ` + ${totalPhotos} photo${totalPhotos === 1 ? "" : "s"}` : ""}`}

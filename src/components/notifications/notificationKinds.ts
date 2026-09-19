@@ -80,6 +80,7 @@ const TYPE_KIND: Record<string, NotificationKindId> = {
     // ── Market, deals, transfers, commissions ──
     offer: "market",
     commission: "market",
+    work_record: "market",
     transfer: "market",
     transfer_claimed: "market",
     marketplace_sale: "market",
@@ -156,6 +157,7 @@ const TYPE_ICON: Record<string, string> = {
     // Market
     offer: "🤝",
     commission: "🎨",
+    work_record: "🖌️",
     transfer: "📦",
     transfer_claimed: "📦",
     marketplace_sale: "💰",

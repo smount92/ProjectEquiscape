@@ -35,7 +35,9 @@ import {
     MAX_MOMENTS_PER_RECORD,
     MAX_MOMENT_NOTES,
     MAX_STAGE_LABEL,
+    dateOrderError,
     isValidMakingPath,
+    parseLooseDate,
 } from "@/lib/studio/making";
 
 // ══════════════════════════════════════════════════════════════
@@ -132,8 +134,9 @@ const createSchema = z.object({
     workType: z.string().min(2).max(60),
     summary: z.string().max(2000).optional(),
     materialsUsed: z.string().max(500).optional(),
-    claimedStart: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
-    dateCompleted: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+    // A year, year-month or full date; normalised below (parseLooseDate).
+    claimedStart: z.string().regex(/^\d{4}(?:-\d{1,2})?(?:-\d{1,2})?$/).nullable().optional(),
+    dateCompleted: z.string().regex(/^\d{4}(?:-\d{1,2})?(?:-\d{1,2})?$/).nullable().optional(),
 });
 
 /**
@@ -155,6 +158,15 @@ export async function createWorkRecord(input: z.input<typeof createSchema>): Pro
 
     const allowed = await checkRateLimit("work-record-create", 20, 60 * 24, user.id);
     if (!allowed) return { success: false, error: "Daily limit reached — try again tomorrow." };
+
+    // "2011" is an honest answer for old work; the DATE column gets Jan 1.
+    // The future and start-after-finish are typos, not timelines.
+    const started = parseLooseDate(data.claimedStart);
+    if (started.error) return { success: false, error: `Started: ${started.error}` };
+    const finished = parseLooseDate(data.dateCompleted);
+    if (finished.error) return { success: false, error: `Finished: ${finished.error}` };
+    const order = dateOrderError(started.iso, finished.iso);
+    if (order) return { success: false, error: order };
 
     // The vocabulary is the studio services list; free text falls to it.
     const workType = (SERVICE_TYPES as readonly string[]).includes(data.workType)
@@ -190,8 +202,8 @@ export async function createWorkRecord(input: z.input<typeof createSchema>): Pro
             recorded_by: "artist",
             summary: data.summary ? decodeHtmlEntities(sanitizeText(data.summary)) : null,
             materials_used: data.materialsUsed ? decodeHtmlEntities(sanitizeText(data.materialsUsed)) : null,
-            claimed_start: data.claimedStart ?? null,
-            date_completed: data.dateCompleted ?? null,
+            claimed_start: started.iso,
+            date_completed: finished.iso,
         })
         .select("id")
         .single()) as { data: { id: string } | null; error: DbError };
@@ -523,7 +535,9 @@ export async function getMakingForHorse(horseId: string): Promise<WorkRecordView
             !viewerIsOwner
         )
             continue;
-        if (!(l.reel_public ?? true) && !viewerIsArtist && !viewerIsOwner) continue;
+        // 202's promise: hiding the reel hides the PHOTOS; the credit and
+        // dates are provenance and stay. Parties still see their own reel.
+        const reelHidden = !(l.reel_public ?? true) && !viewerIsArtist && !viewerIsOwner;
 
         out.push({
             id: l.id,
@@ -540,7 +554,7 @@ export async function getMakingForHorse(horseId: string): Promise<WorkRecordView
             disavowedAt: l.disavowed_at ?? null,
             reelPublic: l.reel_public ?? true,
             commissionId: l.commission_id ?? null,
-            moments: byLog.get(l.id) ?? [],
+            moments: reelHidden ? [] : (byLog.get(l.id) ?? []),
             viewerIsArtist,
             viewerIsOwner,
             artistIsOwner,
@@ -616,23 +630,50 @@ async function stamp(
 }
 
 export async function confirmWorkRecord(logId: string, horseId?: string) {
+    const { user } = await requireAuth();
     const res = await stamp("confirm_work_record", logId);
     if (res.success && horseId) {
         revalidatePath(`/stable/${horseId}`);
         revalidatePath(`/community/${horseId}`);
-        // Tell the artist their credit is now verified.
+        // The stamp is the COUNTERPARTY's signature (204): an owner
+        // confirms an artist's record, an artist confirms an owner's.
+        // Tell whoever wrote the record, never the person who just
+        // pressed confirm.
         after(async () => {
             const admin = getAdminClient();
             const { data: log } = (await loose(admin)
                 .from("customization_logs")
-                .select("artist_user_id, artist_alias, horse_id")
+                .select("artist_user_id, artist_alias, horse_id, recorded_by")
                 .eq("id", logId)
-                .single()) as { data: { artist_user_id: string | null; horse_id: string } | null };
-            if (log?.artist_user_id) {
+                .single()) as {
+                data: {
+                    artist_user_id: string | null;
+                    artist_alias: string | null;
+                    horse_id: string;
+                    recorded_by: string | null;
+                } | null;
+            };
+            if (!log) return;
+            let recipient: string | null = null;
+            let content: string;
+            if (log.recorded_by === "owner") {
+                const { data: horse } = (await loose(admin)
+                    .from("user_horses")
+                    .select("owner_id")
+                    .eq("id", log.horse_id)
+                    .single()) as { data: { owner_id: string } | null };
+                recipient = horse?.owner_id ?? null;
+                content = `${log.artist_alias ?? "The artist"} confirmed the credit you recorded — it's now verified. ✓`;
+            } else {
+                recipient = log.artist_user_id;
+                content = "The owner confirmed your work record — the credit is now verified. ✓";
+            }
+            if (recipient && recipient !== user.id) {
                 await createNotification({
-                    userId: log.artist_user_id,
+                    userId: recipient,
+                    actorId: user.id,
                     type: "work_record",
-                    content: "The owner confirmed your work record — the credit is now verified. ✓",
+                    content,
                     horseId: log.horse_id,
                     linkUrl: `/community/${log.horse_id}`,
                 });
@@ -670,11 +711,15 @@ export async function setWorkRecordReelPublic(logId: string, isPublic: boolean, 
 export async function deleteWorkRecord(logId: string, horseId?: string) {
     const { supabase } = await requireAuth();
     if (!z.string().uuid().safeParse(logId).success) return { success: false, error: "Bad id." };
-    const { error } = (await loose(supabase)
+    const { data, error } = (await loose(supabase)
         .from("customization_logs")
         .delete()
-        .eq("id", logId)) as { error: DbError };
+        .eq("id", logId)
+        .select("id")) as { data: { id: string }[] | null; error: DbError };
     if (error) return { success: false, error: "Could not delete the record." };
+    // PostgREST answers a delete RLS filtered away with no error and no
+    // rows — that is "not yours to withdraw", not "withdrawn".
+    if (!data || data.length === 0) return { success: false, error: "That record isn't yours to withdraw." };
     if (horseId) {
         revalidatePath(`/stable/${horseId}`);
         revalidatePath(`/community/${horseId}`);

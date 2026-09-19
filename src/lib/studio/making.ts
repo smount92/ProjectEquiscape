@@ -149,3 +149,53 @@ export function creditLabel(rec: {
     if (rec.recordedBy === "owner") return { label: "Recorded by owner", verified: false };
     return { label: "Recorded by artist — awaiting owner", verified: false };
 }
+
+// ── Dates on old work ─────────────────────────────────────────────────
+// Nobody remembers the day they finished a piece in 2011. A year, or a
+// year and month, is an honest answer; the DATE column gets the first of
+// it. Future dates are refused — work records are for finished work.
+
+export function parseLooseDate(
+    input: string | null | undefined,
+    today: Date = new Date(),
+): { iso: string | null; error?: string } {
+    const s = (input ?? "").trim();
+    if (!s) return { iso: null };
+    const m = /^(\d{4})(?:-(\d\d?))?(?:-(\d\d?))?$/.exec(s);
+    if (!m) {
+        return { iso: null, error: "Use a year, a year and month, or a full date — 2019, 2019-03 or 2019-03-14." };
+    }
+    const y = Number(m[1]);
+    const mo = m[2] ? Number(m[2]) : 1;
+    const d = m[3] ? Number(m[3]) : 1;
+    if (y < 1950 || mo < 1 || mo > 12 || d < 1 || d > 31) {
+        return { iso: null, error: "That date doesn't look right." };
+    }
+    const iso = `${y}-${String(mo).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
+    const dt = new Date(`${iso}T00:00:00Z`);
+    if (Number.isNaN(dt.getTime()) || dt.getUTCDate() !== d) {
+        return { iso: null, error: "That date doesn't look right." };
+    }
+    if (dt.getTime() > today.getTime() + 86_400_000) {
+        return { iso: null, error: "That's in the future — work records are for finished work." };
+    }
+    return { iso };
+}
+
+/** Started after finished is a typo, not a timeline. */
+export function dateOrderError(start: string | null, finished: string | null): string | null {
+    if (start && finished && start > finished) return "Started comes after finished — check the dates.";
+    return null;
+}
+
+/** Picking a ladder says what the work was; the work type follows unless
+ *  the ladder has no billable counterpart (casting). */
+export const WORK_TYPE_FOR_DISCIPLINE: Record<string, string> = {
+    finishwork: "Finishwork (repaint)",
+    custom: "Custom (sculpting)",
+    sculpture: "Custom (sculpting)",
+    china: "China painting",
+    hair: "Hair / mane & tail",
+    tack: "Tack making",
+    restoration: "Repair & restoration",
+};

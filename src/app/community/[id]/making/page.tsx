@@ -93,7 +93,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
             ? [
                   records[0].workType,
                   artists.length ? `by ${artists.join(", ")}` : null,
-                  momentCount ? `${momentCount} moments, start to finished` : null,
+                  momentCount ? `${momentCount} photos, start to finished` : null,
               ]
                   .filter(Boolean)
                   .join(" · ")
@@ -159,7 +159,7 @@ export default async function MakingPage({ params }: { params: Promise<{ id: str
             ) : (
                 <div className="border-input bg-card text-muted-foreground rounded-xl border border-dashed px-5 py-8 text-center text-sm">
                     No making-of story here yet. If you finished this horse, log the work
-                    from your <Link href="/studio/dashboard" className="text-forest hover:underline">studio</Link>.
+                    from your <Link href="/studio" className="text-forest hover:underline">studio</Link>.
                 </div>
             )}
         </main>
