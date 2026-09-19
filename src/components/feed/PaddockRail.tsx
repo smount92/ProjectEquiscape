@@ -111,6 +111,7 @@ function UpcomingEvents({ events }: { events: MHHEvent[] }) {
 const ROOMS: { href: string; icon: string; label: string; blurb: string }[] = [
     { href: "/community/help-id", icon: "🔍", label: "Help ID", blurb: "Name that model" },
     { href: "/discover", icon: "👥", label: "Members", blurb: "Find collectors" },
+    { href: "/studio", icon: "🎨", label: "Art Studios", blurb: "Find an artist" },
 ];
 
 function Rooms() {

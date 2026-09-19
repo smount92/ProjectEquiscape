@@ -107,7 +107,7 @@ export default function RootLayout({
  <meta name="apple-mobile-web-app-capable" content="yes" />
  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
  </head>
- <body className="w-full overflow-x-hidden antialiased">
+ <body className="w-full overflow-x-clip antialiased">
  <SerwistProvider swUrl="/serwist/sw.js">
  <SimpleModeProvider>
  <ToastProvider>

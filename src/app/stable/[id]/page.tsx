@@ -437,25 +437,17 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  )}
 
  {/* Two-column layout: Gallery | Ledger Card */}
- <div className="animate-fade-in-up grid grid-cols-1 gap-8 lg:grid-cols-[1.5fr_1fr] lg:gap-12">
- {/* Left: Gallery, then The Making — the visual column reads
-     what she looks like now, then how she came to be. */}
- <div>
+ <div className="animate-fade-in-up grid grid-cols-1 gap-8 lg:grid-cols-[5fr_7fr] lg:items-start lg:gap-12">
+ {/* Left: the gallery, and only the gallery — it stays in view while the
+     ledger scrolls beside it, so the column never reads as empty. */}
+ <div className="lg:sticky lg:top-[calc(var(--header-height,64px)+1rem)] lg:self-start">
  <div className="overflow-hidden rounded-2xl shadow-md">
  <PassportGallery images={galleryImages} />
  </div>
- <MakingChapter
- records={makingRecords}
- ownerId={horse.owner_id}
- horseId={horseId}
- showControls
- canAddCredit
- />
- <HorseDocuments horseId={horseId} documents={horseDocuments} isOwner />
  </div>
 
  {/* Right: The Ledger Card */}
- <div className="flex min-h-[100%] flex-col gap-2 rounded-3xl border border-input bg-[#C8B596] px-6 py-8 shadow-sm md:px-10" style={PARCHMENT_INK}>
+ <div className="flex flex-col gap-2 rounded-3xl border border-input bg-[#C8B596] px-6 py-8 shadow-sm md:px-10" style={PARCHMENT_INK}>
  {/* Title */}
  <div>
  <h1 className="mb-1 font-serif text-4xl font-bold leading-tight tracking-tight text-foreground md:text-5xl">
@@ -489,8 +481,8 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  )}
  </div>
 
- {/* Model Details Card */}
- <div className="rounded-lg border border-border-tan/30 bg-card/20 p-5">
+ {/* Model Details Card — two columns of rows on desktop */}
+ <div className="rounded-lg border border-border-tan/30 bg-card/20 p-5 lg:grid lg:grid-cols-2 lg:gap-x-8 lg:[&>h3]:col-span-2">
               <h3 className="mb-3 flex items-center gap-2 text-xs font-semibold tracking-widest text-secondary-foreground uppercase">
                 <span aria-hidden="true">📋</span>{" "}
  {(horse.asset_category ||"model") ==="model"
@@ -794,6 +786,9 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  </div>
  )}
 
+ {/* Documentation — breed notes and reference links a judge can check */}
+ <HorseDocuments horseId={horseId} documents={horseDocuments} isOwner />
+
  {/* Condition Ledger — every grade this model has carried.
   Renders nothing until the first regrade. */}
  <ConditionLedger entries={conditionLedger} />
@@ -812,6 +807,15 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
 
  {/* MHH Qualification Cards (Phase F) — renders nothing when empty */}
  <QualificationCardsSection cards={qualificationCards} />
+
+ {/* The Making — how she came to be: sculptor, prep, paint, restoration */}
+ <MakingChapter
+ records={makingRecords}
+ ownerId={horse.owner_id}
+ horseId={horseId}
+ showControls
+ canAddCredit
+ />
 
  {/* Pedigree Card */}
  <PedigreeCard horseId={horseId} pedigree={pedigree} isOwner={true} />

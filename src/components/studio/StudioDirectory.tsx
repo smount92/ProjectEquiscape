@@ -18,10 +18,22 @@ import { Chip, StudioStatusPill } from "./StudioBits";
  * leads with whoever edited their profile most recently rewards fiddling
  * rather than craft.
  */
-export default function StudioDirectory({ studios }: { studios: DirectoryEntry[] }) {
-    const [search, setSearch] = useState("");
-    const [status, setStatus] = useState<"all" | "open" | "waitlist" | "closed">("all");
+type SortKey = "open" | "finished" | "name" | "newest";
+type Status = "all" | "open" | "waitlist" | "closed";
+
+const SORTS: { key: SortKey; label: string }[] = [
+    { key: "open", label: "Open first" },
+    { key: "finished", label: "Most finished work" },
+    { key: "newest", label: "Newest studios" },
+    { key: "name", label: "A to Z" },
+];
+
+export default function StudioDirectory({ studios, initialQuery = "" }: { studios: DirectoryEntry[]; initialQuery?: string }) {
+    const [search, setSearch] = useState(initialQuery);
+    const [status, setStatus] = useState<Status>("all");
     const [service, setService] = useState("all");
+    const [scale, setScale] = useState("all");
+    const [sort, setSort] = useState<SortKey>("open");
 
     // Specialties were free text before the pick-list, so stored values
     // carry spelling variants of one idea; fold them (lib/studio/facets).
@@ -32,10 +44,12 @@ export default function StudioDirectory({ studios }: { studios: DirectoryEntry[]
         }
         return canonicalFacets(raw).sort((a, b) => a.localeCompare(b));
     }, [studios]);
+    const allScales = useMemo(() => canonicalFacets(studios.flatMap((s) => s.scalesOffered)), [studios]);
 
     const filtered = useMemo(() => {
         const q = search.trim().toLowerCase();
-        return studios.filter((studio) => {
+        const hit = (v: string | null | undefined) => !!v && v.toLowerCase().includes(q);
+        const list = studios.filter((studio) => {
             if (status !== "all" && studio.effectiveStatus !== status) return false;
 
             if (service !== "all") {
@@ -44,33 +58,65 @@ export default function StudioDirectory({ studios }: { studios: DirectoryEntry[]
                     studio.specialties.some((s) => sameFacet(s, service));
                 if (!offers) return false;
             }
+            if (scale !== "all" && !studio.scalesOffered.some((s) => sameFacet(s, scale))) return false;
 
             if (!q) return true;
+            // Everything the artist wrote about themselves is searchable,
+            // not just the name: "restoration", "traditional", "resin",
+            // "vintage customs" all find the right bench.
             return (
-                studio.studioName.toLowerCase().includes(q) ||
-                studio.ownerAlias.toLowerCase().includes(q) ||
-                studio.specialties.some((s) => s.toLowerCase().includes(q)) ||
-                studio.services.some((s) => s.type.toLowerCase().includes(q)) ||
-                studio.mediums.some((m) => m.toLowerCase().includes(q))
+                hit(studio.studioName) ||
+                hit(studio.ownerAlias) ||
+                hit(studio.bioArtist) ||
+                hit(studio.statusNote) ||
+                studio.specialties.some(hit) ||
+                studio.services.some((s) => hit(s.type)) ||
+                studio.mediums.some(hit) ||
+                studio.scalesOffered.some(hit) ||
+                studio.acceptingTypes.some(hit)
             );
         });
-    }, [studios, search, status, service]);
+        const byName = (a: DirectoryEntry, b: DirectoryEntry) => a.studioName.localeCompare(b.studioName);
+        switch (sort) {
+            case "finished":
+                return [...list].sort((a, b) => b.finishedCount - a.finishedCount || byName(a, b));
+            case "name":
+                return [...list].sort(byName);
+            case "newest":
+                return [...list].sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? "") || byName(a, b));
+            default:
+                return list; // the server order: open first, then by finished work
+        }
+    }, [studios, search, status, service, scale, sort]);
 
     const openCount = studios.filter((s) => s.effectiveStatus === "open").length;
+    const filtering = search.trim() !== "" || status !== "all" || service !== "all" || scale !== "all";
+    const clear = () => {
+        setSearch("");
+        setStatus("all");
+        setService("all");
+        setScale("all");
+    };
+
+    const chip = (active: boolean, onClick: () => void, label: string, key?: string) => (
+        <button key={key ?? label} type="button" onClick={onClick} className={`studio-chip ${active ? "active" : ""}`} aria-pressed={active}>
+            {label}
+        </button>
+    );
 
     return (
         <div>
             <div className="bg-card border-input sticky top-[calc(var(--header-height)+0.75rem)] z-10 mb-6 rounded-xl border p-4 shadow-md backdrop-blur-sm">
                 <Input
                     type="search"
-                    placeholder="Search studios by name, artist, service or medium…"
+                    placeholder="Search by studio, artist, service, medium or scale…"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     aria-label="Search studios"
                 />
 
-                <div className="mt-3 flex flex-wrap items-center gap-3">
-                    <div className="flex flex-wrap gap-1.5">
+                <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+                    <div className="flex flex-wrap gap-1.5" role="group" aria-label="Availability">
                         {(
                             [
                                 ["all", `All (${studios.length})`],
@@ -78,34 +124,53 @@ export default function StudioDirectory({ studios }: { studios: DirectoryEntry[]
                                 ["waitlist", "Waitlist"],
                                 ["closed", "Closed"],
                             ] as const
-                        ).map(([key, label]) => (
-                            <button
-                                key={key}
-                                type="button"
-                                onClick={() => setStatus(key)}
-                                className={`studio-chip ${status === key ? "active" : ""}`}
-                            >
-                                {label}
-                            </button>
-                        ))}
+                        ).map(([key, label]) => chip(status === key, () => setStatus(key), label, key))}
                     </div>
-
-                    {allServices.length > 0 && (
+                    <label className="text-secondary-foreground ml-auto flex items-center gap-2 text-xs">
+                        Sort
                         <select
-                            className="border-input bg-card ring-offset-background focus:ring-ring flex h-10 max-w-[240px] rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-offset-2 focus:outline-none"
-                            value={service}
-                            onChange={(e) => setService(e.target.value)}
-                            aria-label="Filter by service type"
+                            className="border-input bg-card text-foreground h-9 rounded-md border px-2 text-sm"
+                            value={sort}
+                            onChange={(e) => setSort(e.target.value as SortKey)}
+                            aria-label="Sort studios"
                         >
-                            <option value="all">Any service</option>
-                            {allServices.map((s) => (
-                                <option key={s} value={s}>
-                                    {s}
+                            {SORTS.map((o) => (
+                                <option key={o.key} value={o.key}>
+                                    {o.label}
                                 </option>
                             ))}
                         </select>
-                    )}
+                    </label>
                 </div>
+
+                {allServices.length > 0 && (
+                    <div className="mt-3 flex flex-wrap items-center gap-1.5" role="group" aria-label="Service needed">
+                        <span className="text-secondary-foreground mr-1 text-xs font-semibold tracking-wider uppercase">Need</span>
+                        {chip(service === "all", () => setService("all"), "Anything", "any-service")}
+                        {allServices.map((s) => chip(sameFacet(service, s), () => setService(sameFacet(service, s) ? "all" : s), s))}
+                    </div>
+                )}
+
+                {allScales.length > 1 && (
+                    <div className="mt-2 flex flex-wrap items-center gap-1.5" role="group" aria-label="Scale">
+                        <span className="text-secondary-foreground mr-1 text-xs font-semibold tracking-wider uppercase">Scale</span>
+                        {chip(scale === "all", () => setScale("all"), "Any", "any-scale")}
+                        {allScales.map((s) => chip(sameFacet(scale, s), () => setScale(sameFacet(scale, s) ? "all" : s), s))}
+                    </div>
+                )}
+
+                <p className="text-secondary-foreground m-0 mt-3 text-xs" aria-live="polite">
+                    {filtered.length} of {studios.length} studio{studios.length === 1 ? "" : "s"}
+                    {openCount > 0 && ` · ${openCount} open for commissions`}
+                    {filtering && (
+                        <>
+                            {" · "}
+                            <button type="button" onClick={clear} className="text-forest cursor-pointer border-0 bg-transparent p-0 text-xs font-semibold hover:underline">
+                                Clear filters
+                            </button>
+                        </>
+                    )}
+                </p>
             </div>
 
             {filtered.length === 0 ? (

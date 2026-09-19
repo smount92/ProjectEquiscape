@@ -141,9 +141,15 @@
 }
 
 /* Mobile viewport safety net */
-html, body {
+html {
   max-width: 100vw;
   overflow-x: hidden;
+}
+/* body clips sideways overflow with clip, not hidden: hidden would make
+   body a scroll container and every position: sticky inside it dead
+   (the passport gallery, 2026-09-19). clip only clips. */
+body {
+  overflow-x: clip;
 }
 
 html {
@@ -2266,6 +2272,19 @@ html[data-simple-mode="true"] {
     inset 0 1px 2px rgba(255, 220, 170, 0.22),
     inset 0 -8px 16px rgba(0, 0, 0, 0.35),
     0 3px 12px rgba(46, 30, 18, 0.35);
+}
+
+/* The site header is a .leather-band with the sticky utility; the rule
+   above pins every band to relative and beat the utility, so the header
+   never stuck. Every bar offset by --header-height (Paddock rail, Barns
+   filters, the passport gallery) was built for a header that does. */
+.leather-band.sticky {
+  position: sticky;
+  top: 0;
+}
+header.leather-band {
+  position: sticky;
+  top: 0;
 }
 
 /* stitched saddle-thread border (pairs with .leather-panel / .leather-band) */

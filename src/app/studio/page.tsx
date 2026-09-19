@@ -23,7 +23,9 @@ export const metadata: Metadata = {
     alternates: { canonical: "/studio" },
 };
 
-export default async function StudioDirectoryPage() {
+export default async function StudioDirectoryPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+    // ?q= lets other rooms deep-link a search ("customs", "tack", an artist name)
+    const { q } = await searchParams;
     const supabase = await createClient();
     const {
         data: { user },
@@ -63,7 +65,7 @@ export default async function StudioDirectoryPage() {
                 }
             />
 
-            <StudioDirectory studios={studios} />
+            <StudioDirectory studios={studios} initialQuery={typeof q === "string" ? q.slice(0, 80) : ""} />
 
             <div className="mt-10 grid gap-4 md:grid-cols-2">
                 <div className="border-input bg-card/50 rounded-lg border p-6 backdrop-blur-sm">

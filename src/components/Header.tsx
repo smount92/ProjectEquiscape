@@ -56,10 +56,13 @@ const NAV_LINKS = [
  { href:"/discover", label:"Members", Icon: Users, id:"nav-discover" },
 ];
 
-// Dynamic link that depends on artist slug
+// The studio item depends on who is looking: an artist gets their own
+// studio; everyone else gets the directory. It used to send collectors
+// to "open a studio" setup, so the place to FIND an artist had no way in
+// from the nav (2026-09-19).
 const getStudioLink = (artistSlug: string | null) => ({
- href: artistSlug ?"/studio/dashboard" :"/studio/setup",
- label:"Art Studio",
+ href: artistSlug ?"/studio/dashboard" :"/studio",
+ label: artistSlug ?"My Studio" :"Art Studios",
  Icon: Palette,
  id:"nav-studio",
 });
@@ -646,13 +649,23 @@ export default function Header() {
  <Users size={16} strokeWidth={1.5} /> Members
  </Link>
  <Link
- href={artistSlug ?"/studio/dashboard" :"/studio/setup"}
+ href="/studio"
+ className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+ id="nav-studios-m"
+ onClick={closeMobileMenu}
+ >
+ <Palette size={16} strokeWidth={1.5} /> Art Studios
+ </Link>
+ {artistSlug && (
+ <Link
+ href="/studio/dashboard"
  className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
  id="nav-studio-m"
  onClick={closeMobileMenu}
  >
- <Palette size={16} strokeWidth={1.5} /> Art Studio
+ <Palette size={16} strokeWidth={1.5} /> My Studio
  </Link>
+ )}
  {/* The member's own doors. */}
  <span className="mt-3 mb-0.5 px-2 text-[0.65rem] font-bold tracking-[0.14em] uppercase text-muted-foreground" aria-hidden="true">Yours</span>
  <Link
