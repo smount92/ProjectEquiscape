@@ -140,7 +140,11 @@ function StandingsTable({
                                       <span className="text-muted-foreground">{row.horseName}</span>
                                   ) : (
                                       <Link
-                                          href={`/stable/${row.horseId}`}
+                                          // /stable/ is the owner's page and 404s for anyone
+                                          // else; the public passport is what a rival's row
+                                          // should open (2026-09-19). Your own rows keep the
+                                          // owner view.
+                                          href={row.ownerId === viewerId ? `/stable/${row.horseId}` : `/community/${row.horseId}`}
                                           className="text-foreground no-underline hover:underline"
                                       >
                                           {titlePrefixByHorse.get(row.horseId) && (
