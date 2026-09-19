@@ -10,7 +10,14 @@
  * and the passport, and tested once.
  */
 
-export type PaperKind = "breeding_certificate" | "registration" | "pedigree_chart" | "other";
+export type PaperKind =
+    | "breeding_certificate"
+    | "registration"
+    | "pedigree_chart"
+    | "qualification_card"
+    | "show_photo"
+    | "award"
+    | "other";
 
 export const PAPER_KINDS: { value: PaperKind; label: string; glyph: string; hint: string }[] = [
     {
@@ -31,8 +38,17 @@ export const PAPER_KINDS: { value: PaperKind; label: string; glyph: string; hint
         glyph: "🌳",
         hint: "The family tree as issued or as you keep it.",
     },
+    // 214 — what gets attached to a show record or an accomplishment.
+    { value: "qualification_card", label: "Qualification card", glyph: "🎫", hint: "A NAN or OMEQ card as the show issued it." },
+    { value: "show_photo", label: "Show photo", glyph: "📷", hint: "A photo from the show — the table, the ribbon, the callback." },
+    { value: "award", label: "Award", glyph: "🏆", hint: "A certificate, a plaque, a race chart." },
     { value: "other", label: "Other papers", glyph: "🗂️", hint: "Anything else that belongs with the horse." },
 ];
+
+/** The kinds that make sense on a show record. */
+export const RECORD_PAPER_KINDS: PaperKind[] = ["qualification_card", "show_photo", "award", "other"];
+/** The kinds that make sense on an accomplishment. */
+export const ACCOMPLISHMENT_PAPER_KINDS: PaperKind[] = ["award", "show_photo", "other"];
 
 export const PAPER_KIND_LABELS: Record<string, string> = Object.fromEntries(
     PAPER_KINDS.map((k) => [k.value, k.label]),

@@ -2137,7 +2137,7 @@ p {
   --secondary: #EAE1CD;
   --secondary-foreground: #594A3C;
   --muted: #EAE1CD;
-  --muted-foreground: #7A6A58;
+  --muted-foreground: #6B5C4A;  /* 2026-09-19: 4.0:1 on a muted ground failed AA for a member with keratoconus — one notch darker */
   --accent: #EAE1CD;
   --accent-foreground: #594A3C;
   --destructive: #9B3028;
@@ -3209,7 +3209,7 @@ html[data-theme="night"] {
   --secondary: #33291C;
   --secondary-foreground: #CDBC9B;
   --muted: #33291C;
-  --muted-foreground: #A8967A;
+  --muted-foreground: #B5A388;  /* 2026-09-19: 4.0:1 on a muted ground failed AA for a member with keratoconus — one notch darker */
   --accent: #33291C;
   --accent-foreground: #CDBC9B;
   --border: #453723;

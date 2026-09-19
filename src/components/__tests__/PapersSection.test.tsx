@@ -52,6 +52,8 @@ const PAPERS: PaperView[] = [
         byteSize: 240_000,
         isPublic: true,
         createdAt: "2026-09-19T00:00:00Z",
+        showRecordId: null,
+        accomplishmentId: null,
     },
     {
         id: "p2",

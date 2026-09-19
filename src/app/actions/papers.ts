@@ -53,6 +53,9 @@ export interface PaperView {
     byteSize: number;
     isPublic: boolean;
     createdAt: string;
+    /** What the paper documents (214): a show record or an accomplishment. */
+    showRecordId: string | null;
+    accomplishmentId: string | null;
 }
 
 type DbError = { code?: string; message?: string } | null;
@@ -95,7 +98,9 @@ export async function listPapers(horseId: string): Promise<PaperView[]> {
     const supabase = await createClient();
     const { data, error } = await loose(supabase)
         .from("horse_papers")
-        .select("id, horse_id, kind, title, issued_by, issued_on, notes, file_path, mime, byte_size, is_public, created_at")
+        // select * so the 214 columns ride along when present and their
+        // absence before the paste is not an error.
+        .select("*")
         .eq("horse_id", horseId)
         .order("created_at", { ascending: true });
     if (error || !data || data.length === 0) return [];
@@ -129,6 +134,8 @@ export async function listPapers(horseId: string): Promise<PaperView[]> {
                 byteSize: Number(r.byte_size ?? 0),
                 isPublic: r.is_public !== false,
                 createdAt: String(r.created_at),
+                showRecordId: (r.show_record_id as string | null) ?? null,
+                accomplishmentId: (r.accomplishment_id as string | null) ?? null,
             },
         ];
     });
@@ -145,6 +152,9 @@ const createSchema = z.object({
     issuedOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
     notes: z.string().max(MAX_PAPER_NOTES).nullable().optional(),
     isPublic: z.boolean().optional(),
+    /** 214: attach to one of the horse's own records. */
+    showRecordId: z.string().uuid().nullable().optional(),
+    accomplishmentId: z.string().uuid().nullable().optional(),
 });
 
 /** After the browser uploaded the file: file the paper. */
@@ -171,6 +181,29 @@ export async function createPaper(
         .is("deleted_at", null)
         .maybeSingle();
     if (!horse) return { success: false, error: "Horse not found or not yours." };
+
+    // An attach point must be THIS horse's own record (RLS shows the
+    // owner their own rows; a foreign id simply isn't found).
+    if (v.showRecordId) {
+        const { data: rec } = await supabase
+            .from("show_records")
+            .select("id")
+            .eq("id", v.showRecordId)
+            .eq("horse_id", v.horseId)
+            .maybeSingle();
+        if (!rec) return { success: false, error: "That show record isn't on this horse." };
+    }
+    if (v.accomplishmentId) {
+        const { data: acc } = await (supabase as unknown as {
+            from: (t: string) => { select: (c: string) => { eq: (k: string, v: string) => { eq: (k: string, v: string) => { maybeSingle: () => PromiseLike<{ data: Row | null }> } } } };
+        })
+            .from("horse_accomplishments")
+            .select("id")
+            .eq("id", v.accomplishmentId)
+            .eq("horse_id", v.horseId)
+            .maybeSingle();
+        if (!acc) return { success: false, error: "That accomplishment isn't on this horse." };
+    }
 
     const admin = getAdminClient();
     const cleanUp = async () => {
@@ -200,24 +233,30 @@ export async function createPaper(
         return { success: false, error: `A horse can hold ${MAX_PAPERS_PER_HORSE} papers — remove one first.` };
     }
 
-    const { data: inserted, error } = await loose(supabase)
-        .from("horse_papers")
-        .insert({
-            horse_id: v.horseId,
-            owner_id: user.id,
-            kind: v.kind,
-            title: text(v.title, MAX_PAPER_TITLE) ?? "Papers",
-            issued_by: text(v.issuedBy, MAX_PAPER_ISSUER),
-            issued_on: v.issuedOn ?? null,
-            notes: text(v.notes, MAX_PAPER_NOTES),
-            file_path: v.path,
-            mime: v.mime,
-            byte_size: v.byteSize,
-            is_public: v.isPublic !== false,
-            sort_order: existing?.length ?? 0,
-        })
-        .select("id")
-        .single();
+    const row: Row = {
+        horse_id: v.horseId,
+        owner_id: user.id,
+        kind: v.kind,
+        title: text(v.title, MAX_PAPER_TITLE) ?? "Papers",
+        issued_by: text(v.issuedBy, MAX_PAPER_ISSUER),
+        issued_on: v.issuedOn ?? null,
+        notes: text(v.notes, MAX_PAPER_NOTES),
+        file_path: v.path,
+        mime: v.mime,
+        byte_size: v.byteSize,
+        is_public: v.isPublic !== false,
+        sort_order: existing?.length ?? 0,
+    };
+    if (v.showRecordId) row.show_record_id = v.showRecordId;
+    if (v.accomplishmentId) row.accomplishment_id = v.accomplishmentId;
+    let { data: inserted, error } = await loose(supabase).from("horse_papers").insert(row).select("id").single();
+    if (error && (error.code === "42703" || error.code === "PGRST204") && (v.showRecordId || v.accomplishmentId)) {
+        // Pre-214: the paper is filed in the folder; the attachment lands
+        // once the columns exist (the member re-attaches by editing).
+        delete row.show_record_id;
+        delete row.accomplishment_id;
+        ({ data: inserted, error } = await loose(supabase).from("horse_papers").insert(row).select("id").single());
+    }
     if (error || !inserted) {
         await cleanUp();
         logger.error("Papers", "insert failed", { message: error?.message });

@@ -14,6 +14,8 @@ import ShowRecordTimeline from"@/components/ShowRecordTimeline";
 import PedigreeCard from"@/components/PedigreeCard";
 import PapersSection from"@/components/passport/PapersSection";
 import { listPapers } from"@/app/actions/papers";
+import { listAccomplishments } from"@/app/actions/accomplishments";
+import AccomplishmentsSection from"@/components/passport/AccomplishmentsSection";
 import HoofprintTimeline from"@/components/HoofprintTimeline";
 import TitlesSection from"@/components/shows/TitlesSection";
 import { getHorseTitles } from"@/lib/shows/horseTitles";
@@ -333,6 +335,12 @@ editionSize: rawPedigree.edition_size,
 
  // Papers (213): RLS-gated read + server-signed URLs; [] before the paste.
  const papers = await listPapers(horseId);
+ // Other accomplishments (214): [] before the paste.
+ const accomplishments = await listAccomplishments(horseId);
+ // Names for the "attached to" tag in the Papers folder.
+ const attachedLabels: Record<string, string> = {};
+ for (const r of showRecords) attachedLabels[r.id] = r.showName;
+ for (const a of accomplishments) attachedLabels[a.id] = a.title;
 
  // Reference display info
  const cat = horse.catalog_items;
@@ -852,10 +860,15 @@ editionSize: rawPedigree.edition_size,
  </div>
 
  {/* Provenance — Read Only */}
- {(showRecords.length > 0 || pedigree || papers.length > 0) && (
+ {(showRecords.length > 0 || pedigree || papers.length > 0 || accomplishments.length > 0) && (
  <div className="animate-fade-in-up mt-8" id="passport-show-record">
  {showRecords.length > 0 && (
- <ShowRecordTimeline horseId={horseId} records={showRecords} isOwner={false} />
+ <ShowRecordTimeline horseId={horseId} records={showRecords} isOwner={false} papers={papers} horseName={horse.custom_name} />
+ )}
+ {accomplishments.length > 0 && (
+ <div className="mt-6">
+ <AccomplishmentsSection horseId={horseId} horseName={horse.custom_name} items={accomplishments} papers={papers} isOwner={false} />
+ </div>
  )}
  {pedigree && (
  <div className="mt-6">
@@ -864,7 +877,7 @@ editionSize: rawPedigree.edition_size,
  )}
  {papers.length > 0 && (
  <div className="mt-6">
- <PapersSection horseId={horseId} horseName={horse.custom_name} papers={papers} isOwner={false} />
+ <PapersSection horseId={horseId} horseName={horse.custom_name} papers={papers} isOwner={false} attachedLabels={attachedLabels} />
  </div>
  )}
  </div>

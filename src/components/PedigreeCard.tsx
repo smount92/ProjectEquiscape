@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { linkHost } from "@/lib/papers/validate";
+import LinkifiedText from "@/components/LinkifiedText";
 
 interface PedigreeData {
  id: string;
@@ -436,7 +437,7 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
 
  {pedigree!.sireName && (
  <div className="flex justify-between border-b border-[var(--border)] py-2 last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
- <span className="text-muted-foreground text-sm">Sire</span>
+ <span className="text-secondary-foreground text-sm">Sire</span>
  <span className="text-sm font-medium">
  {pedigree!.sireId ? (
  <Link
@@ -464,7 +465,7 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  )}
  {pedigree!.damName && (
  <div className="flex justify-between border-b border-[var(--border)] py-2 last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
- <span className="text-muted-foreground text-sm">Dam</span>
+ <span className="text-secondary-foreground text-sm">Dam</span>
  <span className="text-sm font-medium">
  {pedigree!.damId ? (
  <Link
@@ -492,19 +493,19 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  )}
  {pedigree!.bredBy && (
  <div className="flex justify-between border-b border-[var(--border)] py-2 last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
- <span className="text-muted-foreground text-sm">Bred by</span>
+ <span className="text-secondary-foreground text-sm">Bred by</span>
  <span className="text-sm font-medium">{pedigree!.bredBy}</span>
  </div>
  )}
  {pedigree!.sculptor && (
  <div className="flex justify-between border-b border-[var(--border)] py-2 last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
- <span className="text-muted-foreground text-sm">Sculptor</span>
+ <span className="text-secondary-foreground text-sm">Sculptor</span>
  <span className="text-sm font-medium">{pedigree!.sculptor}</span>
  </div>
  )}
  {(pedigree!.castNumber || pedigree!.editionSize) && (
  <div className="flex justify-between border-b border-[var(--border)] py-2 last:border-b-0 max-[600px]:flex-col max-[600px]:gap-1">
- <span className="text-muted-foreground text-sm">Cast / Edition</span>
+ <span className="text-secondary-foreground text-sm">Cast / Edition</span>
  <span className="text-sm font-medium">
  {pedigree!.castNumber && pedigree!.editionSize
  ? `#${pedigree!.castNumber} of ${pedigree!.editionSize}`
@@ -515,8 +516,10 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  </div>
  )}
  {pedigree!.lineageNotes && (
- <div className="text-muted-foreground mt-4 rounded-md bg-muted px-4 py-2 text-sm whitespace-pre-wrap italic">
- {pedigree!.lineageNotes}
+ /* Secondary ink, upright, links live — the muted italic on a muted
+    ground measured 4.0:1, and a member with keratoconus said so. */
+ <div className="text-secondary-foreground mt-4 rounded-md bg-muted px-4 py-2 text-sm whitespace-pre-wrap">
+ <LinkifiedText text={pedigree!.lineageNotes} />
  </div>
  )}
  </div>

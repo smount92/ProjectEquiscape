@@ -5,6 +5,11 @@ import Link from"next/link";
 import { deleteShowRecord } from"@/app/actions/provenance";
 import ShowRecordForm from"@/components/ShowRecordForm";
 import { Button } from "@/components/ui/button";
+import type { PaperView } from "@/app/actions/papers";
+import PaperDialog from "@/components/passport/PaperDialog";
+import PaperThumbs from "@/components/passport/PaperThumbs";
+import LinkifiedText from "@/components/LinkifiedText";
+import { RECORD_PAPER_KINDS } from "@/lib/papers/validate";
 import { isQualifierProgram, qualifierChip, qualifierTitle } from "@/lib/records/qualifiers";
 
 interface ShowRecordDisplay {
@@ -46,6 +51,9 @@ interface ShowRecordTimelineProps {
   *  the passport page via resolvePlacingHrefs — records store no
   *  entry id, so the match is show + class name). Owner-only UI. */
  placingHrefs?: Record<string, string>;
+ /** The horse's papers (213/214); the ones attached to a record render under it. */
+ papers?: PaperView[];
+ horseName?: string;
 }
 
 function formatShowDate(dateStr: string | null, dateText: string | null): string {
@@ -83,8 +91,9 @@ function getRibbonClass(ribbon: string | null): string {
  return map[lower] ||"";
 }
 
-export default function ShowRecordTimeline({ horseId, records: initialRecords, isOwner, placingHrefs }: ShowRecordTimelineProps) {
+export default function ShowRecordTimeline({ horseId, records: initialRecords, isOwner, placingHrefs, papers = [], horseName = "this horse" }: ShowRecordTimelineProps) {
  const [records, setRecords] = useState<ShowRecordDisplay[]>(initialRecords);
+ const [attaching, setAttaching] = useState<ShowRecordDisplay | null>(null);
  const [formMode, setFormMode] = useState<string | null>(null); // null,"add","edit-{id}"
  const [editingRecord, setEditingRecord] = useState<ShowRecordDisplay | null>(null);
  const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -147,6 +156,22 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
 
  {/* Add Form */}
  {formMode ==="add" && <ShowRecordForm horseId={horseId} onSave={handleSave} onCancel={handleCancel} />}
+
+ {attaching && (
+ <PaperDialog
+ horseId={horseId}
+ horseName={horseName}
+ paper={null}
+ attachTo={{ showRecordId: attaching.id, label: attaching.showName }}
+ presetKind="qualification_card"
+ kinds={RECORD_PAPER_KINDS}
+ onClose={() => setAttaching(null)}
+ onSaved={() => {
+ setAttaching(null);
+ window.location.reload();
+ }}
+ />
+ )}
 
  {/* Timeline */}
  {records.length === 0 ? (
@@ -246,9 +271,21 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
  )}
 
  {record.notes && (
- <div className="text-secondary-foreground mt-1 text-sm italic">
- {record.notes}
+ <div className="text-secondary-foreground mt-1 text-sm">
+ <LinkifiedText text={record.notes} />
  </div>
+ )}
+
+ {/* The card the show issued, the photo from the table (214). */}
+ <PaperThumbs papers={papers.filter((p) => p.showRecordId === record.id)} horseName={horseName} />
+ {isOwner && (
+ <button
+ type="button"
+ onClick={() => setAttaching(record)}
+ className="text-forest mt-2 cursor-pointer rounded-sm border-none bg-transparent p-0 text-xs font-semibold hover:underline"
+ >
+ 📎 Attach a card or photo
+ </button>
  )}
 
  {isOwner && (

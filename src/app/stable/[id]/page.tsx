@@ -12,6 +12,8 @@ import ShowRecordTimeline from"@/components/ShowRecordTimeline";
 import PedigreeCard from"@/components/PedigreeCard";
 import PapersSection from"@/components/passport/PapersSection";
 import { listPapers } from"@/app/actions/papers";
+import { listAccomplishments } from"@/app/actions/accomplishments";
+import AccomplishmentsSection from"@/components/passport/AccomplishmentsSection";
 import HoofprintTimeline from"@/components/HoofprintTimeline";
 import MakingChapter from"@/components/making/MakingChapter";
 import HorseDocuments from"@/components/passport/HorseDocuments";
@@ -334,6 +336,12 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
 
  // Papers (213): RLS-gated read + server-signed URLs; [] before the paste.
  const papers = await listPapers(horseId);
+ // Other accomplishments (214): [] before the paste.
+ const accomplishments = await listAccomplishments(horseId);
+ // Names for the "attached to" tag in the Papers folder.
+ const attachedLabels: Record<string, string> = {};
+ for (const r of showRecords) attachedLabels[r.id] = r.showName;
+ for (const a of accomplishments) attachedLabels[a.id] = a.title;
 
  // Hoofprint data + the condition ledger (owner-read; see the RLS note
  // in getConditionHistory — the anon role has no read on this table at
@@ -794,7 +802,10 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  {horse.catalog_id && <MarketValueBadge catalogId={horse.catalog_id} />}
 
  {/* Show Records */}
- <ShowRecordTimeline horseId={horseId} records={showRecords} isOwner={true} placingHrefs={placingHrefs} />
+ <ShowRecordTimeline horseId={horseId} records={showRecords} isOwner={true} placingHrefs={placingHrefs} papers={papers} horseName={horse.custom_name} />
+
+ {/* Other accomplishments (214) — race records, breedings, awards */}
+ <AccomplishmentsSection horseId={horseId} horseName={horse.custom_name} items={accomplishments} papers={papers} isOwner />
 
  {/* MHH Titles (159) — earned plaques + the owner's progress ladder */}
  <TitlesSection titles={horseTitles} ladder={titleLadder} />
@@ -806,7 +817,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  <PedigreeCard horseId={horseId} pedigree={pedigree} isOwner={true} />
 
  {/* Papers (213) — certificates, framed; the owner files them here */}
- <PapersSection horseId={horseId} horseName={horse.custom_name} papers={papers} isOwner />
+ <PapersSection horseId={horseId} horseName={horse.custom_name} papers={papers} isOwner attachedLabels={attachedLabels} />
 
  {/* 🐾 Hoofprint Timeline — model + other_model only */}
  {assetConfig.showHoofprint && (
