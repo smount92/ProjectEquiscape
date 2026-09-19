@@ -18,7 +18,7 @@ export default function IncomePanel({ summary }: { summary: IncomeSummary }) {
         <Panel title="The books" icon="📈">
             <div className="mb-4 grid gap-4 sm:grid-cols-3">
                 <Stat
-                    label="Earned, all time"
+                    label="Agreed, all time"
                     value={formatMoney(summary.earnedAllTime)}
                     hint={`${summary.earnedCount} commission${summary.earnedCount === 1 ? "" : "s"}`}
                 />

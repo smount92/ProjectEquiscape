@@ -16,6 +16,7 @@ import {
     Panel,
 } from "@/components/studio/StudioBits";
 import VaultHandoff from "@/components/studio/VaultHandoff";
+import ClientHorseLink from "@/components/studio/ClientHorseLink";
 import WipThread from "@/components/studio/WipThread";
 import WorkbenchLedger from "@/components/studio/WorkbenchLedger";
 import { createClient } from "@/lib/supabase/server";
@@ -67,6 +68,17 @@ export default async function CommissionPage({
     }
 
     const commission = await getCommission(commissionId, isGuest ? { guestToken: token } : undefined);
+    // The vault hand-off names the horse — "this horse" read like a
+    // placeholder because it was one.
+    let linkedHorseName: string | null = null;
+    if (commission?.horseId) {
+        const { data: linked } = await supabase
+            .from("user_horses")
+            .select("custom_name")
+            .eq("id", commission.horseId)
+            .maybeSingle();
+        linkedHorseName = (linked as { custom_name?: string | null } | null)?.custom_name ?? null;
+    }
     if (!commission) notFound();
 
     let party: Party | null = null;
@@ -147,8 +159,8 @@ export default async function CommissionPage({
                         ? `Shared by @${commission.artistAlias}`
                         : `${isArtist ? "For" : "With"} ${counterparty}`
                 }
-                backHref={isArtist ? "/studio/dashboard" : "/studio/my-commissions"}
-                backLabel={isArtist ? "Dashboard" : "My commissions"}
+                backHref={isArtist ? "/studio/dashboard" : isGuest ? "/studio" : "/studio/my-commissions"}
+                backLabel={isArtist ? "Dashboard" : isGuest ? "The Art Studio" : "My commissions"}
                 actions={
                     isArtist && commission.guestToken ? (
                         <GuestLinkButton
@@ -198,6 +210,15 @@ export default async function CommissionPage({
                 <div className="grid gap-6">
                     {party && <CommissionActions commission={commission} party={party} />}
 
+                    {/* The commissioner links their own horse — the reliable
+                        path (they always see their own stable). Offered until
+                        delivery uses the link. */}
+                    {isClient &&
+                        !commission.horseId &&
+                        !["delivered", "received", "declined", "cancelled"].includes(commission.status) && (
+                            <ClientHorseLink commission={commission} />
+                        )}
+
                     {/* The vault hand-off, at the moment the commissioner
                         knows the number and cares about it. */}
                     {isClient &&
@@ -207,7 +228,7 @@ export default async function CommissionPage({
                             <VaultHandoff
                                 commissionId={commission.id}
                                 horseId={commission.horseId}
-                                horseName={null}
+                                horseName={linkedHorseName}
                                 price={commission.agreedPrice}
                                 alreadyRecorded={commission.vaultRecorded}
                             />
@@ -219,7 +240,7 @@ export default async function CommissionPage({
                         commissionId={commission.id}
                         updates={updates}
                         party={party}
-                        canPost={!!party && commission.status !== "declined"}
+                        canPost={!!party && commission.status !== "declined" && commission.status !== "cancelled"}
                     />
 
                     {transactionId && targetId && (

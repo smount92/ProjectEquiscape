@@ -454,3 +454,17 @@ export function intakeFor(
     }
     return { accepting: true, asWaitlist: false, reason: "This studio is open." };
 }
+
+/**
+ * Where a commission sits on the commissioner's page. `received` is
+ * terminal AND finished — the old page filtered "finished" by name and
+ * "in flight" by !isTerminal, so a commission vanished the moment the
+ * client confirmed it arrived.
+ */
+export type ClientBucket = "needsYou" | "inFlight" | "finished" | "closed";
+
+export function clientBucket(status: CommissionStatus): ClientBucket {
+    if (status === "declined" || status === "cancelled") return "closed";
+    if (status === "completed" || status === "delivered" || status === "received") return "finished";
+    return ballIsWith(status) === "client" ? "needsYou" : "inFlight";
+}

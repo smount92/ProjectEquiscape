@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
+    clientBucket,
     COMMISSION_STATUSES,
     TRANSITIONS,
     availableTransitions,
@@ -316,5 +317,21 @@ describe("intakeFor", () => {
         const intake = intakeFor(slotState(0, 5, "waitlist"), false);
         expect(intake.accepting).toBe(true);
         expect(intake.asWaitlist).toBe(true);
+    });
+});
+
+describe("clientBucket", () => {
+    it("keeps a received commission on the page, under finished", () => {
+        expect(clientBucket("received")).toBe("finished");
+        expect(clientBucket("delivered")).toBe("finished");
+        expect(clientBucket("completed")).toBe("finished");
+    });
+    it("sorts the rest by whose move it is", () => {
+        expect(clientBucket("quoted")).toBe("needsYou");
+        expect(clientBucket("awaiting_approval")).toBe("needsYou");
+        expect(clientBucket("requested")).toBe("inFlight");
+        expect(clientBucket("in_progress")).toBe("inFlight");
+        expect(clientBucket("declined")).toBe("closed");
+        expect(clientBucket("cancelled")).toBe("closed");
     });
 });

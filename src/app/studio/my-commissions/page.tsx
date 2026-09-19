@@ -8,7 +8,7 @@ import PageMasthead from "@/components/layouts/PageMasthead";
 import { CommissionPill } from "@/components/studio/StudioBits";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
-import { ballIsWith, isTerminal, statusBlurb } from "@/lib/studio/pipeline";
+import { clientBucket, statusBlurb } from "@/lib/studio/pipeline";
 import { formatMoney } from "@/lib/studio/terms";
 
 export const metadata: Metadata = {
@@ -30,18 +30,12 @@ export default async function MyCommissionsPage() {
 
     const commissions = await getClientCommissions();
 
-    const needsYou = commissions.filter(
-        (c) => !isTerminal(c.status) && ballIsWith(c.status) === "client",
-    );
-    const inFlight = commissions.filter(
-        (c) => !isTerminal(c.status) && ballIsWith(c.status) !== "client",
-    );
-    const finished = commissions.filter(
-        (c) => c.status === "completed" || c.status === "delivered",
-    );
-    const closed = commissions.filter(
-        (c) => c.status === "declined" || c.status === "cancelled",
-    );
+    // One answer per status (lib/studio/pipeline.clientBucket) — a
+    // received commission used to fall between the filters and vanish.
+    const needsYou = commissions.filter((c) => clientBucket(c.status) === "needsYou");
+    const inFlight = commissions.filter((c) => clientBucket(c.status) === "inFlight");
+    const finished = commissions.filter((c) => clientBucket(c.status) === "finished");
+    const closed = commissions.filter((c) => clientBucket(c.status) === "closed");
 
     return (
         <ExplorerLayout noHeader>

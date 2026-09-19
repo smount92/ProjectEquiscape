@@ -68,7 +68,13 @@ type FinancialVaultInsert = Database["public"]["Tables"]["financial_vault"]["Ins
 
 const ACTIVE_TRANSACTION_STATUSES = ["offer_made", "pending_payment", "funds_verified"];
 
-/** Check if a horse has an active transaction that blocks mutations */
+/** Commission statuses under which the horse is somebody else's work in progress. */
+const ACTIVE_COMMISSION_STATUSES = [
+    "requested", "quoted", "accepted", "in_progress", "awaiting_approval", "completed",
+    "review", "revision", "shipping",
+];
+
+/** Check if a horse has an active transaction or commission that blocks mutations */
 async function checkActiveTransaction(horseId: string): Promise<string | null> {
     const admin = getAdminClient();
     const { data } = await admin
@@ -81,6 +87,21 @@ async function checkActiveTransaction(horseId: string): Promise<string | null> {
 
     if (data) {
         return "Cannot modify or delete a horse while an active transaction is pending. Please cancel the transaction first.";
+    }
+
+    // A commission's transaction row is only created at delivery, so an
+    // in-flight commission never tripped the guard above — the horse
+    // could be deleted under the artist mid-work, and delivery would
+    // then publish her reel onto an invisible passport.
+    const { data: commission } = await admin
+        .from("commissions")
+        .select("id")
+        .eq("horse_id", horseId)
+        .in("status", ACTIVE_COMMISSION_STATUSES)
+        .limit(1)
+        .maybeSingle();
+    if (commission) {
+        return "This horse has a commission in progress. Cancel or finish the commission before deleting the horse.";
     }
     return null;
 }

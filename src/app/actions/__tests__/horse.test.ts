@@ -187,6 +187,22 @@ describe("horse.ts — CRUD", () => {
             expect(result.error).toMatch(/active transaction/i);
         });
 
+        it("blocks deletion while a commission on the horse is in progress", async () => {
+            // Horse found
+            mockClient._mockQuery.single.mockResolvedValueOnce({
+                data: { id: "h1", owner_id: "user-1" },
+                error: null,
+            });
+            // No Safe-Trade transaction, but an accepted commission: the
+            // artist is mid-work, and delivery would publish her reel onto
+            // an invisible passport.
+            mockAdmin._mockQuery.maybeSingle.mockResolvedValueOnce({ data: null, error: null });
+            mockAdmin._mockQuery.maybeSingle.mockResolvedValueOnce({ data: { id: "c-1" }, error: null });
+            const result = await deleteHorse("h1");
+            expect(result.success).toBe(false);
+            expect(result.error).toMatch(/commission in progress/i);
+        });
+
         it("succeeds when owner deletes own horse with no transactions", async () => {
             // Horse found
             mockClient._mockQuery.single.mockResolvedValueOnce({
@@ -623,9 +639,13 @@ describe("server-side validation — the boundary that wasn't there", () => {
         describe("condition note", () => {
             const NOW = new Date().toISOString();
 
-            /** The active-transaction guard reads the admin client first. */
-            const noActiveTransaction = () =>
+            /** The active-transaction guard reads the admin client first —
+             *  two lookups since the commission guard joined it (no pending
+             *  Safe-Trade transaction, then no commission in progress). */
+            const noActiveTransaction = () => {
                 mockAdmin._mockQuery.maybeSingle.mockResolvedValueOnce({ data: null, error: null });
+                mockAdmin._mockQuery.maybeSingle.mockResolvedValueOnce({ data: null, error: null });
+            };
 
             it("attaches the note to the row the trigger just logged", async () => {
                 mockClient._setImplicitResolve({ data: {}, error: null });

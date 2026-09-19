@@ -178,7 +178,7 @@ function PaymentRow({
  * artist's — v1 let the artist attach any horse id at all, with no
  * ownership check, and that link is what drives the artist credit.
  */
-function HorseLinker({
+export function HorseLinker({
     commission,
     busy,
     onLink,
@@ -223,9 +223,10 @@ function HorseLinker({
     if (horses.length === 0) {
         return (
             <p className="text-muted-foreground m-0 text-xs leading-relaxed">
-                No horses of theirs are visible to you. Ask the commissioner to link the horse
-                from their side — it&rsquo;s how the finished piece gets your verified credit and
-                its provenance entry.
+                None of their horses are visible to you (a private stable). The commissioner has
+                a &ldquo;Which horse is this for?&rdquo; box on their side of this page — once
+                they link it, delivery stamps your verified credit and writes the provenance
+                entry.
             </p>
         );
     }

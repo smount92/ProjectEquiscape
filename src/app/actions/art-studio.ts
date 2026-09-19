@@ -242,12 +242,37 @@ async function notify(input: {
     content: string;
     linkUrl: string;
     horseId?: string;
+    /** Subject line → the same sentence also goes to their inbox. An
+     *  artist whose intake is Messenger pushing to her phone never saw
+     *  a bell-only request. */
+    emailSubject?: string;
 }): Promise<void> {
+    const { emailSubject, ...bell } = input;
     try {
         const { createNotification } = await import("@/lib/notifications/createNotification");
-        await createNotification({ type: "commission", ...input });
+        await createNotification({ type: "commission", ...bell });
     } catch (err) {
         logger.error("ArtStudio", "Notification failed (continuing)", err);
+    }
+    if (!emailSubject || input.actorId === input.userId) return;
+    try {
+        const admin = getAdminClient();
+        const [{ data: authUser }, { data: profile }] = await Promise.all([
+            admin.auth.admin.getUserById(input.userId),
+            admin.from("users").select("alias_name").eq("id", input.userId).maybeSingle(),
+        ]);
+        const toEmail = authUser?.user?.email;
+        if (!toEmail) return;
+        const { sendCommissionEmail } = await import("@/lib/email/commissionEmails");
+        await sendCommissionEmail({
+            toEmail,
+            recipientName: (profile as { alias_name?: string | null } | null)?.alias_name ?? "there",
+            subject: emailSubject,
+            body: input.content,
+            ctaUrl: input.linkUrl,
+        });
+    } catch (err) {
+        logger.error("ArtStudio", "Commission email failed (continuing)", err);
     }
 }
 
@@ -743,7 +768,7 @@ export async function updateStudioServices(services: StudioService[]): Promise<A
     if (!support.studioTerms) {
         return {
             success: false,
-            error: "The rate card needs a database update that hasn't been applied yet. Your existing price range still shows.",
+            error: "Rates by scale aren't switched on for this site yet — your existing price range still shows. Try again after the next site update.",
         };
     }
 
@@ -1356,6 +1381,9 @@ export async function createCommission(data: {
             ? `New waitlist request: ${commissionType}`
             : `New commission request: ${commissionType}`,
         linkUrl: `/studio/commission/${commissionId}`,
+        emailSubject: intake.asWaitlist
+            ? `New waitlist request for your studio — ${commissionType}`
+            : `New commission request — ${commissionType}`,
     });
 
     revalidateCommission(commissionId, str(artist.studio_slug));
@@ -1494,6 +1522,7 @@ export async function sendQuote(
             actorId: user.id,
             content: `You have a quote for your ${row.commission_type} commission: $${price.toLocaleString("en-US")}.`,
             linkUrl: `/studio/commission/${commissionId}`,
+            emailSubject: `Your quote is in — ${row.commission_type}, $${price.toLocaleString("en-US")}`,
         });
     }
 
@@ -1644,6 +1673,7 @@ export async function transitionCommission(
             actorId: user.id,
             content: commissionNotice(to, String(row.commission_type), rule.consumesRevision),
             linkUrl: `/studio/commission/${commissionId}`,
+            emailSubject: `Commission update — ${String(row.commission_type)}`,
         });
     }
 
@@ -1706,7 +1736,29 @@ async function runDeliveryHooks(
         }
     }
 
-    if (!horseId) return;
+    if (!horseId) {
+        // No horse, no credit, no provenance — the artist and the client
+        // both need to know that instead of finding a blank wall later.
+        const artistIdForNote = row.artist_id as string;
+        const clientIdForNote = row.client_id as string | null;
+        await notify({
+            userId: artistIdForNote,
+            actorId: actorId === artistIdForNote ? clientIdForNote ?? "" : actorId,
+            content: "Delivered — but no horse was linked, so no verified credit or provenance entry was written. Ask the commissioner to link the horse and message us to move the record.",
+            linkUrl: `/studio/commission/${commissionId}`,
+            emailSubject: "Delivered without a linked horse — your credit didn't land",
+        });
+        if (clientIdForNote) {
+            await notify({
+                userId: clientIdForNote,
+                actorId: actorId,
+                content: "Your commission was delivered without a linked horse, so nothing landed on a passport. Link the horse from your stable and message us — we'll attach the record.",
+                linkUrl: `/studio/commission/${commissionId}`,
+                emailSubject: "Link your horse so the finished work lands on its passport",
+            });
+        }
+        return;
+    }
 
     // The verified-artist stamp. v1 wrote user_horses directly under the
     // artist's session, which RLS has always rejected — so this badge has
@@ -1891,7 +1943,7 @@ export async function addCommissionUpdate(
     let { error } = await supabase.from("commission_updates").insert(withMeta as never);
     if (error && (error.code === "42703" || error.code === "PGRST204")) {
         if (data.updateType === "checkpoint") {
-            return { success: false, error: "Checkpoints arrive with migration 203." };
+            return { success: false, error: "Checkpoints aren't switched on for this site yet — post it as a message for now." };
         }
         ({ error } = await supabase.from("commission_updates").insert(insertRow as never));
     }
@@ -1919,6 +1971,7 @@ export async function addCommissionUpdate(
                 actorId: user.id,
                 content: `Commission update — ${label}.`,
                 linkUrl: `/studio/commission/${commissionId}`,
+                emailSubject: `Commission update — ${label}`,
             });
         }
     }
@@ -1982,6 +2035,7 @@ export async function ackCheckpoint(
         actorId: user.id,
         content: `Checkpoint signed off: ${meta.checkpoint.title} ✓`,
         linkUrl: `/studio/commission/${commissionId}`,
+        emailSubject: `Checkpoint signed off — ${meta.checkpoint.title}`,
     });
     revalidateCommission(commissionId);
     return { success: true };
@@ -2002,7 +2056,7 @@ export async function markModelReceived(
 
     const support = await getStudioColumnSupport(supabase as never);
     if (!support.commissionAgreement) {
-        return { success: false, error: "Logistics tracking needs a database update that hasn't been applied yet." };
+        return { success: false, error: "Shipping notes aren't switched on for this site yet — mention it in the thread for now." };
     }
 
     const now = new Date().toISOString();
@@ -2024,6 +2078,7 @@ export async function markModelReceived(
             actorId: user.id,
             content: "The artist has confirmed your model arrived safely.",
             linkUrl: `/studio/commission/${commissionId}`,
+            emailSubject: "Your model arrived at the studio",
         });
     }
 
@@ -2077,6 +2132,20 @@ export async function recordPayment(
         .eq("id", commissionId);
     if (error) return { success: false, error: error.message };
 
+    // The artist's tick is the commissioner's receipt — say so.
+    const clientId = loaded.row.client_id as string | null;
+    const acknowledged =
+        input.depositPaid === true ? "deposit" : input.finalPaid === true ? "final payment" : null;
+    if (clientId && acknowledged) {
+        await notify({
+            userId: clientId,
+            actorId: user.id,
+            content: `The artist recorded your ${acknowledged} as received.`,
+            linkUrl: `/studio/commission/${commissionId}`,
+            emailSubject: `Your ${acknowledged} was recorded`,
+        });
+    }
+
     revalidateCommission(commissionId);
     return { success: true };
 }
@@ -2090,6 +2159,19 @@ export async function linkHorseToCommission(
     const loaded = await loadParty(supabase, commissionId, user.id);
     if (!loaded.ok) return { success: false, error: loaded.error };
 
+    // Delivery is when the link is USED (credit stamp, provenance entry,
+    // the Making). Re-pointing it afterwards would leave those on the old
+    // horse — link before delivery, or ask us to move a finished one.
+    if (loaded.status === "delivered" || loaded.status === "received") {
+        return {
+            success: false,
+            error: "This commission has already been delivered, so the horse can't be changed here. Message us and we'll move the credit.",
+        };
+    }
+    if (loaded.status === "declined" || loaded.status === "cancelled") {
+        return { success: false, error: "This commission is closed." };
+    }
+
     // v1 let the artist attach ANY horse id, with no ownership check —
     // and that link is what drove the artist-credit stamp. The horse must
     // belong to the commissioner.
@@ -2099,7 +2181,7 @@ export async function linkHorseToCommission(
     }
     const { data: horse } = await supabase
         .from("user_horses")
-        .select("id")
+        .select("id, custom_name")
         .eq("id", horseId)
         .eq("owner_id", clientId)
         .maybeSingle();
@@ -2112,6 +2194,18 @@ export async function linkHorseToCommission(
         .update({ horse_id: horseId } as Patch as never)
         .eq("id", commissionId);
     if (error) return { success: false, error: error.message };
+
+    const other =
+        loaded.party === "artist" ? clientId : (loaded.row.artist_id as string | null);
+    if (other) {
+        await notify({
+            userId: other,
+            actorId: user.id,
+            content: `${String((horse as { custom_name?: string }).custom_name ?? "A horse")} is now linked to this commission.`,
+            linkUrl: `/studio/commission/${commissionId}`,
+            horseId,
+        });
+    }
 
     revalidateCommission(commissionId);
     return { success: true };
@@ -2161,7 +2255,7 @@ export async function recordCommissionInVault(
     if (!support.vaultCommissionCost) {
         return {
             success: false,
-            error: "The vault needs a database update that hasn't been applied yet.",
+            error: "Filing commission costs into the vault isn't switched on yet — add it by hand from the horse's page for now.",
         };
     }
 
