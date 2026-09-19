@@ -68,6 +68,7 @@ export default function StudioDirectory({ studios, initialQuery = "" }: { studio
                 hit(studio.studioName) ||
                 hit(studio.ownerAlias) ||
                 hit(studio.bioArtist) ||
+                hit(studio.region) ||
                 hit(studio.statusNote) ||
                 studio.specialties.some(hit) ||
                 studio.services.some((s) => hit(s.type)) ||
@@ -109,7 +110,7 @@ export default function StudioDirectory({ studios, initialQuery = "" }: { studio
             <div className="bg-card border-input sticky top-[calc(var(--header-height)+0.75rem)] z-10 mb-6 rounded-xl border p-4 shadow-md backdrop-blur-sm">
                 <Input
                     type="search"
-                    placeholder="Search by studio, artist, service, medium or scale…"
+                    placeholder="Search by studio, artist, service, medium, scale or place…"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     aria-label="Search studios"
@@ -225,6 +226,7 @@ function StudioCard({ studio }: { studio: DirectoryEntry }) {
 
             <div className="text-muted-foreground mb-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
                 <span>@{studio.ownerAlias}</span>
+                {studio.region && <span>📍 {studio.region}</span>}
                 {studio.priceLabel !== "Ask" && <span>{studio.priceLabel}</span>}
                 {studio.effectiveStatus !== "closed" && <span>{studio.slotLabel}</span>}
             </div>

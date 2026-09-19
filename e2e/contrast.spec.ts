@@ -75,6 +75,9 @@ const SIGNED_IN_ROUTES = [
     "/wishlist",
     "/feed",
     "/add-horse",
+    "/studio/setup",
+    "/studio/dashboard",
+    "/studio/my-commissions",
     "/dev/contrast-fixtures?owner=1",
     "/dev/contrast-fixtures",
 ];
@@ -132,7 +135,7 @@ async function expandFixtures(page: Page) {
     await page.waitForTimeout(200);
 }
 
-async function visit(page: Page, route: string, expectSignedIn: boolean): Promise<"ok" | "redirected"> {
+async function visit(page: Page, route: string, expectSignedIn: boolean): Promise<"ok" | "redirected" | "errored"> {
     await page.goto(route, { waitUntil: "domcontentloaded" });
     // Idle is a courtesy, not a requirement: a page that polls never idles.
     await page.waitForLoadState("networkidle", { timeout: 8000 }).catch(() => {});
@@ -140,6 +143,10 @@ async function visit(page: Page, route: string, expectSignedIn: boolean): Promis
     const landed = new URL(page.url()).pathname;
     if (landed === "/login" && route !== "/login" && route !== "/") return "redirected";
     if (expectSignedIn && landed === "/login") return "redirected";
+    // The app's error boundary renders perfectly readable text, so a page
+    // that threw would otherwise "pass" (the studio settings page did,
+    // for a day). Treat it as a page that could not be measured.
+    if (await page.getByText("This page didn't load", { exact: false }).count()) return "errored";
     return "ok";
 }
 
@@ -159,6 +166,10 @@ test.describe("contrast audit", () => {
                 const landed = await visit(page, route, signedIn);
                 if (landed === "redirected") {
                     skipped.push(`${route} (redirected to /login)`);
+                    return;
+                }
+                if (landed === "errored") {
+                    skipped.push(`${route} (could not measure: the page threw and showed the error boundary)`);
                     return;
                 }
                 if (route.startsWith("/dev/contrast-fixtures?owner=1")) await expandFixtures(page);

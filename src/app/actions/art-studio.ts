@@ -61,6 +61,8 @@ export interface ArtistProfile {
     mediums: string[];
     scalesOffered: string[];
     bioArtist: string | null;
+    /** Where the artist works, as written (215): "Ohio, USA", "Kent, UK". */
+    region: string | null;
     portfolioVisible: boolean;
     status: StudioStatus;
     statusNote: string | null;
@@ -173,6 +175,13 @@ export interface ActionResult {
 type Row = Record<string, unknown>;
 /** Writes touch columns the generated types don't know about until 170 lands. */
 type Patch = Record<string, unknown>;
+
+/** The region line from a studio form: one line, 60 chars, or nothing. */
+function regionField(formData: FormData): string | null {
+    const v = str(formData.get("region"));
+    return v ? v.replace(/\s+/g, " ").trim().slice(0, 60) || null : null;
+}
+const missingColumn = (e: { code?: string } | null) => !!e && (e.code === "42703" || e.code === "PGRST204");
 
 /**
  * A PostgREST handle for relations the generated types haven't caught up
@@ -330,6 +339,7 @@ function mapArtistProfile(p: Row, alias: string, avatarUrl: string | null): Arti
         mediums: (p.mediums as string[]) ?? [],
         scalesOffered: (p.scales_offered as string[]) ?? [],
         bioArtist: str(p.bio_artist),
+        region: str(p.region),
         portfolioVisible: p.portfolio_visible !== false,
         status,
         statusNote: str(p.status_note),
@@ -559,6 +569,7 @@ export async function createArtistProfile(
         scales_offered: parseArrayField(formData, "scalesOffered"),
         accepting_types: parseArrayField(formData, "acceptingTypes"),
         bio_artist: str(formData.get("bioArtist")),
+        region: regionField(formData),
         // A new studio opens CLOSED. Announcing yourself as open before
         // you have terms or services listed is how artists end up with a
         // queue they never agreed to.
@@ -568,7 +579,12 @@ export async function createArtistProfile(
         links: normalizeStudioLinks(parseJsonField(formData, "links")),
     };
     let { error } = await supabase.from("artist_profiles").insert(row as never);
-    if (error && (error.code === "42703" || error.code === "PGRST204")) {
+    if (missingColumn(error)) {
+        // Pre-215 — the region lands once its column exists.
+        delete row.region;
+        ({ error } = await supabase.from("artist_profiles").insert(row as never));
+    }
+    if (missingColumn(error)) {
         // Pre-212 — the studio still opens; links land once the column exists.
         delete row.links;
         ({ error } = await supabase.from("artist_profiles").insert(row as never));
@@ -611,6 +627,7 @@ export async function updateArtistProfile(formData: FormData): Promise<ActionRes
         scales_offered: parseArrayField(formData, "scalesOffered"),
         accepting_types: parseArrayField(formData, "acceptingTypes"),
         bio_artist: str(formData.get("bioArtist")),
+        region: regionField(formData),
         paypal_me_link: str(formData.get("paypalMeLink")),
         links: normalizeStudioLinks(parseJsonField(formData, "links")),
         updated_at: new Date().toISOString(),
@@ -636,19 +653,19 @@ export async function updateArtistProfile(formData: FormData): Promise<ActionRes
         }
     }
 
-    let { error } = await supabase
-        .from("artist_profiles")
-        .update(patch as never)
-        .eq("user_id", user.id);
-    if (error && (error.code === "42703" || error.code === "PGRST204")) {
+    const save = () => supabase.from("artist_profiles").update(patch as never).eq("user_id", user.id);
+    let { error } = await save();
+    if (missingColumn(error)) {
+        // Pre-215 — the region lands once its column exists.
+        delete patch.region;
+        ({ error } = await save());
+    }
+    if (missingColumn(error)) {
         // Pre-203 / pre-212 — save everything else rather than failing
         // the form; the newer columns land once their migration is in.
         delete patch.barn_group_id;
         delete patch.links;
-        ({ error } = await supabase
-            .from("artist_profiles")
-            .update(patch as never)
-            .eq("user_id", user.id));
+        ({ error } = await save());
     }
     if (error) return { success: false, error: error.message };
 

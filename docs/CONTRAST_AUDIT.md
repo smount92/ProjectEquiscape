@@ -137,5 +137,10 @@ tooltip, and the console prints a table. That is the fastest way to turn
 - A page that navigates during measurement is retried once, then
   reported as "could not measure" and fails the run — a route that
   redirects on load does not belong in the route list.
+- A page that shows the app's own error boundary ("This page didn't
+  load") is reported as "could not measure" and fails the run. The
+  boundary's text is perfectly readable, so without this a broken page
+  would pass; the studio settings page did exactly that for a day. The
+  audit is therefore also a smoke test for every route it visits.
 - `/stable` has no index page and the signed-in 404 page never goes
   network-idle; idle waits are capped at 8 s for that reason.

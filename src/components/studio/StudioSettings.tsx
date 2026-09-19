@@ -1,5 +1,7 @@
 "use client";
 
+import { type SettingsTab as Tab } from "@/lib/studio/settingsTab";
+
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -56,14 +58,8 @@ const MEDIUMS = [
 
 const SCALES = [...SERVICE_SCALES];
 
-type Tab = "studio" | "rates" | "terms";
 
 const SITE_HOST = (process.env.NEXT_PUBLIC_APP_URL ?? "https://modelhorsehub.com").replace(/^https?:\/\//, "");
-
-/** ?tab=rates|terms|studio → a Tab; anything else opens the identity tab. */
-export function tabFromParam(value: string | undefined | null): Tab {
-    return value === "rates" || value === "terms" ? value : "studio";
-}
 
 export interface OwnBarn {
     id: string;
@@ -127,6 +123,7 @@ function StudioForm({
     const [name, setName] = useState(profile?.studioName ?? "");
     const [slug, setSlug] = useState(profile?.studioSlug ?? "");
     const [bio, setBio] = useState(profile?.bioArtist ?? "");
+    const [region, setRegion] = useState(profile?.region ?? "");
     const [paypal, setPaypal] = useState(profile?.paypalMeLink ?? "");
     const [barnId, setBarnId] = useState(profile?.barnGroupId ?? "");
     const [specialties, setSpecialties] = useState<string[]>(profile?.specialties ?? []);
@@ -152,6 +149,7 @@ function StudioForm({
         form.set("studioName", name);
         form.set("studioSlug", autoSlug);
         form.set("bioArtist", bio);
+        form.set("region", region);
         form.set("paypalMeLink", paypal);
         form.set("specialties", JSON.stringify(specialties));
         form.set("mediums", JSON.stringify(mediums));
@@ -225,6 +223,21 @@ function StudioForm({
                         onChange={(e) => setBio(e.target.value)}
                         placeholder="What you do, how you work, and what you're known for. This is the first thing a commissioner reads."
                     />
+                </label>
+
+                <label className="mb-4 block">
+                    <span className="mb-1 block text-sm font-semibold">
+                        Where you work <span className="text-muted-foreground">(optional)</span>
+                    </span>
+                    <Input
+                        value={region}
+                        maxLength={60}
+                        onChange={(e) => setRegion(e.target.value)}
+                        placeholder="e.g. Ohio, USA — or Kent, UK"
+                    />
+                    <span className="text-secondary-foreground mt-1 block text-xs">
+                        Collectors search the directory by place: who is near them, who ships from their country.
+                    </span>
                 </label>
 
                 <label className="block">

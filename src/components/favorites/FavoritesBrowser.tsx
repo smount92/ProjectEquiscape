@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/lib/context/ToastContext";
 import { toggleFavorite } from "@/app/actions/social";
 import { loadMoreFavorites } from "@/app/actions/favorites";
-import { getThumbUrl } from "@/lib/utils/imageUrl";
+import ThumbImage from "@/components/ThumbImage";
 import type { AvailableFavorite, FavoriteEntry } from "@/lib/favorites/shape";
 
 function formatPrice(price: number | null): string | null {
@@ -53,9 +53,9 @@ function AvailableCard({
             <Link href={`/community/${entry.horseId}`} className="flex flex-col text-foreground no-underline">
                 <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-muted">
                     {entry.thumbnailUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                            src={getThumbUrl(entry.thumbnailUrl)}
+                         
+                        <ThumbImage
+                            src={entry.thumbnailUrl}
                             onError={(e) => {
                                 // Fallback to full-res if thumb doesn't exist (older uploads)
                                 (e.target as HTMLImageElement).src = entry.thumbnailUrl!;

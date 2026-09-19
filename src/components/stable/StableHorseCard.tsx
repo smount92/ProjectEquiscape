@@ -9,7 +9,7 @@
 
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import { getThumbUrl } from "@/lib/utils/imageUrl";
+import ThumbImage from "@/components/ThumbImage";
 import type { StableCard } from "@/lib/stable/types";
 import {
     CATEGORY_BADGE_ICONS,
@@ -52,9 +52,9 @@ export default function StableHorseCard({
             {/* Image */}
             <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-muted">
                 {horse.thumbnailUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                        src={getThumbUrl(horse.thumbnailUrl)}
+                     
+                    <ThumbImage
+                        src={horse.thumbnailUrl}
                         onError={(e) => {
                             // Fallback to full-res if thumb doesn't exist (older uploads)
                             (e.target as HTMLImageElement).src = horse.thumbnailUrl!;

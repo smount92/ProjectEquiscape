@@ -43,7 +43,10 @@ export default function MakingChapter({
             <div className="border-input bg-card mt-6 flex flex-wrap items-baseline justify-between gap-2 rounded-2xl border border-dashed px-5 py-4">
                 <span className="text-muted-foreground text-sm">
                     🖌️ No making-of story yet — know who sculpted, prepped, painted or
-                    restored her?
+                    restored her?{" "}
+                    <Link href="/studio" className="text-forest font-semibold no-underline hover:underline">
+                        Or find an artist →
+                    </Link>
                 </span>
                 <OwnerCreditDialog horseId={horseId} />
             </div>

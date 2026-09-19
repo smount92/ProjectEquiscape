@@ -205,6 +205,12 @@ export default async function StudioPage({
                             )}
                         </div>
 
+                        {profile.region && (
+                            <p className="text-secondary-foreground mb-2 text-sm">
+                                <span aria-hidden="true">📍</span> {profile.region}
+                            </p>
+                        )}
+
                         {profile.statusNote && (
                             <p className="text-secondary-foreground mb-3 text-sm">
                                 {profile.statusNote}

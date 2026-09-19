@@ -436,24 +436,17 @@ editionSize: rawPedigree.edition_size,
  />
 
  {/* Two-column layout: Gallery | Ledger Card */}
- <div className="animate-fade-in-up grid grid-cols-1 gap-8 lg:grid-cols-[1.5fr_1fr] lg:gap-12">
- {/* Left: Gallery, then The Making */}
- <div className="self-start">
+ <div className="animate-fade-in-up grid grid-cols-1 gap-8 lg:grid-cols-[5fr_7fr] lg:items-start lg:gap-12">
+ {/* Left: the gallery, and only the gallery — pinned under the header
+     while the ledger scrolls beside it (same as the owner's page). */}
+ <div className="lg:sticky lg:top-[calc(var(--header-height,64px)+1rem)] lg:self-start">
  <div className="overflow-hidden rounded-2xl shadow-md" id="passport-photos">
  <PassportGallery images={galleryImages} />
  </div>
- <MakingChapter
- records={makingRecords}
- ownerId={horse.owner_id}
- horseId={horseId}
- showControls
- canAddCredit={isOwnHorse}
- />
- <HorseDocuments horseId={horseId} documents={horseDocuments} isOwner={isOwnHorse} />
  </div>
 
  {/* Right: The Ledger Card */}
- <div className="flex min-h-[100%] flex-col gap-2 rounded-3xl border border-input bg-[#C8B596] px-6 py-8 shadow-sm md:px-10" style={PARCHMENT_INK}>
+ <div className="flex flex-col gap-2 rounded-3xl border border-input bg-[#C8B596] px-6 py-8 shadow-sm md:px-10" style={PARCHMENT_INK}>
  {/* Buyer panel — the ONE honest commerce surface (the masthead
      carries the name + reference). The market ESTIMATE sits
      adjacent but visually distinct: asking price and estimate
@@ -537,8 +530,8 @@ editionSize: rawPedigree.edition_size,
  </Link>
  )}
 
- {/* Model Details Card */}
- <div className="bg-card/40 p-4 border-input rounded-lg border shadow-md transition-all">
+ {/* Model Details Card — two columns of rows on desktop */}
+ <div className="bg-card/40 p-4 border-input rounded-lg border shadow-md transition-all lg:grid lg:grid-cols-2 lg:gap-x-8 lg:[&>h3]:col-span-2">
  <h3>
  <span aria-hidden="true">📋</span>{""}
  {(horse.asset_category ||"model") ==="model"
@@ -816,6 +809,9 @@ editionSize: rawPedigree.edition_size,
  </div>
  )}
 
+ {/* Documentation — breed notes and reference links a judge can check */}
+ <HorseDocuments horseId={horseId} documents={horseDocuments} isOwner={isOwnHorse} />
+
  {/* 🔒 NO Financial Vault section — this is a PUBLIC view */}
 
  {/* Market Value Badge (for-sale horses get it adjacent to the
@@ -859,8 +855,8 @@ editionSize: rawPedigree.edition_size,
  </div>
  </div>
 
- {/* Provenance — Read Only */}
- {(showRecords.length > 0 || pedigree || papers.length > 0 || accomplishments.length > 0) && (
+ {/* Provenance — Read Only (The Making sits here with the pedigree and papers) */}
+ {(showRecords.length > 0 || pedigree || papers.length > 0 || accomplishments.length > 0 || makingRecords.length > 0 || isOwnHorse) && (
  <div className="animate-fade-in-up mt-8" id="passport-show-record">
  {showRecords.length > 0 && (
  <ShowRecordTimeline horseId={horseId} records={showRecords} isOwner={false} papers={papers} horseName={horse.custom_name} />
@@ -870,6 +866,15 @@ editionSize: rawPedigree.edition_size,
  <AccomplishmentsSection horseId={horseId} horseName={horse.custom_name} items={accomplishments} papers={papers} isOwner={false} />
  </div>
  )}
+ <div className="mt-6">
+ <MakingChapter
+ records={makingRecords}
+ ownerId={horse.owner_id}
+ horseId={horseId}
+ showControls
+ canAddCredit={isOwnHorse}
+ />
+ </div>
  {pedigree && (
  <div className="mt-6">
  <PedigreeCard horseId={horseId} pedigree={pedigree} isOwner={false} />

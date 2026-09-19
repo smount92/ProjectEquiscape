@@ -24,7 +24,7 @@ import WishlistButton from "@/components/WishlistButton";
 import FavoriteButton from "@/components/FavoriteButton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { getThumbUrl } from "@/lib/utils/imageUrl";
+import ThumbImage from "@/components/ThumbImage";
 import { finishBadgeClass } from "@/lib/stable/badges";
 import {
     buildShowRingSearchParams,
@@ -84,9 +84,9 @@ function ShowRingHorseCard({ horse }: { horse: ShowRingCard }) {
                 {/* Image container — locked aspect ratio */}
                 <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-muted">
                     {horse.thumbnailUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                            src={getThumbUrl(horse.thumbnailUrl)}
+                         
+                        <ThumbImage
+                            src={horse.thumbnailUrl}
                             onError={(e) => {
                                 // Fallback to full-res if thumb doesn't exist (older uploads)
                                 (e.target as HTMLImageElement).src = horse.thumbnailUrl!;

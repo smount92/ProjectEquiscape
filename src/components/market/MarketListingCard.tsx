@@ -26,7 +26,7 @@ import HorseRecordChip from "@/components/market/HorseRecordChip";
 import TrustedBadge from "@/components/TrustedBadge";
 import { Badge } from "@/components/ui/badge";
 import { finishBadgeClass } from "@/lib/stable/badges";
-import { getThumbUrl } from "@/lib/utils/imageUrl";
+import ThumbImage from "@/components/ThumbImage";
 import { listingPriceLabel } from "@/lib/market/listingFilters";
 import { recordChipLabel } from "@/lib/market/recordSummary";
 import type { MarketListing } from "@/app/market/listings";
@@ -50,9 +50,9 @@ export default function MarketListingCard({ listing }: { listing: MarketListing 
                 {/* Photo + price stamp */}
                 <div className="relative aspect-[4/3] overflow-hidden rounded-xl border border-input bg-muted">
                     {listing.thumbnailUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                            src={getThumbUrl(listing.thumbnailUrl)}
+                         
+                        <ThumbImage
+                            src={listing.thumbnailUrl}
                             alt={listing.customName}
                             loading="lazy"
                             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"

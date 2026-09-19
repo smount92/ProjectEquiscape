@@ -4,7 +4,8 @@ import { redirect } from "next/navigation";
 import { getArtistProfile } from "@/app/actions/art-studio";
 import FocusLayout from "@/components/layouts/FocusLayout";
 import PageMasthead from "@/components/layouts/PageMasthead";
-import StudioSettings, { tabFromParam } from "@/components/studio/StudioSettings";
+import StudioSettings from "@/components/studio/StudioSettings";
+import { tabFromParam } from "@/lib/studio/settingsTab";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
