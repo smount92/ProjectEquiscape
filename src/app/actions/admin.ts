@@ -1342,6 +1342,12 @@ const PENDING_MIGRATIONS: MigrationSpec[] = [
     summary: "artist_profiles.also_known_as; v_artist_finished_horses gains the older text-credit branch.",
     probe: { kind: "column", table: "artist_profiles", column: "also_known_as" },
   },
+  {
+    id: "217",
+    title: "Artist resin identity",
+    summary: "user_horses.resin_material / resin_body / cast_by / prep_artist; passport RPC carries them; the wall credits prep work by name.",
+    probe: { kind: "column", table: "user_horses", column: "resin_material" },
+  },
 ];
 
 export interface MigrationStatusRow {

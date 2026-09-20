@@ -29,6 +29,7 @@ import {
 } from "@/lib/forms/schema";
 import type { FieldProblem } from "@/lib/forms/types";
 import type { AssetCategory } from "@/lib/types/database";
+import { isMissingResinColumn, withoutResinColumns } from "@/lib/passport/resinIdentity";
 
 /**
  * The server-side half of the form engine.
@@ -444,6 +445,8 @@ export async function updateHorseAction(horseId: string, data: {
             'edition_number', 'edition_size', 'asset_category',
             'finish_details', 'public_notes', 'assigned_breed', 'assigned_gender',
             'assigned_age', 'regional_id', 'attributes',
+            // Artist resin identity (217)
+            'resin_material', 'resin_body', 'cast_by', 'prep_artist',
         ];
         const VAULT_ALLOWED = [
             'purchase_price', 'purchase_date', 'estimated_current_value',
@@ -553,7 +556,15 @@ export async function updateHorseAction(horseId: string, data: {
                 } catch (err) { Sentry.captureException(err, { tags: { domain: "horse" } }); logger.error("Horse", "Catalog identity audit log failed", err); }
             }
 
-            const { error: updErr } = await supabase.from("user_horses").update(horseUpdate).eq("id", horseId).eq("owner_id", user.id);
+            let { error: updErr } = await supabase.from("user_horses").update(horseUpdate).eq("id", horseId).eq("owner_id", user.id);
+            if (updErr && isMissingResinColumn(updErr)) {
+                // Migration 217 not pasted yet: save everything else.
+                ({ error: updErr } = await supabase
+                    .from("user_horses")
+                    .update(withoutResinColumns(horseUpdate))
+                    .eq("id", horseId)
+                    .eq("owner_id", user.id));
+            }
             if (updErr) throw new Error(updErr.message);
         }
 
@@ -661,6 +672,11 @@ export async function createHorseRecord(data: {
     insuranceNotes?: string;
     assetCategory?: string;
     finishDetails?: string;
+    /** Artist resin identity (217). */
+    resinMaterial?: string;
+    resinBody?: string;
+    castBy?: string;
+    prepArtist?: string;
     publicNotes?: string;
     assignedBreed?: string;
     assignedGender?: string;
@@ -718,6 +734,12 @@ export async function createHorseRecord(data: {
     if (data.editionNumber) horseInsert.edition_number = data.editionNumber;
     if (data.editionSize) horseInsert.edition_size = data.editionSize;
     if (data.finishDetails) horseInsert.finish_details = data.finishDetails.trim();
+    // Resin identity (217): the generated types lag the paste, hence the cast.
+    const resinInsert = horseInsert as Record<string, unknown>;
+    if (data.resinMaterial) resinInsert.resin_material = data.resinMaterial;
+    if (data.resinBody) resinInsert.resin_body = data.resinBody;
+    if (data.castBy) resinInsert.cast_by = data.castBy.trim();
+    if (data.prepArtist) resinInsert.prep_artist = data.prepArtist.trim();
     if (data.publicNotes) horseInsert.public_notes = decodeHtmlEntities(data.publicNotes.trim());
     if (data.assignedBreed) horseInsert.assigned_breed = data.assignedBreed.trim();
     if (data.assignedGender) horseInsert.assigned_gender = data.assignedGender.trim();
@@ -738,11 +760,19 @@ export async function createHorseRecord(data: {
         if (data.marketplaceNotes) horseInsert.marketplace_notes = data.marketplaceNotes;
     }
 
-    const { data: horse, error } = await supabase
+    let { data: horse, error } = await supabase
         .from("user_horses")
         .insert(horseInsert)
         .select("id")
         .single<{ id: string }>();
+    if (error && isMissingResinColumn(error)) {
+        // Migration 217 not pasted yet: keep the horse, drop the resin identity.
+        ({ data: horse, error } = await supabase
+            .from("user_horses")
+            .insert(withoutResinColumns(horseInsert as Record<string, unknown>) as typeof horseInsert)
+            .select("id")
+            .single<{ id: string }>());
+    }
 
     if (error || !horse) return { success: false, error: error?.message || "Failed to save horse." };
 

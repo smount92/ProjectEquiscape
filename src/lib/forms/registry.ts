@@ -49,6 +49,7 @@ import {
     WORKING_PARTS,
 } from "./vocab";
 import type { FieldContext, FieldOption, FieldSpec, FormMode } from "./types";
+import { RESIN_BODY_LABEL, RESIN_MATERIAL_LABEL } from "@/lib/passport/resinIdentity";
 
 // ── Category sets ─────────────────────────────────────────────────────
 
@@ -72,6 +73,13 @@ export const FINISH_TYPE_OPTIONS: readonly FieldOption[] = [
     { value: "Custom", label: "Custom (Repaint / Body Mod)" },
     { value: "Artist Resin", label: "Artist Resin" },
 ] as const;
+
+export const RESIN_MATERIAL_OPTIONS: readonly FieldOption[] = (Object.entries(RESIN_MATERIAL_LABEL) as [string, string][]).map(
+    ([value, label]) => ({ value, label }),
+);
+export const RESIN_BODY_OPTIONS: readonly FieldOption[] = (Object.entries(RESIN_BODY_LABEL) as [string, string][]).map(
+    ([value, label]) => ({ value, label }),
+);
 
 /**
  * All ten grades, with their glosses. The CSV importer knew only nine — it
@@ -140,6 +148,9 @@ const isForSale = (ctx: FieldContext): boolean =>
     ctx.values.trade_status === "For Sale" || ctx.values.trade_status === "Open to Offers";
 
 const isTrade = (ctx: FieldContext): boolean => ctx.values.is_trade === true;
+
+/** The resin identity fields (217) only make sense on an artist resin. */
+const isArtistResin = (ctx: FieldContext): boolean => ctx.values.finish_type === "Artist Resin";
 
 // ── The registry ──────────────────────────────────────────────────────
 
@@ -237,6 +248,69 @@ export const HORSE_FIELDS: readonly FieldSpec[] = [
         inputKey: "finishType",
         domIds: { "create-full": "finish-type", edit: "edit-finish", "create-quick": "quick-finish" },
         importAliases: ["finish", "finish type", "finish_type"],
+    },
+    // ── Artist resin identity (217) ──────────────────────────────────
+    {
+        name: "resin_material",
+        type: "select",
+        group: "identity",
+        label: "Resin Material",
+        icon: "🧪",
+        categories: MODEL_ONLY,
+        visibleWhen: isArtistResin,
+        options: RESIN_MATERIAL_OPTIONS,
+        table: "user_horses",
+        inputKey: "resinMaterial",
+        modes: FULL_ONLY,
+        help: "A white urethane cast, a print, or an injection-molded piece (e.g. Chronos Miniatures).",
+        domIds: { "create-full": "resin-material", edit: "edit-resin-material" },
+        importAliases: ["resin material", "material"],
+    },
+    {
+        name: "resin_body",
+        type: "select",
+        group: "identity",
+        label: "Hollow or Solid",
+        categories: MODEL_ONLY,
+        visibleWhen: isArtistResin,
+        options: RESIN_BODY_OPTIONS,
+        table: "user_horses",
+        inputKey: "resinBody",
+        modes: FULL_ONLY,
+        domIds: { "create-full": "resin-body", edit: "edit-resin-body" },
+        importAliases: ["hollow or solid", "hollow/solid", "body"],
+    },
+    {
+        name: "cast_by",
+        type: "text",
+        group: "identity",
+        label: "Cast By",
+        icon: "🏭",
+        categories: MODEL_ONLY,
+        visibleWhen: isArtistResin,
+        maxLength: 100,
+        table: "user_horses",
+        inputKey: "castBy",
+        placeholder: "Casting studio, e.g. MVS, Jolt",
+        modes: FULL_ONLY,
+        domIds: { "create-full": "cast-by", edit: "edit-cast-by" },
+        importAliases: ["cast by", "caster", "casting studio"],
+    },
+    {
+        name: "prep_artist",
+        type: "text",
+        group: "identity",
+        label: "Prepped By",
+        icon: "🪚",
+        categories: MODEL_ONLY,
+        visibleWhen: isArtistResin,
+        maxLength: 100,
+        table: "user_horses",
+        inputKey: "prepArtist",
+        placeholder: "Who prepped the casting?",
+        modes: FULL_ONLY,
+        domIds: { "create-full": "prep-artist", edit: "edit-prep-artist" },
+        importAliases: ["prepped by", "prep artist", "prepper", "prep"],
     },
     {
         name: "finish_details",

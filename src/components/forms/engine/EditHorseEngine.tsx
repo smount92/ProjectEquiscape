@@ -53,6 +53,7 @@ import FieldControl from "./FieldControl";
 import { LedgerLeaf, LeafHeading } from "./LedgerLeaf";
 import PhotoStudio, { EMPTY_STUDIO, type PhotoStudioValue } from "./PhotoStudio";
 import { uploadStudioPhotos } from "./uploadPhotos";
+import { RESIN_COLUMNS, isMissingResinColumn } from "@/lib/passport/resinIdentity";
 
 interface ExistingImage {
     recordId: string;
@@ -63,7 +64,7 @@ interface ExistingImage {
 }
 
 /** The columns the edit form reads. Derived so a new field can't be forgotten. */
-const HORSE_COLUMNS = [
+const HORSE_COLUMN_LIST = [
     "id",
     "owner_id",
     "custom_name",
@@ -89,7 +90,10 @@ const HORSE_COLUMNS = [
     "assigned_age",
     "regional_id",
     "attributes",
-].join(", ");
+];
+const HORSE_COLUMNS = [...HORSE_COLUMN_LIST, ...RESIN_COLUMNS].join(", ");
+/** Before migration 217 the resin identity columns do not exist; select without them. */
+const HORSE_COLUMNS_PRE_217 = HORSE_COLUMN_LIST.join(", ");
 
 export default function EditHorseEngine() {
     const router = useRouter();
@@ -139,11 +143,18 @@ export default function EditHorseEngine() {
             // Minus the entitlement clock — an expired term is not Pro.
             if (user.app_metadata?.tier) setTier(entitledTier(user.app_metadata) as UserTier);
 
-            const { data: horse, error } = await supabase
+            let { data: horse, error } = await supabase
                 .from("user_horses")
                 .select(HORSE_COLUMNS)
                 .eq("id", horseId)
                 .single<Record<string, unknown>>();
+            if (error && isMissingResinColumn(error)) {
+                ({ data: horse, error } = await supabase
+                    .from("user_horses")
+                    .select(HORSE_COLUMNS_PRE_217)
+                    .eq("id", horseId)
+                    .single<Record<string, unknown>>());
+            }
 
             if (cancelled) return;
             if (error || !horse || horse.owner_id !== user.id) {

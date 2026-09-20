@@ -226,6 +226,7 @@ See [Adding a Migration](../guides/adding-a-migration.md) for the full guide.
 | 214 | `214_papers_attach_and_accomplishments.sql` | 214: Papers attach to records; Other accomplishments (2026-09-19). |
 | 215 | `215_artist_region.sql` | where an artist works. |
 | 216 | `216_artist_credit_names.sql` | older credits find their artist. |
+| 217 | `217_resin_identity.sql` | Artist resin identity: material, hollow/solid, cast by, prepped by; passport RPC; prep credits on the wall. |
 
 ---
 

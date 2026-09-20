@@ -10,6 +10,7 @@ import PublicCardsSection from "@/components/shows/PublicCardsSection";
 import { Button } from "@/components/ui/button";
 import { referenceHref } from "@/lib/catalog/referenceUrl";
 import { PARCHMENT_INK } from "@/lib/theme/parchment";
+import { resinIdentityFrom, resinMakeupLine } from "@/lib/passport/resinIdentity";
 import { getPublicHorseRecords } from "@/lib/shows/publicRecords";
 import {
     isChampionshipRecord,
@@ -68,6 +69,11 @@ interface PassportHorse {
     created_at: string | null;
     finishing_artist: string | null;
     finishing_artist_verified: boolean | null;
+    /** Artist resin identity (217); absent from the RPC until pasted. */
+    resin_material?: string | null;
+    resin_body?: string | null;
+    cast_by?: string | null;
+    prep_artist?: string | null;
     finish_details: string | null;
     assigned_breed: string | null;
     assigned_gender: string | null;
@@ -207,6 +213,10 @@ export default async function AnonPassport({
     const topRecords = sortRecordsBestFirst(showRecords).slice(0, TOP_RECORDS_SHOWN);
 
     const horse = row.horse;
+
+    const resin = resinIdentityFrom(horse as unknown as Record<string, unknown>);
+
+    const resinMakeup = resinMakeupLine(resin);
     const cat = row.catalog;
     const ownerAlias = row.owner_alias ?? "Collector";
     const rawImages = row.images ?? [];
@@ -442,6 +452,9 @@ export default async function AnonPassport({
                                 )}
                             </>
                         )}
+                        {resinMakeup && <DetailRow label="🧪 Resin">{resinMakeup}</DetailRow>}
+                        {resin.castBy && <DetailRow label="🏭 Cast by">{resin.castBy}</DetailRow>}
+                        {resin.prepArtist && <DetailRow label="🪚 Prepped by">{resin.prepArtist}</DetailRow>}
                         {horse.finishing_artist && (
                             <DetailRow label="🎨 Finished by">
                                 {horse.finishing_artist}

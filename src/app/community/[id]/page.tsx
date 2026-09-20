@@ -31,6 +31,7 @@ import type { AssetCategory } from"@/lib/types/database";
 import { Button } from "@/components/ui/button";
 import { referenceHref } from"@/lib/catalog/referenceUrl";
 import AnonPassport from"@/components/passport/AnonPassport";
+import { readResinIdentity, resinMakeupLine } from "@/lib/passport/resinIdentity";
 import PublicCardsSection from"@/components/shows/PublicCardsSection";
 import { PARCHMENT_INK } from"@/lib/theme/parchment";
 import ViewBeacon from"@/components/metrics/ViewBeacon";
@@ -190,6 +191,10 @@ export default async function PublicPassportPage({
 
  // eslint-disable-next-line @typescript-eslint/no-explicit-any
  const horse = rawHorse as any;
+ // Artist resin identity (217) — its own tolerant read, so a passport
+ // renders the same before and after the paste.
+ const resin = await readResinIdentity(supabase, horseId);
+ const resinMakeup = resinMakeupLine(resin);
 
  const isForSale = horse.trade_status === "For Sale" || horse.trade_status === "Open to Offers";
 
@@ -680,6 +685,36 @@ editionSize: rawPedigree.edition_size,
  </>
  )}
 
+ {resinMakeup && (
+ <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
+ <span className="text-secondary-foreground text-sm font-medium">
+ 🧪 Resin
+ </span>
+ <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
+ {resinMakeup}
+ </span>
+ </div>
+ )}
+ {resin.castBy && (
+ <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
+ <span className="text-secondary-foreground text-sm font-medium">
+ 🏭 Cast by
+ </span>
+ <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
+ {resin.castBy}
+ </span>
+ </div>
+ )}
+ {resin.prepArtist && (
+ <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
+ <span className="text-secondary-foreground text-sm font-medium">
+ 🪚 Prepped by
+ </span>
+ <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
+ {resin.prepArtist}
+ </span>
+ </div>
+ )}
  {horse.finishing_artist && (
  <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
  <span className="text-secondary-foreground text-sm font-medium">
