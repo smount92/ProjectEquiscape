@@ -85,12 +85,6 @@ export default function ChampionshipLine({
                     </p>
                 )}
 
-                {season.standingsDark && (
-                    <p className="mt-3 mb-0 text-xs text-muted-foreground">
-                        Season rank and points appear here once the rankings go live.
-                    </p>
-                )}
-
                 {titleRows.length > 0 && (
                     <div className="border-input mt-4 border-t pt-3">
                         <h3 className="mb-2 text-[0.65rem] font-semibold tracking-widest text-secondary-foreground uppercase">

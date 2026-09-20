@@ -134,7 +134,7 @@ The one approved-someday revenue line, so its price anchors matter.
 Judges at NAN get a **$100/day stipend**, a shirt, a medallion and lunch. So even the
 hobby's biggest show runs on a volunteer economy with token compensation.
 
-**Local shows:** `docs/GOLD_STANDARD_DESIGN_REVIEW_2026-08.md` describes the hobby's
+**Local shows:** `docs/archive/GOLD_STANDARD_DESIGN_REVIEW_2026-08.md` describes the hobby's
 "volunteer economy ($1–10 entry fees, coupons, satin ribbons)."
 
 **The owner has already ratified a fee *posture*** in

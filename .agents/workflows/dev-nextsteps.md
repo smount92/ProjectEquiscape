@@ -132,8 +132,8 @@ July 2026 work order cycle. All merged to `main`, all four flags flipped ON in V
 (`refactor/shows-v2-*`, `refactor/groups-forum`, `refactor/stable-v2`,
 `refactor/safe-trade-hardening`, etc.), not as `.agents/workflows/*.md` files like the
 V-numbered sprints above. Don't expect to find a workflow file for this work — the
-authoritative record is `docs/OPERATOR_PLAYBOOK.md`, `docs/STRATEGY_2026-07.md`, and
-`docs/WORK_ORDERS_2026-07-11.md`, plus the architecture section in
+authoritative record is `docs/OPERATOR_PLAYBOOK.md`, `docs/archive/STRATEGY_2026-07.md`, and
+`docs/archive/WORK_ORDERS_2026-07-11.md`, plus the architecture section in
 `.agents/MASTER_BLUEPRINT.md`.
 
 **Current queue (post-rebuild), in priority order:**
@@ -144,7 +144,7 @@ authoritative record is `docs/OPERATOR_PLAYBOOK.md`, `docs/STRATEGY_2026-07.md`,
    + Blue Book SEO pages, showholder white-glove recruitment, NAN-card companion + NAMHSA
    pitch, trust story content, Facebook-native distribution, portable reputation/escrow
    marketing, presence & liveness (PWA wrapper, weekly virtual show), Pro monetization spine.
-3. **Batches A–D of `docs/WORK_ORDERS_2026-07-11.md`** — public marketing pages content +
+3. **Batches A–D of `docs/archive/WORK_ORDERS_2026-07-11.md`** — public marketing pages content +
    design pass (About founders section, FAQ Q&As, Getting Started show-hosting step, Signup
    continuity line), plus this documentation refresh.
 4. **Known site-wide follow-ups** (see `docs/OPERATOR_PLAYBOOK.md` "Known follow-ups"): anon

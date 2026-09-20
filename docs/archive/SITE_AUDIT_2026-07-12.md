@@ -79,7 +79,7 @@
 - **Fix:** `CREATE OR REPLACE` with `SET search_path=''` + `public.`-qualified names via additive migrations. Defense-in-depth; low real exploitability on managed Supabase.
 
 ### SEC-6 — [MED] Money flows non-atomic (documented) — **Status: KNOWN/DEFERRED**
-- **Evidence:** `docs/NEXT_SYSTEMS_ROADMAP.md:12-13,27`; `transactions.ts:855-879` (park-then-update), `:731-750` (JS-loop competing-offer cancel), `:906-958` (3-step cancel).
+- **Evidence:** `docs/archive/NEXT_SYSTEMS_ROADMAP.md:12-13,27`; `transactions.ts:855-879` (park-then-update), `:731-750` (JS-loop competing-offer cancel), `:906-958` (3-step cancel).
 - **Fix:** Ship the owed `cancel_transaction_atomic`/`verify_funds_atomic` single-transaction RPCs; fold competing-offer + stale-offer (S2) sweep in.
 
 ### SEC-7 — [LOW] `NEXT_PUBLIC_ADMIN_EMAIL` in client bundle — **Status: CODE FIXED, ENV CLEANUP OUTSTANDING**
@@ -301,4 +301,4 @@ Owner wants to **minimize Vercel deployments** — test locally (tsc, vitest, ex
 
 ---
 
-*Companion docs: `docs/OPERATOR_PLAYBOOK.md` (the 8 MOVES), `docs/NEXT_SYSTEMS_ROADMAP.md`, `docs/MOVE1_REFERENCE_AND_WANTED.md`, `.agents/MASTER_SUPABASE.md` / `MASTER_BLUEPRINT.md`.*
+*Companion docs: `docs/OPERATOR_PLAYBOOK.md` (the 8 MOVES), `docs/archive/NEXT_SYSTEMS_ROADMAP.md`, `docs/archive/MOVE1_REFERENCE_AND_WANTED.md`, `.agents/MASTER_SUPABASE.md` / `MASTER_BLUEPRINT.md`.*

@@ -121,7 +121,7 @@ Two pages intentionally bypass the layout archetype system:
 All 55+ `page.tsx` files and 90+ components have been migrated to the Layout Archetype system.
 The cold-palette token migration is essentially complete: a July 2026 marketing-pages audit
 found `bg-white` violations on the public pages (About, FAQ, Getting Started), and Batch B of
-`docs/WORK_ORDERS_2026-07-11.md` converted them to `.ledger-paper`/`bg-card` tokens (shipped
+`docs/archive/WORK_ORDERS_2026-07-11.md` converted them to `.ledger-paper`/`bg-card` tokens (shipped
 2026-07-11). Treat any remaining `bg-white`/`bg-stone-*` you spot as a real violation to fix,
 not a documented exception.
 

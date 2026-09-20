@@ -9,9 +9,8 @@
  * promised tack a condition grade for a year while both forms hard-coded
  * the control to models only).
  *
- * The public API is unchanged, so the three legacy forms and the display
- * pages keep working byte-for-byte while the engine soaks behind
- * NEXT_PUBLIC_FORM_ENGINE.
+ * The public API is unchanged, so the display pages keep working
+ * byte-for-byte; the engine has been the only form path since 2026-09.
  *
  * Gallery slots, steps, and the page-title helpers are still authored here
  * — they describe layout, not fields.

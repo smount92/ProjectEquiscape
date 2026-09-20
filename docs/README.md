@@ -1,6 +1,6 @@
 # Model Horse Hub — Documentation Index
 
-> **Last Updated:** August 21, 2026 (the launch release — five rooms, migrations 165–175)
+> **Last Updated:** September 20, 2026 (migrations through 216; dated documents moved to `docs/archive/`)
 > **For AI Agents:** This file is the navigation hub. Use it to find the right document for any topic. Each section links to the canonical reference. For architecture rules and Iron Laws, start at `.agents/MASTER_BLUEPRINT.md` instead — this index covers `docs/`.
 >
 > **Dated documents are history, not status.** Anything with a date in its filename — audits, work orders, strategy notes, launch plans — is a point-in-time record and is not maintained. The undated documents below are the ones kept current.
@@ -34,7 +34,8 @@
 | **Style a new surface** | [Guides → Design Language](guides/DESIGN_LANGUAGE.md) |
 | **Understand commission practice** | [studio/COMMISSION_RESEARCH.md](studio/COMMISSION_RESEARCH.md) |
 | **Manually verify a Shows v2 flow** | [SHOWS_V2_TESTING.md](SHOWS_V2_TESTING.md) |
-| **See what's next after the rebuild program** | [NEXT_SYSTEMS_ROADMAP.md](NEXT_SYSTEMS_ROADMAP.md) |
+| **Check every page's text contrast, or see why a colour must be a token** | [CONTRAST_AUDIT.md](CONTRAST_AUDIT.md) |
+| **Read the dated audits, work orders and plans** | [archive/](archive/README.md) — history, not status |
 | **Understand the growth strategy / house rules** | [OPERATOR_PLAYBOOK.md](OPERATOR_PLAYBOOK.md) |
 | **Know what the site can earn / what break-even needs** | [BUSINESS_MODEL_2026.md](BUSINESS_MODEL_2026.md) |
 
@@ -52,11 +53,11 @@ docs/
 │   ├── repo-ground-truth.md           #   prices, tiers and rulings verified in the tree
 │   ├── hobby-size.md                  #   how big the model horse hobby actually is
 │   └── conversion-benchmarks.md       #   freemium conversion, churn, comparable platforms
-├── NEXT_SYSTEMS_ROADMAP.md            # Post-rebuild priority order
+├── CONTRAST_AUDIT.md                  # The three-layer contrast check (tokens, ratchet, runtime walk)
 ├── SHOWS_V2_TESTING.md                # Manual testing checklist for Shows v2
 ├── studio/COMMISSION_RESEARCH.md      # Researched commission practice (the Studio rebuild's basis)
-├── *_2026-*.md                        # HISTORY — dated audits, work orders, strategy notes,
-│                                      #   launch plans. Point-in-time records, not maintained.
+├── archive/                           # HISTORY — dated audits, work orders, strategy notes,
+│                                      #   launch plans. Point-in-time records; see archive/README.md
 ├── getting-started/
 │   ├── setup.md                       # Local dev environment setup
 │   ├── project-structure.md           # Annotated directory tree

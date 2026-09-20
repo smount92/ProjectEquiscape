@@ -53,9 +53,7 @@ Four flags remain, each with one job:
 
 | Variable | State | Purpose |
 |----------|-------|---------|
-| `NEXT_PUBLIC_SHOW_STANDINGS` | on in prod | /standings and the Standings links that point at it |
 | `NEXT_PUBLIC_REFERENCE_PAGES` | on in prod | SEO kill-switch: gates ONLY the sitemap's /reference entries |
-| `NEXT_PUBLIC_FORM_ENGINE` | dark | The premium add/edit/quick-add form engine (legacy forms render with it off) |
 | `NEXT_PUBLIC_WANTED_NUDGE` | off | Owner demand-nudges on the Want List |
 
 Also required since the metrics launch:

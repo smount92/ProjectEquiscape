@@ -172,7 +172,7 @@ export function fixedTermTotal(term: MembershipTerm): string {
 /**
  * The owner's switch for the whole time-boxed feature. Safe in client
  * components — NEXT_PUBLIC, inlined at build time. Only "1" turns it on,
- * matching src/lib/paypal/flag.ts and src/lib/forms/flag.ts.
+ * matching src/lib/paypal/flag.ts.
  *
  * Note what this flag does NOT gate: the entitlement clock. Once a term
  * is sold, turning the switch off must stop new sales, not convert the

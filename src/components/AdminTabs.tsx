@@ -25,6 +25,8 @@ import AdminSanctioningCard from"@/components/AdminSanctioningCard";
 import AdminMembersTab from"@/components/AdminMembersTab";
 import AdminOpsTab from"@/components/AdminOpsTab";
 import AdminEnvFlagsCard from"@/components/AdminEnvFlagsCard";
+import AdminErrorsCard from"@/components/AdminErrorsCard";
+import type { SentryStatus } from "@/lib/sentry/issues";
 import AdminOverdueShowsCard from"@/components/AdminOverdueShowsCard";
 import AdminInsightsTab from"@/components/AdminInsightsTab";
 import AdminPulseStrip from"@/components/AdminPulseStrip";
@@ -110,6 +112,8 @@ interface AdminTabsProps {
  migrations?: MigrationStatusRow[];
  /** Ops corner: what the server sees for the launch flags. Secrets are booleans only. */
  envFlags?: EnvFlagStatus | null;
+ /** Ops corner: unresolved Sentry issues from the last day, or the setup guide. */
+ sentry?: SentryStatus | null;
  /** Server-side count so the Sanctioning tab can badge before its card loads. */
  sanctioningCount?: number;
 }
@@ -211,6 +215,7 @@ export default function AdminTabs({
  pulse = null,
  migrations = [],
  envFlags = null,
+ sentry = null,
  sanctioningCount = 0,
 }: AdminTabsProps) {
  const [activeTab, setActiveTab] = useState<TabKey>("mailbox");
@@ -312,6 +317,7 @@ export default function AdminTabs({
  <div className="flex flex-col gap-8">
   <AdminOpsTab migrations={migrations} />
   <AdminEnvFlagsCard status={envFlags} />
+  <AdminErrorsCard status={sentry} />
  </div>
  )}
  </div>

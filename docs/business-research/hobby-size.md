@@ -46,7 +46,7 @@ across a three-day event, blended with virtual participants, and include accompa
 children and casual horse-lovers. The figure has barely moved across 2023/2024/2025, which
 reads like a recycled press-release number. **Do not treat 30,000 as 30,000 collectors.**
 
-The repo's own July 2026 research (`docs/OPERATOR_PLAYBOOK.md`, `docs/STRATEGY_2026-07.md`)
+The repo's own July 2026 research (`docs/OPERATOR_PLAYBOOK.md`, `docs/archive/STRATEGY_2026-07.md`)
 recorded "BreyerFest ≈ 35,000 attendees" — consistent with the above, and subject to the same
 caveat. The 13,000 ticket figure is the better anchor and supersedes it for modelling.
 

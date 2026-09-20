@@ -34,7 +34,6 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { isAuditNote, isGloballyVisible } from "@/lib/feed/stream";
 import { getPostColumnSupport } from "@/lib/feed/columnSupport";
 import { getExhibitorCardCount, getExhibitorStar } from "@/lib/shows/horseTitles";
-import { showStandingsEnabled } from "@/lib/shows/flags";
 import { showYearOf } from "@/lib/shows/showYear";
 import { HORSE_TITLE_LABELS, nextStarProgress, type HorseTitleCode } from "@/lib/shows/titles";
 import { getStandings } from "@/app/actions/standings";
@@ -108,8 +107,6 @@ export interface ProfileSeason {
     stakesCards: number;
     star: { label: string; stars: number } | null;
     nextStar: { label: string; pointsNeeded: number } | null;
-    /** True when rank/points were deliberately not computed. */
-    standingsDark: boolean;
 }
 
 /**
@@ -133,20 +130,16 @@ export interface ProfileSeason {
  * "Card people read their cards" restricts SELECT to the owner and
  * show staff (118), and nothing has loosened it. Counts only, by design.
  *
- * WHY RANK IS FLAG-GATED. `getStandings` is a season-wide scan —
- * every counted show, every entry paged past PostgREST's 1000-row
- * cap, chunked placings. That is fine on /standings, which a member
- * visits deliberately; running it on every profile view is not. It
- * is also the surface `NEXT_PUBLIC_SHOW_STANDINGS` exists to keep
- * dark. So rank/points ride the same flag, and the rest of the line
- * — which is cheap and already shipped on the strap — always shows.
+ * COST NOTE. `getStandings` is a season-wide scan — every counted
+ * show, every entry paged past PostgREST's 1000-row cap, chunked
+ * placings. It is wrapped in its own try so a standings failure never
+ * costs the rest of the line, which is cheap.
  */
 export async function fetchProfileSeason(
     client: SupabaseClient,
     userId: string,
 ): Promise<ProfileSeason | null> {
     const showYear = showYearOf(new Date());
-    const standingsLive = showStandingsEnabled();
 
     const [careerRes, distinctionRows, cards, star] = await Promise.all([
         safeMaybeSingle<{ career_points: number }>(
@@ -178,19 +171,17 @@ export async function fetchProfileSeason(
     let placings: number | null = null;
     let championships: number | null = null;
 
-    if (standingsLive) {
-        try {
-            const standings = await getStandings({ showYear, scope: "stables" });
-            if (standings.success && standings.scope === "stables") {
-                const row = standings.rows.find((r) => r.ownerId === userId);
-                points = row?.points ?? 0;
-                rank = row?.rank ?? null;
-                placings = row?.placings ?? 0;
-                championships = row?.championships ?? 0;
-            }
-        } catch {
-            // A standings failure must not cost the rest of the line.
+    try {
+        const standings = await getStandings({ showYear, scope: "stables" });
+        if (standings.success && standings.scope === "stables") {
+            const row = standings.rows.find((r) => r.ownerId === userId);
+            points = row?.points ?? 0;
+            rank = row?.rank ?? null;
+            placings = row?.placings ?? 0;
+            championships = row?.championships ?? 0;
         }
+    } catch {
+        // A standings failure must not cost the rest of the line.
     }
 
     const season: ProfileSeason = {
@@ -204,7 +195,6 @@ export async function fetchProfileSeason(
         stakesCards: cards?.stakesCards ?? 0,
         star: star ? { label: star.label, stars: star.stars } : null,
         nextStar: next ? { label: next.label, pointsNeeded: next.pointsNeeded } : null,
-        standingsDark: !standingsLive,
     };
 
     // A member with no record at all gets no scoreboard — same bar

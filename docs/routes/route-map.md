@@ -89,7 +89,7 @@ graph TD
 | `/shows/rules` | Show rules reference | Public | |
 | `/shows/v2/[id]` | Shows v2 direct link | Public | |
 | `/calendar` | Show calendar | Public | Includes community-submitted `external_shows` (migration 143) |
-| `/standings` | Season standings | Auth | **DARK** — 404s unless `NEXT_PUBLIC_SHOW_STANDINGS=1` |
+| `/standings` | Season standings | Auth | Live — season rankings by stable and by horse (points, placings, championships) |
 | `/cards/[code]` | Qualification card verification | Public | Bearer token; card follows the horse on sale |
 
 ### 3. Market (4 routes)

@@ -183,7 +183,7 @@ async function fetchRecordSummaries(
  * Which of these sellers are community-trusted. Note: mv_trusted_sellers
  * is currently empty in production (its source join uses a
  * horse_transfers status the CHECK constraint disallows — see
- * docs/ADVERSARIAL_AUDIT_2026-08-14_PART2.md), so this correctly
+ * docs/archive/ADVERSARIAL_AUDIT_2026-08-14_PART2.md), so this correctly
  * returns nothing today and lights up the moment the view is fixed.
  */
 async function fetchTrustedSellers(

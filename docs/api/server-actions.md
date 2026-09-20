@@ -99,7 +99,7 @@ Four generations coexist. Know which you are in before you edit.
 | [`show-announcements.ts`](../../src/app/actions/show-announcements.ts) | `announceToEntrants` |
 | [`entry-photo.ts`](../../src/app/actions/entry-photo.ts) | `addShowPhotoToHorse` |
 | [`external-shows.ts`](../../src/app/actions/external-shows.ts) | `submitExternalShow`, `listApprovedExternalShows`, `listPendingExternalShows`, `reviewExternalShow` — the `/calendar` surface |
-| [`standings.ts`](../../src/app/actions/standings.ts) | `getMySeason`, `getStandings` — **dark** behind `NEXT_PUBLIC_SHOW_STANDINGS` |
+| [`standings.ts`](../../src/app/actions/standings.ts) | `getMySeason`, `getStandings` — the season rankings at `/standings` (live since 2026-09; the launch flag is gone) |
 | [`horse-events.ts`](../../src/app/actions/horse-events.ts) | `notifyHorsePublic` |
 
 > `competition.ts` and the Show Packer are **not** dead code — they serve real-world show

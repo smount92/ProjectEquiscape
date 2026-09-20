@@ -185,6 +185,48 @@ All SQL migrations are located in `supabase/migrations/` and are applied sequent
 
 See [Adding a Migration](../guides/adding-a-migration.md) for the full guide.
 
+| 176 | `176_revenue_measurability.sql` | ══════════════════════════════════════════════════════════════ |
+| 177 | `177_public_hoofprint_rpc.sql` | ══════════════════════════════════════════════════════════════ |
+| 178 | `178_manufacturer_reclassification.sql` | ══════════════════════════════════════════════════════════════ |
+| 179 | `179_auth_regression_fixes.sql` | ============================================================ |
+| 180 | `180_deal_flow_integrity.sql` | ============================================================ |
+| 181 | `181_hotpath_indexes.sql` | ══════════════════════════════════════════════════════════════ |
+| 182 | `182_ownership_chain_genesis.sql` | ============================================================ |
+| 183 | `183_paypal_billing.sql` | ============================================================ |
+| 184 | `184_show_followers.sql` | ============================================================ |
+| 185 | `185_prepaid_terms.sql` | ============================================================ |
+| 186 | `186_members_directory_visibility.sql` | ============================================================ |
+| 187 | `187_bluebook_reads_the_real_price.sql` | ============================================================ |
+| 188 | `188_catalog_sort_key.sql` | 188: the Registry's first page should be horses, not punctuation. |
+| 189 | `189_ebay_price_signals.sql` | ============================================================ |
+| 190 | `190_member_sale_reports.sql` | ============================================================ |
+| 191 | `191_sale_report_eligibility.sql` | ============================================================ |
+| 192 | `192_curator_badge_descriptions.sql` | ============================================================ |
+| 193 | `193_membership_on_profile.sql` | ============================================================ |
+| 194 | `194_featured_barns.sql` | ============================================================ |
+| 195 | `195_posts_update_policy.sql` | ============================================================ |
+| 196 | `196_price_signal_listings.sql` | ============================================================ |
+| 197 | `197_price_history.sql` | ============================================================ |
+| 198 | `198_barn_post_stats.sql` | ============================================================ |
+| 199 | `199_public_profile_customization.sql` | ============================================================ |
+| 200 | `200_artists.sql` | ============================================================ |
+| 201 | `201_stable_facets_empty_guard.sql` | 201: get_stable_facets must never emit '' (2026-08-29). |
+| 202 | `202_work_records.sql` | 202: Work records — the studio's atom (2026-09-01). |
+| 203 | `203_workbench.sql` | 203: The Workbench — the commission thread grows up (2026-09-01). |
+| 204 | `204_flexible_stages.sql` | 204: Stages belong to the artist, not the schema (2026-09-01). |
+| 205 | `205_scored_judging.sql` | 205: Scored judging — the scorecard (2026-09-01). |
+| 206 | `206_scores_on_the_record.sql` | 206: The scorecard becomes part of the permanent record (2026-09-01). |
+| 207 | `207_judged_photo.sql` | 207: The record keeps the photo it was judged on (2026-09-01). |
+| 208 | `208_wall_cover_from_reel.sql` | 208: The studio wall takes its covers from the reel (2026-09-03). |
+| 209 | `209_documents_on_public_passports.sql` | 209: Documentation shows on the passport (2026-09-16). |
+| 210 | `210_qualifier_cards.sql` | 210: Qualification cards beyond NAN — OMEQ (2026-09-17). |
+| 211 | `211_price_sweep_attempts.sql` | 211: The eBay sweep remembers what it TRIED, not just what it found |
+| 212 | `212_studio_pass_for_artists.sql` | 212: The studio pass, before a professional artist walks in |
+| 213 | `213_papers.sql` | 213: Papers (2026-09-19). |
+| 214 | `214_papers_attach_and_accomplishments.sql` | 214: Papers attach to records; Other accomplishments (2026-09-19). |
+| 215 | `215_artist_region.sql` | where an artist works. |
+| 216 | `216_artist_credit_names.sql` | older credits find their artist. |
+
 ---
 
 **Next:** [Schema Overview](schema-overview.md) · [Full schema reference](../../.agents/MASTER_SUPABASE.md)

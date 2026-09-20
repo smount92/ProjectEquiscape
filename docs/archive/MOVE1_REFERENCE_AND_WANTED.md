@@ -2,7 +2,7 @@
 
 **Status:** spec / pre-build (mock awaiting design-lead sign-off). Ships dark behind
 `NEXT_PUBLIC_REFERENCE_PAGES`. Source strategy: `docs/OPERATOR_PLAYBOOK.md` MOVE 1 +
-`docs/STRATEGY_2026-07.md`. Owner-approved shape: mock-first · all-owners aggregate
+`docs/archive/STRATEGY_2026-07.md`. Owner-approved shape: mock-first · all-owners aggregate
 counts · everything-in-one-pass · **no platform money handling** (connection-only).
 
 ---

@@ -13,8 +13,6 @@ import {
   renderBrandedEmailText,
   renderEmailQuote,
 } from "@/lib/email/layout";
-import { formEngineEnabled } from "@/lib/forms/flag";
-import { showStandingsEnabled } from "@/lib/shows/flags";
 import { loadShowProgram } from "@/lib/shows/queries";
 import { hasSanctioningRequest, stripSanctioningMarker } from "@/lib/shows/sanctioning";
 import { buildSanctioningChecks, type SanctioningCheck } from "@/lib/shows/sanctioningReview";
@@ -1292,6 +1290,55 @@ const PENDING_MIGRATIONS: MigrationSpec[] = [
     summary: "messages.kind/payload, conversation_participants, deal terms.",
     probe: { kind: "column", table: "messages", column: "kind" },
   },
+  // ── September 2026 ──
+  {
+    id: "209",
+    title: "Documents on public passports",
+    summary: "horse_documents readable on public/unlisted passports.",
+    probe: { kind: "column", table: "horse_documents", column: "id" },
+  },
+  {
+    id: "210",
+    title: "Qualifier cards",
+    summary: "show_records.qualifier_program / card / year / card id (NAN + OMEQ).",
+    probe: { kind: "column", table: "show_records", column: "qualifier_program" },
+  },
+  {
+    id: "211",
+    title: "Price sweep ledger",
+    summary: "catalog_price_sweeps — which catalog rows the eBay sweep has tried, and when.",
+    probe: { kind: "column", table: "catalog_price_sweeps", column: "id" },
+  },
+  {
+    id: "212",
+    title: "Studio pass",
+    summary: "artist_profiles.links, making_ uploads on client horses, checkpoint updates, participants-only commissions.",
+    probe: { kind: "column", table: "artist_profiles", column: "links" },
+  },
+  {
+    id: "213",
+    title: "Papers",
+    summary: "horse_papers + the private horse-papers bucket; pedigree sire/dam links and bred-by.",
+    probe: { kind: "column", table: "horse_papers", column: "id" },
+  },
+  {
+    id: "214",
+    title: "Papers on records + accomplishments",
+    summary: "horse_accomplishments; horse_papers.show_record_id / accomplishment_id.",
+    probe: { kind: "column", table: "horse_accomplishments", column: "id" },
+  },
+  {
+    id: "215",
+    title: "Artist region",
+    summary: "artist_profiles.region — where the artist works; searchable in the directory.",
+    probe: { kind: "column", table: "artist_profiles", column: "region" },
+  },
+  {
+    id: "216",
+    title: "Credit names on the wall",
+    summary: "artist_profiles.also_known_as; v_artist_finished_horses gains the older text-credit branch.",
+    probe: { kind: "column", table: "artist_profiles", column: "also_known_as" },
+  },
 ];
 
 export interface MigrationStatusRow {
@@ -1365,7 +1412,7 @@ export async function getMigrationStatus(): Promise<
 //   1. Secrets are reported as SET / NOT SET. Never the value, never a
 //      prefix, never a length — a length is a fingerprint.
 //   2. NEXT_PUBLIC_* is read through the SAME predicate the feature
-//      uses (formEngineEnabled / showStandingsEnabled), not a
+//      uses (paypalBillingEnabled), not a
 //      re-implementation, so this panel cannot drift from the gate it
 //      is describing. Those values are inlined at BUILD time, so a
 //      Vercel env var changed after the last deploy will still read
@@ -1424,20 +1471,6 @@ export async function getEnvFlagStatus(): Promise<
   // `process.env.NEXT_PUBLIC_X` at build time and a computed lookup
   // (`process.env[key]`) would read undefined in the bundle.
   const flags: EnvFlagRow[] = [
-    {
-      key: "NEXT_PUBLIC_FORM_ENGINE",
-      value: publicValue(process.env.NEXT_PUBLIC_FORM_ENGINE),
-      on: formEngineEnabled(),
-      label: "Premium form engine",
-      effect: "Off = the three legacy add/edit forms serve every route.",
-    },
-    {
-      key: "NEXT_PUBLIC_SHOW_STANDINGS",
-      value: publicValue(process.env.NEXT_PUBLIC_SHOW_STANDINGS),
-      on: showStandingsEnabled(),
-      label: "Season standings",
-      effect: "Off = /standings 404s and its links stay hidden.",
-    },
     {
       key: "NEXT_PUBLIC_WANTED_NUDGE",
       // No shared helper for this one — actions/wishlist.ts compares the

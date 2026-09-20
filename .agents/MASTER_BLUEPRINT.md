@@ -119,8 +119,6 @@ Two survivals worth knowing:
 
 | Flag | Gate | State | What it does |
 |---|---|---|---|
-| `NEXT_PUBLIC_FORM_ENGINE` | `formEngineEnabled()` — `src/lib/forms/flag.ts` | **DARK** | The rebuilt AddHorse/QuickAdd/EditHorse engines. The legacy forms are what every member sees today |
-| `NEXT_PUBLIC_SHOW_STANDINGS` | `showStandingsEnabled()` — `src/lib/shows/flags.ts` | **DARK** | `/standings` (404s when off) and the links pointing at it |
 | `NEXT_PUBLIC_REFERENCE_PAGES` | inline — `src/lib/catalog/referenceUrl.ts` | ON in prod | SEO kill-switch (see above) |
 | `NEXT_PUBLIC_WANTED_NUDGE` | inline — `src/app/actions/wishlist.ts` | OFF | Notifies owners of a catalog item when someone wants one |
 

@@ -8,7 +8,6 @@ import PageMasthead from"@/components/layouts/PageMasthead";
 import MyShowLifeSection from"@/components/shows/MyShowLifeSection";
 import MySeasonCard from"@/components/shows/MySeasonCard";
 import { getMySeason } from"@/app/actions/standings";
-import { showStandingsEnabled } from"@/lib/shows/flags";
 import { EMPTY_SHOW_LIFE } from"@/lib/shows/showLife";
 import type { PublicShowSummary } from"@/lib/shows/public";
 import type { ShowStatus } from"@/lib/shows/types";
@@ -173,11 +172,9 @@ export default async function ShowsPage() {
      <Button asChild variant="outline">
       <Link href="/shows/rules">Rules</Link>
      </Button>
-     {showStandingsEnabled() && (
-      <Button asChild variant="outline">
-       <Link href="/standings">Standings</Link>
-      </Button>
-     )}
+     <Button asChild variant="outline">
+      <Link href="/standings">Standings</Link>
+     </Button>
      {user ? (
       <Button asChild variant="outline">
        <Link href="/shows/host">Host a show</Link>
@@ -188,7 +185,7 @@ export default async function ShowsPage() {
     </>
    }
   />
-  {mySeason && <MySeasonCard season={mySeason} standingsLive={showStandingsEnabled()} />}
+  {mySeason && <MySeasonCard season={mySeason} />}
   <MyShowLifeSection life={showLife} />
 
   {V2_GROUPS.map((group) => (

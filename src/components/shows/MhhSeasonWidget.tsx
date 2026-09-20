@@ -7,11 +7,10 @@
  */
 
 import { getMySeason } from "@/app/actions/standings";
-import { showStandingsEnabled } from "@/lib/shows/flags";
 import MySeasonCard from "./MySeasonCard";
 
 export default async function MhhSeasonWidget() {
     const season = await getMySeason();
     if (!season) return null;
-    return <MySeasonCard season={season} standingsLive={showStandingsEnabled()} />;
+    return <MySeasonCard season={season} />;
 }

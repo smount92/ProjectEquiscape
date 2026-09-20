@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 
 import { getStandings, type GetStandingsResult } from "@/app/actions/standings";
 import {
@@ -8,7 +8,6 @@ import {
     MIN_EXHIBITORS_FOR_POINTS,
     POINTS_CAP,
 } from "@/lib/shows/points";
-import { showStandingsEnabled } from "@/lib/shows/flags";
 import { titlePrefix } from "@/lib/shows/titles";
 import { showYearLabel, showYearOf } from "@/lib/shows/showYear";
 import { createClient } from "@/lib/supabase/server";
@@ -218,7 +217,6 @@ export default async function StandingsPage({
 }: {
     searchParams: Promise<{ year?: string; scope?: string; shows?: string }>;
 }) {
-    if (!showStandingsEnabled()) notFound();
 
     const supabase = await createClient();
     const {

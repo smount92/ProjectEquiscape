@@ -496,8 +496,6 @@ describe("getEnvFlagStatus", () => {
     });
 
     it("reads each flag through the app's own gate — only the literal '1' is on", async () => {
-        vi.stubEnv("NEXT_PUBLIC_FORM_ENGINE", "1");
-        vi.stubEnv("NEXT_PUBLIC_SHOW_STANDINGS", "true");
         vi.stubEnv("NEXT_PUBLIC_WANTED_NUDGE", "");
 
         const result = await getEnvFlagStatus();
@@ -505,11 +503,6 @@ describe("getEnvFlagStatus", () => {
         expect(result.success).toBe(true);
         if (!result.success) return;
         const byKey = Object.fromEntries(result.status.flags.map((f) => [f.key, f]));
-        expect(byKey.NEXT_PUBLIC_FORM_ENGINE.on).toBe(true);
-        // Set, but not to "1" — the gate is off and the value is shown so
-        // the owner can see WHY.
-        expect(byKey.NEXT_PUBLIC_SHOW_STANDINGS.on).toBe(false);
-        expect(byKey.NEXT_PUBLIC_SHOW_STANDINGS.value).toBe("true");
         expect(byKey.NEXT_PUBLIC_WANTED_NUDGE.on).toBe(false);
         expect(byKey.NEXT_PUBLIC_WANTED_NUDGE.value).toBeNull();
     });

@@ -12,9 +12,8 @@
  * SEO landing surface for "how do I start" traffic and it must render
  * without a database round trip.
  *
- * Do not describe the premium add-horse forms here: they ship dark
- * behind NEXT_PUBLIC_FORM_ENGINE and the legacy form is what a member
- * actually sees. The wording below is true of either.
+ * The add-horse form is the form engine (AddHorseEngine); keep the
+ * wording below true of its steps rather than naming controls.
  */
 
 import Link from "next/link";

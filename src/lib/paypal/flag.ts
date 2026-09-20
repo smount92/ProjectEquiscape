@@ -2,7 +2,7 @@
  * PayPal billing feature flag. Ships dark: set NEXT_PUBLIC_PAYPAL_BILLING=1
  * to expose the PayPal path alongside the existing Stripe card checkout.
  *
- * Mirrors src/lib/forms/flag.ts — only the literal "1" turns it on.
+ * Only the literal "1" turns it on (the same rule every launch flag used).
  *
  * WHY A SECOND BILLING PATH EXISTS AT ALL. Stripe only offers PayPal as a
  * payment method to businesses registered in the EU/UK/CH/NO/LI. This one

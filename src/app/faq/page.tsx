@@ -15,9 +15,9 @@
  *    cardIssuance.ts), exactly as /shows/rules does, so the FAQ cannot
  *    drift from what actually happens in the ring.
  *
- * 2. NOTHING DARK IS DESCRIBED AS LIVE. No standings page (dark behind
- *    NEXT_PUBLIC_SHOW_STANDINGS), no premium add-horse forms (dark
- *    behind NEXT_PUBLIC_FORM_ENGINE). Only what a member sees today.
+ * 2. NOTHING DARK IS DESCRIBED AS LIVE. Check the flag card on the admin
+ *    Ops tab before mentioning a gated feature. Only what a member sees
+ *    today.
  *
  * SERVER COMPONENT, NO STATE. It used to be a "use client" accordion,
  * which meant search engines and Simple-Mode readers only ever got the

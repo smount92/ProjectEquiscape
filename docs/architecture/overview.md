@@ -99,8 +99,9 @@ then delete the flag and the old branch.** That last step is not optional; nine 
 accumulated into nine live fallback paths nobody was testing, and the launch release's Phase 0
 deleted all of them.
 
-Four flags remain, two of them dark (`NEXT_PUBLIC_FORM_ENGINE`, `NEXT_PUBLIC_SHOW_STANDINGS`) —
-see `.agents/MASTER_BLUEPRINT.md` for the table. `LegacyShowPage` is *not* a flag path: it is
+Two flags remain (`NEXT_PUBLIC_REFERENCE_PAGES`, `NEXT_PUBLIC_WANTED_NUDGE`) — see
+`.agents/MASTER_BLUEPRINT.md` for the table. The form engine and the season standings shipped
+in September 2026 and their flags (and the legacy forms they guarded) were deleted. `LegacyShowPage` is *not* a flag path: it is
 the renderer chosen by data for legacy `events`-engine shows.
 
 ### 3a. Feature-Detect the Schema
@@ -174,9 +175,9 @@ The view UNION ALLs these into a single chronological timeline.
 | Page routes | 94 |
 | Server action files | 58 |
 | API routes | 18 (+ `/auth/callback` and the Serwist handler, both outside `/api`) |
-| Database migrations | 170 files (001–175; 045/047/049/051/174 skipped) |
+| Database migrations | 211 files (001–216; 045/047/049/051/174 skipped) — the admin Ops tab shows which recent ones are pasted |
 | Domain libs | `src/lib/{shows,groups,stable,showring,commerce,deals,studio,forms,feed,metrics,market,members,catalog,external-shows}/` |
-| Feature flags | 4 remaining — 2 dark (`FORM_ENGINE`, `SHOW_STANDINGS`), 1 SEO kill-switch (`REFERENCE_PAGES`), 1 off (`WANTED_NUDGE`) |
+| Feature flags | 2 launch switches (`WANTED_NUDGE`, `PAYPAL_BILLING`), 1 SEO kill-switch (`REFERENCE_PAGES`); the form engine and standings flags were retired 2026-09 |
 | CSS architecture | Tailwind CSS v4 + shadcn/ui + Framer Motion, one `globals.css` (~3,980 lines) |
 | Reference catalog entries | 10,900+ |
 | Test files | 155 unit/integration/component + 10 Playwright E2E specs |

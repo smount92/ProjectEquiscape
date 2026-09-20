@@ -12,6 +12,7 @@ import {
  listSanctioningRequests,
 } from"@/app/actions/admin";
 import AdminTabs from"@/components/AdminTabs";
+import { getSentryIssues } from "@/lib/sentry/issues";
 import CommandCenterLayout from"@/components/layouts/CommandCenterLayout";
 import { Zap, Shield } from "lucide-react";
 
@@ -58,6 +59,7 @@ export default async function AdminPage() {
  pulseResult,
  migrationsResult,
  envFlagsResult,
+ sentryStatus,
  sanctioningResult,
  catalogSuggestionsResult,
  ] = await Promise.all([
@@ -83,6 +85,8 @@ export default async function AdminPage() {
  // flags. Read at render so it reflects this deploy's build — and
  // secrets come back as booleans, never values.
  getEnvFlagStatus(),
+ // Ops corner, third: what Sentry caught in the last day (pull; see lib/sentry/issues).
+ getSentryIssues(),
  listSanctioningRequests(),
  supabaseAdmin
   .from("catalog_suggestions")
@@ -164,6 +168,7 @@ export default async function AdminPage() {
    pulse={pulse}
    migrations={migrations}
    envFlags={envFlags}
+   sentry={sentryStatus}
    sanctioningCount={sanctioningCount}
   />
   }

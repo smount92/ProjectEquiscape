@@ -154,7 +154,7 @@ D5. docs/README.md index: link SHOWS_V2_TESTING, NEXT_SYSTEMS_ROADMAP,
     Complete Report (see D9).
 D6. docs/SHOWS_V2_TESTING.md: intro line — flags are LIVE in prod now;
     note checklist items should be verified against production.
-D7. docs/NEXT_SYSTEMS_ROADMAP.md: launch checklist step 4 (flag flip) →
+D7. docs/archive/NEXT_SYSTEMS_ROADMAP.md: launch checklist step 4 (flag flip) →
     DONE; next action becomes the photo-show→v2 data migration.
     Also mark DONE: Show Ring refactor, Safe-Trade hardening.
 D8. Small patches: test-accounts.md (+device-layout, +visual-qa-mobile

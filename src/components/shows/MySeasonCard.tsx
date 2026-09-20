@@ -24,14 +24,7 @@ function Stat({ num, label }: { num: string; label: string }) {
     );
 }
 
-export default function MySeasonCard({
-    season,
-    standingsLive,
-}: {
-    season: MySeason;
-    /** Flag-gated: only link to the rankings page once it exists. */
-    standingsLive: boolean;
-}) {
+export default function MySeasonCard({ season }: { season: MySeason }) {
     const quiet =
         season.points === 0 &&
         season.liveCards === 0 &&
@@ -75,11 +68,9 @@ export default function MySeasonCard({
                 </div>
 
                 <div className="flex items-center gap-3 text-sm">
-                    {standingsLive && (
-                        <Link href="/standings" className="font-semibold text-forest hover:underline">
-                            Rankings →
-                        </Link>
-                    )}
+                    <Link href="/standings" className="font-semibold text-forest hover:underline">
+                        Rankings →
+                    </Link>
                     <Link
                         href="/shows/rules"
                         className="text-muted-foreground underline decoration-dotted hover:text-foreground"

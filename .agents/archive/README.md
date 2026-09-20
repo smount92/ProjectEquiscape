@@ -22,4 +22,4 @@ archive/
 └── README.md         # This file
 ```
 
-**2026-Q1 batch: safe to delete after NAMHSA pitch (June 2026). 2026-Q2 batch archived 2026-07-11 as part of the documentation refresh (see `docs/WORK_ORDERS_2026-07-11.md`).**
+**2026-Q1 batch: safe to delete after NAMHSA pitch (June 2026). 2026-Q2 batch archived 2026-07-11 as part of the documentation refresh (see `docs/archive/WORK_ORDERS_2026-07-11.md`).**

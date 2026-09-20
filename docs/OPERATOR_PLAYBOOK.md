@@ -109,8 +109,7 @@ BUILT AND LIVE:
    **Do not trust a hand-kept flag list here** — this one named four when
    there were more than twice that. Derive it:
    `grep -rhoE "NEXT_PUBLIC_[A-Z_]+" src/ | sort -u`. Behaviour flags at
-   the time of writing were `NEXT_PUBLIC_FORM_ENGINE`,
-   `NEXT_PUBLIC_SHOW_STANDINGS`, `NEXT_PUBLIC_WANTED_NUDGE`,
+   the time of writing (2026-09-20) were `NEXT_PUBLIC_WANTED_NUDGE`,
    `NEXT_PUBLIC_PAYPAL_BILLING`, `NEXT_PUBLIC_PREPAID_TERMS`,
    `NEXT_PUBLIC_EBAY_COMPS`, `NEXT_PUBLIC_GROUPS_FORUM` and
    `NEXT_PUBLIC_REFERENCE_PAGES` (an SEO kill-switch, ON) — the rest of

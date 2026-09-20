@@ -178,7 +178,7 @@ the product cannot currently honour is the single most expensive mistake availab
 - "We never hold your money and we don't charge you to sell" — true, and structurally true.
 
 **Do not market until fixed** (each is a live audit finding — see
-[`ADVERSARIAL_AUDIT_2026-08-14_PART2.md`](ADVERSARIAL_AUDIT_2026-08-14_PART2.md) Area 6):
+[`archive/ADVERSARIAL_AUDIT_2026-08-14_PART2.md`](archive/ADVERSARIAL_AUDIT_2026-08-14_PART2.md) Area 6):
 
 | Claim | Why it's blocked |
 |---|---|
@@ -186,7 +186,7 @@ the product cannot currently honour is the single most expensive mistake availab
 | **Full ownership chains / "CarFax for model horses"** | F3: `horse_ownership_history` has no INSERT policy, so genesis rows were silently never written. Every never-transferred horse has an empty chain; transferred horses start at the *second* owner. |
 | **Seller reputation / reviews** | F2: reviews are forgeable and review-bombable — a caller can mint a fake completed transaction per review. |
 | **"Verified Artist" badges** | F1: `finishing_artist_verified` is in the owner-editable whitelist. Any owner can self-set it. |
-| **Anything about the season standings or the new add-horse forms** | Both are **built but dark** (`NEXT_PUBLIC_SHOW_STANDINGS`, `NEXT_PUBLIC_FORM_ENGINE`). Members cannot see them. Never describe a dark feature as live. |
+| **Anything about the season standings or the new add-horse forms** | Both went live in September 2026 (the flags are gone). Still: never describe a dark feature as live — check the admin Ops tab before promising one. |
 | **Offline show mode / "works in airplane mode"** | MAJ-4: the PWA page matcher can never match; the offline promise doesn't work today. |
 
 **Two operational risks that will bite during the Summerween campaign specifically:**
@@ -1318,11 +1318,11 @@ widely-circulated SEO statistics are single-source vendor claims and are labelle
 don't put them in anything public.
 
 Internal sources read for this plan: `.agents/MASTER_BLUEPRINT.md`,
-[`OPERATOR_PLAYBOOK.md`](OPERATOR_PLAYBOOK.md), [`STRATEGY_2026-07.md`](STRATEGY_2026-07.md),
+[`OPERATOR_PLAYBOOK.md`](OPERATOR_PLAYBOOK.md), [`archive/STRATEGY_2026-07.md`](archive/STRATEGY_2026-07.md),
 [`CHAMPIONSHIP_PROGRAM_2026.md`](CHAMPIONSHIP_PROGRAM_2026.md),
 [`COMMERCE_AND_COMMS_PLAN.md`](COMMERCE_AND_COMMS_PLAN.md),
-[`MOVE1_REFERENCE_AND_WANTED.md`](MOVE1_REFERENCE_AND_WANTED.md),
-[`LAUNCH_2026-08.md`](LAUNCH_2026-08.md),
-[`ADVERSARIAL_AUDIT_2026-08-14_PART2.md`](ADVERSARIAL_AUDIT_2026-08-14_PART2.md),
-[`summerween-dress-rehearsal.md`](summerween-dress-rehearsal.md), and the landing-page
+[`archive/MOVE1_REFERENCE_AND_WANTED.md`](archive/MOVE1_REFERENCE_AND_WANTED.md),
+[`archive/LAUNCH_2026-08.md`](archive/LAUNCH_2026-08.md),
+[`archive/ADVERSARIAL_AUDIT_2026-08-14_PART2.md`](archive/ADVERSARIAL_AUDIT_2026-08-14_PART2.md),
+[`archive/summerween-dress-rehearsal.md`](archive/summerween-dress-rehearsal.md), and the landing-page
 components in `src/components/landing/` (for voice).

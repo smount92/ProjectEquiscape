@@ -211,6 +211,7 @@ CREATE POLICY "participant_access" ON my_table FOR SELECT
 2. ☐ Owner pastes the SQL in the Supabase Dashboard (AI never runs `db push`)
 3. ☐ Run `npm run gen-types` to regenerate TypeScript types, and replace any interim hand-written types
 4. ☐ Update `docs/database/migrations.md` with the new entry
+4b. ☐ Add a probe for it to `PENDING_MIGRATIONS` in `src/app/actions/admin.ts` (a column or table the migration creates) so the admin Ops tab shows whether it has been pasted
 5. ☐ If new table, add to `docs/database/schema-overview.md` **and** `.agents/MASTER_SUPABASE.md`
 6. ☐ If new RLS policies, add to `docs/database/rls-policies.md`
 7. ☐ Build passes (`npm run build`)
