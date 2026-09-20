@@ -25,6 +25,7 @@ import {
 import { DEFAULT_TERMS, type StudioTerms } from "@/lib/studio/terms";
 import { LINK_META, type StudioLinks } from "@/lib/studio/links";
 import { slugifyStudio } from "@/lib/studio/slug";
+import { canonicalFacets } from "@/lib/studio/facets";
 
 /**
  * Studio settings: identity, rate card, terms.
@@ -126,6 +127,10 @@ function StudioForm({
     const [region, setRegion] = useState(profile?.region ?? "");
     const [alsoKnownAs, setAlsoKnownAs] = useState((profile?.alsoKnownAs ?? []).join(", "));
     const [paypal, setPaypal] = useState(profile?.paypalMeLink ?? "");
+    // A priced service is a skill whether or not it is ticked here; it can
+    // only be removed under Rates. Showing it locked stops the "I deleted
+    // it but the directory still lists it" confusion (2026-09-20).
+    const pricedSkills = canonicalFacets((profile?.services ?? []).filter((x) => x.open).map((x) => x.type));
     const [barnId, setBarnId] = useState(profile?.barnGroupId ?? "");
     const [specialties, setSpecialties] = useState<string[]>(profile?.specialties ?? []);
     const [mediums, setMediums] = useState<string[]>(profile?.mediums ?? []);
@@ -153,7 +158,7 @@ function StudioForm({
         form.set("region", region);
         form.set("alsoKnownAs", JSON.stringify(alsoKnownAs.split(",").map((n) => n.trim()).filter(Boolean).slice(0, 10)));
         form.set("paypalMeLink", paypal);
-        form.set("specialties", JSON.stringify(specialties));
+        form.set("specialties", JSON.stringify(canonicalFacets([...specialties, ...pricedSkills])));
         form.set("mediums", JSON.stringify(mediums));
         form.set("scalesOffered", JSON.stringify(scales));
         form.set("acceptingTypes", JSON.stringify(specialties));
@@ -333,6 +338,8 @@ function StudioForm({
                     options={SPECIALTIES}
                     selected={specialties}
                     onChange={setSpecialties}
+                    locked={pricedSkills}
+                    lockedNote="Priced under Rates — remove it there to drop it here"
                 />
                 <PickList
                     label="Mediums"
@@ -378,23 +385,33 @@ function PickList({
     options,
     selected,
     onChange,
+    locked = [],
+    lockedNote,
 }: {
     label: string;
     options: string[];
     selected: string[];
     onChange: (next: string[]) => void;
+    /** Always on and not removable here (e.g. a priced service). */
+    locked?: string[];
+    lockedNote?: string;
 }) {
+    const all = [...options, ...locked.filter((l) => !options.includes(l))];
     return (
         <div className="mb-4">
             <span className="mb-2 block text-sm font-semibold">{label}</span>
             <div className="flex flex-wrap gap-1.5">
-                {options.map((option) => {
-                    const on = selected.includes(option);
+                {all.map((option) => {
+                    const isLocked = locked.includes(option);
+                    const on = isLocked || selected.includes(option);
                     return (
                         <button
                             key={option}
                             type="button"
                             className={`studio-chip ${on ? "active" : ""}`}
+                            disabled={isLocked}
+                            title={isLocked ? lockedNote : undefined}
+                            aria-pressed={on}
                             onClick={() =>
                                 onChange(
                                     on

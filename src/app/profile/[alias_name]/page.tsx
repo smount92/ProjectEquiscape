@@ -105,8 +105,8 @@ export default async function ProfilePage({
     // Logged-out visitors get a read-only public profile (service-role reads,
     // scoped to public data); the full interactive profile below is for
     // logged-in members. ?shown= drives the anon "Show more" paging.
+    const sp = await searchParams;
     if (!user) {
-        const sp = await searchParams;
         return <AnonProfile alias={aliasDecoded} shownParam={sp.shown} />;
     }
 
@@ -276,6 +276,14 @@ export default async function ProfilePage({
         .eq("is_public", true)
         .order("name");
 
+    // ?collection= opens one public folder on this page. The folder tabs
+    // used to link to /stable/collection/[id], which is the owner's own
+    // room and a 404 for everyone else (artist report, 2026-09-20).
+    const folderParam = typeof sp.collection === "string" ? sp.collection : null;
+    const openFolder = folderParam
+        ? ((publicCollections ?? []).find((c) => c.id === folderParam) ?? null)
+        : null;
+
     // Fetch user badges for Trophy Case
     const { data: rawBadges } = await supabase
         .from("user_badges")
@@ -309,7 +317,7 @@ export default async function ProfilePage({
     // ================================================================
     const PROFILE_PAGE_SIZE = 24;
 
-    const { data: rawHorses, count: publicHorseCount } = await supabase
+    let herdQuery = supabase
         .from("user_horses")
         .select(
             `
@@ -321,11 +329,24 @@ export default async function ProfilePage({
             { count: "exact" },
         )
         .eq("owner_id", profileUser.id)
-        .eq("visibility", "public")
+        .eq("visibility", "public");
+    if (openFolder) herdQuery = herdQuery.eq("collection_id", openFolder.id);
+    const { data: rawHorses, count: shelfCount } = await herdQuery
         .order("created_at", { ascending: false })
         .range(0, PROFILE_PAGE_SIZE - 1);
 
     const horses = rawHorses ?? [];
+
+    // The strap's "Public" figure is the whole herd even with one folder open.
+    const publicHorseCount = openFolder
+        ? (
+              await supabase
+                  .from("user_horses")
+                  .select("id", { count: "exact", head: true })
+                  .eq("owner_id", profileUser.id)
+                  .eq("visibility", "public")
+          ).count
+        : shelfCount;
 
     // Total horse count (all non-deleted, regardless of visibility)
     // Must bypass RLS — the regular client can only see own + public horses
@@ -494,7 +515,7 @@ export default async function ProfilePage({
         (h) => h.tradeStatus === "For Sale" || h.tradeStatus === "Open to Offers",
     );
 
-    const hasMoreHorses = (publicHorseCount ?? 0) > PROFILE_PAGE_SIZE;
+    const hasMoreHorses = (shelfCount ?? 0) > PROFILE_PAGE_SIZE;
 
     // ── The championship line, their titles, barns and posts ──
     // Blocked members' words stay hidden; their public record does not,
@@ -735,11 +756,20 @@ export default async function ProfilePage({
             {publicCollections && publicCollections.length > 0 && (
                 <div className="animate-fade-in-up mt-6">
                     <div className="flex flex-wrap items-center justify-center gap-2">
+                        {openFolder && (
+                            <Link
+                                href={`/profile/${encodeURIComponent(profileUser.alias_name)}#stable`}
+                                className="ledger-tab !mb-0 no-underline transition-all hover:translate-y-[-1px]"
+                            >
+                                All models
+                            </Link>
+                        )}
                         {publicCollections.map((col) => (
                             <Link
                                 key={col.id}
-                                href={`/stable/collection/${col.id}`}
-                                className="ledger-tab !mb-0 no-underline transition-all hover:translate-y-[-1px]"
+                                href={`/profile/${encodeURIComponent(profileUser.alias_name)}?collection=${col.id}#stable`}
+                                className={`ledger-tab !mb-0 no-underline transition-all hover:translate-y-[-1px]${openFolder?.id === col.id ? " active" : ""}`}
+                                aria-current={openFolder?.id === col.id ? "page" : undefined}
                             >
                                 📁 {col.name}
                             </Link>
@@ -857,15 +887,21 @@ export default async function ProfilePage({
             <section className="animate-fade-in-up mt-4 scroll-mt-24" id="stable">
                 <SectionHeading
                     title="The Stable"
-                    note={`${publicHorseCount ?? 0} public model${(publicHorseCount ?? 0) !== 1 ? "s" : ""} — scroll the shelf`}
+                    note={
+                        openFolder
+                            ? `📁 ${openFolder.name} · ${shelfCount ?? 0} public model${(shelfCount ?? 0) !== 1 ? "s" : ""}`
+                            : `${publicHorseCount ?? 0} public model${(publicHorseCount ?? 0) !== 1 ? "s" : ""} — scroll the shelf`
+                    }
                 />
                 {profileCards.length === 0 ? (
                     <EmptyNote
                         icon="🔒"
                         title={
-                            isOwnProfile
-                                ? "You haven't made any models public yet"
-                                : `@${profileUser.alias_name} hasn't made any models public yet`
+                            openFolder
+                                ? `Nothing public in “${openFolder.name}” yet`
+                                : isOwnProfile
+                                  ? "You haven't made any models public yet"
+                                  : `@${profileUser.alias_name} hasn't made any models public yet`
                         }
                         action={
                             isOwnProfile ? (
@@ -893,7 +929,8 @@ export default async function ProfilePage({
                             <ProfileLoadMore
                                 userId={profileUser.id}
                                 initialOffset={PROFILE_PAGE_SIZE}
-                                totalCount={publicHorseCount ?? 0}
+                                totalCount={shelfCount ?? 0}
+                                collectionId={openFolder?.id ?? null}
                             />
                         )}
                     </div>

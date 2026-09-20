@@ -125,6 +125,9 @@ export default async function StudioPage({
     // "Currently accepting" = the services she has open, not a second
     // copy of the specialty chips.
     const acceptingNow = [...new Set(openServices.map((s) => s.type))];
+    // The skill chips under the bio are one list: listed skills plus priced
+    // services. The directory card draws the same union.
+    const skillChips = canonicalFacets([...profile.specialties, ...openServices.map((s) => s.type)]);
 
     // ── The identity joins: Registry artist page + the studio's barn ──
     // Both tolerant — the artists table is 200, barn_group_id is 203.
@@ -223,9 +226,9 @@ export default async function StudioPage({
                             </p>
                         )}
 
-                        {profile.specialties.length > 0 && (
+                        {skillChips.length > 0 && (
                             <div className="mt-4 flex flex-wrap gap-1.5">
-                                {canonicalFacets(profile.specialties).map((s) => (
+                                {skillChips.map((s) => (
                                     <Chip key={s}>{s}</Chip>
                                 ))}
                             </div>

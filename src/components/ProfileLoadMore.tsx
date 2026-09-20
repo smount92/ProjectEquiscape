@@ -5,6 +5,8 @@ import Link from "next/link";
 import { loadMoreProfileHorses, type ProfileHorseCard } from "@/app/actions/profile";
 
 interface Props {
+    /** Set when one public folder is open; paging stays inside it. */
+    collectionId?: string | null;
     userId: string;
     initialOffset: number;
     totalCount: number;
@@ -23,7 +25,7 @@ function formatDate(dateStr: string): string {
  * Loaded horses render as an additional scrollable `.shelf-strip`
  * of polaroids matching the SSR strip above it.
  */
-export default function ProfileLoadMore({ userId, initialOffset, totalCount }: Props) {
+export default function ProfileLoadMore({ userId, initialOffset, totalCount, collectionId = null }: Props) {
     const [horses, setHorses] = useState<ProfileHorseCard[]>([]);
     const [offset, setOffset] = useState(initialOffset);
     const [hasMore, setHasMore] = useState(true);
@@ -33,7 +35,7 @@ export default function ProfileLoadMore({ userId, initialOffset, totalCount }: P
 
     const loadMore = () => {
         startTransition(async () => {
-            const result = await loadMoreProfileHorses(userId, offset);
+            const result = await loadMoreProfileHorses(userId, offset, collectionId);
             setHorses(prev => [...prev, ...result.horses]);
             setOffset(prev => prev + result.horses.length);
             setHasMore(result.hasMore);

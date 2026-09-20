@@ -56,11 +56,12 @@ export async function updateBio(bio: string): Promise<{ success: boolean; error?
  */
 export async function loadMoreProfileHorses(
     userId: string,
-    offset: number
+    offset: number,
+    collectionId: string | null = null,
 ): Promise<{ horses: ProfileHorseCard[]; hasMore: boolean }> {
     const supabase = await createClient();
 
-    const { data: rawHorses, count } = await supabase
+    let query = supabase
         .from("user_horses")
         .select(`
             id, custom_name, finish_type, condition_grade, created_at, trade_status, listing_price, marketplace_notes,
@@ -69,7 +70,9 @@ export async function loadMoreProfileHorses(
             horse_images(image_url, angle_profile)
         `, { count: "exact" })
         .eq("owner_id", userId)
-        .eq("visibility", "public")
+        .eq("visibility", "public");
+    if (collectionId) query = query.eq("collection_id", collectionId);
+    const { data: rawHorses, count } = await query
         .order("created_at", { ascending: false })
         .range(offset, offset + PAGE_SIZE - 1);
 

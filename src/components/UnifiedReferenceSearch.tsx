@@ -134,6 +134,15 @@ export default function UnifiedReferenceSearch({
     };
   }, [query, runSearch]);
 
+  // Typing again means the releases expanded for the last mold clicked are
+  // stale. Left up, they sat under the new results as a second, wrong list
+  // (artist report, 2026-09-20). A linked pick is untouched.
+  const handleQueryChange = (next: string) => {
+    setQuery(next);
+    if (releases.length > 0) setReleases([]);
+    if (!selectedCatalogId && selectedItem) setSelectedItem(null);
+  };
+
   // When a mold is clicked, expand its releases. We do NOT link the mold yet —
   // if it has releases we nudge the user to pick the specific one first (linking
   // to a mold when a release exists is the #1 source of coarse catalog data).
@@ -237,7 +246,7 @@ export default function UnifiedReferenceSearch({
                 className="flex h-11 w-full rounded-md border border-input bg-card px-10 py-2 text-sm text-foreground ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                 placeholder="Search molds, releases, or resins..."
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                onChange={(e) => handleQueryChange(e.target.value)}
                 onFocus={() => {
                   if (query.trim() && hasResults) setShowDropdown(true);
                 }}

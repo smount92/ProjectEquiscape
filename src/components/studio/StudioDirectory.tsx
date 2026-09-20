@@ -190,7 +190,13 @@ export default function StudioDirectory({ studios, initialQuery = "" }: { studio
 }
 
 function StudioCard({ studio }: { studio: DirectoryEntry }) {
-    const services = studio.services.filter((s) => s.open).slice(0, 3);
+    // What the card says a studio does: its priced open services plus its
+    // listed skills, folded to one vocabulary — the same union the studio
+    // page shows, so a chip never appears in one place and not the other.
+    const offers = canonicalFacets([
+        ...studio.services.filter((s) => s.open).map((s) => s.type),
+        ...studio.specialties,
+    ]).slice(0, 4);
 
     return (
         <Link
@@ -229,10 +235,10 @@ function StudioCard({ studio }: { studio: DirectoryEntry }) {
                 </div>
             )}
 
-            {services.length > 0 && (
+            {offers.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
-                    {services.map((s) => (
-                        <Chip key={s.id}>{s.type}</Chip>
+                    {offers.map((s) => (
+                        <Chip key={s}>{s}</Chip>
                     ))}
                 </div>
             )}
