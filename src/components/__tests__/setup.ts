@@ -7,6 +7,22 @@ import { vi } from "vitest";
 import "@testing-library/jest-dom/vitest";
 
 // Mock Next.js navigation
+// Route handlers reach for Sentry only on their failure path, via
+// `await import("@sentry/nextjs")` — right for production (nothing loads
+// on the hot path), but in a test that import pulls in the whole SDK and
+// took 10–12 s under load, tripping the timeout on the PayPal "API fails"
+// tests every time the machine was busy (2026-09-19). A test file that
+// needs the real shape can still vi.mock it itself.
+vi.mock("@sentry/nextjs", () => ({
+    captureException: vi.fn(),
+    captureMessage: vi.fn(),
+    addBreadcrumb: vi.fn(),
+    setUser: vi.fn(),
+    setTag: vi.fn(),
+    withScope: (cb: (scope: unknown) => void) => cb({ setTag: vi.fn(), setExtra: vi.fn(), setUser: vi.fn() }),
+    startSpan: (_opts: unknown, cb: () => unknown) => cb(),
+}));
+
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push: vi.fn(),

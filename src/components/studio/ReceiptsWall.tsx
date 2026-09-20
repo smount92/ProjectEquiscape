@@ -119,6 +119,14 @@ function HorseCard({ horse }: { horse: FinishedHorse }) {
                         ✓ Verified credit
                     </span>
                 )}
+                {!horse.logId && (
+                    <span
+                        className="border-input text-secondary-foreground rounded-full border px-2 py-0.5 text-[0.65rem] font-semibold"
+                        title="The horse's passport names this artist; no work record has been logged for it yet"
+                    >
+                        Passport credit
+                    </span>
+                )}
             </div>
 
             {horse.workType && (

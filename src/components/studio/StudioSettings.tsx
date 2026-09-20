@@ -124,6 +124,7 @@ function StudioForm({
     const [slug, setSlug] = useState(profile?.studioSlug ?? "");
     const [bio, setBio] = useState(profile?.bioArtist ?? "");
     const [region, setRegion] = useState(profile?.region ?? "");
+    const [alsoKnownAs, setAlsoKnownAs] = useState((profile?.alsoKnownAs ?? []).join(", "));
     const [paypal, setPaypal] = useState(profile?.paypalMeLink ?? "");
     const [barnId, setBarnId] = useState(profile?.barnGroupId ?? "");
     const [specialties, setSpecialties] = useState<string[]>(profile?.specialties ?? []);
@@ -150,6 +151,7 @@ function StudioForm({
         form.set("studioSlug", autoSlug);
         form.set("bioArtist", bio);
         form.set("region", region);
+        form.set("alsoKnownAs", JSON.stringify(alsoKnownAs.split(",").map((n) => n.trim()).filter(Boolean).slice(0, 10)));
         form.set("paypalMeLink", paypal);
         form.set("specialties", JSON.stringify(specialties));
         form.set("mediums", JSON.stringify(mediums));
@@ -237,6 +239,22 @@ function StudioForm({
                     />
                     <span className="text-secondary-foreground mt-1 block text-xs">
                         Collectors search the directory by place: who is near them, who ships from their country.
+                    </span>
+                </label>
+
+                <label className="mb-4 block">
+                    <span className="mb-1 block text-sm font-semibold">
+                        Names on older credits <span className="text-muted-foreground">(optional)</span>
+                    </span>
+                    <Input
+                        value={alsoKnownAs}
+                        onChange={(e) => setAlsoKnownAs(e.target.value)}
+                        placeholder="e.g. Amanda Mount, Black Fox Farm"
+                    />
+                    <span className="text-secondary-foreground mt-1 block text-xs">
+                        Passports that credit their artist by one of these names count as your work: those horses join your wall
+                        with their show records, marked as a passport credit rather than a logged work record. Your studio name and
+                        alias always count. Up to 10 names, separated by commas.
                     </span>
                 </label>
 

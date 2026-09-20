@@ -8,6 +8,7 @@ import { useEffect, useState, useCallback, useRef } from"react";
 import NotificationBell from"@/components/NotificationBell";
 import ThemeToggle from"@/components/ThemeToggle";
 import { getHeaderData } from"@/app/actions/header";
+import { onNotFoundPage } from "@/lib/notFoundPage";
 import { useNotifications } from "@/lib/context/NotificationProvider";
 import {
  Home,
@@ -94,6 +95,9 @@ export default function Header() {
  const [moreMenuOpen, setMoreMenuOpen] = useState(false);
  const [visibleCount, setVisibleCount] = useState(NAV_LINKS.length + 1); // +1 for Art Studio
  const navRef = useRef<HTMLElement>(null);
+ // Who the server tree was last refreshed for; a refresh is only worth
+ // it when that changes (see onAuthStateChange below).
+ const refreshedForRef = useRef<string | null>(null);
  const userMenuRef = useRef<HTMLDivElement>(null);
  const moreMenuRef = useRef<HTMLDivElement>(null);
  const primaryNavRef = useRef<HTMLDivElement>(null);
@@ -102,6 +106,10 @@ export default function Header() {
  const supabase = createClient();
 
  const fetchHeaderInfo = useCallback(async () => {
+ // On a not-found page a server action POSTs to a URL that answers 404,
+ // and Next hard-reloads to recover — forever (2026-09-19). The header
+ // keeps whatever it already knows there.
+ if (onNotFoundPage()) return;
  try {
  const data = await getHeaderData();
  setUser(data.user);
@@ -128,14 +136,25 @@ export default function Header() {
 
  const {
  data: { subscription },
- } = supabase.auth.onAuthStateChange(async (_event, session) => {
+ } = supabase.auth.onAuthStateChange(async (event, session) => {
+ // INITIAL_SESSION fires on every subscription, i.e. on every mount, and
+ // initAuth above already handles it. Refreshing the server tree on it
+ // meant a second render of every page — and on a 404 page, whose
+ // server-action POSTs answer 404, a remount → refresh → remount loop
+ // that never stopped (2026-09-19).
+ if (event === "INITIAL_SESSION") return;
  if (session?.user) {
  setUser({ id: session.user.id, email: session.user.email ?? undefined });
- // Force Next.js to re-run server components so the
- // server-side cookie is read by getHeaderData()
+ // Force Next.js to re-run server components so the server-side
+ // cookie is read by getHeaderData() — once per change of who is
+ // signed in, not on every token refresh.
+ if (refreshedForRef.current !== session.user.id) {
+ refreshedForRef.current = session.user.id;
  router.refresh();
+ }
  fetchHeaderInfo();
  } else {
+ refreshedForRef.current = null;
  setUser(null);
  setAliasName(null);
  setAvatarUrl(null);

@@ -63,6 +63,8 @@ export interface ArtistProfile {
     bioArtist: string | null;
     /** Where the artist works, as written (215): "Ohio, USA", "Kent, UK". */
     region: string | null;
+    /** Names this artist's older passport credits carry (216): "Amanda Mount", "Black Fox Farm". */
+    alsoKnownAs: string[];
     portfolioVisible: boolean;
     status: StudioStatus;
     statusNote: string | null;
@@ -182,6 +184,14 @@ function regionField(formData: FormData): string | null {
     return v ? v.replace(/\s+/g, " ").trim().slice(0, 60) || null : null;
 }
 const missingColumn = (e: { code?: string } | null) => !!e && (e.code === "42703" || e.code === "PGRST204");
+
+/** The names on older credits, from the studio form: up to 10, 60 chars each. */
+function akaField(formData: FormData): string[] {
+    return parseArrayField(formData, "alsoKnownAs")
+        .map((n) => n.replace(/\s+/g, " ").trim().slice(0, 60))
+        .filter(Boolean)
+        .slice(0, 10);
+}
 
 /**
  * A PostgREST handle for relations the generated types haven't caught up
@@ -340,6 +350,7 @@ function mapArtistProfile(p: Row, alias: string, avatarUrl: string | null): Arti
         scalesOffered: (p.scales_offered as string[]) ?? [],
         bioArtist: str(p.bio_artist),
         region: str(p.region),
+        alsoKnownAs: Array.isArray(p.also_known_as) ? (p.also_known_as as unknown[]).map(String) : [],
         portfolioVisible: p.portfolio_visible !== false,
         status,
         statusNote: str(p.status_note),
@@ -570,6 +581,7 @@ export async function createArtistProfile(
         accepting_types: parseArrayField(formData, "acceptingTypes"),
         bio_artist: str(formData.get("bioArtist")),
         region: regionField(formData),
+        also_known_as: akaField(formData),
         // A new studio opens CLOSED. Announcing yourself as open before
         // you have terms or services listed is how artists end up with a
         // queue they never agreed to.
@@ -579,6 +591,11 @@ export async function createArtistProfile(
         links: normalizeStudioLinks(parseJsonField(formData, "links")),
     };
     let { error } = await supabase.from("artist_profiles").insert(row as never);
+    if (missingColumn(error)) {
+        // Pre-216 — the credit names land once their column exists.
+        delete row.also_known_as;
+        ({ error } = await supabase.from("artist_profiles").insert(row as never));
+    }
     if (missingColumn(error)) {
         // Pre-215 — the region lands once its column exists.
         delete row.region;
@@ -628,6 +645,7 @@ export async function updateArtistProfile(formData: FormData): Promise<ActionRes
         accepting_types: parseArrayField(formData, "acceptingTypes"),
         bio_artist: str(formData.get("bioArtist")),
         region: regionField(formData),
+        also_known_as: akaField(formData),
         paypal_me_link: str(formData.get("paypalMeLink")),
         links: normalizeStudioLinks(parseJsonField(formData, "links")),
         updated_at: new Date().toISOString(),
@@ -655,6 +673,11 @@ export async function updateArtistProfile(formData: FormData): Promise<ActionRes
 
     const save = () => supabase.from("artist_profiles").update(patch as never).eq("user_id", user.id);
     let { error } = await save();
+    if (missingColumn(error)) {
+        // Pre-216 — the credit names land once their column exists.
+        delete patch.also_known_as;
+        ({ error } = await save());
+    }
     if (missingColumn(error)) {
         // Pre-215 — the region lands once its column exists.
         delete patch.region;

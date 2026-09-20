@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BookOpen, Camera, Home, Newspaper, TrendingUp } from "lucide-react";
+import NotFoundMarker from "@/components/NotFoundMarker";
 import type { LucideIcon } from "lucide-react";
 
 /**
@@ -57,6 +58,7 @@ const ROOMS: { href: string; name: string; blurb: string; Icon: LucideIcon; id: 
 export default function NotFound() {
     return (
         <div className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 md:py-16">
+            <NotFoundMarker />
             <div className="leather-band stitched mb-6 rounded-xl px-6 py-8 text-center">
                 <p
                     className="relative z-[1] m-0 font-serif text-[0.7rem] tracking-[0.22em] uppercase"
