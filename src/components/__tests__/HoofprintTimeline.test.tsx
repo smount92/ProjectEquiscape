@@ -5,6 +5,12 @@ import userEvent from"@testing-library/user-event";
 import HoofprintTimeline from"../HoofprintTimeline";
 
 // Mock server actions
+// The rail now mounts OwnerCreditDialog, whose action module reaches
+// server-only code (createNotification); mock it at the boundary.
+vi.mock("@/app/actions/work-records", () => ({
+    createOwnerCredit: vi.fn(),
+}));
+
 vi.mock("@/app/actions/hoofprint", () => ({
  addTimelineEvent: vi.fn().mockResolvedValue({ success: true }),
  deleteTimelineEvent: vi.fn().mockResolvedValue({ success: true }),
