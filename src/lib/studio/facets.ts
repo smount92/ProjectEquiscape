@@ -34,6 +34,15 @@ const ALIASES: Record<string, string> = {
     "doll / rider": "Dolls & riders",
     "micro mini": "Micro mini",
     "micro": "Micro mini",
+    // Scales: the bare word and the labelled scale are one facet. Without
+    // this the Scale dropdown listed "Traditional (1:9)" and "Traditional"
+    // as two choices (2026-09-20).
+    "traditional": "Traditional (1:9)",
+    "trad": "Traditional (1:9)",
+    "classic": "Classic (1:12)",
+    "stablemate": "Stablemate (1:32)",
+    "sm": "Stablemate (1:32)",
+    "paddock pal": "Paddock Pal (1:24)",
 };
 
 const CANON_BY_KEY = new Map<string, string>(

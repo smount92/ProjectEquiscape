@@ -99,15 +99,35 @@ export default function StudioDirectory({ studios, initialQuery = "" }: { studio
         setScale("all");
     };
 
-    const chip = (active: boolean, onClick: () => void, label: string, key?: string) => (
-        <button key={key ?? label} type="button" onClick={onClick} className={`studio-chip ${active ? "active" : ""}`} aria-pressed={active}>
+    // Four small dropdowns instead of three rows of chips: the chip bar
+    // was 300px tall on a phone and, sticky under the header, left almost
+    // no room for the studios it was filtering (owner, 2026-09-20).
+    const pick = (
+        label: string,
+        value: string,
+        onChange: (v: string) => void,
+        options: readonly (readonly [string, string])[],
+    ) => (
+        <label className="text-secondary-foreground flex min-w-0 flex-col gap-1 text-[0.65rem] font-semibold tracking-wider uppercase">
             {label}
-        </button>
+            <select
+                className="border-input bg-card text-foreground h-9 w-full rounded-md border px-2 text-sm font-normal tracking-normal normal-case"
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                aria-label={label}
+            >
+                {options.map(([v, l]) => (
+                    <option key={v} value={v}>
+                        {l}
+                    </option>
+                ))}
+            </select>
+        </label>
     );
 
     return (
         <div>
-            <div className="bg-card border-input sticky top-[calc(var(--header-height)+0.75rem)] z-10 mb-6 rounded-xl border p-4 shadow-md backdrop-blur-sm">
+            <div className="bg-card border-input z-10 mb-6 rounded-xl border p-3 shadow-md backdrop-blur-sm md:sticky md:top-[calc(var(--header-height)+0.75rem)] md:p-4">
                 <Input
                     type="search"
                     placeholder="Search by studio, artist, service, medium, scale or place…"
@@ -116,51 +136,21 @@ export default function StudioDirectory({ studios, initialQuery = "" }: { studio
                     aria-label="Search studios"
                 />
 
-                <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
-                    <div className="flex flex-wrap gap-1.5" role="group" aria-label="Availability">
-                        {(
-                            [
-                                ["all", `All (${studios.length})`],
-                                ["open", `Open (${openCount})`],
-                                ["waitlist", "Waitlist"],
-                                ["closed", "Closed"],
-                            ] as const
-                        ).map(([key, label]) => chip(status === key, () => setStatus(key), label, key))}
-                    </div>
-                    <label className="text-secondary-foreground ml-auto flex items-center gap-2 text-xs">
-                        Sort
-                        <select
-                            className="border-input bg-card text-foreground h-9 rounded-md border px-2 text-sm"
-                            value={sort}
-                            onChange={(e) => setSort(e.target.value as SortKey)}
-                            aria-label="Sort studios"
-                        >
-                            {SORTS.map((o) => (
-                                <option key={o.key} value={o.key}>
-                                    {o.label}
-                                </option>
-                            ))}
-                        </select>
-                    </label>
+                <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4 md:mt-3">
+                    {pick("Availability", status, (v) => setStatus(v as Status), [
+                        ["all", `All (${studios.length})`],
+                        ["open", `Open (${openCount})`],
+                        ["waitlist", "Waitlist"],
+                        ["closed", "Closed"],
+                    ])}
+                    {allServices.length > 0 &&
+                        pick("Need", service, setService, [["all", "Anything"], ...allServices.map((x) => [x, x] as const)])}
+                    {allScales.length > 1 &&
+                        pick("Scale", scale, setScale, [["all", "Any scale"], ...allScales.map((x) => [x, x] as const)])}
+                    {pick("Sort", sort, (v) => setSort(v as SortKey), SORTS.map((o) => [o.key, o.label] as const))}
                 </div>
 
-                {allServices.length > 0 && (
-                    <div className="mt-3 flex flex-wrap items-center gap-1.5" role="group" aria-label="Service needed">
-                        <span className="text-secondary-foreground mr-1 text-xs font-semibold tracking-wider uppercase">Need</span>
-                        {chip(service === "all", () => setService("all"), "Anything", "any-service")}
-                        {allServices.map((s) => chip(sameFacet(service, s), () => setService(sameFacet(service, s) ? "all" : s), s))}
-                    </div>
-                )}
-
-                {allScales.length > 1 && (
-                    <div className="mt-2 flex flex-wrap items-center gap-1.5" role="group" aria-label="Scale">
-                        <span className="text-secondary-foreground mr-1 text-xs font-semibold tracking-wider uppercase">Scale</span>
-                        {chip(scale === "all", () => setScale("all"), "Any", "any-scale")}
-                        {allScales.map((s) => chip(sameFacet(scale, s), () => setScale(sameFacet(scale, s) ? "all" : s), s))}
-                    </div>
-                )}
-
-                <p className="text-secondary-foreground m-0 mt-3 text-xs" aria-live="polite">
+                <p className="text-secondary-foreground m-0 mt-2 text-xs md:mt-3" aria-live="polite">
                     {filtered.length} of {studios.length} studio{studios.length === 1 ? "" : "s"}
                     {openCount > 0 && ` · ${openCount} open for commissions`}
                     {filtering && (
