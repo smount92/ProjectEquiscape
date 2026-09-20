@@ -44,6 +44,8 @@ export interface StableFilters {
     category?: CategoryOption;
     trade?: TradeOption;
     collection?: string;
+    /** Catalog id of a mold; matches horses on the mold and on any of its releases. */
+    mold?: string;
     hasRecords?: boolean;
     sort: StableSort;
 }
@@ -85,6 +87,9 @@ export function parseStableSearchParams(
     const scale = nonEmpty(params.scale, 40);
     if (scale) filters.scale = scale;
 
+    const mold = nonEmpty(params.mold, 40);
+    if (mold && /^[0-9a-f-]{36}$/i.test(mold)) filters.mold = mold;
+
     const category = nonEmpty(params.category, 40);
     if (category && (CATEGORY_OPTIONS as readonly string[]).includes(category)) {
         filters.category = category as CategoryOption;
@@ -118,6 +123,7 @@ export function buildStableSearchParams(filters: Partial<StableFilters>): URLSea
     if (filters.finish) params.set("finish", filters.finish);
     if (filters.maker) params.set("maker", filters.maker);
     if (filters.scale) params.set("scale", filters.scale);
+    if (filters.mold) params.set("mold", filters.mold);
     if (filters.category) params.set("category", filters.category);
     if (filters.trade) params.set("trade", filters.trade);
     if (filters.collection) params.set("collection", filters.collection);
@@ -129,7 +135,7 @@ export function buildStableSearchParams(filters: Partial<StableFilters>): URLSea
 /** A rubber-stamp chip describing one active filter. */
 export interface FilterChip {
     /** Which StableFilters key removing this chip clears. */
-    key: "q" | "finish" | "maker" | "scale" | "category" | "trade" | "collection" | "hasRecords";
+    key: "q" | "finish" | "maker" | "scale" | "mold" | "category" | "trade" | "collection" | "hasRecords";
     label: string;
 }
 
@@ -140,12 +146,16 @@ export interface FilterChip {
 export function activeFilterChips(
     filters: StableFilters,
     collections: { id: string; name: string }[] = [],
+    molds: { id: string; label: string }[] = [],
 ): FilterChip[] {
     const chips: FilterChip[] = [];
     if (filters.q) chips.push({ key: "q", label: `“${filters.q}”` });
     if (filters.finish) chips.push({ key: "finish", label: filters.finish });
     if (filters.maker) chips.push({ key: "maker", label: filters.maker });
     if (filters.scale) chips.push({ key: "scale", label: filters.scale });
+    if (filters.mold) {
+        chips.push({ key: "mold", label: molds.find((m) => m.id === filters.mold)?.label ?? "Mold" });
+    }
     if (filters.category) {
         chips.push({ key: "category", label: CATEGORY_LABELS[filters.category] ?? filters.category });
     }

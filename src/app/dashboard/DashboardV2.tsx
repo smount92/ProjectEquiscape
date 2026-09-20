@@ -85,7 +85,7 @@ export default async function DashboardV2({
     const hasMore = pageResult.success ? pageResult.hasMore : false;
     const facetOptions = pageResult.success
         ? pageResult.facetOptions
-        : { makers: [], scales: [], finishes: [], categories: [] };
+        : { makers: [], scales: [], finishes: [], categories: [], molds: [] };
     const totalShowRecords = showRecordsResult.count ?? 0;
 
     return (

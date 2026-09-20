@@ -128,8 +128,8 @@ async function queryStableHorses(
     // otherwise keep the left join so unlisted molds still appear.
     const needsInnerJoin = Boolean(filters.maker || filters.scale);
     const catalogSelect = needsInnerJoin
-        ? "catalog_items:catalog_id!inner(title, maker, scale, item_type)"
-        : "catalog_items:catalog_id(title, maker, scale, item_type)";
+        ? "catalog_items:catalog_id!inner(title, maker, scale, item_type, parent_id)"
+        : "catalog_items:catalog_id(title, maker, scale, item_type, parent_id)";
 
     const columns = idOnly
         ? `id, ${catalogSelect}`
@@ -148,6 +148,17 @@ async function queryStableHorses(
     if (filters.trade) query = query.eq("trade_status", filters.trade);
     if (filters.maker) query = query.eq("catalog_items.maker", filters.maker);
     if (filters.scale) query = query.eq("catalog_items.scale", filters.scale);
+    if (filters.mold) {
+        // One mold, every release: the horses linked to the mold itself
+        // plus those linked to any release on it.
+        const { data: releases } = await supabase
+            .from("catalog_items")
+            .select("id")
+            .eq("parent_id", filters.mold)
+            .limit(CATALOG_MATCH_CAP * 4);
+        const ids = [filters.mold, ...((releases ?? []) as { id: string }[]).map((r) => r.id)];
+        query = query.in("catalog_id", ids);
+    }
     if (idConstraint) query = query.in("id", idConstraint);
 
     if (filters.q) {
@@ -158,11 +169,23 @@ async function queryStableHorses(
             // (PostgREST .or() can't mix base and embedded columns).
             const { data: catalogMatches } = await supabase
                 .from("catalog_items")
-                .select("id")
+                .select("id, item_type")
                 .or(`title.ilike.%${q}%,maker.ilike.%${q}%`)
                 .limit(CATALOG_MATCH_CAP);
             const parts = [`custom_name.ilike.%${q}%`, `sculptor.ilike.%${q}%`];
-            const catalogIds = ((catalogMatches ?? []) as { id: string }[]).map((r) => r.id);
+            const matched = (catalogMatches ?? []) as { id: string; item_type: string | null }[];
+            const catalogIds = matched.map((r) => r.id);
+            // A mold's name must find the horses linked to its releases:
+            // "Stock Horse Stallion" is what she types, "Smoky" is the link.
+            const moldIds = matched.filter((r) => r.item_type === "plastic_mold").map((r) => r.id);
+            if (moldIds.length > 0) {
+                const { data: releases } = await supabase
+                    .from("catalog_items")
+                    .select("id")
+                    .in("parent_id", moldIds)
+                    .limit(CATALOG_MATCH_CAP * 4);
+                for (const r of (releases ?? []) as { id: string }[]) catalogIds.push(r.id);
+            }
             if (catalogIds.length > 0) parts.push(`catalog_id.in.(${catalogIds.join(",")})`);
             query = query.or(parts.join(","));
         }
@@ -237,11 +260,36 @@ async function buildCards(
     }
     const signedUrlMap = getPublicImageUrls(thumbnailUrls);
 
+    // A release's card names its mold too, so one mold across four
+    // releases reads as one family instead of four strangers.
+    const parentIds = [
+        ...new Set(
+            rows
+                .map((r) => (r.catalog_items as { parent_id?: string | null } | null)?.parent_id ?? null)
+                .filter((id): id is string => !!id),
+        ),
+    ];
+    const parentTitle = new Map<string, string>();
+    if (parentIds.length > 0) {
+        const { data: parents } = await supabase.from("catalog_items").select("id, title").in("id", parentIds);
+        for (const p of (parents ?? []) as { id: string; title: string }[]) parentTitle.set(p.id, p.title);
+    }
+
     return rows.map((row) => {
         const images = (row.horse_images ?? []) as { image_url: string; angle_profile: string }[];
         const thumb = images.find((img) => img.angle_profile === "Primary_Thumbnail");
         const imageUrl = thumb?.image_url || images[0]?.image_url;
-        const catalog = row.catalog_items as { title: string; maker: string } | null;
+        const catalog = row.catalog_items as
+            | { title: string; maker: string; item_type?: string | null; parent_id?: string | null }
+            | null;
+        const moldName = catalog
+            ? catalog.parent_id
+                ? (parentTitle.get(catalog.parent_id) ?? null)
+                : catalog.item_type === "plastic_mold"
+                  ? catalog.title
+                  : null
+            : null;
+        const releaseName = catalog && catalog.parent_id && moldName ? catalog.title : null;
         const collectionId = row.collection_id as string | null;
         return {
             id: row.id as string,
@@ -249,7 +297,11 @@ async function buildCards(
             finishType: (row.finish_type as string | null) ?? "OF",
             conditionGrade: (row.condition_grade as string | null) ?? "",
             createdAt: row.created_at as string,
-            refName: catalog ? `${catalog.maker} ${catalog.title}` : "Unlisted Mold",
+            refName: catalog
+                ? releaseName
+                    ? `${catalog.maker} ${moldName} · ${releaseName}`
+                    : `${catalog.maker} ${catalog.title}`
+                : "Unlisted Mold",
             thumbnailUrl: (imageUrl && signedUrlMap.get(imageUrl)) || null,
             collectionName: collectionId ? collectionNameMap.get(collectionId) || null : null,
             sculptor: (row.sculptor as string | null) || null,
@@ -257,7 +309,8 @@ async function buildCards(
             assetCategory: (row.asset_category as string | null) || "model",
             vaultValue: vaultMap.get(row.id as string) ?? null,
             showRecordCount: recordCountMap.get(row.id as string) || 0,
-            moldName: catalog?.title || null,
+            moldName: moldName ?? catalog?.title ?? null,
+            releaseName,
         };
     });
 }
@@ -267,11 +320,78 @@ async function buildCards(
  * loaded page). Prefers the get_stable_facets RPC; bounded JS-distinct
  * fallback until migration 123 is applied.
  */
+/** Rows of catalog_id scanned for the mold facet; a stable past this is still filterable, just unfaceted. */
+const MOLD_FACET_SCAN = 2000;
+
+type CatalogFamilyRow = { id: string; title: string; maker: string; item_type: string | null; parent_id: string | null };
+
+async function fetchCatalogRows(supabase: SupabaseClient, ids: string[]): Promise<CatalogFamilyRow[]> {
+    const out: CatalogFamilyRow[] = [];
+    for (let i = 0; i < ids.length; i += 150) {
+        const { data } = await supabase
+            .from("catalog_items")
+            .select("id, title, maker, item_type, parent_id")
+            .in("id", ids.slice(i, i + 150));
+        out.push(...((data ?? []) as CatalogFamilyRow[]));
+    }
+    return out;
+}
+
+/**
+ * The Mold facet: every mold with two or more of the owner's horses on
+ * it, with releases folded into their mold. Built here rather than in
+ * the facets RPC because the fold needs the parent walk. Best effort —
+ * a failure leaves the dropdown empty and nothing else changes.
+ */
+async function fetchMoldFacet(supabase: SupabaseClient, userId: string): Promise<StableFacetOptions["molds"]> {
+    try {
+        const { data: rows } = await supabase
+            .from("user_horses")
+            .select("catalog_id")
+            .eq("owner_id", userId)
+            .is("deleted_at", null)
+            .limit(MOLD_FACET_SCAN);
+        const counts = new Map<string, number>();
+        for (const r of (rows ?? []) as { catalog_id: string | null }[]) {
+            if (r.catalog_id) counts.set(r.catalog_id, (counts.get(r.catalog_id) ?? 0) + 1);
+        }
+        if (counts.size === 0) return [];
+
+        const items = await fetchCatalogRows(supabase, [...counts.keys()]);
+        const families = new Map<string, { count: number; label: string | null }>();
+        for (const it of items) {
+            const key = it.parent_id ?? (it.item_type === "plastic_mold" ? it.id : null);
+            if (!key) continue; // resins, tack and props have no mold family
+            const entry = families.get(key) ?? { count: 0, label: null };
+            entry.count += counts.get(it.id) ?? 0;
+            if (!it.parent_id) entry.label = `${it.maker} ${it.title}`;
+            families.set(key, entry);
+        }
+        const unnamed = [...families.entries()].filter(([, e]) => !e.label).map(([id]) => id);
+        if (unnamed.length > 0) {
+            for (const p of await fetchCatalogRows(supabase, unnamed)) {
+                const entry = families.get(p.id);
+                if (entry) entry.label = `${p.maker} ${p.title}`;
+            }
+        }
+        return [...families.entries()]
+            .filter((pair): pair is [string, { count: number; label: string }] => pair[1].count >= 2 && !!pair[1].label)
+            .map(([id, e]) => ({ id, label: e.label, count: e.count }))
+            .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label))
+            .slice(0, 60);
+    } catch {
+        return [];
+    }
+}
+
 async function fetchFacetOptions(
     supabase: SupabaseClient,
     userId: string,
 ): Promise<StableFacetOptions> {
-    const { data, error } = await supabase.rpc("get_stable_facets", { p_owner: userId });
+    const [{ data, error }, molds] = await Promise.all([
+        supabase.rpc("get_stable_facets", { p_owner: userId }),
+        fetchMoldFacet(supabase, userId),
+    ]);
     if (!error && data) {
         const f = data as Partial<StableFacetOptions>;
         // Radix Select forbids empty-string item values — one "" here
@@ -286,13 +406,14 @@ async function fetchFacetOptions(
             scales: clean(f.scales),
             finishes: clean(f.finishes),
             categories: clean(f.categories),
+            molds,
         };
     }
 
     // Migration 123 is applied — the RPC is canonical. An error here is
     // a real fault; degrade to empty facet lists (filters still work,
     // the dropdowns are just unpopulated) rather than an unbounded scan.
-    return { makers: [], scales: [], finishes: [], categories: [] };
+    return { makers: [], scales: [], finishes: [], categories: [], molds };
 }
 
 // ══════════════════════════════════════════════════════════════

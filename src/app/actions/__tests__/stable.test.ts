@@ -90,6 +90,7 @@ describe("getStablePage", () => {
                 scales: [],
                 finishes: [],
                 categories: [],
+                molds: [],
             });
         }
     });

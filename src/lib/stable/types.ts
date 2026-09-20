@@ -41,7 +41,10 @@ export interface StableCard {
     vaultValue: number | null;
     /** Show placings on record for this horse (🏆 chip). */
     showRecordCount: number;
+    /** The mold this horse is on: the parent of a linked release, or the linked mold itself. */
     moldName: string | null;
+    /** The release name when the horse is linked at release level. */
+    releaseName: string | null;
 }
 
 /** Facet dropdown options across the OWNER's whole collection. */
@@ -50,6 +53,8 @@ export interface StableFacetOptions {
     scales: string[];
     finishes: string[];
     categories: string[];
+    /** Molds with two or more horses on them, releases folded in; most-owned first. */
+    molds: { id: string; label: string; count: number }[];
 }
 
 /** Sidebar aggregates (from the summary RPC, or the interim fallback). */
