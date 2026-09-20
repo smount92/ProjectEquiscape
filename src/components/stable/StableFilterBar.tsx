@@ -118,7 +118,9 @@ export default function StableFilterBar({
         setSearchInput(filters.q ?? "");
     }, [filters.q]);
 
-    const chips = activeFilterChips(filters, collections, facetOptions.molds);
+    // Older callers (and the bar tests) pass facets without molds.
+    const molds = facetOptions.molds ?? [];
+    const chips = activeFilterChips(filters, collections, molds);
 
     const set = (patch: Partial<StableFilters>) => onFiltersChange({ ...filters, ...patch });
     const setOrClear = (key: keyof StableFilters, value: string | undefined) => {
@@ -203,8 +205,8 @@ export default function StableFilterBar({
                 <FacetSelect
                     label="Mold"
                     value={filters.mold}
-                    options={facetOptions.molds.map((m) => m.id)}
-                    optionLabels={Object.fromEntries(facetOptions.molds.map((m) => [m.id, `${m.label} (${m.count})`]))}
+                    options={molds.map((m) => m.id)}
+                    optionLabels={Object.fromEntries(molds.map((m) => [m.id, `${m.label} (${m.count})`]))}
                     onChange={(v) => setOrClear("mold", v)}
                     id="stable-facet-mold"
                 />

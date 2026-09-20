@@ -21,10 +21,22 @@ import {
  * If the name matches an MHH studio, that studio is asked to confirm
  * — otherwise the credit stands honestly labeled "Recorded by owner."
  */
-export default function OwnerCreditDialog({ horseId }: { horseId: string }) {
+export default function OwnerCreditDialog({
+    horseId,
+    defaultWorkType = SERVICE_TYPES[1],
+    label = "+ Add a credit",
+    variant = "link",
+}: {
+    horseId: string;
+    /** The work type the dialog opens on — "Repair & restoration" from the Hoofprint. */
+    defaultWorkType?: string;
+    label?: string;
+    /** "link" is the quiet inline text; "button" sits beside the Hoofprint controls. */
+    variant?: "link" | "button";
+}) {
     const router = useRouter();
     const [open, setOpen] = useState(false);
-    const [workType, setWorkType] = useState<string>(SERVICE_TYPES[1]);
+    const [workType, setWorkType] = useState<string>(defaultWorkType);
     const [artistName, setArtistName] = useState("");
     const [summary, setSummary] = useState("");
     const [date, setDate] = useState("");
@@ -55,13 +67,19 @@ export default function OwnerCreditDialog({ horseId }: { horseId: string }) {
 
     return (
         <>
-            <button
-                type="button"
-                onClick={() => setOpen(true)}
-                className="text-forest text-sm font-semibold hover:underline"
-            >
-                + Add a credit
-            </button>
+            {variant === "button" ? (
+                <Button variant="outline" size="wide" onClick={() => setOpen(true)}>
+                    {label}
+                </Button>
+            ) : (
+                <button
+                    type="button"
+                    onClick={() => setOpen(true)}
+                    className="text-forest text-sm font-semibold hover:underline"
+                >
+                    {label}
+                </button>
+            )}
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogContent>
                     <DialogHeader>

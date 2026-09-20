@@ -12,6 +12,8 @@ import GlossaryLink from"@/components/GlossaryLink";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import OwnerCreditDialog from "@/components/making/OwnerCreditDialog";
+import { workEventIcon } from "@/lib/hoofprint/workIcon";
 
 interface HoofprintTimelineProps {
  horseId: string;
@@ -148,6 +150,15 @@ export default function HoofprintTimeline({
  >
  {showForm ?"Cancel" :"📝 Add Note"}
  </Button>
+ {/* A repair, a prep job, a repaint: who, when, what was done —
+     one work record, and it lands on this rail (artist request,
+     2026-09-20). Opens on Repair & restoration. */}
+ <OwnerCreditDialog
+ horseId={horseId}
+ defaultWorkType="Repair & restoration"
+ label="🔧 Log work done"
+ variant="button"
+ />
  </>
  )}
  </div>
@@ -247,7 +258,9 @@ export default function HoofprintTimeline({
  className="absolute top-0 -left-11 z-[1] flex h-8 w-8 items-center justify-center rounded-full border-2 border-[var(--brass,#B08D3E)] bg-card text-[0.85rem] shadow-sm"
  aria-hidden="true"
  >
- {EVENT_ICONS[event.eventType] ||"📋"}
+ {event.eventType === "customization"
+ ? workEventIcon(typeof event.metadata?.work_type === "string" ? event.metadata.work_type : null)
+ : EVENT_ICONS[event.eventType] ||"📋"}
  </div>
  <div className="flex items-start justify-between gap-2">
  <div className="min-w-0">

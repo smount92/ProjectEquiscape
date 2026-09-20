@@ -339,6 +339,10 @@ export async function createOwnerCredit(input: z.input<typeof ownerCreditSchema>
             artist_user_id: studio?.user_id ?? null,
             recorded_by: "owner",
             summary: data.summary ? decodeHtmlEntities(sanitizeText(data.summary)) : null,
+            // The Hoofprint view (159/177) prints materials_used as the
+            // entry's description; without this the owner's "what was
+            // done" reached The Making but never the rail.
+            materials_used: data.summary ? decodeHtmlEntities(sanitizeText(data.summary)).slice(0, 500) : null,
             date_completed: data.dateCompleted ?? null,
         })
         .select("id")
