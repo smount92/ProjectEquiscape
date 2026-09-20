@@ -1295,7 +1295,10 @@ const PENDING_MIGRATIONS: MigrationSpec[] = [
     id: "209",
     title: "Documents on public passports",
     summary: "horse_documents readable on public/unlisted passports.",
-    probe: { kind: "column", table: "horse_documents", column: "id" },
+    probe: {
+      kind: "none",
+      why: "Policy only — a SELECT policy on horse_documents for public and unlisted horses; nothing new to select. Verify by opening a public passport signed out and looking for its Documentation.",
+    },
   },
   {
     id: "210",
@@ -1307,7 +1310,7 @@ const PENDING_MIGRATIONS: MigrationSpec[] = [
     id: "211",
     title: "Price sweep ledger",
     summary: "catalog_price_sweeps — which catalog rows the eBay sweep has tried, and when.",
-    probe: { kind: "column", table: "catalog_price_sweeps", column: "id" },
+    probe: { kind: "column", table: "catalog_price_sweeps", column: "catalog_item_id" },
   },
   {
     id: "212",

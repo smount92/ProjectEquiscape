@@ -19,6 +19,7 @@ import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { saveProfileCustomization, uploadProfileBanner } from "@/app/actions/profile";
+import { compressImage } from "@/lib/utils/imageCompression";
 import {
     MAX_FEATURED,
     MAX_PRONOUNS,
@@ -78,8 +79,20 @@ export default function ProfileCustomizer({
     const handleBanner = async (file: File) => {
         setUploading(true);
         setMessage(null);
+        // A phone photo is 3–8 MB straight off the camera and a server
+        // action only carries a few MB (Sentry: POST /profile/customize 413).
+        // Downscale to WebP here, the way the horse forms do, so what
+        // travels is a few hundred KB whatever was picked.
+        let body: File;
+        try {
+            body = await compressImage(file, "pro");
+        } catch (err) {
+            setUploading(false);
+            setMessage({ ok: false, text: err instanceof Error ? err.message : "Could not read that image." });
+            return;
+        }
         const formData = new FormData();
-        formData.set("banner", file);
+        formData.set("banner", body);
         const result = await uploadProfileBanner(formData);
         setUploading(false);
         if (!result.success) {

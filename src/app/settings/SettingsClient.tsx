@@ -32,6 +32,7 @@ import {
     deleteAccount,
 } from "@/app/actions/settings";
 import { createClient } from "@/lib/supabase/client";
+import { compressImage } from "@/lib/utils/imageCompression";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -317,8 +318,19 @@ export default function SettingsClient() {
         if (!file) return;
         setIsUploadingAvatar(true);
         setAvatarError(null);
+        // Avatars render small; a 1000px WebP is plenty and keeps the
+        // request well inside the server-action body limit.
+        let body: File;
+        try {
+            body = await compressImage(file, "free");
+        } catch (err) {
+            setAvatarError(err instanceof Error ? err.message : "Could not read that image.");
+            setIsUploadingAvatar(false);
+            e.target.value = "";
+            return;
+        }
         const formData = new FormData();
-        formData.set("avatar", file);
+        formData.set("avatar", body);
         const result = await uploadAvatar(formData);
         if (result.success && result.url) {
             setAvatarUrl(result.url + "?t=" + Date.now()); // bust cache

@@ -18,6 +18,12 @@ const nextConfig: NextConfig = {
     // and fails the build (2026-08-21 launch deploy). Six workers
     // build the same pages comfortably inside the window.
     cpus: 6,
+    // Server-action request bodies default to 1 MB, which sat BELOW the
+    // 2 MB avatar and 3 MB banner limits the actions advertise — a phone
+    // photo got a bare 413 before the action ever ran (Sentry,
+    // /profile/customize, 2026-09). Clients now compress first; this is
+    // the backstop so the advertised limits are real.
+    serverActions: { bodySizeLimit: "4mb" },
   },
   images: {
     remotePatterns: [
