@@ -241,7 +241,7 @@ WHERE uh.finishing_artist IS NOT NULL
   AND NOT EXISTS (
     SELECT 1 FROM public.customization_logs x
     WHERE x.horse_id = uh.id AND x.artist_user_id = ap.user_id
-  );
+  )
 
 UNION ALL
 
