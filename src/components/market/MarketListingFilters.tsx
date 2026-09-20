@@ -17,6 +17,7 @@ import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Input } from "@/components/ui/input";
+import { COUNTRIES } from "@/lib/geo/countries";
 import {
     activeListingChips,
     buildListingHref,
@@ -135,6 +136,13 @@ export default function MarketListingFilters({ filters }: { filters: ListingFilt
                     value={filters.trade}
                     options={LISTING_TRADE_STATUSES.map((t) => ({ value: t, label: t }))}
                     onChange={(v) => setOrClear("trade", v)}
+                />
+                <FacetSelect
+                    label="Ships from"
+                    id="market-facet-from"
+                    value={filters.from}
+                    options={COUNTRIES.map((c) => ({ value: c.code, label: c.name }))}
+                    onChange={(v) => setOrClear("from", v)}
                 />
 
                 {/* The buyer who is hunting a proven horse. */}

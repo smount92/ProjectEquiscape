@@ -30,6 +30,7 @@ import ThumbImage from "@/components/ThumbImage";
 import { listingPriceLabel } from "@/lib/market/listingFilters";
 import { recordChipLabel } from "@/lib/market/recordSummary";
 import type { MarketListing } from "@/app/market/listings";
+import CountryTag from "@/components/CountryTag";
 
 const NOTES_PREVIEW_CHARS = 72;
 
@@ -129,12 +130,20 @@ export default function MarketListingCard({ listing }: { listing: MarketListing 
             {/* Seller line — outside the card link so the profile link
                 and the trust badge are their own targets. */}
             <div className="mt-3 flex items-center justify-between gap-2 border-t border-input px-1 pt-2.5 text-xs">
-                <Link
-                    href={`/profile/${encodeURIComponent(listing.ownerAlias)}`}
-                    className="truncate text-primary no-underline hover:underline"
-                >
-                    @{listing.ownerAlias}
-                </Link>
+                <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5">
+                    <Link
+                        href={`/profile/${encodeURIComponent(listing.ownerAlias)}`}
+                        className="truncate text-primary no-underline hover:underline"
+                    >
+                        @{listing.ownerAlias}
+                    </Link>
+                    <CountryTag code={listing.ownerCountry} className="text-secondary-foreground" />
+                    {listing.ownerOpenToTrades && (
+                        <span className="text-secondary-foreground" title="Open to trades">
+                            ↔ trades
+                        </span>
+                    )}
+                </span>
                 {listing.isTrustedSeller && <TrustedBadge />}
             </div>
         </div>

@@ -29,6 +29,12 @@ export async function getProfile(): Promise<{
     showBadges: boolean;
     showPhotosOnReference: boolean;
     exhibitorNumber: string;
+    /** Seller terms (218); blank strings until set. */
+    country: string;
+    shipsTo: string;
+    shipsNotTo: string;
+    openToTrades: boolean;
+    lookingFor: string;
 } | null> {
     const { supabase, user } = await requireAuth();
 
@@ -62,7 +68,15 @@ export async function getProfile(): Promise<{
         resolvedAvatarUrl = signedData?.signedUrl || null;
     }
 
+    // Seller terms through the same anon-safe RPC the market uses; empty
+    // until migration 218 is pasted, never an error.
+    const mine = (await readSellerTerms(supabase as unknown as SupabaseClient, [user.id])).get(user.id);
     return {
+        country: mine?.country ?? "",
+        shipsTo: mine?.shipsTo ?? "",
+        shipsNotTo: mine?.shipsNotTo ?? "",
+        openToTrades: mine?.openToTrades ?? false,
+        lookingFor: mine?.lookingFor ?? "",
         aliasName: d.alias_name,
         bio: d.bio || "",
         avatarUrl: resolvedAvatarUrl,
@@ -111,6 +125,12 @@ export async function updateProfile(data: {
     showBadges?: boolean;
     showPhotosOnReference?: boolean;
     exhibitorNumber?: string;
+    /** Seller terms (218). */
+    country?: string;
+    shipsTo?: string;
+    shipsNotTo?: string;
+    openToTrades?: boolean;
+    lookingFor?: string;
 }): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
@@ -178,13 +198,30 @@ export async function updateProfile(data: {
         }
         updates.exhibitor_number = exhibitor || null;
     }
+    // ── Seller terms (218) ──
+    if (data.country !== undefined) {
+        const code = data.country.trim().toUpperCase();
+        if (code && !isCountryCode(code)) return { success: false, error: "Pick a country from the list." };
+        updates.country = code || null;
+    }
+    if (data.shipsTo !== undefined) updates.ships_to = data.shipsTo.trim().slice(0, SHIPS_MAX) || null;
+    if (data.shipsNotTo !== undefined) updates.ships_not_to = data.shipsNotTo.trim().slice(0, SHIPS_MAX) || null;
+    if (data.openToTrades !== undefined) updates.open_to_trades = data.openToTrades === true;
+    if (data.lookingFor !== undefined) updates.looking_for = data.lookingFor.trim().slice(0, LOOKING_FOR_MAX) || null;
 
     if (Object.keys(updates).length === 0) return { success: true };
 
-    const { error } = await supabase
+    let { error } = await supabase
         .from("users")
         .update(updates)
         .eq("id", user.id);
+    if (error && isMissingSellerColumn(error)) {
+        // Migration 218 not pasted yet: save everything else.
+        ({ error } = await supabase
+            .from("users")
+            .update(withoutSellerColumns(updates))
+            .eq("id", user.id));
+    }
 
     if (error) return { success: false, error: error.message };
     revalidatePath("/settings");
@@ -333,6 +370,9 @@ export async function uploadAvatar(
 // ── Delete Account (Tombstone) ──
 
 import { getAdminClient } from "@/lib/supabase/admin";
+import { isCountryCode } from "@/lib/geo/countries";
+import { isMissingSellerColumn, LOOKING_FOR_MAX, readSellerTerms, SHIPS_MAX, withoutSellerColumns } from "@/lib/sellers/sellerTerms";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 /** Show statuses a departing host can leave behind without harm once
  *  handled: draft is deleted, these two are archived + entrants told. */

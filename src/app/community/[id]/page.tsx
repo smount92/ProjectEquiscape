@@ -32,6 +32,7 @@ import { Button } from "@/components/ui/button";
 import { referenceHref } from"@/lib/catalog/referenceUrl";
 import AnonPassport from"@/components/passport/AnonPassport";
 import { readResinIdentity, resinMakeupLine } from "@/lib/passport/resinIdentity";
+import { readSellerTerms } from "@/lib/sellers/sellerTerms";
 import PublicCardsSection from"@/components/shows/PublicCardsSection";
 import { PARCHMENT_INK } from"@/lib/theme/parchment";
 import ViewBeacon from"@/components/metrics/ViewBeacon";
@@ -195,6 +196,8 @@ export default async function PublicPassportPage({
  // renders the same before and after the paste.
  const resin = await readResinIdentity(supabase, horseId);
  const resinMakeup = resinMakeupLine(resin);
+ // Seller terms (218) for the buyer panel — same tolerant read.
+ const sellerTerms = (await readSellerTerms(supabase, [horse.owner_id])).get(horse.owner_id) ?? null;
 
  const isForSale = horse.trade_status === "For Sale" || horse.trade_status === "Open to Offers";
 
@@ -468,6 +471,7 @@ editionSize: rawPedigree.edition_size,
  cardsCount={cardsCount}
  variant="member"
  sellerId={horse.owner_id}
+ seller={sellerTerms}
  isOwner={isOwnHorse}
  hoofprintHref="#passport-hoofprint"
  />

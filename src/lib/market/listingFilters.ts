@@ -1,3 +1,5 @@
+import { countryName, isCountryCode } from "@/lib/geo/countries";
+
 /**
  * Marketplace front door — URL filter vocabulary (pure).
  *
@@ -69,6 +71,8 @@ export interface ListingFilters {
     hasRecords?: boolean;
     /** Only "For Sale" or only "Open to Offers" (default: both). */
     trade?: string;
+    /** Seller's country (ISO alpha-2) — "ships from". */
+    from?: string;
     sort?: ListingSort;
 }
 
@@ -111,6 +115,9 @@ export function parseListingFilters(params: RawSearchParams): ListingFilters {
         filters.trade = trade;
     }
 
+    const from = firstValue(params.from)?.toUpperCase();
+    if (from && isCountryCode(from)) filters.from = from;
+
     const sort = firstValue(params.sort);
     if (sort && LISTING_SORT_OPTIONS.some((o) => o.value === sort)) {
         filters.sort = sort as ListingSort;
@@ -143,6 +150,7 @@ export function buildListingSearchParams(
     if (filters.price) params.set("price", filters.price);
     if (filters.hasRecords) params.set("records", "1");
     if (filters.trade) params.set("trade", filters.trade);
+    if (filters.from) params.set("from", filters.from);
     if (filters.sort && filters.sort !== DEFAULT_SORT) params.set("sort", filters.sort);
     if (page > 1) params.set("page", String(page));
     return params;
@@ -162,6 +170,7 @@ export function countActiveListingFilters(filters: ListingFilters): number {
     if (filters.price) count += 1;
     if (filters.hasRecords) count += 1;
     if (filters.trade) count += 1;
+    if (filters.from) count += 1;
     return count;
 }
 
@@ -180,6 +189,7 @@ export function activeListingChips(filters: ListingFilters): ListingChip[] {
     const band = findPriceBand(filters.price);
     if (band) chips.push({ key: "price", label: band.label });
     if (filters.hasRecords) chips.push({ key: "hasRecords", label: "Has show record" });
+    if (filters.from) chips.push({ key: "from", label: `From ${countryName(filters.from) ?? filters.from}` });
     return chips;
 }
 

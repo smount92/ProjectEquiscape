@@ -18,6 +18,7 @@ import TrophyCase from "@/components/TrophyCase";
 import ProfileLoadMore from "@/components/ProfileLoadMore";
 import { Button } from "@/components/ui/button";
 import AnonProfile from "@/components/profile/AnonProfile";
+import { readSellerTerms } from "@/lib/sellers/sellerTerms";
 import ViewBeacon from "@/components/metrics/ViewBeacon";
 import SupporterPlaque from "@/components/profile/SupporterPlaque";
 import MembershipPlaque from "@/components/profile/MembershipPlaque";
@@ -283,6 +284,9 @@ export default async function ProfilePage({
     const openFolder = folderParam
         ? ((publicCollections ?? []).find((c) => c.id === folderParam) ?? null)
         : null;
+
+    // The member's country for the masthead (218), if they chose to show one.
+    const profileSeller = (await readSellerTerms(supabase, [profileUser.id])).get(profileUser.id) ?? null;
 
     // Fetch user badges for Trophy Case
     const { data: rawBadges } = await supabase
@@ -657,6 +661,7 @@ export default async function ProfilePage({
                 memberSince={memberSince}
                 tagline={custom.tagline}
                 pronouns={custom.pronouns}
+                country={profileSeller?.country ?? null}
                 bio={profileUser.bio}
                 isOwnProfile={isOwnProfile}
                 badges={

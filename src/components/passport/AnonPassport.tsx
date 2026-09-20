@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { referenceHref } from "@/lib/catalog/referenceUrl";
 import { PARCHMENT_INK } from "@/lib/theme/parchment";
 import { resinIdentityFrom, resinMakeupLine } from "@/lib/passport/resinIdentity";
+import { readSellerTermsByAlias } from "@/lib/sellers/sellerTerms";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { getPublicHorseRecords } from "@/lib/shows/publicRecords";
 import {
     isChampionshipRecord,
@@ -219,6 +221,8 @@ export default async function AnonPassport({
     const resinMakeup = resinMakeupLine(resin);
     const cat = row.catalog;
     const ownerAlias = row.owner_alias ?? "Collector";
+    // Seller terms (218) by alias — the passport RPC carries no owner id.
+    const seller = row.owner_alias ? await readSellerTermsByAlias(supabase as unknown as SupabaseClient, row.owner_alias) : null;
     const rawImages = row.images ?? [];
 
     const urlMap = getPublicImageUrls(rawImages.map((i) => i.image_url));
@@ -339,6 +343,7 @@ export default async function AnonPassport({
                             recordSummary={recordSummary}
                             cardsCount={cardsCount}
                             variant="anon"
+                            seller={seller}
                             loginHref={loginHref}
                             hoofprintHref={`/community/${horseId}/hoofprint`}
                         />

@@ -194,6 +194,9 @@ export function mapMarketListingRpcRows(rows: unknown): MarketListingsRpcResult 
             thumbnailUrl: str(row.thumbnail_url),
             createdAt: str(row.created_at) ?? "",
             isTrustedSeller: row.is_trusted_seller === true,
+            // Seller terms (218) are joined by the caller, not the RPC.
+            ownerCountry: null,
+            ownerOpenToTrades: false,
             recordSummary: parseRecordAggregate(id, row.records),
         });
     }

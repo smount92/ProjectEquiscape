@@ -64,6 +64,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
 import { createAnonClient } from "@/lib/supabase/anon";
+import { readSellerTerms } from "@/lib/sellers/sellerTerms";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { getPublicImageUrls } from "@/lib/utils/storage";
 import { sanitizeForOr } from "@/lib/utils/search";
@@ -101,6 +102,9 @@ export interface MarketListing {
     thumbnailUrl: string | null;
     createdAt: string;
     isTrustedSeller: boolean;
+    /** Seller terms (218): the flag and the trades chip on the card. */
+    ownerCountry: string | null;
+    ownerOpenToTrades: boolean;
     /** null = no records. The card renders nothing (never "0 placings"). */
     recordSummary: HorseRecordSummary | null;
 }
@@ -264,6 +268,20 @@ async function fetchListingsViaRpc(
 
         const { listings, total } = mapMarketListingRpcRows(pageResult.data);
 
+        // Seller terms (218) ride along from the anon-safe RPC.
+        const sellers = await readSellerTerms(
+            supabase as unknown as SupabaseClient,
+            listings.map((l) => l.ownerId),
+        );
+        for (const listing of listings) {
+            const t = sellers.get(listing.ownerId);
+            listing.ownerCountry = t?.country ?? null;
+            listing.ownerOpenToTrades = t?.openToTrades ?? false;
+        }
+        // The listings RPC predates "ships from"; for a logged-out viewer
+        // the filter applies to the page in hand.
+        const visible = filters.from ? listings.filter((l) => l.ownerCountry === filters.from) : listings;
+
         // The mapper leaves raw storage paths on the cards; resolving
         // them to public URLs is the one batched, non-pure step.
         const paths = listings
@@ -282,8 +300,8 @@ async function fetchListingsViaRpc(
 
         return {
             gated: false,
-            listings,
-            total,
+            listings: visible,
+            total: filters.from ? visible.length : total,
             totalListings: Math.max(headline, total),
             viewerIsAuthenticated: false,
         };
@@ -368,6 +386,8 @@ export async function getMarketListingsPage(
 
     if (filters.trade) query = query.eq("trade_status", filters.trade);
     if (filters.finish) query = query.eq("finish_type", filters.finish);
+    // "Ships from": the seller's country, on the inner users join.
+    if (filters.from) query = query.eq("users.country", filters.from);
 
     const band = findPriceBand(filters.price);
     if (band) {
@@ -415,10 +435,11 @@ export async function getMarketListingsPage(
     const horseIds = rows.map((r) => r.id);
     const ownerIds = [...new Set(rows.map((r) => r.owner_id))];
 
-    const [summaries, trusted, totalListings] = await Promise.all([
+    const [summaries, trusted, totalListings, sellers] = await Promise.all([
         fetchRecordSummaries(supabase, horseIds),
         fetchTrustedSellers(supabase, ownerIds),
         fetchTotalListings(supabase),
+        readSellerTerms(supabase, ownerIds),
     ]);
 
     const urlMap = getPublicImageUrls(
@@ -444,6 +465,8 @@ export async function getMarketListingsPage(
             thumbnailUrl: rawThumb ? (urlMap.get(rawThumb) ?? rawThumb) : null,
             createdAt: row.created_at,
             isTrustedSeller: trusted.has(row.owner_id),
+            ownerCountry: sellers.get(row.owner_id)?.country ?? null,
+            ownerOpenToTrades: sellers.get(row.owner_id)?.openToTrades ?? false,
             recordSummary: summaries.get(row.id) ?? null,
         };
     });

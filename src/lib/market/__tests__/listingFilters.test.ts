@@ -183,3 +183,17 @@ describe("guideHandoffHref", () => {
         );
     });
 });
+
+describe("ships from (218)", () => {
+    it("keeps a real country code and drops junk", () => {
+        expect(parseListingFilters({ from: "pl" })).toEqual({ from: "PL" });
+        expect(parseListingFilters({ from: "Poland" })).toEqual({});
+        expect(parseListingFilters({ from: "ZZ" })).toEqual({});
+    });
+
+    it("round-trips through the URL and counts as one filter with a named chip", () => {
+        expect(buildListingHref({ from: "PL" })).toBe("/market?from=PL");
+        expect(countActiveListingFilters({ from: "PL" })).toBe(1);
+        expect(activeListingChips({ from: "PL" })).toEqual([{ key: "from", label: "From Poland" }]);
+    });
+});

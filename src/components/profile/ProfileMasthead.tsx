@@ -13,6 +13,7 @@
  */
 
 import type { CSSProperties, ReactNode } from "react";
+import CountryTag from "@/components/CountryTag";
 
 export default function ProfileMasthead({
     alias,
@@ -21,6 +22,7 @@ export default function ProfileMasthead({
     memberSince,
     tagline,
     pronouns,
+    country = null,
     bio,
     isOwnProfile,
     themeStyle,
@@ -33,6 +35,8 @@ export default function ProfileMasthead({
     memberSince: string;
     tagline: string | null;
     pronouns: string | null;
+    /** ISO alpha-2 the member chose to show (218). */
+    country?: string | null;
     bio: string | null;
     isOwnProfile: boolean;
     /** Custom-property bag from the member's chosen theme. */
@@ -90,6 +94,11 @@ export default function ProfileMasthead({
                     @{alias}
                     {pronouns && <> · {pronouns}</>} · Member since {memberSince}
                 </div>
+                {country && (
+                    <div className="mt-1 text-[0.85rem] text-(--leather-text-soft)">
+                        <CountryTag code={country} />
+                    </div>
+                )}
 
                 {tagline && (
                     <p className="mx-auto mt-2 mb-0 max-w-[46ch] font-serif text-[0.95rem] tracking-wide text-(--leather-text)">

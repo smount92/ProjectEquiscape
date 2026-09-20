@@ -31,6 +31,8 @@ import {
     type HorseRecordSummary,
 } from "@/lib/market/recordSummary";
 import { PARCHMENT_INK } from "@/lib/theme/parchment";
+import CountryTag from "@/components/CountryTag";
+import { hasSellerTerms, type SellerTerms } from "@/lib/sellers/sellerTerms";
 
 export interface BuyerPanelProps {
     horseId: string;
@@ -55,6 +57,8 @@ export interface BuyerPanelProps {
      * so it points at the public /community/[id]/hoofprint report.
      */
     hoofprintHref: string;
+    /** Seller terms (218): where they are, where they ship, trades. */
+    seller?: SellerTerms | null;
 }
 
 /** "$1,250" / "Open to offers" — locale-formatted, never raw. */
@@ -75,6 +79,7 @@ export default function BuyerPanel({
     sellerId,
     isOwner = false,
     hoofprintHref,
+    seller = null,
 }: BuyerPanelProps) {
     const grade = getConditionGrade(conditionGrade);
     const toneVar = conditionToneVar(conditionGrade);
@@ -183,6 +188,46 @@ export default function BuyerPanel({
                 </div>
             )}
 
+            {/* Row 4b — shipping & seller: the questions a buyer used to
+                have to leave the page to answer (218). */}
+            {seller && hasSellerTerms(seller) && (
+                <div
+                    className="border-t pt-2 text-sm"
+                    style={{ borderColor: "color-mix(in srgb, var(--brass, #B08D3E) 35%, transparent)" }}
+                    data-testid="buyer-panel-seller"
+                >
+                    <p className="m-0 mb-1 text-[0.65rem] font-semibold tracking-wider text-secondary-foreground uppercase">
+                        Shipping &amp; seller
+                    </p>
+                    <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
+                        {seller.country && (
+                            <>
+                                <dt className="text-secondary-foreground">From</dt>
+                                <dd className="m-0">
+                                    <CountryTag code={seller.country} />
+                                </dd>
+                            </>
+                        )}
+                        {seller.shipsTo && (
+                            <>
+                                <dt className="text-secondary-foreground">Ships to</dt>
+                                <dd className="m-0">{seller.shipsTo}</dd>
+                            </>
+                        )}
+                        {seller.shipsNotTo && (
+                            <>
+                                <dt className="text-secondary-foreground">Not to</dt>
+                                <dd className="m-0">{seller.shipsNotTo}</dd>
+                            </>
+                        )}
+                        <dt className="text-secondary-foreground">Trades</dt>
+                        <dd className="m-0">
+                            {seller.openToTrades ? "Yes" : "No"}
+                            {seller.openToTrades && seller.lookingFor ? ` — looking for ${seller.lookingFor}` : ""}
+                        </dd>
+                    </dl>
+                </div>
+            )}
             {/* Row 5 — trust line: each phrase anchors to its section */}
             <div
                 className="border-t pt-2 text-xs text-secondary-foreground"

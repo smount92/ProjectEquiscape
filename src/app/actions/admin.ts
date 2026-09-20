@@ -1348,6 +1348,12 @@ const PENDING_MIGRATIONS: MigrationSpec[] = [
     summary: "user_horses.resin_material / resin_body / cast_by / prep_artist; passport RPC carries them; the wall credits prep work by name.",
     probe: { kind: "column", table: "user_horses", column: "resin_material" },
   },
+  {
+    id: "218",
+    title: "Seller terms",
+    summary: "users.country / ships_to / ships_not_to / open_to_trades / looking_for + get_public_seller_terms RPC.",
+    probe: { kind: "rpc", fn: "get_public_seller_terms" },
+  },
 ];
 
 export interface MigrationStatusRow {

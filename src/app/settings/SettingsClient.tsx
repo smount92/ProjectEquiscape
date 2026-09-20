@@ -35,6 +35,7 @@ import { createClient } from "@/lib/supabase/client";
 import { compressImage } from "@/lib/utils/imageCompression";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { COUNTRIES } from "@/lib/geo/countries";
 import { Button } from "@/components/ui/button";
 import SupporterLedgerToggle from "@/components/SupporterLedgerToggle";
 import MembershipDisplayToggle from "@/components/MembershipDisplayToggle";
@@ -160,6 +161,12 @@ export default function SettingsClient() {
     const [showBadges, setShowBadges] = useState(true);
     const [showPhotosOnReference, setShowPhotosOnReference] = useState(true);
     const [currencySymbol, setCurrencySymbol] = useState("$");
+    // Seller terms (218)
+    const [country, setCountry] = useState("");
+    const [shipsTo, setShipsTo] = useState("");
+    const [shipsNotTo, setShipsNotTo] = useState("");
+    const [openToTrades, setOpenToTrades] = useState(false);
+    const [lookingFor, setLookingFor] = useState("");
     const [exhibitorNumber, setExhibitorNumber] = useState("");
     const [profileMsg, setProfileMsg] = useState<{ type: "success" | "error"; text: string } | null>(
         null,
@@ -221,6 +228,11 @@ export default function SettingsClient() {
             setShowPhotosOnReference(profile.showPhotosOnReference);
             setCurrencySymbol(profile.currencySymbol);
             setExhibitorNumber(profile.exhibitorNumber || "");
+            setCountry(profile.country);
+            setShipsTo(profile.shipsTo);
+            setShipsNotTo(profile.shipsNotTo);
+            setOpenToTrades(profile.openToTrades);
+            setLookingFor(profile.lookingFor);
             setIsLoading(false);
 
             // Supporter state, read client-side from the viewer's own users row
@@ -280,6 +292,11 @@ export default function SettingsClient() {
             showPhotosOnReference,
             currencySymbol,
             exhibitorNumber,
+            country,
+            shipsTo,
+            shipsNotTo,
+            openToTrades,
+            lookingFor,
         });
         if (result.success) {
             setProfileMsg({ type: "success", text: "Saved." });
@@ -492,6 +509,82 @@ export default function SettingsClient() {
                         <span className="text-muted-foreground mt-1 block text-xs">
                             {bio.length}/500
                         </span>
+                    </div>
+
+                    <div className="mb-6">
+                        <label htmlFor="settings-country" className="text-foreground mb-1 block text-sm font-semibold">
+                            Where you are
+                        </label>
+                        <select
+                            id="settings-country"
+                            className="border-input bg-card text-foreground h-10 w-full rounded-md border px-3 text-sm"
+                            value={country}
+                            onChange={(e) => setCountry(e.target.value)}
+                        >
+                            <option value="">Not shown</option>
+                            {COUNTRIES.map((c) => (
+                                <option key={c.code} value={c.code}>
+                                    {c.name}
+                                </option>
+                            ))}
+                        </select>
+                        <span className="text-muted-foreground mt-1 block text-xs">
+                            Optional. Country only — shown as a flag on your listings, passports and profile so buyers know which side of the ocean you are on.
+                        </span>
+                    </div>
+
+                    <div className="border-input bg-card/50 mb-6 rounded-lg border p-4">
+                        <h3 className="m-0 mb-1 font-serif text-base font-bold">Selling terms</h3>
+                        <p className="text-secondary-foreground mb-3 text-xs leading-relaxed">
+                            Set once, shown on every horse you list, so a buyer never has to hunt through your profile.
+                        </p>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                            <label className="block">
+                                <span className="text-foreground mb-1 block text-sm font-semibold">Ships to</span>
+                                <Input
+                                    id="settings-ships-to"
+                                    value={shipsTo}
+                                    maxLength={200}
+                                    placeholder="e.g. Worldwide, or EU and UK only"
+                                    onChange={(e) => setShipsTo(e.target.value)}
+                                />
+                            </label>
+                            <label className="block">
+                                <span className="text-foreground mb-1 block text-sm font-semibold">Ships to, except</span>
+                                <Input
+                                    id="settings-ships-not-to"
+                                    value={shipsNotTo}
+                                    maxLength={200}
+                                    placeholder="e.g. Russia, Australia"
+                                    onChange={(e) => setShipsNotTo(e.target.value)}
+                                />
+                            </label>
+                        </div>
+                        <label className="mt-3 flex items-start gap-2 text-sm">
+                            <input
+                                id="settings-open-to-trades"
+                                type="checkbox"
+                                className="mt-0.5"
+                                checked={openToTrades}
+                                onChange={(e) => setOpenToTrades(e.target.checked)}
+                            />
+                            <span>
+                                <span className="font-semibold">Open to trades</span>
+                                <span className="text-muted-foreground block text-xs">
+                                    Your Want List stays private. The line below is the one thing buyers see.
+                                </span>
+                            </span>
+                        </label>
+                        <label className="mt-3 block">
+                            <span className="text-foreground mb-1 block text-sm font-semibold">Looking for</span>
+                            <Input
+                                id="settings-looking-for"
+                                value={lookingFor}
+                                maxLength={300}
+                                placeholder="e.g. Traditional resins by Sarah Rose; vintage chalkies"
+                                onChange={(e) => setLookingFor(e.target.value)}
+                            />
+                        </label>
                     </div>
 
                     {/* Themes and profile decoration live on their own page —

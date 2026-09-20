@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import SupporterPlaque from "@/components/profile/SupporterPlaque";
 import { fetchSupporterBadge } from "@/lib/supporter";
 import ViewBeacon from "@/components/metrics/ViewBeacon";
+import CountryTag from "@/components/CountryTag";
+import { readSellerTerms } from "@/lib/sellers/sellerTerms";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 // Read-only public profile for logged-OUT visitors (FUNNEL-4 / MOVE-6). The full
 // interactive profile (follow/message/block/rate/edit) stays in
@@ -67,6 +70,8 @@ export default async function AnonProfile({
         }>();
 
     if (!profileUser || profileUser.account_status === "deleted") notFound();
+    // The member's country (218), if they chose to show one.
+    const anonSeller = (await readSellerTerms(admin as unknown as SupabaseClient, [profileUser.id])).get(profileUser.id) ?? null;
 
     // Supporter plaque (public recognition) — separate tolerant read so anon
     // profiles keep rendering even before migration 142 is applied.
@@ -151,6 +156,11 @@ export default async function AnonProfile({
                 <div className="font-serif text-[0.78rem] tracking-[0.2em] uppercase text-(--leather-text-soft)">
                     @{profileUser.alias_name} · Member since {memberSince}
                 </div>
+                {anonSeller?.country && (
+                    <div className="mt-1 text-[0.85rem] text-(--leather-text-soft)">
+                        <CountryTag code={anonSeller.country} />
+                    </div>
+                )}
                 {supporterBadge.isSupporter && <SupporterPlaque since={supporterBadge.since} />}
                 {profileUser.bio && (
                     <p className="mx-auto mt-3 mb-0 max-w-[52ch] text-[0.92rem] italic text-(--leather-text)">
