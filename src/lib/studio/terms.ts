@@ -39,6 +39,17 @@ export interface StudioTerms {
  * non-refundable once started, 2 revisions, 50% kill fee, no rush orders.
  * A brand-new studio starts somewhere defensible rather than empty.
  */
+/**
+ * The date a quote should start from: today plus the studio's longest
+ * turnaround (the shortest if only that is set). Null when no turnaround
+ * has been written — the quote form then says so.
+ */
+export function suggestedCompletion(terms: Pick<StudioTerms, "turnaroundMinDays" | "turnaroundMaxDays">, from: Date = new Date()): string | null {
+    const days = terms.turnaroundMaxDays ?? terms.turnaroundMinDays;
+    if (days == null) return null;
+    return new Date(from.getTime() + days * 24 * 3600 * 1000).toISOString().slice(0, 10);
+}
+
 export const DEFAULT_TERMS: StudioTerms = {
     depositPercent: 50,
     depositRefundableBeforeStart: true,

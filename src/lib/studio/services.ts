@@ -38,7 +38,9 @@ export const SERVICE_TYPES = [
  * Stablemate ≈ 1:32. Medallions and pewters are their own thing.
  */
 export const SERVICE_SCALES = [
+    "Large Traditional (1:8)",
     "Traditional",
+    "Small Traditional (1:10)",
     "Classic",
     "Stablemate",
     "Little Bit / Paddock Pal",

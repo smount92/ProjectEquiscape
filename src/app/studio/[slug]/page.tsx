@@ -451,11 +451,23 @@ export default async function StudioPage({
                     }
                 >
                     {!profile.termsSetAt && (
-                        <p className="text-muted-foreground mb-3 text-xs leading-relaxed">
-                            {isOwner
-                                ? "These are the site's standard terms. Make them yours in Settings → Terms."
-                                : "This studio hasn't written its own terms yet — these are the site's standard ones. Confirm details when you request."}
-                        </p>
+                        <div
+                            className="border-warning/50 bg-warning/10 mb-4 rounded-md border px-3 py-2 text-sm leading-relaxed"
+                            role="note"
+                        >
+                            <strong className="text-warning">Standard terms, not this studio&rsquo;s own.</strong>{" "}
+                            {isOwner ? (
+                                <>
+                                    Pre-filled from common practice. Write yours under{" "}
+                                    <Link href="/studio/setup?tab=terms" className="text-forest font-semibold">
+                                        Settings → Terms
+                                    </Link>{" "}
+                                    so clients are agreeing to your deposit, turnaround and revisions, not the site&rsquo;s.
+                                </>
+                            ) : (
+                                "This studio hasn't written its own terms yet. Confirm deposit, turnaround and revisions when you request."
+                            )}
+                        </div>
                     )}
                     <TermsList terms={profile.terms} />
                     <div className="border-input mt-4 border-t pt-4">

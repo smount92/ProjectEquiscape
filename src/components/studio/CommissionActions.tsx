@@ -32,9 +32,12 @@ import { formatMoney, killFeeFor } from "@/lib/studio/terms";
 export default function CommissionActions({
     commission,
     party,
+    defaultCompletion = null,
 }: {
     commission: Commission;
     party: Party;
+    /** ISO date the quote form starts with — today plus the studio's max turnaround. */
+    defaultCompletion?: string | null;
 }) {
     const router = useRouter();
     const [busy, setBusy] = useState(false);
@@ -101,6 +104,7 @@ export default function CommissionActions({
             {quoting && (
                 <QuoteForm
                     commission={commission}
+                    defaultCompletion={defaultCompletion}
                     onClose={() => setQuoting(false)}
                     onDone={() => {
                         setQuoting(false);
@@ -170,10 +174,12 @@ export default function CommissionActions({
  */
 function QuoteForm({
     commission,
+    defaultCompletion,
     onClose,
     onDone,
 }: {
     commission: Commission;
+    defaultCompletion: string | null;
     onClose: () => void;
     onDone: () => void;
 }) {
@@ -181,7 +187,7 @@ function QuoteForm({
         commission.agreedPrice != null ? String(commission.agreedPrice) : "",
     );
     const [note, setNote] = useState(commission.quoteNote ?? "");
-    const [completion, setCompletion] = useState(commission.estimatedCompletion ?? "");
+    const [completion, setCompletion] = useState(commission.estimatedCompletion ?? defaultCompletion ?? "");
     const [revisions, setRevisions] = useState(
         commission.revisionsIncluded ? String(commission.revisionsIncluded) : "",
     );
@@ -195,6 +201,10 @@ function QuoteForm({
         const value = Number(price);
         if (!Number.isFinite(value) || value <= 0) {
             setError("A quote needs a price.");
+            return;
+        }
+        if (!completion) {
+            setError("A quote needs an estimated completion date.");
             return;
         }
         setBusy(true);
@@ -245,13 +255,19 @@ function QuoteForm({
                 </label>
                 <label className="block">
                     <span className="mb-1 block text-sm font-semibold">
-                        Estimated completion
+                        Estimated completion <span className="text-destructive">*</span>
                     </span>
                     <Input
                         type="date"
                         value={completion}
+                        required
                         onChange={(e) => setCompletion(e.target.value)}
                     />
+                    <span className="text-muted-foreground mt-1 block text-xs">
+                        {defaultCompletion
+                            ? "Starts at your longest turnaround. Change it for this piece if you need to."
+                            : "Set a turnaround under Settings → Terms and this fills itself in."}
+                    </span>
                 </label>
             </div>
 

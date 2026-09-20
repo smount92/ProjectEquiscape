@@ -719,6 +719,23 @@ export async function setStudioIntake(input: {
     const maxSlots = Math.min(20, Math.max(1, Math.round(input.maxSlots || 5)));
 
     const support = await getStudioColumnSupport(supabase as never);
+    // Opening with no turnaround means every quote is dated from nothing.
+    // The first artist through the door had to correct her completion
+    // date on her first quote and asked for this (2026-09-20).
+    if (input.status === "open" && support.studioTerms) {
+        const { data: t } = await supabase
+            .from("artist_profiles")
+            .select("turnaround_min_days, turnaround_max_days")
+            .eq("user_id", user.id)
+            .maybeSingle();
+        const tt = t as { turnaround_min_days: number | null; turnaround_max_days: number | null } | null;
+        if (tt && tt.turnaround_min_days == null && tt.turnaround_max_days == null) {
+            return {
+                success: false,
+                error: "Set your turnaround under Settings → Terms before opening. Every quote is dated from it.",
+            };
+        }
+    }
     const patch: Patch = {
         status: input.status,
         max_slots: maxSlots,
@@ -1518,13 +1535,22 @@ export async function sendQuote(
     if (price == null || price <= 0) {
         return { success: false, error: "A quote needs a price." };
     }
+    // The completion date is the term most commissions fall out over;
+    // a quote without one is a quote the client will have to chase.
+    const completion = str(quote.estimatedCompletion);
+    if (!completion || Number.isNaN(Date.parse(completion))) {
+        return { success: false, error: "A quote needs an estimated completion date." };
+    }
+    if (Date.parse(completion) < Date.now() - 24 * 3600 * 1000) {
+        return { success: false, error: "The estimated completion date is in the past." };
+    }
 
     const support = await getStudioColumnSupport(supabase as never);
     const now = new Date().toISOString();
 
     const patch: Patch = {
         status: "quoted",
-        estimated_completion: str(quote.estimatedCompletion),
+        estimated_completion: completion,
         last_update_at: now,
         updated_at: now,
     };

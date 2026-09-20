@@ -21,7 +21,9 @@ import { GENDER_GROUPS } from "@/lib/config/genders";
  * exactly this order — never alphabetically.
  */
 export const CANONICAL_SCALES = [
+    "Large Traditional (1:8)",
     "Traditional (1:9)",
+    "Small Traditional (1:10)",
     "Classic (1:12)",
     "Pebbles (1:18)",
     "Paddock Pal (1:24)",
@@ -42,6 +44,13 @@ export type CanonicalScale = (typeof CANONICAL_SCALES)[number];
  * importer's SCALE_MAP.
  */
 const SCALE_ALIASES: Record<string, CanonicalScale> = {
+    // The two Traditional neighbours (artist resins, some Eberl/Stone work).
+    "1:8": "Large Traditional (1:8)",
+    "large traditional": "Large Traditional (1:8)",
+    "large trad": "Large Traditional (1:8)",
+    "1:10": "Small Traditional (1:10)",
+    "small traditional": "Small Traditional (1:10)",
+    "small trad": "Small Traditional (1:10)",
     traditional: "Traditional (1:9)",
     "animal traditional": "Traditional (1:9)",
     "gallery crystal": "Traditional (1:9)",

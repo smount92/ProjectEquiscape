@@ -8,6 +8,7 @@ import {
     snapshotTerms,
     termsLines,
     turnaroundLabel,
+    suggestedCompletion,
 } from "@/lib/studio/terms";
 import {
     coerceServices,
@@ -238,5 +239,12 @@ describe("serviceTypesOffered", () => {
             { type: "Custom (sculpting)", open: false },
         ]);
         expect(serviceTypesOffered(services)).toEqual(["Prep work"]);
+    });
+
+    it("suggests a completion date from the longest turnaround, or nothing", () => {
+        const from = new Date("2026-09-20T12:00:00Z");
+        expect(suggestedCompletion({ turnaroundMinDays: 30, turnaroundMaxDays: 90 }, from)).toBe("2026-12-19");
+        expect(suggestedCompletion({ turnaroundMinDays: 30, turnaroundMaxDays: null }, from)).toBe("2026-10-20");
+        expect(suggestedCompletion({ turnaroundMinDays: null, turnaroundMaxDays: null }, from)).toBeNull();
     });
 });

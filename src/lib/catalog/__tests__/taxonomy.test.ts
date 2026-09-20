@@ -214,6 +214,16 @@ describe("resolveNewEntryMaker", () => {
         expect(resolveNewEntryMaker("medallion", "", "Sarah Rose")).toBe("Sarah Rose");
     });
 
+    it("knows the Traditional neighbours, 1:8 and 1:10", () => {
+        expect(normalizeScale("1:8")).toBe("Large Traditional (1:8)");
+        expect(normalizeScale("Large Traditional")).toBe("Large Traditional (1:8)");
+        expect(normalizeScale("1:10")).toBe("Small Traditional (1:10)");
+        expect(normalizeScale("small trad")).toBe("Small Traditional (1:10)");
+        // Display order is by physical size, so 1:8 leads and 1:10 sits after 1:9.
+        expect(CANONICAL_SCALES.indexOf("Large Traditional (1:8)")).toBe(0);
+        expect(CANONICAL_SCALES.indexOf("Small Traditional (1:10)")).toBe(2);
+    });
+
     it("factory categories do NOT take the sculptor as maker (the North Light lesson)", () => {
         expect(resolveNewEntryMaker("plastic_release", "", "Guy Pocock")).toBe("Unknown");
     });

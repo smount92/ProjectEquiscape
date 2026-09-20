@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
-import { getCommission, getCommissionUpdates } from "@/app/actions/art-studio";
+import { getArtistProfile, getCommission, getCommissionUpdates } from "@/app/actions/art-studio";
 import GuestLinkButton from "@/components/GuestLinkButton";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
 import PageMasthead from "@/components/layouts/PageMasthead";
@@ -21,7 +21,7 @@ import WipThread from "@/components/studio/WipThread";
 import WorkbenchLedger from "@/components/studio/WorkbenchLedger";
 import { createClient } from "@/lib/supabase/server";
 import { progress, revisionState, type Party } from "@/lib/studio/pipeline";
-import { formatMoney, termsLines, turnaroundLabel } from "@/lib/studio/terms";
+import { formatMoney, suggestedCompletion, termsLines, turnaroundLabel } from "@/lib/studio/terms";
 
 export const metadata: Metadata = {
     title: "Commission",
@@ -94,6 +94,12 @@ export default async function CommissionPage({
 
     const updates = await getCommissionUpdates(commissionId, isGuest ? { guestToken: token } : undefined);
     const isArtist = party === "artist";
+    // The quote form starts at the artist's own longest turnaround.
+    let defaultCompletion: string | null = null;
+    if (isArtist && userId) {
+        const mine = await getArtistProfile(userId);
+        if (mine) defaultCompletion = suggestedCompletion(mine.terms);
+    }
     const isClient = party === "client";
     const revisions = revisionState(commission.revisionsUsed, commission.revisionsIncluded);
     const snapshot = commission.termsSnapshot;
@@ -208,7 +214,7 @@ export default async function CommissionPage({
 
             <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
                 <div className="grid gap-6">
-                    {party && <CommissionActions commission={commission} party={party} />}
+                    {party && <CommissionActions commission={commission} party={party} defaultCompletion={defaultCompletion} />}
 
                     {/* The commissioner links their own horse — the reliable
                         path (they always see their own stable). Offered until

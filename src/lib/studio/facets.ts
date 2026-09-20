@@ -39,6 +39,10 @@ const ALIASES: Record<string, string> = {
     // as two choices (2026-09-20).
     "traditional": "Traditional (1:9)",
     "trad": "Traditional (1:9)",
+    "1:8": "Large Traditional (1:8)",
+    "large traditional": "Large Traditional (1:8)",
+    "1:10": "Small Traditional (1:10)",
+    "small traditional": "Small Traditional (1:10)",
     "classic": "Classic (1:12)",
     "stablemate": "Stablemate (1:32)",
     "sm": "Stablemate (1:32)",
