@@ -21,6 +21,7 @@ import type {
     StaffRole,
     DivisionAxis,
 } from "./types";
+import { colorText, selectWithPending } from "@/lib/passport/pendingColumns";
 
 export interface ShowCore {
     id: string;
@@ -106,13 +107,13 @@ export async function getHorseShowIdentities(
 ): Promise<Map<string, string> | { error: string }> {
     const unique = [...new Set(horseIds)];
     if (unique.length === 0) return new Map();
-    const { data, error } = await supabase
-        .from("user_horses")
-        .select(
-            "id, assigned_breed, assigned_gender, finish_type, catalog_items:catalog_id(attributes)",
-        )
-        .in("id", unique);
-    if (error) return { error: error.message };
+    // color (219) is a pending column: selected when the paste is in.
+    const { data, error } = await selectWithPending<unknown[]>(
+        (columns) => supabase.from("user_horses").select(columns).in("id", unique),
+        "id, assigned_breed, assigned_gender, finish_type, catalog_items:catalog_id(attributes)",
+        "color",
+    );
+    if (error) return { error: error.message ?? "Could not read show identities." };
     const out = new Map<string, string>();
     for (const raw of data ?? []) {
         const r = raw as unknown as {
@@ -120,12 +121,15 @@ export async function getHorseShowIdentities(
             assigned_breed: string | null;
             assigned_gender: string | null;
             finish_type: string | null;
+            color?: string | null;
             catalog_items: { attributes: Record<string, unknown> | null } | null;
         };
         const cat = r.catalog_items?.attributes ?? {};
         const sex = r.assigned_gender || (cat.gender as string | undefined) || null;
         const breed = r.assigned_breed || (cat.breed as string | undefined) || null;
-        const color = (cat.color_description as string | undefined) || r.finish_type || null;
+        // The owner's own color first — a workmanship judge is scoring
+        // exactly that — then the registry's, then the finish.
+        const color = colorText(r.color) || (cat.color_description as string | undefined) || r.finish_type || null;
         const line = [sex, breed, color].filter(Boolean).join(" · ");
         if (line) out.set(r.id, line);
     }

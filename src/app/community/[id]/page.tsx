@@ -31,7 +31,8 @@ import type { AssetCategory } from"@/lib/types/database";
 import { Button } from "@/components/ui/button";
 import { referenceHref } from"@/lib/catalog/referenceUrl";
 import AnonPassport from"@/components/passport/AnonPassport";
-import { readResinIdentity, resinMakeupLine } from "@/lib/passport/resinIdentity";
+import { resinIdentityFrom, resinMakeupLine } from "@/lib/passport/resinIdentity";
+import { colorText, readPendingColumns } from "@/lib/passport/pendingColumns";
 import { readSellerTerms } from "@/lib/sellers/sellerTerms";
 import PublicCardsSection from"@/components/shows/PublicCardsSection";
 import { PARCHMENT_INK } from"@/lib/theme/parchment";
@@ -192,10 +193,12 @@ export default async function PublicPassportPage({
 
  // eslint-disable-next-line @typescript-eslint/no-explicit-any
  const horse = rawHorse as any;
- // Artist resin identity (217) — its own tolerant read, so a passport
- // renders the same before and after the paste.
- const resin = await readResinIdentity(supabase, horseId);
+ // Columns still awaiting their paste (217 resin identity, 219 color) —
+ // one tolerant read, so a passport renders the same before and after.
+ const pending = await readPendingColumns(supabase, horseId);
+ const resin = resinIdentityFrom(pending);
  const resinMakeup = resinMakeupLine(resin);
+ const horseColor = colorText(pending.color);
  // Seller terms (218) for the buyer panel — same tolerant read.
  const sellerTerms = (await readSellerTerms(supabase, [horse.owner_id])).get(horse.owner_id) ?? null;
 
@@ -790,11 +793,21 @@ editionSize: rawPedigree.edition_size,
  )}
 
   {/* Show Bio — model only */}
-  {assetConfig.showShowBio && (horse.assigned_breed || horse.assigned_gender || horse.assigned_age || horse.regional_id) && (
+  {assetConfig.showShowBio && (horseColor || horse.assigned_breed || horse.assigned_gender || horse.assigned_age || horse.regional_id) && (
  <div className="bg-card/40 p-4 border-input rounded-lg border shadow-md transition-all">
  <h3>
  <span aria-hidden="true">🏅</span> Show Identity
  </h3>
+ {horseColor && (
+ <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
+ <span className="text-muted-foreground text-sm font-medium">
+ Color
+ </span>
+ <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
+ {horseColor}
+ </span>
+ </div>
+ )}
  {horse.assigned_breed && (
  <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
  <span className="text-muted-foreground text-sm font-medium">

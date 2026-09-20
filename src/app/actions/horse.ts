@@ -29,7 +29,7 @@ import {
 } from "@/lib/forms/schema";
 import type { FieldProblem } from "@/lib/forms/types";
 import type { AssetCategory } from "@/lib/types/database";
-import { isMissingResinColumn, withoutResinColumns } from "@/lib/passport/resinIdentity";
+import { colorText, isMissingPendingColumn, withoutPendingColumns } from "@/lib/passport/pendingColumns";
 
 /**
  * The server-side half of the form engine.
@@ -447,6 +447,8 @@ export async function updateHorseAction(horseId: string, data: {
             'assigned_age', 'regional_id', 'attributes',
             // Artist resin identity (217)
             'resin_material', 'resin_body', 'cast_by', 'prep_artist',
+            // Show identity: color / pattern (219)
+            'color',
         ];
         const VAULT_ALLOWED = [
             'purchase_price', 'purchase_date', 'estimated_current_value',
@@ -557,11 +559,11 @@ export async function updateHorseAction(horseId: string, data: {
             }
 
             let { error: updErr } = await supabase.from("user_horses").update(horseUpdate).eq("id", horseId).eq("owner_id", user.id);
-            if (updErr && isMissingResinColumn(updErr)) {
-                // Migration 217 not pasted yet: save everything else.
+            if (updErr && isMissingPendingColumn(updErr)) {
+                // Migration 217/219 not pasted yet: save everything else.
                 ({ error: updErr } = await supabase
                     .from("user_horses")
-                    .update(withoutResinColumns(horseUpdate))
+                    .update(withoutPendingColumns(horseUpdate))
                     .eq("id", horseId)
                     .eq("owner_id", user.id));
             }
@@ -677,6 +679,8 @@ export async function createHorseRecord(data: {
     resinBody?: string;
     castBy?: string;
     prepArtist?: string;
+    /** Show identity: color / pattern (219). */
+    color?: string;
     publicNotes?: string;
     assignedBreed?: string;
     assignedGender?: string;
@@ -740,6 +744,7 @@ export async function createHorseRecord(data: {
     if (data.resinBody) resinInsert.resin_body = data.resinBody;
     if (data.castBy) resinInsert.cast_by = data.castBy.trim();
     if (data.prepArtist) resinInsert.prep_artist = data.prepArtist.trim();
+    if (colorText(data.color)) resinInsert.color = colorText(data.color);
     if (data.publicNotes) horseInsert.public_notes = decodeHtmlEntities(data.publicNotes.trim());
     if (data.assignedBreed) horseInsert.assigned_breed = data.assignedBreed.trim();
     if (data.assignedGender) horseInsert.assigned_gender = data.assignedGender.trim();
@@ -765,11 +770,11 @@ export async function createHorseRecord(data: {
         .insert(horseInsert)
         .select("id")
         .single<{ id: string }>();
-    if (error && isMissingResinColumn(error)) {
-        // Migration 217 not pasted yet: keep the horse, drop the resin identity.
+    if (error && isMissingPendingColumn(error)) {
+        // Migration 217/219 not pasted yet: keep the horse, drop the pending columns.
         ({ data: horse, error } = await supabase
             .from("user_horses")
-            .insert(withoutResinColumns(horseInsert as Record<string, unknown>) as typeof horseInsert)
+            .insert(withoutPendingColumns(horseInsert as Record<string, unknown>) as typeof horseInsert)
             .select("id")
             .single<{ id: string }>());
     }

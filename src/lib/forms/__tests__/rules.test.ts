@@ -149,7 +149,8 @@ describe("per-category visibility", () => {
     });
 
     it("shows the show-bio block for models only", () => {
-        expect(getGroupFields(ctx("model", "create-full"), "showbio")).toHaveLength(4);
+        // color (219), breed, gender, age, regional id
+        expect(getGroupFields(ctx("model", "create-full"), "showbio")).toHaveLength(5);
         for (const category of ["tack", "prop", "diorama", "other_model"] as AssetCategory[]) {
             expect(getGroupFields(ctx(category, "create-full"), "showbio")).toHaveLength(0);
         }

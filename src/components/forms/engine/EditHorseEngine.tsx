@@ -53,7 +53,7 @@ import FieldControl from "./FieldControl";
 import { LedgerLeaf, LeafHeading } from "./LedgerLeaf";
 import PhotoStudio, { EMPTY_STUDIO, type PhotoStudioValue } from "./PhotoStudio";
 import { uploadStudioPhotos } from "./uploadPhotos";
-import { RESIN_COLUMNS, isMissingResinColumn } from "@/lib/passport/resinIdentity";
+import { PENDING_HORSE_COLUMNS, isMissingPendingColumn } from "@/lib/passport/pendingColumns";
 
 interface ExistingImage {
     recordId: string;
@@ -91,8 +91,8 @@ const HORSE_COLUMN_LIST = [
     "regional_id",
     "attributes",
 ];
-const HORSE_COLUMNS = [...HORSE_COLUMN_LIST, ...RESIN_COLUMNS].join(", ");
-/** Before migration 217 the resin identity columns do not exist; select without them. */
+const HORSE_COLUMNS = [...HORSE_COLUMN_LIST, ...PENDING_HORSE_COLUMNS].join(", ");
+/** Before migrations 217/219 the pending columns do not exist; select without them. */
 const HORSE_COLUMNS_PRE_217 = HORSE_COLUMN_LIST.join(", ");
 
 export default function EditHorseEngine() {
@@ -148,7 +148,7 @@ export default function EditHorseEngine() {
                 .select(HORSE_COLUMNS)
                 .eq("id", horseId)
                 .single<Record<string, unknown>>();
-            if (error && isMissingResinColumn(error)) {
+            if (error && isMissingPendingColumn(error)) {
                 ({ data: horse, error } = await supabase
                     .from("user_horses")
                     .select(HORSE_COLUMNS_PRE_217)

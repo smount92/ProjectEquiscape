@@ -76,6 +76,8 @@ interface PassportHorse {
     resin_body?: string | null;
     cast_by?: string | null;
     prep_artist?: string | null;
+    /** Show identity color / pattern (219); absent from the RPC until pasted. */
+    color?: string | null;
     finish_details: string | null;
     assigned_breed: string | null;
     assigned_gender: string | null;
@@ -293,7 +295,7 @@ export default async function AnonPassport({
     const horseAttributes = (horse.attributes ?? {}) as Record<string, unknown>;
     const hasShowIdentity =
         assetConfig.showShowBio &&
-        !!(horse.assigned_breed || horse.assigned_gender || horse.assigned_age || horse.regional_id);
+        !!(horse.color || horse.assigned_breed || horse.assigned_gender || horse.assigned_age || horse.regional_id);
 
     return (
         <ExplorerLayout noHeader>
@@ -502,6 +504,7 @@ export default async function AnonPassport({
 
                     {hasShowIdentity && (
                         <LedgerBlock icon="🏅" title="Show Identity" testId="anon-show-identity">
+                            {horse.color && <DetailRow label="Color">{horse.color}</DetailRow>}
                             {horse.assigned_breed && (
                                 <DetailRow label="Breed">{horse.assigned_breed}</DetailRow>
                             )}

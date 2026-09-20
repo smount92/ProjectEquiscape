@@ -1354,6 +1354,12 @@ const PENDING_MIGRATIONS: MigrationSpec[] = [
     summary: "users.country / ships_to / ships_not_to / open_to_trades / looking_for + get_public_seller_terms RPC.",
     probe: { kind: "rpc", fn: "get_public_seller_terms" },
   },
+  {
+    id: "219",
+    title: "Color / pattern",
+    summary: "user_horses.color for the show identity; get_public_passport carries it.",
+    probe: { kind: "column", table: "user_horses", column: "color" },
+  },
 ];
 
 export interface MigrationStatusRow {

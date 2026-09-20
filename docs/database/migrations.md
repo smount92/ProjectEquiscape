@@ -228,6 +228,7 @@ See [Adding a Migration](../guides/adding-a-migration.md) for the full guide.
 | 216 | `216_artist_credit_names.sql` | older credits find their artist. |
 | 217 | `217_resin_identity.sql` | Artist resin identity: material, hollow/solid, cast by, prepped by; passport RPC; prep credits on the wall. |
 | 218 | `218_seller_terms.sql` | Seller terms: country flag, ships to / not to, open to trades, looking for; get_public_seller_terms RPC. |
+| 219 | `219_horse_color.sql` | Color / pattern on the show identity (user_horses.color); passport RPC carries it. |
 
 ---
 

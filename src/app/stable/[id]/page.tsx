@@ -40,6 +40,8 @@ import type { AssetCategory } from"@/lib/types/database";
 import { Button } from "@/components/ui/button";
 import { PARCHMENT_INK } from"@/lib/theme/parchment";
 import { getHorseViewStats, viewStatsLabel } from"@/lib/metrics/sellerViews";
+import { resinIdentityFrom, resinMakeupLine } from "@/lib/passport/resinIdentity";
+import { colorText, readPendingColumns } from "@/lib/passport/pendingColumns";
 
 
 // Types
@@ -116,6 +118,11 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
 
  // eslint-disable-next-line @typescript-eslint/no-explicit-any
  const horse = rawHorse as any;
+ // Columns still awaiting their paste (217 resin identity, 219 color).
+ const pending = await readPendingColumns(supabase, horseId);
+ const resin = resinIdentityFrom(pending);
+ const resinMakeup = resinMakeupLine(resin);
+ const horseColor = colorText(pending.color);
  const assetCat = (horse.asset_category as AssetCategory) || "model";
  const assetConfig = getAssetConfig(assetCat);
  const horseAttributes = (horse.attributes as Record<string, any>) || {};
@@ -668,6 +675,36 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  </div>
  )}
 
+ {resinMakeup && (
+ <div className="flex items-center justify-between border-b border-dashed border-border-tan/20 px-0 py-3 last:border-0">
+ <span className="text-sm font-medium text-secondary-foreground">
+ 🧪 Resin
+ </span>
+ <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
+ {resinMakeup}
+ </span>
+ </div>
+ )}
+ {resin.castBy && (
+ <div className="flex items-center justify-between border-b border-dashed border-border-tan/20 px-0 py-3 last:border-0">
+ <span className="text-sm font-medium text-secondary-foreground">
+ 🏭 Cast by
+ </span>
+ <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
+ {resin.castBy}
+ </span>
+ </div>
+ )}
+ {resin.prepArtist && (
+ <div className="flex items-center justify-between border-b border-dashed border-border-tan/20 px-0 py-3 last:border-0">
+ <span className="text-sm font-medium text-secondary-foreground">
+ 🪚 Prepped by
+ </span>
+ <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
+ {resin.prepArtist}
+ </span>
+ </div>
+ )}
  {horse.finishing_artist && (
  <div className="flex items-center justify-between border-b border-dashed border-border-tan/20 px-0 py-3 last:border-0">
  <span className="text-sm font-medium text-secondary-foreground">
@@ -728,11 +765,21 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  )}
 
  {/* Show Bio — model only */}
- {assetConfig.showShowBio && (horse.assigned_breed || horse.assigned_gender || horse.assigned_age || horse.regional_id) && (
+ {assetConfig.showShowBio && (horseColor || horse.assigned_breed || horse.assigned_gender || horse.assigned_age || horse.regional_id) && (
             <div className="rounded-lg border border-border-tan/30 bg-card/20 p-5">
               <h3 className="mb-3 flex items-center gap-2 text-xs font-semibold tracking-widest text-secondary-foreground uppercase">
                 <span aria-hidden="true">🏅</span> Show Identity
               </h3>
+ {horseColor && (
+ <div className="flex items-center justify-between border-b border-dashed border-border-tan/20 px-0 py-3 last:border-0">
+ <span className="text-sm font-medium text-secondary-foreground">
+ Color
+ </span>
+ <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
+ {horseColor}
+ </span>
+ </div>
+ )}
  {horse.assigned_breed && (
  <div className="flex items-center justify-between border-b border-dashed border-border-tan/20 px-0 py-3 last:border-0">
  <span className="text-sm font-medium text-secondary-foreground">

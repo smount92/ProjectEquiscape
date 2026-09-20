@@ -380,6 +380,22 @@ export const HORSE_FIELDS: readonly FieldSpec[] = [
 
     // ── Show bio (model only) ─────────────────────────────────────────
     {
+        name: "color",
+        type: "text",
+        group: "showbio",
+        label: "Color / Pattern",
+        icon: "🎨",
+        categories: MODEL_ONLY,
+        maxLength: 60,
+        table: "user_horses",
+        inputKey: "color",
+        placeholder: "e.g. bay tobiano, dapple grey, sooty palomino",
+        help: "What the judge reads in a workmanship or color class; on a factory model, the finish it came in.",
+        modes: FULL_ONLY,
+        domIds: { "create-full": "color", edit: "edit-color" },
+        importAliases: ["color", "colour", "color / pattern", "pattern", "color pattern"],
+    },
+    {
         name: "assigned_breed",
         type: "text",
         group: "showbio",
