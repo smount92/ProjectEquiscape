@@ -1360,6 +1360,12 @@ const PENDING_MIGRATIONS: MigrationSpec[] = [
     summary: "user_horses.color for the show identity; get_public_passport carries it.",
     probe: { kind: "column", table: "user_horses", column: "color" },
   },
+  {
+    id: "220",
+    title: "Import undo",
+    summary: "show_records.import_batch — one undo removes a whole spreadsheet import.",
+    probe: { kind: "column", table: "show_records", column: "import_batch" },
+  },
 ];
 
 export interface MigrationStatusRow {

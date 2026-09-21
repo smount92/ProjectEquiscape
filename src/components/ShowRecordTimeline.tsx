@@ -153,7 +153,11 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
  >
  + Add Record
  </Button>
- <ShowRecordsImport horseId={horseId} horseName={horseName} />
+ <ShowRecordsImport
+ horseId={horseId}
+ horseName={horseName}
+ existing={records.map((r) => ({ showName: r.showName, showDate: r.showDate, className: r.className, placing: r.placing }))}
+ />
  </div>
  )}
  </div>

@@ -5,13 +5,18 @@
  * lib/records/import for the template and the parser). The client
  * parses and previews; this re-parses the same cells on the server so a
  * direct caller gets the same truth, checks the horse is the caller's,
- * and writes every good row in one insert. Rows are self-reported, the
- * same tier as the manual form.
+ * skips placings the horse already has (unless told to keep them), and
+ * writes every good row in one insert stamped with a batch id so the
+ * whole file can be undone (220). Rows are self-reported, the same
+ * tier as the manual form.
  */
+import { randomUUID } from "node:crypto";
+
 import { revalidatePath } from "next/cache";
 
 import { requireAuth } from "@/lib/auth";
 import { IMPORT_MAX_ROWS, parseImportRows, type ImportRowProblem } from "@/lib/records/import";
+import { findDuplicates } from "@/lib/records/importTools";
 import { validateQualifier, type QualifierValue } from "@/lib/records/qualifiers";
 
 export interface ImportShowRecordsResult {
@@ -19,9 +24,16 @@ export interface ImportShowRecordsResult {
     error?: string;
     imported?: number;
     problems?: ImportRowProblem[];
-    /** Set when the card columns (210) are not in the database: records kept, cards dropped. */
+    /** Row numbers skipped because the horse already had that placing (or the file repeated it). */
+    duplicates?: number[];
+    /** The batch id for undo; null when 220 is not in the database yet. */
+    batchId?: string | null;
+    /** Set when a column is not in the database yet: records kept, that part dropped. */
     warning?: string;
 }
+
+/** How long an import can be undone. */
+const UNDO_WINDOW_MS = 7 * 24 * 3600 * 1000;
 
 /** The 210 columns. */
 function qualifierColumns(q: QualifierValue | null): Record<string, unknown> {
@@ -45,16 +57,19 @@ function showTypeFor(kind: "photo" | "live", series: string | null): string {
     return "photo_other";
 }
 
-function isMissingColumn(error: { code?: string } | null): boolean {
-    return error?.code === "42703" || error?.code === "PGRST204";
+function isMissingColumn(error: { code?: string; message?: string } | null, column: string): boolean {
+    return (error?.code === "42703" || error?.code === "PGRST204") && (error?.message ?? "").includes(column);
 }
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function importShowRecords(
     horseId: string,
     rows: Record<string, string>[],
+    options: { includeDuplicates?: boolean } = {},
 ): Promise<ImportShowRecordsResult> {
     const { supabase, user } = await requireAuth();
-    if (!/^[0-9a-f-]{36}$/i.test(horseId)) return { success: false, error: "That isn't a horse." };
+    if (!UUID.test(horseId)) return { success: false, error: "That isn't a horse." };
     if (!Array.isArray(rows) || rows.length === 0) return { success: false, error: "The file has no rows." };
     if (rows.length > IMPORT_MAX_ROWS) {
         return { success: false, error: `That is more than ${IMPORT_MAX_ROWS} rows — split the file.` };
@@ -78,10 +93,27 @@ export async function importShowRecords(
         return { success: false, error: "No rows could be read.", problems: parsed.problems };
     }
 
+    // What the horse already has, for the duplicate check.
+    const { data: existingRows } = await supabase
+        .from("show_records")
+        .select("show_name, show_date, class_name, placing")
+        .eq("horse_id", horseId)
+        .limit(2000);
+    const existing = ((existingRows ?? []) as { show_name: string; show_date: string | null; class_name: string | null; placing: string | null }[]).map((r) => ({
+        showName: r.show_name,
+        showDate: r.show_date,
+        className: r.class_name,
+        placing: r.placing,
+    }));
+    const dupes = findDuplicates(parsed.records, existing);
+    const keep = options.includeDuplicates === true;
+
+    const batchId = randomUUID();
     const base: Record<string, unknown>[] = [];
     const withCards: Record<string, unknown>[] = [];
     let anyCard = false;
     for (const { rowNumber, record: r } of parsed.records) {
+        if (!keep && dupes.has(rowNumber)) continue;
         const q = validateQualifier({
             program: r.qualifierProgram,
             card: r.qualifierCard,
@@ -118,23 +150,76 @@ export async function importShowRecords(
             notes: r.notes,
             is_nan: q.value?.program === "nan",
             verification_tier: "self_reported",
+            import_batch: batchId,
             ...nanMirror(q.value),
         };
         base.push(row);
         withCards.push({ ...row, ...qualifierColumns(q.value) });
     }
-    if (base.length === 0) return { success: false, error: "No rows could be read.", problems: parsed.problems };
-
-    let warning: string | undefined;
-    let { error } = await supabase.from("show_records").insert((anyCard ? withCards : base) as never);
-    if (error && anyCard && isMissingColumn(error)) {
-        warning = "Imported — but card tracking isn't switched on yet, so the cards weren't kept. Edit those records to add them once it is.";
-        ({ error } = await supabase.from("show_records").insert(base as never));
+    const duplicates = [...dupes].sort((a, b) => a - b);
+    if (base.length === 0) {
+        return {
+            success: false,
+            error: duplicates.length ? "Every row is already on this horse." : "No rows could be read.",
+            problems: parsed.problems,
+            duplicates,
+        };
     }
-    if (error) return { success: false, error: error.message, problems: parsed.problems };
+
+    const warnings: string[] = [];
+    let undoable = true;
+    let payload = anyCard ? withCards : base;
+    let { error } = await supabase.from("show_records").insert(payload as never);
+    if (error && anyCard && isMissingColumn(error, "qualifier")) {
+        warnings.push("Card tracking isn't switched on yet, so the cards weren't kept. Edit those records to add them once it is.");
+        payload = base;
+        ({ error } = await supabase.from("show_records").insert(payload as never));
+    }
+    if (error && isMissingColumn(error, "import_batch")) {
+        // 220 not pasted yet: the records land, there is just no one-click undo.
+        undoable = false;
+        warnings.push("Undo isn't switched on yet, so this import can only be removed record by record.");
+        payload = payload.map((row) => {
+            const copy = { ...row };
+            delete copy.import_batch;
+            return copy;
+        });
+        ({ error } = await supabase.from("show_records").insert(payload as never));
+    }
+    if (error) return { success: false, error: error.message, problems: parsed.problems, duplicates };
 
     revalidatePath(`/stable/${horseId}`);
     revalidatePath(`/community/${horseId}`);
     revalidatePath(`/community/${horseId}/hoofprint`);
-    return { success: true, imported: base.length, problems: parsed.problems, warning };
+    return {
+        success: true,
+        imported: base.length,
+        problems: parsed.problems,
+        duplicates,
+        batchId: undoable ? batchId : null,
+        warning: warnings.length ? warnings.join(" ") : undefined,
+    };
+}
+
+/** Remove every record a single import created, for seven days after it ran. Owner only. */
+export async function undoShowRecordsImport(horseId: string, batchId: string): Promise<{ success: boolean; error?: string; removed?: number }> {
+    const { supabase, user } = await requireAuth();
+    if (!UUID.test(horseId) || !UUID.test(batchId)) return { success: false, error: "Nothing to undo." };
+    const since = new Date(Date.now() - UNDO_WINDOW_MS).toISOString();
+    const { data, error } = await supabase
+        .from("show_records")
+        .delete()
+        .eq("horse_id", horseId)
+        .eq("user_id", user.id)
+        .eq("import_batch", batchId)
+        .gte("created_at", since)
+        .select("id");
+    if (error) {
+        if (isMissingColumn(error, "import_batch")) return { success: false, error: "Undo isn't switched on yet." };
+        return { success: false, error: error.message };
+    }
+    revalidatePath(`/stable/${horseId}`);
+    revalidatePath(`/community/${horseId}`);
+    revalidatePath(`/community/${horseId}/hoofprint`);
+    return { success: true, removed: (data ?? []).length };
 }
