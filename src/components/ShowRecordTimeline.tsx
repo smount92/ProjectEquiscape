@@ -4,6 +4,7 @@ import { useState } from"react";
 import Link from"next/link";
 import { deleteShowRecord } from"@/app/actions/provenance";
 import ShowRecordForm from"@/components/ShowRecordForm";
+import ShowRecordsImport from "@/components/ShowRecordsImport";
 import { Button } from "@/components/ui/button";
 import type { PaperView } from "@/app/actions/papers";
 import PaperDialog from "@/components/passport/PaperDialog";
@@ -145,12 +146,15 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
  </h3>
  </div>
  {isOwner && (
+ <div className="flex flex-wrap items-center gap-2">
  <Button
  onClick={handleAdd}
  id="add-show-record"
  >
  + Add Record
  </Button>
+ <ShowRecordsImport horseId={horseId} horseName={horseName} />
+ </div>
  )}
  </div>
 
