@@ -72,6 +72,7 @@ export default function ShowRecordsImport({
     const [map, setMap] = useState<HeaderMap>({});
     const [showMapping, setShowMapping] = useState(false);
     const [parseError, setParseError] = useState<string | null>(null);
+    const [dragging, setDragging] = useState(false);
     const [includeDuplicates, setIncludeDuplicates] = useState(false);
     const [busy, setBusy] = useState(false);
     const [done, setDone] = useState<{ imported: number; skipped: number; duplicates: number; batchId: string | null; warning?: string } | null>(null);
@@ -277,16 +278,44 @@ export default function ShowRecordsImport({
                                 </Button>
                             </div>
 
-                            <label className="border-input bg-muted/40 block rounded-lg border p-3 text-sm">
-                                <strong>2.</strong> Choose the file (.csv or .xlsx).
+                            <div
+                                className={`rounded-lg border-2 border-dashed p-4 text-center text-sm transition-colors ${dragging ? "border-forest bg-forest/10" : "border-input bg-muted/40"}`}
+                                onDragOver={(e) => {
+                                    e.preventDefault();
+                                    setDragging(true);
+                                }}
+                                onDragLeave={() => setDragging(false)}
+                                onDrop={(e) => {
+                                    e.preventDefault();
+                                    setDragging(false);
+                                    void onFile(e.dataTransfer.files?.[0]);
+                                }}
+                                data-testid="import-dropzone"
+                            >
                                 <input
                                     ref={fileRef}
                                     type="file"
                                     accept=".csv,.xlsx,.xlsm,.xls,.ods,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                                    className="mt-2 block w-full text-sm"
+                                    className="sr-only"
+                                    id="import-show-records-file"
                                     onChange={(e) => void onFile(e.target.files?.[0])}
                                 />
-                            </label>
+                                <p className="m-0 mb-2">
+                                    <strong>2.</strong> Upload the filled-in file.
+                                </p>
+                                <Button type="button" onClick={() => fileRef.current?.click()} id="import-show-records-choose">
+                                    📂 Choose a file
+                                </Button>
+                                <p className="text-muted-foreground m-0 mt-2 text-xs">
+                                    {fileName ? (
+                                        <>
+                                            Selected: <strong className="text-foreground">{fileName}</strong>
+                                        </>
+                                    ) : (
+                                        "or drag it here · .csv, .xlsx or .ods"
+                                    )}
+                                </p>
+                            </div>
 
                             {parseError && <p className="text-destructive m-0 text-sm">{parseError}</p>}
 
