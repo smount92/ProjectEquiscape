@@ -226,7 +226,7 @@ const FAQ_SECTIONS: FaqSection[] = [
             },
             {
                 q: "What is the Blue Book?",
-                a: "The price guide: average, median and range of what a given model has actually sold for, drawn from completed sales on this site rather than from asking prices. It covers the whole 10,500+ item catalog, it's free for everyone, and it is never going behind the paid tier. One honest caveat: because money moves off-platform, the sale prices are what buyer and seller reported. It's a well-founded starting point for pricing, not an appraisal.",
+                a: "The price guide: average, median and range of what a model has actually sold for, drawn from completed sales recorded on this site rather than from asking prices. It spans the whole 10,500+ item catalog, but the figures come from the sales members have recorded so far, and every model says how many that is. Where a model has no recorded sale yet, the guide shows current eBay asking prices and labels them as asking prices, not sales. It's free for everyone and is never going behind the paid tier. One honest caveat: because money moves off-platform, the sale prices are what buyer and seller reported.",
                 links: [{ href: "/market/guide", label: "Open the Blue Book" }],
             },
             {
@@ -294,7 +294,7 @@ const FAQ_SECTIONS: FaqSection[] = [
             },
             {
                 q: "Is Model Horse Hub really free?",
-                a: "Yes, and the free tier is the hobby, not a trial: unlimited horses in your stable, enter shows, host shows, list horses for sale, read the Blue Book, print an insurance report. MHH Pro buys conveniences — extra detail photos, sale-history charts, market replacement values on insurance reports, printable cut-out show tags, a monthly report on what your collection has been doing. There's also a Studio tier aimed at artists taking commissions.",
+                a: "Yes, and the free tier is the hobby, not a trial: unlimited horses in your stable, enter shows, host shows, list horses for sale, read the Blue Book, print an insurance report. MHH Pro buys conveniences — extra detail photos, sale-history charts, market replacement values on insurance reports, printable cut-out show tags, a monthly report on what your collection has been doing. There's also a Studio tier aimed at artists taking commissions. MHH Pro is $5 a month and Studio Pro $10 a month, cancel any time; the prices are on the upgrade page whether or not you are signed in.",
                 links: [{ href: "/upgrade", label: "See what Pro adds" }],
             },
             {

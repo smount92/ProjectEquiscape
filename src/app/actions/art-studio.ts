@@ -879,12 +879,16 @@ export async function browseArtists(): Promise<DirectoryEntry[]> {
 
     const { data } = await supabase
         .from("artist_profiles")
-        .select("*, owner:users!user_id(alias_name, avatar_url)")
+        .select("*, owner:users!user_id(alias_name, avatar_url, account_status)")
         .eq("portfolio_visible", true)
         .order("updated_at", { ascending: false })
         .limit(100);
 
-    const rows = (data as Row[] | null) ?? [];
+    // A studio outlives nothing: an owner who deleted their account takes
+    // the card with them (outside review, 2026-09-22).
+    const rows = ((data as Row[] | null) ?? []).filter(
+        (r) => (r.owner as { account_status?: string | null } | null)?.account_status !== "deleted",
+    );
     if (rows.length === 0) return [];
 
     const userIds = rows.map((r) => String(r.user_id));

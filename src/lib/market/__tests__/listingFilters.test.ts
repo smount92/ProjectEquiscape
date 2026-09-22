@@ -13,6 +13,7 @@ import {
     parseListingPage,
     PRICE_BANDS,
     type ListingFilters,
+    formatPriceIn,
 } from "@/lib/market/listingFilters";
 
 describe("parseListingFilters", () => {
@@ -195,5 +196,16 @@ describe("ships from (218)", () => {
         expect(buildListingHref({ from: "PL" })).toBe("/market?from=PL");
         expect(countActiveListingFilters({ from: "PL" })).toBe(1);
         expect(activeListingChips({ from: "PL" })).toEqual([{ key: "from", label: "From Poland" }]);
+    });
+});
+
+describe("seller currency (222)", () => {
+    it("prices in the seller's symbol, dollars when unset", () => {
+        expect(formatPriceIn(1250, "€")).toBe("€1,250");
+        expect(formatPriceIn(1250, null)).toBe("$1,250");
+        expect(formatPriceIn(1250, "$")).toBe("$1,250");
+        expect(listingPriceLabel("For Sale", 80, "£")).toBe("£80");
+        expect(listingPriceLabel("Open to Offers", 80, "£")).toBe("Open to offers · ~£80");
+        expect(listingPriceLabel("For Sale", null, "£")).toBe("Ask for price");
     });
 });

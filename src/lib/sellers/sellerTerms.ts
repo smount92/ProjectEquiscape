@@ -31,10 +31,12 @@ export interface SellerTerms {
     shipsNotTo: string | null;
     openToTrades: boolean;
     lookingFor: string | null;
+    /** The symbol the seller prices in (Settings → currency); null = not set. */
+    currency: string | null;
 }
 
 export function emptySellerTerms(userId: string): SellerTerms {
-    return { userId, country: null, shipsTo: null, shipsNotTo: null, openToTrades: false, lookingFor: null };
+    return { userId, country: null, shipsTo: null, shipsNotTo: null, openToTrades: false, lookingFor: null, currency: null };
 }
 
 function text(v: unknown, max: number): string | null {
@@ -53,6 +55,7 @@ export function sellerTermsFrom(row: Record<string, unknown> | null | undefined,
         shipsNotTo: text(row.ships_not_to, SHIPS_MAX),
         openToTrades: row.open_to_trades === true,
         lookingFor: text(row.looking_for, LOOKING_FOR_MAX),
+        currency: text(row.currency_symbol, 5),
     };
 }
 

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 import { getStandings, type GetStandingsResult } from "@/app/actions/standings";
 import {
@@ -96,7 +95,7 @@ function StandingsTable({
     titlePrefixByHorse,
 }: {
     result: GetStandingsResult & { success: true };
-    viewerId: string;
+    viewerId: string | null;
     titlePrefixByHorse: Map<string, string>;
 }) {
     if (result.rows.length === 0) {
@@ -222,7 +221,6 @@ export default async function StandingsPage({
     const {
         data: { user },
     } = await supabase.auth.getUser();
-    if (!user) redirect("/login?redirectTo=" + encodeURIComponent("/standings"));
 
     const params = await searchParams;
     const currentYear = showYearOf(new Date());
@@ -270,7 +268,7 @@ export default async function StandingsPage({
     // The viewer's own rank, said plainly above the table.
     const myStableRow =
         result.success && result.scope === "stables"
-            ? result.rows.find((r) => r.ownerId === user.id)
+            ? result.rows.find((r) => r.ownerId === user?.id)
             : undefined;
 
     return (
@@ -347,7 +345,7 @@ export default async function StandingsPage({
                     <>
                         <StandingsTable
                             result={result}
-                            viewerId={user.id}
+                            viewerId={user?.id ?? null}
                             titlePrefixByHorse={titlePrefixByHorse}
                         />
                         <p className="mt-4 text-xs text-muted-foreground">

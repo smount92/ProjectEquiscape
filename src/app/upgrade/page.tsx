@@ -1,7 +1,6 @@
 import { getUserTier, isPro } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { fetchSupporterBadge, formatSupporterSince } from "@/lib/supporter";
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import UpgradeButton from "@/components/UpgradeButton";
 import StudioProButton from "@/components/StudioProButton";
@@ -239,6 +238,22 @@ function MatrixMark({ value }: { value: MatrixCell }) {
     return <span className="text-foreground text-xs font-semibold">{value}</span>;
 }
 
+/** The visitor's version of every buy button: an account first. */
+function SignUpToUpgrade({ tone }: { tone: "leather" | "ledger" }) {
+    return (
+        <Link
+            href="/signup?redirectTo=%2Fupgrade"
+            className={`inline-flex w-full items-center justify-center rounded-md px-4 py-2.5 text-sm font-semibold no-underline transition-colors ${
+                tone === "leather"
+                    ? "bg-[var(--leather-text)]/15 text-[var(--leather-text)] hover:bg-[var(--leather-text)]/25"
+                    : "bg-forest text-primary-foreground hover:bg-forest/90"
+            }`}
+        >
+            Create a free account to upgrade
+        </Link>
+    );
+}
+
 export default async function UpgradePage({
     searchParams,
 }: {
@@ -246,9 +261,12 @@ export default async function UpgradePage({
 }) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) redirect("/login?redirectTo=/upgrade");
+    // Readable signed out (outside review, 2026-09-22): the prices are the
+    // point of the page, and the FAQ links here. Checkout still needs an
+    // account, so the buttons become "create an account" for a visitor.
+    const signedOut = !user;
 
-    const tier = await getUserTier();
+    const tier = user ? await getUserTier() : "free";
     const params = await searchParams;
     const status = params.status;
 
@@ -270,14 +288,15 @@ export default async function UpgradePage({
     // When a time-boxed membership runs out. Null for everyone else,
     // which today is everyone: absent means no expiry, always.
     const paidThroughLabel = formatPaidThrough(
-        (user.app_metadata as Record<string, unknown> | undefined)?.paid_through as string | undefined,
+        (user?.app_metadata as Record<string, unknown> | undefined)?.paid_through as string | undefined,
     );
 
     // Supporter is orthogonal to tier — cosmetic recognition, gates nothing.
     const supporterPriceLabel = await getSupporterPriceLabel();
-    const supporterBadge = supporterPriceLabel
-        ? await fetchSupporterBadge(supabase, user.id)
-        : { isSupporter: false, since: null, showInLedger: false };
+    const supporterBadge =
+        supporterPriceLabel && user
+            ? await fetchSupporterBadge(supabase, user.id)
+            : { isSupporter: false, since: null, showInLedger: false };
     const supporterSinceLabel = formatSupporterSince(supporterBadge.since);
 
     return (
@@ -462,6 +481,10 @@ export default async function UpgradePage({
                         </div>
                     ) : (
                         <div className="relative z-[1] mt-6">
+                            {signedOut ? (
+                                <SignUpToUpgrade tone="leather" />
+                            ) : (
+                                <>
                             <UpgradeButton />
                             <PayPalButton plan="pro" enabled={paypalLive} variant="leather" />
                             <PrepaidTermButtons
@@ -470,6 +493,8 @@ export default async function UpgradePage({
                                 terms={proTerms}
                                 variant="leather"
                             />
+                                </>
+                            )}
                         </div>
                     )}
                 </div>
@@ -509,6 +534,10 @@ export default async function UpgradePage({
                         </div>
                     ) : (
                         <div className="mt-6">
+                            {signedOut ? (
+                                <SignUpToUpgrade tone="ledger" />
+                            ) : (
+                                <>
                             <StudioProButton />
                             <PayPalButton plan="studio" enabled={paypalLive} variant="ledger" />
                             <PrepaidTermButtons
@@ -517,6 +546,8 @@ export default async function UpgradePage({
                                 terms={studioTerms}
                                 variant="ledger"
                             />
+                                </>
+                            )}
                         </div>
                     )}
                 </div>
@@ -561,7 +592,7 @@ export default async function UpgradePage({
                                         <SupporterLedgerToggle initialListed={supporterBadge.showInLedger} />
                                     </div>
                                 ) : (
-                                    <SupporterButton priceLabel={supporterPriceLabel} />
+                                    signedOut ? <SignUpToUpgrade tone="ledger" /> : <SupporterButton priceLabel={supporterPriceLabel} />
                                 )}
                             </div>
                         </div>

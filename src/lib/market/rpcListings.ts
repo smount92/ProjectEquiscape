@@ -197,6 +197,7 @@ export function mapMarketListingRpcRows(rows: unknown): MarketListingsRpcResult 
             // Seller terms (218) are joined by the caller, not the RPC.
             ownerCountry: null,
             ownerOpenToTrades: false,
+            ownerCurrency: null,
             recordSummary: parseRecordAggregate(id, row.records),
         });
     }

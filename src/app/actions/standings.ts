@@ -19,6 +19,7 @@
  */
 
 import { AuthError, requireAuth } from "@/lib/auth";
+import { getAdminClient } from "@/lib/supabase/admin";
 import {
     buildHorseStandings,
     buildStableStandings,
@@ -157,8 +158,11 @@ export async function getStandings(params: GetStandingsParams): Promise<GetStand
     };
 
     try {
-        // Authed-only v1 — see file header. AuthError is caught below.
-        const { supabase } = await requireAuth();
+        // A member reads under their own RLS; a visitor reads the same
+        // published-result tables as the server. Standings are computed
+        // from completed shows' entries, placings and callbacks — public
+        // record by design — and the only user column read is alias_name.
+        const supabase = await standingsClient();
         // 1. Result-final shows of the year (completed/archived only —
         //    results_review is provisional, house precedent). The DB
         //    filter narrows the fetch; countedShowIds stays the single
@@ -295,5 +299,15 @@ export async function getStandings(params: GetStandingsParams): Promise<GetStand
             success: false,
             error: "Standings could not be tallied — please try again.",
         };
+    }
+}
+
+async function standingsClient() {
+    try {
+        const { supabase } = await requireAuth();
+        return supabase;
+    } catch (err) {
+        if (err instanceof AuthError) return getAdminClient() as unknown as Awaited<ReturnType<typeof requireAuth>>["supabase"];
+        throw err;
     }
 }

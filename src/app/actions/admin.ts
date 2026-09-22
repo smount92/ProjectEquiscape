@@ -1372,6 +1372,15 @@ const PENDING_MIGRATIONS: MigrationSpec[] = [
     summary: "posts.thread_status — In progress / Implemented / Not planned on barn threads (the suggestion box).",
     probe: { kind: "column", table: "posts", column: "thread_status" },
   },
+  {
+    id: "222",
+    title: "Seller currency",
+    summary: "get_public_seller_terms returns currency_symbol; listings and the buyer panel price in the seller's own symbol.",
+    probe: {
+      kind: "none",
+      why: "Replaces an existing function's return shape — a probe can't tell 218 from 222. Verify: a listing by a seller with a non-dollar symbol shows it on its card.",
+    },
+  },
 ];
 
 export interface MigrationStatusRow {

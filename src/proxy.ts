@@ -108,6 +108,12 @@ export async function proxy(request: NextRequest) {
         // freezes the installed worker for anyone whose session
         // lapsed, since update checks fail forever. None of these
         // serve user data.
+        // Pricing and rankings are the two pages worth linking from
+        // outside (outside review, 2026-09-22): the prices are the point
+        // of /upgrade, and a championship nobody can see is a private
+        // club. Checkout and the "your rank" line still need a session.
+        "/upgrade",
+        "/standings",
         "/serwist",
         "/manifest.json",
         "/~offline",

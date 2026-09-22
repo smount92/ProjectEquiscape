@@ -79,8 +79,10 @@ function BlueBookPointer() {
         <div className="border-input bg-card/50 rounded-lg border p-6 backdrop-blur-sm">
             <h3 className="mb-1 font-serif text-lg font-bold">📈 Blue Book price guide</h3>
             <p className="text-secondary-foreground mb-4 text-sm">
-                What did this mold actually sell for? Average, median and range for 10,500+ catalog items,
-                drawn from completed Model Horse Hub transactions. Free, and never behind a paywall.
+                What did this mold actually sell for? Average, median and range from completed sales
+                recorded on this site — the guide spans the whole catalog, and every model says how many
+                sales its figures rest on. Where there are none yet, current eBay asking prices are shown
+                and labelled as asks. Free, and never behind a paywall.
             </p>
             <Button asChild variant="outline" size="wide">
                 <Link href="/market/guide">Open the Blue Book →</Link>
@@ -97,7 +99,7 @@ export default async function MarketplacePage({
     const params = await searchParams;
     const filters = parseListingFilters(params);
     const page = parseListingPage(params);
-    const { gated, listings, total, totalListings, viewerIsAuthenticated } =
+    const { gated, listings, total, totalListings, viewerIsAuthenticated, countries } =
         await getMarketListingsPage(filters, page);
 
     const activeCount = countActiveListingFilters(filters);
@@ -153,7 +155,7 @@ export default async function MarketplacePage({
                 ) : (
                     <>
                         <Suspense fallback={null}>
-                            <MarketListingFilters filters={filters} />
+                            <MarketListingFilters filters={filters} shipsFrom={countries} />
                         </Suspense>
 
                         {listings.length === 0 ? (

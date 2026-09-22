@@ -20,6 +20,7 @@ describe("seller terms", () => {
             shipsNotTo: null,
             openToTrades: true,
             lookingFor: "Sarah Rose resins",
+            currency: null,
         });
         expect(sellerTermsFrom({ user_id: "u-2", country: "Poland" }).country).toBeNull();
     });

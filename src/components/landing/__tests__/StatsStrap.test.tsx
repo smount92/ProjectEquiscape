@@ -74,7 +74,8 @@ describe("StatsStrap", () => {
         expect(screen.getByText("11,237")).toBeTruthy();
         expect(screen.getByText("Reference entries")).toBeTruthy();
         expect(screen.getByText("486")).toBeTruthy();
-        expect(screen.getByText("Horses on show")).toBeTruthy();
+        // "Horses on show" counted public horses, which is what it now says (2026-09-22).
+        expect(screen.getByText("Public horses")).toBeTruthy();
 
         // A failed read and a zero read both stay off the page.
         expect(screen.queryByText("Shows judged")).toBeNull();

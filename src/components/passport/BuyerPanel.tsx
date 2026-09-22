@@ -62,8 +62,10 @@ export interface BuyerPanelProps {
 }
 
 /** "$1,250" / "Open to offers" — locale-formatted, never raw. */
-export function formatAskingPrice(listingPrice: number | null): string {
-    return listingPrice != null ? `$${Number(listingPrice).toLocaleString("en-US")}` : "Open to offers";
+export function formatAskingPrice(listingPrice: number | null, currency?: string | null): string {
+    if (listingPrice == null) return "Open to offers";
+    const symbol = (currency ?? "").trim() || "$";
+    return `${symbol}${Number(listingPrice).toLocaleString("en-US")}`;
 }
 
 export default function BuyerPanel({
@@ -111,7 +113,7 @@ export default function BuyerPanel({
                             : "font-serif text-2xl font-bold text-foreground"
                     }
                 >
-                    {formatAskingPrice(listingPrice)}
+                    {formatAskingPrice(listingPrice, seller?.currency)}
                 </span>
             </div>
 

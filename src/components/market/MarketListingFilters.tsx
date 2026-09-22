@@ -60,7 +60,16 @@ function FacetSelect({
     );
 }
 
-export default function MarketListingFilters({ filters }: { filters: ListingFilters }) {
+export default function MarketListingFilters({
+    filters,
+    shipsFrom = [],
+}: {
+    filters: ListingFilters;
+    /** Countries with a live listing; the ships-from facet lists only these. */
+    shipsFrom?: string[];
+}) {
+    const shipsFromSet = new Set([...shipsFrom, ...(filters.from ? [filters.from] : [])]);
+    const shipsFromOptions = COUNTRIES.filter((c) => shipsFromSet.has(c.code)).map((c) => ({ value: c.code, label: c.name }));
     const router = useRouter();
     const [searchInput, setSearchInput] = useState(filters.q ?? "");
 
@@ -137,13 +146,15 @@ export default function MarketListingFilters({ filters }: { filters: ListingFilt
                     options={LISTING_TRADE_STATUSES.map((t) => ({ value: t, label: t }))}
                     onChange={(v) => setOrClear("trade", v)}
                 />
-                <FacetSelect
-                    label="Ships from"
-                    id="market-facet-from"
-                    value={filters.from}
-                    options={COUNTRIES.map((c) => ({ value: c.code, label: c.name }))}
-                    onChange={(v) => setOrClear("from", v)}
-                />
+                {shipsFromOptions.length > 0 && (
+                    <FacetSelect
+                        label="Ships from"
+                        id="market-facet-from"
+                        value={filters.from}
+                        options={shipsFromOptions}
+                        onChange={(v) => setOrClear("from", v)}
+                    />
+                )}
 
                 {/* The buyer who is hunting a proven horse. */}
                 <button

@@ -17,10 +17,10 @@ export default function StatsStrap({ stats }: { stats: PublicStats }) {
         entries.push({ value: stats.catalogItems, label: "Reference entries" });
     }
     if (statIsPresentable(stats.publicHorses)) {
-        entries.push({ value: stats.publicHorses, label: "Horses on show" });
+        entries.push({ value: stats.publicHorses, label: stats.publicHorses === 1 ? "Public horse" : "Public horses" });
     }
     if (statIsPresentable(stats.showsCompleted)) {
-        entries.push({ value: stats.showsCompleted, label: "Shows judged" });
+        entries.push({ value: stats.showsCompleted, label: stats.showsCompleted === 1 ? "Show judged" : "Shows judged" });
     }
     if (statIsPresentable(stats.listingsForSale)) {
         entries.push({ value: stats.listingsForSale, label: "For sale now" });

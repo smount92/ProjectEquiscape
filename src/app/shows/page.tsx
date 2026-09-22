@@ -165,7 +165,7 @@ export default async function ShowsPage() {
   <PageMasthead
    icon="🏆"
    title="Shows"
-   subtitle="Enter your models, vote for your favorites, and compete for community glory!"
+   subtitle="Judged shows, live and photo, run to one published rulebook. Enter, earn cards and points, and take a horse up the season rankings."
    actions={
     <>
      {/* The rules ARE marketing (program §0) — anon sees them too. */}

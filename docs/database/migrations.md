@@ -231,6 +231,7 @@ See [Adding a Migration](../guides/adding-a-migration.md) for the full guide.
 | 219 | `219_horse_color.sql` | Color / pattern on the show identity (user_horses.color); passport RPC carries it. |
 | 220 | `220_show_records_import_batch.sql` | show_records.import_batch so a spreadsheet import can be undone as one. |
 | 221 | `221_thread_status.sql` | posts.thread_status: In progress / Implemented / Not planned marks on barn threads. |
+| 222 | `222_seller_terms_currency.sql` | get_public_seller_terms gains currency_symbol so listings price in the seller's own currency. |
 
 ---
 

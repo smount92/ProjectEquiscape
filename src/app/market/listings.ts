@@ -105,6 +105,8 @@ export interface MarketListing {
     /** Seller terms (218): the flag and the trades chip on the card. */
     ownerCountry: string | null;
     ownerOpenToTrades: boolean;
+    /** The seller's currency symbol (222); null = dollars. */
+    ownerCurrency: string | null;
     /** null = no records. The card renders nothing (never "0 placings"). */
     recordSummary: HorseRecordSummary | null;
 }
@@ -118,6 +120,8 @@ export interface MarketListingsPage {
     /** Live listings ignoring filters — the masthead's headline number. */
     totalListings: number;
     viewerIsAuthenticated: boolean;
+    /** Countries with at least one live listing (ISO alpha-2), for the ships-from facet. */
+    countries: string[];
 }
 
 /** Max catalog rows matched for the q ilike-over-the-join expansion. */
@@ -206,6 +210,28 @@ async function fetchTrustedSellers(
     }
 }
 
+/**
+ * Countries with a live listing right now, for the ships-from facet —
+ * a dropdown of every country in the world was the wrong shape
+ * (outside review, 2026-09-22). Public rows only; best effort.
+ */
+async function liveSellerCountries(supabase: SupabaseClient): Promise<string[]> {
+    try {
+        const { data } = await supabase
+            .from("user_horses")
+            .select("owner_id")
+            .eq("visibility", "public")
+            .is("deleted_at", null)
+            .in("trade_status", LIVE_TRADE_STATUSES)
+            .limit(1000);
+        const ids = [...new Set(((data ?? []) as { owner_id: string }[]).map((r) => r.owner_id))];
+        const terms = await readSellerTerms(supabase, ids);
+        return [...new Set([...terms.values()].map((t) => t.country).filter((c): c is string => !!c))].sort();
+    } catch {
+        return [];
+    }
+}
+
 /** Live listings ignoring every filter — the "N horses for sale" headline. */
 async function fetchTotalListings(supabase: SupabaseClient): Promise<number> {
     try {
@@ -277,7 +303,9 @@ async function fetchListingsViaRpc(
             const t = sellers.get(listing.ownerId);
             listing.ownerCountry = t?.country ?? null;
             listing.ownerOpenToTrades = t?.openToTrades ?? false;
+            listing.ownerCurrency = t?.currency ?? null;
         }
+        const countries = await liveSellerCountries(supabase as unknown as SupabaseClient);
         // The listings RPC predates "ships from"; for a logged-out viewer
         // the filter applies to the page in hand.
         const visible = filters.from ? listings.filter((l) => l.ownerCountry === filters.from) : listings;
@@ -304,6 +332,7 @@ async function fetchListingsViaRpc(
             total: filters.from ? visible.length : total,
             totalListings: Math.max(headline, total),
             viewerIsAuthenticated: false,
+            countries,
         };
     } catch {
         return null;
@@ -334,6 +363,7 @@ export async function getMarketListingsPage(
         total: 0,
         totalListings: 0,
         viewerIsAuthenticated,
+        countries: [],
     });
 
     let supabase: SupabaseClient;
@@ -435,11 +465,12 @@ export async function getMarketListingsPage(
     const horseIds = rows.map((r) => r.id);
     const ownerIds = [...new Set(rows.map((r) => r.owner_id))];
 
-    const [summaries, trusted, totalListings, sellers] = await Promise.all([
+    const [summaries, trusted, totalListings, sellers, countries] = await Promise.all([
         fetchRecordSummaries(supabase, horseIds),
         fetchTrustedSellers(supabase, ownerIds),
         fetchTotalListings(supabase),
         readSellerTerms(supabase, ownerIds),
+        liveSellerCountries(supabase),
     ]);
 
     const urlMap = getPublicImageUrls(
@@ -467,6 +498,7 @@ export async function getMarketListingsPage(
             isTrustedSeller: trusted.has(row.owner_id),
             ownerCountry: sellers.get(row.owner_id)?.country ?? null,
             ownerOpenToTrades: sellers.get(row.owner_id)?.openToTrades ?? false,
+            ownerCurrency: sellers.get(row.owner_id)?.currency ?? null,
             recordSummary: summaries.get(row.id) ?? null,
         };
     });
@@ -477,5 +509,6 @@ export async function getMarketListingsPage(
         total: count ?? listings.length,
         totalListings,
         viewerIsAuthenticated,
+        countries,
     };
 }

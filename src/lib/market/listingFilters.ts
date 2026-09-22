@@ -209,12 +209,24 @@ const PRICE_FORMAT = new Intl.NumberFormat("en-US", {
 export function listingPriceLabel(
     tradeStatus: string,
     listingPrice: number | null | undefined,
+    currency?: string | null,
 ): string {
     const hasPrice = typeof listingPrice === "number" && Number.isFinite(listingPrice) && listingPrice > 0;
     if (tradeStatus === "Open to Offers") {
-        return hasPrice ? `Open to offers · ~${PRICE_FORMAT.format(listingPrice as number)}` : "Open to offers";
+        return hasPrice ? `Open to offers · ~${formatPriceIn(listingPrice as number, currency)}` : "Open to offers";
     }
-    return hasPrice ? PRICE_FORMAT.format(listingPrice as number) : "Ask for price";
+    return hasPrice ? formatPriceIn(listingPrice as number, currency) : "Ask for price";
+}
+
+/**
+ * A price in the seller's own symbol ("€1,250"); dollars when they have
+ * not set one. Sellers store a symbol, not an ISO code, so the number is
+ * formatted plainly and the symbol goes in front.
+ */
+export function formatPriceIn(value: number, currency?: string | null): string {
+    const symbol = (currency ?? "").trim();
+    if (!symbol || symbol === "$") return PRICE_FORMAT.format(value);
+    return `${symbol}${Math.round(value).toLocaleString("en-US")}`;
 }
 
 /** Plain currency, for the guide cross-link and band labels. */

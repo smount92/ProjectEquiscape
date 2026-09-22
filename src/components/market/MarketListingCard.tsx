@@ -35,7 +35,7 @@ import CountryTag from "@/components/CountryTag";
 const NOTES_PREVIEW_CHARS = 72;
 
 export default function MarketListingCard({ listing }: { listing: MarketListing }) {
-    const priceLabel = listingPriceLabel(listing.tradeStatus, listing.listingPrice);
+    const priceLabel = listingPriceLabel(listing.tradeStatus, listing.listingPrice, listing.ownerCurrency);
     const isForSale = listing.tradeStatus === "For Sale";
     // Empty-state honesty: no record, no chip, no noise.
     const hasRecord = recordChipLabel(listing.recordSummary) !== null;
