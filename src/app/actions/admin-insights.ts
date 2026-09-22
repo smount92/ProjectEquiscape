@@ -22,6 +22,7 @@ import { requireAdmin } from "@/lib/auth";
 import { isMissingMetricsSchema, metricsDb } from "@/lib/metrics/db";
 import { ENTITY_TYPES, type EntityType } from "@/lib/metrics/entities";
 import { entityKey, resolveEntityNames, type ResolvedEntity } from "@/lib/metrics/resolve";
+import { bucketByDay, countPriorWindow, dayLabels, isGrowthRange, type GrowthRange } from "@/lib/metrics/growth";
 import {
     computeRevenue,
     isMissingRevenueSchema,
@@ -283,5 +284,92 @@ export async function getRevenueInsights(): Promise<
         };
     } catch (err) {
         return { success: false, error: err instanceof Error ? err.message : String(err) };
+    }
+}
+
+// ══════════════════════════════════════════════════════════════
+// Growth — what was added, per day
+// ══════════════════════════════════════════════════════════════
+// Independent of the view rollups (175): these come off created_at on
+// the tables themselves, so they work on day one and cost one bounded
+// select per series. Owner ask (2026-09-21): "a little graph for users
+// and horses added over 7 / 30 / 90 days, like the views graph".
+
+export interface GrowthSeries {
+    key: "members" | "horses" | "records" | "listings";
+    label: string;
+    /** One count per day, oldest first, aligned with `days`. */
+    perDay: number[];
+    /** Sum over the window. */
+    total: number;
+    /** The same-length window before this one. */
+    prior: number;
+    /** All-time count (never deleted). */
+    allTime: number | null;
+}
+
+export interface GrowthInsights {
+    range: GrowthRange;
+    /** YYYY-MM-DD, oldest first. */
+    days: string[];
+    series: GrowthSeries[];
+}
+
+/** Rows fetched per series; a window with more than this is capped and the last days undercount. */
+const GROWTH_ROW_CAP = 5000;
+
+export async function getGrowthInsights(
+    range: number,
+): Promise<{ success: true; growth: GrowthInsights } | { success: false; error: string }> {
+    await requireAdmin();
+    const r: GrowthRange = isGrowthRange(range) ? range : 30;
+    const now = new Date();
+    // Two windows back so the prior-window delta comes off the same rows.
+    const since = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) - (2 * r - 1) * 86_400_000).toISOString();
+    const db = serviceClient();
+
+    const CAP = GROWTH_ROW_CAP;
+    const LIVE = ["For Sale", "Open to Offers"];
+    const list = (r: { data: unknown; error: unknown }) =>
+        r.error ? null : ((r.data ?? []) as { created_at: string }[]).map((x) => x.created_at);
+    const cnt = (r: { count: number | null; error: unknown }) => (r.error ? null : r.count);
+
+    try {
+        const [members, horses, records, listings, membersAll, horsesAll, recordsAll, listingsAll] = await Promise.all([
+            db.from("users").select("created_at").neq("account_status", "deleted").gte("created_at", since).limit(CAP),
+            db.from("user_horses").select("created_at").is("deleted_at", null).gte("created_at", since).limit(CAP),
+            db.from("show_records").select("created_at").gte("created_at", since).limit(CAP),
+            db.from("user_horses").select("created_at").is("deleted_at", null).in("trade_status", LIVE).gte("created_at", since).limit(CAP),
+            db.from("users").select("id", { count: "exact", head: true }).neq("account_status", "deleted"),
+            db.from("user_horses").select("id", { count: "exact", head: true }).is("deleted_at", null),
+            db.from("show_records").select("id", { count: "exact", head: true }),
+            db.from("user_horses").select("id", { count: "exact", head: true }).is("deleted_at", null).in("trade_status", LIVE),
+        ]);
+        const build = (key: GrowthSeries["key"], label: string, list: string[] | null, allTime: number | null): GrowthSeries => {
+            const perDay = bucketByDay(list ?? [], r, now);
+            return {
+                key,
+                label,
+                perDay,
+                total: perDay.reduce((a, b) => a + b, 0),
+                prior: countPriorWindow(list ?? [], r, now),
+                allTime,
+            };
+        };
+        return {
+            success: true,
+            growth: {
+                range: r,
+                days: dayLabels(r, now),
+                series: [
+                    build("members", "New members", list(members), cnt(membersAll)),
+                    build("horses", "Horses added", list(horses), cnt(horsesAll)),
+                    build("records", "Show records added", list(records), cnt(recordsAll)),
+                    build("listings", "Horses listed for sale", list(listings), cnt(listingsAll)),
+                ],
+            },
+        };
+    } catch (err) {
+        return { success: false, error: err instanceof Error ? err.message : "Growth read failed." };
     }
 }

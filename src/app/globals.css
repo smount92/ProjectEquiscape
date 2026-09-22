@@ -3333,6 +3333,7 @@ html[data-theme="night"] {
   .text-warning { color: var(--ink-warning); }
   .text-info { color: var(--ink-info); }
   .text-studio { color: var(--ink-studio); }
+  .text-brass { color: var(--ink-brass); }
   .text-destructive { color: var(--ink-destructive); }
   .hover\:text-destructive:hover { color: var(--ink-destructive); }
 }

@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
+    getGrowthInsights,
+    type GrowthInsights,
     getAdminInsights,
     getRevenueInsights,
     type ActivityDay,
@@ -11,6 +13,7 @@ import {
     type TopObject,
 } from "@/app/actions/admin-insights";
 import { ENTITY_LABELS, ENTITY_TYPES, type EntityType } from "@/lib/metrics/entities";
+import { deltaLabel, GROWTH_RANGES, shortDay, type GrowthRange } from "@/lib/metrics/growth";
 
 /**
  * Insights — what the site's own data knows that a traffic tool cannot.
@@ -144,6 +147,146 @@ function RevenueBand() {
 const CHART_W = 720;
 const CHART_H = 150;
 const PAD = 8;
+
+/** Line colours per growth series, as theme tokens so both themes work. */
+const GROWTH_TONE: Record<string, string> = {
+    members: "text-forest",
+    horses: "text-brass",
+    records: "text-info",
+    listings: "text-warning",
+};
+
+/**
+ * Growth: what was added per day over 7 / 30 / 90 days. Same hand-rolled
+ * SVG as the activity chart, one polyline per series, the totals and the
+ * prior-window delta beside it. Reads its own action so it works before
+ * the view rollups (175) exist.
+ */
+function GrowthBand() {
+    const [range, setRange] = useState<GrowthRange>(30);
+    const [growth, setGrowth] = useState<GrowthInsights | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    const [visible, setVisible] = useState<Record<string, boolean>>({ members: true, horses: true, records: false, listings: false });
+
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            const result = await getGrowthInsights(range);
+            if (cancelled) return;
+            if (result.success) {
+                setGrowth(result.growth);
+                setError(null);
+            } else setError(result.error);
+        })();
+        return () => {
+            cancelled = true;
+        };
+    }, [range]);
+
+    const shown = growth ? growth.series.filter((x) => visible[x.key]) : [];
+    const peak = Math.max(1, ...shown.flatMap((x) => x.perDay));
+    const n = growth?.days.length ?? 0;
+    const stepX = n > 1 ? (CHART_W - PAD * 2) / (n - 1) : 0;
+    const toPoints = (values: number[]) =>
+        values
+            .map((v, i) => {
+                const x = PAD + i * stepX;
+                const y = CHART_H - PAD - (v / peak) * (CHART_H - PAD * 2);
+                return `${x.toFixed(1)},${y.toFixed(1)}`;
+            })
+            .join(" ");
+    const ticks = growth ? [0, Math.floor((n - 1) / 2), n - 1].filter((i, k, a) => a.indexOf(i) === k) : [];
+
+    return (
+        <div className="border-input bg-card rounded-lg border px-4 py-3" data-testid="growth-band">
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                <div className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">Growth · added per day</div>
+                <div className="flex items-center gap-1" role="group" aria-label="Range">
+                    {GROWTH_RANGES.map((r) => (
+                        <button
+                            key={r}
+                            type="button"
+                            onClick={() => setRange(r)}
+                            aria-pressed={range === r}
+                            className={`cursor-pointer rounded-md border px-2.5 py-1 text-xs font-semibold transition-colors ${
+                                range === r ? "border-forest bg-forest/10 text-forest" : "border-input bg-card text-secondary-foreground hover:text-foreground"
+                            }`}
+                            id={`growth-range-${r}`}
+                        >
+                            {r}d
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {error && <p className="text-destructive m-0 text-sm">{error}</p>}
+            {!growth && !error && <p className="text-muted-foreground m-0 py-6 text-center text-sm">Counting…</p>}
+
+            {growth && (
+                <>
+                    <div className="mb-3 grid gap-2 [grid-template-columns:repeat(auto-fit,minmax(160px,1fr))]">
+                        {growth.series.map((x) => (
+                            <button
+                                key={x.key}
+                                type="button"
+                                onClick={() => setVisible((v) => ({ ...v, [x.key]: !v[x.key] }))}
+                                aria-pressed={visible[x.key]}
+                                className={`cursor-pointer rounded-lg border px-3 py-2 text-left transition-colors ${
+                                    visible[x.key] ? "border-input bg-muted/50" : "border-input/60 bg-transparent opacity-60"
+                                }`}
+                                title={visible[x.key] ? "Hide this line" : "Show this line"}
+                                data-testid={`growth-${x.key}`}
+                            >
+                                <div className={`flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase ${GROWTH_TONE[x.key] ?? "text-forest"}`}>
+                                    <span className="inline-block h-0.5 w-4 bg-current" aria-hidden="true" />
+                                    {x.label}
+                                </div>
+                                <div className="text-foreground font-serif text-2xl font-bold tabular-nums">{fmt(x.total)}</div>
+                                <div className="text-muted-foreground text-xs">
+                                    {deltaLabel(x.total, x.prior, growth.range)}
+                                    {x.allTime !== null && <> · {fmt(x.allTime)} all time</>}
+                                </div>
+                            </button>
+                        ))}
+                    </div>
+                    {n < 2 || shown.length === 0 ? (
+                        <p className="text-muted-foreground m-0 py-4 text-center text-sm">
+                            {shown.length === 0 ? "Pick a line above." : "Not enough days for a line."}
+                        </p>
+                    ) : (
+                        <>
+                            <svg
+                                viewBox={`0 0 ${CHART_W} ${CHART_H}`}
+                                className="h-auto w-full overflow-visible"
+                                role="img"
+                                aria-label={`Added per day over the last ${growth.range} days, peak ${peak}`}
+                            >
+                                {shown.map((x) => (
+                                    <polyline
+                                        key={x.key}
+                                        points={toPoints(x.perDay)}
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth={x.key === "members" ? 2.5 : 2}
+                                        strokeLinejoin="round"
+                                        strokeLinecap="round"
+                                        className={GROWTH_TONE[x.key] ?? "text-forest"}
+                                    />
+                                ))}
+                            </svg>
+                            <div className="text-muted-foreground mt-1 flex justify-between text-xs tabular-nums">
+                                {ticks.map((i) => (
+                                    <span key={i}>{shortDay(growth.days[i])}</span>
+                                ))}
+                            </div>
+                            <p className="text-muted-foreground m-0 mt-1 text-xs">Peak day {fmt(peak)}. UTC days; deleted members and horses are not counted.</p>
+                        </>
+                    )}
+                </>
+            )}
+        </div>
+    );
+}
 
 /**
  * The daily-actives line. Hand-rolled SVG rather than a charting dependency:
@@ -307,6 +450,7 @@ export default function AdminInsightsTab() {
     if (error || !insights) {
         return (
             <div className="flex flex-col gap-6">
+                <GrowthBand />
                 {/* The revenue reader is independent of the view rollups —
                     one failing says nothing about the other. */}
                 <RevenueBand />
@@ -326,6 +470,7 @@ export default function AdminInsightsTab() {
     if (!insights.schemaReady) {
         return (
             <div className="flex flex-col gap-6">
+                <GrowthBand />
                 <RevenueBand />
                 <div className="border-input bg-card rounded-lg border px-8 py-12 text-center">
                     <div className="mb-3 text-4xl">📈</div>
@@ -360,10 +505,12 @@ export default function AdminInsightsTab() {
 
     return (
         <div className="flex flex-col gap-6">
-            {/* Band 0 — what the place earns, and who is actually here */}
+            {/* Band 0 — what was added: members, horses, records, listings */}
+            <GrowthBand />
+            {/* Band 1 — what the place earns, and who is actually here */}
             <RevenueBand />
 
-            {/* Band 1 — how busy is the place */}
+            {/* Band 2 — how busy is the place */}
             <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(150px,1fr))]">
                 <Stat value={fmt(today?.memberDau ?? 0)} label="Members today" sub="UTC day" />
                 <Stat
@@ -386,7 +533,7 @@ export default function AdminInsightsTab() {
 
             <ActivityChart days={insights.activity} />
 
-            {/* Band 2 — where the attention went */}
+            {/* Band 3 — where the attention went */}
             <div>
                 <h3 className="mt-0 mb-2 text-base font-bold">
                     Last {insights.windowDays} days by object type
@@ -406,7 +553,7 @@ export default function AdminInsightsTab() {
                 </div>
             </div>
 
-            {/* Band 3 — the leaderboards */}
+            {/* Band 4 — the leaderboards */}
             {insights.top.length === 0 ? (
                 <div className="border-input bg-card text-muted-foreground rounded-lg border px-4 py-8 text-center text-sm">
                     Nothing viewed in the last {insights.windowDays} days yet.
