@@ -1366,6 +1366,12 @@ const PENDING_MIGRATIONS: MigrationSpec[] = [
     summary: "show_records.import_batch — one undo removes a whole spreadsheet import.",
     probe: { kind: "column", table: "show_records", column: "import_batch" },
   },
+  {
+    id: "221",
+    title: "Thread marks",
+    summary: "posts.thread_status — In progress / Implemented / Not planned on barn threads (the suggestion box).",
+    probe: { kind: "column", table: "posts", column: "thread_status" },
+  },
 ];
 
 export interface MigrationStatusRow {

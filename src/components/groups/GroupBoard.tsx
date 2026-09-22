@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { createGroupChannel, type GroupChannel } from "@/app/actions/groups";
 import { createThread, getGroupBoard, markGroupRead } from "@/app/actions/groups-forum";
 import type { BoardThread } from "@/lib/groups/types";
+import { ThreadStatusBadge } from "@/components/groups/ThreadStatusControl";
 
 // ============================================================
 // BARN NOTICE BOARD — the crown jewel of a barn. These channel
@@ -297,6 +298,12 @@ export default function GroupBoard({
                         )}
                         <span className={`truncate text-[0.95rem] ${t.unread || t.isPinned ? "text-foreground font-bold" : "text-secondary-foreground font-normal"}`}>
                             {t.displayTitle}
+                            {t.status && (
+                                <>
+                                    {" "}
+                                    <ThreadStatusBadge status={t.status} />
+                                </>
+                            )}
                         </span>
                         <span className="row-span-2 text-right">
                             <span className="text-forest block text-base font-bold tabular-nums">{t.repliesCount}</span>

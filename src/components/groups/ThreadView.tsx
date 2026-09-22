@@ -6,6 +6,7 @@ import RichText from "@/components/RichText";
 import MentionTextarea from "@/components/feed/MentionTextarea";
 import { PostHeader, ReactionBar, UserAvatar } from "@/components/social";
 import { PinPostButton } from "@/components/groups/PinPostButton";
+import { ThreadStatusBadge, ThreadStatusControl } from "@/components/groups/ThreadStatusControl";
 import { togglePostLike, updatePost } from "@/app/actions/posts";
 import { getThread, replyToThread } from "@/app/actions/groups-forum";
 import type { ThreadPost, ThreadViewData } from "@/lib/groups/types";
@@ -196,7 +197,12 @@ export default function ThreadView({
                 >
                     ← Back to the notice board
                 </Link>
-                {canPin && <PinPostButton postId={thread.id} isPinned={thread.isPinned} />}
+                {canPin && (
+                    <div className="flex flex-wrap items-center gap-3">
+                        <ThreadStatusControl postId={thread.id} status={thread.status ?? null} />
+                        <PinPostButton postId={thread.id} isPinned={thread.isPinned} />
+                    </div>
+                )}
             </div>
 
             <div className="border-input bg-card overflow-hidden rounded-lg border shadow-sm">
@@ -212,6 +218,12 @@ export default function ThreadView({
                     <h1 className="m-0 text-lg leading-snug" style={{ color: "var(--leather-text, #EFDDBB)" }}>
                         {thread.isPinned && <span title="Pinned">📌 </span>}
                         {thread.displayTitle}
+                        {thread.status && (
+                            <>
+                                {" "}
+                                <ThreadStatusBadge status={thread.status} />
+                            </>
+                        )}
                     </h1>
                 </div>
 

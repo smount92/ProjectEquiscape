@@ -5,6 +5,7 @@ import Link from"next/link";
 import { deleteShowRecord } from"@/app/actions/provenance";
 import ShowRecordForm from"@/components/ShowRecordForm";
 import ShowRecordsImport from "@/components/ShowRecordsImport";
+import { filterLedger, groupByYear, LEDGER_FILTER_FROM, LEDGER_PREVIEW, summarizeLedger } from "@/lib/records/ledger";
 import { Button } from "@/components/ui/button";
 import type { PaperView } from "@/app/actions/papers";
 import PaperDialog from "@/components/passport/PaperDialog";
@@ -98,6 +99,15 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
  const [formMode, setFormMode] = useState<string | null>(null); // null,"add","edit-{id}"
  const [editingRecord, setEditingRecord] = useState<ShowRecordDisplay | null>(null);
  const [deletingId, setDeletingId] = useState<string | null>(null);
+ // The ledger view (2026-09-21): a summary strip, the newest few, the
+ // rest folded by season, and a filter once the list is long.
+ const [expanded, setExpanded] = useState(false);
+ const [filter, setFilter] = useState("");
+ const summary = summarizeLedger(records);
+ const filtered = filterLedger(records, filter);
+ const folded = records.length > LEDGER_PREVIEW && !expanded && !filter.trim();
+ const shown = folded ? filtered.slice(0, LEDGER_PREVIEW) : filtered;
+ const groups = !folded && records.length > LEDGER_PREVIEW ? groupByYear(shown) : null;
 
  const handleAdd = () => {
  setEditingRecord(null);
@@ -132,63 +142,8 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
  setEditingRecord(null);
  };
 
- return (
- <div
- className="show-record-timeline rounded-lg border border-input bg-card p-4 shadow-sm transition-all"
- id="show-records"
- >
- <div className="mb-6 flex flex-wrap items-center justify-between gap-2">
- <div className="brass-heading">
- <span className="brass-heading-bar" aria-hidden="true" />
- <h3 className="m-0 text-lg">
- Show Records
- {records.length > 0 && ` (${records.length})`}
- </h3>
- </div>
- {isOwner && (
- <div className="flex flex-wrap items-center gap-2">
- <Button
- onClick={handleAdd}
- id="add-show-record"
- >
- + Add Record
- </Button>
- <ShowRecordsImport
- horseId={horseId}
- horseName={horseName}
- existing={records.map((r) => ({ showName: r.showName, showDate: r.showDate, className: r.className, placing: r.placing }))}
- />
- </div>
- )}
- </div>
 
- {/* Add Form */}
- {formMode ==="add" && <ShowRecordForm horseId={horseId} onSave={handleSave} onCancel={handleCancel} />}
-
- {attaching && (
- <PaperDialog
- horseId={horseId}
- horseName={horseName}
- paper={null}
- attachTo={{ showRecordId: attaching.id, label: attaching.showName }}
- presetKind="qualification_card"
- kinds={RECORD_PAPER_KINDS}
- onClose={() => setAttaching(null)}
- onSaved={() => {
- setAttaching(null);
- window.location.reload();
- }}
- />
- )}
-
- {/* Timeline */}
- {records.length === 0 ? (
- <div className="text-secondary-foreground py-6 text-center text-sm">
- {isOwner ?"No show records yet. Add your first win! 🏆" :"No show records yet."}
- </div>
- ) : (
- <div className="relative pl-8">
- {records.map((record) => (
+ const renderRecord = (record: ShowRecordDisplay) => (
  <div
  key={record.id}
  className={`show-record-item group/record relative mb-4 rounded-md bg-muted p-4 transition-colors hover:bg-muted/70 ${getRibbonClass(record.ribbonColor)}`}
@@ -320,7 +275,119 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
  </>
  )}
  </div>
- ))}
+ );
+
+ return (
+ <div
+ className="show-record-timeline rounded-lg border border-input bg-card p-4 shadow-sm transition-all"
+ id="show-records"
+ >
+ <div className="mb-6 flex flex-wrap items-center justify-between gap-2">
+ <div className="brass-heading">
+ <span className="brass-heading-bar" aria-hidden="true" />
+ <h3 className="m-0 text-lg">
+ Show Records
+ {records.length > 0 && ` (${records.length})`}
+ </h3>
+ </div>
+ {isOwner && (
+ <div className="flex flex-wrap items-center gap-2">
+ <Button
+ onClick={handleAdd}
+ id="add-show-record"
+ >
+ + Add Record
+ </Button>
+ <ShowRecordsImport
+ horseId={horseId}
+ horseName={horseName}
+ existing={records.map((r) => ({ showName: r.showName, showDate: r.showDate, className: r.className, placing: r.placing }))}
+ />
+ </div>
+ )}
+ </div>
+
+ {/* Add Form */}
+ {formMode ==="add" && <ShowRecordForm horseId={horseId} onSave={handleSave} onCancel={handleCancel} />}
+
+ {attaching && (
+ <PaperDialog
+ horseId={horseId}
+ horseName={horseName}
+ paper={null}
+ attachTo={{ showRecordId: attaching.id, label: attaching.showName }}
+ presetKind="qualification_card"
+ kinds={RECORD_PAPER_KINDS}
+ onClose={() => setAttaching(null)}
+ onSaved={() => {
+ setAttaching(null);
+ window.location.reload();
+ }}
+ />
+ )}
+
+ {/* Timeline */}
+ {records.length === 0 ? (
+ <div className="text-secondary-foreground py-6 text-center text-sm">
+ {isOwner ?"No show records yet. Add your first win! 🏆" :"No show records yet."}
+ </div>
+ ) : (
+ <div className="relative pl-8">
+ <>
+ {records.length > 1 && (
+ <div className="mb-4 flex flex-wrap items-center gap-x-5 gap-y-1 rounded-md bg-muted/60 px-3 py-2 text-sm" data-testid="record-ledger-summary">
+ <span><strong>{summary.total}</strong> placings</span>
+ {summary.firsts > 0 && <span><strong>{summary.firsts}</strong> {summary.firsts === 1 ? "first" : "firsts"}</span>}
+ {summary.championships > 0 && <span><strong>{summary.championships}</strong> {summary.championships === 1 ? "championship" : "championships"}</span>}
+ {summary.cards > 0 && <span><strong>{summary.cards}</strong> {summary.cards === 1 ? "card" : "cards"}</span>}
+ <span><strong>{summary.shows}</strong> {summary.shows === 1 ? "show" : "shows"}</span>
+ {summary.span && <span className="text-secondary-foreground">{summary.span}</span>}
+ </div>
+ )}
+ {records.length >= LEDGER_FILTER_FROM && (
+ <input
+ type="search"
+ value={filter}
+ onChange={(e) => setFilter(e.target.value)}
+ placeholder="Find a show, class, placing or judge…"
+ className="border-input bg-card text-foreground mb-3 h-9 w-full rounded-md border px-3 text-sm"
+ aria-label="Filter show records"
+ id="record-ledger-filter"
+ />
+ )}
+ {filter.trim() !== "" && filtered.length === 0 && (
+ <p className="text-secondary-foreground m-0 mb-3 text-sm">Nothing matches &ldquo;{filter}&rdquo;.</p>
+ )}
+ {groups
+ ? groups.map((g, i) => (
+ <details key={g.label} open={i === 0 || groups.length <= 2 || filter.trim() !== ""} className="mb-2" data-testid="record-year-group">
+ <summary className="text-secondary-foreground mb-2 cursor-pointer text-xs font-semibold tracking-wider uppercase">
+ {g.label} · {g.records.length} {g.records.length === 1 ? "placing" : "placings"}
+ </summary>
+ {g.records.map(renderRecord)}
+ </details>
+ ))
+ : shown.map(renderRecord)}
+ {folded && (
+ <button
+ type="button"
+ onClick={() => setExpanded(true)}
+ className="text-forest mt-1 cursor-pointer rounded-sm border-none bg-transparent p-0 text-sm font-semibold hover:underline"
+ id="record-ledger-show-all"
+ >
+ Show all {records.length} placings ↓
+ </button>
+ )}
+ {expanded && records.length > LEDGER_PREVIEW && filter.trim() === "" && (
+ <button
+ type="button"
+ onClick={() => setExpanded(false)}
+ className="text-forest mt-1 cursor-pointer rounded-sm border-none bg-transparent p-0 text-sm font-semibold hover:underline"
+ >
+ Show fewer ↑
+ </button>
+ )}
+ </>
  </div>
  )}
  </div>

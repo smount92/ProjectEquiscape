@@ -11,6 +11,7 @@ import { GROUP_FILE_MAX_SIZE, GROUP_FILE_ALLOWED_EXTENSIONS } from "@/lib/groupF
 import { revalidatePath, revalidateTag } from "next/cache";
 import { sanitizeText } from "@/lib/utils/validation";
 import { sanitizeForOr } from "@/lib/utils/search";
+import { isThreadStatus, type ThreadStatus } from "@/lib/groups/threadStatus";
 
 // ============================================================
 // BARNS — Server Actions
@@ -1188,6 +1189,41 @@ export async function togglePinPost(
         .eq("id", postId);
 
     if (error) return { success: false, error: error.message };
+    revalidatePath("/community/groups");
+    return { success: true };
+}
+
+/** Mark a barn thread In progress / Implemented / Not planned (221). Barn staff only. */
+export async function setThreadStatus(
+    postId: string,
+    status: ThreadStatus | null,
+): Promise<{ success: boolean; error?: string }> {
+    const { supabase, user } = await requireAuth();
+    if (status !== null && !isThreadStatus(status)) return { success: false, error: "That isn't a mark." };
+    const { data: post } = await supabase.from("posts").select("group_id").eq("id", postId).maybeSingle();
+    const p = post as { group_id: string | null } | null;
+    if (!p) return { success: false, error: "Thread not found." };
+    if (!p.group_id) return { success: false, error: "Not a barn thread." };
+    const { data: membership } = await supabase
+        .from("group_memberships")
+        .select("role")
+        .eq("group_id", p.group_id)
+        .eq("user_id", user.id)
+        .maybeSingle();
+    const role = (membership as { role: string } | null)?.role;
+    if (!role || !["owner", "admin", "moderator"].includes(role)) {
+        return { success: false, error: "Only barn admins can mark threads." };
+    }
+    const { error } = await supabase
+        .from("posts")
+        .update({ thread_status: status } as never)
+        .eq("id", postId);
+    if (error) {
+        if (error.code === "42703" || error.code === "PGRST204") {
+            return { success: false, error: "Thread marks aren't switched on yet (migration 221)." };
+        }
+        return { success: false, error: error.message };
+    }
     revalidatePath("/community/groups");
     return { success: true };
 }

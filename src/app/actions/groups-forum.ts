@@ -36,6 +36,7 @@ import {
 } from "@/lib/groups/schemas";
 import { compareBoardThreads, deriveThreadTitle, isThreadUnread } from "@/lib/groups/threads";
 import type { BoardThread, ThreadPost, ThreadViewData } from "@/lib/groups/types";
+import { isThreadStatus, type ThreadStatus } from "@/lib/groups/threadStatus";
 
 type ActionResult<T = object> =
     | ({ success: true } & T)
@@ -151,6 +152,9 @@ export async function getGroupBoard(
         };
     });
     threads.sort(compareBoardThreads);
+    // Thread marks (221) — their own tolerant read, so the board renders before the paste.
+    const marks = await readThreadStatuses(supabase as unknown as SupabaseClient, threads.map((t) => t.id));
+    for (const t of threads) t.status = marks.get(t.id) ?? null;
 
     // Resolve avatar storage paths → URLs
     const avatarMap = await resolveAvatarUrls(threads.map((t) => t.authorAvatarUrl));
@@ -286,10 +290,12 @@ export async function getThread(
         logger.error("GroupsForum", "Thread mention resolution failed", err);
     }
 
+    const threadMarks = await readThreadStatuses(supabase as unknown as SupabaseClient, [r.id as string]);
     return {
         success: true,
         thread: {
             id: r.id as string,
+            status: threadMarks.get(r.id as string) ?? null,
             groupId: r.group_id as string,
             channelId: (r.channel_id as string | null) ?? null,
             channelName,
@@ -500,4 +506,20 @@ export async function replyToThread(
     });
 
     return { success: true, replyId: replyId as string };
+}
+
+/** Thread marks (221): id → status. Empty (never an error) until the column exists. */
+async function readThreadStatuses(supabase: SupabaseClient, ids: string[]): Promise<Map<string, ThreadStatus>> {
+    const out = new Map<string, ThreadStatus>();
+    if (ids.length === 0) return out;
+    try {
+        const { data, error } = await supabase.from("posts").select("id, thread_status").in("id", ids);
+        if (error) return out;
+        for (const row of (data ?? []) as { id: string; thread_status: unknown }[]) {
+            if (isThreadStatus(row.thread_status)) out.set(row.id, row.thread_status);
+        }
+    } catch {
+        // pre-paste
+    }
+    return out;
 }

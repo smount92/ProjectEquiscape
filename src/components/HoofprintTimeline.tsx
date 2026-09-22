@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import OwnerCreditDialog from "@/components/making/OwnerCreditDialog";
 import { workEventIcon } from "@/lib/hoofprint/workIcon";
+import { rollupShowResults, TIMELINE_PREVIEW } from "@/lib/hoofprint/rollup";
 
 interface HoofprintTimelineProps {
  horseId: string;
@@ -73,6 +74,12 @@ export default function HoofprintTimeline({
  currentUserId,
  showRecordsListedElsewhere = false,
 }: HoofprintTimelineProps) {
+ // One line per show instead of one per placing (the record lives in
+ // Show Records), and the latest few first — 112 placings arrived by
+ // import on 2026-09-21 and drowned the story.
+ const [showAllEvents, setShowAllEvents] = useState(false);
+ const rolled = rollupShowResults(timeline);
+ const visibleEvents = showAllEvents ? rolled : rolled.slice(0, TIMELINE_PREVIEW);
  const router = useRouter();
  const [showForm, setShowForm] = useState(false);
  const [formState, setFormState] = useState({
@@ -251,7 +258,7 @@ export default function HoofprintTimeline({
   animate="visible"
   variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.08 } } }}
  >
- {timeline.map((event) => (
+ {visibleEvents.map((event) => (
  <motion.div key={event.id} className="relative pb-6 last:pb-0" variants={{ hidden: { opacity: 0, x: -20 }, visible: { opacity: 1, x: 0, transition: { type: "spring" as const, stiffness: 200, damping: 25 } } }}>
  {/* Brass event dot on the rail */}
  <div
@@ -322,6 +329,18 @@ export default function HoofprintTimeline({
  </motion.div>
  ))}
  </motion.div>
+ )}
+ {rolled.length > TIMELINE_PREVIEW && (
+ <div className="mt-2 text-center">
+ <button
+ type="button"
+ onClick={() => setShowAllEvents((v) => !v)}
+ className="text-forest cursor-pointer rounded-sm border-none bg-transparent p-0 text-sm font-semibold hover:underline"
+ id="hoofprint-show-earlier"
+ >
+ {showAllEvents ? "Show fewer ↑" : `Show ${rolled.length - TIMELINE_PREVIEW} earlier ↓`}
+ </button>
+ </div>
  )}
  </div>
  );

@@ -1,3 +1,5 @@
+import type { ThreadStatus } from "@/lib/groups/threadStatus";
+
 /**
  * Groups forum — row types derived from the generated schema
  * (migration 122 applied 2026-07-10; columns flow in via gen-types).
@@ -43,6 +45,8 @@ export interface BoardThread {
     /** bumped_at — when the thread last saw activity. */
     lastActivity: string;
     isPinned: boolean;
+    /** Barn-staff mark (221): in_progress / implemented / not_planned. */
+    status?: ThreadStatus | null;
     channelId: string | null;
     /** Bumped since the viewer's last board visit? */
     unread: boolean;
@@ -69,6 +73,8 @@ export interface ThreadViewData {
     channelName: string | null;
     displayTitle: string;
     isPinned: boolean;
+    /** Barn-staff mark (221): in_progress / implemented / not_planned. */
+    status?: ThreadStatus | null;
     repliesCount: number;
     op: ThreadPost;
     replies: ThreadPost[];
