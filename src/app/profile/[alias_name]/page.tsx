@@ -917,7 +917,7 @@ export default async function ProfilePage({
                         }
                     >
                         {isOwnProfile
-                            ? 'Toggle "Show in Public Community Feed" on any of your models to showcase them here.'
+                            ? 'Open a horse, choose Edit, and set its Visibility to Public — it appears here, and in any public folder you have put it in.'
                             : "Check back later — they may share some soon!"}
                     </EmptyNote>
                 ) : (
