@@ -705,6 +705,28 @@ export async function updateArtistProfile(formData: FormData): Promise<ActionRes
  * explains it ("slots open Sept 1"). Separate from the profile editor
  * because artists change this weekly and everything else almost never.
  */
+/**
+ * List or hide the studio (portfolio_visible, 170). Hidden = off the
+ * directory and its page 404s for everyone but the owner; the work
+ * records, commissions and credits stay exactly as they are.
+ */
+export async function setStudioListed(listed: boolean): Promise<ActionResult> {
+    const { supabase, user } = await requireAuth();
+    const { data, error } = await supabase
+        .from("artist_profiles")
+        .update({ portfolio_visible: listed === true, updated_at: new Date().toISOString() } as never)
+        .eq("user_id", user.id)
+        .select("studio_slug")
+        .maybeSingle();
+    if (error) return { success: false, error: error.message };
+    revalidatePath("/studio");
+    revalidatePath("/studio/dashboard");
+    revalidatePath("/studio/setup");
+    const slug = (data as { studio_slug: string } | null)?.studio_slug;
+    if (slug) revalidatePath(`/studio/${slug}`);
+    return { success: true };
+}
+
 export async function setStudioIntake(input: {
     status: StudioStatus;
     maxSlots: number;

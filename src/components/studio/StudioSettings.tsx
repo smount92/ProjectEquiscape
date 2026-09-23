@@ -26,6 +26,7 @@ import { DEFAULT_TERMS, type StudioTerms } from "@/lib/studio/terms";
 import { LINK_META, type StudioLinks } from "@/lib/studio/links";
 import { slugifyStudio } from "@/lib/studio/slug";
 import { canonicalFacets } from "@/lib/studio/facets";
+import StudioListingToggle from "@/components/studio/StudioListingToggle";
 
 /**
  * Studio settings: identity, rate card, terms.
@@ -330,6 +331,8 @@ function StudioForm({
                     </label>
                 )}
             </div>
+
+            {profile && <StudioListingToggle listed={profile.portfolioVisible} />}
 
             <div className="bg-card border-input rounded-lg border p-6 shadow-md">
                 <h2 className="mb-4 font-serif text-lg font-bold">What you do</h2>
