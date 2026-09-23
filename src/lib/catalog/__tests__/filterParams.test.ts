@@ -9,6 +9,7 @@ import {
     parseCatalogSearchParams,
     removeCatalogFilter,
     CATALOG_SORTS,
+    defaultCatalogSort,
 } from "@/lib/catalog/filterParams";
 
 describe("parseCatalogSearchParams", () => {
@@ -103,7 +104,7 @@ describe("catalogSortToQuery", () => {
         expect(catalogSortToQuery("newest")).toEqual({ sortBy: "created_at", sortDir: "desc" });
     });
     it("only offers honest sorts", () => {
-        expect(CATALOG_SORTS).toEqual(["name-az", "name-za", "maker", "newest"]);
+        expect(CATALOG_SORTS).toEqual(["relevance", "name-az", "name-za", "maker", "newest"]);
     });
 });
 
@@ -236,5 +237,25 @@ describe("advanced (attributes) filters", () => {
         expect(activeCatalogChips({ sort: "name-az", page: 1, yearFrom: 1999 })[0].label).toBe("1999+");
         expect(activeCatalogChips({ sort: "name-az", page: 1, yearTo: 1999 })[0].label).toBe("≤1999");
         expect(activeCatalogChips({ sort: "name-az", page: 1, yearFrom: 2000, yearTo: 2000 })[0].label).toBe("2000");
+    });
+});
+
+describe("best match is the default for a search (223)", () => {
+    it("a typed name starts in relevance order; a bare browse starts A→Z", () => {
+        expect(defaultCatalogSort("smoky")).toBe("relevance");
+        expect(defaultCatalogSort(undefined)).toBe("name-az");
+        expect(parseCatalogSearchParams({ q: "smoky" })).toEqual({ q: "smoky", sort: "relevance", page: 1 });
+        expect(parseCatalogSearchParams({ q: "smoky", sort: "name-az" }).sort).toBe("name-az");
+    });
+
+    it("omits whichever sort is the default for that URL, and keeps an explicit one", () => {
+        expect(buildCatalogSearchParams({ q: "smoky", sort: "relevance", page: 1 }).toString()).toBe("q=smoky");
+        expect(buildCatalogSearchParams({ q: "smoky", sort: "name-az", page: 1 }).toString()).toBe("q=smoky&sort=name-az");
+        expect(buildCatalogSearchParams({ sort: "name-az", page: 1 }).toString()).toBe("");
+    });
+
+    it("relevance sends no sortBy so the search order stands", () => {
+        expect(catalogSortToQuery("relevance").sortBy).toBeUndefined();
+        expect(catalogSortToQuery("name-az")).toEqual({ sortBy: "title", sortDir: "asc" });
     });
 });

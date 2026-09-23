@@ -112,6 +112,9 @@ function mapCatalogRow(row: Record<string, unknown>): CatalogItem {
         maker: row.maker as string,
         scale: row.scale as string | null,
         attributes: (row.attributes as Record<string, unknown>) || {},
+        // The fuzzy RPC (110) joins the parent's title; a release row can
+        // then say which mold it sits on.
+        ...(typeof row.parent_title === "string" ? { parentTitle: row.parent_title } : {}),
     };
 }
 

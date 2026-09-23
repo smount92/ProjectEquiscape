@@ -41,6 +41,7 @@ import {
 import { RUN_TYPES } from "@/lib/catalog/taxonomy";
 
 const SORT_LABELS: Record<CatalogSort, string> = {
+    "relevance": "Best match",
     "name-az": "Name A→Z",
     "name-za": "Name Z→A",
     "maker": "Maker",

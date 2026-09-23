@@ -253,6 +253,12 @@ export async function getCatalogItems(filters: CatalogFilters) {
     // part.
     const CATALOG_BROWSE_COLUMNS =
         "id, item_type, parent_id, title, maker, maker_slug, slug, scale, attributes, created_at";
+    // With a text search and no sort chosen, the order is the search's
+    // relevance (the RPC's candidate order, 223), not the alphabet: the
+    // Registry used to file "Smoky" among "Dun Smokin" and "Smoke 'N
+    // Mirrors" and the name people typed sat mid-page. The candidate set
+    // is capped, so it is fetched whole, ordered here, and paged here.
+    const relevance = !!searchIds && !filters.sortBy;
     const build = (nameSortColumn: string) => {
         // Widened to string on the priced join: the embedded relation is
         // not in the generated types, and every caller casts rows anyway.
@@ -263,8 +269,9 @@ export async function getCatalogItems(filters: CatalogFilters) {
             .from("catalog_items")
             .select(columns, {
                 count: searchIds || pricedJoin ? "exact" : "estimated",
-            })
-            .range(from, from + pageSize - 1);
+            });
+        if (relevance) query = query.limit(FUZZY_CANDIDATE_LIMIT);
+        else query = query.range(from, from + pageSize - 1);
         if (pricedJoin && flaggedIds.length > 0) {
             query = query.not("id", "in", `(${flaggedIds.join(",")})`);
         }
@@ -308,7 +315,9 @@ export async function getCatalogItems(filters: CatalogFilters) {
         // page one and left Éclair sorting after Z. Maker and date sorts
         // are unaffected.
         const sortBy = filters.sortBy === "title" ? nameSortColumn : filters.sortBy;
-        if (sortBy)
+        if (relevance) {
+            // ordered by candidate rank below
+        } else if (sortBy)
             query = query.order(sortBy, {
                 ascending: filters.sortDir === "asc",
             });
@@ -330,6 +339,19 @@ export async function getCatalogItems(filters: CatalogFilters) {
     }
     if (error)
         return { success: false as const, error: error.message };
+    if (relevance && searchIds) {
+        const rank = new Map(searchIds.map((id, i) => [id, i]));
+        const ordered = [...((data ?? []) as unknown as { id: string }[])].sort(
+            (a, b) => (rank.get(a.id) ?? Number.MAX_SAFE_INTEGER) - (rank.get(b.id) ?? Number.MAX_SAFE_INTEGER),
+        );
+        return {
+            success: true as const,
+            items: ordered.slice(from, from + pageSize) as unknown as typeof data,
+            total: ordered.length,
+            page,
+            pageSize,
+        };
+    }
     return {
         success: true as const,
         items: data ?? [],

@@ -12,7 +12,9 @@
  * Tiers, strongest first:
  *   1. exact title match (case-insensitive)
  *   2. title prefix match
- *   3. everything else, in the order the trigram RPC returned
+ *   3. a word in the title starts with the query ("sherm" → Sherman Morgan)
+ *   4. the title contains the query
+ *   5. everything else, in the order the trigram RPC returned
  * Within a tier, entries whose item_type fits the declared finish of
  * the horse being linked float first — an Artist Resin horse probably
  * links a resin; an OF or Custom links a mold or release. It is a
@@ -36,7 +38,20 @@ const FINISH_AFFINITY: Record<string, ReadonlySet<string>> = {
 function tierOf(queryLower: string, titleLower: string): number {
     if (titleLower === queryLower) return 0;
     if (titleLower.startsWith(queryLower)) return 1;
-    return 2;
+    if (titleLower.includes(` ${queryLower}`)) return 2;
+    if (titleLower.includes(queryLower)) return 3;
+    return 4;
+}
+
+/** "2018–", "1977–1990" or "2006" from a release's year attributes; null when undated. */
+export function releaseYears(attributes: Record<string, unknown> | null | undefined): string | null {
+    const year = (v: unknown): number | null =>
+        typeof v === "number" ? v : typeof v === "string" && /^\d{4}$/.test(v) ? Number(v) : null;
+    const a = year(attributes?.release_year_start);
+    const b = year(attributes?.release_year_end);
+    if (a == null && b == null) return null;
+    if (a != null && b != null) return a === b ? String(a) : `${a}–${b}`;
+    return a != null ? `${a}–` : `–${b}`;
 }
 
 export function rankSearchResults<T extends RankableItem>(

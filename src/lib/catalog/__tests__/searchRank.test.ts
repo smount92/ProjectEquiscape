@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyTypeFilter, rankSearchResults } from "@/lib/catalog/searchRank";
+import { applyTypeFilter, rankSearchResults, releaseYears } from "@/lib/catalog/searchRank";
 
 const item = (title: string, itemType: string) => ({ title, itemType });
 
@@ -68,5 +68,29 @@ describe("applyTypeFilter", () => {
     });
     it("'of' keeps plastic and china", () => {
         expect(applyTypeFilter(results, "of").map((r) => r.title)).toEqual(["A", "D"]);
+    });
+});
+
+describe("typing, not typos (223)", () => {
+    it("puts word-prefix and containing titles above lookalikes, which keep the RPC order", () => {
+        const out = rankSearchResults(
+            [
+                { title: "Sheba", itemType: "plastic_release" },
+                { title: "Sherlock", itemType: "artist_resin" },
+                { title: "Justin Sherman", itemType: "plastic_release" },
+                { title: "Sherman Morgan", itemType: "plastic_mold" },
+                { title: "The Shermanator", itemType: "artist_resin" },
+            ],
+            "sherm",
+        );
+        expect(out.map((x) => x.title)).toEqual(["Sherman Morgan", "Justin Sherman", "The Shermanator", "Sheba", "Sherlock"]);
+    });
+
+    it("formats a release's years", () => {
+        expect(releaseYears({ release_year_start: 2018 })).toBe("2018–");
+        expect(releaseYears({ release_year_start: 1977, release_year_end: 1990 })).toBe("1977–1990");
+        expect(releaseYears({ release_year_start: "2006", release_year_end: 2006 })).toBe("2006");
+        expect(releaseYears({})).toBeNull();
+        expect(releaseYears(undefined)).toBeNull();
     });
 });

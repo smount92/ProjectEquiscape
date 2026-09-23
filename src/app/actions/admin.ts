@@ -1381,6 +1381,15 @@ const PENDING_MIGRATIONS: MigrationSpec[] = [
       why: "Replaces an existing function's return shape — a probe can't tell 218 from 222. Verify: a listing by a seller with a non-dollar symbol shows it on its card.",
     },
   },
+  {
+    id: "223",
+    title: "Search ranking",
+    summary: "search_catalog_fuzzy orders exact, prefix, word-prefix and containing titles above trigram similarity.",
+    probe: {
+      kind: "none",
+      why: "Same function, same columns, new ORDER BY — nothing to select. Verify: type sherm in the reference picker; Sherman Morgan should lead.",
+    },
+  },
 ];
 
 export interface MigrationStatusRow {

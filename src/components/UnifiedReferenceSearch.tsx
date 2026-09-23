@@ -6,6 +6,7 @@ import MarketValueBadge from "@/components/MarketValueBadge";
 import {
   applyTypeFilter,
   rankSearchResults,
+  releaseYears,
   SEARCH_TYPE_FILTERS,
   type SearchTypeFilterKey,
 } from "@/lib/catalog/searchRank";
@@ -325,6 +326,8 @@ export default function UnifiedReferenceSearch({
                           </div>
                           <div className="mt-0.5 text-xs text-muted-foreground">
                             {badge.label} {"·"} {item.maker}{item.scale ? ` ${"·"} ${item.scale}` : ""}
+                            {releaseYears(item.attributes) ? ` ${"·"} ${releaseYears(item.attributes)}` : ""}
+                            {item.parentTitle && item.itemType === "plastic_release" ? ` ${"·"} on ${item.parentTitle}` : ""}
                           </div>
                         </div>
                         <span className={

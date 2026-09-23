@@ -232,6 +232,7 @@ See [Adding a Migration](../guides/adding-a-migration.md) for the full guide.
 | 220 | `220_show_records_import_batch.sql` | show_records.import_batch so a spreadsheet import can be undone as one. |
 | 221 | `221_thread_status.sql` | posts.thread_status: In progress / Implemented / Not planned marks on barn threads. |
 | 222 | `222_seller_terms_currency.sql` | get_public_seller_terms gains currency_symbol so listings price in the seller's own currency. |
+| 223 | `223_search_ranking.sql` | search_catalog_fuzzy ranks exact / prefix / word-prefix / containing titles above similarity. |
 
 ---
 

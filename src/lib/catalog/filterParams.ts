@@ -12,8 +12,18 @@
 
 import { CATALOG_CATEGORIES, RUN_TYPES } from "./taxonomy";
 
-export const CATALOG_SORTS = ["name-az", "name-za", "maker", "newest"] as const;
+export const CATALOG_SORTS = ["relevance", "name-az", "name-za", "maker", "newest"] as const;
 export type CatalogSort = (typeof CATALOG_SORTS)[number];
+
+/**
+ * The sort a page starts with: best match when there is a search term,
+ * name order otherwise (223). A typed name used to be filed
+ * alphabetically among its lookalikes, so the row people typed sat
+ * mid-page. The default is omitted from URLs.
+ */
+export function defaultCatalogSort(q: string | undefined): CatalogSort {
+    return q ? "relevance" : "name-az";
+}
 
 /**
  * The Category filter vocabulary — the full item_type list from
@@ -85,9 +95,8 @@ function yearOrUndef(v: string | string[] | undefined): number | undefined {
 export function parseCatalogSearchParams(
     params: Record<string, string | string[] | undefined>,
 ): CatalogFilters {
-    const filters: CatalogFilters = { sort: "name-az", page: 1 };
-
     const q = nonEmpty(params.q, 100);
+    const filters: CatalogFilters = { sort: defaultCatalogSort(q), page: 1 };
     if (q) filters.q = q;
 
     const maker = nonEmpty(params.maker, 80);
@@ -165,17 +174,23 @@ export function buildCatalogSearchParams(filters: Partial<CatalogFilters>): URLS
     if (filters.material) params.set("material", filters.material);
     if (filters.runType) params.set("run", filters.runType);
     if (filters.priced) params.set("priced", "1");
-    if (filters.sort && filters.sort !== "name-az") params.set("sort", filters.sort);
+    if (filters.sort && filters.sort !== defaultCatalogSort(filters.q)) params.set("sort", filters.sort);
     if (filters.page && filters.page > 1) params.set("page", String(filters.page));
     return params;
 }
 
-/** Map a CatalogSort to getCatalogItems' (sortBy, sortDir) shape. */
+/**
+ * Map a CatalogSort to getCatalogItems' (sortBy, sortDir) shape. "relevance"
+ * sends no sortBy: with a search term getCatalogItems then keeps the
+ * search's own order, and without one it falls back to name order.
+ */
 export function catalogSortToQuery(sort: CatalogSort): {
-    sortBy: "title" | "maker" | "created_at";
+    sortBy?: "title" | "maker" | "created_at";
     sortDir: "asc" | "desc";
 } {
     switch (sort) {
+        case "relevance":
+            return { sortDir: "asc" };
         case "name-za":
             return { sortBy: "title", sortDir: "desc" };
         case "maker":
