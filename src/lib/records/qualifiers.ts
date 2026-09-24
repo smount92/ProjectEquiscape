@@ -46,8 +46,8 @@ export const QUALIFIER_PROGRAMS: QualifierProgramInfo[] = [
         liveYears: 3,
         validity: "NAN cards stay live for three years after the year they're earned.",
         cards: [
-            { value: "green", glyph: "🟢", label: "Green · OF halter" },
-            { value: "yellow", glyph: "🟡", label: "Yellow · CM/AR halter" },
+            { value: "green", glyph: "🟢", label: "Green · breed / halter (OF, CM and AR)" },
+            { value: "yellow", glyph: "🟡", label: "Yellow · collectibility / workmanship" },
             { value: "pink", glyph: "🩷", label: "Pink · performance" },
         ],
     },

@@ -39,7 +39,7 @@ export const TEMPLATE_COLUMNS: readonly TemplateColumn[] = [
     { header: "Judge", key: "judgeName", example: "", help: "The judge's name if known." },
     { header: "Location", key: "showLocation", example: "Warsaw, PL", help: "City, venue or online host." },
     { header: "Card program", key: "qualifierProgram", example: "", help: "NAN or OMEQ if the placing earned a qualification card; blank otherwise." },
-    { header: "Card color", key: "qualifierCard", example: "", help: "green / yellow / pink for NAN; blue / red for OMEQ." },
+    { header: "Card color", key: "qualifierCard", example: "", help: "NAN: green (breed / halter), yellow (collectibility / workmanship), pink (performance). OMEQ: blue / orange / purple." },
     { header: "Card year", key: "qualifierYear", example: "", help: "The year on the card. Blank = the show's year." },
     { header: "Card id", key: "qualifierCardId", example: "", help: "The number printed on the card, if any." },
     { header: "Notes", key: "notes", example: "", help: "Anything else worth keeping with the placing." },
