@@ -329,6 +329,11 @@ export default function UnifiedReferenceSearch({
                             {releaseYears(item.attributes) ? ` ${"·"} ${releaseYears(item.attributes)}` : ""}
                             {item.parentTitle && item.itemType === "plastic_release" ? ` ${"·"} on ${item.parentTitle}` : ""}
                           </div>
+                          {!!item.attributes.color_description && (
+                            <div className="mt-0.5 text-xs text-foreground/80">
+                              🎨 {String(item.attributes.color_description)}
+                            </div>
+                          )}
                         </div>
                         <span className={
                           isMold

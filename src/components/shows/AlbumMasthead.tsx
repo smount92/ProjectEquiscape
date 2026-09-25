@@ -98,9 +98,12 @@ function statusDateBit(show: PublicShow): React.ReactNode {
 export default function AlbumMasthead({
     show,
     entryCount,
+    focusChips = [],
 }: {
     show: PublicShow;
     entryCount: number;
+    /** "OF · CM · Halter · Performance", read off the class list. */
+    focusChips?: string[];
 }) {
     const fee = feeText(show.feeInfo);
     const feeInline = fee.length <= FEE_INLINE_MAX ? fee : "fees apply — see details";
@@ -132,6 +135,11 @@ export default function AlbumMasthead({
                     {show.isMhhQualifying &&
                         ` · 🏅 MHH Sanctioned${show.showYear !== null ? ` · ${showYearLabel(show.showYear)} season` : ""}`}
                 </p>
+                {focusChips.length > 0 && (
+                    <p className="mt-1 mb-0 text-xs tracking-wide text-(--leather-text)/80" aria-label="Show focus">
+                        {focusChips.join(" · ")}
+                    </p>
+                )}
             </div>
 
             {/* THE one status line, expandable to the full fact grid. */}

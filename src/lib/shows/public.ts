@@ -11,6 +11,7 @@
  */
 
 import type { EntryStatus, Place, ShowJudging, ShowMode, ShowStatus } from "./types";
+import type { ShowFocus } from "./focus";
 
 /** Statuses the public browse ledger lists. Draft is never public;
  *  archived shows leave the browse page (their results live on the
@@ -31,6 +32,8 @@ export const PUBLIC_BROWSE_STATUSES: ShowStatus[] = [
 
 export interface PublicShowSummary {
     id: string;
+    /** Finishes / axes / scales read off the class list (lib/shows/focus). */
+    focus: ShowFocus;
     title: string;
     mode: ShowMode;
     judging: ShowJudging;

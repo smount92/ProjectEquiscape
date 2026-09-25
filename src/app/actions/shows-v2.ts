@@ -15,6 +15,7 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { deriveShowFocus, type FocusInput } from "@/lib/shows/focus";
 import { revalidatePath, unstable_cache } from "next/cache";
 import { after } from "next/server";
 import { z } from "zod";
@@ -1921,12 +1922,24 @@ async function readPublicShows(
     // Class counts (enterable classes only) via the tree chain.
     const { data: divisionRows, error: dErr } = await supabase
         .from("show_divisions")
-        .select("id, show_id")
+        .select("id, show_id, axis")
         .in("show_id", showIds);
     if (dErr) return { success: false, error: dErr.message };
     const showByDivision = new Map(
         (divisionRows ?? []).map((d: { id: string; show_id: string }) => [d.id, d.show_id]),
     );
+    // The focus chips (OF / CM / Halter / …) are read off the same
+    // rows the class count walks, so the list costs no extra query.
+    const focusByShow = new Map<string, FocusInput[]>();
+    const focusByDivision = new Map<string, FocusInput>();
+    for (const d of (divisionRows ?? []) as { id: string; show_id: string; axis: string | null }[]) {
+        const input: FocusInput = { axis: d.axis ?? "other", classes: [] };
+        focusByDivision.set(d.id, input);
+        const list = focusByShow.get(d.show_id) ?? [];
+        list.push(input);
+        focusByShow.set(d.show_id, list);
+    }
+    const divisionBySection = new Map<string, string>();
 
     const classCounts = new Map<string, number>();
     if (showByDivision.size > 0) {
@@ -1941,14 +1954,25 @@ async function readPublicShows(
                 showByDivision.get(s.division_id) ?? "",
             ]),
         );
+        for (const s of (sectionRows ?? []) as { id: string; division_id: string }[]) {
+            divisionBySection.set(s.id, s.division_id);
+        }
 
         if (showBySection.size > 0) {
             const { data: classRows, error: cErr } = await supabase
                 .from("show_classes")
-                .select("id, section_id, status")
+                .select("id, section_id, status, allowed_finishes, allowed_scales")
                 .in("section_id", [...showBySection.keys()]);
             if (cErr) return { success: false, error: cErr.message };
             for (const c of classRows ?? []) {
+                const division = focusByDivision.get(divisionBySection.get(c.section_id as string) ?? "");
+                if (division) {
+                    division.classes.push({
+                        allowedFinishes: (c as { allowed_finishes?: string[] | null }).allowed_finishes ?? null,
+                        allowedScales: (c as { allowed_scales?: string[] | null }).allowed_scales ?? null,
+                        status: c.status as string,
+                    });
+                }
                 if (c.status === "cancelled" || c.status === "combined") continue;
                 const showId = showBySection.get(c.section_id as string);
                 if (showId) classCounts.set(showId, (classCounts.get(showId) ?? 0) + 1);
@@ -1990,6 +2014,7 @@ async function readPublicShows(
             classCount: classCounts.get(s.id as string) ?? 0,
             entryCount: entryCounts.get(s.id as string) ?? 0,
             createdAt: s.created_at as string,
+            focus: deriveShowFocus(focusByShow.get(s.id as string) ?? []),
         })),
     };
 }

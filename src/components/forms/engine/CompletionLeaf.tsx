@@ -12,8 +12,12 @@
  * `e2e/inventory.spec.ts` waits for to know the save landed.
  */
 
+import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import ShowRecordForm from "@/components/ShowRecordForm";
+import ShowRecordsImport from "@/components/ShowRecordsImport";
+import PedigreeCard from "@/components/PedigreeCard";
 
 export default function CompletionLeaf({
     horseName,
@@ -24,6 +28,8 @@ export default function CompletionLeaf({
     /** Set when the user arrived from a show's "get show-ready" ramp. */
     showReturnTo,
     onAddAnother,
+    onAddAnotherLikeThis,
+    isModel = true,
 }: {
     horseName: string;
     horseId: string | null;
@@ -32,13 +38,24 @@ export default function CompletionLeaf({
     photoWarning: string | null;
     showReturnTo: string | null;
     onAddAnother: () => void;
+    /** Same reference, finish, breed and collections, fresh name and photos. */
+    onAddAnotherLikeThis?: () => void;
+    /** Plate V (records) only makes sense for a model, not tack or a prop. */
+    isModel?: boolean;
 }) {
     const passportHref =
         visibility === "public" ? `/community/${horseId}` : `/stable/${horseId}`;
+    // Plate V — the horse exists now, so its records can be written
+    // here without a trip to the passport and back (a user adding ten
+    // horses in a row asked for exactly this). Each save re-arms a
+    // blank form; the count says what landed.
+    const [recordsSaved, setRecordsSaved] = useState(0);
+    const [recordFormKey, setRecordFormKey] = useState(0);
+    const [recordOpen, setRecordOpen] = useState(false);
 
     return (
         <div className="success-overlay">
-            <div className="animate-fade-in-up max-h-[calc(100dvh-2rem)] w-full max-w-[520px] overflow-y-auto">
+            <div className="animate-fade-in-up max-h-[calc(100dvh-2rem)] w-full max-w-[720px] overflow-y-auto">
                 <div className="fe-leaf text-center">
                     <p className="mb-1 font-serif text-[0.8125rem] tracking-[0.18em] text-muted-foreground uppercase">
                         Entered in the ledger
@@ -104,7 +121,7 @@ export default function CompletionLeaf({
                             </>
                         )}
 
-                        <div className="mt-1 flex gap-3">
+                        <div className="mt-1 flex flex-wrap gap-3">
                             <Button
                                 variant="outline"
                                 className="flex-1"
@@ -112,12 +129,75 @@ export default function CompletionLeaf({
                             >
                                 Add another
                             </Button>
+                            {onAddAnotherLikeThis && (
+                                <Button
+                                    variant="outline"
+                                    className="flex-1"
+                                    onClick={onAddAnotherLikeThis}
+                                    title="Keeps the reference, finish, breed and collections; clears the name and photos"
+                                >
+                                    Add another like this
+                                </Button>
+                            )}
                             <Button asChild variant="outline" className="flex-1">
                                 <Link href="/dashboard">View stable</Link>
                             </Button>
                         </div>
                     </div>
                 </div>
+
+                {horseId && isModel && (
+                    <div className="fe-leaf mt-4 text-left" data-testid="plate-v">
+                        <p className="mb-1 font-serif text-[0.8125rem] tracking-[0.18em] text-muted-foreground uppercase">
+                            Plate V · While it&apos;s fresh
+                        </p>
+                        <p className="mb-4 text-sm text-secondary-foreground">
+                            Show results and lineage can go on the record now. Everything here
+                            is optional and can also be edited from the passport later.
+                        </p>
+
+                        <details className="group mb-3 rounded-md border border-input bg-card/60 p-3" open={recordOpen}
+                            onToggle={(e) => setRecordOpen((e.target as HTMLDetailsElement).open)}>
+                            <summary className="cursor-pointer list-none font-serif text-sm font-bold tracking-wide">
+                                🏆 Show results
+                                {recordsSaved > 0 && (
+                                    <span className="ml-2 rounded-full bg-forest/10 px-2 py-0.5 text-xs font-semibold text-forest">
+                                        {recordsSaved} recorded
+                                    </span>
+                                )}
+                            </summary>
+                            <div className="mt-3">
+                                <ShowRecordForm
+                                    key={recordFormKey}
+                                    horseId={horseId}
+                                    onSave={() => {
+                                        setRecordsSaved((n) => n + 1);
+                                        setRecordFormKey((k) => k + 1);
+                                    }}
+                                    onCancel={() => setRecordOpen(false)}
+                                />
+                                <div className="mt-3 border-t border-dashed border-input pt-3 text-sm text-muted-foreground">
+                                    Lots of placings? Import them from a spreadsheet:{" "}
+                                    <ShowRecordsImport horseId={horseId} horseName={horseName} />
+                                </div>
+                            </div>
+                        </details>
+
+                        <details className="group rounded-md border border-input bg-card/60 p-3">
+                            <summary className="cursor-pointer list-none font-serif text-sm font-bold tracking-wide">
+                                🧬 Sire, dam &amp; lineage
+                            </summary>
+                            <div className="mt-3">
+                                <PedigreeCard horseId={horseId} pedigree={null} isOwner />
+                            </div>
+                        </details>
+
+                        <p className="mt-3 mb-0 text-xs text-muted-foreground">
+                            Papers and documents attach from the passport, where the files can be
+                            filed against a specific placing.
+                        </p>
+                    </div>
+                )}
             </div>
         </div>
     );

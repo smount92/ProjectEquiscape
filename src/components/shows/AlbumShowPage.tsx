@@ -12,11 +12,13 @@
  *      the per-class rooms (EntryRibbon).
  *   4. #entries — My Entries + readiness + the program accordion
  *      under #program (AlbumEntrySection).
- *   5. About + Rules cards, unchanged vocabulary.
+ *   5. About + Rules now sit under the CTA row (folded once the
+ *      viewer has entered); the program closes the page.
  *   On completed shows the champions strip renders ABOVE the ribbon.
  */
 
 import Link from "next/link";
+import { focusChips, focusFromConsole } from "@/lib/shows/focus";
 import HandlerBanner from "@/components/shows/HandlerBanner";
 import { notFound } from "next/navigation";
 
@@ -110,7 +112,11 @@ export default async function AlbumShowPage({ showId }: { showId: string }) {
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(showJsonLd) }}
             />
             <div className="flex flex-col gap-5">
-                <AlbumMasthead show={show} entryCount={entryCount} />
+                <AlbumMasthead
+                    show={show}
+                    entryCount={entryCount}
+                    focusChips={focusChips(focusFromConsole(divisions))}
+                />
 
                 <AlbumCtaRow
                     showId={showId}
@@ -128,6 +134,42 @@ export default async function AlbumShowPage({ showId }: { showId: string }) {
                 />
 
                 {staffRole && <StaffBanner show={show} role={staffRole} />}
+
+                {/* About + Rules sit under the CTA row, not under the
+                    program: a user who enters twenty horses had to scroll
+                    past every entry to find the rules (suggestion box,
+                    2026-09-24). Open until the viewer has entered; folded
+                    after, still one click away and still #about / #rules. */}
+                {(show.aboutMd || show.rulesMd) && (
+                    <div className="grid gap-3 md:grid-cols-2">
+                        {show.aboutMd && (
+                            <details
+                                id="about"
+                                className="ledger-card group scroll-mt-32"
+                                open={liveEntryCount === 0}
+                            >
+                                <summary className="ledger-tab cursor-pointer list-none" id="show-about-heading">
+                                    About this show
+                                    <span className="ml-2 text-xs opacity-70 group-open:hidden">▾</span>
+                                </summary>
+                                <RichText content={show.aboutMd} />
+                            </details>
+                        )}
+                        {show.rulesMd && (
+                            <details
+                                id="rules"
+                                className="ledger-card group scroll-mt-32"
+                                open={liveEntryCount === 0}
+                            >
+                                <summary className="ledger-tab cursor-pointer list-none" id="show-rules-heading">
+                                    Rules
+                                    <span className="ml-2 text-xs opacity-70 group-open:hidden">▾</span>
+                                </summary>
+                                <RichText content={show.rulesMd} />
+                            </details>
+                        )}
+                    </div>
+                )}
 
                 {/* #results — notification deep-links land here; the
                     champions strip sits ABOVE the wall by design. */}
@@ -191,31 +233,6 @@ export default async function AlbumShowPage({ showId }: { showId: string }) {
                     />
                 </div>
 
-                {show.aboutMd && (
-                    <section
-                        id="about"
-                        className="ledger-card scroll-mt-32"
-                        aria-labelledby="show-about-heading"
-                    >
-                        <span className="ledger-tab" id="show-about-heading">
-                            About this show
-                        </span>
-                        <RichText content={show.aboutMd} />
-                    </section>
-                )}
-
-                {show.rulesMd && (
-                    <section
-                        id="rules"
-                        className="ledger-card scroll-mt-32"
-                        aria-labelledby="show-rules-heading"
-                    >
-                        <span className="ledger-tab" id="show-rules-heading">
-                            Rules
-                        </span>
-                        <RichText content={show.rulesMd} />
-                    </section>
-                )}
             </div>
         </ExplorerLayout>
     );

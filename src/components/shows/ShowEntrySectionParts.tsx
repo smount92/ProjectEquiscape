@@ -17,6 +17,7 @@
  * parity is test-asserted against this markup.
  */
 
+import { useState } from "react";
 import Link from "next/link";
 
 import type { ConsoleClass } from "@/lib/shows/console";
@@ -53,6 +54,9 @@ interface MyEntriesCardProps {
     onReenter: (cls: ConsoleClass) => void;
 }
 
+/** Entries shown before the fold. */
+export const MY_ENTRIES_PREVIEW = 6;
+
 export function MyEntriesCard({
     myEntries,
     classById,
@@ -64,10 +68,15 @@ export function MyEntriesCard({
 }: MyEntriesCardProps) {
     // Result stamps arrive with the completed transition (Phase E1).
     const hasResults = myEntries.some((e) => e.place !== null);
+    // Twenty entries pushed the program off the screen; fold past a
+    // handful and let the count say the rest.
+    const [showAll, setShowAll] = useState(false);
+    const folded = !showAll && myEntries.length > MY_ENTRIES_PREVIEW;
+    const visibleEntries = folded ? myEntries.slice(0, MY_ENTRIES_PREVIEW) : myEntries;
     return (
         <section className="ledger-card" aria-labelledby="my-entries-heading">
             <span className="ledger-tab" id="my-entries-heading">
-                My Entries
+                My Entries{myEntries.length > 0 ? ` · ${myEntries.length}` : ""}
             </span>
             <Table>
                 <TableHeader>
@@ -82,7 +91,7 @@ export function MyEntriesCard({
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {myEntries.map((entry) => {
+                    {visibleEntries.map((entry) => {
                         const cls = classById.get(entry.classId);
                         const scratched = entry.status === "scratched";
                         return (
@@ -174,6 +183,13 @@ export function MyEntriesCard({
                     })}
                 </TableBody>
             </Table>
+            {folded && (
+                <div className="mt-3 text-center">
+                    <Button type="button" variant="outline" size="sm" onClick={() => setShowAll(true)}>
+                        Show all {myEntries.length} entries
+                    </Button>
+                </div>
+            )}
             {entriesOpen && (
                 <p className="mt-2 text-xs text-muted-foreground">
                     Scratching keeps the entry on the record; re-entering afterwards

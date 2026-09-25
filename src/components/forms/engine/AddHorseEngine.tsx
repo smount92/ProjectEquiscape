@@ -93,6 +93,22 @@ const NAV_IDS: Record<LeafKey, { back?: string; next?: string }> = {
     vault: { back: "step-4-back" },
 };
 
+/** What "Add another like this" carries into the next horse. */
+const KEEP_LIKE_THIS = [
+    "catalog_id",
+    "finish_type",
+    "assigned_breed",
+    "sculptor",
+    "finishing_artist",
+    "life_stage",
+    "condition_grade",
+    "visibility",
+    "trade_status",
+    "resin_material",
+    "resin_body",
+    "cast_by",
+] as const;
+
 export default function AddHorseEngine() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -332,6 +348,25 @@ export default function AddHorseEngine() {
         window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
+    // "Add another like this": the next horse of a run of ten shares the
+    // reference, finish, breed, collections and visibility; only the
+    // name, photos and particulars start blank.
+    const startAnotherLikeThis = () => {
+        const keep: Record<string, unknown> = {};
+        for (const key of KEEP_LIKE_THIS) {
+            const v = form.values[key];
+            if (v !== undefined && v !== null && v !== "") keep[key] = v;
+        }
+        const keptReference = reference;
+        const keptCollections = collectionIds;
+        startAnother();
+        form.reset({ ...keep } as typeof form.values);
+        setReference(keptReference);
+        setCollectionIds(keptCollections);
+        // Reference and finish are settled; land on the details plate.
+        setStep(Math.max(0, identityIdx));
+    };
+
     if (saved) {
         return (
             <CompletionLeaf
@@ -342,6 +377,8 @@ export default function AddHorseEngine() {
                 photoWarning={photoWarning}
                 showReturnTo={showReturnTo}
                 onAddAnother={startAnother}
+                onAddAnotherLikeThis={startAnotherLikeThis}
+                isModel={category === "model"}
             />
         );
     }
