@@ -18,14 +18,17 @@ export function LedgerLeaf({
     tab,
     children,
     className = "",
+    id,
 }: {
     /** Kraft index tab sitting on the leaf's top edge. */
     tab?: ReactNode;
     children: ReactNode;
     className?: string;
+    /** Anchor target, so a passport nudge can deep-link to one leaf. */
+    id?: string;
 }) {
     return (
-        <div className={className}>
+        <div className={className} id={id}>
             {tab && <span className="ledger-tab">{tab}</span>}
             <div className="fe-leaf">{children}</div>
         </div>

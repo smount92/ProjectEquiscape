@@ -461,7 +461,7 @@ export default function EditHorseEngine() {
 
                 {/* ── Reference ── */}
                 {config.showReferenceStep && (
-                    <LedgerLeaf tab="Reference">
+                    <LedgerLeaf tab="Reference" id="reference">
                         <LeafHeading note="Changing an identity is recorded on this horse's Hoofprint — provenance is not quietly rewritable.">
                             Reference Link
                         </LeafHeading>

@@ -589,10 +589,11 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
                 <span className="text-sm font-medium text-secondary-foreground">
  Reference
  </span>
- <span
- className="max-w-[60%] text-right text-sm font-semibold text-foreground italic opacity-60"
- >
- Not linked to database — Custom Entry
+ <span className="max-w-[60%] text-right text-sm">
+ <span className="block font-semibold text-foreground italic opacity-60">Not in the Registry yet</span>
+ <Link href={`/stable/${horseId}/edit#reference`} className="text-forest text-xs font-semibold hover:underline">
+ Link it to a mold, release or resin {"→"}
+ </Link>
  </span>
  </div>
  )}

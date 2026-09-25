@@ -168,3 +168,12 @@ describe("saved-view param round trip", () => {
         });
     });
 });
+
+describe("not-in-Registry filter", () => {
+    it("parses, serializes and chips unlinked=1", () => {
+        expect(parseStableSearchParams({ unlinked: "1" })).toEqual({ sort: "newest", unlinked: true });
+        expect(parseStableSearchParams({ unlinked: "yes" })).toEqual({ sort: "newest" });
+        expect(buildStableSearchParams({ sort: "newest", unlinked: true }).toString()).toBe("unlinked=1");
+        expect(activeFilterChips({ sort: "newest", unlinked: true }).map((c) => c.key)).toEqual(["unlinked"]);
+    });
+});

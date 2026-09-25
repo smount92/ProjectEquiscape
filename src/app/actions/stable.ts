@@ -144,6 +144,7 @@ async function queryStableHorses(
         .is("deleted_at", null);
 
     if (filters.finish) query = query.eq("finish_type", filters.finish);
+    if (filters.unlinked) query = query.is("catalog_id", null);
     if (filters.category) query = query.eq("asset_category", filters.category);
     if (filters.trade) query = query.eq("trade_status", filters.trade);
     if (filters.maker) query = query.eq("catalog_items.maker", filters.maker);

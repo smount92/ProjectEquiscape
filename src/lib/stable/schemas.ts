@@ -22,6 +22,7 @@ export const stableFiltersSchema = z.object({
     /** A mold's catalog id: every horse on it, whichever release it is linked to. */
     mold: uuidSchema.optional(),
     hasRecords: z.boolean().optional(),
+    unlinked: z.boolean().optional(),
     sort: z.enum(STABLE_SORTS).default("newest"),
 });
 
@@ -56,6 +57,7 @@ export const savedViewParamsSchema = z
         collection: z.string().max(40).optional(),
         mold: z.string().max(40).optional(),
         records: z.string().max(4).optional(),
+        unlinked: z.string().max(4).optional(),
         sort: z.string().max(20).optional(),
     })
     .strict();

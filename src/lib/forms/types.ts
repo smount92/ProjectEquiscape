@@ -111,6 +111,11 @@ export interface FieldSpec {
     /** Help text under the control. */
     help?: string;
     placeholder?: string;
+    /**
+     * Browser suggestions (datalist) for a free-text field: the common
+     * spellings one keystroke away, never a restriction on what is typed.
+     */
+    suggestions?: readonly string[];
     /** Glossary anchor (`/learn/glossary#<id>`). */
     glossaryAnchor?: string;
     /**

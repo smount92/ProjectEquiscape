@@ -253,6 +253,20 @@ export default function StableFilterBar({
                 >
                     🏆 Has show records
                 </button>
+                <button
+                    type="button"
+                    onClick={() => set({ unlinked: filters.unlinked ? undefined : true })}
+                    aria-pressed={Boolean(filters.unlinked)}
+                    className={`cursor-pointer rounded-full border px-3 py-1.5 font-serif text-xs tracking-wide transition-colors ${
+                        filters.unlinked
+                            ? "border-forest bg-forest/15 font-semibold text-forest"
+                            : "border-forest/50 bg-forest/5 text-forest hover:bg-forest/10"
+                    }`}
+                    id="stable-unlinked"
+                    title="Horses not yet linked to a Registry entry"
+                >
+                    📚 Not in Registry
+                </button>
             </div>
 
             {/* Row 2: stamp chips + clear-all + save view + sort + view toggle */}

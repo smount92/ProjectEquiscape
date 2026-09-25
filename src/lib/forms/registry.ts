@@ -38,6 +38,7 @@
 import type { AssetCategory } from "@/lib/types/database";
 import { CONDITION_GRADES, conditionOptionLabel } from "@/lib/conditionGrades";
 import { GENDER_GROUPS } from "@/lib/config/genders";
+import { showbioSuggestions } from "@/lib/showbio/vocab";
 import {
     DISCIPLINES,
     MATERIALS,
@@ -390,6 +391,7 @@ export const HORSE_FIELDS: readonly FieldSpec[] = [
         table: "user_horses",
         inputKey: "color",
         placeholder: "e.g. bay tobiano, dapple grey, sooty palomino",
+        suggestions: showbioSuggestions("color"),
         help: "What the judge reads in a workmanship or color class; on a factory model, the finish it came in.",
         modes: FULL_ONLY,
         domIds: { "create-full": "color", edit: "edit-color" },
@@ -405,6 +407,7 @@ export const HORSE_FIELDS: readonly FieldSpec[] = [
         table: "user_horses",
         inputKey: "assignedBreed",
         placeholder: "e.g. Andalusian, Arabian, Quarter Horse",
+        suggestions: showbioSuggestions("breed"),
         modes: FULL_ONLY,
         domIds: { "create-full": "assigned-breed", edit: "edit-assigned-breed" },
         importAliases: ["breed", "assigned breed"],
@@ -432,6 +435,7 @@ export const HORSE_FIELDS: readonly FieldSpec[] = [
         table: "user_horses",
         inputKey: "assignedAge",
         placeholder: "e.g. Foal, Yearling, Adult, 5 years",
+        suggestions: showbioSuggestions("age"),
         modes: FULL_ONLY,
         domIds: { "create-full": "assigned-age", edit: "edit-assigned-age" },
     },

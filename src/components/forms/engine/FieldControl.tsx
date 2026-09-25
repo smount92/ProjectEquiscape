@@ -206,17 +206,27 @@ export default function FieldControl({
 
         default:
             control = (
-                <Input
-                    id={id}
-                    type="text"
-                    value={(value as string) ?? ""}
-                    onChange={(e) => set(e.target.value)}
-                    placeholder={spec.placeholder}
-                    maxLength={spec.maxLength}
-                    disabled={disabled}
-                    autoFocus={autoFocus}
-                    className={`${tone} ${shakeClass}`}
-                />
+                <>
+                    <Input
+                        id={id}
+                        type="text"
+                        value={(value as string) ?? ""}
+                        onChange={(e) => set(e.target.value)}
+                        placeholder={spec.placeholder}
+                        maxLength={spec.maxLength}
+                        disabled={disabled}
+                        autoFocus={autoFocus}
+                        className={`${tone} ${shakeClass}`}
+                        list={spec.suggestions ? `${id}-suggestions` : undefined}
+                    />
+                    {spec.suggestions && (
+                        <datalist id={`${id}-suggestions`}>
+                            {spec.suggestions.map((v) => (
+                                <option key={v} value={v} />
+                            ))}
+                        </datalist>
+                    )}
+                </>
             );
     }
 

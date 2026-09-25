@@ -9,7 +9,7 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { Suspense } from "react";
-import { BarChart3, DollarSign, FolderOpen, Mail, Plus, Award, Trash2 } from "lucide-react";
+import { BarChart3, BookOpen, DollarSign, FolderOpen, Mail, Plus, Award, Trash2 } from "lucide-react";
 
 import StableMasthead from "@/components/stable/StableMasthead";
 import StableBrowser from "@/components/stable/StableBrowser";
@@ -67,13 +67,23 @@ export default async function DashboardV2({
     // The unread badge used to be an unbounded "all my conversation ids,
     // then .in(...)" pair that had to await AFTER this wave; one embedded
     // count folds it in and removes the only dependent hop.
-    const [pageResult, summaryResult, viewsResult, showRecordsResult, unreadMsgCount] =
+    const [pageResult, summaryResult, viewsResult, showRecordsResult, unreadMsgCount, unlinkedResult] =
         await Promise.all([
             getStablePage(filters),
             getStableSummary(),
             listStableViews(),
             supabase.from("show_records").select("id", { count: "exact", head: true }).eq("user_id", userId),
             countUnreadMessages(supabase, userId),
+            // Models with no Registry link: the Blue Book, show tags and
+            // mold browsing all key off catalog_id, so this is the one
+            // number worth nudging on.
+            supabase
+                .from("user_horses")
+                .select("id", { count: "exact", head: true })
+                .eq("owner_id", userId)
+                .eq("asset_category", "model")
+                .is("catalog_id", null)
+                .is("deleted_at", null),
         ]);
 
     const summary: StableSummary = summaryResult.success
@@ -87,6 +97,7 @@ export default async function DashboardV2({
         ? pageResult.facetOptions
         : { makers: [], scales: [], finishes: [], categories: [], molds: [] };
     const totalShowRecords = showRecordsResult.count ?? 0;
+    const unlinkedCount = unlinkedResult.count ?? 0;
 
     return (
         <>
@@ -145,6 +156,19 @@ export default async function DashboardV2({
                                     label="Show Placings"
                                     value={totalShowRecords}
                                 />
+                                {unlinkedCount > 0 && (
+                                    <Link
+                                        href="/dashboard?unlinked=1"
+                                        className="flex items-center justify-between rounded-sm px-1 py-2 no-underline transition-colors hover:bg-black/[0.03]"
+                                        style={{ textDecoration: "none" }}
+                                        title="Models not yet linked to a Registry entry"
+                                    >
+                                        <span className="flex items-center gap-1.5 text-sm text-secondary-foreground">
+                                            <BookOpen size={14} strokeWidth={1.5} /> Not in Registry
+                                        </span>
+                                        <span className="text-forest text-sm font-bold">{unlinkedCount}</span>
+                                    </Link>
+                                )}
                                 {(unreadMsgCount ?? 0) > 0 && (
                                     <Link
                                         href="/inbox"

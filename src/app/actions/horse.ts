@@ -30,6 +30,7 @@ import {
 import type { FieldProblem } from "@/lib/forms/types";
 import type { AssetCategory } from "@/lib/types/database";
 import { colorText, isMissingPendingColumn, withoutPendingColumns } from "@/lib/passport/pendingColumns";
+import { canonicalShowbio } from "@/lib/showbio/vocab";
 
 /**
  * The server-side half of the form engine.
@@ -471,6 +472,14 @@ export async function updateHorseAction(horseId: string, data: {
             if (typeof horseUpdate.public_notes === "string") {
                 horseUpdate.public_notes = decodeHtmlEntities(horseUpdate.public_notes);
             }
+            // Show bio in the list spelling ("paint" → "Paint Horse",
+            // "Bay Tobiano" → "Bay tobiano"); unknown values stay as typed.
+            if (typeof horseUpdate.assigned_breed === "string")
+                horseUpdate.assigned_breed = canonicalShowbio("breed", horseUpdate.assigned_breed);
+            if (typeof horseUpdate.assigned_age === "string")
+                horseUpdate.assigned_age = canonicalShowbio("age", horseUpdate.assigned_age);
+            if (typeof horseUpdate.color === "string")
+                horseUpdate.color = canonicalShowbio("color", horseUpdate.color);
         }
 
         const vaultData = data.vaultData
@@ -744,11 +753,11 @@ export async function createHorseRecord(data: {
     if (data.resinBody) resinInsert.resin_body = data.resinBody;
     if (data.castBy) resinInsert.cast_by = data.castBy.trim();
     if (data.prepArtist) resinInsert.prep_artist = data.prepArtist.trim();
-    if (colorText(data.color)) resinInsert.color = colorText(data.color);
+    if (colorText(data.color)) resinInsert.color = canonicalShowbio("color", colorText(data.color));
     if (data.publicNotes) horseInsert.public_notes = decodeHtmlEntities(data.publicNotes.trim());
-    if (data.assignedBreed) horseInsert.assigned_breed = data.assignedBreed.trim();
+    if (data.assignedBreed) horseInsert.assigned_breed = canonicalShowbio("breed", data.assignedBreed);
     if (data.assignedGender) horseInsert.assigned_gender = data.assignedGender.trim();
-    if (data.assignedAge) horseInsert.assigned_age = data.assignedAge.trim();
+    if (data.assignedAge) horseInsert.assigned_age = canonicalShowbio("age", data.assignedAge);
     if (data.regionalId) horseInsert.regional_id = data.regionalId.trim();
     // The attributes bag is on the column allow-list, so an unfiltered call
     // could write arbitrary JSONB. Clean it against the category's own key

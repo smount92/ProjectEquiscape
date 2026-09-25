@@ -47,6 +47,8 @@ export interface StableFilters {
     /** Catalog id of a mold; matches horses on the mold and on any of its releases. */
     mold?: string;
     hasRecords?: boolean;
+    /** Only horses with no Registry link (catalog_id null). */
+    unlinked?: boolean;
     sort: StableSort;
 }
 
@@ -104,6 +106,7 @@ export function parseStableSearchParams(
     if (collection && UUID_RE.test(collection)) filters.collection = collection;
 
     if (first(params.records) === "1") filters.hasRecords = true;
+    if (first(params.unlinked) === "1") filters.unlinked = true;
 
     const sort = nonEmpty(params.sort, 20);
     if (sort && (STABLE_SORTS as readonly string[]).includes(sort)) {
@@ -128,6 +131,7 @@ export function buildStableSearchParams(filters: Partial<StableFilters>): URLSea
     if (filters.trade) params.set("trade", filters.trade);
     if (filters.collection) params.set("collection", filters.collection);
     if (filters.hasRecords) params.set("records", "1");
+    if (filters.unlinked) params.set("unlinked", "1");
     if (filters.sort && filters.sort !== "newest") params.set("sort", filters.sort);
     return params;
 }
@@ -135,7 +139,7 @@ export function buildStableSearchParams(filters: Partial<StableFilters>): URLSea
 /** A rubber-stamp chip describing one active filter. */
 export interface FilterChip {
     /** Which StableFilters key removing this chip clears. */
-    key: "q" | "finish" | "maker" | "scale" | "mold" | "category" | "trade" | "collection" | "hasRecords";
+    key: "q" | "finish" | "maker" | "scale" | "mold" | "category" | "trade" | "collection" | "hasRecords" | "unlinked";
     label: string;
 }
 
@@ -165,6 +169,7 @@ export function activeFilterChips(
         chips.push({ key: "collection", label: name ?? "Collection" });
     }
     if (filters.hasRecords) chips.push({ key: "hasRecords", label: "Has show records" });
+    if (filters.unlinked) chips.push({ key: "unlinked", label: "Not in Registry" });
     return chips;
 }
 

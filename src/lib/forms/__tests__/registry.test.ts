@@ -280,3 +280,14 @@ describe("attribute fields per category", () => {
         }
     });
 });
+
+describe("show-bio suggestions", () => {
+    it("offers suggestions on breed, colour and age, and only on free-text fields", () => {
+        const withLists = HORSE_FIELDS.filter((f) => f.suggestions);
+        expect(withLists.map((f) => f.name).sort()).toEqual(["assigned_age", "assigned_breed", "color"]);
+        for (const f of withLists) {
+            expect(f.type).toBe("text");
+            expect(f.suggestions!.length).toBeGreaterThan(0);
+        }
+    });
+});
