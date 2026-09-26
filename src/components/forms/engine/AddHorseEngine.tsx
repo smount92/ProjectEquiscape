@@ -121,10 +121,12 @@ export default function AddHorseEngine() {
     const config = getAssetConfig(category);
     const gallerySlots = getGallerySlots(category);
 
+    const [currencySymbol, setCurrencySymbol] = useState("$");
     const form = useHorseForm({
         mode: "create-full",
         category,
         initialValues: { visibility: "public", trade_status: "Not for Sale", life_stage: "completed" },
+        currencySymbol,
     });
 
     const [photos, setPhotos] = useState<PhotoStudioValue>(EMPTY_STUDIO);
@@ -170,6 +172,7 @@ export default function AddHorseEngine() {
         getProfile()
             .then((profile) => {
                 if (profile) {
+                    setCurrencySymbol(profile.currencySymbol || "$");
                     setWatermark({
                         enabled: profile.watermarkPhotos,
                         alias: profile.aliasName,

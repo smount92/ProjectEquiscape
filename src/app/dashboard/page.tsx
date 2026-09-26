@@ -65,7 +65,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
  const params = await searchParams;
 
  // Fast query for profile name (needed for the masthead)
- const { data: profile } = await supabase.from("users").select("alias_name").eq("id", user.id).single<{ alias_name: string }>();
+ const { data: profile } = await supabase.from("users").select("alias_name, currency_symbol").eq("id", user.id).single<{ alias_name: string; currency_symbol: string | null }>();
 
  return (
  <div className="mx-auto w-full max-w-[1920px] px-4 py-8 sm:px-6 md:py-12 lg:px-8">
@@ -73,7 +73,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
   <DashboardToast />
   </Suspense>
   <Suspense fallback={<DashboardSkeleton />}>
-  <DashboardV2 userId={user.id} aliasName={profile?.alias_name ?? null} searchParams={params} />
+  <DashboardV2 userId={user.id} aliasName={profile?.alias_name ?? null} currencySymbol={profile?.currency_symbol || "$"} searchParams={params} />
   </Suspense>
  </div>
  );

@@ -30,7 +30,7 @@ export async function GET() {
         // them with the service-role client, scoped to this user's own id.
         const { data: profile } = await getAdminClient()
             .from("users")
-            .select("alias_name, full_name, email")
+            .select("alias_name, full_name, email, currency_symbol")
             .eq("id", user.id)
             .single();
 
@@ -81,6 +81,7 @@ export async function GET() {
                 generatedAt: new Date().toISOString(),
                 tier,
                 marketValueMap,
+                currencySymbol: (profile as { currency_symbol?: string | null } | null)?.currency_symbol || "$",
             })
         );
 

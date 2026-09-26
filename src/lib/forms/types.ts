@@ -61,6 +61,8 @@ export interface FieldContext {
     category: AssetCategory;
     mode: FormMode;
     values: FormValues;
+    /** The member's currency symbol, for money-field labels ("Purchase Price (€)"). */
+    currencySymbol?: string;
 }
 
 export interface FieldOption {

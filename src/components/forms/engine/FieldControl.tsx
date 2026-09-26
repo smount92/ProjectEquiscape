@@ -13,6 +13,7 @@
  */
 
 import { Input } from "@/components/ui/input";
+import { moneyLabel } from "@/lib/money/format";
 import { Textarea } from "@/components/ui/textarea";
 import GlossaryLink from "@/components/GlossaryLink";
 import { conditionToneVar, getConditionGrade } from "@/lib/conditionGrades";
@@ -45,7 +46,8 @@ export default function FieldControl({
     shake = false,
     autoFocus = false,
 }: FieldControlProps) {
-    const label = resolveLabel(spec, context.category);
+    const baseLabel = resolveLabel(spec, context.category);
+    const label = spec.type === "money" ? moneyLabel(baseLabel, context.currencySymbol) : baseLabel;
     const required = isFieldRequired(spec, context);
     const disabled = isFieldDisabled(spec, context);
     const id = getDomId(spec, context.mode) ?? `fe-${spec.name.replace(/_/g, "-")}`;

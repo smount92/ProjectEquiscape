@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { formatMoney } from "@/lib/money/format";
 import { escapeCSV } from "@/lib/utils/csv";
 import { NextResponse } from "next/server";
 
@@ -13,6 +14,10 @@ export async function GET() {
     if (!user) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    // Money columns carry the member's own symbol (Settings → currency).
+    const { data: me } = await supabase.from("users").select("currency_symbol").eq("id", user.id).maybeSingle();
+    const currencySymbol = ((me as { currency_symbol?: string | null } | null)?.currency_symbol || "$").trim() || "$";
 
     // Fetch all horses with joined reference data, collection, and financial vault
     const { data: rawHorses, error } = await supabase
@@ -113,10 +118,10 @@ export async function GET() {
             escapeCSV(horse.sculptor),
             escapeCSV(horse.user_collections?.name),
             escapeCSV(horse.trade_status || "Not for Sale"),
-            horse.listing_price ? `$${horse.listing_price}` : "",
-            vault?.purchase_price ? `$${vault.purchase_price}` : "",
+            horse.listing_price ? formatMoney(Number(horse.listing_price), currencySymbol, { decimals: 2 }) : "",
+            vault?.purchase_price ? formatMoney(Number(vault.purchase_price), currencySymbol, { decimals: 2 }) : "",
             vault?.estimated_current_value
-                ? `$${vault.estimated_current_value}`
+                ? formatMoney(Number(vault.estimated_current_value), currencySymbol, { decimals: 2 })
                 : "",
             escapeCSV(vault?.insurance_notes),
             new Date(horse.created_at).toLocaleDateString("en-US"),

@@ -68,10 +68,12 @@ export default function QuickAddEngine() {
     const router = useRouter();
     const supabase = useMemo(() => createClient(), []);
 
+    const [currencySymbol, setCurrencySymbol] = useState("$");
     const form = useHorseForm({
         mode: "create-quick",
         category: "model",
         initialValues: { ...DEFAULTS },
+        currencySymbol,
     });
 
     const [reference, setReference] = useState<CatalogItem | null>(null);
@@ -93,6 +95,7 @@ export default function QuickAddEngine() {
         getProfile()
             .then((profile) => {
                 if (profile) {
+                    setCurrencySymbol(profile.currencySymbol || "$");
                     setWatermark({
                         enabled: profile.watermarkPhotos,
                         alias: profile.aliasName,

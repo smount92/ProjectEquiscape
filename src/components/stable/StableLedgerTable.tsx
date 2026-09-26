@@ -8,6 +8,7 @@
  */
 
 import { useMemo, useState } from "react";
+import { formatMoney } from "@/lib/money/format";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -52,11 +53,13 @@ export default function StableLedgerTable({
     selectMode = false,
     selectedIds = new Set(),
     onToggleSelect,
+    currencySymbol = "$",
 }: {
     horses: StableCard[];
     selectMode?: boolean;
     selectedIds?: Set<string>;
     onToggleSelect?: (id: string) => void;
+    currencySymbol?: string;
 }) {
     const [sortKey, setSortKey] = useState<SortKey | null>(null);
     const [sortDir, setSortDir] = useState<SortDir>("asc");
@@ -215,7 +218,7 @@ export default function StableLedgerTable({
                                         )}
                                     </TableCell>
                                     <TableCell className="text-secondary-foreground max-md:hidden">
-                                        {horse.vaultValue ? `$${horse.vaultValue.toLocaleString()}` : "—"}
+                                        {horse.vaultValue ? formatMoney(horse.vaultValue, currencySymbol) : "—"}
                                     </TableCell>
                                     <TableCell className="text-xs text-muted-foreground">
                                         {formatRelDate(horse.createdAt)}

@@ -80,6 +80,7 @@ export default function DealThread({
     const [pendingFiles, setPendingFiles] = useState<File[]>([]);
     const [uploadProgress, setUploadProgress] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const streamRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const router = useRouter();
@@ -124,8 +125,15 @@ export default function DealThread({
         }
     };
 
+    // Scroll the STREAM to its newest message, never the page. The old
+    // scrollIntoView on the end marker also scrolled the window until the
+    // marker sat at the top of the screen, so after a send on an ended
+    // deal the messages vanished above and only the "deal ended" notice
+    // and footer were left in view (owner, 2026-09-26).
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        const stream = streamRef.current;
+        if (!stream) return;
+        stream.scrollTo({ top: stream.scrollHeight, behavior: "smooth" });
     }, [messages]);
 
     useEffect(() => {
@@ -310,7 +318,10 @@ export default function DealThread({
                 open when they land — Vercel measured it as a 0.42 layout
                 shift on mobile (this exact selector). The floor holds the
                 thread's space through the load. */}
-            <div className="bg-card border-input mb-4 flex min-h-[50dvh] flex-1 flex-col gap-2 overflow-y-auto rounded-lg border p-4">
+            <div
+                ref={streamRef}
+                className="bg-card border-input mb-4 flex min-h-[50dvh] flex-1 flex-col gap-2 overflow-y-auto rounded-lg border p-4"
+            >
                 {messages.length === 0 ? (
                     <div className="text-muted-foreground flex flex-1 flex-col items-center justify-center gap-2 py-12 text-center">
                         <div className="text-5xl opacity-50">💬</div>

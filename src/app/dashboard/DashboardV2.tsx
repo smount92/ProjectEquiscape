@@ -7,6 +7,7 @@
  */
 
 import { createClient } from "@/lib/supabase/server";
+import { formatMoney } from "@/lib/money/format";
 import Link from "next/link";
 import { Suspense } from "react";
 import { BarChart3, BookOpen, DollarSign, FolderOpen, Mail, Plus, Award, Trash2 } from "lucide-react";
@@ -53,10 +54,13 @@ function StatRow({ icon, label, value }: { icon: React.ReactNode; label: string;
 export default async function DashboardV2({
     userId,
     aliasName,
+    currencySymbol = "$",
     searchParams,
 }: {
     userId: string;
     aliasName: string | null;
+    /** The member's preferred symbol (Settings → currency); vault figures are labelled, never converted. */
+    currencySymbol?: string;
     searchParams: Record<string, string | string[] | undefined>;
 }) {
     const supabase = await createClient();
@@ -121,6 +125,7 @@ export default async function DashboardV2({
                         collections={summary.collections.map((c) => ({ id: c.id, name: c.name }))}
                         savedViews={savedViews}
                         filters={filters}
+                        currencySymbol={currencySymbol}
                     />
                 </main>
 
@@ -147,7 +152,7 @@ export default async function DashboardV2({
                                     label="Vault Value"
                                     value={
                                         summary.vaultTotal > 0
-                                            ? `$${summary.vaultTotal.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
+                                            ? formatMoney(summary.vaultTotal, currencySymbol)
                                             : "—"
                                     }
                                 />
@@ -217,11 +222,7 @@ export default async function DashboardV2({
                                             {col.value > 0 && (
                                                 <>
                                                     {" "}
-                                                    · $
-                                                    {col.value.toLocaleString("en-US", {
-                                                        minimumFractionDigits: 0,
-                                                        maximumFractionDigits: 0,
-                                                    })}
+                                                    · {formatMoney(col.value, currencySymbol)}
                                                 </>
                                             )}
                                         </span>

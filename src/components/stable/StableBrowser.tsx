@@ -53,6 +53,7 @@ export default function StableBrowser({
     collections,
     savedViews,
     filters,
+    currencySymbol = "$",
 }: {
     initialCards: StableCard[];
     /** Horses matching the current filters (whole collection, not page). */
@@ -64,6 +65,8 @@ export default function StableBrowser({
     collections: { id: string; name: string }[];
     savedViews: SavedView[];
     filters: StableFilters;
+    /** Vault column symbol (Settings → currency). */
+    currencySymbol?: string;
 }) {
     const router = useRouter();
     const [cards, setCards] = useState<StableCard[]>(initialCards);
@@ -277,6 +280,7 @@ export default function StableBrowser({
                     selectMode={selectMode}
                     selectedIds={selectedIds}
                     onToggleSelect={toggleSelect}
+                    currencySymbol={currencySymbol}
                 />
             )}
 

@@ -106,7 +106,8 @@ export default function EditHorseEngine() {
     const [loadError, setLoadError] = useState<string | null>(null);
 
     const [initial, setInitial] = useState<FormValues>({});
-    const form = useHorseForm({ mode: "edit", category, initialValues: initial });
+    const [currencySymbol, setCurrencySymbol] = useState("$");
+    const form = useHorseForm({ mode: "edit", category, initialValues: initial, currencySymbol });
 
     const [reference, setReference] = useState<CatalogItem | null>(null);
     const [collectionIds, setCollectionIds] = useState<string[]>([]);
@@ -243,6 +244,7 @@ export default function EditHorseEngine() {
         getProfile()
             .then((profile) => {
                 if (profile) {
+                    setCurrencySymbol(profile.currencySymbol || "$");
                     setWatermark({
                         enabled: profile.watermarkPhotos,
                         alias: profile.aliasName,

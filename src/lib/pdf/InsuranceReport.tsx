@@ -1,4 +1,5 @@
 import React from"react";
+import { formatMoney } from "@/lib/money/format";
 import { Document, Page, View, Text, Image, StyleSheet } from"@react-pdf/renderer";
 
 /* ═══════════════════════════════════════════════════════════════
@@ -32,6 +33,8 @@ export interface InsuranceReportProps {
  generatedAt: string;
  tier?: "free" | "pro" | "studio";
  marketValueMap?: Map<string, number>;
+ /** The owner's preferred currency symbol (Settings → currency). */
+ currencySymbol?: string;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -266,9 +269,10 @@ const s = StyleSheet.create({
 /* ═══════════════════════════════════════════════════════════════
  Helpers
  ═══════════════════════════════════════════════════════════════ */
-function fmt$(amount: number | null | undefined): string {
+/** Vault money in the owner's symbol; the Blue Book replacement value is always USD. */
+function fmt$(amount: number | null | undefined, symbol = "$"): string {
  if (!amount) return"—";
- return `$${amount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+ return formatMoney(amount, symbol, { decimals: 2 });
 }
 
 function fmtDate(iso: string | null | undefined): string {
@@ -300,11 +304,13 @@ function CoverPage({
  totalModels,
  totalValue,
  generatedAt,
+ currencySymbol,
 }: {
  owner: InsuranceReportProps["owner"];
  totalModels: number;
  totalValue: number;
  generatedAt: string;
+ currencySymbol: string;
 }) {
  return (
  <Page size="LETTER" style={s.page}>
@@ -323,7 +329,7 @@ function CoverPage({
  </View>
  <View style={s.coverStatItem}>
  <Text style={s.coverStatLabel}>Estimated Value</Text>
- <Text style={s.coverStatValue}>{fmt$(totalValue)}</Text>
+ <Text style={s.coverStatValue}>{fmt$(totalValue, currencySymbol)}</Text>
  </View>
  </View>
  </View>
@@ -335,7 +341,7 @@ function CoverPage({
 /* ═══════════════════════════════════════════════════════════════
  Summary Table Page
  ═══════════════════════════════════════════════════════════════ */
-function SummaryPage({ horses, generatedAt }: { horses: InsuranceHorse[]; generatedAt: string }) {
+function SummaryPage({ horses, generatedAt, currencySymbol }: { horses: InsuranceHorse[]; generatedAt: string; currencySymbol: string }) {
  const totalPurchase = horses.reduce((sum, h) => sum + (h.financial_vault?.purchase_price || 0), 0);
  const totalValue = horses.reduce((sum, h) => sum + (h.financial_vault?.estimated_current_value || 0), 0);
 
@@ -360,8 +366,8 @@ function SummaryPage({ horses, generatedAt }: { horses: InsuranceHorse[]; genera
  <Text style={[s.tableCell, { width:"30%" }]}>{horse.custom_name}</Text>
  <Text style={[s.tableCell, { width:"22%" }]}>{horse.catalog_items?.title ||"—"}</Text>
  <Text style={[s.tableCell, { width:"14%" }]}>{horse.condition_grade ||"—"}</Text>
- <Text style={[s.tableCellMoney, { width:"17%" }]}>{fmt$(vault?.purchase_price)}</Text>
- <Text style={[s.tableCellMoney, { width:"17%" }]}>{fmt$(vault?.estimated_current_value)}</Text>
+ <Text style={[s.tableCellMoney, { width:"17%" }]}>{fmt$(vault?.purchase_price, currencySymbol)}</Text>
+ <Text style={[s.tableCellMoney, { width:"17%" }]}>{fmt$(vault?.estimated_current_value, currencySymbol)}</Text>
  </View>
  );
  })}
@@ -369,8 +375,8 @@ function SummaryPage({ horses, generatedAt }: { horses: InsuranceHorse[]; genera
  {/* Totals */}
  <View style={s.totalRow}>
  <Text style={[s.totalText, { width:"66%" }]}>TOTAL ({horses.length} models)</Text>
- <Text style={[s.totalText, { width:"17%", textAlign:"right" }]}>{fmt$(totalPurchase)}</Text>
- <Text style={[s.totalText, { width:"17%", textAlign:"right" }]}>{fmt$(totalValue)}</Text>
+ <Text style={[s.totalText, { width:"17%", textAlign:"right" }]}>{fmt$(totalPurchase, currencySymbol)}</Text>
+ <Text style={[s.totalText, { width:"17%", textAlign:"right" }]}>{fmt$(totalValue, currencySymbol)}</Text>
  </View>
 
  <PageFooter generatedAt={generatedAt} />
@@ -386,11 +392,13 @@ function DetailPage({
  thumbnailUrl,
  generatedAt,
  marketValue,
+ currencySymbol,
 }: {
  horse: InsuranceHorse;
  thumbnailUrl?: string;
  generatedAt: string;
  marketValue?: number;
+ currencySymbol: string;
 }) {
  const vault = horse.financial_vault;
  const ref = horse.catalog_items;
@@ -429,7 +437,7 @@ function DetailPage({
  </View>
  <View style={s.detailField}>
  <Text style={s.detailFieldLabel}>Purchase Price</Text>
- <Text style={s.detailFieldValue}>{fmt$(vault?.purchase_price)}</Text>
+ <Text style={s.detailFieldValue}>{fmt$(vault?.purchase_price, currencySymbol)}</Text>
  </View>
  <View style={s.detailField}>
  <Text style={s.detailFieldLabel}>Purchase Date</Text>
@@ -438,7 +446,7 @@ function DetailPage({
  <View style={s.detailField}>
  <Text style={s.detailFieldLabel}>Estimated Value</Text>
  <Text style={[s.detailFieldValue, { color: colors.success }]}>
- {fmt$(vault?.estimated_current_value)}
+ {fmt$(vault?.estimated_current_value, currencySymbol)}
  </Text>
  </View>
  <View style={s.detailField}>
@@ -449,7 +457,7 @@ function DetailPage({
  <View style={[s.detailField, { borderColor: '#2563eb', borderWidth: 1 }]}>
  <Text style={[s.detailFieldLabel, { color: '#2563eb' }]}>Market Replacement Value (PRO)</Text>
  <Text style={[s.detailFieldValue, { color: '#2563eb', fontFamily: 'Helvetica-Bold' }]}>
- {fmt$(marketValue)}
+ {fmt$(marketValue, "$")}
  </Text>
  </View>
  )}
@@ -472,6 +480,7 @@ function DetailPage({
  ═══════════════════════════════════════════════════════════════ */
 export function InsuranceReportDocument(props: InsuranceReportProps) {
  const { owner, horses, thumbnailMap, generatedAt, tier, marketValueMap } = props;
+ const currencySymbol = (props.currencySymbol ?? "").trim() || "$";
  const totalValue = horses.reduce((sum, h) => sum + (h.financial_vault?.estimated_current_value || 0), 0);
 
  return (
@@ -481,8 +490,8 @@ export function InsuranceReportDocument(props: InsuranceReportProps) {
  subject="Model Horse Collection Insurance Documentation"
  creator="Model Horse Hub"
  >
- <CoverPage owner={owner} totalModels={horses.length} totalValue={totalValue} generatedAt={generatedAt} />
- <SummaryPage horses={horses} generatedAt={generatedAt} />
+ <CoverPage owner={owner} totalModels={horses.length} totalValue={totalValue} generatedAt={generatedAt} currencySymbol={currencySymbol} />
+ <SummaryPage horses={horses} generatedAt={generatedAt} currencySymbol={currencySymbol} />
  {horses.map((horse) => (
  <DetailPage
  key={horse.id}
@@ -490,6 +499,7 @@ export function InsuranceReportDocument(props: InsuranceReportProps) {
  thumbnailUrl={thumbnailMap.get(horse.id)}
  generatedAt={generatedAt}
  marketValue={tier === 'pro' && horse.catalog_id ? marketValueMap?.get(horse.catalog_id) : undefined}
+ currencySymbol={currencySymbol}
  />
  ))}
  </Document>

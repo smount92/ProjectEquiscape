@@ -20,17 +20,19 @@ export interface UseHorseFormOptions {
     mode: FormMode;
     category: AssetCategory;
     initialValues?: FormValues;
+    /** Settings → currency; labels money fields, never converts. */
+    currencySymbol?: string;
 }
 
-export function useHorseForm({ mode, category, initialValues }: UseHorseFormOptions) {
+export function useHorseForm({ mode, category, initialValues, currencySymbol }: UseHorseFormOptions) {
     const [values, setValues] = useState<FormValues>(() => ({ ...initialValues }));
     /** Fields the user has been TOLD are missing — drives the error tone. */
     const [flagged, setFlagged] = useState<string[]>([]);
     const [shake, setShake] = useState(false);
 
     const context: FieldContext = useMemo(
-        () => ({ category, mode, values }),
-        [category, mode, values],
+        () => ({ category, mode, values, currencySymbol }),
+        [category, mode, values, currencySymbol],
     );
 
     const setValue = useCallback((name: string, value: unknown) => {
