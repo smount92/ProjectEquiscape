@@ -21,10 +21,12 @@
  * BOOST, never a filter: a custom on an OF body legitimately links to
  * plastic, so nothing is ever hidden by context.
  */
+import { makerMatches } from "./queryParse";
 
 export interface RankableItem {
     title: string;
     itemType: string;
+    maker?: string | null;
 }
 
 /** Item types that fit each declared finish. Missing finish = no boost. */
@@ -58,6 +60,8 @@ export function rankSearchResults<T extends RankableItem>(
     results: readonly T[],
     query: string,
     finishType?: string | null,
+    /** The maker the query named ("Peter Stone ISH"); its rows float first, nothing is hidden. */
+    makerHint?: string | null,
 ): T[] {
     const q = query.trim().toLowerCase();
     const affinity = finishType ? FINISH_AFFINITY[finishType] : undefined;
@@ -66,11 +70,12 @@ export function rankSearchResults<T extends RankableItem>(
     return results
         .map((item, i) => ({
             item,
+            maker: makerHint && makerMatches(item.maker, makerHint) ? 0 : 1,
             tier: tierOf(q, item.title.trim().toLowerCase()),
             fits: affinity?.has(item.itemType) ? 0 : 1,
             i,
         }))
-        .sort((a, b) => a.tier - b.tier || a.fits - b.fits || a.i - b.i)
+        .sort((a, b) => a.maker - b.maker || a.tier - b.tier || a.fits - b.fits || a.i - b.i)
         .map((d) => d.item);
 }
 

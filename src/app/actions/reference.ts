@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { parseCatalogQuery, makerMatches } from "@/lib/catalog/queryParse";
 
 // ============================================================
 // UNIVERSAL CATALOG — Server Actions
@@ -36,17 +37,20 @@ export async function searchCatalogAction(query: string): Promise<CatalogItem[]>
     const q = sanitizeSearchQuery(query);
     if (!q || q.length < 2) return [];
 
+    // "Peter stone Ideal sto": the maker comes off the front and the
+    // initials are spelled out before the title search runs.
+    const parsed = parseCatalogQuery(q);
+    const term = parsed.term.length >= 2 ? parsed.term : q;
+
     // Use pg_trgm trigram search — leverages GIN index from Migration 100
     const { data, error } = await supabase.rpc("search_catalog_fuzzy", {
-        search_term: q,
+        search_term: term,
         max_results: 50,
     });
 
     if (error || !data) return [];
 
-    // Map RPC result rows to CatalogItem shape
-    // Cast through unknown — generated types may lag behind migration 110
-    return (data as unknown as Array<{
+    type Row = {
         id: string;
         item_type: string;
         parent_id: string | null;
@@ -54,7 +58,29 @@ export async function searchCatalogAction(query: string): Promise<CatalogItem[]>
         maker: string;
         scale: string | null;
         attributes: Record<string, unknown>;
-    }>).map(mapCatalogRow);
+        parent_title?: string | null;
+    };
+    // Cast through unknown — generated types may lag behind migration 110
+    let rows = data as unknown as Row[];
+
+    // A named maker's own rows must be present even when fifty better
+    // titled rows from other makers fill the fuzzy window ("Arabian" is
+    // mostly Breyer). Top up straight from the table, then let the
+    // client rank the named maker first.
+    if (parsed.maker && !rows.some((r) => makerMatches(r.maker, parsed.maker))) {
+        const { data: makerRows } = await supabase
+            .from("catalog_items")
+            .select("id, item_type, parent_id, title, maker, scale, attributes")
+            .ilike("maker", parsed.maker)
+            .ilike("title", `%${term.replace(/[%_]/g, "")}%`)
+            .limit(25);
+        if (Array.isArray(makerRows) && makerRows.length > 0) {
+            const seen = new Set(rows.map((r) => r.id));
+            rows = [...(makerRows as unknown as Row[]).filter((r) => !seen.has(r.id)), ...rows];
+        }
+    }
+
+    return rows.map(mapCatalogRow);
 }
 
 /**

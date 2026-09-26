@@ -1,6 +1,7 @@
 "use server";
 
 import { requireAuth } from "@/lib/auth";
+import { parseCatalogQuery } from "@/lib/catalog/queryParse";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath, revalidateTag } from "next/cache";
@@ -167,10 +168,17 @@ export async function getCatalogItems(filters: CatalogFilters) {
     // catalog sort (not raw similarity), and a text query is capped at
     // FUZZY_CANDIDATE_LIMIT candidates — broad sweeps like a bare maker
     // name belong in the (uncapped) Maker facet.
+    // "Breyer Adios" / "Stone ISH": a leading maker becomes the maker
+    // facet (unless one is already chosen) and the initials are spelled
+    // out, so the text search runs on the name alone.
+    const parsedSearch = filters.search ? parseCatalogQuery(filters.search) : null;
+    const searchTerm = parsedSearch && parsedSearch.term.length >= 2 ? parsedSearch.term : filters.search;
+    const makerFacet = filters.maker ?? parsedSearch?.maker ?? undefined;
+
     let searchIds: string[] | null = null;
-    if (filters.search) {
+    if (searchTerm) {
         const { data: fuzzyRows, error: fuzzyError } = await supabase.rpc("search_catalog_fuzzy", {
-            search_term: filters.search,
+            search_term: searchTerm,
             max_results: FUZZY_CANDIDATE_LIMIT,
         });
         if (!fuzzyError && Array.isArray(fuzzyRows)) {
@@ -276,7 +284,7 @@ export async function getCatalogItems(filters: CatalogFilters) {
             query = query.not("id", "in", `(${flaggedIds.join(",")})`);
         }
 
-        if (filters.maker) query = query.eq("maker", filters.maker);
+        if (makerFacet) query = query.eq("maker", makerFacet);
         // Attribution split (156): company / person facets.
         if (filters.manufacturer) query = query.eq("manufacturer", filters.manufacturer);
         if (filters.artist) query = query.eq("artist", filters.artist);
@@ -284,8 +292,8 @@ export async function getCatalogItems(filters: CatalogFilters) {
         if (filters.type) query = query.eq("item_type", filters.type);
         if (searchIds) {
             query = query.in("id", searchIds);
-        } else if (filters.search) {
-            const q = sanitizeForOr(filters.search);
+        } else if (searchTerm) {
+            const q = sanitizeForOr(searchTerm);
             if (q) query = query.or(`title.ilike.%${q}%,maker.ilike.%${q}%`);
         }
 

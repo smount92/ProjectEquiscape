@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { parseCatalogQuery } from "@/lib/catalog/queryParse";
 import { searchCatalogAction, getReleasesForMold, getCatalogItem, type CatalogItem } from "@/app/actions/reference";
 import MarketValueBadge from "@/components/MarketValueBadge";
 import {
@@ -184,7 +185,8 @@ export default function UnifiedReferenceSearch({
   // under fuzzy plastic and silently dropped every other item type.
   // Ranking: exact title > prefix > RPC similarity, with the declared
   // finish floating its own kind within each tier (searchRank.ts).
-  const ranked = rankSearchResults(results, query, finishType);
+  const parsedQuery = parseCatalogQuery(query);
+  const ranked = rankSearchResults(results, parsedQuery.term || query, finishType, parsedQuery.maker);
   const visible = applyTypeFilter(ranked, typeFilter);
   const hasResults = visible.length > 0;
   const noResults = query.trim().length >= 2 && !isSearching && results.length === 0;

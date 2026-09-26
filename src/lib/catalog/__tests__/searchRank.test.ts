@@ -94,3 +94,23 @@ describe("typing, not typos (223)", () => {
         expect(releaseYears(undefined)).toBeNull();
     });
 });
+
+describe("a named maker floats first (queryParse)", () => {
+    it("puts the named maker's rows ahead of better-titled rows from other makers, and hides none", () => {
+        const out = rankSearchResults(
+            [
+                { title: "Ideal Stock Horse", itemType: "plastic_mold", maker: "Breyer" },
+                { title: "Ideal Stock Horse Mare", itemType: "plastic_release", maker: "Peter Stone" },
+                { title: "Ideal Stock Horse", itemType: "plastic_mold", maker: "Peter Stone" },
+            ],
+            "Ideal Stock Horse",
+            null,
+            "Peter Stone",
+        );
+        expect(out.map((x) => x.maker + " · " + x.title)).toEqual([
+            "Peter Stone · Ideal Stock Horse",
+            "Peter Stone · Ideal Stock Horse Mare",
+            "Breyer · Ideal Stock Horse",
+        ]);
+    });
+});
