@@ -87,13 +87,13 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
 
     const vaultMeta = room.transaction?.metadata ?? null;
 
-    // A bounded height, not a floor: the thread is a chat, so the message
-    // stream scrolls inside the viewport with the composer pinned beneath
-    // it. With min-h the stream grew to its content, nothing scrolled it
-    // to the newest message, and on a phone a thread opened at March
-    // (mobile pass, 2026-09-27).
+    // The page grows with its content (a deal room carries the agreement,
+    // the ledger and the record below the chat); the CHAT BOX below is
+    // the part with a bounded height. Bounding the whole page instead
+    // squeezed the message stream to nothing on an open deal (owner,
+    // 2026-09-27).
     return (
-        <div className="mx-auto flex h-[calc(100dvh-var(--header-height))] max-w-6xl flex-col px-4 md:px-8">
+        <div className="mx-auto flex min-h-[calc(100dvh-var(--header-height))] max-w-6xl flex-col px-4 md:px-8">
             {/* ── 1. The pinned header ── */}
             <div className="bg-card border-input animate-fade-in-up mb-2 flex shrink-0 flex-wrap items-center gap-3 rounded-lg border px-4 py-3 sm:mb-4 sm:gap-4 sm:px-6 sm:py-4">
                 <Link
@@ -237,11 +237,13 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
                     />
                 )}
 
-                {/* ── 3. The transcript ── flex, so the stream inside can
-                    shrink and scroll while the composer stays put. The old
-                    block wrapper with a 50dvh floor cut the flex chain and
-                    the stream grew to its content instead. */}
-                <div className="flex min-h-0 flex-1 flex-col">
+                {/* ── 3. The transcript ── a chat box of fixed height: the
+                    stream inside scrolls (and opens on the newest message)
+                    while the composer stays put beneath it; the deal panels
+                    follow on the page as before. A block wrapper with only a
+                    floor let the stream grow to its content and nothing
+                    could scroll it to the newest message. */}
+                <div className="flex h-[min(72dvh,46rem)] min-h-[20rem] shrink-0 flex-col">
                     <DealThread
                         conversationId={conversationId}
                         currentUserId={user.id}

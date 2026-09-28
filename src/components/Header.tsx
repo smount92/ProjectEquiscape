@@ -620,6 +620,9 @@ export default function Header() {
  </Link>
  {/* The inner rooms — what the desktop bar keeps under More. */}
  <span className="mt-3 mb-0.5 px-2 text-[0.65rem] font-bold tracking-[0.14em] uppercase text-muted-foreground" aria-hidden="true">Inside the Paddock</span>
+ {/* Short on purpose: Barns, Events, Members and Art Studios are one
+     tap away inside the Paddock, and a phone menu that scrolls is a
+     menu people miss the end of (owner, 2026-09-27). */}
  <Link
  href="/community"
  className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
@@ -627,22 +630,6 @@ export default function Header() {
  onClick={closeMobileMenu}
  >
  <Trophy size={16} strokeWidth={1.5} /> Show Ring
- </Link>
- <Link
- href="/community/groups"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-groups-m"
- onClick={closeMobileMenu}
- >
- <Building2 size={16} strokeWidth={1.5} /> Barns
- </Link>
- <Link
- href="/community/events"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-events-m"
- onClick={closeMobileMenu}
- >
- <Calendar size={16} strokeWidth={1.5} /> Events
  </Link>
  <Link
  href="/calendar"
@@ -659,22 +646,6 @@ export default function Header() {
  onClick={closeMobileMenu}
  >
  <Search size={16} strokeWidth={1.5} /> Help ID
- </Link>
- <Link
- href="/discover"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-discover-m"
- onClick={closeMobileMenu}
- >
- <Users size={16} strokeWidth={1.5} /> Members
- </Link>
- <Link
- href="/studio"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-studios-m"
- onClick={closeMobileMenu}
- >
- <Palette size={16} strokeWidth={1.5} /> Art Studios
  </Link>
  {artistSlug && (
  <Link
@@ -706,6 +677,21 @@ export default function Header() {
  Inbox
  {unreadMessages > 0 && (
  <span className="inbox-unread-badge">{unreadMessages > 9 ?"9+" : unreadMessages}</span>
+ )}
+ </Link>
+ {/* On a phone the bell's dropdown is position:fixed inside a menu
+     that is itself positioned, so it opened wherever the menu had
+     scrolled to — often off-screen ("opens to a spot you cannot
+     read", 2026-09-27). The menu links to the full page instead. */}
+ <Link
+ href="/notifications"
+ className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+ id="nav-notifications-m"
+ onClick={closeMobileMenu}
+ >
+ <Bell size={16} strokeWidth={1.5} /> Notifications
+ {unreadNotifications > 0 && (
+ <span className="inbox-unread-badge">{unreadNotifications > 9 ? "9+" : unreadNotifications}</span>
  )}
  </Link>
  <Link
@@ -741,21 +727,6 @@ export default function Header() {
  <Settings size={16} strokeWidth={1.5} /> Settings
  </Link>
  <ThemeToggle />
- {/* On a phone the bell's dropdown is position:fixed inside a menu
-     that is itself positioned, so it opened wherever the menu had
-     scrolled to — often off-screen ("opens to a spot you cannot
-     read", 2026-09-27). The menu links to the full page instead. */}
- <Link
- href="/notifications"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-notifications-m"
- onClick={closeMobileMenu}
- >
- <Bell size={16} strokeWidth={1.5} /> Notifications
- {unreadNotifications > 0 && (
- <span className="inbox-unread-badge">{unreadNotifications > 9 ? "9+" : unreadNotifications}</span>
- )}
- </Link>
  {isAdmin && (
  <Link
  href="/admin"
