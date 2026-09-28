@@ -130,10 +130,29 @@ export default function DealThread({
     // marker sat at the top of the screen, so after a send on an ended
     // deal the messages vanished above and only the "deal ended" notice
     // and footer were left in view (owner, 2026-09-26).
+    // Photos in the stream load after the messages do and grow it, so
+    // one scroll lands short of the newest bubble: scroll now and again
+    // as the images arrive, but only while the reader is already near
+    // the bottom, so someone scrolled up into history is never yanked.
     useEffect(() => {
         const stream = streamRef.current;
         if (!stream) return;
-        stream.scrollTo({ top: stream.scrollHeight, behavior: "smooth" });
+        const toBottom = () => stream.scrollTo({ top: stream.scrollHeight });
+        toBottom();
+        // The reader taking the wheel (or a thumb) ends the follow-up scrolls.
+        let readerScrolled = false;
+        const mark = () => { readerScrolled = true; };
+        stream.addEventListener("wheel", mark, { passive: true });
+        stream.addEventListener("touchmove", mark, { passive: true });
+        const timers = [300, 1000, 2500].map((ms) => window.setTimeout(() => { if (!readerScrolled) toBottom(); }, ms));
+        const onImage = (e: Event) => { if ((e.target as HTMLElement)?.tagName === "IMG" && !readerScrolled) toBottom(); };
+        stream.addEventListener("load", onImage, true);
+        return () => {
+            timers.forEach(clearTimeout);
+            stream.removeEventListener("wheel", mark);
+            stream.removeEventListener("touchmove", mark);
+            stream.removeEventListener("load", onImage, true);
+        };
     }, [messages]);
 
     useEffect(() => {
@@ -320,7 +339,7 @@ export default function DealThread({
                 thread's space through the load. */}
             <div
                 ref={streamRef}
-                className="bg-card border-input mb-4 flex min-h-[50dvh] flex-1 flex-col gap-2 overflow-y-auto rounded-lg border p-4"
+                className="bg-card border-input mb-4 flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto rounded-lg border p-4"
             >
                 {messages.length === 0 ? (
                     <div className="text-muted-foreground flex flex-1 flex-col items-center justify-center gap-2 py-12 text-center">

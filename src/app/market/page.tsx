@@ -189,7 +189,11 @@ export default async function MarketplacePage({
                                     </span>
                                 </div>
 
-                                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                                {/* grid-cols-1 is minmax(0,1fr): without it the lone
+                                    phone column is `auto`, whose minimum is the
+                                    listing photo's natural width, and cards ran
+                                    ~80px past the screen edge (mobile pass, 2026-09-27). */}
+                                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                                     {listings.map((listing) => (
                                         <MarketListingCard key={listing.id} listing={listing} />
                                     ))}

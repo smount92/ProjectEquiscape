@@ -36,6 +36,7 @@ import {
  Bookmark,
  Heart,
  Gem,
+ Bell,
 } from"lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -85,7 +86,7 @@ export default function Header() {
  }
  return null;
  });
- const { unreadMessages } = useNotifications();
+ const { unreadMessages, unreadNotifications } = useNotifications();
  const [aliasName, setAliasName] = useState<string | null>(null);
  const [isAdmin, setIsAdmin] = useState(false);
  const [artistSlug, setArtistSlug] = useState<string | null>(null);
@@ -572,7 +573,7 @@ export default function Header() {
  {user && (
  <nav
  ref={navRef}
- className={`leather-menu absolute left-0 top-[var(--header-height)] z-[150] flex w-full flex-col gap-1 border-b border-input bg-secondary px-4 py-3 shadow-lg transition-all md:hidden ${mobileMenuOpen ?"" :"hidden"}`}
+ className={`leather-menu absolute left-0 top-[var(--header-height)] z-[150] flex max-h-[calc(100dvh-var(--header-height))] w-full flex-col gap-1 overflow-y-auto border-b border-input bg-secondary px-4 py-3 shadow-lg transition-all md:hidden ${mobileMenuOpen ?"" :"hidden"}`}
  aria-label="Mobile navigation"
  >
  {/* The five rooms, in the order the desktop bar walks them. */}
@@ -740,7 +741,21 @@ export default function Header() {
  <Settings size={16} strokeWidth={1.5} /> Settings
  </Link>
  <ThemeToggle />
- <NotificationBell />
+ {/* On a phone the bell's dropdown is position:fixed inside a menu
+     that is itself positioned, so it opened wherever the menu had
+     scrolled to — often off-screen ("opens to a spot you cannot
+     read", 2026-09-27). The menu links to the full page instead. */}
+ <Link
+ href="/notifications"
+ className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+ id="nav-notifications-m"
+ onClick={closeMobileMenu}
+ >
+ <Bell size={16} strokeWidth={1.5} /> Notifications
+ {unreadNotifications > 0 && (
+ <span className="inbox-unread-badge">{unreadNotifications > 9 ? "9+" : unreadNotifications}</span>
+ )}
+ </Link>
  {isAdmin && (
  <Link
  href="/admin"
@@ -823,7 +838,7 @@ export default function Header() {
  {!user && (
  <nav
  ref={navRef}
- className={`leather-menu absolute left-0 top-[var(--header-height)] z-[150] flex w-full flex-col gap-1 border-b border-input bg-secondary px-4 py-3 shadow-lg transition-all md:hidden ${mobileMenuOpen ?"" :"hidden"}`}
+ className={`leather-menu absolute left-0 top-[var(--header-height)] z-[150] flex max-h-[calc(100dvh-var(--header-height))] w-full flex-col gap-1 overflow-y-auto border-b border-input bg-secondary px-4 py-3 shadow-lg transition-all md:hidden ${mobileMenuOpen ?"" :"hidden"}`}
  aria-label="Mobile navigation"
  >
  <Link
