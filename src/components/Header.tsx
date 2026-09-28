@@ -96,6 +96,7 @@ export default function Header() {
  const [moreMenuOpen, setMoreMenuOpen] = useState(false);
  const [visibleCount, setVisibleCount] = useState(NAV_LINKS.length + 1); // +1 for Art Studio
  const navRef = useRef<HTMLElement>(null);
+ const hamburgerRef = useRef<HTMLButtonElement>(null);
  // Who the server tree was last refreshed for; a refresh is only worth
  // it when that changes (see onAuthStateChange below).
  const refreshedForRef = useRef<string | null>(null);
@@ -197,7 +198,13 @@ export default function Header() {
  useEffect(() => {
  if (!mobileMenuOpen) return;
  const handleClickOutside = (e: MouseEvent) => {
- if (navRef.current && !navRef.current.contains(e.target as Node)) {
+ const target = e.target as Node;
+ // The hamburger is outside the nav, so its own press counted as an
+ // outside click: mousedown closed the menu, then the button's click
+ // toggled it straight back open, and the X never seemed to work
+ // (owner, 2026-09-27). Its click handler owns that decision.
+ if (hamburgerRef.current?.contains(target)) return;
+ if (navRef.current && !navRef.current.contains(target)) {
  setMobileMenuOpen(false);
  }
  };
@@ -302,6 +309,7 @@ export default function Header() {
  {/* ── Hamburger Button (mobile only) ── */}
  {user && (
  <button
+ ref={hamburgerRef}
  className="leather-icon-btn relative hidden max-md:flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-md border border-input bg-transparent text-muted-foreground transition-all"
  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
  aria-label={mobileMenuOpen ?"Close menu" :"Open menu"}
@@ -897,6 +905,7 @@ export default function Header() {
  <span className="md:hidden">Sign Up</span>
  </Link></Button>
  <button
+ ref={hamburgerRef}
  className="leather-icon-btn relative hidden max-md:flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-md border border-input bg-transparent text-muted-foreground transition-all"
  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
  aria-label={mobileMenuOpen ?"Close menu" :"Open menu"}
