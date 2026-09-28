@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getPublicImageUrls } from "@/lib/utils/storage";
 import { getAdminClient } from "@/lib/supabase/admin";
+import { publicFolderHorseIds } from "@/lib/collections/folderMembers";
 import ShareButton from "@/components/ShareButton";
 import MessageSellerButton from "@/components/MessageSellerButton";
 import RatingBadge from "@/components/RatingBadge";
@@ -334,7 +335,14 @@ export default async function ProfilePage({
         )
         .eq("owner_id", profileUser.id)
         .eq("visibility", "public");
-    if (openFolder) herdQuery = herdQuery.eq("collection_id", openFolder.id);
+    // A folder's members come from BOTH the junction and the legacy
+    // column (lib/collections/folderMembers); the column alone showed a
+    // fraction of the folder.
+    let folderIds: string[] | null = null;
+    if (openFolder) {
+        folderIds = await publicFolderHorseIds(adminClient, profileUser.id, openFolder.id);
+        herdQuery = herdQuery.in("id", folderIds.length > 0 ? folderIds : ["00000000-0000-0000-0000-000000000000"]);
+    }
     const { data: rawHorses, count: shelfCount } = await herdQuery
         .order("created_at", { ascending: false })
         .range(0, PROFILE_PAGE_SIZE - 1);

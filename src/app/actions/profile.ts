@@ -1,6 +1,8 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { getAdminClient } from "@/lib/supabase/admin";
+import { publicFolderHorseIds } from "@/lib/collections/folderMembers";
 import { revalidatePath } from "next/cache";
 import { AuthError, requireAuth } from "@/lib/auth";
 import { getPublicImageUrls } from "@/lib/utils/storage";
@@ -71,7 +73,11 @@ export async function loadMoreProfileHorses(
         `, { count: "exact" })
         .eq("owner_id", userId)
         .eq("visibility", "public");
-    if (collectionId) query = query.eq("collection_id", collectionId);
+    if (collectionId) {
+        // Junction ∪ legacy column, same as the page (lib/collections/folderMembers).
+        const ids = await publicFolderHorseIds(getAdminClient(), userId, collectionId);
+        query = query.in("id", ids.length > 0 ? ids : ["00000000-0000-0000-0000-000000000000"]);
+    }
     const { data: rawHorses, count } = await query
         .order("created_at", { ascending: false })
         .range(offset, offset + PAGE_SIZE - 1);
