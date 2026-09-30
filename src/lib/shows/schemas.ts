@@ -183,6 +183,27 @@ export const updateClassSchema = z.object({
         }),
 });
 
+/** One set of class rules for the whole show (max per entrant, finishes, scales, qualifying). */
+export const applyClassDefaultsSchema = z.object({
+    showId: uuidSchema,
+    patch: z
+        .object({
+            maxPerEntrant: classFields.maxPerEntrant,
+            allowedScales: classFields.allowedScales,
+            allowedFinishes: classFields.allowedFinishes,
+            isQualifying: classFields.isQualifying,
+        })
+        .refine((p) => Object.values(p).some((v) => v !== undefined), {
+            message: "Nothing to apply.",
+        }),
+});
+
+/** Copy another of your shows' classlists into this (still empty) show. */
+export const copyClasslistSchema = z.object({
+    showId: uuidSchema,
+    sourceShowId: uuidSchema,
+});
+
 export const reorderClasslistSchema = z.object({
     showId: uuidSchema,
     kind: z.enum(["division", "section", "class"]),

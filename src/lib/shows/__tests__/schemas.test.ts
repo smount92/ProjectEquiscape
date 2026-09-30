@@ -14,6 +14,8 @@ import {
     transitionShowStatusSchema,
     updateClassSchema,
     updateShowSettingsSchema,
+    applyClassDefaultsSchema,
+    copyClasslistSchema,
 } from "@/lib/shows/schemas";
 
 const UUID = "123e4567-e89b-42d3-a456-426614174000";
@@ -221,5 +223,19 @@ describe("schemas — template + staff", () => {
     it("removeShowStaff requires uuids", () => {
         expect(removeShowStaffSchema.safeParse({ showId: UUID, userId: "someone" }).success).toBe(false);
         expect(removeShowStaffSchema.safeParse({ showId: UUID, userId: UUID2 }).success).toBe(true);
+    });
+});
+
+describe("show-wide class defaults + copy (2026-09-29)", () => {
+    const showId = "123e4567-e89b-42d3-a456-426614174000";
+    it("accepts a partial patch and refuses an empty one", () => {
+        expect(applyClassDefaultsSchema.safeParse({ showId, patch: { maxPerEntrant: 3 } }).success).toBe(true);
+        expect(applyClassDefaultsSchema.safeParse({ showId, patch: { allowedFinishes: ["OF"], allowedScales: null } }).success).toBe(true);
+        expect(applyClassDefaultsSchema.safeParse({ showId, patch: {} }).success).toBe(false);
+        expect(applyClassDefaultsSchema.safeParse({ showId, patch: { maxPerEntrant: 0 } }).success).toBe(false);
+    });
+    it("copy needs two show ids", () => {
+        expect(copyClasslistSchema.safeParse({ showId, sourceShowId: showId }).success).toBe(true);
+        expect(copyClasslistSchema.safeParse({ showId }).success).toBe(false);
     });
 });

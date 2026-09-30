@@ -43,6 +43,8 @@ import {
     getShowConsoleSchema,
     getShowGallerySchema,
     loadTemplateSchema,
+    applyClassDefaultsSchema,
+    copyClasslistSchema,
     recordPlacingsSchema,
     removeShowStaffSchema,
     removeVoteSchema,
@@ -122,7 +124,7 @@ import {
     canTransitionClass,
     isShowMutableForClasslist,
 } from "@/lib/shows/stateMachine";
-import { getClasslistTemplate } from "@/lib/shows/namhsaTemplate";
+import { getClasslistTemplate, type ShowClasslistTemplate } from "@/lib/shows/namhsaTemplate";
 import type {
     CallbackScope,
     ClassStatus,
@@ -1248,13 +1250,141 @@ export async function loadNamhsaTemplate(
         return { success: false, error: "Templates can only be loaded before entries open." };
     }
 
-    // Three batch inserts (divisions → sections → classes), not
-    // per-row loops. IDs map back by name / (division_id, name).
+    return insertClasslist(supabase, v.showId, template);
+}
+
+/**
+ * Copy the classlist of another show you manage into this one — your
+ * past shows are your templates (asked for 2026-09-29). Divisions,
+ * sections and classes come across with their rules (max per entrant,
+ * finishes, scales, qualifying); cancelled and combined classes do not.
+ */
+export async function copyClasslistFromShow(
+    input: z.input<typeof copyClasslistSchema>,
+): Promise<ActionResult<{ divisions: number; sections: number; classes: number }>> {
+    const parsed = copyClasslistSchema.safeParse(input);
+    if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
+    const { supabase, user } = await requireAuth();
+    const { showId, sourceShowId } = parsed.data;
+    if (showId === sourceShowId) return { success: false, error: "Pick a different show to copy from." };
+
+    const ctx = await getShowRole(supabase, showId, user.id);
+    if ("error" in ctx) return { success: false, error: ctx.error };
+    if (!ctx.role || !MANAGER_ROLES.includes(ctx.role)) {
+        return { success: false, error: "Only the host or a co-host can copy a classlist in." };
+    }
+    if (ctx.show.status !== "draft" && ctx.show.status !== "published") {
+        return { success: false, error: "A classlist can only be copied in before entries open." };
+    }
+    const source = await getShowRole(supabase, sourceShowId, user.id);
+    if ("error" in source) return { success: false, error: source.error };
+    if (!source.role || !MANAGER_ROLES.includes(source.role)) {
+        return { success: false, error: "You can copy from shows you host or co-host." };
+    }
+    const existing = await loadShowProgram(supabase, showId);
+    if ("error" in existing) return { success: false, error: existing.error };
+    if (existing.divisions.length > 0) {
+        return { success: false, error: "This show already has a classlist — copying works into an empty one." };
+    }
+    const program = await loadShowProgram(supabase, sourceShowId);
+    if ("error" in program) return { success: false, error: program.error };
+
+    const template: ShowClasslistTemplate = {
+        key: `copy:${sourceShowId}`,
+        label: "Copied classlist",
+        description: "",
+        divisions: program.divisions.map((d) => ({
+            name: d.name,
+            axis: d.axis,
+            sections: d.sections.map((sec) => ({
+                name: sec.name,
+                classes: sec.classes
+                    .filter((c) => c.status !== "cancelled" && c.status !== "combined")
+                    .map((c) => ({
+                        name: c.name,
+                        classNumber: c.classNumber ?? undefined,
+                        isQualifying: c.isQualifying,
+                        maxPerEntrant: c.maxPerEntrant,
+                        allowedScales: c.allowedScales,
+                        allowedFinishes: c.allowedFinishes,
+                    })),
+            })),
+        })),
+    };
+    if (template.divisions.length === 0) return { success: false, error: "That show has no classlist to copy." };
+    return insertClasslist(supabase, showId, template);
+}
+
+/** The shows this member could copy a classlist from: ones they manage that have one. */
+export async function listClasslistSources(
+    excludeShowId: string,
+): Promise<ActionResult<{ shows: { id: string; title: string; status: ShowStatus }[] }>> {
+    const hosted = await getHostedShows();
+    if (!hosted.success) return hosted;
+    const shows = hosted.shows
+        .filter((s) => s.id !== excludeShowId && MANAGER_ROLES.includes(s.role))
+        .map((s) => ({ id: s.id, title: s.title, status: s.status }));
+    return { success: true, shows };
+}
+
+/**
+ * One set of rules for every live class in the show — max per entrant,
+ * allowed finishes, allowed scales, qualifying — instead of opening
+ * each class in turn (co-owner, 2026-09-29). Cancelled and combined
+ * classes are left alone.
+ */
+export async function applyClassDefaults(
+    input: z.input<typeof applyClassDefaultsSchema>,
+): Promise<ActionResult<{ classes: number }>> {
+    const parsed = applyClassDefaultsSchema.safeParse(input);
+    if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
+    const { supabase, user } = await requireAuth();
+    const { showId, patch } = parsed.data;
+
+    const ctx = await getShowRole(supabase, showId, user.id);
+    if ("error" in ctx) return { success: false, error: ctx.error };
+    if (!ctx.role || !MANAGER_ROLES.includes(ctx.role)) {
+        return { success: false, error: "Only the host or a co-host can set class rules." };
+    }
+    if (!isShowMutableForClasslist(ctx.show.status)) {
+        return { success: false, error: CLASSLIST_FROZEN_ERROR };
+    }
+
+    const program = await loadShowProgram(supabase, showId);
+    if ("error" in program) return { success: false, error: program.error };
+    const classIds = program.divisions.flatMap((d) =>
+        d.sections.flatMap((sec) =>
+            sec.classes.filter((c) => c.status !== "cancelled" && c.status !== "combined").map((c) => c.id),
+        ),
+    );
+    if (classIds.length === 0) return { success: true, classes: 0 };
+
+    const update: Record<string, unknown> = {};
+    if (patch.maxPerEntrant !== undefined) update.max_per_entrant = patch.maxPerEntrant;
+    if (patch.allowedScales !== undefined) update.allowed_scales = patch.allowedScales;
+    if (patch.allowedFinishes !== undefined) update.allowed_finishes = patch.allowedFinishes;
+    if (patch.isQualifying !== undefined) update.is_qualifying = patch.isQualifying;
+
+    const { error } = await supabase.from("show_classes").update(update).in("id", classIds);
+    if (error) return { success: false, error: error.message };
+    return { success: true, classes: classIds.length };
+}
+
+/**
+ * Three batch inserts (divisions → sections → classes), not per-row
+ * loops. IDs map back by name / (division_id, name). Shared by the
+ * built-in templates and by copying another show's classlist.
+ */
+async function insertClasslist(
+    supabase: SupabaseClient,
+    showId: string,
+    template: ShowClasslistTemplate,
+): Promise<ActionResult<{ divisions: number; sections: number; classes: number }>> {
     const { data: divisionRows, error: dErr } = await supabase
         .from("show_divisions")
         .insert(
             template.divisions.map((d, i) => ({
-                show_id: v.showId,
+                show_id: showId,
                 name: d.name,
                 axis: d.axis,
                 sort_order: i,
@@ -1303,6 +1433,9 @@ export async function loadNamhsaTemplate(
                     status: "scheduled",
                     is_qualifying: cls.isQualifying ?? true,
                     sort_order: i,
+                    ...(cls.maxPerEntrant !== undefined ? { max_per_entrant: cls.maxPerEntrant } : {}),
+                    ...(cls.allowedScales !== undefined ? { allowed_scales: cls.allowedScales } : {}),
+                    ...(cls.allowedFinishes !== undefined ? { allowed_finishes: cls.allowedFinishes } : {}),
                 });
             });
         }

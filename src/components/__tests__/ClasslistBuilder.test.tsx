@@ -18,6 +18,9 @@ const actions = vi.hoisted(() => ({
         .mockResolvedValue({ success: true, divisions: 3, sections: 10, classes: 41 }),
     reorderClasslist: vi.fn().mockResolvedValue({ success: true, updated: 2 }),
     updateClass: vi.fn().mockResolvedValue({ success: true }),
+    applyClassDefaults: vi.fn().mockResolvedValue({ success: true, classes: 41 }),
+    listClasslistSources: vi.fn().mockResolvedValue({ success: true, shows: [{ id: "223e4567-e89b-42d3-a456-426614174000", title: "Last Spring Live", status: "completed" }] }),
+    copyClasslistFromShow: vi.fn().mockResolvedValue({ success: true, divisions: 3, sections: 10, classes: 41 }),
 }));
 
 vi.mock("@/app/actions/shows-v2", () => actions);
@@ -229,5 +232,53 @@ describe("ClasslistBuilder — frozen show", () => {
 
         expect(screen.getByRole("note")).toHaveTextContent(/only the host or a co-host/i);
         expect(screen.queryByRole("button", { name: /add class/i })).not.toBeInTheDocument();
+    });
+});
+
+describe("ClasslistBuilder — show-wide rules and copy-from-show (2026-09-29)", () => {
+    it("applies ticked rules to every class in one action", async () => {
+        render(
+            <ClasslistBuilder
+                showId={SHOW_ID}
+                showStatus="draft"
+                divisions={templateDivisions()}
+                canManage
+                entriesExist={false}
+            />,
+        );
+        fireEvent.click(screen.getByRole("button", { name: /set rules for all classes/i }));
+        fireEvent.click(screen.getByLabelText(/apply a max per entrant/i));
+        fireEvent.change(screen.getByPlaceholderText(/blank = no cap/i), { target: { value: "3" } });
+        fireEvent.click(screen.getByLabelText(/apply allowed finishes/i));
+        fireEvent.click(screen.getByLabelText("OF"));
+        fireEvent.click(screen.getByRole("button", { name: /apply to all 41 classes/i }));
+        await waitFor(() =>
+            expect(actions.applyClassDefaults).toHaveBeenCalledWith({
+                showId: SHOW_ID,
+                patch: { maxPerEntrant: 3, allowedFinishes: ["OF"] },
+            }),
+        );
+    });
+
+    it("lets an empty show copy the classlist of one of the host's shows", async () => {
+        render(
+            <ClasslistBuilder
+                showId={SHOW_ID}
+                showStatus="draft"
+                divisions={[]}
+                canManage
+                entriesExist={false}
+            />,
+        );
+        fireEvent.click(screen.getByRole("button", { name: /copy the classlist from one of my shows/i }));
+        const select = await screen.findByLabelText(/show to copy the classlist from/i);
+        fireEvent.change(select, { target: { value: "223e4567-e89b-42d3-a456-426614174000" } });
+        fireEvent.click(screen.getByRole("button", { name: /^copy classlist$/i }));
+        await waitFor(() =>
+            expect(actions.copyClasslistFromShow).toHaveBeenCalledWith({
+                showId: SHOW_ID,
+                sourceShowId: "223e4567-e89b-42d3-a456-426614174000",
+            }),
+        );
     });
 });

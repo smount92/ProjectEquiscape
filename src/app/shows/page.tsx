@@ -120,7 +120,8 @@ export default async function ShowsPage() {
  // The doors are open: anon browses everything public. The legacy
  // photo-show list stays members-only below (its `events` RLS is
  // authed-only), so we only fetch it for signed-in viewers.
- const shows = user ? await getPhotoShows() : [];
+ // Cancelled legacy photo shows are history, not listings (2026-09-29).
+ const shows = (user ? await getPhotoShows() : []).filter((s) => s.status !== "cancelled");
 
  // v2 shows render ABOVE the legacy photo-show list.
  let v2Shows: PublicShowSummary[] = [];

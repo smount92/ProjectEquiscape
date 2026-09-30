@@ -551,7 +551,7 @@ export default function ShowSettingsForm({ show }: { show: ConsoleShow }) {
                     </Field>
                     <Field
                         label="Fees"
-                        hint="How entrants pay and how much — blank reads as “Free” on the show page."
+                        hint="How entrants pay and how much. A full link (https://paypal.me/yourname) becomes a clickable link on the show page. Blank reads as “Free”."
                     >
                         <Textarea
                             value={values.feeInfo}

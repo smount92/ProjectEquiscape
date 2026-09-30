@@ -17,6 +17,10 @@ export interface TemplateClass {
     classNumber?: string;
     /** Counts toward MHH qualification cards. Defaults true for halter breeds. */
     isQualifying?: boolean;
+    /** Per-class rules; set when a classlist is copied from another show. */
+    maxPerEntrant?: number | null;
+    allowedScales?: string[] | null;
+    allowedFinishes?: string[] | null;
 }
 
 export interface TemplateSection {

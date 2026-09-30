@@ -256,12 +256,12 @@ export default function CreateShowV2Form() {
                 />
             </Field>
 
-            <Field label="Fees" hint="How entrants pay and how much — fee checkout ships later; this is your notice text.">
+            <Field label="Fees" hint="How entrants pay and how much. A full link (https://paypal.me/yourname) becomes a clickable link on the show page. Blank reads as “Free”.">
                 <Textarea
                     value={feeInfo}
                     onChange={(e) => setFeeInfo(e.target.value)}
                     rows={3}
-                    placeholder="$20 per table, PayPal to..."
+                    placeholder="$5 per entrant, PayPal: https://paypal.me/yourname"
                 />
             </Field>
 

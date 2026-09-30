@@ -29,6 +29,8 @@ import {
 } from "@/app/actions/shows-v2";
 import type { ConsoleClass, ConsoleDivision, ConsoleSection } from "@/lib/shows/console";
 import { countTemplateClasses, SHOW_CLASSLIST_TEMPLATES } from "@/lib/shows/namhsaTemplate";
+import ShowDefaultsCard from "@/components/shows/ShowDefaultsCard";
+import CopyClasslistPicker from "@/components/shows/CopyClasslistPicker";
 import { friendlyClassStatus, friendlyShowStatus } from "@/lib/shows/plainWords";
 import { isShowMutableForClasslist } from "@/lib/shows/stateMachine";
 import type { DivisionAxis, ShowStatus } from "@/lib/shows/types";
@@ -558,6 +560,18 @@ export default function ClasslistBuilder({
                 </p>
             )}
 
+            {!isEmpty && canEdit && (
+                <ShowDefaultsCard
+                    showId={showId}
+                    classCount={divisions.reduce(
+                        (n, d) => n + d.sections.reduce((m, sec) => m + sec.classes.filter((c) => c.status !== "cancelled" && c.status !== "combined").length, 0),
+                        0,
+                    )}
+                    pending={pending}
+                    run={run}
+                />
+            )}
+
             {isEmpty ? (
                 <div className="ledger-card flex flex-col items-center gap-4 py-10 text-center">
                     <span className="ledger-tab">Empty Classlist</span>
@@ -599,6 +613,7 @@ export default function ClasslistBuilder({
                             ))}
                         </ul>
                     )}
+                    {canEdit && <CopyClasslistPicker showId={showId} pending={pending} run={run} />}
                     {canEdit && pending && (
                         <p className="text-sm text-muted-foreground">Loading template…</p>
                     )}

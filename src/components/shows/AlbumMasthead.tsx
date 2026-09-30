@@ -16,6 +16,7 @@
  */
 
 import Link from "next/link";
+import LinkifiedText from "@/components/LinkifiedText";
 
 import type { PublicShow } from "@/lib/shows/public";
 import type { ShowStatus } from "@/lib/shows/types";
@@ -231,7 +232,7 @@ export default function AlbumMasthead({
                     )}
                     <DetailsFact
                         label="Fees"
-                        value={<span className="whitespace-pre-wrap">{fee}</span>}
+                        value={<span className="whitespace-pre-wrap"><LinkifiedText text={fee} /></span>}
                     />
                     <DetailsFact label="Sanctioning" value={show.sanctioningNote} />
                 </dl>
