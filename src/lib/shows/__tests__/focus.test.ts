@@ -38,6 +38,15 @@ describe("show focus, derived from the program", () => {
         expect(focus.classCount).toBe(1);
     });
 
+    it("ignores 'all' / 'any' typed as a scale or finish, and repeats in other cases", () => {
+        const focus = deriveShowFocus([
+            { axis: "halter", classes: [cls(["OF", "of"], ["ALL"]), cls(["any"], ["all", "Traditional (1:9)"])] },
+        ]);
+        expect(focus.finishes).toEqual(["OF"]);
+        expect(focus.scales).toEqual(["Traditional (1:9)"]);
+        expect(focusChips(focus)).toEqual(["OF", "Halter", "Traditional"]);
+    });
+
     it("caps the scale chips", () => {
         const focus = deriveShowFocus([
             { axis: "halter", classes: [cls(null, ["Traditional (1:9)", "Classic (1:12)", "Stablemate (1:32)", "Mini Whinnie (1:64)", "Pebbles (1:18)"])] },

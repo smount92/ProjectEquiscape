@@ -1,5 +1,6 @@
 import { createClient } from"@/lib/supabase/server";
 import { focusChips } from "@/lib/shows/focus";
+import { feeText } from "@/lib/shows/plainWords";
 import { getPhotoShows } from"@/app/actions/shows";
 import { getPublicShows } from"@/app/actions/shows-v2";
 import { getMyShowLife } from"@/app/actions/show-life";
@@ -81,6 +82,7 @@ function V2ShowsSection({ title, shows }: { title: string; shows: PublicShowSumm
        <Badge variant="secondary">{show.mode ==="live" ?"Live" :"Online"}</Badge>
        {show.judging ==="community_vote" && <Badge variant="secondary">Community vote</Badge>}
        {show.isMhhQualifying && <Badge>🏅 MHH Sanctioned</Badge>}
+       {feeText(show.feeInfo ?? null) !== "Free" && <Badge variant="outline">💵 Entry fee</Badge>}
        {focusChips(show.focus).map((chip) => (
         <Badge key={chip} variant="outline">{chip}</Badge>
        ))}

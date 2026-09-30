@@ -107,7 +107,11 @@ export default function AlbumMasthead({
     focusChips?: string[];
 }) {
     const fee = feeText(show.feeInfo);
-    const feeInline = fee.length <= FEE_INLINE_MAX ? fee : "fees apply — see details";
+    const isFree = fee === "Free";
+    // The status line keeps one word; the full notice (amount, how to
+    // pay, a PayPal link) gets its own strip below, always visible — it
+    // used to live only behind Details (owner, 2026-09-30).
+    const feeInline = isFree ? fee : fee.length <= FEE_INLINE_MAX ? fee : "entry fee";
     const statusWord =
         show.status === "judging" && show.judging === "community_vote"
             ? "Voting open"
@@ -237,6 +241,25 @@ export default function AlbumMasthead({
                     <DetailsFact label="Sanctioning" value={show.sanctioningNote} />
                 </dl>
             </details>
+
+            {/* The fee, in the open: amount, how to pay, and a link if the
+                host gave one. Free shows say nothing here — the status line
+                already reads "Free". */}
+            {!isFree && (
+                <div
+                    className="flex items-start gap-2 rounded-md bg-(--paper-lit) px-4 py-2.5 text-sm text-(--paper-lit-ink)"
+                    data-testid="album-fee-strip"
+                >
+                    <span aria-hidden="true">💵</span>
+                    <span className="min-w-0">
+                        <span className="font-semibold">Entry fee</span>
+                        <span aria-hidden="true"> · </span>
+                        <span className="whitespace-pre-wrap">
+                            <LinkifiedText text={fee} />
+                        </span>
+                    </span>
+                </div>
+            )}
         </section>
     );
 }

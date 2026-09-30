@@ -34,6 +34,8 @@ export interface PublicShowSummary {
     id: string;
     /** Finishes / axes / scales read off the class list (lib/shows/focus). */
     focus: ShowFocus;
+    /** The host's fee notice; blank or zero means free (see feeText). */
+    feeInfo: string | null;
     title: string;
     mode: ShowMode;
     judging: ShowJudging;

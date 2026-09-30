@@ -2041,7 +2041,7 @@ async function readPublicShows(
     const { data: showRows, error: showsError } = await supabase
         .from("shows")
         .select(
-            "id, host_id, title, mode, judging, status, venue_name, show_date, entries_open_at, entries_close_at, judging_ends_at, is_mhh_qualifying, show_year, created_at",
+            "id, host_id, title, mode, judging, status, venue_name, show_date, entries_open_at, entries_close_at, judging_ends_at, is_mhh_qualifying, show_year, fee_info, created_at",
         )
         .in("status", PUBLIC_BROWSE_STATUSES)
         .order("created_at", { ascending: false })
@@ -2148,6 +2148,7 @@ async function readPublicShows(
             entryCount: entryCounts.get(s.id as string) ?? 0,
             createdAt: s.created_at as string,
             focus: deriveShowFocus(focusByShow.get(s.id as string) ?? []),
+            feeInfo: ((s as { fee_info?: string | null }).fee_info as string | null) ?? null,
         })),
     };
 }

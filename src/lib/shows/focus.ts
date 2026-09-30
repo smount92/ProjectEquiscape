@@ -35,6 +35,24 @@ const AXIS_LABEL: Record<string, string> = {
     collectibility: "Collectibility",
 };
 
+/**
+ * Hosts type "all" or "any" into the scale and finish boxes to mean no
+ * limit; that is not a rule, and "ALL · all" on a card looked like one
+ * (owner, 2026-09-30).
+ */
+const NOT_A_RULE = /^(all|any|open|none|n\/a|\*|-)$/i;
+function isRule(value: string): boolean {
+    const v = value.trim();
+    return v !== "" && !NOT_A_RULE.test(v);
+}
+
+/** Case-insensitive de-duplication, first spelling wins. */
+function distinct(values: Iterable<string>): string[] {
+    const seen = new Map<string, string>();
+    for (const v of values) if (!seen.has(v.toLowerCase())) seen.set(v.toLowerCase(), v);
+    return [...seen.values()];
+}
+
 function ordered(values: Iterable<string>, order: readonly string[]): string[] {
     return [...new Set(values)].sort((a, b) => {
         const ia = order.indexOf(a);
@@ -57,14 +75,14 @@ export function deriveShowFocus(divisions: readonly FocusInput[]): ShowFocus {
         classCount += live.length;
         if (d.axis && d.axis !== "other") axes.add(d.axis);
         for (const c of live) {
-            for (const f of c.allowedFinishes ?? []) if (f.trim()) finishes.add(f.trim());
-            for (const s of c.allowedScales ?? []) if (s.trim()) scales.add(s.trim());
+            for (const f of c.allowedFinishes ?? []) if (isRule(f)) finishes.add(f.trim());
+            for (const s of c.allowedScales ?? []) if (isRule(s)) scales.add(s.trim());
         }
     }
     return {
-        finishes: ordered(finishes, FINISH_ORDER),
+        finishes: ordered(distinct(finishes), FINISH_ORDER),
         axes: ordered(axes, AXIS_ORDER),
-        scales: [...scales].sort(),
+        scales: distinct(scales).sort(),
         classCount,
     };
 }
