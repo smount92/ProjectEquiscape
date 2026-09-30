@@ -821,23 +821,53 @@ function SectionBlock({
                 )}
             </div>
             <ul className="mt-1 flex list-none flex-col p-0">
-                {section.classes.map((cls, cIndex) => (
-                    <ClassRow
-                        key={cls.id}
-                        cls={cls}
-                        canEdit={canEdit}
-                        pending={pending}
-                        entriesExist={entriesExist}
-                        onEdit={() => onEditClass(cls)}
-                        onCancelClass={() => onCancelClass(cls)}
-                        onRestoreClass={() => onRestoreClass(cls)}
-                        onMove={(dir) => onMoveClass(cIndex, dir)}
-                    />
-                ))}
+                {section.classes.map((cls, cIndex) =>
+                    cls.status === "cancelled" ? null : (
+                        <ClassRow
+                            key={cls.id}
+                            cls={cls}
+                            canEdit={canEdit}
+                            pending={pending}
+                            entriesExist={entriesExist}
+                            onEdit={() => onEditClass(cls)}
+                            onCancelClass={() => onCancelClass(cls)}
+                            onRestoreClass={() => onRestoreClass(cls)}
+                            onMove={(dir) => onMoveClass(cIndex, dir)}
+                        />
+                    ),
+                )}
                 {section.classes.length === 0 && (
                     <li className="py-1.5 text-sm text-muted-foreground italic">No classes yet.</li>
                 )}
             </ul>
+            {/* Cancelled classes fold away: a host who trims a 41-class
+                template to a dozen was reading through thirty struck-out
+                rows to find the live ones (co-owner, 2026-09-29). They
+                stay one click away so a cancel can be undone. */}
+            {section.classes.some((c) => c.status === "cancelled") && (
+                <details className="mt-1">
+                    <summary className="cursor-pointer py-1 text-xs text-muted-foreground">
+                        {section.classes.filter((c) => c.status === "cancelled").length} cancelled
+                    </summary>
+                    <ul className="flex list-none flex-col p-0 opacity-80">
+                        {section.classes.map((cls, cIndex) =>
+                            cls.status !== "cancelled" ? null : (
+                                <ClassRow
+                                    key={cls.id}
+                                    cls={cls}
+                                    canEdit={canEdit}
+                                    pending={pending}
+                                    entriesExist={entriesExist}
+                                    onEdit={() => onEditClass(cls)}
+                                    onCancelClass={() => onCancelClass(cls)}
+                                    onRestoreClass={() => onRestoreClass(cls)}
+                                    onMove={(dir) => onMoveClass(cIndex, dir)}
+                                />
+                            ),
+                        )}
+                    </ul>
+                </details>
+            )}
             {canEdit && (
                 <div className="mt-2">
                     <InlineAddForm

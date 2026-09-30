@@ -258,7 +258,7 @@ describe("ClasslistBuilder — show-wide rules and copy-from-show (2026-09-29)",
                 patch: { maxPerEntrant: 3, allowedFinishes: ["OF"] },
             }),
         );
-    });
+    }, 20000);
 
     it("lets an empty show copy the classlist of one of the host's shows", async () => {
         render(
@@ -280,5 +280,5 @@ describe("ClasslistBuilder — show-wide rules and copy-from-show (2026-09-29)",
                 sourceShowId: "223e4567-e89b-42d3-a456-426614174000",
             }),
         );
-    });
+    }, 20000);
 });

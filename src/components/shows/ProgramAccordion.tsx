@@ -112,7 +112,8 @@ export default function ProgramAccordion({
                                                     {section.name}
                                                 </h4>
                                                 <ul className="mt-1 flex list-none flex-col p-0">
-                                                    {section.classes.map((cls) => (
+                                                    {/* Cancelled classes are not on the program an entrant reads. */}
+                                                    {section.classes.filter((cls) => cls.status !== "cancelled").map((cls) => (
                                                         <PublicClassRow
                                                             key={cls.id}
                                                             cls={cls}
