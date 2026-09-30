@@ -20,6 +20,7 @@
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { groupSizes, isMissingSetColumn, vaultValueOf } from "@/lib/vault/setPurchase";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 
@@ -223,23 +224,43 @@ async function buildCards(
     if (rows.length === 0) return [];
     const pageIds = rows.map((r) => r.id as string);
 
-    const [vaultResult, recordsResult, collectionsResult] = await Promise.all([
+    const [vaultResultWithSets, recordsResult, collectionsResult] = await Promise.all([
         supabase
             .from("financial_vault")
-            .select("horse_id, purchase_price, estimated_current_value")
+            .select("horse_id, purchase_price, estimated_current_value, purchase_group_id")
             .in("horse_id", pageIds),
         supabase.from("show_records").select("horse_id").eq("user_id", userId).in("horse_id", pageIds),
         supabase.from("user_collections").select("id, name").eq("user_id", userId),
     ]);
 
-    const vaultMap = new Map<string, number>();
-    for (const v of (vaultResult.data ?? []) as {
+    // Before 224 is pasted the group column is unknown: read without it.
+    const vaultResult = isMissingSetColumn(vaultResultWithSets.error)
+        ? await supabase
+              .from("financial_vault")
+              .select("horse_id, purchase_price, estimated_current_value")
+              .in("horse_id", pageIds)
+        : vaultResultWithSets;
+    type VaultRow = {
         horse_id: string;
         purchase_price: number | null;
         estimated_current_value: number | null;
-    }[]) {
-        const val = v.estimated_current_value ?? v.purchase_price ?? 0;
-        if (val > 0) vaultMap.set(v.horse_id, val);
+        purchase_group_id?: string | null;
+    };
+    const vaultRows = (vaultResult.data ?? []) as VaultRow[];
+    // A set's members may sit on other pages; count the whole group.
+    const groupIds = [...new Set(vaultRows.map((v) => v.purchase_group_id).filter((g): g is string => !!g))];
+    let sizes = groupSizes(vaultRows);
+    if (groupIds.length > 0) {
+        const { data: groupRows } = await supabase
+            .from("financial_vault")
+            .select("purchase_group_id")
+            .in("purchase_group_id", groupIds);
+        if (groupRows) sizes = groupSizes(groupRows as { purchase_group_id: string | null }[]);
+    }
+    const vaultMap = new Map<string, number>();
+    for (const v of vaultRows) {
+        const val = vaultValueOf(v, v.purchase_group_id ? (sizes.get(v.purchase_group_id) ?? 1) : 1);
+        if (val !== null && val > 0) vaultMap.set(v.horse_id, val);
     }
 
     const recordCountMap = new Map<string, number>();

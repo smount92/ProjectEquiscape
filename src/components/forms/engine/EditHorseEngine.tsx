@@ -54,6 +54,9 @@ import { LedgerLeaf, LeafHeading } from "./LedgerLeaf";
 import PhotoStudio, { EMPTY_STUDIO, type PhotoStudioValue } from "./PhotoStudio";
 import { uploadStudioPhotos } from "./uploadPhotos";
 import { PENDING_HORSE_COLUMNS, isMissingPendingColumn } from "@/lib/passport/pendingColumns";
+import SetPurchasePanel from "@/components/SetPurchasePanel";
+import { getSetPurchase } from "@/app/actions/set-purchase";
+import type { SetPurchase } from "@/lib/vault/setPurchase";
 
 interface ExistingImage {
     recordId: string;
@@ -107,6 +110,7 @@ export default function EditHorseEngine() {
 
     const [initial, setInitial] = useState<FormValues>({});
     const [currencySymbol, setCurrencySymbol] = useState("$");
+    const [setPurchase, setSetPurchase] = useState<SetPurchase | null>(null);
     const form = useHorseForm({ mode: "edit", category, initialValues: initial, currencySymbol });
 
     const [reference, setReference] = useState<CatalogItem | null>(null);
@@ -241,6 +245,7 @@ export default function EditHorseEngine() {
         })();
 
         getMyTier().then(setViewerTier).catch(() => setViewerTier(null));
+        getSetPurchase(horseId).then(setSetPurchase).catch(() => setSetPurchase(null));
         getProfile()
             .then((profile) => {
                 if (profile) {
@@ -556,6 +561,14 @@ export default function EditHorseEngine() {
                         🔒 The Financial Vault
                     </LeafHeading>
                     <EditGroup form={form} group="vault" />
+                    {category === "model" && (
+                        <SetPurchasePanel
+                            horseId={horseId}
+                            horseName={String(form.values.custom_name ?? "this horse")}
+                            initial={setPurchase}
+                            currencySymbol={currencySymbol}
+                        />
+                    )}
                 </LedgerLeaf>
             </div>
 

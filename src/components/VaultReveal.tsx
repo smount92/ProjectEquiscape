@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from"react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { shareOf, type SetPurchase } from "@/lib/vault/setPurchase";
 
 interface VaultData {
   purchase_price: number | null;
@@ -15,6 +17,8 @@ interface VaultData {
 interface VaultRevealProps {
  vault: VaultData | null;
  currencySymbol?: string;
+ /** The set this horse was bought in, if any (224). */
+ setPurchase?: SetPurchase | null;
 }
 
 function formatCurrency(value: number, symbol: string ="$"): string {
@@ -33,7 +37,7 @@ function formatDate(dateStr: string): string {
  });
 }
 
-export default function VaultReveal({ vault, currencySymbol ="$" }: VaultRevealProps) {
+export default function VaultReveal({ vault, currencySymbol ="$", setPurchase = null }: VaultRevealProps) {
  const [isUnlocked, setIsUnlocked] = useState(false);
 
  const hasData =
@@ -43,7 +47,8 @@ export default function VaultReveal({ vault, currencySymbol ="$" }: VaultRevealP
  vault.estimated_current_value !== null ||
  vault.insurance_notes !== null ||
  vault.purchase_date_text !== null ||
- vault.is_trade);
+ vault.is_trade ||
+ !!setPurchase);
 
  return (
  <div
@@ -122,8 +127,34 @@ export default function VaultReveal({ vault, currencySymbol ="$" }: VaultRevealP
  Purchase Price
  </div>
  <div className="text-success text-base font-bold">
- {formatCurrency(vault.purchase_price, currencySymbol)}
+ {setPurchase
+ ? formatCurrency(shareOf(setPurchase.price, setPurchase.members.length), currencySymbol)
+ : formatCurrency(vault.purchase_price, currencySymbol)}
  </div>
+ {setPurchase && (
+ <div className="text-muted-foreground mt-1 text-xs">
+ share of a {formatCurrency(setPurchase.price, currencySymbol)} set of {setPurchase.members.length}
+ </div>
+ )}
+ </div>
+ )}
+
+ {setPurchase && (
+ <div className="border-input rounded-md border bg-card p-4 sm:col-span-2" data-testid="vault-set-purchase">
+ <div className="text-secondary-foreground mb-1 text-xs font-medium tracking-[0.05em] uppercase">
+ Bought as a set
+ </div>
+ <div className="text-sm">
+ <strong>{setPurchase.label || `Set of ${setPurchase.members.length}`}</strong>
+ {" · "}
+ {setPurchase.members.map((m, i) => (
+ <span key={m.id}>
+ <Link href={`/stable/${m.id}`} className="underline underline-offset-2">{m.name}</Link>
+ {i < setPurchase.members.length - 1 ? ", " : ""}
+ </span>
+ ))}
+ </div>
+ <div className="text-muted-foreground mt-1 text-xs">The vault total counts this set once.</div>
  </div>
  )}
 

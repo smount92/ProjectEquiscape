@@ -1,11 +1,25 @@
 import React from"react";
 import { formatMoney } from "@/lib/money/format";
+import { shareOf } from "@/lib/vault/setPurchase";
+
+/** A set purchase this horse belongs to (224): the whole price, how many share it, what it was. */
+export interface SetInfo {
+ total: number;
+ members: number;
+ label: string | null;
+}
+
+/** What one horse paid: its share of a set, or its own price. */
+function purchaseOf(vault: { purchase_price: number | null } | null | undefined, set: SetInfo | undefined): number | null {
+ if (!vault || vault.purchase_price == null) return null;
+ return set ? shareOf(Number(vault.purchase_price), set.members) : Number(vault.purchase_price);
+}
 import { Document, Page, View, Text, Image, StyleSheet } from"@react-pdf/renderer";
 
 /* ═══════════════════════════════════════════════════════════════
  Types
  ═══════════════════════════════════════════════════════════════ */
-interface InsuranceHorse {
+export interface InsuranceHorse {
  id: string;
  custom_name: string;
  finish_type: string | null;
@@ -35,6 +49,8 @@ export interface InsuranceReportProps {
  marketValueMap?: Map<string, number>;
  /** The owner's preferred currency symbol (Settings → currency). */
  currencySymbol?: string;
+ /** horse id → the set it was bought in (224). */
+ setInfo?: Map<string, SetInfo>;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -341,8 +357,8 @@ function CoverPage({
 /* ═══════════════════════════════════════════════════════════════
  Summary Table Page
  ═══════════════════════════════════════════════════════════════ */
-function SummaryPage({ horses, generatedAt, currencySymbol }: { horses: InsuranceHorse[]; generatedAt: string; currencySymbol: string }) {
- const totalPurchase = horses.reduce((sum, h) => sum + (h.financial_vault?.purchase_price || 0), 0);
+function SummaryPage({ horses, generatedAt, currencySymbol, setInfo }: { horses: InsuranceHorse[]; generatedAt: string; currencySymbol: string; setInfo: Map<string, SetInfo> }) {
+ const totalPurchase = horses.reduce((sum, h) => sum + (purchaseOf(h.financial_vault, setInfo.get(h.id)) || 0), 0);
  const totalValue = horses.reduce((sum, h) => sum + (h.financial_vault?.estimated_current_value || 0), 0);
 
  return (
@@ -366,7 +382,7 @@ function SummaryPage({ horses, generatedAt, currencySymbol }: { horses: Insuranc
  <Text style={[s.tableCell, { width:"30%" }]}>{horse.custom_name}</Text>
  <Text style={[s.tableCell, { width:"22%" }]}>{horse.catalog_items?.title ||"—"}</Text>
  <Text style={[s.tableCell, { width:"14%" }]}>{horse.condition_grade ||"—"}</Text>
- <Text style={[s.tableCellMoney, { width:"17%" }]}>{fmt$(vault?.purchase_price, currencySymbol)}</Text>
+ <Text style={[s.tableCellMoney, { width:"17%" }]}>{fmt$(purchaseOf(vault, setInfo.get(horse.id)), currencySymbol)}</Text>
  <Text style={[s.tableCellMoney, { width:"17%" }]}>{fmt$(vault?.estimated_current_value, currencySymbol)}</Text>
  </View>
  );
@@ -393,12 +409,14 @@ function DetailPage({
  generatedAt,
  marketValue,
  currencySymbol,
+ set,
 }: {
  horse: InsuranceHorse;
  thumbnailUrl?: string;
  generatedAt: string;
  marketValue?: number;
  currencySymbol: string;
+ set: SetInfo | undefined;
 }) {
  const vault = horse.financial_vault;
  const ref = horse.catalog_items;
@@ -437,7 +455,10 @@ function DetailPage({
  </View>
  <View style={s.detailField}>
  <Text style={s.detailFieldLabel}>Purchase Price</Text>
- <Text style={s.detailFieldValue}>{fmt$(vault?.purchase_price, currencySymbol)}</Text>
+ <Text style={s.detailFieldValue}>
+ {fmt$(purchaseOf(vault, set), currencySymbol)}
+ {set ? ` (share of a ${fmt$(set.total, currencySymbol)} set of ${set.members}${set.label ? `: ${set.label}` : ""})` : ""}
+ </Text>
  </View>
  <View style={s.detailField}>
  <Text style={s.detailFieldLabel}>Purchase Date</Text>
@@ -481,6 +502,7 @@ function DetailPage({
 export function InsuranceReportDocument(props: InsuranceReportProps) {
  const { owner, horses, thumbnailMap, generatedAt, tier, marketValueMap } = props;
  const currencySymbol = (props.currencySymbol ?? "").trim() || "$";
+ const setInfo = props.setInfo ?? new Map<string, SetInfo>();
  const totalValue = horses.reduce((sum, h) => sum + (h.financial_vault?.estimated_current_value || 0), 0);
 
  return (
@@ -491,7 +513,7 @@ export function InsuranceReportDocument(props: InsuranceReportProps) {
  creator="Model Horse Hub"
  >
  <CoverPage owner={owner} totalModels={horses.length} totalValue={totalValue} generatedAt={generatedAt} currencySymbol={currencySymbol} />
- <SummaryPage horses={horses} generatedAt={generatedAt} currencySymbol={currencySymbol} />
+ <SummaryPage horses={horses} generatedAt={generatedAt} currencySymbol={currencySymbol} setInfo={setInfo} />
  {horses.map((horse) => (
  <DetailPage
  key={horse.id}
@@ -500,6 +522,7 @@ export function InsuranceReportDocument(props: InsuranceReportProps) {
  generatedAt={generatedAt}
  marketValue={tier === 'pro' && horse.catalog_id ? marketValueMap?.get(horse.catalog_id) : undefined}
  currencySymbol={currencySymbol}
+ set={setInfo.get(horse.id)}
  />
  ))}
  </Document>

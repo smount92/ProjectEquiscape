@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { formatMoney } from "@/lib/money/format";
+import { isMissingSetColumn, shareOf } from "@/lib/vault/setPurchase";
 import { escapeCSV } from "@/lib/utils/csv";
 import { NextResponse } from "next/server";
 
@@ -20,19 +21,24 @@ export async function GET() {
     const currencySymbol = ((me as { currency_symbol?: string | null } | null)?.currency_symbol || "$").trim() || "$";
 
     // Fetch all horses with joined reference data, collection, and financial vault
-    const { data: rawHorses, error } = await supabase
-        .from("user_horses")
-        .select(
-            `
+    const selectHorses = (withSets: boolean) =>
+        supabase
+            .from("user_horses")
+            .select(
+                `
       id, custom_name, finish_type, condition_grade, sculptor, trade_status, listing_price, created_at, asset_category,
       catalog_items:catalog_id(title, maker, item_type, attributes),
       user_collections(name),
-      financial_vault(purchase_price, estimated_current_value, insurance_notes)
+      financial_vault(purchase_price, estimated_current_value, insurance_notes${withSets ? ", purchase_group_id, purchase_group_label" : ""})
     `
-        )
-        .eq("owner_id", user.id)
-        .is("deleted_at", null)
-        .order("custom_name");
+            )
+            .eq("owner_id", user.id)
+            .is("deleted_at", null)
+            .order("custom_name");
+    // Set columns are migration 224; read without them until the paste.
+    let horsesResult = await selectHorses(true);
+    if (horsesResult.error && isMissingSetColumn(horsesResult.error)) horsesResult = await selectHorses(false);
+    const { data: rawHorses, error } = horsesResult;
 
     if (error) {
         return NextResponse.json(
@@ -43,6 +49,12 @@ export async function GET() {
 
     const horses = rawHorses ?? [];
     const horseIds = horses.map((h) => h.id as string);
+    // Set sizes, so a member's purchase column is its share (224).
+    const setSizes = new Map<string, number>();
+    for (const h of horses as { financial_vault?: { purchase_group_id?: string | null } | null }[]) {
+        const g = h.financial_vault?.purchase_group_id;
+        if (g) setSizes.set(g, (setSizes.get(g) ?? 0) + 1);
+    }
     const horseNameById = new Map(
         horses.map((h) => [h.id as string, h.custom_name as string])
     );
@@ -96,6 +108,7 @@ export async function GET() {
         "Marketplace Status",
         "Listing Price",
         "Purchase Price",
+        "Set Purchase",
         "Estimated Value",
         "Insurance Notes",
         "Date Added",
@@ -103,8 +116,17 @@ export async function GET() {
     ];
 
     // Build CSV rows
+    type ExportVault = {
+        purchase_price: number | null;
+        estimated_current_value: number | null;
+        insurance_notes: string | null;
+        purchase_group_id?: string | null;
+        purchase_group_label?: string | null;
+    };
     const rows = horses.map((horse) => {
-        const vault = horse.financial_vault;
+        // The set columns are 224; the generated types lag the paste.
+        const vault = (horse.financial_vault ?? null) as unknown as ExportVault | null;
+        const setSize = vault?.purchase_group_id ? (setSizes.get(vault.purchase_group_id) ?? 1) : 1;
 
         return [
             escapeCSV(horse.custom_name),
@@ -119,7 +141,18 @@ export async function GET() {
             escapeCSV(horse.user_collections?.name),
             escapeCSV(horse.trade_status || "Not for Sale"),
             horse.listing_price ? formatMoney(Number(horse.listing_price), currencySymbol, { decimals: 2 }) : "",
-            vault?.purchase_price ? formatMoney(Number(vault.purchase_price), currencySymbol, { decimals: 2 }) : "",
+            vault?.purchase_price
+                ? formatMoney(
+                      vault.purchase_group_id ? shareOf(Number(vault.purchase_price), setSize) : Number(vault.purchase_price),
+                      currencySymbol,
+                      { decimals: 2 },
+                  )
+                : "",
+            vault?.purchase_group_id
+                ? escapeCSV(
+                      `${vault.purchase_group_label || "Set"} (${formatMoney(Number(vault.purchase_price ?? 0), currencySymbol, { decimals: 2 })} for ${setSize})`,
+                  )
+                : "",
             vault?.estimated_current_value
                 ? formatMoney(Number(vault.estimated_current_value), currencySymbol, { decimals: 2 })
                 : "",

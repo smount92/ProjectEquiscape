@@ -1390,6 +1390,12 @@ const PENDING_MIGRATIONS: MigrationSpec[] = [
       why: "Same function, same columns, new ORDER BY — nothing to select. Verify: type sherm in the reference picker; Sherman Morgan should lead.",
     },
   },
+  {
+    id: "224",
+    title: "Set purchases",
+    summary: "financial_vault.purchase_group_id + label; get_stable_summary counts a set's price once (equal shares).",
+    probe: { kind: "column", table: "financial_vault", column: "purchase_group_id" },
+  },
 ];
 
 export interface MigrationStatusRow {

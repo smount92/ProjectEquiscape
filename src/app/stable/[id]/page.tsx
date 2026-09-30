@@ -42,6 +42,7 @@ import { PARCHMENT_INK } from"@/lib/theme/parchment";
 import { getHorseViewStats, viewStatsLabel } from"@/lib/metrics/sellerViews";
 import { resinIdentityFrom, resinMakeupLine } from "@/lib/passport/resinIdentity";
 import { colorText, readPendingColumns } from "@/lib/passport/pendingColumns";
+import { getSetPurchase } from "@/app/actions/set-purchase";
 
 
 // Types
@@ -183,6 +184,8 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  .single<VaultData>();
 
  const vault = rawVault ?? null;
+ // The set this horse was bought in (224); null before the paste or when solo.
+ const setPurchase = await getSetPurchase(horseId).catch(() => null);
 
  // Fetch owner's currency symbol
  const { data: ownerProfile } = await supabase.from("users").select("currency_symbol").eq("id", user.id).single();
@@ -885,7 +888,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  )}
 
  {/* Financial Vault */}
- <VaultReveal vault={vault} currencySymbol={currencySymbol} />
+ <VaultReveal vault={vault} currencySymbol={currencySymbol} setPurchase={setPurchase} />
 
  {/* Actions */}
  <div className="flex flex-wrap gap-4">

@@ -1,7 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import { renderToBuffer } from "@react-pdf/renderer";
-import { InsuranceReportDocument } from "@/lib/pdf/InsuranceReport";
+import { InsuranceReportDocument, type InsuranceHorse, type SetInfo } from "@/lib/pdf/InsuranceReport";
+import { isMissingSetColumn } from "@/lib/vault/setPurchase";
 import { getUserTier, isPro } from "@/lib/auth";
 import { getAdminClient } from "@/lib/supabase/admin";
 
@@ -13,17 +14,38 @@ export async function GET() {
     try {
         const tier = await getUserTier();
 
-        // Fetch all horses with vault data
-        const { data: horses } = await supabase
-            .from("user_horses")
-            .select(`
+        // Fetch all horses with vault data (set columns are 224; read
+        // without them until the paste).
+        const selectHorses = (withSets: boolean) =>
+            supabase
+                .from("user_horses")
+                .select(`
                 id, custom_name, finish_type, condition_grade, trade_status, created_at, catalog_id,
                 catalog_items:catalog_id(title, maker, scale),
-                financial_vault(purchase_price, purchase_date, estimated_current_value, insurance_notes)
+                financial_vault(purchase_price, purchase_date, estimated_current_value, insurance_notes${withSets ? ", purchase_group_id, purchase_group_label" : ""})
             `)
-            .eq("owner_id", user.id)
-            .is("deleted_at", null)
-            .order("custom_name");
+                .eq("owner_id", user.id)
+                .is("deleted_at", null)
+                .order("custom_name");
+        let horsesResult = await selectHorses(true);
+        if (horsesResult.error && isMissingSetColumn(horsesResult.error)) horsesResult = await selectHorses(false);
+        const horses = horsesResult.data;
+
+        // One entry per set: total, size, label — the detail page names it
+        // and the summary counts the set once through per-horse shares.
+        const setInfo = new Map<string, SetInfo>();
+        {
+            const sizes = new Map<string, number>();
+            for (const h of (horses ?? []) as { financial_vault?: { purchase_group_id?: string | null } | null }[]) {
+                const g = h.financial_vault?.purchase_group_id;
+                if (g) sizes.set(g, (sizes.get(g) ?? 0) + 1);
+            }
+            for (const h of (horses ?? []) as { id: string; financial_vault?: { purchase_price: number | null; purchase_group_id?: string | null; purchase_group_label?: string | null } | null }[]) {
+                const g = h.financial_vault?.purchase_group_id;
+                if (!g) continue;
+                setInfo.set(h.id, { total: Number(h.financial_vault?.purchase_price ?? 0), members: sizes.get(g) ?? 1, label: h.financial_vault?.purchase_group_label ?? null });
+            }
+        }
 
         // Fetch owner profile for report header. full_name + email are
         // column-REVOKE'd from the authenticated role (migration 133), so read
@@ -76,12 +98,14 @@ export async function GET() {
                     full_name: null,
                     email: user.email || "",
                 },
-                horses: horses || [],
+                // Two select shapes (with / without the 224 columns); the report reads either.
+                horses: (horses ?? []) as unknown as InsuranceHorse[],
                 thumbnailMap,
                 generatedAt: new Date().toISOString(),
                 tier,
                 marketValueMap,
                 currencySymbol: (profile as { currency_symbol?: string | null } | null)?.currency_symbol || "$",
+                setInfo,
             })
         );
 
