@@ -31,6 +31,7 @@ import type { FieldProblem } from "@/lib/forms/types";
 import type { AssetCategory } from "@/lib/types/database";
 import { colorText, isMissingPendingColumn, withoutPendingColumns } from "@/lib/passport/pendingColumns";
 import { canonicalShowbio } from "@/lib/showbio/vocab";
+import { addHorseToFolder, setHorsesFolders } from "@/lib/collections/membership";
 
 /**
  * The server-side half of the form engine.
@@ -994,21 +995,30 @@ export async function bulkUpdateHorses(
     }
 
     const updateObj: Record<string, unknown> = {};
-    if (updates.collectionId !== undefined) updateObj.collection_id = updates.collectionId;
     if (updates.tradeStatus) updateObj.trade_status = updates.tradeStatus;
     if (updates.visibility) updateObj.visibility = updates.visibility;
+    const movesFolder = updates.collectionId !== undefined;
 
-    if (Object.keys(updateObj).length === 0) {
+    if (Object.keys(updateObj).length === 0 && !movesFolder) {
         return { success: false, error: "No updates specified." };
     }
 
-    const { error } = await supabase
-        .from("user_horses")
-        .update(updateObj)
-        .in("id", horseIds)
-        .eq("owner_id", user.id);
+    // A bulk move used to write only the legacy column, which the public
+    // profile never read — the junction and its mirror now move together.
+    if (movesFolder) {
+        const moved = await setHorsesFolders(supabase, horseIds, updates.collectionId ? [updates.collectionId] : []);
+        if (moved.error) return { success: false, error: moved.error };
+    }
 
-    if (error) return { success: false, error: error.message };
+    if (Object.keys(updateObj).length > 0) {
+        const { error } = await supabase
+            .from("user_horses")
+            .update(updateObj)
+            .in("id", horseIds)
+            .eq("owner_id", user.id);
+
+        if (error) return { success: false, error: error.message };
+    }
 
     revalidatePath("/dashboard");
     return { success: true, count: horseIds.length };
@@ -1193,6 +1203,8 @@ export async function quickAddHorse(data: {
         .single<{ id: string }>();
 
     if (error || !horse) return { success: false, error: error?.message || "Failed to add." };
+    // The folder is recorded in the junction as well as the mirror column.
+    if (input.collectionId) await addHorseToFolder(supabase, horse.id, input.collectionId);
 
     revalidatePath("/dashboard");
     if (input.isPublic) revalidateTag("public_horses", "max");

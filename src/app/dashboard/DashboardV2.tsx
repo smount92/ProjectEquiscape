@@ -190,6 +190,9 @@ export default async function DashboardV2({
                             <div className="mt-4 flex flex-wrap gap-2 border-t border-input pt-4">
                                 <ExportButton />
                                 <InsuranceReportButton />
+                                <Link href="/stable/collections" className="inline-flex items-center gap-1.5 rounded-md border border-input px-3 py-1.5 text-sm font-medium text-foreground no-underline hover:bg-black/[0.04]" id="folders-link">
+                                    <FolderOpen size={14} strokeWidth={1.5} /> Folders
+                                </Link>
                             </div>
                         </div>
                     )}
@@ -207,6 +210,9 @@ export default async function DashboardV2({
                         <div className="bg-card rounded-lg border border-input p-6 shadow-md transition-all">
                             <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest text-secondary-foreground uppercase">
                                 <FolderOpen size={14} strokeWidth={1.5} /> Collections
+                                <Link href="/stable/collections" className="text-forest ml-auto text-[0.7rem] font-semibold tracking-normal normal-case hover:underline" id="manage-folders">
+                                    Manage
+                                </Link>
                             </h3>
                             <div className="flex flex-col gap-1">
                                 {summary.collections.map((col) => (

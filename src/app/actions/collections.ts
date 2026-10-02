@@ -3,6 +3,7 @@
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { horseFolderIds, setHorsesFolders } from "@/lib/collections/membership";
 
 /**
  * Get all collections for the current user with horse counts.
@@ -66,6 +67,9 @@ export async function updateCollectionAction(
 
     if (error) return { success: false, error: error.message };
     revalidatePath(`/stable/collection/${collectionId}`);
+    revalidatePath("/stable/collections");
+    revalidatePath("/dashboard");
+    revalidatePath("/stable/collections");
     return { success: true };
 }
 
@@ -99,6 +103,7 @@ export async function deleteCollectionAction(
 
     if (error) return { success: false, error: error.message };
     revalidatePath("/dashboard");
+    revalidatePath("/stable/collections");
     return { success: true };
 }
 
@@ -107,12 +112,8 @@ export async function deleteCollectionAction(
  */
 export async function getHorseCollections(horseId: string): Promise<string[]> {
     const supabase = await createClient();
-    const { data } = await supabase
-        .from("horse_collections")
-        .select("collection_id")
-        .eq("horse_id", horseId);
-
-    return (data || []).map((r: { collection_id: string }) => r.collection_id);
+    // Junction ∪ the legacy column, so a horse filed by an old path still shows its folder.
+    return horseFolderIds(supabase, horseId);
 }
 
 /**
@@ -134,32 +135,11 @@ export async function setHorseCollections(
 
     if (!horse) return { success: false, error: "Horse not found or not yours." };
 
-    // Delete all existing assignments
-    await supabase
-        .from("horse_collections")
-        .delete()
-        .eq("horse_id", horseId);
-
-    // Insert new assignments
-    if (collectionIds.length > 0) {
-        const inserts = collectionIds.map(cid => ({
-            horse_id: horseId,
-            collection_id: cid,
-        }));
-
-        const { error } = await supabase
-            .from("horse_collections")
-            .insert(inserts);
-
-        if (error) return { success: false, error: error.message };
-    }
-
-    // Also update legacy FK to first collection (for backward compat reads)
-    await supabase
-        .from("user_horses")
-        .update({ collection_id: collectionIds[0] || null })
-        .eq("id", horseId);
+    // Junction and its mirror column move together (lib/collections/membership).
+    const result = await setHorsesFolders(supabase, [horseId], collectionIds);
+    if (result.error) return { success: false, error: result.error };
 
     revalidatePath("/dashboard");
+    revalidatePath("/stable/collections");
     return { success: true };
 }

@@ -21,6 +21,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { groupSizes, isMissingSetColumn, vaultValueOf } from "@/lib/vault/setPurchase";
+import { folderHorseIds } from "@/lib/collections/membership";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 
@@ -71,25 +72,8 @@ async function resolveIdConstraint(
     let constraint: Set<string> | null = null;
 
     if (filters.collection) {
-        // Dual-source membership: junction table ∪ legacy FK.
-        const [junction, legacy] = await Promise.all([
-            supabase
-                .from("horse_collections")
-                .select("horse_id")
-                .eq("collection_id", filters.collection)
-                .limit(ID_CONSTRAINT_CAP),
-            supabase
-                .from("user_horses")
-                .select("id")
-                .eq("owner_id", userId)
-                .eq("collection_id", filters.collection)
-                .is("deleted_at", null)
-                .limit(ID_CONSTRAINT_CAP),
-        ]);
-        constraint = new Set<string>([
-            ...((junction.data ?? []) as { horse_id: string }[]).map((r) => r.horse_id),
-            ...((legacy.data ?? []) as { id: string }[]).map((r) => r.id),
-        ]);
+        // Membership has one reader: lib/collections/membership.
+        constraint = new Set<string>(await folderHorseIds(supabase, userId, filters.collection, ID_CONSTRAINT_CAP));
     }
 
     if (filters.hasRecords) {

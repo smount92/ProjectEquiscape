@@ -1405,6 +1405,15 @@ const PENDING_MIGRATIONS: MigrationSpec[] = [
       why: "Re-creates a function's return shape — nothing to select. Verify: a public horse's record on a logged-out passport shows the field size.",
     },
   },
+  {
+    id: "226",
+    title: "Folders: one source",
+    summary: "Backfills horse_collections from the legacy column and lets visitors read links for public horses in public folders.",
+    probe: {
+      kind: "none",
+      why: "A data backfill and a row policy — nothing to select. Verify: every horse you moved in bulk shows in its folder on your public profile.",
+    },
+  },
 ];
 
 export interface MigrationStatusRow {
