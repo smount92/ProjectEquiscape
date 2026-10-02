@@ -1,5 +1,6 @@
 "use server";
 
+import { fieldSize } from "@/lib/records/placingLine";
 import { createClient } from "@/lib/supabase/server";
 import { safeHttpUrl } from "@/lib/papers/validate";
 import { validateQualifier, type QualifierValue } from "@/lib/records/qualifiers";
@@ -49,6 +50,8 @@ export async function addShowRecord(data: {
     division?: string | null;
     className?: string | null;
     placing?: string | null;
+    /** Horses in the class, so the placing reads "3rd of 12". */
+    totalEntries?: number | string | null;
     ribbonColor?: string | null;
     judgeName?: string | null;
     isNan?: boolean;
@@ -103,6 +106,7 @@ export async function addShowRecord(data: {
         is_nan: data.isNan ?? false,
         notes: data.notes?.trim() || null,
         class_name: data.className?.trim() || null,
+        total_entries: fieldSize(data.totalEntries),
         show_location: data.showLocation?.trim() || null,
         section_name: data.sectionName?.trim() || null,
         award_category: data.awardCategory?.trim() || null,
@@ -149,6 +153,7 @@ export async function updateShowRecord(
         division?: string | null;
         className?: string | null;
         placing?: string | null;
+        totalEntries?: number | string | null;
         ribbonColor?: string | null;
         judgeName?: string | null;
         isNan?: boolean;
@@ -182,6 +187,7 @@ export async function updateShowRecord(
     if (data.isNan !== undefined) updateData.is_nan = data.isNan;
     if (data.notes !== undefined) updateData.notes = data.notes?.trim() || null;
     if (data.className !== undefined) updateData.class_name = data.className?.trim() || null;
+    if (data.totalEntries !== undefined) updateData.total_entries = fieldSize(data.totalEntries);
     if (data.showLocation !== undefined) updateData.show_location = data.showLocation?.trim() || null;
     if (data.sectionName !== undefined) updateData.section_name = data.sectionName?.trim() || null;
     if (data.awardCategory !== undefined) updateData.award_category = data.awardCategory?.trim() || null;

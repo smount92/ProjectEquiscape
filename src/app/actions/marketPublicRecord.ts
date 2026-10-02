@@ -84,7 +84,7 @@ async function fetchViaSession(horseId: string): Promise<MarketRecordDetailRow[]
         const { data, error } = await supabase
             .from("show_records")
             .select(
-                'id, show_name, show_id, show_date, show_date_text, division, class_name, "placing", ribbon_color, verification_tier, is_nan',
+                'id, show_name, show_id, show_date, show_date_text, division, class_name, "placing", ribbon_color, verification_tier, is_nan, total_entries',
             )
             .eq("horse_id", horseId)
             .order("show_date", { ascending: false, nullsFirst: false })
@@ -103,6 +103,7 @@ async function fetchViaSession(horseId: string): Promise<MarketRecordDetailRow[]
             ribbonColor: r.ribbon_color,
             verificationTier: r.verification_tier,
             isNan: r.is_nan === true,
+            totalEntries: (r as { total_entries?: number | null }).total_entries ?? null,
         }));
     } catch {
         return [];

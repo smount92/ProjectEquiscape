@@ -8,8 +8,8 @@
  * Day-mode trap: all text on the band uses the --leather-text ramp.
  */
 
-import Link from "next/link";
 import type { ReactNode } from "react";
+import BackLink from "@/components/nav/BackLink";
 
 export default function CatalogSubMasthead({
     icon,
@@ -28,13 +28,13 @@ export default function CatalogSubMasthead({
 }) {
     return (
         <div className="leather-band stitched relative mb-6 rounded-xl px-6 py-5">
-            <Link
+            <BackLink
                 href={backHref}
                 className="relative z-[1] mb-2 inline-block font-serif text-[0.7rem] tracking-[0.18em] uppercase no-underline hover:underline"
                 style={{ color: "var(--leather-text-muted)" }}
             >
                 ← {backLabel}
-            </Link>
+            </BackLink>
             <div className="flex flex-wrap items-center gap-4">
                 <span
                     aria-hidden="true"

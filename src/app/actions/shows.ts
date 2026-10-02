@@ -1002,6 +1002,7 @@ interface ShowHistoryRecord {
     horseId: string;
     showName: string;
     placing: string;
+    totalEntries?: number | null;
     ribbonColor: string | null;
     showDate: string;
 }
@@ -1027,7 +1028,7 @@ export async function getShowHistory(): Promise<{
     // fix is a grouped aggregate RPC (migration), not a cap.
     const { data, error } = await supabase
         .from("show_records")
-        .select("horse_id, show_name, placing, ribbon_color, show_date")
+        .select("horse_id, show_name, placing, total_entries, ribbon_color, show_date")
         .eq("user_id", user.id)
         .order("show_date", { ascending: false });
 
@@ -1046,7 +1047,7 @@ export async function getShowHistory(): Promise<{
     const yearMap = new Map<number, ShowHistoryRecord[]>();
     const showNames = new Set<string>();
 
-    for (const r of data as { horse_id: string; show_name: string; placing: string; ribbon_color: string | null; show_date: string }[]) {
+    for (const r of data as { horse_id: string; show_name: string; placing: string; total_entries?: number | null; ribbon_color: string | null; show_date: string }[]) {
         const year = new Date(r.show_date).getFullYear();
         const records = yearMap.get(year) || [];
         records.push({
@@ -1054,6 +1055,7 @@ export async function getShowHistory(): Promise<{
             horseId: r.horse_id,
             showName: r.show_name,
             placing: r.placing,
+            totalEntries: r.total_entries ?? null,
             ribbonColor: r.ribbon_color,
             showDate: r.show_date,
         });

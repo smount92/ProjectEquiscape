@@ -1,5 +1,6 @@
 "use client";
 
+import { placingWithField } from "@/lib/records/placingLine";
 import { useState } from"react";
 import Link from"next/link";
 
@@ -8,6 +9,7 @@ interface ShowHistoryRecord {
  horseId: string;
  showName: string;
  placing: string;
+ totalEntries?: number | null;
  ribbonColor: string | null;
  showDate: string;
 }
@@ -101,7 +103,7 @@ export default function ShowHistoryWidget({ years, totalShows, totalRibbons }: S
  {record.horseName}
  </Link>
  <span className="text-secondary-foreground overflow-hidden text-xs text-ellipsis whitespace-nowrap">
- {record.showName} · {record.placing}
+ {record.showName} · {placingWithField(record.placing, record.totalEntries)}
  </span>
  </div>
  </div>

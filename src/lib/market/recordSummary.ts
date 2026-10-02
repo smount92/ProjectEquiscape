@@ -169,6 +169,8 @@ export interface MarketRecordDetailRow extends RankableRecord {
     ribbonColor: string | null;
     verificationTier: string | null;
     isNan: boolean;
+    /** Horses in the class (total_entries), when known. */
+    totalEntries?: number | null;
 }
 
 /**

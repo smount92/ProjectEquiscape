@@ -31,6 +31,8 @@ interface PublicRecordRow {
     ribbon_color: string | null;
     verification_tier: string | null;
     is_nan: boolean | null;
+    /** Migration 225; absent before the paste. */
+    total_entries?: number | null;
 }
 
 /**
@@ -59,6 +61,7 @@ export function mapPublicRecordRows(rows: unknown): MarketRecordDetailRow[] {
             ribbonColor: typeof row.ribbon_color === "string" ? row.ribbon_color : null,
             verificationTier: typeof row.verification_tier === "string" ? row.verification_tier : null,
             isNan: row.is_nan === true,
+            totalEntries: typeof row.total_entries === "number" ? row.total_entries : null,
         });
     }
     return records;

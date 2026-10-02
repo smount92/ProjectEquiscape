@@ -234,6 +234,7 @@ See [Adding a Migration](../guides/adding-a-migration.md) for the full guide.
 | 222 | `222_seller_terms_currency.sql` | get_public_seller_terms gains currency_symbol so listings price in the seller's own currency. |
 | 223 | `223_search_ranking.sql` | search_catalog_fuzzy ranks exact / prefix / word-prefix / containing titles above similarity. |
 | 224 | `224_set_purchases.sql` | financial_vault.purchase_group_id + purchase_group_label; get_stable_summary counts a set once via equal shares. |
+| 225 | `225_public_records_field_size.sql` | get_public_horse_records returns total_entries (the size of the field). |
 
 ---
 

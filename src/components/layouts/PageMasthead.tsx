@@ -11,8 +11,8 @@
  * (.text-engraved-light + inline leather-text vars), never default ink.
  */
 
-import Link from "next/link";
 import type { ReactNode } from "react";
+import BackLink from "@/components/nav/BackLink";
 
 export default function PageMasthead({
     icon,
@@ -37,14 +37,17 @@ export default function PageMasthead({
                 compact ? "px-5 py-4" : "px-6 py-5"
             }`}
         >
+            {/* BackLink, not a bare link: when the reader came from this
+                parent it returns them to it as they left it (filters,
+                scroll) through history; cold, it is an ordinary link. */}
             {backHref && (
-                <Link
+                <BackLink
                     href={backHref}
                     className="relative z-[1] mb-2 inline-block font-serif text-[0.7rem] tracking-[0.18em] uppercase no-underline hover:underline"
                     style={{ color: "var(--leather-text-muted)" }}
                 >
                     ← {backLabel}
-                </Link>
+                </BackLink>
             )}
             <div className="flex flex-wrap items-center gap-4">
                 {icon && (

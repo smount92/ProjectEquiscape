@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import Link from "next/link";
+import BackLink from "@/components/nav/BackLink";
 import RichText from "@/components/RichText";
 import MentionTextarea from "@/components/feed/MentionTextarea";
 import { PostHeader, ReactionBar, UserAvatar } from "@/components/social";
@@ -191,12 +191,12 @@ export default function ThreadView({
     return (
         <div>
             <div className="mb-3 flex items-center justify-between gap-2">
-                <Link
+                <BackLink
                     href={`/community/groups/${groupSlug}`}
                     className="text-muted-foreground hover:text-foreground text-sm no-underline"
                 >
                     ← Back to the notice board
-                </Link>
+                </BackLink>
                 {canPin && (
                     <div className="flex flex-wrap items-center gap-3">
                         <ThreadStatusControl postId={thread.id} status={thread.status ?? null} />

@@ -1396,6 +1396,15 @@ const PENDING_MIGRATIONS: MigrationSpec[] = [
     summary: "financial_vault.purchase_group_id + label; get_stable_summary counts a set's price once (equal shares).",
     probe: { kind: "column", table: "financial_vault", column: "purchase_group_id" },
   },
+  {
+    id: "225",
+    title: "Field size on public records",
+    summary: "get_public_horse_records returns total_entries, so a logged-out passport reads '3rd of 12'.",
+    probe: {
+      kind: "none",
+      why: "Re-creates a function's return shape — nothing to select. Verify: a public horse's record on a logged-out passport shows the field size.",
+    },
+  },
 ];
 
 export interface MigrationStatusRow {

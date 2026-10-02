@@ -320,6 +320,7 @@ export default async function PublicPassportPage({
  competitionLevel: r.competition_level,
  showDateText: r.show_date_text,
  verificationTier: r.verification_tier,
+ totalEntries: (r as { total_entries?: number | null }).total_entries ?? null,
  ...qualifierDisplayFields(r as Record<string, unknown>),
  scoreTotal: (r as { score_total?: number | string | null }).score_total == null ? null : Number((r as { score_total?: number | string | null }).score_total),
  entryPhotoUrl: ((r as { entry_photo_url?: string | null }).entry_photo_url) ?? null,

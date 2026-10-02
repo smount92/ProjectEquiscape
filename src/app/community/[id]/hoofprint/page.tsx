@@ -1,3 +1,4 @@
+import { placingWithField } from "@/lib/records/placingLine";
 import { createClient } from"@/lib/supabase/server";
 import { notFound } from"next/navigation";
 import { getHoofprint } from"@/app/actions/hoofprint";
@@ -46,7 +47,7 @@ export default async function HoofprintReportPage({ params }: { params: Promise<
 
  const { data: rawRecords } = await supabase
  .from("show_records")
- .select('show_name, show_date, division,"placing", ribbon_color')
+ .select('show_name, show_date, division,"placing", ribbon_color, total_entries')
  .eq("horse_id", horseId)
  .order("show_date", { ascending: false, nullsFirst: false });
 
@@ -117,7 +118,7 @@ export default async function HoofprintReportPage({ params }: { params: Promise<
     </span>
     <span className="font-semibold">{r.show_name}</span>
     {r.division && <span className="text-muted-foreground">— {r.division}</span>}
-    {r.placing && <span className="text-muted-foreground">({r.placing})</span>}
+    {r.placing && <span className="text-muted-foreground">({placingWithField(r.placing, (r as { total_entries?: number | null }).total_entries)})</span>}
     {r.show_date && (
      <span className="text-muted-foreground ml-auto text-xs">
      {new Date(r.show_date).toLocaleDateString("en-US", {

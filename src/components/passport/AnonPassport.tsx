@@ -1,3 +1,4 @@
+import { placingWithField } from "@/lib/records/placingLine";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createAnonClient } from "@/lib/supabase/anon";
@@ -153,7 +154,7 @@ function AnonRecordRow({ record }: { record: MarketRecordDetailRow }) {
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                 <span className={champion ? "font-serif font-bold text-warning" : "font-semibold text-foreground"}>
                     {champion ? "🏆 " : "🎖️ "}
-                    {record.placing || "Shown"}
+                    {placingWithField(record.placing, record.totalEntries) || "Shown"}
                 </span>
                 {record.isNan && (
                     <span className="inline-flex items-center gap-[2px] rounded-sm bg-warning/15 px-1.5 py-[1px] text-[0.65rem] font-bold tracking-wider text-warning uppercase">

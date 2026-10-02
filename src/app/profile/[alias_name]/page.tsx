@@ -1,3 +1,4 @@
+import { placingWithField } from "@/lib/records/placingLine";
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -394,7 +395,7 @@ export default async function ProfilePage({
     const { data: rawRecords } = await supabase
         .from("show_records")
         .select(
-            "id, horse_id, show_name, show_id, class_name, division, placing, show_date, is_nan_qualifying, nan_card_type, created_at, user_horses!inner(custom_name, visibility)",
+            "id, horse_id, show_name, show_id, class_name, division, placing, total_entries, show_date, is_nan_qualifying, nan_card_type, created_at, user_horses!inner(custom_name, visibility)",
         )
         .eq("user_id", profileUser.id)
         .eq("user_horses.visibility", "public")
@@ -410,6 +411,7 @@ export default async function ProfilePage({
         showId: r.show_id,
         className: r.class_name || r.division || null,
         placing: r.placing,
+        totalEntries: (r as { total_entries?: number | null }).total_entries ?? null,
         showDate: r.show_date,
         isNanQualifying: r.is_nan_qualifying ?? false,
         nanCardType: r.nan_card_type,
@@ -514,7 +516,7 @@ export default async function ProfilePage({
             if (nanRec) {
                 starLine = `★ NAN Qualified${nanRec.nanCardType ? ` — ${nanRec.nanCardType} card` : ""}`;
             } else if (placedRec) {
-                starLine = `★ ${placedRec.placing} — ${placedRec.showName}`;
+                starLine = `★ ${placingWithField(placedRec.placing, placedRec.totalEntries)} — ${placedRec.showName}`;
             } else if (horseRecords.length > 0) {
                 starLine = `★ ${horseRecords.length} show record${horseRecords.length !== 1 ? "s" : ""}`;
             }
@@ -1033,7 +1035,7 @@ export default async function ProfilePage({
                                                                 : "stamp stamp-red"
                                                         }
                                                     >
-                                                        {rec.placing}
+                                                        {placingWithField(rec.placing, rec.totalEntries)}
                                                     </span>
                                                 ) : rec.isNanQualifying ? (
                                                     <span className="stamp">NAN</span>

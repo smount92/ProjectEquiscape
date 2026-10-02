@@ -7,6 +7,8 @@ import { useRouter, usePathname } from"next/navigation";
 import { useEffect, useState, useCallback, useRef } from"react";
 import NotificationBell from"@/components/NotificationBell";
 import ThemeToggle from"@/components/ThemeToggle";
+import NavTrail from "@/components/nav/NavTrail";
+import AppBackButton from "@/components/nav/AppBackButton";
 import { getHeaderData } from"@/app/actions/header";
 import { onNotFoundPage } from "@/lib/notFoundPage";
 import { useNotifications } from "@/lib/context/NotificationProvider";
@@ -296,6 +298,10 @@ export default function Header() {
  className="leather-band sticky top-0 z-[100] flex h-[var(--header-height)] items-center justify-between px-8 py-0 transition-all max-sm:px-4"
  role="banner"
  >
+ {/* The session's navigation trail, and the installed app's Back
+     (a browser tab has its own; an app window has none). */}
+ <NavTrail />
+ <AppBackButton />
  <Link
  href={user ?"/dashboard" :"/"}
  className="text-foreground mr-6 flex shrink-0 items-center gap-2 text-lg font-extrabold tracking-[-0.02em] no-underline"

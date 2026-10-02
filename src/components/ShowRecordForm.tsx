@@ -46,6 +46,7 @@ interface ShowRecordFormProps {
  division: string | null;
  className: string | null;
  placing: string | null;
+ totalEntries?: number | null;
  ribbonColor: string | null;
  judgeName: string | null;
  isNan: boolean;
@@ -74,6 +75,7 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  const [division, setDivision] = useState(existingRecord?.division ??"");
  const [className, setClassName] = useState(existingRecord?.className ??"");
  const [placing, setPlacing] = useState(existingRecord?.placing ??"");
+ const [classSize, setClassSize] = useState(existingRecord?.totalEntries != null ? String(existingRecord.totalEntries) : "");
  const [ribbonColor, setRibbonColor] = useState(existingRecord?.ribbonColor ??"");
  const [judgeName, setJudgeName] = useState(existingRecord?.judgeName ??"");
  const [isNan, setIsNan] = useState(existingRecord?.isNan ?? false);
@@ -136,6 +138,8 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  division: division.trim() || null,
  className: className.trim() || null,
  placing: placing.trim() || null,
+ // Always sent, so clearing the box clears the count on edit.
+ totalEntries: classSize.trim() === "" ? null : Number(classSize),
  ribbonColor: ribbonColor || null,
  judgeName: judgeName.trim() || null,
  isNan,
@@ -230,6 +234,24 @@ export default function ShowRecordForm({ horseId, existingRecord, onSave, onCanc
  />
  <small className="text-muted-foreground text-[var(--font-size-xs)]">
  Individual class name (not division or section callbacks).
+ </small>
+ </div>
+
+ {/* Class size — what turns "3rd" into "3rd of 12" */}
+ <div className="mb-6">
+ <label htmlFor="show-record-class-size" className="text-foreground mb-1 block text-sm font-semibold">Horses in the class</label>
+ <Input
+ type="number"
+ inputMode="numeric"
+ min={1}
+ max={5000}
+ value={classSize}
+ onChange={(e) => setClassSize(e.target.value)}
+ placeholder="e.g. 12"
+ id="show-record-class-size"
+ />
+ <small className="text-muted-foreground text-[var(--font-size-xs)]">
+ Optional. With it, the placing reads &ldquo;3rd of 12&rdquo; on the passport.
  </small>
  </div>
 

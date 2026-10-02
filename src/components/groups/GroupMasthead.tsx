@@ -11,7 +11,7 @@
  * uses the --leather-text ramp.
  */
 
-import Link from "next/link";
+import BackLink from "@/components/nav/BackLink";
 import type { ReactNode } from "react";
 
 export default function GroupMasthead({
@@ -67,9 +67,9 @@ export default function GroupMasthead({
                 </div>
                 <div className="z-[1] ml-auto flex flex-wrap items-center gap-2">
                     {actions}
-                    <Link href="/community/groups" className="btn-ghostleather !px-4 !py-2 !text-xs">
+                    <BackLink href="/community/groups" className="btn-ghostleather !px-4 !py-2 !text-xs">
                         ← All Barns
-                    </Link>
+                    </BackLink>
                 </div>
             </div>
             {description && (

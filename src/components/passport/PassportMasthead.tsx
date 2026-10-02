@@ -13,6 +13,7 @@
 
 import Link from "next/link";
 
+import BackLink from "@/components/nav/BackLink";
 import { favoriteCountLabel } from "@/lib/favorites/publicCount";
 
 export default function PassportMasthead({
@@ -43,14 +44,17 @@ export default function PassportMasthead({
     const likes = typeof favoriteCount === "number" && favoriteCount > 0 ? favoriteCount : null;
     return (
         <div className="leather-band stitched relative mb-6 rounded-xl px-6 py-5" data-testid="passport-masthead">
+            {/* BackLink: back through history when the reader came from this
+                parent (a filtered market, a scrolled Show Ring), a plain
+                link otherwise. */}
             {backHref && (
-                <Link
+                <BackLink
                     href={backHref}
                     className="relative z-[1] mb-2 inline-block font-serif text-[0.7rem] tracking-[0.18em] uppercase no-underline hover:underline"
                     style={{ color: "var(--leather-text-muted)" }}
                 >
                     ← {backLabel}
-                </Link>
+                </BackLink>
             )}
             <p
                 className="m-0 font-serif text-[0.7rem] tracking-[0.18em] uppercase"

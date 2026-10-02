@@ -18,6 +18,7 @@
  */
 
 import Link from "next/link";
+import BackLink from "@/components/nav/BackLink";
 
 import type { ClassRoomData } from "@/lib/shows/gallery";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
@@ -117,12 +118,12 @@ export default function ClassRoomPage({ room }: { room: ClassRoomData }) {
                 {/* ── Masthead (leather = light text via the leather vars,
                      matching AlbumMasthead) ── */}
                 <header className="leather-panel stitched flex flex-col gap-2 rounded-lg p-5 sm:p-6">
-                    <Link
+                    <BackLink
                         href={`/shows/${room.show.id}`}
                         className="text-sm text-(--leather-text-muted) hover:underline"
                     >
                         ← {room.show.title}
-                    </Link>
+                    </BackLink>
                     <h1 className="m-0 font-serif text-xl font-bold tracking-tight text-(--leather-text) sm:text-2xl">
                         {room.room.classNumber ? `Class ${room.room.classNumber} — ` : ""}
                         {room.room.className}

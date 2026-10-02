@@ -1,5 +1,6 @@
 "use client";
 
+import PlacingText from "@/components/records/PlacingText";
 import { useState } from"react";
 import Link from"next/link";
 import { deleteShowRecord } from"@/app/actions/provenance";
@@ -33,6 +34,8 @@ interface ShowRecordDisplay {
  competitionLevel: string | null;
  showDateText: string | null;
  verificationTier: string | null;
+ /** How many horses were in the class (total_entries), when known. */
+ totalEntries?: number | null;
  /** Scored judging (206): the weighted total, when the class was scored. */
  scoreTotal?: number | null;
  /** The entry photo AS JUDGED (207) — frozen at publish; galleries change, records don't. */
@@ -210,7 +213,7 @@ export default function ShowRecordTimeline({ horseId, records: initialRecords, i
 
  <div className="text-secondary-foreground flex flex-wrap gap-x-6 gap-y-2 text-sm [&_span]:flex [&_span]:items-center [&_span]:gap-1">
  <span>📅 {formatShowDate(record.showDate, record.showDateText)}</span>
- {record.placing && <span>🎖️ {record.placing}</span>}
+ {record.placing && <span>🎖️ <PlacingText placing={record.placing} totalEntries={record.totalEntries} /></span>}
  {record.scoreTotal != null && <span title="Scored class — weighted rubric total">🎯 {record.scoreTotal}/100</span>}
  {record.entryPhotoUrl && (
  <a href={record.entryPhotoUrl} target="_blank" rel="noopener noreferrer" title="The photo as judged" className="shrink-0">
