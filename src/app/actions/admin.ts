@@ -3,6 +3,7 @@
 import { logger } from "@/lib/logger";
 import { revalidateTag } from "next/cache";
 import { ANNOUNCEMENTS_CACHE_TAG } from "@/lib/announcements";
+import { paddockPinRefusal } from "@/lib/feed/paddockPin";
 
 import { createClient } from "@supabase/supabase-js";
 import { createClient as createAuthClient } from "@/lib/supabase/server";
@@ -2125,14 +2126,14 @@ export async function setFeedPostPinned(
   const admin = getAdminSupabase();
   const { data: post, error: readError } = await admin
     .from("posts")
-    .select("id, parent_id")
+    .select("id, parent_id, group_id")
     .eq("id", postId)
     .maybeSingle();
   if (readError) return { success: false, error: readError.message };
   if (!post) return { success: false, error: "Post not found." };
-  if ((post as { parent_id: string | null }).parent_id) {
-    return { success: false, error: "Replies can't be pinned — pin the post itself." };
-  }
+  // Barn pins share the column but belong to the barn (lib/feed/paddockPin).
+  const refusal = paddockPinRefusal(post as { parent_id: string | null; group_id: string | null });
+  if (refusal) return { success: false, error: refusal };
 
   const { error } = await admin
     .from("posts")

@@ -2,6 +2,7 @@
 
 import { logger } from "@/lib/logger";
 import { catalogDisplayName } from "@/lib/catalog/displayName";
+import { isPaddockPin, type PinnableRow } from "@/lib/feed/paddockPin";
 
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -831,19 +832,22 @@ export async function getFeedStream(options?: {
 
     // ── Pinned announcements — held above the stream, first page only ──
     // Admin-pinned, context-free posts (setFeedPostPinned in admin.ts).
-    // They ride the same visibility/block filters as everything else and
-    // are excluded from the regular batches so they never appear twice.
+    // A barn's own pins share the column but belong to the barn board
+    // (lib/feed/paddockPin). They ride the same visibility/block filters
+    // as everything else and are excluded from the regular batches so
+    // they never appear twice.
     let pinnedRows: Record<string, unknown>[] = [];
     if (!cursor) {
         const { data: pinnedRaw } = await supabase
             .from("posts")
             .select(selectColumns)
             .is("parent_id", null)
+            .is("group_id", null)
             .eq("is_pinned", true)
             .order("created_at", { ascending: false })
             .limit(3);
         const eligible = ((pinnedRaw ?? []) as unknown as Record<string, unknown>[]).filter(
-            (r) => !blockedIds.has(r.author_id as string),
+            (r) => isPaddockPin(r as PinnableRow) && !blockedIds.has(r.author_id as string),
         );
         pinnedRows = await filterToGloballyVisible(supabase, eligible);
     }
@@ -1108,7 +1112,8 @@ async function hydratePostItems(
             id: p.id as string,
             source: "post" as const,
             kind,
-            isPinned: (p.is_pinned as boolean) || false,
+            // A barn pin flowing through the stream is not pinned HERE.
+            isPinned: isPaddockPin(p as PinnableRow),
             authorId: p.author_id as string,
             authorAlias: postUser?.alias_name ?? "Unknown",
             authorAvatarUrl: postUser?.avatar_url ?? null,
