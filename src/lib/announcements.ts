@@ -9,6 +9,16 @@
 
 import { createAnonClient } from "@/lib/supabase/anon";
 
+/**
+ * The announcement cache is cleared by tag the moment an admin creates
+ * or deletes one (actions/admin.ts), so the time window is only a
+ * backstop for a timed `ends_at`. It is inherited by every static page
+ * on the site (the slot lives in the root layout), so it must never be
+ * short — see AnnouncementSlot.
+ */
+export const ANNOUNCEMENTS_CACHE_TAG = "announcements";
+export const ANNOUNCEMENTS_CACHE_SECONDS = 3600;
+
 export interface Announcement {
     id: string;
     message: string;

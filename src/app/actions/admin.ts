@@ -1,6 +1,8 @@
 "use server";
 
 import { logger } from "@/lib/logger";
+import { revalidateTag } from "next/cache";
+import { ANNOUNCEMENTS_CACHE_TAG } from "@/lib/announcements";
 
 import { createClient } from "@supabase/supabase-js";
 import { createClient as createAuthClient } from "@/lib/supabase/server";
@@ -298,6 +300,9 @@ export async function createAnnouncement(input: {
     created_by: user.id,
   });
   if (error) return { success: false, error: error.message };
+  // The banner's cache is cleared here, not by a short time window —
+  // a short window would be inherited by every static page on the site.
+  revalidateTag(ANNOUNCEMENTS_CACHE_TAG, "max");
   return { success: true };
 }
 
@@ -307,6 +312,7 @@ export async function deleteAnnouncement(id: string): Promise<{ success: boolean
   const from = getAdminSupabase().from.bind(getAdminSupabase()) as unknown as AnnouncementsTable;
   const { error } = await from("announcements").delete().eq("id", id);
   if (error) return { success: false, error: error.message };
+  revalidateTag(ANNOUNCEMENTS_CACHE_TAG, "max");
   return { success: true };
 }
 
