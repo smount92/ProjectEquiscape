@@ -155,6 +155,13 @@ export const updateSectionSchema = z.object({
     name: z.string().trim().min(1, "Section name is required.").max(120),
 });
 
+/** Removing an empty node of the classlist. A node with entries is
+ *  never deleted — cancel the class instead, so results stay tied to
+ *  the classlist exactly as it ran. */
+export const deleteDivisionSchema = z.object({ divisionId: uuidSchema });
+export const deleteSectionSchema = z.object({ sectionId: uuidSchema });
+export const deleteClassSchema = z.object({ classId: uuidSchema });
+
 const classFields = {
     name: z.string().trim().min(1, "Class name is required.").max(120),
     classNumber: z.string().trim().max(20).optional(),

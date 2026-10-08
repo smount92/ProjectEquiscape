@@ -134,6 +134,8 @@ export default async function SuggestionsPage({ searchParams }: Props) {
  ?"📗"
  : s.suggestion_type ==="photo"
  ?"📸"
+ : s.suggestion_type ==="duplicate"
+ ?"🔁"
  :"🗑";
 
  const statusBadge =
@@ -159,6 +161,8 @@ export default async function SuggestionsPage({ searchParams }: Props) {
  changeSummary = changes;
  } else if (s.suggestion_type ==="addition") {
  changeSummary = `New: ${(s.field_changes as { title?: string })?.title ??"Untitled"}`;
+ } else if (s.suggestion_type ==="duplicate") {
+ changeSummary = `Duplicate of: ${(s.field_changes as { duplicate_of_title?: string })?.duplicate_of_title ||"another entry"}`;
  }
 
  const curatorCount = userData?.approved_suggestions_count ?? 0;

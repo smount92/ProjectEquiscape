@@ -189,6 +189,8 @@ export default async function SuggestionDetailPage({ params }: Props) {
  ?"📗 New Entry"
  : s.suggestion_type ==="photo"
  ?"📸 Photo"
+ : s.suggestion_type ==="duplicate"
+ ?"🔁 Duplicate"
  :"🗑 Removal"}
  </span>
  </div>
@@ -262,6 +264,20 @@ export default async function SuggestionDetailPage({ params }: Props) {
       </div>
       </div>
     </div>
+ </div>
+ )}
+
+ {/* Duplicate report: which entry stays */}
+ {s.suggestion_type ==="duplicate" && (
+ <div className="my-3">
+ <h3>Duplicate of</h3>
+ <p className="m-0 text-sm">
+ This entry would be removed and everything linked to it moved to{" "}
+ <Link href={`/catalog/${String((s.field_changes as { duplicate_of?: string })?.duplicate_of ??"")}`} className="font-semibold underline hover:no-underline">
+ {(s.field_changes as { duplicate_of_title?: string })?.duplicate_of_title ||"the entry to keep"}
+ </Link>
+ . Approving runs the merge; it cannot be undone.
+ </p>
  </div>
  )}
 

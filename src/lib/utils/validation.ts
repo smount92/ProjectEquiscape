@@ -46,16 +46,27 @@ export function getBoolean(formData: FormData, key: string, defaultValue = false
 // ============================================================
 
 import sanitizeHtml from "sanitize-html";
+import { decodeHtmlEntities } from "@/lib/utils/decodeEntities";
 
 /**
- * Sanitize plain-text input: strip ALL HTML tags.
+ * Sanitize plain-text input: strip ALL HTML tags and return PLAIN TEXT.
  * Use for names, titles, notes, descriptions, etc.
+ *
+ * The result is text, not HTML. sanitize-html escapes the characters it
+ * keeps, so "Bugs & Help" came back as "Bugs &amp; Help" and was stored
+ * that way; React then escaped it again on render and members saw the
+ * literal "&amp;" in barn names, posts and messages (report, 2026-10-07).
+ * Four call sites had grown their own decode-after-sanitize workaround.
+ * The decode now lives here, once. Plain text is always rendered as
+ * text (React escapes it), so a decoded "<" is inert.
  */
 export function sanitizeText(input: string): string {
-    return sanitizeHtml(input, {
-        allowedTags: [],
-        allowedAttributes: {},
-    }).trim();
+    return decodeHtmlEntities(
+        sanitizeHtml(input, {
+            allowedTags: [],
+            allowedAttributes: {},
+        }),
+    ).trim();
 }
 
 /**

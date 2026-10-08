@@ -332,3 +332,55 @@ describe("entryRules — validateEntry", () => {
         expect(errorsOf(r).length).toBeGreaterThanOrEqual(3);
     });
 });
+
+describe("entryRules — the same photo under two stable records (online shows)", () => {
+    const otherHalterClass: ClassFacts = { ...halterClass, id: "class-app" };
+    const samePhotoElsewhere: ExistingEntry[] = [
+        { classId: "class-qh", horseId: "horse-2", ownerId: "user-1", status: "entered", divisionAxis: "halter", photoId: "photo-1" },
+    ];
+
+    it("refuses the photo a second halter class under a different horse", () => {
+        const r = validateEntry(
+            input({
+                candidate: { horseId: "horse-1", ownerId: "user-1", photoId: "photo-1" },
+                targetClass: otherHalterClass,
+                existingEntries: samePhotoElsewhere,
+            }),
+        );
+        expect(r.ok).toBe(false);
+        expect(errorsOf(r).join(" ")).toMatch(/photo is already entered/i);
+    });
+
+    it("the same photo may enter a collectibility class", () => {
+        const r = validateEntry(
+            input({
+                candidate: { horseId: "horse-1", ownerId: "user-1", photoId: "photo-1" },
+                targetClass: { ...otherHalterClass, divisionAxis: "collectibility" },
+                existingEntries: samePhotoElsewhere,
+            }),
+        );
+        expect(r).toEqual({ ok: true });
+    });
+
+    it("a scratched entry releases the photo", () => {
+        const r = validateEntry(
+            input({
+                candidate: { horseId: "horse-1", ownerId: "user-1", photoId: "photo-1" },
+                targetClass: otherHalterClass,
+                existingEntries: [{ ...samePhotoElsewhere[0], status: "scratched" }],
+            }),
+        );
+        expect(r).toEqual({ ok: true });
+    });
+
+    it("entries without a photo (live shows) are unaffected", () => {
+        const r = validateEntry(
+            input({
+                candidate: { horseId: "horse-1", ownerId: "user-1" },
+                targetClass: otherHalterClass,
+                existingEntries: samePhotoElsewhere,
+            }),
+        );
+        expect(r).toEqual({ ok: true });
+    });
+});

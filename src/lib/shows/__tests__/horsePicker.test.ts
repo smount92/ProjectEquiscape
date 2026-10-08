@@ -117,3 +117,35 @@ describe("horsePicker — filterAndRankHorses", () => {
         expect(out[167].horse.id).toBe("b1");
     });
 });
+
+describe("horsePicker — breed-aware (host request, 2026-09-05)", () => {
+    const arabian = horse({ id: "b1", name: "Zafirah", breed: "Arabian" });
+    const partArab = horse({ id: "b2", name: "Rose Parade", breed: "Part-Arabian" });
+    const qh = horse({ id: "b3", name: "Chics Casanova", breed: "Quarter Horse" });
+    const unknown = horse({ id: "b4", name: "Mystery" });
+
+    it("the search box matches breed as well as name", () => {
+        expect(matchesQuery(qh, "quarter")).toBe(true);
+        expect(matchesQuery(arabian, "arab")).toBe(true);
+        expect(matchesQuery(unknown, "arab")).toBe(false);
+    });
+
+    it("a class named for a breed floats that breed first, nothing hidden", () => {
+        const ranked = filterAndRankHorses([unknown, qh, partArab, arabian], { name: "101 Arabian" }, "");
+        expect(ranked.map((p) => p.horse.id)).toEqual(["b2", "b1", "b4", "b3"]);
+        expect(ranked.every((p) => p.fitsClass)).toBe(true);
+    });
+
+    it("a class that names no breed keeps the server order", () => {
+        const ranked = filterAndRankHorses([unknown, qh, arabian], { name: "Other Light/Gaited" }, "");
+        expect(ranked.map((p) => p.horse.id)).toEqual(["b4", "b3", "b1"]);
+    });
+
+    it("a likely scale mismatch still sorts below a breed match", () => {
+        const smallArab = horse({ id: "b5", name: "Tiny", breed: "Arabian", scale: "Stablemate" });
+        const tradArab = horse({ id: "b6", name: "Big", breed: "Arabian", scale: "Traditional" });
+        const tradQh = horse({ id: "b7", name: "Chics", breed: "Quarter Horse", scale: "Traditional" });
+        const ranked = filterAndRankHorses([smallArab, tradQh, tradArab], { name: "Arabian", allowedScales: ["Traditional"] }, "");
+        expect(ranked.map((p) => p.horse.id)).toEqual(["b6", "b7", "b5"]);
+    });
+});

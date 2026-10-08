@@ -2,16 +2,20 @@
  * Shows domain — horse-picker ordering for the entry dialog.
  *
  * Pure helpers behind EnterClassDialog's picker so a 50–500-horse
- * stable stays scannable: filter by name as the user types, then
- * float the horses that LOOK compatible with the class's
- * allowed_scales / allowed_finishes to the top.
+ * stable stays scannable: filter by name OR breed as the user types,
+ * then float the horses that LOOK right for the class to the top —
+ * first those whose breed matches the class's name ("Arabian" for
+ * class 101 Arabian), then those compatible with the class's
+ * allowed_scales / allowed_finishes.
  *
  * SOFT ordering only. The comparison deliberately mirrors
  * entryRules.validateEntry (exact string match against the allowed
  * lists; a null scale/finish cannot match a restricted list) so the
  * hint agrees with the server as often as possible — but the server
  * remains the sole authority. Nothing here may hide, disable, or
- * pre-reject a horse; a "mismatch" is a hint, never a gate.
+ * pre-reject a horse; a "mismatch" is a hint, never a gate. The breed
+ * match is a hint too: an "Other Light" class names no breed and
+ * ranks nothing.
  *
  * Secondary order is the server-provided order untouched (a stable
  * partition): listMyEntrantHorses / the show page's server render
@@ -28,6 +32,9 @@ import type { EntrantHorse } from "./public";
 export interface PickerClassRestrictions {
     allowedScales?: string[] | null;
     allowedFinishes?: string[] | null;
+    /** The class's name, e.g. "Arabian" or "Thoroughbred/Standardbred".
+     *  Used only to float breed matches; optional. */
+    name?: string | null;
 }
 
 export interface PickerHorse {
@@ -38,6 +45,8 @@ export interface PickerHorse {
     /** Human hint parts for a mismatch row, e.g. ["Traditional/Classic scale only"].
      *  Empty when fitsClass. */
     mismatches: string[];
+    /** The horse's breed appears in the class's name (soft). */
+    breedMatch: boolean;
 }
 
 /** Does `value` pass a restriction list, the way the server does?
@@ -48,11 +57,36 @@ function passes(value: string | null, allowed: string[] | null | undefined): boo
     return value !== null && allowed.includes(value);
 }
 
-/** Case-insensitive substring match on the horse's name. */
+/** Lower-case words of three letters or more; "Thoroughbred/Standardbred"
+ *  → ["thoroughbred", "standardbred"]. */
+function words(text: string | null | undefined): string[] {
+    return (text ?? "")
+        .toLowerCase()
+        .split(/[^a-zÀ-ɏ]+/)
+        .filter((w) => w.length >= 3);
+}
+
+/**
+ * Does the class's name name this horse's breed? Word-level, either
+ * direction: "Arabian" matches a "Part-Arabian" class and a "Quarter
+ * Horse" horse matches class "Quarter Horse". Generic words that
+ * appear in class names but name no breed are ignored.
+ */
+const GENERIC = new Set(["horse", "horses", "other", "breed", "breeds", "halter", "class", "mare", "stallion", "gelding", "foal", "foals", "pony", "ponies", "light", "sport", "stock", "draft", "gaited"]);
+
+export function breedMatchesClass(breed: string | null, className: string | null | undefined): boolean {
+    if (!breed || !className) return false;
+    const classWords = words(className).filter((w) => !GENERIC.has(w));
+    const breedWords = words(breed).filter((w) => !GENERIC.has(w));
+    if (classWords.length === 0 || breedWords.length === 0) return false;
+    return breedWords.some((b) => classWords.some((c) => c === b || c.startsWith(b) || b.startsWith(c)));
+}
+
+/** Case-insensitive substring match on the horse's name or breed. */
 export function matchesQuery(horse: EntrantHorse, query: string): boolean {
     const q = query.trim().toLowerCase();
     if (q === "") return true;
-    return horse.name.toLowerCase().includes(q);
+    return horse.name.toLowerCase().includes(q) || (horse.breed ?? "").toLowerCase().includes(q);
 }
 
 /** Annotate one horse against the class's soft restrictions. */
@@ -67,12 +101,18 @@ export function annotateHorse(
     if (!passes(horse.finish, cls.allowedFinishes)) {
         mismatches.push(`${cls.allowedFinishes!.join("/")} finish only`);
     }
-    return { horse, fitsClass: mismatches.length === 0, mismatches };
+    return {
+        horse,
+        fitsClass: mismatches.length === 0,
+        mismatches,
+        breedMatch: breedMatchesClass(horse.breed, cls.name),
+    };
 }
 
 /**
- * The picker's list: name-filtered, likely-fits first, otherwise in
- * the caller's (server's) order. Stable in both partitions.
+ * The picker's list: name/breed-filtered, then breed matches that
+ * fit, other horses that fit, and finally likely mismatches — in the
+ * caller's (server's) order within each group. Stable throughout.
  */
 export function filterAndRankHorses(
     horses: EntrantHorse[],
@@ -80,5 +120,9 @@ export function filterAndRankHorses(
     query: string,
 ): PickerHorse[] {
     const kept = horses.filter((h) => matchesQuery(h, query)).map((h) => annotateHorse(h, cls));
-    return [...kept.filter((p) => p.fitsClass), ...kept.filter((p) => !p.fitsClass)];
+    return [
+        ...kept.filter((p) => p.fitsClass && p.breedMatch),
+        ...kept.filter((p) => p.fitsClass && !p.breedMatch),
+        ...kept.filter((p) => !p.fitsClass),
+    ];
 }

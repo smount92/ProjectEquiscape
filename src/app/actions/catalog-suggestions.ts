@@ -30,6 +30,14 @@ import {
     suggestionItemTypeToDb,
 } from "@/lib/catalog/taxonomy";
 import { REFERENCE_PAGES_CACHE_TAG } from "@/app/actions/reference-pages";
+import {
+    DUPLICATE_MIGRATION_NOTICE,
+    DUPLICATE_SUGGESTION_TYPE,
+    duplicateReportRefusal,
+    duplicateTarget,
+    isMissingDuplicateType,
+} from "@/lib/catalog/duplicates";
+import { mergeCatalogItemsCore, resolveCatalogRef, type MergeClient } from "@/lib/catalog/merge";
 import type { Database } from "@/lib/types/database.generated";
 
 type CatalogItemInsert = Database["public"]["Tables"]["catalog_items"]["Insert"];
@@ -64,7 +72,9 @@ interface CatalogFilters {
 
 interface SuggestionInput {
     catalogItemId?: string | null; // null = new entry
-    suggestionType: "correction" | "addition" | "removal" | "photo";
+    /** "duplicate": filed FROM the entry to remove; field_changes.duplicate_of
+     *  names the entry to keep (lib/catalog/duplicates). */
+    suggestionType: "correction" | "addition" | "removal" | "photo" | "duplicate";
     fieldChanges: Record<string, unknown>;
     reason: string;
     /** Addition flow: the submitter saw the duplicate candidates and
@@ -453,6 +463,26 @@ export async function createSuggestion(input: SuggestionInput) {
         }
     }
 
+    // ── Duplicate reports: a merge is irreversible, so no rank
+    // auto-approves one. Both entries must exist and differ.
+    if (input.suggestionType === DUPLICATE_SUGGESTION_TYPE) {
+        const refusal = duplicateReportRefusal({
+            catalogItemId: input.catalogItemId,
+            fieldChanges: input.fieldChanges,
+        });
+        if (refusal) return { success: false, error: refusal };
+        const target = duplicateTarget(input.fieldChanges)!;
+        const { data: both } = await admin
+            .from("catalog_items")
+            .select("id, title")
+            .in("id", [input.catalogItemId as string, target.duplicate_of]);
+        const rows = (both ?? []) as { id: string; title: string }[];
+        if (rows.length !== 2) return { success: false, error: "One of those entries no longer exists." };
+        const keep = rows.find((r) => r.id === target.duplicate_of);
+        input.fieldChanges = { duplicate_of: target.duplicate_of, duplicate_of_title: keep?.title ?? "" };
+        autoApprove = false;
+    }
+
     const status = autoApprove ? "auto_approved" : "pending";
 
     const { data, error } = await supabase
@@ -468,7 +498,10 @@ export async function createSuggestion(input: SuggestionInput) {
         .select("id")
         .single();
 
-    if (error) return { success: false, error: error.message };
+    if (error) {
+        if (isMissingDuplicateType(error)) return { success: false, error: DUPLICATE_MIGRATION_NOTICE };
+        return { success: false, error: error.message };
+    }
 
     // If auto-approved, apply immediately
     if (autoApprove && data) {
@@ -1209,6 +1242,26 @@ async function applyApprovedSuggestion(
         changeSummary = "📸 Reference photo added";
     } else if (s.suggestion_type === "removal") {
         changeSummary = "🗑 Entry marked for removal";
+    } else if (s.suggestion_type === DUPLICATE_SUGGESTION_TYPE && s.catalog_item_id) {
+        // The same merge the admin button runs (lib/catalog/merge):
+        // references move to the kept entry, the duplicate is deleted.
+        // The merge repoints this suggestion's own catalog_item_id too,
+        // so the changelog row below lands on the kept entry.
+        const target = duplicateTarget(s.field_changes);
+        const mergeClient = admin as unknown as MergeClient;
+        const dup = target ? await resolveCatalogRef(mergeClient, s.catalog_item_id) : null;
+        const keep = target ? await resolveCatalogRef(mergeClient, target.duplicate_of) : null;
+        if (!target || !dup || !keep) {
+            changeSummary = "🔁 Duplicate report approved, but one entry was already gone — nothing merged";
+        } else {
+            const merged = await mergeCatalogItemsCore(mergeClient, dup, keep, { userId, alias });
+            if (!merged.success) {
+                changeSummary = `🔁 Duplicate merge failed: ${merged.error}`;
+            } else {
+                catalogItemId = keep.id;
+                changeSummary = `🔁 ${merged.summary}`;
+            }
+        }
     }
 
     // Log to changelog

@@ -236,6 +236,8 @@ See [Adding a Migration](../guides/adding-a-migration.md) for the full guide.
 | 224 | `224_set_purchases.sql` | financial_vault.purchase_group_id + purchase_group_label; get_stable_summary counts a set once via equal shares. |
 | 225 | `225_public_records_field_size.sql` | get_public_horse_records returns total_entries (the size of the field). |
 | 226 | `226_folders_one_source.sql` | Backfill horse_collections from user_horses.collection_id; public read policy on junction rows for public horses in public folders. |
+| 227 | _(reserved)_ | Owner-pasted backfill decoding `&amp;`-style entities in plain-text columns (groups, posts, messages, external_shows, catalog_suggestions.reason); see commit for the SQL shape. |
+| 228 | `228_duplicate_suggestions.sql` | Widens catalog_suggestions.suggestion_type and catalog_changelog.change_type CHECKs to include 'duplicate' (member duplicate reports → admin-approved merge). |
 
 ---
 

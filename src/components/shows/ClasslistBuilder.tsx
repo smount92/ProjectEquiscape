@@ -21,6 +21,9 @@ import {
     addClass,
     addDivision,
     addSection,
+    deleteClass,
+    deleteDivision,
+    deleteSection,
     loadNamhsaTemplate,
     reorderClasslist,
     updateClass,
@@ -408,6 +411,23 @@ function ClassEditDialog({ cls, open, onClose, onSaved, setError }: ClassEditDia
 
 // ── Class row ──
 
+/** A node with no entries can be deleted outright; one with entries is
+ *  cancelled instead so the record stays whole (server rule, mirrored
+ *  here only to decide which button to show). */
+function sectionEntryCount(section: ConsoleSection): number {
+    return section.classes.reduce((n, c) => n + c.entryCount, 0);
+}
+function divisionEntryCount(division: ConsoleDivision): number {
+    return division.sections.reduce((n, s) => n + sectionEntryCount(s), 0);
+}
+
+/** What the confirm dialog is about to remove. */
+interface DeleteTarget {
+    kind: "division" | "section" | "class";
+    id: string;
+    name: string;
+}
+
 function ClassRow({
     cls,
     canEdit,
@@ -415,6 +435,7 @@ function ClassRow({
     onEdit,
     onCancelClass,
     onRestoreClass,
+    onDelete,
     onMove,
     entriesExist,
 }: {
@@ -424,6 +445,7 @@ function ClassRow({
     onEdit: () => void;
     onCancelClass: () => void;
     onRestoreClass: () => void;
+    onDelete: () => void;
     onMove: (direction: -1 | 1) => void;
     entriesExist: boolean;
 }) {
@@ -469,6 +491,16 @@ function ClassRow({
                         <Button variant="outline" size="sm" disabled={pending} onClick={onRestoreClass}>
                             Restore
                         </Button>
+                    ) : cls.entryCount === 0 ? (
+                        <Button
+                            variant="destructive-outline"
+                            size="sm"
+                            disabled={pending}
+                            onClick={onDelete}
+                            aria-label={`Delete class ${cls.name}`}
+                        >
+                            Delete
+                        </Button>
                     ) : (
                         <Button
                             variant="destructive-outline"
@@ -508,6 +540,7 @@ export default function ClasslistBuilder({
     const [error, setError] = useState<string | null>(null);
     const [editingClass, setEditingClass] = useState<ConsoleClass | null>(null);
     const [cancellingClass, setCancellingClass] = useState<ConsoleClass | null>(null);
+    const [deleting, setDeleting] = useState<DeleteTarget | null>(null);
 
     const mutable = isShowMutableForClasslist(showStatus);
     const canEdit = canManage && mutable;
@@ -642,12 +675,24 @@ export default function ClasslistBuilder({
                                 )}
                                 <Badge variant="secondary">{division.axis}</Badge>
                                 {canEdit && (
-                                    <span className="ml-auto">
+                                    <span className="ml-auto inline-flex items-center gap-1">
                                         <ReorderButtons
                                             disabled={pending}
                                             onMove={(dir) => moveNode("division", divisions, dIndex, dir)}
                                             label={division.name}
                                         />
+                                        {divisionEntryCount(division) === 0 && (
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                disabled={pending}
+                                                className="text-destructive"
+                                                onClick={() => setDeleting({ kind: "division", id: division.id, name: division.name })}
+                                                aria-label={`Remove division ${division.name}`}
+                                            >
+                                                Remove division
+                                            </Button>
+                                        )}
                                     </span>
                                 )}
                             </div>
@@ -676,6 +721,8 @@ export default function ClasslistBuilder({
                                             }
                                             onEditClass={setEditingClass}
                                             onCancelClass={setCancellingClass}
+                                            onDeleteClass={(cls) => setDeleting({ kind: "class", id: cls.id, name: cls.name })}
+                                            onDeleteSection={() => setDeleting({ kind: "section", id: section.id, name: section.name })}
                                             onRestoreClass={(cls) =>
                                                 run(() =>
                                                     updateClass({
@@ -767,6 +814,44 @@ export default function ClasslistBuilder({
                 </Dialog>
             )}
 
+            {deleting && (
+                <Dialog open onOpenChange={(o) => !o && setDeleting(null)}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Remove {deleting.kind} “{deleting.name}”?</DialogTitle>
+                            <DialogDescription>
+                                {deleting.kind === "class"
+                                    ? "Nothing is entered in it, so it goes for good. A class with entries is cancelled instead, never deleted."
+                                    : `Nothing is entered under it, so it and everything in it go for good. A ${deleting.kind} with entries can only be cancelled class by class.`}
+                            </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter>
+                            <Button variant="outline" onClick={() => setDeleting(null)} disabled={pending}>
+                                Keep it
+                            </Button>
+                            <Button
+                                variant="destructive-outline"
+                                disabled={pending}
+                                data-testid="confirm-delete-node"
+                                onClick={async () => {
+                                    const target = deleting;
+                                    await run(() =>
+                                        target.kind === "class"
+                                            ? deleteClass({ classId: target.id })
+                                            : target.kind === "section"
+                                              ? deleteSection({ sectionId: target.id })
+                                              : deleteDivision({ divisionId: target.id }),
+                                    );
+                                    setDeleting(null);
+                                }}
+                            >
+                                Remove {deleting.kind}
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+            )}
+
             {toastNode}
         </div>
     );
@@ -783,6 +868,8 @@ function SectionBlock({
     onRenameSection,
     onEditClass,
     onCancelClass,
+    onDeleteClass,
+    onDeleteSection,
     onRestoreClass,
 }: {
     section: ConsoleSection;
@@ -795,6 +882,8 @@ function SectionBlock({
     onRenameSection: (name: string) => Promise<void>;
     onEditClass: (cls: ConsoleClass) => void;
     onCancelClass: (cls: ConsoleClass) => void;
+    onDeleteClass: (cls: ConsoleClass) => void;
+    onDeleteSection: () => void;
     onRestoreClass: (cls: ConsoleClass) => void;
 }) {
     const heading = (
@@ -819,6 +908,18 @@ function SectionBlock({
                 {canEdit && (
                     <ReorderButtons disabled={pending} onMove={onMoveSection} label={section.name} />
                 )}
+                {canEdit && sectionEntryCount(section) === 0 && (
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        disabled={pending}
+                        className="text-destructive"
+                        onClick={onDeleteSection}
+                        aria-label={`Remove section ${section.name}`}
+                    >
+                        Remove section
+                    </Button>
+                )}
             </div>
             <ul className="mt-1 flex list-none flex-col p-0">
                 {section.classes.map((cls, cIndex) =>
@@ -831,6 +932,7 @@ function SectionBlock({
                             entriesExist={entriesExist}
                             onEdit={() => onEditClass(cls)}
                             onCancelClass={() => onCancelClass(cls)}
+                            onDelete={() => onDeleteClass(cls)}
                             onRestoreClass={() => onRestoreClass(cls)}
                             onMove={(dir) => onMoveClass(cIndex, dir)}
                         />
@@ -860,6 +962,7 @@ function SectionBlock({
                                     entriesExist={entriesExist}
                                     onEdit={() => onEditClass(cls)}
                                     onCancelClass={() => onCancelClass(cls)}
+                                    onDelete={() => onDeleteClass(cls)}
                                     onRestoreClass={() => onRestoreClass(cls)}
                                     onMove={(dir) => onMoveClass(cIndex, dir)}
                                 />

@@ -283,7 +283,7 @@ describe("EnterClassDialog — big-stable horse picker (search-first list)", () 
         fireEvent.change(screen.getByLabelText(/search your horses/i), {
             target: { value: "zanzibar" },
         });
-        expect(screen.getByText(/no horses named/i)).toBeInTheDocument();
+        expect(screen.getByText(/no horse in your stable is named or bred/i)).toBeInTheDocument();
         fireEvent.click(screen.getByRole("button", { name: /clear search/i }));
         expect(screen.getByTestId("horse-picker-count")).toHaveTextContent("All 14 horses");
     });

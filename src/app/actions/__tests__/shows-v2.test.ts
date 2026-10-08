@@ -36,6 +36,9 @@ import {
     addShowStaff,
     combineClasses,
     createShow,
+    deleteClass,
+    deleteDivision,
+    deleteSection,
     deleteShow,
     loadNamhsaTemplate,
     removeShowStaff,
@@ -991,5 +994,70 @@ describe("shows-v2 — updateDivision (rename)", () => {
         const result = await updateDivision({ divisionId: DIVISION_ID, name: "Renamed" });
         expect(result.success).toBe(false);
         expect(mockClient._mockQuery.update).not.toHaveBeenCalled();
+    });
+});
+
+// ── Removing empty nodes (host could not remove an accidental division, 2026-10-07) ──
+describe("deleteClass / deleteSection / deleteDivision", () => {
+    beforeEach(() => {
+        vi.clearAllMocks();
+        mockClient._setImplicitResolve({ data: [], error: null });
+    });
+
+    it("deletes a class with no entries", async () => {
+        mockClient._mockQuery.maybeSingle
+            .mockResolvedValueOnce({ data: { id: CLASS_ID, section_id: SECTION_ID, name: "Arabian" }, error: null })
+            .mockResolvedValueOnce({ data: { id: SECTION_ID, division_id: DIVISION_ID }, error: null })
+            .mockResolvedValueOnce({ data: { id: DIVISION_ID, show_id: SHOW_ID }, error: null })
+            .mockResolvedValueOnce({ data: showRow({ status: "published" }), error: null });
+        mockClient._setImplicitResolve({ data: null, error: null, count: 0 } as never);
+        const result = await deleteClass({ classId: CLASS_ID });
+        expect(result).toEqual({ success: true });
+        expect(mockClient._mockQuery.delete).toHaveBeenCalled();
+    });
+
+    it("refuses to delete a class that has entries — cancel it instead", async () => {
+        mockClient._mockQuery.maybeSingle
+            .mockResolvedValueOnce({ data: { id: CLASS_ID, section_id: SECTION_ID, name: "Arabian" }, error: null })
+            .mockResolvedValueOnce({ data: { id: SECTION_ID, division_id: DIVISION_ID }, error: null })
+            .mockResolvedValueOnce({ data: { id: DIVISION_ID, show_id: SHOW_ID }, error: null })
+            .mockResolvedValueOnce({ data: showRow({ status: "entries_open" }), error: null });
+        mockClient._setImplicitResolve({ data: null, error: null, count: 3 } as never);
+        const result = await deleteClass({ classId: CLASS_ID });
+        expect(result.success).toBe(false);
+        expect((result as { error: string }).error).toMatch(/3 entries.*cancel it instead/);
+        expect(mockClient._mockQuery.delete).not.toHaveBeenCalled();
+    });
+
+    it("refuses once the classlist is frozen", async () => {
+        mockClient._mockQuery.maybeSingle
+            .mockResolvedValueOnce({ data: { id: DIVISION_ID, show_id: SHOW_ID, name: "Performance" }, error: null })
+            .mockResolvedValueOnce({ data: showRow({ status: "completed" }), error: null });
+        const result = await deleteDivision({ divisionId: DIVISION_ID });
+        expect(result.success).toBe(false);
+        expect(mockClient._mockQuery.delete).not.toHaveBeenCalled();
+    });
+
+    it("deletes an empty division (its sections and classes cascade)", async () => {
+        mockClient._mockQuery.maybeSingle
+            .mockResolvedValueOnce({ data: { id: DIVISION_ID, show_id: SHOW_ID, name: "Performance" }, error: null })
+            .mockResolvedValueOnce({ data: showRow({ status: "entries_open" }), error: null });
+        mockClient._setImplicitResolve({ data: [{ id: SECTION_ID }], error: null, count: 0 } as never);
+        const result = await deleteDivision({ divisionId: DIVISION_ID });
+        expect(result).toEqual({ success: true });
+        expect(mockClient._mockQuery.delete).toHaveBeenCalled();
+    });
+
+    it("refuses an empty-looking section whose classes still hold entries", async () => {
+        mockClient._mockQuery.maybeSingle
+            .mockResolvedValueOnce({ data: { id: SECTION_ID, division_id: DIVISION_ID, name: "Light Breeds" }, error: null })
+            .mockResolvedValueOnce({ data: { id: SECTION_ID, division_id: DIVISION_ID }, error: null })
+            .mockResolvedValueOnce({ data: { id: DIVISION_ID, show_id: SHOW_ID }, error: null })
+            .mockResolvedValueOnce({ data: showRow({ status: "entries_open" }), error: null });
+        mockClient._setImplicitResolve({ data: [{ id: CLASS_ID }], error: null, count: 1 } as never);
+        const result = await deleteSection({ sectionId: SECTION_ID });
+        expect(result.success).toBe(false);
+        expect((result as { error: string }).error).toMatch(/1 entry/);
+        expect(mockClient._mockQuery.delete).not.toHaveBeenCalled();
     });
 });

@@ -57,6 +57,9 @@ import {
     updateClassSchema,
     updateDivisionSchema,
     updateSectionSchema,
+    deleteClassSchema,
+    deleteDivisionSchema,
+    deleteSectionSchema,
     updateShowSettingsSchema,
 } from "@/lib/shows/schemas";
 import {
@@ -1037,6 +1040,153 @@ export async function updateClass(
     if (patch.status !== undefined) update.status = patch.status;
 
     const { error } = await supabase.from("show_classes").update(update).eq("id", classId);
+    if (error) return { success: false, error: error.message };
+    return { success: true };
+}
+
+// ── Removing empty nodes of the classlist ──
+// A node with entries is never deleted: cancel the class instead, so
+// results stay tied to the classlist exactly as it ran. Without this a
+// host who added a division by accident could only leave it standing
+// empty on the public show page (Starshore, 2026-10-07).
+
+async function entriesUnderClasses(
+    supabase: SupabaseClient,
+    classIds: string[],
+): Promise<number | { error: string }> {
+    if (classIds.length === 0) return 0;
+    const { count, error } = await supabase
+        .from("show_class_entries")
+        .select("id", { count: "exact", head: true })
+        .in("class_id", classIds);
+    if (error) return { error: error.message };
+    return count ?? 0;
+}
+
+async function classlistManagerGate(
+    supabase: SupabaseClient,
+    showId: string,
+    userId: string,
+): Promise<{ error: string } | { ok: true }> {
+    const ctx = await getShowRole(supabase, showId, userId);
+    if ("error" in ctx) return { error: ctx.error };
+    if (!ctx.role || !MANAGER_ROLES.includes(ctx.role)) {
+        return { error: "Only the host or a co-host can edit the classlist." };
+    }
+    if (!isShowMutableForClasslist(ctx.show.status)) return { error: CLASSLIST_FROZEN_ERROR };
+    return { ok: true };
+}
+
+function hasEntriesRefusal(name: string, entries: number): string {
+    return `“${name}” has ${entries} ${entries === 1 ? "entry" : "entries"} — cancel it instead of deleting it, so the entries stay on record.`;
+}
+
+export async function deleteClass(
+    input: z.input<typeof deleteClassSchema>,
+): Promise<ActionResult> {
+    const parsed = deleteClassSchema.safeParse(input);
+    if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
+    const { supabase, user } = await requireAuth();
+
+    const { data: cls, error: cErr } = await supabase
+        .from("show_classes")
+        .select("id, section_id, name")
+        .eq("id", parsed.data.classId)
+        .maybeSingle();
+    if (cErr) return { success: false, error: cErr.message };
+    if (!cls) return { success: false, error: "Class not found." };
+
+    const located = await getShowIdOfClass(supabase, cls.section_id as string);
+    if ("error" in located) return { success: false, error: located.error };
+    const gate = await classlistManagerGate(supabase, located.showId, user.id);
+    if ("error" in gate) return { success: false, error: gate.error };
+
+    const entries = await entriesUnderClasses(supabase, [cls.id as string]);
+    if (typeof entries !== "number") return { success: false, error: entries.error };
+    if (entries > 0) return { success: false, error: hasEntriesRefusal(cls.name as string, entries) };
+
+    const { error } = await supabase.from("show_classes").delete().eq("id", cls.id as string);
+    if (error) return { success: false, error: error.message };
+    return { success: true };
+}
+
+export async function deleteSection(
+    input: z.input<typeof deleteSectionSchema>,
+): Promise<ActionResult> {
+    const parsed = deleteSectionSchema.safeParse(input);
+    if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
+    const { supabase, user } = await requireAuth();
+
+    const { data: section, error: sErr } = await supabase
+        .from("show_sections")
+        .select("id, division_id, name")
+        .eq("id", parsed.data.sectionId)
+        .maybeSingle();
+    if (sErr) return { success: false, error: sErr.message };
+    if (!section) return { success: false, error: "Section not found." };
+
+    const located = await getShowIdOfClass(supabase, section.id as string);
+    if ("error" in located) return { success: false, error: located.error };
+    const gate = await classlistManagerGate(supabase, located.showId, user.id);
+    if ("error" in gate) return { success: false, error: gate.error };
+
+    const { data: classRows, error: clErr } = await supabase
+        .from("show_classes")
+        .select("id")
+        .eq("section_id", section.id as string);
+    if (clErr) return { success: false, error: clErr.message };
+    const entries = await entriesUnderClasses(
+        supabase,
+        ((classRows ?? []) as { id: string }[]).map((c) => c.id),
+    );
+    if (typeof entries !== "number") return { success: false, error: entries.error };
+    if (entries > 0) return { success: false, error: hasEntriesRefusal(section.name as string, entries) };
+
+    // Classes under the section go with it (ON DELETE CASCADE, 117).
+    const { error } = await supabase.from("show_sections").delete().eq("id", section.id as string);
+    if (error) return { success: false, error: error.message };
+    return { success: true };
+}
+
+export async function deleteDivision(
+    input: z.input<typeof deleteDivisionSchema>,
+): Promise<ActionResult> {
+    const parsed = deleteDivisionSchema.safeParse(input);
+    if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
+    const { supabase, user } = await requireAuth();
+
+    const { data: division, error: dErr } = await supabase
+        .from("show_divisions")
+        .select("id, show_id, name")
+        .eq("id", parsed.data.divisionId)
+        .maybeSingle();
+    if (dErr) return { success: false, error: dErr.message };
+    if (!division) return { success: false, error: "Division not found." };
+
+    const gate = await classlistManagerGate(supabase, division.show_id as string, user.id);
+    if ("error" in gate) return { success: false, error: gate.error };
+
+    const { data: sectionRows, error: sErr } = await supabase
+        .from("show_sections")
+        .select("id")
+        .eq("division_id", division.id as string);
+    if (sErr) return { success: false, error: sErr.message };
+    const sectionIds = ((sectionRows ?? []) as { id: string }[]).map((s) => s.id);
+    let classIds: string[] = [];
+    if (sectionIds.length > 0) {
+        const { data: classRows, error: clErr } = await supabase
+            .from("show_classes")
+            .select("id")
+            .in("section_id", sectionIds);
+        if (clErr) return { success: false, error: clErr.message };
+        classIds = ((classRows ?? []) as { id: string }[]).map((c) => c.id);
+    }
+    const entries = await entriesUnderClasses(supabase, classIds);
+    if (typeof entries !== "number") return { success: false, error: entries.error };
+    if (entries > 0) return { success: false, error: hasEntriesRefusal(division.name as string, entries) };
+
+    // Sections and classes under the division go with it (ON DELETE CASCADE, 117).
+    const { error } = await supabase.from("show_divisions").delete().eq("id", division.id as string);
     if (error) return { success: false, error: error.message };
     return { success: true };
 }
@@ -2379,6 +2529,7 @@ interface ShowEntryWithAxis {
     owner_id: string;
     status: string;
     entry_number: number | null;
+    photo_id?: string | null;
     show_classes: {
         show_sections: { show_divisions: { axis: string } };
     };
@@ -2476,7 +2627,7 @@ export async function enterClass(
     const { data: entryRows, error: eErr } = await supabase
         .from("show_class_entries")
         .select(
-            "class_id, horse_id, owner_id, status, entry_number, show_classes!inner(show_sections!inner(show_divisions!inner(axis)))",
+            "class_id, horse_id, owner_id, status, entry_number, photo_id, show_classes!inner(show_sections!inner(show_divisions!inner(axis)))",
         )
         .eq("show_id", showId);
     if (eErr) return { success: false, error: eErr.message };
@@ -2521,6 +2672,7 @@ export async function enterClass(
             status: e.status as EntryStatus,
             divisionAxis: e.show_classes.show_sections.show_divisions
                 .axis as DivisionAxis,
+            photoId: e.photo_id ?? null,
         })),
         isBarred: !!barRow,
         judgeUserIds,

@@ -129,6 +129,24 @@ describe("sanitizeText", () => {
     it("trims whitespace", () => {
         expect(sanitizeText("  hello  ")).toBe("hello");
     });
+
+    // The result is plain text, never HTML: an ampersand stays an
+    // ampersand. It used to come back as "&amp;" and members saw that
+    // literally in barn names and messages.
+    it("keeps ampersands, quotes and angle brackets as plain characters", () => {
+        expect(sanitizeText("Site Suggestions, Bugs & Help")).toBe("Site Suggestions, Bugs & Help");
+        expect(sanitizeText('He said "hi" & left')).toBe('He said "hi" & left');
+        expect(sanitizeText("1 < 2")).toBe("1 < 2");
+    });
+
+    it("decodes entities that arrive already encoded", () => {
+        expect(sanitizeText("Smoke &amp; Mirrors")).toBe("Smoke & Mirrors");
+    });
+
+    it("still strips a tag even when it is spelled with entities", () => {
+        // The tag is decoded into text, which React will escape on render.
+        expect(sanitizeText("<b>x</b> &lt;i&gt;y")).toBe("x <i>y");
+    });
 });
 
 describe("sanitizeRichText", () => {

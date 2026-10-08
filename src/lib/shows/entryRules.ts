@@ -84,6 +84,9 @@ export interface ExistingEntry {
     ownerId: string;
     status: EntryStatus;
     divisionAxis: DivisionAxis;
+    /** Online shows: the judged photo. Optional so live-show callers
+     *  and older fixtures need not supply it. */
+    photoId?: string | null;
 }
 
 export interface ValidateEntryInput {
@@ -195,6 +198,28 @@ export function validateEntry(input: ValidateEntryInput): ValidateEntryResult {
             errors.push(
                 "This horse is already entered in a breed halter class at this show. Entering breed halter declares the model's breed, so each horse shows in exactly one halter class. (It may still enter performance, workmanship, and collectibility classes.)",
             );
+        }
+
+        // ── Same PHOTO under another stable record (online shows) ──
+        // In a photo show the judged object is the photo. The same
+        // photo in two halter classes is the same model declaring two
+        // breeds, whatever stable record it rides in — a host judged
+        // exactly that and could only disqualify after the fact
+        // (Québec Live, 2026-10-01). The horse-id rule above cannot see
+        // it; this one can.
+        if (candidate.photoId) {
+            const samePhoto = active.find(
+                (e) =>
+                    e.photoId === candidate.photoId &&
+                    e.divisionAxis === "halter" &&
+                    e.classId !== targetClass.id &&
+                    e.horseId !== candidate.horseId,
+            );
+            if (samePhoto) {
+                errors.push(
+                    "This photo is already entered in a breed halter class at this show under another of your horses. One photo shows one model, and a model shows in exactly one halter class.",
+                );
+            }
         }
     }
 

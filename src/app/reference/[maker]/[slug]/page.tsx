@@ -832,6 +832,9 @@ export default async function ReferencePage({ params }: Props) {
                         <Link href={`/catalog/${item.id}?suggest=true`} className="text-secondary-foreground hover:text-foreground">
                             ✎ Suggest an edit
                         </Link>
+                        <Link href={`/catalog/${item.id}?duplicate=true`} className="text-secondary-foreground hover:text-foreground">
+                            🔁 Report a duplicate
+                        </Link>
                         <Link href="/catalog/changelog" className="text-secondary-foreground hover:text-foreground">
                             📋 Change history
                         </Link>

@@ -88,6 +88,7 @@ const SUGGESTION_TYPE_LABELS: Record<string, string> = {
  addition:"New entry",
  photo:"Photo",
  removal:"Removal",
+ duplicate:"Duplicate — approve to merge",
 };
 
 const SUGGESTION_STATUS_LABELS: Record<string, string> = {
@@ -557,11 +558,16 @@ function CatalogQueue({ suggestions }: { suggestions: CatalogSuggestionAdmin[] }
  ?"📗"
  : s.suggestion_type ==="photo"
  ?"📸"
+ : s.suggestion_type ==="duplicate"
+ ?"🔁"
  :"🗑";
 
  // Build changes summary
  let changeText ="";
- if (s.suggestion_type ==="correction" && s.field_changes) {
+ if (s.suggestion_type ==="duplicate") {
+ const keep = (s.field_changes as { duplicate_of_title?: string } | null)?.duplicate_of_title;
+ changeText = `Remove this entry, keep: ${keep ||"(entry)"}`;
+ } else if (s.suggestion_type ==="correction" && s.field_changes) {
  changeText = Object.entries(s.field_changes)
  .map(([k, v]) => {
  const val = v as { from: string; to: string };

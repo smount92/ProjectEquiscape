@@ -2,6 +2,7 @@ import { createClient } from"@/lib/supabase/server";
 import { notFound } from"next/navigation";
 import type { Metadata } from"next";
 import SuggestEditModal from"@/components/SuggestEditModal";
+import ReportDuplicateModal from "@/components/ReportDuplicateModal";
 import Link from"next/link";
 import FocusLayout from"@/components/layouts/FocusLayout";
 import CatalogSubMasthead from"@/components/catalog/CatalogSubMasthead";
@@ -13,7 +14,7 @@ import { FileEdit, Plus } from"lucide-react";
 
 interface Props {
  params: Promise<{ id: string }>;
- searchParams: Promise<{ suggest?: string }>;
+ searchParams: Promise<{ suggest?: string; duplicate?: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -37,7 +38,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CatalogItemPage({ params, searchParams }: Props) {
  const { id } = await params;
- const { suggest } = await searchParams;
+ const { suggest, duplicate } = await searchParams;
  const supabase = await createClient();
 
  const { data: item, error } = await supabase.from("catalog_items").select("*").eq("id", id).single();
@@ -128,7 +129,10 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
     </Link>
    </Button>
    {user ? (
-    <SuggestEditModal catalogItem={catalogItem} openOnMount={suggest ==="true"} />
+    <>
+     <SuggestEditModal catalogItem={catalogItem} openOnMount={suggest ==="true"} />
+     <ReportDuplicateModal catalogItem={catalogItem} openOnMount={duplicate ==="true"} />
+    </>
    ) : (
     <Button asChild><Link
     href={`/login?redirectTo=${encodeURIComponent(`/catalog/${id}?suggest=true`)}`}

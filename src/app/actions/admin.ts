@@ -4,6 +4,7 @@ import { logger } from "@/lib/logger";
 import { revalidateTag } from "next/cache";
 import { ANNOUNCEMENTS_CACHE_TAG } from "@/lib/announcements";
 import { paddockPinRefusal } from "@/lib/feed/paddockPin";
+import { mergeCatalogItemsCore, resolveCatalogRef, type MergeClient } from "@/lib/catalog/merge";
 
 import { createClient } from "@supabase/supabase-js";
 import { createClient as createAuthClient } from "@/lib/supabase/server";
@@ -435,61 +436,19 @@ export async function mergeCatalogItems(
   const user = await verifyAdmin();
   if (!user) return { success: false, error: "Unauthorized" };
 
-  const admin = getAdminSupabase();
-  const resolve = async (ref: string) => {
-    const clean = ref.trim();
-    if (!clean) return null;
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(clean);
-    const { data } = await admin
-      .from("catalog_items")
-      .select("id, title, maker, slug")
-      .eq(isUuid ? "id" : "slug", isUuid ? clean : clean.toLowerCase())
-      .maybeSingle();
-    return data as { id: string; title: string; maker: string | null; slug: string | null } | null;
-  };
-
-  const dup = await resolve(duplicateRef);
+  // The procedure itself lives in lib/catalog/merge — an approved
+  // duplicate report runs the very same one.
+  const admin = getAdminSupabase() as unknown as MergeClient;
+  const dup = await resolveCatalogRef(admin, duplicateRef);
   if (!dup) return { success: false, error: `Duplicate "${duplicateRef}" not found (id or slug).` };
-  const canonical = await resolve(canonicalRef);
+  const canonical = await resolveCatalogRef(admin, canonicalRef);
   if (!canonical) return { success: false, error: `Canonical "${canonicalRef}" not found (id or slug).` };
-  if (dup.id === canonical.id) return { success: false, error: "Those are the same entry." };
 
-  const repoints: [string, string][] = [
-    ["user_horses", "catalog_id"],
-    ["user_wishlists", "catalog_id"],
-    ["id_suggestions", "catalog_id"],
-    ["catalog_suggestions", "catalog_item_id"],
-    ["catalog_changelog", "catalog_item_id"],
-    ["catalog_items", "parent_id"],
-  ];
-  let moved = 0;
-  for (const [table, column] of repoints) {
-    const { data, error } = await admin
-      .from(table)
-      .update({ [column]: canonical.id })
-      .eq(column, dup.id)
-      .select("id");
-    if (error) return { success: false, error: `Repointing ${table}.${column} failed: ${error.message}` };
-    moved += data?.length ?? 0;
-  }
-
-  const { error: logError } = await admin.from("catalog_changelog").insert({
-    catalog_item_id: canonical.id,
-    change_type: "removal",
-    change_summary: `Merged duplicate "${dup.title}" (${dup.maker ?? "unknown"}) into "${canonical.title}" — references repointed.`,
-    contributed_by: user.id,
-    contributor_alias: "Admin",
-    approved_by: user.id,
-  });
-  if (logError) logger.error("Admin", "Merge changelog write failed (continuing)", logError);
-
-  const { error: deleteError } = await admin.from("catalog_items").delete().eq("id", dup.id);
-  if (deleteError) return { success: false, error: `Delete failed: ${deleteError.message}` };
-
-  return {
-    success: true,
-    summary: `Merged "${dup.title}" into "${canonical.title}" — ${moved} reference${moved === 1 ? "" : "s"} repointed.`,
-  };
+  const result = await mergeCatalogItemsCore(admin, dup, canonical, { userId: user.id, alias: "Admin" }, (logError) =>
+    logger.error("Admin", "Merge changelog write failed (continuing)", logError),
+  );
+  if (!result.success) return { success: false, error: result.error };
+  return { success: true, summary: result.summary };
 }
 
 // ── MHH sanctioning requests (Season 1 manual approval) ──
@@ -1419,6 +1378,15 @@ const PENDING_MIGRATIONS: MigrationSpec[] = [
     probe: {
       kind: "none",
       why: "A data backfill and a row policy — nothing to select. Verify: every horse you moved in bulk shows in its folder on your public profile.",
+    },
+  },
+  {
+    id: "228",
+    title: "Duplicate reports",
+    summary: "Lets catalog_suggestions and catalog_changelog carry the 'duplicate' type, so a member can report two registry entries as one and an admin can approve the merge.",
+    probe: {
+      kind: "none",
+      why: "Widens two CHECK constraints — nothing to select. Verify: 'Report a duplicate' on a reference page files without the migration notice.",
     },
   },
 ];

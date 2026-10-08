@@ -520,8 +520,8 @@ export default function EnterClassDialog({
                                                 selectHorse(rankedHorses[0].horse);
                                             }
                                         }}
-                                        placeholder="Search your horses by name…"
-                                        aria-label="Search your horses by name"
+                                        placeholder="Search your horses by name or breed…"
+                                        aria-label="Search your horses by name or breed"
                                         className="h-9"
                                     />
                                     <p
@@ -539,8 +539,7 @@ export default function EnterClassDialog({
                             {rankedHorses.length === 0 ? (
                                 <div className="flex flex-col items-start gap-2 py-4">
                                     <p className="text-sm text-muted-foreground">
-                                        No horses named &ldquo;{horseQuery.trim()}&rdquo; in your
-                                        stable.
+                                        No horse in your stable is named or bred &ldquo;{horseQuery.trim()}&rdquo;.
                                     </p>
                                     <Button
                                         variant="ghost"
@@ -582,9 +581,9 @@ export default function EnterClassDialog({
                                                     <span className="truncate text-sm font-medium text-foreground">
                                                         {h.name}
                                                     </span>
-                                                    {(h.scale || h.finish) && (
+                                                    {(h.breed || h.scale || h.finish) && (
                                                         <span className="truncate text-xs text-muted-foreground">
-                                                            {[h.scale, h.finish]
+                                                            {[h.breed, h.scale, h.finish]
                                                                 .filter(Boolean)
                                                                 .join(" · ")}
                                                         </span>
