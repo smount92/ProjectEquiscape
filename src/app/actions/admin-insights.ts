@@ -23,6 +23,7 @@ import { isMissingMetricsSchema, metricsDb } from "@/lib/metrics/db";
 import { ENTITY_TYPES, type EntityType } from "@/lib/metrics/entities";
 import { entityKey, resolveEntityNames, type ResolvedEntity } from "@/lib/metrics/resolve";
 import { bucketByDay, countPriorWindow, dayLabels, isGrowthRange, type GrowthRange } from "@/lib/metrics/growth";
+import { tallyHerd, windowCounts, type HerdRow, type HerdTally } from "@/lib/metrics/herd";
 import {
     computeRevenue,
     isMissingRevenueSchema,
@@ -315,8 +316,30 @@ export interface GrowthInsights {
     series: GrowthSeries[];
 }
 
-/** Rows fetched per series; a window with more than this is capped and the last days undercount. */
-const GROWTH_ROW_CAP = 5000;
+/** Rows fetched per series; a window with more than this is capped and the oldest days undercount. */
+const GROWTH_ROW_CAP = 20_000;
+/** PostgREST returns at most this many rows per request whatever .limit() says. */
+const PAGE = 1000;
+
+/**
+ * Every created_at in a window, newest first, paged in PAGE-row requests.
+ * .limit(5000) silently came back as 1,000 unordered rows, so a 30-day
+ * window with 2,270 horses showed the chart a random thousand and the
+ * newest days read as zero ("my insights tab might be broken", 2026-10-10).
+ */
+async function pageStamps(
+    query: (from: number, to: number) => PromiseLike<{ data: unknown; error: unknown }>,
+): Promise<string[] | null> {
+    const out: string[] = [];
+    for (let from = 0; from < GROWTH_ROW_CAP; from += PAGE) {
+        const { data, error } = await query(from, from + PAGE - 1);
+        if (error) return null;
+        const rows = (data ?? []) as { created_at: string }[];
+        out.push(...rows.map((r) => r.created_at));
+        if (rows.length < PAGE) break;
+    }
+    return out;
+}
 
 export async function getGrowthInsights(
     range: number,
@@ -328,18 +351,15 @@ export async function getGrowthInsights(
     const since = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) - (2 * r - 1) * 86_400_000).toISOString();
     const db = serviceClient();
 
-    const CAP = GROWTH_ROW_CAP;
     const LIVE = ["For Sale", "Open to Offers"];
-    const list = (r: { data: unknown; error: unknown }) =>
-        r.error ? null : ((r.data ?? []) as { created_at: string }[]).map((x) => x.created_at);
     const cnt = (r: { count: number | null; error: unknown }) => (r.error ? null : r.count);
 
     try {
         const [members, horses, records, listings, membersAll, horsesAll, recordsAll, listingsAll] = await Promise.all([
-            db.from("users").select("created_at").neq("account_status", "deleted").gte("created_at", since).limit(CAP),
-            db.from("user_horses").select("created_at").is("deleted_at", null).gte("created_at", since).limit(CAP),
-            db.from("show_records").select("created_at").gte("created_at", since).limit(CAP),
-            db.from("user_horses").select("created_at").is("deleted_at", null).in("trade_status", LIVE).gte("created_at", since).limit(CAP),
+            pageStamps((a, b) => db.from("users").select("created_at").neq("account_status", "deleted").gte("created_at", since).order("created_at", { ascending: false }).range(a, b)),
+            pageStamps((a, b) => db.from("user_horses").select("created_at").is("deleted_at", null).gte("created_at", since).order("created_at", { ascending: false }).range(a, b)),
+            pageStamps((a, b) => db.from("show_records").select("created_at").gte("created_at", since).order("created_at", { ascending: false }).range(a, b)),
+            pageStamps((a, b) => db.from("user_horses").select("created_at").is("deleted_at", null).in("trade_status", LIVE).gte("created_at", since).order("created_at", { ascending: false }).range(a, b)),
             db.from("users").select("id", { count: "exact", head: true }).neq("account_status", "deleted"),
             db.from("user_horses").select("id", { count: "exact", head: true }).is("deleted_at", null),
             db.from("show_records").select("id", { count: "exact", head: true }),
@@ -362,14 +382,159 @@ export async function getGrowthInsights(
                 range: r,
                 days: dayLabels(r, now),
                 series: [
-                    build("members", "New members", list(members), cnt(membersAll)),
-                    build("horses", "Horses added", list(horses), cnt(horsesAll)),
-                    build("records", "Show records added", list(records), cnt(recordsAll)),
-                    build("listings", "Horses listed for sale", list(listings), cnt(listingsAll)),
+                    build("members", "New members", members, cnt(membersAll)),
+                    build("horses", "Horses added", horses, cnt(horsesAll)),
+                    build("records", "Show records added", records, cnt(recordsAll)),
+                    build("listings", "Horses listed for sale", listings, cnt(listingsAll)),
                 ],
             },
         };
     } catch (err) {
         return { success: false, error: err instanceof Error ? err.message : "Growth read failed." };
+    }
+}
+
+// ══════════════════════════════════════════════════════════════
+// Registry — how the catalog is read and edited
+// ══════════════════════════════════════════════════════════════
+// Owner ask (2026-10-10): "how many people look at it, how many items
+// were changed in 7/30/90 days". Views come off the 175 rollups
+// (etype 'reference'); edits off catalog_changelog and the suggestion
+// queue, which exist from day one.
+
+export const REGISTRY_WINDOWS = [7, 30, 90] as const;
+export type RegistryWindow = (typeof REGISTRY_WINDOWS)[number];
+
+export interface RegistryWindowStats {
+    days: RegistryWindow;
+    /** Reference-page views and distinct viewers (null until 175 is live). */
+    views: number | null;
+    viewers: number | null;
+    /** Changelog rows: every applied change, member or admin. */
+    changes: number;
+    /** Suggestions approved or auto-approved. */
+    approved: number;
+    /** Distinct members whose suggestions were approved. */
+    contributors: number;
+}
+
+export interface RegistryInsights {
+    items: number | null;
+    pending: number | null;
+    approvedAllTime: number | null;
+    changesAllTime: number | null;
+    windows: RegistryWindowStats[];
+}
+
+/** Suggestion rows older than 90 days are not read; the all-time counts still are. */
+const REGISTRY_ROW_CAP = 20_000;
+
+export async function getRegistryInsights(): Promise<
+    { success: true; registry: RegistryInsights } | { success: false; error: string }
+> {
+    await requireAdmin();
+    const db = serviceClient();
+    const metrics = metricsDb(db);
+    const since = new Date(Date.now() - 90 * 86_400_000).toISOString();
+    try {
+        const [changes, approved, items, pending, approvedAll, changesAll, ...viewRes] = await Promise.all([
+            pageStamps((a, b) => db.from("catalog_changelog").select("created_at").gte("created_at", since).order("created_at", { ascending: false }).range(a, b)),
+            (async () => {
+                const rows: { created_at: string; user_id: string }[] = [];
+                for (let from = 0; from < REGISTRY_ROW_CAP; from += PAGE) {
+                    const { data, error } = await db
+                        .from("catalog_suggestions")
+                        .select("created_at, user_id")
+                        .in("status", ["approved", "auto_approved"])
+                        .gte("created_at", since)
+                        .order("created_at", { ascending: false })
+                        .range(from, from + PAGE - 1);
+                    if (error) return null;
+                    const page = (data ?? []) as { created_at: string; user_id: string }[];
+                    rows.push(...page);
+                    if (page.length < PAGE) break;
+                }
+                return rows;
+            })(),
+            db.from("catalog_items").select("id", { count: "exact", head: true }),
+            db.from("catalog_suggestions").select("id", { count: "exact", head: true }).eq("status", "pending"),
+            db.from("catalog_suggestions").select("id", { count: "exact", head: true }).in("status", ["approved", "auto_approved"]),
+            db.from("catalog_changelog").select("id", { count: "exact", head: true }),
+            ...REGISTRY_WINDOWS.map((d) => metrics.rpc("metrics_entity_totals", { p_days: d })),
+        ]);
+        const changeCounts = windowCounts(changes ?? []);
+        const windows: RegistryWindowStats[] = REGISTRY_WINDOWS.map((days, i) => {
+            const cutoff = Date.now() - days * 86_400_000;
+            const inWindow = (approved ?? []).filter((r) => new Date(r.created_at).getTime() >= cutoff);
+            const totals = viewRes[i] as { data: unknown; error: unknown };
+            const ref = totals.error
+                ? null
+                : (((totals.data ?? []) as Record<string, unknown>[]).find((r) => r.etype === "reference") ?? null);
+            return {
+                days,
+                views: totals.error ? null : num(ref?.total_views),
+                viewers: totals.error ? null : num(ref?.total_uniques),
+                changes: changeCounts[days] ?? 0,
+                approved: inWindow.length,
+                contributors: new Set(inWindow.map((r) => r.user_id)).size,
+            };
+        });
+        const cnt = (r: { count: number | null; error: unknown }) => (r.error ? null : r.count);
+        return {
+            success: true,
+            registry: {
+                items: cnt(items),
+                pending: cnt(pending),
+                approvedAllTime: cnt(approvedAll),
+                changesAllTime: cnt(changesAll),
+                windows,
+            },
+        };
+    } catch (err) {
+        return { success: false, error: err instanceof Error ? err.message : "Registry read failed." };
+    }
+}
+
+// ══════════════════════════════════════════════════════════════
+// The herd — what the public horses are
+// ══════════════════════════════════════════════════════════════
+// Public horses only, aggregates only (lib/metrics/herd). The colour
+// column arrived with migration 219; a database without it is read
+// without it and colour comes from the Registry's description alone.
+
+const HERD_ROW_CAP = 30_000;
+const HERD_COLUMNS =
+    "finish_type, assigned_breed, assigned_gender, assigned_age, life_stage, asset_category, catalog_id, catalog_items:catalog_id(maker, scale, item_type, attributes)";
+
+export async function getHerdInsights(): Promise<
+    { success: true; herd: HerdTally } | { success: false; error: string }
+> {
+    await requireAdmin();
+    const db = serviceClient();
+    try {
+        const rows: HerdRow[] = [];
+        let columns = HERD_COLUMNS.replace("finish_type,", "finish_type, color,");
+        const read = (cols: string, from: number) =>
+            db
+                .from("user_horses")
+                .select(cols)
+                .eq("is_public", true)
+                .is("deleted_at", null)
+                .order("created_at", { ascending: true })
+                .range(from, from + PAGE - 1);
+        for (let from = 0; from < HERD_ROW_CAP; from += PAGE) {
+            let res = await read(columns, from);
+            if (res.error && res.error.code === "42703" && columns.includes("color,")) {
+                columns = HERD_COLUMNS;
+                res = await read(columns, from);
+            }
+            if (res.error) return { success: false, error: res.error.message };
+            const page = (res.data ?? []) as unknown as HerdRow[];
+            rows.push(...page);
+            if (page.length < PAGE) break;
+        }
+        return { success: true, herd: tallyHerd(rows) };
+    } catch (err) {
+        return { success: false, error: err instanceof Error ? err.message : "Herd read failed." };
     }
 }

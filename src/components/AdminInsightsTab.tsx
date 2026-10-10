@@ -4,7 +4,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
     getGrowthInsights,
+    getHerdInsights,
+    getRegistryInsights,
     type GrowthInsights,
+    type RegistryInsights,
     getAdminInsights,
     getRevenueInsights,
     type ActivityDay,
@@ -14,6 +17,7 @@ import {
 } from "@/app/actions/admin-insights";
 import { ENTITY_LABELS, ENTITY_TYPES, type EntityType } from "@/lib/metrics/entities";
 import { deltaLabel, GROWTH_RANGES, shortDay, type GrowthRange } from "@/lib/metrics/growth";
+import type { Bucket, HerdTally } from "@/lib/metrics/herd";
 
 /**
  * Insights — what the site's own data knows that a traffic tool cannot.
@@ -162,6 +166,156 @@ const GROWTH_TONE: Record<string, string> = {
  * prior-window delta beside it. Reads its own action so it works before
  * the view rollups (175) exist.
  */
+/** A small two-column count table for one herd dimension. */
+function BucketTable({ title, rows, total }: { title: string; rows: Bucket[]; total: number }) {
+    return (
+        <div className="border-input bg-card rounded-lg border px-3 py-2">
+            <div className="mb-1 text-xs font-bold tracking-wide uppercase">{title}</div>
+            <table className="w-full border-collapse text-sm">
+                <tbody>
+                    {rows.map((b) => (
+                        <tr key={b.label}>
+                            <td className="truncate py-0.5 pr-2">{b.label}</td>
+                            <td className="py-0.5 text-right tabular-nums">{b.count.toLocaleString()}</td>
+                            <td className="text-muted-foreground w-12 py-0.5 text-right text-xs tabular-nums">
+                                {total > 0 ? `${Math.round((b.count / total) * 100)}%` : ""}
+                            </td>
+                        </tr>
+                    ))}
+                    {rows.length === 0 && (
+                        <tr>
+                            <td className="text-muted-foreground py-0.5">—</td>
+                        </tr>
+                    )}
+                </tbody>
+            </table>
+        </div>
+    );
+}
+
+/** Band — the Registry: read and edited, over 7 / 30 / 90 days. */
+function RegistryBand() {
+    const [data, setData] = useState<RegistryInsights | null>(null);
+    const [failed, setFailed] = useState(false);
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            const result = await getRegistryInsights();
+            if (cancelled) return;
+            if (result.success) setData(result.registry);
+            else setFailed(true);
+        })();
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+    return (
+        <div>
+            <h3 className="mt-0 mb-2 flex flex-wrap items-baseline gap-2 text-base font-bold">
+                📗 The Registry
+                {!data && (
+                    <span className="text-muted-foreground text-xs font-normal">
+                        {failed ? "could not be read this load" : "reading…"}
+                    </span>
+                )}
+            </h3>
+            <div className="mb-3 grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(150px,1fr))]">
+                <Stat value={fmt(data?.items ?? null)} label="Entries" sub="Molds, releases, resins" />
+                <Stat value={fmt(data?.approvedAllTime ?? null)} label="Member changes approved" sub="All time" />
+                <Stat value={fmt(data?.changesAllTime ?? null)} label="Changelog rows" sub="Every applied change" />
+                <Stat value={fmt(data?.pending ?? null)} label="Waiting for review" sub="Pending suggestions" />
+            </div>
+            <div className="border-input bg-card overflow-x-auto rounded-lg border">
+                <table className="w-full border-collapse text-sm">
+                    <thead>
+                        <tr className="text-muted-foreground text-left text-xs tracking-wide uppercase">
+                            <th className="px-3 py-2">Last</th>
+                            <th className="px-3 py-2 text-right">Reference views</th>
+                            <th className="px-3 py-2 text-right">Viewers</th>
+                            <th className="px-3 py-2 text-right">Changes applied</th>
+                            <th className="px-3 py-2 text-right">Suggestions approved</th>
+                            <th className="px-3 py-2 text-right">Contributors</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {(data?.windows ?? []).map((w) => (
+                            <tr key={w.days} className="border-input border-t">
+                                <td className="px-3 py-1.5 font-semibold">{w.days} days</td>
+                                <td className="px-3 py-1.5 text-right tabular-nums">{fmt(w.views)}</td>
+                                <td className="px-3 py-1.5 text-right tabular-nums">{fmt(w.viewers)}</td>
+                                <td className="px-3 py-1.5 text-right tabular-nums">{fmt(w.changes)}</td>
+                                <td className="px-3 py-1.5 text-right tabular-nums">{fmt(w.approved)}</td>
+                                <td className="px-3 py-1.5 text-right tabular-nums">{fmt(w.contributors)}</td>
+                            </tr>
+                        ))}
+                        {!data && (
+                            <tr className="border-input border-t">
+                                <td className="text-muted-foreground px-3 py-2" colSpan={6}>
+                                    {failed ? "—" : "Reading…"}
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
+            <p className="text-muted-foreground mt-2 mb-0 text-xs">
+                Views are reference pages only (the 175 rollups; &quot;—&quot; until that migration is in).
+                Changes are changelog rows: member suggestions once approved, plus admin edits and merges.
+            </p>
+        </div>
+    );
+}
+
+/** Band — the public herd, counted by what it is. */
+function HerdBand() {
+    const [data, setData] = useState<HerdTally | null>(null);
+    const [failed, setFailed] = useState(false);
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            const result = await getHerdInsights();
+            if (cancelled) return;
+            if (result.success) setData(result.herd);
+            else setFailed(true);
+        })();
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+    const total = data?.total ?? 0;
+    return (
+        <div>
+            <h3 className="mt-0 mb-2 flex flex-wrap items-baseline gap-2 text-base font-bold">
+                🐴 The public herd
+                <span className="text-muted-foreground text-xs font-normal">
+                    {data
+                        ? `${fmt(data.total)} public horses · ${fmt(data.linked)} linked to the Registry`
+                        : failed
+                          ? "could not be read this load"
+                          : "counting…"}
+                </span>
+            </h3>
+            {data && (
+                <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(220px,1fr))]">
+                    <BucketTable title="Maker" rows={data.byMaker} total={total} />
+                    <BucketTable title="Finish" rows={data.byFinish} total={total} />
+                    <BucketTable title="Scale" rows={data.byScale} total={total} />
+                    <BucketTable title="Sex" rows={data.byGender} total={total} />
+                    <BucketTable title="Breed" rows={data.byBreed} total={total} />
+                    <BucketTable title="Colour" rows={data.byColor} total={total} />
+                    <BucketTable title="Age" rows={data.byAge} total={total} />
+                    <BucketTable title="Category" rows={data.byCategory} total={total} />
+                </div>
+            )}
+            <p className="text-muted-foreground mt-2 mb-0 text-xs">
+                Public horses only, counted as aggregates. Maker and scale come from the Registry
+                entry a horse is linked to; sex, breed and colour prefer what the owner set, then the
+                Registry&apos;s. &quot;Unknown&quot; is a blank, not a guess.
+            </p>
+        </div>
+    );
+}
+
 function GrowthBand() {
     const [range, setRange] = useState<GrowthRange>(30);
     const [growth, setGrowth] = useState<GrowthInsights | null>(null);
@@ -454,6 +608,8 @@ export default function AdminInsightsTab() {
                 {/* The revenue reader is independent of the view rollups —
                     one failing says nothing about the other. */}
                 <RevenueBand />
+                <RegistryBand />
+                <HerdBand />
                 <div className="border-input bg-card rounded-lg border px-8 py-12 text-center">
                     <div className="mb-3 text-4xl">📈</div>
                     <h2 className="m-0 text-base font-bold">Insights unavailable</h2>
@@ -472,6 +628,8 @@ export default function AdminInsightsTab() {
             <div className="flex flex-col gap-6">
                 <GrowthBand />
                 <RevenueBand />
+                <RegistryBand />
+                <HerdBand />
                 <div className="border-input bg-card rounded-lg border px-8 py-12 text-center">
                     <div className="mb-3 text-4xl">📈</div>
                     <h2 className="m-0 text-base font-bold">Waiting on migration 175</h2>
@@ -509,6 +667,8 @@ export default function AdminInsightsTab() {
             <GrowthBand />
             {/* Band 1 — what the place earns, and who is actually here */}
             <RevenueBand />
+                <RegistryBand />
+                <HerdBand />
 
             {/* Band 2 — how busy is the place */}
             <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(150px,1fr))]">
