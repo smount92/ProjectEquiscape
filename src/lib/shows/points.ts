@@ -43,6 +43,7 @@
  */
 
 import type { CallbackScope, ShowStatus } from "./types";
+import { DELETED_NAME_PLACEHOLDER } from "@/lib/stable/softDelete";
 
 // ── The scale (v2) ──
 
@@ -389,6 +390,13 @@ function byPointsThenName<T extends { points: number; id: string; name: string }
 // ── Builders ──
 
 /** Horse standings for one show year (aggregating the horse's pairs). */
+/** A row belongs in the public table once it has a result of any kind:
+ *  points, a placing (even one that paid nothing), or a championship.
+ *  "Entered and never placed" is attendance, not a ranking. */
+function hasResult(row: { points: number; placings: number; championships: number }): boolean {
+    return row.points > 0 || row.placings > 0 || row.championships > 0;
+}
+
 export function buildHorseStandings(input: StandingsInput): HorseStandingRow[] {
     const pairs = tallyPairs(input);
     const counted = countedShowIds(input.shows, input.filter);
@@ -427,9 +435,15 @@ export function buildHorseStandings(input: StandingsInput): HorseStandingRow[] {
         championships: agg.championships,
         showsEntered: agg.showIds.size,
     }));
-    unranked.sort(byPointsThenName);
+    // The public table ranks what has scored. A horse that entered and
+    // never placed, or one its owner has since deleted from their stable,
+    // stays in the show's own results but is not a ranking (the 2026-27
+    // page listed 300 zero-point rows and "[Deleted]" entries under the
+    // real standings).
+    const ranked = unranked.filter((row) => hasResult(row) && row.name !== DELETED_NAME_PLACEHOLDER);
+    ranked.sort(byPointsThenName);
 
-    return assignRanks(unranked).map((row) => ({
+    return assignRanks(ranked).map((row) => ({
         rank: row.rank,
         horseId: row.id,
         horseName: row.name,
@@ -472,9 +486,11 @@ export function buildStableStandings(input: StandingsInput): StableStandingRow[]
         championships: agg.championships,
         showsEntered: agg.showIds.size,
     }));
-    unranked.sort(byPointsThenName);
+    // Same rule as the horse table: a stable with no result yet is not a ranking.
+    const ranked = unranked.filter(hasResult);
+    ranked.sort(byPointsThenName);
 
-    return assignRanks(unranked).map((row) => ({
+    return assignRanks(ranked).map((row) => ({
         rank: row.rank,
         ownerId: row.id,
         ownerAlias: row.name,

@@ -132,8 +132,30 @@ describe("buildHorseStandings — v2", () => {
         );
         expect(rows[0]).toMatchObject({ horseId: "horse-1", points: 4, rank: 1 });
         expect(rows[1]).toMatchObject({ horseId: "horse-2", points: 3, rank: 2 });
-        // Entered-but-unplaced horses still stand at 0.
-        expect(rows.find((r) => r.horseId === "horse-3")?.points).toBe(0);
+        // Entered-but-unplaced horses are not a ranking: the table is
+        // who has a result, not everyone who turned up (2026-10-10).
+        expect(rows.find((r) => r.horseId === "horse-3")).toBeUndefined();
+        expect(rows).toHaveLength(2);
+    });
+
+    it("a horse deleted from its owner's stable leaves the table", () => {
+        const entries = classOf(3);
+        const rows = buildHorseStandings(
+            input({
+                shows: [show({ id: "show-1" })],
+                entries,
+                placings: [
+                    { entry_id: "e1", place: 1 },
+                    { entry_id: "e2", place: 2 },
+                ],
+                horseNamesById: new Map([
+                    ["horse-1", "[Deleted]"],
+                    ["horse-2", "Still Here"],
+                ]),
+            }),
+        );
+        expect(rows.map((r) => r.horseId)).toEqual(["horse-2"]);
+        expect(rows[0].rank).toBe(1);
     });
 
     it("a self-only class pays 0 points but still counts the placing", () => {
@@ -347,12 +369,21 @@ describe("buildStableStandings — v2 pair semantics", () => {
     });
 
     it("tied stables share the rank and order alphabetically", () => {
-        const entries = classOf(3);
+        // Three self-only classes: each stable places once and pays 0.
+        const entries = [
+            entry("e1", "show-1", "horse-1", "owner-1", "c1"),
+            entry("e2", "show-1", "horse-2", "owner-2", "c2"),
+            entry("e3", "show-1", "horse-3", "owner-3", "c3"),
+        ];
         const rows = buildStableStandings(
             input({
                 shows: [show({ id: "show-1" })],
                 entries,
-                placings: [], // everyone at 0
+                placings: [
+                    { entry_id: "e1", place: 1 },
+                    { entry_id: "e2", place: 1 },
+                    { entry_id: "e3", place: 1 },
+                ], // everyone at 0
                 ownerAliasById: new Map([
                     ["owner-1", "Zinnia"],
                     ["owner-2", "Apple"],

@@ -71,7 +71,7 @@ export default async function PublicShowResultsPage({ params }: { params: Promis
                     📸 Show Results
                     {event.isSanctioned && (
                         <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-warning/15 px-2.5 py-0.5 text-xs font-semibold text-warning">
-                            🏛️ NAMHSA Sanctioned
+                            🏛️ NAMHSA-approved, per the host
                         </span>
                     )}
                 </div>
@@ -202,7 +202,9 @@ export default async function PublicShowResultsPage({ params }: { params: Promis
                     <Link href="/" className="font-medium text-secondary-foreground hover:text-foreground">
                         Model Horse Hub
                     </Link>
-                    {event.isSanctioned && " in partnership with NAMHSA"}
+                    {/* A host's declaration about their own show — never a claim
+                        of any relationship between this site and NAMHSA. */}
+                    {event.isSanctioned && " · the host lists this show as NAMHSA-approved"}
                 </p>
                 <p className="mt-2 text-xs text-muted-foreground">
                     <Link href={`/shows/${event.id}`} className="text-muted-foreground hover:text-secondary-foreground">
