@@ -567,7 +567,19 @@ export default function AdminInsightsTab() {
     useEffect(() => {
         let cancelled = false;
         (async () => {
-            const result = await getAdminInsights();
+            // A thrown action (a deploy landing under an open tab invalidates
+            // its action ids; a function timeout; a network drop) used to
+            // leave this on "Reading the rollups…" forever (2026-10-10).
+            // It is an error like any other, and says so.
+            let result: Awaited<ReturnType<typeof getAdminInsights>>;
+            try {
+                result = await getAdminInsights();
+            } catch (err) {
+                result = {
+                    success: false,
+                    error: `${err instanceof Error ? err.message : "The request failed."} Reload the page — a new version may have deployed under this tab.`,
+                };
+            }
             if (cancelled) return;
             if (result.success) setInsights(result.insights);
             else setError(result.error);

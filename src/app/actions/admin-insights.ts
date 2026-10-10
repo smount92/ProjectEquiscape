@@ -402,7 +402,10 @@ export async function getGrowthInsights(
 // (etype 'reference'); edits off catalog_changelog and the suggestion
 // queue, which exist from day one.
 
-export const REGISTRY_WINDOWS = [7, 30, 90] as const;
+// Not exported: a "use server" module may only export async functions,
+// and a value export here 500s EVERY action in the file (2026-10-10,
+// the admin tab stuck on "Reading the rollups…").
+const REGISTRY_WINDOWS = [7, 30, 90] as const;
 export type RegistryWindow = (typeof REGISTRY_WINDOWS)[number];
 
 export interface RegistryWindowStats {
