@@ -518,6 +518,46 @@ export const attachDocumentToEntrySchema = z.object({
     documentId: uuidSchema.nullable(),
 });
 
+/** Most horses one "Enter class" press can carry. */
+export const MAX_BATCH_ENTRIES = 10;
+
+/**
+ * Documentation riding on one batch entry: reuse one of the horse's
+ * existing write-ups, or write a new one (saved to the horse, then
+ * attached). Attached AFTER the entry lands — never costs the entry.
+ */
+export const batchDocumentationSchema = z.union([
+    z.object({ documentId: uuidSchema }),
+    z.object({
+        kind: documentKindSchema,
+        title: z.string().trim().max(120).optional(),
+        body: z.string().trim().min(1, "Write the documentation body.").max(4000),
+    }),
+]);
+
+/** The entry page's "Enter class": several of your horses into ONE class. */
+export const enterClassBatchSchema = z.object({
+    showId: uuidSchema,
+    classId: uuidSchema,
+    entries: z
+        .array(
+            z.object({
+                horseId: uuidSchema,
+                /** Online shows: the judged photo (horse_images.id). */
+                photoId: uuidSchema.nullable().optional(),
+                /** Proxy showing: someone else handles this horse. */
+                handlerId: uuidSchema.nullable().optional(),
+                documentation: batchDocumentationSchema.optional(),
+            }),
+        )
+        .min(1, "Pick at least one horse.")
+        .max(MAX_BATCH_ENTRIES, `Enter at most ${MAX_BATCH_ENTRIES} horses at a time.`)
+        .refine(
+            (rows) => new Set(rows.map((r) => r.horseId)).size === rows.length,
+            "The same horse is listed twice.",
+        ),
+});
+
 /** First zod issue as a user-facing error string. */
 export function firstZodError(error: z.ZodError): string {
     return error.issues[0]?.message ?? "Invalid input.";

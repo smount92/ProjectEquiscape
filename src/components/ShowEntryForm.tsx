@@ -257,8 +257,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
     divisionGroups.set(c.divisionName, group);
   }
 
-  // Name-filter via the tested v2 picker helper (same list the
-  // EnterClassDialog uses). This legacy form has no class-restriction
+  // Name-filter via the tested v2 picker helper. This legacy form has no class-restriction
   // data on hand, so restrictions are {} and ranking degrades to pure
   // name filtering in the server's order.
   const rankedHorses = filterAndRankHorses(

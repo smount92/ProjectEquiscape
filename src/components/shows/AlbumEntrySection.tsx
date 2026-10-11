@@ -2,14 +2,14 @@
 
 /**
  * Wave 4b — the album's "#entries" body: the viewer's entries +
- * readiness panel (the SAME MyEntriesCard/ShowReadinessPanel the
- * legacy layout renders) and the program accordion under #program
- * (divisions collapsed with counts → the existing class rows with
- * Enter buttons).
+ * readiness panel (MyEntriesCard / ShowReadinessPanel) and the
+ * program accordion under #program (divisions collapsed with counts →
+ * the class rows, whose Enter links go to the entry page).
  *
- * State wiring (enter dialog, self-scratch confirm, horse refetch)
- * mirrors ShowEntrySection — the blocks are shared, the layout is
- * the album's.
+ * Entering lives on /shows/[id]/enter (EnterShowWorkbench) — this
+ * section only links there (program Enter, Re-enter). It still owns
+ * the self-scratch confirm and the horse refetch behind the readiness
+ * panel.
  */
 
 import { useCallback, useMemo, useState } from "react";
@@ -21,7 +21,6 @@ import { listMyEntrantHorses } from "@/app/actions/show-readiness";
 import type { ConsoleClass, ConsoleDivision } from "@/lib/shows/console";
 import type { EntrantHorse, MyShowEntry } from "@/lib/shows/public";
 import type { ShowMode, ShowStatus } from "@/lib/shows/types";
-import EnterClassDialog from "@/components/shows/EnterClassDialog";
 import ProgramAccordion from "@/components/shows/ProgramAccordion";
 import ShowReadinessPanel from "@/components/shows/ShowReadinessPanel";
 import {
@@ -59,7 +58,6 @@ export default function AlbumEntrySection({
     status,
     divisions,
     showYear,
-
     showIsQualifying,
     myEntries,
     horses,
@@ -70,24 +68,20 @@ export default function AlbumEntrySection({
     const canEnter = authed && entriesOpen;
 
     const { showToast, toastNode } = useShowToast();
-    const [activeClass, setActiveClass] = useState<ConsoleClass | null>(null);
-    const [dialogNonce, setDialogNonce] = useState(0);
     const [scratchTarget, setScratchTarget] = useState<MyShowEntry | null>(null);
     const [scratching, setScratching] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    // The readiness panel makes a horse public mid-visit; refetch so
+    // the program's Enter links appear without a reload.
     const [freshHorses, setFreshHorses] = useState<EntrantHorse[] | null>(null);
     const effectiveHorses = freshHorses ?? horses;
 
-    const refreshHorses = useCallback(async () => {
+    const handleHorsesReady = useCallback(async () => {
         const result = await listMyEntrantHorses();
         if (result.success) setFreshHorses(result.horses);
-    }, []);
-
-    const handleHorsesReady = useCallback(async () => {
-        await refreshHorses();
         router.refresh();
-    }, [refreshHorses, router]);
+    }, [router]);
 
     const classById = useMemo(() => {
         const map = new Map<string, ConsoleClass>();
@@ -98,12 +92,6 @@ export default function AlbumEntrySection({
         }
         return map;
     }, [divisions]);
-
-    const openDialog = (cls: ConsoleClass) => {
-        setError(null);
-        setDialogNonce((n) => n + 1);
-        setActiveClass(cls);
-    };
 
     const handleScratch = async () => {
         if (!scratchTarget) return;
@@ -144,7 +132,10 @@ export default function AlbumEntrySection({
                         setError(null);
                         setScratchTarget(entry);
                     }}
-                    onReenter={openDialog}
+                    // Re-enter renders as a Link when showId is set; this
+                    // fallback is never reached on the album page.
+                    onReenter={(cls) => router.push(`/shows/${showId}/enter?class=${cls.id}`)}
+                    showId={showId}
                 />
             )}
 
@@ -155,7 +146,7 @@ export default function AlbumEntrySection({
                 >
                     <span>Entries are open — sign in to enter your horses.</span>
                     <Button asChild size="sm">
-                        <Link href={`/login?redirectTo=${encodeURIComponent(`/shows/${showId}`)}`}>
+                        <Link href={`/login?redirectTo=${encodeURIComponent(`/shows/${showId}/enter`)}`}>
                             Sign in to enter
                         </Link>
                     </Button>
@@ -180,33 +171,11 @@ export default function AlbumEntrySection({
                 <ProgramAccordion
                     divisions={divisions}
                     canEnter={canEnter && effectiveHorses.length > 0}
-                    onEnter={openDialog}
                     showId={showId}
                     showYear={showYear}
-
                     showIsQualifying={showIsQualifying}
                 />
             </section>
-
-            {activeClass && (
-                <EnterClassDialog
-                    key={`${activeClass.id}-${dialogNonce}`}
-                    showId={showId}
-                    cls={activeClass}
-                    mode={mode}
-                    horses={effectiveHorses}
-                    onRefreshHorses={refreshHorses}
-                    onClose={() => setActiveClass(null)}
-                    onEntered={({ horseName, documentationNote }) => {
-                        showToast(
-                            documentationNote
-                                ? `${horseName} is entered, but the documentation didn't save: ${documentationNote}`
-                                : `${horseName} is entered — see My Entries above.`,
-                        );
-                        router.refresh();
-                    }}
-                />
-            )}
 
             {/* Self-scratch confirm — same pause, same plain words as
                 the legacy layout. */}

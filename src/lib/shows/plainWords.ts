@@ -79,7 +79,8 @@ export function feeText(feeInfo: string | null): string {
  * what "halter" even means.
  */
 export const AXIS_GLOSS: Record<DivisionAxis, string> = {
-    halter: "Halter — judged on breed type & conformation",
+    halter:
+        "Halter — judged on breed type & conformation. Each horse may enter one halter class per show.",
     performance: "Performance — horse + tack/props depicting an event",
     workmanship: "Workmanship — judged on the quality of the finish work",
     collectibility: "Collectibility — judged on rarity & condition",

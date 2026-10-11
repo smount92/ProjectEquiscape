@@ -11,7 +11,7 @@
 
 import Link from "next/link";
 
-import { formatStatus } from "@/lib/shows/stateMachine";
+import { friendlyShowStatus } from "@/lib/shows/plainWords";
 import {
     formatCloseAt,
     placeLabel,
@@ -41,7 +41,7 @@ export default function MyShowLifeSection({ life }: { life: MyShowLife }) {
                                     id={`show-life-${entry.showId}`}
                                 >
                                     <span className="font-semibold text-foreground">{entry.showTitle}</span>
-                                    <span className="stamp">{formatStatus(entry.showStatus)}</span>
+                                    <span className="stamp">{friendlyShowStatus(entry.showStatus)}</span>
                                     {deadline && entry.showStatus === "entries_open" && (
                                         <span className="text-sm font-semibold text-forest">{deadline}</span>
                                     )}

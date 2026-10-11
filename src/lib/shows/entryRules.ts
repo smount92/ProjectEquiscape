@@ -26,6 +26,7 @@
  */
 
 import { normalizeScale } from "@/lib/catalog/taxonomy";
+import { horseBlocks } from "./entrantLedger";
 import type {
     ClassStatus,
     DivisionAxis,
@@ -181,25 +182,44 @@ export function validateEntry(input: ValidateEntryInput): ValidateEntryResult {
 
     const active = existingEntries.filter((e) => e.status !== "scratched");
 
+    // ── The certain horse × class rules, decided by the entrant ledger ──
+    // (already in this class · one breed-halter class per horse ·
+    // per-entrant cap). entrantLedger owns the logic so the entry page
+    // and this validator can never disagree; this function only maps
+    // its codes to the server's wording. "Mine" = the owner's live
+    // entries, plus any live entry of THIS horse under another owner
+    // (a mid-show transfer) so the horse rules still see it.
+    const myLive = active
+        .filter((e) => e.ownerId === candidate.ownerId || e.horseId === candidate.horseId)
+        .map((e) => ({ classId: e.classId, horseId: e.horseId, axis: e.divisionAxis }));
+    const blocks = new Set(
+        horseBlocks({
+            horse: { id: candidate.horseId, scale: horse.scale ?? null, finish: horse.finish ?? null },
+            cls: {
+                id: targetClass.id,
+                name: "",
+                axis: targetClass.divisionAxis,
+                maxPerEntrant: targetClass.maxPerEntrant,
+                allowedScales: targetClass.allowedScales,
+                allowedFinishes: targetClass.allowedFinishes,
+            },
+            myLive,
+        }).map((b) => b.code),
+    );
+
     // ── No double entry in the same class ──
-    if (active.some((e) => e.classId === targetClass.id && e.horseId === candidate.horseId)) {
+    if (blocks.has("in_this_class")) {
         errors.push("This horse is already entered in this class.");
     }
 
     // ── ONE breed-halter class per horse per show ──
-    if (targetClass.divisionAxis === "halter") {
-        const otherHalter = active.find(
-            (e) =>
-                e.horseId === candidate.horseId &&
-                e.divisionAxis === "halter" &&
-                e.classId !== targetClass.id,
+    if (blocks.has("in_other_halter")) {
+        errors.push(
+            "This horse is already entered in a breed halter class at this show. Entering breed halter declares the model's breed, so each horse shows in exactly one halter class. (It may still enter performance, workmanship, and collectibility classes.)",
         );
-        if (otherHalter) {
-            errors.push(
-                "This horse is already entered in a breed halter class at this show. Entering breed halter declares the model's breed, so each horse shows in exactly one halter class. (It may still enter performance, workmanship, and collectibility classes.)",
-            );
-        }
+    }
 
+    if (targetClass.divisionAxis === "halter") {
         // ── Same PHOTO under another stable record (online shows) ──
         // In a photo show the judged object is the photo. The same
         // photo in two halter classes is the same model declaring two
@@ -224,15 +244,11 @@ export function validateEntry(input: ValidateEntryInput): ValidateEntryResult {
     }
 
     // ── Per-class entrant cap ──
-    if (targetClass.maxPerEntrant !== null && targetClass.maxPerEntrant > 0) {
-        const mine = active.filter(
-            (e) => e.classId === targetClass.id && e.ownerId === candidate.ownerId,
-        ).length;
-        if (mine >= targetClass.maxPerEntrant) {
-            errors.push(
-                `This class allows at most ${targetClass.maxPerEntrant} ${targetClass.maxPerEntrant === 1 ? "entry" : "entries"} per entrant.`,
-            );
-        }
+    if (blocks.has("class_full_for_you")) {
+        const cap = targetClass.maxPerEntrant ?? 0;
+        errors.push(
+            `This class allows at most ${cap} ${cap === 1 ? "entry" : "entries"} per entrant.`,
+        );
     }
 
     // ── Scale / finish eligibility ──

@@ -65,9 +65,20 @@ describe("horsePicker — annotateHorse (mirrors server semantics, soft)", () =>
         expect(both.mismatches).toEqual(["Traditional scale only", "OF finish only"]);
     });
 
-    it("comparison is exact, not fuzzy (no case folding — server parity)", () => {
+    it("scales compare through normalizeScale, as the server does (case and spelling drift fit)", () => {
         const lower = horse({ id: "h4", name: "Lowercase", scale: "traditional" });
-        expect(annotateHorse(lower, traditionalOnly).fitsClass).toBe(false);
+        expect(annotateHorse(lower, traditionalOnly).fitsClass).toBe(true);
+    });
+
+    it('"Traditional" fits a "Traditional (1:9)" restriction (no false "may not fit")', () => {
+        const canonicalTrad: PickerClassRestrictions = { allowedScales: ["Traditional (1:9)"], allowedFinishes: null };
+        expect(annotateHorse(traditionalOF, canonicalTrad).fitsClass).toBe(true);
+        expect(annotateHorse(classicCM, canonicalTrad).fitsClass).toBe(false);
+    });
+
+    it("finishes still compare exactly", () => {
+        const lowerFinish = horse({ id: "h5", name: "Lower finish", finish: "of" });
+        expect(annotateHorse(lowerFinish, ofOnly).fitsClass).toBe(false);
     });
 });
 

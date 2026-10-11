@@ -466,7 +466,7 @@ function ClassRow({
                     {friendlyClassStatus(cls.status)}
                 </span>
             )}
-            {/* Same badge the public show page uses (ShowEntrySection),
+            {/* Same badge the public show page uses (PublicClassRow),
                 so hosts see the flag without opening Edit. */}
             {cls.isQualifying ? (
                 <Badge variant="outline">qualifying</Badge>

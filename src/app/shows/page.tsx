@@ -1,6 +1,6 @@
 import { createClient } from"@/lib/supabase/server";
 import { focusChips } from "@/lib/shows/focus";
-import { feeText } from "@/lib/shows/plainWords";
+import { feeText, friendlyShowStatus } from "@/lib/shows/plainWords";
 import { getPhotoShows } from"@/app/actions/shows";
 import { getPublicShows } from"@/app/actions/shows-v2";
 import { getMyShowLife } from"@/app/actions/show-life";
@@ -13,7 +13,6 @@ import { getMySeason } from"@/app/actions/standings";
 import { EMPTY_SHOW_LIFE } from"@/lib/shows/showLife";
 import type { PublicShowSummary } from"@/lib/shows/public";
 import type { ShowStatus } from"@/lib/shows/types";
-import { formatStatus } from"@/lib/shows/stateMachine";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -78,7 +77,7 @@ function V2ShowsSection({ title, shows }: { title: string; shows: PublicShowSumm
        <h3 className="m-0 text-base font-bold text-foreground">{show.title}</h3>
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-2">
-       <span className="stamp">{formatStatus(show.status)}</span>
+       <span className="stamp">{friendlyShowStatus(show.status)}</span>
        <Badge variant="secondary">{show.mode ==="live" ?"Live" :"Online"}</Badge>
        {show.judging ==="community_vote" && <Badge variant="secondary">Community vote</Badge>}
        {show.isMhhQualifying && <Badge>🏅 MHH Sanctioned</Badge>}

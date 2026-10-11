@@ -22,7 +22,7 @@ interface ProgramAccordionProps {
     divisions: ConsoleDivision[];
     /** Caller pre-multiplies authed + entries_open + horses>0. */
     canEnter: boolean;
-    onEnter: (cls: ConsoleClass) => void;
+    onEnter?: (cls: ConsoleClass) => void;
     /** Index of the division to render open initially (the CTA
      *  dialog opens the first; #program starts all collapsed). */
     defaultOpenIndex?: number | null;
@@ -118,6 +118,7 @@ export default function ProgramAccordion({
                                                             key={cls.id}
                                                             cls={cls}
                                                             canEnter={canEnter}
+                                                            showId={showId}
                                                             onEnter={onEnter}
                                                             showYear={showYear}
                                                             showIsQualifying={showIsQualifying}

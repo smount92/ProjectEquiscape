@@ -6,8 +6,8 @@
  *
  *   1. Compact leather masthead — title, host line, ONE status line
  *      with a Details disclosure (AlbumMasthead).
- *   2. Sticky CTA row — brass "Enter this show" → "Pick your class"
- *      → the existing EnterClassDialog flow (AlbumCtaRow).
+ *   2. Sticky CTA row — brass "Enter this show" → the entry page,
+ *      /shows/[id]/enter (AlbumCtaRow).
  *   3. The ENTRY RIBBON — every entry at a glance, funneling into
  *      the per-class rooms (EntryRibbon).
  *   4. #entries — My Entries + readiness + the program accordion
@@ -124,11 +124,7 @@ export default async function AlbumShowPage({ showId }: { showId: string }) {
                     mode={show.mode}
                     status={show.status}
                     authed={!!user}
-                    divisions={divisions}
-                    horses={horses}
                     myEntryCount={liveEntryCount}
-                    showYear={show.showYear}
-                    showIsQualifying={show.isMhhQualifying}
                     followSupported={followState.supported}
                     isFollowing={followState.isFollowing}
                 />

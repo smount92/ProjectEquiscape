@@ -35,7 +35,15 @@ vi.mock("@/lib/shows/notifications", () => ({
     runVotingOpenedFanout: vi.fn().mockResolvedValue(undefined),
 }));
 
-import { enterClass, scratchEntry } from "@/app/actions/shows-v2";
+// enterClassBatch attaches documentation through the v4 document
+// actions (dynamic import) — they own documents; mocked here.
+const v4 = vi.hoisted(() => ({
+    createHorseDocument: vi.fn(),
+    attachDocumentToEntry: vi.fn(),
+}));
+vi.mock("@/app/actions/shows-v4", () => v4);
+
+import { enterClass, enterClassBatch, scratchEntry } from "@/app/actions/shows-v2";
 
 const SHOW_ID = "123e4567-e89b-42d3-a456-426614174000";
 const CLASS_ID = "223e4567-e89b-42d3-a456-426614174000";
@@ -343,6 +351,164 @@ describe("shows-v2 — enterClass", () => {
         if (!result.success) {
             expect(result.error).toMatch(/already entered in this class/i);
         }
+    });
+});
+
+describe("shows-v2 — enterClassBatch", () => {
+    const SECOND_ENTRY_ID = "b23e4567-e89b-42d3-a456-426614174000";
+    const DOC_ID = "c23e4567-e89b-42d3-a456-426614174000";
+
+    it("rejects invalid input (duplicate horse) before touching auth", async () => {
+        const result = await enterClassBatch({
+            showId: SHOW_ID,
+            classId: CLASS_ID,
+            entries: [{ horseId: HORSE_ID }, { horseId: HORSE_ID }],
+        });
+        expect(result.success).toBe(false);
+        if (!result.success) expect(result.error).toMatch(/listed twice/i);
+        expect(mockClient.auth.getUser).not.toHaveBeenCalled();
+    });
+
+    it("two horses both enter, each through the single enterOne path", async () => {
+        queueEntryContext({ horse: { id: HORSE_ID } });
+        queueEntryContext({ horse: { id: OTHER_HORSE_ID } });
+        mockClient._mockQuery.single
+            .mockResolvedValueOnce({ data: { id: ENTRY_ID }, error: null })
+            .mockResolvedValueOnce({ data: { id: SECOND_ENTRY_ID }, error: null });
+
+        const result = await enterClassBatch({
+            showId: SHOW_ID,
+            classId: CLASS_ID,
+            entries: [{ horseId: HORSE_ID }, { horseId: OTHER_HORSE_ID }],
+        });
+        expect(result.success).toBe(true);
+        if (result.success) {
+            expect(result.results).toEqual([
+                expect.objectContaining({ horseId: HORSE_ID, success: true, entryId: ENTRY_ID }),
+                expect.objectContaining({
+                    horseId: OTHER_HORSE_ID,
+                    success: true,
+                    entryId: SECOND_ENTRY_ID,
+                }),
+            ]);
+            // Re-read via the getMyShowEntries query (none in the mock).
+            expect(result.myEntries).toEqual([]);
+        }
+        expect(mockClient._mockQuery.insert).toHaveBeenCalledTimes(2);
+        expect(mockClient._mockQuery.insert).toHaveBeenNthCalledWith(
+            1,
+            expect.objectContaining({ class_id: CLASS_ID, horse_id: HORSE_ID }),
+        );
+        expect(mockClient._mockQuery.insert).toHaveBeenNthCalledWith(
+            2,
+            expect.objectContaining({ class_id: CLASS_ID, horse_id: OTHER_HORSE_ID }),
+        );
+    });
+
+    it("second horse refused → the first is still entered and the refusal is verbatim", async () => {
+        queueEntryContext({ horse: { id: HORSE_ID } });
+        queueEntryContext({ horse: { id: OTHER_HORSE_ID, owner_id: "someone-else" } });
+        mockClient._mockQuery.single.mockResolvedValueOnce({
+            data: { id: ENTRY_ID },
+            error: null,
+        });
+
+        const result = await enterClassBatch({
+            showId: SHOW_ID,
+            classId: CLASS_ID,
+            entries: [{ horseId: HORSE_ID }, { horseId: OTHER_HORSE_ID }],
+        });
+        expect(result.success).toBe(true);
+        if (result.success) {
+            expect(result.results[0]).toEqual(
+                expect.objectContaining({ horseId: HORSE_ID, success: true, entryId: ENTRY_ID }),
+            );
+            expect(result.results[1].success).toBe(false);
+            expect(result.results[1].error).toMatch(/only enter horses you own/i);
+            expect(result.results[1].violations).toEqual([
+                expect.stringMatching(/only enter horses you own/i),
+            ]);
+        }
+        expect(mockClient._mockQuery.insert).toHaveBeenCalledTimes(1);
+    });
+
+    it("refuses a class that belongs to another show", async () => {
+        queueEntryContext({ division: { show_id: "f23e4567-e89b-42d3-a456-426614174000" } });
+        const result = await enterClassBatch({
+            showId: SHOW_ID,
+            classId: CLASS_ID,
+            entries: [{ horseId: HORSE_ID }],
+        });
+        expect(result.success).toBe(true);
+        if (result.success) {
+            expect(result.results[0]).toEqual(
+                expect.objectContaining({ success: false, error: "That class isn't part of this show." }),
+            );
+        }
+        expect(mockClient._mockQuery.insert).not.toHaveBeenCalled();
+    });
+
+    it("documentation rides behind the entry: created, then attached", async () => {
+        queueEntryContext();
+        mockClient._mockQuery.single.mockResolvedValueOnce({
+            data: { id: ENTRY_ID },
+            error: null,
+        });
+        v4.createHorseDocument.mockResolvedValueOnce({ success: true, documentId: DOC_ID });
+        v4.attachDocumentToEntry.mockResolvedValueOnce({ success: true });
+
+        const result = await enterClassBatch({
+            showId: SHOW_ID,
+            classId: CLASS_ID,
+            entries: [
+                {
+                    horseId: HORSE_ID,
+                    documentation: { kind: "breed", title: "Breed — Duns", body: "See the registry." },
+                },
+            ],
+        });
+        expect(result.success).toBe(true);
+        if (result.success) {
+            expect(result.results[0]).toEqual(
+                expect.objectContaining({ success: true, documentationNote: null }),
+            );
+        }
+        expect(v4.createHorseDocument).toHaveBeenCalledWith({
+            horseId: HORSE_ID,
+            kind: "breed",
+            title: "Breed — Duns",
+            bodyMd: "See the registry.",
+        });
+        expect(v4.attachDocumentToEntry).toHaveBeenCalledWith({
+            entryId: ENTRY_ID,
+            documentId: DOC_ID,
+        });
+    });
+
+    it("a documentation failure is a note, never a lost entry", async () => {
+        queueEntryContext();
+        mockClient._mockQuery.single.mockResolvedValueOnce({
+            data: { id: ENTRY_ID },
+            error: null,
+        });
+        v4.attachDocumentToEntry.mockResolvedValueOnce({ success: false, error: "Document not found." });
+
+        const result = await enterClassBatch({
+            showId: SHOW_ID,
+            classId: CLASS_ID,
+            entries: [{ horseId: HORSE_ID, documentation: { documentId: DOC_ID } }],
+        });
+        expect(result.success).toBe(true);
+        if (result.success) {
+            expect(result.results[0]).toEqual(
+                expect.objectContaining({
+                    success: true,
+                    entryId: ENTRY_ID,
+                    documentationNote: "Document not found.",
+                }),
+            );
+        }
+        expect(v4.createHorseDocument).not.toHaveBeenCalled();
     });
 });
 

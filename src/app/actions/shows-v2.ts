@@ -33,6 +33,7 @@ import {
     combineClassesSchema,
     createShowSchema,
     deleteShowSchema,
+    enterClassBatchSchema,
     enterClassSchema,
     finalizeCommunityVotesSchema,
     findUserByAliasSchema,
@@ -103,6 +104,7 @@ import {
 } from "@/lib/shows/gallery";
 import { parseRubric } from "@/lib/shows/rubrics";
 import { validateEntry } from "@/lib/shows/entryRules";
+import { DOC_KIND_LABELS } from "@/lib/shows/documents";
 import {
     PUBLIC_BROWSE_STATUSES,
     type EntrantHorse,
@@ -2382,11 +2384,21 @@ export async function getMyShowEntries(
     const parsed = getMyShowEntriesSchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { supabase, user } = await requireAuth();
+    return readMyShowEntries(supabase, user.id, parsed.data.showId);
+}
 
+/** The read behind getMyShowEntries — shared with enterClassBatch so
+ *  the entry page's refreshed list is byte-for-byte the same shape. */
+async function readMyShowEntries(
+    supabase: SupabaseClient,
+    userId: string,
+    showId: string,
+): Promise<ActionResult<{ entries: MyShowEntry[] }>> {
+    const user = { id: userId };
     const { data: rows, error } = await supabase
         .from("show_class_entries")
         .select("id, class_id, horse_id, handler_id, entry_number, status, photo_id, created_at")
-        .eq("show_id", parsed.data.showId)
+        .eq("show_id", showId)
         .eq("owner_id", user.id)
         .order("created_at", { ascending: true });
     if (error) return { success: false, error: error.message };
@@ -2418,7 +2430,7 @@ export async function getMyShowEntries(
         const { data: show } = await supabase
             .from("shows")
             .select("status")
-            .eq("id", parsed.data.showId)
+            .eq("id", showId)
             .maybeSingle();
         if (show && RESULTS_STATUSES.includes(show.status as ShowStatus)) {
             const { data: placingRows, error: pErr } = await supabase
@@ -2548,7 +2560,30 @@ export async function enterClass(
     const parsed = enterClassSchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { supabase, user } = await requireAuth();
-    const v = parsed.data;
+    return enterOne(supabase, user.id, parsed.data);
+}
+
+/**
+ * THE single owner of "put one horse in one class": context load,
+ * validateEntry, the online-photo rule, entry number, INSERT, the
+ * friendly error mapping and the after-entry notices. enterClass and
+ * enterClassBatch both call it — never fork this path.
+ *
+ * `expectedShowId` (batch only): refuse a class from another show, so
+ * the entry page can never write outside the show it is showing.
+ */
+async function enterOne(
+    supabase: SupabaseClient,
+    userId: string,
+    v: {
+        classId: string;
+        horseId: string;
+        photoId?: string | null;
+        handlerId?: string | null;
+    },
+    expectedShowId?: string,
+): Promise<EnterClassResult> {
+    const user = { id: userId };
 
     // ── Target class + its division axis + the show ──
     const { data: cls, error: cErr } = await supabase
@@ -2576,6 +2611,9 @@ export async function enterClass(
     if (!division) return { success: false, error: "Division not found." };
 
     const showId = division.show_id as string;
+    if (expectedShowId && showId !== expectedShowId) {
+        return { success: false, error: "That class isn't part of this show." };
+    }
     const { data: show, error: shErr } = await supabase
         .from("shows")
         .select("id, mode, status, entries_close_at, capacity, title")
@@ -2813,6 +2851,119 @@ export async function enterClass(
     }
 
     return { success: true, entryId: inserted.id as string, entryNumber };
+}
+
+/** One horse's outcome inside an enterClassBatch press. */
+export interface BatchEntryResult {
+    horseId: string;
+    success: boolean;
+    entryId?: string;
+    entryNumber?: number;
+    /** The server's refusal, verbatim (enterOne's error). */
+    error?: string;
+    violations?: string[];
+    /** The entry is IN; only its documentation failed to save/attach. */
+    documentationNote?: string | null;
+}
+
+export type EnterClassBatchResult =
+    | {
+          success: true;
+          results: BatchEntryResult[];
+          /** The viewer's entries at the show, re-read after the loop
+           *  (same read as getMyShowEntries); null if that read failed —
+           *  the entries themselves are still in. */
+          myEntries: MyShowEntry[] | null;
+      }
+    | { success: false; error: string };
+
+/**
+ * The entry page's "Enter class": several of your horses into ONE
+ * class, each through enterOne in order (so the second horse sees the
+ * first one's entry — caps and leg-tag numbers stay right). One horse
+ * failing never stops the others. Documentation rides behind each
+ * successful entry, exactly as the old dialog did.
+ */
+export async function enterClassBatch(
+    input: z.input<typeof enterClassBatchSchema>,
+): Promise<EnterClassBatchResult> {
+    const parsed = enterClassBatchSchema.safeParse(input);
+    if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
+    const { supabase, user } = await requireAuth();
+    const v = parsed.data;
+
+    const results: BatchEntryResult[] = [];
+    for (const row of v.entries) {
+        let entered: EnterClassResult;
+        try {
+            entered = await enterOne(
+                supabase,
+                user.id,
+                {
+                    classId: v.classId,
+                    horseId: row.horseId,
+                    photoId: row.photoId ?? null,
+                    handlerId: row.handlerId ?? null,
+                },
+                v.showId,
+            );
+        } catch {
+            entered = { success: false, error: "Something went wrong entering this horse — try again." };
+        }
+        if (!entered.success) {
+            results.push({
+                horseId: row.horseId,
+                success: false,
+                error: entered.error,
+                ...(entered.violations ? { violations: entered.violations } : {}),
+            });
+            continue;
+        }
+        const documentationNote = row.documentation
+            ? await attachBatchDocumentation(row.horseId, entered.entryId, row.documentation)
+            : null;
+        results.push({
+            horseId: row.horseId,
+            success: true,
+            entryId: entered.entryId,
+            entryNumber: entered.entryNumber,
+            documentationNote,
+        });
+    }
+
+    const mine = await readMyShowEntries(supabase, user.id, v.showId);
+    return { success: true, results, myEntries: mine.success ? mine.entries : null };
+}
+
+/** Create (or reuse) a write-up and attach it to a fresh entry. Returns
+ *  an error string for the page to show, or null when it worked. The
+ *  v4 document actions stay the single owner of documents. */
+async function attachBatchDocumentation(
+    horseId: string,
+    entryId: string,
+    doc: z.output<typeof enterClassBatchSchema>["entries"][number]["documentation"],
+): Promise<string | null> {
+    if (!doc) return null;
+    try {
+        const { attachDocumentToEntry, createHorseDocument } = await import("./shows-v4");
+        let documentId: string;
+        if ("documentId" in doc) {
+            documentId = doc.documentId;
+        } else {
+            const created = await createHorseDocument({
+                horseId,
+                kind: doc.kind,
+                title: doc.title?.trim() || DOC_KIND_LABELS[doc.kind] || "Documentation",
+                bodyMd: doc.body,
+            });
+            if (!created.success) return created.error;
+            documentId = created.documentId;
+        }
+        const attached = await attachDocumentToEntry({ entryId, documentId });
+        return attached.success ? null : attached.error;
+    } catch {
+        return "The documentation didn't save — the entry itself is in.";
+    }
 }
 
 /**

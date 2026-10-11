@@ -1,17 +1,18 @@
 /**
- * Shows domain — horse-picker ordering for the entry dialog.
+ * Shows domain — horse-picker ordering.
  *
- * Pure helpers behind EnterClassDialog's picker so a 50–500-horse
+ * Pure helpers (the legacy ShowEntryForm's picker; breedMatchesClass
+ * also feeds the entrant ledger) so a 50–500-horse
  * stable stays scannable: filter by name OR breed as the user types,
  * then float the horses that LOOK right for the class to the top —
  * first those whose breed matches the class's name ("Arabian" for
  * class 101 Arabian), then those compatible with the class's
  * allowed_scales / allowed_finishes.
  *
- * SOFT ordering only. The comparison deliberately mirrors
- * entryRules.validateEntry (exact string match against the allowed
- * lists; a null scale/finish cannot match a restricted list) so the
- * hint agrees with the server as often as possible — but the server
+ * SOFT ordering only. The comparison mirrors entryRules.validateEntry
+ * (scales through normalizeScale on both sides, finishes by exact
+ * match; a null scale/finish cannot match a restricted list) so the
+ * hint agrees with the server — but the server
  * remains the sole authority. Nothing here may hide, disable, or
  * pre-reject a horse; a "mismatch" is a hint, never a gate. The breed
  * match is a hint too: an "Other Light" class names no breed and
@@ -23,11 +24,11 @@
  * decide (alphabetical today) rather than re-sorting client-side.
  */
 
+import { normalizeScale } from "@/lib/catalog/taxonomy";
 import type { EntrantHorse } from "./public";
 
 /** The slice of a class the picker orders against — structurally
- *  satisfied by ConsoleClass and by EnterClassDialog's
- *  EnterableClass; every field is optional so callers without
+ *  satisfied by ConsoleClass; every field is optional so callers without
  *  restriction data degrade to "everything fits". */
 export interface PickerClassRestrictions {
     allowedScales?: string[] | null;
@@ -50,11 +51,15 @@ export interface PickerHorse {
 }
 
 /** Does `value` pass a restriction list, the way the server does?
- *  No list (null/empty) accepts everything; a restricted list
- *  requires an exact match, so an unknown (null) value fails. */
-function passes(value: string | null, allowed: string[] | null | undefined): boolean {
+ *  No list (null/empty) accepts everything; an unknown (null) value
+ *  fails a restricted list. Finishes match exactly; scales compare
+ *  through normalizeScale on BOTH sides (as entryRules does), so
+ *  "Traditional" fits a "Traditional (1:9)" class. */
+function passes(value: string | null, allowed: string[] | null | undefined, normalize?: (v: string | null) => string | null): boolean {
     if (!allowed || allowed.length === 0) return true;
-    return value !== null && allowed.includes(value);
+    if (!normalize) return value !== null && allowed.includes(value);
+    const norm = normalize(value);
+    return norm !== null && allowed.some((a) => normalize(a) === norm);
 }
 
 /** Lower-case words of three letters or more; "Thoroughbred/Standardbred"
@@ -95,7 +100,7 @@ export function annotateHorse(
     cls: PickerClassRestrictions,
 ): PickerHorse {
     const mismatches: string[] = [];
-    if (!passes(horse.scale, cls.allowedScales)) {
+    if (!passes(horse.scale, cls.allowedScales, normalizeScale)) {
         mismatches.push(`${cls.allowedScales!.join("/")} scale only`);
     }
     if (!passes(horse.finish, cls.allowedFinishes)) {

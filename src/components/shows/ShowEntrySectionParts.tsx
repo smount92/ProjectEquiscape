@@ -1,20 +1,16 @@
 "use client";
 
 /**
- * Wave 4b — ShowEntrySection's two reusable blocks, extracted
- * VERBATIM so the legacy public page and the album page render the
- * exact same markup from one implementation:
+ * The two reusable blocks of the show entry page, kept in one place
+ * so every surface renders the same markup:
  *
  *   - MyEntriesCard: the authed viewer's entries table (scratch /
  *     re-enter / result stamps). State stays with the caller — this
  *     is the render + callbacks only.
  *   - PublicClassRow: one classlist row (number, name, status
- *     stamp, rule badges, entry count, Enter button). Used by the
- *     legacy flat classlist, the album's program accordion, AND the
- *     album CTA's "Pick your class" dialog.
- *
- * Do not restyle here without checking both layouts — flag-off
- * parity is test-asserted against this markup.
+ *     stamp, rule badges, entry count, Enter link). Used by the
+ *     program accordion, which the album page and its CTA dialog
+ *     both render.
  */
 
 import { useState } from "react";
@@ -51,7 +47,12 @@ interface MyEntriesCardProps {
      *  for the same class+horse (the server enforces this too). */
     hasLiveEntry: (classId: string, horseId: string) => boolean;
     onScratch: (entry: MyShowEntry) => void;
+    /** Legacy path: opens the in-page entry dialog for the class. Used
+     *  when showId is absent. */
     onReenter: (cls: ConsoleClass) => void;
+    /** When set, Re-enter is a link to the entry page, preselecting the
+     *  class and horse. Omitted = the onReenter button. */
+    showId?: string;
 }
 
 /** Entries shown before the fold. */
@@ -65,9 +66,12 @@ export function MyEntriesCard({
     hasLiveEntry,
     onScratch,
     onReenter,
+    showId,
 }: MyEntriesCardProps) {
     // Result stamps arrive with the completed transition (Phase E1).
     const hasResults = myEntries.some((e) => e.place !== null);
+    // The tab counts LIVE entries, matching the sticky entries pill.
+    const liveCount = myEntries.filter((e) => e.status !== "scratched").length;
     // Twenty entries pushed the program off the screen; fold past a
     // handful and let the count say the rest.
     const [showAll, setShowAll] = useState(false);
@@ -76,7 +80,7 @@ export function MyEntriesCard({
     return (
         <section className="ledger-card" aria-labelledby="my-entries-heading">
             <span className="ledger-tab" id="my-entries-heading">
-                My Entries{myEntries.length > 0 ? ` · ${myEntries.length}` : ""}
+                My Entries{myEntries.length > 0 ? ` · ${liveCount}` : ""}
             </span>
             <Table>
                 <TableHeader>
@@ -167,7 +171,16 @@ export function MyEntriesCard({
                                         {scratched &&
                                             cls &&
                                             cls.status === "scheduled" &&
-                                            !hasLiveEntry(entry.classId, entry.horseId) && (
+                                            !hasLiveEntry(entry.classId, entry.horseId) &&
+                                            (showId ? (
+                                                <Button variant="outline" size="sm" asChild>
+                                                    <Link
+                                                        href={`/shows/${showId}/enter?class=${entry.classId}&horse=${entry.horseId}`}
+                                                    >
+                                                        Re-enter
+                                                    </Link>
+                                                </Button>
+                                            ) : (
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
@@ -175,7 +188,7 @@ export function MyEntriesCard({
                                                 >
                                                     Re-enter
                                                 </Button>
-                                            )}
+                                            ))}
                                     </TableCell>
                                 )}
                             </TableRow>
@@ -192,8 +205,8 @@ export function MyEntriesCard({
             )}
             {entriesOpen && (
                 <p className="mt-2 text-xs text-muted-foreground">
-                    Scratching keeps the entry on the record; re-entering afterwards
-                    creates a fresh entry.
+                    Scratch to withdraw a horse. You can enter it again later; the
+                    withdrawn entry stays on the record.
                 </p>
             )}
         </section>
@@ -207,8 +220,13 @@ interface PublicClassRowProps {
     /** Caller pre-multiplies authed + entries_open + horses>0; the
      *  per-class `scheduled` gate stays here with the row. */
     canEnter: boolean;
-    onEnter: (cls: ConsoleClass) => void;
-    /** v4: when set, an inline "Class room →" link renders in the row. */
+    /** The show the row belongs to. When set, Enter is a link to the
+     *  entry page, preselecting this class. */
+    showId?: string;
+    /** Legacy path: opens the in-page entry dialog. Used when showId
+     *  is absent. */
+    onEnter?: (cls: ConsoleClass) => void;
+    /** When set, an inline "See entries →" link renders in the row. */
     classRoomHref?: string;
     /** The show's season — picks the card gate in force (Season 1
      *  vs permanent). Omitted = Season 1 gate. */
@@ -255,6 +273,7 @@ function QualifyingGateBadge({ cls, showYear }: { cls: ConsoleClass; showYear?: 
 export function PublicClassRow({
     cls,
     canEnter,
+    showId,
     onEnter,
     classRoomHref,
     showYear,
@@ -262,6 +281,7 @@ export function PublicClassRow({
 }: PublicClassRowProps) {
     const cancelled = cls.status === "cancelled";
     const combined = cls.status === "combined";
+    const enterable = canEnter && cls.status === "scheduled" && (!!showId || !!onEnter);
     return (
         <li
             className={`flex flex-wrap items-center gap-x-3 gap-y-1 py-1.5 ${cancelled || combined ? "opacity-60" : ""}`}
@@ -284,7 +304,7 @@ export function PublicClassRow({
                 <QualifyingGateBadge cls={cls} showYear={showYear} />
             )}
             {cls.maxPerEntrant !== null && (
-                <Badge variant="secondary">max {cls.maxPerEntrant}/entrant</Badge>
+                <Badge variant="secondary">Up to {cls.maxPerEntrant} of your horses</Badge>
             )}
             {(cls.allowedScales?.length ?? 0) > 0 && (
                 <span className="text-xs text-muted-foreground">
@@ -305,14 +325,20 @@ export function PublicClassRow({
                     href={classRoomHref}
                     className="text-xs font-medium whitespace-nowrap text-forest hover:underline"
                 >
-                    Class room →
+                    See entries →
                 </Link>
             )}
-            {canEnter && cls.status === "scheduled" && (
+            {enterable && (
                 <span className="ml-auto">
-                    <Button variant="outline" size="sm" onClick={() => onEnter(cls)}>
-                        Enter
-                    </Button>
+                    {showId ? (
+                        <Button variant="outline" size="sm" asChild>
+                            <Link href={`/shows/${showId}/enter?class=${cls.id}`}>Enter</Link>
+                        </Button>
+                    ) : (
+                        <Button variant="outline" size="sm" onClick={() => onEnter?.(cls)}>
+                            Enter
+                        </Button>
+                    )}
                 </span>
             )}
         </li>

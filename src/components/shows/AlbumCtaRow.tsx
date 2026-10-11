@@ -2,37 +2,21 @@
 
 /**
  * Wave 4b — the STICKY CTA ROW, pinned under the site header while
- * the visitor wanders the wall. Primary brass "Enter this show"
- * opens a "Pick your class" dialog — the program accordion with
- * per-class Enter buttons feeding the EXISTING EnterClassDialog
- * flow (class-first, unchanged). Anon visitors get the 4a
- * sign-in-with-redirect pattern instead. Secondary: share. If the
- * viewer has entries, a compact pill jumps to #entries.
+ * the visitor wanders the wall. Primary brass "Enter this show" goes
+ * to the entry page (/shows/[id]/enter — the single owner of
+ * entering). Anon visitors get the 4a sign-in-with-redirect pattern
+ * instead, landing back on the entry page. Secondary: follow, share.
+ * If the viewer has entries, a compact pill jumps to #entries.
  *
- * The row only ever links/opens — every entry rule stays with the
- * server (validateEntry + RLS), exactly as on the legacy layout.
+ * The row only ever links — every entry rule stays with the server
+ * (validateEntry + RLS).
  */
 
-import { useCallback, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
-import { listMyEntrantHorses } from "@/app/actions/show-readiness";
-import type { ConsoleClass, ConsoleDivision } from "@/lib/shows/console";
-import type { EntrantHorse } from "@/lib/shows/public";
 import type { ShowMode, ShowStatus } from "@/lib/shows/types";
 import ShareButton from "@/components/ShareButton";
-import EnterClassDialog from "@/components/shows/EnterClassDialog";
-import ProgramAccordion from "@/components/shows/ProgramAccordion";
 import ShowFollowButton from "@/components/shows/ShowFollowButton";
-import { useShowToast } from "@/components/shows/useShowToast";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
 
 interface AlbumCtaRowProps {
     showId: string;
@@ -40,14 +24,8 @@ interface AlbumCtaRowProps {
     mode: ShowMode;
     status: ShowStatus;
     authed: boolean;
-    divisions: ConsoleDivision[];
-    horses: EntrantHorse[];
     /** The viewer's LIVE entries (scratched excluded) — the pill. */
     myEntryCount: number;
-    /** Season for the card-gate badges (defaults to Season 1). */
-    showYear?: number | null;
-    /** Whether the show is MHH-sanctioned; gates the card-gate badge. */
-    showIsQualifying?: boolean;
     /** False = migration 184 unapplied; the Follow control is hidden. */
     followSupported?: boolean;
     /** The viewer's current follow state (false for anon). */
@@ -60,39 +38,12 @@ export default function AlbumCtaRow({
     mode,
     status,
     authed,
-    divisions,
-    horses,
     myEntryCount,
-    showYear,
-
-    showIsQualifying,
     followSupported = false,
     isFollowing = false,
 }: AlbumCtaRowProps) {
-    const router = useRouter();
-    const { showToast, toastNode } = useShowToast();
     const entriesOpen = status === "entries_open";
-
-    const [pickerOpen, setPickerOpen] = useState(false);
-    const [activeClass, setActiveClass] = useState<ConsoleClass | null>(null);
-    // Remounts the entry dialog fresh each time it opens.
-    const [dialogNonce, setDialogNonce] = useState(0);
-
-    // Same client-side refetch the entry section uses (Batch 3): a
-    // horse made public mid-visit becomes enterable without reload.
-    const [freshHorses, setFreshHorses] = useState<EntrantHorse[] | null>(null);
-    const effectiveHorses = freshHorses ?? horses;
-
-    const refreshHorses = useCallback(async () => {
-        const result = await listMyEntrantHorses();
-        if (result.success) setFreshHorses(result.horses);
-    }, []);
-
-    const handlePickClass = (cls: ConsoleClass) => {
-        setPickerOpen(false);
-        setDialogNonce((n) => n + 1);
-        setActiveClass(cls);
-    };
+    const enterHref = `/shows/${showId}/enter`;
 
     return (
         <div
@@ -101,17 +52,12 @@ export default function AlbumCtaRow({
         >
             {entriesOpen &&
                 (authed ? (
-                    <button
-                        type="button"
-                        className="btn-brass"
-                        onClick={() => setPickerOpen(true)}
-                        data-testid="album-enter-cta"
-                    >
+                    <Link href={enterHref} className="btn-brass" data-testid="album-enter-cta">
                         Enter this show
-                    </button>
+                    </Link>
                 ) : (
                     <Link
-                        href={`/login?redirectTo=${encodeURIComponent(`/shows/${showId}`)}`}
+                        href={`/login?redirectTo=${encodeURIComponent(enterHref)}`}
                         className="btn-brass"
                         data-testid="album-enter-cta"
                     >
@@ -143,64 +89,6 @@ export default function AlbumCtaRow({
                     <span aria-hidden="true">↓</span>
                 </a>
             )}
-
-            {/* "Pick your class" — the program accordion with Enter
-                buttons; picking one hands off to EnterClassDialog. */}
-            <Dialog open={pickerOpen} onOpenChange={setPickerOpen}>
-                <DialogContent className="max-h-[85dvh] overflow-y-auto sm:max-w-[640px]">
-                    <DialogHeader>
-                        <DialogTitle>Pick your class</DialogTitle>
-                        <DialogDescription>
-                            Every class in the program — pick one and choose which horse to
-                            enter.
-                        </DialogDescription>
-                    </DialogHeader>
-                    {effectiveHorses.length === 0 && (
-                        <p className="rounded-md border border-input bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
-                            You need a public horse in your stable before you can enter —{" "}
-                            <a
-                                href="#entries"
-                                className="font-semibold text-forest underline"
-                                onClick={() => setPickerOpen(false)}
-                            >
-                                the readiness panel below
-                            </a>{" "}
-                            walks you through it.
-                        </p>
-                    )}
-                    <ProgramAccordion
-                        divisions={divisions}
-                        canEnter={authed && entriesOpen && effectiveHorses.length > 0}
-                        onEnter={handlePickClass}
-                        defaultOpenIndex={0}
-                        showYear={showYear}
-
-                        showIsQualifying={showIsQualifying}
-                    />
-                </DialogContent>
-            </Dialog>
-
-            {activeClass && (
-                <EnterClassDialog
-                    key={`${activeClass.id}-${dialogNonce}`}
-                    showId={showId}
-                    cls={activeClass}
-                    mode={mode}
-                    horses={effectiveHorses}
-                    onRefreshHorses={refreshHorses}
-                    onClose={() => setActiveClass(null)}
-                    onEntered={({ horseName, documentationNote }) => {
-                        showToast(
-                            documentationNote
-                                ? `${horseName} is entered, but the documentation didn't save: ${documentationNote}`
-                                : `${horseName} is entered — see Your entries below.`,
-                        );
-                        router.refresh();
-                    }}
-                />
-            )}
-
-            {toastNode}
         </div>
     );
 }

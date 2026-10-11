@@ -116,7 +116,9 @@ describe("AXIS_GLOSS", () => {
             // A gloss explains — it must say more than the axis word.
             expect(gloss.length, axis).toBeGreaterThan(axis.length + 5);
         }
-        expect(AXIS_GLOSS.halter).toMatch(/breed type/i);
+        expect(AXIS_GLOSS.halter).toBe(
+            "Halter — judged on breed type & conformation. Each horse may enter one halter class per show.",
+        );
         expect(AXIS_GLOSS.performance).toMatch(/tack/i);
     });
 });
