@@ -1,18 +1,27 @@
 "use client";
 
 /**
- * The centre of the entry page: the current class, its limits in
- * plain words, your entries already in it, then YOUR HORSES FOR THIS
- * CLASS (the ledger's `applicable`) as cards, and the "Other horses"
- * fold (the ledger's `other`) with each verdict's reason. Blocked
- * horses are not selectable; soft mismatches are, with a warning —
- * the server decides.
+ * The centre of the entry page: the current class, its limits in plain
+ * words, then your horses in three tiers the ledger decides —
+ *
+ *   Looks like it lines up   nothing stands in the way; breed matches
+ *                            the class, or the class names no breed
+ *   Maybe?                   enterable, but something is uncertain:
+ *                            scale or finish may not fit, or the class
+ *                            names a breed this horse isn't listed as
+ *   Can't enter this class   a rule the server WILL refuse: already in
+ *                            this class, already in another halter
+ *                            class, or at your limit here
+ *
+ * The owner asked for the knowns and the warnings to be kept apart
+ * (2026-10-11). The horses already in the class live on the right, with
+ * the selection — that panel is the answer to "who did I put where".
  */
 
 import { Fragment, type ReactNode, type RefObject } from "react";
 import Link from "next/link";
 
-import { classLabel, type ClassLedger } from "@/lib/shows/entrantLedger";
+import { classLabel, type ClassLedger, type HorseVerdict } from "@/lib/shows/entrantLedger";
 import { friendlyClassStatus } from "@/lib/shows/plainWords";
 import type { EntrantHorse } from "@/lib/shows/public";
 import HorseCard from "./HorseCard";
@@ -23,8 +32,6 @@ interface ClassPaneProps {
     cls: ClassLedger;
     limits: string;
     horsesById: Map<string, EntrantHorse>;
-    /** Names of your live entries already in this class. */
-    enteredNames: string[];
     online: boolean;
     selection: Map<string, SelectedHorse>;
     photoUrlFor: (horseId: string) => string | null;
@@ -37,12 +44,36 @@ interface ClassPaneProps {
 
 const GRID = "grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4";
 
+function Tier({
+    title,
+    note,
+    count,
+    testId,
+    children,
+}: {
+    title: string;
+    note: string;
+    count: number;
+    testId: string;
+    children: ReactNode;
+}) {
+    return (
+        <section className="mt-5" data-testid={testId} aria-label={title}>
+            <h3 className="m-0 flex items-baseline gap-2 font-serif text-base font-bold text-foreground">
+                {title}
+                <span className="font-sans text-xs font-normal text-muted-foreground">({count})</span>
+            </h3>
+            <p className="m-0 mb-2 text-xs text-muted-foreground">{note}</p>
+            {children}
+        </section>
+    );
+}
+
 export default function ClassPane({
     showId,
     cls,
     limits,
     horsesById,
-    enteredNames,
     online,
     selection,
     photoUrlFor,
@@ -58,7 +89,7 @@ export default function ClassPane({
     const card = (horseId: string) => {
         const horse = horsesById.get(horseId);
         if (!horse) return null;
-        const v = verdictOf.get(horseId);
+        const v: HorseVerdict | undefined = verdictOf.get(horseId);
         const blocked = !!v?.blocked;
         return (
             <Fragment key={horseId}>
@@ -66,7 +97,7 @@ export default function ClassPane({
                     horse={horse}
                     selected={selection.has(horseId)}
                     blocked={blocked}
-                    reason={v?.reason ?? null}
+                    reason={v?.reason ?? v?.hint ?? null}
                     breedMatch={!!v?.breedMatch}
                     photoUrl={online ? photoUrlFor(horseId) : null}
                     showPhotoControl={online}
@@ -95,19 +126,6 @@ export default function ClassPane({
             <p className="m-0 mt-1 text-sm text-muted-foreground" data-testid="class-limits">
                 {limits}
             </p>
-            {enteredNames.length > 0 && (
-                <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                    <span className="text-xs text-muted-foreground">Already entered:</span>
-                    {enteredNames.map((name, i) => (
-                        <span
-                            key={`${name}-${i}`}
-                            className="rounded-full border border-forest/40 bg-card px-2 py-0.5 text-xs font-semibold text-forest"
-                        >
-                            ✓ {name}
-                        </span>
-                    ))}
-                </div>
-            )}
 
             {!takingEntries ? (
                 <p className="mt-4 text-sm text-muted-foreground" role="note">
@@ -131,30 +149,48 @@ export default function ClassPane({
                             You&rsquo;re at your limit in this class.
                         </p>
                     )}
-                    <h3 className="mt-4 mb-2 font-serif text-base font-bold text-foreground">
-                        Your horses for this class
-                    </h3>
-                    {cls.applicable.length === 0 ? (
-                        <p className="m-0 text-sm text-muted-foreground">
-                            None of your horses is a clean fit — see Other horses below.
-                        </p>
-                    ) : (
-                        <div className={GRID} data-testid="applicable-horses">
-                            {cls.applicable.map(card)}
-                        </div>
+
+                    {cls.fits.length > 0 && (
+                        <Tier
+                            title="Looks like it lines up"
+                            note={
+                                cls.breedNamed
+                                    ? "Listed as the breed this class is for, and nothing else stands in the way."
+                                    : "Nothing stands in the way."
+                            }
+                            count={cls.fits.length}
+                            testId="fits-horses"
+                        >
+                            <div className={GRID}>{cls.fits.map(card)}</div>
+                        </Tier>
                     )}
 
-                    {cls.other.length > 0 && (
-                        <details className="mt-4" data-testid="other-horses">
-                            <summary className="cursor-pointer font-serif text-sm font-bold text-foreground">
-                                Other horses ({cls.other.length})
-                            </summary>
-                            <p className="m-0 my-2 text-xs text-muted-foreground">
-                                Greyed horses can&rsquo;t enter this class. A ⚠ warning may still be accepted —
-                                the host&rsquo;s rules decide at entry.
-                            </p>
-                            <div className={GRID}>{cls.other.map(card)}</div>
-                        </details>
+                    {cls.maybe.length > 0 && (
+                        <Tier
+                            title="Maybe?"
+                            note="You can still pick these. The note on each card says what's uncertain; the host's rules decide at entry."
+                            count={cls.maybe.length}
+                            testId="maybe-horses"
+                        >
+                            <div className={GRID}>{cls.maybe.map(card)}</div>
+                        </Tier>
+                    )}
+
+                    {cls.fits.length === 0 && cls.maybe.length === 0 && (
+                        <p className="mt-4 text-sm text-muted-foreground">
+                            None of your horses can go in this class right now.
+                        </p>
+                    )}
+
+                    {cls.blocked.length > 0 && (
+                        <Tier
+                            title="Can't enter this class"
+                            note="These would be refused. Each card says why."
+                            count={cls.blocked.length}
+                            testId="blocked-horses"
+                        >
+                            <div className={GRID}>{cls.blocked.map(card)}</div>
+                        </Tier>
                     )}
                 </>
             )}

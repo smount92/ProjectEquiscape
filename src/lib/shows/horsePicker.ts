@@ -79,6 +79,17 @@ function words(text: string | null | undefined): string[] {
  */
 const GENERIC = new Set(["horse", "horses", "other", "breed", "breeds", "halter", "class", "mare", "stallion", "gelding", "foal", "foals", "pony", "ponies", "light", "sport", "stock", "draft", "gaited"]);
 
+/**
+ * Does the class's name name ANY breed at all? "101 Arabian" does;
+ * "Fall & Creative Scenes" and "Vintage (Pre-1990)" do not. Decides
+ * whether a horse with no breed match is a "maybe" or a plain fit.
+ */
+export function classNamesBreed(className: string | null | undefined, breeds: readonly string[]): boolean {
+    const classWords = words(className).filter((w) => !GENERIC.has(w));
+    if (classWords.length === 0) return false;
+    return breeds.some((b) => breedMatchesClass(b, className));
+}
+
 export function breedMatchesClass(breed: string | null, className: string | null | undefined): boolean {
     if (!breed || !className) return false;
     const classWords = words(className).filter((w) => !GENERIC.has(w));

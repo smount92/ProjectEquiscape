@@ -357,7 +357,6 @@ export default function EnterShowWorkbench({
                             },
                         )}
                         horsesById={horsesById}
-                        enteredNames={current.myHorseIds.map(nameForEntry)}
                         online={online}
                         selection={selection}
                         photoUrlFor={photoUrlFor}
@@ -392,6 +391,11 @@ export default function EnterShowWorkbench({
                         onSubmit={() => void submit()}
                         onSkip={() => goToClass(nextClassWithRoom(ledger, current.classId))}
                         canSkip={!!nextClassWithRoom(ledger, current.classId)}
+                        entered={current.myHorseIds.map((horseId) => ({
+                            horseId,
+                            name: nameForEntry(horseId),
+                            photoUrl: online ? photoUrlFor(horseId) : null,
+                        }))}
                     >
                         {[...selection.entries()].map(([horseId, sel]) => {
                             const horse = horsesById.get(horseId);

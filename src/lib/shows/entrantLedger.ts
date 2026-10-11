@@ -31,7 +31,8 @@
 
 import { normalizeScale } from "@/lib/catalog/taxonomy";
 import type { ConsoleClass, ConsoleDivision } from "./console";
-import { breedMatchesClass } from "./horsePicker";
+import { breedMatchesClass, classNamesBreed } from "./horsePicker";
+import { BREEDS } from "@/lib/showbio/vocab";
 import type { EntrantHorse, MyShowEntry } from "./public";
 import type { ClassStatus, DivisionAxis } from "./types";
 
@@ -54,7 +55,19 @@ export interface HorseVerdict {
     otherClassId?: string;
     /** Soft breed hint: the class name names this horse's breed (reuse breedMatchesClass from horsePicker). */
     breedMatch: boolean;
+    /**
+     * The tier the page shows the horse under (owner, 2026-10-11):
+     * "fits" — nothing stands in the way and the breed lines up (or the
+     * class names no breed); "maybe" — enterable but uncertain (scale,
+     * finish, or the class names a breed this horse isn't listed as);
+     * "blocked" — a rule the server will refuse.
+     */
+    tier: HorseTier;
+    /** The "maybe" note when `reason` is null, e.g. "Listed as Morgan" or "Breed not set on this horse". */
+    hint: string | null;
 }
+
+export type HorseTier = "fits" | "maybe" | "blocked";
 
 export interface ClassLedger {
     classId: string;
@@ -79,6 +92,12 @@ export interface ClassLedger {
     applicable: string[];
     /** Everything else, blocked first (certain reasons), then soft mismatches. */
     other: string[];
+    /** The class's name names a breed ("101 Arabian" yes, "Vintage (Pre-1990)" no). */
+    breedNamed: boolean;
+    /** The three tiers the page shows — see HorseVerdict.tier. Breed matches lead `fits`. */
+    fits: string[];
+    maybe: string[];
+    blocked: string[];
 }
 
 export interface HorseLedger {
@@ -226,6 +245,8 @@ export function horseVerdict(args: HorseVerdictArgs): HorseVerdict {
             reason: blockReason(block, cls, classNameById),
             ...(block.otherClassId ? { otherClassId: block.otherClassId } : {}),
             breedMatch,
+            tier: "blocked",
+            hint: null,
         };
     }
 
@@ -237,6 +258,8 @@ export function horseVerdict(args: HorseVerdictArgs): HorseVerdict {
             blocked: false,
             reason: `${allowed.join(" / ")} only · ${horse.scale ? `this horse is ${horse.scale}` : "this horse's scale is unknown"}`,
             breedMatch,
+            tier: "maybe",
+            hint: null,
         };
     }
 
@@ -247,10 +270,26 @@ export function horseVerdict(args: HorseVerdictArgs): HorseVerdict {
             blocked: false,
             reason: `${cls.allowedFinishes!.join(" / ")} only · ${horse.finish ? `this horse is ${horse.finish}` : "this horse's finish is unknown"}`,
             breedMatch,
+            tier: "maybe",
+            hint: null,
         };
     }
 
-    return { horseId: horse.id, code: "ok", blocked: false, reason: null, breedMatch };
+    // Nothing stands in the way. Whether that is a clean fit or a
+    // "maybe" depends on whether the class names a breed at all: an
+    // "Arabian" class with a horse listed as Morgan (or not listed) is
+    // a maybe; "Fall & Creative Scenes" names no breed, so every horse fits.
+    const breedNamed = classNamesBreed(cls.name, BREEDS);
+    const uncertain = breedNamed && !breedMatch;
+    return {
+        horseId: horse.id,
+        code: "ok",
+        blocked: false,
+        reason: null,
+        breedMatch,
+        tier: uncertain ? "maybe" : "fits",
+        hint: uncertain ? (horse.breed ? `Listed as ${horse.breed}` : "Breed not set on this horse") : null,
+    };
 }
 
 // ── The whole show, for one viewer ──
@@ -363,6 +402,15 @@ export function buildEntrantLedger(input: {
             verdicts,
             applicable,
             other,
+            breedNamed: classNamesBreed(cls.name, BREEDS),
+            // The three tiers the page shows (owner, 2026-10-11): knowns apart
+            // from warnings. Breed matches lead the first tier.
+            fits: [
+                ...verdicts.filter((v) => v.tier === "fits" && v.breedMatch),
+                ...verdicts.filter((v) => v.tier === "fits" && !v.breedMatch),
+            ].map((v) => v.horseId),
+            maybe: verdicts.filter((v) => v.tier === "maybe").map((v) => v.horseId),
+            blocked: verdicts.filter((v) => v.tier === "blocked").map((v) => v.horseId),
         };
         classes.push(ledger);
         byClass[cls.id] = ledger;

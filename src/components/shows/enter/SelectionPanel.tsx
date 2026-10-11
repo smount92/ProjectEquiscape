@@ -23,6 +23,8 @@ interface SelectionPanelProps {
     onSubmit: () => void;
     onSkip: () => void;
     canSkip: boolean;
+    /** Your live entries already in this class — the answer to "who did I put where". */
+    entered: { horseId: string; name: string; photoUrl: string | null }[];
     /** The SelectionRow list items. */
     children: ReactNode;
 }
@@ -37,10 +39,33 @@ export default function SelectionPanel({
     onSubmit,
     onSkip,
     canSkip,
+    entered,
     children,
 }: SelectionPanelProps) {
     const [expanded, setExpanded] = useState(false);
     const canSubmit = count > 0 && blockedReason === null && !submitting;
+    const enteredList = entered.length > 0 && (
+        <div className="min-w-0" data-testid="entered-in-class">
+            <p className="m-0 text-xs font-bold tracking-wide text-muted-foreground uppercase">
+                Already in this class ({entered.length})
+            </p>
+            <ul className="m-0 mt-1 flex list-none flex-col gap-1 p-0">
+                {entered.map((e) => (
+                    <li key={e.horseId} className="flex items-center gap-2 text-sm">
+                        {e.photoUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={e.photoUrl} alt="" className="h-7 w-7 shrink-0 rounded-md object-cover" loading="lazy" />
+                        ) : (
+                            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-muted text-sm" aria-hidden="true">
+                                🐴
+                            </span>
+                        )}
+                        <span className="truncate font-semibold text-forest">✓ {e.name}</span>
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
 
     return (
         <aside
@@ -67,6 +92,9 @@ export default function SelectionPanel({
                     </Button>
                 )}
             </div>
+
+            {/* On the phone sheet the entered list rides with the expanded view; on desktop it sits above the selection. */}
+            <div className={`${expanded ? "block" : "hidden lg:block"}`}>{enteredList}</div>
 
             {count === 0 ? (
                 <p className="m-0 hidden text-sm text-muted-foreground lg:block">

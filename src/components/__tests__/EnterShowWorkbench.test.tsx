@@ -189,21 +189,21 @@ describe("EnterShowWorkbench", () => {
         expect(within(rail).getByText("✓ You: 1 of 3")).toBeInTheDocument();
     });
 
-    it("splits your horses into applicable and the Other horses fold, with reasons", () => {
+    it("shows three tiers: lines up, maybe, and can't enter — each with its reason", () => {
         renderBench();
-        const applicable = screen.getByTestId("applicable-horses");
-        const names = within(applicable)
-            .getAllByRole("button", { pressed: false })
-            .map((b) => b.textContent ?? "");
-        // Breed match floats first.
-        expect(names[0]).toMatch(/Duns Blazing/);
-        expect(names[1]).toMatch(/Star/);
-        expect(within(applicable).getByText("likely fit")).toBeInTheDocument();
+        // 110 · Quarter Horse names a breed, so only the Quarter Horse is a clean fit.
+        const fits = screen.getByTestId("fits-horses");
+        expect(within(fits).getAllByRole("button", { pressed: false }).map((b) => b.textContent ?? "")[0]).toMatch(/Duns Blazing/);
+        expect(within(fits).getByText("likely fit")).toBeInTheDocument();
 
-        const other = screen.getByTestId("other-horses");
-        expect(within(other).getByText("Other horses (2)")).toBeInTheDocument();
-        expect(within(other).getByText("Already entered in this class")).toBeInTheDocument();
-        expect(within(other).getByText(/this horse is Classic/)).toBeInTheDocument();
+        const maybe = screen.getByTestId("maybe-horses");
+        expect(within(maybe).getByText(/Star/)).toBeInTheDocument();
+        expect(within(maybe).getByText(/this horse is Classic/)).toBeInTheDocument();
+
+        const blocked = screen.getByTestId("blocked-horses");
+        expect(within(blocked).getByText("Already entered in this class")).toBeInTheDocument();
+        // The horse already in the class is listed beside the selection, not in the centre.
+        expect(within(screen.getByTestId("entered-in-class")).getByText("✓ Already In")).toBeInTheDocument();
     });
 
     it("a blocked horse in Other is not selectable; a soft mismatch is", () => {
