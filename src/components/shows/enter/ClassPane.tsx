@@ -2,28 +2,32 @@
 
 /**
  * The centre of the entry page: the current class, its limits in plain
- * words, then your horses in three tiers the ledger decides —
+ * words, a search box, and your horses — either in the three tiers the
+ * ledger decides, or as one list A to Z.
  *
  *   Eligible        nothing stands in the way; breed matches the class,
  *                   or the class names no breed
  *   Check first     enterable, but something is uncertain: scale or
  *                   finish may not fit, or the class names a breed this
  *                   horse isn't listed as
- *   Not eligible    a rule the server WILL refuse: already in this
+ *   Not eligible    a rule the server will refuse: already in this
  *                   class, already in another halter class, or at your
  *                   limit here
  *
- * The owner asked for the knowns and the warnings to be kept apart
- * (2026-10-11). The horses already in the class live on the right, with
- * the selection — that panel is the answer to "who did I put where".
+ * Nothing here is un-selectable (owner, 2026-10-11: never block an
+ * edge case; any horse may be entered anywhere). The tiers forecast,
+ * the server refuses. The A-to-Z view and the search exist for the
+ * member with three hundred horses. The horses already in the class
+ * live on the right, with the selection.
  */
 
-import { Fragment, type ReactNode, type RefObject } from "react";
+import { Fragment, useMemo, useState, type ReactNode, type RefObject } from "react";
 import Link from "next/link";
 
 import { classLabel, type ClassLedger, type HorseVerdict } from "@/lib/shows/entrantLedger";
 import { friendlyClassStatus } from "@/lib/shows/plainWords";
 import type { EntrantHorse } from "@/lib/shows/public";
+import { Input } from "@/components/ui/input";
 import HorseCard from "./HorseCard";
 import type { SelectedHorse } from "./shared";
 
@@ -42,7 +46,16 @@ interface ClassPaneProps {
     headingRef: RefObject<HTMLHeadingElement | null>;
 }
 
+type View = "tiers" | "az";
+
 const GRID = "grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4";
+
+/** Case-insensitive match on name or breed. */
+function matches(horse: EntrantHorse, query: string): boolean {
+    const q = query.trim().toLowerCase();
+    if (!q) return true;
+    return horse.name.toLowerCase().includes(q) || (horse.breed ?? "").toLowerCase().includes(q);
+}
 
 function Tier({
     title,
@@ -83,20 +96,37 @@ export default function ClassPane({
     onChangePhoto,
     headingRef,
 }: ClassPaneProps) {
-    const verdictOf = new Map(cls.verdicts.map((v) => [v.horseId, v]));
+    const [view, setView] = useState<View>("tiers");
+    const [query, setQuery] = useState("");
+    const verdictOf = useMemo(() => new Map(cls.verdicts.map((v) => [v.horseId, v])), [cls.verdicts]);
     const takingEntries = cls.state !== "closed";
+
+    // The search applies to every view; the tiers keep their own order,
+    // the A-to-Z view sorts by name.
+    const keep = (id: string) => {
+        const h = horsesById.get(id);
+        return !!h && matches(h, query);
+    };
+    const fits = cls.fits.filter(keep);
+    const maybe = cls.maybe.filter(keep);
+    const blocked = cls.blocked.filter(keep);
+    const az = [...horsesById.values()]
+        .filter((h) => matches(h, query))
+        .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }))
+        .map((h) => h.id);
+    const shown = view === "az" ? az.length : fits.length + maybe.length + blocked.length;
 
     const card = (horseId: string) => {
         const horse = horsesById.get(horseId);
         if (!horse) return null;
         const v: HorseVerdict | undefined = verdictOf.get(horseId);
-        const blocked = !!v?.blocked;
+        const blockedHorse = !!v?.blocked;
         return (
             <Fragment key={horseId}>
                 <HorseCard
                     horse={horse}
                     selected={selection.has(horseId)}
-                    blocked={blocked}
+                    blocked={blockedHorse}
                     reason={v?.reason ?? v?.hint ?? null}
                     breedMatch={!!v?.breedMatch}
                     photoUrl={online ? photoUrlFor(horseId) : null}
@@ -105,7 +135,7 @@ export default function ClassPane({
                     onToggle={() => onToggle(horseId)}
                     onChangePhoto={() => onChangePhoto(horseId)}
                 />
-                {pickerHorseId === horseId && !blocked && <div className="col-span-full">{renderPicker(horseId)}</div>}
+                {pickerHorseId === horseId && <div className="col-span-full">{renderPicker(horseId)}</div>}
             </Fragment>
         );
     };
@@ -146,51 +176,96 @@ export default function ClassPane({
                 <>
                     {cls.state === "full" && (
                         <p className="mt-3 text-sm font-semibold text-muted-foreground" role="note">
-                            You&rsquo;re at your limit in this class.
+                            You&rsquo;re at your limit in this class — more would be refused.
                         </p>
                     )}
 
-                    {cls.fits.length > 0 && (
-                        <Tier
-                            title="Eligible"
-                            note={
-                                cls.breedNamed
-                                    ? "Listed as the breed this class is for; nothing stands in the way."
-                                    : "Nothing stands in the way."
-                            }
-                            count={cls.fits.length}
-                            testId="fits-horses"
-                        >
-                            <div className={GRID}>{cls.fits.map(card)}</div>
-                        </Tier>
-                    )}
+                    {/* Search + view, for the member with three hundred horses. */}
+                    <div className="mt-4 flex flex-wrap items-center gap-2">
+                        <Input
+                            type="search"
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
+                            placeholder="Search your horses by name or breed…"
+                            aria-label="Search your horses by name or breed"
+                            className="h-9 min-w-[12rem] flex-1"
+                            id="enter-horse-search"
+                        />
+                        <div className="flex rounded-md border border-input p-0.5" role="group" aria-label="View">
+                            {(
+                                [
+                                    ["tiers", "By eligibility"],
+                                    ["az", "All horses A–Z"],
+                                ] as [View, string][]
+                            ).map(([key, label]) => (
+                                <button
+                                    key={key}
+                                    type="button"
+                                    aria-pressed={view === key}
+                                    onClick={() => setView(key)}
+                                    className={`min-h-8 cursor-pointer rounded px-2.5 text-xs font-semibold ${
+                                        view === key ? "bg-forest text-primary-foreground" : "text-foreground hover:bg-muted"
+                                    }`}
+                                >
+                                    {label}
+                                </button>
+                            ))}
+                        </div>
+                        <span className="text-xs text-muted-foreground" aria-live="polite" data-testid="horse-count">
+                            {query.trim() ? `${shown} of ${horsesById.size} horses` : `${horsesById.size} horses`}
+                        </span>
+                    </div>
 
-                    {cls.maybe.length > 0 && (
-                        <Tier
-                            title="Check first"
-                            note="These can still be entered. The note on each card says what to check; the host's rules decide at entry."
-                            count={cls.maybe.length}
-                            testId="maybe-horses"
-                        >
-                            <div className={GRID}>{cls.maybe.map(card)}</div>
-                        </Tier>
-                    )}
-
-                    {cls.fits.length === 0 && cls.maybe.length === 0 && (
+                    {shown === 0 ? (
                         <p className="mt-4 text-sm text-muted-foreground">
-                            None of your horses can go in this class right now.
+                            No horse in your stable is named or bred &ldquo;{query.trim()}&rdquo;.
                         </p>
-                    )}
+                    ) : view === "az" ? (
+                        <section className="mt-4" data-testid="az-horses" aria-label="All horses A to Z">
+                            <p className="m-0 mb-2 text-xs text-muted-foreground">
+                                Every horse, A to Z. The note on a card is a forecast; the host&rsquo;s rules decide at entry.
+                            </p>
+                            <div className={GRID}>{az.map(card)}</div>
+                        </section>
+                    ) : (
+                        <>
+                            {fits.length > 0 && (
+                                <Tier
+                                    title="Eligible"
+                                    note={
+                                        cls.breedNamed
+                                            ? "Listed as the breed this class is for; nothing stands in the way."
+                                            : "Nothing stands in the way."
+                                    }
+                                    count={fits.length}
+                                    testId="fits-horses"
+                                >
+                                    <div className={GRID}>{fits.map(card)}</div>
+                                </Tier>
+                            )}
 
-                    {cls.blocked.length > 0 && (
-                        <Tier
-                            title="Not eligible"
-                            note="These would be refused for this class. Each card says why."
-                            count={cls.blocked.length}
-                            testId="blocked-horses"
-                        >
-                            <div className={GRID}>{cls.blocked.map(card)}</div>
-                        </Tier>
+                            {maybe.length > 0 && (
+                                <Tier
+                                    title="Check first"
+                                    note="These can still be entered. The note on each card says what to check; the host's rules decide at entry."
+                                    count={maybe.length}
+                                    testId="maybe-horses"
+                                >
+                                    <div className={GRID}>{maybe.map(card)}</div>
+                                </Tier>
+                            )}
+
+                            {blocked.length > 0 && (
+                                <Tier
+                                    title="Not eligible"
+                                    note="These would be refused for this class. Each card says why. You can still pick one if you need to — the host's rules decide."
+                                    count={blocked.length}
+                                    testId="blocked-horses"
+                                >
+                                    <div className={GRID}>{blocked.map(card)}</div>
+                                </Tier>
+                            )}
+                        </>
                     )}
                 </>
             )}

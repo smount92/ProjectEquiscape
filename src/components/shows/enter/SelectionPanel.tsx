@@ -18,6 +18,8 @@ interface SelectionPanelProps {
     remaining: number | null;
     /** Why Enter is disabled, in plain words (null = it isn't). */
     blockedReason: string | null;
+    /** A forecast that doesn't disable Enter, e.g. over the host's per-entrant cap. */
+    warning?: string | null;
     submitting: boolean;
     error: string | null;
     onSubmit: () => void;
@@ -34,6 +36,7 @@ export default function SelectionPanel({
     count,
     remaining,
     blockedReason,
+    warning = null,
     submitting,
     error,
     onSubmit,
@@ -109,6 +112,11 @@ export default function SelectionPanel({
             )}
 
             {blockedReason && count > 0 && <p className="m-0 text-xs font-semibold text-destructive">{blockedReason}</p>}
+            {!blockedReason && warning && count > 0 && (
+                <p className="m-0 text-xs font-semibold text-warning" data-testid="selection-warning">
+                    ⚠ {warning}
+                </p>
+            )}
             {error && (
                 <p role="alert" className="m-0 text-sm font-semibold text-destructive">
                     {error}

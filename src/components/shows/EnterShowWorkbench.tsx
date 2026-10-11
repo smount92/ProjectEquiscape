@@ -129,7 +129,10 @@ export default function EnterShowWorkbench({
         });
 
     const toggle = (horseId: string) => {
-        if (current?.verdicts.find((v) => v.horseId === horseId)?.blocked || current?.state === "closed") return;
+        // Any horse may be picked for any class (owner, 2026-10-11); the
+        // ledger only forecasts, the server refuses. A closed class is the
+        // one exception — there is nothing to submit to.
+        if (current?.state === "closed") return;
         if (selection.has(horseId)) {
             setSelection((prev) => {
                 const next = new Map(prev);
@@ -178,15 +181,19 @@ export default function EnterShowWorkbench({
         ? "Pick a class first."
         : current.state === "closed"
           ? "This class isn't taking entries."
-          : remaining !== null && selection.size > remaining
+          : selection.size > MAX_BATCH_ENTRIES
+            ? `Enter at most ${MAX_BATCH_ENTRIES} horses at a time.`
+            : online && [...selection.values()].some((s) => !s.photoId)
+              ? "Every horse needs a judged photo."
+              : null;
+    // Over the host's per-entrant cap is a warning, not a block: the
+    // server refuses the extra horses one by one with its own words.
+    const capWarning =
+        current && remaining !== null && selection.size > remaining
             ? remaining === 0
-                ? "You're at your limit in this class."
-                : `Only ${remaining} more of your horses fit this class.`
-            : selection.size > MAX_BATCH_ENTRIES
-              ? `Enter at most ${MAX_BATCH_ENTRIES} horses at a time.`
-              : online && [...selection.values()].some((s) => !s.photoId)
-                ? "Every horse needs a judged photo."
-                : null;
+                ? "You're already at your limit in this class — these would be refused."
+                : `Only ${remaining} more of your horses fit this class — the rest would be refused.`
+            : null;
     const canSubmit = !!current && selection.size > 0 && blockedReason === null && !submitting;
 
     const submit = async () => {
@@ -386,6 +393,7 @@ export default function EnterShowWorkbench({
                         count={selection.size}
                         remaining={remaining}
                         blockedReason={blockedReason}
+                        warning={capWarning}
                         submitting={submitting}
                         error={error}
                         onSubmit={() => void submit()}

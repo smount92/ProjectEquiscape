@@ -3,9 +3,10 @@
 /**
  * One of your horses on the entry page. The card IS a toggle button
  * (aria-pressed); online shows add a "Change photo" control under it
- * for the judged photo. A blocked horse (the ledger's certain refusal
- * — the server WILL refuse it) renders disabled with the reason; a
- * soft mismatch stays selectable with the reason as a warning.
+ * for the judged photo. Every horse is selectable — the owner's rule
+ * (2026-10-11): never block an edge case; the server is the only thing
+ * that refuses. A horse the ledger expects to be refused renders muted
+ * with the reason; a soft doubt shows its reason as a warning.
  */
 
 import type { EntrantHorse } from "@/lib/shows/public";
@@ -13,7 +14,7 @@ import type { EntrantHorse } from "@/lib/shows/public";
 interface HorseCardProps {
     horse: EntrantHorse;
     selected: boolean;
-    /** Certain refusal — not selectable. */
+    /** The ledger expects the server to refuse this one — shown muted, still selectable. */
     blocked?: boolean;
     /** The ledger's plain-words reason (blocked or soft). */
     reason?: string | null;
@@ -49,9 +50,8 @@ export default function HorseCard({
         >
             <button
                 type="button"
-                className="flex min-h-11 w-full cursor-pointer flex-col gap-1 p-2 text-left disabled:cursor-not-allowed"
+                className="flex min-h-11 w-full cursor-pointer flex-col gap-1 p-2 text-left"
                 aria-pressed={selected}
-                disabled={blocked}
                 onClick={onToggle}
             >
                 <span className="relative block">
@@ -84,11 +84,11 @@ export default function HorseCard({
                 )}
                 {reason && (
                     <span className={`text-xs ${blocked ? "text-muted-foreground" : "font-semibold text-destructive"}`}>
-                        {blocked ? reason : `⚠ ${reason}`}
+                        {blocked ? `✗ ${reason}` : `⚠ ${reason}`}
                     </span>
                 )}
             </button>
-            {showPhotoControl && !blocked && (
+            {showPhotoControl && (
                 <button
                     type="button"
                     className="min-h-9 cursor-pointer border-t border-input px-2 py-1 text-xs font-semibold text-forest hover:bg-muted"

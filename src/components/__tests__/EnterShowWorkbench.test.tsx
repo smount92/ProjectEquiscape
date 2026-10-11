@@ -201,21 +201,51 @@ describe("EnterShowWorkbench", () => {
         expect(within(maybe).getByText(/this horse is Classic/)).toBeInTheDocument();
 
         const blocked = screen.getByTestId("blocked-horses");
-        expect(within(blocked).getByText("Already entered in this class")).toBeInTheDocument();
+        expect(within(blocked).getByText(/Already entered in this class/)).toBeInTheDocument();
         // The horse already in the class is listed beside the selection, not in the centre.
         expect(within(screen.getByTestId("entered-in-class")).getByText("✓ Already In")).toBeInTheDocument();
     });
 
-    it("a blocked horse in Other is not selectable; a soft mismatch is", () => {
+    it("every horse is selectable — a forecast refusal never blocks (owner, 2026-10-11)", () => {
         renderBench();
-        expect(cardButton("h4")).toBeDisabled();
+        expect(cardButton("h4")).not.toBeDisabled();
         fireEvent.click(cardButton("h4"));
-        expect(screen.getByTestId("selection-count")).toHaveTextContent("0 of 2");
+        expect(cardButton("h4")).toHaveAttribute("aria-pressed", "true");
+        expect(screen.getByTestId("selection-count")).toHaveTextContent("1 of 2");
 
-        expect(cardButton("h3")).not.toBeDisabled();
         fireEvent.click(cardButton("h3"));
         expect(cardButton("h3")).toHaveAttribute("aria-pressed", "true");
-        expect(screen.getByTestId("selection-count")).toHaveTextContent("1 of 2");
+        expect(screen.getByTestId("selection-count")).toHaveTextContent("2 of 2");
+    });
+
+    it("over the cap is a warning, not a block", () => {
+        renderBench();
+        fireEvent.click(cardButton("h1"));
+        fireEvent.click(cardButton("h3"));
+        fireEvent.click(cardButton("h4"));
+        expect(screen.getByTestId("selection-count")).toHaveTextContent("3 of 2");
+        expect(screen.getByTestId("selection-warning")).toHaveTextContent(/would be refused/);
+        expect(screen.getByTestId("enter-class-button")).not.toBeDisabled();
+    });
+
+    it("search narrows every view by name or breed; A–Z lists everyone alphabetically", () => {
+        renderBench();
+        const search = screen.getByLabelText(/search your horses/i);
+        fireEvent.change(search, { target: { value: "star" } });
+        expect(screen.getByTestId("horse-count")).toHaveTextContent(/of 4 horses/);
+        expect(screen.queryByText(/Duns Blazing/)).not.toBeInTheDocument();
+        fireEvent.change(search, { target: { value: "" } });
+
+        fireEvent.click(screen.getByRole("button", { name: /all horses a–z/i }));
+        const az = screen.getByTestId("az-horses");
+        const names = within(az)
+            .getAllByRole("button", { pressed: false })
+            .map((b) => b.textContent ?? "")
+            .filter((t) => !/change photo|close photos/i.test(t));
+        const sorted = [...names].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
+        expect(names).toEqual(sorted);
+        expect(names).toHaveLength(4);
+        expect(screen.queryByTestId("fits-horses")).not.toBeInTheDocument();
     });
 
     it("selecting two horses enables Enter class", () => {
@@ -227,10 +257,10 @@ describe("EnterShowWorkbench", () => {
         expect(cardButton("h1")).toHaveAttribute("aria-pressed", "true");
         expect(screen.getByTestId("selection-count")).toHaveTextContent("2 of 2");
         expect(enter).toBeEnabled();
-        // A third would exceed the cap.
+        // A third exceeds the host's cap: Enter stays live, the panel forecasts the refusal.
         fireEvent.click(cardButton("h3"));
-        expect(enter).toBeDisabled();
-        expect(screen.getByText("Only 2 more of your horses fit this class.")).toBeInTheDocument();
+        expect(enter).toBeEnabled();
+        expect(screen.getByTestId("selection-warning")).toHaveTextContent(/would be refused/);
     });
 
     it("submits the selection through enterClassBatch and advances to the next class with room", async () => {
