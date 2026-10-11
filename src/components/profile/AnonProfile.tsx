@@ -8,6 +8,9 @@ import { fetchSupporterBadge } from "@/lib/supporter";
 import ViewBeacon from "@/components/metrics/ViewBeacon";
 import CountryTag from "@/components/CountryTag";
 import { readSellerTerms } from "@/lib/sellers/sellerTerms";
+import { readProfileLinks } from "@/lib/links/readProfileLinks";
+import LinkifiedText from "@/components/LinkifiedText";
+import OutboundLinks from "@/components/profile/OutboundLinks";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 // Read-only public profile for logged-OUT visitors (FUNNEL-4 / MOVE-6). The full
@@ -76,6 +79,7 @@ export default async function AnonProfile({
     // Supporter plaque (public recognition) — separate tolerant read so anon
     // profiles keep rendering even before migration 142 is applied.
     const supporterBadge = await fetchSupporterBadge(admin, profileUser.id);
+    const anonLinks = await readProfileLinks(admin as unknown as Parameters<typeof readProfileLinks>[0], profileUser.id);
 
     // Avatar → signed URL (service role can read the avatars bucket).
     let avatarUrl = profileUser.avatar_url;
@@ -164,9 +168,11 @@ export default async function AnonProfile({
                 {supporterBadge.isSupporter && <SupporterPlaque since={supporterBadge.since} />}
                 {profileUser.bio && (
                     <p className="mx-auto mt-3 mb-0 max-w-[52ch] text-[0.92rem] italic text-(--leather-text)">
-                        {profileUser.bio}
+                        <LinkifiedText text={profileUser.bio} />
                     </p>
                 )}
+                {/* Links are what the member chose to publish — visitors see them too (229). */}
+                <OutboundLinks links={anonLinks} className="mt-3" />
                 <div className="masthead-cta mt-5 flex flex-wrap items-center justify-center gap-3">
                     <Button asChild>
                         <Link href={loginHref}>Log in to follow or message</Link>

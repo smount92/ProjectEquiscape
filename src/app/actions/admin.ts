@@ -1381,6 +1381,12 @@ const PENDING_MIGRATIONS: MigrationSpec[] = [
     },
   },
   {
+    id: "229",
+    title: "Profile links",
+    summary: "Adds users.links (outbound links a member shows on their profile) and grants the column to readers.",
+    probe: { kind: "column", table: "users", column: "links" },
+  },
+  {
     id: "228",
     title: "Duplicate reports",
     summary: "Lets catalog_suggestions and catalog_changelog carry the 'duplicate' type, so a member can report two registry entries as one and an admin can approve the merge.",

@@ -12,6 +12,7 @@ import FollowButton from "@/components/FollowButton";
 import { getUserReviewSummary } from "@/app/actions/transactions";
 import { getFollowStats } from "@/app/actions/follows";
 import EditBioButton from "@/components/EditBioButton";
+import { readProfileLinks } from "@/lib/links/readProfileLinks";
 import BlockButton from "@/components/BlockButton";
 import MessageUserButton from "@/components/MessageUserButton";
 import RatingForm from "@/components/RatingForm";
@@ -131,6 +132,10 @@ export default async function ProfilePage({
     if (!profileUser) {
         notFound();
     }
+
+    // Outbound links (229) — read on its own so a pre-229 database still
+    // renders the profile.
+    const profileLinks = await readProfileLinks(supabase as unknown as Parameters<typeof readProfileLinks>[0], profileUser.id);
 
     // Tombstoned accounts are gone for everyone. The anon path already
     // enforced this; the member path did not, so a deleted member's
@@ -673,6 +678,7 @@ export default async function ProfilePage({
                 pronouns={custom.pronouns}
                 country={profileSeller?.country ?? null}
                 bio={profileUser.bio}
+                links={profileLinks}
                 isOwnProfile={isOwnProfile}
                 badges={
                     supporterBadge.isSupporter || showsMembership ? (
@@ -757,7 +763,7 @@ export default async function ProfilePage({
                         🎨 {isOwnProfile ? "My Studio" : `Visit ${studioName || "Studio"}`}
                     </Link>
                 )}
-                {isOwnProfile && <EditBioButton currentBio={profileUser.bio} />}
+                {isOwnProfile && <EditBioButton currentBio={profileUser.bio} currentLinks={profileLinks} />}
                 {!isOwnProfile && (
                     <BlockButton
                         targetId={profileUser.id}

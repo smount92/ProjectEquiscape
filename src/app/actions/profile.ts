@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { publicFolderHorseIds } from "@/lib/collections/folderMembers";
+import { normalizeMemberLinks, PROFILE_LINK_KEYS, type MemberLinks } from "@/lib/links/memberLinks";
 import { revalidatePath } from "next/cache";
 import { AuthError, requireAuth } from "@/lib/auth";
 import { getPublicImageUrls } from "@/lib/utils/storage";
@@ -50,6 +51,37 @@ export async function updateBio(bio: string): Promise<{ success: boolean; error?
 
     revalidatePath("/profile");
     return { success: true };
+}
+
+/** The notice an owner sees until migration 229 is pasted. */
+const LINKS_MIGRATION_NOTICE =
+    "Profile links need a database update (migration 229) before they can be saved.";
+
+function isMissingLinksColumn(error: { code?: string; message?: string } | null): boolean {
+    return !!error && (error.code === "42703" || error.code === "PGRST204") && (error.message ?? "").includes("links");
+}
+
+/**
+ * Update the current user's outbound links (users.links, 229). Whatever
+ * was typed is normalised to https URLs for the profile's slots; junk
+ * is dropped, never stored.
+ */
+export async function updateProfileLinks(input: unknown): Promise<{ success: boolean; error?: string; links?: MemberLinks }> {
+    const supabase = await createClient();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return { success: false, error: "Not authenticated" };
+
+    const links = normalizeMemberLinks(input, PROFILE_LINK_KEYS);
+    const { error } = await supabase.from("users").update({ links } as never).eq("id", user.id);
+    if (error) {
+        if (isMissingLinksColumn(error)) return { success: false, error: LINKS_MIGRATION_NOTICE };
+        return { success: false, error: error.message };
+    }
+
+    revalidatePath("/profile");
+    return { success: true, links };
 }
 
 /**

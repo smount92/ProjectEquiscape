@@ -14,6 +14,9 @@
 
 import type { CSSProperties, ReactNode } from "react";
 import CountryTag from "@/components/CountryTag";
+import LinkifiedText from "@/components/LinkifiedText";
+import OutboundLinks from "@/components/profile/OutboundLinks";
+import type { MemberLinks } from "@/lib/links/memberLinks";
 
 export default function ProfileMasthead({
     alias,
@@ -24,6 +27,7 @@ export default function ProfileMasthead({
     pronouns,
     country = null,
     bio,
+    links = null,
     isOwnProfile,
     themeStyle,
     badges,
@@ -38,6 +42,8 @@ export default function ProfileMasthead({
     /** ISO alpha-2 the member chose to show (218). */
     country?: string | null;
     bio: string | null;
+    /** Outbound links the member chose to show (users.links, 229). */
+    links?: MemberLinks | null;
     isOwnProfile: boolean;
     /** Custom-property bag from the member's chosen theme. */
     themeStyle?: CSSProperties;
@@ -110,9 +116,12 @@ export default function ProfileMasthead({
 
                 {bio && (
                     <p className="mx-auto mt-3 mb-0 max-w-[52ch] text-[0.92rem] italic text-(--leather-text)">
-                        {bio}
+                        {/* A pasted https link in the bio is a link (member ask, 2026-10-11). */}
+                        <LinkifiedText text={bio} />
                     </p>
                 )}
+
+                <OutboundLinks links={links} className="mt-3" />
 
                 {actions && (
                     <div className="masthead-cta mt-5 flex flex-wrap items-center justify-center gap-3">
