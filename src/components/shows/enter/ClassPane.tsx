@@ -4,14 +4,14 @@
  * The centre of the entry page: the current class, its limits in plain
  * words, then your horses in three tiers the ledger decides —
  *
- *   Looks like it lines up   nothing stands in the way; breed matches
- *                            the class, or the class names no breed
- *   Maybe?                   enterable, but something is uncertain:
- *                            scale or finish may not fit, or the class
- *                            names a breed this horse isn't listed as
- *   Can't enter this class   a rule the server WILL refuse: already in
- *                            this class, already in another halter
- *                            class, or at your limit here
+ *   Eligible        nothing stands in the way; breed matches the class,
+ *                   or the class names no breed
+ *   Check first     enterable, but something is uncertain: scale or
+ *                   finish may not fit, or the class names a breed this
+ *                   horse isn't listed as
+ *   Not eligible    a rule the server WILL refuse: already in this
+ *                   class, already in another halter class, or at your
+ *                   limit here
  *
  * The owner asked for the knowns and the warnings to be kept apart
  * (2026-10-11). The horses already in the class live on the right, with
@@ -152,10 +152,10 @@ export default function ClassPane({
 
                     {cls.fits.length > 0 && (
                         <Tier
-                            title="Looks like it lines up"
+                            title="Eligible"
                             note={
                                 cls.breedNamed
-                                    ? "Listed as the breed this class is for, and nothing else stands in the way."
+                                    ? "Listed as the breed this class is for; nothing stands in the way."
                                     : "Nothing stands in the way."
                             }
                             count={cls.fits.length}
@@ -167,8 +167,8 @@ export default function ClassPane({
 
                     {cls.maybe.length > 0 && (
                         <Tier
-                            title="Maybe?"
-                            note="You can still pick these. The note on each card says what's uncertain; the host's rules decide at entry."
+                            title="Check first"
+                            note="These can still be entered. The note on each card says what to check; the host's rules decide at entry."
                             count={cls.maybe.length}
                             testId="maybe-horses"
                         >
@@ -184,8 +184,8 @@ export default function ClassPane({
 
                     {cls.blocked.length > 0 && (
                         <Tier
-                            title="Can't enter this class"
-                            note="These would be refused. Each card says why."
+                            title="Not eligible"
+                            note="These would be refused for this class. Each card says why."
                             count={cls.blocked.length}
                             testId="blocked-horses"
                         >

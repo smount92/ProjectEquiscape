@@ -189,12 +189,12 @@ describe("EnterShowWorkbench", () => {
         expect(within(rail).getByText("✓ You: 1 of 3")).toBeInTheDocument();
     });
 
-    it("shows three tiers: lines up, maybe, and can't enter — each with its reason", () => {
+    it("shows three tiers: eligible, check first, not eligible — each with its reason", () => {
         renderBench();
         // 110 · Quarter Horse names a breed, so only the Quarter Horse is a clean fit.
         const fits = screen.getByTestId("fits-horses");
         expect(within(fits).getAllByRole("button", { pressed: false }).map((b) => b.textContent ?? "")[0]).toMatch(/Duns Blazing/);
-        expect(within(fits).getByText("likely fit")).toBeInTheDocument();
+        expect(within(fits).getByText("Breed match")).toBeInTheDocument();
 
         const maybe = screen.getByTestId("maybe-horses");
         expect(within(maybe).getByText(/Star/)).toBeInTheDocument();

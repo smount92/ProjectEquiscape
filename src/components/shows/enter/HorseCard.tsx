@@ -79,7 +79,7 @@ export default function HorseCard({
                 {facts && <span className="truncate text-xs text-muted-foreground">{facts}</span>}
                 {breedMatch && !blocked && (
                     <span className="self-start rounded-full border border-forest/40 px-2 text-[0.7rem] font-semibold text-forest">
-                        likely fit
+                        Breed match
                     </span>
                 )}
                 {reason && (
