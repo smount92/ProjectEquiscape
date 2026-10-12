@@ -123,7 +123,7 @@ export default function StableHorseCard({
                 className={`group relative cursor-pointer rounded-2xl border bg-card p-3 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md ${
                     isSelected ? "border-[var(--primary)] ring-2 ring-forest" : "border-input"
                 }`}
-                id={`horse-card-${horse.id}`}
+                id={`horse-${horse.id}`}
             >
                 {cardContent}
             </div>
@@ -134,7 +134,7 @@ export default function StableHorseCard({
         <Link
             href={`/stable/${horse.id}`}
             className="group relative block rounded-2xl border border-input bg-card p-3 no-underline shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
-            id={`horse-card-${horse.id}`}
+            id={`horse-${horse.id}`}
         >
             {cardContent}
         </Link>

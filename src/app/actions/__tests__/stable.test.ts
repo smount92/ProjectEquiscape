@@ -18,7 +18,6 @@ import {
     getStablePage,
     getStableSummary,
     listStableViews,
-    loadMoreStable,
     saveStableView,
 } from "@/app/actions/stable";
 
@@ -39,7 +38,7 @@ beforeEach(() => {
 
 describe("getStablePage", () => {
     it("rejects invalid input before touching auth or the DB", async () => {
-        const result = await getStablePage({ limit: 100 });
+        const result = await getStablePage({ per: 500 });
         expect(result.success).toBe(false);
         expect(mockClient.from).not.toHaveBeenCalled();
     });
@@ -78,13 +77,13 @@ describe("getStablePage", () => {
         }
     });
 
-    it("returns cards, count, hasMore, and facet options on success", async () => {
+    it("returns cards, count, the page served, and facet options on success", async () => {
         const result = await getStablePage({});
         expect(result.success).toBe(true);
         if (result.success) {
             expect(result.cards).toEqual([]);
             expect(result.totalCount).toBe(0);
-            expect(result.hasMore).toBe(false);
+            expect(result).toMatchObject({ page: 1, per: 48, pageCount: 1 });
             expect(result.facetOptions).toEqual({
                 makers: [],
                 scales: [],
@@ -111,18 +110,71 @@ describe("getStablePage", () => {
     });
 });
 
-describe("loadMoreStable", () => {
-    it("pages with the requested offset (append semantics)", async () => {
-        const result = await loadMoreStable({ offset: 48 });
+describe("getStablePage paging", () => {
+    function rangeCalls(): unknown[][] {
+        return (mockClient._mockQuery.range as ReturnType<typeof vi.fn>).mock.calls;
+    }
+    const someRows = (n: number) => Array.from({ length: n }, (_, i) => ({ id: `h${i}`, custom_name: `H${i}` }));
+
+    it("computes the offset from page and page size", async () => {
+        mockClient._setImplicitResolve({ data: someRows(96), count: 412, error: null } as never);
+        const result = await getStablePage({ page: 3, per: 96 });
         expect(result.success).toBe(true);
-        expect(
-            (mockClient._mockQuery.range as ReturnType<typeof vi.fn>).mock.calls,
-        ).toEqual(expect.arrayContaining([[48, 95]]));
+        expect(rangeCalls()).toEqual(expect.arrayContaining([[192, 287]]));
+        if (result.success) {
+            expect(result).toMatchObject({ page: 3, per: 96, totalCount: 412, pageCount: 5 });
+        }
     });
 
-    it("rejects unauthenticated users", async () => {
-        mockClient.auth.getUser.mockResolvedValueOnce({ data: { user: null } });
-        await expect(loadMoreStable({ offset: 48 })).rejects.toThrow(AuthError);
+    it("page 1 at the default size reads rows 0–47", async () => {
+        await getStablePage({});
+        expect(rangeCalls()).toEqual(expect.arrayContaining([[0, 47]]));
+    });
+
+    it("clamps a page past the end to the last page (empty result with a count)", async () => {
+        mockClient._setImplicitResolve({ data: [], count: 412, error: null } as never);
+        const result = await getStablePage({ page: 50 });
+        expect(result.success).toBe(true);
+        // asked for 2352–2399, then served the last page: 412 at 48 = 9 pages
+        expect(rangeCalls()).toEqual(expect.arrayContaining([[2352, 2399], [384, 431]]));
+        if (result.success) {
+            expect(result).toMatchObject({ page: 9, pageCount: 9, totalCount: 412 });
+        }
+    });
+
+    it("clamps when PostgREST answers the out-of-range offset with PGRST103", async () => {
+        const range = mockClient._mockQuery.range as ReturnType<typeof vi.fn>;
+        range.mockImplementation((from: number) => {
+            mockClient._setImplicitResolve(
+                from >= 412
+                    ? ({ data: null, count: null, error: { code: "PGRST103", message: "Requested range not satisfiable" } } as never)
+                    : ({ data: [], count: 412, error: null } as never),
+            );
+            return mockClient._mockQuery;
+        });
+        try {
+            const result = await getStablePage({ page: 20, per: 96 });
+            expect(result.success).toBe(true);
+            if (result.success) {
+                expect(result).toMatchObject({ page: 5, per: 96, pageCount: 5, totalCount: 412 });
+            }
+            expect(rangeCalls()).toEqual(expect.arrayContaining([[1824, 1919], [384, 479]]));
+        } finally {
+            range.mockReset();
+            range.mockReturnValue(mockClient._mockQuery);
+        }
+    });
+
+    it("an empty stable is one page, never clamped below page 1", async () => {
+        const result = await getStablePage({ page: 1 });
+        expect(result.success).toBe(true);
+        if (result.success) expect(result).toMatchObject({ page: 1, pageCount: 1, totalCount: 0 });
+    });
+
+    it("still surfaces real query errors", async () => {
+        mockClient._setImplicitResolve({ data: null, error: { code: "42P01", message: "boom" } });
+        const result = await getStablePage({ page: 2 });
+        expect(result.success).toBe(false);
     });
 });
 

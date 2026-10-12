@@ -20,6 +20,23 @@
 export const TRAIL_KEY = "mhh:nav-trail";
 export const TRAIL_EVENT = "mhh:nav-trail";
 export const TRAIL_MAX = 40;
+/**
+ * The page the reader was on just before the current one, whichever
+ * way they moved. The stack alone can't say after a Back: Back pops
+ * the page they left. (The stable uses it to find the card a member
+ * opened, 2026-10-12.)
+ */
+export const TRAIL_FROM_KEY = "mhh:nav-trail-from";
+
+/**
+ * The page left by moving from `before` to `after`: the old top, when
+ * the top actually changed. A repeat (same page) leaves nothing.
+ */
+export function trailLeft(before: readonly string[], after: readonly string[]): string | null {
+    const was = before[before.length - 1];
+    const now = after[after.length - 1];
+    return was !== undefined && was !== now ? was : null;
+}
 
 /** Path + query, the part of a URL that identifies an in-app page. */
 export function trailUrl(href: string, base = "http://local"): string {

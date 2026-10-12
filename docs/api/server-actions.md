@@ -31,7 +31,7 @@ logic belongs in a pure `src/lib/<domain>/` module, not inline in the action —
 | File | Functions |
 |------|-----------|
 | [`horse.ts`](../../src/app/actions/horse.ts) | `createHorseRecord`, `updateHorseAction`, `quickAddHorse`, `deleteHorse`, `listDeletedHorses`, `restoreHorse`, `finalizeHorseImages`, `deleteHorseImageAction`, `reorderHorseImages`, `bulkUpdateHorses`, `bulkDeleteHorses`, `searchPublicHorses`, `getMyTier` |
-| [`stable.ts`](../../src/app/actions/stable.ts) | `getStablePage`, `loadMoreStable`, `getMatchingHorseIds`, `getStableSummary`, `listStableViews`, `saveStableView`, `deleteStableView` |
+| [`stable.ts`](../../src/app/actions/stable.ts) | `getStablePage`, `getMatchingHorseIds`, `getStableSummary`, `listStableViews`, `saveStableView`, `deleteStableView` |
 | [`collections.ts`](../../src/app/actions/collections.ts) | `getCollectionsAction`, `createCollectionAction`, `updateCollectionAction`, `deleteCollectionAction`, `getHorseCollections`, `setHorseCollections` |
 | [`csv-import.ts`](../../src/app/actions/csv-import.ts) | `executeBatchImport`, `getExistingHorseNames` |
 | [`favorites.ts`](../../src/app/actions/favorites.ts) | `getFavoritesPage`, `loadMoreFavorites` |

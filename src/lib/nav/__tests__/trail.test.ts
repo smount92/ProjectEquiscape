@@ -1,5 +1,15 @@
 import { describe, it, expect } from "vitest";
-import { cameFrom, parseTrail, pathOf, trailPrevious, trailPush, trailReplace, trailTraverse, trailUrl } from "@/lib/nav/trail";
+import {
+    cameFrom,
+    parseTrail,
+    pathOf,
+    trailLeft,
+    trailPrevious,
+    trailPush,
+    trailReplace,
+    trailTraverse,
+    trailUrl,
+} from "@/lib/nav/trail";
 
 describe("navigation trail", () => {
     it("records forward navigations and ignores a repeat of the top", () => {
@@ -26,6 +36,17 @@ describe("navigation trail", () => {
         expect(cameFrom(t, "/market")).toBe(true);
         expect(cameFrom(t, "/community")).toBe(false);
         expect(cameFrom(["/community/abc"], "/market")).toBe(false);
+    });
+
+    it("remembers the page left, including the one a Back pops off", () => {
+        const before = ["/dashboard?page=3", "/stable/abc"];
+        // Back: the passport leaves the stack, but trailLeft still names it
+        expect(trailLeft(before, trailTraverse(before, "/dashboard?page=3"))).toBe("/stable/abc");
+        // Forward
+        expect(trailLeft(["/dashboard?page=3"], trailPush(["/dashboard?page=3"], "/stable/abc"))).toBe("/dashboard?page=3");
+        // A repeat of the top or an empty start leaves nothing
+        expect(trailLeft(["/x"], trailPush(["/x"], "/x"))).toBeNull();
+        expect(trailLeft([], ["/x"])).toBeNull();
     });
 
     it("normalises urls and survives junk storage", () => {

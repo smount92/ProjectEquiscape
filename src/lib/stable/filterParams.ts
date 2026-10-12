@@ -1,8 +1,14 @@
 /**
  * Digital Stable v2 — URL filter-param vocabulary.
  *
- * The URL is the single source of truth for the stable's filter state:
- * /dashboard?q=…&finish=…&maker=…&scale=…&category=…&trade=…&collection=…&records=1&sort=…
+ * The URL is the single source of truth for the stable's filter state
+ * AND the reader's place in it:
+ * /dashboard?q=…&finish=…&maker=…&scale=…&category=…&trade=…&collection=…&records=1&sort=…&page=3&per=96
+ *
+ * The place used to live in component state (Show More appended into
+ * a useState list), so opening a horse and coming back dropped the
+ * member onto the first 48 again (member report, 2026-10-12). Page and
+ * page size are now URL state like everything else: Back restores them.
  *
  * Pure functions only (no React, no Supabase) so they are directly
  * unit-testable and shared by the server page, the server actions,
@@ -11,6 +17,13 @@
 
 export const STABLE_SORTS = ["newest", "oldest", "name-az", "name-za"] as const;
 export type StableSort = (typeof STABLE_SORTS)[number];
+
+/** Page sizes on offer. 192 is the server cap (getStablePageSchema). */
+export const STABLE_PER_OPTIONS = [24, 48, 96, 192] as const;
+export type StablePer = (typeof STABLE_PER_OPTIONS)[number];
+export const DEFAULT_STABLE_PER: StablePer = 48;
+/** Highest page number the URL may name (offsets past the end are clamped on the server). */
+export const MAX_STABLE_PAGE = 10_000;
 
 export const FINISH_OPTIONS = ["OF", "Custom", "Artist Resin"] as const;
 
@@ -50,6 +63,34 @@ export interface StableFilters {
     /** Only horses with no Registry link (catalog_id null). */
     unlinked?: boolean;
     sort: StableSort;
+    /** 1-based page. View state, not a filter: absent = page 1. */
+    page?: number;
+    /** Page size. View state, not a filter: absent = DEFAULT_STABLE_PER. */
+    per?: StablePer;
+}
+
+/** The page the filters name (1 when absent). */
+export function pageOf(filters: Pick<StableFilters, "page">): number {
+    return filters.page && filters.page > 1 ? filters.page : 1;
+}
+
+/** The page size the filters name (DEFAULT_STABLE_PER when absent). */
+export function perOf(filters: Pick<StableFilters, "per">): StablePer {
+    return filters.per ?? DEFAULT_STABLE_PER;
+}
+
+function parsePage(v: string | undefined): number | undefined {
+    if (!v || !/^\d{1,6}$/.test(v)) return undefined;
+    const n = Number(v);
+    if (n <= 1 || n > MAX_STABLE_PAGE) return undefined;
+    return n;
+}
+
+function parsePer(v: string | undefined): StablePer | undefined {
+    if (!v || !/^\d{1,4}$/.test(v)) return undefined;
+    const n = Number(v);
+    if (n === DEFAULT_STABLE_PER) return undefined;
+    return (STABLE_PER_OPTIONS as readonly number[]).includes(n) ? (n as StablePer) : undefined;
 }
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -113,6 +154,12 @@ export function parseStableSearchParams(
         filters.sort = sort as StableSort;
     }
 
+    // Place in the list: dropped when invalid, normalised away when default.
+    const page = parsePage(nonEmpty(params.page, 10));
+    if (page) filters.page = page;
+    const per = parsePer(nonEmpty(params.per, 10));
+    if (per) filters.per = per;
+
     return filters;
 }
 
@@ -133,7 +180,65 @@ export function buildStableSearchParams(filters: Partial<StableFilters>): URLSea
     if (filters.hasRecords) params.set("records", "1");
     if (filters.unlinked) params.set("unlinked", "1");
     if (filters.sort && filters.sort !== "newest") params.set("sort", filters.sort);
+    if (filters.page && filters.page > 1) params.set("page", String(filters.page));
+    if (filters.per && filters.per !== DEFAULT_STABLE_PER) params.set("per", String(filters.per));
     return params;
+}
+
+/** The dashboard URL for a filter state (path only when pristine). */
+export function stableHref(filters: Partial<StableFilters>, path = "/dashboard"): string {
+    const qs = buildStableSearchParams(filters).toString();
+    return qs ? `${path}?${qs}` : path;
+}
+
+/** Same filters, sort and page size (ignores the page number)? */
+export function sameFilterSet(a: StableFilters, b: StableFilters): boolean {
+    return (
+        buildStableSearchParams({ ...a, page: undefined }).toString() ===
+        buildStableSearchParams({ ...b, page: undefined }).toString()
+    );
+}
+
+/**
+ * A filter, sort or saved-view change: always back to page 1 (the old
+ * page number means nothing in a different result set). Returns null
+ * when nothing actually changed — the search box submits on blur, and
+ * a blur must never throw the member off the page they are on.
+ */
+export function applyFilterChange(current: StableFilters, next: StableFilters): StableFilters | null {
+    if (sameFilterSet(current, next)) return null;
+    const out = { ...next };
+    delete out.page;
+    return out;
+}
+
+/** The filters and sort without the reader's place (for whole-result-set queries). */
+export function withoutPlace(filters: StableFilters): StableFilters {
+    const out = { ...filters };
+    delete out.page;
+    delete out.per;
+    return out;
+}
+
+/** Jump to a page, same filters and page size. */
+export function withPage(filters: StableFilters, page: number): StableFilters {
+    const out = { ...filters };
+    if (page > 1) out.page = Math.min(Math.floor(page), MAX_STABLE_PAGE);
+    else delete out.page;
+    return out;
+}
+
+/**
+ * Change the page size and keep the reader's place: the new page is the
+ * one holding the first horse they were looking at (97–144 at 48 a page
+ * becomes page 2 at 96 a page, 97–192), not page 1.
+ */
+export function withPer(filters: StableFilters, per: StablePer): StableFilters {
+    const firstIndex = (pageOf(filters) - 1) * perOf(filters);
+    const out = { ...filters };
+    if (per === DEFAULT_STABLE_PER) delete out.per;
+    else out.per = per;
+    return withPage(out, Math.floor(firstIndex / per) + 1);
 }
 
 /** A rubber-stamp chip describing one active filter. */
@@ -145,7 +250,7 @@ export interface FilterChip {
 
 /**
  * The active-filter chips for the ledger bar, in a stable display
- * order. Sort is a view preference, not a filter — no chip.
+ * order. Sort, page and page size are view state, not filters — no chips.
  */
 export function activeFilterChips(
     filters: StableFilters,
@@ -178,25 +283,30 @@ export function countActiveFilters(filters: StableFilters): number {
     return activeFilterChips(filters).length;
 }
 
-/** Remove one filter (chip ✕). Returns a new object. */
+/** Remove one filter (chip ✕) and go back to page 1. Returns a new object. */
 export function removeFilter(filters: StableFilters, key: FilterChip["key"]): StableFilters {
     const next = { ...filters };
     delete next[key];
+    delete next.page;
     return next;
 }
 
-/** Clear every filter but keep the sort preference. */
+/** Clear every filter but keep the sort and page-size preferences. */
 export function clearAllFilters(filters: StableFilters): StableFilters {
-    return { sort: filters.sort };
+    const next: StableFilters = { sort: filters.sort };
+    if (filters.per) next.per = filters.per;
+    return next;
 }
 
 /**
  * Saved-view params ⇄ filters. Saved views persist the plain-object
- * form of the filters (JSONB in stable_saved_views.params).
+ * form of the filters (JSONB in stable_saved_views.params). A view
+ * remembers its page size but never a page number: a view opens at
+ * its first page, whatever page it was saved from.
  */
 export function filtersToViewParams(filters: StableFilters): Record<string, string> {
     const out: Record<string, string> = {};
-    buildStableSearchParams(filters).forEach((value, key) => {
+    buildStableSearchParams({ ...filters, page: undefined }).forEach((value, key) => {
         out[key] = value;
     });
     return out;
@@ -205,7 +315,7 @@ export function filtersToViewParams(filters: StableFilters): Record<string, stri
 export function viewParamsToFilters(params: Record<string, unknown>): StableFilters {
     const clean: Record<string, string | undefined> = {};
     for (const [k, v] of Object.entries(params)) {
-        if (typeof v === "string") clean[k] = v;
+        if (typeof v === "string" && k !== "page") clean[k] = v;
     }
     return parseStableSearchParams(clean);
 }

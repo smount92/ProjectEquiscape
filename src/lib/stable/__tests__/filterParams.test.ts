@@ -1,13 +1,19 @@
 import { describe, it, expect } from "vitest";
 import {
     activeFilterChips,
+    applyFilterChange,
     buildStableSearchParams,
     clearAllFilters,
     countActiveFilters,
     filtersToViewParams,
     parseStableSearchParams,
     removeFilter,
+    sameFilterSet,
+    stableHref,
     viewParamsToFilters,
+    withoutPlace,
+    withPage,
+    withPer,
 } from "@/lib/stable/filterParams";
 
 const COLLECTION_ID = "123e4567-e89b-42d3-a456-426614174000";
@@ -166,6 +172,86 @@ describe("saved-view param round trip", () => {
             finish: "OF",
             sort: "newest",
         });
+    });
+});
+
+describe("page and page size (the reader's place)", () => {
+    it("parses page and per, round-trips them, and omits the defaults", () => {
+        const filters = parseStableSearchParams({ finish: "OF", page: "3", per: "96" });
+        expect(filters).toEqual({ finish: "OF", sort: "newest", page: 3, per: 96 });
+        const qs = buildStableSearchParams(filters).toString();
+        expect(qs).toBe("finish=OF&page=3&per=96");
+        expect(parseStableSearchParams(Object.fromEntries(new URLSearchParams(qs)))).toEqual(filters);
+        expect(stableHref({ sort: "newest", page: 3, per: 96 })).toBe("/dashboard?page=3&per=96");
+    });
+
+    it("normalises page=1 and per=48 away", () => {
+        expect(parseStableSearchParams({ page: "1", per: "48" })).toEqual({ sort: "newest" });
+        expect(buildStableSearchParams({ sort: "newest", page: 1, per: 48 }).toString()).toBe("");
+        expect(stableHref({ sort: "newest" })).toBe("/dashboard");
+    });
+
+    it("drops invalid page and per values", () => {
+        for (const page of ["0", "-2", "abc", "2.5", "1e3", "99999999", " "]) {
+            expect(parseStableSearchParams({ page }).page).toBeUndefined();
+        }
+        for (const per of ["50", "0", "1000", "abc", "96.0", "193"]) {
+            expect(parseStableSearchParams({ per }).per).toBeUndefined();
+        }
+        expect(parseStableSearchParams({ per: "24" }).per).toBe(24);
+        expect(parseStableSearchParams({ per: "192" }).per).toBe(192);
+    });
+
+    it("page and per are view state: no chips", () => {
+        expect(activeFilterChips({ sort: "newest", page: 4, per: 96 })).toEqual([]);
+        expect(countActiveFilters({ sort: "newest", page: 4, per: 96 })).toBe(0);
+    });
+
+    it("any filter or sort change goes back to page 1 and keeps the page size", () => {
+        const here = { finish: "OF" as const, sort: "newest" as const, page: 5, per: 96 as const };
+        expect(applyFilterChange(here, { ...here, maker: "Breyer" })).toEqual({
+            finish: "OF",
+            maker: "Breyer",
+            sort: "newest",
+            per: 96,
+        });
+        expect(applyFilterChange(here, { ...here, sort: "oldest" })?.page).toBeUndefined();
+        expect(removeFilter(here, "finish")).toEqual({ sort: "newest", per: 96 });
+        expect(clearAllFilters(here)).toEqual({ sort: "newest", per: 96 });
+    });
+
+    it("an unchanged filter set (the search box blurring) changes nothing", () => {
+        const here = { q: "chic", sort: "newest" as const, page: 5 };
+        expect(applyFilterChange(here, { ...here })).toBeNull();
+        expect(sameFilterSet(here, { q: "chic", sort: "newest" })).toBe(true);
+    });
+
+    it("withPage jumps pages and withPer keeps the first horse in view", () => {
+        const f = { finish: "OF" as const, sort: "newest" as const };
+        expect(withPage(f, 3)).toEqual({ ...f, page: 3 });
+        expect(withPage({ ...f, page: 3 }, 1)).toEqual(f);
+        // 97–144 at 48 a page → page 2 at 96 a page (97–192)
+        expect(withPer({ ...f, page: 3 }, 96)).toEqual({ ...f, page: 2, per: 96 });
+        // 97–192 at 96 → page 5 at 24 (97–120)
+        expect(withPer({ ...f, page: 2, per: 96 }, 24)).toEqual({ ...f, page: 5, per: 24 });
+        // back to the default size drops per from the URL
+        expect(withPer({ ...f, per: 96 }, 48)).toEqual(f);
+    });
+
+    it("withoutPlace strips page and per for whole-result queries", () => {
+        expect(withoutPlace({ finish: "OF", sort: "newest", page: 2, per: 24 })).toEqual({
+            finish: "OF",
+            sort: "newest",
+        });
+    });
+
+    it("saved views keep per and never page", () => {
+        const filters = parseStableSearchParams({ finish: "OF", page: "7", per: "192" });
+        const params = filtersToViewParams(filters);
+        expect(params).toEqual({ finish: "OF", per: "192" });
+        expect(viewParamsToFilters(params)).toEqual({ finish: "OF", sort: "newest", per: 192 });
+        // A stored page (older or hand-made row) is ignored on load.
+        expect(viewParamsToFilters({ finish: "OF", page: "4" })).toEqual({ finish: "OF", sort: "newest" });
     });
 });
 

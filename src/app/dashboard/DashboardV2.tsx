@@ -2,7 +2,7 @@
  * Digital Stable v2 (NEXT_PUBLIC_STABLE_V2) — the filter-ledger
  * dashboard. Leather masthead band → ledger filter bar → server-
  * filtered grid/ledger fed by getStablePage. The URL is the single
- * source of truth for filters; the sidebar is fed by getStableSummary
+ * source of truth for filters and the page (?page=&per=); the sidebar is fed by getStableSummary
  * (one aggregate round-trip instead of three unbounded fetches).
  */
 
@@ -26,7 +26,7 @@ import ShowLifeRail from "@/components/shows/ShowLifeRail";
 import { getShowHistory } from "@/app/actions/shows";
 import { getStablePage, getStableSummary, listStableViews } from "@/app/actions/stable";
 import { countUnreadMessages } from "@/lib/messaging/unreadCount";
-import { parseStableSearchParams } from "@/lib/stable/filterParams";
+import { pageOf, parseStableSearchParams, perOf } from "@/lib/stable/filterParams";
 import type { StableSummary } from "@/lib/stable/types";
 
 /** Async server-side wrapper to fetch show history data */
@@ -96,7 +96,11 @@ export default async function DashboardV2({
     const savedViews = viewsResult.success ? viewsResult.views : [];
     const cards = pageResult.success ? pageResult.cards : [];
     const totalCount = pageResult.success ? pageResult.totalCount : 0;
-    const hasMore = pageResult.success ? pageResult.hasMore : false;
+    // The page actually served: a ?page= past the end (horses deleted
+    // since) comes back clamped to the last page, never an empty list.
+    const per = perOf(filters);
+    const page = pageResult.success ? pageResult.page : pageOf(filters);
+    const pageCount = pageResult.success ? pageResult.pageCount : 1;
     const facetOptions = pageResult.success
         ? pageResult.facetOptions
         : { makers: [], scales: [], finishes: [], categories: [], molds: [] };
@@ -117,9 +121,11 @@ export default async function DashboardV2({
                 {/* ── MAIN: filter ledger + browser ── */}
                 <main className="min-w-0">
                     <StableBrowser
-                        initialCards={cards}
+                        cards={cards}
                         totalCount={totalCount}
-                        initialHasMore={hasMore}
+                        page={page}
+                        per={per}
+                        pageCount={pageCount}
                         herdTotal={summary.totalHorses}
                         facetOptions={facetOptions}
                         collections={summary.collections.map((c) => ({ id: c.id, name: c.name }))}

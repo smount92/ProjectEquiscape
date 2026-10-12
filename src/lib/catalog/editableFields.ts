@@ -148,7 +148,12 @@ function valueFor(item: EditableSource, key: string): string {
  * carries, so nothing that exists silently becomes uneditable.
  */
 export function buildEditableFields(item: EditableSource): FieldEdit[] {
-    const curated = CATALOG_EDITABLE_FIELDS.map((f) => {
+    // A mold IS its name: asking a mold entry for "Mold" would ask for the
+    // same thing twice (a member hit exactly that, 2026-10-12). The field
+    // belongs to releases, where it names the parent sculpture.
+    const curated = CATALOG_EDITABLE_FIELDS.filter(
+        (f) => !(f.key === "mold_name" && item.item_type === "plastic_mold"),
+    ).map((f) => {
         const value = valueFor(item, f.key);
         return { ...f, original: value, current: value, isEmpty: value === "" };
     });

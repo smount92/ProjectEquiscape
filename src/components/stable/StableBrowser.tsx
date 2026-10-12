@@ -2,11 +2,12 @@
 
 /**
  * Digital Stable v2 browser — the client orchestrator under the
- * leather masthead. Wires the ledger filter bar to the URL (single
- * source of truth: router.push, so paging and the back button never
- * wipe filters), renders the gallery/ledger views from server data,
- * appends via Show More, and runs the forest bulk bar (now with a
- * Visibility toggle and cross-page "Select all N matching").
+ * leather masthead. Wires the ledger filter bar AND the page controls
+ * to the URL (single source of truth: router.push, so the back button
+ * restores filters, page and page size), renders the gallery/ledger
+ * views from server data, brings back the card the member just opened
+ * (ReturnToCard), and runs the forest bulk bar (Visibility toggle and
+ * cross-page "Select all N matching").
  */
 
 import { useCallback, useEffect, useState } from "react";
@@ -21,13 +22,20 @@ import StableFilterBar from "@/components/stable/StableFilterBar";
 import StableWelcome from "@/components/stable/StableWelcome";
 import StableHorseCard from "@/components/stable/StableHorseCard";
 import StableLedgerTable from "@/components/stable/StableLedgerTable";
+import StablePagination from "@/components/stable/StablePagination";
+import ReturnToCard from "@/components/stable/ReturnToCard";
 import {
-    buildStableSearchParams,
+    applyFilterChange,
     countActiveFilters,
+    stableHref,
+    withoutPlace,
+    withPage,
+    withPer,
     type StableFilters,
+    type StablePer,
 } from "@/lib/stable/filterParams";
 import type { SavedView, StableCard, StableFacetOptions } from "@/lib/stable/types";
-import { getMatchingHorseIds, loadMoreStable } from "@/app/actions/stable";
+import { getMatchingHorseIds } from "@/app/actions/stable";
 import { bulkDeleteHorses, bulkUpdateHorses } from "@/app/actions/horse";
 
 const containerVariants = {
@@ -45,9 +53,11 @@ const cardVariants = {
 };
 
 export default function StableBrowser({
-    initialCards,
+    cards,
     totalCount,
-    initialHasMore,
+    page,
+    per,
+    pageCount,
     herdTotal,
     facetOptions,
     collections,
@@ -55,10 +65,14 @@ export default function StableBrowser({
     filters,
     currencySymbol = "$",
 }: {
-    initialCards: StableCard[];
+    /** The horses on this page, in server order. */
+    cards: StableCard[];
     /** Horses matching the current filters (whole collection, not page). */
     totalCount: number;
-    initialHasMore: boolean;
+    /** The page served (the server clamps a page past the end to the last one). */
+    page: number;
+    per: StablePer;
+    pageCount: number;
     /** Unfiltered herd size, for the "N of TOTAL match" line. */
     herdTotal: number;
     facetOptions: StableFacetOptions;
@@ -69,11 +83,11 @@ export default function StableBrowser({
     currencySymbol?: string;
 }) {
     const router = useRouter();
-    const [cards, setCards] = useState<StableCard[]>(initialCards);
-    const [hasMore, setHasMore] = useState(initialHasMore);
-    const [loadingMore, setLoadingMore] = useState(false);
 
     const [view, setView] = useState<"grid" | "ledger">("grid");
+    // ReturnToCard waits for the saved view preference, so it scrolls
+    // to the card in the layout the member will actually see.
+    const [viewReady, setViewReady] = useState(false);
     const [selectMode, setSelectMode] = useState(false);
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
     const [isProcessing, setIsProcessing] = useState(false);
@@ -82,44 +96,55 @@ export default function StableBrowser({
 
     // Persist view preference (same key as v1)
     useEffect(() => {
-        const saved = localStorage.getItem("mhh-dashboard-view");
-        if (saved === "grid" || saved === "ledger") setView(saved);
+        try {
+            const saved = localStorage.getItem("mhh-dashboard-view");
+            if (saved === "grid" || saved === "ledger") setView(saved);
+        } catch {
+            // Blocked storage: gallery it is.
+        }
+        setViewReady(true);
     }, []);
 
     const handleViewChange = useCallback((v: "grid" | "ledger") => {
         setView(v);
-        localStorage.setItem("mhh-dashboard-view", v);
+        try {
+            localStorage.setItem("mhh-dashboard-view", v);
+        } catch {
+            // Blocked storage: the choice lasts for this visit only.
+        }
     }, []);
 
-    // Server re-rendered with new data (filter/sort change or refresh):
-    // replace the loaded set. Selection ids stay valid, so keep them.
-    useEffect(() => {
-        setCards(initialCards);
-        setHasMore(initialHasMore);
-    }, [initialCards, initialHasMore]);
+    // A different page (or page size, or result set) is a different set
+    // of cards: a selection made on the last one doesn't carry over.
+    // "Select all N matching" is the cross-page tool.
+    const placeKey = stableHref({ ...filters, page, per });
+    const [selectionKey, setSelectionKey] = useState(placeKey);
+    if (selectionKey !== placeKey) {
+        setSelectionKey(placeKey);
+        setSelectedIds(new Set());
+        setBulkNotice(null);
+    }
 
-    // ── URL is the single source of truth ──
+    // ── URL is the single source of truth (filters AND place) ──
     const pushFilters = useCallback(
         (next: StableFilters) => {
-            const qs = buildStableSearchParams(next).toString();
-            router.push(qs ? `/dashboard?${qs}` : "/dashboard");
+            const changed = applyFilterChange(filters, next);
+            if (changed) router.push(stableHref(changed));
         },
-        [router],
+        [filters, router],
     );
 
-    // ── Show More: appends below; filters, scroll, selection stay put ──
-    const handleLoadMore = useCallback(async () => {
-        setLoadingMore(true);
-        try {
-            const result = await loadMoreStable({ ...filters, offset: cards.length });
-            if (result.success) {
-                setCards((prev) => [...prev, ...result.cards]);
-                setHasMore(result.hasMore);
-            }
-        } finally {
-            setLoadingMore(false);
-        }
-    }, [cards.length, filters]);
+    const goToPage = useCallback(
+        (p: number) => router.push(stableHref(withPage({ ...filters, per }, Math.max(1, Math.min(p, pageCount))))),
+        [filters, per, pageCount, router],
+    );
+
+    const changePer = useCallback(
+        (next: StablePer) => {
+            if (next !== per) router.push(stableHref(withPer({ ...filters, page, per }, next)));
+        },
+        [filters, page, per, router],
+    );
 
     // ── Selection ──
     const toggleSelect = useCallback((id: string) => {
@@ -141,7 +166,7 @@ export default function StableBrowser({
         setIsProcessing(true);
         setBulkNotice(null);
         try {
-            const result = await getMatchingHorseIds(filters);
+            const result = await getMatchingHorseIds(withoutPlace(filters));
             if (result.success) {
                 setSelectedIds(new Set(result.ids));
                 if (result.capped) {
@@ -247,6 +272,19 @@ export default function StableBrowser({
                 </button>
             </div>
 
+            {cards.length > 0 && (
+                <StablePagination
+                    placement="top"
+                    page={page}
+                    pageCount={pageCount}
+                    per={per}
+                    totalCount={totalCount}
+                    shown={cards.length}
+                    onPage={goToPage}
+                    onPer={changePer}
+                />
+            )}
+
             {/* Filtered-empty state (true-empty is handled above, pre-bar) */}
             {cards.length === 0 ? (
                 <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-input bg-muted/50 p-16">
@@ -284,25 +322,20 @@ export default function StableBrowser({
                 />
             )}
 
-            {/* Show More — appends; nothing above is lost */}
-            {cards.length > 0 && hasMore && (
-                <div className="mt-8 flex flex-col items-center gap-2">
-                    <button
-                        type="button"
-                        onClick={handleLoadMore}
-                        disabled={loadingMore}
-                        className="btn-brass disabled:cursor-not-allowed disabled:opacity-60"
-                        id="stable-show-more"
-                    >
-                        {loadingMore ? "Loading…" : `Show more (${cards.length} of ${totalCount} shown)`}
-                    </button>
-                </div>
+            {/* Numbered pages — the place lives in the URL, so Back from a horse returns here */}
+            {cards.length > 0 && (
+                <StablePagination
+                    placement="bottom"
+                    page={page}
+                    pageCount={pageCount}
+                    per={per}
+                    totalCount={totalCount}
+                    shown={cards.length}
+                    onPage={goToPage}
+                    onPer={changePer}
+                />
             )}
-            {cards.length > 0 && !hasMore && totalCount > 48 && (
-                <p className="mt-6 text-center text-sm text-muted-foreground italic">
-                    All {totalCount} shown.
-                </p>
-            )}
+            {viewReady && <ReturnToCard ids={cards.map((c) => c.id)} />}
 
             {/* ── Forest bulk bar ── */}
             {selectMode && (

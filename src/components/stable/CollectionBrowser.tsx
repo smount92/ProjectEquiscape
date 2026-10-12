@@ -2,16 +2,20 @@
 
 /**
  * Collection page grid (Digital Stable v2) — the shared StableHorseCard
- * plus Show More pagination, replacing the bespoke third grid and its
- * unbounded fetch. No filter bar here this pass; the fixed collection
- * filter is baked in.
+ * plus the same numbered pages as the dashboard (?page=&per= in the
+ * URL, so Back from a horse lands on the page it was opened from, and
+ * ReturnToCard brings its card back into view). No filter bar here;
+ * the fixed collection filter is baked in.
  */
 
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import StableHorseCard from "@/components/stable/StableHorseCard";
+import StablePagination from "@/components/stable/StablePagination";
+import ReturnToCard from "@/components/stable/ReturnToCard";
+import { stableHref, withPage, withPer, type StablePer } from "@/lib/stable/filterParams";
 import type { StableCard } from "@/lib/stable/types";
-import { loadMoreStable } from "@/app/actions/stable";
 
 const containerVariants = {
     hidden: {},
@@ -28,35 +32,46 @@ const cardVariants = {
 };
 
 export default function CollectionBrowser({
-    collectionId,
-    initialCards,
+    cards,
     totalCount,
-    initialHasMore,
+    page,
+    per,
+    pageCount,
 }: {
-    collectionId: string;
-    initialCards: StableCard[];
+    cards: StableCard[];
     totalCount: number;
-    initialHasMore: boolean;
+    page: number;
+    per: StablePer;
+    pageCount: number;
 }) {
-    const [cards, setCards] = useState<StableCard[]>(initialCards);
-    const [hasMore, setHasMore] = useState(initialHasMore);
-    const [loadingMore, setLoadingMore] = useState(false);
+    const router = useRouter();
+    const path = usePathname();
 
-    const handleLoadMore = useCallback(async () => {
-        setLoadingMore(true);
-        try {
-            const result = await loadMoreStable({ collection: collectionId, offset: cards.length });
-            if (result.success) {
-                setCards((prev) => [...prev, ...result.cards]);
-                setHasMore(result.hasMore);
-            }
-        } finally {
-            setLoadingMore(false);
-        }
-    }, [cards.length, collectionId]);
+    const goToPage = useCallback(
+        (p: number) =>
+            router.push(stableHref(withPage({ sort: "newest", per }, Math.max(1, Math.min(p, pageCount))), path)),
+        [path, per, pageCount, router],
+    );
+    const changePer = useCallback(
+        (next: StablePer) => {
+            if (next !== per) router.push(stableHref(withPer({ sort: "newest", page, per }, next), path));
+        },
+        [page, path, per, router],
+    );
 
     return (
         <>
+            <StablePagination
+                placement="top"
+                page={page}
+                pageCount={pageCount}
+                per={per}
+                totalCount={totalCount}
+                shown={cards.length}
+                onPage={goToPage}
+                onPer={changePer}
+            />
+
             <motion.div
                 className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:gap-8 lg:grid-cols-3 xl:grid-cols-4"
                 variants={containerVariants}
@@ -70,19 +85,17 @@ export default function CollectionBrowser({
                 ))}
             </motion.div>
 
-            {hasMore && (
-                <div className="mt-8 flex justify-center">
-                    <button
-                        type="button"
-                        onClick={handleLoadMore}
-                        disabled={loadingMore}
-                        className="btn-brass disabled:cursor-not-allowed disabled:opacity-60"
-                        id="collection-show-more"
-                    >
-                        {loadingMore ? "Loading…" : `Show more (${cards.length} of ${totalCount} shown)`}
-                    </button>
-                </div>
-            )}
+            <StablePagination
+                placement="bottom"
+                page={page}
+                pageCount={pageCount}
+                per={per}
+                totalCount={totalCount}
+                shown={cards.length}
+                onPage={goToPage}
+                onPer={changePer}
+            />
+            <ReturnToCard ids={cards.map((c) => c.id)} />
         </>
     );
 }

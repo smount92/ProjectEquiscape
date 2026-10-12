@@ -6,7 +6,14 @@
  */
 
 import { z } from "zod";
-import { CATEGORY_OPTIONS, FINISH_OPTIONS, STABLE_SORTS, TRADE_OPTIONS } from "./filterParams";
+import {
+    CATEGORY_OPTIONS,
+    DEFAULT_STABLE_PER,
+    FINISH_OPTIONS,
+    MAX_STABLE_PAGE,
+    STABLE_SORTS,
+    TRADE_OPTIONS,
+} from "./filterParams";
 
 export const uuidSchema = z.uuid();
 
@@ -26,9 +33,15 @@ export const stableFiltersSchema = z.object({
     sort: z.enum(STABLE_SORTS).default("newest"),
 });
 
+/**
+ * One page of the stable. Paging is by page number (1-based) and page
+ * size, the same shape the URL carries; the server computes the offset
+ * and clamps a page past the end to the last page.
+ */
 export const getStablePageSchema = stableFiltersSchema.extend({
-    offset: z.number().int().min(0).max(100_000).default(0),
-    limit: z.number().int().min(1).max(48).default(48),
+    page: z.number().int().min(1).max(MAX_STABLE_PAGE).default(1),
+    /** 192 is the cap — the largest page-size option the controls offer. */
+    per: z.number().int().min(1).max(192).default(DEFAULT_STABLE_PER),
 });
 
 export const getMatchingHorseIdsSchema = stableFiltersSchema;
@@ -59,6 +72,8 @@ export const savedViewParamsSchema = z
         records: z.string().max(4).optional(),
         unlinked: z.string().max(4).optional(),
         sort: z.string().max(20).optional(),
+        /** Page size travels with a view; the page number never does. */
+        per: z.string().max(4).optional(),
     })
     .strict();
 

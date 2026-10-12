@@ -94,6 +94,7 @@ export default function SuggestNewEntryForm({
  // Attribution split: for artist pieces the person IS the primary
  // attribution (maker); for factory pieces the company is.
  const isArtistPiece = ARTIST_ATTRIBUTED_CATEGORIES.has(itemType);
+ const isMold = itemType === "plastic_mold";
  const effectiveMaker = isArtistPiece
  ? artistName.trim()
  : maker ==="Other" ? customMaker.trim() : maker;
@@ -119,7 +120,10 @@ export default function SuggestNewEntryForm({
  run_count: isArtistPiece ? undefined : (/^\d{1,7}$/.test(runCount.trim()) ? runCount.trim() : undefined),
  breed: breed.trim() || undefined,
  gender: gender || undefined,
- mold_name: moldName || undefined,
+ // A mold IS its name: the title is written to both places so the
+ // review screens and the duplicate check keep reading mold_name.
+ // (A member was asked for the same name twice, 2026-10-12.)
+ mold_name: isMold ? title.trim() : moldName || undefined,
  },
  reason: reason.trim(),
  confirmDuplicates,
@@ -190,16 +194,21 @@ export default function SuggestNewEntryForm({
  {/* Title */}
  <div className="mb-6">
  <label className="text-foreground mb-1 block text-sm font-semibold" htmlFor="new-entry-title">
- Title / Name *
+ {itemType === "plastic_mold" ? "Mold name *" : "Title / Name *"}
  </label>
  <Input
  id="new-entry-title"
 
  value={title}
  onChange={(e) => setTitle(e.target.value)}
- placeholder="e.g. Breyer #712 — Misty of Chincoteague"
+ placeholder={itemType === "plastic_mold" ? "e.g. Family Arabian Stallion" : "e.g. Breyer #712 — Misty of Chincoteague"}
  maxLength={200}
  />
+ {itemType === "plastic_mold" && (
+ <p className="text-muted-foreground m-0 mt-1 text-xs">
+ The sculpture itself. Releases on this mold are added as their own entries afterwards.
+ </p>
+ )}
  </div>
 
  {/* Item Type */}
@@ -376,9 +385,12 @@ export default function SuggestNewEntryForm({
 
  {/* Two-column row: Mold + Year */}
  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+ {/* For a mold entry the title IS the mold name, so this field would
+     ask for the same thing twice; it is the release's parent only. */}
+ {itemType !== "plastic_mold" && (
  <div className="mb-6">
  <label className="text-foreground mb-1 block text-sm font-semibold" htmlFor="new-entry-mold">
- Mold Name
+ Belongs to mold
  </label>
  <Input
  id="new-entry-mold"
@@ -388,7 +400,9 @@ export default function SuggestNewEntryForm({
  placeholder="e.g. Family Arabian Stallion"
  maxLength={200}
  />
+ <p className="text-muted-foreground m-0 mt-1 text-xs">The sculpture this release was made on, if you know it.</p>
  </div>
+ )}
  <div className="mb-6">
  <label className="text-foreground mb-1 block text-sm font-semibold" htmlFor="new-entry-year">
  Year

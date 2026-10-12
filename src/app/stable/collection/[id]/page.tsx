@@ -6,6 +6,7 @@ import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import { Button } from "@/components/ui/button";
 import CollectionBrowser from"@/components/stable/CollectionBrowser";
 import { getStablePage, getStableSummary } from"@/app/actions/stable";
+import { pageOf, parseStableSearchParams, perOf } from "@/lib/stable/filterParams";
 
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
@@ -19,8 +20,18 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
  };
 }
 
-export default async function CollectionPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function CollectionPage({
+ params,
+ searchParams,
+}: {
+ params: Promise<{ id: string }>;
+ searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
  const { id: collectionId } = await params;
+ // Only the place in the list comes from the URL here (?page=&per=); the
+ // collection itself is the one filter.
+ const place = parseStableSearchParams(await searchParams);
+ const per = perOf(place);
  const supabase = await createClient();
 
  const {
@@ -43,12 +54,13 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
  }
 
  const [pageResult, summaryResult] = await Promise.all([
-  getStablePage({ collection: collectionId }),
+  getStablePage({ collection: collectionId, page: pageOf(place), per }),
   getStableSummary(),
  ]);
  const cards = pageResult.success ? pageResult.cards : [];
  const totalCount = pageResult.success ? pageResult.totalCount : 0;
- const hasMore = pageResult.success ? pageResult.hasMore : false;
+ const page = pageResult.success ? pageResult.page : 1;
+ const pageCount = pageResult.success ? pageResult.pageCount : 1;
  const colStats = summaryResult.success
   ? summaryResult.summary.collections.find((c) => c.id === collectionId)
   : undefined;
@@ -113,7 +125,7 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
   </div>
   )}
 
-  {/* Grid — shared StableHorseCard + Show More */}
+  {/* Grid — shared StableHorseCard + numbered pages */}
   {totalCount === 0 ? (
   <div className="bg-card border-input animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
    <div className="mb-4 text-5xl">📂</div>
@@ -130,10 +142,11 @@ export default async function CollectionPage({ params }: { params: Promise<{ id:
   </div>
   ) : (
   <CollectionBrowser
-   collectionId={collectionId}
-   initialCards={cards}
+   cards={cards}
    totalCount={totalCount}
-   initialHasMore={hasMore}
+   page={page}
+   per={per}
+   pageCount={pageCount}
   />
   )}
  </ExplorerLayout>

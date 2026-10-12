@@ -56,7 +56,6 @@ vi.mock("@/app/actions/stable", () => ({
     getStablePage,
     getStableSummary,
     listStableViews,
-    loadMoreStable: vi.fn(),
     getMatchingHorseIds: vi.fn(),
     saveStableView: vi.fn(),
     deleteStableView: vi.fn(),
@@ -102,7 +101,9 @@ function emptyStablePage() {
         success: true as const,
         cards: [],
         totalCount: 0,
-        hasMore: false,
+        page: 1,
+        per: 48,
+        pageCount: 1,
         facetOptions: { makers: [], scales: [], finishes: [], categories: [] },
     };
 }
@@ -126,5 +127,50 @@ describe("dashboard onboarding empty states", () => {
         // The masthead landmark stays; the sidebar overview card does not render at 0 horses
         expect(screen.getByTestId("stable-masthead")).toBeInTheDocument();
         expect(screen.queryByText("Stable Overview")).not.toBeInTheDocument();
+    });
+});
+
+describe("dashboard paging", () => {
+    it("passes page and per from the URL and renders the page the server served (clamped)", async () => {
+        const cards = Array.from({ length: 28 }, (_, i) => ({
+            id: `h-${i}`,
+            customName: `Horse ${i}`,
+            finishType: "OF",
+            conditionGrade: "",
+            createdAt: "2026-07-01T00:00:00Z",
+            refName: "Unlisted Mold",
+            thumbnailUrl: null,
+            collectionName: null,
+            sculptor: null,
+            tradeStatus: "Not for Sale",
+            assetCategory: "model",
+            vaultValue: null,
+            showRecordCount: 0,
+            moldName: null,
+        }));
+        // Asked for page 12 at 96; only 5 pages exist — the server clamps.
+        getStablePage.mockResolvedValue({
+            ...emptyStablePage(),
+            cards,
+            totalCount: 412,
+            page: 5,
+            per: 96,
+            pageCount: 5,
+        });
+        getStableSummary.mockResolvedValue({
+            success: true,
+            summary: { totalHorses: 412, vaultTotal: 0, forSaleCount: 0, collections: [] },
+        });
+        listStableViews.mockResolvedValue({ success: true, views: [] });
+
+        const tree = await resolveServerTree(
+            <DashboardV2 userId="test-user-id" aliasName="Tester" searchParams={{ page: "12", per: "96" }} />,
+        );
+        render(<>{tree}</>);
+
+        expect(getStablePage).toHaveBeenCalledWith(expect.objectContaining({ page: 12, per: 96 }));
+        expect(screen.getAllByText(/Showing/)[0].textContent).toBe("Showing 385–412 of 412");
+        expect(screen.getAllByRole("button", { name: "Page 5" })[0]).toHaveAttribute("aria-current", "page");
+        expect(screen.getAllByRole("button", { name: "Next page" })[0]).toBeDisabled();
     });
 });

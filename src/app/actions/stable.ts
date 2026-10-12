@@ -5,8 +5,10 @@
  *
  * The dashboard adopts the Show Ring architecture: URL is the single
  * source of truth, ALL filtering happens server-side in the query
- * (never a useMemo over one 48-row page), Show More appends via
- * loadMoreStable.
+ * (never a useMemo over one page). Paging is numbered pages carried in
+ * the URL (?page=&per=), so Back from a horse returns to the same page;
+ * the old Show More append (loadMoreStable) lost the member's place and
+ * is gone.
  *
  * RLS-first: every query runs on the user's client and is additionally
  * owner-scoped with .eq("owner_id", user.id). Each action:
@@ -28,6 +30,7 @@ import { revalidatePath } from "next/cache";
 import { requireAuth } from "@/lib/auth";
 import { getPublicImageUrls } from "@/lib/utils/storage";
 import { sanitizeForOr } from "@/lib/utils/search";
+import { clampPage, offsetFor, pageCountFor } from "@/lib/stable/pagination";
 import {
     deleteStableViewSchema,
     firstZodError,
@@ -48,7 +51,6 @@ type ActionResult<T = object> =
     | ({ success: true } & T)
     | { success: false; error: string };
 
-const PAGE_SIZE = 48;
 /** Max catalog rows matched for the q ilike-over-the-join expansion. */
 const CATALOG_MATCH_CAP = 100;
 /** Max horse ids in an .in() constraint (collection / has-records). */
@@ -56,7 +58,6 @@ const ID_CONSTRAINT_CAP = 1000;
 /** "Select all N matching" hard cap. */
 const SELECT_ALL_CAP = 500;
 
-type StablePageInput = z.infer<typeof getStablePageSchema>;
 type StableFilterInput = z.infer<typeof getMatchingHorseIdsSchema>;
 
 /**
@@ -177,7 +178,7 @@ async function queryStableHorses(
         }
     }
 
-    // Stable ordering: the sort key plus an id tiebreaker, so Show More
+    // Stable ordering: the sort key plus an id tiebreaker, so numbered
     // pages never skip or duplicate rows.
     switch (filters.sort) {
         case "oldest":
@@ -195,7 +196,12 @@ async function queryStableHorses(
     query = query.order("id", { ascending: true });
 
     const { data, count, error } = await query.range(offset, offset + limit - 1);
-    if (error) throw new Error(error.message);
+    if (error) {
+        // PostgREST answers an offset past the last row with 416 /
+        // PGRST103 instead of an empty page; the caller clamps.
+        if ((error as { code?: string }).code === "PGRST103") return { rows: [], count: null };
+        throw new Error(error.message);
+    }
     return { rows: (data ?? []) as unknown as Record<string, unknown>[], count: count ?? 0 };
 }
 
@@ -427,8 +433,12 @@ async function fetchFacetOptions(
 // ══════════════════════════════════════════════════════════════
 
 /**
- * The filtered, sorted first page of the owner's stable plus total
- * match count and whole-collection facet options.
+ * One numbered page of the owner's filtered, sorted stable, plus the
+ * total match count, page count and whole-collection facet options.
+ *
+ * A page past the end (horses deleted since the URL was made, a stale
+ * bookmark, a hand-edited ?page=) is clamped to the last page rather
+ * than rendering an empty list; the returned `page` is the one served.
  */
 export async function getStablePage(
     input: z.input<typeof getStablePageSchema>,
@@ -436,49 +446,52 @@ export async function getStablePage(
     ActionResult<{
         cards: StableCard[];
         totalCount: number;
-        hasMore: boolean;
+        page: number;
+        per: number;
+        pageCount: number;
         facetOptions: StableFacetOptions;
     }>
 > {
     const parsed = getStablePageSchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { supabase, user } = await requireAuth();
-    const { offset, limit, ...filters } = parsed.data;
+    const { page: requestedPage, per, ...filters } = parsed.data;
 
     try {
-        const [{ rows, count }, facetOptions] = await Promise.all([
-            queryStableHorses(supabase, user.id, filters, offset, limit),
+        const [first, facetOptions] = await Promise.all([
+            queryStableHorses(supabase, user.id, filters, offsetFor(requestedPage, per), per),
             fetchFacetOptions(supabase, user.id),
         ]);
+        let { rows } = first;
+        let count = first.count;
+        let page = requestedPage;
+
+        if (page > 1 && rows.length === 0) {
+            // Past the end: learn the true count if the range error hid
+            // it, then serve the last page instead.
+            if (count === null) {
+                count = (await queryStableHorses(supabase, user.id, filters, 0, 1, true)).count ?? 0;
+            }
+            const last = pageCountFor(count, per);
+            if (last !== page) {
+                page = clampPage(page, last);
+                const again = await queryStableHorses(supabase, user.id, filters, offsetFor(page, per), per);
+                rows = again.rows;
+                count = again.count ?? count;
+            }
+        }
+
+        const totalCount = count ?? 0;
         const cards = await buildCards(supabase, user.id, rows);
         return {
             success: true,
             cards,
-            totalCount: count,
-            hasMore: count > offset + rows.length,
+            totalCount,
+            page,
+            per,
+            pageCount: pageCountFor(totalCount, per),
             facetOptions,
         };
-    } catch (err) {
-        return { success: false, error: err instanceof Error ? err.message : "Query failed." };
-    }
-}
-
-/**
- * Append the next page for the "Show More" button — same filters,
- * offset past what's loaded (loadMoreShowRing pattern).
- */
-export async function loadMoreStable(
-    input: z.input<typeof getStablePageSchema>,
-): Promise<ActionResult<{ cards: StableCard[]; hasMore: boolean }>> {
-    const parsed = getStablePageSchema.safeParse(input);
-    if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
-    const { supabase, user } = await requireAuth();
-    const { offset, limit, ...filters } = parsed.data;
-
-    try {
-        const { rows, count } = await queryStableHorses(supabase, user.id, filters, offset, limit);
-        const cards = await buildCards(supabase, user.id, rows);
-        return { success: true, cards, hasMore: count > offset + rows.length };
     } catch (err) {
         return { success: false, error: err instanceof Error ? err.message : "Query failed." };
     }
@@ -504,11 +517,12 @@ export async function getMatchingHorseIds(
             SELECT_ALL_CAP,
             true,
         );
+        const total = count ?? 0;
         return {
             success: true,
             ids: rows.map((r) => r.id as string),
-            totalMatching: count,
-            capped: count > SELECT_ALL_CAP,
+            totalMatching: total,
+            capped: total > SELECT_ALL_CAP,
         };
     } catch (err) {
         return { success: false, error: err instanceof Error ? err.message : "Query failed." };

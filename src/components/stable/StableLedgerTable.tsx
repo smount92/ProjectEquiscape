@@ -151,6 +151,7 @@ export default function StableLedgerTable({
                             return (
                                 <TableRow
                                     key={horse.id}
+                                    id={`horse-${horse.id}`}
                                     className={`transition-colors hover:bg-muted ${selectMode && selectedIds.has(horse.id) ? "bg-forest/5" : ""} ${selectMode ? "cursor-pointer" : ""}`}
                                     onClick={selectMode ? () => onToggleSelect?.(horse.id) : undefined}
                                 >
