@@ -15,13 +15,17 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import {
+    addRoadmapNote,
     createRoadmapItem,
     deleteRoadmapItem,
+    listRecentRoadmapEvents,
     listRoadmap,
+    listRoadmapEvents,
     updateRoadmapItem,
     type RoadmapItemInput,
 } from "@/app/actions/admin-roadmap";
 import {
+    describeEvent,
     groupByHorizon,
     HORIZON_HINTS,
     HORIZON_LABELS,
@@ -36,13 +40,176 @@ import {
     ROADMAP_PRIORITIES,
     ROADMAP_STATUSES,
     STATUS_LABELS,
+    NOTE_MAX,
     summarize,
+    type RoadmapEvent,
+    type RoadmapEventWithItem,
     type RoadmapHorizon,
     type RoadmapItem,
     type RoadmapKind,
     type RoadmapStatus,
 } from "@/lib/roadmap/model";
 import { Button } from "@/components/ui/button";
+
+function when(iso: string): string {
+    return new Date(iso).toLocaleString("en-US", {
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+    });
+}
+
+/** One line of history: a note in full, or the recorded change. */
+function EventLine({ event, title }: { event: RoadmapEvent; title?: string }) {
+    const isNote = event.kind === "comment";
+    return (
+        <li
+            className={`flex gap-2 text-sm ${isNote ? "" : "text-muted-foreground"}`}
+            data-testid="roadmap-event"
+            data-kind={event.kind}
+        >
+            <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${isNote ? "bg-forest" : "bg-border"}`} aria-hidden />
+            <div className="min-w-0 flex-1">
+                {title && <span className="font-semibold text-foreground">{title} · </span>}
+                <span className={isNote ? "whitespace-pre-wrap text-foreground" : ""}>{describeEvent(event)}</span>
+                <span className="ml-2 text-xs text-muted-foreground tabular-nums">{when(event.createdAt)}</span>
+            </div>
+        </li>
+    );
+}
+
+/**
+ * The thread under an item: a note box, then everything that happened
+ * to it, newest first. Fetches when opened and again whenever the item
+ * row changes (the server records the change; we read it back).
+ */
+function HistoryThread({ item, onActivity }: { item: RoadmapItem; onActivity: () => void }) {
+    const [events, setEvents] = useState<RoadmapEvent[]>([]);
+    const [notice, setNotice] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    const [draft, setDraft] = useState("");
+    const [pending, startTransition] = useTransition();
+
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            const result = await listRoadmapEvents(item.id);
+            if (cancelled) return;
+            if (!result.success) setError(result.error);
+            else if (!result.schemaReady) setNotice(result.notice);
+            else setEvents(result.events);
+        })();
+        return () => {
+            cancelled = true;
+        };
+    }, [item.id, item.updatedAt]);
+
+    const submit = () => {
+        const body = draft.trim();
+        if (!body) return;
+        startTransition(async () => {
+            setError(null);
+            const result = await addRoadmapNote(item.id, body);
+            if (!result.success) {
+                setError(result.error);
+                return;
+            }
+            setEvents((prev) => [result.event, ...prev]);
+            setDraft("");
+            onActivity();
+        });
+    };
+
+    return (
+        <div className="flex flex-col gap-2" data-testid="roadmap-history">
+            <h4 className="m-0 text-xs font-bold tracking-wide text-muted-foreground uppercase">Notes &amp; history</h4>
+            {notice ? (
+                <p className="m-0 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs" role="status">
+                    {notice}
+                </p>
+            ) : (
+                <form
+                    className="flex flex-col gap-2"
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        submit();
+                    }}
+                >
+                    <textarea
+                        className="min-h-16 w-full rounded-md border border-input bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground"
+                        placeholder="Add a note — what you learned, who you asked, what to try next"
+                        value={draft}
+                        maxLength={NOTE_MAX}
+                        aria-label={`Note on ${item.title}`}
+                        onChange={(e) => setDraft(e.target.value)}
+                        onKeyDown={(e) => {
+                            if ((e.ctrlKey || e.metaKey) && e.key === "Enter") submit();
+                        }}
+                    />
+                    <div className="flex items-center gap-2">
+                        <Button type="submit" size="sm" disabled={pending || !draft.trim()}>
+                            {pending ? "Saving…" : "Add note"}
+                        </Button>
+                        <span className="text-xs text-muted-foreground">Ctrl+Enter to save</span>
+                    </div>
+                </form>
+            )}
+            {error && (
+                <p role="alert" className="m-0 text-xs font-semibold text-destructive">
+                    {error}
+                </p>
+            )}
+            {events.length > 0 && (
+                <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
+                    {events.map((e) => (
+                        <EventLine key={e.id} event={e} />
+                    ))}
+                </ul>
+            )}
+        </div>
+    );
+}
+
+/** The latest activity across the whole board — what changed lately, item by item. */
+function RecentActivity({ version }: { version: number }) {
+    const [events, setEvents] = useState<RoadmapEventWithItem[]>([]);
+    const [open, setOpen] = useState(true);
+
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            const result = await listRecentRoadmapEvents(20);
+            if (!cancelled && result.success) setEvents(result.events);
+        })();
+        return () => {
+            cancelled = true;
+        };
+    }, [version]);
+
+    if (events.length === 0) return null;
+    return (
+        <section className="rounded-lg border border-input bg-card p-4" data-testid="roadmap-activity">
+            <button
+                type="button"
+                className="flex w-full cursor-pointer items-center justify-between border-0 bg-transparent p-0 text-left"
+                onClick={() => setOpen((o) => !o)}
+                aria-expanded={open}
+            >
+                <h3 className="m-0 text-sm font-bold text-foreground">🕓 Recent activity</h3>
+                <span className="text-xs text-muted-foreground">{open ? "Hide" : "Show"}</span>
+            </button>
+            {open && (
+                <ul className="m-0 mt-3 flex list-none flex-col gap-1.5 p-0">
+                    {events.map((e) => (
+                        <EventLine key={e.id} event={e} title={e.itemTitle} />
+                    ))}
+                </ul>
+            )}
+        </section>
+    );
+}
 
 const SELECT_CLASS =
     "h-8 rounded-md border border-input bg-card px-2 text-xs font-semibold text-foreground";
@@ -239,13 +406,17 @@ function ItemRow({
     busy,
     onPatch,
     onDelete,
+    onActivity,
 }: {
     item: RoadmapItem;
     busy: boolean;
     onPatch: (id: string, patch: Partial<RoadmapItemInput>) => void;
     onDelete: (id: string) => void;
+    /** Something was written to history; the board's activity stream should refetch. */
+    onActivity: () => void;
 }) {
     const [open, setOpen] = useState(false);
+    const [editing, setEditing] = useState(false);
     const [confirming, setConfirming] = useState(false);
     const closed = isClosed(item.status);
     const overdue = isOverdue(item);
@@ -319,32 +490,43 @@ function ItemRow({
             </div>
 
             {open && (
-                <div className="mt-3 border-t border-input pt-3">
-                    {item.detail && (
-                        <p className="m-0 mb-3 text-sm whitespace-pre-wrap text-secondary-foreground">{item.detail}</p>
+                <div className="mt-3 flex flex-col gap-4 border-t border-input pt-3">
+                    {item.detail && !editing && (
+                        <p className="m-0 text-sm whitespace-pre-wrap text-secondary-foreground">{item.detail}</p>
                     )}
-                    <ItemForm
-                        initial={{
-                            title: item.title,
-                            detail: item.detail,
-                            kind: item.kind,
-                            horizon: item.horizon,
-                            status: item.status,
-                            priority: item.priority,
-                            area: item.area,
-                            source: item.source,
-                            link: item.link,
-                            dueOn: item.dueOn,
-                        }}
-                        submitLabel="Save"
-                        busy={busy}
-                        onSubmit={(values) => {
-                            onPatch(item.id, values);
-                            setOpen(false);
-                        }}
-                        onCancel={() => setOpen(false)}
-                    />
-                    <div className="mt-3 flex gap-2">
+
+                    {editing ? (
+                        <ItemForm
+                            initial={{
+                                title: item.title,
+                                detail: item.detail,
+                                kind: item.kind,
+                                horizon: item.horizon,
+                                status: item.status,
+                                priority: item.priority,
+                                area: item.area,
+                                source: item.source,
+                                link: item.link,
+                                dueOn: item.dueOn,
+                            }}
+                            submitLabel="Save"
+                            busy={busy}
+                            onSubmit={(values) => {
+                                onPatch(item.id, values);
+                                setEditing(false);
+                            }}
+                            onCancel={() => setEditing(false)}
+                        />
+                    ) : (
+                        <HistoryThread item={item} onActivity={onActivity} />
+                    )}
+
+                    <div className="flex flex-wrap gap-2">
+                        {!editing && (
+                            <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
+                                Edit details
+                            </Button>
+                        )}
                         {confirming ? (
                             <>
                                 <Button variant="destructive" size="sm" disabled={busy} onClick={() => onDelete(item.id)}>
@@ -374,6 +556,8 @@ export default function AdminRoadmapTab() {
     const [showClosed, setShowClosed] = useState(false);
     const [kindFilter, setKindFilter] = useState<RoadmapKind | "all">("all");
     const [adding, setAdding] = useState(false);
+    const [activityVersion, setActivityVersion] = useState(0);
+    const bumpActivity = () => setActivityVersion((v) => v + 1);
     const [pending, startTransition] = useTransition();
 
     useEffect(() => {
@@ -408,6 +592,7 @@ export default function AdminRoadmapTab() {
             }
             setItems((prev) => [result.item, ...prev]);
             setAdding(false);
+            bumpActivity();
         });
     };
 
@@ -420,6 +605,7 @@ export default function AdminRoadmapTab() {
                 return;
             }
             setItems((prev) => prev.map((i) => (i.id === id ? result.item : i)));
+            bumpActivity();
         });
     };
 
@@ -432,6 +618,7 @@ export default function AdminRoadmapTab() {
                 return;
             }
             setItems((prev) => prev.filter((i) => i.id !== id));
+            bumpActivity();
         });
     };
 
@@ -497,6 +684,8 @@ export default function AdminRoadmapTab() {
                 </label>
             </section>
 
+            {!notice && <RecentActivity version={activityVersion} />}
+
             {adding && (
                 <section className="rounded-lg border border-input bg-card p-4" data-testid="roadmap-add">
                     <h3 className="mt-0 mb-3 text-sm font-bold">New item</h3>
@@ -528,7 +717,14 @@ export default function AdminRoadmapTab() {
                             ) : (
                                 <ul className="m-0 flex list-none flex-col gap-2 p-0">
                                     {columns[h].map((item) => (
-                                        <ItemRow key={item.id} item={item} busy={pending} onPatch={patch} onDelete={remove} />
+                                        <ItemRow
+                                            key={item.id}
+                                            item={item}
+                                            busy={pending}
+                                            onPatch={patch}
+                                            onDelete={remove}
+                                            onActivity={bumpActivity}
+                                        />
                                     ))}
                                 </ul>
                             )}

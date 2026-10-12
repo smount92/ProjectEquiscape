@@ -202,3 +202,106 @@ export function closedAtFor(next: RoadmapStatus, previous: string | null, now = 
     if (isClosed(next)) return previous ?? now.toISOString();
     return null;
 }
+
+// ── History: notes and recorded changes (migration 231) ──
+
+export type RoadmapEventKind = "created" | "comment" | "change";
+
+/** One field that changed, with both values as display strings (null = empty). */
+export interface FieldChange {
+    field: keyof RoadmapItem;
+    from: string | null;
+    to: string | null;
+}
+
+export interface RoadmapEvent {
+    id: string;
+    itemId: string;
+    kind: RoadmapEventKind;
+    /** The note text for a comment; a short line for created. */
+    body: string;
+    changes: FieldChange[];
+    createdAt: string;
+}
+
+/** A recent-activity row carries its item's title so the stream reads without a lookup. */
+export interface RoadmapEventWithItem extends RoadmapEvent {
+    itemTitle: string;
+}
+
+export const NOTE_MAX = 4000;
+
+const TRACKED_FIELDS: (keyof RoadmapItem)[] = [
+    "title",
+    "detail",
+    "kind",
+    "horizon",
+    "status",
+    "priority",
+    "area",
+    "source",
+    "link",
+    "dueOn",
+];
+
+const FIELD_LABELS: Record<string, string> = {
+    title: "Title",
+    detail: "Detail",
+    kind: "Kind",
+    horizon: "Horizon",
+    status: "Status",
+    priority: "Priority",
+    area: "Area",
+    source: "Source",
+    link: "Link",
+    dueOn: "Due",
+};
+
+/** The value in the words the tab uses, so history reads "Open → Blocked", not "open → blocked". */
+export function displayValue(field: keyof RoadmapItem, value: unknown): string | null {
+    if (value === null || value === undefined || value === "") return null;
+    switch (field) {
+        case "kind":
+            return KIND_LABELS[value as RoadmapKind] ?? String(value);
+        case "horizon":
+            return HORIZON_LABELS[value as RoadmapHorizon] ?? String(value);
+        case "status":
+            return STATUS_LABELS[value as RoadmapStatus] ?? String(value);
+        case "priority":
+            return PRIORITY_LABELS[value as RoadmapPriority] ?? String(value);
+        default:
+            return String(value);
+    }
+}
+
+/** Which tracked fields differ, with display values. Detail is recorded as edited, not quoted. */
+export function diffItem(before: RoadmapItem, after: RoadmapItem): FieldChange[] {
+    const out: FieldChange[] = [];
+    for (const field of TRACKED_FIELDS) {
+        const a = before[field];
+        const b = after[field];
+        if ((a ?? "") === (b ?? "")) continue;
+        if (field === "detail") {
+            out.push({ field, from: null, to: null });
+            continue;
+        }
+        out.push({ field, from: displayValue(field, a), to: displayValue(field, b) });
+    }
+    return out;
+}
+
+/** One change as a line of history. */
+export function describeChange(c: FieldChange): string {
+    const label = FIELD_LABELS[c.field] ?? c.field;
+    if (c.field === "detail") return "Detail edited";
+    if (c.from === null && c.to !== null) return `${label} set to ${c.to}`;
+    if (c.from !== null && c.to === null) return `${label} cleared (was ${c.from})`;
+    return `${label}: ${c.from} → ${c.to}`;
+}
+
+/** The whole event as one line (a comment returns its text). */
+export function describeEvent(e: RoadmapEvent): string {
+    if (e.kind === "comment") return e.body;
+    if (e.kind === "created") return e.body || "Added to the roadmap";
+    return e.changes.map(describeChange).join(" · ") || "Edited";
+}

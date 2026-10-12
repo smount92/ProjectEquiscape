@@ -15,6 +15,9 @@ const actions = vi.hoisted(() => ({
     createRoadmapItem: vi.fn(),
     updateRoadmapItem: vi.fn(),
     deleteRoadmapItem: vi.fn(),
+    listRoadmapEvents: vi.fn(),
+    addRoadmapNote: vi.fn(),
+    listRecentRoadmapEvents: vi.fn(),
 }));
 vi.mock("@/app/actions/admin-roadmap", () => actions);
 
@@ -46,6 +49,8 @@ const ITEMS: RoadmapItem[] = [
 beforeEach(() => {
     vi.clearAllMocks();
     actions.listRoadmap.mockResolvedValue({ success: true, items: ITEMS, schemaReady: true });
+    actions.listRoadmapEvents.mockResolvedValue({ success: true, events: [], schemaReady: true });
+    actions.listRecentRoadmapEvents.mockResolvedValue({ success: true, events: [] });
 });
 
 describe("AdminRoadmapTab", () => {
@@ -120,5 +125,74 @@ describe("AdminRoadmapTab", () => {
         await screen.findByRole("status");
         expect(screen.getByRole("status").textContent).toMatch(/230_roadmap\.sql/);
         expect((screen.getByText("+ Add an item") as HTMLButtonElement).disabled).toBe(true);
+    });
+it("opens the thread under a title: history newest first, and a note is added through the action", async () => {
+        actions.listRoadmapEvents.mockResolvedValue({
+            success: true,
+            schemaReady: true,
+            events: [
+                {
+                    id: "e2",
+                    itemId: "b",
+                    kind: "change",
+                    body: "",
+                    changes: [{ field: "status", from: "Open", to: "In progress" }],
+                    createdAt: "2026-10-12T10:00:00Z",
+                },
+                { id: "e1", itemId: "b", kind: "created", body: "Added to the roadmap", changes: [], createdAt: "2026-10-11T10:00:00Z" },
+            ],
+        });
+        actions.addRoadmapNote.mockResolvedValue({
+            success: true,
+            event: { id: "e3", itemId: "b", kind: "comment", body: "Asked Misty", changes: [], createdAt: "2026-10-12T11:00:00Z" },
+        });
+        render(<AdminRoadmapTab />);
+        fireEvent.click(await screen.findByText("Entries tray"));
+        const thread = await screen.findByTestId("roadmap-history");
+        await waitFor(() => expect(within(thread).getAllByTestId("roadmap-event")).toHaveLength(2));
+        expect(within(thread).getAllByTestId("roadmap-event")[0].textContent).toContain("Status: Open → In progress");
+
+        fireEvent.change(within(thread).getByLabelText("Note on Entries tray"), { target: { value: "Asked Misty" } });
+        fireEvent.click(within(thread).getByText("Add note"));
+        await waitFor(() => expect(actions.addRoadmapNote).toHaveBeenCalledWith("b", "Asked Misty"));
+        await waitFor(() => expect(within(thread).getAllByTestId("roadmap-event")).toHaveLength(3));
+        expect(within(thread).getAllByTestId("roadmap-event")[0].getAttribute("data-kind")).toBe("comment");
+        // The activity stream refetches after a note.
+        await waitFor(() => expect(actions.listRecentRoadmapEvents.mock.calls.length).toBeGreaterThanOrEqual(2));
+    });
+
+    it("shows the recent-activity stream with item titles", async () => {
+        actions.listRecentRoadmapEvents.mockResolvedValue({
+            success: true,
+            events: [
+                {
+                    id: "e9",
+                    itemId: "a",
+                    itemTitle: "Test shows still qualifying",
+                    kind: "change",
+                    body: "",
+                    changes: [{ field: "priority", from: "Should", to: "Must" }],
+                    createdAt: "2026-10-12T10:00:00Z",
+                },
+            ],
+        });
+        render(<AdminRoadmapTab />);
+        const stream = await screen.findByTestId("roadmap-activity");
+        expect(stream.textContent).toContain("Test shows still qualifying");
+        expect(stream.textContent).toContain("Priority: Should → Must");
+    });
+
+    it("says history is waiting on 231 inside the thread when its table is missing", async () => {
+        actions.listRoadmapEvents.mockResolvedValue({
+            success: true,
+            events: [],
+            schemaReady: false,
+            notice: "Roadmap history is not in the database yet — paste supabase/migrations/231_roadmap_events.sql.",
+        });
+        render(<AdminRoadmapTab />);
+        fireEvent.click(await screen.findByText("Entries tray"));
+        const thread = await screen.findByTestId("roadmap-history");
+        await waitFor(() => expect(within(thread).getByRole("status").textContent).toMatch(/231_roadmap_events/));
+        expect(within(thread).queryByText("Add note")).toBeNull();
     });
 });
