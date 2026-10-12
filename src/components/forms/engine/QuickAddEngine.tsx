@@ -25,7 +25,7 @@ import { useRouter } from "next/navigation";
 
 import FocusLayout from "@/components/layouts/FocusLayout";
 import PageMasthead from "@/components/layouts/PageMasthead";
-import UnifiedReferenceSearch from "@/components/UnifiedReferenceSearch";
+import ReferenceLinkerSwitch from "@/components/linker/ReferenceLinkerSwitch";
 import CollectionPicker from "@/components/CollectionPicker";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
@@ -288,7 +288,7 @@ export default function QuickAddEngine() {
                         🔍 The Horse
                     </LeafHeading>
 
-                    <UnifiedReferenceSearch
+                    <ReferenceLinkerSwitch
                         finishType={String(form.values.finish_type ?? "") || null}
                         selectedCatalogId={reference?.id ?? null}
                         onCatalogSelect={(_id, item) => {

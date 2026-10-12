@@ -25,7 +25,7 @@ import { useParams, useRouter } from "next/navigation";
 import FocusLayout from "@/components/layouts/FocusLayout";
 import PageMasthead from "@/components/layouts/PageMasthead";
 import CollectionPicker from "@/components/CollectionPicker";
-import UnifiedReferenceSearch from "@/components/UnifiedReferenceSearch";
+import ReferenceLinkerSwitch from "@/components/linker/ReferenceLinkerSwitch";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { createClient } from "@/lib/supabase/client";
@@ -472,7 +472,7 @@ export default function EditHorseEngine() {
                         <LeafHeading note="Changing an identity is recorded on this horse's Hoofprint — provenance is not quietly rewritable.">
                             Reference Link
                         </LeafHeading>
-                        <UnifiedReferenceSearch
+                        <ReferenceLinkerSwitch
                             finishType={String(form.values.finish_type ?? "") || null}
                             selectedCatalogId={(form.values.catalog_id as string) ?? null}
                             onCatalogSelect={(id, item) => {

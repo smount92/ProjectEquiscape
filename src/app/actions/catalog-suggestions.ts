@@ -1186,6 +1186,11 @@ async function applyApprovedSuggestion(
         // undefined: a bad value costs the field, never the whole approval.
         const runCount = normalizeRunCount(fc.run_count);
         const breed = normalizeCatalogBreed(fc.breed);
+        // The reference linker (2026-10) files a release with the id of
+        // the mold the member was looking at. Honour it: the release is
+        // filed under that mold and inherits its scale, which is the one
+        // thing this path never did (517 orphan releases say so).
+        const parentId = await resolveParentMold(admin, fc.parent_catalog_id, itemType);
         const insertPayload = {
             item_type: itemType,
             title: (fc.title ?? fc.mold_name ?? "Untitled") as string,
@@ -1194,7 +1199,8 @@ async function applyApprovedSuggestion(
             manufacturer: attribution.manufacturer,
             // Scales enter in canonical vocabulary; normalize defensively
             // (older pending suggestions carry bare "Traditional" etc.).
-            scale: normalizeScale(fc.scale as string | undefined),
+            scale: normalizeScale(fc.scale as string | undefined) ?? parentId?.scale ?? null,
+            ...(parentId ? { parent_id: parentId.id } : {}),
             attributes: JSON.parse(JSON.stringify({
                 ...(fc.year ? { release_year_start: fc.year } : {}),
                 ...(fc.color ? { color_description: fc.color } : {}),
@@ -1224,6 +1230,7 @@ async function applyApprovedSuggestion(
                 // this used to be dropped on apply. Kept as an attribute so
                 // admins can wire parent_id from it later.
                 ...(fc.mold_name && fc.title ? { mold_name: fc.mold_name } : {}),
+                ...(typeof fc.set_name === "string" && fc.set_name.trim() ? { set_name: fc.set_name.trim() } : {}),
             })),
         };
         const { data: newItem, error: insertError } = await admin
@@ -1500,4 +1507,22 @@ export async function suggestArtistNotes(input: {
 
     revalidatePath("/catalog/suggestions");
     return { success: true };
+}
+
+/**
+ * A release filed with `parent_catalog_id` (the reference linker) is
+ * filed under that mold when the id names a plastic mold that exists.
+ * Anything else, including a stale id, falls back to no parent and the
+ * mold_name attribute, as before.
+ */
+async function resolveParentMold(
+    admin: ReturnType<typeof getAdminClient>,
+    raw: unknown,
+    itemType: string,
+): Promise<{ id: string; scale: string | null } | null> {
+    if (itemType !== "plastic_release" || typeof raw !== "string") return null;
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(raw)) return null;
+    const { data } = await admin.from("catalog_items").select("id, scale").eq("id", raw).eq("item_type", "plastic_mold").maybeSingle();
+    if (!data) return null;
+    return { id: (data as { id: string }).id, scale: ((data as { scale: string | null }).scale ?? null) };
 }

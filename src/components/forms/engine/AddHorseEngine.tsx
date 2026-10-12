@@ -21,7 +21,7 @@ import { Camera, Link2, Tag, Lock, ScrollText } from "lucide-react";
 
 import FocusLayout from "@/components/layouts/FocusLayout";
 import PageMasthead from "@/components/layouts/PageMasthead";
-import UnifiedReferenceSearch from "@/components/UnifiedReferenceSearch";
+import ReferenceLinkerSwitch from "@/components/linker/ReferenceLinkerSwitch";
 import CollectionPicker from "@/components/CollectionPicker";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
@@ -490,7 +490,7 @@ export default function AddHorseEngine() {
 
                     {reference && <ReferenceCard item={reference} />}
 
-                    <UnifiedReferenceSearch
+                    <ReferenceLinkerSwitch
                         finishType={String(form.values.finish_type ?? "") || null}
                         selectedCatalogId={(form.values.catalog_id as string) ?? null}
                         onCatalogSelect={(id, item) => {
