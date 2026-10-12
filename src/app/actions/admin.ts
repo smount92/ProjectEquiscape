@@ -1381,6 +1381,12 @@ const PENDING_MIGRATIONS: MigrationSpec[] = [
     },
   },
   {
+    id: "230",
+    title: "Roadmap",
+    summary: "Creates roadmap_items (the owners' goals, problems and chores shown on the Roadmap tab) with the first backlog seeded; service role only.",
+    probe: { kind: "column", table: "roadmap_items", column: "id" },
+  },
+  {
     id: "229",
     title: "Profile links",
     summary: "Adds users.links (outbound links a member shows on their profile) and grants the column to readers.",
@@ -1429,8 +1435,10 @@ export async function getMigrationStatus(): Promise<
       const { error } = await admin.from(m.probe.table).select(m.probe.column).limit(1);
       if (!error) return true;
       const code = (error as { code?: string }).code;
-      // 42703 undefined_column, 42P01 undefined_table, PGRST204 schema cache.
-      if (code === "42703" || code === "42P01" || code === "PGRST204") return false;
+      // 42703 undefined_column, 42P01 undefined_table, PGRST204 column
+      // and PGRST205 table missing from the schema cache (a never-created
+      // table answers PGRST205, not 42P01).
+      if (code === "42703" || code === "42P01" || code === "PGRST204" || code === "PGRST205") return false;
       return null;
     })
   );

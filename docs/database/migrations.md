@@ -239,6 +239,7 @@ See [Adding a Migration](../guides/adding-a-migration.md) for the full guide.
 | 227 | _(reserved)_ | Owner-pasted backfill decoding `&amp;`-style entities in plain-text columns (groups, posts, messages, external_shows, catalog_suggestions.reason); see commit for the SQL shape. |
 | 228 | `228_duplicate_suggestions.sql` | Widens catalog_suggestions.suggestion_type and catalog_changelog.change_type CHECKs to include 'duplicate' (member duplicate reports → admin-approved merge). |
 | 229 | `229_member_links.sql` | users.links JSONB (outbound links a member shows on their profile: facebook, instagram, website, feedback) + column SELECT grant to anon/authenticated. |
+| 230 | `230_roadmap.sql` | roadmap_items — the owners' goals, problems, ideas and chores with horizon, status, priority; RLS on with no policies, revoked from API roles (service role only, Admin → Roadmap tab); seeds the 2026-10-12 backlog. |
 
 ---
 
