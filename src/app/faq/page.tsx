@@ -26,6 +26,7 @@
  */
 
 import Link from "next/link";
+import { registryClaimLive } from "@/lib/stats/registryClaimLive";
 import type { Metadata } from "next";
 import {
     BRONZE_THRESHOLD,
@@ -96,7 +97,7 @@ const FAQ_SECTIONS: FaqSection[] = [
             },
             {
                 q: "Can I import a collection I already keep in a spreadsheet?",
-                a: "Yes. Upload your spreadsheet and each row is fuzzy-matched against the 10,500+ entry reference catalog. You review and confirm the matches before anything is saved, so a bad guess never quietly becomes your data. Most people get a whole collection in during one afternoon.",
+                a: "Yes. Upload your spreadsheet and each row is fuzzy-matched against the {{registry}} entry reference catalog. You review and confirm the matches before anything is saved, so a bad guess never quietly becomes your data. Most people get a whole collection in during one afternoon.",
                 links: [{ href: "/stable/import", label: "Import a spreadsheet" }],
             },
             {
@@ -226,7 +227,7 @@ const FAQ_SECTIONS: FaqSection[] = [
             },
             {
                 q: "What is the Blue Book?",
-                a: "The price guide: average, median and range of what a model has actually sold for, drawn from completed sales recorded on this site rather than from asking prices. It spans the whole 10,500+ item catalog, but the figures come from the sales members have recorded so far, and every model says how many that is. Where a model has no recorded sale yet, the guide shows current eBay asking prices and labels them as asking prices, not sales. It's free for everyone and is never going behind the paid tier. One honest caveat: because money moves off-platform, the sale prices are what buyer and seller reported.",
+                a: "The price guide: average, median and range of what a model has actually sold for, drawn from completed sales recorded on this site rather than from asking prices. It spans the whole {{registry}} item catalog, but the figures come from the sales members have recorded so far, and every model says how many that is. Where a model has no recorded sale yet, the guide shows current eBay asking prices and labels them as asking prices, not sales. It's free for everyone and is never going behind the paid tier. One honest caveat: because money moves off-platform, the sale prices are what buyer and seller reported.",
                 links: [{ href: "/market/guide", label: "Open the Blue Book" }],
             },
             {
@@ -354,7 +355,8 @@ const faqJsonLd = {
     ),
 };
 
-export default function FaqPage() {
+export default async function FaqPage() {
+    const registry = await registryClaimLive();
     return (
         <ExplorerLayout noHeader>
             <script
@@ -419,7 +421,7 @@ export default function FaqPage() {
                                             </span>
                                         </summary>
                                         <div className="text-secondary-foreground pt-2 text-[0.95rem] leading-[1.75]">
-                                            <p className="m-0">{item.a}</p>
+                                            <p className="m-0">{item.a.split("{{registry}}").join(registry)}</p>
                                             {item.links && (
                                                 <p className="m-0 mt-2 flex flex-wrap gap-x-5 gap-y-1">
                                                     {item.links.map((link) => (

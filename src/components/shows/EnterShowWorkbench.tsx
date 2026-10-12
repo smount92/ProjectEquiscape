@@ -16,6 +16,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { UserTier } from "@/lib/auth";
 
 import { enterClassBatch } from "@/app/actions/shows-v2";
 import { track } from "@/lib/analytics";
@@ -46,6 +47,8 @@ interface EnterShowWorkbenchProps {
     show: Pick<PublicShow, "id" | "title" | "mode">;
     divisions: ConsoleDivision[];
     myEntries: MyShowEntry[];
+    /** For the Done view's tag printer; null = unknown/hidden. */
+    viewerTier?: UserTier | null;
     horses: EntrantHorse[];
     initialClassId?: string | null;
     initialHorseId?: string | null;
@@ -63,6 +66,7 @@ export default function EnterShowWorkbench({
     show,
     divisions,
     myEntries: initialEntries,
+    viewerTier = null,
     horses,
     initialClassId = null,
     initialHorseId = null,
@@ -344,6 +348,7 @@ export default function EnterShowWorkbench({
             {done || !current ? (
                 <DoneView
                     showId={show.id}
+                    viewerTier={viewerTier}
                     ledger={ledger}
                     myEntries={myEntries}
                     onKeepEntering={

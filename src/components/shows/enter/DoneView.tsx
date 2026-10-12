@@ -6,6 +6,8 @@
  */
 
 import Link from "next/link";
+import PrintTagsLink from "@/components/shows/PrintTagsLink";
+import type { UserTier } from "@/lib/auth";
 
 import { classLabel, type EntrantLedger } from "@/lib/shows/entrantLedger";
 import type { MyShowEntry } from "@/lib/shows/public";
@@ -17,9 +19,11 @@ interface DoneViewProps {
     myEntries: MyShowEntry[];
     /** null when nothing has room left. */
     onKeepEntering: (() => void) | null;
+    /** The viewer's tier for the Pro-gated tag printer; null hides it. */
+    viewerTier?: UserTier | null;
 }
 
-export default function DoneView({ showId, ledger, myEntries, onKeepEntering }: DoneViewProps) {
+export default function DoneView({ showId, ledger, myEntries, onKeepEntering, viewerTier = null }: DoneViewProps) {
     const live = myEntries.filter((e) => e.status !== "scratched");
     const byHorse = new Map<string, { name: string; classIds: string[] }>();
     for (const e of live) {
@@ -67,6 +71,7 @@ export default function DoneView({ showId, ledger, myEntries, onKeepEntering }: 
                         Keep entering
                     </Button>
                 )}
+                {live.length > 0 && <PrintTagsLink showId={showId} tier={viewerTier} />}
             </div>
         </section>
     );

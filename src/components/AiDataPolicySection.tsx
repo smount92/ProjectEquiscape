@@ -1,4 +1,7 @@
-export default function AiDataPolicySection() {
+import { registryClaimLive } from "@/lib/stats/registryClaimLive";
+
+export default async function AiDataPolicySection() {
+    const registry = await registryClaimLive();
  return (
  <section className="mb-12" id="ai-data-policy">
  <h2>🤖 AI, Data Collection, and Copyright Policy</h2>
@@ -28,7 +31,7 @@ export default function AiDataPolicySection() {
    2. Did you use AI to scrape other hobby websites?
   </h3>
   <p className="text-base leading-relaxed text-secondary-foreground">
-   <strong>No.</strong> Our reference catalog of 10,500+ models was built using
+   <strong>No.</strong> Our reference catalog of {registry} models was built using
    traditional, standard data-gathering scripts, not AI scrapers.
   </p>
   </div>

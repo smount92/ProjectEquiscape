@@ -27,6 +27,8 @@ import ShowEntriesPanel from "@/components/shows/ShowEntriesPanel";
 import ShowSettingsForm from "@/components/shows/ShowSettingsForm";
 import ShowStaffPanel from "@/components/shows/ShowStaffPanel";
 import ShowStatusCard from "@/components/shows/ShowStatusCard";
+import PrintTagsLink from "@/components/shows/PrintTagsLink";
+import type { UserTier } from "@/lib/auth";
 import { useShowToast } from "@/components/shows/useShowToast";
 
 type TabKey = "overview" | "classlist" | "staff" | "entries" | "settings";
@@ -41,7 +43,7 @@ const TABS: { key: TabKey; label: string }[] = [
 
 const TAB_KEYS = TABS.map((t) => t.key);
 
-export default function ShowConsole({ data }: { data: ShowConsoleData }) {
+export default function ShowConsole({ data, viewerTier = null }: { data: ShowConsoleData; viewerTier?: UserTier | null }) {
     const {
         show,
         viewerId,
@@ -200,6 +202,8 @@ export default function ShowConsole({ data }: { data: ShowConsoleData }) {
                     <ShowStaffPanel showId={show.id} staff={staff} viewerRole={viewerRole} />
                 )}
                 {activeTab === "entries" && (
+                    <>
+                    {canManage && <PrintTagsLink showId={show.id} all tier={viewerTier} className="mb-3" />}
                     <ShowEntriesPanel
                         showId={show.id}
                         divisions={divisions}
@@ -212,6 +216,7 @@ export default function ShowConsole({ data }: { data: ShowConsoleData }) {
                         viewerRole={viewerRole}
                         viewerId={viewerId}
                     />
+                    </>
                 )}
                 {activeTab === "settings" && canManage && <ShowSettingsForm show={show} />}
             </div>

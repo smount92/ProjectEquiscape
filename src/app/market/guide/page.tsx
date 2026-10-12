@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { registryClaimLive, withRegistryClaim } from "@/lib/stats/registryClaimLive";
 import { Suspense } from "react";
 import type { Metadata } from "next";
 
@@ -25,10 +26,10 @@ import { referenceHref } from "@/lib/catalog/referenceUrl";
  * /market carrying guide-only params.
  */
 
-export const metadata: Metadata = {
+const metadataTemplate: Metadata = {
     title: "Model Horse Price Guide — The Blue Book",
     description:
-        "Real sale prices for 10,500+ model horses. Search Breyer, Stone, and artist resin values based on actual completed Model Horse Hub transactions. Free.",
+        "Real sale prices for {{registry}} model horses. Search Breyer, Stone, and artist resin values based on actual completed Model Horse Hub transactions. Free.",
     alternates: { canonical: "/market/guide" },
 };
 
@@ -295,4 +296,9 @@ export default async function BlueBookPage({
             </div>
         </ExplorerLayout>
     );
+}
+
+/** The Registry claim in the description is the live count (lib/stats/registryClaim). */
+export async function generateMetadata(): Promise<Metadata> {
+    return withRegistryClaim(metadataTemplate, await registryClaimLive());
 }

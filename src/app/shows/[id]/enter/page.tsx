@@ -13,6 +13,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { getMyEntrantHorses, getMyShowEntries, getPublicShow } from "@/app/actions/shows-v2";
 import { getShowRole } from "@/lib/shows/queries";
+import { getUserTier } from "@/lib/auth";
 import type { EntrantHorse, MyShowEntry } from "@/lib/shows/public";
 import { createClient } from "@/lib/supabase/server";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
@@ -88,11 +89,13 @@ export default async function EnterShowPage({
 
     const myEntries: MyShowEntry[] = entriesResult.success ? entriesResult.entries : [];
     const horses: EntrantHorse[] = horsesResult?.success ? horsesResult.horses : [];
+    const viewerTier = await getUserTier();
 
     return (
         <ExplorerLayout frameless noHeader>
             {masthead}
             <EnterShowWorkbench
+                viewerTier={viewerTier}
                 show={{ id: show.id, title: show.title, mode: show.mode }}
                 divisions={divisions}
                 myEntries={myEntries}

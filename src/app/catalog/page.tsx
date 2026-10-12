@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { registryClaimLive, withRegistryClaim } from "@/lib/stats/registryClaimLive";
 import type { Metadata } from "next";
 import Link from "next/link";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
@@ -24,10 +25,10 @@ import {
 } from "@/lib/catalog/filterParams";
 import { sortScalesBySize } from "@/lib/catalog/taxonomy";
 
-export const metadata: Metadata = {
+const metadataTemplate: Metadata = {
     title: "Reference Catalog",
     description:
-        "Browse 10,500+ model horse reference entries. Search by name, maker, mold, and scale. Community-maintained catalog for Breyer, Stone, and Artist Resins.",
+        "Browse {{registry}} model horse reference entries. Search by name, maker, mold, and scale. Community-maintained catalog for Breyer, Stone, and Artist Resins.",
 };
 
 const PAGE_SIZE = 50;
@@ -441,4 +442,9 @@ export default async function ReferencePage({
             </div>
         </ExplorerLayout>
     );
+}
+
+/** The Registry claim in the description is the live count (lib/stats/registryClaim). */
+export async function generateMetadata(): Promise<Metadata> {
+    return withRegistryClaim(metadataTemplate, await registryClaimLive());
 }

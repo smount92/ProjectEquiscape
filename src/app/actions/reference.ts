@@ -151,7 +151,7 @@ function mapCatalogRow(row: Record<string, unknown>): CatalogItem {
 
 /**
  * Fuzzy search catalog items using trigram similarity (server-side).
- * Much lighter than fetching all 10,500+ rows for client-side matching.
+ * Much lighter than fetching every catalog row for client-side matching.
  * @param term - Search term to fuzzy-match against catalog names
  * @param maxResults - Maximum number of results (default 20)
  */

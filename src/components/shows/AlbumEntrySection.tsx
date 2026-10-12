@@ -13,6 +13,8 @@
  */
 
 import { useCallback, useMemo, useState } from "react";
+import PrintTagsLink from "@/components/shows/PrintTagsLink";
+import type { UserTier } from "@/lib/auth";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -50,6 +52,8 @@ interface AlbumEntrySectionProps {
     showYear?: number | null;
     /** Whether the show is MHH-sanctioned; gates the card-gate badge. */
     showIsQualifying?: boolean;
+    /** The viewer's tier, for the Pro-gated tag printer (null = signed out). */
+    viewerTier?: UserTier | null;
 }
 
 export default function AlbumEntrySection({
@@ -61,6 +65,7 @@ export default function AlbumEntrySection({
     showIsQualifying,
     myEntries,
     horses,
+    viewerTier = null,
     authed,
 }: AlbumEntrySectionProps) {
     const router = useRouter();
@@ -137,6 +142,9 @@ export default function AlbumEntrySection({
                     onReenter={(cls) => router.push(`/shows/${showId}/enter?class=${cls.id}`)}
                     showId={showId}
                 />
+            )}
+            {authed && myEntries.some((e) => e.status !== "scratched") && (
+                <PrintTagsLink showId={showId} tier={viewerTier} />
             )}
 
             {entriesOpen && !authed && (

@@ -18,6 +18,7 @@
  */
 
 import Link from "next/link";
+import { getUserTier } from "@/lib/auth";
 import { focusChips, focusFromConsole } from "@/lib/shows/focus";
 import HandlerBanner from "@/components/shows/HandlerBanner";
 import { notFound } from "next/navigation";
@@ -104,6 +105,7 @@ export default async function AlbumShowPage({ showId }: { showId: string }) {
     if (championsResult?.success) champions = championsResult.champions;
 
     const liveEntryCount = myEntries.filter((e) => e.status !== "scratched").length;
+    const viewerTier = user ? await getUserTier() : null;
 
     return (
         <ExplorerLayout frameless noHeader>
@@ -224,6 +226,7 @@ export default async function AlbumShowPage({ showId }: { showId: string }) {
                         myEntries={myEntries}
                         horses={horses}
                         authed={!!user}
+                        viewerTier={viewerTier}
                         showYear={show.showYear}
                     showIsQualifying={show.isMhhQualifying}
                     />

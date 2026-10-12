@@ -1,4 +1,5 @@
 import type { Metadata } from"next";
+import { registryClaimLive, withRegistryClaim } from "@/lib/stats/registryClaimLive";
 import { Inter, Playfair_Display } from"next/font/google";
 import Script from"next/script";
 import"./globals.css";
@@ -21,7 +22,7 @@ import { cn } from "@/lib/utils";
 
 const GA_MEASUREMENT_ID ="G-7DWKBT1JV9";
 
-export const metadata: Metadata = {
+const metadataTemplate: Metadata = {
  title: {
  default:"Model Horse Hub — Your Digital Stable",
  template:"%s",
@@ -34,7 +35,7 @@ export const metadata: Metadata = {
  siteName:"Model Horse Hub",
  title:"Model Horse Hub — Your Digital Stable",
  description:
-"The all-in-one platform for model horse collectors and artists. 10,500+ reference releases, Hoofprint provenance, LSQ photography, private financial vault, and community marketplace.",
+"The all-in-one platform for model horse collectors and artists. {{registry}} reference releases, Hoofprint provenance, LSQ photography, private financial vault, and community marketplace.",
  locale:"en_US",
   images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Model Horse Hub" }],
  },
@@ -42,7 +43,7 @@ export const metadata: Metadata = {
  card:"summary",
  title:"Model Horse Hub — Your Digital Stable",
  description:
-"The all-in-one platform for model horse collectors and artists. 10,500+ reference releases, Hoofprint provenance, and community marketplace.",
+"The all-in-one platform for model horse collectors and artists. {{registry}} reference releases, Hoofprint provenance, and community marketplace.",
  },
  robots: {
  index: true,
@@ -133,4 +134,9 @@ export default function RootLayout({
  </body>
  </html>
  );
+}
+
+/** The Registry claim in the description is the live count (lib/stats/registryClaim). */
+export async function generateMetadata(): Promise<Metadata> {
+    return withRegistryClaim(metadataTemplate, await registryClaimLive());
 }

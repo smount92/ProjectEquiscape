@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 
 import { getShowConsole } from "@/app/actions/shows-v2";
+import { getUserTier } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import CommandCenterLayout from "@/components/layouts/CommandCenterLayout";
 import ShowConsole from "@/components/shows/ShowConsole";
@@ -31,6 +32,7 @@ export default async function ShowConsolePage({
     if (!result.success) notFound();
 
     const { console: data } = result;
+    const viewerTier = await getUserTier();
 
     return (
         <CommandCenterLayout
@@ -40,7 +42,7 @@ export default async function ShowConsolePage({
                     ? "Live show console — build the classlist, staff the rings, run the day."
                     : "Online show console — build the classlist, staff the judging, watch entries."
             }
-            mainContent={<ShowConsole data={data} />}
+            mainContent={<ShowConsole data={data} viewerTier={viewerTier} />}
         />
     );
 }

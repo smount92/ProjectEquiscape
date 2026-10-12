@@ -1,14 +1,15 @@
 import { createClient } from"@/lib/supabase/server";
+import { registryClaimLive, withRegistryClaim } from "@/lib/stats/registryClaimLive";
 import { redirect } from"next/navigation";
 import Link from"next/link";
 import type { Metadata } from"next";
 import CsvImport from"@/components/CsvImport";
 import { Button } from "@/components/ui/button";
 
-export const metadata: Metadata = {
+const metadataTemplate: Metadata = {
  title:"Batch CSV Import",
  description:
-"Import your model horse collection from a CSV spreadsheet. Fuzzy-match against 10,500+ reference releases and artist resins, review matches, and bulk import.",
+"Import your model horse collection from a CSV spreadsheet. Fuzzy-match against {{registry}} reference releases and artist resins, review matches, and bulk import.",
 };
 
 export default async function ImportPage() {
@@ -50,4 +51,9 @@ export default async function ImportPage() {
   </div>
  </div>
  );
+}
+
+/** The Registry claim in the description is the live count (lib/stats/registryClaim). */
+export async function generateMetadata(): Promise<Metadata> {
+    return withRegistryClaim(metadataTemplate, await registryClaimLive());
 }

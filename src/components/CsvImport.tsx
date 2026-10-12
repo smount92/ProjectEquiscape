@@ -426,8 +426,8 @@ export default function CsvImport() {
  <div className="animate-fade-in-up mx-auto max-w-[900px]">
  <h2>📄 Upload Your CSV</h2>
  <p className="mb-8 text-base leading-[1.6] text-muted-foreground">
- Export your spreadsheet as CSV and upload it here. We&apos;ll match your models against our
- 10,500+ reference database.
+ Export your spreadsheet as CSV and upload it here. We&apos;ll match your models against the
+ Registry.
  </p>
 
  <div

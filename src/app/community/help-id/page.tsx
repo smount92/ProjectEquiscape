@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { registryClaimLive, withRegistryClaim } from "@/lib/stats/registryClaimLive";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -19,10 +20,10 @@ import PageMasthead from "@/components/layouts/PageMasthead";
  * for status, which is how every other queue on the Hub reads.
  */
 
-export const metadata: Metadata = {
+const metadataTemplate: Metadata = {
     title: "Help Me ID This Model",
     description:
-        "Can't identify a model horse? Upload a photo and let the community help! Our collectors can identify from 10,500+ reference releases and artist resins.",
+        "Can't identify a model horse? Upload a photo and let the community help! Our collectors can identify from {{registry}} reference releases and artist resins.",
 };
 
 interface HelpIdRequest {
@@ -244,4 +245,9 @@ export default async function HelpIdPage() {
             )}
         </ExplorerLayout>
     );
+}
+
+/** The Registry claim in the description is the live count (lib/stats/registryClaim). */
+export async function generateMetadata(): Promise<Metadata> {
+    return withRegistryClaim(metadataTemplate, await registryClaimLive());
 }
