@@ -115,10 +115,11 @@ function ReleaseRow({
     const [filling, setFilling] = useState<MissingFact | null>(null);
     const gaps = missingFacts(release);
     const years = yearsLabel(release);
-    const showTitle = !release.setName && !release.look && release.title !== (mold?.title ?? "");
+    // A release with its own name ("Montana Harvest", "T-Bone") says so; the mold's name and set titles are already on screen.
+    const showTitle = !release.setName && release.title.trim().toLowerCase() !== (mold?.title ?? "").trim().toLowerCase();
     return (
         <li
-            className={`grid grid-cols-[44px_1fr_auto] items-center gap-3 border-t border-input px-4 py-2.5 ${selected ? "bg-forest/5" : ""}`}
+            className={`grid grid-cols-[44px_1fr_auto] items-center gap-3 border-t border-input px-4 py-2.5 ${selected ? "bg-forest/5" : release.hit ? "bg-amber-500/5" : ""}`}
             data-testid="linker-release"
             data-release-id={release.id}
         >
@@ -132,6 +133,7 @@ function ReleaseRow({
                     {years ?? <span className="text-amber-700 dark:text-amber-400">year not recorded</span>}
                     {release.run ? ` · ${release.run}` : ""}
                     {showTitle ? ` · ${release.title}` : ""}
+                    {release.hit ? <span className="ml-1 rounded bg-amber-500/15 px-1.5 text-[0.65rem] font-bold text-amber-800 uppercase dark:text-amber-300">matches your search</span> : null}
                 </div>
                 {release.setName && <div className="text-xs text-muted-foreground/80">from the {release.setName}</div>}
                 {gaps.length > 0 && !filling && (
@@ -472,6 +474,7 @@ export default function ReferenceLinker({ selectedCatalogId, onCatalogSelect, fi
                                             <div className="font-serif font-bold text-foreground">{m.title}</div>
                                             <div className="text-xs text-secondary-foreground">
                                                 {identityLine({ ...m, sculptor: null })} · {m.releaseCount} release{m.releaseCount === 1 ? "" : "s"}
+                                                {m.hitTitle ? ` · has ${m.hitTitle}` : ""}
                                             </div>
                                         </div>
                                         <Button type="button" size="sm" variant="outline" onClick={() => chooseScale(m.scale ?? "any")}>

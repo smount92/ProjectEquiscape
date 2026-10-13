@@ -81,6 +81,10 @@ describe("linker model", () => {
             rel({ id: "nonumber", look: "dun", from: 1980 }),
         ]);
         expect(ordered.map((r) => r.id)).toEqual(["regular", "early", "later", "nonumber", "nocolour", "set"]);
+        // A release whose own name was typed leads its group, even a set piece.
+        const withHit = orderReleases([rel({ id: "regular", look: "chestnut", run: "Regular Run" }), rel({ id: "named", look: "bay", hit: true, setName: "Gift set" })]);
+        expect(withHit.map((r) => r.id)).toEqual(["named", "regular"]);
+        expect(commonOne([rel({ id: "hit", look: "bay", model: "9", hit: true }), rel({ id: "first", look: "grey", model: "1", from: 1980 })])).toBe("first");
         expect(commonOne(ordered)).toBe("regular");
         expect(commonOne([rel({ id: "a", look: "bay", model: "1" }), rel({ id: "b" })])).toBe("a");
         expect(commonOne([rel({ id: "b" })])).toBeNull();

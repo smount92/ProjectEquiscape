@@ -134,7 +134,7 @@ async function ownersOf(supabase: Client, moldId: string): Promise<number | null
 }
 
 /** A mold's own releases plus the set rows on other molds whose title names it. */
-async function expandMold(supabase: Client, mold: Row): Promise<LinkerMold> {
+async function expandMold(supabase: Client, mold: Row, hitIds: Set<string> = new Set()): Promise<LinkerMold> {
     const [{ data: own }, { data: sets }, owners] = await Promise.all([
         supabase.from("catalog_items").select(COLS).eq("parent_id", mold.id).eq("item_type", "plastic_release").limit(400),
         supabase
@@ -153,8 +153,8 @@ async function expandMold(supabase: Client, mold: Row): Promise<LinkerMold> {
     const photos = await photosFor(supabase, [...ownRows, ...setRows].map((r) => r.id));
     const releases = collapseSetPieces(
         orderReleases([
-            ...ownRows.map((r) => toRelease(r, false, photos)),
-            ...setRows.map((r) => ({ ...toRelease(r, true, photos), look: null })),
+            ...ownRows.map((r) => ({ ...toRelease(r, false, photos), hit: hitIds.has(r.id) })),
+            ...setRows.map((r) => ({ ...toRelease(r, true, photos), look: null, hit: hitIds.has(r.id) })),
         ]),
     );
     const a = mold.attributes ?? {};
@@ -238,7 +238,13 @@ export async function searchLinker(rawTerm: string, scale: string | null): Promi
     }
 
     const termLower = stripGeneration(term).toLowerCase();
-    const named = (r: Row) => titleMatches(r.title, termLower);
+    // A release whose own name matches ("Montana Harvest") pulls its mold in,
+    // with that release leading the group; the mold's name need not match.
+    const hitReleases = rows.filter((r) => r.item_type === "plastic_release" && r.parent_id && titleMatches(r.title, termLower));
+    const hitIds = new Set(hitReleases.map((r) => r.id));
+    const viaRelease = new Map<string, string>();
+    for (const r of hitReleases) if (!viaRelease.has(r.parent_id as string)) viaRelease.set(r.parent_id as string, r.title);
+    const named = (r: Row) => titleMatches(r.title, termLower) || viaRelease.has(r.id);
     const allMolds = rows.filter((r) => r.item_type === "plastic_mold");
     // Named matches first; when nothing is named, the three closest names so the member is not stranded.
     const moldPool = allMolds.some(named) ? allMolds.filter(named) : allMolds.slice(0, 3);
@@ -252,7 +258,7 @@ export async function searchLinker(rawTerm: string, scale: string | null): Promi
     const outScale = chosen ? molds.filter((m) => !scaleMatches(m.scale, chosen)).slice(0, 12) : [];
 
     const [expanded, counts] = await Promise.all([
-        Promise.all(inScale.map((m) => expandMold(supabase, m))),
+        Promise.all(inScale.map((m) => expandMold(supabase, m, hitIds))),
         releaseCounts(supabase, outScale.map((m) => m.id)),
     ]);
     const marked = markAmbiguous(expanded);
@@ -269,7 +275,7 @@ export async function searchLinker(rawTerm: string, scale: string | null): Promi
     return {
         ...empty,
         molds: marked,
-        otherScales: outScale.map((m) => toSummary(m, counts.get(m.id) ?? 0)),
+        otherScales: outScale.map((m) => ({ ...toSummary(m, counts.get(m.id) ?? 0), ...(viaRelease.has(m.id) ? { hitTitle: viaRelease.get(m.id) } : {}) })),
         others,
     };
 }

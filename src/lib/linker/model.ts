@@ -31,6 +31,8 @@ export interface LinkerRelease {
     setName: string | null;
     /** True when this row hangs on ANOTHER mold but its set title names this one. */
     isSetPiece: boolean;
+    /** True when this release's own name is what the member typed. It leads its group. */
+    hit?: boolean;
     /** A member's photo of a horse on this release, when one exists. */
     photo: string | null;
     scale: string | null;
@@ -62,6 +64,8 @@ export interface LinkerMoldSummary {
     generation: string | null;
     year: number | null;
     releaseCount: number;
+    /** The release name that matched the search, when the mold was reached through one. */
+    hitTitle?: string;
     href: string;
 }
 
@@ -204,6 +208,7 @@ function isRegular(run: string | null): boolean {
  */
 export function orderReleases(list: LinkerRelease[]): LinkerRelease[] {
     const rank = (r: LinkerRelease) => [
+        r.hit ? 0 : 1,
         r.isSetPiece || r.setName ? 1 : 0,
         r.look ? 0 : 1,
         isRegular(r.run) ? 0 : 1,
@@ -248,7 +253,8 @@ export function collapseSetPieces(list: LinkerRelease[]): (LinkerRelease & { cop
 
 /** Which is "the common one": the regular run, else the earliest row that has a colour and a number. */
 export function commonOne(list: LinkerRelease[]): string | null {
-    const ordered = orderReleases(list).filter((r) => !r.isSetPiece && !r.setName);
+    // A search hit sorts first, but being searched for does not make it the common release.
+    const ordered = orderReleases(list.map((r) => ({ ...r, hit: false }))).filter((r) => !r.isSetPiece && !r.setName);
     const reg = ordered.find((r) => isRegular(r.run));
     if (reg) return reg.id;
     const first = ordered.find((r) => r.look && r.model);
