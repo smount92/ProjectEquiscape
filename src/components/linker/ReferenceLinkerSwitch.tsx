@@ -63,7 +63,12 @@ export default function ReferenceLinkerSwitch(props: Props) {
                 )}
             </div>
             {pref === "new" ? (
-                <ReferenceLinker selectedCatalogId={props.selectedCatalogId} onCatalogSelect={props.onCatalogSelect} finishType={props.finishType} />
+                <ReferenceLinker
+                    selectedCatalogId={props.selectedCatalogId}
+                    onCatalogSelect={props.onCatalogSelect}
+                    finishType={props.finishType}
+                    onCustomEntry={props.onCustomEntry}
+                />
             ) : (
                 <UnifiedReferenceSearch {...props} />
             )}

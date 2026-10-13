@@ -29,6 +29,8 @@ import {
     type MissingFact,
 } from "@/lib/linker/model";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import SuggestNewEntryForm from "@/components/SuggestNewEntryForm";
 import { useLocalPref } from "@/lib/linker/prefs";
 
 const SCALE_KEY = "mhh:linker-scale";
@@ -39,6 +41,8 @@ export interface ReferenceLinkerProps {
     onCatalogSelect: (catalogId: string | null, item: CatalogItem | null) => void;
     /** The finish declared on the horse form; changes the help line, never the list. */
     finishType?: string | null;
+    /** After "Suggest an entry" is filed: the host names the horse after it, as the old picker does. */
+    onCustomEntry?: (searchTerm: string) => void;
 }
 
 function Chip({ on, children, onClick, testid }: { on: boolean; children: React.ReactNode; onClick: () => void; testid?: string }) {
@@ -119,7 +123,7 @@ function ReleaseRow({
     const showTitle = !release.setName && release.title.trim().toLowerCase() !== (mold?.title ?? "").trim().toLowerCase();
     return (
         <li
-            className={`grid grid-cols-[44px_1fr_auto] items-center gap-3 border-t border-input px-4 py-2.5 ${selected ? "bg-forest/5" : release.hit ? "bg-amber-500/5" : ""}`}
+            className={`grid grid-cols-[44px_1fr] items-center gap-x-3 gap-y-2 border-t border-input px-4 py-2.5 sm:grid-cols-[44px_1fr_auto] ${selected ? "bg-forest/5" : release.hit ? "bg-amber-500/5" : ""}`}
             data-testid="linker-release"
             data-release-id={release.id}
         >
@@ -146,7 +150,14 @@ function ReleaseRow({
                 )}
                 {filling && <FactForm release={release} fact={filling} onDone={(m) => { setFilling(null); onNotice(m); }} />}
             </div>
-            <Button type="button" size="sm" variant={selected ? "default" : "outline"} onClick={onPick} data-testid="linker-pick">
+            <Button
+                type="button"
+                size="sm"
+                variant={selected ? "default" : "outline"}
+                onClick={onPick}
+                data-testid="linker-pick"
+                className="col-span-2 justify-self-end sm:col-span-1"
+            >
                 {selected ? "Linked" : "This one"}
             </Button>
         </li>
@@ -293,9 +304,10 @@ function MoldGroup({
     );
 }
 
-export default function ReferenceLinker({ selectedCatalogId, onCatalogSelect, finishType }: ReferenceLinkerProps) {
+export default function ReferenceLinker({ selectedCatalogId, onCatalogSelect, finishType, onCustomEntry }: ReferenceLinkerProps) {
     const [scale, chooseScale] = useLocalPref(SCALE_KEY, "any");
     const [q, setQ] = useState("");
+    const [suggesting, setSuggesting] = useState(false);
     const [result, setResult] = useState<LinkerResult | null>(null);
     const [searching, setSearching] = useState(false);
     const [banner, setBanner] = useState<string | null>(null);
@@ -460,7 +472,7 @@ export default function ReferenceLinker({ selectedCatalogId, onCatalogSelect, fi
                         <p className="m-0 rounded-md bg-muted px-3 py-2 text-sm text-secondary-foreground" data-testid="linker-none">
                             {scale !== "any" && result.otherScales.length > 0
                                 ? `No ${shortScale(scale)} mold by that name. The matches below are other scales; pick one or change the scale above.`
-                                : "Nothing in the Registry by that name."}
+                                : "Nothing in the Registry by that name. Check the spelling, try the maker's name for it, or suggest it below."}
                         </p>
                     )}
 
@@ -509,9 +521,39 @@ export default function ReferenceLinker({ selectedCatalogId, onCatalogSelect, fi
                 </div>
             )}
 
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-dashed border-input px-3 py-2 text-xs text-muted-foreground">
+                <span>
+                    Not in the Registry at all, mold and all? Suggest it; the community reviews it and you get contributor credit.
+                </span>
+                <Button type="button" size="sm" variant="outline" onClick={() => setSuggesting(true)} data-testid="linker-suggest-open">
+                    Suggest an entry
+                </Button>
+            </div>
             <p className="m-0 text-xs text-muted-foreground">
                 Linking is optional. A one-of-a-kind is still a horse.
             </p>
+
+            <Dialog open={suggesting} onOpenChange={(open) => { if (!open) setSuggesting(false); }}>
+                <DialogContent className="max-h-[85dvh] overflow-y-auto sm:max-w-[580px]">
+                    <DialogHeader>
+                        <DialogTitle>Suggest a new entry</DialogTitle>
+                        <DialogDescription>
+                            For a mold, resin or release the Registry does not hold yet. If the mold is here and only your release is missing, use &quot;Add my release&quot; under that mold instead.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <SuggestNewEntryForm
+                        key={q}
+                        variant="dialog"
+                        initialTitle={q.trim()}
+                        onCancel={() => setSuggesting(false)}
+                        onSubmitted={(title) => {
+                            setSuggesting(false);
+                            setNotice("Suggested for the Registry. Your horse keeps that name until the entry is approved; link it then.");
+                            onCustomEntry?.(title);
+                        }}
+                    />
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

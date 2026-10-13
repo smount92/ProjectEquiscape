@@ -28,6 +28,14 @@ vi.mock("@/app/actions/reference", () => reference);
 vi.mock("@/lib/analytics", () => ({ track: vi.fn() }));
 vi.mock("@/app/actions/catalog-suggestions", () => ({ createSuggestion: vi.fn() }));
 vi.mock("@/lib/context/ToastContext", () => ({ useToast: () => ({ toast: vi.fn() }) }));
+vi.mock("@/components/SuggestNewEntryForm", () => ({
+    default: (p: { initialTitle?: string; onSubmitted?: (t: string) => void }) => (
+        <div data-testid="suggest-form">
+            {p.initialTitle}
+            <button type="button" onClick={() => p.onSubmitted?.("Pinto Pony")}>file</button>
+        </div>
+    ),
+}));
 
 const SM = {
     id: "sm", title: "Silky Sullivan", maker: "Breyer", scale: "Stablemate (1:32)", generation: null, sculptor: null, year: 1976, owners: 4, ambiguous: false, href: "/reference/breyer/silky-sullivan-2",
@@ -110,6 +118,19 @@ describe("ReferenceLinker", () => {
         expect(within(mold).getByTestId("linker-no-releases")).toBeTruthy();
         expect(within(mold).getByTestId("linker-add-open")).toBeTruthy();
         expect(within(mold).getByTestId("linker-pick-mold")).toBeTruthy();
+    });
+
+    it("opens Suggest an entry with the typed term and hands the filed title to the host", async () => {
+        const onCustom = vi.fn();
+        render(<ReferenceLinker selectedCatalogId={null} onCatalogSelect={vi.fn()} onCustomEntry={onCustom} />);
+        fireEvent.change(screen.getByLabelText("Find the model"), { target: { value: "Pinto Pony" } });
+        fireEvent.click(screen.getByTestId("linker-suggest-open"));
+        const form = await screen.findByTestId("suggest-form");
+        expect(form.textContent).toContain("Pinto Pony");
+        fireEvent.click(within(form).getByText("file"));
+        await waitFor(() => expect(onCustom).toHaveBeenCalledWith("Pinto Pony"));
+        expect(screen.queryByTestId("suggest-form")).toBeNull();
+        expect(screen.getByRole("status").textContent).toMatch(/Suggested for the Registry/);
     });
 
     it("the switch starts on the old picker, remembers 'new', and goes back", async () => {

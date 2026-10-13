@@ -240,7 +240,11 @@ export async function searchLinker(rawTerm: string, scale: string | null): Promi
     const termLower = stripGeneration(term).toLowerCase();
     // A release whose own name matches ("Montana Harvest") pulls its mold in,
     // with that release leading the group; the mold's name need not match.
-    const hitReleases = rows.filter((r) => r.item_type === "plastic_release" && r.parent_id && titleMatches(r.title, termLower));
+    // Only the release's own name counts, not the roster after "With": a set
+    // that lists Silky Sullivan among its pieces must not drag Man O' War in.
+    const hitReleases = rows.filter(
+        (r) => r.item_type === "plastic_release" && r.parent_id && titleMatches(r.title.replace(/\s+with\s+.*$/i, ""), termLower),
+    );
     const hitIds = new Set(hitReleases.map((r) => r.id));
     const viaRelease = new Map<string, string>();
     for (const r of hitReleases) if (!viaRelease.has(r.parent_id as string)) viaRelease.set(r.parent_id as string, r.title);
@@ -258,7 +262,10 @@ export async function searchLinker(rawTerm: string, scale: string | null): Promi
     const outScale = chosen ? molds.filter((m) => !scaleMatches(m.scale, chosen)).slice(0, 12) : [];
 
     const [expanded, counts] = await Promise.all([
-        Promise.all(inScale.map((m) => expandMold(supabase, m, hitIds))),
+        // A mold found by its own name gets no "matches your search" rows: its
+        // regular run and its set rows carry that name too, and tagging them
+        // would mean nothing. Only a mold reached through a release gets them.
+        Promise.all(inScale.map((m) => expandMold(supabase, m, titleMatches(m.title, termLower) ? new Set<string>() : hitIds))),
         releaseCounts(supabase, outScale.map((m) => m.id)),
     ]);
     const marked = markAmbiguous(expanded);
