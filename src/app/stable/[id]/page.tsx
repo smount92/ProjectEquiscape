@@ -1,3 +1,4 @@
+import { referenceLines, moldLinkTarget, type ReferenceRow } from "@/lib/passport/referenceLines";
 import { createClient } from"@/lib/supabase/server";
 import LinkifiedText from "@/components/LinkifiedText";
 import { redirect, notFound } from"next/navigation";
@@ -107,7 +108,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
   id, owner_id, custom_name, finish_type, condition_grade, asset_category, attributes,
   is_for_sale, is_public, visibility, created_at, sculptor, finishing_artist, finishing_artist_verified, edition_number, edition_size, catalog_id, trade_status,
  finish_details, public_notes, assigned_breed, assigned_gender, assigned_age, regional_id,
- catalog_items:catalog_id(title, maker, scale, item_type, attributes, maker_slug, slug)
+ catalog_items:catalog_id(title, maker, scale, item_type, attributes, maker_slug, slug, parent:parent_id(id, title, maker, attributes, maker_slug, slug))
  `,
  )
  .eq("id", horseId)
@@ -393,20 +394,10 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  }
  : null;
  const attrs = (cat?.attributes ?? {}) as Record<string, unknown>;
- const refInfo = cat
- ? {
- type: cat.item_type ==="artist_resin" ?"Artist Resin" :"Mold",
- name: cat.title,
- maker: cat.maker,
- scale: cat.scale ||"Unknown",
- extra:
- cat.item_type ==="artist_resin"
- ? (attrs.cast_medium as string | null)
- : attrs.release_year_start
- ? `First released ${attrs.release_year_start}`
- : null,
- }
- : null;
+ // One owner for the Mold/Manufacturer/Scale lines (lib/passport/referenceLines):
+ // a release names its parent mold here, not itself.
+ const refInfo = cat ? referenceLines(cat as unknown as ReferenceRow) : null;
+ const moldLink = cat && registryItem ? moldLinkTarget(cat as unknown as ReferenceRow, registryItem) : null;
 
  // Owner-only, and enforced in the RPC rather than here — the page has
  // already notFound()ed a non-owner, but get_horse_view_stats checks
@@ -547,7 +538,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  {refInfo.type}
  </span>
  <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
- {registryItem ? <RegistryLink item={registryItem}>{refInfo.name}</RegistryLink> : refInfo.name}
+ {moldLink && refInfo.moldKnown ? <RegistryLink item={moldLink}>{refInfo.name}</RegistryLink> : <span className={refInfo.moldKnown ? "" : "italic opacity-70"}>{refInfo.name}</span>}
  </span>
  </div>
 

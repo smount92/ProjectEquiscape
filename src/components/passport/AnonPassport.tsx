@@ -9,6 +9,7 @@ import PassportGallery from "@/components/PassportGallery";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
 import PublicCardsSection from "@/components/shows/PublicCardsSection";
 import { Button } from "@/components/ui/button";
+import { referenceLines, type ReferenceParent, type ReferenceRow } from "@/lib/passport/referenceLines";
 import { referenceHref } from "@/lib/catalog/referenceUrl";
 import { PARCHMENT_INK } from "@/lib/theme/parchment";
 import { resinIdentityFrom, resinMakeupLine } from "@/lib/passport/resinIdentity";
@@ -266,20 +267,20 @@ export default async function AnonPassport({
 
     // Same reference framing the member card uses.
     const catAttrs = (cat?.attributes ?? {}) as Record<string, unknown>;
-    const refInfo = cat
-        ? {
-              type: cat.item_type === "artist_resin" ? "Artist Resin" : "Mold",
-              name: cat.title,
-              maker: cat.maker,
-              scale: cat.scale || "Unknown",
-              extra:
-                  cat.item_type === "artist_resin"
-                      ? (catAttrs.cast_medium as string | null)
-                      : catAttrs.release_year_start
-                        ? `First released ${catAttrs.release_year_start}`
-                        : null,
-          }
-        : null;
+    // The passport RPC (135) carries the linked row but not its parent; a
+    // release reads its mold with one public catalog_items read so the
+    // Mold line names the sculpture, not the release (lib/passport/referenceLines).
+    let parent: ReferenceParent | null = null;
+    if (cat && cat.item_type === "plastic_release" && horse.catalog_id) {
+        const { data: parentRow } = await supabase
+            .from("catalog_items")
+            .select("parent:parent_id(id, title, maker, attributes, maker_slug, slug)")
+            .eq("id", horse.catalog_id)
+            .maybeSingle();
+        parent = ((parentRow as { parent?: ReferenceParent | ReferenceParent[] | null } | null)?.parent ?? null) as ReferenceParent | null;
+        if (Array.isArray(parent)) parent = parent[0] ?? null;
+    }
+    const refInfo = cat ? referenceLines({ ...(cat as unknown as ReferenceRow), parent }) : null;
     const releaseInfo =
         cat && cat.item_type === "plastic_release"
             ? {
@@ -418,7 +419,9 @@ export default async function AnonPassport({
                         )}
                         {refInfo ? (
                             <>
-                                <DetailRow label={refInfo.type}>{refInfo.name}</DetailRow>
+                                <DetailRow label={refInfo.type}>
+                                    <span className={refInfo.moldKnown ? "" : "italic opacity-70"}>{refInfo.name}</span>
+                                </DetailRow>
                                 <DetailRow
                                     label={refInfo.type === "Mold" ? "Manufacturer" : "Sculptor"}
                                 >

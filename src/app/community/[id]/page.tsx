@@ -1,3 +1,4 @@
+import { referenceLines, type ReferenceRow } from "@/lib/passport/referenceLines";
 import { createClient } from"@/lib/supabase/server";
 import LinkifiedText from "@/components/LinkifiedText";
 import { notFound } from"next/navigation";
@@ -180,7 +181,7 @@ export default async function PublicPassportPage({
  trade_status, listing_price,
  finish_details, public_notes, assigned_breed, assigned_gender, assigned_age, regional_id,
  users!inner(alias_name),
- catalog_items:catalog_id(title, maker, scale, item_type, attributes, maker_slug, slug)
+ catalog_items:catalog_id(title, maker, scale, item_type, attributes, maker_slug, slug, parent:parent_id(id, title, maker, attributes, maker_slug, slug))
  `,
  )
  .eq("id", horseId)
@@ -357,20 +358,8 @@ editionSize: rawPedigree.edition_size,
  // Reference display info
  const cat = horse.catalog_items;
  const attrs = (cat?.attributes ?? {}) as Record<string, unknown>;
- const refInfo = cat
- ? {
- type: cat.item_type ==="artist_resin" ?"Artist Resin" :"Mold",
- name: cat.title,
- maker: cat.maker,
- scale: cat.scale ||"Unknown",
- extra:
- cat.item_type ==="artist_resin"
- ? (attrs.cast_medium as string | null)
- : attrs.release_year_start
- ? `First released ${attrs.release_year_start}`
- : null,
- }
- : null;
+ // One owner for the Mold/Manufacturer/Scale lines (lib/passport/referenceLines).
+ const refInfo = cat ? referenceLines(cat as unknown as ReferenceRow) : null;
 
  // Link to this model's public reference-catalog entry.
  const refHref =
@@ -597,7 +586,7 @@ editionSize: rawPedigree.edition_size,
  <span className="text-secondary-foreground text-sm font-medium">
  {refInfo.type}
  </span>
- <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
+ <span className={`text-foreground max-w-[60%] text-right text-sm font-semibold${refInfo.moldKnown ? "" : " italic opacity-70"}`}>
  {refInfo.name}
  </span>
  </div>
