@@ -289,6 +289,22 @@ export function linkedLabel(mold: Pick<LinkerMold, "title" | "scale" | "generati
     return [moldBit, rel || release.title].filter(Boolean).join(" · ");
 }
 
+/**
+ * A correction on one attribute, in the shape every suggestion surface and
+ * the apply path expect: `{ field: { from, to } }` with both as strings. The
+ * first 13 "fill in what you know" corrections (2026-10-13) went out as bare
+ * strings and read "undefined → undefined" on the admin queue.
+ */
+export function factCorrection(
+    field: "color_description" | "release_year_start" | "model_number",
+    current: unknown,
+    value: string,
+): Record<string, { from: string; to: string }> {
+    const to = field === "model_number" ? value.trim().replace(/^#/, "") : value.trim();
+    const from = current === null || current === undefined ? "" : String(current);
+    return { [field]: { from, to } };
+}
+
 /** Strip a leading "#5022 " from a typed title so the number goes in its own field. */
 export function splitNumberFromTitle(title: string): { title: string; model: string | null } {
     const m = title.trim().match(/^#?\s*(\d{3,7}[a-z]?)\s+(.+)$/i);

@@ -21,6 +21,7 @@ import { createSuggestion } from "@/app/actions/catalog-suggestions";
 import {
     collapseSetPieces,
     commonOne,
+    factCorrection,
     generationOf,
     markAmbiguous,
     mentionsMold,
@@ -340,12 +341,16 @@ export async function fileReleaseFact(input: {
     const value = input.value.trim();
     if (!value) return { success: false, error: "Type the value first." };
     const field = input.fact === "colour" ? "color_description" : input.fact === "year" ? "release_year_start" : "model_number";
-    const typed = field === "release_year_start" ? parseInt(value, 10) : value.replace(/^#/, "");
-    if (field === "release_year_start" && !Number.isFinite(typed)) return { success: false, error: "Use a four-digit year." };
+    if (field === "release_year_start" && !/^\d{4}$/.test(value)) return { success: false, error: "Use a four-digit year." };
+    // The correction carries what the Registry holds today as `from`, so the
+    // queue shows a real diff and a revert knows what to put back.
+    const supabase = await createClient();
+    const { data: row } = await supabase.from("catalog_items").select("attributes").eq("id", input.catalogId).maybeSingle();
+    const current = ((row as { attributes?: Record<string, unknown> | null } | null)?.attributes ?? {})[field];
     const result = await createSuggestion({
         catalogItemId: input.catalogId,
         suggestionType: "correction",
-        fieldChanges: { [field]: typed },
+        fieldChanges: factCorrection(field, current, value),
         reason: "Filled in from the reference linker by a member holding the horse.",
     });
     if (!result.success) return { success: false, error: ("error" in result && result.error) || "Could not file it." };

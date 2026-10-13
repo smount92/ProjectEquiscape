@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
     collapseSetPieces,
     commonOne,
+    factCorrection,
     generationOf,
     identityLine,
     linkedLabel,
@@ -102,6 +103,12 @@ describe("linker model", () => {
         expect(rows.map((r) => r.id)).toEqual(["a", "d", "e"]);
         expect(rows[0].copies).toBe(3);
         expect(rows[1].copies).toBeUndefined();
+    });
+
+    it("files a fact as a from/to correction with strings on both sides", () => {
+        expect(factCorrection("color_description", undefined, " dark bay ")).toEqual({ color_description: { from: "", to: "dark bay" } });
+        expect(factCorrection("release_year_start", 1976, "1988")).toEqual({ release_year_start: { from: "1976", to: "1988" } });
+        expect(factCorrection("model_number", null, "#5022")).toEqual({ model_number: { from: "", to: "5022" } });
     });
 
     it("matches scale chips", () => {
