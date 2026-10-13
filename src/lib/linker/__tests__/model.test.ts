@@ -11,6 +11,7 @@ import {
     normalizeTerm,
     orderReleases,
     parseTerm,
+    releaseName,
     scaleMatches,
     setLabel,
     splitNumberFromTitle,
@@ -113,7 +114,11 @@ describe("linker model", () => {
     it("words the linked banner and splits a number out of a typed title", () => {
         const mold = { title: "Silky Sullivan", scale: "Stablemate (1:32)", generation: "G1" };
         expect(linkedLabel(mold, null)).toBe("Silky Sullivan (Stablemate G1), mold only");
-        expect(linkedLabel(mold, rel({ id: "r", model: "5022", look: "dark chestnut" }))).toBe("Silky Sullivan (Stablemate G1) · #5022 · dark chestnut");
+        expect(linkedLabel(mold, rel({ id: "r", title: "Silky Sullivan", model: "5022", look: "dark chestnut" }))).toBe("Silky Sullivan (Stablemate G1) · #5022 · dark chestnut");
+        expect(linkedLabel(mold, rel({ id: "r", title: "Montana Harvest", model: "1142", look: "dapple buckskin" }))).toBe("Silky Sullivan (Stablemate G1) · #1142 · Montana Harvest · dapple buckskin");
+        expect(releaseName(rel({ id: "r", title: "#5022 Silky Sullivan" }), "Silky Sullivan")).toBeNull();
+        expect(releaseName(rel({ id: "r", title: "T-Bone" }), "Silky Sullivan")).toBe("T-Bone");
+        expect(releaseName(rel({ id: "r", title: "Gift set With Kelso", setName: "Gift set" }), "Silky Sullivan")).toBeNull();
         expect(splitNumberFromTitle("#5022 Silky Sullivan")).toEqual({ title: "Silky Sullivan", model: "5022" });
         expect(splitNumberFromTitle("Andrew")).toEqual({ title: "Andrew", model: null });
     });

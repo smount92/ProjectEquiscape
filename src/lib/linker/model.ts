@@ -267,12 +267,25 @@ export function scaleMatches(rowScale: string | null, chosen: string | null): bo
     return rowScale === chosen;
 }
 
+/**
+ * A release's own name ("Montana Harvest", "T-Bone"): the title, minus a
+ * leading number, when it is not the mold's name and not a set. Null when
+ * the release is just "the mold in this colour".
+ */
+export function releaseName(release: Pick<LinkerRelease, "title" | "setName" | "isSetPiece">, moldTitle: string | null | undefined): string | null {
+    if (release.setName || release.isSetPiece) return null;
+    const name = splitNumberFromTitle(release.title).title;
+    if (!name) return null;
+    if ((moldTitle ?? "").trim().toLowerCase() === name.trim().toLowerCase()) return null;
+    return name;
+}
+
 /** What the linked banner says. */
 export function linkedLabel(mold: Pick<LinkerMold, "title" | "scale" | "generation"> | null, release: LinkerRelease | null): string {
     if (!mold && !release) return "";
     const moldBit = mold ? mold.title + (mold.scale ? " (" + shortScale(mold.scale) + (mold.generation ? " " + mold.generation : "") + ")" : "") : "";
     if (!release) return moldBit + ", mold only";
-    const rel = [release.model ? "#" + release.model : null, release.look].filter(Boolean).join(" · ");
+    const rel = [release.model ? "#" + release.model : null, releaseName(release, mold?.title), release.look].filter(Boolean).join(" · ");
     return [moldBit, rel || release.title].filter(Boolean).join(" · ");
 }
 

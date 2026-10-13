@@ -69,6 +69,11 @@ describe("ReferenceLinker", () => {
         expect(rows).toHaveLength(2);
         expect(rows[0].textContent).toContain("#5022 · Dark chestnut, various socks");
         expect(rows[0].textContent).toContain("year not recorded");
+        // A named release leads with its number and name in bold; the colour drops below.
+        linker.searchLinker.mockResolvedValue({ ...RESULT, molds: [{ ...SM, releases: [{ ...SM.releases[0], id: "rmh", title: "Montana Harvest", model: "1142", look: "dapple shaded buckskin" }] }] });
+        fireEvent.change(screen.getByLabelText("Find the model"), { target: { value: "Montana Harvest" } });
+        await waitFor(() => expect(screen.getByTestId("linker-row-lead").textContent).toBe("#1142 · Montana Harvest"), { timeout: 3000 });
+        expect(screen.getByTestId("linker-row-lead").className).toContain("font-bold");
         expect(rows[1].textContent).toContain("colour not recorded");
         expect(rows[1].textContent).toContain("from the 12-Piece Stablemates Set");
         expect(screen.getByTestId("linker-other-scales").textContent).toContain("Classic");

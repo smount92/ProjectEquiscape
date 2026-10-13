@@ -22,6 +22,7 @@ import {
     missingFacts,
     shortScale,
     yearsLabel,
+    releaseName,
     type LinkerMold,
     type LinkerMoldSummary,
     type LinkerRelease,
@@ -120,7 +121,11 @@ function ReleaseRow({
     const gaps = missingFacts(release);
     const years = yearsLabel(release);
     // A release with its own name ("Montana Harvest", "T-Bone") says so; the mold's name and set titles are already on screen.
-    const showTitle = !release.setName && release.title.trim().toLowerCase() !== (mold?.title ?? "").trim().toLowerCase();
+    // Amanda's rule (trial, 2026-10-12): number, then the release's own name in
+    // bold, then everything else below. A release with no name of its own leads
+    // with its colour instead, so "the mold in chestnut" still reads at a glance.
+    const name = releaseName(release, mold?.title);
+    const missingLook = release.isSetPiece ? "colour not recorded for this piece" : "colour not recorded";
     return (
         <li
             className={`grid grid-cols-[44px_1fr] items-center gap-x-3 gap-y-2 border-t border-input px-4 py-2.5 sm:grid-cols-[44px_1fr_auto] ${selected ? "bg-forest/5" : release.hit ? "bg-amber-500/5" : ""}`}
@@ -129,15 +134,25 @@ function ReleaseRow({
         >
             <Photo src={release.photo} alt="" />
             <div className="min-w-0">
-                <div className={`text-sm ${release.look ? "font-semibold text-foreground" : "italic text-muted-foreground"}`}>
-                    {release.model ? `#${release.model} · ` : ""}
-                    {release.look ?? (release.isSetPiece ? "colour not recorded for this piece" : "colour not recorded")}
-                </div>
+                {name ? (
+                    <>
+                        <div className="text-sm font-bold text-foreground" data-testid="linker-row-lead">
+                            {release.model ? `#${release.model} · ` : ""}
+                            {name}
+                            {release.hit ? <span className="ml-1 rounded bg-amber-500/15 px-1.5 align-middle text-[0.65rem] font-bold text-amber-800 uppercase dark:text-amber-300">matches your search</span> : null}
+                        </div>
+                        <div className={`text-xs ${release.look ? "text-secondary-foreground" : "italic text-muted-foreground"}`}>{release.look ?? missingLook}</div>
+                    </>
+                ) : (
+                    <div className={`text-sm ${release.look ? "font-semibold text-foreground" : "italic text-muted-foreground"}`} data-testid="linker-row-lead">
+                        {release.model ? `#${release.model} · ` : ""}
+                        {release.look ?? missingLook}
+                        {release.hit ? <span className="ml-1 rounded bg-amber-500/15 px-1.5 align-middle text-[0.65rem] font-bold text-amber-800 uppercase not-italic dark:text-amber-300">matches your search</span> : null}
+                    </div>
+                )}
                 <div className="text-xs text-muted-foreground">
                     {years ?? <span className="text-amber-700 dark:text-amber-400">year not recorded</span>}
                     {release.run ? ` · ${release.run}` : ""}
-                    {showTitle ? ` · ${release.title}` : ""}
-                    {release.hit ? <span className="ml-1 rounded bg-amber-500/15 px-1.5 text-[0.65rem] font-bold text-amber-800 uppercase dark:text-amber-300">matches your search</span> : null}
                 </div>
                 {release.setName && <div className="text-xs text-muted-foreground/80">from the {release.setName}</div>}
                 {gaps.length > 0 && !filling && (
