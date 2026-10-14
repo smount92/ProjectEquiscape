@@ -83,7 +83,7 @@ function FactForm({ release, fact, onDone }: { release: LinkerRelease; fact: Mis
             onSubmit={(e) => {
                 e.preventDefault();
                 start(async () => {
-                    const r = await fileReleaseFact({ catalogId: release.id, fact, value });
+                    const r = await fileReleaseFact({ catalogId: release.id, fact, value, isSetPiece: release.isSetPiece });
                     if (!r.success) setError(r.error);
                     else onDone(`Thanks. The ${fact} is filed for review.`);
                 });
@@ -118,7 +118,12 @@ function ReleaseRow({
     onNotice: (msg: string) => void;
 }) {
     const [filling, setFilling] = useState<MissingFact | null>(null);
-    const gaps = missingFacts(release);
+    // A set piece is a row filed under ANOTHER mold; its stored colour is that
+    // mold's piece. Never offer to fill its colour here: 14 corrections did
+    // exactly that on 2026-10-13/14 and overwrote Draft Horse, Citation,
+    // Native Dancer and Appaloosa colours with Silky Sullivan and Arabian
+    // Mare ones. The member's piece belongs in "Add my release" instead.
+    const gaps = missingFacts(release).filter((f) => !(release.isSetPiece && f === "colour"));
     const years = yearsLabel(release);
     // A release with its own name ("Montana Harvest", "T-Bone") says so; the mold's name and set titles are already on screen.
     // Amanda's rule (trial, 2026-10-12): number, then the release's own name in

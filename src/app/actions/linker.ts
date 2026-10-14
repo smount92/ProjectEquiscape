@@ -337,9 +337,16 @@ export async function fileReleaseFact(input: {
     catalogId: string;
     fact: "colour" | "year" | "model number";
     value: string;
+    /** The row is a set piece filed under another mold (see ReleaseRow). */
+    isSetPiece?: boolean;
 }): Promise<{ success: true } | { success: false; error: string }> {
     const value = input.value.trim();
     if (!value) return { success: false, error: "Type the value first." };
+    // A set row's colour describes the piece on the mold it is filed under.
+    // A colour for a different piece of the set would overwrite it.
+    if (input.isSetPiece && input.fact === "colour") {
+        return { success: false, error: "This row is the set, filed under another mold. Use \"Add my release\" to record your piece's colour." };
+    }
     const field = input.fact === "colour" ? "color_description" : input.fact === "year" ? "release_year_start" : "model_number";
     if (field === "release_year_start" && !/^\d{4}$/.test(value)) return { success: false, error: "Use a four-digit year." };
     // The correction carries what the Registry holds today as `from`, so the

@@ -75,6 +75,8 @@ describe("ReferenceLinker", () => {
         await waitFor(() => expect(screen.getByTestId("linker-row-lead").textContent).toBe("#1142 · Montana Harvest"), { timeout: 3000 });
         expect(screen.getByTestId("linker-row-lead").className).toContain("font-bold");
         expect(rows[1].textContent).toContain("colour not recorded");
+        // A set piece never offers to fill its colour: that row's colour belongs to another mold's piece.
+        expect(rows[1].textContent).not.toMatch(/know the colour/);
         expect(rows[1].textContent).toContain("from the 12-Piece Stablemates Set");
         expect(screen.getByTestId("linker-other-scales").textContent).toContain("Classic");
         expect(linker.searchLinker).toHaveBeenCalledWith("Silky Sullivan", null);
