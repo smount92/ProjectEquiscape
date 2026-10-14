@@ -241,6 +241,7 @@ See [Adding a Migration](../guides/adding-a-migration.md) for the full guide.
 | 229 | `229_member_links.sql` | users.links JSONB (outbound links a member shows on their profile: facebook, instagram, website, feedback) + column SELECT grant to anon/authenticated. |
 | 230 | `230_roadmap.sql` | roadmap_items — the owners' goals, problems, ideas and chores with horizon, status, priority; RLS on with no policies, revoked from API roles (service role only, Admin → Roadmap tab); seeds the 2026-10-12 backlog. |
 | 231 | `231_roadmap_events.sql` | roadmap_events — notes (comment) and server-recorded field changes (change) per roadmap item, cascade on delete; same service-role-only shape as 230; seeds a created row for every existing item. |
+| 232 | `232_catalog_maker_slug_follows_maker.sql` | BEFORE UPDATE OF maker trigger on catalog_items: maker_slug recomputed from the new maker, slug takes a -N suffix only on a clash in the new maker's namespace; title changes still keep the slug. |
 
 ---
 

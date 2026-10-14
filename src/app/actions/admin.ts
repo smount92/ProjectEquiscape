@@ -1381,6 +1381,15 @@ const PENDING_MIGRATIONS: MigrationSpec[] = [
     },
   },
   {
+    id: "232",
+    title: "Page address follows the maker",
+    summary: "A catalog row's maker_slug (and, on a clash, its slug) now follows a change of maker, so a corrected maker moves the page instead of leaving it under the old one.",
+    probe: {
+      kind: "none",
+      why: "A trigger — nothing to select. Verify: correct a test entry's maker and its page moves to /reference/<new-maker>/….",
+    },
+  },
+  {
     id: "231",
     title: "Roadmap history",
     summary: "Creates roadmap_events (notes and recorded changes under each roadmap item) and gives every existing item its opening line; service role only.",
