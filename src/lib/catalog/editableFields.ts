@@ -188,3 +188,21 @@ export function missingFieldLabels(item: EditableSource): string[] {
         .filter((f) => !REAL_COLUMN_KEYS.has(f.key) && valueFor(item, f.key) === "")
         .map((f) => f.label);
 }
+
+/** The label a member reads for a catalog field key ("color_description" → "Colour and markings"). */
+export function fieldLabel(key: string): string {
+    const f = CATALOG_EDITABLE_FIELDS.find((x) => x.key === key);
+    if (f) return f.label;
+    const t = key.replace(/_/g, " ");
+    return t.charAt(0).toUpperCase() + t.slice(1);
+}
+
+/**
+ * A changelog line with raw field keys swapped for their labels, so
+ * "Correction: color_description: dun → Black" reads "Colour and
+ * markings: dun → Black". Applied at display time, so older rows read
+ * the same as new ones.
+ */
+export function humanizeChangeSummary(summary: string): string {
+    return summary.replace(/(^|[\s,:])([a-z]+(?:_[a-z]+)+|title|maker|scale|material|breed|gender|sculptor)(?=:\s)/g, (_m, pre: string, key: string) => `${pre}${fieldLabel(key)}`);
+}

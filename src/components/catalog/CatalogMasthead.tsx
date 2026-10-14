@@ -11,7 +11,14 @@
 import Link from "next/link";
 import { BookOpen, FileText, Lightbulb } from "lucide-react";
 
-export default function CatalogMasthead({ totalCount }: { totalCount: number }) {
+export default function CatalogMasthead({
+    totalCount,
+    filtered = false,
+}: {
+    totalCount: number;
+    /** A search or filter is on: the number is what matched, not the Registry's size. */
+    filtered?: boolean;
+}) {
     return (
         <div className="leather-band stitched relative mb-6 rounded-xl px-6 py-5">
             <div className="flex flex-wrap items-center gap-4">
@@ -34,7 +41,9 @@ export default function CatalogMasthead({ totalCount }: { totalCount: number }) 
                         className="font-serif text-[0.7rem] tracking-[0.18em] uppercase"
                         style={{ color: "var(--leather-text-soft)" }}
                     >
-                        {totalCount.toLocaleString()} model{totalCount === 1 ? "" : "s"} on record
+                        {filtered
+                            ? `${totalCount.toLocaleString()} filtered result${totalCount === 1 ? "" : "s"}`
+                            : `${totalCount.toLocaleString()} model${totalCount === 1 ? "" : "s"} on record`}
                     </span>
                 </div>
                 <div className="z-[1] ml-auto flex flex-wrap gap-2">

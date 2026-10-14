@@ -19,11 +19,15 @@ import { Button } from "@/components/ui/button";
  * All of that is now token-based. Behaviour is unchanged.
  */
 
-const TYPE_GROUPS: { key: string; label: string }[] = [
-    { key: "plastic_mold", label: "🏭 Base molds" },
-    { key: "plastic_release", label: "📦 Releases" },
-    { key: "artist_resin", label: "🎨 Artist resins" },
+// Every item type has a home: china, micro minis, medallions and factory
+// resins used to vanish from the dropdown because no group claimed them.
+const TYPE_GROUPS: { key: string; label: string; types: string[] | null }[] = [
+    { key: "plastic_mold", label: "🏭 Base molds", types: ["plastic_mold"] },
+    { key: "plastic_release", label: "📦 Releases", types: ["plastic_release"] },
+    { key: "artist_resin", label: "🎨 Artist resins", types: ["artist_resin", "factory_resin"] },
+    { key: "other", label: "🐎 China, micro minis and more", types: null },
 ];
+const GROUPED = new Set(TYPE_GROUPS.flatMap((g) => g.types ?? []));
 
 export default function WishlistSearch() {
     const [query, setQuery] = useState("");
@@ -192,8 +196,8 @@ export default function WishlistSearch() {
                         </div>
                     ) : (
                         <>
-                            {TYPE_GROUPS.map(({ key, label }) => {
-                                const group = results.filter((r) => r.itemType === key);
+                            {TYPE_GROUPS.map(({ key, label, types }) => {
+                                const group = results.filter((r) => (types ? types.includes(r.itemType) : !GROUPED.has(r.itemType)));
                                 if (group.length === 0) return null;
                                 return (
                                     <div key={key}>

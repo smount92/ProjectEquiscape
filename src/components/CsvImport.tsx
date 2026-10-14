@@ -14,11 +14,16 @@ import {
 import { decodeHtmlEntities } from"@/lib/utils/decodeEntities";
 import { Button } from "@/components/ui/button";
 
-type DictRelease = { i: string; n: string; m: string | null; c: string | null; mn: string | null; mf: string | null };
+type DictRelease = { i: string; n: string; m: string | null; c: string | null; mn: string | null; mf: string | null; sc?: string | null };
 type DictResin = { i: string; n: string; s: string };
+type DictMold = { i: string; n: string; mf: string | null; sc: string | null };
+type DictOther = { i: string; n: string; s: string; t: string };
 interface RefDict {
  releases: DictRelease[];
  resins: DictResin[];
+ /** Absent from a dictionary cached before 2026-10-15. */
+ molds?: DictMold[];
+ others?: DictOther[];
 }
 
 // ============================================================
@@ -238,8 +243,9 @@ export default function CsvImport() {
 
  // Build search targets
  const releaseTargets = dict.releases.map((r) => {
- const display = [r.mf, r.m ? `#${r.m}` : null,"—", r.n, r.mn].filter(Boolean).join("");
- const searchText = [r.n, r.mn, r.c, r.m, r.mf].filter(Boolean).join("");
+ // Spaced: the parts used to run together ("Breyer#1142—Montana HarvestJustin Morgan").
+ const display = [[r.mf, r.m ? `#${r.m}` : null].filter(Boolean).join(" "), [r.n, r.mn ? `on ${r.mn}` : null, r.sc].filter(Boolean).join(" · ")].filter(Boolean).join(" — ");
+ const searchText = [r.n, r.mn, r.c, r.m, r.mf].filter(Boolean).join(" ");
  return {
  id: r.i,
  display,
@@ -256,8 +262,25 @@ export default function CsvImport() {
  return { id: r.i, display, searchText, sculptor_alias: r.s, resin_name: r.n };
  });
 
+ const moldTargets = (dict.molds ?? []).map((r) => ({
+ id: r.i,
+ display: `${r.mf ?? "Unknown"} — ${r.n} (mold${r.sc ? `, ${r.sc}` : ""})`,
+ searchText: [r.n, r.mf, r.sc].filter(Boolean).join(" "),
+ manufacturer: r.mf ?? "Unknown",
+ mold_name: r.n,
+ release_name: r.n,
+ }));
+ const otherTargets = (dict.others ?? []).map((r) => ({
+ id: r.i,
+ display: `${r.s} — ${r.n} (${r.t.replace(/_/g, " ")})`,
+ searchText: `${r.n} ${r.s}`,
+ manufacturer: r.s,
+ mold_name: r.n,
+ release_name: r.n,
+ }));
+
  const results: MatchResult[] = mappedRows.map((row, index) => {
- const searchQuery = [row.name, row.mold, row.manufacturer].filter(Boolean).join("").trim();
+ const searchQuery = [row.name, row.mold, row.manufacturer].filter(Boolean).join(" ").trim();
 
  if (!searchQuery) {
  return {
@@ -281,7 +304,24 @@ export default function CsvImport() {
  threshold: -2000,
  });
 
+ const extraResults = [
+ ...fuzzysort.go(searchQuery, moldTargets, { key:"searchText", limit: 3, threshold: -2000 }),
+ ...fuzzysort.go(searchQuery, otherTargets, { key:"searchText", limit: 3, threshold: -2000 }),
+ ];
+
  const allMatches: ReferenceMatch[] = [];
+ for (const res of extraResults) {
+ const obj = res.obj;
+ allMatches.push({
+ id: obj.id,
+ score: res.score,
+ display: obj.display,
+ manufacturer: obj.manufacturer,
+ mold_name: obj.mold_name,
+ release_name: obj.release_name,
+ table:"catalog_items",
+ });
+ }
  for (const res of releaseResults) {
  // eslint-disable-next-line @typescript-eslint/no-explicit-any
  const obj = res.obj as any;

@@ -26,6 +26,8 @@ export const CANONICAL_SCALES = [
     "Small Traditional (1:10)",
     "Classic (1:12)",
     "Pebbles (1:18)",
+    // CollectA's large line; 189 rows used it before it was a listed scale (2026-10-15).
+    "1:20",
     "Paddock Pal (1:24)",
     "Stablemate (1:32)",
     "Mini Whinnies (1:64)",

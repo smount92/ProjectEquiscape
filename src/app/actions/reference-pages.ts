@@ -1,6 +1,8 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
 import { createAnonClient } from "@/lib/supabase/anon";
+import { referenceHref } from "@/lib/catalog/referenceUrl";
+import { mentionsMold, setLabel, splitNumberFromTitle, stripGeneration } from "@/lib/linker/model";
 import { getPublicImageUrls } from "@/lib/utils/storage";
 
 // ============================================================
@@ -37,6 +39,18 @@ export interface CatalogRow {
     /** Attribution split (migration 156) — corrected values win over derivation. */
     artist: string | null;
     manufacturer: string | null;
+    /** The mold a release is filed under (null for molds, resins, orphans). */
+    parent?: ReferenceParentRow | null;
+}
+
+export interface ReferenceParentRow {
+    id: string;
+    title: string;
+    maker: string | null;
+    maker_slug: string | null;
+    slug: string | null;
+    scale: string | null;
+    item_type: string;
 }
 
 export const resolveReferenceItem = unstable_cache(
@@ -44,13 +58,18 @@ export const resolveReferenceItem = unstable_cache(
         const supabase = createAnonClient();
         const { data } = await supabase
             .from("catalog_items")
-            .select("id, item_type, title, maker, maker_slug, slug, scale, attributes, artist, manufacturer")
+            .select(
+                "id, item_type, title, maker, maker_slug, slug, scale, attributes, artist, manufacturer, parent:parent_id(id, title, maker, maker_slug, slug, scale, item_type)",
+            )
             .eq("maker_slug", makerSlug)
             .eq("slug", slug)
             .maybeSingle();
-        return (data as CatalogRow | null) ?? null;
+        const row = data as (CatalogRow & { parent?: ReferenceParentRow | ReferenceParentRow[] | null }) | null;
+        if (!row) return null;
+        const parent = Array.isArray(row.parent) ? (row.parent[0] ?? null) : (row.parent ?? null);
+        return { ...row, parent };
     },
-    ["reference:item"],
+    ["reference:item:v2"],
     { revalidate: REVALIDATE, tags: [REFERENCE_PAGES_CACHE_TAG] },
 );
 
@@ -461,5 +480,79 @@ export const getArtistCareerData = unstable_cache(
         return { career, isArtist, meta };
     },
     ["reference:artist-career"],
+    { revalidate: REVALIDATE, tags: [REFERENCE_PAGES_CACHE_TAG] },
+);
+
+export interface MoldSetMention {
+    /** "12-Piece Stablemates Set" — the set's name without its roster. */
+    setName: string;
+    modelNumber: string | null;
+    year: number | null;
+    /** A Registry page for the set (one of its pieces), to read what else came in it. */
+    setHref: string;
+}
+
+/**
+ * Sets this mold was sold in whose piece for THIS mold is not catalogued.
+ *
+ * The Registry stores a set as one release per piece, each filed under its
+ * own mold, with the whole roster in the title ("12-Piece Stablemates Set
+ * With Arabian Stallion, Citation, … Morgan Stallion, …"). Only some pieces
+ * were ever entered, so a mold named in a set's roster can show no release
+ * for it: the Stablemate Morgan Stallion is named in 38 set rows and holds
+ * none (2026-10-14). This lists those sets on the mold page so the gap is
+ * visible and a member who owns the piece can add it.
+ */
+export const getMoldSetMentions = unstable_cache(
+    async (moldId: string, moldTitle: string, scale: string | null): Promise<MoldSetMention[]> => {
+        const supabase = createAnonClient();
+        const name = stripGeneration(moldTitle).trim();
+        if (name.length < 3) return [];
+        let query = supabase
+            .from("catalog_items")
+            .select("id, title, maker, maker_slug, slug, parent_id, attributes")
+            .eq("item_type", "plastic_release")
+            .ilike("title", `%with%${name.replace(/[%_]/g, "")}%`)
+            .limit(300);
+        if (scale) query = query.eq("scale", scale);
+        const [{ data: sets }, { data: own }] = await Promise.all([
+            query,
+            supabase.from("catalog_items").select("title, attributes").eq("parent_id", moldId).eq("item_type", "plastic_release").limit(1000),
+        ]);
+        // A piece already catalogued counts whether its number sits in the
+        // number field or, as members long had to type it, at the front of the title.
+        const ownNumbers = new Set(
+            ((own ?? []) as { title: string; attributes: Record<string, unknown> | null }[])
+                .map((r) => String(r.attributes?.model_number ?? splitNumberFromTitle(r.title).model ?? "").replace(/^#/, "").toLowerCase())
+                .filter(Boolean),
+        );
+        const seen = new Map<string, MoldSetMention>();
+        for (const r of (sets ?? []) as {
+            id: string;
+            title: string;
+            maker: string | null;
+            maker_slug: string | null;
+            slug: string | null;
+            parent_id: string | null;
+            attributes: Record<string, unknown> | null;
+        }[]) {
+            if (r.parent_id === moldId) continue;
+            if (!mentionsMold(r.title, name)) continue;
+            const model = String(r.attributes?.model_number ?? "").replace(/^#/, "").trim() || null;
+            if (model && ownNumbers.has(model.toLowerCase())) continue;
+            const setName = setLabel(r.title) ?? r.title;
+            const key = `${(model ?? "").toLowerCase()}|${setName.toLowerCase().replace(/s\b/g, "")}`;
+            if (seen.has(key)) continue;
+            const y = Number(r.attributes?.release_year_start);
+            seen.set(key, {
+                setName,
+                modelNumber: model,
+                year: Number.isFinite(y) && y > 1900 ? y : null,
+                setHref: referenceHref({ id: r.id, maker: r.maker, title: r.title, maker_slug: r.maker_slug, slug: r.slug }),
+            });
+        }
+        return [...seen.values()].sort((a, b) => (a.year ?? 9999) - (b.year ?? 9999) || a.setName.localeCompare(b.setName));
+    },
+    ["reference:mold-sets:v2"],
     { revalidate: REVALIDATE, tags: [REFERENCE_PAGES_CACHE_TAG] },
 );

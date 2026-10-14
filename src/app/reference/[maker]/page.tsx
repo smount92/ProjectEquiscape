@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { shortScale } from "@/lib/linker/model";
 import Link from "next/link";
 import FocusLayout from "@/components/layouts/FocusLayout";
 import CatalogSubMasthead from "@/components/catalog/CatalogSubMasthead";
@@ -153,7 +154,12 @@ export default async function MakerHubPage({ params }: Props) {
                                     })}
                                     className="flex items-baseline justify-between gap-3 rounded-lg border border-input bg-card px-4 py-3 no-underline transition-colors hover:border-forest"
                                 >
-                                    <span className="font-semibold text-foreground">{m.title}</span>
+                                    <span className="min-w-0">
+                                        <span className="font-semibold text-foreground">{m.title}</span>
+                                        {m.scale && (
+                                            <span className="block text-xs text-muted-foreground">{shortScale(m.scale)}</span>
+                                        )}
+                                    </span>
                                     {m.releaseCount > 0 && (
                                         <span className="text-sm whitespace-nowrap text-muted-foreground tabular-nums">
                                             {m.releaseCount} release{m.releaseCount === 1 ? "" : "s"}

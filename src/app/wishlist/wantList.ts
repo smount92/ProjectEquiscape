@@ -47,6 +47,9 @@ export interface WantListItem {
     maker: string | null;
     scale: string | null;
     itemType: string | null;
+    /** Stored page address: same-name entries carry a -2/-3 suffix only these know. */
+    makerSlug: string | null;
+    slug: string | null;
     /** Live listings of this exact catalog entry, by other collectors. */
     matches: MarketplaceMatch[];
 }
@@ -88,7 +91,7 @@ export async function getWantListBoard(userId: string): Promise<WantListBoard> {
         .from("user_wishlists")
         .select(
             `id, notes, created_at, catalog_id,
-             catalog_items:catalog_id(title, maker, scale, item_type)`,
+             catalog_items:catalog_id(title, maker, scale, item_type, maker_slug, slug)`,
         )
         .eq("user_id", userId)
         .order("created_at", { ascending: false });
@@ -153,6 +156,8 @@ export async function getWantListBoard(userId: string): Promise<WantListBoard> {
             maker: catalogItem?.maker ?? null,
             scale: catalogItem?.scale ?? null,
             itemType: catalogItem?.item_type ?? null,
+            makerSlug: (catalogItem as { maker_slug?: string | null } | null)?.maker_slug ?? null,
+            slug: (catalogItem as { slug?: string | null } | null)?.slug ?? null,
             matches: row.catalog_id ? (matchesByCatalogId.get(row.catalog_id) ?? []) : [],
         };
     });

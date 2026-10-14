@@ -141,7 +141,7 @@ export default async function CatalogItemPage({ params, searchParams }: Props) {
     </Link></Button>
    )}
    <a
-    href={buildEbaySearchUrl(catalogItem.title, catalogItem.maker, (attrs as Record<string, string>).item_number ?? null)}
+    href={buildEbaySearchUrl(catalogItem.title, catalogItem.maker, (attrs as Record<string, string>).model_number ?? null)}
     target="_blank"
     rel="noopener noreferrer"
     className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-lg border border-info/30 bg-info/10 px-4 py-1 text-sm font-semibold text-info no-underline shadow-sm transition-colors hover:bg-info/20"

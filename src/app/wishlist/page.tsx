@@ -131,7 +131,7 @@ function WantCard({ item }: { item: WantListItem }) {
     const title = item.title || "Custom entry";
     const icon = (item.itemType && TYPE_ICON[item.itemType]) || "📝";
     const href = item.catalog_id
-        ? referenceHref({ id: item.catalog_id, maker: item.maker, title })
+        ? referenceHref({ id: item.catalog_id, maker: item.maker, title, maker_slug: item.makerSlug, slug: item.slug })
         : null;
 
     return (

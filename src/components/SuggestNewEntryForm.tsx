@@ -41,6 +41,11 @@ interface SuggestNewEntryFormProps {
  onSubmitted?: (title: string) => void;
  /** Dialog mode: called when the user cancels. */
  onCancel?: () => void;
+ /** Prefills from a mold page's "add this piece" link. */
+ initialMoldName?: string;
+ initialScale?: string;
+ initialMaker?: string;
+ initialModelNumber?: string;
 }
 
 export default function SuggestNewEntryForm({
@@ -48,6 +53,10 @@ export default function SuggestNewEntryForm({
  variant ="page",
  onSubmitted,
  onCancel,
+ initialMoldName ="",
+ initialScale ="",
+ initialMaker ="",
+ initialModelNumber ="",
 }: SuggestNewEntryFormProps = {}) {
  const router = useRouter();
  const [isPending, startTransition] = useTransition();
@@ -56,14 +65,14 @@ export default function SuggestNewEntryForm({
  const [submittedTitle, setSubmittedTitle] = useState("");
 
  const [title, setTitle] = useState(initialTitle);
- const [maker, setMaker] = useState("");
+ const [maker, setMaker] = useState(initialMaker);
  const [customMaker, setCustomMaker] = useState("");
  const [sculptor, setSculptor] = useState("");
  // Artist categories: the primary attribution is a PERSON.
  const [artistName, setArtistName] = useState("");
  const [manufacturer, setManufacturer] = useState("");
  const [itemType, setItemType] = useState("plastic_release");
- const [scale, setScale] = useState("");
+ const [scale, setScale] = useState(initialScale);
  const [color, setColor] = useState("");
  const [material, setMaterial] = useState("");
  const [year, setYear] = useState("");
@@ -74,7 +83,10 @@ export default function SuggestNewEntryForm({
  const [runCount, setRunCount] = useState("");
  const [breed, setBreed] = useState("");
  const [gender, setGender] = useState("");
- const [moldName, setMoldName] = useState("");
+ const [moldName, setMoldName] = useState(initialMoldName);
+ // The model number has its own field: without one, members typed it into
+ // the title ("#5022 Silky Sullivan") where search cannot read it.
+ const [modelNumber, setModelNumber] = useState(initialModelNumber);
  const [reason, setReason] = useState("");
  // Duplicate speed bump: candidates from the server's title match.
  const [duplicates, setDuplicates] = useState<
@@ -99,14 +111,20 @@ export default function SuggestNewEntryForm({
  ? artistName.trim()
  : maker ==="Other" ? customMaker.trim() : maker;
 
+ // A number typed at the front of the title moves to its own field.
+ const typedNumber = title.trim().match(/^#s*(d{3,7}[a-z]?)s+(.+)$/i);
+ const finalTitle = typedNumber && !modelNumber.trim() ? typedNumber[2].trim() : title.trim();
+ const finalModel = (modelNumber.trim() || (typedNumber ? typedNumber[1] : "")).replace(/^#/, "");
+
  startTransition(async () => {
  setError(null);
  const result = await createSuggestion({
  catalogItemId: null, // null = new entry suggestion
  suggestionType:"addition",
  fieldChanges: {
- title: title.trim(),
+ title: finalTitle,
  maker: effectiveMaker || undefined,
+ model_number: isArtistPiece || isMold ? undefined : finalModel || undefined,
  manufacturer: isArtistPiece ? manufacturer.trim() || undefined : undefined,
  sculptor: isArtistPiece ? undefined : sculptor.trim() || undefined,
  item_type: itemType,
@@ -123,7 +141,7 @@ export default function SuggestNewEntryForm({
  // A mold IS its name: the title is written to both places so the
  // review screens and the duplicate check keep reading mold_name.
  // (A member was asked for the same name twice, 2026-10-12.)
- mold_name: isMold ? title.trim() : moldName || undefined,
+ mold_name: isMold ? finalTitle : moldName || undefined,
  },
  reason: reason.trim(),
  confirmDuplicates,
@@ -131,7 +149,7 @@ export default function SuggestNewEntryForm({
 
  if (result.success) {
  setDuplicates(null);
- setSubmittedTitle(title.trim());
+ setSubmittedTitle(finalTitle);
  setSuccess(true);
  } else if (result.error ==="possible-duplicates" &&"duplicates" in result) {
  setDuplicates(result.duplicates ?? []);
@@ -403,6 +421,21 @@ export default function SuggestNewEntryForm({
  <p className="text-muted-foreground m-0 mt-1 text-xs">The sculpture this release was made on, if you know it.</p>
  </div>
  )}
+ {itemType !== "plastic_mold" && !ARTIST_ATTRIBUTED_CATEGORIES.has(itemType) && (
+ <div className="mb-6">
+ <label className="text-foreground mb-1 block text-sm font-semibold" htmlFor="new-entry-model-number">
+ Model number
+ </label>
+ <Input
+ id="new-entry-model-number"
+ value={modelNumber}
+ onChange={(e) => setModelNumber(e.target.value)}
+ placeholder="e.g. 5022"
+ maxLength={40}
+ />
+ <p className="text-muted-foreground m-0 mt-1 text-xs">The maker&apos;s catalogue number, without the #. Leave it out of the name.</p>
+ </div>
+ )}
  <div className="mb-6">
  <label className="text-foreground mb-1 block text-sm font-semibold" htmlFor="new-entry-year">
  Year
@@ -431,7 +464,7 @@ export default function SuggestNewEntryForm({
  placeholder="e.g. 59.99"
  maxLength={9}
  />
- <p className="text-muted-foreground mt-1 text-xs">What it sold for new, if you know it — shown beside today's Blue Book range.</p>
+ <p className="text-muted-foreground mt-1 text-xs">What it sold for new, if you know it — shown beside today&apos;s Blue Book range.</p>
  </div>
  </div>
 

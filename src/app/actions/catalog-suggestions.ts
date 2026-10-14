@@ -2,6 +2,7 @@
 
 import { requireAuth } from "@/lib/auth";
 import { stripGeneration } from "@/lib/linker/model";
+import { fieldLabel } from "@/lib/catalog/editableFields";
 import { namedMolds, placeReleasesUnderMolds, searchName, termImpliesStablemate, type CandidateRow } from "@/lib/catalog/moldSearch";
 import { parseCatalogQuery } from "@/lib/catalog/queryParse";
 import { getAdminClient } from "@/lib/supabase/admin";
@@ -441,6 +442,10 @@ export async function createSuggestion(input: SuggestionInput) {
     // suggestion, look for existing catalog items with a matching
     // title. The caller renders the candidates and may resubmit with
     // confirmDuplicates — this is a speed bump, never a wall.
+    if (input.suggestionType === "addition") {
+        const existing = await findExistingMold(admin, input.fieldChanges ?? {});
+        if (existing) return { success: false, error: existingMoldMessage(existing) };
+    }
     if (
         input.suggestionType === "addition" &&
         !input.confirmDuplicates &&
@@ -1037,6 +1042,11 @@ export async function reviewSuggestion(decision: ReviewDecision) {
         (contributorProfile as { alias_name: string } | null)
             ?.alias_name ?? "Unknown";
 
+    if (decision.decision === "approved" && s.suggestion_type === "addition") {
+        const existing = await findExistingMold(admin, (s.field_changes ?? {}) as Record<string, unknown>);
+        if (existing) return { success: false, error: existingMoldMessage(existing) + " Reject this suggestion." };
+    }
+
     // Update status
     await admin
         .from("catalog_suggestions")
@@ -1179,7 +1189,7 @@ async function applyApprovedSuggestion(
         const changes = Object.entries(s.field_changes)
             .map(([k, v]) => {
                 const val = v as { from: unknown; to: unknown };
-                return `${k}: ${val.from} → ${val.to}`;
+                return `${fieldLabel(k)}: ${val.from} → ${val.to}`;
             })
             .join(", ");
         changeSummary = `🔧 Correction: ${changes}`;
@@ -1586,4 +1596,35 @@ async function resolveParentMold(
     for (const k of (kids ?? []) as { parent_id: string }[]) counts.set(k.parent_id, (counts.get(k.parent_id) ?? 0) + 1);
     candidates.sort((a, b) => (counts.get(b.id) ?? 0) - (counts.get(a.id) ?? 0) || a.created_at.localeCompare(b.created_at));
     return { id: candidates[0].id, scale: candidates[0].scale ?? null };
+}
+
+/**
+ * A mold the Registry already holds under this maker, scale and name
+ * (generation token ignored). 44 of the 48 duplicate molds found on
+ * 2026-10-14 were approved additions of molds that already existed; the
+ * duplicate check was a dismissible speed bump. A second copy of a mold
+ * is now refused outright, at filing and again at approval.
+ */
+async function findExistingMold(
+    admin: ReturnType<typeof getAdminClient>,
+    fc: Record<string, unknown>,
+): Promise<{ id: string; title: string; scale: string | null } | null> {
+    if (suggestionItemTypeToDb(fc.item_type as string | undefined) !== "plastic_mold") return null;
+    const title = typeof fc.title === "string" ? fc.title : typeof fc.mold_name === "string" ? fc.mold_name : "";
+    const name = stripGeneration(title).trim();
+    if (!name) return null;
+    const maker = typeof fc.maker === "string" ? fc.maker.trim() : "";
+    const scale = normalizeScale(typeof fc.scale === "string" ? fc.scale : null);
+    let q = admin.from("catalog_items").select("id, title, scale").eq("item_type", "plastic_mold");
+    if (maker) q = q.ilike("maker", maker);
+    q = scale ? q.eq("scale", scale) : q.is("scale", null);
+    const { data } = await q.limit(50);
+    const hit = ((data ?? []) as { id: string; title: string; scale: string | null }[]).find(
+        (m) => stripGeneration(m.title).trim().toLowerCase() === name.toLowerCase(),
+    );
+    return hit ?? null;
+}
+
+function existingMoldMessage(m: { title: string; scale: string | null }): string {
+    return `The Registry already has the ${m.scale ? m.scale + " " : ""}"${m.title}" mold. Add releases under it instead of a second copy.`;
 }

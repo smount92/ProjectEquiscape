@@ -15,6 +15,7 @@ import {
     resolveReferenceItem,
     getActiveListingsForCatalog,
     getMoldTimelineData,
+    getMoldSetMentions,
     getCatalogPhotos,
     getCatalogCounts,
     getReferenceMarket,
@@ -259,11 +260,13 @@ export default async function ReferencePage({ params }: Props) {
     if (!item) notFound();
 
     const isMold = item.item_type === "plastic_mold";
+    // The mold this release is filed under, read from the link itself.
+    const moldOf = item.item_type === "plastic_release" && item.parent?.item_type === "plastic_mold" ? item.parent : null;
 
     // Everything in parallel — all anon-safe / aggregate-only and cookie-free,
     // so this page statically generates + ISR-caches. Per-user state (the
     // "already wanted?" check) is fetched client-side by WantButton.
-    const [counts, market, marketHistory, listings, photos, moldTimeline, customs, ebaySignal] =
+    const [counts, market, marketHistory, listings, photos, moldTimeline, customs, ebaySignal, setMentions] =
         await Promise.all([
             getCatalogCounts(item.id),
             getReferenceMarket(item.id),
@@ -273,6 +276,7 @@ export default async function ReferencePage({ params }: Props) {
             isMold ? getMoldTimelineData(item.id) : Promise.resolve(null),
             isMold ? getMoldCustoms(item.id) : Promise.resolve([]),
             getEbaySignalForReference(item.id),
+            isMold ? getMoldSetMentions(item.id, item.title, item.scale) : Promise.resolve([]),
         ]);
 
     // Product JSON-LD — built only from data the page already fetched above
@@ -354,6 +358,7 @@ export default async function ReferencePage({ params }: Props) {
             : null;
 
     const specRows: [string, string][] = [
+        ...(moldOf ? [["Mold", moldOf.title] as [string, string]] : []),
         ...(attribution.manufacturer
             ? [["Manufacturer", attribution.manufacturer] as [string, string]]
             : []),
@@ -367,6 +372,8 @@ export default async function ReferencePage({ params }: Props) {
                     k !== "source" &&
                     k !== "source_id" &&
                     k !== "sculptor" &&
+                    // The mold is shown from the real link above, never the typed text.
+                    k !== "mold_name" &&
                     // Prose renders as its own section, never as a spec row.
                     k !== "registry_notes",
             )
@@ -455,6 +462,21 @@ export default async function ReferencePage({ params }: Props) {
                             {item.scale ? ` · ${item.scale}` : ""}
                             {isMold ? " · Mold" : ""}
                         </div>
+                        {moldOf && (
+                            <p className="m-0 text-base text-secondary-foreground" data-testid="release-mold">
+                                A release on the{" "}
+                                <Link href={referenceHref(moldOf)} className="font-semibold text-forest underline decoration-dotted hover:decoration-solid">
+                                    {moldOf.title}
+                                </Link>{" "}
+                                mold{moldOf.scale && moldOf.scale !== item.scale ? ` (${moldOf.scale})` : ""}.
+                            </p>
+                        )}
+                        {!isMold && item.item_type === "plastic_release" && !moldOf && (
+                            <p className="m-0 text-sm text-muted-foreground italic" data-testid="release-mold-missing">
+                                Not yet filed under a mold
+                                {typeof attrs.mold_name === "string" && attrs.mold_name.trim() ? ` (listed as "${attrs.mold_name.trim()}")` : ""}.
+                            </p>
+                        )}
                         {isMold && (
                             <p className="rounded-lg border border-input bg-muted/50 px-3 py-2 text-sm text-secondary-foreground">
                                 This is a <b className="text-foreground">mold</b>
@@ -699,6 +721,49 @@ export default async function ReferencePage({ params }: Props) {
                     <MoldTimeline data={moldTimeline} maker={item.maker} />
                 )}
 
+                {/* SETS WITHOUT THIS PIECE — sets whose roster names this mold
+                    but whose piece for it is not catalogued (reference-pages
+                    getMoldSetMentions). The gap made the Stablemate Morgan
+                    Stallion look empty while it sat in 38 set rows. */}
+                {isMold && setMentions.length > 0 && (
+                    <section data-testid="mold-set-mentions">
+                        <h2 className="mb-1 font-serif text-xl font-bold text-foreground">
+                            Also sold in these sets ({setMentions.length})
+                        </h2>
+                        <p className="mb-3 text-sm text-muted-foreground">
+                            The Registry has these sets, but not this mold&apos;s piece in them yet. If you own one, add it so it shows above with its colour.
+                        </p>
+                        <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
+                            {setMentions.map((sm) => (
+                                <li
+                                    key={`${sm.modelNumber ?? ""}-${sm.setName}`}
+                                    className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 rounded-lg border border-input bg-card px-4 py-2 text-sm"
+                                >
+                                    <span className="min-w-0">
+                                        <span className="tabular-nums text-muted-foreground">{sm.year ?? "year ?"}</span>{" "}
+                                        <Link href={sm.setHref} className="font-semibold text-foreground hover:text-forest hover:underline">
+                                            {sm.setName}
+                                        </Link>
+                                        {sm.modelNumber ? <span className="text-muted-foreground"> #{sm.modelNumber}</span> : null}
+                                    </span>
+                                    <Link
+                                        href={`/catalog/suggestions/new?${new URLSearchParams({
+                                            prefill: sm.setName,
+                                            mold: item.title,
+                                            ...(item.scale ? { scale: item.scale } : {}),
+                                            ...(item.maker ? { maker: item.maker } : {}),
+                                            ...(sm.modelNumber ? { model: sm.modelNumber } : {}),
+                                        }).toString()}`}
+                                        className="text-xs font-semibold text-forest hover:underline"
+                                    >
+                                        Add this piece →
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+                    </section>
+                )}
+
                 {/* CUSTOMS OF THIS MOLD (Taxonomy v2 — customs are horses,
                     not catalog rows; the mold page gathers the public ones) */}
                 {isMold && customs.length > 0 && (
@@ -812,7 +877,7 @@ export default async function ReferencePage({ params }: Props) {
                         reference and the makers' own archives; descriptions are
                         written here. Members correcting an entry beats any import. */}
                     <p className="mt-2 text-xs text-muted-foreground">
-                        Facts from the hobby's published record and the makers' archives —{" "}
+                        Facts from the hobby&apos;s published record and the makers&apos; archives —{" "}
                         <Link href="/faq#collecting" className="underline hover:no-underline">
                             where our information comes from
                         </Link>

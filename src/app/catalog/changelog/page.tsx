@@ -1,5 +1,6 @@
 import { createClient } from"@/lib/supabase/server";
 import Link from"next/link";
+import { humanizeChangeSummary } from "@/lib/catalog/editableFields";
 import type { Metadata } from"next";
 import ExplorerLayout from"@/components/layouts/ExplorerLayout";
 import CatalogSubMasthead from"@/components/catalog/CatalogSubMasthead";
@@ -75,7 +76,7 @@ export default async function ChangelogPage() {
     </span>
     <div className="space-y-4">
     <p className="mb-[4px] text-sm font-medium text-foreground">
-     {entry.change_summary}
+     {humanizeChangeSummary(entry.change_summary)}
     </p>
     <p className="text-forest">
      Contributed by{" "}

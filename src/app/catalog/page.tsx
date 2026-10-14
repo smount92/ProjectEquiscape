@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
 import CatalogMasthead from "@/components/catalog/CatalogMasthead";
+import { getPublicStats } from "@/lib/stats/publicStats";
 import CatalogFilterBar from "@/components/catalog/CatalogFilterBar";
 import CatalogResultsTable from "@/components/catalog/CatalogResultsTable";
 import CatalogCardsList from "@/components/catalog/CatalogCardsList";
@@ -113,6 +114,9 @@ export default async function ReferencePage({
     if (facets.scales) facets.scales = sortScalesBySize(facets.scales);
     const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
     const activeCount = countActiveCatalogFilters(filters);
+    // Unfiltered, the headline is the Registry's exact size (the browse
+    // count is a planner estimate there, 11,821 against 11,855 real rows).
+    const registrySize = activeCount > 0 ? null : await getPublicStats().then((st) => st.catalogItems).catch(() => null);
 
     // eBay asking medians for the visible page — one batched read, flag-
     // aware: a signal a member has reported as wrongly matched shows
@@ -247,7 +251,7 @@ export default async function ReferencePage({
     return (
         <ExplorerLayout noHeader>
             {/* Leather landmark: the catalog masthead IS the page header */}
-            <CatalogMasthead totalCount={total} />
+            <CatalogMasthead totalCount={activeCount > 0 ? total : registrySize ?? total} filtered={activeCount > 0} />
 
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_280px]">
                 {/* Main: filter bar + results table + pagination.
@@ -305,7 +309,7 @@ export default async function ReferencePage({
                                     suggest flow (and its login bounce) can bring
                                     the searcher back to where they left off. */}
                                 <Link
-                                    href={`/catalog/suggestions/new?redirectTo=${encodeURIComponent(pageHref(filters, filters.page))}`}
+                                    href={`/catalog/suggestions/new?${new URLSearchParams({ ...(filters.q ? { prefill: filters.q } : {}), ...(filters.scale ? { scale: filters.scale } : {}), ...(filters.maker ? { maker: filters.maker } : {}), redirectTo: pageHref(filters, filters.page) }).toString()}`}
                                     className="text-forest hover:underline"
                                 >
                                     Suggest a new entry?

@@ -52,6 +52,8 @@ export interface MakerMold {
     title: string;
     makerSlug: string | null;
     slug: string | null;
+    /** Same-name molds at different scales are different sculptures; the grid says which. */
+    scale: string | null;
     /** Number of catalogued releases on this mold (0 for none). */
     releaseCount: number;
 }
@@ -68,7 +70,7 @@ export const getMakerMolds = unstable_cache(
 
         const { data: moldData } = await supabase
             .from("catalog_items")
-            .select("id, title, maker_slug, slug")
+            .select("id, title, maker_slug, slug, scale")
             .eq("maker_slug", makerSlug)
             .eq("item_type", "plastic_mold")
             .order("title")
@@ -78,6 +80,7 @@ export const getMakerMolds = unstable_cache(
             title: string;
             maker_slug: string | null;
             slug: string | null;
+            scale: string | null;
         }[];
         if (molds.length === 0) return [];
 
@@ -101,10 +104,11 @@ export const getMakerMolds = unstable_cache(
             title: m.title,
             makerSlug: m.maker_slug,
             slug: m.slug,
+            scale: m.scale,
             releaseCount: counts.get(m.id) ?? 0,
         }));
     },
-    ["maker-hubs:molds"],
+    ["maker-hubs:molds:v2"],
     { revalidate: REVALIDATE, tags: [REFERENCE_PAGES_CACHE_TAG] },
 );
 

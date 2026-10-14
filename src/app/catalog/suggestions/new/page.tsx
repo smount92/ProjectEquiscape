@@ -28,6 +28,11 @@ export default async function SuggestNewEntryPage({
 }) {
  const params = await searchParams;
  const prefill = first(params.prefill);
+ // A mold page's "add this piece" link carries the mold and its facts.
+ const prefillMold = (first(params.mold) ?? "").slice(0, 200);
+ const prefillScale = (first(params.scale) ?? "").slice(0, 60);
+ const prefillMaker = (first(params.maker) ?? "").slice(0, 80);
+ const prefillModel = (first(params.model) ?? "").slice(0, 40);
  const redirectTo = safeInternalPath(params.redirectTo);
  const supabase = await createClient();
  const {
@@ -40,6 +45,10 @@ export default async function SuggestNewEntryPage({
  if (!user) {
  const qs = new URLSearchParams();
  if (prefill) qs.set("prefill", prefill);
+ if (prefillMold) qs.set("mold", prefillMold);
+ if (prefillScale) qs.set("scale", prefillScale);
+ if (prefillMaker) qs.set("maker", prefillMaker);
+ if (prefillModel) qs.set("model", prefillModel);
  if (redirectTo) qs.set("redirectTo", redirectTo);
  const self = "/catalog/suggestions/new" + (qs.size ? `?${qs.toString()}` : "");
  redirect("/login?redirectTo=" + encodeURIComponent(self));
@@ -60,7 +69,13 @@ export default async function SuggestNewEntryPage({
   </p>
   )}
   <div className="bg-card border-input rounded-lg border p-8 shadow-md transition-all">
-  <SuggestNewEntryForm initialTitle={(prefill ??"").slice(0, 200)} />
+  <SuggestNewEntryForm
+   initialTitle={(prefill ??"").slice(0, 200)}
+   initialMoldName={prefillMold}
+   initialScale={prefillScale}
+   initialMaker={prefillMaker}
+   initialModelNumber={prefillModel}
+  />
   </div>
  </FocusLayout>
  );
