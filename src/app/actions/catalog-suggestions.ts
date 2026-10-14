@@ -1,6 +1,7 @@
 "use server";
 
 import { requireAuth } from "@/lib/auth";
+import { stripGeneration } from "@/lib/linker/model";
 import { parseCatalogQuery } from "@/lib/catalog/queryParse";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -1190,7 +1191,11 @@ async function applyApprovedSuggestion(
         // the mold the member was looking at. Honour it: the release is
         // filed under that mold and inherits its scale, which is the one
         // thing this path never did (517 orphan releases say so).
-        const parentId = await resolveParentMold(admin, fc.parent_catalog_id, itemType);
+        const parentId = await resolveParentMold(admin, fc.parent_catalog_id, itemType, {
+            moldName: fc.mold_name,
+            maker,
+            scale: typeof fc.scale === "string" ? fc.scale : null,
+        });
         const insertPayload = {
             item_type: itemType,
             title: (fc.title ?? fc.mold_name ?? "Untitled") as string,
@@ -1519,10 +1524,38 @@ async function resolveParentMold(
     admin: ReturnType<typeof getAdminClient>,
     raw: unknown,
     itemType: string,
+    typed?: { moldName?: unknown; maker?: string | null; scale?: string | null },
 ): Promise<{ id: string; scale: string | null } | null> {
-    if (itemType !== "plastic_release" || typeof raw !== "string") return null;
-    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(raw)) return null;
-    const { data } = await admin.from("catalog_items").select("id, scale").eq("id", raw).eq("item_type", "plastic_mold").maybeSingle();
-    if (!data) return null;
-    return { id: (data as { id: string }).id, scale: ((data as { scale: string | null }).scale ?? null) };
+    if (itemType !== "plastic_release") return null;
+    if (typeof raw === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(raw)) {
+        const { data } = await admin.from("catalog_items").select("id, scale").eq("id", raw).eq("item_type", "plastic_mold").maybeSingle();
+        if (data) return { id: (data as { id: string }).id, scale: ((data as { scale: string | null }).scale ?? null) };
+    }
+    // The old suggestion form sends the mold as typed text ("G1 Arabian
+    // Stallion"). Resolve it the way the linker does: same maker, same
+    // scale, same name with the generation token stripped. Two molds with
+    // that name (the Registry holds 48 such pairs) resolve to the one that
+    // already carries the most releases, then the older one, so the
+    // duplicate does not keep collecting children. 22 Arabian Stallion
+    // releases sat with no parent before this (2026-10-14).
+    const name = typeof typed?.moldName === "string" ? stripGeneration(typed.moldName).trim() : "";
+    if (!name) return null;
+    let query = admin.from("catalog_items").select("id, scale, created_at").eq("item_type", "plastic_mold").ilike("title", name);
+    if (typed?.maker) query = query.ilike("maker", typed.maker);
+    const scale = normalizeScale(typed?.scale ?? null);
+    if (scale) query = query.eq("scale", scale);
+    const { data: molds } = await query.limit(5);
+    const candidates = (molds ?? []) as { id: string; scale: string | null; created_at: string }[];
+    if (candidates.length === 0) return null;
+    if (candidates.length === 1) return { id: candidates[0].id, scale: candidates[0].scale ?? null };
+    const { data: kids } = await admin
+        .from("catalog_items")
+        .select("parent_id")
+        .in("parent_id", candidates.map((c) => c.id))
+        .eq("item_type", "plastic_release")
+        .limit(5000);
+    const counts = new Map<string, number>();
+    for (const k of (kids ?? []) as { parent_id: string }[]) counts.set(k.parent_id, (counts.get(k.parent_id) ?? 0) + 1);
+    candidates.sort((a, b) => (counts.get(b.id) ?? 0) - (counts.get(a.id) ?? 0) || a.created_at.localeCompare(b.created_at));
+    return { id: candidates[0].id, scale: candidates[0].scale ?? null };
 }
