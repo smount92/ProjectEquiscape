@@ -54,10 +54,14 @@ export function yearRangeLabel(attrs: CardAttributes | null | undefined): string
 export function disambiguationLine(
     maker: string | null | undefined,
     attrs: CardAttributes | null | undefined,
+    /** A release's mold, so the card says what it is on ("on Arabian Stallion"). */
+    moldTitle?: string | null,
 ): string {
     const parts: string[] = [];
     const m = asText(maker);
     if (m) parts.push(m);
+    const mold = asText(moldTitle);
+    if (mold) parts.push(`on ${mold}`);
     const years = yearRangeLabel(attrs);
     if (years) parts.push(years);
     const color = attrs && typeof attrs === "object" ? asText(attrs.color_description) : null;

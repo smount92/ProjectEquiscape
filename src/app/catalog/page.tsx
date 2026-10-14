@@ -174,6 +174,18 @@ export default async function ReferencePage({
     //    (aggregated here — PostgREST has no GROUP BY). No per-item loops.
     const thumbsMap = new Map<string, string>();
     const releaseCounts = new Map<string, number>();
+    // 3. The mold each visible release is filed on, so a release card says
+    //    "on Arabian Stallion". Molds already on the page are read from it;
+    //    the rest in one batched query.
+    const parentTitles = new Map<string, string>();
+    for (const i of items) if (i.item_type === "plastic_mold") parentTitles.set(i.id, i.title);
+    const missingParents = [
+        ...new Set(items.map((i) => i.parent_id).filter((p): p is string => !!p && !parentTitles.has(p))),
+    ];
+    if (missingParents.length > 0) {
+        const { data: parents } = await supabase.from("catalog_items").select("id, title").in("id", missingParents);
+        for (const p of (parents ?? []) as { id: string; title: string }[]) parentTitles.set(p.id, p.title);
+    }
     if (items.length > 0) {
         const moldIds = items
             .filter((i) => i.item_type === "plastic_mold")
@@ -312,6 +324,7 @@ export default async function ReferencePage({
                                     thumbs={thumbsMap}
                                     releaseCounts={releaseCounts}
                                     ebayMedians={ebayMap}
+                                    parentTitles={parentTitles}
                                 />
                             }
                             table={<CatalogResultsTable items={items} statsMap={statsMap} />}

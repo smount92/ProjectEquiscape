@@ -27,6 +27,7 @@ export interface CatalogCardItem {
     maker_slug: string | null;
     slug: string | null;
     scale: string | null;
+    parent_id?: string | null;
     attributes?: CardAttributes | null;
 }
 
@@ -36,7 +37,10 @@ export default function CatalogCardsList({
     thumbs,
     releaseCounts,
     ebayMedians,
+    parentTitles,
 }: {
+    /** release parent_id → the mold's title, so a release says what it is on. */
+    parentTitles?: Map<string, string>;
     items: CatalogCardItem[];
     statsMap: Map<string, { owner: number; want: number; forSale: number }>;
     /** catalog_id → community thumbnail URL (migration 147; may be empty). */
@@ -55,7 +59,10 @@ export default function CatalogCardsList({
                 const thumb = thumbs.get(item.id);
                 const isMold = item.item_type === "plastic_mold";
                 const releases = isMold ? (releaseCounts.get(item.id) ?? 0) : 0;
-                const subLineBase = disambiguationLine(item.maker, item.attributes);
+                // A release names the mold it is filed on, so a search for the
+                // mold reads as the mold followed by its releases.
+                const moldTitle = !isMold && item.parent_id ? parentTitles?.get(item.parent_id) : undefined;
+                const subLineBase = disambiguationLine(item.maker, item.attributes, moldTitle);
                 const subLine =
                     isMold && releases > 0
                         ? subLineBase

@@ -2,6 +2,7 @@
 
 import { requireAuth } from "@/lib/auth";
 import { stripGeneration } from "@/lib/linker/model";
+import { namedMolds, placeReleasesUnderMolds, searchName, termImpliesStablemate, type CandidateRow } from "@/lib/catalog/moldSearch";
 import { parseCatalogQuery } from "@/lib/catalog/queryParse";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -183,7 +184,10 @@ export async function getCatalogItems(filters: CatalogFilters) {
     // facet (unless one is already chosen) and the initials are spelled
     // out, so the text search runs on the name alone.
     const parsedSearch = filters.search ? parseCatalogQuery(filters.search) : null;
-    const searchTerm = parsedSearch && parsedSearch.term.length >= 2 ? parsedSearch.term : filters.search;
+    const parsedTerm = parsedSearch && parsedSearch.term.length >= 2 ? parsedSearch.term : filters.search;
+    // "G1 Arabian Stallion" / "SM Arabian Stallion" search for the mold's
+    // own name, so the exact-name tier of the RPC can find it (lib/catalog/moldSearch).
+    const searchTerm = parsedTerm ? searchName(parsedTerm) || parsedTerm : parsedTerm;
     const makerFacet = filters.maker ?? parsedSearch?.maker ?? undefined;
 
     let searchIds: string[] | null = null;
@@ -193,9 +197,33 @@ export async function getCatalogItems(filters: CatalogFilters) {
             max_results: FUZZY_CANDIDATE_LIMIT,
         });
         if (!fuzzyError && Array.isArray(fuzzyRows)) {
-            searchIds = (fuzzyRows as { id: string }[]).map((r) => r.id);
+            const rows = fuzzyRows as CandidateRow[];
+            searchIds = rows.map((r) => r.id);
             if (searchIds.length === 0) {
                 return { success: true as const, items: [], total: 0, page, pageSize };
+            }
+            // A search that names a mold shows the releases filed under it,
+            // whatever those releases are called (2026-10-14: a member's 16
+            // Stablemate Arabian Stallion releases were filed under the mold
+            // and 11 never surfaced, because search reads titles).
+            const named = namedMolds(rows, searchTerm);
+            if (named.length > 0) {
+                const { data: kids } = await supabase
+                    .from("catalog_items")
+                    .select("id, parent_id, title, attributes")
+                    .in("parent_id", named.map((m) => m.id))
+                    .eq("item_type", "plastic_release")
+                    .limit(1000);
+                const byMold = new Map<string, string[]>(named.map((m) => [m.id, []]));
+                const sorted = ((kids ?? []) as { id: string; parent_id: string; title: string; attributes: Record<string, unknown> | null }[]).sort(
+                    (a, b) =>
+                        Number(a.attributes?.release_year_start ?? 9999) - Number(b.attributes?.release_year_start ?? 9999) ||
+                        a.title.localeCompare(b.title),
+                );
+                for (const k of sorted) byMold.get(k.parent_id)?.push(k.id);
+                searchIds = placeReleasesUnderMolds(rows, byMold, {
+                    preferStablemate: !!parsedTerm && termImpliesStablemate(parsedTerm) && !filters.scale,
+                });
             }
         }
         // RPC unavailable (fresh env, migration pending)? searchIds stays
@@ -289,7 +317,7 @@ export async function getCatalogItems(filters: CatalogFilters) {
             .select(columns, {
                 count: searchIds || pricedJoin ? "exact" : "estimated",
             });
-        if (relevance) query = query.limit(FUZZY_CANDIDATE_LIMIT);
+        if (relevance) query = query.limit(Math.max(FUZZY_CANDIDATE_LIMIT, searchIds?.length ?? 0));
         else query = query.range(from, from + pageSize - 1);
         if (pricedJoin && flaggedIds.length > 0) {
             query = query.not("id", "in", `(${flaggedIds.join(",")})`);
