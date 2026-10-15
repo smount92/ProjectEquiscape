@@ -1,9 +1,10 @@
 ---
 id: MHH-013
 title: Colour check catches hex literals; muted text uses the right token
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-10-15 22:19'
+updated_date: '2026-10-15 23:16'
 labels:
   - platform
 milestone: m-0
@@ -25,8 +26,8 @@ docs/STANDARDS.md plan step 8.
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Ratchet test counts hex and [#hex] outside PDFs
-- [ ] #2 text-muted replaced with text-muted-foreground where it is text
+- [x] #1 Ratchet test counts hex and [#hex] outside PDFs
+- [x] #2 text-muted replaced with text-muted-foreground where it is text
 <!-- AC:END -->
 
 ## Definition of Done
@@ -35,3 +36,9 @@ docs/STANDARDS.md plan step 8.
 - [ ] #2 Decision recorded in docs/DECISIONS.md if one was made
 - [ ] #3 Member who reported it has a drafted reply, if any
 <!-- DOD:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+hardcoded-hex.test.ts ratchets hex literals in components (200 today, PDFs exempt). The 29 'bare text-muted' uses the audit reported were all the --leather-text-muted CSS variable; there is no bare text-muted class in use, so nothing to fix. STANDARDS.md corrected.
+<!-- SECTION:FINAL_SUMMARY:END -->

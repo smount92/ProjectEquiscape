@@ -51,8 +51,8 @@ live Registry. Counts are the baseline; they should only go down.
 
 | Rule | Status | Today |
 |---|---|---|
-| Colours come from tokens, never literals | Ratchet (`hardcoded-colors.test.ts`, baseline 406) | The test misses hex: 205 hex literals outside PDFs, 52 `[#hex]` classes. |
-| `text-muted-foreground` for muted text; `text-muted` is a background token | Doc only | 29 `text-muted` uses, likely the wrong colour. |
+| Colours come from tokens, never literals | Ratchet (`hardcoded-colors.test.ts` 406 palette classes; `hardcoded-hex.test.ts` 200 hex literals outside PDFs) | Lower each baseline as usages convert. |
+| `text-muted-foreground` for muted text; `text-muted` is a background token | Doc only | Checked 2026-10-15: no bare `text-muted` class in use (the audit counted the `--leather-text-muted` variable). |
 | Use the `ui/` components (`Button`, `Input` ...) | Doc only | 307 raw `<button>`, 109 `<input>`. |
 | Contrast passes in light and Lamplight | Enforced (`npm run test:contrast` + token test) | Clean. |
 
