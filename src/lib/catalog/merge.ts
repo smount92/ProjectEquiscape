@@ -26,6 +26,9 @@ export interface MergeRef {
     id: string;
     title: string;
     maker: string | null;
+    /** The page address, so the duplicate's old link can forward (migration 233). */
+    maker_slug?: string | null;
+    slug?: string | null;
 }
 
 export type MergeResult =
@@ -49,7 +52,7 @@ export async function resolveCatalogRef(admin: MergeClient, ref: string): Promis
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(clean);
     const { data } = await admin
         .from("catalog_items")
-        .select("id, title, maker, slug")
+        .select("id, title, maker, maker_slug, slug")
         .eq(isUuid ? "id" : "slug", isUuid ? clean : clean.toLowerCase())
         .maybeSingle();
     return (data as MergeRef | null) ?? null;
@@ -84,6 +87,14 @@ export async function mergeCatalogItemsCore(
         approved_by: actor.userId,
     });
     if (logError) onLogError?.(logError);
+
+    // The duplicate's address, and any older addresses that led to it, now
+    // forward to the kept entry (owner ruling Q1). Best effort: before
+    // migration 233 the table is missing and the merge goes on without it.
+    await admin.from("catalog_slug_history").update({ item_id: canonical.id }).eq("item_id", dup.id).select("item_id");
+    if (dup.maker_slug && dup.slug) {
+        await admin.from("catalog_slug_history").insert({ old_maker_slug: dup.maker_slug, old_slug: dup.slug, item_id: canonical.id });
+    }
 
     const { error: deleteError } = await admin.from("catalog_items").delete().eq("id", dup.id);
     if (deleteError) return { success: false, error: `Delete failed: ${deleteError.message}` };

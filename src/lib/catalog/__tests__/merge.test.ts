@@ -45,7 +45,8 @@ describe("mergeCatalogItemsCore", () => {
         const c = client({ movedPerTable: 2 });
         const result = await mergeCatalogItemsCore(c.admin, DUP, KEEP, { userId: "u", alias: "Admin" });
         expect(result.success).toBe(true);
-        expect(c.updates.map(([t]) => t)).toEqual(MERGE_REPOINTS.map(([t]) => t));
+        // Every reference table, then the old-address history (migration 233).
+        expect(c.updates.map(([t]) => t)).toEqual([...MERGE_REPOINTS.map(([t]) => t), "catalog_slug_history"]);
         for (const [, row, from] of c.updates) {
             expect(Object.values(row)).toEqual([KEEP.id]);
             expect(from).toBe(DUP.id);
@@ -53,6 +54,14 @@ describe("mergeCatalogItemsCore", () => {
         expect(c.inserted[0]).toMatchObject({ catalog_item_id: KEEP.id, change_type: "removal", contributor_alias: "Admin" });
         expect(c.deleted).toEqual([DUP.id]);
         if (result.success) expect(result.moved).toBe(2 * MERGE_REPOINTS.length);
+    });
+
+    it("records the duplicate's address so its old link forwards to the kept entry", async () => {
+        const c = client();
+        const dup = { ...DUP, maker_slug: "breyer", slug: "silky-sullivan" };
+        const result = await mergeCatalogItemsCore(c.admin, dup, KEEP, { userId: "u", alias: "Admin" });
+        expect(result.success).toBe(true);
+        expect(c.inserted).toContainEqual({ old_maker_slug: "breyer", old_slug: "silky-sullivan", item_id: KEEP.id });
     });
 
     it("stops before deleting when a repoint fails", async () => {

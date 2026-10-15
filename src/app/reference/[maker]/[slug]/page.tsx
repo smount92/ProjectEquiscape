@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { catalogDisplayName } from "@/lib/catalog/displayName";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -13,6 +13,7 @@ import { missingFieldLabels } from "@/lib/catalog/editableFields";
 import { createAnonClient } from "@/lib/supabase/anon";
 import {
     resolveReferenceItem,
+    resolveMovedReference,
     getActiveListingsForCatalog,
     getMoldTimelineData,
     getMoldSetMentions,
@@ -111,6 +112,17 @@ export async function generateStaticParams(): Promise<{ maker: string; slug: str
     }
 }
 
+/**
+ * A page that moved (a corrected maker, or a duplicate merged away) sends
+ * its old address on to the new one, permanently; anything else is a real
+ * 404 (owner ruling Q1).
+ */
+async function forwardOrNotFound(maker: string, slug: string): Promise<never> {
+    const moved = await resolveMovedReference(maker, slug);
+    if (moved) permanentRedirect(`/reference/${moved.makerSlug}/${moved.slug}`);
+    notFound();
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { maker, slug } = await params;
     const item = await resolveReferenceItem(maker, slug);
@@ -120,7 +132,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     // soft-404 (200 + "Model Not Found") on every bad slug in
     // production — poison for exactly the Google crawl traffic the
     // reference pages exist to catch.
-    if (!item) notFound();
+    if (!item) return forwardOrNotFound(maker, slug);
 
     const attrs = item.attributes ?? {};
     const year = attrs.release_year_start ? ` (${attrs.release_year_start})` : "";
@@ -257,7 +269,7 @@ function medianTag(price: number | null, median: number): { text: string; over: 
 export default async function ReferencePage({ params }: Props) {
     const { maker, slug } = await params;
     const item = await resolveReferenceItem(maker, slug);
-    if (!item) notFound();
+    if (!item) return forwardOrNotFound(maker, slug);
 
     const isMold = item.item_type === "plastic_mold";
     // The mold this release is filed under, read from the link itself.

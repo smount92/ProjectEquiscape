@@ -11,7 +11,8 @@ measured, and run by the owner.
 ## Hard rules
 
 - **Agents never write to the production database.** No service-role scripts, no mass UPDATEs. Read with the public key; hand the owner SQL files to paste.
-- **Never delete a row a horse or want list points at.** Merge: repoint every reference to the kept row, then delete the empty duplicate. Members must never have to re-link.
+- **Never delete a row a horse or want list points at.** Merge: repoint every reference to the kept row, then delete the empty duplicate. Members must never have to re-link. (Since migration 233 the database refuses the delete if you forget.)
+- **Old addresses keep working.** A merge in SQL also repoints `catalog_slug_history` rows to the kept row and inserts the duplicate's own `maker_slug`/`slug` there, as `lib/catalog/merge.ts` does, so its page forwards.
 - **Every repair has a dry run** that changes nothing and shows exactly what the repair will do.
 - **Every repair is expect-guarded**: it changes a row only if the row still holds the value we read. A re-run does nothing; a member's edit in between is not trampled.
 - **Repairs run in one transaction** and end by listing what they changed.

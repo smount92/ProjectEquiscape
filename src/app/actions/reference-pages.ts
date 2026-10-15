@@ -556,3 +556,65 @@ export const getMoldSetMentions = unstable_cache(
     ["reference:mold-sets:v2"],
     { revalidate: REVALIDATE, tags: [REFERENCE_PAGES_CACHE_TAG] },
 );
+
+// ── Old addresses (migration 233) ──
+
+type HistoryRow = { item: { maker_slug: string | null; slug: string | null } | { maker_slug: string | null; slug: string | null }[] | null };
+type HistoryClient = {
+    from: (t: string) => {
+        select: (c: string) => {
+            eq: (k: string, v: string) => {
+                eq: (k: string, v: string) => { maybeSingle: () => PromiseLike<{ data: HistoryRow | null; error: unknown }> };
+                limit: (n: number) => PromiseLike<{ data: HistoryRow[] | null; error: unknown }>;
+            };
+        };
+    };
+};
+
+const currentOf = (row: HistoryRow | null) => {
+    const item = Array.isArray(row?.item) ? row?.item[0] : row?.item;
+    return item?.maker_slug && item.slug ? { makerSlug: item.maker_slug, slug: item.slug } : null;
+};
+
+/**
+ * Where a Registry page that used to live at /reference/<maker>/<slug> lives
+ * now, or null. A maker correction (232) or a merge records the old address
+ * in catalog_slug_history; until 233 is pasted the table is missing and
+ * this quietly returns null, so the page 404s exactly as before.
+ */
+export const resolveMovedReference = unstable_cache(
+    async (makerSlug: string, slug: string): Promise<{ makerSlug: string; slug: string } | null> => {
+        const db = createAnonClient() as unknown as HistoryClient;
+        const { data, error } = await db
+            .from("catalog_slug_history")
+            .select("item:item_id(maker_slug, slug)")
+            .eq("old_maker_slug", makerSlug)
+            .eq("old_slug", slug)
+            .maybeSingle();
+        if (error) return null;
+        return currentOf(data);
+    },
+    ["reference:moved:v1"],
+    { revalidate: REVALIDATE, tags: [REFERENCE_PAGES_CACHE_TAG] },
+);
+
+/** Where a maker's pages went when the maker's name was corrected, or null. */
+export const resolveMovedMaker = unstable_cache(
+    async (makerSlug: string): Promise<string | null> => {
+        const db = createAnonClient() as unknown as HistoryClient;
+        const { data, error } = await db
+            .from("catalog_slug_history")
+            .select("item:item_id(maker_slug, slug)")
+            .eq("old_maker_slug", makerSlug)
+            .limit(200);
+        if (error || !data?.length) return null;
+        const tally = new Map<string, number>();
+        for (const row of data) {
+            const now = currentOf(row)?.makerSlug;
+            if (now && now !== makerSlug) tally.set(now, (tally.get(now) ?? 0) + 1);
+        }
+        return [...tally.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+    },
+    ["reference:moved-maker:v1"],
+    { revalidate: REVALIDATE, tags: [REFERENCE_PAGES_CACHE_TAG] },
+);

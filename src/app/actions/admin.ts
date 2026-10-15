@@ -1381,6 +1381,12 @@ const PENDING_MIGRATIONS: MigrationSpec[] = [
     },
   },
   {
+    id: "233",
+    title: "Registry guards",
+    summary: "Old Registry addresses forward to the current page; scale, run type and material are checked by the database; a want list can't hold one model twice; catalog rows that horses link to, and a horse's history, can't be deleted out from under them.",
+    probe: { kind: "column", table: "catalog_slug_history", column: "item_id" },
+  },
+  {
     id: "232",
     title: "Page address follows the maker",
     summary: "A catalog row's maker_slug (and, on a clash, its slug) now follows a change of maker, so a corrected maker moves the page instead of leaving it under the old one.",

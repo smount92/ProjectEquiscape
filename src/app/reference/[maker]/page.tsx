@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import type { Metadata } from "next";
 import { shortScale } from "@/lib/linker/model";
 import Link from "next/link";
@@ -6,7 +6,7 @@ import FocusLayout from "@/components/layouts/FocusLayout";
 import CatalogSubMasthead from "@/components/catalog/CatalogSubMasthead";
 import { referenceHref } from "@/lib/catalog/referenceUrl";
 import { getMakerIndex, getMakerMolds, getMakerRecent } from "@/app/actions/maker-hubs";
-import { getArtistCareerData } from "@/app/actions/reference-pages";
+import { getArtistCareerData, resolveMovedMaker } from "@/app/actions/reference-pages";
 import ArtistCareer from "@/components/reference/ArtistCareer";
 
 interface Props {
@@ -52,7 +52,12 @@ export default async function MakerHubPage({ params }: Props) {
     const { maker } = await params;
     const index = await getMakerIndex();
     const summary = index.find((m) => m.makerSlug === maker);
-    if (!summary) notFound();
+    if (!summary) {
+        // A corrected maker name moved its pages; follow them (ruling Q1).
+        const now = await resolveMovedMaker(maker);
+        if (now) permanentRedirect(`/reference/${now}`);
+        notFound();
+    }
 
     const [molds, recent, careerData] = await Promise.all([
         getMakerMolds(maker),
