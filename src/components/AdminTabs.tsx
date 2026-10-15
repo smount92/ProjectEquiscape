@@ -28,7 +28,6 @@ import AdminErrorsCard from"@/components/AdminErrorsCard";
 import type { SentryStatus } from "@/lib/sentry/issues";
 import AdminOverdueShowsCard from"@/components/AdminOverdueShowsCard";
 import AdminInsightsTab from"@/components/AdminInsightsTab";
-import AdminRoadmapTab from"@/components/AdminRoadmapTab";
 import AdminPulseStrip from"@/components/AdminPulseStrip";
 import type { PendingExternalShow } from"@/app/actions/external-shows";
 import type {
@@ -136,7 +135,6 @@ type TabKey =
  |"members"
  |"content"
  |"insights"
- |"roadmap"
  |"ops";
 
 const TABS: { key: TabKey; emoji: string; label: string }[] = [
@@ -149,7 +147,6 @@ const TABS: { key: TabKey; emoji: string; label: string }[] = [
  { key:"members", emoji:"👤", label:"Members" },
  { key:"content", emoji:"💡", label:"Content" },
  { key:"insights", emoji:"📈", label:"Insights" },
- { key:"roadmap", emoji:"🧭", label:"Roadmap" },
  { key:"ops", emoji:"🛠️", label:"Ops" },
 ];
 
@@ -317,7 +314,6 @@ export default function AdminTabs({
  {activeTab ==="sanctioning" && <AdminSanctioningCard showEmptyState />}
  {activeTab ==="members" && <AdminMembersTab />}
  {activeTab ==="insights" && <AdminInsightsTab />}
- {activeTab ==="roadmap" && <AdminRoadmapTab />}
  {activeTab ==="ops" && (
  <div className="flex flex-col gap-8">
   <AdminOpsTab migrations={migrations} />

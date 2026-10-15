@@ -1392,13 +1392,13 @@ const PENDING_MIGRATIONS: MigrationSpec[] = [
   {
     id: "231",
     title: "Roadmap history",
-    summary: "Creates roadmap_events (notes and recorded changes under each roadmap item) and gives every existing item its opening line; service role only.",
+    summary: "Creates roadmap_events. The Roadmap tab was retired 2026-10-15 (the Backlog board replaced it); the table stays until a cleanup migration.",
     probe: { kind: "column", table: "roadmap_events", column: "id" },
   },
   {
     id: "230",
     title: "Roadmap",
-    summary: "Creates roadmap_items (the owners' goals, problems and chores shown on the Roadmap tab) with the first backlog seeded; service role only.",
+    summary: "Creates roadmap_items. The Roadmap tab was retired 2026-10-15 (the Backlog board replaced it); the table stays until a cleanup migration.",
     probe: { kind: "column", table: "roadmap_items", column: "id" },
   },
   {

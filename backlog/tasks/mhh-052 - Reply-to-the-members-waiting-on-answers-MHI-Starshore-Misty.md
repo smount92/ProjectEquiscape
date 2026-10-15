@@ -1,9 +1,10 @@
 ---
 id: MHH-052
 title: 'Reply to the members waiting on answers (MHI, Starshore, Misty)'
-status: Waiting on owner
+status: Done
 assignee: []
 created_date: '2026-10-15 22:19'
+updated_date: '2026-10-15 22:45'
 labels:
   - member-reported
 milestone: m-1
@@ -34,3 +35,9 @@ Old Roadmap (inbox 2026-10-08).
 - [ ] #2 Decision recorded in docs/DECISIONS.md if one was made
 - [ ] #3 Member who reported it has a drafted reply, if any
 <!-- DOD:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Marked done in the Roadmap tab export (2026-10-12).
+<!-- SECTION:FINAL_SUMMARY:END -->
