@@ -33,6 +33,7 @@ import type { AssetCategory } from "@/lib/types/database";
 import { colorText, isMissingPendingColumn, withoutPendingColumns } from "@/lib/passport/pendingColumns";
 import { canonicalShowbio } from "@/lib/showbio/vocab";
 import { addHorseToFolder, setHorsesFolders } from "@/lib/collections/membership";
+import type { Json, TablesInsert } from "@/lib/types/database.generated";
 
 /**
  * The server-side half of the form engine.
@@ -171,7 +172,7 @@ export async function deleteHorse(horseId: string): Promise<{ success: boolean; 
             visibility: "private",
             custom_name: DELETED_NAME_PLACEHOLDER,
             trade_status: "Not for Sale",
-            attributes: stashDeletedName(scrubbed.attributes, scrubbed.custom_name),
+            attributes: stashDeletedName(scrubbed.attributes, scrubbed.custom_name) as Json,
         })
         .eq("id", horseId);
 
@@ -309,7 +310,7 @@ export async function restoreHorse(
             visibility: "private",
             trade_status: "Not for Sale",
             custom_name: restoredName,
-            attributes: clearStashedName(row.attributes),
+            attributes: clearStashedName(row.attributes) as Json,
         })
         .eq("id", horseId)
         .eq("owner_id", user.id);
@@ -925,7 +926,7 @@ export async function finalizeHorseImages(
         return {
             horse_id: horseId,
             image_url: publicUrl,
-            angle_profile: img.angle,
+            angle_profile: img.angle as TablesInsert<"horse_images">["angle_profile"],
         };
     });
 
@@ -1119,7 +1120,7 @@ export async function bulkDeleteHorses(
                 ownedRows.slice(i, i + CHUNK).map((row) =>
                     supabase
                         .from("user_horses")
-                        .update({ attributes: stashDeletedName(row.attributes, row.custom_name) })
+                        .update({ attributes: stashDeletedName(row.attributes, row.custom_name) as Json })
                         .eq("id", row.id)
                         .eq("owner_id", user.id),
                 ),

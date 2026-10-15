@@ -21,8 +21,8 @@ live Registry. Counts are the baseline; they should only go down.
 |---|---|---|
 | `"use server"` first; only async functions exported | Enforced (`use-server-exports.test.ts`) | Clean. 3 files in `actions/` are cached readers (`maker-hubs.ts`, `mentions.ts`, `reference-pages.ts`), not actions. |
 | Order: zod `safeParse` → `requireAuth()` → ownership check → write through RLS | Doc only | Zod in 17 of 69 files. Raw `auth.getUser()` in 31 action files. |
-| Return `{ success: true, ... } \| { success: false, error }`, never throw to the client | Doc only | 13 files each declare their own `ActionResult`; three shapes in use. `requireAuth()` throws `AuthError`, which 12 files never catch, so "not logged in" shows as a 500. |
-| Never return raw database error text to the member | Doc only | `error: error.message` 296 times. |
+| Return `{ success: true, ... } | { success: false, error }`, never throw to the client | Ratchet (shared `ActionResult` in `src/lib/actions/result.ts`; local copies counted) |\| { success: false, error }`, never throw to the client | Doc only | 13 files each declare their own `ActionResult`; three shapes in use. `requireAuth()` throws `AuthError`, which 12 files never catch, so "not logged in" shows as a 500. |
+| Never return raw database error text to the member | Ratchet (`action-standards.test.ts`; use `safeError` from `src/lib/actions/result.ts`) | 364 returns today. |
 | One wording for "not logged in": **"Please log in to do that."** | Doc only | Six different wordings today. |
 | Every mutation revalidates what it changed | Doc only | 12 files write without revalidating. |
 | Admin (service-role) client only from `getAdminClient()`, with a comment saying why RLS can't do it | Doc only | 3 admin files build their own client; about 30 call sites have no comment; `lib/supabase/admin.ts` lacks `import "server-only"`. |

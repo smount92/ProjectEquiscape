@@ -42,6 +42,7 @@ import {
     isMissingDuplicateType,
 } from "@/lib/catalog/duplicates";
 import { mergeCatalogItemsCore, resolveCatalogRef, type MergeClient } from "@/lib/catalog/merge";
+import type { Json } from "@/lib/types/database.generated";
 import type { Database } from "@/lib/types/database.generated";
 
 type CatalogItemInsert = Database["public"]["Tables"]["catalog_items"]["Insert"];
@@ -519,7 +520,7 @@ export async function createSuggestion(input: SuggestionInput) {
             user_id: user.id,
             catalog_item_id: input.catalogItemId || null,
             suggestion_type: input.suggestionType,
-            field_changes: input.fieldChanges,
+            field_changes: input.fieldChanges as Json,
             reason,
             status,
         })

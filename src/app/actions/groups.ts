@@ -517,12 +517,10 @@ export async function joinGroup(
 
     // Increment member count (best effort)
     try {
-        const { error: rpcErr } = await supabase.rpc("increment_count", { table_name: "groups", row_id: groupId, column_name: "member_count" });
-        if (rpcErr) {
-            // Fallback: manual increment
-            const { data: g } = await supabase.from("groups").select("member_count").eq("id", groupId).single();
-            if (g) await supabase.from("groups").update({ member_count: ((g as { member_count: number }).member_count || 0) + 1 }).eq("id", groupId);
-        }
+        // There is no increment_count function in the database (the typed
+        // client caught it); this read-then-write was always what ran.
+        const { data: g } = await supabase.from("groups").select("member_count").eq("id", groupId).single();
+        if (g) await supabase.from("groups").update({ member_count: (g.member_count || 0) + 1 }).eq("id", groupId);
     } catch (err) { logger.error("Groups", "Background task failed", err); }
 
     revalidatePath("/community/groups");

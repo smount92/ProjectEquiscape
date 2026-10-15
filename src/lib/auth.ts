@@ -5,6 +5,7 @@ import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { entitledTier } from "@/lib/entitlement/clock";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/lib/types/database.generated";
 
 export class AuthError extends Error {
     constructor(message = "Not authenticated.") {
@@ -23,7 +24,7 @@ export class AuthError extends Error {
  * keep getting a client alongside the user, as they always have.
  */
 const resolveViewer = cache(async function resolveViewer(): Promise<{
-    supabase: SupabaseClient;
+    supabase: SupabaseClient<Database>;
     user: { id: string; email?: string; app_metadata?: Record<string, unknown> } | null;
 }> {
     const supabase = await createClient();
@@ -41,7 +42,7 @@ const resolveViewer = cache(async function resolveViewer(): Promise<{
  *   const { supabase, user } = await requireAuth();
  */
 export async function requireAuth(): Promise<{
-    supabase: SupabaseClient;
+    supabase: SupabaseClient<Database>;
     user: { id: string; email?: string };
 }> {
     const { supabase, user } = await resolveViewer();
@@ -61,7 +62,7 @@ export async function requireAuth(): Promise<{
  * Never throws.
  */
 export async function optionalAuth(): Promise<{
-    supabase: SupabaseClient;
+    supabase: SupabaseClient<Database>;
     user: { id: string; email?: string } | null;
 }> {
     return resolveViewer();
@@ -77,7 +78,7 @@ export async function optionalAuth(): Promise<{
  *   const { supabase, user } = await requireAdmin();
  */
 export async function requireAdmin(): Promise<{
-    supabase: SupabaseClient;
+    supabase: SupabaseClient<Database>;
     user: { id: string; email?: string };
 }> {
     const { supabase, user } = await resolveViewer();

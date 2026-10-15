@@ -257,7 +257,7 @@ export async function initializeHoofprint(data: {
     // this path can claim "I am the first owner" and nothing else.
     const { error } = await supabase.rpc("initialize_hoofprint_genesis", {
         p_horse_id: data.horseId,
-        p_notes: data.acquisitionNotes || null,
+        p_notes: (data.acquisitionNotes || null) as string, // NULL is valid; the generator types SQL args as non-null
     });
 
     if (!error) return;

@@ -29,6 +29,8 @@ export default defineConfig({
     resolve: {
         alias: {
             "@": path.resolve(__dirname, "./src"),
+            // Next resolves "server-only" itself; under vitest it is an empty module.
+            "server-only": path.resolve(__dirname, "./src/__tests__/mocks/server-only.ts"),
         },
     },
 });

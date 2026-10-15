@@ -1028,7 +1028,7 @@ export async function updateClass(
     }
 
     if (patch.status && patch.status !== cls.status) {
-        const legal = canTransitionClass(cls.status, patch.status);
+        const legal = canTransitionClass(cls.status as ClassStatus, patch.status);
         if (!legal.ok) return { success: false, error: legal.reason };
     }
 
@@ -1260,7 +1260,7 @@ export async function splitClass(
         return { success: false, error: CLASSLIST_FROZEN_ERROR };
     }
 
-    const legal = canSplitClass(cls.status);
+    const legal = canSplitClass(cls.status as ClassStatus);
     if (!legal.ok) return { success: false, error: legal.reason };
 
     // One transactional RPC (SECURITY INVOKER — RLS still gates
@@ -1272,7 +1272,7 @@ export async function splitClass(
     const { data: newClassId, error: rpcError } = await supabase.rpc("split_show_class", {
         p_class_id: v.classId,
         p_new_name: v.newClassName,
-        p_new_class_number: v.newClassNumber ?? null,
+        p_new_class_number: (v.newClassNumber ?? null) as string, // NULL is valid; the generator types SQL args as non-null
         p_entry_ids: v.entryIdsToMove,
     });
     if (rpcError) return { success: false, error: rpcError.message };
@@ -1315,7 +1315,7 @@ export async function combineClasses(
     }
 
     for (const cls of classes) {
-        const legal = canCombineClass(cls.status);
+        const legal = canCombineClass(cls.status as ClassStatus);
         if (!legal.ok) return { success: false, error: legal.reason };
     }
 
@@ -1354,7 +1354,7 @@ export async function combineClasses(
     const { data: newClassId, error: rpcError } = await supabase.rpc("combine_show_classes", {
         p_class_ids: v.classIds,
         p_new_name: v.newClassName,
-        p_new_class_number: v.newClassNumber ?? null,
+        p_new_class_number: (v.newClassNumber ?? null) as string, // NULL is valid; the generator types SQL args as non-null
     });
     if (rpcError) return { success: false, error: rpcError.message };
     if (!newClassId) return { success: false, error: "Failed to create the combined class." };

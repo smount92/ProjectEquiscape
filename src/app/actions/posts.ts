@@ -12,6 +12,7 @@ import { getPublicImageUrls } from "@/lib/utils/storage";
 import { resolveAvatarUrls } from "@/lib/utils/avatars.server";
 import { sanitizeText } from "@/lib/utils/validation";
 import { getPostColumnSupport } from "@/lib/feed/columnSupport";
+import type { TablesInsert } from "@/lib/types/database.generated";
 import {
     mergeByCreatedAtDesc,
     takePage,
@@ -93,7 +94,7 @@ export async function createPost(data: {
         if (support.visibility) insertRow.visibility = "followers";
     }
 
-    const { data: post, error } = await supabase.from("posts").insert(insertRow).select("id").single();
+    const { data: post, error } = await supabase.from("posts").insert(insertRow as TablesInsert<"posts">).select("id").single();
 
     if (error) return { success: false, error: error.message };
 
@@ -527,7 +528,7 @@ export async function getPosts(context: {
             createdAt: p.created_at as string,
             updatedAt: (p.updated_at as string | null) || null,
             media: (media ?? [])
-                .filter((m: { post_id: string }) => m.post_id === p.id)
+                .filter((m) => m.post_id === p.id)
                 .map((m: { id: string; storage_path: string; caption: string | null }) => ({
                     id: m.id,
                     imageUrl: urlMap.get(m.storage_path) || "",

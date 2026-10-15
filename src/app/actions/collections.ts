@@ -35,7 +35,7 @@ export async function createCollectionAction(name: string, description: string |
             name,
             description,
             is_public: isPublic,
-        } as Record<string, unknown>)
+        })
         .select("id, name, description")
         .single();
 
