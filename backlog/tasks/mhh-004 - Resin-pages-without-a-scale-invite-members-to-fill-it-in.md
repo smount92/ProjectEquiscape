@@ -1,9 +1,10 @@
 ---
 id: MHH-004
 title: Resin pages without a scale invite members to fill it in
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-10-15 22:19'
+updated_date: '2026-10-15 22:46'
 labels:
   - registry
 milestone: m-0
@@ -25,8 +26,8 @@ Ruling Q26.
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 A reference page with no scale shows 'Scale not recorded' and a one-click suggestion
-- [ ] #2 The suggestion files through the normal queue
+- [x] #1 A reference page with no scale shows 'Scale not recorded' and a one-click suggestion
+- [x] #2 The suggestion files through the normal queue
 <!-- AC:END -->
 
 ## Definition of Done
@@ -35,3 +36,9 @@ Ruling Q26.
 - [ ] #2 Decision recorded in docs/DECISIONS.md if one was made
 - [ ] #3 Member who reported it has a drafted reply, if any
 <!-- DOD:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Reference pages show 'Not recorded. Know it? Add it' in the Scale row when the scale is empty, and Scale now appears in the 'This entry is missing…' prompt. Both open the normal suggest-an-edit form (queue as usual; Gold checks the scale is canonical).
+<!-- SECTION:FINAL_SUMMARY:END -->

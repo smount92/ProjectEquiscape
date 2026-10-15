@@ -363,7 +363,8 @@ export default async function ReferencePage({ params }: Props) {
             ? [["Manufacturer", attribution.manufacturer] as [string, string]]
             : []),
         ...(attribution.artist ? [["Artist", attribution.artist] as [string, string]] : []),
-        ["Scale", item.scale ?? "—"],
+        // Unknown stays empty (owner ruling Q26); the row asks instead.
+        ["Scale", item.scale ?? ""],
         ...Object.entries(attrs)
             .filter(
                 ([k, v]) =>
@@ -848,7 +849,16 @@ export default async function ReferencePage({ params }: Props) {
                                         <td className="w-2/5 px-4 py-2.5 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
                                             {k}
                                         </td>
-                                        <td className="px-4 py-2.5 font-semibold text-foreground">{v}</td>
+                                        <td className="px-4 py-2.5 font-semibold text-foreground">
+                                            {v || (
+                                                <span className="font-normal text-muted-foreground">
+                                                    Not recorded.{" "}
+                                                    <Link href={`/catalog/${item.id}?suggest=true`} className="underline hover:no-underline">
+                                                        Know it? Add it
+                                                    </Link>
+                                                </span>
+                                            )}
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>
