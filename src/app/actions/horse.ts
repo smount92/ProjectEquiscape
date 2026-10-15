@@ -1003,6 +1003,24 @@ export async function bulkUpdateHorses(
         return { success: false, error: "No updates specified." };
     }
 
+    // The same rug-pull guard as the single-horse editor: a horse in an
+    // active sale can't be taken off the market or hidden in bulk either.
+    // Folder moves stay allowed; they change nothing the buyer sees.
+    if (Object.keys(updateObj).length > 0) {
+        const { data: activeTxns } = await getAdminClient()
+            .from("transactions")
+            .select("horse_id")
+            .in("horse_id", horseIds)
+            .in("status", ACTIVE_TRANSACTION_STATUSES)
+            .limit(1);
+        if (activeTxns && activeTxns.length > 0) {
+            return {
+                success: false,
+                error: "One or more of these horses is in an active sale. Cancel the sale before changing its marketplace status or visibility.",
+            };
+        }
+    }
+
     // A bulk move used to write only the legacy column, which the public
     // profile never read — the junction and its mirror now move together.
     if (movesFolder) {

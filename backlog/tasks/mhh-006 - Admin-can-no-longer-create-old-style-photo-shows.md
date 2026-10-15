@@ -1,9 +1,10 @@
 ---
 id: MHH-006
 title: Admin can no longer create old-style photo shows
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-10-15 22:19'
+updated_date: '2026-10-15 22:43'
 labels:
   - admin
   - shows
@@ -26,8 +27,8 @@ Ruling Q20.
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 The legacy creation control and its action are removed
-- [ ] #2 Existing legacy shows still display
+- [x] #1 The legacy creation control and its action are removed
+- [x] #2 Existing legacy shows still display
 <!-- AC:END -->
 
 ## Definition of Done
@@ -36,3 +37,9 @@ Ruling Q20.
 - [ ] #2 Decision recorded in docs/DECISIONS.md if one was made
 - [ ] #3 Member who reported it has a drafted reply, if any
 <!-- DOD:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Removed CreateShowForm, the createPhotoShow action and the admin Shows-tab block. Existing shows are untouched; Manage Shows stays.
+<!-- SECTION:FINAL_SUMMARY:END -->

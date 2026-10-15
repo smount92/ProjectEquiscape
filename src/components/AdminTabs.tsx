@@ -12,7 +12,6 @@ import { deleteContactMessage } from"@/app/actions/admin";
 import MarkReadButton from"@/components/MarkReadButton";
 import AdminReplyForm from"@/components/AdminReplyForm";
 import FeatureHorseForm from"@/components/FeatureHorseForm";
-import CreateShowForm from"@/components/CreateShowForm";
 import AdminShowManager from"@/components/AdminShowManager";
 import AdminSuggestionsPanel from"@/components/AdminSuggestionsPanel";
 import ReportActions from"@/components/ReportActions";
@@ -395,7 +394,7 @@ function MailboxTab({ messages }: { messages: ContactMessage[] }) {
 }
 
 /* ═══════════════════════════════════════════
- Shows Tab — the overdue queue, then Create + Manage
+ Shows Tab — the overdue queue, then Manage
 
  The queue goes on top because it is the only part of this tab that
  is waiting on you. Everything below it you go to on purpose.
@@ -407,11 +406,7 @@ function ShowsTab({ shows }: { shows: Show[] }) {
  <h3 className="mt-0 mb-3 flex items-center gap-2 text-base font-bold">⏰ Overdue &amp; stalled</h3>
  <AdminOverdueShowsCard />
  </div>
- <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-6">
  <div>
-  <h3 className="mb-4 flex items-center gap-2 text-base font-bold">📸 Create Photo Show</h3>
-  <CreateShowForm />
- </div>
  <div>
   <h3 className="mb-4 flex items-center gap-2 text-base font-bold">
   🎛️ Manage Shows <span className="mt-6-count">{shows.length}</span>

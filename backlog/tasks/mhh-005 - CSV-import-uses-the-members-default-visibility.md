@@ -1,9 +1,10 @@
 ---
 id: MHH-005
 title: CSV import uses the member's default visibility
-status: To Do
+status: Waiting on owner
 assignee: []
 created_date: '2026-10-15 22:19'
+updated_date: '2026-10-15 22:41'
 labels:
   - stable
 milestone: m-0
@@ -35,3 +36,9 @@ Ruling Q11.
 - [ ] #2 Decision recorded in docs/DECISIONS.md if one was made
 - [ ] #3 Member who reported it has a drafted reply, if any
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Found 2026-10-15: members have no default-visibility setting. CSV import has a 'publish imported horses' checkbox that starts ticked, like Quick Add's public default. Options: (a) start the checkbox unticked; (b) add a member setting 'New horses start as Public/Private' used by Add Horse, Quick Add and CSV import (one migration + settings + three forms).
+<!-- SECTION:NOTES:END -->

@@ -1,9 +1,10 @@
 ---
 id: MHH-048
 title: Bulk trade-status change respects the active-sale lock
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-10-15 22:19'
+updated_date: '2026-10-15 22:43'
 labels:
   - stable
 milestone: m-0
@@ -28,8 +29,8 @@ src/app/actions/horse.ts
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Bulk path uses the same guard
-- [ ] #2 Test covers a horse in an active deal
+- [x] #1 Bulk path uses the same guard
+- [x] #2 Test covers a horse in an active deal
 <!-- AC:END -->
 
 ## Definition of Done
@@ -38,3 +39,9 @@ src/app/actions/horse.ts
 - [ ] #2 Decision recorded in docs/DECISIONS.md if one was made
 - [ ] #3 Member who reported it has a drafted reply, if any
 <!-- DOD:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+bulkUpdateHorses refuses trade-status and visibility changes when any selected horse is in an active sale (same statuses as the single-horse guard); folder moves still allowed. Test added.
+<!-- SECTION:FINAL_SUMMARY:END -->

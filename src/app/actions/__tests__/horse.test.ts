@@ -262,6 +262,18 @@ describe("horse.ts — CRUD", () => {
             expect(mockClient._mockQuery.eq).toHaveBeenCalledWith("owner_id", "user-1");
         });
 
+        it("refuses a trade-status or visibility change while a horse is in an active sale", async () => {
+            mockClient._setImplicitResolve({ data: [{ id: "h1" }, { id: "h2" }], error: null });
+            mockAdmin._setImplicitResolve({ data: [{ horse_id: "h2" }], error: null });
+            const off = await bulkUpdateHorses(["h1", "h2"], { tradeStatus: "Not for Sale" });
+            expect(off.success).toBe(false);
+            expect(off.error).toMatch(/active sale/i);
+            const hide = await bulkUpdateHorses(["h1", "h2"], { visibility: "private" });
+            expect(hide.success).toBe(false);
+            expect(mockClient._mockQuery.update).not.toHaveBeenCalled();
+            mockAdmin._setImplicitResolve({ data: [], error: null });
+        });
+
         it("clears the collection when collectionId is null", async () => {
             mockClient._setImplicitResolve({ data: [{ id: "h1" }], error: null });
             const result = await bulkUpdateHorses(["h1"], { collectionId: null });
