@@ -1,9 +1,10 @@
 ---
 id: MHH-014
 title: Database types regenerated and kept current
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-10-15 22:19'
+updated_date: '2026-10-15 23:14'
 labels:
   - platform
 milestone: m-0
@@ -25,8 +26,8 @@ docs/STANDARDS.md plan step 9.
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Types regenerated
-- [ ] #2 add-migration skill step confirmed in practice
+- [x] #1 Types regenerated
+- [x] #2 add-migration skill step confirmed in practice
 <!-- AC:END -->
 
 ## Definition of Done
@@ -35,3 +36,9 @@ docs/STANDARDS.md plan step 9.
 - [ ] #2 Decision recorded in docs/DECISIONS.md if one was made
 - [ ] #3 Member who reported it has a drafted reply, if any
 <!-- DOD:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Regenerated database.generated.ts (6,868 → 7,313 lines); the 9 missing tables are in. One real mismatch surfaced (eBay cron listings → jsonb) and is typed. Regenerate once more after migration 233 is pasted (adds catalog_slug_history, updated_at).
+<!-- SECTION:FINAL_SUMMARY:END -->

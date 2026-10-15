@@ -77,13 +77,6 @@ export type Database = {
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "activity_events_horse_id_fkey"
-            columns: ["horse_id"]
-            isOneToOne: false
-            referencedRelation: "v_artist_finished_horses"
-            referencedColumns: ["horse_id"]
-          },
         ]
       }
       activity_likes: {
@@ -192,6 +185,8 @@ export type Database = {
         Row: {
           accepting_types: string[] | null
           accepts_rush: boolean | null
+          also_known_as: string[]
+          barn_group_id: string | null
           bio_artist: string | null
           client_ships_model: boolean | null
           created_at: string | null
@@ -199,12 +194,14 @@ export type Database = {
           deposit_refundable_before_start: boolean | null
           extra_revision_fee: number | null
           kill_fee_percent: number | null
+          links: Json
           max_slots: number | null
           mediums: string[] | null
           paypal_me_link: string | null
           portfolio_visible: boolean | null
           price_range_max: number | null
           price_range_min: number | null
+          region: string | null
           revisions_included: number | null
           scales_offered: string[] | null
           services: Json
@@ -225,6 +222,8 @@ export type Database = {
         Insert: {
           accepting_types?: string[] | null
           accepts_rush?: boolean | null
+          also_known_as?: string[]
+          barn_group_id?: string | null
           bio_artist?: string | null
           client_ships_model?: boolean | null
           created_at?: string | null
@@ -232,12 +231,14 @@ export type Database = {
           deposit_refundable_before_start?: boolean | null
           extra_revision_fee?: number | null
           kill_fee_percent?: number | null
+          links?: Json
           max_slots?: number | null
           mediums?: string[] | null
           paypal_me_link?: string | null
           portfolio_visible?: boolean | null
           price_range_max?: number | null
           price_range_min?: number | null
+          region?: string | null
           revisions_included?: number | null
           scales_offered?: string[] | null
           services?: Json
@@ -258,6 +259,8 @@ export type Database = {
         Update: {
           accepting_types?: string[] | null
           accepts_rush?: boolean | null
+          also_known_as?: string[]
+          barn_group_id?: string | null
           bio_artist?: string | null
           client_ships_model?: boolean | null
           created_at?: string | null
@@ -265,12 +268,14 @@ export type Database = {
           deposit_refundable_before_start?: boolean | null
           extra_revision_fee?: number | null
           kill_fee_percent?: number | null
+          links?: Json
           max_slots?: number | null
           mediums?: string[] | null
           paypal_me_link?: string | null
           portfolio_visible?: boolean | null
           price_range_max?: number | null
           price_range_min?: number | null
+          region?: string | null
           revisions_included?: number | null
           scales_offered?: string[] | null
           services?: Json
@@ -290,6 +295,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "artist_profiles_barn_group_id_fkey"
+            columns: ["barn_group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "artist_profiles_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
@@ -307,6 +319,73 @@ export type Database = {
             foreignKeyName: "artist_profiles_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      artists: {
+        Row: {
+          active_from: number | null
+          active_to: number | null
+          created_at: string
+          disciplines: string[]
+          id: string
+          name: string
+          registry_notes: string | null
+          slug: string | null
+          studio_name: string | null
+          updated_at: string
+          verified_user_id: string | null
+          website: string | null
+        }
+        Insert: {
+          active_from?: number | null
+          active_to?: number | null
+          created_at?: string
+          disciplines?: string[]
+          id?: string
+          name: string
+          registry_notes?: string | null
+          slug?: string | null
+          studio_name?: string | null
+          updated_at?: string
+          verified_user_id?: string | null
+          website?: string | null
+        }
+        Update: {
+          active_from?: number | null
+          active_to?: number | null
+          created_at?: string
+          disciplines?: string[]
+          id?: string
+          name?: string
+          registry_notes?: string | null
+          slug?: string | null
+          studio_name?: string | null
+          updated_at?: string
+          verified_user_id?: string | null
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "artists_verified_user_id_fkey"
+            columns: ["verified_user_id"]
+            isOneToOne: false
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "artists_verified_user_id_fkey"
+            columns: ["verified_user_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "artists_verified_user_id_fkey"
+            columns: ["verified_user_id"]
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -532,6 +611,91 @@ export type Database = {
           },
         ]
       }
+      catalog_price_history: {
+        Row: {
+          asking_high: number
+          asking_low: number
+          asking_median: number
+          catalog_item_id: string
+          created_at: string
+          currency: string
+          id: string
+          observed_on: string
+          sample_size: number
+          source: string
+        }
+        Insert: {
+          asking_high: number
+          asking_low: number
+          asking_median: number
+          catalog_item_id: string
+          created_at?: string
+          currency?: string
+          id?: string
+          observed_on?: string
+          sample_size: number
+          source?: string
+        }
+        Update: {
+          asking_high?: number
+          asking_low?: number
+          asking_median?: number
+          catalog_item_id?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          observed_on?: string
+          sample_size?: number
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalog_price_history_catalog_item_id_fkey"
+            columns: ["catalog_item_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      catalog_price_signal_flags: {
+        Row: {
+          catalog_item_id: string
+          created_at: string
+          id: string
+          note: string | null
+          reporter_id: string
+          resolved_at: string | null
+          status: string
+        }
+        Insert: {
+          catalog_item_id: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          reporter_id: string
+          resolved_at?: string | null
+          status?: string
+        }
+        Update: {
+          catalog_item_id?: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          reporter_id?: string
+          resolved_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalog_price_signal_flags_catalog_item_id_fkey"
+            columns: ["catalog_item_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       catalog_price_signals: {
         Row: {
           asking_high: number
@@ -539,6 +703,7 @@ export type Database = {
           asking_median: number
           catalog_item_id: string
           currency: string
+          listings: Json
           match_basis: string
           observed_at: string
           sample_size: number
@@ -550,6 +715,7 @@ export type Database = {
           asking_median: number
           catalog_item_id: string
           currency?: string
+          listings?: Json
           match_basis: string
           observed_at?: string
           sample_size: number
@@ -561,6 +727,7 @@ export type Database = {
           asking_median?: number
           catalog_item_id?: string
           currency?: string
+          listings?: Json
           match_basis?: string
           observed_at?: string
           sample_size?: number
@@ -569,6 +736,35 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "catalog_price_signals_catalog_item_id_fkey"
+            columns: ["catalog_item_id"]
+            isOneToOne: true
+            referencedRelation: "catalog_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      catalog_price_sweeps: {
+        Row: {
+          catalog_item_id: string
+          outcome: string
+          sample_size: number
+          swept_at: string
+        }
+        Insert: {
+          catalog_item_id: string
+          outcome: string
+          sample_size?: number
+          swept_at?: string
+        }
+        Update: {
+          catalog_item_id?: string
+          outcome?: string
+          sample_size?: number
+          swept_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalog_price_sweeps_catalog_item_id_fkey"
             columns: ["catalog_item_id"]
             isOneToOne: true
             referencedRelation: "catalog_items"
@@ -699,6 +895,7 @@ export type Database = {
       catalog_suggestions: {
         Row: {
           admin_notes: string | null
+          artist_name: string | null
           catalog_item_id: string | null
           created_at: string
           downvotes: number
@@ -715,6 +912,7 @@ export type Database = {
         }
         Insert: {
           admin_notes?: string | null
+          artist_name?: string | null
           catalog_item_id?: string | null
           created_at?: string
           downvotes?: number
@@ -731,6 +929,7 @@ export type Database = {
         }
         Update: {
           admin_notes?: string | null
+          artist_name?: string | null
           catalog_item_id?: string | null
           created_at?: string
           downvotes?: number
@@ -763,7 +962,9 @@ export type Database = {
           created_at: string | null
           id: string
           image_urls: string[] | null
+          is_public: boolean
           is_visible_to_client: boolean | null
+          metadata: Json
           new_status: string | null
           old_status: string | null
           requires_payment: boolean | null
@@ -777,7 +978,9 @@ export type Database = {
           created_at?: string | null
           id?: string
           image_urls?: string[] | null
+          is_public?: boolean
           is_visible_to_client?: boolean | null
+          metadata?: Json
           new_status?: string | null
           old_status?: string | null
           requires_payment?: boolean | null
@@ -791,7 +994,9 @@ export type Database = {
           created_at?: string | null
           id?: string
           image_urls?: string[] | null
+          is_public?: boolean
           is_visible_to_client?: boolean | null
+          metadata?: Json
           new_status?: string | null
           old_status?: string | null
           requires_payment?: boolean | null
@@ -866,6 +1071,7 @@ export type Database = {
           queue_position: number | null
           quote_note: string | null
           quoted_at: string | null
+          received_at: string | null
           reference_images: string[] | null
           revisions_included: number | null
           revisions_used: number
@@ -915,6 +1121,7 @@ export type Database = {
           queue_position?: number | null
           quote_note?: string | null
           quoted_at?: string | null
+          received_at?: string | null
           reference_images?: string[] | null
           revisions_included?: number | null
           revisions_used?: number
@@ -964,6 +1171,7 @@ export type Database = {
           queue_position?: number | null
           quote_note?: string | null
           quoted_at?: string | null
+          received_at?: string | null
           reference_images?: string[] | null
           revisions_included?: number | null
           revisions_used?: number
@@ -1048,13 +1256,6 @@ export type Database = {
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "commissions_horse_id_fkey"
-            columns: ["horse_id"]
-            isOneToOne: false
-            referencedRelation: "v_artist_finished_horses"
-            referencedColumns: ["horse_id"]
-          },
         ]
       }
       condition_history: {
@@ -1092,13 +1293,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "condition_history_horse_id_fkey"
-            columns: ["horse_id"]
-            isOneToOne: false
-            referencedRelation: "v_artist_finished_horses"
-            referencedColumns: ["horse_id"]
           },
         ]
       }
@@ -1252,50 +1446,61 @@ export type Database = {
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "conversations_horse_id_fkey"
-            columns: ["horse_id"]
-            isOneToOne: false
-            referencedRelation: "v_artist_finished_horses"
-            referencedColumns: ["horse_id"]
-          },
         ]
       }
       customization_logs: {
         Row: {
           artist_alias: string | null
           artist_user_id: string | null
+          claimed_start: string | null
           commission_id: string | null
           created_at: string
           date_completed: string | null
+          disavowed_at: string | null
           horse_id: string
           id: string
           image_urls: string[] | null
           materials_used: string | null
+          owner_confirmed_at: string | null
+          recorded_by: string
+          reel_public: boolean
+          summary: string | null
           work_type: string
         }
         Insert: {
           artist_alias?: string | null
           artist_user_id?: string | null
+          claimed_start?: string | null
           commission_id?: string | null
           created_at?: string
           date_completed?: string | null
+          disavowed_at?: string | null
           horse_id: string
           id?: string
           image_urls?: string[] | null
           materials_used?: string | null
+          owner_confirmed_at?: string | null
+          recorded_by?: string
+          reel_public?: boolean
+          summary?: string | null
           work_type: string
         }
         Update: {
           artist_alias?: string | null
           artist_user_id?: string | null
+          claimed_start?: string | null
           commission_id?: string | null
           created_at?: string
           date_completed?: string | null
+          disavowed_at?: string | null
           horse_id?: string
           id?: string
           image_urls?: string[] | null
           materials_used?: string | null
+          owner_confirmed_at?: string | null
+          recorded_by?: string
+          reel_public?: boolean
+          summary?: string | null
           work_type?: string
         }
         Relationships: [
@@ -1333,13 +1538,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "customization_logs_horse_id_fkey"
-            columns: ["horse_id"]
-            isOneToOne: false
-            referencedRelation: "v_artist_finished_horses"
-            referencedColumns: ["horse_id"]
           },
         ]
       }
@@ -1596,13 +1794,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "event_entries_horse_id_fkey"
-            columns: ["horse_id"]
-            isOneToOne: false
-            referencedRelation: "v_artist_finished_horses"
-            referencedColumns: ["horse_id"]
           },
           {
             foreignKeyName: "event_entries_show_string_id_fkey"
@@ -2169,13 +2360,6 @@ export type Database = {
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "featured_horses_horse_id_fkey"
-            columns: ["horse_id"]
-            isOneToOne: false
-            referencedRelation: "v_artist_finished_horses"
-            referencedColumns: ["horse_id"]
-          },
         ]
       }
       financial_vault: {
@@ -2189,6 +2373,8 @@ export type Database = {
           is_trade: boolean
           purchase_date: string | null
           purchase_date_text: string | null
+          purchase_group_id: string | null
+          purchase_group_label: string | null
           purchase_price: number | null
         }
         Insert: {
@@ -2201,6 +2387,8 @@ export type Database = {
           is_trade?: boolean
           purchase_date?: string | null
           purchase_date_text?: string | null
+          purchase_group_id?: string | null
+          purchase_group_label?: string | null
           purchase_price?: number | null
         }
         Update: {
@@ -2213,6 +2401,8 @@ export type Database = {
           is_trade?: boolean
           purchase_date?: string | null
           purchase_date_text?: string | null
+          purchase_group_id?: string | null
+          purchase_group_label?: string | null
           purchase_price?: number | null
         }
         Relationships: [
@@ -2222,13 +2412,6 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "financial_vault_horse_id_fkey"
-            columns: ["horse_id"]
-            isOneToOne: true
-            referencedRelation: "v_artist_finished_horses"
-            referencedColumns: ["horse_id"]
           },
         ]
       }
@@ -2520,13 +2703,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "group_posts_horse_id_fkey"
-            columns: ["horse_id"]
-            isOneToOne: false
-            referencedRelation: "v_artist_finished_horses"
-            referencedColumns: ["horse_id"]
-          },
-          {
             foreignKeyName: "group_posts_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -2558,6 +2734,7 @@ export type Database = {
           group_type: string
           icon_url: string | null
           id: string
+          is_featured: boolean
           is_private: boolean
           member_count: number | null
           name: string
@@ -2574,6 +2751,7 @@ export type Database = {
           group_type: string
           icon_url?: string | null
           id?: string
+          is_featured?: boolean
           is_private?: boolean
           member_count?: number | null
           name: string
@@ -2590,6 +2768,7 @@ export type Database = {
           group_type?: string
           icon_url?: string | null
           id?: string
+          is_featured?: boolean
           is_private?: boolean
           member_count?: number | null
           name?: string
@@ -2622,6 +2801,89 @@ export type Database = {
           },
         ]
       }
+      horse_accomplishments: {
+        Row: {
+          created_at: string
+          date_text: string | null
+          detail: string | null
+          happened_on: string | null
+          horse_id: string
+          id: string
+          is_public: boolean
+          kind: string
+          link_url: string | null
+          organization: string | null
+          owner_id: string
+          result: string | null
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          date_text?: string | null
+          detail?: string | null
+          happened_on?: string | null
+          horse_id: string
+          id?: string
+          is_public?: boolean
+          kind?: string
+          link_url?: string | null
+          organization?: string | null
+          owner_id: string
+          result?: string | null
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          date_text?: string | null
+          detail?: string | null
+          happened_on?: string | null
+          horse_id?: string
+          id?: string
+          is_public?: boolean
+          kind?: string
+          link_url?: string | null
+          organization?: string | null
+          owner_id?: string
+          result?: string | null
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "horse_accomplishments_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: false
+            referencedRelation: "user_horses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "horse_accomplishments_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "horse_accomplishments_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "horse_accomplishments_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       horse_career: {
         Row: {
           career_points: number
@@ -2645,13 +2907,6 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "horse_career_horse_id_fkey"
-            columns: ["horse_id"]
-            isOneToOne: true
-            referencedRelation: "v_artist_finished_horses"
-            referencedColumns: ["horse_id"]
           },
         ]
       }
@@ -2688,13 +2943,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "horse_collections_horse_id_fkey"
-            columns: ["horse_id"]
-            isOneToOne: false
-            referencedRelation: "v_artist_finished_horses"
-            referencedColumns: ["horse_id"]
           },
         ]
       }
@@ -2736,13 +2984,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "horse_documents_horse_id_fkey"
-            columns: ["horse_id"]
-            isOneToOne: false
-            referencedRelation: "v_artist_finished_horses"
-            referencedColumns: ["horse_id"]
           },
           {
             foreignKeyName: "horse_documents_owner_id_fkey"
@@ -2794,13 +3035,6 @@ export type Database = {
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "horse_favorites_horse_id_fkey"
-            columns: ["horse_id"]
-            isOneToOne: false
-            referencedRelation: "v_artist_finished_horses"
-            referencedColumns: ["horse_id"]
-          },
         ]
       }
       horse_images: {
@@ -2838,13 +3072,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "horse_images_horse_id_fkey"
-            columns: ["horse_id"]
-            isOneToOne: false
-            referencedRelation: "v_artist_finished_horses"
-            referencedColumns: ["horse_id"]
           },
         ]
       }
@@ -2903,13 +3130,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "horse_ownership_history_horse_id_fkey"
-            columns: ["horse_id"]
-            isOneToOne: false
-            referencedRelation: "v_artist_finished_horses"
-            referencedColumns: ["horse_id"]
-          },
-          {
             foreignKeyName: "horse_ownership_history_owner_id_fkey"
             columns: ["owner_id"]
             isOneToOne: false
@@ -2932,12 +3152,117 @@ export type Database = {
           },
         ]
       }
+      horse_papers: {
+        Row: {
+          accomplishment_id: string | null
+          byte_size: number
+          created_at: string
+          file_path: string
+          horse_id: string
+          id: string
+          is_public: boolean
+          issued_by: string | null
+          issued_on: string | null
+          kind: string
+          mime: string
+          notes: string | null
+          owner_id: string
+          show_record_id: string | null
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          accomplishment_id?: string | null
+          byte_size: number
+          created_at?: string
+          file_path: string
+          horse_id: string
+          id?: string
+          is_public?: boolean
+          issued_by?: string | null
+          issued_on?: string | null
+          kind?: string
+          mime: string
+          notes?: string | null
+          owner_id: string
+          show_record_id?: string | null
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          accomplishment_id?: string | null
+          byte_size?: number
+          created_at?: string
+          file_path?: string
+          horse_id?: string
+          id?: string
+          is_public?: boolean
+          issued_by?: string | null
+          issued_on?: string | null
+          kind?: string
+          mime?: string
+          notes?: string | null
+          owner_id?: string
+          show_record_id?: string | null
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "horse_papers_accomplishment_id_fkey"
+            columns: ["accomplishment_id"]
+            isOneToOne: false
+            referencedRelation: "horse_accomplishments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "horse_papers_horse_id_fkey"
+            columns: ["horse_id"]
+            isOneToOne: false
+            referencedRelation: "user_horses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "horse_papers_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "horse_papers_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "horse_papers_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "horse_papers_show_record_id_fkey"
+            columns: ["show_record_id"]
+            isOneToOne: false
+            referencedRelation: "show_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       horse_pedigrees: {
         Row: {
+          bred_by: string | null
           cast_number: string | null
           created_at: string
           dam_id: string | null
           dam_name: string | null
+          dam_url: string | null
           edition_size: string | null
           horse_id: string
           id: string
@@ -2945,14 +3270,17 @@ export type Database = {
           sculptor: string | null
           sire_id: string | null
           sire_name: string | null
+          sire_url: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          bred_by?: string | null
           cast_number?: string | null
           created_at?: string
           dam_id?: string | null
           dam_name?: string | null
+          dam_url?: string | null
           edition_size?: string | null
           horse_id: string
           id?: string
@@ -2960,14 +3288,17 @@ export type Database = {
           sculptor?: string | null
           sire_id?: string | null
           sire_name?: string | null
+          sire_url?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          bred_by?: string | null
           cast_number?: string | null
           created_at?: string
           dam_id?: string | null
           dam_name?: string | null
+          dam_url?: string | null
           edition_size?: string | null
           horse_id?: string
           id?: string
@@ -2975,6 +3306,7 @@ export type Database = {
           sculptor?: string | null
           sire_id?: string | null
           sire_name?: string | null
+          sire_url?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -2987,29 +3319,8 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "horse_pedigrees_dam_id_fkey"
-            columns: ["dam_id"]
-            isOneToOne: false
-            referencedRelation: "v_artist_finished_horses"
-            referencedColumns: ["horse_id"]
-          },
-          {
             foreignKeyName: "horse_pedigrees_horse_id_fkey"
             columns: ["horse_id"]
-            isOneToOne: false
-            referencedRelation: "user_horses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "horse_pedigrees_horse_id_fkey"
-            columns: ["horse_id"]
-            isOneToOne: false
-            referencedRelation: "v_artist_finished_horses"
-            referencedColumns: ["horse_id"]
-          },
-          {
-            foreignKeyName: "horse_pedigrees_sire_id_fkey"
-            columns: ["sire_id"]
             isOneToOne: false
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
@@ -3018,8 +3329,8 @@ export type Database = {
             foreignKeyName: "horse_pedigrees_sire_id_fkey"
             columns: ["sire_id"]
             isOneToOne: false
-            referencedRelation: "v_artist_finished_horses"
-            referencedColumns: ["horse_id"]
+            referencedRelation: "user_horses"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -3055,13 +3366,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "horse_photo_stages_horse_id_fkey"
-            columns: ["horse_id"]
-            isOneToOne: false
-            referencedRelation: "v_artist_finished_horses"
-            referencedColumns: ["horse_id"]
           },
           {
             foreignKeyName: "horse_photo_stages_image_id_fkey"
@@ -3104,13 +3408,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "horse_titles_horse_id_fkey"
-            columns: ["horse_id"]
-            isOneToOne: false
-            referencedRelation: "v_artist_finished_horses"
-            referencedColumns: ["horse_id"]
           },
         ]
       }
@@ -3170,13 +3467,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "horse_transfers_horse_id_fkey"
-            columns: ["horse_id"]
-            isOneToOne: false
-            referencedRelation: "v_artist_finished_horses"
-            referencedColumns: ["horse_id"]
           },
         ]
       }
@@ -3518,13 +3808,6 @@ export type Database = {
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "notifications_horse_id_fkey"
-            columns: ["horse_id"]
-            isOneToOne: false
-            referencedRelation: "v_artist_finished_horses"
-            referencedColumns: ["horse_id"]
-          },
         ]
       }
       object_view_daily: {
@@ -3702,6 +3985,7 @@ export type Database = {
           replies_count: number
           show_id: string | null
           studio_id: string | null
+          thread_status: string | null
           title: string | null
           updated_at: string
           visibility: string
@@ -3724,6 +4008,7 @@ export type Database = {
           replies_count?: number
           show_id?: string | null
           studio_id?: string | null
+          thread_status?: string | null
           title?: string | null
           updated_at?: string
           visibility?: string
@@ -3746,6 +4031,7 @@ export type Database = {
           replies_count?: number
           show_id?: string | null
           studio_id?: string | null
+          thread_status?: string | null
           title?: string | null
           updated_at?: string
           visibility?: string
@@ -3808,13 +4094,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "posts_horse_id_fkey"
-            columns: ["horse_id"]
-            isOneToOne: false
-            referencedRelation: "v_artist_finished_horses"
-            referencedColumns: ["horse_id"]
-          },
-          {
             foreignKeyName: "posts_parent_id_fkey"
             columns: ["parent_id"]
             isOneToOne: false
@@ -3859,13 +4138,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "purchased_reports_horse_id_fkey"
-            columns: ["horse_id"]
-            isOneToOne: false
-            referencedRelation: "v_artist_finished_horses"
-            referencedColumns: ["horse_id"]
           },
         ]
       }
@@ -3980,13 +4252,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "qualification_cards_horse_id_fkey"
-            columns: ["horse_id"]
-            isOneToOne: false
-            referencedRelation: "v_artist_finished_horses"
-            referencedColumns: ["horse_id"]
           },
           {
             foreignKeyName: "qualification_cards_show_id_fkey"
@@ -4121,6 +4386,92 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      roadmap_events: {
+        Row: {
+          body: string
+          changes: Json
+          created_at: string
+          id: string
+          item_id: string
+          kind: string
+        }
+        Insert: {
+          body?: string
+          changes?: Json
+          created_at?: string
+          id?: string
+          item_id: string
+          kind: string
+        }
+        Update: {
+          body?: string
+          changes?: Json
+          created_at?: string
+          id?: string
+          item_id?: string
+          kind?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "roadmap_events_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "roadmap_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      roadmap_items: {
+        Row: {
+          area: string
+          closed_at: string | null
+          created_at: string
+          detail: string
+          due_on: string | null
+          horizon: string
+          id: string
+          kind: string
+          link: string
+          priority: number
+          source: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          area?: string
+          closed_at?: string | null
+          created_at?: string
+          detail?: string
+          due_on?: string | null
+          horizon: string
+          id?: string
+          kind: string
+          link?: string
+          priority?: number
+          source?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          area?: string
+          closed_at?: string | null
+          created_at?: string
+          detail?: string
+          due_on?: string | null
+          horizon?: string
+          id?: string
+          kind?: string
+          link?: string
+          priority?: number
+          source?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       show_barred_entrants: {
         Row: {
@@ -4288,6 +4639,8 @@ export type Database = {
           note: string | null
           owner_id: string
           photo_id: string | null
+          score_data: Json | null
+          score_total: number | null
           show_id: string
           status: string
         }
@@ -4306,6 +4659,8 @@ export type Database = {
           note?: string | null
           owner_id: string
           photo_id?: string | null
+          score_data?: Json | null
+          score_total?: number | null
           show_id: string
           status?: string
         }
@@ -4324,6 +4679,8 @@ export type Database = {
           note?: string | null
           owner_id?: string
           photo_id?: string | null
+          score_data?: Json | null
+          score_total?: number | null
           show_id?: string
           status?: string
         }
@@ -4392,13 +4749,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "show_class_entries_horse_id_fkey"
-            columns: ["horse_id"]
-            isOneToOne: false
-            referencedRelation: "v_artist_finished_horses"
-            referencedColumns: ["horse_id"]
-          },
-          {
             foreignKeyName: "show_class_entries_owner_id_fkey"
             columns: ["owner_id"]
             isOneToOne: false
@@ -4447,6 +4797,7 @@ export type Database = {
           max_per_entrant: number | null
           name: string
           results_published_at: string | null
+          rubric: Json | null
           section_id: string
           sort_order: number
           split_from_class_id: string | null
@@ -4463,6 +4814,7 @@ export type Database = {
           max_per_entrant?: number | null
           name: string
           results_published_at?: string | null
+          rubric?: Json | null
           section_id: string
           sort_order?: number
           split_from_class_id?: string | null
@@ -4479,6 +4831,7 @@ export type Database = {
           max_per_entrant?: number | null
           name?: string
           results_published_at?: string | null
+          rubric?: Json | null
           section_id?: string
           sort_order?: number
           split_from_class_id?: string | null
@@ -4784,8 +5137,10 @@ export type Database = {
           competition_level: string | null
           created_at: string
           division: string | null
+          entry_photo_url: string | null
           horse_id: string
           id: string
+          import_batch: string | null
           is_nan: boolean
           is_nan_qualifying: boolean | null
           judge_critique: string | null
@@ -4796,8 +5151,14 @@ export type Database = {
           nan_year: number | null
           notes: string | null
           placing: string | null
+          qualifier_card: string | null
+          qualifier_card_id: string | null
+          qualifier_program: string | null
+          qualifier_year: number | null
           ribbon_color: string | null
           sanctioning_body: string | null
+          score_total: number | null
+          scorecard: Json | null
           section_name: string | null
           show_date: string | null
           show_date_text: string | null
@@ -4817,8 +5178,10 @@ export type Database = {
           competition_level?: string | null
           created_at?: string
           division?: string | null
+          entry_photo_url?: string | null
           horse_id: string
           id?: string
+          import_batch?: string | null
           is_nan?: boolean
           is_nan_qualifying?: boolean | null
           judge_critique?: string | null
@@ -4829,8 +5192,14 @@ export type Database = {
           nan_year?: number | null
           notes?: string | null
           placing?: string | null
+          qualifier_card?: string | null
+          qualifier_card_id?: string | null
+          qualifier_program?: string | null
+          qualifier_year?: number | null
           ribbon_color?: string | null
           sanctioning_body?: string | null
+          score_total?: number | null
+          scorecard?: Json | null
           section_name?: string | null
           show_date?: string | null
           show_date_text?: string | null
@@ -4850,8 +5219,10 @@ export type Database = {
           competition_level?: string | null
           created_at?: string
           division?: string | null
+          entry_photo_url?: string | null
           horse_id?: string
           id?: string
+          import_batch?: string | null
           is_nan?: boolean
           is_nan_qualifying?: boolean | null
           judge_critique?: string | null
@@ -4862,8 +5233,14 @@ export type Database = {
           nan_year?: number | null
           notes?: string | null
           placing?: string | null
+          qualifier_card?: string | null
+          qualifier_card_id?: string | null
+          qualifier_program?: string | null
+          qualifier_year?: number | null
           ribbon_color?: string | null
           sanctioning_body?: string | null
+          score_total?: number | null
+          scorecard?: Json | null
           section_name?: string | null
           show_date?: string | null
           show_date_text?: string | null
@@ -4884,13 +5261,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "show_records_horse_id_fkey"
-            columns: ["horse_id"]
-            isOneToOne: false
-            referencedRelation: "v_artist_finished_horses"
-            referencedColumns: ["horse_id"]
           },
           {
             foreignKeyName: "show_records_show_id_fkey"
@@ -5117,13 +5487,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_horses"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "show_string_entries_horse_id_fkey"
-            columns: ["horse_id"]
-            isOneToOne: false
-            referencedRelation: "v_artist_finished_horses"
-            referencedColumns: ["horse_id"]
           },
           {
             foreignKeyName: "show_string_entries_show_string_id_fkey"
@@ -5499,13 +5862,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "transactions_horse_id_fkey"
-            columns: ["horse_id"]
-            isOneToOne: false
-            referencedRelation: "v_artist_finished_horses"
-            referencedColumns: ["horse_id"]
-          },
-          {
             foreignKeyName: "transactions_party_a_id_fkey"
             columns: ["party_a_id"]
             isOneToOne: false
@@ -5712,8 +6068,10 @@ export type Database = {
           assigned_breed: string | null
           assigned_gender: string | null
           attributes: Json | null
+          cast_by: string | null
           catalog_id: string | null
           collection_id: string | null
+          color: string | null
           condition_grade: string | null
           created_at: string
           custom_name: string
@@ -5732,8 +6090,11 @@ export type Database = {
           listing_price: number | null
           marketplace_notes: string | null
           owner_id: string
+          prep_artist: string | null
           public_notes: string | null
           regional_id: string | null
+          resin_body: string | null
+          resin_material: string | null
           sculptor: string | null
           trade_status: string
           visibility: string
@@ -5744,8 +6105,10 @@ export type Database = {
           assigned_breed?: string | null
           assigned_gender?: string | null
           attributes?: Json | null
+          cast_by?: string | null
           catalog_id?: string | null
           collection_id?: string | null
+          color?: string | null
           condition_grade?: string | null
           created_at?: string
           custom_name: string
@@ -5764,8 +6127,11 @@ export type Database = {
           listing_price?: number | null
           marketplace_notes?: string | null
           owner_id: string
+          prep_artist?: string | null
           public_notes?: string | null
           regional_id?: string | null
+          resin_body?: string | null
+          resin_material?: string | null
           sculptor?: string | null
           trade_status?: string
           visibility?: string
@@ -5776,8 +6142,10 @@ export type Database = {
           assigned_breed?: string | null
           assigned_gender?: string | null
           attributes?: Json | null
+          cast_by?: string | null
           catalog_id?: string | null
           collection_id?: string | null
+          color?: string | null
           condition_grade?: string | null
           created_at?: string
           custom_name?: string
@@ -5796,8 +6164,11 @@ export type Database = {
           listing_price?: number | null
           marketplace_notes?: string | null
           owner_id?: string
+          prep_artist?: string | null
           public_notes?: string | null
           regional_id?: string | null
+          resin_body?: string | null
+          resin_material?: string | null
           sculptor?: string | null
           trade_status?: string
           visibility?: string
@@ -5924,6 +6295,7 @@ export type Database = {
           approved_suggestions_count: number
           avatar_url: string | null
           bio: string | null
+          country: string | null
           created_at: string
           currency_symbol: string | null
           default_horse_public: boolean | null
@@ -5938,12 +6310,18 @@ export type Database = {
           is_trusted_curator: boolean
           is_verified: boolean
           last_seen_on: string | null
+          links: Json
+          looking_for: string | null
           notification_prefs: Json | null
+          open_to_trades: boolean
           pref_simple_mode: boolean
           profile_customization: Json | null
           role: string | null
+          ships_not_to: string | null
+          ships_to: string | null
           show_badges: boolean
           show_in_supporters_ledger: boolean
+          show_membership_on_profile: boolean
           show_photos_on_reference: boolean
           supporter_since: string | null
           suspended_at: string | null
@@ -5957,6 +6335,7 @@ export type Database = {
           approved_suggestions_count?: number
           avatar_url?: string | null
           bio?: string | null
+          country?: string | null
           created_at?: string
           currency_symbol?: string | null
           default_horse_public?: boolean | null
@@ -5971,12 +6350,18 @@ export type Database = {
           is_trusted_curator?: boolean
           is_verified?: boolean
           last_seen_on?: string | null
+          links?: Json
+          looking_for?: string | null
           notification_prefs?: Json | null
+          open_to_trades?: boolean
           pref_simple_mode?: boolean
           profile_customization?: Json | null
           role?: string | null
+          ships_not_to?: string | null
+          ships_to?: string | null
           show_badges?: boolean
           show_in_supporters_ledger?: boolean
+          show_membership_on_profile?: boolean
           show_photos_on_reference?: boolean
           supporter_since?: string | null
           suspended_at?: string | null
@@ -5990,6 +6375,7 @@ export type Database = {
           approved_suggestions_count?: number
           avatar_url?: string | null
           bio?: string | null
+          country?: string | null
           created_at?: string
           currency_symbol?: string | null
           default_horse_public?: boolean | null
@@ -6004,12 +6390,18 @@ export type Database = {
           is_trusted_curator?: boolean
           is_verified?: boolean
           last_seen_on?: string | null
+          links?: Json
+          looking_for?: string | null
           notification_prefs?: Json | null
+          open_to_trades?: boolean
           pref_simple_mode?: boolean
           profile_customization?: Json | null
           role?: string | null
+          ships_not_to?: string | null
+          ships_to?: string | null
           show_badges?: boolean
           show_in_supporters_ledger?: boolean
+          show_membership_on_profile?: boolean
           show_photos_on_reference?: boolean
           supporter_since?: string | null
           suspended_at?: string | null
@@ -6018,6 +6410,74 @@ export type Database = {
           watermark_text?: string | null
         }
         Relationships: []
+      }
+      work_moments: {
+        Row: {
+          author_id: string | null
+          caption: string | null
+          claimed_date: string | null
+          created_at: string
+          id: string
+          image_urls: string[]
+          is_public: boolean
+          log_id: string
+          sort_order: number
+          stage: string
+        }
+        Insert: {
+          author_id?: string | null
+          caption?: string | null
+          claimed_date?: string | null
+          created_at?: string
+          id?: string
+          image_urls?: string[]
+          is_public?: boolean
+          log_id: string
+          sort_order?: number
+          stage?: string
+        }
+        Update: {
+          author_id?: string | null
+          caption?: string | null
+          claimed_date?: string | null
+          created_at?: string
+          id?: string
+          image_urls?: string[]
+          is_public?: boolean
+          log_id?: string
+          sort_order?: number
+          stage?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_moments_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_moments_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "work_moments_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_moments_log_id_fkey"
+            columns: ["log_id"]
+            isOneToOne: false
+            referencedRelation: "customization_logs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -6099,10 +6559,13 @@ export type Database = {
           best_placing: number | null
           catalog_id: string | null
           commission_id: string | null
+          credit_verified: boolean | null
           date_completed: string | null
+          disavowed_at: string | null
           finishing_artist: string | null
           finishing_artist_verified: boolean | null
           horse_created_at: string | null
+          horse_deleted_at: string | null
           horse_id: string | null
           horse_name: string | null
           image_urls: string[] | null
@@ -6110,69 +6573,14 @@ export type Database = {
           latest_show_date: string | null
           log_id: string | null
           nan_qualifying_count: number | null
+          owner_confirmed_at: string | null
           owner_id: string | null
+          recorded_by: string | null
           show_count: number | null
           titles: string[] | null
           work_type: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "customization_logs_artist_user_id_fkey"
-            columns: ["artist_user_id"]
-            isOneToOne: false
-            referencedRelation: "discover_users_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "customization_logs_artist_user_id_fkey"
-            columns: ["artist_user_id"]
-            isOneToOne: false
-            referencedRelation: "mv_trusted_sellers"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "customization_logs_artist_user_id_fkey"
-            columns: ["artist_user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "customization_logs_commission_id_fkey"
-            columns: ["commission_id"]
-            isOneToOne: false
-            referencedRelation: "commissions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_horses_catalog_id_fkey"
-            columns: ["catalog_id"]
-            isOneToOne: false
-            referencedRelation: "catalog_items"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_horses_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "discover_users_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_horses_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "mv_trusted_sellers"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "user_horses_owner_id_fkey"
-            columns: ["owner_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       v_horse_hoofprint: {
         Row: {
@@ -6223,6 +6631,7 @@ export type Database = {
         Args: { p_is_public?: boolean; rows: Json }
         Returns: Json
       }
+      can_report_sales: { Args: { p_user_id: string }; Returns: boolean }
       catalog_slugify: { Args: { txt: string }; Returns: string }
       check_rate_limit: {
         Args: {
@@ -6268,6 +6677,11 @@ export type Database = {
         }
         Returns: string
       }
+      confirm_work_record: { Args: { p_log: string }; Returns: boolean }
+      confirm_work_records_on_claim: {
+        Args: { p_horse: string; p_parker: string }
+        Returns: number
+      }
       count_catalog_collectors: {
         Args: { p_catalog_id: string }
         Returns: number
@@ -6285,8 +6699,17 @@ export type Database = {
         }
         Returns: Json
       }
+      disavow_work_record: { Args: { p_log: string }; Returns: boolean }
       entry_owner_of: { Args: { p_entry_id: string }; Returns: string }
       entry_vote_open: { Args: { p_entry_id: string }; Returns: boolean }
+      get_barn_post_stats: {
+        Args: { p_group_ids: string[] }
+        Returns: {
+          group_id: string
+          last_post_at: string
+          post_count: number
+        }[]
+      }
       get_catalog_browse_thumbs: {
         Args: { p_ids: string[] }
         Returns: {
@@ -6420,6 +6843,7 @@ export type Database = {
         }[]
       }
       get_photo_limit: { Args: never; Returns: number }
+      get_profile_customization: { Args: { p_user_id: string }; Returns: Json }
       get_public_aliases: {
         Args: { p_ids: string[] }
         Returns: {
@@ -6467,9 +6891,11 @@ export type Database = {
           show_date_text: string
           show_id: string
           show_name: string
+          total_entries: number
           verification_tier: string
         }[]
       }
+      get_public_making: { Args: { p_horse: string }; Returns: Json }
       get_public_passport: {
         Args: { p_horse_id: string }
         Returns: {
@@ -6477,6 +6903,18 @@ export type Database = {
           horse: Json
           images: Json
           owner_alias: string
+        }[]
+      }
+      get_public_seller_terms: {
+        Args: { p_aliases?: string[]; p_user_ids?: string[] }
+        Returns: {
+          country: string
+          currency_symbol: string
+          looking_for: string
+          open_to_trades: boolean
+          ships_not_to: string
+          ships_to: string
+          user_id: string
         }[]
       }
       get_show_staff_public: {
@@ -6497,6 +6935,8 @@ export type Database = {
           vault_total: number
         }[]
       }
+      get_studio_owner_card: { Args: { p_user: string }; Returns: Json }
+      get_studio_wall: { Args: { p_user: string }; Returns: Json }
       get_supporters_ledger: {
         Args: never
         Returns: {
@@ -6563,6 +7003,7 @@ export type Database = {
         Returns: number
       }
       placings_announced: { Args: { p_class_id: string }; Returns: boolean }
+      public_membership_label: { Args: { p_user_id: string }; Returns: string }
       record_class_placings_atomic: {
         Args: { p_class_id: string; p_placings: Json }
         Returns: undefined
@@ -6635,6 +7076,10 @@ export type Database = {
           similarity: number
           title: string
         }[]
+      }
+      set_work_record_reel_public: {
+        Args: { p_log: string; p_public: boolean }
+        Returns: boolean
       }
       show_follower_count: { Args: { p_show_id: string }; Returns: number }
       show_id_of_class: { Args: { p_class_id: string }; Returns: string }
@@ -6735,12 +7180,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -6764,11 +7209,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -6789,11 +7234,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -6814,11 +7259,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -6831,11 +7276,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }

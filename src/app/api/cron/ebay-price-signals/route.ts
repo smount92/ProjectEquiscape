@@ -19,6 +19,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminClient } from "@/lib/supabase/admin";
+import type { Json } from "@/lib/types/database.generated";
 import { logger } from "@/lib/logger";
 import * as Sentry from "@sentry/nextjs";
 import { ebayCompsLive } from "@/lib/ebay/flag";
@@ -230,7 +231,8 @@ export async function GET(request: NextRequest) {
                 currency: s.currency,
                 sample_size: s.sampleSize,
                 match_basis: s.matchBasis,
-                listings: s.listings,
+                // Plain objects of strings and numbers: valid JSON for the jsonb column.
+                listings: s.listings as unknown as Json,
                 source: "ebay-browse",
                 observed_at: now.toISOString(),
             };
