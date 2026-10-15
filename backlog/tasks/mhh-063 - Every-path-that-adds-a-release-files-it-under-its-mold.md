@@ -1,9 +1,10 @@
 ---
 id: MHH-063
 title: Every path that adds a release files it under its mold
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-10-15 22:27'
+updated_date: '2026-10-15 22:49'
 labels:
   - registry
   - member-reported
@@ -29,9 +30,9 @@ Done so far: approval resolves the mold (resolveParentMold), the linker files un
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 CSV import sets the mold for releases it adds
-- [ ] #2 The delta import tool sets the mold
-- [ ] #3 The suggestion form picks a mold from the Registry, with free text only as a fallback
+- [x] #1 CSV import sets the mold for releases it adds
+- [x] #2 The delta import tool sets the mold
+- [x] #3 The suggestion form picks a mold from the Registry, with free text only as a fallback
 <!-- AC:END -->
 
 ## Definition of Done
@@ -40,3 +41,9 @@ Done so far: approval resolves the mold (resolveParentMold), the linker files un
 - [ ] #2 Decision recorded in docs/DECISIONS.md if one was made
 - [ ] #3 Member who reported it has a drafted reply, if any
 <!-- DOD:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+CSV import never adds Registry entries (it links horses to existing rows), and delta_import.mjs already resolves molds by name and scale, so both criteria hold as built. The new-entry form now has a mold picker (pickMold in actions/linker.ts): picking a mold sends parent_catalog_id, which approval honours; free text stays as a fallback. Also fixed a broken number-in-title pattern in the same form (it never matched); it now uses the linker's splitNumberFromTitle.
+<!-- SECTION:FINAL_SUMMARY:END -->

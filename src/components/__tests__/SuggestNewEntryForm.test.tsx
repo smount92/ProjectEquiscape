@@ -6,6 +6,10 @@ const createSuggestion = vi.fn();
 vi.mock("@/app/actions/catalog-suggestions", () => ({
     createSuggestion: (...args: unknown[]) => createSuggestion(...args),
 }));
+const pickMold = vi.fn();
+vi.mock("@/app/actions/linker", () => ({
+    pickMold: (...args: unknown[]) => pickMold(...args),
+}));
 vi.mock("@/lib/context/ToastContext", () => ({ useToast: () => ({ toast: vi.fn() }) }));
 
 import SuggestNewEntryForm from "@/components/SuggestNewEntryForm";
@@ -37,5 +41,42 @@ describe("SuggestNewEntryForm — a mold is asked for its name once", () => {
         expect(input.fieldChanges.title).toBe("Family Arabian Stallion");
         expect(input.fieldChanges.mold_name).toBe("Family Arabian Stallion");
         expect(input.fieldChanges.item_type).toBe("plastic_mold");
+    });
+});
+
+describe("SuggestNewEntryForm — releases are filed under a picked mold", () => {
+    beforeEach(() => {
+        createSuggestion.mockReset();
+        createSuggestion.mockResolvedValue({ success: true });
+        pickMold.mockReset();
+        pickMold.mockResolvedValue([
+            { id: "mold-1", title: "Justin Morgan", maker: "Breyer", scale: "Traditional (1:9)" },
+        ]);
+    });
+
+    it("sends the picked mold's id with the suggestion", async () => {
+        render(<SuggestNewEntryForm />);
+        fireEvent.change(screen.getByLabelText(/title \/ name/i), { target: { value: "Montana Harvest" } });
+        fireEvent.change(screen.getByLabelText(/belongs to mold/i), { target: { value: "justin" } });
+        fireEvent.click(await screen.findByRole("button", { name: /justin morgan/i }, { timeout: 2000 }));
+        expect(screen.getByText(/linked to this mold/i)).toBeInTheDocument();
+        fireEvent.change(screen.getByLabelText(/reason|why/i), { target: { value: "Missing release on this mold." } });
+        fireEvent.click(screen.getByRole("button", { name: /submit/i }));
+        await waitFor(() => expect(createSuggestion).toHaveBeenCalled());
+        const input = createSuggestion.mock.calls[0][0] as { fieldChanges: Record<string, unknown> };
+        expect(input.fieldChanges.parent_catalog_id).toBe("mold-1");
+        expect(input.fieldChanges.mold_name).toBe("Justin Morgan");
+    });
+
+    it("moves a model number typed at the front of the title into its own field", async () => {
+        render(<SuggestNewEntryForm />);
+        fireEvent.change(screen.getByLabelText(/title \/ name/i), { target: { value: "#1838 Montana Harvest" } });
+        fireEvent.change(screen.getByLabelText(/reason|why/i), { target: { value: "Missing release on this mold." } });
+        fireEvent.click(screen.getByRole("button", { name: /submit/i }));
+        await waitFor(() => expect(createSuggestion).toHaveBeenCalled());
+        const input = createSuggestion.mock.calls[0][0] as { fieldChanges: Record<string, unknown> };
+        expect(input.fieldChanges.title).toBe("Montana Harvest");
+        expect(input.fieldChanges.model_number).toBe("1838");
+        expect(input.fieldChanges.parent_catalog_id).toBeUndefined();
     });
 });

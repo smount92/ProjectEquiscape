@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useTransition } from"react";
+import { useRef, useState, useTransition } from"react";
 import { useRouter } from"next/navigation";
 import { createSuggestion } from"@/app/actions/catalog-suggestions";
+import { pickMold, type MoldChoice } from "@/app/actions/linker";
+import { splitNumberFromTitle } from "@/lib/linker/model";
 import { ARTIST_ATTRIBUTED_CATEGORIES, CANONICAL_SCALES, KNOWN_MANUFACTURERS, RUN_TYPES } from "@/lib/catalog/taxonomy";
 import { MATERIAL_OPTIONS } from "@/lib/catalog/editableFields";
 import { GENDER_GROUPS } from "@/lib/config/genders";
@@ -84,6 +86,25 @@ export default function SuggestNewEntryForm({
  const [breed, setBreed] = useState("");
  const [gender, setGender] = useState("");
  const [moldName, setMoldName] = useState(initialMoldName);
+ // The mold picked from the Registry, if any. Its id travels with the
+ // suggestion so approval files the release under it; typed text alone
+ // is matched later and can miss (MHH-063).
+ const [moldId, setMoldId] = useState<string | null>(null);
+ const [moldChoices, setMoldChoices] = useState<MoldChoice[]>([]);
+ const moldTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+ const onMoldInput = (value: string) => {
+ setMoldName(value);
+ setMoldId(null);
+ if (moldTimer.current) clearTimeout(moldTimer.current);
+ if (value.trim().length < 2) {
+ setMoldChoices([]);
+ return;
+ }
+ moldTimer.current = setTimeout(async () => {
+ const makerNow = maker === "Other" ? customMaker.trim() : maker;
+ setMoldChoices(await pickMold(value, makerNow || null, scale || null));
+ }, 250);
+ };
  // The model number has its own field: without one, members typed it into
  // the title ("#5022 Silky Sullivan") where search cannot read it.
  const [modelNumber, setModelNumber] = useState(initialModelNumber);
@@ -112,9 +133,9 @@ export default function SuggestNewEntryForm({
  : maker ==="Other" ? customMaker.trim() : maker;
 
  // A number typed at the front of the title moves to its own field.
- const typedNumber = title.trim().match(/^#s*(d{3,7}[a-z]?)s+(.+)$/i);
- const finalTitle = typedNumber && !modelNumber.trim() ? typedNumber[2].trim() : title.trim();
- const finalModel = (modelNumber.trim() || (typedNumber ? typedNumber[1] : "")).replace(/^#/, "");
+ const typed = splitNumberFromTitle(title);
+ const finalTitle = typed.model && !modelNumber.trim() ? typed.title : title.trim();
+ const finalModel = (modelNumber.trim() || typed.model || "").replace(/^#/, "");
 
  startTransition(async () => {
  setError(null);
@@ -142,6 +163,8 @@ export default function SuggestNewEntryForm({
  // review screens and the duplicate check keep reading mold_name.
  // (A member was asked for the same name twice, 2026-10-12.)
  mold_name: isMold ? finalTitle : moldName || undefined,
+ // A mold picked from the Registry files the release under it at approval.
+ ...(!isMold && moldId ? { parent_catalog_id: moldId } : {}),
  },
  reason: reason.trim(),
  confirmDuplicates,
@@ -414,11 +437,37 @@ export default function SuggestNewEntryForm({
  id="new-entry-mold"
 
  value={moldName}
- onChange={(e) => setMoldName(e.target.value)}
+ onChange={(e) => onMoldInput(e.target.value)}
  placeholder="e.g. Family Arabian Stallion"
  maxLength={200}
+ autoComplete="off"
+ aria-describedby="new-entry-mold-help"
  />
- <p className="text-muted-foreground m-0 mt-1 text-xs">The sculpture this release was made on, if you know it.</p>
+ {moldChoices.length > 0 && !moldId && (
+ <ul className="m-0 mt-1 list-none rounded-md border border-input bg-card p-1 shadow-sm" aria-label="Molds in the Registry">
+ {moldChoices.map((m) => (
+ <li key={m.id}>
+ <button
+ type="button"
+ className="w-full rounded px-2 py-1.5 text-left text-sm hover:bg-muted focus-visible:bg-muted"
+ onClick={() => {
+ setMoldName(m.title);
+ setMoldId(m.id);
+ setMoldChoices([]);
+ }}
+ >
+ <span className="font-semibold text-foreground">{m.title}</span>
+ <span className="text-muted-foreground"> · {m.maker}{m.scale ? ` · ${m.scale}` : ""}</span>
+ </button>
+ </li>
+ ))}
+ </ul>
+ )}
+ <p id="new-entry-mold-help" className="text-muted-foreground m-0 mt-1 text-xs">
+ {moldId
+ ? "Linked to this mold in the Registry."
+ : "The sculpture this release was made on, if you know it. Pick it from the list when it appears."}
+ </p>
  </div>
  )}
  {itemType !== "plastic_mold" && !ARTIST_ATTRIBUTED_CATEGORIES.has(itemType) && (

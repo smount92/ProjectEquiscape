@@ -370,3 +370,27 @@ function titleMatches(title: string, termLower: string): boolean {
     if (!termLower) return true;
     return t.includes(termLower) || termLower.includes(t);
 }
+
+export type MoldChoice = { id: string; title: string; maker: string; scale: string | null };
+
+/**
+ * Molds for the "Belongs to mold" picker on the new-entry form: a name
+ * match, the member's maker and scale first. Picking one sends the mold's
+ * id with the suggestion, so the approved release is filed under it
+ * instead of matching typed text later.
+ */
+export async function pickMold(rawTerm: string, maker: string | null, scale: string | null): Promise<MoldChoice[]> {
+    const term = rawTerm.replace(/[%*,()]/g, " ").replace(/\s+/g, " ").trim();
+    if (term.length < 2) return [];
+    const supabase = await createClient();
+    const { data } = await supabase
+        .from("catalog_items")
+        .select("id, title, maker, scale")
+        .eq("item_type", "plastic_mold")
+        .ilike("title", `%${stripGeneration(term)}%`)
+        .limit(40);
+    const rows = (data ?? []) as MoldChoice[];
+    const rank = (m: MoldChoice) =>
+        (maker && m.maker.toLowerCase() === maker.toLowerCase() ? 0 : 2) + (scale && m.scale === scale ? 0 : 1);
+    return rows.sort((a, b) => rank(a) - rank(b) || a.title.localeCompare(b.title)).slice(0, 8);
+}
