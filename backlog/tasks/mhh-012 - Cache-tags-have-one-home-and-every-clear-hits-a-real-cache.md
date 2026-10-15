@@ -1,9 +1,10 @@
 ---
 id: MHH-012
 title: Cache tags have one home and every clear hits a real cache
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-10-15 22:19'
+updated_date: '2026-10-15 23:11'
 labels:
   - platform
 milestone: m-0
@@ -25,9 +26,9 @@ docs/STANDARDS.md plan step 7.
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 lib/cache/tags.ts lists every tag
-- [ ] #2 A test fails on a revalidateTag with an unregistered tag
-- [ ] #3 The 3 untagged caches carry tags
+- [x] #1 lib/cache/tags.ts lists every tag
+- [x] #2 A test fails on a revalidateTag with an unregistered tag
+- [x] #3 The 3 untagged caches carry tags
 <!-- AC:END -->
 
 ## Definition of Done
@@ -36,3 +37,9 @@ docs/STANDARDS.md plan step 7.
 - [ ] #2 Decision recorded in docs/DECISIONS.md if one was made
 - [ ] #3 Member who reported it has a drafted reply, if any
 <!-- DOD:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+src/lib/cache/tags.ts holds every tag; cache-tags.test.ts refuses typed strings in revalidateTag and tags lists. Horse changes now clear the Show Ring facets cache (was the dead 'public_horses'); legacy show status clears show results; public shows cache tagged; dead 'events', 'groups' and 'feed' clears removed (they cleared nothing).
+<!-- SECTION:FINAL_SUMMARY:END -->

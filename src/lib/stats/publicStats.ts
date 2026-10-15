@@ -1,5 +1,6 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 
 import { createAnonClient } from "@/lib/supabase/anon";
 import { NO_PUBLIC_STATS, type PublicStats } from "@/lib/stats/publicStatsShape";
@@ -119,5 +120,5 @@ export const getPublicStats = unstable_cache(
         }
     },
     ["public-stats:landing"],
-    { revalidate: REVALIDATE, tags: ["public-stats"] },
+    { revalidate: REVALIDATE, tags: [CACHE_TAGS.publicStats] },
 );

@@ -6,7 +6,7 @@ import { isPaddockPin, type PinnableRow } from "@/lib/feed/paddockPin";
 
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { getPublicImageUrls } from "@/lib/utils/storage";
 import { resolveAvatarUrls } from "@/lib/utils/avatars.server";
@@ -114,7 +114,6 @@ export async function createPost(data: {
     if (data.eventId) revalidatePath(`/shows/${data.eventId}`);
     if (data.studioId) revalidatePath(`/studio`);
     revalidatePath("/feed");
-    revalidateTag("feed", "max");
 
     // Deferred: notify context owner + mentions after response is sent
     const userId = user.id;

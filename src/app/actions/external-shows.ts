@@ -25,6 +25,7 @@
  */
 
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 
 import { requireAdmin, requireAuth } from "@/lib/auth";
 import { createAnonClient } from "@/lib/supabase/anon";
@@ -74,7 +75,7 @@ const DISPLAY_COLUMNS =
     "id, title, url, venue_type, host_name, platform, starts_on, entries_close_on, location, description";
 
 /** Busted by reviewExternalShow so a moderated listing appears at once. */
-const EXTERNAL_SHOWS_CACHE_TAG = "external-shows";
+const EXTERNAL_SHOWS_CACHE_TAG = CACHE_TAGS.externalShows;
 
 // ── Submit (any member; always lands pending) ──
 

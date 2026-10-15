@@ -17,6 +17,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { deriveShowFocus, type FocusInput } from "@/lib/shows/focus";
 import { revalidatePath, unstable_cache } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { after } from "next/server";
 import { z } from "zod";
 
@@ -2171,7 +2172,7 @@ const loadPublicShowsCore = unstable_cache(
         return result.shows;
     },
     ["public-shows-core"],
-    { revalidate: 60 },
+    { revalidate: 60, tags: [CACHE_TAGS.publicShows] },
 );
 
 export async function getPublicShows(): Promise<ActionResult<{ shows: PublicShowSummary[] }>> {

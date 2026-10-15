@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidateTag, unstable_cache } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 
 import { requireAuth } from "@/lib/auth";
 import { createAnonClient } from "@/lib/supabase/anon";
@@ -48,7 +49,7 @@ export interface MarketPrice {
 // ============================================================
 
 /** Cache tag on the market core; revalidated by refreshMarketPrices(). */
-const MARKET_CACHE_TAG = "market-prices";
+const MARKET_CACHE_TAG = CACHE_TAGS.marketPrices;
 const MARKET_CACHE_SECONDS = 300;
 /** Catalog ids per `.in()` request — PostgREST puts them in the URL. */
 const CATALOG_ID_CHUNK = 300;

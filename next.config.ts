@@ -10,6 +10,11 @@ const withSerwist = withSerwistInit({
 });
 
 const nextConfig: NextConfig = {
+  // The build type-checks app code only. From Next 16.3 the build checks
+  // every file tsconfig.json includes, and the test files carry type
+  // errors vitest never sees (ticketed); they must not block a deploy.
+  // `npm run typecheck` in CI uses the same config.
+  typescript: { tsconfigPath: "tsconfig.typecheck.json" },
   experimental: {
     // Cap static-generation workers. Vercel's Turbo build machine has
     // 30 cores → 29 workers, and every prebuilt /reference page hits

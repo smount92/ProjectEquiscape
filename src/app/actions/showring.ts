@@ -28,6 +28,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { unstable_cache } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { z } from "zod";
 
 import { requireAuth } from "@/lib/auth";
@@ -296,7 +297,7 @@ const getShowRingFacetsCached = unstable_cache(
     async (): Promise<ShowRingFacetOptions> =>
         fetchShowRingFacets(createAnonClient() as unknown as SupabaseClient),
     ["showring-facets"],
-    { revalidate: 300 },
+    { revalidate: 300, tags: [CACHE_TAGS.showRing] },
 );
 
 // ══════════════════════════════════════════════════════════════

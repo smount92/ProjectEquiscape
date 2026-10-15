@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { getPublicImageUrls } from "@/lib/utils/storage";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { after } from "next/server";
 import type { Database } from "@/lib/types/database.generated";
 
@@ -461,7 +462,7 @@ export async function updateShowStatus(
 
     revalidatePath("/shows");
     revalidatePath(`/shows/${showId}`);
-    revalidateTag("shows", "max");
+    revalidateTag(CACHE_TAGS.showResults, "max");
 
     // Notify all entrants when show results are announced — personalized
     if (newStatus === "closed") {

@@ -9,6 +9,7 @@ import type { Database } from "@/lib/types/database.generated";
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath, revalidateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { after } from "next/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { sanitizeText } from "@/lib/utils/validation";
@@ -179,7 +180,7 @@ export async function deleteHorse(horseId: string): Promise<{ success: boolean; 
     revalidatePath("/dashboard");
     revalidatePath("/stable/deleted");
     revalidatePath(`/stable/${horseId}`);
-    revalidateTag("public_horses", "max");
+    revalidateTag(CACHE_TAGS.showRing, "max");
     return { success: true };
 }
 
@@ -318,7 +319,7 @@ export async function restoreHorse(
     revalidatePath("/dashboard");
     revalidatePath("/stable/deleted");
     revalidatePath(`/stable/${horseId}`);
-    revalidateTag("public_horses", "max");
+    revalidateTag(CACHE_TAGS.showRing, "max");
     return { success: true, name: restoredName };
 }
 
@@ -810,7 +811,7 @@ export async function createHorseRecord(data: {
     }
 
     revalidatePath("/dashboard");
-    revalidateTag("public_horses", "max");
+    revalidateTag(CACHE_TAGS.showRing, "max");
 
     // Deferred: evaluate achievements
     const finalUserId = user.id;
@@ -1225,7 +1226,7 @@ export async function quickAddHorse(data: {
     if (input.collectionId) await addHorseToFolder(supabase, horse.id, input.collectionId);
 
     revalidatePath("/dashboard");
-    if (input.isPublic) revalidateTag("public_horses", "max");
+    if (input.isPublic) revalidateTag(CACHE_TAGS.showRing, "max");
     return { success: true, horseId: horse.id, horseName };
 }
 

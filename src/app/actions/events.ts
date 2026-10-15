@@ -4,7 +4,7 @@ import { logger } from "@/lib/logger";
 
 import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { sanitizeText } from "@/lib/utils/validation";
 import {
@@ -181,7 +181,6 @@ export async function createEvent(data: {
     });
 
     revalidatePath("/community/events");
-    revalidateTag("events", "max");
     return { success: true, eventId };
 }
 

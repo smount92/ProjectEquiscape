@@ -1,5 +1,6 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { createAnonClient } from "@/lib/supabase/anon";
 import { referenceHref } from "@/lib/catalog/referenceUrl";
 import { mentionsMold, setLabel, splitNumberFromTitle, stripGeneration } from "@/lib/linker/model";
@@ -25,7 +26,7 @@ const REVALIDATE = 3600;
  * after the hour-long revalidate window. One coarse tag on purpose:
  * approvals are rare, correctness beats cache-partition finesse.
  */
-export const REFERENCE_PAGES_CACHE_TAG = "reference-pages";
+export const REFERENCE_PAGES_CACHE_TAG = CACHE_TAGS.referencePages;
 
 export interface CatalogRow {
     id: string;

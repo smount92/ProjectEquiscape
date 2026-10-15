@@ -1,3 +1,4 @@
+import { CACHE_TAGS } from "@/lib/cache/tags";
 /**
  * Announcement banner (phase 1) — owner-authored site notices.
  *
@@ -16,7 +17,7 @@ import { createAnonClient } from "@/lib/supabase/anon";
  * on the site (the slot lives in the root layout), so it must never be
  * short — see AnnouncementSlot.
  */
-export const ANNOUNCEMENTS_CACHE_TAG = "announcements";
+export const ANNOUNCEMENTS_CACHE_TAG = CACHE_TAGS.announcements;
 export const ANNOUNCEMENTS_CACHE_SECONDS = 3600;
 
 export interface Announcement {

@@ -8,7 +8,7 @@ import { requireAuth, AuthError } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { GROUP_FILE_MAX_SIZE, GROUP_FILE_ALLOWED_EXTENSIONS } from "@/lib/groupFiles";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { sanitizeText } from "@/lib/utils/validation";
 import { sanitizeForOr } from "@/lib/utils/search";
 import { isThreadStatus, type ThreadStatus } from "@/lib/groups/threadStatus";
@@ -245,7 +245,6 @@ export async function createGroup(data: {
     });
 
     revalidatePath("/community/groups");
-    revalidateTag("groups", "max");
     return { success: true, slug };
 }
 
@@ -291,7 +290,6 @@ export async function updateBarnSettings(
     if (error) return { success: false, error: error.message };
 
     revalidatePath("/community/groups");
-    revalidateTag("groups", "max");
     return { success: true };
 }
 
@@ -1431,6 +1429,5 @@ export async function setGroupBanner(
     if (error) return { success: false, error: error.message };
 
     revalidatePath("/community/groups");
-    revalidateTag("groups", "max");
     return { success: true };
 }
