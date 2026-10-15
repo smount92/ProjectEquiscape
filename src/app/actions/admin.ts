@@ -1381,6 +1381,12 @@ const PENDING_MIGRATIONS: MigrationSpec[] = [
     },
   },
   {
+    id: "234",
+    title: "Where new horses start",
+    summary: "users.default_horse_visibility (Public / Unlisted / Private, carried over from the old on/off setting) and batch_import_horses_v3, so Add Horse, Quick Add and CSV import start where the member chose.",
+    probe: { kind: "column", table: "users", column: "default_horse_visibility" },
+  },
+  {
     id: "233",
     title: "Registry guards",
     summary: "Old Registry addresses forward to the current page; scale, run type and material are checked by the database; a want list can't hold one model twice; catalog rows that horses link to, and a horse's history, can't be deleted out from under them.",

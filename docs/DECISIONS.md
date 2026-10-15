@@ -66,6 +66,9 @@ Owner rulings, newest first. Each one is also folded into the sections below.
 
 ## Confirmed decisions
 
+### The deciding rule (owner, 2026-10-15)
+- **Which option produces a better product for the member?** Pick it, and accept more work to get there, unless it risks live data or completely changes an existing workflow. The bar is a premium experience, as if a team of twenty built and reviewed it; agents supply that review.
+
 ### Strategy
 - **Registry first.** The Registry is the product and the moat. Shows are glue and a source of records, not the fight.
 - **Everything in one place.** The hobby's data comes together here; outside feeds (eBay first) are welcome even if the sale happens elsewhere.

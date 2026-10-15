@@ -5,6 +5,9 @@ import Papa from"papaparse";
 import fuzzysort from"fuzzysort";
 import type { CsvRow, MatchResult, ReferenceMatch } from"@/lib/types/csv-import";
 import { executeBatchImport, getExistingHorseNames, type BatchImportResult } from"@/app/actions/csv-import";
+import { getDefaultHorseVisibility } from "@/app/actions/settings";
+import { VISIBILITY_OPTIONS } from "@/lib/forms/registry";
+import type { HorseVisibility } from "@/lib/stable/defaultVisibility";
 import {
  validateCsvRows,
  matchScoreLabel,
@@ -394,7 +397,12 @@ export default function CsvImport() {
  const noMatchCount = matchResults.filter((r) => r.status ==="no_match").length;
 
  // Publish toggle — defaults ON: public horses can enter shows.
- const [publishImported, setPublishImported] = useState(true);
+ // Where imported horses start: the member's default from Settings (MHH-005),
+ // changeable here for this one import.
+ const [importVisibility, setImportVisibility] = useState<HorseVisibility>("public");
+ useEffect(() => {
+ getDefaultHorseVisibility().then(setImportVisibility).catch(() => {});
+ }, []);
 
  // Duplicate check against the user's existing stable (case-insensitive).
  const duplicates = findDuplicateNames(
@@ -418,7 +426,7 @@ export default function CsvImport() {
  catalogId: r.selectedMatch?.id ?? null,
  }));
 
- const result = await executeBatchImport({ rows, publish: publishImported });
+ const result = await executeBatchImport({ rows, visibility: importVisibility });
  setImportResult(result);
  setIsImporting(false);
  setStep(4);
@@ -765,15 +773,20 @@ export default function CsvImport() {
  {duplicates.rowCount === 1 ?"es" :""} horses already in your stable
  </span>
  )}
- <label
- className="flex cursor-pointer items-center gap-2 text-sm"
+ <label className="flex items-center gap-2 text-sm" htmlFor="import-visibility">
+ <span>Imported horses start as</span>
+ <select
+ id="import-visibility"
+ className="border-input bg-card h-9 rounded-md border px-2 text-sm"
+ value={importVisibility}
+ onChange={(e) => setImportVisibility(e.target.value as HorseVisibility)}
  >
- <input
- type="checkbox"
- checked={publishImported}
- onChange={(e) => setPublishImported(e.target.checked)}
- />
- <span>Publish imported horses (public horses can enter shows)</span>
+ {VISIBILITY_OPTIONS.map((opt) => (
+ <option key={opt.value} value={opt.value}>
+ {opt.label}: {opt.hint}
+ </option>
+ ))}
+ </select>
  </label>
  <Button
  onClick={handleImport}

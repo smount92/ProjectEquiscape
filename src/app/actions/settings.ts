@@ -23,6 +23,8 @@ export async function getProfile(): Promise<{
     email: string;
     notificationPrefs: Record<string, boolean>;
     defaultHorsePublic: boolean;
+    /** Where new horses start; replaces the on/off defaultHorsePublic. */
+    defaultHorseVisibility: HorseVisibility;
     watermarkPhotos: boolean;
     watermarkText: string;
     currencySymbol: string;
@@ -100,6 +102,7 @@ export async function getProfile(): Promise<{
             show_deadlines: true,
         },
         defaultHorsePublic: d.default_horse_public ?? true,
+        defaultHorseVisibility: await readDefaultVisibility(supabase, user.id),
         watermarkPhotos: d.watermark_photos ?? true,
         watermarkText: d.watermark_text ?? "",
         currencySymbol: d.currency_symbol || "$",
@@ -119,6 +122,7 @@ export async function updateProfile(data: {
     aliasName?: string;
     bio?: string;
     defaultHorsePublic?: boolean;
+    defaultHorseVisibility?: HorseVisibility;
     watermarkPhotos?: boolean;
     watermarkText?: string;
     currencySymbol?: string;
@@ -158,6 +162,15 @@ export async function updateProfile(data: {
 
     if (data.defaultHorsePublic !== undefined) {
         updates.default_horse_public = data.defaultHorsePublic;
+    }
+
+    if (data.defaultHorseVisibility !== undefined) {
+        if (!isHorseVisibility(data.defaultHorseVisibility)) {
+            return { success: false, error: "Pick Public, Unlisted or Private." };
+        }
+        updates.default_horse_visibility = data.defaultHorseVisibility;
+        // Kept in step for code that still reads the older on/off setting.
+        updates.default_horse_public = data.defaultHorseVisibility === "public";
     }
 
     if (data.watermarkPhotos !== undefined) {
@@ -221,6 +234,12 @@ export async function updateProfile(data: {
             .from("users")
             .update(withoutSellerColumns(updates))
             .eq("id", user.id));
+    }
+    if (error && isMissingVisibilityColumn(error)) {
+        // Migration 234 not pasted yet: the on/off setting still saves.
+        const { default_horse_visibility: _skip, ...rest } = updates;
+        void _skip;
+        ({ error } = await supabase.from("users").update(rest).eq("id", user.id));
     }
 
     if (error) return { success: false, error: error.message };
@@ -373,6 +392,13 @@ import { getAdminClient } from "@/lib/supabase/admin";
 import { isCountryCode } from "@/lib/geo/countries";
 import { isMissingSellerColumn, LOOKING_FOR_MAX, readSellerTerms, SHIPS_MAX, withoutSellerColumns } from "@/lib/sellers/sellerTerms";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { isHorseVisibility, isMissingVisibilityColumn, readDefaultVisibility, type HorseVisibility } from "@/lib/stable/defaultVisibility";
+
+/** Where this member's new horses start (Settings › Privacy & Defaults). */
+export async function getDefaultHorseVisibility(): Promise<HorseVisibility> {
+    const { supabase, user } = await requireAuth();
+    return readDefaultVisibility(supabase, user.id);
+}
 
 /** Show statuses a departing host can leave behind without harm once
  *  handled: draft is deleted, these two are archived + entrants told. */

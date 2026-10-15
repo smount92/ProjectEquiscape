@@ -34,7 +34,10 @@ const importRowSchema = z.object({
 
 const importInputSchema = z.object({
     rows: z.array(importRowSchema).min(1).max(1000),
-    publish: z.boolean(),
+    /** Where the imported horses start (MHH-005). */
+    visibility: z.enum(["public", "unlisted", "private"]).optional(),
+    /** Older callers: true = public, false = private. */
+    publish: z.boolean().optional(),
 });
 
 export interface ImportRowError {
@@ -80,6 +83,7 @@ export async function executeBatchImport(
             return { success: false, error: "Invalid import payload." };
         }
         const { rows, publish } = parsed.data;
+        const visibility = parsed.data.visibility ?? (publish === false ? "private" : "public");
 
         const { supabase, user } = await requireAuth();
 
@@ -128,14 +132,23 @@ export async function executeBatchImport(
             return { success: true, imported: 0, rowErrors };
         }
 
-        // ── Preferred path: v2 (migration 144). The cast is the house
-        //    feature-detect idiom (see likes.ts): the RPC only reaches the
-        //    generated types once 144 is applied + gen-types has run. ──
+        // ── Preferred path: v3 (migration 234) takes all three visibilities;
+        //    before 234 is pasted, v2 (144) takes public or private, so an
+        //    Unlisted import lands Private there (never more visible than
+        //    chosen). The casts are the house feature-detect idiom: the RPCs
+        //    reach the generated types only after the paste + gen-types. ──
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data, error } = await supabase.rpc("batch_import_horses_v2" as any, {
+        let { data, error } = await supabase.rpc("batch_import_horses_v3" as any, {
             rows: payload,
-            p_is_public: publish,
+            p_visibility: visibility,
         });
+        if (error && isMissingFunctionError(error)) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ({ data, error } = await supabase.rpc("batch_import_horses_v2" as any, {
+                rows: payload,
+                p_is_public: visibility === "public",
+            }));
+        }
 
         if (!error) {
             const result = data as unknown as {

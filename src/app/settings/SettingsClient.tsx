@@ -36,6 +36,8 @@ import { compressImage } from "@/lib/utils/imageCompression";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { COUNTRIES } from "@/lib/geo/countries";
+import { VISIBILITY_OPTIONS } from "@/lib/forms/registry";
+import type { HorseVisibility } from "@/lib/stable/defaultVisibility";
 import { Button } from "@/components/ui/button";
 import SupporterLedgerToggle from "@/components/SupporterLedgerToggle";
 import MembershipDisplayToggle from "@/components/MembershipDisplayToggle";
@@ -155,7 +157,7 @@ export default function SettingsClient() {
     const [bio, setBio] = useState("");
     const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
     const [email, setEmail] = useState("");
-    const [defaultHorsePublic, setDefaultHorsePublic] = useState(true);
+    const [defaultHorseVisibility, setDefaultHorseVisibility] = useState<HorseVisibility>("public");
     const [watermarkPhotos, setWatermarkPhotos] = useState(false);
     const [watermarkText, setWatermarkText] = useState("");
     const [showBadges, setShowBadges] = useState(true);
@@ -221,7 +223,7 @@ export default function SettingsClient() {
             setAvatarUrl(profile.avatarUrl);
             setEmail(profile.email);
             setNotifPrefs(profile.notificationPrefs);
-            setDefaultHorsePublic(profile.defaultHorsePublic);
+            setDefaultHorseVisibility(profile.defaultHorseVisibility);
             setWatermarkPhotos(profile.watermarkPhotos);
             setWatermarkText(profile.watermarkText);
             setShowBadges(profile.showBadges);
@@ -285,7 +287,7 @@ export default function SettingsClient() {
         const result = await updateProfile({
             aliasName,
             bio,
-            defaultHorsePublic,
+            defaultHorseVisibility,
             watermarkPhotos,
             watermarkText,
             showBadges,
@@ -648,13 +650,40 @@ export default function SettingsClient() {
                         a horse or a photo.
                     </p>
 
-                    <ToggleRow
-                        icon="🐎"
-                        label="New horses start public"
-                        hint="Off means every horse you add is private until you publish it yourself."
-                        on={defaultHorsePublic}
-                        onToggle={() => setDefaultHorsePublic(!defaultHorsePublic)}
-                    />
+                    <fieldset className="border-input border-b py-3">
+                        <legend className="text-foreground flex items-center gap-2 text-sm font-semibold">
+                            <span aria-hidden="true">🐎</span> New horses start as
+                        </legend>
+                        <span className="text-muted-foreground mt-0.5 block text-xs leading-relaxed">
+                            Used by Add Horse, Quick Add and spreadsheet import. You can still change any
+                            one horse as you add it.
+                        </span>
+                        <div className="mt-2 grid gap-2 sm:grid-cols-3">
+                            {VISIBILITY_OPTIONS.map((opt) => (
+                                <label
+                                    key={opt.value}
+                                    className={`flex cursor-pointer items-start gap-2 rounded-md border p-2.5 text-sm transition-colors ${
+                                        defaultHorseVisibility === opt.value
+                                            ? "border-forest bg-muted"
+                                            : "border-input hover:bg-muted/60"
+                                    }`}
+                                >
+                                    <input
+                                        type="radio"
+                                        name="default-horse-visibility"
+                                        value={opt.value}
+                                        checked={defaultHorseVisibility === opt.value}
+                                        onChange={() => setDefaultHorseVisibility(opt.value as HorseVisibility)}
+                                        className="mt-0.5"
+                                    />
+                                    <span>
+                                        <span className="text-foreground block font-semibold">{opt.label}</span>
+                                        <span className="text-muted-foreground block text-xs">{opt.hint}</span>
+                                    </span>
+                                </label>
+                            ))}
+                        </div>
+                    </fieldset>
                     <ToggleRow
                         icon="📸"
                         label="Watermark uploaded photos"

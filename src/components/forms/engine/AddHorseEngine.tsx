@@ -173,6 +173,8 @@ export default function AddHorseEngine() {
             .then((profile) => {
                 if (profile) {
                     setCurrencySymbol(profile.currencySymbol || "$");
+                    // New horses start where the member chose in Settings (MHH-005).
+                    form.setValue("visibility", profile.defaultHorseVisibility);
                     setWatermark({
                         enabled: profile.watermarkPhotos,
                         alias: profile.aliasName,

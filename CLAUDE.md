@@ -6,6 +6,14 @@ resins), which is the reason most people come. Next.js 16 (app router) on
 Vercel, Supabase (Postgres + RLS + storage), Tailwind v4, vitest,
 Playwright. Pushing to `main` deploys.
 
+## The rule that decides between options
+
+**Which one produces a better product for the member?** Choose that one,
+even when it is more work, as long as it doesn't put live data at risk or
+completely change how people already work. The bar is a premium
+experience, built and reviewed as if by a team of twenty: use agents for
+the reviewing, testing and second opinions a team would give.
+
 ## Read first
 
 - `docs/GLOSSARY.md`: the words we use (mold, release, set piece, the five rooms ...).

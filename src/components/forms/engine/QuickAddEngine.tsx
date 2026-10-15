@@ -91,11 +91,14 @@ export default function QuickAddEngine() {
     const [watermark, setWatermark] = useState({ enabled: false, alias: "", text: "" });
     const photoInput = useRef<HTMLInputElement>(null);
 
+    const setFormValue = form.setValue;
     useEffect(() => {
         getProfile()
             .then((profile) => {
                 if (profile) {
                     setCurrencySymbol(profile.currencySymbol || "$");
+                    // New horses start where the member chose in Settings (MHH-005).
+                    setFormValue("visibility", profile.defaultHorseVisibility);
                     setWatermark({
                         enabled: profile.watermarkPhotos,
                         alias: profile.aliasName,
@@ -108,7 +111,7 @@ export default function QuickAddEngine() {
             // Minus the entitlement clock — an expired term is not Pro.
             if (user?.app_metadata?.tier) setTier(entitledTier(user.app_metadata) as UserTier);
         });
-    }, [supabase]);
+    }, [supabase, setFormValue]);
 
     /**
      * One string per distinct form state. After a success the Add button
