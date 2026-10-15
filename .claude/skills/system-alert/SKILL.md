@@ -19,4 +19,4 @@ description: Use when the system itself signals trouble with no member report - 
 3. **Error**: `investigate-bug`, with the stack trace as the reproduction.
 4. **Cost spike**: check ISR writes and function invocations first. Layout-level caches must be long and cleared by tag (a 60-second layout cache once made every page revalidate per request).
 5. **Deploy failed**: read the build log; never force-push to fix it.
-6. Record what happened, and what would have caught it sooner, in a Roadmap item.
+6. Record what happened, and what would have caught it sooner, in a ticket.

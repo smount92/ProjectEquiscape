@@ -20,7 +20,7 @@ description: Use when someone reports a person, post, comment, horse photo, list
 3. **Pick the smallest action that stops it**: hide or remove the content, a show-level bar, then suspension. Suspension is for repeated or serious conduct.
 4. **Tell both sides** in plain words: the reporter that it was handled (not the details), the member what was removed and which rule. Draft; the owner sends.
 5. **Check for a pattern**: other content by the same account, new accounts created right after, the same photos elsewhere.
-6. **Record it**: the report note, plus a Roadmap item if a tool was missing.
+6. **Record it**: the report note, plus a ticket if a tool was missing.
 
 ## Stolen photos and false credit
 

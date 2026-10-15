@@ -11,7 +11,7 @@ A report that was fixed but never answered counts as unfinished.
 
 ## 1. Capture before you touch anything
 
-Write down, in the conversation or the Roadmap item:
+Write down, in the conversation or the ticket:
 
 - **Who** reported it (alias, never email in repo files) and **where** it came in (channel table below).
 - **Their words**, quoted exactly. Members often name the symptom, not the cause ("I can't find Montana Harvest" was a linker search bug, not missing data).
@@ -54,6 +54,6 @@ Known gaps in this table are tracked in `docs/workflows/README.md`.
 ## 4. Close the loop
 
 1. **Reply to the member** in plain words: what was wrong, what changed, what they need to do (often nothing). Draft it; the owner sends it. Never promise a date.
-2. **Record it**: if it led to a fix, the commit message names the symptom. If it needs a decision or more work, add a Roadmap item (Admin › Roadmap) with the member's words as the source.
+2. **Record it**: if it led to a fix, the commit message names the symptom. If it needs a decision or more work, create a ticket (`ticket` skill) with the member's words as the source.
 3. **Look sideways**: one member's report usually stands for many silent ones. Check whether other rows, horses or members have the same problem, and say how many.
-4. **Ask once**: could the member have fixed this themselves? If not, should they be able to? That answer goes in the Roadmap item.
+4. **Ask once**: could the member have fixed this themselves? If not, should they be able to? That answer goes in the ticket.

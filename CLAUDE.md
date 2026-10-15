@@ -28,6 +28,14 @@ Playwright. Pushing to `main` deploys.
 | Errors, crons, cost, failed deploys | `system-alert` |
 | New ideas and changes | `feature-request` |
 | Any schema change | `add-migration` |
+| Tracking any work: create, start, finish a ticket | `ticket` |
+
+## Tickets and releases
+
+The board is Backlog.md: one markdown file per ticket in `backlog/tasks/`,
+managed with the `backlog` CLI (`backlog browser` opens the kanban board).
+Each release is a milestone and ships as **one push, one rebuild**. Work
+that isn't on the board isn't tracked; create the ticket first.
 
 ## Hard rules
 
@@ -48,5 +56,5 @@ Playwright. Pushing to `main` deploys.
 - Registry vocabulary: `src/lib/catalog/taxonomy.ts` (the only place scales, run types and the rest are defined).
 - Migrations: `supabase/migrations/` · probes: `PENDING_MIGRATIONS` in `src/app/actions/admin.ts`.
 - Data scripts: `scripts/catalog-delta/` (see its README).
-- Admin console: `/admin` (Mailbox, Reports, Catalog, Roadmap, Ops ...).
+- Admin console: `/admin` (Mailbox, Reports, Catalog, Ops ...).
 - Guides: `docs/guides/` · architecture: `docs/architecture/` (ADRs in `adrs/`).

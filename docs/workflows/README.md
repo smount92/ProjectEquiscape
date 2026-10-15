@@ -35,7 +35,7 @@ back. In priority order:
 | G7 | Content report cards show no link to the content and have no takedown action. "Take action" only saves a note. | Moderation means hunting for the content by hand. | Link plus Hide/Remove on the card. |
 | G8 | Show entrants and judges have no way to dispute a result, bar or scratch. | Disputes happen in DMs or nowhere. | "Message the host" on the entry, with the show attached. |
 | G9 | The contact form has no category, no status, no account link and no error reference; Admin shows only the last 100. Account deletions are invisible to the admin. | Hard to tell what is open; the error reference must be typed. | Category + Open/Resolved status; prefill the error reference and the signed-in account. |
-| G10 | The suggestion-box barn and the Roadmap are not connected; nothing can be promoted to the Roadmap in one click. | Ideas live in two places. | "Add to Roadmap" on contact messages, reports, suggestions and barn threads. |
+| G10 | Nothing can be turned into a ticket in one click from a contact message, report, suggestion or barn thread. | Ideas live in two places. | "Add to Roadmap" on contact messages, reports, suggestions and barn threads. |
 | G11 | No cron heartbeat; no Sentry push alerts. | A cron that stops is invisible. | Record each cron's last success; show it in Admin › Ops, red when late. |
 | G12 | The admin catalog queue loads only `pending`, not `under_review`; the review notification has no link back. | Suggestions can drop out of sight. | Load both; add the link. |
 
@@ -50,4 +50,4 @@ fits alongside these. Useful ones: `diagnosing-bugs` and `tdd` (they match
 writes the answers into `docs/GLOSSARY.md` and the ADRs), `handoff` (hands
 a long session to the next one), and `retro` (after a session, lists what
 in our setup should change). Skip `triage`, `to-tickets` and `wayfinder`
-until we decide whether issues live in the Roadmap tab or in repo files.
+for now: our board is Backlog.md (see the `ticket` skill).

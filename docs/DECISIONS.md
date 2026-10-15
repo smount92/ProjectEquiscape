@@ -23,44 +23,46 @@ kept by the AI assistant across sessions, then checked against the code.
 
 | # | Question | What the sources say | Recommendation |
 |---|---|---|---|
-| Q1 | Does a page address change when an item's maker is corrected? | August: the maker part of the address stays forever. October (migration 232): it follows a maker correction, so old links break. | Keep 232 and add a redirect from the old address (needs a small slug-history table). |
-| Q2 | How do changes reach the live site? | Repo docs: branches, never push to main. Practice: commit to main, batch pushes, push when the owner says. | Write down the practice: main, batched, owner says push. Emergency fixes go out at once. |
-| Q3 | Does the design lead see new looks before they ship? | Playbook: mock, approve, build. A later note: review on live and roll back if needed. | Mock first for new pages and flows; small visual fixes are reviewed live. |
-| Q4 | Can files pass through server actions? | Rule: never. Code: avatars and banners do, with a 4 MB limit. | Keep the avatar/banner exception, written down; everything else uploads directly to storage. |
-| Q5 | Should Gold curators' corrections apply without any format check? | Gold auto-approves any correction; the code notes that the apply path does no vocabulary validation. Silver must pass format checks. | Gold passes the same format checks as Silver. A rank should skip the queue, not the rules. |
 
 ### Earlier decisions to re-confirm
 
 | # | Decision today | Why it needs a look | Recommendation |
 |---|---|---|---|
-| Q6 | One admin: the single `ADMIN_EMAIL` account. | Expedient hard-code; the design lead cannot see admin. | A small admin list (role-based), when a second person needs it. |
-| Q7 | The new linker is opt-in; the old picker is the default. | Trial running. | Set a date or a condition (for example, two weeks without a new linker bug) to make it the default and delete the old picker. |
-| Q8 | No manufacturer → mold → release tree browsing ("don't rock the boat"). | Made before the Registry became the priority. | Revisit after the linker is the default; the data now supports it. |
-| Q9 | Collector counts on reference pages count public horses only. | Changed from "all owners" in migration 145. | Keep public-only (privacy). |
-| Q10 | Unlisted horses show no history to logged-out visitors. | "One-word change if wanted." | Keep. |
-| Q11 | CSV import defaults new horses to public. | Agent-made default. | Default to the member's own default visibility setting. |
-| Q12 | Want List private, country flags opt-in, cast-by per horse. | Taken with defaults after the artist feedback. | Keep. |
-| Q13 | Free studios: 3 active commissions; the tier check fails open. | Made under pre-launch pressure. | Keep the cap; failing open is right for an outage. |
-| Q14 | Prepaid prices: Pro $15/27/50, Studio $30/54/100 for 3/6/12 months. | Marked "proposed". | Owner sets. |
-| Q15 | No account ban; suspend plus per-show bars. | Moderation scope after the Summerween troll. | Keep, but add a real ban if a suspended member returns. |
-| Q16 | No comment threads on show pages. | Dated August, pre-launch. | Owner decides. |
-| Q17 | Live (in-person) show judging is a target, photo shows only for now. | Timing never set. | Owner decides. |
-| Q18 | Championship star thresholds. | Marked provisional. | Confirm before the season ends 2027-04-30. |
-| Q19 | OMEQ card expiry rule. | An assumption; NAN card colours were recorded from memory. | Check with USOMHS and NAMHSA. |
-| Q20 | Admin can still create legacy photo shows. | Keep or kill never decided. | Kill; hosts use the normal flow. |
-| Q21 | National numbering (M-/H- numbers). | Research done, 8 decisions open. | Wait for NAMHSA. |
-| Q22 | Photo model (sizes, quality, free categories). | 5 decisions open. | Owner decides. |
-
-### Registry data formats (see `docs/STANDARDS.md` §3)
-
-| # | Question | Today | Recommendation |
-|---|---|---|---|
-| Q23 | Do colour descriptions start with a capital? | 4,016 lowercase ("red chestnut"), 2,283 capitalized ("Bay"). | Capitalize the first letter only: "Red chestnut, star". Matches the rule for names. |
-| Q24 | What happens to the 279 release titles that hold a description ("QVC With hang tag. Model shown has aftermarket base.")? | The import put the description into the title. | Keep the name in the title; move the rest to the release's notes. Owner reviews the list before the repair. |
-| Q25 | Maker and artist names one or two letters apart (12 pairs, e.g. Brigitte / Brigette Eberl, Melody Peña / Pena). Typo or two people? | Each spelling has its own maker page. | Owner (or a member who knows) rules pair by pair; obvious typos merge to the more common spelling. |
-| Q26 | 1,290 artist resins have no scale. | Shown with no scale. | Leave empty (unknown is honest) and invite members to fill it in from the reference page. |
+| Q8 | No manufacturer → mold → release tree browsing ("don't rock the boat"). | Made before the Registry became the priority. 2026-10-15: owner is open to it but wants to weigh what the community expects first. | Revisit after the linker is the default; the data now supports it. |
 
 ---
+
+## Rulings log
+
+Owner rulings, newest first. Each one is also folded into the sections below.
+
+**2026-10-15**
+- **Tracker**: Backlog.md (task files in `backlog/`, kanban board) is the one tracker. The admin Roadmap tab's items move into it and the tab is retired. Ticket entry follows one written method so tickets stay consistent.
+- **Q14 Prepaid prices**: Pro $15/27/50 and Studio $30/54/100 for 3/6/12 months stand; revisit if uptake stays low.
+- **Q16 Show comments**: wanted eventually, and they must be premium: modern comment design, not a message board.
+- **Q17 Live show judging**: the software exists; it waits for a host willing to test it at a real show.
+- **Q18 Star thresholds**: confirm before the season ends (ticket due March 2027).
+- **Q19 Card facts**: verify the OMEQ expiry rule and NAN card colours with USOMHS and NAMHSA (ticket).
+- **Q20 Legacy photo shows**: remove admin creation of old-style photo shows.
+- **Q21 National numbering, Q22 Photo model**: parked as tickets, taken up separately.
+- **Q8 Tree browsing**: still open; the owner wants to weigh community expectations (ticket).
+- **Q2 Going live**: fixes are batched locally and pushed on the owner's word; emergencies go out at once. Wanted next: a proper CI/CD pipeline with testing and auditing, and a kanban ticket system for long-term tracking.
+- **Q3 Design approval**: a mock first for any new page or flow; small visual fixes are reviewed live.
+- **Q4 Files through server actions**: never, except avatars and banners (4 MB).
+- **Q6 Admin**: the admin pages are for the site's operator only (the owner). Other roles, such as Registry moderators, get their own tools, not admin.
+- **Q9 Collector counts**: public horses only.
+- **Q10 Unlisted horses**: no history shown to logged-out visitors.
+- **Q11 CSV import**: imported horses take the member's own default visibility.
+- **Q12 Artist-feedback defaults**: want lists private, country flags opt-in, cast-by per horse.
+- **Q13 Free studios**: 3 active commissions; the check fails open.
+- **Q15 Bans**: suspension and show bars for now; a real ban is a tracked ticket for later.
+- **Q1 Page addresses**: a maker correction moves the page to the corrected address, and the old address forwards to the new one.
+- **Q5 Trusted members**: Gold curators' corrections pass the same format checks as Silver. Also: a new **Registry moderator** role (see Registry below).
+- **Q7 New linker**: becomes the default for everyone after two weeks with no new linker bug, counted from 2026-10-15; the old picker is then removed.
+- **Q23 Colour descriptions**: first letter capitalized ("Red chestnut, star").
+- **Q24 Descriptions in titles**: the name stays in the title; the rest moves to the release's notes (owner sees the list first).
+- **Q25 Near-identical names**: merged into the more common spelling.
+- **Q26 Resins with no scale**: left empty; members are invited to fill it in.
 
 ## Confirmed decisions
 
@@ -92,6 +94,10 @@ kept by the AI assistant across sessions, then checked against the code.
 - **Sculptor is the artist** for factory pieces, by design.
 - **Never edit a row from a view that shows it under another parent.**
 - **Reference pages** (`/reference/...`) are the public face; `/catalog/[id]` is the edit surface.
+- **Addresses follow maker corrections**, and old addresses forward to the new one.
+- **Curator ranks skip the queue, not the rules**: every auto-applied correction passes the format checks.
+- **Registry moderators** (planned): trusted members with the owner's Registry powers (add, merge, edit, bulk changes) in an admin-like tab. Members apply; seats open when the review queue backs up. Design first.
+- **Formats**: colour descriptions start with a capital; titles hold the name only; one spelling per maker or artist; unknown scale stays empty.
 - **eBay prices are asking prices**, never "sold". Minimum 3 listings. Currency is a label, never converted.
 
 ### Shows
@@ -126,7 +132,7 @@ kept by the AI assistant across sessions, then checked against the code.
 - **Single owner**: when several places decide the same thing, build one owner and delete the rest.
 - **Long caches, cleared by tag**, for anything shared across pages.
 - **Ship big changes opt-in** ("Try the new ..."), then make them the default and delete the old path and the flag.
-- **The Roadmap tab is the backlog.**
+- **The Backlog board is the one tracker** (`backlog/`, `ticket` skill). Each release is a milestone: one push, one rebuild.
 - **Types are generated** (`npm run gen-types` → `database.generated.ts`). *(ADR 003 is out of date.)*
 
 ### Design and copy

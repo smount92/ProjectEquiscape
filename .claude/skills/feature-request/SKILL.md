@@ -10,7 +10,7 @@ only what the owner decides.
 
 ## Steps
 
-1. **Capture**: a Roadmap item (Admin › Roadmap) with the member's exact words, who asked, and the link. Several members asking for the same thing go on one item.
+1. **Capture**: a ticket (`ticket` skill) with the member's exact words, who asked, and the link. Several members asking for the same thing go on one item.
 2. **Find the real need**: what were they trying to do when they asked? (Members put serial numbers into horse names because the Registry hid the numbers; the fix was the display, not a new field.)
 3. **Check the decisions** in `docs/DECISIONS.md`. Does the idea contradict one (never hold money, trust never paywalled, record not referee, Registry first)? Say so.
 4. **Design before code** for anything members will see: a short spec, a mock or prototype, the open questions as a numbered list with a recommendation each. The owner and the design lead approve the look.

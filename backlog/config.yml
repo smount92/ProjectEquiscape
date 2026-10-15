@@ -1,0 +1,17 @@
+project_name: "Model Horse Hub"
+default_status: "To Do"
+statuses: ["To Do", "In Progress", "Waiting on owner", "Done"]
+labels: ["registry", "stable", "shows", "market", "paddock", "studio", "admin", "billing", "accounts", "moderation", "platform", "data", "member-reported"]
+date_format: yyyy-mm-dd
+max_column_width: 20
+auto_open_browser: true
+definition_of_done: ["Tests pass (pre-commit)", "Decision recorded in docs/DECISIONS.md if one was made", "Member who reported it has a drafted reply, if any"]
+default_port: 6420
+remote_operations: false
+auto_commit: false
+filesystem_only: false
+zero_padded_ids: 3
+bypass_git_hooks: false
+check_active_branches: false
+active_branch_days: 30
+task_prefix: "mhh"
