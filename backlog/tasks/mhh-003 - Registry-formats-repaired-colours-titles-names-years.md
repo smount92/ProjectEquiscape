@@ -4,6 +4,7 @@ title: 'Registry formats repaired: colours, titles, names, years'
 status: To Do
 assignee: []
 created_date: '2026-10-15 22:19'
+updated_date: '2026-10-15 22:41'
 labels:
   - registry
   - data
@@ -42,3 +43,9 @@ Dry run + expect-guarded repair the owner runs. Owner sees the 279 titles list b
 - [ ] #2 Decision recorded in docs/DECISIONS.md if one was made
 - [ ] #3 Member who reported it has a drafted reply, if any
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Write side done in MHH-002: normalizeFactValue() stops new drift. This ticket now only repairs existing rows.
+<!-- SECTION:NOTES:END -->

@@ -4,6 +4,8 @@ import {
     GOLD_THRESHOLD,
     SILVER_AUTO_FIELDS,
     SILVER_THRESHOLD,
+    curatorAutoApprovable,
+    goldAutoApprovable,
     silverAutoApprovable,
 } from "@/lib/catalog/corrections";
 import { CATALOG_EDITABLE_FIELDS } from "@/lib/catalog/editableFields";
@@ -56,15 +58,10 @@ describe("Auto-approve rules (pure logic)", () => {
         changedFields: string[]
     ): boolean {
         if (suggestionType !== "correction") return false;
-        if (approvedCount >= GOLD_THRESHOLD) return true;
-        if (approvedCount >= SILVER_THRESHOLD) {
-            return silverAutoApprovable(
-                Object.fromEntries(
-                    changedFields.map((f) => [f, { from: "", to: SAMPLE[f] ?? "x" }])
-                )
-            );
-        }
-        return false;
+        return curatorAutoApprovable(
+            approvedCount,
+            Object.fromEntries(changedFields.map((f) => [f, { from: "", to: SAMPLE[f] ?? "X" }]))
+        );
     }
 
     it("returns false for regular users regardless of fields", () => {
@@ -132,10 +129,25 @@ describe("Auto-approve rules (pure logic)", () => {
         expect(shouldAutoApprove(SILVER_THRESHOLD, "correction", ["year"])).toBe(false);
     });
 
-    it("Gold auto-approves ALL correction fields", () => {
+    it("Gold auto-approves any field whose value is well-formed", () => {
         expect(shouldAutoApprove(GOLD_THRESHOLD, "correction", ["maker"])).toBe(true);
         expect(shouldAutoApprove(GOLD_THRESHOLD, "correction", ["mold"])).toBe(true);
+        expect(shouldAutoApprove(GOLD_THRESHOLD, "correction", ["title"])).toBe(true);
         expect(shouldAutoApprove(999, "correction", ["mold"])).toBe(true);
+    });
+
+    it("Gold skips the queue, not the rules (owner ruling Q5)", () => {
+        const one = (k: string, to: string) => ({ [k]: { from: "", to } });
+        expect(goldAutoApprovable(one("run_type", "whatever"))).toBe(false);
+        expect(goldAutoApprovable(one("release_year_start", "98"))).toBe(false);
+        expect(goldAutoApprovable(one("scale", "Huge"))).toBe(false);
+        expect(goldAutoApprovable(one("scale", "Stablemate (1:32)"))).toBe(true);
+        expect(goldAutoApprovable(one("title", "lowercase start"))).toBe(false);
+        expect(goldAutoApprovable(one("title", "Trailing period."))).toBe(false);
+        expect(goldAutoApprovable(one("maker", "Breyer"))).toBe(true);
+        expect(goldAutoApprovable(one("item_type", "plastic_mold"))).toBe(false);
+        expect(goldAutoApprovable(one("parent_id", "abc"))).toBe(false);
+        expect(goldAutoApprovable({})).toBe(false);
     });
 
     it("additions NEVER auto-approve, even for Gold", () => {

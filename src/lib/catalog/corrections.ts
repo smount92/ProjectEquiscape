@@ -13,7 +13,7 @@
  * shared by the server action. Mirrors src/lib/catalog/filterParams.ts.
  */
 
-import { CATALOG_GENDERS, RUN_TYPES } from "@/lib/catalog/taxonomy";
+import { CANONICAL_SCALES, CATALOG_GENDERS, RUN_TYPES } from "@/lib/catalog/taxonomy";
 import { MATERIAL_OPTIONS } from "@/lib/catalog/editableFields";
 
 // Real (top-level) columns on catalog_items. Anything else in a correction's
@@ -79,6 +79,33 @@ export const SILVER_AUTO_FIELDS = new Set([
 type FieldChange = { from?: unknown; to: unknown };
 
 /**
+ * The one place a Registry value is tidied before it is written
+ * (docs/STANDARDS.md §3, owner rulings Q23-Q25): names lose stray spaces
+ * and trailing punctuation, a colour description starts with a capital,
+ * and a four-digit year is stored as a number. Anything else passes
+ * through unchanged. Used by corrections and additions alike.
+ */
+export function normalizeFactValue(key: string, value: unknown): unknown {
+    if (typeof value !== "string") return value;
+    const v = value.replace(/\s+/g, " ").trim();
+    switch (key) {
+        case "title":
+        case "maker":
+        case "artist":
+        case "manufacturer":
+        case "mold_name":
+            return v.replace(/[\s.,;:]+$/, "");
+        case "color_description":
+            return v.charAt(0).toUpperCase() + v.slice(1);
+        case "release_year_start":
+        case "release_year_end":
+            return /^\d{4}$/.test(v) ? Number(v) : v;
+        default:
+            return v;
+    }
+}
+
+/**
  * Split an approved correction's field_changes into real-column updates and a
  * merged attributes object.
  *
@@ -99,7 +126,7 @@ export function buildCorrectionUpdate(
 
     for (const [key, value] of Object.entries(fieldChanges)) {
         if (typeof value === "object" && value !== null && "to" in value) {
-            const to = (value as FieldChange).to;
+            const to = normalizeFactValue(key, (value as FieldChange).to);
             if (CATALOG_REAL_COLUMNS.has(key)) {
                 columnUpdates[key] = to;
             } else {
@@ -167,4 +194,46 @@ export function silverAutoApprovable(
         const to = (value as FieldChange).to;
         return typeof to === "string" && check(to.trim());
     });
+}
+
+// ── Gold auto-approval: any field, same rules ──
+
+/**
+ * Value rules for the identity fields Silver may not touch. A name is
+ * capitalized and carries no trailing punctuation (owner ruling Q23-Q25,
+ * docs/STANDARDS.md §3); a scale is one of the canonical scales.
+ */
+const IDENTITY_VALUE_CHECKS: Record<string, (to: string) => boolean> = {
+    title: (v) => v.length > 0 && v.length <= 200 && !/^[a-z]/.test(v) && !/[.,;:]$/.test(v),
+    maker: (v) => v.length > 0 && v.length <= 120 && !/^[a-z]/.test(v) && !/[.,;:]$/.test(v),
+    artist: (v) => v.length <= 120 && !/^[a-z]/.test(v) && !/[.,;:]$/.test(v),
+    manufacturer: (v) => v.length <= 120 && !/^[a-z]/.test(v) && !/[.,;:]$/.test(v),
+    scale: (v) => (CANONICAL_SCALES as readonly string[]).includes(v),
+};
+
+/**
+ * May a Gold curator's correction apply at once? Gold may change any
+ * field, but every value must pass the same checks Silver's do, plus the
+ * identity rules above; a field with no rule takes any plain text up to
+ * 500 characters. "A rank skips the queue, not the rules" (owner ruling
+ * Q5, 2026-10-15). A miss files the suggestion for review, as for anyone.
+ */
+export function goldAutoApprovable(fieldChanges: Record<string, unknown>): boolean {
+    const entries = Object.entries(fieldChanges);
+    if (entries.length === 0) return false;
+    return entries.every(([key, value]) => {
+        if (key === "item_type" || key === "parent_id") return false;
+        if (typeof value !== "object" || value === null || !("to" in value)) return false;
+        const to = (value as FieldChange).to;
+        if (typeof to !== "string") return false;
+        const check = SILVER_VALUE_CHECKS[key] ?? IDENTITY_VALUE_CHECKS[key];
+        return check ? check(to.trim()) : to.length <= 500;
+    });
+}
+
+/** The whole curator decision: which rank, then that rank's rules. */
+export function curatorAutoApprovable(approvedCount: number, fieldChanges: Record<string, unknown>): boolean {
+    if (approvedCount >= GOLD_THRESHOLD) return goldAutoApprovable(fieldChanges);
+    if (approvedCount >= SILVER_THRESHOLD) return silverAutoApprovable(fieldChanges);
+    return false;
 }

@@ -19,7 +19,8 @@ import {
     SILVER_THRESHOLD,
     buildCorrectionUpdate,
     correctionTouchesAttributes,
-    silverAutoApprovable,
+    curatorAutoApprovable,
+    normalizeFactValue,
 } from "@/lib/catalog/corrections";
 import { referenceHref } from "@/lib/catalog/referenceUrl";
 import {
@@ -483,18 +484,11 @@ export async function createSuggestion(input: SuggestionInput) {
 
     let autoApprove = false;
     if (input.suggestionType === "correction" && input.fieldChanges) {
-        const isGoldCurator = approvedCount >= GOLD_THRESHOLD;
-        const isSilverCurator = approvedCount >= SILVER_THRESHOLD;
-
-        if (isGoldCurator) {
-            autoApprove = true;
-        } else if (isSilverCurator) {
-            // Field AND value: the correction apply path does no vocabulary
-            // validation of its own, so the fast path demands well-formed
-            // values. A miss here is not a rejection — the suggestion files
-            // for human review like anyone else's.
-            autoApprove = silverAutoApprovable(input.fieldChanges);
-        }
+        // Field AND value, at every rank: the correction apply path does no
+        // vocabulary validation of its own, so the fast path demands
+        // well-formed values. A miss is not a rejection; the suggestion
+        // files for human review like anyone else's.
+        autoApprove = curatorAutoApprovable(approvedCount, input.fieldChanges);
     }
 
     // ── Duplicate reports: a merge is irreversible, so no rank
@@ -1236,7 +1230,7 @@ async function applyApprovedSuggestion(
         });
         const insertPayload = {
             item_type: itemType,
-            title: (fc.title ?? fc.mold_name ?? "Untitled") as string,
+            title: normalizeFactValue("title", fc.title ?? fc.mold_name ?? "Untitled") as string,
             maker,
             artist: attribution.artist,
             manufacturer: attribution.manufacturer,
@@ -1245,8 +1239,8 @@ async function applyApprovedSuggestion(
             scale: normalizeScale(fc.scale as string | undefined) ?? parentId?.scale ?? null,
             ...(parentId ? { parent_id: parentId.id } : {}),
             attributes: JSON.parse(JSON.stringify({
-                ...(fc.year ? { release_year_start: fc.year } : {}),
-                ...(fc.color ? { color_description: fc.color } : {}),
+                ...(fc.year ? { release_year_start: normalizeFactValue("release_year_start", fc.year) } : {}),
+                ...(fc.color ? { color_description: normalizeFactValue("color_description", fc.color) } : {}),
                 ...(fc.model_number ? { model_number: fc.model_number } : {}),
                 ...(fc.material ? { material: fc.material } : {}),
                 // Original retail price (Amanda, 2026-08-23): what the maker
