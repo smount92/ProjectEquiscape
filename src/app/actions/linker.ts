@@ -329,7 +329,7 @@ export async function fileReleaseUnderMold(input: {
         reason: `Added from the reference linker while linking a horse${input.note?.trim() ? ": " + input.note.trim() : "."}`,
     });
     if (!result.success) return { success: false, error: ("error" in result && result.error) || "Could not file it." };
-    return { success: true, suggestionId: (result as { suggestionId?: string }).suggestionId, autoApproved: (result as { autoApproved?: boolean }).autoApproved };
+    return { success: true, suggestionId: (result as { id?: string }).id, autoApproved: (result as { autoApproved?: boolean }).autoApproved };
 }
 
 /** "Fill in what you know": one fact on one release. */

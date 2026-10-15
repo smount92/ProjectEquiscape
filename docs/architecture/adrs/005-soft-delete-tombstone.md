@@ -1,6 +1,6 @@
 # ADR 005: Soft Delete (Tombstone) Pattern
 
-**Status:** Accepted  
+**Status:** Accepted in principle; the mechanism below is out of date. There is no `is_tombstone` column: soft delete is `deleted_at` on `users`, `user_horses` and `messages`. History tables still cascade from `user_horses` (see `docs/STANDARDS.md` §2, Safety).  
 **Date:** February 2026  
 **Deciders:** Project team
 

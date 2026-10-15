@@ -1,6 +1,6 @@
 # ADR 006: Private Storage with Signed URLs
 
-**Status:** Accepted  
+**Status:** Superseded for horse photos. The `horse-images` bucket is public; privacy is enforced on the `horse_images` rows. Signed URLs are still used for private files (papers, workbench). See `docs/DECISIONS.md`.  
 **Date:** January 2026  
 **Deciders:** Project team
 

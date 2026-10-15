@@ -1,6 +1,6 @@
 # ADR 003: Manual Types Over Generated
 
-**Status:** Accepted (with known limitations)  
+**Status:** Superseded. Types are generated (`npm run gen-types` → `src/lib/types/database.generated.ts`); `database.ts` keeps hand-written domain types only. See `docs/DECISIONS.md` and `docs/STANDARDS.md`.  
 **Date:** January 2026  
 **Deciders:** Project team
 

@@ -1,6 +1,6 @@
 # ADR 001: Server Actions Over API Routes
 
-**Status:** Accepted  
+**Status:** Accepted; counts out of date. Server actions remain the default; there are now 66 action files and 23 API routes (webhooks, crons, exports, the reference dictionary). See `docs/DECISIONS.md`.  
 **Date:** January 2026  
 **Deciders:** Project team
 

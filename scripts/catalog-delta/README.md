@@ -1,4 +1,23 @@
-# Catalog delta importer
+# Catalog scripts
+
+## Registry health scan (start here)
+
+```bash
+node scripts/catalog-delta/registry_health.mjs > before.txt
+```
+
+Read-only, public key only. Counts duplicates, orphans, releases under the
+wrong mold, vocabulary and format drift. Run it before and after every
+repair; the workflow is `.claude/skills/registry-data-fix/SKILL.md`.
+
+## Repairs
+
+Repairs are SQL files the owner runs in the Supabase SQL editor, always as a
+pair: `<name>_dryrun.sql` (changes nothing, shows what would change) and
+`<name>.sql` (expect-guarded, one transaction). Example:
+`registry_repair_2026_10_15_dryrun.sql` + `registry_repair_2026_10_15.sql`.
+
+## Catalog delta importer
 
 Source-agnostic tool for adding external model data to `catalog_items` **without
 re-importing known-bad data**. Parses a JSON dataset (from a source the owner

@@ -17,7 +17,7 @@ graph LR
 
 ### Hosting Tier
 
-Currently on **Vercel Hobby tier** (free). Key limits:
+Now on **Vercel Pro** and **Supabase Pro** (the limits below date from the Hobby tier and may be out of date). Key limits:
 - Serverless function execution: 10 seconds
 - Bandwidth: 100 GB/month
 - Builds: 6000 minutes/month
@@ -45,7 +45,6 @@ Configure in **Vercel Dashboard → Settings → Environment Variables**:
 | `STRIPE_SECRET_KEY` | Stripe payments | Stripe Dashboard |
 | `STRIPE_WEBHOOK_SECRET` | Stripe webhook verification | Stripe Dashboard → Webhooks |
 | `STRIPE_PRO_PRICE_ID` | Pro subscription price | Stripe Dashboard → Products |
-| `GEMINI_API_KEY` | Stablemaster AI | Google AI Studio |
 | `CRON_SECRET` | Validates cron requests | Generate a random secret |
 
 > ⚠️ **Never expose `SUPABASE_SERVICE_ROLE_KEY` client-side.** It bypasses all RLS.

@@ -23,11 +23,9 @@ graph TD
     end
 
     Email["Resend (Transactional Email)"]
-    Gemini["Google Gemini (AI)"]
 
     SA -->|"Checkout Sessions"| Stripe
     Stripe -->|"Webhooks"| SA
-    Cron -->|"Monthly analysis"| Gemini
 
     SC --> SA
     CC --> SA
@@ -56,7 +54,6 @@ graph TD
 | **UI Components** | shadcn/ui (Radix) | — | Button, Input, Select, Textarea, Badge, Card, Dialog, Popover, Skeleton, Separator, Table |
 | **Animations** | Framer Motion | — | Spring physics, staggered grid reveals, tactile micro-interactions |
 | **Payments** | Stripe | — | Checkout Sessions + Webhooks for Pro tier subscriptions |
-| **AI** | Google Gemini | — | Stablemaster collection analysis (monthly cron) |
 | **Email** | Resend | 6.9.3 | Transactional notifications (offers, comments, follows) |
 | **PDF** | @react-pdf/renderer | 4.3.2 | Insurance reports, Certificate of Authenticity, Show Tags |
 | **Search** | fuzzysort | 3.1.0 | Client-side fuzzy matching for reference catalog |

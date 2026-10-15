@@ -12,14 +12,14 @@ All database changes go through SQL migration files in `supabase/migrations/`.
 
 ### 1. Choose the Next Number
 
-Check the latest migration file in `supabase/migrations/`. As of the August 2026 launch release the latest is `175_object_metrics.sql`, so the next number is **176**.
+Check the latest migration file in `supabase/migrations/`. Take the next number after the highest file there. Never reuse a number.
 
 > **Note:** Numbers 045, 047, 049 and 051 were consolidated into adjacent migrations during early development, and **174 is an intentional gap** — no such file exists and none should be written.
 
 ### 2. Create the File
 
 ```
-supabase/migrations/176_your_feature_name.sql
+supabase/migrations/NNN_your_feature_name.sql
 ```
 
 **Naming conventions:**
