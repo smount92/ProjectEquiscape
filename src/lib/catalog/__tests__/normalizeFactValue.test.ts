@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildCorrectionUpdate, normalizeFactValue } from "@/lib/catalog/corrections";
+import { buildCorrectionUpdate, hasTrailingPunctuation, normalizeFactValue, tidyName } from "@/lib/catalog/corrections";
 
 describe("normalizeFactValue: one tidy step before a Registry write", () => {
     it("capitalizes a colour description and keeps the rest as typed", () => {
@@ -13,6 +13,15 @@ describe("normalizeFactValue: one tidy step before a Registry write", () => {
         expect(normalizeFactValue("maker", "Maggie Bennett. ")).toBe("Maggie Bennett");
         expect(normalizeFactValue("title", "Arabian  Stallion (G1)")).toBe("Arabian Stallion (G1)");
         expect(normalizeFactValue("title", "Mr. Ed")).toBe("Mr. Ed");
+    });
+
+    it("keeps a period that ends an abbreviation", () => {
+        expect(normalizeFactValue("title", "I.C.E.")).toBe("I.C.E.");
+        expect(normalizeFactValue("title", "JCPenney Holiday Catalog, later Bentley Sales Co.")).toBe("JCPenney Holiday Catalog, later Bentley Sales Co.");
+        expect(normalizeFactValue("title", "Dr. Peaches.")).toBe("Dr. Peaches");
+        expect(hasTrailingPunctuation("Smart Chic Olena Jr.")).toBe(false);
+        expect(hasTrailingPunctuation("Vanity,")).toBe(true);
+        expect(tidyName("Bayberry and Roses.;")).toBe("Bayberry and Roses");
     });
 
     it("stores a four-digit year as a number", () => {

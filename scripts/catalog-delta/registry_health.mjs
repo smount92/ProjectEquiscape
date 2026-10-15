@@ -144,7 +144,10 @@ const yrText = items.filter((i) => typeof i.attributes?.release_year_start === "
 say("years stored as text instead of numbers", yrText.length);
 const col = items.map((i) => i.attributes?.color_description).filter((v) => typeof v === "string" && v.trim());
 say("colour descriptions starting lowercase / uppercase", `${col.filter((v) => /^[a-z]/.test(v)).length} / ${col.filter((v) => /^[A-Z]/.test(v)).length}`);
-say("titles ending in punctuation (usually a description pasted into the title)", t((s) => /[.,;:]$/.test(s.trim())).length, t((s) => /[.,;:]$/.test(s.trim())).map((i) => i.title.slice(0, 80)));
+// Same rule as hasTrailingPunctuation in src/lib/catalog/corrections.ts: an abbreviation's period ("I.C.E.", "Co.") is fine.
+const ABBREVIATION_END = /(?:\b[A-Za-z]|\b(?:Co|Jr|Sr|Inc|Ltd|St|Mr|Mrs|Ms|Dr|No|Bros|Corp|Mt|vs))\.$/;
+const strayEnd = (s) => /[.,;:]$/.test(s.trim()) && !ABBREVIATION_END.test(s.trim());
+say("titles ending in punctuation (usually a description pasted into the title)", t(strayEnd).length, t(strayEnd).map((i) => i.title.slice(0, 80)));
 say("titles starting lowercase", t((s) => /^[a-z]/.test(s)).length, t((s) => /^[a-z]/.test(s)).map((i) => i.title));
 const people = {};
 for (const i of items) for (const c of ["maker", "artist"]) if (i[c]) people[i[c]] = (people[i[c]] ?? 0) + 1;

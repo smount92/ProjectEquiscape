@@ -1,10 +1,10 @@
 ---
 id: MHH-003
 title: 'Registry formats repaired: colours, titles, names, years'
-status: To Do
+status: Waiting on owner
 assignee: []
 created_date: '2026-10-15 22:19'
-updated_date: '2026-10-15 22:41'
+updated_date: '2026-10-15 23:00'
 labels:
   - registry
   - data
@@ -48,4 +48,6 @@ Dry run + expect-guarded repair the owner runs. Owner sees the 279 titles list b
 
 <!-- SECTION:NOTES:BEGIN -->
 Write side done in MHH-002: normalizeFactValue() stops new drift. This ticket now only repairs existing rows.
+
+Ready 2026-10-15: review list scripts/catalog-delta/review/registry_format_review_2026_10.md (12 name merges, 271 titles: 59 split, 155 sets keep roster, 57 trimmed; 4,015 colours; 1,662 text years). Owner reviews, then runs registry_format_repair_2026_10_dryrun.sql and registry_format_repair_2026_10.sql, after migration 233 (so merged makers' old pages forward). Generator: gen_format_repair_2026_10.mjs. Abbreviation periods (I.C.E., Co., Jr.) are kept, here and in normalizeFactValue.
 <!-- SECTION:NOTES:END -->

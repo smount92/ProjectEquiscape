@@ -78,6 +78,22 @@ export const SILVER_AUTO_FIELDS = new Set([
 
 type FieldChange = { from?: unknown; to: unknown };
 
+/** A final period that belongs to an abbreviation ("I.C.E.", "Sales Co.", "Jr."). */
+const ABBREVIATION_END = /(?:\b[A-Za-z]|\b(?:Co|Jr|Sr|Inc|Ltd|St|Mr|Mrs|Ms|Dr|No|Bros|Corp|Mt|vs))\.$/;
+
+/** Does a name end in stray punctuation (an abbreviation's period is not stray)? */
+export function hasTrailingPunctuation(name: string): boolean {
+    const v = name.trim();
+    return /[.,;:]$/.test(v) && !ABBREVIATION_END.test(v);
+}
+
+/** A name without stray trailing punctuation. */
+export function tidyName(name: string): string {
+    let v = name.replace(/\s+/g, " ").trim();
+    while (hasTrailingPunctuation(v)) v = v.slice(0, -1).trimEnd();
+    return v;
+}
+
 /**
  * The one place a Registry value is tidied before it is written
  * (docs/STANDARDS.md §3, owner rulings Q23-Q25): names lose stray spaces
@@ -94,7 +110,7 @@ export function normalizeFactValue(key: string, value: unknown): unknown {
         case "artist":
         case "manufacturer":
         case "mold_name":
-            return v.replace(/[\s.,;:]+$/, "");
+            return tidyName(v);
         case "color_description":
             return v.charAt(0).toUpperCase() + v.slice(1);
         case "release_year_start":
@@ -204,10 +220,10 @@ export function silverAutoApprovable(
  * docs/STANDARDS.md §3); a scale is one of the canonical scales.
  */
 const IDENTITY_VALUE_CHECKS: Record<string, (to: string) => boolean> = {
-    title: (v) => v.length > 0 && v.length <= 200 && !/^[a-z]/.test(v) && !/[.,;:]$/.test(v),
-    maker: (v) => v.length > 0 && v.length <= 120 && !/^[a-z]/.test(v) && !/[.,;:]$/.test(v),
-    artist: (v) => v.length <= 120 && !/^[a-z]/.test(v) && !/[.,;:]$/.test(v),
-    manufacturer: (v) => v.length <= 120 && !/^[a-z]/.test(v) && !/[.,;:]$/.test(v),
+    title: (v) => v.length > 0 && v.length <= 200 && !/^[a-z]/.test(v) && !hasTrailingPunctuation(v),
+    maker: (v) => v.length > 0 && v.length <= 120 && !/^[a-z]/.test(v) && !hasTrailingPunctuation(v),
+    artist: (v) => v.length <= 120 && !/^[a-z]/.test(v) && !hasTrailingPunctuation(v),
+    manufacturer: (v) => v.length <= 120 && !/^[a-z]/.test(v) && !hasTrailingPunctuation(v),
     scale: (v) => (CANONICAL_SCALES as readonly string[]).includes(v),
 };
 
