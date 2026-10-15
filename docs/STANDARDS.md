@@ -144,18 +144,19 @@ The live Registry, 2026-10-14: 11,806 rows. Run
 
 ## 4. Plan: from doc-only to enforced
 
-In order. Each step is small and can ship alone.
+Each step is a ticket on the Backlog board. Status as of Release 1 (2026-10-15):
 
-1. **Lint gate.** Fix the 30 ESLint errors; make the CI lint step fail on error. Add `tsc --noEmit` for app code to CI.
-2. **One action result.** A shared `ActionResult` type in `src/lib/actions/result.ts`; `requireAuth()` typed as `SupabaseClient<Database>`; a `safeError()` helper that logs the database error and returns plain words. Convert files as they are touched; a ratchet test counts `error.message` returns and raw `getUser()` calls.
-3. **Database guards for the Registry** (one migration, after a data repair clears today's violations):
-   - CHECK constraints on `scale`, `attributes->>'run_type'` and `attributes->>'material'`, generated from `taxonomy.ts`, plus a test that fails when the two lists differ;
-   - `user_wishlists (user_id, catalog_id)` unique;
-   - `catalog_id` foreign keys `ON DELETE RESTRICT`, so a catalog row a horse points at cannot be deleted, only merged;
-   - `updated_at` with a shared trigger on `catalog_items` and `user_horses`.
-4. **History is never cascade-deleted.** Switch ownership history, transfers and show records to `RESTRICT` (soft delete keeps working).
-5. **Data format repair** for titles, text years, and maker spellings, using the `registry-data-fix` workflow, once the owner answers Q23–Q26 in `docs/DECISIONS.md`.
-6. **Prettier**: one formatting commit, then `prettier --check` in CI. It touches nearly every file, so do it when no other branch is open.
-7. **Caching**: a central `lib/cache/tags.ts`, and a test that every `revalidateTag` names a registered tag.
-8. **Colours**: extend the hardcoded-colours test to catch hex and `[#hex]`; fix `text-muted`.
-9. **Regenerate types** and add a probe-style check that warns when a table in the database has no generated type.
+| Step | Ticket | Status |
+|---|---|---|
+| Lint gate: 0 errors, CI fails on lint, app type check in CI and the build | MHH-008 | Done |
+| One action result: shared `ActionResult`, `safeError()`, typed `requireAuth()`; ratchets on raw error text and raw `getUser()` | MHH-009 | Done (files convert as they are touched) |
+| Database guards: CHECKs on scale, run type, material; one want-list row per model; catalog links can't be deleted; `updated_at` | MHH-010 (migration 233) | Done, awaiting paste |
+| History is never cascade-deleted | MHH-011 (migration 233) | Done, awaiting paste |
+| Registry data formats repaired (colours, titles, names, years) | MHH-003 | Awaiting owner review of the list |
+| Cache tags in one place, tested | MHH-012 | Done |
+| Hex colours ratcheted | MHH-013 | Done |
+| Database types regenerated | MHH-014 | Done; regenerate again after 233 |
+| Prettier: one formatting commit, then a CI check | MHH-018 | Awaiting owner (touches ~1,000 files) |
+| Test files type-check | MHH-066 | Later |
+| Migrations checked automatically (numbering, re-runnable, probe) | MHH-015 | Done (`migration-standards.test.ts`) |
+| Registry vocabularies equal in code and database | MHH-010 | Done (`registry-vocabulary.test.ts`) |
