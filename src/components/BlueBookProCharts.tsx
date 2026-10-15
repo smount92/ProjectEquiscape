@@ -83,7 +83,7 @@ export default function BlueBookProCharts({
                                 <div
                                     key={i}
                                     className="flex-1 rounded-t bg-gradient-to-t from-emerald-400 to-emerald-600"
-                                    style={{ height: `${30 + Math.sin(i * 0.8) * 25 + Math.random() * 40}%` }}
+                                    style={{ height: `${30 + Math.sin(i * 0.8) * 25 + ((Math.abs(Math.sin(i * 12.9898) * 43758.5453) % 1) * 40)}%` }}
                                 />
                             ))}
                         </div>

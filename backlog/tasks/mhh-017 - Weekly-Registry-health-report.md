@@ -1,9 +1,10 @@
 ---
 id: MHH-017
 title: Weekly Registry health report
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-10-15 22:19'
+updated_date: '2026-10-15 22:37'
 labels:
   - platform
   - registry

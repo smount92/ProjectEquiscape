@@ -142,7 +142,7 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
                                     aria-hidden="true"
                                     tabIndex={-1}
                                 >
-                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    { }
                                     {/* aspect-[4/1] matches the barn page and the
                                         crop frame: same ratio everywhere = the
                                         same slice of the image everywhere. */}

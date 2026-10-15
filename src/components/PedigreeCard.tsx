@@ -70,6 +70,7 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  // Debounced search for sire
  useEffect(() => {
  if (!sireName || sireName.length < 2 || sireId) {
+ // eslint-disable-next-line react-hooks/set-state-in-effect -- clear stale results when the search is too short or a horse is picked
  setSireResults([]);
  return;
  }
@@ -84,6 +85,7 @@ export default function PedigreeCard({ horseId, pedigree, isOwner }: PedigreeCar
  // Debounced search for dam
  useEffect(() => {
  if (!damName || damName.length < 2 || damId) {
+ // eslint-disable-next-line react-hooks/set-state-in-effect -- clear stale results when the search is too short or a horse is picked
  setDamResults([]);
  return;
  }

@@ -162,7 +162,7 @@ export default function ImageCropModal({
  );
  } else if (dragMode ==="resize" && resizeHandle) {
  setCrop((prev) => {
- let newCrop = { ...prev };
+ const newCrop = { ...prev };
 
  // Handle each corner/edge
  if (resizeHandle.includes("e")) {

@@ -3,6 +3,8 @@
  * Registry health scan: structure, duplicates, vocabulary and formats.
  *
  *   node scripts/catalog-delta/registry_health.mjs
+ *   node scripts/catalog-delta/registry_health.mjs --json health.json   (also writes the counts)
+ *   node scripts/catalog-delta/registry_health.mjs --compare last.json   (flags counts that rose)
  *
  * Read-only, and uses the public (anon) key only, so anyone can run it.
  * Run it before and after any repair script and paste both outputs into
@@ -14,11 +16,12 @@
  * one mold per sculpture, one spelling per maker, one format per field.
  */
 import fs from "node:fs";
-const env = Object.fromEntries(
+const env = fs.existsSync(".env.local") ? Object.fromEntries(
   fs.readFileSync(".env.local", "utf8").split(/\r?\n/)
     .filter((l) => l.includes("=") && !l.startsWith("#"))
     .map((l) => { const i = l.indexOf("="); return [l.slice(0, i).trim(), l.slice(i + 1).trim().replace(/^["']|["']$/g, "")]; }),
-);
+) : {};
+for (const k of ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY"]) env[k] ??= process.env[k];
 const url = env.NEXT_PUBLIC_SUPABASE_URL, key = env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 async function page(path) {
   const out = [];
@@ -158,3 +161,15 @@ say("maker/artist names one or two letters apart (check: typo or two people?)", 
 say("rows added in the last 14 days", items.filter((i) => i.created_at >= new Date(Date.now() - 14 * 864e5).toISOString()).length, top(count(items.filter((i) => i.created_at >= new Date(Date.now() - 14 * 864e5).toISOString()), (i) => `${i.created_at.slice(0, 10)} ${i.item_type}`), 14).map(([k, v]) => `${k}=${v}`));
 
 for (const o of out) console.log(`\n■ ${o.k}: ${o.v}${o.ex.length ? "\n   - " + o.ex.join("\n   - ") : ""}`);
+
+// ── Machine-readable counts, and the week-on-week comparison ──
+const arg = (flag) => { const i = process.argv.indexOf(flag); return i > -1 ? process.argv[i + 1] : null; };
+const counts = Object.fromEntries(out.filter((o) => typeof o.v === "number").map((o) => [o.k, o.v]));
+if (arg("--json")) fs.writeFileSync(arg("--json"), JSON.stringify({ at: new Date().toISOString(), counts }, null, 2));
+if (arg("--compare") && fs.existsSync(arg("--compare"))) {
+  const last = JSON.parse(fs.readFileSync(arg("--compare"), "utf8"));
+  const rose = Object.entries(counts).filter(([k, v]) => typeof last.counts?.[k] === "number" && v > last.counts[k] && k !== "rows" && !k.startsWith("rows added"));
+  console.log(`
+■ Compared with ${last.at.slice(0, 10)}: ${rose.length ? rose.length + " count(s) rose" : "nothing rose"}`);
+  for (const [k, v] of rose) console.log(`   ▲ ${k}: ${last.counts[k]} → ${v}`);
+}

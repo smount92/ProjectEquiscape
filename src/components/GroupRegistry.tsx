@@ -18,6 +18,7 @@ export default function GroupRegistry({ groupId, isMember }: Props) {
 
  useEffect(() => {
  if (!expanded || !isMember) return;
+ // eslint-disable-next-line react-hooks/set-state-in-effect -- loading flag for a fetch started by the effect
  setLoading(true);
  getGroupRegistry(groupId).then((data) => {
  setEntries(data);

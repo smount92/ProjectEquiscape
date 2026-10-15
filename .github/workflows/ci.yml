@@ -1,35 +1,50 @@
 name: CI
 
+# Every push to any branch, and every pull request, runs the full set of
+# checks here on GitHub. The website itself only rebuilds when main changes
+# (vercel.json: git.deploymentEnabled), so a release branch can be pushed
+# and checked as often as needed without a rebuild.
+
 on:
   push:
-    branches: [main, quality-sprint-*]
+    branches: ["**"]
   pull_request:
     branches: [main]
 
-jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
-    strategy:
-      matrix:
-        node-version: [20]
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js 20
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
+          node-version: 20
+          cache: npm
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Lint check
+      - name: Lint
         run: npm run lint -- --quiet
-        continue-on-error: true  # Advisory until the 30 existing errors are fixed (docs/STANDARDS.md)
+
+      - name: Type check (app code)
+        run: npm run typecheck
+
+      - name: Unit, component and standards tests
+        run: npx vitest run
+        # Includes the migration standards test: unique numbers, re-runnable
+        # DDL and a probe for every new migration.
+
+      - name: Dependency audit (production, critical)
+        run: npm audit --omit=dev --audit-level=critical
 
       - name: Build
         run: npm run build
@@ -43,14 +58,3 @@ jobs:
           NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_placeholder' }}
           STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY || 'sk_test_placeholder' }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY || 're_placeholder' }}
-
-      - name: Unit + Component Tests
-        run: npx vitest run
-
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results
-          path: coverage/
-          retention-days: 14

@@ -25,7 +25,7 @@ export function SimpleModeProvider({ children }: { children: ReactNode }) {
  // eslint-disable-next-line react-hooks/set-state-in-effect
  setIsSimpleMode(true);
  }
- // eslint-disable-next-line react-hooks/set-state-in-effect
+  
  setIsLoaded(true);
 
  // Sync with user's database preference if logged in

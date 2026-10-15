@@ -86,6 +86,7 @@ export default function ShowEntryForm({ showId, userHorses, classes }: ShowEntry
   // Fetch horse photos + scale when a horse is selected
   useEffect(() => {
     if (!selectedHorse) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- reset photo state when the horse is cleared
       setHorsePhotos([]);
       setSelectedPhoto(null);
       setHorseScale(null);

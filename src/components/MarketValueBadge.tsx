@@ -23,6 +23,7 @@ export default function MarketValueBadge({ catalogId, compact = false }: MarketV
 
  useEffect(() => {
  if (!catalogId) {
+ // eslint-disable-next-line react-hooks/set-state-in-effect -- no catalog id means nothing to load; settle the loading flag
  setLoading(false);
  return;
  }

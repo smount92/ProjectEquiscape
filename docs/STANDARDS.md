@@ -74,7 +74,7 @@ live Registry. Counts are the baseline; they should only go down.
 
 | Rule | Status | Today |
 |---|---|---|
-| ESLint passes | **Advisory in CI** | CI ran `next lint`, which no longer exists in Next 16, so lint never ran. Fixed to `npm run lint`; 30 errors and 73 warnings to clear before it can fail the build. |
+| ESLint passes | Enforced (CI fails on any error) | 0 errors; 68 warnings. Intended setState-in-effect sites carry a reason. |
 | Prettier formatting | Not run anywhere | 987 of 1,059 files differ from `.prettierrc`. |
 
 ---

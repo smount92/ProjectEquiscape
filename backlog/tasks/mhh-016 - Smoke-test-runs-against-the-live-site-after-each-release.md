@@ -1,9 +1,10 @@
 ---
 id: MHH-016
 title: Smoke test runs against the live site after each release
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-10-15 22:19'
+updated_date: '2026-10-15 22:37'
 labels:
   - platform
 milestone: m-0

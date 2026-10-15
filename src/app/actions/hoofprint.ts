@@ -65,7 +65,7 @@ export async function getHoofprint(horseId: string): Promise<{
 
     // Fetch user aliases for all unique user IDs in the results
     const userIds = [...new Set((rawTimeline ?? []).map((e: { user_id: string | null }) => e.user_id).filter(Boolean))] as string[];
-    let aliasMap = new Map<string, string>();
+    const aliasMap = new Map<string, string>();
     if (userIds.length > 0) {
         const { data: users } = await supabase
             .from("users")

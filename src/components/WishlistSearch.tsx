@@ -77,6 +77,7 @@ export default function WishlistSearch() {
     useEffect(() => {
         if (fetchTimeoutRef.current) clearTimeout(fetchTimeoutRef.current);
         if (!query.trim()) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect -- clear stale results when the query is emptied
             setResults([]);
             setShowDropdown(false);
             return;

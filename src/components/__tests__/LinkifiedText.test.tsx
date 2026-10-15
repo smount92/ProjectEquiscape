@@ -39,7 +39,7 @@ describe("LinkifiedText", () => {
 
     it("leaves a javascript: payload as inert text", () => {
         const { container } = render(
-            // eslint-disable-next-line no-script-url
+             
             <LinkifiedText text="click javascript:alert('x') now" />,
         );
         expect(screen.queryByRole("link")).toBeNull();

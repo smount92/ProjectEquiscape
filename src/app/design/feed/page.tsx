@@ -1,4 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getPosts, type Post } from "@/app/actions/posts";
@@ -98,7 +99,7 @@ export default async function LeatherFeedPrototype() {
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
       <p className="mb-4 text-center text-xs tracking-wide text-muted-foreground">
         Design prototype — real posts from the live feed, leather treatment.
-        Compare with <a className="underline" href="/feed">/feed</a>.
+        Compare with <Link className="underline" href="/feed">/feed</Link>.
       </p>
       <div className="panel">
         <h1>Stable Activity Feed</h1>

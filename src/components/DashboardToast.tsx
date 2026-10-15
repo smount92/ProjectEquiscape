@@ -47,6 +47,7 @@ export default function DashboardToast() {
  const photos = searchParams.get("photos");
 
  if (toast && TOAST_MESSAGES[toast]) {
+ // eslint-disable-next-line react-hooks/set-state-in-effect -- show the toast named in the URL once, after mount
  setToastType(toast);
  setToastName(name);
  setToastPhotos(photos);

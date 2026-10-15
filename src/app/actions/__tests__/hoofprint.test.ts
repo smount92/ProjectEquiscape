@@ -384,7 +384,7 @@ describe("Hoofprint — Transfer & Provenance System", () => {
                 select: vi.fn().mockReturnThis(),
                 eq: vi.fn().mockReturnThis(),
                 order: vi.fn().mockResolvedValue({ data: [], error: null }),
-            } as any);
+            } as never);
 
             const result = await getMyPendingTransfers();
             expect(result).toEqual([]);

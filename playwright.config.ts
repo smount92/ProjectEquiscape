@@ -22,6 +22,8 @@ if (existsSync(envPath)) {
 
 export default defineConfig({
     testDir: "./e2e",
+    // e2e/live runs against the real site (playwright.live.config.ts), never here.
+    testIgnore: ["**/live/**"],
     // 60s: against the production server (see webServer below) the Serwist
     // service worker — disabled in dev, active in prod — precaches the asset
     // manifest once per fresh browser context. Under all four projects in

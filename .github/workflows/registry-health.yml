@@ -1,0 +1,54 @@
+name: Registry health (weekly)
+
+# Every Monday: run the read-only Registry health scan with the public key,
+# compare it with last week's, and put the report on the run's summary page.
+# Counts that rose are flagged. The full report is kept as an artifact.
+
+on:
+  schedule:
+    - cron: "0 13 * * 1"
+  workflow_dispatch:
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Last week's counts
+        uses: actions/cache/restore@v4
+        with:
+          path: last-health.json
+          key: registry-health-${{ github.run_id }}
+          restore-keys: registry-health-
+
+      - name: Scan the Registry
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          node scripts/catalog-delta/registry_health.mjs --json health.json --compare last-health.json > report.txt
+          {
+            echo '## Registry health'
+            echo '```'
+            grep -E '^■|▲' report.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          cp health.json last-health.json
+
+      - name: Keep this week's counts
+        uses: actions/cache/save@v4
+        with:
+          path: last-health.json
+          key: registry-health-${{ github.run_id }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: registry-health
+          path: report.txt
+          retention-days: 90

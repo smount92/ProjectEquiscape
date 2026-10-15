@@ -721,7 +721,7 @@ export async function getEventDivisions(eventId: string): Promise<Division[]> {
 
     // Get entry counts per class
     const classIds = ((classes || []) as { id: string }[]).map(c => c.id);
-    let entryCountMap = new Map<string, number>();
+    const entryCountMap = new Map<string, number>();
     if (classIds.length > 0) {
         const { data: entries } = await supabase
             .from("event_entries")

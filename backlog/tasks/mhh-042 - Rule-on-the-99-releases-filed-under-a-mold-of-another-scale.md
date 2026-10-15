@@ -4,6 +4,7 @@ title: Rule on the 99 releases filed under a mold of another scale
 status: Waiting on owner
 assignee: []
 created_date: '2026-10-15 22:19'
+updated_date: '2026-10-15 22:27'
 labels:
   - registry
 milestone: m-1
@@ -35,3 +36,9 @@ Post-repair check 2026-10-15.
 - [ ] #2 Decision recorded in docs/DECISIONS.md if one was made
 - [ ] #3 Member who reported it has a drafted reply, if any
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+From the old Roadmap: the 13 Traditional Justadream releases (S Justadream, Oasis, Raia, Make A Wish, Burnham, Furano, Belesema Sapphire...) under the Classic Arabian Mare mold belong to the Traditional 'Arabian Mare - Justadream' mold.
+<!-- SECTION:NOTES:END -->

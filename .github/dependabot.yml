@@ -1,0 +1,22 @@
+# Weekly dependency updates, grouped so they arrive as at most a few pull
+# requests. Each one runs CI; none rebuilds the website (only main deploys).
+# Security alerts and security updates are switched on in the repository's
+# GitHub settings (Settings > Code security).
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+    labels: [dependencies]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    labels: [dependencies]

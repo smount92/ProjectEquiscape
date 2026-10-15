@@ -10,6 +10,7 @@ export default function OfflineIndicator() {
         const goOnline = () => setIsOffline(false);
 
         // Check initial state
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- mount-gate: navigator.onLine is unknown during SSR
         setIsOffline(!navigator.onLine);
 
         window.addEventListener("offline", goOffline);

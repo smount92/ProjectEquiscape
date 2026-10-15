@@ -188,12 +188,14 @@ export default function ManageEventPage() {
  }, [eventId, router, supabase]);
 
  useEffect(() => {
+ // eslint-disable-next-line react-hooks/set-state-in-effect -- load on mount and clear stale suggestions; both are intended
  loadData();
  }, [loadData]);
 
  // ── Debounced user search for judge autocomplete ──
  useEffect(() => {
  if (newJudgeAlias.trim().length < 2) {
+ // eslint-disable-next-line react-hooks/set-state-in-effect -- load on mount and clear stale suggestions; both are intended
  setUserSuggestions([]);
  return;
  }
@@ -1058,7 +1060,7 @@ export default function ManageEventPage() {
  </Button>
  </div>
  <p className="text-muted-foreground mt-[4] text-xs">
- Type 2+ characters to search. Click a result to select, then"Add Judge".
+ Type 2+ characters to search. Click a result to select, then &ldquo;Add Judge&rdquo;.
  </p>
  </div>
 

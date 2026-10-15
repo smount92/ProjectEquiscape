@@ -31,13 +31,14 @@ import type { StableSummary } from "@/lib/stable/types";
 
 /** Async server-side wrapper to fetch show history data */
 async function ShowHistoryWidgetWrapper() {
+    let data: Awaited<ReturnType<typeof getShowHistory>>;
     try {
-        const data = await getShowHistory();
-        if (data.totalRibbons === 0) return null;
-        return <ShowHistoryWidget years={data.years} totalShows={data.totalShows} totalRibbons={data.totalRibbons} />;
+        data = await getShowHistory();
     } catch {
         return null;
     }
+    if (data.totalRibbons === 0) return null;
+    return <ShowHistoryWidget years={data.years} totalShows={data.totalShows} totalRibbons={data.totalRibbons} />;
 }
 
 function StatRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: React.ReactNode }) {

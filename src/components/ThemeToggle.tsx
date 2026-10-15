@@ -21,6 +21,7 @@ export default function ThemeToggle() {
   // The inline head script stamps data-theme before hydration; sync
   // React state to it after mount (server HTML always renders "day").
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- mount-gate: the head script sets the theme before hydration
     setNight(document.documentElement.dataset.theme === "night");
   }, []);
 

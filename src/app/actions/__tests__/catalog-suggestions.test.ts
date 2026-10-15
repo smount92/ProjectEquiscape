@@ -275,7 +275,7 @@ describe("Vote count denormalization", () => {
 
     it("handles toggle (removing same vote type)", () => {
         let upvotes = 5;
-        let downvotes = 2;
+        const downvotes = 2;
         const currentVote = "up";
 
         // Toggle off up

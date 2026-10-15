@@ -722,7 +722,7 @@ function EditBubble({
         <div className="flex flex-row-reverse items-end gap-2">
             <div className="border-forest bg-card w-full max-w-[75%] rounded-2xl rounded-br-[4px] border-2 p-2 shadow-sm max-md:max-w-[85%]">
                 <textarea
-                    // eslint-disable-next-line jsx-a11y/no-autofocus
+                     
                     autoFocus
                     rows={Math.min(6, Math.max(2, text.split("\n").length))}
                     value={text}

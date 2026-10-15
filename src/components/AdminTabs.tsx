@@ -228,6 +228,7 @@ export default function AdminTabs({
  useEffect(() => {
  const saved = localStorage.getItem("admin-tab");
  if (saved && TABS.some((t) => t.key === saved)) {
+ // eslint-disable-next-line react-hooks/set-state-in-effect -- mount-gate: the saved tab lives in localStorage, unreadable during SSR
  setActiveTab(saved as TabKey);
  }
  }, []);

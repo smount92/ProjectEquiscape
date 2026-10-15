@@ -43,7 +43,7 @@ export default async function LegacyShowPage({ showId }: { showId: string }) {
  .eq("is_public", true);
 
   const horseIds = (userHorses ?? []).map((h: { id: string }) => h.id);
-  let thumbMap = new Map<string, string>();
+  const thumbMap = new Map<string, string>();
   if (horseIds.length > 0) {
     const { data: horseThumbs } = await supabase
       .from("horse_images")

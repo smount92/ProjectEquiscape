@@ -1,9 +1,10 @@
 ---
 id: MHH-015
 title: 'Pipeline: checks run on a branch, the site builds once per release'
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-10-15 22:19'
+updated_date: '2026-10-15 22:37'
 labels:
   - platform
 milestone: m-0

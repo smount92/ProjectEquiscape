@@ -1,0 +1,35 @@
+name: Live smoke test
+
+# After a production deploy finishes on Vercel, open the pages members reach
+# first and fail loudly if any is broken. GitHub emails the owner when a run
+# fails. Can also be run by hand from the Actions tab.
+
+on:
+  deployment_status:
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.deployment_status.state == 'success' &&
+       github.event.deployment.environment == 'Production')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install the browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Smoke test the live site
+        run: npx playwright test -c playwright.live.config.ts
+        env:
+          SMOKE_URL: https://modelhorsehub.com

@@ -127,7 +127,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
  const horseColor = colorText(pending.color);
  const assetCat = (horse.asset_category as AssetCategory) || "model";
  const assetConfig = getAssetConfig(assetCat);
- const horseAttributes = (horse.attributes as Record<string, any>) || {};
+ const horseAttributes = (horse.attributes as Record<string, unknown>) || {};
 
  // Only the owner can see the full passport for now
  if (horse.owner_id !== user.id) {

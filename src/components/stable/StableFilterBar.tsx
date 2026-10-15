@@ -115,6 +115,7 @@ export default function StableFilterBar({
     // Keep the search box in sync when the URL changes underneath us
     // (back button, chip ✕, saved-view load).
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- keep the search box in sync when the URL changes underneath it
         setSearchInput(filters.q ?? "");
     }, [filters.q]);
 

@@ -96,6 +96,7 @@ export default function UnifiedReferenceSearch({
   // External search query from AI detection
   useEffect(() => {
     if (externalSearchQuery && externalSearchQuery.trim()) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sync from a prop / clear stale results; intended
       setQuery(externalSearchQuery.trim());
     }
   }, [externalSearchQuery]);
@@ -126,6 +127,7 @@ export default function UnifiedReferenceSearch({
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     if (!query.trim() || query.trim().length < 2) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- sync from a prop / clear stale results; intended
       setResults([]);
       setShowDropdown(false);
       return;
