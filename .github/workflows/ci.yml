@@ -1,15 +1,15 @@
 name: CI
 
-# Every push to any branch, and every pull request, runs the full set of
-# checks here on GitHub. The website itself only rebuilds when main changes
-# (vercel.json: git.deploymentEnabled), so a release branch can be pushed
-# and checked as often as needed without a rebuild.
+# Every push to any branch (main included) runs the full set of checks here
+# on GitHub. There is no separate pull_request trigger: a pull request from
+# one of this repository's branches already gets the push run, and listing
+# both ran everything twice. The website itself only rebuilds when main
+# changes (vercel.json: git.deploymentEnabled), so a release branch can be
+# pushed and checked as often as needed without a rebuild.
 
 on:
   push:
     branches: ["**"]
-  pull_request:
-    branches: [main]
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -17,16 +17,20 @@ concurrency:
 
 jobs:
   checks:
-    runs-on: ubuntu-latest
+    # Pinned: ubuntu-latest moves to 26.04 from 2026-10-19, and Playwright
+    # 1.58 does not support it yet.
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Use Node.js 20
+      # Keep this equal to the Node version set in the Vercel project
+      # (Settings > Build and Deployment > Node.js Version).
+      - name: Use Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
@@ -48,13 +52,17 @@ jobs:
 
       - name: Build
         run: npm run build
+        # Placeholders only, never secrets. The CI build must not reach the
+        # production database: prerendering the /reference pages against
+        # production would compete with the Vercel production build for the
+        # same database connections (see experimental.cpus in next.config.ts).
         env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-anon-key' }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-role-key' }}
-          SENTRY_DSN: ${{ secrets.SENTRY_DSN || '' }}
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN || '' }}
-          NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_DSN || '' }}
-          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_placeholder' }}
-          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY || 'sk_test_placeholder' }}
-          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY || 're_placeholder' }}
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+          SUPABASE_SERVICE_ROLE_KEY: placeholder-service-role-key
+          SENTRY_DSN: ""
+          SENTRY_AUTH_TOKEN: ""
+          NEXT_PUBLIC_SENTRY_DSN: ""
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_placeholder
+          STRIPE_SECRET_KEY: sk_test_placeholder
+          RESEND_API_KEY: re_placeholder

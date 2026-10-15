@@ -2,6 +2,7 @@
 
 import { logger } from "@/lib/logger";
 import { revalidateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { ANNOUNCEMENTS_CACHE_TAG } from "@/lib/announcements";
 import { paddockPinRefusal } from "@/lib/feed/paddockPin";
 import { mergeCatalogItemsCore, resolveCatalogRef, type MergeClient } from "@/lib/catalog/merge";
@@ -448,6 +449,8 @@ export async function mergeCatalogItems(
     logger.error("Admin", "Merge changelog write failed (continuing)", logError),
   );
   if (!result.success) return { success: false, error: result.error };
+  // The removed page and its old address must stop serving from the cache.
+  revalidateTag(CACHE_TAGS.referencePages, "max");
   return { success: true, summary: result.summary };
 }
 

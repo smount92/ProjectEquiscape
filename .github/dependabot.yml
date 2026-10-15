@@ -2,6 +2,10 @@
 # requests. Each one runs CI; none rebuilds the website (only main deploys).
 # Security alerts and security updates are switched on in the repository's
 # GitHub settings (Settings > Code security).
+#
+# xlsx (SheetJS) is installed from cdn.sheetjs.com, not the npm registry, so
+# Dependabot cannot update it. Check https://cdn.sheetjs.com for new versions
+# by hand.
 version: 2
 updates:
   - package-ecosystem: npm

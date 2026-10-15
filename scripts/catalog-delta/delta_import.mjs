@@ -110,13 +110,43 @@ const SCALE_MAP = {
   "curio": "Curio",
   "plush": "Plush",
 };
-const mapScale = (raw) => SCALE_MAP[norm(raw)] || (raw || null);
+// The database refuses any scale, run type or material outside the
+// Registry's lists (migration 233; src/lib/catalog/taxonomy.ts and
+// editableFields.ts). Map onto the lists; anything unknown is left empty
+// rather than failing a whole batch.
+const CANONICAL_SCALES = [
+  "Large Traditional (1:8)", "Traditional (1:9)", "Small Traditional (1:10)", "Classic (1:12)",
+  "Pebbles (1:18)", "1:20", "Paddock Pal (1:24)", "Stablemate (1:32)", "Mini Whinnies (1:64)",
+  "Venti", "Curio", "Micro Mini", "Plush", "Other",
+];
+const mapScale = (raw) => {
+  const hit = SCALE_MAP[norm(raw)] || CANONICAL_SCALES.find((c) => c.toLowerCase() === String(raw || "").trim().toLowerCase());
+  return hit || null;
+};
 
-// Title-case material so the facet stays consistent (Pewter, Resin, Plastic,
-// China) regardless of how a dataset spells it — .eq filtering is case-sensitive.
+const MATERIALS = ["Plastic", "Rubber/PVC/Vinyl", "Resin", "Pewter", "China/Ceramic", "Metal", "Other"];
+const MATERIAL_MAP = { china: "China/Ceramic", ceramic: "China/Ceramic", porcelain: "China/Ceramic", rubber: "Rubber/PVC/Vinyl", pvc: "Rubber/PVC/Vinyl", vinyl: "Rubber/PVC/Vinyl" };
 const mapMaterial = (raw) => {
+  const s = String(raw || "").trim().toLowerCase();
+  if (!s) return null;
+  return MATERIALS.find((m) => m.toLowerCase() === s) || MATERIAL_MAP[s] || "Other";
+};
+
+// Same rules as step 5 of registry_repair_2026_10_15.sql; the source's
+// own wording is kept as run_detail.
+const RUN_TYPES = ["Regular Run", "Special Run", "BreyerFest", "Collector's Club", "Web Special", "Store Special", "Test Run", "One of a Kind", "Other"];
+const mapRunType = (raw) => {
   const s = String(raw || "").trim();
-  return s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : null;
+  if (!s) return { run_type: null, run_detail: null };
+  const listed = RUN_TYPES.find((r) => r.toLowerCase() === s.toLowerCase());
+  if (listed) return { run_type: listed, run_detail: null };
+  const l = s.toLowerCase();
+  let run_type = "Other";
+  if (l.startsWith("benefit live auction") || l.includes("raffle")) run_type = "One of a Kind";
+  else if (l.includes("prize") || l.includes("breyerfest") || ["single day stablemate", "tent/store special/ltd edition", "celebration horse", "surprise model"].includes(l)) run_type = "BreyerFest";
+  else if (l === "limited edition") run_type = "Special Run";
+  else if (l === "annual bonus model") run_type = "Collector's Club";
+  return { run_type, run_detail: s };
 };
 
 // ── read all rows of a table, paginated ──
@@ -353,7 +383,7 @@ async function main() {
         run_count: rec.number_produced ?? null,
         retail_price: rec.sold_for || null,
         category: rec.category || null,
-        run_type: rec.run_type || null,
+        ...mapRunType(rec.run_type),
         source,
         source_id: info.source_id,
       },

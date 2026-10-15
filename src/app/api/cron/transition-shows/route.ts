@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
+import { CACHE_TAGS } from "@/lib/cache/tags";
 import { getAdminClient } from "@/lib/supabase/admin";
 import * as Sentry from "@sentry/nextjs";
 
@@ -238,6 +240,10 @@ export async function GET(request: NextRequest) {
             reminded += toNudge.length;
         }
 
+        // Shows changed status on the clock: the public list and legacy
+        // results must not wait out their cache.
+        revalidateTag(CACHE_TAGS.publicShows, "max");
+        revalidateTag(CACHE_TAGS.showResults, "max");
         return NextResponse.json({
             success: true,
             legacy_transitioned: legacyTransitioned,

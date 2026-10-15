@@ -6,6 +6,15 @@
 import { vi } from "vitest";
 import "@testing-library/jest-dom/vitest";
 
+// revalidateTag/revalidatePath need Next's request store, which tests don't
+// have ("static generation store missing"). Everything else in next/cache
+// (unstable_cache) stays real. A test that asserts on them mocks them itself.
+vi.mock("next/cache", async (importOriginal) => ({
+    ...(await importOriginal<typeof import("next/cache")>()),
+    revalidateTag: vi.fn(),
+    revalidatePath: vi.fn(),
+}));
+
 // Mock Next.js navigation
 // Route handlers reach for Sentry only on their failure path, via
 // `await import("@sentry/nextjs")` — right for production (nothing loads

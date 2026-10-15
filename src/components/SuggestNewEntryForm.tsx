@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from"react";
+import { useEffect, useRef, useState, useTransition, type KeyboardEvent } from"react";
 import { useRouter } from"next/navigation";
 import { createSuggestion } from"@/app/actions/catalog-suggestions";
 import { pickMold, type MoldChoice } from "@/app/actions/linker";
@@ -91,19 +91,59 @@ export default function SuggestNewEntryForm({
  // is matched later and can miss (MHH-063).
  const [moldId, setMoldId] = useState<string | null>(null);
  const [moldChoices, setMoldChoices] = useState<MoldChoice[]>([]);
+ const [activeMold, setActiveMold] = useState(-1);
  const moldTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+ // Each search gets a number; an answer to an older search is ignored, so
+ // fast typing (or clearing the box) never brings back a stale list.
+ const moldRequest = useRef(0);
+ useEffect(() => () => {
+ if (moldTimer.current) clearTimeout(moldTimer.current);
+ }, []);
+ // The mold picker files a factory release; other entry types keep the
+ // typed mold name only.
+ const picksMold = itemType === "plastic_release";
+ const closeMoldList = () => {
+ moldRequest.current += 1;
+ if (moldTimer.current) clearTimeout(moldTimer.current);
+ setMoldChoices([]);
+ setActiveMold(-1);
+ };
+ const chooseMold = (m: MoldChoice) => {
+ setMoldName(m.title);
+ setMoldId(m.id);
+ closeMoldList();
+ };
+ // A picked mold belongs to one maker, scale and entry type; changing any
+ // of them unlinks it (the typed name stays).
+ const unlinkMold = () => setMoldId(null);
  const onMoldInput = (value: string) => {
  setMoldName(value);
  setMoldId(null);
- if (moldTimer.current) clearTimeout(moldTimer.current);
- if (value.trim().length < 2) {
- setMoldChoices([]);
- return;
- }
+ closeMoldList();
+ if (!picksMold || value.trim().length < 2) return;
+ const request = moldRequest.current;
  moldTimer.current = setTimeout(async () => {
  const makerNow = maker === "Other" ? customMaker.trim() : maker;
- setMoldChoices(await pickMold(value, makerNow || null, scale || null));
+ const found = await pickMold(value, makerNow || null, scale || null);
+ if (request !== moldRequest.current) return;
+ setMoldChoices(found);
+ setActiveMold(-1);
  }, 250);
+ };
+ const onMoldKey = (e: KeyboardEvent<HTMLInputElement>) => {
+ if (moldChoices.length === 0) return;
+ if (e.key === "ArrowDown") {
+ e.preventDefault();
+ setActiveMold((i) => (i + 1) % moldChoices.length);
+ } else if (e.key === "ArrowUp") {
+ e.preventDefault();
+ setActiveMold((i) => (i <= 0 ? moldChoices.length - 1 : i - 1));
+ } else if (e.key === "Enter" && activeMold >= 0) {
+ e.preventDefault();
+ chooseMold(moldChoices[activeMold]);
+ } else if (e.key === "Escape") {
+ closeMoldList();
+ }
  };
  // The model number has its own field: without one, members typed it into
  // the title ("#5022 Silky Sullivan") where search cannot read it.
@@ -164,7 +204,7 @@ export default function SuggestNewEntryForm({
  // (A member was asked for the same name twice, 2026-10-12.)
  mold_name: isMold ? finalTitle : moldName || undefined,
  // A mold picked from the Registry files the release under it at approval.
- ...(!isMold && moldId ? { parent_catalog_id: moldId } : {}),
+ ...(picksMold && moldId ? { parent_catalog_id: moldId } : {}),
  },
  reason: reason.trim(),
  confirmDuplicates,
@@ -261,7 +301,10 @@ export default function SuggestNewEntryForm({
  id="new-entry-type"
  className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={itemType}
- onChange={(e) => setItemType(e.target.value)}
+ onChange={(e) => {
+ setItemType(e.target.value);
+ unlinkMold();
+ }}
  >
  {ITEM_TYPES.map((t) => (
  <option key={t.value} value={t.value}>
@@ -312,7 +355,10 @@ export default function SuggestNewEntryForm({
  id="new-entry-maker"
  className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={maker}
- onChange={(e) => setMaker(e.target.value)}
+ onChange={(e) => {
+ setMaker(e.target.value);
+ unlinkMold();
+ }}
  >
  <option value="">— Select —</option>
  {MAKERS.map((m) => (
@@ -401,7 +447,10 @@ export default function SuggestNewEntryForm({
  id="new-entry-scale"
  className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
  value={scale}
- onChange={(e) => setScale(e.target.value)}
+ onChange={(e) => {
+ setScale(e.target.value);
+ unlinkMold();
+ }}
  >
  <option value="">— Select —</option>
  {CANONICAL_SCALES.map((s) => (
@@ -438,35 +487,49 @@ export default function SuggestNewEntryForm({
 
  value={moldName}
  onChange={(e) => onMoldInput(e.target.value)}
+ onKeyDown={onMoldKey}
+ onBlur={() => window.setTimeout(closeMoldList, 150)}
  placeholder="e.g. Family Arabian Stallion"
  maxLength={200}
  autoComplete="off"
+ role={picksMold ? "combobox" : undefined}
+ aria-autocomplete={picksMold ? "list" : undefined}
+ aria-expanded={picksMold ? moldChoices.length > 0 : undefined}
+ aria-controls={picksMold ? "new-entry-mold-list" : undefined}
+ aria-activedescendant={activeMold >= 0 ? `new-entry-mold-${activeMold}` : undefined}
  aria-describedby="new-entry-mold-help"
  />
- {moldChoices.length > 0 && !moldId && (
- <ul className="m-0 mt-1 list-none rounded-md border border-input bg-card p-1 shadow-sm" aria-label="Molds in the Registry">
- {moldChoices.map((m) => (
- <li key={m.id}>
- <button
- type="button"
- className="w-full rounded px-2 py-1.5 text-left text-sm hover:bg-muted focus-visible:bg-muted"
- onClick={() => {
- setMoldName(m.title);
- setMoldId(m.id);
- setMoldChoices([]);
+ {picksMold && moldChoices.length > 0 && !moldId && (
+ <ul
+ id="new-entry-mold-list"
+ role="listbox"
+ aria-label="Molds in the Registry"
+ className="m-0 mt-1 list-none rounded-md border border-input bg-card p-1 shadow-sm"
+ >
+ {moldChoices.map((m, i) => (
+ <li
+ key={m.id}
+ id={`new-entry-mold-${i}`}
+ role="option"
+ aria-selected={i === activeMold}
+ className={`cursor-pointer rounded px-2 py-1.5 text-left text-sm hover:bg-muted ${i === activeMold ? "bg-muted" : ""}`}
+ onMouseDown={(e) => {
+ e.preventDefault();
+ chooseMold(m);
  }}
  >
  <span className="font-semibold text-foreground">{m.title}</span>
  <span className="text-muted-foreground"> · {m.maker}{m.scale ? ` · ${m.scale}` : ""}</span>
- </button>
  </li>
  ))}
  </ul>
  )}
- <p id="new-entry-mold-help" className="text-muted-foreground m-0 mt-1 text-xs">
+ <p id="new-entry-mold-help" aria-live="polite" className="text-muted-foreground m-0 mt-1 text-xs">
  {moldId
  ? "Linked to this mold in the Registry."
- : "The sculpture this release was made on, if you know it. Pick it from the list when it appears."}
+ : picksMold
+ ? "The sculpture this release was made on, if you know it. Pick it from the list when it appears."
+ : "The sculpture this piece was made on, if you know it."}
  </p>
  </div>
  )}

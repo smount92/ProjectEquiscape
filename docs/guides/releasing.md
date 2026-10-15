@@ -34,13 +34,19 @@ rebuild. Then fix forward on a new branch.
 
 ## Owner setup (once)
 
-- GitHub › Settings › Secrets › Actions: `NEXT_PUBLIC_SUPABASE_URL` and
-  `NEXT_PUBLIC_SUPABASE_ANON_KEY` (public values; the weekly Registry health
-  report and the build use them).
+- GitHub › Settings › Secrets › Actions: `HEALTH_SUPABASE_URL` and
+  `HEALTH_SUPABASE_ANON_KEY`, the public Supabase URL and anon key (the same
+  values as `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+  in Vercel). Only the weekly Registry health report uses them. The CI
+  build uses placeholders on purpose and never touches the real database.
 - GitHub › Settings › Code security: turn on Dependabot alerts and Dependabot
   security updates.
-- Optional: GitHub › Settings › Branches: protect `main` so it only accepts
-  merges whose checks passed.
+- Make sure a red CI can't go live: GitHub › Settings › Branches, protect
+  `main` and require the `checks` job to pass; or turn on Vercel Deployment
+  Checks (https://vercel.com/docs/deployment-checks).
+- Delete merged branches on GitHub. A branch made before `vercel.json`
+  switched branch deploys off still carries the old setting, so Vercel keeps
+  making preview deploys for it until it is deleted.
 
 ## Scheduled checks
 

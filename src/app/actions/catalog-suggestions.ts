@@ -6,6 +6,7 @@ import { fieldLabel } from "@/lib/catalog/editableFields";
 import { namedMolds, placeReleasesUnderMolds, searchName, termImpliesStablemate, type CandidateRow } from "@/lib/catalog/moldSearch";
 import { parseCatalogQuery } from "@/lib/catalog/queryParse";
 import { getAdminClient } from "@/lib/supabase/admin";
+import { logger } from "@/lib/logger";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { after } from "next/server";
@@ -19,14 +20,15 @@ import {
     SILVER_THRESHOLD,
     buildCorrectionUpdate,
     correctionTouchesAttributes,
+    canonicalVocabulary,
     curatorAutoApprovable,
     normalizeFactValue,
+    vocabularyProblem,
 } from "@/lib/catalog/corrections";
 import { referenceHref } from "@/lib/catalog/referenceUrl";
 import {
     deriveAttribution,
     isCatalogGender,
-    isRunType,
     normalizeCatalogBreed,
     normalizeRunCount,
     normalizeScale,
@@ -512,6 +514,13 @@ export async function createSuggestion(input: SuggestionInput) {
         autoApprove = false;
     }
 
+    // A scale, run type or material the Registry's lists don't know would be
+    // refused by the database when applied (233); say so now, in words.
+    if ((input.suggestionType === "correction" || input.suggestionType === "addition") && input.fieldChanges) {
+        const problem = vocabularyProblem(input.fieldChanges);
+        if (problem) return { success: false, error: problem };
+    }
+
     const status = autoApprove ? "auto_approved" : "pending";
 
     const { data, error } = await supabase
@@ -534,11 +543,13 @@ export async function createSuggestion(input: SuggestionInput) {
 
     // If auto-approved, apply immediately
     if (autoApprove && data) {
-        await applyApprovedSuggestion(
+        const applied = await applyApprovedSuggestion(
             data.id as string,
             user.id,
             alias
         );
+        // Could not be written: it is back in the queue for a person.
+        if (!applied.ok) autoApprove = false;
     }
 
     // Notify admins on EVERY suggestion — auto-approved ones loudest.
@@ -658,12 +669,17 @@ export async function revertSuggestion(input: {
             : attrs[key];
 
         // The guard: only revert what the correction actually left behind.
-        if (String(current ?? "") !== String(to ?? "")) {
+        if (String(current ?? "") !== String(normalizeFactValue(key, to) ?? "")) {
             drifted.push(key);
             continue;
         }
 
         const restored = from == null ? "" : String(from);
+        // A value the Registry's lists no longer accept can't be put back.
+        if (restored && (key === "scale" || key === "run_type" || key === "material") && canonicalVocabulary(key, restored) === null) {
+            drifted.push(key);
+            continue;
+        }
         if (isColumn) {
             // Title and maker cannot be emptied; scale can go back to null.
             if (restored === "" && (key === "title" || key === "maker")) {
@@ -1077,11 +1093,15 @@ export async function reviewSuggestion(decision: ReviewDecision) {
                 revalidateTag(REFERENCE_PAGES_CACHE_TAG, "max");
             }
         } else {
-            await applyApprovedSuggestion(
+            const applied = await applyApprovedSuggestion(
                 decision.suggestionId,
                 s.user_id,
                 contributorAlias
             );
+            if (!applied.ok) {
+                revalidatePath("/admin");
+                return { success: false, error: `It could not be applied, so it is back in the queue: ${applied.error}.` };
+            }
         }
     }
 
@@ -1117,11 +1137,36 @@ export async function reviewSuggestion(decision: ReviewDecision) {
 
 // ── APPLY APPROVED SUGGESTION ──
 
+/**
+ * An approval the Registry refused goes back to the queue with the reason,
+ * so it is never marked approved while nothing changed.
+ */
+async function unapply(
+    admin: ReturnType<typeof getAdminClient>,
+    suggestionId: string,
+    error: { code?: string; message?: string },
+    reason?: string,
+): Promise<{ ok: false; error: string }> {
+    logger.error("CatalogSuggestions", "An approved suggestion could not be applied", error);
+    const words =
+        reason ??
+        (error.code === "23514"
+            ? "a value is not in the Registry's lists (scale, run type or material)"
+            : error.code === "23505"
+              ? "an entry at that address already exists"
+              : "the Registry refused the change");
+    await admin
+        .from("catalog_suggestions")
+        .update({ status: "pending", admin_notes: `Not applied: ${words}` })
+        .eq("id", suggestionId);
+    return { ok: false, error: words };
+}
+
 async function applyApprovedSuggestion(
     suggestionId: string,
     userId: string,
     alias: string
-) {
+): Promise<{ ok: true } | { ok: false; error: string }> {
     const admin = getAdminClient();
 
     const { data: suggestion } = await admin
@@ -1130,7 +1175,7 @@ async function applyApprovedSuggestion(
         .eq("id", suggestionId)
         .single();
 
-    if (!suggestion) return;
+    if (!suggestion) return { ok: false, error: "that suggestion no longer exists" };
 
     const s = suggestion as CatalogSuggestion;
 
@@ -1168,7 +1213,7 @@ async function applyApprovedSuggestion(
         // Taxonomy v2: corrections are free-text — normalize scale so
         // an approved "traditional" lands as "Traditional (1:9)".
         if (typeof updates.scale === "string") {
-            updates.scale = normalizeScale(updates.scale);
+            updates.scale = canonicalVocabulary("scale", updates.scale) ?? updates.scale;
         }
         if (attributes) {
             (updates as Record<string, unknown>).attributes = JSON.parse(
@@ -1176,10 +1221,11 @@ async function applyApprovedSuggestion(
             );
         }
         if (Object.keys(updates).length > 0) {
-            await admin
+            const { error: applyError } = await admin
                 .from("catalog_items")
                 .update(updates)
                 .eq("id", s.catalog_item_id);
+            if (applyError) return unapply(admin, suggestionId, applyError);
         }
         const changes = Object.entries(s.field_changes)
             .map(([k, v]) => {
@@ -1237,13 +1283,14 @@ async function applyApprovedSuggestion(
             manufacturer: attribution.manufacturer,
             // Scales enter in canonical vocabulary; normalize defensively
             // (older pending suggestions carry bare "Traditional" etc.).
-            scale: normalizeScale(fc.scale as string | undefined) ?? parentId?.scale ?? null,
+            // A release filed under a mold is that mold's scale.
+            scale: parentId?.scale ?? canonicalVocabulary("scale", fc.scale),
             ...(parentId ? { parent_id: parentId.id } : {}),
             attributes: JSON.parse(JSON.stringify({
                 ...(fc.year ? { release_year_start: normalizeFactValue("release_year_start", fc.year) } : {}),
                 ...(fc.color ? { color_description: normalizeFactValue("color_description", fc.color) } : {}),
                 ...(fc.model_number ? { model_number: fc.model_number } : {}),
-                ...(fc.material ? { material: fc.material } : {}),
+                ...(canonicalVocabulary("material", fc.material) ? { material: canonicalVocabulary("material", fc.material) } : {}),
                 // Original retail price (Amanda, 2026-08-23): what the maker
                 // charged at release. Pairs with the Blue Book on reference
                 // pages — original price beside today's market range.
@@ -1251,7 +1298,7 @@ async function applyApprovedSuggestion(
                 // Run type must be one of RUN_TYPES — free text here would
                 // defeat the whole point (the browse filter groups on the
                 // exact string). Anything else is dropped, not stored.
-                ...(isRunType(fc.run_type) ? { run_type: fc.run_type } : {}),
+                ...(canonicalVocabulary("run_type", fc.run_type) ? { run_type: canonicalVocabulary("run_type", fc.run_type) } : {}),
                 // Pieces made: a positive integer as a plain string, matching
                 // the 74 imported rows. "~2500" / "2,500" / "0" are dropped.
                 ...(runCount ? { run_count: runCount } : {}),
@@ -1276,9 +1323,7 @@ async function applyApprovedSuggestion(
             .insert(insertPayload as CatalogItemInsert)
             .select("id")
             .single();
-        if (insertError) {
-            console.error("Failed to insert catalog addition:", insertError.message);
-        }
+        if (insertError) return unapply(admin, suggestionId, insertError);
         catalogItemId = newItem
             ? (newItem as { id: string }).id
             : null;
@@ -1301,7 +1346,7 @@ async function applyApprovedSuggestion(
         } else {
             const merged = await mergeCatalogItemsCore(mergeClient, dup, keep, { userId, alias });
             if (!merged.success) {
-                changeSummary = `🔁 Duplicate merge failed: ${merged.error}`;
+                return unapply(admin, suggestionId, { message: merged.error }, `the merge failed (${merged.error})`);
             } else {
                 catalogItemId = keep.id;
                 changeSummary = `🔁 ${merged.summary}`;
@@ -1397,6 +1442,8 @@ async function applyApprovedSuggestion(
             );
         }
     }
+
+    return { ok: true };
 }
 
 // ── CHANGELOG ──

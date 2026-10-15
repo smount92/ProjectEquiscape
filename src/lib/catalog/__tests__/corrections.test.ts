@@ -22,7 +22,7 @@ describe("buildCorrectionUpdate", () => {
         expect(columnUpdates).toEqual({
             title: "New",
             maker: "Stone",
-            scale: "Classic",
+            scale: "Classic (1:12)", // the list spelling
         });
         // No attribute keys touched → JSONB left untouched.
         expect(attributes).toBeNull();
@@ -47,7 +47,7 @@ describe("buildCorrectionUpdate", () => {
             color_description: "Dark Bay",
             release_year_start: 1998,
             model_number: "1100",
-            material: "plastic",
+            material: "Plastic", // the list spelling
         });
     });
 

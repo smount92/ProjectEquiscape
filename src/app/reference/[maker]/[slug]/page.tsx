@@ -119,7 +119,10 @@ export async function generateStaticParams(): Promise<{ maker: string; slug: str
  */
 async function forwardOrNotFound(maker: string, slug: string): Promise<never> {
     const moved = await resolveMovedReference(maker, slug);
-    if (moved) permanentRedirect(`/reference/${moved.makerSlug}/${moved.slug}`);
+    // Never forward an address to itself (a stale cache could say so).
+    if (moved && (moved.makerSlug !== maker || moved.slug !== slug)) {
+        permanentRedirect(`/reference/${moved.makerSlug}/${moved.slug}`);
+    }
     notFound();
 }
 

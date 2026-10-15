@@ -185,8 +185,9 @@ export function changedFields(fields: FieldEdit[]): FieldEdit[] {
 /** Which curated fields this entry is still missing — drives the nudge. */
 export function missingFieldLabels(item: EditableSource): string[] {
     return CATALOG_EDITABLE_FIELDS
-        // Scale is the one identity field members are asked to fill (ruling Q26).
-        .filter((f) => (!REAL_COLUMN_KEYS.has(f.key) || f.key === "scale") && valueFor(item, f.key) === "")
+        // Scale has its own prompt in the Details table (ruling Q26), so it is
+        // not asked for twice.
+        .filter((f) => !REAL_COLUMN_KEYS.has(f.key) && valueFor(item, f.key) === "")
         .map((f) => f.label);
 }
 

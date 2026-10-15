@@ -3,51 +3,70 @@ name: Registry health (weekly)
 # Every Monday: run the read-only Registry health scan with the public key,
 # compare it with last week's, and put the report on the run's summary page.
 # Counts that rose are flagged. The full report is kept as an artifact.
+#
+# Last week's counts come from the previous successful run's artifact, not
+# from the Actions cache: GitHub evicts caches unused for 7 days, so a weekly
+# cache restore would usually miss.
+#
+# Secrets (GitHub > Settings > Secrets > Actions): HEALTH_SUPABASE_URL and
+# HEALTH_SUPABASE_ANON_KEY, the public Supabase URL and anon key.
 
 on:
   schedule:
     - cron: "0 13 * * 1"
   workflow_dispatch:
 
+permissions:
+  actions: read
+  contents: read
+
 jobs:
   health:
-    runs-on: ubuntu-latest
+    # Pinned: ubuntu-latest moves to 26.04 from 2026-10-19.
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
+      # Keep this equal to the Node version set in the Vercel project.
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Last week's counts
-        uses: actions/cache/restore@v4
-        with:
-          path: last-health.json
-          key: registry-health-${{ github.run_id }}
-          restore-keys: registry-health-
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          id=$(gh run list --workflow registry-health.yml --status success --limit 1 --json databaseId -q '.[0].databaseId')
+          if [ -n "$id" ] && [ "$id" != "null" ]; then
+            gh run download "$id" -n registry-health-json -D last \
+              || echo "Run $id kept no counts; this week is compared with nothing."
+          else
+            echo "No earlier successful run; this is the first."
+          fi
 
       - name: Scan the Registry
         env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.HEALTH_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.HEALTH_SUPABASE_ANON_KEY }}
         run: |
-          node scripts/catalog-delta/registry_health.mjs --json health.json --compare last-health.json > report.txt
+          node scripts/catalog-delta/registry_health.mjs --json health.json --compare last/health.json > report.txt
           {
             echo '## Registry health'
             echo '```'
-            grep -E '^■|▲' report.txt
+            grep -E '^■|▲' report.txt || echo 'No counts in this report.'
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-          cp health.json last-health.json
 
       - name: Keep this week's counts
-        uses: actions/cache/save@v4
+        uses: actions/upload-artifact@v4
         with:
-          path: last-health.json
-          key: registry-health-${{ github.run_id }}
+          name: registry-health-json
+          path: health.json
+          retention-days: 90
 
-      - uses: actions/upload-artifact@v4
+      - name: Keep the full report
+        uses: actions/upload-artifact@v4
         with:
           name: registry-health
           path: report.txt

@@ -13,7 +13,7 @@
  * shared by the server action. Mirrors src/lib/catalog/filterParams.ts.
  */
 
-import { CANONICAL_SCALES, CATALOG_GENDERS, RUN_TYPES } from "@/lib/catalog/taxonomy";
+import { CANONICAL_SCALES, CATALOG_GENDERS, RUN_TYPES, normalizeScale } from "@/lib/catalog/taxonomy";
 import { MATERIAL_OPTIONS } from "@/lib/catalog/editableFields";
 
 // Real (top-level) columns on catalog_items. Anything else in a correction's
@@ -79,7 +79,9 @@ export const SILVER_AUTO_FIELDS = new Set([
 type FieldChange = { from?: unknown; to: unknown };
 
 /** A final period that belongs to an abbreviation ("I.C.E.", "Sales Co.", "Jr."). */
-const ABBREVIATION_END = /(?:\b[A-Za-z]|\b(?:Co|Jr|Sr|Inc|Ltd|St|Mr|Mrs|Ms|Dr|No|Bros|Corp|Mt|vs))\.$/;
+// A lone letter counts only when no letter precedes it, so "Mesteño." is
+// not read as ending in the one-letter abbreviation "o.".
+const ABBREVIATION_END = /(?:(?<!\p{L})\p{L}|\b(?:Co|Jr|Sr|Inc|Ltd|St|Mr|Mrs|Ms|Dr|No|Bros|Corp|Mt|vs))\.$/u;
 
 /** Does a name end in stray punctuation (an abbreviation's period is not stray)? */
 export function hasTrailingPunctuation(name: string): boolean {
@@ -98,12 +100,13 @@ export function tidyName(name: string): string {
  * The one place a Registry value is tidied before it is written
  * (docs/STANDARDS.md §3, owner rulings Q23-Q25): names lose stray spaces
  * and trailing punctuation, a colour description starts with a capital,
- * and a four-digit year is stored as a number. Anything else passes
- * through unchanged. Used by corrections and additions alike.
+ * and a four-digit year is stored as a number. Anything else is only
+ * trimmed: notes and descriptions keep their line breaks and paragraphs.
+ * Used by corrections and additions alike.
  */
 export function normalizeFactValue(key: string, value: unknown): unknown {
     if (typeof value !== "string") return value;
-    const v = value.replace(/\s+/g, " ").trim();
+    const v = value.trim();
     switch (key) {
         case "title":
         case "maker":
@@ -116,9 +119,54 @@ export function normalizeFactValue(key: string, value: unknown): unknown {
         case "release_year_start":
         case "release_year_end":
             return /^\d{4}$/.test(v) ? Number(v) : v;
+        case "scale":
+        case "run_type":
+        case "material":
+            // The list's own spelling ("traditional" → "Traditional (1:9)").
+            return canonicalVocabulary(key, v) ?? v;
         default:
             return v;
     }
+}
+
+// ── Registry vocabularies (the database refuses anything else, 233) ──
+
+const VOCAB_LABEL = { scale: "scale", run_type: "run type", material: "material" } as const;
+type VocabKey = keyof typeof VOCAB_LABEL;
+
+/**
+ * A scale, run type or material in its list spelling ("traditional" →
+ * "Traditional (1:9)", "china/ceramic" → "China/Ceramic"), or null when
+ * it is in no list. Empty input is null too.
+ */
+export function canonicalVocabulary(key: VocabKey, value: unknown): string | null {
+    if (typeof value !== "string" || !value.trim()) return null;
+    const v = value.trim();
+    if (key === "scale") {
+        const s = normalizeScale(v);
+        return s && (CANONICAL_SCALES as readonly string[]).includes(s) ? s : null;
+    }
+    const list: readonly string[] = key === "run_type" ? RUN_TYPES : MATERIAL_OPTIONS;
+    return list.find((x) => x.toLowerCase() === v.toLowerCase()) ?? null;
+}
+
+/**
+ * The first scale, run type or material in a suggestion that is not in the
+ * Registry's lists, as words for the member; null when all are fine. Takes
+ * both shapes: corrections ({ scale: { from, to } }) and additions
+ * ({ scale: "..." }). An empty value (clearing a field) is fine.
+ */
+export function vocabularyProblem(fieldChanges: Record<string, unknown>): string | null {
+    for (const key of Object.keys(VOCAB_LABEL) as VocabKey[]) {
+        if (!(key in fieldChanges)) continue;
+        const raw = fieldChanges[key];
+        const value = raw && typeof raw === "object" && "to" in raw ? (raw as FieldChange).to : raw;
+        if (value === null || value === undefined || (typeof value === "string" && !value.trim())) continue;
+        if (canonicalVocabulary(key, value) === null) {
+            return `"${String(value)}" is not a ${VOCAB_LABEL[key]} the Registry knows. Pick one from the list.`;
+        }
+    }
+    return null;
 }
 
 /**

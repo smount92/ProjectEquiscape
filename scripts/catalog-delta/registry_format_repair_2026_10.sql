@@ -2,7 +2,9 @@
 -- Owner rulings Q23-Q25. Review list: scripts/catalog-delta/review/registry_format_review_2026_10.md
 -- Every step is expect-guarded: a row changes only if it still holds what the
 -- review list showed. Safe to run twice.
+-- If any statement errors in the SQL editor, run ROLLBACK; before trying again.
 BEGIN;
+DO $$ BEGIN IF to_regclass('public.catalog_slug_history') IS NULL THEN RAISE EXCEPTION 'Paste migration 233 first: it records old page addresses so links keep working.'; END IF; END $$;
 
 CREATE TEMP TABLE IF NOT EXISTS _titles (id uuid, old_title text, new_title text, note text);
 TRUNCATE _titles;
@@ -78,10 +80,10 @@ INSERT INTO _titles VALUES
   ('483a3d3b-fa9c-4b19-afb7-2306d566fe10', 'BreyerFest Single Day Stablemate Available as a gambler''s choice to General Admission and Online Stablemate Access ticket holders.', 'BreyerFest Single Day Stablemate Available as a gambler''s choice to General Admission and Online Stablemate Access ticket holders', NULL),
   ('48839419-fbe2-4fbd-9a28-a2773400453b', 'Set of 12 Miniatures With Arabian Mare, Arabian Stallion, Citation, Morgan Mare, Morgan Stallion, Native Dancer, Quarter Horse Stallion, Silky Sullivan, Swaps, Thoroughbred Mare.', 'Set of 12 Miniatures With Arabian Mare, Arabian Stallion, Citation, Morgan Mare, Morgan Stallion, Native Dancer, Quarter Horse Stallion, Silky Sullivan, Swaps, Thoroughbred Mare', NULL),
   ('497882af-be35-4269-9b8a-4fe9a3229628', 'Utterly Horses (1 made) With clear acrylic base engraved with Lloyds TSB logo. Prototype for bank giveaway that did not happen.', 'Utterly Horses (1 made)', 'With clear acrylic base engraved with Lloyds TSB logo. Prototype for bank giveaway that did not happen.'),
-  ('4a290e8f-cdbe-41fb-91c6-13b2ef2a31db', 'Panuhu, Spotted Mustang Stallion and Honego, Foal With Rojo.', 'Panuhu, Spotted Mustang Stallion and Honego, Foal', 'With Rojo.'),
+  ('4a290e8f-cdbe-41fb-91c6-13b2ef2a31db', 'Panuhu, Spotted Mustang Stallion and Honego, Foal With Rojo.', 'Panuhu, Spotted Mustang Stallion and Honego, Foal With Rojo', NULL),
   ('4ab9d780-32db-4283-af70-3eafd54c0f52', 'Pony Palace Complete Gift Set With Bouncer, Deluxe Wood Barn, doll, and accessories.', 'Pony Palace Complete Gift Set With Bouncer, Deluxe Wood Barn, doll, and accessories', NULL),
   ('4b8d652b-4e92-4aa3-8f0f-09271949a705', 'Classics Trail Ride Set With Western bridle, Western saddle, saddle pad, 6 inch rider doll.', 'Classics Trail Ride Set With Western bridle, Western saddle, saddle pad, 6 inch rider doll', NULL),
-  ('4b9548f0-ce92-491a-9b4d-c664bbb8df86', 'Similar in color to older sorrel #52 Five Gaiter). Source and quantity unknown.', 'Similar in color to older sorrel #52 Five Gaiter)', 'Source and quantity unknown.'),
+  ('4b9548f0-ce92-491a-9b4d-c664bbb8df86', 'Similar in color to older sorrel #52 Five Gaiter). Source and quantity unknown.', 'Similar in color to older sorrel #52 Five Gaiter', 'Source and quantity unknown.'),
   ('4bcea43f-ead0-42d5-82ae-4d1f8626351c', 'QVC Same as #474. With Certificate of Authenticity.', 'QVC Same as #474', 'With Certificate of Authenticity.'),
   ('4e21031c-f20e-4882-9bad-107df0ed4f39', '"Horspital" Play Set With American Saddlebred, blankets, corral fencing, green rubber hose, water trough, bucket, bale of hay, medical kit, pitchfork, ointment, and spray bottle.', '"Horspital" Play Set With American Saddlebred, blankets, corral fencing, green rubber hose, water trough, bucket, bale of hay, medical kit, pitchfork, ointment, and spray bottle', NULL),
   ('4e902fb8-cabd-49b0-875d-74b11541b6a7', 'JCPenney Holiday Catalog Same pinto pattern as #229.', 'JCPenney Holiday Catalog Same pinto pattern as #229', NULL),
@@ -146,7 +148,7 @@ INSERT INTO _titles VALUES
   ('82f6625b-a832-4384-85b9-692bf76d2e2e', 'Given to singer Hunter Hayes by Breyer. Only one made.', 'Given to singer Hunter Hayes by Breyer', 'Only one made.'),
   ('8376d383-2a98-46cf-bb14-cf124ae98177', 'Western Pony with Grooming Kit With vinyl blanket, toothbrush, white plastic comb, metal nail file, ballpoint pen.', 'Western Pony with Grooming Kit With vinyl blanket, toothbrush, white plastic comb, metal nail file, ballpoint pen', NULL),
   ('83b8d72d-b4a8-4d01-8014-5940537deb1d', '12-Piece Stablemates Set With Arabian Mare, Arabian Stallion, Citation, Draft Horse, Morgan Mare, Morgan Stallion, Native Dancer, Quarter Horse Stallion, Seabiscuit, Silky Sullivan, Swaps.', '12-Piece Stablemates Set With Arabian Mare, Arabian Stallion, Citation, Draft Horse, Morgan Mare, Morgan Stallion, Native Dancer, Quarter Horse Stallion, Seabiscuit, Silky Sullivan, Swaps', NULL),
-  ('846f7376-c6d7-4714-afdd-f1ca58de6ca8', 'Holiday Pony Playset "Mia" With bareback pad, wreath of roses, unicorn halter, rider in pjs with stocking full of carrots.', 'Holiday Pony Playset "Mia" With bareback pad, wreath of roses, unicorn halter, rider in pjs with stocking full of carrots', NULL),
+  ('846f7376-c6d7-4714-afdd-f1ca58de6ca8', 'Holiday Pony Playset "Mia" With bareback pad, wreath of roses, unicorn halter, rider in pjs with stocking full of carrots.', 'Holiday Pony Playset "Mia"', 'With bareback pad, wreath of roses, unicorn halter, rider in pjs with stocking full of carrots.'),
   ('855ee6d5-5c9f-4dab-b1c2-f098785cd6ac', 'Stablemates Collector''s ClubGamblers choice between Black Rabicano and a micro run Chestnut Rabicano (217 pieces).', 'Stablemates Collector''s ClubGamblers choice between Black Rabicano and a micro run Chestnut Rabicano (217 pieces)', NULL),
   ('860aae3e-885d-4369-a5a8-d0ecdb4b7cfa', 'Spanish Riding School of Vienna Gift Set With red bridle, saddle, and rider.', 'Spanish Riding School of Vienna Gift Set With red bridle, saddle, and rider', NULL),
   ('879f7f57-6250-4784-b5bf-257fda51e00f', 'Deluxe Animal Hospital With grey Standing Stock Horse and black Scrambling Foal, Donkey, Goat, Border Collie and Sitting Cat. Other accessories include a horse blanket, operating table, and a bandage box.', 'Deluxe Animal Hospital With grey Standing Stock Horse and black Scrambling Foal, Donkey, Goat, Border Collie and Sitting Cat. Other accessories include a horse blanket, operating table, and a bandage box', NULL),
@@ -237,6 +239,7 @@ INSERT INTO _titles VALUES
   ('d233da8a-b6c4-45d2-835b-78b21c0fe29e', 'Arabian - Dapple Bay Best in Show: features mohair manes and tails, glass eyes, horse shoes, and a presentation base.', 'Arabian - Dapple Bay Best in Show: features mohair manes and tails, glass eyes, horse shoes, and a presentation base', NULL),
   ('d42d916e-050f-4b3a-8a28-0a04a644e600', 'Sears Holiday Catalog Some with red in nostrils. Model shown is from the Black Horse Ranch Model Horse Collection.', 'Sears Holiday Catalog Some with red in nostrils. Model shown is from the Black Horse Ranch Model Horse Collection', NULL),
   ('d44e16ae-bc85-4877-8c24-18541ac5094d', 'Deluxe Farm Pocket Barn With Standing Foal, Mule, barn, doll, vet kit, pig, rooster, chicken, rabbit.', 'Deluxe Farm Pocket Barn With Standing Foal, Mule, barn, doll, vet kit, pig, rooster, chicken, rabbit', NULL),
+  ('d552cde3-f624-4d22-8b84-e64d5bb0bff9', 'Alano and Mateo With Rojo. Replaced Mesteño.', 'Alano and Mateo With Rojo. Replaced Mesteño', NULL),
   ('d7ffdd3b-0f9c-4b57-a20e-d28cf6785302', 'QVC 2002 printed on belly. With hang tag.', 'QVC 2002 printed on belly', 'With hang tag.'),
   ('d817f159-9ae7-48e8-a761-ca80adbfc13e', 'Montgomery Ward Holiday Catalog Same as #216.', 'Montgomery Ward Holiday Catalog Same as #216', NULL),
   ('d82bc900-c387-4752-8030-124043005ff4', 'BreyerFest Special Run (1,162 made)Split run of Dappled Gray, Dappled Grey Sabino and Grey Holographic “BreyerFest 2025” stamp on belly. In-person purchase only.', 'BreyerFest Special Run (1,162 made)Split run of Dappled Gray, Dappled Grey Sabino and Grey Holographic “BreyerFest 2025” stamp on belly', 'In-person purchase only.'),
@@ -289,11 +292,11 @@ INSERT INTO _names VALUES
   ('Kristina Kantunina', 'Kristina Katunina'),
   ('Melody Pena', 'Melody Peña'),
   ('Elzbieta Zarzecka', 'Elżbieta Zarzecka'),
-  ('Pamela du Boulay', 'Pamela Du Boulay'),
   ('Sandra Winters', 'Sandra Winter'),
   ('Maria Hjerppe', 'Mariah Hjerppe'),
   ('Luis Agular', 'Luis M. Aguilar'),
-  ('Maggie Jenner-Bennet', 'Maggie Jenner-Bennett');
+  ('Maggie Jenner-Bennet', 'Maggie Jenner-Bennett'),
+  ('Pamela Du Boulay', 'Pamela du Boulay');
 
 -- 1. Colour descriptions start with a capital.
 UPDATE public.catalog_items
@@ -314,6 +317,8 @@ WHERE jsonb_typeof(attributes->'release_year_end') = 'string' AND attributes->>'
 UPDATE public.catalog_items c SET maker = n.new_name FROM _names n WHERE c.maker = n.old_name;
 UPDATE public.catalog_items c SET artist = n.new_name FROM _names n WHERE c.artist = n.old_name;
 UPDATE public.catalog_items c SET manufacturer = n.new_name FROM _names n WHERE c.manufacturer = n.old_name;
+-- The sculptor field holds the same names and the Registry's linker reads it.
+UPDATE public.catalog_items c SET attributes = jsonb_set(c.attributes, '{sculptor}', to_jsonb(n.new_name)) FROM _names n WHERE c.attributes->>'sculptor' = n.old_name;
 
 -- 4. Titles: the name stays; the description moves into the release's notes.
 UPDATE public.catalog_items c
@@ -327,7 +332,8 @@ WHERE c.id = t.id AND c.title = t.old_title;
 COMMIT;
 
 -- What changed (run with the health scan before and after).
-SELECT 'colours still lowercase' AS check, count(*) FROM public.catalog_items WHERE attributes->>'color_description' ~ '^[a-z]'
-UNION ALL SELECT 'years still text', count(*) FROM public.catalog_items WHERE jsonb_typeof(attributes->'release_year_start') = 'string' AND attributes->>'release_year_start' ~ '^\s*\d{4}\s*$'
-UNION ALL SELECT 'old spellings left', count(*) FROM public.catalog_items c WHERE c.maker IN (SELECT old_name FROM _names) OR c.artist IN (SELECT old_name FROM _names) OR c.manufacturer IN (SELECT old_name FROM _names)
-UNION ALL SELECT 'titles ending in punctuation', count(*) FROM public.catalog_items WHERE title ~ '[.,;:]\s*$';
+SELECT 'rows: colours still lowercase' AS check, count(*) FROM public.catalog_items WHERE attributes->>'color_description' ~ '^[a-z]'
+UNION ALL SELECT 'values: years still text', (SELECT count(*) FROM public.catalog_items WHERE jsonb_typeof(attributes->'release_year_start') = 'string' AND attributes->>'release_year_start' ~ '^\s*\d{4}\s*$')
+  + (SELECT count(*) FROM public.catalog_items WHERE jsonb_typeof(attributes->'release_year_end') = 'string' AND attributes->>'release_year_end' ~ '^\s*\d{4}\s*$')
+UNION ALL SELECT 'rows: old spellings left (incl. sculptor)', count(*) FROM public.catalog_items c WHERE c.maker IN (SELECT old_name FROM _names) OR c.artist IN (SELECT old_name FROM _names) OR c.manufacturer IN (SELECT old_name FROM _names) OR c.attributes->>'sculptor' IN (SELECT old_name FROM _names)
+UNION ALL SELECT 'rows: titles ending in punctuation (about 7 expected: abbreviations keep their period)', count(*) FROM public.catalog_items WHERE title ~ '[.,;:]\s*$';

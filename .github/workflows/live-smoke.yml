@@ -3,25 +3,41 @@ name: Live smoke test
 # After a production deploy finishes on Vercel, open the pages members reach
 # first and fail loudly if any is broken. GitHub emails the owner when a run
 # fails. Can also be run by hand from the Actions tab.
+#
+# Two triggers for "a deploy finished": Vercel's GitHub deployment_status
+# events, and its repository_dispatch events. Vercel may switch the
+# deployment_status events off in favour of repository_dispatch
+# (https://vercel.com/docs/git/vercel-for-github), so both are listed.
 
 on:
   deployment_status:
+  repository_dispatch:
+    types: [vercel.deployment.success, vercel.deployment.promoted]
   workflow_dispatch:
 
 jobs:
   smoke:
+    # repository_dispatch: run when the payload says production; if it names
+    # no environment, run anyway (the test is read-only and gentle).
     if: >-
       github.event_name == 'workflow_dispatch' ||
-      (github.event.deployment_status.state == 'success' &&
-       github.event.deployment.environment == 'Production')
-    runs-on: ubuntu-latest
+      (github.event_name == 'deployment_status' &&
+       github.event.deployment_status.state == 'success' &&
+       github.event.deployment.environment == 'Production') ||
+      (github.event_name == 'repository_dispatch' &&
+       (github.event.client_payload.environment == null ||
+        github.event.client_payload.environment == 'production'))
+    # Pinned: ubuntu-latest moves to 26.04 from 2026-10-19, and Playwright
+    # 1.58 does not support it yet.
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
+      # Keep this equal to the Node version set in the Vercel project.
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - run: npm ci

@@ -3,37 +3,52 @@
 Built 2026-10-15 from the live Registry. Nothing changes until the owner runs
 `registry_format_repair_2026_10.sql` (dry run first). Owner rulings Q23, Q24, Q25.
 
-## What the repair does
+> **Before you run**
+>
+> 1. Paste migration 233 first (and 234). The repair stops with a message if 233 is missing: it records old page addresses so links keep working.
+> 2. Run `registry_format_repair_2026_10_dryrun.sql`. It changes nothing; its numbers should match the ones below.
+> 3. Run `registry_format_repair_2026_10.sql`. If any statement errors in the SQL editor, run `ROLLBACK;` before trying again.
+> 4. Pages are cached for up to an hour, so the changes appear on the site within the hour.
+
+## What the repair does (what the dry run will show)
 
 1. **Colour descriptions** that start lowercase get a capital first letter: 4015 rows ("red chestnut" → "Red chestnut").
-2. **Years stored as text** become numbers: 1662 rows. Nothing visible changes.
-3. **Names one or two letters apart** merge into the more common spelling: 12 pairs (below). The less common spelling's pages forward to the kept one.
-4. **Titles ending in punctuation**: 271 rows (below). Sets keep their roster and lose only the final period; other titles keep the name and move the description into the release's notes.
+2. **Years stored as text** become numbers: 1729 values (start and end years counted separately) on 1662 rows. The dry run counts values. Nothing visible changes.
+3. **Names one or two letters apart** merge into one spelling: 12 pairs (below), touching 21 rows (a row counts once even if its maker and artist both change; 9 of them have the old spelling in the sculptor field, which the Registry also reads). Known-correct spellings win; otherwise the more common one does. The less common spelling's pages forward to the kept one.
+4. **Titles ending in punctuation**: 272 rows (below). Sets keep their roster and lose only the final period; other titles keep the name and move the description into the release's notes.
+
+After the run, the final check's "titles ending in punctuation" should read about 7, not 0: titles that end in an abbreviation ("Co.", "Jr.", "I.C.E.") keep their period on purpose.
 
 ## 3. Names
 
 | Keep | Rows | Merge in | Rows | Check |
 |---|---|---|---|---|
-| Brigitte Eberl | 692 | Brigette Eberl | 3 |  |
-| D'Arry Jone Frank | 81 | D'Arry Jones Frank | 3 |  |
-| Tanya Baneman | 32 | Tanya Banemann | 1 |  |
-| Tanya Baneman | 32 | Tanga Bannemann | 1 |  |
-| Kristina Katunina | 32 | Kristina Kantunina | 8 |  |
-| Melody Peña | 21 | Melody Pena | 1 |  |
-| Elżbieta Zarzecka | 6 | Elzbieta Zarzecka | 1 |  |
-| Pamela Du Boulay | 6 | Pamela du Boulay | 1 |  |
-| Sandra Winter | 4 | Sandra Winters | 2 |  |
-| Mariah Hjerppe | 4 | Maria Hjerppe | 2 |  |
-| Luis M. Aguilar | 4 | Luis Agular | 2 |  |
-| Maggie Jenner-Bennett | 2 | Maggie Jenner-Bennet | 1 |  |
+| Brigitte Eberl | 362 | Brigette Eberl | 3 |  |
+| D'Arry Jone Frank | 41 | D'Arry Jones Frank | 3 | **Please confirm**: the records don't settle which spelling is right |
+| Tanya Baneman | 16 | Tanya Banemann | 1 |  |
+| Tanya Baneman | 16 | Tanga Bannemann | 1 |  |
+| Kristina Katunina | 16 | Kristina Kantunina | 4 |  |
+| Melody Peña | 19 | Melody Pena | 1 |  |
+| Elżbieta Zarzecka | 4 | Elzbieta Zarzecka | 1 |  |
+| Sandra Winter | 2 | Sandra Winters | 1 | **Please confirm**: the records don't settle which spelling is right |
+| Mariah Hjerppe | 2 | Maria Hjerppe | 1 |  |
+| Luis M. Aguilar | 2 | Luis Agular | 1 |  |
+| Maggie Jenner-Bennett | 2 | Maggie Jenner-Bennet | 2 |  |
+| Pamela du Boulay | 1 | Pamela Du Boulay | 3 | Known correct spelling |
+
+Rows: catalog rows naming that spelling as maker, artist, manufacturer or sculptor.
 
 If the kept spelling is itself the typo for any pair, say which and it will be flipped.
+
+Separate question, not merged: "Maggie Jenner-Bennett" may be the same artist as "Maggie Bennett". Say if they are one person.
 
 ## 4. Titles
 
 Many of these "titles" are a run description rather than a name ("BreyerFest Special Run (1,113 made) Split run of …"); the March import put the source's notes where the name should be. This repair only tidies them as listed. Giving those releases real names is a separate job; say if you want it ticketed.
 
-Titles whose "With …" part names a mold are treated as sets and keep it: mold pages read it to list the sets a mold was sold in.
+Titles whose "With …" part names a mold are treated as sets and keep it: mold pages read it to list the sets a mold was sold in. A mold name counts when it appears with its own capitals as whole words ("With Rojo" counts; "foal blanket" is not the Foal mold).
+
+2 moved descriptions mention a mold only as a cross-reference (no "with", so mold pages never read them; nothing is lost): "Same pattern as #175 Indian Pony. See also Ford Motor Company Running Foal."; "Note the Appaloosa Performance Horse model standing in for the actual Stud Spider sold."
 
 ### Name kept, description moved to notes (59)
 
@@ -62,8 +77,7 @@ Titles whose "With …" part names a mold are treated as sets and keep it: mold 
 | Cutting Horse | With cowboy, Western saddle and bridle, Calf, and 4 sections of fencing. |
 | BreyerFest Limited Edition (2,250 made) Split run of Glossy & Matte “BreyerFest 2025” stamp on belly | Online purchase only. |
 | Utterly Horses (1 made) | With clear acrylic base engraved with Lloyds TSB logo. Prototype for bank giveaway that did not happen. |
-| Panuhu, Spotted Mustang Stallion and Honego, Foal | With Rojo. |
-| Similar in color to older sorrel #52 Five Gaiter) | Source and quantity unknown. |
+| Similar in color to older sorrel #52 Five Gaiter | Source and quantity unknown. |
 | QVC Same as #474 | With Certificate of Authenticity. |
 | Bayberry and Roses | With green and red ribbons with intricate gold trim, holiday flora lays in a wreath. |
 | Cloud | With neck ribbon. |
@@ -77,6 +91,7 @@ Titles whose "With …" part names a mold are treated as sets and keep it: mold 
 | Similar in color to older sorrel #52 Five Gaiter | Source and quantity unknown. |
 | BreyerFest Special Run (384 made)Split run of 6 color variations | Deco is glossy only, Blue Roan is matte only, other 4 colors glossy & matte versions. “BreyerFest 2025” stamp on belly. |
 | Given to singer Hunter Hayes by Breyer | Only one made. |
+| Holiday Pony Playset "Mia" | With bareback pad, wreath of roses, unicorn halter, rider in pjs with stocking full of carrots. |
 | Charm with Canterwood Crest's Take the Reins Includes Take the Reins paperback novel by Jessica Burkhart | Some autographed by author. |
 | Aristocrat with Canterwood Crest: Chasing Blue Includes Chasing Blue paperback novel by Jessica Burkhart | Some autographed by author. |
 | BreyerFest Limited Edition (750 made) Split run of Glossy & Matte “BreyerFest 2025” stamp on belly | Online purchase only. |
@@ -99,7 +114,7 @@ Titles whose "With …" part names a mold are treated as sets and keep it: mold 
 | Country Wagon | With Rabbit, Pig, Hen, and Goat, blue ribbon, wagon, harness, and fencing. |
 | JCPenney Holiday Catalog Same as #66 | Note the Appaloosa Performance Horse model standing in for the actual Stud Spider sold. |
 
-### Sets: roster kept, final period dropped (155)
+### Sets: roster kept, final period dropped (156)
 
 | Title becomes | Notes get |
 |---|---|
@@ -133,6 +148,7 @@ Titles whose "With …" part names a mold are treated as sets and keep it: mold 
 | Stablemates Collection With Arabian Mare, Citation, Native Dancer, Silky Sullivan, Swaps |  |
 | Buffalo Bill Rough Rider Play Set With Warmblood, rider, wagon, hitching post, lantern, campfire |  |
 | Set of 12 Miniatures With Arabian Mare, Arabian Stallion, Citation, Morgan Mare, Morgan Stallion, Native Dancer, Quarter Horse Stallion, Silky Sullivan, Swaps, Thoroughbred Mare |  |
+| Panuhu, Spotted Mustang Stallion and Honego, Foal With Rojo |  |
 | Pony Palace Complete Gift Set With Bouncer, Deluxe Wood Barn, doll, and accessories |  |
 | Classics Trail Ride Set With Western bridle, Western saddle, saddle pad, 6 inch rider doll |  |
 | "Horspital" Play Set With American Saddlebred, blankets, corral fencing, green rubber hose, water trough, bucket, bale of hay, medical kit, pitchfork, ointment, and spray bottle |  |
@@ -175,7 +191,6 @@ Titles whose "With …" part names a mold are treated as sets and keep it: mold 
 | Stablemates Assortment IV With Arabian Mare, Arabian Stallion, Citation, Draft Horse, Morgan Mare, Morgan Stallion, Native Dancer, Quarter Horse Stallion, Seabiscuit, Silky Sullivan, Swaps |  |
 | Western Pony with Grooming Kit With vinyl blanket, toothbrush, white plastic comb, metal nail file, ballpoint pen |  |
 | 12-Piece Stablemates Set With Arabian Mare, Arabian Stallion, Citation, Draft Horse, Morgan Mare, Morgan Stallion, Native Dancer, Quarter Horse Stallion, Seabiscuit, Silky Sullivan, Swaps |  |
-| Holiday Pony Playset "Mia" With bareback pad, wreath of roses, unicorn halter, rider in pjs with stocking full of carrots |  |
 | Spanish Riding School of Vienna Gift Set With red bridle, saddle, and rider |  |
 | Deluxe Animal Hospital With grey Standing Stock Horse and black Scrambling Foal, Donkey, Goat, Border Collie and Sitting Cat. Other accessories include a horse blanket, operating table, and a bandage box |  |
 | Thoroughbred Lying and Standing Foals With Thoroughbred Lying Foal |  |
@@ -236,6 +251,7 @@ Titles whose "With …" part names a mold are treated as sets and keep it: mold 
 | Let's Go Riding - English With English saddle set with bridle, and an 8" articulated rider dressed in casual riding attire |  |
 | Sears Holiday Catalog Some with red in nostrils. Model shown is from the Black Horse Ranch Model Horse Collection |  |
 | Deluxe Farm Pocket Barn With Standing Foal, Mule, barn, doll, vet kit, pig, rooster, chicken, rabbit |  |
+| Alano and Mateo With Rojo. Replaced Mesteño |  |
 | New Arrival Play Set With Paso Fino, hay manger, water bucket, carrots, brush, straw, pitchfork, yellow corral fencing and tack trunk |  |
 | Classics Grooming Kit Gift Set With stained wood grooming box and sweat scraper, curry comb, hoof pick, face brush, body brush, hoof polish, electric clippers and mud scraper |  |
 | Tractor Play Set With farmer, cowgirl, Quarter Horse, Steer, Llama, Swan, Border Collie, hay bale and tractor |  |

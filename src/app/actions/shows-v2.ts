@@ -16,7 +16,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { deriveShowFocus, type FocusInput } from "@/lib/shows/focus";
-import { revalidatePath, unstable_cache } from "next/cache";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { CACHE_TAGS } from "@/lib/cache/tags";
 import { after } from "next/server";
 import { z } from "zod";
@@ -610,6 +610,7 @@ export async function transitionShowStatus(
             }
         });
     }
+    revalidateTag(CACHE_TAGS.publicShows, "max");
     return { success: true };
 }
 

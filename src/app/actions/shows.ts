@@ -1241,7 +1241,7 @@ const loadPublicShowResultsBody = unstable_cache(
         return { divisions, totalEntries: totalEntries ?? 0, totalClasses };
     },
     ["public-show-results"],
-    { revalidate: 300 },
+    { revalidate: 300, tags: [CACHE_TAGS.showResults] },
 );
 
 /**

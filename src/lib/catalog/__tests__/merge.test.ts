@@ -5,16 +5,23 @@ const DUP = { id: "11111111-1111-4111-8111-111111111111", title: "Adios (dup)", 
 const KEEP = { id: "22222222-2222-4222-8222-222222222222", title: "Adios", maker: "Breyer" };
 
 /** A client that records every repoint and delete. */
-function client(opts: { movedPerTable?: number; failTable?: string } = {}) {
+function client(opts: { movedPerTable?: number; failTable?: string; wishlists?: { user_id: string; catalog_id: string }[] } = {}) {
     const updates: [string, Record<string, unknown>, string][] = [];
     const inserted: Record<string, unknown>[] = [];
+    const upserted: Record<string, unknown>[] = [];
     const deleted: string[] = [];
+    const wishlistDeletes: { catalogId: string; userIds: string[] }[] = [];
+    const done = { error: null };
     const admin: MergeClient = {
         from: (table) => ({
             select: () => ({
-                eq: (col, val) => ({
-                    maybeSingle: async () => ({ data: val === KEEP.id || val === "adios" ? KEEP : null }),
-                }),
+                eq: (col, val) => {
+                    const rows = table === "user_wishlists" ? (opts.wishlists ?? []).filter((w) => w.catalog_id === val) : [];
+                    return {
+                        then: (resolve: (v: { data: unknown }) => unknown) => Promise.resolve({ data: rows }).then(resolve),
+                        maybeSingle: async () => ({ data: val === KEEP.id || val === "adios" ? KEEP : null }),
+                    };
+                },
             }),
             update: (row) => ({
                 eq: (col, val) => ({
@@ -27,17 +34,27 @@ function client(opts: { movedPerTable?: number; failTable?: string } = {}) {
             }),
             insert: async (row) => {
                 inserted.push(row);
-                return { error: null };
+                return done;
+            },
+            upsert: async (row) => {
+                upserted.push(row);
+                return done;
             },
             delete: () => ({
-                eq: async (_col, val) => {
-                    deleted.push(val);
-                    return { error: null };
-                },
+                eq: (_col, val) => ({
+                    then: (resolve: (v: typeof done) => unknown) => {
+                        if (table === "catalog_items") deleted.push(val);
+                        return Promise.resolve(done).then(resolve);
+                    },
+                    in: async (_c: string, userIds: string[]) => {
+                        wishlistDeletes.push({ catalogId: val, userIds });
+                        return done;
+                    },
+                }),
             }),
         }),
     };
-    return { admin, updates, inserted, deleted };
+    return { admin, updates, inserted, upserted, deleted, wishlistDeletes };
 }
 
 describe("mergeCatalogItemsCore", () => {
@@ -61,7 +78,20 @@ describe("mergeCatalogItemsCore", () => {
         const dup = { ...DUP, maker_slug: "breyer", slug: "silky-sullivan" };
         const result = await mergeCatalogItemsCore(c.admin, dup, KEEP, { userId: "u", alias: "Admin" });
         expect(result.success).toBe(true);
-        expect(c.inserted).toContainEqual({ old_maker_slug: "breyer", old_slug: "silky-sullivan", item_id: KEEP.id });
+        expect(c.upserted).toContainEqual({ old_maker_slug: "breyer", old_slug: "silky-sullivan", item_id: KEEP.id });
+    });
+
+    it("drops the duplicate's want-list row when the member already wants the kept entry", async () => {
+        const c = client({
+            wishlists: [
+                { user_id: "both", catalog_id: DUP.id },
+                { user_id: "both", catalog_id: KEEP.id },
+                { user_id: "dup-only", catalog_id: DUP.id },
+            ],
+        });
+        const result = await mergeCatalogItemsCore(c.admin, DUP, KEEP, { userId: "u", alias: "Admin" });
+        expect(result.success).toBe(true);
+        expect(c.wishlistDeletes).toEqual([{ catalogId: DUP.id, userIds: ["both"] }]);
     });
 
     it("stops before deleting when a repoint fails", async () => {

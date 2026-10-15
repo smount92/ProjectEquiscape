@@ -380,16 +380,26 @@ export type MoldChoice = { id: string; title: string; maker: string; scale: stri
  * instead of matching typed text later.
  */
 export async function pickMold(rawTerm: string, maker: string | null, scale: string | null): Promise<MoldChoice[]> {
-    const term = rawTerm.replace(/[%*,()]/g, " ").replace(/\s+/g, " ").trim();
+    const term = stripGeneration(rawTerm.replace(/[%*,()]/g, " ").replace(/\s+/g, " ").trim()).trim();
     if (term.length < 2) return [];
     const supabase = await createClient();
-    const { data } = await supabase
-        .from("catalog_items")
-        .select("id, title, maker, scale")
-        .eq("item_type", "plastic_mold")
-        .ilike("title", `%${stripGeneration(term)}%`)
-        .limit(40);
-    const rows = (data ?? []) as MoldChoice[];
+    const search = (makerOnly: string | null) => {
+        let q = supabase
+            .from("catalog_items")
+            .select("id, title, maker, scale")
+            .eq("item_type", "plastic_mold")
+            .ilike("title", `%${term}%`)
+            .order("title")
+            .limit(40);
+        if (makerOnly) q = q.eq("maker", makerOnly);
+        return q;
+    };
+    // The member's own maker first: common words ("Mare", "Stallion") match
+    // hundreds of molds, and theirs must not fall outside the first 40.
+    const own = maker ? ((await search(maker)).data ?? []) as MoldChoice[] : [];
+    const rest = own.length >= 8 ? [] : (((await search(null)).data ?? []) as MoldChoice[]);
+    const seen = new Set<string>();
+    const rows = [...own, ...rest].filter((m) => (seen.has(m.id) ? false : (seen.add(m.id), true)));
     const rank = (m: MoldChoice) =>
         (maker && m.maker.toLowerCase() === maker.toLowerCase() ? 0 : 2) + (scale && m.scale === scale ? 0 : 1);
     return rows.sort((a, b) => rank(a) - rank(b) || a.title.localeCompare(b.title)).slice(0, 8);

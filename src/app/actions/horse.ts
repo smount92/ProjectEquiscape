@@ -1021,6 +1021,19 @@ export async function bulkUpdateHorses(
                 error: "One or more of these horses is in an active sale. Cancel the sale before changing its marketplace status or visibility.",
             };
         }
+        // An artist's work in progress is guarded the same way as a sale.
+        const { data: activeCommissions } = await getAdminClient()
+            .from("commissions")
+            .select("horse_id")
+            .in("horse_id", horseIds)
+            .in("status", ACTIVE_COMMISSION_STATUSES)
+            .limit(1);
+        if (activeCommissions && activeCommissions.length > 0) {
+            return {
+                success: false,
+                error: "One or more of these horses is an artist's commission in progress. It can't be hidden or relisted until the commission is finished.",
+            };
+        }
     }
 
     // A bulk move used to write only the legacy column, which the public

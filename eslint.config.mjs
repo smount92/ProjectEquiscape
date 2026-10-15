@@ -22,6 +22,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // ESLint 9 flat config does not read .gitignore; the Obsidian vault's
+    // plugin files are not ours and fail local lint.
+    ".obsidian/**",
   ]),
 ]);
 

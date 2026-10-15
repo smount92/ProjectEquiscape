@@ -2,36 +2,45 @@
 -- 233: Registry guards: old addresses forward, values are checked,
 --      links and history can't be lost
 --
--- Release 1 (2026-10), tickets MHH-001, MHH-010, MHH-011.
+-- Release 1 (2026-10), tickets MHH-001, MHH-010, MHH-011. Reviewed by
+-- four independent reviewers before release; their fixes are folded in.
 --
 -- 1. catalog_slug_history: every address a Registry page has had. When a
 --    maker correction moves a page (232) or a duplicate is merged away,
 --    the old address is recorded and the site forwards it to the page's
---    current address instead of showing "not found" (owner ruling Q1).
--- 2. updated_at on catalog_items and user_horses, kept by one shared
---    trigger function.
--- 3. The database refuses a scale, run type or material outside the
+--    current address instead of showing "not found" (owner ruling Q1). An
+--    address a live page takes back is removed from the history, so a
+--    forward can never point at itself or hide a new page.
+-- 2. Page addresses for accented names. The letter map in catalog_slugify
+--    (129) was misaligned from "è" on: Melody Peña lives at "melody-peia",
+--    Mesteño at "mesteio", Crème at "crcme". The map is corrected and the
+--    88 affected pages move to the right address; their old addresses
+--    forward.
+-- 3. updated_at on catalog_items and user_horses, kept by one trigger
+--    function. Existing rows get the paste time.
+-- 4. The database refuses a scale, run type or material outside the
 --    Registry's lists (src/lib/catalog/taxonomy.ts and editableFields.ts;
---    a test fails if the lists here and there ever differ). Added NOT VALID
---    and then validated, so a stray old row can't stop the migration; if
---    validation fails, a NOTICE says which check, and new writes are still
---    checked.
--- 4. A member can't have the same model on their want list twice (the
---    guard went missing in 052). Existing exact duplicates are folded into
---    the oldest row first.
--- 5. A catalog row that a horse or a want list points at can no longer be
+--    a test fails if the lists here and there ever differ). If any existing
+--    row breaks a list, the paste stops with a message saying which, and
+--    nothing is changed: send the message to the developer.
+-- 5. A member can't have the same model on their want list twice (the
+--    guard went missing in 052). Existing duplicates are folded into the
+--    oldest row first, keeping every note and the latest paid boost.
+-- 6. A catalog row that a horse or a want list points at can no longer be
 --    deleted (it used to silently unlink them). Duplicates are merged,
 --    which moves those links first, so merging keeps working.
--- 6. A horse's permanent history (ownership, transfers, show results,
+-- 7. A horse's permanent history (ownership, transfers, show results,
 --    cards, titles, condition, work records, papers) can no longer be
 --    erased by deleting the horse. Horses are soft-deleted, so nothing on
---    the site changes; this stops a hard delete from wiping history. One
---    consequence: deleting a member outright in the Supabase dashboard is
---    refused if their horses have history (members delete themselves
---    from Settings, which is a soft delete).
+--    the site changes. One consequence: deleting a member outright in the
+--    Supabase dashboard is refused if their horses have history (members
+--    delete themselves from Settings, which is a soft delete).
 --
--- Safe to paste twice.
+-- If the site is busy the paste may stop with "lock timeout"; paste it
+-- again a minute later. Safe to paste twice.
 -- ============================================================
+
+SET lock_timeout = '5s';
 
 -- ── 1. Old addresses ──────────────────────────────────────────
 
@@ -82,6 +91,20 @@ CREATE TRIGGER catalog_items_maker_slug_bu
   BEFORE UPDATE OF maker, maker_slug, slug ON public.catalog_items
   FOR EACH ROW EXECUTE FUNCTION public.trg_catalog_items_maker_slug_update();
 
+-- An address a live page holds is not an old address any more.
+CREATE OR REPLACE FUNCTION public.trg_catalog_slug_history_release()
+RETURNS TRIGGER LANGUAGE plpgsql SET search_path = '' AS $$
+BEGIN
+  DELETE FROM public.catalog_slug_history
+  WHERE old_maker_slug = NEW.maker_slug AND old_slug = NEW.slug;
+  RETURN NULL;
+END; $$;
+
+DROP TRIGGER IF EXISTS catalog_items_slug_history_release_aiu ON public.catalog_items;
+CREATE TRIGGER catalog_items_slug_history_release_aiu
+  AFTER INSERT OR UPDATE OF maker, maker_slug, slug ON public.catalog_items
+  FOR EACH ROW EXECUTE FUNCTION public.trg_catalog_slug_history_release();
+
 -- The duplicate deleted by the 2026-10-15 repair: /reference/breyer/silky-sullivan
 -- forwards to the Stablemate Silky Sullivan mold that was kept.
 INSERT INTO public.catalog_slug_history (old_maker_slug, old_slug, item_id)
@@ -94,9 +117,82 @@ ORDER BY m.created_at
 LIMIT 1
 ON CONFLICT (old_maker_slug, old_slug) DO NOTHING;
 
--- ── 2. updated_at ─────────────────────────────────────────────
+-- ── 2. Addresses for accented names ───────────────────────────
+-- Each letter on the first line maps to the letter below it (65 each;
+-- src/__tests__/slugify-map.test.ts checks they line up).
 
-CREATE OR REPLACE FUNCTION public.set_updated_at()
+CREATE OR REPLACE FUNCTION public.catalog_slugify(txt TEXT)
+RETURNS TEXT LANGUAGE sql IMMUTABLE SET search_path = '' AS $$
+  -- lower() BEFORE translate() so uppercase accents (Öjvind) map too
+  SELECT regexp_replace(
+           regexp_replace(
+             translate(lower(coalesce(txt, '')),
+               'àáâãäåāăąçćčďèéêëēĕėęěğìíîïĩīıłñńňòóôõöøōőðřšśşßťùúûüũūůűýÿžźżþæœ',
+               'aaaaaaaaacccdeeeeeeeeegiiiiiiilnnnoooooooodrsssstuuuuuuuuyyzzztao'),
+             '[^a-z0-9]+', '-', 'g'),
+           '(^-+|-+$)', '', 'g');
+$$;
+
+-- 129's map, kept only to recognise the addresses it produced.
+CREATE OR REPLACE FUNCTION pg_temp.catalog_slugify_129(txt TEXT)
+RETURNS TEXT LANGUAGE sql IMMUTABLE AS $$
+  SELECT regexp_replace(
+           regexp_replace(
+             translate(lower(coalesce(txt, '')),
+               'àáâãäåāăąçćèéêëēĕėęěìíîïĩīñòóôõöøōðšśßùúûüũūýÿžźżþ',
+               'aaaaaaaaaccceeeeeeeeeiiiiiinoooooooodsssuuuuuuyyzzzt'),
+             '[^a-z0-9]+', '-', 'g'),
+           '(^-+|-+$)', '', 'g');
+$$;
+
+-- Move each page whose address came from the broken map. A page whose
+-- address was set by hand (anything the old map would not have produced)
+-- is left alone. The trigger above records every old address.
+DO $$
+DECLARE
+  r RECORD;
+  old_base TEXT;
+  new_base TEXT;
+  new_maker TEXT;
+  root TEXT;
+  candidate TEXT;
+  n INT;
+BEGIN
+  FOR r IN
+    SELECT id, maker, title, maker_slug, slug FROM public.catalog_items
+    WHERE maker ~ '[^\x01-\x7F]' OR title ~ '[^\x01-\x7F]'
+  LOOP
+    new_maker := r.maker_slug;
+    IF r.maker IS NOT NULL AND r.maker_slug = pg_temp.catalog_slugify_129(r.maker) THEN
+      new_maker := public.catalog_slugify(r.maker);
+    END IF;
+
+    root := r.slug;
+    old_base := pg_temp.catalog_slugify_129(r.title);
+    new_base := public.catalog_slugify(r.title);
+    IF old_base <> '' AND new_base <> '' AND old_base <> new_base
+       AND (r.slug = old_base OR r.slug ~ ('^' || old_base || '-[0-9]+$')) THEN
+      root := new_base || substr(r.slug, length(old_base) + 1);
+    END IF;
+
+    IF new_maker IS DISTINCT FROM r.maker_slug OR root IS DISTINCT FROM r.slug THEN
+      candidate := root;
+      n := 1;
+      WHILE EXISTS (
+        SELECT 1 FROM public.catalog_items
+        WHERE maker_slug = new_maker AND slug = candidate AND id <> r.id
+      ) LOOP
+        n := n + 1;
+        candidate := root || '-' || n;
+      END LOOP;
+      UPDATE public.catalog_items SET maker_slug = new_maker, slug = candidate WHERE id = r.id;
+    END IF;
+  END LOOP;
+END $$;
+
+-- ── 3. updated_at ─────────────────────────────────────────────
+
+CREATE OR REPLACE FUNCTION public.trg_touch_updated_at()
 RETURNS TRIGGER LANGUAGE plpgsql SET search_path = '' AS $$
 BEGIN
   NEW.updated_at := now();
@@ -109,14 +205,14 @@ ALTER TABLE public.user_horses ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ N
 DROP TRIGGER IF EXISTS trg_catalog_items_updated_at ON public.catalog_items;
 CREATE TRIGGER trg_catalog_items_updated_at
   BEFORE UPDATE ON public.catalog_items
-  FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+  FOR EACH ROW EXECUTE FUNCTION public.trg_touch_updated_at();
 
 DROP TRIGGER IF EXISTS trg_user_horses_updated_at ON public.user_horses;
 CREATE TRIGGER trg_user_horses_updated_at
   BEFORE UPDATE ON public.user_horses
-  FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+  FOR EACH ROW EXECUTE FUNCTION public.trg_touch_updated_at();
 
--- ── 3. Registry values ────────────────────────────────────────
+-- ── 4. Registry values ────────────────────────────────────────
 -- Lists must match taxonomy.ts CANONICAL_SCALES and RUN_TYPES and
 -- editableFields.ts MATERIAL_OPTIONS (src/__tests__/registry-vocabulary.test.ts).
 
@@ -144,19 +240,34 @@ ALTER TABLE public.catalog_items ADD CONSTRAINT catalog_items_material_check CHE
   )
 ) NOT VALID;
 
-DO $$
-DECLARE c TEXT;
-BEGIN
-  FOREACH c IN ARRAY ARRAY['catalog_items_scale_check', 'catalog_items_run_type_check', 'catalog_items_material_check'] LOOP
-    BEGIN
-      EXECUTE format('ALTER TABLE public.catalog_items VALIDATE CONSTRAINT %I', c);
-    EXCEPTION WHEN check_violation THEN
-      RAISE NOTICE '233: % not validated: some existing rows break it. New writes are still checked; send this notice to the developer.', c;
-    END;
-  END LOOP;
-END $$;
+-- Validate now. A failure stops the paste (a half-checked table would
+-- refuse every later edit of the offending rows, including repairs).
+ALTER TABLE public.catalog_items VALIDATE CONSTRAINT catalog_items_scale_check;
+ALTER TABLE public.catalog_items VALIDATE CONSTRAINT catalog_items_run_type_check;
+ALTER TABLE public.catalog_items VALIDATE CONSTRAINT catalog_items_material_check;
 
--- ── 4. One want-list row per model ────────────────────────────
+-- ── 5. One want-list row per model ────────────────────────────
+-- Fold duplicates into the oldest row: every distinct note is kept and
+-- the latest paid boost wins. Then remove the duplicates.
+
+WITH ranked AS (
+  SELECT w.id, w.notes, w.is_boosted_until,
+         first_value(w.id) OVER (PARTITION BY w.user_id, w.catalog_id ORDER BY w.created_at, w.id) AS keep_id
+  FROM public.user_wishlists w
+  WHERE w.catalog_id IS NOT NULL
+), folded AS (
+  SELECT keep_id,
+         string_agg(DISTINCT NULLIF(btrim(notes), ''), E'\n\n') AS notes,
+         max(is_boosted_until) AS boosted_until
+  FROM ranked
+  GROUP BY keep_id
+  HAVING count(*) > 1
+)
+UPDATE public.user_wishlists k
+SET notes = coalesce(folded.notes, k.notes),
+    is_boosted_until = GREATEST(k.is_boosted_until, folded.boosted_until)
+FROM folded
+WHERE k.id = folded.keep_id;
 
 DELETE FROM public.user_wishlists w
 USING public.user_wishlists keep
@@ -169,7 +280,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_user_wishlists_user_catalog
   ON public.user_wishlists (user_id, catalog_id)
   WHERE catalog_id IS NOT NULL;
 
--- ── 5 and 6. Foreign keys that must refuse a delete ───────────
+-- ── 6 and 7. Foreign keys that must refuse a delete ───────────
 
 DO $$
 DECLARE
@@ -178,10 +289,10 @@ DECLARE
 BEGIN
   FOR spec IN
     SELECT * FROM (VALUES
-      -- Member links to the Registry (5): merge moves these first.
+      -- Member links to the Registry (6): merge moves these first.
       ('user_horses', 'catalog_id', 'catalog_items'),
       ('user_wishlists', 'catalog_id', 'catalog_items'),
-      -- A horse's permanent history (6).
+      -- A horse's permanent history (7).
       ('horse_ownership_history', 'horse_id', 'user_horses'),
       ('horse_transfers', 'horse_id', 'user_horses'),
       ('horse_timeline', 'horse_id', 'user_horses'),
@@ -215,3 +326,5 @@ BEGIN
     END LOOP;
   END LOOP;
 END $$;
+
+RESET lock_timeout;

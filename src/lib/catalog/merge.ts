@@ -9,16 +9,23 @@
  * service-role client the caller has already authorised.
  */
 
+type Done = { error: { message: string } | null };
+
 export interface MergeClient {
     from: (table: string) => {
         select: (cols: string) => {
-            eq: (col: string, val: string) => { maybeSingle: () => Promise<{ data: unknown; error?: unknown }> };
+            eq: (col: string, val: string) => PromiseLike<{ data: unknown; error?: unknown }> & {
+                maybeSingle: () => Promise<{ data: unknown; error?: unknown }>;
+            };
         };
         update: (row: Record<string, unknown>) => {
             eq: (col: string, val: string) => { select: (cols: string) => Promise<{ data: unknown; error: { message: string } | null }> };
         };
-        insert: (row: Record<string, unknown>) => Promise<{ error: { message: string } | null }>;
-        delete: () => { eq: (col: string, val: string) => Promise<{ error: { message: string } | null }> };
+        insert: (row: Record<string, unknown>) => Promise<Done>;
+        upsert: (row: Record<string, unknown>, options: { onConflict: string }) => PromiseLike<Done>;
+        delete: () => {
+            eq: (col: string, val: string) => PromiseLike<Done> & { in: (col: string, vals: string[]) => PromiseLike<Done> };
+        };
     };
 }
 
@@ -67,6 +74,20 @@ export async function mergeCatalogItemsCore(
 ): Promise<MergeResult> {
     if (dup.id === canonical.id) return { success: false, error: "Those are the same entry." };
 
+    // A member who wants both entries would end up with two want-list rows
+    // for one model, which the database refuses (migration 233). Their row
+    // on the kept entry stays; the duplicate's goes.
+    const wanters = async (id: string) => {
+        const { data } = await admin.from("user_wishlists").select("user_id").eq("catalog_id", id);
+        return new Set(((data as { user_id: string }[] | null) ?? []).map((r) => r.user_id));
+    };
+    const keepWanters = await wanters(canonical.id);
+    const both = [...(await wanters(dup.id))].filter((u) => keepWanters.has(u));
+    if (both.length > 0) {
+        const { error } = await admin.from("user_wishlists").delete().eq("catalog_id", dup.id).in("user_id", both);
+        if (error) return { success: false, error: `Folding want lists failed: ${error.message}` };
+    }
+
     let moved = 0;
     for (const [table, column] of MERGE_REPOINTS) {
         const { data, error } = await admin
@@ -93,7 +114,9 @@ export async function mergeCatalogItemsCore(
     // migration 233 the table is missing and the merge goes on without it.
     await admin.from("catalog_slug_history").update({ item_id: canonical.id }).eq("item_id", dup.id).select("item_id");
     if (dup.maker_slug && dup.slug) {
-        await admin.from("catalog_slug_history").insert({ old_maker_slug: dup.maker_slug, old_slug: dup.slug, item_id: canonical.id });
+        await admin
+            .from("catalog_slug_history")
+            .upsert({ old_maker_slug: dup.maker_slug, old_slug: dup.slug, item_id: canonical.id }, { onConflict: "old_maker_slug,old_slug" });
     }
 
     const { error: deleteError } = await admin.from("catalog_items").delete().eq("id", dup.id);

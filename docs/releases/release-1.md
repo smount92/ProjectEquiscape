@@ -23,7 +23,11 @@ batch". One push to `main`, one rebuild. How releases work:
 ## What changes behind the scenes
 
 - Security: Next.js 16.1.6 → 16.3.8 (30+ advisories), other dependency
-  fixes; production dependencies have no known vulnerabilities.
+  fixes; production dependencies have no known vulnerabilities. The
+  notable moves from `npm audit fix`: resend 6.9.3 → 6.33.0 (email),
+  @sentry/nextjs 10.46 → 10.76.2 (error reports), sharp 0.34 → 0.35
+  (images), zod 4.4 → 4.6, sanitize-html 2.17 → 2.18, serwist 9.5.7 →
+  9.5.13 (the installable app). Step 6 below checks the first two.
 - The pipeline: checks on every branch, the site builds only from `main`,
   a live smoke test after each deploy, a weekly Registry health report,
   Dependabot.
@@ -34,9 +38,20 @@ batch". One push to `main`, one rebuild. How releases work:
 
 ## Go-live checklist (owner)
 
-1. **GitHub settings** (once): Actions secrets `NEXT_PUBLIC_SUPABASE_URL`
-   and `NEXT_PUBLIC_SUPABASE_ANON_KEY`; turn on Dependabot alerts and
-   security updates.
+1. **GitHub settings** (once):
+   - Actions secrets `HEALTH_SUPABASE_URL` and `HEALTH_SUPABASE_ANON_KEY`:
+     the public Supabase URL and anon key (the same values as
+     `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in
+     Vercel). Only the weekly Registry health report uses them; the CI
+     build never touches the real database.
+   - Turn on Dependabot alerts and security updates.
+   - Make sure a red CI can't go live: protect `main` (Settings › Branches:
+     require the `checks` job to pass), or turn on Vercel Deployment Checks
+     (https://vercel.com/docs/deployment-checks).
+   - The 28 old `ws/*` branches will keep making Vercel preview deploys
+     until they are deleted (they predate the "only `main` deploys"
+     setting). All of them are fully merged, so they are safe to delete on
+     GitHub (the Branches page).
 2. **Push the branch** (`git push origin release-1`) and wait for CI to go
    green. The website does not rebuild.
 3. **Paste migrations 233 and 234** (`supabase/migrations/233_registry_guards.sql`,
@@ -49,7 +64,10 @@ batch". One push to `main`, one rebuild. How releases work:
    `registry_format_repair_2026_10.sql`.
 5. **Merge to main and push.** Vercel builds once; the live smoke test runs
    on its own.
-6. **Regenerate types** (`npm run gen-types`) so `catalog_slug_history` and
+6. **Check email and error reports** on the live site: send yourself one
+   transactional email (e.g. a password reset) and confirm one Sentry event
+   arrives.
+7. **Regenerate types** (`npm run gen-types`) so `catalog_slug_history` and
    `updated_at` enter the types, in the next release.
 
 ## Still open in this milestone
