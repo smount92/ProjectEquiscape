@@ -15,6 +15,10 @@ batch". One push to `main`, one rebuild. How releases work:
 - New Registry values arrive tidy: colours start with a capital, names lose
   stray punctuation, years are stored as numbers.
 - Bulk edits can't take a horse in an active sale off the market.
+- Settings › "New horses start as" Public / Unlisted / Private now really
+  applies to Add Horse, Quick Add and spreadsheet import (it was saved but
+  ignored before); spreadsheet import lets you pick for that import too
+  (needs migration 234 for Unlisted).
 
 ## What changes behind the scenes
 
@@ -35,9 +39,10 @@ batch". One push to `main`, one rebuild. How releases work:
    security updates.
 2. **Push the branch** (`git push origin release-1`) and wait for CI to go
    green. The website does not rebuild.
-3. **Paste migration 233** (`supabase/migrations/233_registry_guards.sql`)
-   in the Supabase SQL editor. If it prints a NOTICE, send it to the
-   developer. Admin › Ops shows 233 green once the site is live.
+3. **Paste migrations 233 and 234** (`supabase/migrations/233_registry_guards.sql`,
+   then `234_default_horse_visibility.sql`) in the Supabase SQL editor. If
+   either prints a NOTICE, send it to the developer. Admin › Ops shows both
+   green once the site is live.
 4. **Registry format repair** (after 233): read
    `scripts/catalog-delta/review/registry_format_review_2026_10.md`, then run
    `registry_format_repair_2026_10_dryrun.sql`, then
@@ -49,6 +54,6 @@ batch". One push to `main`, one rebuild. How releases work:
 
 ## Still open in this milestone
 
-- MHH-005 CSV import visibility: needs a decision (see the ticket).
-- MHH-018 code formatting: needs a go once no other branch or worktree
-  holds unmerged work.
+- MHH-018 code formatting: checked 2026-10-15, all 28 worktrees and every
+  branch are merged with nothing uncommitted, so it runs as the last commit
+  of this release, after the review fixes.
