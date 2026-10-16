@@ -10,6 +10,7 @@ import { runEntriesClosedFanout } from "@/lib/shows/notifications";
 import { loadShowAudience } from "@/lib/shows/followers";
 import { createNotificationsBulk } from "@/lib/notifications/createNotification";
 import { sendEntriesClosingEmails } from "@/lib/email/showEmails";
+import { withHeartbeat } from "@/lib/ops/heartbeat";
 import type { ShowMode, ShowStatus } from "@/lib/shows/types";
 
 /**
@@ -35,7 +36,7 @@ import type { ShowMode, ShowStatus } from "@/lib/shows/types";
  * through canTransition (the state machine stays the single
  * authority) and use CAS updates so a racing host action wins.
  */
-export async function GET(request: NextRequest) {
+async function runJob(request: NextRequest) {
     const authHeader = request.headers.get("authorization");
     // Unset-secret guard: without it, an env missing CRON_SECRET
     // (e.g. preview deploys) accepts the literal "Bearer undefined".
@@ -253,4 +254,9 @@ export async function GET(request: NextRequest) {
         Sentry.captureException(error, { tags: { domain: "cron" }, level: "error" });
         return NextResponse.json({ success: false, error: String(error) }, { status: 500 });
     }
+}
+
+// Every authorised run records a heartbeat for Admin › Ops (MHH-029).
+export async function GET(request: NextRequest) {
+    return withHeartbeat("transition-shows", request, runJob);
 }

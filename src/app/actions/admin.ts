@@ -1344,6 +1344,13 @@ const PENDING_MIGRATIONS: MigrationSpec[] = [
         },
     },
     {
+        id: "237",
+        title: "Scheduled-job heartbeats",
+        summary:
+            "cron_heartbeats: each scheduled job records when it ran and whether it worked; Admin › Ops shows late or failing jobs.",
+        probe: { kind: "column", table: "cron_heartbeats", column: "job" },
+    },
+    {
         id: "236",
         title: "Contact messages: category, status, account",
         summary:
@@ -2121,4 +2128,53 @@ export async function setFeedPostPinned(
     const { error } = await admin.from("posts").update({ is_pinned: pinned }).eq("id", postId);
     if (error) return { success: false, error: error.message };
     return { success: true };
+}
+
+// ── Scheduled jobs (MHH-029) ──
+
+/** Each scheduled job's last run, success and failure, for Admin › Ops. */
+export async function getCronHealth(): Promise<
+    | { success: true; jobs: import("@/lib/ops/heartbeat").CronHealth[]; installed: boolean }
+    | { success: false; error: string }
+> {
+    const user = await verifyAdmin();
+    if (!user) return { success: false, error: "Unauthorized" };
+    const { CRON_JOBS, cronState } = await import("@/lib/ops/heartbeat");
+    const db = getAdminSupabase() as unknown as {
+        from: (t: string) => {
+            select: (c: string) => PromiseLike<{
+                data:
+                    | {
+                          job: string;
+                          last_run_at: string | null;
+                          last_ok_at: string | null;
+                          last_failed_at: string | null;
+                          last_error: string | null;
+                      }[]
+                    | null;
+                error: { code?: string } | null;
+            }>;
+        };
+    };
+    const { data, error } = await db
+        .from("cron_heartbeats")
+        .select("job, last_run_at, last_ok_at, last_failed_at, last_error");
+    const installed = !error;
+    const rows = new Map((data ?? []).map((r) => [r.job, r]));
+    return {
+        success: true,
+        installed,
+        jobs: CRON_JOBS.map((j) => {
+            const row = rows.get(j.job) ?? null;
+            return {
+                job: j.job,
+                schedule: j.schedule,
+                lastRunAt: row?.last_run_at ?? null,
+                lastOkAt: row?.last_ok_at ?? null,
+                lastFailedAt: row?.last_failed_at ?? null,
+                lastError: row?.last_error ?? null,
+                state: cronState(row, j.lateAfterHours),
+            };
+        }),
+    };
 }

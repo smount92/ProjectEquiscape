@@ -8,9 +8,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/logger";
+import { withHeartbeat } from "@/lib/ops/heartbeat";
 import * as Sentry from "@sentry/nextjs";
 
-export async function GET(request: NextRequest) {
+async function runJob(request: NextRequest) {
     // Verify Vercel cron secret
     const authHeader = request.headers.get("authorization");
     // Unset-secret guard: without it, an env missing CRON_SECRET
@@ -74,4 +75,9 @@ export async function GET(request: NextRequest) {
         Sentry.captureException(error, { tags: { domain: "cron" }, level: "fatal" });
         return NextResponse.json({ success: false, error: String(error) }, { status: 500 });
     }
+}
+
+// Every authorised run records a heartbeat for Admin › Ops (MHH-029).
+export async function GET(request: NextRequest) {
+    return withHeartbeat("refresh-market", request, runJob);
 }

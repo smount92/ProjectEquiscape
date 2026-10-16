@@ -28,6 +28,13 @@ to `main`, one rebuild. How releases work: `docs/guides/releasing.md`.
   the console pulse and listed in Admin › Members. Notification links now
   open the right admin tab.
 
+- Admin › Catalog › Hidden eBay prices: prices members reported as the wrong
+  model, with "Show it again" (the member is told).
+- Admin › Ops › Scheduled jobs: each job shows its last success and whether
+  it is on time, late or failing.
+- The review queue includes suggestions under review, and the Registry
+  history records who approved each change.
+
 ## Go-live checklist (owner)
 
 1. **Stripe dashboard, once:**
@@ -39,4 +46,5 @@ to `main`, one rebuild. How releases work: `docs/guides/releasing.md`.
 2. Push the branch, wait for CI to go green.
 3. Paste this release's migrations in number order:
    - `236_contact_messages_triage.sql`
+   - `237_cron_heartbeats.sql`
 4. Merge to main and push. The live smoke test runs by itself.

@@ -23,6 +23,7 @@ import AdminPulseStrip from "@/components/AdminPulseStrip";
 import type { PendingExternalShow } from "@/app/actions/external-shows";
 import type { AdminPulse, EnvFlagStatus, LegacySuggestionRow, MigrationStatusRow } from "@/app/actions/admin";
 import AdminHiddenPricesCard from "@/components/AdminHiddenPricesCard";
+import AdminCronCard from "@/components/AdminCronCard";
 import AdminMailbox from "@/components/AdminMailbox";
 
 interface Show {
@@ -241,6 +242,7 @@ export default function AdminTabs({
                         <AdminOpsTab migrations={migrations} />
                         <AdminEnvFlagsCard status={envFlags} />
                         <AdminErrorsCard status={sentry} />
+                        <AdminCronCard />
                     </div>
                 )}
             </div>
