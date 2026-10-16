@@ -33,7 +33,7 @@ import {
     orderReleases,
     parseTerm,
     releaseYearFields,
-    rosterPrefilterWords,
+    rosterPrefilterPatterns,
     scaleMatches,
     setLabel,
     stripGeneration,
@@ -142,20 +142,16 @@ async function ownersOf(supabase: Client, moldId: string): Promise<number | null
 }
 
 /**
- * Candidate set rows for a mold: a title with "with" and every word of the
- * mold's name, in any order. `mentionsMold` then keeps only rows that list
- * the mold as a whole piece; this read is the coarse sieve, sized so a
- * common name (Thoroughbred, 120+ sets) is never cut short (MHH-074).
+ * Candidate set rows for a mold: every word of the mold's name after "with",
+ * in any order. `mentionsMold` then keeps only rows that list the mold as a
+ * whole piece; this read is the coarse sieve, sized so a common name
+ * (Thoroughbred, 120+ sets) is never cut short (MHH-074), and ordered so
+ * that, if it ever is, the cut is the same on every call.
  */
 function setCandidates(supabase: Client, mold: Row, limit: number) {
-    let q = supabase
-        .from("catalog_items")
-        .select(COLS)
-        .eq("item_type", "plastic_release")
-        .neq("parent_id", mold.id)
-        .ilike("title", "%with%");
-    for (const w of rosterPrefilterWords(mold.title)) q = q.ilike("title", `%${w.replace(/[%_]/g, "")}%`);
-    return q.limit(limit);
+    let q = supabase.from("catalog_items").select(COLS).eq("item_type", "plastic_release").neq("parent_id", mold.id);
+    for (const p of rosterPrefilterPatterns(mold.title)) q = q.ilike("title", p);
+    return q.order("id").limit(limit);
 }
 
 /** A mold's own releases plus the set rows on other molds whose title names it. */
@@ -394,6 +390,8 @@ export async function fileReleaseUnderMold(input: {
     const look = (input.look ?? "").trim();
     // A number typed in front of the name (or of the set's name, when that is
     // the title) moves to the number field, or must agree with it (MHH-079).
+    // A bare number that may be part of the name ("101 Dalmatians") stays:
+    // the form has already asked the member.
     const named = reconcileTitleNumber((input.name ?? "").trim() || (input.setName ?? "").trim(), input.modelNumber);
     if (!named.ok) return { success: false, error: titleNumberProblem(named.inTitle, named.inBox) };
     const model = named.model;

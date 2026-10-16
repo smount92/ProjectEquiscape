@@ -47,7 +47,7 @@ import { resinIdentityFrom, resinMakeupLine } from "@/lib/passport/resinIdentity
 import { colorText, readPendingColumns } from "@/lib/passport/pendingColumns";
 import { getSetPurchase } from "@/app/actions/set-purchase";
 import { selectWithPurchaseNotes } from "@/lib/vault/purchaseNotes";
-import { yearRangeLabel } from "@/lib/catalog/cardDisplay";
+import { passportReleaseInfo } from "@/lib/catalog/cardDisplay";
 
 // Types
 interface VaultData {
@@ -393,7 +393,6 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
                   slug: (cat as { slug?: string | null }).slug ?? null,
               }
             : null;
-    const attrs = (cat?.attributes ?? {}) as Record<string, unknown>;
     // One owner for the Mold/Manufacturer/Scale lines (lib/passport/referenceLines):
     // a release names its parent mold here, not itself.
     const refInfo = cat ? referenceLines(cat as unknown as ReferenceRow) : null;
@@ -405,16 +404,7 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
     // SELECT to nobody. Null when 175 has not been pasted: the line vanishes.
     const viewStats = viewStatsLabel(await getHorseViewStats(supabase, horseId));
 
-    const releaseInfo =
-        cat && cat.item_type === "plastic_release"
-            ? {
-                  name: cat.title,
-                  modelNumber: attrs.model_number as string | null,
-                  color: attrs.color_description as string | null,
-                  yearStart: attrs.release_year_start as number | null,
-                  yearEnd: attrs.release_year_end as number | null,
-              }
-            : null;
+    const releaseInfo = passportReleaseInfo(cat);
 
     return (
         <ExplorerLayout noHeader>
@@ -642,16 +632,13 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
                                     </div>
                                 )}
 
-                                {releaseInfo.yearStart && (
+                                {releaseInfo.years && (
                                     <div className="flex items-center justify-between border-b border-dashed border-border-tan/20 px-0 py-3 last:border-0">
                                         <span className="text-sm font-medium text-secondary-foreground">
                                             Release Years
                                         </span>
                                         <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
-                                            {yearRangeLabel({
-                                                release_year_start: releaseInfo.yearStart,
-                                                release_year_end: releaseInfo.yearEnd,
-                                            })}
+                                            {releaseInfo.years}
                                         </span>
                                     </div>
                                 )}

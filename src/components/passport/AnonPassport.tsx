@@ -37,7 +37,7 @@ import type { AssetCategory } from "@/lib/types/database";
 import { getPublicFavoriteCount } from "@/lib/favorites/publicCount";
 import HoofprintTimeline from "@/components/HoofprintTimeline";
 import { getPublicHoofprint } from "@/lib/hoofprint/publicHoofprint";
-import { yearRangeLabel } from "@/lib/catalog/cardDisplay";
+import { passportReleaseInfo } from "@/lib/catalog/cardDisplay";
 
 // Read-only public passport for logged-OUT visitors (FUNNEL-4). The full
 // interactive passport (favorite/comment/message/hoofprint) stays in
@@ -269,7 +269,6 @@ export default async function AnonPassport({
     const publicNamePrefix = titlePrefix(publicTitles.map((t) => t.code));
 
     // Same reference framing the member card uses.
-    const catAttrs = (cat?.attributes ?? {}) as Record<string, unknown>;
     // The passport RPC (135) carries the linked row but not its parent; a
     // release reads its mold with one public catalog_items read so the
     // Mold line names the sculpture, not the release (lib/passport/referenceLines).
@@ -285,16 +284,7 @@ export default async function AnonPassport({
         if (Array.isArray(parent)) parent = parent[0] ?? null;
     }
     const refInfo = cat ? referenceLines({ ...(cat as unknown as ReferenceRow), parent }) : null;
-    const releaseInfo =
-        cat && cat.item_type === "plastic_release"
-            ? {
-                  name: cat.title,
-                  modelNumber: catAttrs.model_number as string | null,
-                  color: catAttrs.color_description as string | null,
-                  yearStart: catAttrs.release_year_start as number | null,
-                  yearEnd: catAttrs.release_year_end as number | null,
-              }
-            : null;
+    const releaseInfo = passportReleaseInfo(cat);
 
     const assetCat = (horse.asset_category || "model") as AssetCategory;
     const assetConfig = getAssetConfig(assetCat);
@@ -440,14 +430,7 @@ export default async function AnonPassport({
                                     <DetailRow label="Model #">#{releaseInfo.modelNumber}</DetailRow>
                                 )}
                                 {releaseInfo.color && <DetailRow label="Color">{releaseInfo.color}</DetailRow>}
-                                {releaseInfo.yearStart && (
-                                    <DetailRow label="Release Years">
-                                        {yearRangeLabel({
-                                            release_year_start: releaseInfo.yearStart,
-                                            release_year_end: releaseInfo.yearEnd,
-                                        })}
-                                    </DetailRow>
-                                )}
+                                {releaseInfo.years && <DetailRow label="Release Years">{releaseInfo.years}</DetailRow>}
                             </>
                         )}
                         {resinMakeup && <DetailRow label="🧪 Resin">{resinMakeup}</DetailRow>}

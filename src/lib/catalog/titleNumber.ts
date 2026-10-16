@@ -9,40 +9,60 @@
  * my release", and createSuggestion as the last guard.
  *
  *  - the title's number equals the box: take it off the title;
- *  - the box is empty: move it there;
- *  - they disagree: ask the member which is right.
+ *  - the number carries a "#" ("#5038 Silky") and the box is empty: move it there;
+ *  - a "#" number and the box disagree: ask the member which is right.
  *
- * A bare four-digit year in front of a name ("2019 Holiday Horse") is a
- * year, not a number, unless it carries a "#".
+ * A bare number with no "#" may be part of the name ("101 Dalmatians"), so
+ * it is only ever taken off silently when it equals the box. Otherwise the
+ * forms ask the member (`bare: "ask"`), and the server guard, which has no
+ * one to ask, leaves the title as typed (`bare: "keep"`, the default). A
+ * bare four-digit year in front of a name ("2019 Holiday Horse") is a year
+ * and is never read as a number at all.
  */
 
-/** The model number leading a title, and the name after it; null when none. */
-export function leadingModelNumber(title: string): { number: string; rest: string } | null {
+/** The model number leading a title, the name after it, and whether it carried a "#"; null when none. */
+export function leadingModelNumber(title: string): { number: string; rest: string; hash: boolean } | null {
     const m = title.trim().match(/^(#?)\s*(\d{3,7}[a-z]?)(?:\s*[-–—:·.]\s*|\s+)(\S.*)$/i);
     if (!m) return null;
     const [, hash, number, rest] = m;
     if (!hash && /^(19|20)\d\d$/.test(number)) return null;
-    return { number, rest: rest.trim() };
+    return { number, rest: rest.trim(), hash: !!hash };
 }
 
 const clean = (n: string | null | undefined) => (n ?? "").trim().replace(/^#\s*/, "");
 const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
 
+/**
+ * `inBox` is "" when a bare number leads the title and the box is empty:
+ * the question is then whether the number is the model number at all.
+ */
 export type TitleNumber =
     | { ok: true; title: string; model: string }
     | { ok: false; title: string; inTitle: string; inBox: string };
 
-/** The title and number to store, or the disagreement to put to the member. */
-export function reconcileTitleNumber(title: string, modelNumber: string | null | undefined): TitleNumber {
+/**
+ * The title and number to store, or the question to put to the member.
+ * `bare` says what to do with a number written without "#" that does not
+ * equal the box: "keep" leaves the title as typed (the server, which
+ * cannot ask); "ask" returns the question (the forms).
+ */
+export function reconcileTitleNumber(
+    title: string,
+    modelNumber: string | null | undefined,
+    opts: { bare?: "keep" | "ask" } = {},
+): TitleNumber {
     const box = clean(modelNumber);
     const lead = leadingModelNumber(title);
     if (!lead) return { ok: true, title: title.trim(), model: box };
-    if (!box || same(box, lead.number)) return { ok: true, title: lead.rest, model: box || lead.number };
+    if (box && same(box, lead.number)) return { ok: true, title: lead.rest, model: box };
+    if (!lead.hash && (opts.bare ?? "keep") === "keep") return { ok: true, title: title.trim(), model: box };
+    if (!box && lead.hash) return { ok: true, title: lead.rest, model: lead.number };
     return { ok: false, title: lead.rest, inTitle: lead.number, inBox: box };
 }
 
-/** The question, in words. */
+/** The question, in words. An empty `inBox` asks whether a bare number is the model number. */
 export function titleNumberProblem(inTitle: string, inBox: string): string {
+    if (!inBox) return `The name starts with ${inTitle}. Is that the model number?`;
     return `The name starts with #${inTitle} but the model number says ${inBox}. Which is right?`;
 }
 
@@ -55,7 +75,9 @@ const isChange = (v: unknown): v is Change => typeof v === "object" && v !== nul
  * a correction ({ title: { from, to } }), where the number to compare is the
  * correction's own model_number or else the entry's current one. Entries
  * with no model number of their own (molds, artist pieces) keep the title
- * as typed. Returns the field changes to file, or the question to ask.
+ * as typed. A bare number that is not the box's is left in the title: the
+ * forms have already asked the member about it. Returns the field changes
+ * to file, or the question to ask.
  */
 export function applyTitleNumberRule(
     fieldChanges: Record<string, unknown>,
@@ -77,6 +99,9 @@ export function applyTitleNumberRule(
         out.title = { ...(t as Change), to: r.title };
         if (r.model && !isChange(m) && !clean(entry.currentModel))
             out.model_number = { from: entry.currentModel ?? "", to: r.model };
+        // The box was cleared and the number typed into the title instead: the
+        // number leaves the title, so it must land in the box, not vanish.
+        else if (r.model && isChange(m) && !clean(String(m.to ?? ""))) out.model_number = { ...m, to: r.model };
     } else {
         out.title = r.title;
         if (r.model) out.model_number = r.model;

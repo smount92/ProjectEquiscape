@@ -94,6 +94,30 @@ describe("moldSearch", () => {
         expect(matchKind({ title: "Stallion", parent_title: "Morgan Stallion (G1)" }, "Morgan Stallion")).toBe("own");
     });
 
+    it("calls a row a roster match only when one piece holds every typed word (review of MHH-075)", () => {
+        // Every word is in the title, but in two different pieces: this set does not include a Morgan Stallion.
+        expect(
+            matchKind(
+                { title: "Set With Morgan Mare, Arabian Stallion", parent_title: "Arabian Stallion" },
+                "Morgan Stallion",
+            ),
+        ).toBe("other");
+        expect(
+            matchKind({ title: "Set With Morgan Mare and Arabian Stallion", parent_title: null }, "Morgan Stallion"),
+        ).toBe("other");
+        expect(
+            matchKind({ title: "Set With Morgan Stallion (G1), Swaps", parent_title: "Swaps" }, "Morgan Stallion"),
+        ).toBe("roster");
+        // A piece whose own name holds "and" is still found when the member typed it.
+        expect(matchKind({ title: "Set With Mare and Foal, Stallion", parent_title: null }, "Mare and Foal")).toBe(
+            "roster",
+        );
+        // The set's own name before "With" is the row's own match, as before.
+        expect(matchKind({ title: "Morgan Stallion Set With Swaps", parent_title: null }, "Morgan Stallion")).toBe(
+            "own",
+        );
+    });
+
     it("moves roster-only rows after everything else and keeps each band's order", () => {
         const rows = [
             {

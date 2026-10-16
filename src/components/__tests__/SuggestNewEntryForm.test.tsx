@@ -150,6 +150,28 @@ describe("SuggestNewEntryForm — a model number typed into the title (MHH-079)"
         expect(input.fieldChanges.title).toBe("Silky Sullivan");
         expect(input.fieldChanges.model_number).toBe("5039");
     });
+
+    it("asks whether a bare number in front of the name is the model number, and keeps it in the name on No", async () => {
+        fill("101 Dalmatians", "");
+        const ask = await screen.findByTestId("new-entry-number-conflict");
+        expect(ask.textContent).toMatch(/starts with 101.*model number\?/);
+        expect(createSuggestion).not.toHaveBeenCalled();
+        fireEvent.click(within(ask).getByRole("button", { name: /part of the name/i }));
+        await waitFor(() => expect(createSuggestion).toHaveBeenCalled());
+        const input = createSuggestion.mock.calls[0][0] as { fieldChanges: Record<string, unknown> };
+        expect(input.fieldChanges.title).toBe("101 Dalmatians");
+        expect(input.fieldChanges.model_number).toBeUndefined();
+    });
+
+    it("moves a bare number into the box when the member says it is the model number", async () => {
+        fill("5038 Silky Sullivan", "");
+        const ask = await screen.findByTestId("new-entry-number-conflict");
+        fireEvent.click(within(ask).getByRole("button", { name: "It's #5038" }));
+        await waitFor(() => expect(createSuggestion).toHaveBeenCalled());
+        const input = createSuggestion.mock.calls[0][0] as { fieldChanges: Record<string, unknown> };
+        expect(input.fieldChanges.title).toBe("Silky Sullivan");
+        expect(input.fieldChanges.model_number).toBe("5038");
+    });
 });
 
 describe("SuggestNewEntryForm — a release's last year (MHH-077)", () => {

@@ -13,8 +13,11 @@
 -- 1. public.catalog_search_key(text): the title the way a person types
 --    it. Lowercase, accents folded, quotes and other punctuation removed,
 --    hyphens, dashes and slashes turned into spaces, "&" read as "and",
---    spaces squashed. The app's TypeScript twin is searchKey() in
---    src/lib/catalog/searchKey.ts; change the two together.
+--    spaces squashed. A non-breaking space (U+00A0) and the other Unicode
+--    spaces are turned into plain spaces first: [:space:] does not cover
+--    them, so "Silky<nbsp>Sullivan" would otherwise key as one word. The
+--    app's TypeScript twin is searchKey() in src/lib/catalog/searchKey.ts;
+--    change the two together (a test checks the lists match).
 -- 2. catalog_items.search_key, kept by the database: a STORED generated
 --    column, like sort_key (188), so it fills every existing row when this
 --    is pasted and can never drift from the title. (A trigger plus a
@@ -48,7 +51,9 @@ AS $$
       regexp_replace(
         regexp_replace(
           replace(
-            lower(translate(coalesce(t, ''),
+            lower(translate(translate(coalesce(t, ''),
+              chr(160) || chr(5760) || chr(8192) || chr(8193) || chr(8194) || chr(8195) || chr(8196) || chr(8197) || chr(8198) || chr(8199) || chr(8200) || chr(8201) || chr(8202) || chr(8232) || chr(8233) || chr(8239) || chr(8287) || chr(12288) || chr(65279),
+              repeat(' ', 19)),
               'ÀÁÂÃÄÅÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝàáâãäåçèéêëìíîïñòóôõöùúûüýÿĄĆĘŁŃŚŹŻąćęłńśźżØøŠšŽžČčŘřĚěŮů',
               'AAAAAACEEEEIIIINOOOOOUUUUYaaaaaaceeeeiiiinooooouuuuyyACELNSZZacelnszzOoSsZzCcRrEeUu')),
             '&', ' and '),

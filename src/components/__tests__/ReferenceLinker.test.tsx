@@ -236,6 +236,42 @@ describe("ReferenceLinker", () => {
         expect((within(form).getByPlaceholderText("e.g. 1976 or 1995-1997") as HTMLInputElement).value).toBe("1996");
     });
 
+    it("never fills a set piece's end year in as its first year", async () => {
+        linker.searchLinker.mockResolvedValue({
+            ...RESULT,
+            molds: [{ ...SM, releases: [SM.releases[0], { ...SM.releases[1], from: null, to: 1997 }] }],
+        });
+        render(<ReferenceLinker selectedCatalogId={null} onCatalogSelect={vi.fn()} />);
+        fireEvent.change(screen.getByLabelText("Find the model"), { target: { value: "Silky Sullivan" } });
+        const mold = await screen.findByTestId("linker-mold", {}, { timeout: 3000 });
+        fireEvent.click(within(within(mold).getAllByTestId("linker-release")[1]).getByTestId("linker-add-piece"));
+        const form = within(mold).getByTestId("linker-add");
+        expect((within(form).getByPlaceholderText("e.g. 1976 or 1995-1997") as HTMLInputElement).value).toBe("");
+    });
+
+    it("asks whether a bare number in front of the name is the model number (review of MHH-079)", async () => {
+        linker.fileReleaseUnderMold.mockResolvedValue({ success: true, autoApproved: false });
+        render(<ReferenceLinker selectedCatalogId={null} onCatalogSelect={vi.fn()} />);
+        fireEvent.change(screen.getByLabelText("Find the model"), { target: { value: "Silky Sullivan" } });
+        const mold = await screen.findByTestId("linker-mold", {}, { timeout: 3000 });
+        fireEvent.click(within(mold).getByTestId("linker-add-open"));
+        const form = within(mold).getByTestId("linker-add");
+        fireEvent.change(within(form).getByPlaceholderText("dark chestnut, various socks"), {
+            target: { value: "Spotted" },
+        });
+        fireEvent.change(within(form).getByPlaceholderText("Andrew"), { target: { value: "101 Dalmatians" } });
+        fireEvent.click(within(form).getByText("Add it under this mold"));
+        const ask = await within(form).findByTestId("linker-number-conflict");
+        expect(ask.closest("[role=alert]")?.textContent).toMatch(/starts with 101.*model number\?/);
+        expect(linker.fileReleaseUnderMold).not.toHaveBeenCalled();
+        fireEvent.click(within(ask).getByRole("button", { name: /part of the name/i }));
+        await waitFor(() =>
+            expect(linker.fileReleaseUnderMold).toHaveBeenCalledWith(
+                expect.objectContaining({ moldId: "sm", name: "101 Dalmatians", modelNumber: "" }),
+            ),
+        );
+    });
+
     it("asks which number is right when the name and the number box disagree (MHH-079)", async () => {
         linker.fileReleaseUnderMold.mockResolvedValue({ success: true, autoApproved: false });
         render(<ReferenceLinker selectedCatalogId={null} onCatalogSelect={vi.fn()} />);

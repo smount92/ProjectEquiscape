@@ -160,13 +160,22 @@ export default function SuggestNewEntryForm({
         { id: string; title: string; maker: string | null; item_type: string }[] | null
     >(null);
 
-    // A title that starts with a different number from the Model number box:
-    // the member says which is right before anything is sent (MHH-079).
-    const [numberConflict, setNumberConflict] = useState<{ inTitle: string; inBox: string; title: string } | null>(
-        null,
-    );
+    // A title that starts with a different number from the Model number box,
+    // or with a bare number while the box is empty ("101 Dalmatians"): the
+    // member says which is right before anything is sent (MHH-079).
+    const [numberConflict, setNumberConflict] = useState<{
+        inTitle: string;
+        inBox: string;
+        title: string;
+        typed: string;
+    } | null>(null);
+    // The title the member said keeps its leading number as part of the name.
+    const [numberIsName, setNumberIsName] = useState<string | null>(null);
 
-    const handleSubmit = (confirmDuplicates = false, chosen?: { title: string; model: string }) => {
+    const handleSubmit = (
+        confirmDuplicates = false,
+        chosen?: { title: string; model: string; keepNumber?: boolean },
+    ) => {
         const titleNow = chosen?.title ?? title;
         const modelNow = chosen?.model ?? modelNumber;
         if (!titleNow.trim()) {
@@ -196,14 +205,21 @@ export default function SuggestNewEntryForm({
         const effectiveMaker = isArtistPiece ? artistName.trim() : maker === "Other" ? customMaker.trim() : maker;
 
         // A number typed at the front of the title: off the title when the box
-        // holds it, into the box when it is empty, a question when they differ.
+        // holds it, into the box when it is empty and written "#5038", a
+        // question when they differ or when a bare number may be part of the name.
         // Molds and artist pieces have no number field, so their titles stay as typed.
         const hasNumberField = !isArtistPiece && !isMold;
+        const keepNumber = chosen?.keepNumber || numberIsName === titleNow.trim();
         const numbered = hasNumberField
-            ? reconcileTitleNumber(titleNow, modelNow)
+            ? reconcileTitleNumber(titleNow, modelNow, { bare: keepNumber ? "keep" : "ask" })
             : ({ ok: true, title: titleNow.trim(), model: "" } as const);
         if (!numbered.ok) {
-            setNumberConflict({ inTitle: numbered.inTitle, inBox: numbered.inBox, title: numbered.title });
+            setNumberConflict({
+                inTitle: numbered.inTitle,
+                inBox: numbered.inBox,
+                title: numbered.title,
+                typed: titleNow.trim(),
+            });
             return;
         }
         setNumberConflict(null);
@@ -757,10 +773,11 @@ export default function SuggestNewEntryForm({
                         {titleNumberProblem(numberConflict.inTitle, numberConflict.inBox)}
                     </p>
                     <p className="m-0 mb-3 text-xs text-muted-foreground">
-                        The number goes in its own box; the name keeps just “{numberConflict.title}”.
+                        {numberConflict.inBox ? "The" : "If it is, the"} number goes in its own box; the name keeps just
+                        “{numberConflict.title}”.
                     </p>
                     <div className="flex flex-wrap gap-2">
-                        {[numberConflict.inTitle, numberConflict.inBox].map((n) => (
+                        {[numberConflict.inTitle, numberConflict.inBox].filter(Boolean).map((n) => (
                             <Button
                                 key={n}
                                 variant="outline"
@@ -776,6 +793,23 @@ export default function SuggestNewEntryForm({
                                 It&apos;s #{n}
                             </Button>
                         ))}
+                        {!numberConflict.inBox && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={isPending}
+                                onClick={() => {
+                                    setNumberIsName(numberConflict.typed);
+                                    handleSubmit(duplicates !== null, {
+                                        title: numberConflict.typed,
+                                        model: modelNumber,
+                                        keepNumber: true,
+                                    });
+                                }}
+                            >
+                                No, it&apos;s part of the name
+                            </Button>
+                        )}
                     </div>
                 </div>
             )}

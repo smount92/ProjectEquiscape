@@ -5,7 +5,7 @@ import { createAnonClient } from "@/lib/supabase/anon";
 import { referenceHref } from "@/lib/catalog/referenceUrl";
 import {
     mentionsMold,
-    rosterPrefilterWords,
+    rosterPrefilterPatterns,
     setLabel,
     splitNumberFromTitle,
     stripGeneration,
@@ -546,15 +546,15 @@ export const getMoldSetMentions = unstable_cache(
         const supabase = createAnonClient();
         const name = stripGeneration(moldTitle).trim();
         if (name.length < 3) return [];
-        // Every word of the name, any order; mentionsMold below keeps only
-        // rows that list this mold as a whole piece (MHH-074).
+        // Every word of the name after "with", any order; mentionsMold below
+        // keeps only rows that list this mold as a whole piece (MHH-074).
+        // Ordered, so the 400-row cap cuts the same rows on every call.
         let query = supabase
             .from("catalog_items")
             .select("id, title, maker, maker_slug, slug, parent_id, attributes")
-            .eq("item_type", "plastic_release")
-            .ilike("title", "%with%");
-        for (const w of rosterPrefilterWords(name)) query = query.ilike("title", `%${w.replace(/[%_]/g, "")}%`);
-        query = query.limit(400);
+            .eq("item_type", "plastic_release");
+        for (const p of rosterPrefilterPatterns(name)) query = query.ilike("title", p);
+        query = query.order("id").limit(400);
         if (scale) query = query.eq("scale", scale);
         const [{ data: sets }, { data: own }] = await Promise.all([
             query,
@@ -614,7 +614,7 @@ export const getMoldSetMentions = unstable_cache(
             (a, b) => (a.year ?? 9999) - (b.year ?? 9999) || a.setName.localeCompare(b.setName),
         );
     },
-    ["reference:mold-sets:v3"],
+    ["reference:mold-sets:v4"],
     { revalidate: REVALIDATE, tags: [REFERENCE_PAGES_CACHE_TAG] },
 );
 

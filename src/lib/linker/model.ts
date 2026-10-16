@@ -185,19 +185,56 @@ export function setLabel(title: string): string | null {
  * blanket", "unicorn halter") or a note ("replaced by …"), MHH-068.
  */
 export function rosterPieces(title: string): string[] {
+    return rosterSegments(title)
+        .map((s) => s.text)
+        .filter(isHorsePiece);
+}
+
+/** A capitalised piece is a horse; a lowercase one is an accessory or a note. */
+const isHorsePiece = (p: string) => /^[\p{Lu}\d]/u.test(p);
+
+/** The roster cut into pieces, each with whether "and"/"&" (rather than a comma) joined it to the one before. */
+function rosterSegments(title: string): { text: string; joinedByAnd: boolean }[] {
     const i = title.search(/\bwith\b/i);
     if (i < 0) return [];
-    return title
+    // A capturing split keeps the separators at the odd positions.
+    const parts = title
         .slice(i)
         .replace(/^with\b/i, "")
-        .split(/,|&|\band\b|\bwith\b|;/i)
-        .map((p) =>
-            p
+        .split(/(,|&|\band\b|\bwith\b|;)/i);
+    const out: { text: string; joinedByAnd: boolean }[] = [];
+    for (let k = 0; k < parts.length; k += 2) {
+        const sep = k > 0 ? parts[k - 1] : "";
+        out.push({
+            text: parts[k]
                 .replace(/\([^)]*\)/g, " ")
                 .replace(/^[\s"'“”‘’]+|[\s.,;:!"'“”‘’]+$/g, "")
                 .replace(/\s+/g, " "),
-        )
-        .filter((p) => /^[\p{Lu}\d]/u.test(p));
+            joinedByAnd: sep === "&" || /^and$/i.test(sep),
+        });
+    }
+    return out;
+}
+
+/**
+ * Runs of two or more roster pieces joined by "and" or "&", put back
+ * together ("Set With Mare and Foal, Stallion" → ["Mare and Foal"]). The
+ * split on "and" that lets "Shetland Pony and Welsh Pony" name two molds
+ * also cut a mold whose own name holds "and" in two; these runs let that
+ * name match whole. Never joined across a comma.
+ */
+export function rosterRuns(title: string): string[] {
+    const segs = rosterSegments(title);
+    const out: string[] = [];
+    for (let a = 0; a < segs.length; a++) {
+        if (!isHorsePiece(segs[a].text)) continue;
+        let run = segs[a].text;
+        for (let b = a + 1; b < segs.length && segs[b].joinedByAnd && segs[b].text; b++) {
+            run += " and " + segs[b].text;
+            out.push(run);
+        }
+    }
+    return out;
 }
 
 /**
@@ -205,18 +242,18 @@ export function rosterPieces(title: string): string[] {
  * piece counts only when it IS the mold's name, whole (same words, any
  * order, punctuation aside): "American Saddlebred" is not the Saddlebred
  * mold. Matching the name as a word inside a piece put 37 false set lines
- * on the Stablemate Saddlebred mold (MHH-074).
+ * on the Stablemate Saddlebred mold (MHH-074). Pieces joined by "and" also
+ * count together, for a mold named "Mare and Foal".
  */
 export function mentionsMold(title: string, moldTitle: string): boolean {
     const mold = stripGeneration(moldTitle);
-    return rosterPieces(title).some((piece) => sameWords(stripGeneration(piece), mold));
+    return [...rosterPieces(title), ...rosterRuns(title)].some((piece) => sameWords(stripGeneration(piece), mold));
 }
 
 /**
- * Words a title must contain to be worth testing with `mentionsMold`, for
- * the database read that fetches candidate set rows ("with" is added by
- * the caller). Order-free, so "Morgan - Prancing" is fetched for Prancing
- * Morgan. One-letter words ("O" in Man O' War) are left out.
+ * Words a title must contain to be worth testing with `mentionsMold`.
+ * Order-free, so "Morgan - Prancing" is fetched for Prancing Morgan.
+ * One-letter words ("O" in Man O' War) are left out.
  */
 export function rosterPrefilterWords(moldTitle: string): string[] {
     return stripGeneration(moldTitle)
@@ -224,9 +261,30 @@ export function rosterPrefilterWords(moldTitle: string): string[] {
         .filter((w) => w.length >= 2);
 }
 
-/** The Registry's one year label (cardDisplay.yearRangeLabel): "1995–1997", or "1998" for a start alone. */
+/**
+ * The ILIKE patterns for the database read that fetches a mold's candidate
+ * set rows: each word after "with", where the roster is. That read stops at
+ * 400 rows, so a word matched anywhere in the title filled it with sets
+ * that only carry the word in their own name, and real ones were cut.
+ * The words hold only letters and digits, so no LIKE wildcard gets in.
+ */
+export function rosterPrefilterPatterns(moldTitle: string): string[] {
+    return rosterPrefilterWords(moldTitle).map((w) => `%with%${w}%`);
+}
+
+/** The Registry's one year label (cardDisplay.yearRangeLabel): "1995–1997", "1998" for a start alone, "–1997" for an end alone. */
 export function yearsLabel(r: Pick<LinkerRelease, "from" | "to">): string | null {
     return yearRangeLabel({ release_year_start: r.from, release_year_end: r.to });
+}
+
+/**
+ * The years a form box is filled in with, in the shape `parseYearRange`
+ * reads: "1995-1997" or "1998". A row with only a last year fills in
+ * nothing, so its end year is never filed as a first year.
+ */
+export function yearsInput(r: Pick<LinkerRelease, "from" | "to">): string {
+    if (!r.from) return "";
+    return r.to && r.to !== r.from ? `${r.from}-${r.to}` : String(r.from);
 }
 
 export type MissingFact = "colour" | "year" | "model number";

@@ -9,6 +9,7 @@ import {
     searchKey,
     searchWords,
     termMatchesTitle,
+    UNICODE_SPACE_CODES,
 } from "@/lib/catalog/searchKey";
 
 /**
@@ -73,5 +74,26 @@ describe("searchKey", () => {
         );
         expect(sql).toContain(`'${ACCENTS_FROM}'`);
         expect(sql).toContain(`'${ACCENTS_TO}'`);
+    });
+
+    it("reads a non-breaking space as a space, here and in the database function", () => {
+        // Built from code points: the characters themselves are invisible in an editor.
+        const sp = (n: number) => String.fromCharCode(n);
+        expect(searchKey(`Silky${sp(0xa0)}Sullivan`)).toBe("silky sullivan");
+        expect(searchKey(`Silky${sp(0x202f)}Sullivan`)).toBe("silky sullivan");
+        expect(searchKey(`Silky${sp(0x3000)}Sullivan`)).toBe("silky sullivan");
+        expect(searchKey(`${sp(0xfeff)}Silky${sp(0x2007)}${sp(0xa0)}Sullivan`)).toBe("silky sullivan");
+        // Every non-ASCII character JavaScript reads as a space is on the list.
+        const listed = new Set(UNICODE_SPACE_CODES);
+        for (let code = 0x80; code <= 0xffff; code++)
+            if (/\s/.test(sp(code))) expect(listed.has(code), code.toString(16)).toBe(true);
+        // SQL [:space:] does not cover U+00A0 (and its kin), so 240 turns the
+        // same list into spaces first, or "Silky<nbsp>Sullivan" keys as "silkysullivan".
+        const sql = readFileSync(
+            path.join(process.cwd(), "supabase", "migrations", "240_registry_search_key.sql"),
+            "utf8",
+        );
+        expect(sql).toContain(UNICODE_SPACE_CODES.map((n) => `chr(${n})`).join(" || "));
+        expect(sql).toContain(`repeat(' ', ${UNICODE_SPACE_CODES.length})`);
     });
 });

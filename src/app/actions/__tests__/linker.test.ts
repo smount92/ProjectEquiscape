@@ -89,12 +89,19 @@ describe("fileReleaseUnderMold: the years", () => {
             }),
         );
         suggestions.createSuggestion.mockClear();
-        await fileReleaseUnderMold({ moldId: "sb", name: "5002 Pinto Saddlebred", look: "Pinto" });
+        await fileReleaseUnderMold({ moldId: "sb", name: "#5002 Pinto Saddlebred", look: "Pinto" });
         expect(suggestions.createSuggestion).toHaveBeenCalledWith(
             expect.objectContaining({
                 fieldChanges: expect.objectContaining({ title: "Pinto Saddlebred", model_number: "5002" }),
             }),
         );
+        // A bare number with an empty box may be part of the name ("101 Dalmatians"):
+        // the form asks the member; the server never moves it silently.
+        suggestions.createSuggestion.mockClear();
+        await fileReleaseUnderMold({ moldId: "sb", name: "101 Dalmatians", look: "Spotted" });
+        const sent = suggestions.createSuggestion.mock.calls[0][0] as { fieldChanges: Record<string, unknown> };
+        expect(sent.fieldChanges.title).toBe("101 Dalmatians");
+        expect(sent.fieldChanges.model_number).toBeUndefined();
         suggestions.createSuggestion.mockClear();
         const r = await fileReleaseUnderMold({
             moldId: "sb",

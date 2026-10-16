@@ -48,7 +48,7 @@ import HorseDocuments from "@/components/passport/HorseDocuments";
 import { getHorseDocuments } from "@/lib/shows/queries";
 import { qualifierDisplayFields } from "@/lib/records/qualifiers";
 import { getMakingForHorse } from "@/app/actions/work-records";
-import { yearRangeLabel } from "@/lib/catalog/cardDisplay";
+import { passportReleaseInfo } from "@/lib/catalog/cardDisplay";
 
 // Force fresh data on every request — prevents stale comments/favorites
 
@@ -345,7 +345,6 @@ export default async function PublicPassportPage({
 
     // Reference display info
     const cat = horse.catalog_items;
-    const attrs = (cat?.attributes ?? {}) as Record<string, unknown>;
     // One owner for the Mold/Manufacturer/Scale lines (lib/passport/referenceLines).
     const refInfo = cat ? referenceLines(cat as unknown as ReferenceRow) : null;
 
@@ -361,16 +360,7 @@ export default async function PublicPassportPage({
               })
             : null;
 
-    const releaseInfo =
-        cat && cat.item_type === "plastic_release"
-            ? {
-                  name: cat.title,
-                  modelNumber: attrs.model_number as string | null,
-                  color: attrs.color_description as string | null,
-                  yearStart: attrs.release_year_start as number | null,
-                  yearEnd: attrs.release_year_end as number | null,
-              }
-            : null;
+    const releaseInfo = passportReleaseInfo(cat);
 
     const ownerAlias = horse.users?.alias_name ?? "Unknown";
     const isOwnHorse = horse.owner_id === user.id;
@@ -645,16 +635,13 @@ export default async function PublicPassportPage({
                                     </div>
                                 )}
 
-                                {releaseInfo.yearStart && (
+                                {releaseInfo.years && (
                                     <div className="flex items-center justify-between border-b border-white/20 px-0 py-[5px]">
                                         <span className="text-sm font-medium text-secondary-foreground">
                                             Release Years
                                         </span>
                                         <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
-                                            {yearRangeLabel({
-                                                release_year_start: releaseInfo.yearStart,
-                                                release_year_end: releaseInfo.yearEnd,
-                                            })}
+                                            {releaseInfo.years}
                                         </span>
                                     </div>
                                 )}
