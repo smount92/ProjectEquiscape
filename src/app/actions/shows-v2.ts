@@ -2613,15 +2613,10 @@ async function enterOne(
     // axis — the halter-declaration rule needs it. ──
     // moderation_scratched_at (235) keeps a horse the site team scratched
     // out of that class; before 235 the column isn't there, so ask without it.
-    let { data: entryRows, error: eErr } = await supabase
-        .from("show_class_entries")
-        .select(`${ENTRY_RULE_COLUMNS}, moderation_scratched_at`)
-        .eq("show_id", showId);
+    const readEntries = (columns: string) => supabase.from("show_class_entries").select(columns).eq("show_id", showId);
+    let { data: entryRows, error: eErr } = await readEntries(`${ENTRY_RULE_COLUMNS}, moderation_scratched_at`);
     if (eErr && (eErr.code === "42703" || eErr.code === "PGRST204")) {
-        ({ data: entryRows, error: eErr } = await supabase
-            .from("show_class_entries")
-            .select(ENTRY_RULE_COLUMNS)
-            .eq("show_id", showId));
+        ({ data: entryRows, error: eErr } = await readEntries(ENTRY_RULE_COLUMNS));
     }
     if (eErr) return { success: false, error: eErr.message };
     const allEntries = (entryRows ?? []) as unknown as ShowEntryWithAxis[];
