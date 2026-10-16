@@ -12,6 +12,7 @@
  */
 
 import { stripGeneration } from "@/lib/linker/model";
+import { sameWords } from "@/lib/catalog/searchKey";
 
 /** Most ids one search carries into the facet query (a URL-length budget). */
 export const EXPANDED_CANDIDATE_LIMIT = 260;
@@ -38,11 +39,14 @@ export interface CandidateRow {
     scale?: string | null;
 }
 
-/** Molds whose own name (generation stripped) is exactly the searched name. */
+/**
+ * Molds whose own name (generation stripped) is the searched name: the same
+ * words, however punctuated or ordered ("Morgan - Prancing" names Prancing
+ * Morgan, MHH-080), but never a longer name.
+ */
 export function namedMolds<T extends CandidateRow>(rows: T[], name: string): T[] {
-    const n = name.trim().toLowerCase();
-    if (!n) return [];
-    return rows.filter((r) => r.item_type === "plastic_mold" && stripGeneration(r.title).trim().toLowerCase() === n);
+    if (!name.trim()) return [];
+    return rows.filter((r) => r.item_type === "plastic_mold" && sameWords(stripGeneration(r.title), name));
 }
 
 /**

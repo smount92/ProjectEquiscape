@@ -22,6 +22,10 @@ describe("moldSearch", () => {
         ];
         expect(namedMolds(rows, "Arabian Stallion").map((r) => r.id)).toEqual(["pp", "sm"]);
         expect(namedMolds(rows, "")).toEqual([]);
+        // However it is punctuated or ordered (MHH-080).
+        const morgan = [{ id: "pm", item_type: "plastic_mold", title: "Prancing Morgan", scale: "Stablemate (1:32)" }];
+        expect(namedMolds(morgan, "Morgan - Prancing").map((r) => r.id)).toEqual(["pm"]);
+        expect(namedMolds(rows, "arabian-stallion").map((r) => r.id)).toEqual(["pp", "sm"]);
     });
 
     it("places each named mold's releases right under it, moves loose ones up, and keeps the rest in order", () => {

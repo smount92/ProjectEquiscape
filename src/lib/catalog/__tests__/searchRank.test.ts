@@ -4,6 +4,14 @@ import { applyTypeFilter, rankSearchResults, releaseYears } from "@/lib/catalog/
 const item = (title: string, itemType: string) => ({ title, itemType });
 
 describe("rankSearchResults", () => {
+    it("ranks an exact title exact however it is punctuated (MHH-080)", () => {
+        const results = [
+            { title: "Horspital Play Set With Lying Foal", itemType: "plastic_release" },
+            { title: '"Horspital" Play Set', itemType: "plastic_release" },
+        ];
+        expect(rankSearchResults(results, "Horspital Play Set")[0].title).toBe('"Horspital" Play Set');
+    });
+
     // Amanda's actual report, 2026-08-27: searching "Rising Hopes"
     // put the exact-match resin second to last, below every fuzzy
     // Breyer release, because the old UI sectioned resins last.

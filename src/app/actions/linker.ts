@@ -18,6 +18,7 @@ import { createClient } from "@/lib/supabase/server";
 import { parseCatalogQuery, makerMatches } from "@/lib/catalog/queryParse";
 import { referenceHref } from "@/lib/catalog/referenceUrl";
 import { createSuggestion } from "@/app/actions/catalog-suggestions";
+import { containsEveryWord, sameWords, searchKey } from "@/lib/catalog/searchKey";
 import {
     collapseSetPieces,
     commonOne,
@@ -302,8 +303,8 @@ export async function searchLinker(rawTerm: string, scale: string | null): Promi
     // Named matches first; when nothing is named, the three closest names so the member is not stranded.
     const moldPool = allMolds.some(named) ? allMolds.filter(named) : allMolds.slice(0, 3);
     const molds = moldPool.sort((a, b) => {
-        const ea = stripGeneration(a.title).toLowerCase() === termLower ? 0 : 1;
-        const eb = stripGeneration(b.title).toLowerCase() === termLower ? 0 : 1;
+        const ea = sameWords(stripGeneration(a.title), termLower) ? 0 : 1;
+        const eb = sameWords(stripGeneration(b.title), termLower) ? 0 : 1;
         return ea - eb;
     });
     const inScale = molds.filter((m) => scaleMatches(m.scale, chosen)).slice(0, MAX_MOLDS);
@@ -441,11 +442,18 @@ export async function fileReleaseFact(input: {
     return { success: true };
 }
 
-/** The row's name is the term, or contains it, or the term contains it ("G1 Silky Sullivan" vs "Silky Sullivan"). */
+/**
+ * The row's name is the term, or contains it, or the term contains it ("G1
+ * Silky Sullivan" vs "Silky Sullivan"), or holds every word of it in another
+ * order ("Morgan - Prancing" for Prancing Morgan). Compared as search keys,
+ * so quotes, hyphens and apostrophes never decide it (MHH-080).
+ */
 function titleMatches(title: string, termLower: string): boolean {
-    const t = stripGeneration(title).toLowerCase();
-    if (!termLower) return true;
-    return t.includes(termLower) || termLower.includes(t);
+    const term = searchKey(termLower);
+    if (!term) return true;
+    const t = searchKey(stripGeneration(title));
+    if (!t) return false;
+    return t.includes(term) || term.includes(t) || containsEveryWord(t, term);
 }
 
 export type MoldChoice = { id: string; title: string; maker: string; scale: string | null };
