@@ -24,7 +24,10 @@ describe("describeReportTargets", () => {
             "posts",
             rows([
                 { id: "p1", content: "Buy cheap   models\nhere", author_id: "u1", parent_id: null, group_id: null },
-                { id: "r1", content: "rude", author_id: "u2", parent_id: "t1", group_id: "g1", hidden_at: null },
+                // A barn reply has no group_id of its own (replyToThread
+                // doesn't pass one); its thread does.
+                { id: "r1", content: "rude", author_id: "u2", parent_id: "t1", group_id: null, hidden_at: null },
+                { id: "t1", title: "Show me your bays", content: "…", author_id: "u3", group_id: "g1" },
             ]),
         );
         db.on("groups", rows([{ id: "g1", slug: "quarter-horse-barn" }]));
@@ -211,6 +214,21 @@ describe("takeDownReportedContent", () => {
         expect(db.filter(cleared, "like", "link_url")).toBe("%/thread/t1");
     });
 
+    it("hides only what is still showing; a second take-down closes the report and tells nobody", async () => {
+        db.on("posts", (q) => (q.op === "update" ? { data: [], error: null } : { data: { id: "p1" }, error: null }));
+        expect(await takeDownReportedContent(client, "post", "p1", ADMIN)).toEqual({
+            success: true,
+            ownerId: null,
+            withdrawnOffers: [],
+        });
+        expect(db.filter(db.writes("posts")[0], "is", "hidden_at")).toBeNull();
+        expect(db.writes("notifications")).toEqual([]);
+
+        db.reset();
+        db.on("posts", (q) => (q.op === "update" ? { data: [], error: null } : { data: null, error: null }));
+        expect((await takeDownReportedContent(client, "post", "p1", ADMIN)).success).toBe(false);
+    });
+
     it("clears only the notices a hidden reply sent, not the thread's others", async () => {
         db.on("posts", (q) =>
             q.op === "update"
@@ -220,13 +238,13 @@ describe("takeDownReportedContent", () => {
                               id: "r1",
                               author_id: "u2",
                               parent_id: "t1",
-                              group_id: "g1",
+                              group_id: null, // as real barn replies are; the thread has it
                               created_at: "2026-10-15T10:00:00.000Z",
                           },
                       ],
                       error: null,
                   }
-                : OK,
+                : { data: { group_id: "g1" }, error: null },
         );
         await takeDownReportedContent(client, "comment", "r1", ADMIN);
         const [cleared] = db.writes("notifications");
@@ -397,14 +415,22 @@ describe("takeDownReportedContent", () => {
             expect(db.writes("user_horses")).toEqual([]);
         });
 
-        it("won't hold a horse twice", async () => {
+        it("treats a horse already held as done: closes the report, tells nobody again", async () => {
             db.on("user_horses", () => ({
                 data: { ...LISTED_HORSE, moderation_hidden_at: "2026-10-15T00:00:00Z" },
                 error: null,
             }));
             const result = await takeDownReportedContent(client, "horse", "h1", ADMIN);
-            expect(result.success).toBe(false);
+            expect(result).toEqual({ success: true, ownerId: null, withdrawnOffers: [] });
             expect(db.writes("user_horses")).toEqual([]);
+        });
+
+        it("clears a stale Pending Sale too, once no sale is under way", async () => {
+            db.on("user_horses", (q) =>
+                q.op === "select" ? { data: { ...LISTED_HORSE, trade_status: "Pending Sale" }, error: null } : OK,
+            );
+            await takeDownReportedContent(client, "horse", "h1", ADMIN);
+            expect(db.writes("user_horses")[0].payload).toMatchObject({ trade_status: "Not for Sale" });
         });
     });
 

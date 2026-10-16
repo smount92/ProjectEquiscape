@@ -333,6 +333,11 @@ export async function suspendUser(userId: string, reason: string): Promise<{ suc
                 app_metadata: { ...target.user.app_metadata, is_suspended: true },
             });
             if (authError) return { success: false, error: authError.message };
+            try {
+                await admin.auth.admin.signOut(userId, "global");
+            } catch (err) {
+                logger.error("Admin", `session revocation failed for suspended user ${userId}`, err);
+            }
         }
         if (was.suspended_reason === trimmedReason) return { success: true };
         const { error: amendError } = await admin

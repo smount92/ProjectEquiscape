@@ -105,8 +105,19 @@ export async function describeReportTargets(
         rowsById(db, "id_suggestions", "*", idsOf("id_suggestion")),
     ]);
 
+    // A barn reply has no group_id of its own (replyToThread calls
+    // add_post_reply without one); its thread has, so read the threads too.
+    const parents = await rowsById(db, "posts", "id, group_id", [
+        ...new Set(
+            [...posts.values()]
+                .filter((p) => str(p.parent_id) && !str(p.group_id))
+                .map((p) => str(p.parent_id) as string),
+        ),
+    ]);
+    const groupOf = (p: Row) => str(p.group_id) ?? str(parents.get(str(p.parent_id) ?? "")?.group_id);
+
     // Second hop: barn slugs for thread links, and the names a show entry needs.
-    const groupIds = [...posts.values()].map((p) => str(p.group_id)).filter((x): x is string => !!x);
+    const groupIds = [...posts.values()].map(groupOf).filter((x): x is string => !!x);
     const entryRows = [...entries.values()];
     const [groups, entryHorses, shows, classes] = await Promise.all([
         rowsById(db, "groups", "id, slug", [...new Set(groupIds)]),
@@ -126,7 +137,7 @@ export async function describeReportTargets(
             const p = posts.get(t.targetId);
             if (p) {
                 const root = (type === "comment" ? str(p.parent_id) : null) ?? t.targetId;
-                const slug = str(groups.get(str(p.group_id) ?? "")?.slug);
+                const slug = str(groups.get(groupOf(p) ?? "")?.slug);
                 const title = str(p.title);
                 view = {
                     summary: title ? `${title}: ${excerpt(str(p.content), 120)}` : excerpt(str(p.content)),
@@ -287,17 +298,25 @@ export async function takeDownReportedContent(
     const hideable = HIDEABLE[type];
     if (hideable) {
         const isPost = hideable.table === "posts";
+        // Only while it is still showing, so a second take-down (another
+        // report on the same thing) keeps the first stamp and tells nobody twice.
         const { data, error } = await db
             .from(hideable.table)
             .update({ hidden_at: now, hidden_by: adminId })
             .eq("id", id)
+            .is("hidden_at", null)
             .select(isPost ? "id, author_id, parent_id, group_id, created_at" : `id, ${hideable.owner}`);
         if (isMissingColumn(error)) {
             return fail("Hiding needs migration 235. Paste it (Admin › Ops lists it), then try again.");
         }
         if (error) return safeError("Moderation", error, "Could not hide it. Please try again.");
         const row = ((data ?? []) as unknown as Row[])[0];
-        if (!row) return fail("It has already been deleted, so there is nothing to hide.");
+        if (!row) {
+            const { data: still } = await db.from(hideable.table).select("id").eq("id", id).maybeSingle();
+            // Already hidden: the report is closed as dealt with, and nobody is told again.
+            if (still) return done(null);
+            return fail("It has already been deleted, so there is nothing to hide.");
+        }
         if (isPost) await clearNotificationsAbout(db, row);
         return done(str(row[hideable.owner]));
     }
@@ -305,17 +324,18 @@ export async function takeDownReportedContent(
     if (type === "message") {
         const { data: m } = await db
             .from("messages")
-            .select("id, kind, sender_id, conversation_id, created_at")
+            .select("id, kind, sender_id, conversation_id, created_at, deleted_at")
             .eq("id", id)
             .maybeSingle();
         const msg = m as Row | null;
         if (!msg) return fail("That message has already been deleted.");
+        if (msg.deleted_at) return done(null); // already removed: nobody is told again
         if (!REMOVABLE_MESSAGE_KINDS.includes(str(msg.kind) ?? "chat")) {
             return fail(
                 "This entry is part of a deal's record and can't be removed. Suspend the member instead if they broke the rules.",
             );
         }
-        const { error } = await db.from("messages").update({ deleted_at: now }).eq("id", id);
+        const { error } = await db.from("messages").update({ deleted_at: now }).eq("id", id).is("deleted_at", null);
         if (error) return safeError("Moderation", error, "Could not remove the message. Please try again.");
         await clearInboxPreview(db, str(msg.conversation_id), str(msg.created_at));
         return done(str(msg.sender_id));
@@ -327,7 +347,7 @@ export async function takeDownReportedContent(
         const { data: e } = await db.from("show_class_entries").select("*").eq("id", id).maybeSingle();
         const entry = e as Row | null;
         if (!entry) return fail("That entry has already been removed from the show.");
-        if (entry.moderation_scratched_at) return fail("This entry has already been scratched by the site team.");
+        if (entry.moderation_scratched_at) return done(null); // already scratched by us: nobody is told again
         const { data: s } = await db.from("shows").select("status").eq("id", entry.show_id).maybeSingle();
         if (RESULTS_FINAL.includes(str((s as Row | null)?.status) ?? "")) {
             // The same rule the hosts' tools follow: after results, only
@@ -374,7 +394,7 @@ async function takeDownHorse(db: Db, id: string, adminId: string, now: string): 
     const { data: h } = await db.from("user_horses").select("*").eq("id", id).maybeSingle();
     const horse = h as Row | null;
     if (!horse || horse.deleted_at) return fail("That horse has already been deleted by its owner.");
-    if (horse.moderation_hidden_at) return fail("This horse has already been made private by the site team.");
+    if (horse.moderation_hidden_at) return { success: true, ownerId: null, withdrawnOffers: [] }; // already held: nobody is told again
 
     const saleUnderWay = async (): Promise<ActionFailure | null> => {
         const { data: deals, error } = await db
@@ -430,7 +450,9 @@ async function takeDownHorse(db: Db, id: string, adminId: string, now: string): 
     // Private takes the passport, and with it the listing, off every
     // public surface; the trade status is reset too so the horse does
     // not reappear on the Market if the hold is ever lifted.
-    const listed = LISTED.includes(str(horse.trade_status) ?? "");
+    // A "Pending Sale" with no sale under way (checked above) is stale, and
+    // a later reset to "Open to Offers" would trip the hold, so it goes too.
+    const listed = [...LISTED, "Pending Sale"].includes(str(horse.trade_status) ?? "");
     const privately = { visibility: "private", ...(listed ? { trade_status: "Not for Sale" } : {}) };
     let { error } = await db
         .from("user_horses")
@@ -457,10 +479,16 @@ async function takeDownHorse(db: Db, id: string, adminId: string, now: string): 
 async function clearNotificationsAbout(db: Db, post: Row): Promise<void> {
     const id = str(post.id);
     const parentId = str(post.parent_id);
-    const inBarn = !!str(post.group_id);
-    const linkOf = (postId: string) => (inBarn ? `%/thread/${postId}` : `/feed/${postId}`);
     try {
         if (!id) return;
+        // A barn reply has no group_id of its own; its thread says whether
+        // the notices link to a barn thread or a feed post.
+        let inBarn = !!str(post.group_id);
+        if (!inBarn && parentId) {
+            const { data: parent } = await db.from("posts").select("group_id").eq("id", parentId).maybeSingle();
+            inBarn = !!str((parent as Row | null)?.group_id);
+        }
+        const linkOf = (postId: string) => (inBarn ? `%/thread/${postId}` : `/feed/${postId}`);
         if (!parentId) {
             const q = db.from("notifications").delete();
             const { error } = inBarn ? await q.like("link_url", linkOf(id)) : await q.eq("link_url", linkOf(id));
