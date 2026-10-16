@@ -15,6 +15,10 @@ to `main`, one rebuild. How releases work: `docs/guides/releasing.md`.
   a link to the customer in Stripe. Refunds never cancel anyone by
   themselves: to end a member's access, cancel the subscription in Stripe.
 
+- A bell when a member opens a Deal Room dispute; open disputes are counted in
+  the console pulse and listed in Admin › Members. Notification links now
+  open the right admin tab.
+
 ## Go-live checklist (owner)
 
 1. **Stripe dashboard, once:**

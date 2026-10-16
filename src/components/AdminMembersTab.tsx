@@ -19,6 +19,7 @@ import { useCallback, useEffect, useState, useTransition } from "react";
 
 import { searchMembers, suspendUser, unsuspendUser, type AdminMemberRow } from "@/app/actions/admin";
 import AdminModerationCard from "@/components/AdminModerationCard";
+import AdminDisputesCard from "@/components/AdminDisputesCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -223,6 +224,8 @@ export default function AdminMembersTab() {
                 <h3 className="mt-0 mb-2 text-sm font-bold text-muted-foreground">Direct handle (no search needed)</h3>
                 <AdminModerationCard />
             </div>
+
+            <AdminDisputesCard />
         </div>
     );
 }

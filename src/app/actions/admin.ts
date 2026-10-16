@@ -1001,6 +1001,8 @@ export interface AdminPulse {
         contactMessages: number | null;
         legacySuggestions: number | null;
         externalShows: number | null;
+        /** Deal Room disputes still open (MHH-020). */
+        disputes: number | null;
     };
 }
 
@@ -1073,6 +1075,7 @@ export async function getAdminPulse(): Promise<
         barnRequests,
         shows,
         sanctioning,
+        disputes,
     ] = await Promise.allSettled([
         admin.auth.admin.listUsers({ perPage: 1000, page: 1 }),
         head("users").gte("created_at", since7d) as unknown as Promise<CountResult>,
@@ -1094,6 +1097,7 @@ export async function getAdminPulse(): Promise<
                 .ilike("sanctioning_note", `%${SANCTIONING_REQUEST_MARKER}%`);
             return { count, error };
         })(),
+        head("conversations").not("disputed_at", "is", null) as unknown as Promise<CountResult>,
     ]);
 
     const showsValue =
@@ -1122,6 +1126,7 @@ export async function getAdminPulse(): Promise<
                 contactMessages: countOf(contactMessages as PromiseSettledResult<CountResult>),
                 legacySuggestions: countOf(legacySuggestions as PromiseSettledResult<CountResult>),
                 externalShows: countOf(externalShows as PromiseSettledResult<CountResult>),
+                disputes: countOf(disputes as PromiseSettledResult<CountResult>),
             },
         },
     };

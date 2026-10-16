@@ -201,9 +201,11 @@ export default function AdminTabs({
 }: AdminTabsProps) {
     const [activeTab, setActiveTab] = useState<TabKey>("mailbox");
 
-    // Restore from localStorage
+    // Restore from the address (/admin#members, used by notification links),
+    // then from localStorage.
     useEffect(() => {
-        const saved = localStorage.getItem("admin-tab");
+        const fromHash = window.location.hash.slice(1);
+        const saved = TABS.some((t) => t.key === fromHash) ? fromHash : localStorage.getItem("admin-tab");
         if (saved && TABS.some((t) => t.key === saved)) {
             // eslint-disable-next-line react-hooks/set-state-in-effect -- mount-gate: the saved tab lives in localStorage, unreadable during SSR
             setActiveTab(saved as TabKey);
