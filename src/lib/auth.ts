@@ -125,3 +125,25 @@ export async function getUserTier(): Promise<UserTier> {
 export function isPro(tier: UserTier | string | null | undefined): boolean {
     return tier === "pro" || tier === "studio";
 }
+
+// PLACEHOLDER for Package A/C: replaced at merge
+// ── Registry Desk role (Package A builds the real ones; signatures from
+// docs/design/registry-desk-phase1-plan.md §2). At merge, take Package A's
+// version of this block and drop this one. Until then nobody passes. ──
+
+export type RegistryRole = "owner" | "moderator";
+
+/** Never throws; null for everyone who is not a Registry moderator or the owner. */
+export async function registryRoleOf(): Promise<{ userId: string; alias: string; role: RegistryRole } | null> {
+    return null;
+}
+
+/** Throws AuthError("The Registry Desk is for Registry moderators.") for everyone else. */
+export async function requireRegistryModerator(): Promise<{
+    supabase: SupabaseClient<Database>;
+    user: { id: string; email?: string };
+    role: RegistryRole;
+    alias: string;
+}> {
+    throw new AuthError("The Registry Desk is for Registry moderators.");
+}
