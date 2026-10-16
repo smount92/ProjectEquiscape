@@ -838,7 +838,8 @@ export default async function PublicPassportPage({
                                 label="Share"
                                 variant="full"
                             />
-                            {!isOwnHorse && <ReportButton targetType="horse" targetId={horseId} />}
+                            {/* Reports the listing too: the passport is the listing. */}
+                            <ReportButton targetType="horse" targetId={horseId} isOwn={isOwnHorse} />
                             {/* Contact actions live in the buyer panel — one honest panel,
      no duplicate CTAs in the icon row */}
                             {isOwnHorse && (

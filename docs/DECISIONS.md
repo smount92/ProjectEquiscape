@@ -29,6 +29,7 @@ kept by the AI assistant across sessions, then checked against the code.
 | # | Decision today | Why it needs a look | Recommendation |
 |---|---|---|---|
 | Q8 | No manufacturer → mold → release tree browsing ("don't rock the boat"). | Made before the Registry became the priority. 2026-10-15: owner is open to it but wants to weigh what the community expects first. | Revisit after the linker is the default; the data now supports it. |
+| Q27 | A market listing is reported as its horse; there is no separate "listing" report (MHH-019). | Agent-made in Release 2. The passport *is* the listing, so one report covers both and taking it down takes the listing down with it. | Keep. |
 
 ---
 

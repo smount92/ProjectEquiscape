@@ -1339,6 +1339,16 @@ const PENDING_MIGRATIONS: MigrationSpec[] = [
         },
     },
     {
+        id: "235",
+        title: "Report everything",
+        summary:
+            "The reports table accepts show entries, Help ID requests and Help ID suggestions as well as posts, replies, horses, members and messages.",
+        probe: {
+            kind: "none",
+            why: "Widens a CHECK constraint — nothing to select. Verify: report a show entry; it files without the 'not switched on yet' notice.",
+        },
+    },
+    {
         id: "234",
         title: "Where new horses start",
         summary:

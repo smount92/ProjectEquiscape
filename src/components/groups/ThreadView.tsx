@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import BackLink from "@/components/nav/BackLink";
 import RichText from "@/components/RichText";
+import ReportButton from "@/components/ReportButton";
 import MentionTextarea from "@/components/feed/MentionTextarea";
 import { PostHeader, ReactionBar, UserAvatar } from "@/components/social";
 import { PinPostButton } from "@/components/groups/PinPostButton";
@@ -130,6 +131,9 @@ function ThreadPostBlock({
                         ✏️ Edit
                     </button>
                 )}
+                {/* A thread is a post; its replies are comments — the same
+                    rows as the feed, so the same report types. */}
+                <ReportButton targetType={isOp ? "post" : "comment"} targetId={post.id} isOwn={canEdit} />
             </div>
         </div>
     );

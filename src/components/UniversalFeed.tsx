@@ -6,6 +6,7 @@ import { createPost, replyToPost, deletePost, updatePost, togglePostLike, getPos
 import type { Post } from "@/app/actions/posts";
 import { createClient } from "@/lib/supabase/client";
 import RichText from "@/components/RichText";
+import ReportButton from "@/components/ReportButton";
 import { safeUUID } from "@/lib/utils/uuid";
 import { PostHeader, HorseEmbedCard, ReactionBar, ReplyComposer } from "@/components/social";
 import { Button } from "@/components/ui/button";
@@ -441,7 +442,9 @@ function PostCard({
                                 🗑️
                             </button>
                         </>
-                    ) : undefined
+                    ) : (
+                        <ReportButton targetType="post" targetId={post.id} variant="icon" />
+                    )
                 }
             />
 
@@ -542,7 +545,9 @@ function PostCard({
                                         >
                                             🗑️
                                         </button>
-                                    ) : undefined
+                                    ) : (
+                                        <ReportButton targetType="comment" targetId={r.id} variant="icon" />
+                                    )
                                 }
                             />
                             <div className="mt-0.5 pl-8">

@@ -27,6 +27,7 @@ import AdminPulseStrip from "@/components/AdminPulseStrip";
 import type { PendingExternalShow } from "@/app/actions/external-shows";
 import type { AdminPulse, EnvFlagStatus, LegacySuggestionRow, MigrationStatusRow } from "@/app/actions/admin";
 import { Button } from "@/components/ui/button";
+import { REPORT_TARGET_LABEL, isReportTargetType } from "@/lib/moderation/reports";
 
 interface ContactMessage {
     id: string;
@@ -439,7 +440,10 @@ function ReportsTab({ reports }: { reports: Report[] }) {
                     <div className="mb-1 flex justify-between">
                         <strong>{report.reason}</strong>
                         <span className="text-xs text-muted-foreground">
-                            {report.targetType} · {new Date(report.createdAt).toLocaleDateString()}
+                            {isReportTargetType(report.targetType)
+                                ? REPORT_TARGET_LABEL[report.targetType]
+                                : report.targetType}{" "}
+                            · {new Date(report.createdAt).toLocaleDateString()}
                         </span>
                     </div>
                     <p className="mb-1 text-sm">

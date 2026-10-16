@@ -7,6 +7,7 @@ import { editMessage, sendMessage } from "@/app/actions/messaging";
 import { markThreadRead } from "@/app/actions/deals";
 import { createClient } from "@/lib/supabase/client";
 import { UserAvatar } from "@/components/social";
+import ReportButton from "@/components/ReportButton";
 import { useNotifications } from "@/lib/context/NotificationProvider";
 import { RISKY_PAYMENT_REGEX } from "@/lib/safety";
 import { coerceKind, describeEvent, isEventKind, type MessageKind } from "@/lib/deals/transcript";
@@ -677,6 +678,13 @@ function ChatBubble({
                     ✎
                 </button>
             )}
+            <ReportButton
+                targetType="message"
+                targetId={msg.id}
+                isOwn={msg.isMine}
+                variant="icon"
+                className="self-center border-transparent opacity-60 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+            />
             {msg.isMine &&
                 (showAvatar ? (
                     <UserAvatar src={currentUserAvatar} alias="You" size="xs" />
