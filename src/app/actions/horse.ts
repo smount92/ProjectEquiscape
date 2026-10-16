@@ -26,6 +26,7 @@ import {
 import type { FieldProblem } from "@/lib/forms/types";
 import type { AssetCategory } from "@/lib/types/database";
 import { colorText, isMissingPendingColumn, withoutPendingColumns } from "@/lib/passport/pendingColumns";
+import { PURCHASE_NOTES_PENDING_NOTICE, hasPurchaseNote, writeVaultRow } from "@/lib/vault/purchaseNotes";
 import { canonicalShowbio } from "@/lib/showbio/vocab";
 import { addHorseToFolder, setHorsesFolders } from "@/lib/collections/membership";
 import { MODERATION_HOLD_MESSAGE, heldHorseIds, liftsModerationHold } from "@/lib/moderation/horseHold";
@@ -402,7 +403,12 @@ export async function updateHorseAction(
          */
         assetCategory?: AssetCategory;
     },
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{
+    success: boolean;
+    error?: string;
+    /** Saved, with something the member should know (purchase notes before 241). */
+    notice?: string;
+}> {
     try {
         const supabase = await createClient();
         const {
@@ -496,6 +502,8 @@ export async function updateHorseAction(
             "horse_id",
             "purchase_date_text",
             "is_trade",
+            // 241; written through writeVaultRow, which keeps the rest if it isn't pasted yet.
+            "purchase_notes",
         ];
 
         const horseUpdate = data.horseUpdate
@@ -536,6 +544,11 @@ export async function updateHorseAction(
         if (vaultData && vaultData.is_trade) {
             vaultData.purchase_price = null;
             vaultData.estimated_current_value = null;
+        }
+        if (vaultData && "purchase_notes" in vaultData) {
+            vaultData.purchase_notes = hasPurchaseNote(vaultData.purchase_notes)
+                ? vaultData.purchase_notes.trim()
+                : null;
         }
 
         // ── Form-engine validation (the boundary this action never had) ──
@@ -637,15 +650,20 @@ export async function updateHorseAction(
             if (updErr) throw new Error(updErr.message);
         }
 
+        let notice: string | undefined;
         if (data.deleteVault) {
             await supabase.from("financial_vault").delete().eq("horse_id", horseId);
         } else if (vaultData) {
             vaultData.horse_id = horseId;
-            if (data.hasExistingVault) {
-                await supabase.from("financial_vault").update(vaultData).eq("horse_id", horseId);
-            } else {
-                await supabase.from("financial_vault").insert(vaultData as unknown as FinancialVaultInsert);
-            }
+            const vault = await writeVaultRow(
+                (row) =>
+                    data.hasExistingVault
+                        ? supabase.from("financial_vault").update(row).eq("horse_id", horseId)
+                        : supabase.from("financial_vault").insert(row as unknown as FinancialVaultInsert),
+                vaultData,
+            );
+            if (vault.notesDropped) notice = PURCHASE_NOTES_PENDING_NOTICE;
+            if (vault.error) logger.error("Horse", "Vault save failed", vault.error);
         }
 
         // ── Condition History Ledger ──
@@ -698,7 +716,7 @@ export async function updateHorseAction(
         }
 
         revalidatePath(`/stable/${horseId}`);
-        return { success: true };
+        return notice ? { success: true, notice } : { success: true };
     } catch (error) {
         return { success: false, error: error instanceof Error ? error.message : "Failed to update horse" };
     }
@@ -752,9 +770,11 @@ export async function createHorseRecord(data: {
     assignedAge?: string;
     regionalId?: string;
     purchaseDateText?: string;
+    /** Where and from whom it was bought (241). */
+    purchaseNotes?: string;
     isTrade?: boolean;
     attributes?: Record<string, unknown>;
-}): Promise<{ success: boolean; horseId?: string; error?: string }> {
+}): Promise<{ success: boolean; horseId?: string; error?: string; notice?: string }> {
     const { supabase, user } = await requireAuth();
 
     if (!data.customName?.trim()) {
@@ -853,7 +873,9 @@ export async function createHorseRecord(data: {
         data.estimatedValue ||
         data.insuranceNotes ||
         data.purchaseDateText ||
+        hasPurchaseNote(data.purchaseNotes) ||
         data.isTrade;
+    let notice: string | undefined;
     if (hasVault) {
         const vaultInsert: FinancialVaultInsert = { horse_id: horse.id };
         vaultInsert.is_trade = !!data.isTrade;
@@ -867,7 +889,15 @@ export async function createHorseRecord(data: {
         if (data.purchaseDate) vaultInsert.purchase_date = data.purchaseDate;
         if (data.insuranceNotes) vaultInsert.insurance_notes = data.insuranceNotes;
         if (data.purchaseDateText) vaultInsert.purchase_date_text = data.purchaseDateText.trim();
-        await supabase.from("financial_vault").insert(vaultInsert);
+        // 241: the generated types lag the paste, hence the record.
+        const vaultRow = vaultInsert as Record<string, unknown>;
+        if (hasPurchaseNote(data.purchaseNotes)) vaultRow.purchase_notes = data.purchaseNotes.trim();
+        const vault = await writeVaultRow(
+            (row) => supabase.from("financial_vault").insert(row as unknown as FinancialVaultInsert),
+            vaultRow,
+        );
+        if (vault.notesDropped) notice = PURCHASE_NOTES_PENDING_NOTICE;
+        if (vault.error) logger.error("Horse", "Vault save failed on create", vault.error);
     }
 
     revalidatePath("/dashboard");
@@ -885,7 +915,7 @@ export async function createHorseRecord(data: {
         }
     });
 
-    return { success: true, horseId: horse.id };
+    return notice ? { success: true, horseId: horse.id, notice } : { success: true, horseId: horse.id };
 }
 
 /**

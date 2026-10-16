@@ -51,6 +51,7 @@ import {
 } from "./vocab";
 import type { FieldContext, FieldOption, FieldSpec, FormMode } from "./types";
 import { RESIN_BODY_LABEL, RESIN_MATERIAL_LABEL } from "@/lib/passport/resinIdentity";
+import { PURCHASE_NOTES_MAX } from "@/lib/vault/purchaseNotes";
 
 // ── Category sets ─────────────────────────────────────────────────────
 
@@ -723,6 +724,22 @@ export const HORSE_FIELDS: readonly FieldSpec[] = [
         help: "Use this when you don't remember the exact date.",
         modes: FULL_ONLY,
         domIds: { "create-full": "purchase-date-text", edit: "edit-purchase-date-text" },
+    },
+    {
+        // Migration 241. Saved through src/lib/vault/purchaseNotes.ts, which
+        // keeps the other vault fields when the column isn't pasted yet.
+        name: "purchase_notes",
+        type: "textarea",
+        group: "vault",
+        label: "Purchase notes",
+        categories: ALL_CATEGORIES,
+        maxLength: PURCHASE_NOTES_MAX,
+        table: "financial_vault",
+        inputKey: "purchaseNotes",
+        placeholder: "e.g. Bought from the artist at BreyerFest 2024. Receipt: https://…",
+        help: "Where and from whom you bought it, a receipt or listing link, anything you want to remember.",
+        modes: FULL_ONLY,
+        domIds: { "create-full": "purchase-notes", edit: "edit-purchase-notes" },
     },
     {
         name: "estimated_current_value",

@@ -53,6 +53,8 @@ import { PENDING_HORSE_COLUMNS, isMissingPendingColumn } from "@/lib/passport/pe
 import SetPurchasePanel from "@/components/SetPurchasePanel";
 import { getSetPurchase } from "@/app/actions/set-purchase";
 import type { SetPurchase } from "@/lib/vault/setPurchase";
+import { selectWithPurchaseNotes } from "@/lib/vault/purchaseNotes";
+import { useToast } from "@/lib/context/ToastContext";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import ModerationHoldNotice from "@/components/ModerationHoldNotice";
 import { heldHorseIds, isModerationHoldError } from "@/lib/moderation/horseHold";
@@ -99,6 +101,7 @@ const HORSE_COLUMNS_PRE_217 = HORSE_COLUMN_LIST.join(", ");
 
 export default function EditHorseEngine() {
     const router = useRouter();
+    const { toast } = useToast();
     const params = useParams();
     const horseId = params.id as string;
     const supabase = useMemo(() => createClient(), []);
@@ -184,13 +187,17 @@ export default function EditHorseEngine() {
             Object.assign(values, unpackAttributes(cat, horse.attributes as Record<string, unknown> | null));
 
             // ── Vault ──
-            const { data: vault } = await supabase
-                .from("financial_vault")
-                .select(
-                    "purchase_price, purchase_date, estimated_current_value, insurance_notes, purchase_date_text, is_trade",
-                )
-                .eq("horse_id", horseId)
-                .maybeSingle<Record<string, unknown>>();
+            // purchase_notes is 241; read without it until the paste, so the
+            // rest of the vault still loads (and a save updates, not inserts).
+            const { data: vault } = await selectWithPurchaseNotes(
+                (columns) =>
+                    supabase
+                        .from("financial_vault")
+                        .select(columns)
+                        .eq("horse_id", horseId)
+                        .maybeSingle<Record<string, unknown>>(),
+                "purchase_price, purchase_date, estimated_current_value, insurance_notes, purchase_date_text, is_trade",
+            );
             if (vault) {
                 setHasVault(true);
                 for (const spec of getColumnFields(cat)) {
@@ -363,6 +370,8 @@ export default function EditHorseEngine() {
             }
 
             track("edit_horse", { category });
+            // The toast outlives the navigation (the provider is in the root layout).
+            if (result.notice) toast(result.notice, "warning", 12000);
             router.push(`/stable/${horseId}`);
         } catch (err) {
             setSaveError(err instanceof Error ? err.message : "Something went wrong.");

@@ -876,3 +876,148 @@ describe("finalizeHorseImages — tier limits never eat the batch", () => {
         expect(result.skippedReason).toMatch(/limit reached \(29\/30\)/i);
     });
 });
+
+/**
+ * Purchase notes (241): where and from whom a horse was bought. The code
+ * ships before the owner pastes the migration, so until then a save keeps
+ * every other vault field and tells the member, in plain words, that the
+ * note itself wasn't kept.
+ */
+describe("purchase notes in the vault (241)", () => {
+    const MISSING = {
+        code: "PGRST204",
+        message: "Could not find the 'purchase_notes' column of 'financial_vault' in the schema cache",
+    };
+
+    beforeEach(() => {
+        vi.clearAllMocks();
+        mockClient.auth.getUser.mockResolvedValue({
+            data: { user: { id: "user-1", email: "test@test.com" } },
+        });
+        mockClient._setImplicitResolve({ data: {}, error: null });
+    });
+
+    function vaultWrites(method: "insert" | "update") {
+        return (mockClient._mockQuery[method] as ReturnType<typeof vi.fn>).mock.calls
+            .map((c) => c[0] as Record<string, unknown>)
+            .filter((row) => "horse_id" in row);
+    }
+
+    describe("createHorseRecord", () => {
+        it("writes the note into the new vault row, trimmed", async () => {
+            mockClient._mockQuery.single.mockResolvedValueOnce({ data: { id: "horse-1" }, error: null });
+            const result = await createHorseRecord({
+                customName: "Dapple",
+                finishType: "OF",
+                isPublic: true,
+                purchaseNotes: "  Bought from the artist. https://example.com/receipt  ",
+            });
+            expect(result).toEqual({ success: true, horseId: "horse-1" });
+            expect(vaultWrites("insert")).toEqual([
+                expect.objectContaining({
+                    horse_id: "horse-1",
+                    purchase_notes: "Bought from the artist. https://example.com/receipt",
+                }),
+            ]);
+        });
+
+        it("a blank note alone does not create a vault row", async () => {
+            mockClient._mockQuery.single.mockResolvedValueOnce({ data: { id: "horse-1" }, error: null });
+            await createHorseRecord({ customName: "Dapple", finishType: "OF", isPublic: true, purchaseNotes: "   " });
+            expect(vaultWrites("insert")).toEqual([]);
+        });
+
+        it("before 241: keeps the price and says the note wasn't kept", async () => {
+            mockClient._mockQuery.single.mockResolvedValueOnce({ data: { id: "horse-1" }, error: null });
+            const insert = mockClient._mockQuery.insert as ReturnType<typeof vi.fn>;
+            insert
+                .mockImplementationOnce(() => mockClient._mockQuery) // the horse
+                .mockImplementationOnce(() => Promise.resolve({ data: null, error: MISSING })); // vault, first try
+            const result = await createHorseRecord({
+                customName: "Dapple",
+                finishType: "OF",
+                isPublic: true,
+                purchasePrice: 85,
+                purchaseNotes: "eBay",
+            });
+            expect(result.success).toBe(true);
+            expect(result.notice).toMatch(/Purchase notes switch on soon/);
+            const writes = vaultWrites("insert");
+            expect(writes).toHaveLength(2);
+            expect(writes[0]).toMatchObject({ purchase_price: 85, purchase_notes: "eBay" });
+            expect(writes[1]).toMatchObject({ purchase_price: 85 });
+            expect(writes[1]).not.toHaveProperty("purchase_notes");
+        });
+    });
+
+    describe("updateHorseAction", () => {
+        it("saves an edited note with the rest of the vault", async () => {
+            const result = await updateHorseAction("horse-1", {
+                horseUpdate: null,
+                vaultData: { purchase_price: 40, purchase_notes: "  From a dispersal sale  " },
+                hasExistingVault: true,
+                deleteVault: false,
+                conditionChange: null,
+            });
+            expect(result).toEqual({ success: true });
+            expect(vaultWrites("update")).toEqual([
+                expect.objectContaining({ purchase_price: 40, purchase_notes: "From a dispersal sale" }),
+            ]);
+        });
+
+        it("clears a note the member emptied", async () => {
+            await updateHorseAction("horse-1", {
+                horseUpdate: null,
+                vaultData: { purchase_notes: "  " },
+                hasExistingVault: true,
+                deleteVault: false,
+                conditionChange: null,
+            });
+            expect(vaultWrites("update")[0]).toMatchObject({ purchase_notes: null });
+        });
+
+        it("refuses a note over 2,000 characters", async () => {
+            const result = await updateHorseAction("horse-1", {
+                horseUpdate: null,
+                vaultData: { purchase_notes: "x".repeat(2001) },
+                hasExistingVault: true,
+                deleteVault: false,
+                conditionChange: null,
+            });
+            expect(result.success).toBe(false);
+            expect(vaultWrites("update")).toEqual([]);
+        });
+
+        it("before 241: saves the other vault fields and says the note wasn't kept", async () => {
+            const update = mockClient._mockQuery.update as ReturnType<typeof vi.fn>;
+            update.mockImplementationOnce(() => ({ eq: () => Promise.resolve({ data: null, error: MISSING }) }));
+            const result = await updateHorseAction("horse-1", {
+                horseUpdate: null,
+                vaultData: { purchase_price: 40, purchase_notes: "eBay listing" },
+                hasExistingVault: true,
+                deleteVault: false,
+                conditionChange: null,
+            });
+            expect(result.success).toBe(true);
+            expect(result.notice).toMatch(/Purchase notes switch on soon/);
+            const writes = vaultWrites("update");
+            expect(writes).toHaveLength(2);
+            expect(writes[1]).toMatchObject({ purchase_price: 40 });
+            expect(writes[1]).not.toHaveProperty("purchase_notes");
+        });
+
+        it("before 241: an edit with no note says nothing extra", async () => {
+            const update = mockClient._mockQuery.update as ReturnType<typeof vi.fn>;
+            update.mockImplementationOnce(() => ({ eq: () => Promise.resolve({ data: null, error: MISSING }) }));
+            const result = await updateHorseAction("horse-1", {
+                horseUpdate: null,
+                vaultData: { purchase_price: 40, purchase_notes: null },
+                hasExistingVault: true,
+                deleteVault: false,
+                conditionChange: null,
+            });
+            expect(result).toEqual({ success: true });
+            expect(vaultWrites("update")).toHaveLength(2);
+        });
+    });
+});
