@@ -36,6 +36,7 @@ const CHAIN_METHODS = [
     "order",
     "limit",
     "range",
+    "upsert",
 ] as const;
 
 type MockQuery = Record<string, Mock> & {
@@ -106,6 +107,7 @@ vi.mock("@/lib/supabase/server", () => ({
     createClient: vi.fn(async () => ({ auth: { getUser: authGetUser } })),
 }));
 vi.mock("resend", () => ({ Resend: vi.fn(() => ({ emails: { send: vi.fn() } })) }));
+vi.mock("next/cache", () => ({ revalidateTag: vi.fn(), revalidatePath: vi.fn() }));
 
 /**
  * The notification sink is `import "server-only"` and is reached by a
@@ -133,7 +135,11 @@ import {
     resolveLegacySuggestion,
     searchMembers,
     getShowForSanctioningReview,
+    grantRegistryModerator,
+    listRegistryModerators,
+    removeRegistryModerator,
 } from "@/app/actions/admin";
+import { requireRegistryModerator } from "@/lib/auth";
 
 const ORIGINAL_ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 const ORIGINAL_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -197,7 +203,14 @@ describe("resolveLegacySuggestion — the Content tab jam", () => {
 
     it("approve mints the catalog entry when nothing matches", async () => {
         queue("database_suggestions", { data: PENDING_ROW, error: null });
-        queue("catalog_items", { data: [], error: null }, { data: null, error: null });
+        queue(
+            "catalog_items",
+            { data: [], error: null },
+            {
+                data: { id: "cat-new", item_type: "plastic_mold", title: "Stock Horse Stallion", maker: "Breyer" },
+                error: null,
+            },
+        );
 
         const result = await resolveLegacySuggestion("sug-1", "approve");
 
@@ -457,6 +470,80 @@ describe("searchMembers", () => {
         authGetUser.mockResolvedValue({ data: { user: { id: "u-9", email: "x@test.com" } } });
         const result = await searchMembers("a");
         expect(result.success).toBe(false);
+    });
+});
+
+describe("Registry moderators (owner only)", () => {
+    const MEMBER_ID = "11111111-1111-4111-8111-111111111111";
+
+    it("grant gives an active seat with a new term and the badge", async () => {
+        queue("users", { data: { id: MEMBER_ID, alias_name: "Maple", is_suspended: false }, error: null });
+
+        const result = await grantRegistryModerator(MEMBER_ID);
+
+        expect(result).toEqual({ success: true });
+        const seat = queriesFor("registry_moderators")[0].upsert.mock.calls[0];
+        expect(seat[0]).toMatchObject({
+            user_id: MEMBER_ID,
+            status: "active",
+            granted_by: "admin-1",
+            removed_at: null,
+        });
+        expect(seat[1]).toEqual({ onConflict: "user_id" });
+        expect(queriesFor("user_badges")[0].upsert.mock.calls[0][0]).toEqual({
+            user_id: MEMBER_ID,
+            badge_id: "registry_moderator",
+        });
+    });
+
+    it("grant refuses a suspended account", async () => {
+        queue("users", { data: { id: MEMBER_ID, alias_name: "Maple", is_suspended: true }, error: null });
+        const result = await grantRegistryModerator(MEMBER_ID);
+        expect(result.success).toBe(false);
+        expect(queriesFor("registry_moderators")).toHaveLength(0);
+    });
+
+    it("before 242 the owner is told to add the update", async () => {
+        queue("users", { data: { id: MEMBER_ID, alias_name: "Maple", is_suspended: false }, error: null });
+        queue("registry_moderators", { data: null, error: { code: "PGRST205", message: "missing" } });
+        const result = await grantRegistryModerator(MEMBER_ID);
+        expect(result).toEqual({ success: false, error: expect.stringContaining("update 242") });
+
+        queue("registry_moderators", { data: null, error: { code: "42P01", message: "missing" } });
+        const list = await listRegistryModerators();
+        expect(list).toEqual({ success: true, ready: false, moderators: [] });
+    });
+
+    it("remove needs a private reason, ends the seat and takes the badge off", async () => {
+        expect((await removeRegistryModerator(MEMBER_ID, "")).success).toBe(false);
+
+        queue("registry_moderators", { data: [{ user_id: MEMBER_ID }], error: null });
+        const result = await removeRegistryModerator(MEMBER_ID, "inactive for months");
+
+        expect(result).toEqual({ success: true });
+        const ended = queriesFor("registry_moderators")[0].update.mock.calls[0][0] as Record<string, unknown>;
+        expect(ended).toMatchObject({ status: "removed", removed_reason: "inactive for months" });
+        const badge = queriesFor("user_badges")[0];
+        expect(badge.delete).toHaveBeenCalled();
+        expect(badge.eq).toHaveBeenCalledWith("badge_id", "registry_moderator");
+    });
+
+    it("a removed moderator is refused on their next action", async () => {
+        authGetUser.mockResolvedValue({ data: { user: { id: MEMBER_ID, email: "maple@test.com" } } });
+        queue("users", { data: { alias_name: "Maple" }, error: null });
+        queue("registry_moderators", { data: { status: "removed" }, error: null });
+        await expect(requireRegistryModerator()).rejects.toThrow("The Registry Desk is for Registry moderators.");
+    });
+
+    it.each([
+        ["grant", () => grantRegistryModerator(MEMBER_ID)],
+        ["remove", () => removeRegistryModerator(MEMBER_ID, "reason here")],
+        ["list", () => listRegistryModerators()],
+    ])("%s refuses a non-admin", async (_name, call) => {
+        authGetUser.mockResolvedValue({ data: { user: { id: "u-9", email: "x@test.com" } } });
+        const result = await call();
+        expect(result.success).toBe(false);
+        expect(queriesFor("registry_moderators")).toHaveLength(0);
     });
 });
 
