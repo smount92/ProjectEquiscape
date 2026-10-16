@@ -89,6 +89,17 @@ describe("external show reviews tell the member who sent the show", () => {
         );
     });
 
+    it("rejection: a note without a full stop still ends its sentence", async () => {
+        db.on("external_shows", () => ({ data: [{ title: "Spam Show", submitted_by: "u-1" }], error: null }));
+        await reviewExternalShow({ id: SHOW, decision: "rejected", note: "The link goes to a shop " });
+        expect(createNotification).toHaveBeenCalledWith(
+            expect.objectContaining({
+                content:
+                    'We didn\'t add "Spam Show" to the calendar. The reason: The link goes to a shop. Questions? Write to us through the contact page.',
+            }),
+        );
+    });
+
     it("tells them once: a second click on an already-reviewed show sends nothing", async () => {
         db.on("external_shows", () => ({ data: [], error: null }));
         await reviewExternalShow({ id: SHOW, decision: "approved" });

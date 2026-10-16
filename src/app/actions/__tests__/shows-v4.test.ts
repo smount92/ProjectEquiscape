@@ -53,6 +53,7 @@ function stubRole(input: { hostId: string; status?: string; staffRole?: string |
             status: input.status ?? "entries_open",
             mode: "online",
             judging: "judged",
+            title: "Summerween Photo Show",
         },
         error: null,
     });
@@ -87,7 +88,24 @@ describe("barEntrant", () => {
         );
         expect(q.update).toHaveBeenCalledWith(expect.objectContaining({ status: "scratched" }));
         expect(createNotification).toHaveBeenCalledWith(
-            expect.objectContaining({ userId: USER_ID, type: "show_moderation" }),
+            expect.objectContaining({
+                userId: USER_ID,
+                type: "show_moderation",
+                content: `The host of "Summerween Photo Show" has removed your entry, and you can't re-enter this show. You can message the host about it.`,
+                linkUrl: `/shows/${SHOW_ID}/message-host`,
+            }),
+        );
+    });
+
+    it("a bar without the sweep asks them not to enter, naming the show", async () => {
+        signInAs("host-1");
+        stubRole({ hostId: "host-1" });
+
+        await barEntrant({ showId: SHOW_ID, userId: USER_ID, scratchEntries: false });
+        expect(createNotification).toHaveBeenCalledWith(
+            expect.objectContaining({
+                content: `The host of "Summerween Photo Show" has asked that you not enter this show. You can message the host about it.`,
+            }),
         );
     });
 

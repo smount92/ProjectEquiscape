@@ -280,12 +280,15 @@ async function tellTheSubmitter(
     decision: "approved" | "rejected",
     note: string | null,
 ): Promise<void> {
+    // The note is the owner's own words; end it as a sentence so the next
+    // one doesn't run on ("...a shop Questions?").
+    const said = note?.trim() ? (/[.!?]["')\]]*$/.test(note.trim()) ? note.trim() : `${note.trim()}.`) : null;
     const content =
         decision === "approved"
-            ? `"${title}" is on the calendar now. Thank you for adding it.${note ? ` A note from us: ${note}` : ""}`
+            ? `"${title}" is on the calendar now. Thank you for adding it.${said ? ` A note from us: ${said}` : ""}`
             : `We didn't add "${title}" to the calendar.${
-                  note
-                      ? ` The reason: ${note} Questions? Write to us through the contact page.`
+                  said
+                      ? ` The reason: ${said} Questions? Write to us through the contact page.`
                       : " Write to us through the contact page if you'd like to know why."
               }`;
     try {

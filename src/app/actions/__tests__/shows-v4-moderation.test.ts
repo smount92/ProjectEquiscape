@@ -64,6 +64,7 @@ function stubRole(input: { hostId: string; status?: string; staffRole?: string |
             status: input.status ?? "entries_open",
             mode: "online",
             judging: "judged",
+            title: "Summerween Photo Show",
         },
         error: null,
     });
@@ -401,8 +402,36 @@ describe("removeEntrantFromShow — telling the member", () => {
             }),
         );
         const sent = vi.mocked(createNotification).mock.calls[0][0];
-        expect(sent.content).toContain("entries were removed");
+        expect(sent.content).toBe(
+            `The host of "Summerween Photo Show" has removed your entries, and you can't re-enter this show. You can message the host about it.`,
+        );
         expect(sent.content).not.toContain("sloptrough");
+    });
+
+    it("says 'entry' for one, and names the show", async () => {
+        signInAs(HOST_ID);
+        stubRole({ hostId: HOST_ID });
+        queueRemovalSequence(queueList, [{ id: ENTRY_1, class_id: CLASS_A }]);
+
+        await removeEntrantFromShow({ showId: SHOW_ID, userId: TROLL_ID });
+        expect(vi.mocked(createNotification).mock.calls[0][0].content).toBe(
+            `The host of "Summerween Photo Show" has removed your entry, and you can't re-enter this show. You can message the host about it.`,
+        );
+    });
+
+    it("a bar with no entries asks them not to enter, and names the show", async () => {
+        signInAs(HOST_ID);
+        stubRole({ hostId: HOST_ID });
+        queueList([]); // entries read
+        queueList(null); // bar upsert
+
+        await removeEntrantFromShow({ showId: SHOW_ID, userId: TROLL_ID });
+        expect(createNotification).toHaveBeenCalledWith(
+            expect.objectContaining({
+                content: `The host of "Summerween Photo Show" has asked that you not enter this show. You can message the host about it.`,
+                linkUrl: `/shows/${SHOW_ID}/message-host`,
+            }),
+        );
     });
 
     it("a failing notification never breaks the removal", async () => {
