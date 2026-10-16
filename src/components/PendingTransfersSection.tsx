@@ -7,7 +7,7 @@ export default async function PendingTransfersSection() {
     if (transfers.length === 0) return null;
 
     return (
-        <div className="bg-card border-input rounded-lg border p-6 shadow-md transition-all" id="pending-transfers">
+        <div className="rounded-lg border border-input bg-card p-6 shadow-md transition-all" id="pending-transfers">
             <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest text-secondary-foreground uppercase">
                 📤 Pending Transfers
             </h3>
@@ -19,7 +19,7 @@ export default async function PendingTransfersSection() {
                     >
                         <div className="min-w-0">
                             <p className="truncate text-sm font-semibold text-foreground">{t.horseName}</p>
-                            <p className="text-muted-foreground text-xs">
+                            <p className="text-xs text-muted-foreground">
                                 <span className="font-mono tracking-widest">{t.transferCode}</span>
                                 {" · "}
                                 {new Date(t.createdAt).toLocaleDateString("en-US", {

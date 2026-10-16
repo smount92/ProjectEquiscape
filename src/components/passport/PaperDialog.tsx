@@ -102,7 +102,11 @@ export default function PaperDialog({
         if (!isPdf(f.type)) setPreview(URL.createObjectURL(f));
         if (!title.trim()) {
             // A sensible default title from the kind and the horse (or the record).
-            setTitle(attachTo?.label ? `${PAPER_KIND_LABELS[kind]} — ${attachTo.label}` : `${PAPER_KIND_LABELS[kind]} — ${horseName}`);
+            setTitle(
+                attachTo?.label
+                    ? `${PAPER_KIND_LABELS[kind]} — ${attachTo.label}`
+                    : `${PAPER_KIND_LABELS[kind]} — ${horseName}`,
+            );
         }
     };
 
@@ -194,7 +198,7 @@ export default function PaperDialog({
 
                 <div className="flex flex-col gap-4">
                     <div>
-                        <span className="text-foreground mb-1 block text-sm font-semibold">What is it?</span>
+                        <span className="mb-1 block text-sm font-semibold text-foreground">What is it?</span>
                         <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label="Kind of paper">
                             {offered.map((k) => (
                                 <button
@@ -206,7 +210,7 @@ export default function PaperDialog({
                                     title={k.hint}
                                     className={`cursor-pointer rounded-full border px-2.5 py-1 text-xs ${
                                         kind === k.value
-                                            ? "border-forest bg-forest/10 text-forest font-semibold"
+                                            ? "border-forest bg-forest/10 font-semibold text-forest"
                                             : "border-input text-muted-foreground"
                                     }`}
                                 >
@@ -218,13 +222,20 @@ export default function PaperDialog({
 
                     {isNew && (
                         <div>
-                            <span className="text-foreground mb-1 block text-sm font-semibold">The scan, photo or PDF</span>
+                            <span className="mb-1 block text-sm font-semibold text-foreground">
+                                The scan, photo or PDF
+                            </span>
                             <div className="flex flex-wrap items-center gap-3">
-                                <Button variant="outline" size="sm" onClick={() => fileInput.current?.click()} disabled={!!busy}>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => fileInput.current?.click()}
+                                    disabled={!!busy}
+                                >
                                     {file ? "Choose a different file" : "Choose a file"}
                                 </Button>
                                 {file && (
-                                    <span className="text-muted-foreground text-xs">
+                                    <span className="text-xs text-muted-foreground">
                                         {file.name} · {formatBytes(file.size)}
                                     </span>
                                 )}
@@ -248,14 +259,14 @@ export default function PaperDialog({
                                     </div>
                                 </div>
                             )}
-                            <span className="text-muted-foreground mt-1 block text-xs">
+                            <span className="mt-1 block text-xs text-muted-foreground">
                                 Up to 10 MB. Photos and scans are stored at reading size; PDFs as they are.
                             </span>
                         </div>
                     )}
 
                     <label className="block">
-                        <span className="text-foreground mb-1 block text-sm font-semibold">Title</span>
+                        <span className="mb-1 block text-sm font-semibold text-foreground">Title</span>
                         <Input
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
@@ -266,8 +277,8 @@ export default function PaperDialog({
 
                     <div className="grid gap-4 sm:grid-cols-2">
                         <label className="block">
-                            <span className="text-foreground mb-1 block text-sm font-semibold">
-                                Issued by <span className="text-muted-foreground font-normal">(optional)</span>
+                            <span className="mb-1 block text-sm font-semibold text-foreground">
+                                Issued by <span className="font-normal text-muted-foreground">(optional)</span>
                             </span>
                             <Input
                                 value={issuedBy}
@@ -277,8 +288,8 @@ export default function PaperDialog({
                             />
                         </label>
                         <label className="block">
-                            <span className="text-foreground mb-1 block text-sm font-semibold">
-                                Issued on <span className="text-muted-foreground font-normal">(optional)</span>
+                            <span className="mb-1 block text-sm font-semibold text-foreground">
+                                Issued on <span className="font-normal text-muted-foreground">(optional)</span>
                             </span>
                             <Input
                                 value={issuedOn}
@@ -290,8 +301,8 @@ export default function PaperDialog({
                     </div>
 
                     <label className="block">
-                        <span className="text-foreground mb-1 block text-sm font-semibold">
-                            Notes <span className="text-muted-foreground font-normal">(optional)</span>
+                        <span className="mb-1 block text-sm font-semibold text-foreground">
+                            Notes <span className="font-normal text-muted-foreground">(optional)</span>
                         </span>
                         <Textarea
                             value={notes}
@@ -303,17 +314,22 @@ export default function PaperDialog({
                     </label>
 
                     <label className="flex cursor-pointer items-start gap-2 text-sm">
-                        <input type="checkbox" checked={isPublic} onChange={(e) => setIsPublic(e.target.checked)} className="mt-0.5 h-4 w-4" />
+                        <input
+                            type="checkbox"
+                            checked={isPublic}
+                            onChange={(e) => setIsPublic(e.target.checked)}
+                            className="mt-0.5 h-4 w-4"
+                        />
                         <span>
                             Show on the public passport
-                            <span className="text-muted-foreground block text-xs">
+                            <span className="block text-xs text-muted-foreground">
                                 Off keeps it for your eyes only. Papers on a private horse are never public either way.
                             </span>
                         </span>
                     </label>
 
                     {error && (
-                        <p role="alert" className="text-destructive m-0 text-sm font-semibold">
+                        <p role="alert" className="m-0 text-sm font-semibold text-destructive">
                             {error}
                         </p>
                     )}

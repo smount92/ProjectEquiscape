@@ -63,10 +63,7 @@ async function loadPrefs(userIds: string[]): Promise<Map<string, NotificationPre
     const unique = [...new Set(userIds)];
     if (unique.length === 0) return new Map();
     const supabaseAdmin = getAdminClient();
-    const { data, error } = await supabaseAdmin
-        .from("users")
-        .select("id, notification_prefs")
-        .in("id", unique);
+    const { data, error } = await supabaseAdmin.from("users").select("id, notification_prefs").in("id", unique);
     if (error) throw new Error(error.message);
     return new Map(
         (data ?? []).map((r: { id: string; notification_prefs: unknown }) => [
@@ -103,9 +100,7 @@ export async function createNotification(data: NotificationInput): Promise<void>
  * BULK_NOTIFICATION_CAP rows. Returns the number of rows inserted —
  * 0 on failure (fire-and-forget, never throws).
  */
-export async function createNotificationsBulk(
-    rows: NotificationInput[],
-): Promise<number> {
+export async function createNotificationsBulk(rows: NotificationInput[]): Promise<number> {
     try {
         let candidates = rows.filter((row) => !isSelfNotification(row));
         if (candidates.length === 0) return 0;
@@ -124,9 +119,7 @@ export async function createNotificationsBulk(
         if (deliverable.length === 0) return 0;
 
         const supabaseAdmin = getAdminClient();
-        const { error } = await supabaseAdmin
-            .from("notifications")
-            .insert(deliverable.map(toInsertRow));
+        const { error } = await supabaseAdmin.from("notifications").insert(deliverable.map(toInsertRow));
         if (error) throw new Error(error.message);
         return deliverable.length;
     } catch (err) {

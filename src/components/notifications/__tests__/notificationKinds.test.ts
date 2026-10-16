@@ -88,16 +88,12 @@ describe("isSafeNotificationLink", () => {
 describe("resolveNotificationHref — the deep link chain", () => {
     it("prefers the emitter's link_url above everything else", () => {
         expect(
-            resolveNotificationHref(
-                row({ linkUrl: "/shows/s1/classes/c2", horseId: "h1", conversationId: "c1" }),
-            ),
+            resolveNotificationHref(row({ linkUrl: "/shows/s1/classes/c2", horseId: "h1", conversationId: "c1" })),
         ).toBe("/shows/s1/classes/c2");
     });
 
     it("ignores an unsafe link_url and keeps falling back", () => {
-        expect(resolveNotificationHref(row({ linkUrl: "https://evil.example", horseId: "h1" }))).toBe(
-            "/community/h1",
-        );
+        expect(resolveNotificationHref(row({ linkUrl: "https://evil.example", horseId: "h1" }))).toBe("/community/h1");
     });
 
     it("falls back to the horse passport", () => {
@@ -105,21 +101,15 @@ describe("resolveNotificationHref — the deep link chain", () => {
     });
 
     it("falls back to the conversation thread", () => {
-        expect(resolveNotificationHref(row({ type: "message", conversationId: "k3" }))).toBe(
-            "/inbox/k3",
-        );
+        expect(resolveNotificationHref(row({ type: "message", conversationId: "k3" }))).toBe("/inbox/k3");
     });
 
     it("sends a follow to the follower's profile", () => {
-        expect(resolveNotificationHref(row({ type: "follow", actorAlias: "Amanda" }))).toBe(
-            "/profile/Amanda",
-        );
+        expect(resolveNotificationHref(row({ type: "follow", actorAlias: "Amanda" }))).toBe("/profile/Amanda");
     });
 
     it("encodes an alias that needs it", () => {
-        expect(resolveNotificationHref(row({ type: "follow", actorAlias: "a b&c" }))).toBe(
-            "/profile/a%20b%26c",
-        );
+        expect(resolveNotificationHref(row({ type: "follow", actorAlias: "a b&c" }))).toBe("/profile/a%20b%26c");
     });
 
     it("sends a linkless show row to the shows listing rather than nowhere", () => {
@@ -128,9 +118,7 @@ describe("resolveNotificationHref — the deep link chain", () => {
     });
 
     it("uses the actor's profile as the last real destination", () => {
-        expect(resolveNotificationHref(row({ type: "achievement", actorAlias: "Bea" }))).toBe(
-            "/profile/Bea",
-        );
+        expect(resolveNotificationHref(row({ type: "achievement", actorAlias: "Bea" }))).toBe("/profile/Bea");
     });
 
     it("only self-links when there is genuinely nothing to open", () => {

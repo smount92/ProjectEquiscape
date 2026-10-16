@@ -13,12 +13,7 @@ export const metadata = {
     description: "Run your show: status, classlist, staff, and entries.",
 };
 
-export default async function ShowConsolePage({
-    params,
-}: {
-    params: Promise<{ id: string }>;
-}) {
-
+export default async function ShowConsolePage({ params }: { params: Promise<{ id: string }> }) {
     const supabase = await createClient();
     const {
         data: { user },

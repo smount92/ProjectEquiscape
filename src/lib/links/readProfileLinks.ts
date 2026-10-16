@@ -9,7 +9,10 @@ import { normalizeMemberLinks, PROFILE_LINK_KEYS, type MemberLinks } from "./mem
 interface LinksReader {
     from: (table: string) => {
         select: (cols: string) => {
-            eq: (col: string, val: string) => {
+            eq: (
+                col: string,
+                val: string,
+            ) => {
                 maybeSingle: () => PromiseLike<{ data: unknown; error: { code?: string; message?: string } | null }>;
             };
         };

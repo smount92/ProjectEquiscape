@@ -96,10 +96,7 @@ const CHAMPION_HEX: Record<ChampionKind, string> = {
  * "Section Champion", "Division Reserve Champion",
  * "Grand Champion" (show scope).
  */
-export function championLabel(
-    kind: ChampionKind,
-    scope: "section" | "division" | "show" = "section",
-): string {
+export function championLabel(kind: ChampionKind, scope: "section" | "division" | "show" = "section"): string {
     if (scope === "show") {
         return kind === "champion" ? "Grand Champion" : "Reserve Grand Champion";
     }

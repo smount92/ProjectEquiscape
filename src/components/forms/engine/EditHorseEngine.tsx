@@ -31,11 +31,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { createClient } from "@/lib/supabase/client";
 import { entitledTier } from "@/lib/entitlement/clock";
 import { getCatalogItem, type CatalogItem } from "@/app/actions/reference";
-import {
-    deleteHorseImageAction,
-    getMyTier,
-    updateHorseAction,
-} from "@/app/actions/horse";
+import { deleteHorseImageAction, getMyTier, updateHorseAction } from "@/app/actions/horse";
 import { getHorseCollections, setHorseCollections } from "@/app/actions/collections";
 import { getProfile } from "@/app/actions/settings";
 import { track } from "@/lib/analytics";
@@ -178,18 +174,16 @@ export default function EditHorseEngine() {
                 if (raw === null || raw === undefined) continue;
                 values[spec.name] = typeof raw === "number" ? String(raw) : raw;
             }
-            values.visibility =
-                (horse.visibility as string) ?? (horse.is_public ? "public" : "private");
+            values.visibility = (horse.visibility as string) ?? (horse.is_public ? "public" : "private");
             if (horse.catalog_id) values.catalog_id = horse.catalog_id;
-            Object.assign(
-                values,
-                unpackAttributes(cat, horse.attributes as Record<string, unknown> | null),
-            );
+            Object.assign(values, unpackAttributes(cat, horse.attributes as Record<string, unknown> | null));
 
             // ── Vault ──
             const { data: vault } = await supabase
                 .from("financial_vault")
-                .select("purchase_price, purchase_date, estimated_current_value, insurance_notes, purchase_date_text, is_trade")
+                .select(
+                    "purchase_price, purchase_date, estimated_current_value, insurance_notes, purchase_date_text, is_trade",
+                )
                 .eq("horse_id", horseId)
                 .maybeSingle<Record<string, unknown>>();
             if (vault) {
@@ -210,19 +204,17 @@ export default function EditHorseEngine() {
                 .order("sort_order", { ascending: true });
             if (images) {
                 setExistingImages(
-                    (images as { id: string; image_url: string; angle_profile: string }[]).map(
-                        (img) => {
-                            // deleteHorseImageAction needs the bucket-relative
-                            // path to remove the object, not just the row.
-                            const parts = img.image_url.split("/horse-images/");
-                            return {
-                                recordId: img.id,
-                                imageUrl: img.image_url,
-                                storagePath: parts.length > 1 ? parts[1] : null,
-                                angle: img.angle_profile,
-                            };
-                        },
-                    ),
+                    (images as { id: string; image_url: string; angle_profile: string }[]).map((img) => {
+                        // deleteHorseImageAction needs the bucket-relative
+                        // path to remove the object, not just the row.
+                        const parts = img.image_url.split("/horse-images/");
+                        return {
+                            recordId: img.id,
+                            imageUrl: img.image_url,
+                            storagePath: parts.length > 1 ? parts[1] : null,
+                            angle: img.angle_profile,
+                        };
+                    }),
                 );
             }
 
@@ -244,8 +236,12 @@ export default function EditHorseEngine() {
             }
         })();
 
-        getMyTier().then(setViewerTier).catch(() => setViewerTier(null));
-        getSetPurchase(horseId).then(setSetPurchase).catch(() => setSetPurchase(null));
+        getMyTier()
+            .then(setViewerTier)
+            .catch(() => setViewerTier(null));
+        getSetPurchase(horseId)
+            .then(setSetPurchase)
+            .catch(() => setSetPurchase(null));
         getProfile()
             .then((profile) => {
                 if (profile) {
@@ -343,9 +339,7 @@ export default function EditHorseEngine() {
             await setHorseCollections(horseId, collectionIds);
 
             const hasNew =
-                Object.keys(newPhotos.slots).length > 0 ||
-                newPhotos.extras.length > 0 ||
-                newPhotos.flaws.length > 0;
+                Object.keys(newPhotos.slots).length > 0 || newPhotos.extras.length > 0 || newPhotos.flaws.length > 0;
             if (hasNew) {
                 await uploadStudioPhotos({
                     supabase,
@@ -429,18 +423,14 @@ export default function EditHorseEngine() {
 
                     {existingImages.length > 0 && (
                         <div className="mb-6">
-                            <p className="mb-3 text-sm text-secondary-foreground">
-                                Already on file:
-                            </p>
+                            <p className="mb-3 text-sm text-secondary-foreground">Already on file:</p>
                             <div className="flex flex-wrap gap-3">
                                 {existingImages.map((image) => (
                                     <div
                                         key={image.recordId}
                                         className="fe-mount relative h-[92px] w-[122px]"
                                         data-filled="true"
-                                        data-primary={
-                                            image.angle === "Primary_Thumbnail" ? "true" : "false"
-                                        }
+                                        data-primary={image.angle === "Primary_Thumbnail" ? "true" : "false"}
                                     >
                                         {/* eslint-disable-next-line @next/next/no-img-element */}
                                         <img src={image.imageUrl} alt={image.angle} />
@@ -491,9 +481,7 @@ export default function EditHorseEngine() {
 
                 {/* ── Identity ── */}
                 <LedgerLeaf tab="Identity">
-                    <LeafHeading>
-                        {category === "model" ? "Model Identity" : `${config.label} Details`}
-                    </LeafHeading>
+                    <LeafHeading>{category === "model" ? "Model Identity" : `${config.label} Details`}</LeafHeading>
                     <EditGroup form={form} group="identity" />
 
                     {/* A grade change wants a word about why. */}
@@ -514,8 +502,8 @@ export default function EditHorseEngine() {
                                 placeholder="e.g. Ear tip chipped in transit; rub on the near shoulder"
                             />
                             <p className="mt-1 text-xs text-muted-foreground">
-                                Optional. This is written into the condition history so the
-                                grade change has a reason attached to it.
+                                Optional. This is written into the condition history so the grade change has a reason
+                                attached to it.
                             </p>
                         </div>
                     )}
@@ -532,9 +520,7 @@ export default function EditHorseEngine() {
                 {/* ── Show bio ── */}
                 {getGroupFields(form.context, "showbio").length > 0 && (
                     <LedgerLeaf tab="Show Bio">
-                        <LeafHeading note="The show identity you assign for competition.">
-                            🏅 Show Bio
-                        </LeafHeading>
+                        <LeafHeading note="The show identity you assign for competition.">🏅 Show Bio</LeafHeading>
                         <EditGroup form={form} group="showbio" />
                     </LedgerLeaf>
                 )}
@@ -542,10 +528,7 @@ export default function EditHorseEngine() {
                 {/* ── Collections ── */}
                 <LedgerLeaf tab="Collections">
                     <LeafHeading>Collections</LeafHeading>
-                    <CollectionPicker
-                        selectedCollectionIds={collectionIds}
-                        onSelect={setCollectionIds}
-                    />
+                    <CollectionPicker selectedCollectionIds={collectionIds} onSelect={setCollectionIds} />
                 </LedgerLeaf>
 
                 {/* ── Marketplace + visibility ── */}
@@ -592,13 +575,7 @@ export default function EditHorseEngine() {
     );
 }
 
-function EditGroup({
-    form,
-    group,
-}: {
-    form: ReturnType<typeof useHorseForm>;
-    group: FieldGroup;
-}) {
+function EditGroup({ form, group }: { form: ReturnType<typeof useHorseForm>; group: FieldGroup }) {
     return (
         <>
             {getGroupFields(form.context, group).map((spec) => (

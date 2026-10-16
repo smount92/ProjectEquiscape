@@ -39,84 +39,84 @@ export {
 // ── Types ──
 
 export interface GallerySlot {
-  angle: string;
-  label: string;
-  primary?: boolean;
+    angle: string;
+    label: string;
+    primary?: boolean;
 }
 
 export interface StepDef {
-  label: string;
-  icon: string;
+    label: string;
+    icon: string;
 }
 
 export interface FieldDef {
-  visible: boolean;
-  label: string;
-  required: boolean;
+    visible: boolean;
+    label: string;
+    required: boolean;
 }
 
 export interface AssetConfig {
-  label: string;
-  icon: string;
-  steps: StepDef[];
-  gallerySlots: GallerySlot[];
-  fields: Record<string, FieldDef>;
-  showReferenceStep: boolean;
-  showHoofprint: boolean;
-  showShowBio: boolean;
+    label: string;
+    icon: string;
+    steps: StepDef[];
+    gallerySlots: GallerySlot[];
+    fields: Record<string, FieldDef>;
+    showReferenceStep: boolean;
+    showHoofprint: boolean;
+    showShowBio: boolean;
 }
 
 // ── Gallery slots per category ──
 
 const MODEL_GALLERY: GallerySlot[] = [
-  { angle: "Primary_Thumbnail", label: "Near-Side (Recommended)", primary: true },
-  { angle: "Right_Side", label: "Off-Side" },
-  { angle: "Front_Chest", label: "Front / Chest" },
-  { angle: "Back_Hind", label: "Hindquarters / Tail" },
-  { angle: "Belly_Makers_Mark", label: "Identifying Marks & Logos" },
+    { angle: "Primary_Thumbnail", label: "Near-Side (Recommended)", primary: true },
+    { angle: "Right_Side", label: "Off-Side" },
+    { angle: "Front_Chest", label: "Front / Chest" },
+    { angle: "Back_Hind", label: "Hindquarters / Tail" },
+    { angle: "Belly_Makers_Mark", label: "Identifying Marks & Logos" },
 ];
 
 const TACK_GALLERY: GallerySlot[] = [
-  { angle: "Primary_Thumbnail", label: "Main View (Recommended)", primary: true },
-  { angle: "Detail_Face_Eyes", label: "Detail / Hardware" },
-  { angle: "Belly_Makers_Mark", label: "Maker's Mark" },
-  { angle: "Right_Side", label: "On-Model Fit" },
+    { angle: "Primary_Thumbnail", label: "Main View (Recommended)", primary: true },
+    { angle: "Detail_Face_Eyes", label: "Detail / Hardware" },
+    { angle: "Belly_Makers_Mark", label: "Maker's Mark" },
+    { angle: "Right_Side", label: "On-Model Fit" },
 ];
 
 const PROP_GALLERY: GallerySlot[] = [
-  { angle: "Primary_Thumbnail", label: "Main View (Recommended)", primary: true },
-  { angle: "Right_Side", label: "Scale Reference" },
-  { angle: "Detail_Face_Eyes", label: "Detail" },
-  { angle: "Back_Hind", label: "In-Use / Scene" },
+    { angle: "Primary_Thumbnail", label: "Main View (Recommended)", primary: true },
+    { angle: "Right_Side", label: "Scale Reference" },
+    { angle: "Detail_Face_Eyes", label: "Detail" },
+    { angle: "Back_Hind", label: "In-Use / Scene" },
 ];
 
 const DIORAMA_GALLERY: GallerySlot[] = [
-  { angle: "Primary_Thumbnail", label: "Overview (Recommended)", primary: true },
-  { angle: "Detail_Face_Eyes", label: "Close-Up 1" },
-  { angle: "Right_Side", label: "Close-Up 2" },
-  { angle: "Belly_Makers_Mark", label: "Documentation Card" },
+    { angle: "Primary_Thumbnail", label: "Overview (Recommended)", primary: true },
+    { angle: "Detail_Face_Eyes", label: "Close-Up 1" },
+    { angle: "Right_Side", label: "Close-Up 2" },
+    { angle: "Belly_Makers_Mark", label: "Documentation Card" },
 ];
 
 const OTHER_MODEL_GALLERY: GallerySlot[] = [
-  { angle: "Primary_Thumbnail", label: "Main View (Recommended)", primary: true },
-  { angle: "Right_Side", label: "Side View" },
-  { angle: "Detail_Face_Eyes", label: "Detail" },
-  { angle: "Belly_Makers_Mark", label: "Maker's Mark" },
+    { angle: "Primary_Thumbnail", label: "Main View (Recommended)", primary: true },
+    { angle: "Right_Side", label: "Side View" },
+    { angle: "Detail_Face_Eyes", label: "Detail" },
+    { angle: "Belly_Makers_Mark", label: "Maker's Mark" },
 ];
 
 // ── Steps per category ──
 
 const FULL_STEPS: StepDef[] = [
-  { label: "Gallery", icon: "📸" },
-  { label: "Reference", icon: "🔗" },
-  { label: "Identity", icon: "🏷️" },
-  { label: "Vault", icon: "🔒" },
+    { label: "Gallery", icon: "📸" },
+    { label: "Reference", icon: "🔗" },
+    { label: "Identity", icon: "🏷️" },
+    { label: "Vault", icon: "🔒" },
 ];
 
 const SHORT_STEPS: StepDef[] = [
-  { label: "Gallery", icon: "📸" },
-  { label: "Details", icon: "🏷️" },
-  { label: "Vault", icon: "🔒" },
+    { label: "Gallery", icon: "📸" },
+    { label: "Details", icon: "🏷️" },
+    { label: "Vault", icon: "🔒" },
 ];
 
 // ── Field definitions per category — DERIVED from the registry ──
@@ -133,126 +133,124 @@ const SHORT_STEPS: StepDef[] = [
  * Both resolve through their representative spec, named here.
  */
 const LEGACY_FIELD_SOURCES: { key: string; from: string; label: string }[] = [
-  { key: "custom_name", from: "custom_name", label: "Custom Name" },
-  { key: "sculptor", from: "sculptor", label: "Sculptor / Artist" },
-  { key: "finishing_artist", from: "finishing_artist", label: "Finishing Artist" },
-  { key: "edition_info", from: "edition_number", label: "Edition Info" },
-  { key: "finish_type", from: "finish_type", label: "Finish Type" },
-  { key: "finish_details", from: "finish_details", label: "Finish Details" },
-  { key: "condition_grade", from: "condition_grade", label: "Condition Grade" },
-  { key: "life_stage", from: "life_stage", label: "Life Stage" },
-  { key: "show_bio", from: "assigned_breed", label: "Show Bio" },
-  { key: "public_notes", from: "public_notes", label: "Public Notes" },
+    { key: "custom_name", from: "custom_name", label: "Custom Name" },
+    { key: "sculptor", from: "sculptor", label: "Sculptor / Artist" },
+    { key: "finishing_artist", from: "finishing_artist", label: "Finishing Artist" },
+    { key: "edition_info", from: "edition_number", label: "Edition Info" },
+    { key: "finish_type", from: "finish_type", label: "Finish Type" },
+    { key: "finish_details", from: "finish_details", label: "Finish Details" },
+    { key: "condition_grade", from: "condition_grade", label: "Condition Grade" },
+    { key: "life_stage", from: "life_stage", label: "Life Stage" },
+    { key: "show_bio", from: "assigned_breed", label: "Show Bio" },
+    { key: "public_notes", from: "public_notes", label: "Public Notes" },
 ];
 
 const SPEC_BY_NAME = new Map<string, FieldSpec>(HORSE_FIELDS.map((f) => [f.name, f]));
 
 function makeFields(category: AssetCategory): Record<string, FieldDef> {
-  const fields: Record<string, FieldDef> = {};
+    const fields: Record<string, FieldDef> = {};
 
-  for (const entry of LEGACY_FIELD_SOURCES) {
-    const spec = SPEC_BY_NAME.get(entry.from);
-    if (!spec) continue;
+    for (const entry of LEGACY_FIELD_SOURCES) {
+        const spec = SPEC_BY_NAME.get(entry.from);
+        if (!spec) continue;
 
-    const visible = spec.categories.includes(category);
-    // `required` is evaluated in a neutral context — no life stage chosen,
-    // so a model's condition grade reads as required, exactly as the old
-    // literal said. The engine re-evaluates it per keystroke; this static
-    // snapshot is only here to keep the legacy shape honest.
-    const required = visible
-      ? Boolean(spec.requiredWhen?.({ category, mode: "create-full", values: {} }))
-      : false;
+        const visible = spec.categories.includes(category);
+        // `required` is evaluated in a neutral context — no life stage chosen,
+        // so a model's condition grade reads as required, exactly as the old
+        // literal said. The engine re-evaluates it per keystroke; this static
+        // snapshot is only here to keep the legacy shape honest.
+        const required = visible ? Boolean(spec.requiredWhen?.({ category, mode: "create-full", values: {} })) : false;
 
-    fields[entry.key] = {
-      visible,
-      // The config's own key labels win where they differ from the field's
-      // (an `edition_info` control is labelled "Edition Info", not
-      // "Edition Number"); otherwise the registry's per-category label.
-      label: entry.key === entry.from ? resolveLabel(spec, category) : entry.label,
-      required,
-    };
-  }
+        fields[entry.key] = {
+            visible,
+            // The config's own key labels win where they differ from the field's
+            // (an `edition_info` control is labelled "Edition Info", not
+            // "Edition Number"); otherwise the registry's per-category label.
+            label: entry.key === entry.from ? resolveLabel(spec, category) : entry.label,
+            required,
+        };
+    }
 
-  return fields;
+    return fields;
 }
 
 // ── Config map ──
 
 const CONFIGS: Record<AssetCategory, AssetConfig> = {
-  model: {
-    label: "Model Horse",
-    icon: "🐎",
-    steps: FULL_STEPS,
-    gallerySlots: MODEL_GALLERY,
-    fields: makeFields("model"),
-    showReferenceStep: true,
-    showHoofprint: true,
-    showShowBio: true,
-  },
-  tack: {
-    label: "Tack & Gear",
-    icon: "🏇",
-    steps: SHORT_STEPS,
-    gallerySlots: TACK_GALLERY,
-    fields: makeFields("tack"),
-    showReferenceStep: false,
-    showHoofprint: false,
-    showShowBio: false,
-  },
-  prop: {
-    label: "Prop",
-    icon: "🌲",
-    steps: SHORT_STEPS,
-    gallerySlots: PROP_GALLERY,
-    fields: makeFields("prop"),
-    showReferenceStep: false,
-    showHoofprint: false,
-    showShowBio: false,
-  },
-  diorama: {
-    label: "Diorama",
-    icon: "🎭",
-    steps: SHORT_STEPS,
-    gallerySlots: DIORAMA_GALLERY,
-    fields: makeFields("diorama"),
-    showReferenceStep: false,
-    showHoofprint: false,
-    showShowBio: false,
-  },
-  other_model: {
-    label: "Other Model",
-    icon: "🐄",
-    steps: FULL_STEPS,
-    gallerySlots: OTHER_MODEL_GALLERY,
-    fields: makeFields("other_model"),
-    showReferenceStep: true,
-    showHoofprint: true,
-    showShowBio: false,
-  },
+    model: {
+        label: "Model Horse",
+        icon: "🐎",
+        steps: FULL_STEPS,
+        gallerySlots: MODEL_GALLERY,
+        fields: makeFields("model"),
+        showReferenceStep: true,
+        showHoofprint: true,
+        showShowBio: true,
+    },
+    tack: {
+        label: "Tack & Gear",
+        icon: "🏇",
+        steps: SHORT_STEPS,
+        gallerySlots: TACK_GALLERY,
+        fields: makeFields("tack"),
+        showReferenceStep: false,
+        showHoofprint: false,
+        showShowBio: false,
+    },
+    prop: {
+        label: "Prop",
+        icon: "🌲",
+        steps: SHORT_STEPS,
+        gallerySlots: PROP_GALLERY,
+        fields: makeFields("prop"),
+        showReferenceStep: false,
+        showHoofprint: false,
+        showShowBio: false,
+    },
+    diorama: {
+        label: "Diorama",
+        icon: "🎭",
+        steps: SHORT_STEPS,
+        gallerySlots: DIORAMA_GALLERY,
+        fields: makeFields("diorama"),
+        showReferenceStep: false,
+        showHoofprint: false,
+        showShowBio: false,
+    },
+    other_model: {
+        label: "Other Model",
+        icon: "🐄",
+        steps: FULL_STEPS,
+        gallerySlots: OTHER_MODEL_GALLERY,
+        fields: makeFields("other_model"),
+        showReferenceStep: true,
+        showHoofprint: true,
+        showShowBio: false,
+    },
 };
 
 // ── Public API ──
 
 export function getAssetConfig(category: AssetCategory): AssetConfig {
-  return CONFIGS[category] ?? CONFIGS.model;
+    return CONFIGS[category] ?? CONFIGS.model;
 }
 
 export function getGallerySlots(category: AssetCategory): GallerySlot[] {
-  return (CONFIGS[category] ?? CONFIGS.model).gallerySlots;
+    return (CONFIGS[category] ?? CONFIGS.model).gallerySlots;
 }
 
 export function getSteps(category: AssetCategory): StepDef[] {
-  return (CONFIGS[category] ?? CONFIGS.model).steps;
+    return (CONFIGS[category] ?? CONFIGS.model).steps;
 }
 
 export function isFieldVisible(category: AssetCategory, fieldName: string): boolean {
-  const fields = (CONFIGS[category] ?? CONFIGS.model).fields;
-  return fields[fieldName]?.visible ?? false;
+    const fields = (CONFIGS[category] ?? CONFIGS.model).fields;
+    return fields[fieldName]?.visible ?? false;
 }
 
 export function getFieldLabel(category: AssetCategory, fieldName: string): string {
-  const fields = (CONFIGS[category] ?? CONFIGS.model).fields;
-  return fields[fieldName]?.label ?? fieldName;
+    const fields = (CONFIGS[category] ?? CONFIGS.model).fields;
+    return fields[fieldName]?.label ?? fieldName;
 }
 
 /**
@@ -265,29 +263,35 @@ export function getFieldLabel(category: AssetCategory, fieldName: string): strin
  * browser. As of the form engine, the server actions call it too.
  */
 export function validateAttributes(
-  category: AssetCategory,
-  attrs: Record<string, unknown>
+    category: AssetCategory,
+    attrs: Record<string, unknown>,
 ): { valid: boolean; cleaned: Record<string, unknown> } {
-  return cleanAttributeBag(category, attrs);
+    return cleanAttributeBag(category, attrs);
 }
 
 /**
  * Get the category-aware label for the asset (e.g. "Model Passport" vs "Item Details")
  */
 export function getCategoryPageTitle(category: AssetCategory): string {
-  switch (category) {
-    case "model": return "Model Passport";
-    case "tack": return "Tack Details";
-    case "prop": return "Prop Details";
-    case "diorama": return "Diorama Details";
-    case "other_model": return "Model Details";
-    default: return "Item Details";
-  }
+    switch (category) {
+        case "model":
+            return "Model Passport";
+        case "tack":
+            return "Tack Details";
+        case "prop":
+            return "Prop Details";
+        case "diorama":
+            return "Diorama Details";
+        case "other_model":
+            return "Model Details";
+        default:
+            return "Item Details";
+    }
 }
 
 /**
  * Get the human-readable label for the category
  */
 export function getCategoryLabel(category: AssetCategory): string {
-  return (CONFIGS[category] ?? CONFIGS.model).label;
+    return (CONFIGS[category] ?? CONFIGS.model).label;
 }

@@ -15,23 +15,9 @@ import type { ShowJudging, ShowMode } from "@/lib/shows/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-function Field({
-    label,
-    hint,
-    children,
-}: {
-    label: string;
-    hint?: string;
-    children: React.ReactNode;
-}) {
+function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
     return (
         <label className="flex flex-col gap-1.5">
             <span className="text-sm font-semibold text-foreground">{label}</span>
@@ -102,10 +88,7 @@ export default function CreateShowV2Form() {
                       showDate: showDate || undefined,
                       venueName: venueName.trim() || undefined,
                       venueAddress: venueAddress.trim() || undefined,
-                      capacity:
-                          capacityNum !== undefined && Number.isFinite(capacityNum)
-                              ? capacityNum
-                              : undefined,
+                      capacity: capacityNum !== undefined && Number.isFinite(capacityNum) ? capacityNum : undefined,
                   }
                 : {
                       entriesOpenAt: toIso(entriesOpenAt),
@@ -157,10 +140,7 @@ export default function CreateShowV2Form() {
                         </SelectContent>
                     </Select>
                 </Field>
-                <Field
-                    label="Judging method"
-                    hint="Community vote is a fun option for casual shows."
-                >
+                <Field label="Judging method" hint="Community vote is a fun option for casual shows.">
                     <Select value={judging} onValueChange={(v) => setJudging(v as ShowJudging)}>
                         <SelectTrigger aria-label="Judging method">
                             <SelectValue />
@@ -176,11 +156,7 @@ export default function CreateShowV2Form() {
             {mode === "live" ? (
                 <div className="grid gap-5 sm:grid-cols-2">
                     <Field label="Show date">
-                        <Input
-                            type="date"
-                            value={showDate}
-                            onChange={(e) => setShowDate(e.target.value)}
-                        />
+                        <Input type="date" value={showDate} onChange={(e) => setShowDate(e.target.value)} />
                     </Field>
                     <Field label="Table capacity" hint="Leave blank for no cap.">
                         <Input
@@ -256,7 +232,10 @@ export default function CreateShowV2Form() {
                 />
             </Field>
 
-            <Field label="Fees" hint="How entrants pay and how much. A full link (https://paypal.me/yourname) becomes a clickable link on the show page. Blank reads as “Free”.">
+            <Field
+                label="Fees"
+                hint="How entrants pay and how much. A full link (https://paypal.me/yourname) becomes a clickable link on the show page. Blank reads as “Free”."
+            >
                 <Textarea
                     value={feeInfo}
                     onChange={(e) => setFeeInfo(e.target.value)}
@@ -275,10 +254,9 @@ export default function CreateShowV2Form() {
                     />
                     Request MHH sanctioning
                     <span className="font-normal text-muted-foreground">
-                        (Sanctioned shows count for the Championship Series: season points,
-                        qualification cards for 1st &amp; 2nd, and titles. Season 1 sanctioning
-                        is granted by MHH — checking this sends a request with your show.
-                        Individual classes can be exempted in the classlist builder.)
+                        (Sanctioned shows count for the Championship Series: season points, qualification cards for 1st
+                        &amp; 2nd, and titles. Season 1 sanctioning is granted by MHH — checking this sends a request
+                        with your show. Individual classes can be exempted in the classlist builder.)
                     </span>
                 </label>
                 <Field label="Sanctioning note (optional)">

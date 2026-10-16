@@ -117,17 +117,10 @@ describe("ThreadView", () => {
         // the optimistic node for the confirmed one on re-render, so a
         // handle captured by findByText can be detached by assertion time
         // (the load-dependent flake this replaced).
-        await waitFor(
-            () =>
-                expect(
-                    screen.getByText("Can we stop at that bakery in Centralia?"),
-                ).toBeInTheDocument(),
-            { timeout: 5000 },
-        );
-        await waitFor(
-            () => expect(screen.getAllByTestId("thread-reply")).toHaveLength(3),
-            { timeout: 5000 },
-        );
+        await waitFor(() => expect(screen.getByText("Can we stop at that bakery in Centralia?")).toBeInTheDocument(), {
+            timeout: 5000,
+        });
+        await waitFor(() => expect(screen.getAllByTestId("thread-reply")).toHaveLength(3), { timeout: 5000 });
         expect(box).toHaveValue("");
     }, 20000);
 
@@ -148,13 +141,14 @@ describe("ThreadView", () => {
         const user = userEvent.setup();
         getThread.mockResolvedValue({
             success: true,
-            thread: threadData({ replies: [post({ id: "r-3", content: "Late to the party!" })], hasMoreReplies: false }),
+            thread: threadData({
+                replies: [post({ id: "r-3", content: "Late to the party!" })],
+                hasMoreReplies: false,
+            }),
         });
         renderThread(threadData({ hasMoreReplies: true }));
         await user.click(screen.getByText("Load more replies"));
-        await waitFor(() =>
-            expect(getThread).toHaveBeenCalledWith({ postId: "op-1", repliesOffset: 2 }),
-        );
+        await waitFor(() => expect(getThread).toHaveBeenCalledWith({ postId: "op-1", repliesOffset: 2 }));
         expect(await screen.findByText("Late to the party!")).toBeInTheDocument();
     });
 });

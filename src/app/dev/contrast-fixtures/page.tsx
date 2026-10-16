@@ -160,7 +160,8 @@ const pedigree = {
     sculptor: "Brigitte Eberl",
     castNumber: "12",
     editionSize: "25",
-    lineageNotes: "Bred by Starrfyre. Sire's record: https://www.starrfyre.com/rds/sdlist/hanoverians/winter_wonderland.htm",
+    lineageNotes:
+        "Bred by Starrfyre. Sire's record: https://www.starrfyre.com/rds/sdlist/hanoverians/winter_wonderland.htm",
     sireUrl: "https://www.starrfyre.com/rds/sdlist/hanoverians/winter_wonderland.htm",
     damUrl: "https://www.starrfyre.com/rds/sdlist/quarter_horses/starlight_edition.htm",
     bredBy: "Starrfyre",
@@ -176,28 +177,70 @@ export default async function ContrastFixtures({ searchParams }: { searchParams:
     return (
         <div className="mx-auto flex max-w-3xl flex-col gap-6 p-6" data-testid="contrast-fixtures">
             <h1 className="m-0 text-xl">Contrast fixtures — {isOwner ? "owner view" : "visitor view"}</h1>
-            <ShowRecordTimeline horseId={HORSE} records={records} isOwner={isOwner} placingHrefs={placingHrefs} papers={papers} horseName="Brooksong" />
-            <AccomplishmentsSection horseId={HORSE} horseName="Brooksong" items={items} papers={papers} isOwner={isOwner} />
+            <ShowRecordTimeline
+                horseId={HORSE}
+                records={records}
+                isOwner={isOwner}
+                placingHrefs={placingHrefs}
+                papers={papers}
+                horseName="Brooksong"
+            />
+            <AccomplishmentsSection
+                horseId={HORSE}
+                horseName="Brooksong"
+                items={items}
+                papers={papers}
+                isOwner={isOwner}
+            />
             <PedigreeCard horseId={HORSE} pedigree={pedigree} isOwner={isOwner} />
-            <PapersSection horseId={HORSE} horseName="Brooksong" papers={papers} isOwner={isOwner} attachedLabels={labels} />
+            <PapersSection
+                horseId={HORSE}
+                horseName="Brooksong"
+                papers={papers}
+                isOwner={isOwner}
+                attachedLabels={labels}
+            />
 
             {/* The same sections on LIT PAPER — the passport column stays cream at
                 night, and text that inherits body's colour must be re-inked there. */}
-            <div className="lit-paper flex flex-col gap-6 rounded-lg p-4" style={{ background: "var(--paper-lit)" }} data-testid="fixtures-lit-paper">
+            <div
+                className="lit-paper flex flex-col gap-6 rounded-lg p-4"
+                style={{ background: "var(--paper-lit)" }}
+                data-testid="fixtures-lit-paper"
+            >
                 <h2 className="m-0 text-lg">On lit paper</h2>
-                <ShowRecordTimeline horseId={HORSE} records={records} isOwner={isOwner} placingHrefs={placingHrefs} papers={papers} horseName="Brooksong" />
-                <AccomplishmentsSection horseId={HORSE} horseName="Brooksong" items={items} papers={papers} isOwner={isOwner} />
+                <ShowRecordTimeline
+                    horseId={HORSE}
+                    records={records}
+                    isOwner={isOwner}
+                    placingHrefs={placingHrefs}
+                    papers={papers}
+                    horseName="Brooksong"
+                />
+                <AccomplishmentsSection
+                    horseId={HORSE}
+                    horseName="Brooksong"
+                    items={items}
+                    papers={papers}
+                    isOwner={isOwner}
+                />
             </div>
 
             {/* …and on the tan parchment card (PARCHMENT_INK pins the inks inline). */}
-            <div className="flex flex-col gap-3 rounded-3xl border border-input bg-[#C8B596] px-6 py-8" style={PARCHMENT_INK} data-testid="fixtures-parchment">
+            <div
+                className="flex flex-col gap-3 rounded-3xl border border-input bg-[#C8B596] px-6 py-8"
+                style={PARCHMENT_INK}
+                data-testid="fixtures-parchment"
+            >
                 <h2 className="m-0 text-lg">On parchment</h2>
-                <p className="text-secondary-foreground m-0 text-sm">Secondary ink on the tan card.</p>
-                <p className="text-muted-foreground m-0 text-xs">Muted ink on the tan card · 3 more cards</p>
-                <a href="#top" className="text-forest text-sm font-semibold">A forest link on the tan card ↗</a>
-                <span className="text-warning text-xs font-bold">⭐ NAN</span>
-                <span className="text-success text-xs font-bold">🛡️ MHH Verified</span>
-                <span className="text-destructive text-xs font-bold">Overdue</span>
+                <p className="m-0 text-sm text-secondary-foreground">Secondary ink on the tan card.</p>
+                <p className="m-0 text-xs text-muted-foreground">Muted ink on the tan card · 3 more cards</p>
+                <a href="#top" className="text-sm font-semibold text-forest">
+                    A forest link on the tan card ↗
+                </a>
+                <span className="text-xs font-bold text-warning">⭐ NAN</span>
+                <span className="text-xs font-bold text-success">🛡️ MHH Verified</span>
+                <span className="text-xs font-bold text-destructive">Overdue</span>
             </div>
         </div>
     );

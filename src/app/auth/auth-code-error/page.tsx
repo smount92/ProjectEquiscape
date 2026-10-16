@@ -11,7 +11,7 @@ export default function AuthCodeErrorPage() {
                 <div aria-hidden="true" className="mb-6 text-[4rem]">
                     ⚠️
                 </div>
-                
+
                 <div className="flex w-full flex-col gap-3 sm:max-w-xs">
                     <Link
                         href="/signup"

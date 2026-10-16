@@ -1,32 +1,35 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from"react";
-import Papa from"papaparse";
-import fuzzysort from"fuzzysort";
-import type { CsvRow, MatchResult, ReferenceMatch } from"@/lib/types/csv-import";
-import { executeBatchImport, getExistingHorseNames, type BatchImportResult } from"@/app/actions/csv-import";
+import { useState, useCallback, useRef, useEffect } from "react";
+import Papa from "papaparse";
+import fuzzysort from "fuzzysort";
+import type { CsvRow, MatchResult, ReferenceMatch } from "@/lib/types/csv-import";
+import { executeBatchImport, getExistingHorseNames, type BatchImportResult } from "@/app/actions/csv-import";
 import { getDefaultHorseVisibility } from "@/app/actions/settings";
 import { VISIBILITY_OPTIONS } from "@/lib/forms/registry";
 import type { HorseVisibility } from "@/lib/stable/defaultVisibility";
-import {
- validateCsvRows,
- matchScoreLabel,
- findDuplicateNames,
- type CsvRowError,
-} from"@/lib/csv-import/validation";
-import { decodeHtmlEntities } from"@/lib/utils/decodeEntities";
+import { validateCsvRows, matchScoreLabel, findDuplicateNames, type CsvRowError } from "@/lib/csv-import/validation";
+import { decodeHtmlEntities } from "@/lib/utils/decodeEntities";
 import { Button } from "@/components/ui/button";
 
-type DictRelease = { i: string; n: string; m: string | null; c: string | null; mn: string | null; mf: string | null; sc?: string | null };
+type DictRelease = {
+    i: string;
+    n: string;
+    m: string | null;
+    c: string | null;
+    mn: string | null;
+    mf: string | null;
+    sc?: string | null;
+};
 type DictResin = { i: string; n: string; s: string };
 type DictMold = { i: string; n: string; mf: string | null; sc: string | null };
 type DictOther = { i: string; n: string; s: string; t: string };
 interface RefDict {
- releases: DictRelease[];
- resins: DictResin[];
- /** Absent from a dictionary cached before 2026-10-15. */
- molds?: DictMold[];
- others?: DictOther[];
+    releases: DictRelease[];
+    resins: DictResin[];
+    /** Absent from a dictionary cached before 2026-10-15. */
+    molds?: DictMold[];
+    others?: DictOther[];
 }
 
 // ============================================================
@@ -34,50 +37,50 @@ interface RefDict {
 // ============================================================
 
 const HEADER_MAP: Record<string, string> = {
- name:"name",
-"horse name":"name",
- model:"name",
-"model name":"name",
- horse:"name",
- mold:"mold",
-"mold name":"mold",
-"mold/model":"mold",
- moldname:"mold",
- sculpt:"mold",
- manufacturer:"manufacturer",
- brand:"manufacturer",
- maker:"manufacturer",
- company:"manufacturer",
- condition:"condition",
-"condition grade":"condition",
- grade:"condition",
- finish:"finish_type",
-"finish type":"finish_type",
- type:"finish_type",
-"purchase price":"purchase_price",
- price:"purchase_price",
- paid:"purchase_price",
- cost:"purchase_price",
-"estimated value":"estimated_value",
- value:"estimated_value",
- worth:"estimated_value",
-"current value":"estimated_value",
- notes:"notes",
- note:"notes",
- comments:"notes",
- description:"notes",
+    name: "name",
+    "horse name": "name",
+    model: "name",
+    "model name": "name",
+    horse: "name",
+    mold: "mold",
+    "mold name": "mold",
+    "mold/model": "mold",
+    moldname: "mold",
+    sculpt: "mold",
+    manufacturer: "manufacturer",
+    brand: "manufacturer",
+    maker: "manufacturer",
+    company: "manufacturer",
+    condition: "condition",
+    "condition grade": "condition",
+    grade: "condition",
+    finish: "finish_type",
+    "finish type": "finish_type",
+    type: "finish_type",
+    "purchase price": "purchase_price",
+    price: "purchase_price",
+    paid: "purchase_price",
+    cost: "purchase_price",
+    "estimated value": "estimated_value",
+    value: "estimated_value",
+    worth: "estimated_value",
+    "current value": "estimated_value",
+    notes: "notes",
+    note: "notes",
+    comments: "notes",
+    description: "notes",
 };
 
 const MHH_FIELDS = [
- { value:"", label:"— Skip —" },
- { value:"name", label:"Name" },
- { value:"mold", label:"Mold / Model" },
- { value:"manufacturer", label:"Manufacturer" },
- { value:"condition", label:"Condition" },
- { value:"finish_type", label:"Finish Type" },
- { value:"purchase_price", label:"Purchase Price" },
- { value:"estimated_value", label:"Estimated Value" },
- { value:"notes", label:"Notes" },
+    { value: "", label: "— Skip —" },
+    { value: "name", label: "Name" },
+    { value: "mold", label: "Mold / Model" },
+    { value: "manufacturer", label: "Manufacturer" },
+    { value: "condition", label: "Condition" },
+    { value: "finish_type", label: "Finish Type" },
+    { value: "purchase_price", label: "Purchase Price" },
+    { value: "estimated_value", label: "Estimated Value" },
+    { value: "notes", label: "Notes" },
 ];
 
 // ============================================================
@@ -85,818 +88,813 @@ const MHH_FIELDS = [
 // ============================================================
 
 export default function CsvImport() {
- const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
- const [csvData, setCsvData] = useState<CsvRow[]>([]);
- const [csvHeaders, setCsvHeaders] = useState<string[]>([]);
- const [columnMapping, setColumnMapping] = useState<Record<string, string>>({});
- const [matchResults, setMatchResults] = useState<MatchResult[]>([]);
- const [isMatching, setIsMatching] = useState(false);
- const [isImporting, setIsImporting] = useState(false);
- const [importResult, setImportResult] = useState<BatchImportResult | null>(null);
- const [dragOver, setDragOver] = useState(false);
- const [parseError, setParseError] = useState<string | null>(null);
- // Pre-upload validation problems (spreadsheet row numbers) — shown at
- // step 3 so bad rows never surprise the user post-import.
- const [validationErrors, setValidationErrors] = useState<CsvRowError[]>([]);
- // The user's current stable names for the duplicate warning.
- const [existingNames, setExistingNames] = useState<string[]>([]);
- const [showDupePanel, setShowDupePanel] = useState(false);
- const fileInputRef = useRef<HTMLInputElement>(null);
- const dictRef = useRef<RefDict | null>(null);
+    const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+    const [csvData, setCsvData] = useState<CsvRow[]>([]);
+    const [csvHeaders, setCsvHeaders] = useState<string[]>([]);
+    const [columnMapping, setColumnMapping] = useState<Record<string, string>>({});
+    const [matchResults, setMatchResults] = useState<MatchResult[]>([]);
+    const [isMatching, setIsMatching] = useState(false);
+    const [isImporting, setIsImporting] = useState(false);
+    const [importResult, setImportResult] = useState<BatchImportResult | null>(null);
+    const [dragOver, setDragOver] = useState(false);
+    const [parseError, setParseError] = useState<string | null>(null);
+    // Pre-upload validation problems (spreadsheet row numbers) — shown at
+    // step 3 so bad rows never surprise the user post-import.
+    const [validationErrors, setValidationErrors] = useState<CsvRowError[]>([]);
+    // The user's current stable names for the duplicate warning.
+    const [existingNames, setExistingNames] = useState<string[]>([]);
+    const [showDupePanel, setShowDupePanel] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const dictRef = useRef<RefDict | null>(null);
 
- // Fetch reference dictionary on mount (cached for 24h server-side)
- useEffect(() => {
- fetch("/api/reference-dictionary")
- .then((res) => res.json())
- .then((data: RefDict) => {
- dictRef.current = data;
- })
- .catch((err) => console.error("[CSV] Failed to load dictionary:", err));
- }, []);
+    // Fetch reference dictionary on mount (cached for 24h server-side)
+    useEffect(() => {
+        fetch("/api/reference-dictionary")
+            .then((res) => res.json())
+            .then((data: RefDict) => {
+                dictRef.current = data;
+            })
+            .catch((err) => console.error("[CSV] Failed to load dictionary:", err));
+    }, []);
 
- // Fetch the user's existing horse names once — powers the dedupe warning.
- useEffect(() => {
- getExistingHorseNames()
- .then(setExistingNames)
- .catch(() => setExistingNames([]));
- }, []);
+    // Fetch the user's existing horse names once — powers the dedupe warning.
+    useEffect(() => {
+        getExistingHorseNames()
+            .then(setExistingNames)
+            .catch(() => setExistingNames([]));
+    }, []);
 
- // ── Step 1: File Upload ──────────────────────────────────────
- const handleFile = useCallback((file: File) => {
- setParseError(null);
- if (!file.name.endsWith(".csv") && !file.name.endsWith(".CSV")) {
- setParseError("Please upload a CSV file.");
- return;
- }
+    // ── Step 1: File Upload ──────────────────────────────────────
+    const handleFile = useCallback((file: File) => {
+        setParseError(null);
+        if (!file.name.endsWith(".csv") && !file.name.endsWith(".CSV")) {
+            setParseError("Please upload a CSV file.");
+            return;
+        }
 
- Papa.parse<CsvRow>(file, {
- header: true,
- skipEmptyLines: true,
- complete: (result) => {
- if (result.errors.length > 0) {
- setParseError(`CSV parse error: ${result.errors[0].message}`);
- return;
- }
- if (result.data.length === 0) {
- setParseError("The CSV file is empty or has no data rows.");
- return;
- }
+        Papa.parse<CsvRow>(file, {
+            header: true,
+            skipEmptyLines: true,
+            complete: (result) => {
+                if (result.errors.length > 0) {
+                    setParseError(`CSV parse error: ${result.errors[0].message}`);
+                    return;
+                }
+                if (result.data.length === 0) {
+                    setParseError("The CSV file is empty or has no data rows.");
+                    return;
+                }
 
- const headers = result.meta.fields || [];
- setCsvHeaders(headers);
- setCsvData(result.data);
+                const headers = result.meta.fields || [];
+                setCsvHeaders(headers);
+                setCsvData(result.data);
 
- // Auto-detect column mappings
- const autoMap: Record<string, string> = {};
- headers.forEach((h) => {
- const normalized = h.toLowerCase().trim();
- if (HEADER_MAP[normalized]) {
- autoMap[h] = HEADER_MAP[normalized];
- }
- });
- setColumnMapping(autoMap);
- setStep(2);
- },
- error: (err) => {
- setParseError(`Failed to parse CSV: ${err.message}`);
- },
- });
- }, []);
+                // Auto-detect column mappings
+                const autoMap: Record<string, string> = {};
+                headers.forEach((h) => {
+                    const normalized = h.toLowerCase().trim();
+                    if (HEADER_MAP[normalized]) {
+                        autoMap[h] = HEADER_MAP[normalized];
+                    }
+                });
+                setColumnMapping(autoMap);
+                setStep(2);
+            },
+            error: (err) => {
+                setParseError(`Failed to parse CSV: ${err.message}`);
+            },
+        });
+    }, []);
 
- const handleDrop = useCallback(
- (e: React.DragEvent) => {
- e.preventDefault();
- setDragOver(false);
- const file = e.dataTransfer.files[0];
- if (file) handleFile(file);
- },
- [handleFile],
- );
+    const handleDrop = useCallback(
+        (e: React.DragEvent) => {
+            e.preventDefault();
+            setDragOver(false);
+            const file = e.dataTransfer.files[0];
+            if (file) handleFile(file);
+        },
+        [handleFile],
+    );
 
- const handleFileInput = useCallback(
- (e: React.ChangeEvent<HTMLInputElement>) => {
- const file = e.target.files?.[0];
- if (file) handleFile(file);
- },
- [handleFile],
- );
+    const handleFileInput = useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+            const file = e.target.files?.[0];
+            if (file) handleFile(file);
+        },
+        [handleFile],
+    );
 
- // ── Step 2: Column Mapping ───────────────────────────────────
- const handleMappingChange = (csvCol: string, mhhField: string) => {
- setColumnMapping((prev) => ({ ...prev, [csvCol]: mhhField }));
- };
+    // ── Step 2: Column Mapping ───────────────────────────────────
+    const handleMappingChange = (csvCol: string, mhhField: string) => {
+        setColumnMapping((prev) => ({ ...prev, [csvCol]: mhhField }));
+    };
 
- const proceedToMatch = async () => {
- setIsMatching(true);
+    const proceedToMatch = async () => {
+        setIsMatching(true);
 
- // Build mapped rows from CSV data + column mapping
- const mappedRows = csvData.map((row) => {
- const mapped: {
- name: string;
- mold: string;
- manufacturer: string;
- condition: string;
- finish_type: string;
- purchase_price: string;
- estimated_value: string;
- notes: string;
- [key: string]: string;
- } = {
- name:"",
- mold:"",
- manufacturer:"",
- condition:"",
- finish_type:"",
- purchase_price:"",
- estimated_value:"",
- notes:"",
- };
+        // Build mapped rows from CSV data + column mapping
+        const mappedRows = csvData.map((row) => {
+            const mapped: {
+                name: string;
+                mold: string;
+                manufacturer: string;
+                condition: string;
+                finish_type: string;
+                purchase_price: string;
+                estimated_value: string;
+                notes: string;
+                [key: string]: string;
+            } = {
+                name: "",
+                mold: "",
+                manufacturer: "",
+                condition: "",
+                finish_type: "",
+                purchase_price: "",
+                estimated_value: "",
+                notes: "",
+            };
 
- for (const [csvCol, mhhField] of Object.entries(columnMapping)) {
- if (mhhField && row[csvCol] !== undefined) {
- mapped[mhhField] = mhhField ==="name" ? decodeHtmlEntities(row[csvCol]) : row[csvCol];
- }
- }
+            for (const [csvCol, mhhField] of Object.entries(columnMapping)) {
+                if (mhhField && row[csvCol] !== undefined) {
+                    mapped[mhhField] = mhhField === "name" ? decodeHtmlEntities(row[csvCol]) : row[csvCol];
+                }
+            }
 
- return mapped;
- });
+            return mapped;
+        });
 
- // Pre-validate BEFORE upload: finish enum, condition, prices — with the
- // user's spreadsheet row numbers, so most errors never round-trip.
- setValidationErrors(
- validateCsvRows(
- mappedRows.map((r) => ({
- name: r.name,
- finish_type: r.finish_type,
- condition: r.condition,
- purchase_price: r.purchase_price,
- estimated_value: r.estimated_value,
- })),
- ),
- );
+        // Pre-validate BEFORE upload: finish enum, condition, prices — with the
+        // user's spreadsheet row numbers, so most errors never round-trip.
+        setValidationErrors(
+            validateCsvRows(
+                mappedRows.map((r) => ({
+                    name: r.name,
+                    finish_type: r.finish_type,
+                    condition: r.condition,
+                    purchase_price: r.purchase_price,
+                    estimated_value: r.estimated_value,
+                })),
+            ),
+        );
 
- // Client-side fuzzy matching using cached dictionary
- if (!dictRef.current) {
- setParseError("Reference dictionary not loaded yet. Please wait and try again.");
- setIsMatching(false);
- return;
- }
+        // Client-side fuzzy matching using cached dictionary
+        if (!dictRef.current) {
+            setParseError("Reference dictionary not loaded yet. Please wait and try again.");
+            setIsMatching(false);
+            return;
+        }
 
- const dict = dictRef.current;
+        const dict = dictRef.current;
 
- // Build search targets
- const releaseTargets = dict.releases.map((r) => {
- // Spaced: the parts used to run together ("Breyer#1142—Montana HarvestJustin Morgan").
- const display = [[r.mf, r.m ? `#${r.m}` : null].filter(Boolean).join(" "), [r.n, r.mn ? `on ${r.mn}` : null, r.sc].filter(Boolean).join(" · ")].filter(Boolean).join(" — ");
- const searchText = [r.n, r.mn, r.c, r.m, r.mf].filter(Boolean).join(" ");
- return {
- id: r.i,
- display,
- searchText,
- manufacturer: r.mf ??"Unknown",
- mold_name: r.mn ??"Unknown",
- release_name: r.n,
- };
- });
+        // Build search targets
+        const releaseTargets = dict.releases.map((r) => {
+            // Spaced: the parts used to run together ("Breyer#1142—Montana HarvestJustin Morgan").
+            const display = [
+                [r.mf, r.m ? `#${r.m}` : null].filter(Boolean).join(" "),
+                [r.n, r.mn ? `on ${r.mn}` : null, r.sc].filter(Boolean).join(" · "),
+            ]
+                .filter(Boolean)
+                .join(" — ");
+            const searchText = [r.n, r.mn, r.c, r.m, r.mf].filter(Boolean).join(" ");
+            return {
+                id: r.i,
+                display,
+                searchText,
+                manufacturer: r.mf ?? "Unknown",
+                mold_name: r.mn ?? "Unknown",
+                release_name: r.n,
+            };
+        });
 
- const resinTargets = dict.resins.map((r) => {
- const display = `${r.s} — ${r.n}`;
- const searchText = `${r.n} ${r.s}`;
- return { id: r.i, display, searchText, sculptor_alias: r.s, resin_name: r.n };
- });
+        const resinTargets = dict.resins.map((r) => {
+            const display = `${r.s} — ${r.n}`;
+            const searchText = `${r.n} ${r.s}`;
+            return { id: r.i, display, searchText, sculptor_alias: r.s, resin_name: r.n };
+        });
 
- const moldTargets = (dict.molds ?? []).map((r) => ({
- id: r.i,
- display: `${r.mf ?? "Unknown"} — ${r.n} (mold${r.sc ? `, ${r.sc}` : ""})`,
- searchText: [r.n, r.mf, r.sc].filter(Boolean).join(" "),
- manufacturer: r.mf ?? "Unknown",
- mold_name: r.n,
- release_name: r.n,
- }));
- const otherTargets = (dict.others ?? []).map((r) => ({
- id: r.i,
- display: `${r.s} — ${r.n} (${r.t.replace(/_/g, " ")})`,
- searchText: `${r.n} ${r.s}`,
- manufacturer: r.s,
- mold_name: r.n,
- release_name: r.n,
- }));
+        const moldTargets = (dict.molds ?? []).map((r) => ({
+            id: r.i,
+            display: `${r.mf ?? "Unknown"} — ${r.n} (mold${r.sc ? `, ${r.sc}` : ""})`,
+            searchText: [r.n, r.mf, r.sc].filter(Boolean).join(" "),
+            manufacturer: r.mf ?? "Unknown",
+            mold_name: r.n,
+            release_name: r.n,
+        }));
+        const otherTargets = (dict.others ?? []).map((r) => ({
+            id: r.i,
+            display: `${r.s} — ${r.n} (${r.t.replace(/_/g, " ")})`,
+            searchText: `${r.n} ${r.s}`,
+            manufacturer: r.s,
+            mold_name: r.n,
+            release_name: r.n,
+        }));
 
- const results: MatchResult[] = mappedRows.map((row, index) => {
- const searchQuery = [row.name, row.mold, row.manufacturer].filter(Boolean).join(" ").trim();
+        const results: MatchResult[] = mappedRows.map((row, index) => {
+            const searchQuery = [row.name, row.mold, row.manufacturer].filter(Boolean).join(" ").trim();
 
- if (!searchQuery) {
- return {
- csvRow: row as unknown as Record<string, string>,
- rowIndex: index,
- status:"no_match" as const,
- matches: [],
- selectedMatch: null,
- customName: row.name || `Import Row ${index + 1}`,
- };
- }
+            if (!searchQuery) {
+                return {
+                    csvRow: row as unknown as Record<string, string>,
+                    rowIndex: index,
+                    status: "no_match" as const,
+                    matches: [],
+                    selectedMatch: null,
+                    customName: row.name || `Import Row ${index + 1}`,
+                };
+            }
 
- const releaseResults = fuzzysort.go(searchQuery, releaseTargets, {
- key:"searchText",
- limit: 3,
- threshold: -2000,
- });
- const resinResults = fuzzysort.go(searchQuery, resinTargets, {
- key:"searchText",
- limit: 3,
- threshold: -2000,
- });
+            const releaseResults = fuzzysort.go(searchQuery, releaseTargets, {
+                key: "searchText",
+                limit: 3,
+                threshold: -2000,
+            });
+            const resinResults = fuzzysort.go(searchQuery, resinTargets, {
+                key: "searchText",
+                limit: 3,
+                threshold: -2000,
+            });
 
- const extraResults = [
- ...fuzzysort.go(searchQuery, moldTargets, { key:"searchText", limit: 3, threshold: -2000 }),
- ...fuzzysort.go(searchQuery, otherTargets, { key:"searchText", limit: 3, threshold: -2000 }),
- ];
+            const extraResults = [
+                ...fuzzysort.go(searchQuery, moldTargets, { key: "searchText", limit: 3, threshold: -2000 }),
+                ...fuzzysort.go(searchQuery, otherTargets, { key: "searchText", limit: 3, threshold: -2000 }),
+            ];
 
- const allMatches: ReferenceMatch[] = [];
- for (const res of extraResults) {
- const obj = res.obj;
- allMatches.push({
- id: obj.id,
- score: res.score,
- display: obj.display,
- manufacturer: obj.manufacturer,
- mold_name: obj.mold_name,
- release_name: obj.release_name,
- table:"catalog_items",
- });
- }
- for (const res of releaseResults) {
- // eslint-disable-next-line @typescript-eslint/no-explicit-any
- const obj = res.obj as any;
- allMatches.push({
- id: obj.id,
- score: res.score,
- display: obj.display,
- manufacturer: obj.manufacturer,
- mold_name: obj.mold_name,
- release_name: obj.release_name,
- table:"catalog_items",
- });
- }
- for (const res of resinResults) {
- // eslint-disable-next-line @typescript-eslint/no-explicit-any
- const obj = res.obj as any;
- allMatches.push({
- id: obj.id,
- score: res.score,
- display: obj.display,
- manufacturer: obj.sculptor_alias,
- mold_name: obj.resin_name,
- release_name: obj.resin_name,
- table:"catalog_items",
- });
- }
+            const allMatches: ReferenceMatch[] = [];
+            for (const res of extraResults) {
+                const obj = res.obj;
+                allMatches.push({
+                    id: obj.id,
+                    score: res.score,
+                    display: obj.display,
+                    manufacturer: obj.manufacturer,
+                    mold_name: obj.mold_name,
+                    release_name: obj.release_name,
+                    table: "catalog_items",
+                });
+            }
+            for (const res of releaseResults) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const obj = res.obj as any;
+                allMatches.push({
+                    id: obj.id,
+                    score: res.score,
+                    display: obj.display,
+                    manufacturer: obj.manufacturer,
+                    mold_name: obj.mold_name,
+                    release_name: obj.release_name,
+                    table: "catalog_items",
+                });
+            }
+            for (const res of resinResults) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const obj = res.obj as any;
+                allMatches.push({
+                    id: obj.id,
+                    score: res.score,
+                    display: obj.display,
+                    manufacturer: obj.sculptor_alias,
+                    mold_name: obj.resin_name,
+                    release_name: obj.resin_name,
+                    table: "catalog_items",
+                });
+            }
 
- allMatches.sort((a, b) => b.score - a.score);
- const topMatches = allMatches.slice(0, 3);
- const bestScore = topMatches[0]?.score ?? -Infinity;
- const status = bestScore >= -50 ?"perfect" : topMatches.length > 0 ?"review" :"no_match";
+            allMatches.sort((a, b) => b.score - a.score);
+            const topMatches = allMatches.slice(0, 3);
+            const bestScore = topMatches[0]?.score ?? -Infinity;
+            const status = bestScore >= -50 ? "perfect" : topMatches.length > 0 ? "review" : "no_match";
 
- return {
- csvRow: row as unknown as Record<string, string>,
- rowIndex: index,
- status: status as"perfect" |"review" |"no_match",
- matches: topMatches,
- selectedMatch: status ==="perfect" ? topMatches[0] : null,
- customName: row.name || `Import Row ${index + 1}`,
- };
- });
+            return {
+                csvRow: row as unknown as Record<string, string>,
+                rowIndex: index,
+                status: status as "perfect" | "review" | "no_match",
+                matches: topMatches,
+                selectedMatch: status === "perfect" ? topMatches[0] : null,
+                customName: row.name || `Import Row ${index + 1}`,
+            };
+        });
 
- setIsMatching(false);
- setMatchResults(results);
- setShowDupePanel(false);
- setStep(3);
- };
+        setIsMatching(false);
+        setMatchResults(results);
+        setShowDupePanel(false);
+        setStep(3);
+    };
 
- // ── Step 3: Reconciliation ───────────────────────────────────
- const handleSelectMatch = (rowIndex: number, match: ReferenceMatch | null) => {
- setMatchResults((prev) =>
- prev.map((r) =>
- r.rowIndex === rowIndex
- ? {
- ...r,
- selectedMatch: match,
- status: match ? ("perfect" as const) : ("no_match" as const),
- }
- : r,
- ),
- );
- };
+    // ── Step 3: Reconciliation ───────────────────────────────────
+    const handleSelectMatch = (rowIndex: number, match: ReferenceMatch | null) => {
+        setMatchResults((prev) =>
+            prev.map((r) =>
+                r.rowIndex === rowIndex
+                    ? {
+                          ...r,
+                          selectedMatch: match,
+                          status: match ? ("perfect" as const) : ("no_match" as const),
+                      }
+                    : r,
+            ),
+        );
+    };
 
- const handleCustomNameChange = (rowIndex: number, name: string) => {
- setMatchResults((prev) => prev.map((r) => (r.rowIndex === rowIndex ? { ...r, customName: name } : r)));
- };
+    const handleCustomNameChange = (rowIndex: number, name: string) => {
+        setMatchResults((prev) => prev.map((r) => (r.rowIndex === rowIndex ? { ...r, customName: name } : r)));
+    };
 
- const perfectCount = matchResults.filter((r) => r.status ==="perfect").length;
- const reviewCount = matchResults.filter((r) => r.status ==="review").length;
- const noMatchCount = matchResults.filter((r) => r.status ==="no_match").length;
+    const perfectCount = matchResults.filter((r) => r.status === "perfect").length;
+    const reviewCount = matchResults.filter((r) => r.status === "review").length;
+    const noMatchCount = matchResults.filter((r) => r.status === "no_match").length;
 
- // Publish toggle — defaults ON: public horses can enter shows.
- // Where imported horses start: the member's default from Settings (MHH-005),
- // changeable here for this one import.
- const [importVisibility, setImportVisibility] = useState<HorseVisibility>("public");
- useEffect(() => {
- getDefaultHorseVisibility().then(setImportVisibility).catch(() => {});
- }, []);
+    // Publish toggle — defaults ON: public horses can enter shows.
+    // Where imported horses start: the member's default from Settings (MHH-005),
+    // changeable here for this one import.
+    const [importVisibility, setImportVisibility] = useState<HorseVisibility>("public");
+    useEffect(() => {
+        getDefaultHorseVisibility()
+            .then(setImportVisibility)
+            .catch(() => {});
+    }, []);
 
- // Duplicate check against the user's existing stable (case-insensitive).
- const duplicates = findDuplicateNames(
- matchResults.map((r) => r.customName),
- existingNames,
- );
+    // Duplicate check against the user's existing stable (case-insensitive).
+    const duplicates = findDuplicateNames(
+        matchResults.map((r) => r.customName),
+        existingNames,
+    );
 
- // ── Step 4: Import ──────────────────────────────────────────
- const runImport = async () => {
- setIsImporting(true);
- setShowDupePanel(false);
+    // ── Step 4: Import ──────────────────────────────────────────
+    const runImport = async () => {
+        setIsImporting(true);
+        setShowDupePanel(false);
 
- const rows = matchResults.map((r) => ({
- rowNumber: r.rowIndex + 2, // header is spreadsheet row 1
- customName: r.customName,
- condition: (r.csvRow as Record<string, string>).condition ||"",
- finishType: (r.csvRow as Record<string, string>).finish_type ||"",
- purchasePrice: (r.csvRow as Record<string, string>).purchase_price ||"",
- estimatedValue: (r.csvRow as Record<string, string>).estimated_value ||"",
- notes: (r.csvRow as Record<string, string>).notes ||"",
- catalogId: r.selectedMatch?.id ?? null,
- }));
+        const rows = matchResults.map((r) => ({
+            rowNumber: r.rowIndex + 2, // header is spreadsheet row 1
+            customName: r.customName,
+            condition: (r.csvRow as Record<string, string>).condition || "",
+            finishType: (r.csvRow as Record<string, string>).finish_type || "",
+            purchasePrice: (r.csvRow as Record<string, string>).purchase_price || "",
+            estimatedValue: (r.csvRow as Record<string, string>).estimated_value || "",
+            notes: (r.csvRow as Record<string, string>).notes || "",
+            catalogId: r.selectedMatch?.id ?? null,
+        }));
 
- const result = await executeBatchImport({ rows, visibility: importVisibility });
- setImportResult(result);
- setIsImporting(false);
- setStep(4);
- };
+        const result = await executeBatchImport({ rows, visibility: importVisibility });
+        setImportResult(result);
+        setIsImporting(false);
+        setStep(4);
+    };
 
- const handleImport = () => {
- if (isImporting) return;
- // Duplicate names in the stable? Ask before importing.
- if (duplicates.rowCount > 0 && !showDupePanel) {
- setShowDupePanel(true);
- return;
- }
- runImport();
- };
+    const handleImport = () => {
+        if (isImporting) return;
+        // Duplicate names in the stable? Ask before importing.
+        if (duplicates.rowCount > 0 && !showDupePanel) {
+            setShowDupePanel(true);
+            return;
+        }
+        runImport();
+    };
 
- const rowErrors = importResult?.rowErrors ?? [];
- const importedCount = importResult?.imported ?? 0;
+    const rowErrors = importResult?.rowErrors ?? [];
+    const importedCount = importResult?.imported ?? 0;
 
- // ── Render ──────────────────────────────────────────────────
+    // ── Render ──────────────────────────────────────────────────
 
- return (
- <div className="mt-8">
- {/* Step Indicator */}
- <div className="relative mb-12 flex justify-center gap-12">
- {[
- { num: 1, label:"Upload" },
- { num: 2, label:"Map Columns" },
- { num: 3, label:"Review Matches" },
- { num: 4, label:"Import" },
- ].map((s) => (
- <div
- key={s.num}
- className={`csv-step-dot ${step >= s.num ?"active" :""} ${step === s.num ?"current" :""}`}
- >
- <span className="csv-step-number">
- {s.num}
- </span>
- <span className="csv-step-label">{s.label}</span>
- </div>
- ))}
- </div>
+    return (
+        <div className="mt-8">
+            {/* Step Indicator */}
+            <div className="relative mb-12 flex justify-center gap-12">
+                {[
+                    { num: 1, label: "Upload" },
+                    { num: 2, label: "Map Columns" },
+                    { num: 3, label: "Review Matches" },
+                    { num: 4, label: "Import" },
+                ].map((s) => (
+                    <div
+                        key={s.num}
+                        className={`csv-step-dot ${step >= s.num ? "active" : ""} ${step === s.num ? "current" : ""}`}
+                    >
+                        <span className="csv-step-number">{s.num}</span>
+                        <span className="csv-step-label">{s.label}</span>
+                    </div>
+                ))}
+            </div>
 
- {/* ═══ Step 1: Upload ═══ */}
- {step === 1 && (
- <div className="animate-fade-in-up mx-auto max-w-[900px]">
- <h2>📄 Upload Your CSV</h2>
- <p className="mb-8 text-base leading-[1.6] text-muted-foreground">
- Export your spreadsheet as CSV and upload it here. We&apos;ll match your models against the
- Registry.
- </p>
+            {/* ═══ Step 1: Upload ═══ */}
+            {step === 1 && (
+                <div className="animate-fade-in-up mx-auto max-w-[900px]">
+                    <h2>📄 Upload Your CSV</h2>
+                    <p className="mb-8 text-base leading-[1.6] text-muted-foreground">
+                        Export your spreadsheet as CSV and upload it here. We&apos;ll match your models against the
+                        Registry.
+                    </p>
 
- <div
- className={`csv-dropzone ${dragOver ?"dragover" :""}`}
- onDragOver={(e) => {
- e.preventDefault();
- setDragOver(true);
- }}
- onDragLeave={() => setDragOver(false)}
- onDrop={handleDrop}
- onClick={() => fileInputRef.current?.click()}
- >
- <div className="mb-4 text-[3rem] opacity-[0.7]">📁</div>
- <p className="text-center">
- Drag &amp; drop your CSV file here
- <br />
- <span className="text-forest text-sm underline">or click to browse</span>
- </p>
- <input
- ref={fileInputRef}
- type="file"
- accept=".csv"
- onChange={handleFileInput}
- className="hidden"
- id="csv-file-input"
- title="Upload CSV file"
- />
- </div>
+                    <div
+                        className={`csv-dropzone ${dragOver ? "dragover" : ""}`}
+                        onDragOver={(e) => {
+                            e.preventDefault();
+                            setDragOver(true);
+                        }}
+                        onDragLeave={() => setDragOver(false)}
+                        onDrop={handleDrop}
+                        onClick={() => fileInputRef.current?.click()}
+                    >
+                        <div className="mb-4 text-[3rem] opacity-[0.7]">📁</div>
+                        <p className="text-center">
+                            Drag &amp; drop your CSV file here
+                            <br />
+                            <span className="text-sm text-forest underline">or click to browse</span>
+                        </p>
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept=".csv"
+                            onChange={handleFileInput}
+                            className="hidden"
+                            id="csv-file-input"
+                            title="Upload CSV file"
+                        />
+                    </div>
 
- {parseError && (
- <div className="text-destructive mt-4 rounded-md border border-destructive/30 bg-destructive/10 px-6 py-4 text-sm">
- {parseError}
- </div>
- )}
+                    {parseError && (
+                        <div className="mt-4 rounded-md border border-destructive/30 bg-destructive/10 px-6 py-4 text-sm text-destructive">
+                            {parseError}
+                        </div>
+                    )}
 
- <div className="mt-6 text-center">
- <Button asChild variant="outline" size="wide"><a
- href="/templates/mhh_import_template.csv"
- download
- >
- 📥 Download CSV Template
- </a></Button>
- </div>
- </div>
- )}
+                    <div className="mt-6 text-center">
+                        <Button asChild variant="outline" size="wide">
+                            <a href="/templates/mhh_import_template.csv" download>
+                                📥 Download CSV Template
+                            </a>
+                        </Button>
+                    </div>
+                </div>
+            )}
 
- {/* ═══ Step 2: Column Mapping ═══ */}
- {step === 2 && (
- <div className="animate-fade-in-up mx-auto max-w-[900px]">
- <h2>🔗 Map Your Columns</h2>
- <p className="mb-8 text-base leading-[1.6] text-muted-foreground">
- We detected <strong>{csvHeaders.length}</strong> columns and <strong>{csvData.length}</strong>{""}
- rows. Map each column to a Model Horse Hub field.
- </p>
+            {/* ═══ Step 2: Column Mapping ═══ */}
+            {step === 2 && (
+                <div className="animate-fade-in-up mx-auto max-w-[900px]">
+                    <h2>🔗 Map Your Columns</h2>
+                    <p className="mb-8 text-base leading-[1.6] text-muted-foreground">
+                        We detected <strong>{csvHeaders.length}</strong> columns and <strong>{csvData.length}</strong>
+                        {""}
+                        rows. Map each column to a Model Horse Hub field.
+                    </p>
 
- <div className="mb-8 flex flex-col gap-4">
- {csvHeaders.map((header) => (
- <div
- key={header}
- className="bg-card border-input flex flex-wrap items-center gap-4 rounded-md border px-6 py-4 shadow-md transition-all"
- >
- <span className="text-foreground min-w-[8rem] flex-1 overflow-hidden text-sm font-semibold text-ellipsis whitespace-nowrap">
- {header}
- </span>
- <span className="text-muted-foreground shrink-0 text-base">
- →
- </span>
- <select
- className="bg-input border-input-input text-foreground min-w-0 flex-1 basis-full cursor-pointer rounded-sm border px-4 py-2 font-sans text-sm sm:basis-auto"
- value={columnMapping[header] ||""}
- onChange={(e) => handleMappingChange(header, e.target.value)}
- aria-label={`Map ${header} to field`}
- >
- {MHH_FIELDS.map((f) => (
- <option key={f.value} value={f.value}>
- {f.label}
- </option>
- ))}
- </select>
- </div>
- ))}
- </div>
+                    <div className="mb-8 flex flex-col gap-4">
+                        {csvHeaders.map((header) => (
+                            <div
+                                key={header}
+                                className="flex flex-wrap items-center gap-4 rounded-md border border-input bg-card px-6 py-4 shadow-md transition-all"
+                            >
+                                <span className="min-w-[8rem] flex-1 overflow-hidden text-sm font-semibold text-ellipsis whitespace-nowrap text-foreground">
+                                    {header}
+                                </span>
+                                <span className="shrink-0 text-base text-muted-foreground">→</span>
+                                <select
+                                    className="border-input-input min-w-0 flex-1 basis-full cursor-pointer rounded-sm border bg-input px-4 py-2 font-sans text-sm text-foreground sm:basis-auto"
+                                    value={columnMapping[header] || ""}
+                                    onChange={(e) => handleMappingChange(header, e.target.value)}
+                                    aria-label={`Map ${header} to field`}
+                                >
+                                    {MHH_FIELDS.map((f) => (
+                                        <option key={f.value} value={f.value}>
+                                            {f.label}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        ))}
+                    </div>
 
- {/* Preview first 5 rows */}
- <div className="mb-8">
- <h3>Preview (first {Math.min(5, csvData.length)} rows)</h3>
- <div className="border-input overflow-x-auto rounded-md border">
- <table className="bg-muted text-foreground border-input border-b px-4 py-2 text-left font-semibold whitespace-nowrap">
- <thead>
- <tr>
- {csvHeaders.map((h) => (
- <th key={h}>{h}</th>
- ))}
- </tr>
- </thead>
- <tbody>
- {csvData.slice(0, 5).map((row, i) => (
- <tr key={i}>
- {csvHeaders.map((h) => (
- <td key={h}>{row[h]}</td>
- ))}
- </tr>
- ))}
- </tbody>
- </table>
- </div>
- </div>
+                    {/* Preview first 5 rows */}
+                    <div className="mb-8">
+                        <h3>Preview (first {Math.min(5, csvData.length)} rows)</h3>
+                        <div className="overflow-x-auto rounded-md border border-input">
+                            <table className="border-b border-input bg-muted px-4 py-2 text-left font-semibold whitespace-nowrap text-foreground">
+                                <thead>
+                                    <tr>
+                                        {csvHeaders.map((h) => (
+                                            <th key={h}>{h}</th>
+                                        ))}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {csvData.slice(0, 5).map((row, i) => (
+                                        <tr key={i}>
+                                            {csvHeaders.map((h) => (
+                                                <td key={h}>{row[h]}</td>
+                                            ))}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
 
- <div className="border-input flex items-center justify-between gap-4 border-t pt-6">
- <Button variant="outline" size="wide"
- onClick={() => setStep(1)}
- >
- ← Back
- </Button>
- <Button
- onClick={proceedToMatch}
- disabled={isMatching || !Object.values(columnMapping).some((v) => v ==="name")}
- id="proceed-to-match-btn"
- >
- {isMatching ? (
- <>
- <span className="spinner-inline" /> Matching…
- </>
- ) : (
-"Match Against Database →"
- )}
- </Button>
- </div>
+                    <div className="flex items-center justify-between gap-4 border-t border-input pt-6">
+                        <Button variant="outline" size="wide" onClick={() => setStep(1)}>
+                            ← Back
+                        </Button>
+                        <Button
+                            onClick={proceedToMatch}
+                            disabled={isMatching || !Object.values(columnMapping).some((v) => v === "name")}
+                            id="proceed-to-match-btn"
+                        >
+                            {isMatching ? (
+                                <>
+                                    <span className="spinner-inline" /> Matching…
+                                </>
+                            ) : (
+                                "Match Against Database →"
+                            )}
+                        </Button>
+                    </div>
 
- {!Object.values(columnMapping).some((v) => v ==="name") && (
- <p className="text-warning mt-4 text-center text-sm">
- ⚠️ You must map at least one column to <strong>Name</strong> to proceed.
- </p>
- )}
- </div>
- )}
+                    {!Object.values(columnMapping).some((v) => v === "name") && (
+                        <p className="mt-4 text-center text-sm text-warning">
+                            ⚠️ You must map at least one column to <strong>Name</strong> to proceed.
+                        </p>
+                    )}
+                </div>
+            )}
 
- {/* ═══ Step 3: Reconciliation ═══ */}
- {step === 3 && (
- <div className="animate-fade-in-up mx-auto max-w-[900px]">
- <h2>🔍 Review Matches</h2>
- <p className="mb-8 text-base leading-[1.6] text-muted-foreground">
- We matched your {matchResults.length} rows against the reference database. Review and confirm
- the matches below.
- </p>
+            {/* ═══ Step 3: Reconciliation ═══ */}
+            {step === 3 && (
+                <div className="animate-fade-in-up mx-auto max-w-[900px]">
+                    <h2>🔍 Review Matches</h2>
+                    <p className="mb-8 text-base leading-[1.6] text-muted-foreground">
+                        We matched your {matchResults.length} rows against the reference database. Review and confirm
+                        the matches below.
+                    </p>
 
- {/* Pre-upload validation problems — caught here, before anything uploads */}
- {validationErrors.length > 0 && (
- <div className="border-warning/40 bg-warning/10 mb-8 rounded-md border px-6 py-4">
- <p className="text-warning mb-2 text-sm font-bold">
- ⚠️ {validationErrors.length} problem{validationErrors.length === 1 ?"" :"s"} found in your
- file. These rows will be skipped unless you fix the CSV and re-upload:
- </p>
- <ul className="m-0 flex max-h-[160px] list-none flex-col gap-1 overflow-y-auto p-0 text-sm text-secondary-foreground">
- {validationErrors.map((err, i) => (
- <li key={i}>
- <strong>Row {err.rowNumber}</strong> ({err.name}): {err.message}
- </li>
- ))}
- </ul>
- </div>
- )}
+                    {/* Pre-upload validation problems — caught here, before anything uploads */}
+                    {validationErrors.length > 0 && (
+                        <div className="mb-8 rounded-md border border-warning/40 bg-warning/10 px-6 py-4">
+                            <p className="mb-2 text-sm font-bold text-warning">
+                                ⚠️ {validationErrors.length} problem{validationErrors.length === 1 ? "" : "s"} found in
+                                your file. These rows will be skipped unless you fix the CSV and re-upload:
+                            </p>
+                            <ul className="m-0 flex max-h-[160px] list-none flex-col gap-1 overflow-y-auto p-0 text-sm text-secondary-foreground">
+                                {validationErrors.map((err, i) => (
+                                    <li key={i}>
+                                        <strong>Row {err.rowNumber}</strong> ({err.name}): {err.message}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
 
- {/* Match summary badges */}
- <div className="mb-8 flex flex-wrap gap-4">
- <span className="bg-success/10 text-success border-success/30 rounded-full border px-3 py-1 text-sm font-semibold">
- ✅ {perfectCount} strong match{perfectCount === 1 ?"" :"es"}
- </span>
- <span className="bg-warning/10 text-warning border-warning/30 rounded-full border px-3 py-1 text-sm font-semibold">
- ⚠️ {reviewCount} to review
- </span>
- <span className="bg-destructive/10 text-destructive border-destructive/30 rounded-full border px-3 py-1 text-sm font-semibold">
- ❌ {noMatchCount} no match
- </span>
- </div>
+                    {/* Match summary badges */}
+                    <div className="mb-8 flex flex-wrap gap-4">
+                        <span className="rounded-full border border-success/30 bg-success/10 px-3 py-1 text-sm font-semibold text-success">
+                            ✅ {perfectCount} strong match{perfectCount === 1 ? "" : "es"}
+                        </span>
+                        <span className="rounded-full border border-warning/30 bg-warning/10 px-3 py-1 text-sm font-semibold text-warning">
+                            ⚠️ {reviewCount} to review
+                        </span>
+                        <span className="rounded-full border border-destructive/30 bg-destructive/10 px-3 py-1 text-sm font-semibold text-destructive">
+                            ❌ {noMatchCount} no match
+                        </span>
+                    </div>
 
- {/* Match cards */}
- <div className="mb-8 flex max-h-[600px] flex-col gap-4 overflow-y-auto pr-2">
- {matchResults.map((result) => (
- <div
- key={result.rowIndex}
- className={`csv-match-card ${result.status}`}
- id={`match-row-${result.rowIndex}`}
- >
- <div className="mb-3 flex items-center gap-3">
- <span className="shrink-0 text-xl">
- {result.status ==="perfect" ?"✅" : result.status ==="review" ?"⚠️" :"❌"}
- </span>
- <input
- className="bg-input border-input-input text-foreground flex-1 rounded-sm border px-4 py-2 font-sans text-base font-semibold"
- value={result.customName}
- onChange={(e) => handleCustomNameChange(result.rowIndex, e.target.value)}
- placeholder="Horse name..."
- />
- </div>
+                    {/* Match cards */}
+                    <div className="mb-8 flex max-h-[600px] flex-col gap-4 overflow-y-auto pr-2">
+                        {matchResults.map((result) => (
+                            <div
+                                key={result.rowIndex}
+                                className={`csv-match-card ${result.status}`}
+                                id={`match-row-${result.rowIndex}`}
+                            >
+                                <div className="mb-3 flex items-center gap-3">
+                                    <span className="shrink-0 text-xl">
+                                        {result.status === "perfect" ? "✅" : result.status === "review" ? "⚠️" : "❌"}
+                                    </span>
+                                    <input
+                                        className="border-input-input flex-1 rounded-sm border bg-input px-4 py-2 font-sans text-base font-semibold text-foreground"
+                                        value={result.customName}
+                                        onChange={(e) => handleCustomNameChange(result.rowIndex, e.target.value)}
+                                        placeholder="Horse name..."
+                                    />
+                                </div>
 
- {/* CSV row preview */}
- <div className="mb-4 flex flex-wrap gap-1">
- {Object.entries(result.csvRow)
- .filter(([, v]) => v)
- .slice(0, 4)
- .map(([k, v]) => (
- <span
- key={k}
- className="bg-muted text-secondary-foreground rounded-sm px-[8px] py-[2px] text-xs"
- >
- {k}: {v}
- </span>
- ))}
- </div>
+                                {/* CSV row preview */}
+                                <div className="mb-4 flex flex-wrap gap-1">
+                                    {Object.entries(result.csvRow)
+                                        .filter(([, v]) => v)
+                                        .slice(0, 4)
+                                        .map(([k, v]) => (
+                                            <span
+                                                key={k}
+                                                className="rounded-sm bg-muted px-[8px] py-[2px] text-xs text-secondary-foreground"
+                                            >
+                                                {k}: {v}
+                                            </span>
+                                        ))}
+                                </div>
 
- {/* Match options */}
- {result.matches.length > 0 && (
- <div className="flex flex-col gap-2">
- {result.matches.map((match) => (
- <label
- key={match.id}
- className="flex cursor-pointer items-start gap-2 rounded-sm px-4 py-2 transition-colors"
- >
- <input
- type="radio"
- name={`match-${result.rowIndex}`}
- checked={result.selectedMatch?.id === match.id}
- onChange={() => handleSelectMatch(result.rowIndex, match)}
- />
- <span className="flex flex-col gap-[2px]">
- <span className="text-foreground text-sm">{match.display}</span>
- <span className={`text-xs font-medium ${matchScoreLabel(match.score) ==="Strong match" ?"text-success" :"text-warning"}`}>
- {matchScoreLabel(match.score)}
- </span>
- </span>
- </label>
- ))}
- <label className="flex cursor-pointer items-start gap-2 rounded-sm px-4 py-2 transition-colors">
- <input
- type="radio"
- name={`match-${result.rowIndex}`}
- checked={result.selectedMatch === null}
- onChange={() => handleSelectMatch(result.rowIndex, null)}
- />
- <span className="flex flex-col gap-[2px]">
- <span className="text-foreground text-sm">
- Custom / Unknown — no reference link
- </span>
- </span>
- </label>
- </div>
- )}
+                                {/* Match options */}
+                                {result.matches.length > 0 && (
+                                    <div className="flex flex-col gap-2">
+                                        {result.matches.map((match) => (
+                                            <label
+                                                key={match.id}
+                                                className="flex cursor-pointer items-start gap-2 rounded-sm px-4 py-2 transition-colors"
+                                            >
+                                                <input
+                                                    type="radio"
+                                                    name={`match-${result.rowIndex}`}
+                                                    checked={result.selectedMatch?.id === match.id}
+                                                    onChange={() => handleSelectMatch(result.rowIndex, match)}
+                                                />
+                                                <span className="flex flex-col gap-[2px]">
+                                                    <span className="text-sm text-foreground">{match.display}</span>
+                                                    <span
+                                                        className={`text-xs font-medium ${matchScoreLabel(match.score) === "Strong match" ? "text-success" : "text-warning"}`}
+                                                    >
+                                                        {matchScoreLabel(match.score)}
+                                                    </span>
+                                                </span>
+                                            </label>
+                                        ))}
+                                        <label className="flex cursor-pointer items-start gap-2 rounded-sm px-4 py-2 transition-colors">
+                                            <input
+                                                type="radio"
+                                                name={`match-${result.rowIndex}`}
+                                                checked={result.selectedMatch === null}
+                                                onChange={() => handleSelectMatch(result.rowIndex, null)}
+                                            />
+                                            <span className="flex flex-col gap-[2px]">
+                                                <span className="text-sm text-foreground">
+                                                    Custom / Unknown — no reference link
+                                                </span>
+                                            </span>
+                                        </label>
+                                    </div>
+                                )}
 
- {result.matches.length === 0 && (
- <p className="text-muted-foreground text-sm italic">
- No matches found in the reference database. This model will be imported as
- custom/unknown.
- </p>
- )}
- </div>
- ))}
- </div>
+                                {result.matches.length === 0 && (
+                                    <p className="text-sm text-muted-foreground italic">
+                                        No matches found in the reference database. This model will be imported as
+                                        custom/unknown.
+                                    </p>
+                                )}
+                            </div>
+                        ))}
+                    </div>
 
- {/* Duplicate warning — confirm before importing look-alike rows */}
- {showDupePanel && duplicates.rowCount > 0 && (
- <div className="border-warning/40 bg-warning/10 mb-6 rounded-md border px-6 py-4">
- <p className="text-warning mb-2 text-sm font-bold">
- ⚠️ {duplicates.rowCount} row{duplicates.rowCount === 1 ?"" :"s"} match{duplicates.rowCount === 1 ?"es" :""} horses already in your stable:
- </p>
- <p className="mb-3 text-sm text-secondary-foreground">
- {duplicates.names.slice(0, 8).join(", ")}
- {duplicates.names.length > 8 ? ` and ${duplicates.names.length - 8} more` :""}
- </p>
- <p className="mb-3 text-xs text-muted-foreground">
- Importing will create a second copy of each — that&apos;s fine if you own duplicates, but
- double-check if you already imported this file.
- </p>
- <div className="flex flex-wrap gap-2">
- <Button variant="outline" size="wide" onClick={() => setShowDupePanel(false)}>
- ← Go back and review
- </Button>
- <Button onClick={runImport} disabled={isImporting}>
- Import anyway →
- </Button>
- </div>
- </div>
- )}
+                    {/* Duplicate warning — confirm before importing look-alike rows */}
+                    {showDupePanel && duplicates.rowCount > 0 && (
+                        <div className="mb-6 rounded-md border border-warning/40 bg-warning/10 px-6 py-4">
+                            <p className="mb-2 text-sm font-bold text-warning">
+                                ⚠️ {duplicates.rowCount} row{duplicates.rowCount === 1 ? "" : "s"} match
+                                {duplicates.rowCount === 1 ? "es" : ""} horses already in your stable:
+                            </p>
+                            <p className="mb-3 text-sm text-secondary-foreground">
+                                {duplicates.names.slice(0, 8).join(", ")}
+                                {duplicates.names.length > 8 ? ` and ${duplicates.names.length - 8} more` : ""}
+                            </p>
+                            <p className="mb-3 text-xs text-muted-foreground">
+                                Importing will create a second copy of each — that&apos;s fine if you own duplicates,
+                                but double-check if you already imported this file.
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                                <Button variant="outline" size="wide" onClick={() => setShowDupePanel(false)}>
+                                    ← Go back and review
+                                </Button>
+                                <Button onClick={runImport} disabled={isImporting}>
+                                    Import anyway →
+                                </Button>
+                            </div>
+                        </div>
+                    )}
 
- <div className="border-input flex items-center justify-between gap-4 border-t pt-6">
- <Button variant="outline" size="wide"
- onClick={() => setStep(2)}
- >
- ← Back
- </Button>
- <div className="flex flex-col items-end gap-2">
- {duplicates.rowCount > 0 && !showDupePanel && (
- <span className="text-warning text-xs font-medium">
- ⚠️ {duplicates.rowCount} row{duplicates.rowCount === 1 ?"" :"s"} match
- {duplicates.rowCount === 1 ?"es" :""} horses already in your stable
- </span>
- )}
- <label className="flex items-center gap-2 text-sm" htmlFor="import-visibility">
- <span>Imported horses start as</span>
- <select
- id="import-visibility"
- className="border-input bg-card h-9 rounded-md border px-2 text-sm"
- value={importVisibility}
- onChange={(e) => setImportVisibility(e.target.value as HorseVisibility)}
- >
- {VISIBILITY_OPTIONS.map((opt) => (
- <option key={opt.value} value={opt.value}>
- {opt.label}: {opt.hint}
- </option>
- ))}
- </select>
- </label>
- <Button
- onClick={handleImport}
- disabled={isImporting}
- id="import-btn"
- >
- {isImporting ? (
- <>
- <span className="spinner-inline" /> Importing…
- </>
- ) : (
- `Import ${matchResults.length} Models →`
- )}
- </Button>
- </div>
- </div>
- </div>
- )}
+                    <div className="flex items-center justify-between gap-4 border-t border-input pt-6">
+                        <Button variant="outline" size="wide" onClick={() => setStep(2)}>
+                            ← Back
+                        </Button>
+                        <div className="flex flex-col items-end gap-2">
+                            {duplicates.rowCount > 0 && !showDupePanel && (
+                                <span className="text-xs font-medium text-warning">
+                                    ⚠️ {duplicates.rowCount} row{duplicates.rowCount === 1 ? "" : "s"} match
+                                    {duplicates.rowCount === 1 ? "es" : ""} horses already in your stable
+                                </span>
+                            )}
+                            <label className="flex items-center gap-2 text-sm" htmlFor="import-visibility">
+                                <span>Imported horses start as</span>
+                                <select
+                                    id="import-visibility"
+                                    className="h-9 rounded-md border border-input bg-card px-2 text-sm"
+                                    value={importVisibility}
+                                    onChange={(e) => setImportVisibility(e.target.value as HorseVisibility)}
+                                >
+                                    {VISIBILITY_OPTIONS.map((opt) => (
+                                        <option key={opt.value} value={opt.value}>
+                                            {opt.label}: {opt.hint}
+                                        </option>
+                                    ))}
+                                </select>
+                            </label>
+                            <Button onClick={handleImport} disabled={isImporting} id="import-btn">
+                                {isImporting ? (
+                                    <>
+                                        <span className="spinner-inline" /> Importing…
+                                    </>
+                                ) : (
+                                    `Import ${matchResults.length} Models →`
+                                )}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
- {/* ═══ Step 4: Import Result ═══ */}
- {step === 4 && (
- <div className="animate-fade-in-up mx-auto max-w-[900px]">
- {importResult?.success ? (
- <div className="text-center">
- <div className="mb-4 text-[4rem]">
- {rowErrors.length === 0 ?"🎉" : importedCount > 0 ?"⚠️" :"❌"}
- </div>
- <h2>
- {rowErrors.length === 0
- ?"Import Complete!"
- : importedCount > 0
- ?"Import Finished — With Skipped Rows"
- :"Nothing Was Imported"}
- </h2>
- <p className="text-secondary-foreground mb-4 text-base">
- Imported <strong>{importedCount}</strong> model
- {importedCount !== 1 ?"s" :""} to your stable
- {rowErrors.length > 0 ? (
- <>
- {" — "}
- <strong>{rowErrors.length}</strong> row{rowErrors.length !== 1 ?"s were" :" was"} skipped.
- </>
- ) : (
- "."
- )}
- </p>
+            {/* ═══ Step 4: Import Result ═══ */}
+            {step === 4 && (
+                <div className="animate-fade-in-up mx-auto max-w-[900px]">
+                    {importResult?.success ? (
+                        <div className="text-center">
+                            <div className="mb-4 text-[4rem]">
+                                {rowErrors.length === 0 ? "🎉" : importedCount > 0 ? "⚠️" : "❌"}
+                            </div>
+                            <h2>
+                                {rowErrors.length === 0
+                                    ? "Import Complete!"
+                                    : importedCount > 0
+                                      ? "Import Finished — With Skipped Rows"
+                                      : "Nothing Was Imported"}
+                            </h2>
+                            <p className="mb-4 text-base text-secondary-foreground">
+                                Imported <strong>{importedCount}</strong> model
+                                {importedCount !== 1 ? "s" : ""} to your stable
+                                {rowErrors.length > 0 ? (
+                                    <>
+                                        {" — "}
+                                        <strong>{rowErrors.length}</strong> row
+                                        {rowErrors.length !== 1 ? "s were" : " was"} skipped.
+                                    </>
+                                ) : (
+                                    "."
+                                )}
+                            </p>
 
- {/* Fallback notice: migration 144 not applied yet */}
- {importResult.usedFallback && (
- <div className="border-info/30 bg-info/10 mx-auto mb-6 max-w-[560px] rounded-md border px-6 py-3 text-left text-sm text-secondary-foreground">
- ℹ️ Imported with the older import engine: horses were saved as{""}
- <strong>private</strong> and the Notes column was not saved. You can publish
- them anytime from your stable.
- </div>
- )}
+                            {/* Fallback notice: migration 144 not applied yet */}
+                            {importResult.usedFallback && (
+                                <div className="mx-auto mb-6 max-w-[560px] rounded-md border border-info/30 bg-info/10 px-6 py-3 text-left text-sm text-secondary-foreground">
+                                    ℹ️ Imported with the older import engine: horses were saved as{""}
+                                    <strong>private</strong> and the Notes column was not saved. You can publish them
+                                    anytime from your stable.
+                                </div>
+                            )}
 
- {/* Per-row errors, with the user's spreadsheet row numbers */}
- {rowErrors.length > 0 && (
- <div className="border-destructive/30 bg-destructive/10 mx-auto mb-6 max-w-[640px] rounded-md border px-6 py-4 text-left">
- <p className="text-destructive mb-2 text-sm font-bold">Skipped rows:</p>
- <ul className="m-0 flex max-h-[220px] list-none flex-col gap-1 overflow-y-auto p-0 text-sm text-secondary-foreground">
- {rowErrors.map((err, i) => (
- <li key={i}>
- <strong>Row {err.rowNumber}</strong> ({err.name}): {err.message}
- </li>
- ))}
- </ul>
- <p className="mt-3 text-xs text-muted-foreground">
- Fix these rows in your spreadsheet and import just those rows again — the
- imported ones are already saved.
- </p>
- </div>
- )}
+                            {/* Per-row errors, with the user's spreadsheet row numbers */}
+                            {rowErrors.length > 0 && (
+                                <div className="mx-auto mb-6 max-w-[640px] rounded-md border border-destructive/30 bg-destructive/10 px-6 py-4 text-left">
+                                    <p className="mb-2 text-sm font-bold text-destructive">Skipped rows:</p>
+                                    <ul className="m-0 flex max-h-[220px] list-none flex-col gap-1 overflow-y-auto p-0 text-sm text-secondary-foreground">
+                                        {rowErrors.map((err, i) => (
+                                            <li key={i}>
+                                                <strong>Row {err.rowNumber}</strong> ({err.name}): {err.message}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    <p className="mt-3 text-xs text-muted-foreground">
+                                        Fix these rows in your spreadsheet and import just those rows again — the
+                                        imported ones are already saved.
+                                    </p>
+                                </div>
+                            )}
 
- <div className="flex flex-wrap justify-center gap-4">
- <Button asChild variant="outline"><a
- href="/dashboard"
- >
- 🐴 View Your Stable
- </a></Button>
- <Button variant="outline" size="wide"
- onClick={() => {
- setStep(1);
- setCsvData([]);
- setCsvHeaders([]);
- setColumnMapping({});
- setMatchResults([]);
- setImportResult(null);
- setValidationErrors([]);
- setShowDupePanel(false);
- }}
- >
- 📄 Import Another CSV
- </Button>
- </div>
- </div>
- ) : (
- <div className="bg-card border-input rounded-lg border px-8 py-12 text-center shadow-md transition-all">
- <div className="mb-6 text-[4rem]">❌</div>
- <h2>Import Failed</h2>
- <p>{importResult?.error ||"An unexpected error occurred."}</p>
- <Button
- onClick={() => setStep(3)}
- >
- ← Back to Review
- </Button>
- </div>
- )}
- </div>
- )}
- </div>
- );
+                            <div className="flex flex-wrap justify-center gap-4">
+                                <Button asChild variant="outline">
+                                    <a href="/dashboard">🐴 View Your Stable</a>
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    size="wide"
+                                    onClick={() => {
+                                        setStep(1);
+                                        setCsvData([]);
+                                        setCsvHeaders([]);
+                                        setColumnMapping({});
+                                        setMatchResults([]);
+                                        setImportResult(null);
+                                        setValidationErrors([]);
+                                        setShowDupePanel(false);
+                                    }}
+                                >
+                                    📄 Import Another CSV
+                                </Button>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="rounded-lg border border-input bg-card px-8 py-12 text-center shadow-md transition-all">
+                            <div className="mb-6 text-[4rem]">❌</div>
+                            <h2>Import Failed</h2>
+                            <p>{importResult?.error || "An unexpected error occurred."}</p>
+                            <Button onClick={() => setStep(3)}>← Back to Review</Button>
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    );
 }

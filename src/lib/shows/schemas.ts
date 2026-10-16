@@ -24,21 +24,8 @@ export const showStatusSchema = z.enum([
     "completed",
     "archived",
 ]);
-export const classStatusSchema = z.enum([
-    "scheduled",
-    "called",
-    "judging",
-    "placed",
-    "combined",
-    "cancelled",
-]);
-export const divisionAxisSchema = z.enum([
-    "halter",
-    "performance",
-    "workmanship",
-    "collectibility",
-    "other",
-]);
+export const classStatusSchema = z.enum(["scheduled", "called", "judging", "placed", "combined", "cancelled"]);
+export const divisionAxisSchema = z.enum(["halter", "performance", "workmanship", "collectibility", "other"]);
 /** Roles a host can grant. 'host' itself lives on shows.host_id and is not grantable. */
 export const grantableStaffRoleSchema = z.enum(["co_host", "steward", "judge"]);
 
@@ -68,13 +55,9 @@ export const createShowSchema = z
         isMhhQualifying: z.boolean().default(true),
         sanctioningNote: shortText.optional(),
     })
-    .refine(
-        (v) =>
-            !v.entriesOpenAt ||
-            !v.entriesCloseAt ||
-            new Date(v.entriesOpenAt) < new Date(v.entriesCloseAt),
-        { message: "Entries must open before they close." },
-    );
+    .refine((v) => !v.entriesOpenAt || !v.entriesCloseAt || new Date(v.entriesOpenAt) < new Date(v.entriesCloseAt), {
+        message: "Entries must open before they close.",
+    });
 
 export const updateShowSettingsSchema = z.object({
     showId: uuidSchema,
@@ -107,10 +90,7 @@ export const updateShowSettingsSchema = z.object({
         // A patch carrying only one is checked in the action against
         // the stored other half (the schema can't see the DB).
         .refine(
-            (p) =>
-                !p.entriesOpenAt ||
-                !p.entriesCloseAt ||
-                new Date(p.entriesOpenAt) < new Date(p.entriesCloseAt),
+            (p) => !p.entriesOpenAt || !p.entriesCloseAt || new Date(p.entriesOpenAt) < new Date(p.entriesCloseAt),
             { message: "Entries must open before they close." },
         ),
 });
@@ -345,14 +325,12 @@ export const recordPlacingsSchema = z.object({
             }),
         )
         .max(6)
-        .refine(
-            (rows) => new Set(rows.map((r) => r.place)).size === rows.length,
-            { message: "Each place can only be assigned once." },
-        )
-        .refine(
-            (rows) => new Set(rows.map((r) => r.entryId)).size === rows.length,
-            { message: "An entry can only take one place." },
-        ),
+        .refine((rows) => new Set(rows.map((r) => r.place)).size === rows.length, {
+            message: "Each place can only be assigned once.",
+        })
+        .refine((rows) => new Set(rows.map((r) => r.entryId)).size === rows.length, {
+            message: "An entry can only take one place.",
+        }),
     /**
      * Placing notes for EVERY entry the judge wrote one on — placed or
      * not. Unplaced entries' notes persist as participation rows
@@ -396,8 +374,7 @@ export const recordCallbackSchema = z
         reserveEntryId: uuidSchema.nullable().optional(),
     })
     .refine((v) => (v.scope === "show" ? !v.scopeId : !!v.scopeId), {
-        message:
-            "Section and division callbacks need their section/division id; the show callback must not have one.",
+        message: "Section and division callbacks need their section/division id; the show callback must not have one.",
     })
     .refine((v) => !v.reserveEntryId || v.reserveEntryId !== v.championEntryId, {
         message: "Champion and reserve must be different entries.",
@@ -436,9 +413,7 @@ export const listBarredEntrantsSchema = z.object({
 });
 
 export const voidCardSchema = z.object({
-    code: z
-        .string()
-        .regex(/^[A-HJ-NP-Za-km-z2-9]{8}$/, "That is not a valid card code."),
+    code: z.string().regex(/^[A-HJ-NP-Za-km-z2-9]{8}$/, "That is not a valid card code."),
     reason: z.string().trim().min(3, "Give a short reason — it lands on the card's audit trail.").max(500),
 });
 
@@ -487,12 +462,7 @@ export const unpublishClassResultsSchema = z.object({
     classId: uuidSchema,
 });
 
-export const documentKindSchema = z.enum([
-    "breed",
-    "performance",
-    "collectibility",
-    "other",
-]);
+export const documentKindSchema = z.enum(["breed", "performance", "collectibility", "other"]);
 
 export const createHorseDocumentSchema = z.object({
     horseId: uuidSchema,
@@ -552,10 +522,7 @@ export const enterClassBatchSchema = z.object({
         )
         .min(1, "Pick at least one horse.")
         .max(MAX_BATCH_ENTRIES, `Enter at most ${MAX_BATCH_ENTRIES} horses at a time.`)
-        .refine(
-            (rows) => new Set(rows.map((r) => r.horseId)).size === rows.length,
-            "The same horse is listed twice.",
-        ),
+        .refine((rows) => new Set(rows.map((r) => r.horseId)).size === rows.length, "The same horse is listed twice."),
 });
 
 /** First zod issue as a user-facing error string. */

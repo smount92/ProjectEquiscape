@@ -1,9 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-    NAMHSA_CORE_TEMPLATE,
-    countTemplateClasses,
-    getClasslistTemplate,
-} from "@/lib/shows/namhsaTemplate";
+import { NAMHSA_CORE_TEMPLATE, countTemplateClasses, getClasslistTemplate } from "@/lib/shows/namhsaTemplate";
 import { SHOW_TEMPLATES } from "@/lib/constants/showTemplates";
 
 describe("namhsaTemplate — NAMHSA core classlist", () => {
@@ -13,11 +9,7 @@ describe("namhsaTemplate — NAMHSA core classlist", () => {
     });
 
     it("has three divisions with correct axes", () => {
-        expect(NAMHSA_CORE_TEMPLATE.divisions.map((d) => d.axis)).toEqual([
-            "halter",
-            "performance",
-            "collectibility",
-        ]);
+        expect(NAMHSA_CORE_TEMPLATE.divisions.map((d) => d.axis)).toEqual(["halter", "performance", "collectibility"]);
     });
 
     it("carries the full legacy classlist: 10 sections, 41 classes", () => {

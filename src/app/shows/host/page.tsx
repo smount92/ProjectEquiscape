@@ -9,14 +9,7 @@ import CommandCenterLayout from "@/components/layouts/CommandCenterLayout";
 import CreateShowV2Form from "@/components/shows/CreateShowV2Form";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export const dynamic = "force-dynamic";
 
@@ -45,8 +38,8 @@ function MyShowsList({ shows }: { shows: HostedShowSummary[] }) {
         return (
             <div className="py-8 text-center">
                 <p className="text-sm text-muted-foreground">
-                    You haven&rsquo;t hosted a show yet — open your first one below. Free shows are
-                    complete: create, take entries, judge, and publish results.
+                    You haven&rsquo;t hosted a show yet — open your first one below. Free shows are complete: create,
+                    take entries, judge, and publish results.
                 </p>
             </div>
         );
@@ -81,15 +74,11 @@ function MyShowsList({ shows }: { shows: HostedShowSummary[] }) {
                         </TableCell>
                         <TableCell>{show.mode === "live" ? "Live" : "Online"}</TableCell>
                         <TableCell>
-                            <span
-                                className={`stamp ${show.status === "draft" ? "stamp-red" : ""}`}
-                            >
+                            <span className={`stamp ${show.status === "draft" ? "stamp-red" : ""}`}>
                                 {friendlyShowStatus(show.status)}
                             </span>
                         </TableCell>
-                        <TableCell>
-                            {formatDate(show.mode === "live" ? show.showDate : show.entriesCloseAt)}
-                        </TableCell>
+                        <TableCell>{formatDate(show.mode === "live" ? show.showDate : show.entriesCloseAt)}</TableCell>
                         <TableCell className="text-right">{show.entryCount}</TableCell>
                         <TableCell className="text-right">
                             <Button asChild variant="outline" size="sm">
@@ -104,7 +93,6 @@ function MyShowsList({ shows }: { shows: HostedShowSummary[] }) {
 }
 
 export default async function HostShowsPage() {
-
     const supabase = await createClient();
     const {
         data: { user },

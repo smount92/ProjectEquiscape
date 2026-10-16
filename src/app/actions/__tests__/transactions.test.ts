@@ -163,7 +163,10 @@ describe("Commerce State Machine — transactions.ts", () => {
         });
 
         it("rejects when horse not For Sale (RPC)", async () => {
-            mockClient.rpc.mockResolvedValueOnce({ data: { success: false, error: "Horse is not available for offers" }, error: null });
+            mockClient.rpc.mockResolvedValueOnce({
+                data: { success: false, error: "Horse is not available for offers" },
+                error: null,
+            });
             const result = await makeOffer(validOffer);
             expect(result.success).toBe(false);
             expect(result.error).toMatch(/not available/i);
@@ -184,11 +187,14 @@ describe("Commerce State Machine — transactions.ts", () => {
             expect(result.success).toBe(true);
             expect(result.transactionId).toBe(TXN);
             expect(result.conversationId).toBe("conv-1");
-            expect(mockClient.rpc).toHaveBeenCalledWith("make_offer_atomic", expect.objectContaining({
-                p_buyer_id: BUYER,
-                p_seller_id: SELLER,
-                p_offered_price: 150,
-            }));
+            expect(mockClient.rpc).toHaveBeenCalledWith(
+                "make_offer_atomic",
+                expect.objectContaining({
+                    p_buyer_id: BUYER,
+                    p_seller_id: SELLER,
+                    p_offered_price: 150,
+                }),
+            );
         });
     });
 
@@ -423,7 +429,10 @@ describe("Commerce State Machine — transactions.ts", () => {
                 data: txnRow("pending_payment", { paid_at: "2026-07-01T00:00:00Z" }),
                 error: null,
             });
-            mockParkHorse.mockResolvedValueOnce({ success: false, error: "Cannot park a horse flagged as Stolen/Missing." });
+            mockParkHorse.mockResolvedValueOnce({
+                success: false,
+                error: "Cannot park a horse flagged as Stolen/Missing.",
+            });
             const result = await verifyFundsAndRelease(TXN);
             expect(result.success).toBe(false);
             expect(result.error).toMatch(/stolen/i);
@@ -875,8 +884,22 @@ describe("Commerce State Machine — transactions.ts", () => {
         it("averages reviews to one decimal", async () => {
             mockClient._setImplicitResolve({
                 data: [
-                    { id: "r1", stars: 5, content: "great", created_at: "2026-01-01", reviewer_id: BUYER, users: { alias_name: "B" } },
-                    { id: "r2", stars: 4, content: null, created_at: "2026-01-02", reviewer_id: STRANGER, users: { alias_name: "S" } },
+                    {
+                        id: "r1",
+                        stars: 5,
+                        content: "great",
+                        created_at: "2026-01-01",
+                        reviewer_id: BUYER,
+                        users: { alias_name: "B" },
+                    },
+                    {
+                        id: "r2",
+                        stars: 4,
+                        content: null,
+                        created_at: "2026-01-02",
+                        reviewer_id: STRANGER,
+                        users: { alias_name: "S" },
+                    },
                 ],
                 error: null,
             });
@@ -898,9 +921,17 @@ describe("Commerce State Machine — transactions.ts", () => {
         it("maps the row to the OfferCard shape", async () => {
             mockClient._mockQuery.maybeSingle.mockResolvedValueOnce({
                 data: {
-                    id: TXN, status: "pending_payment", type: "marketplace_sale",
-                    offer_amount: 100, offer_message: "hi", party_a_id: SELLER, party_b_id: BUYER,
-                    horse_id: HORSE, paid_at: null, verified_at: null, metadata: null,
+                    id: TXN,
+                    status: "pending_payment",
+                    type: "marketplace_sale",
+                    offer_amount: 100,
+                    offer_message: "hi",
+                    party_a_id: SELLER,
+                    party_b_id: BUYER,
+                    horse_id: HORSE,
+                    paid_at: null,
+                    verified_at: null,
+                    metadata: null,
                 },
                 error: null,
             });

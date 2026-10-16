@@ -86,17 +86,12 @@ export default async function ShowRingV2({
 }) {
     const filters = parseShowRingSearchParams(searchParams);
 
-    const [pageResult, featuredHorse] = await Promise.all([
-        getShowRingPage(filters),
-        fetchFeaturedHorse(),
-    ]);
+    const [pageResult, featuredHorse] = await Promise.all([getShowRingPage(filters), fetchFeaturedHorse()]);
 
     const cards = pageResult.success ? pageResult.cards : [];
     const totalCount = pageResult.success ? pageResult.totalCount : 0;
     const hasMore = pageResult.success ? pageResult.hasMore : false;
-    const facetOptions = pageResult.success
-        ? pageResult.facetOptions
-        : { makers: [], scales: [], finishes: [] };
+    const facetOptions = pageResult.success ? pageResult.facetOptions : { makers: [], scales: [], finishes: [] };
 
     return (
         <>

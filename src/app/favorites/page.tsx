@@ -34,9 +34,8 @@ export default async function FavoritesPage() {
             }
             description={
                 <>
-                    Horses you ♥ around the Show Ring land here. Favorites are{" "}
-                    <strong>individual horses</strong> you admire — if you&apos;re hunting for a{" "}
-                    <strong>model to buy</strong>, that&apos;s your{" "}
+                    Horses you ♥ around the Show Ring land here. Favorites are <strong>individual horses</strong> you
+                    admire — if you&apos;re hunting for a <strong>model to buy</strong>, that&apos;s your{" "}
                     <Link href="/wishlist" className="text-forest underline underline-offset-2">
                         Want List
                     </Link>
@@ -52,11 +51,7 @@ export default async function FavoritesPage() {
                     ⚠️ We couldn&apos;t load your favorites just now. Please refresh to try again.
                 </div>
             ) : (
-                <FavoritesBrowser
-                    initialEntries={entries}
-                    totalCount={totalCount}
-                    initialHasMore={hasMore}
-                />
+                <FavoritesBrowser initialEntries={entries} totalCount={totalCount} initialHasMore={hasMore} />
             )}
         </ExplorerLayout>
     );

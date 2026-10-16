@@ -30,10 +30,7 @@ export interface HorseViewStats {
  * or the read failed. All four are the same outcome for the page — a line
  * that simply is not there — so they collapse to one return value.
  */
-export async function getHorseViewStats(
-    client: unknown,
-    horseId: string,
-): Promise<HorseViewStats | null> {
+export async function getHorseViewStats(client: unknown, horseId: string): Promise<HorseViewStats | null> {
     try {
         const { data, error } = await metricsDb(client)
             .rpc("get_horse_view_stats", { p_horse_id: horseId })

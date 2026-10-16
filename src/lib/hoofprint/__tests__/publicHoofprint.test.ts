@@ -94,9 +94,7 @@ describe("mapPublicHoofprint", () => {
         // The "🔒 Private" marker exists for the owner's own view. If a
         // row ever arrived claiming is_public false, showing that badge
         // to a stranger would advertise the existence of hidden history.
-        const result = mapPublicHoofprint(
-            row({ timeline: [{ source_id: "a", title: "T", is_public: false }] }),
-        );
+        const result = mapPublicHoofprint(row({ timeline: [{ source_id: "a", title: "T", is_public: false }] }));
         expect(result!.timeline[0].isPublic).toBe(true);
     });
 
@@ -165,9 +163,7 @@ describe("mapPublicHoofprint", () => {
     });
 
     it("falls back to Unknown for an alias that did not resolve", () => {
-        const result = mapPublicHoofprint(
-            row({ timeline: [{ source_id: "a", title: "T", user_alias: null }] }),
-        );
+        const result = mapPublicHoofprint(row({ timeline: [{ source_id: "a", title: "T", user_alias: null }] }));
         expect(result!.timeline[0].userAlias).toBe("Unknown");
     });
 });

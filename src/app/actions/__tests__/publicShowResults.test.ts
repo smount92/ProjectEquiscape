@@ -148,13 +148,48 @@ describe("getPublicShowResults — the flattened public results build", () => {
                 // 1. the placed-entry batch — deliberately NOT in place order
                 {
                     data: [
-                        { id: "e1", horse_id: "horse-a", class_id: "cls-1", user_id: "u1", placing: "2nd", users: { alias_name: "Ann" } },
-                        { id: "e2", horse_id: "horse-b", class_id: "cls-1", user_id: "u2", placing: "Champion", users: [{ alias_name: "Bea" }] },
-                        { id: "e3", horse_id: "horse-c", class_id: "cls-2", user_id: "u3", placing: "1st", users: null },
+                        {
+                            id: "e1",
+                            horse_id: "horse-a",
+                            class_id: "cls-1",
+                            user_id: "u1",
+                            placing: "2nd",
+                            users: { alias_name: "Ann" },
+                        },
+                        {
+                            id: "e2",
+                            horse_id: "horse-b",
+                            class_id: "cls-1",
+                            user_id: "u2",
+                            placing: "Champion",
+                            users: [{ alias_name: "Bea" }],
+                        },
+                        {
+                            id: "e3",
+                            horse_id: "horse-c",
+                            class_id: "cls-2",
+                            user_id: "u3",
+                            placing: "1st",
+                            users: null,
+                        },
                         // horse-d went private after competing
-                        { id: "e4", horse_id: "horse-d", class_id: "cls-3", user_id: "u4", placing: "HM", users: { alias_name: "Dot" } },
+                        {
+                            id: "e4",
+                            horse_id: "horse-d",
+                            class_id: "cls-3",
+                            user_id: "u4",
+                            placing: "HM",
+                            users: { alias_name: "Dot" },
+                        },
                         // an entry whose class was deleted — no class_id
-                        { id: "e5", horse_id: "horse-a", class_id: null, user_id: "u1", placing: "1st", users: { alias_name: "Ann" } },
+                        {
+                            id: "e5",
+                            horse_id: "horse-a",
+                            class_id: null,
+                            user_id: "u1",
+                            placing: "1st",
+                            users: { alias_name: "Ann" },
+                        },
                     ],
                 },
                 // 2. the totalEntries head-count
@@ -174,7 +209,11 @@ describe("getPublicShowResults — the flattened public results build", () => {
                 {
                     data: [
                         { horse_id: "horse-a", image_url: "horse-images/a-side.webp", angle_profile: "Left_Side" },
-                        { horse_id: "horse-a", image_url: "horse-images/a-thumb.webp", angle_profile: "Primary_Thumbnail" },
+                        {
+                            horse_id: "horse-a",
+                            image_url: "horse-images/a-thumb.webp",
+                            angle_profile: "Primary_Thumbnail",
+                        },
                         { horse_id: "horse-c", image_url: "horse-images/c-only.webp", angle_profile: "Right_Side" },
                     ],
                 },
@@ -197,7 +236,9 @@ describe("getPublicShowResults — the flattened public results build", () => {
             id: "event-1",
             name: "Autumn Gold Live",
             date: new Date(CLOSED_EVENT.starts_at).toLocaleDateString("en-US", {
-                month: "long", day: "numeric", year: "numeric",
+                month: "long",
+                day: "numeric",
+                year: "numeric",
             }),
             host: "AutumnGoldCrew",
             type: "live_show",
@@ -279,17 +320,44 @@ describe("getPublicShowResults — the flattened public results build", () => {
             event_entries: [
                 {
                     data: [
-                        { id: "e1", horse_id: "horse-a", class_id: null, user_id: "u1", placing: "3rd", users: { alias_name: "Ann" } },
-                        { id: "e2", horse_id: "horse-b", class_id: null, user_id: "u2", placing: "Grand Champion", users: { alias_name: "Bea" } },
+                        {
+                            id: "e1",
+                            horse_id: "horse-a",
+                            class_id: null,
+                            user_id: "u1",
+                            placing: "3rd",
+                            users: { alias_name: "Ann" },
+                        },
+                        {
+                            id: "e2",
+                            horse_id: "horse-b",
+                            class_id: null,
+                            user_id: "u2",
+                            placing: "Grand Champion",
+                            users: { alias_name: "Bea" },
+                        },
                     ],
                 },
                 { data: null, count: 2 },
             ],
             user_horses: [
-                { data: [{ id: "horse-a", custom_name: "Amber" }, { id: "horse-b", custom_name: "Basil" }] },
+                {
+                    data: [
+                        { id: "horse-a", custom_name: "Amber" },
+                        { id: "horse-b", custom_name: "Basil" },
+                    ],
+                },
             ],
             horse_images: [
-                { data: [{ horse_id: "horse-a", image_url: "horse-images/a-thumb.webp", angle_profile: "Primary_Thumbnail" }] },
+                {
+                    data: [
+                        {
+                            horse_id: "horse-a",
+                            image_url: "horse-images/a-thumb.webp",
+                            angle_profile: "Primary_Thumbnail",
+                        },
+                    ],
+                },
             ],
         };
 

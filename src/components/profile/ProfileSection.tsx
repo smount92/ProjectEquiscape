@@ -20,7 +20,7 @@ export function SectionHeading({
         <div className="brass-heading mb-3" id={id}>
             <span className="brass-heading-bar" aria-hidden="true" />
             <h2 className="font-serif text-base font-bold text-foreground">{title}</h2>
-            {note && <span className="ml-auto text-xs italic text-muted-foreground">{note}</span>}
+            {note && <span className="ml-auto text-xs text-muted-foreground italic">{note}</span>}
         </div>
     );
 }
@@ -42,14 +42,12 @@ export function EmptyNote({
     action?: ReactNode;
 }) {
     return (
-        <div className="border-input bg-card/40 rounded-lg border border-dashed px-6 py-8 text-center backdrop-blur-sm">
+        <div className="rounded-lg border border-dashed border-input bg-card/40 px-6 py-8 text-center backdrop-blur-sm">
             <div className="mb-2 text-3xl" aria-hidden="true">
                 {icon}
             </div>
             <h3 className="mb-1 font-serif text-base font-bold text-foreground">{title}</h3>
-            {children && (
-                <p className="text-secondary-foreground mx-auto max-w-[46ch] text-sm">{children}</p>
-            )}
+            {children && <p className="mx-auto max-w-[46ch] text-sm text-secondary-foreground">{children}</p>}
             {action && <div className="mt-4 flex justify-center">{action}</div>}
         </div>
     );

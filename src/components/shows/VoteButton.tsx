@@ -25,13 +25,7 @@ interface VoteButtonProps {
     onToggle: (entry: GalleryEntry) => void;
 }
 
-export default function VoteButton({
-    entry,
-    votingOpen,
-    authed,
-    pending,
-    onToggle,
-}: VoteButtonProps) {
+export default function VoteButton({ entry, votingOpen, authed, pending, onToggle }: VoteButtonProps) {
     const disabled = !votingOpen || !authed || entry.isOwn || pending;
     const voted = entry.viewerHasVoted;
 
@@ -43,18 +37,11 @@ export default function VoteButton({
     useEffect(() => {
         if (prevCount.current === entry.voteCount) return;
         prevCount.current = entry.voteCount;
-        if (
-            typeof window.matchMedia === "function" &&
-            window.matchMedia("(prefers-reduced-motion: reduce)").matches
-        ) {
+        if (typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
             return;
         }
         countRef.current?.animate?.(
-            [
-                { transform: "scale(1)" },
-                { transform: "scale(1.3)" },
-                { transform: "scale(1)" },
-            ],
+            [{ transform: "scale(1)" }, { transform: "scale(1.3)" }, { transform: "scale(1)" }],
             { duration: 220, easing: "ease-out" },
         );
     }, [entry.voteCount]);
@@ -72,7 +59,7 @@ export default function VoteButton({
     return (
         <button
             type="button"
-            className={`flex min-h-8 cursor-pointer items-center gap-1.5 rounded-full border border-input bg-card px-2.5 py-0.5 text-xs font-semibold transition-all pointer-coarse:min-h-11 disabled:cursor-default disabled:opacity-60 ${
+            className={`flex min-h-8 cursor-pointer items-center gap-1.5 rounded-full border border-input bg-card px-2.5 py-0.5 text-xs font-semibold transition-all disabled:cursor-default disabled:opacity-60 pointer-coarse:min-h-11 ${
                 voted ? "text-destructive" : "text-muted-foreground"
             }`}
             disabled={disabled}
@@ -81,20 +68,13 @@ export default function VoteButton({
             data-testid="vote-button"
             onClick={() => onToggle(entry)}
         >
-            <Heart
-                size={14}
-                strokeWidth={2}
-                aria-hidden="true"
-                fill={voted ? "currentColor" : "none"}
-            />
+            <Heart size={14} strokeWidth={2} aria-hidden="true" fill={voted ? "currentColor" : "none"} />
             <span>{voted ? "Voted" : "Vote"}</span>
             <span aria-hidden="true">·</span>
             <span ref={countRef} data-testid="vote-count" className="inline-block">
                 {entry.voteCount}
             </span>
-            {entry.isOwn && (
-                <span className="font-normal text-muted-foreground italic">(your entry)</span>
-            )}
+            {entry.isOwn && <span className="font-normal text-muted-foreground italic">(your entry)</span>}
         </button>
     );
 }

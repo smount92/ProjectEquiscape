@@ -63,10 +63,7 @@ describe("daysSince / cutoffs", () => {
 
 describe("classifyOverdueShow — judging", () => {
     it("fires the moment judging_ends_at passes (the cron's own predicate)", () => {
-        const verdict = classifyOverdueShow(
-            show({ status: "judging", judgingEndsAt: ago(4) }),
-            NOW,
-        );
+        const verdict = classifyOverdueShow(show({ status: "judging", judgingEndsAt: ago(4) }), NOW);
         expect(verdict).toMatchObject({ reason: "judging_overdue", overdueDays: 4 });
     });
 
@@ -119,42 +116,28 @@ describe("classifyOverdueShow — the states nothing advances", () => {
     });
 
     it("leaves a freshly closed show alone", () => {
-        expect(
-            classifyOverdueShow(show({ status: "entries_closed", entriesCloseAt: ago(1) }), NOW),
-        ).toBeNull();
+        expect(classifyOverdueShow(show({ status: "entries_closed", entriesCloseAt: ago(1) }), NOW)).toBeNull();
     });
 
     it("flags a live show still running past its show date", () => {
         const showDate = cutoffDate(NOW, RUNNING_PAST_DATE_DAYS + 1);
-        const verdict = classifyOverdueShow(
-            show({ status: "running", showDate, updatedAt: ago(0) }),
-            NOW,
-        );
+        const verdict = classifyOverdueShow(show({ status: "running", showDate, updatedAt: ago(0) }), NOW);
         // Edited yesterday, but the DATE is what says it's stalled.
         expect(verdict?.reason).toBe("running_stalled");
     });
 
     it("falls back to idleness for a running show with no date on file", () => {
         expect(
-            classifyOverdueShow(
-                show({ status: "running", showDate: null, updatedAt: ago(RUNNING_IDLE_DAYS) }),
-                NOW,
-            )?.reason,
+            classifyOverdueShow(show({ status: "running", showDate: null, updatedAt: ago(RUNNING_IDLE_DAYS) }), NOW)
+                ?.reason,
         ).toBe("running_stalled");
-        expect(
-            classifyOverdueShow(
-                show({ status: "running", showDate: null, updatedAt: ago(1) }),
-                NOW,
-            ),
-        ).toBeNull();
+        expect(classifyOverdueShow(show({ status: "running", showDate: null, updatedAt: ago(1) }), NOW)).toBeNull();
     });
 
     it("flags results that were never published to entrants", () => {
         expect(
-            classifyOverdueShow(
-                show({ status: "results_review", updatedAt: ago(RESULTS_REVIEW_STALLED_DAYS) }),
-                NOW,
-            )?.reason,
+            classifyOverdueShow(show({ status: "results_review", updatedAt: ago(RESULTS_REVIEW_STALLED_DAYS) }), NOW)
+                ?.reason,
         ).toBe("results_review_stalled");
     });
 

@@ -44,11 +44,9 @@ export async function getSentryIssues(): Promise<SentryStatus> {
     const token = process.env.SENTRY_AUTH_TOKEN;
     const org = process.env.SENTRY_ORG;
     const project = process.env.SENTRY_PROJECT;
-    const missing = [
-        !token && "SENTRY_AUTH_TOKEN",
-        !org && "SENTRY_ORG",
-        !project && "SENTRY_PROJECT",
-    ].filter((x): x is string => typeof x === "string");
+    const missing = [!token && "SENTRY_AUTH_TOKEN", !org && "SENTRY_ORG", !project && "SENTRY_PROJECT"].filter(
+        (x): x is string => typeof x === "string",
+    );
     if (missing.length > 0) return { configured: false, missing };
 
     const url =
@@ -82,6 +80,10 @@ export async function getSentryIssues(): Promise<SentryStatus> {
         return { configured: true, ok: true, issues, fetchedAt: new Date().toISOString(), period: PERIOD };
     } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
-        return { configured: true, ok: false, error: /abort|timeout/i.test(msg) ? "Sentry did not answer within 6 seconds." : msg };
+        return {
+            configured: true,
+            ok: false,
+            error: /abort|timeout/i.test(msg) ? "Sentry did not answer within 6 seconds." : msg,
+        };
     }
 }

@@ -202,9 +202,7 @@ export const MISSING_COLUMN = "PGRST204";
  * as well as a table and two functions, and a missing column reports
  * differently from a missing relation.
  */
-export function isMissingRevenueSchema(
-    error: { code?: string; message?: string } | null | undefined,
-): boolean {
+export function isMissingRevenueSchema(error: { code?: string; message?: string } | null | undefined): boolean {
     if (!error) return false;
     if (
         error.code === UNDEFINED_TABLE ||

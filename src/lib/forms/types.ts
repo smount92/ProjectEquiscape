@@ -34,24 +34,13 @@ export type FieldType =
  */
 export type FormMode = "create-full" | "create-quick" | "edit" | "import";
 
-export const FORM_MODES: readonly FormMode[] = [
-    "create-full",
-    "create-quick",
-    "edit",
-    "import",
-] as const;
+export const FORM_MODES: readonly FormMode[] = ["create-full", "create-quick", "edit", "import"] as const;
 
 /**
  * Which ledger page a field belongs on. The renderer groups by this; the
  * step rail is built from the groups a category actually uses.
  */
-export type FieldGroup =
-    | "identity"
-    | "showbio"
-    | "attributes"
-    | "market"
-    | "visibility"
-    | "vault";
+export type FieldGroup = "identity" | "showbio" | "attributes" | "market" | "visibility" | "vault";
 
 /** Free-form field values, keyed by `FieldSpec.name`. */
 export type FormValues = Record<string, unknown>;

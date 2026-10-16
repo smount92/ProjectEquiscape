@@ -1,9 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { createHash } from "node:crypto";
-import {
-    challengeResponseFor,
-    isValidVerificationToken,
-} from "@/lib/ebay/accountDeletion";
+import { challengeResponseFor, isValidVerificationToken } from "@/lib/ebay/accountDeletion";
 
 /* The one thing that can silently fail here is the HASH ORDER —
    challengeCode, then token, then URL, concatenated with no separators.

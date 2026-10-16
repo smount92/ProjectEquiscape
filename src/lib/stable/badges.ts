@@ -14,10 +14,10 @@
 
 /** finish_type is a 3-value enum (OF | Custom | Artist Resin). */
 export const FINISH_BADGE_CLASSES: Record<string, string> = {
-    "OF": "border-warning/40 bg-warning/10 text-warning",
-    "Custom": "border-info/40 bg-info/10 text-info",
+    OF: "border-warning/40 bg-warning/10 text-warning",
+    Custom: "border-info/40 bg-info/10 text-info",
     "Artist Resin": "border-destructive/40 bg-destructive/10 text-destructive",
-    "default": "border-input bg-muted text-secondary-foreground",
+    default: "border-input bg-muted text-secondary-foreground",
 };
 
 export function finishBadgeClass(finishType: string): string {

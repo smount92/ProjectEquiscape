@@ -1,6 +1,15 @@
 import { describe, expect, it } from "vitest";
 
-import { IMPORT_MAX_ROWS, matchHeader, parseImportRows, parsePlacing, parseShowDate, parseShowType, TEMPLATE_COLUMNS, templateCsv } from "../import";
+import {
+    IMPORT_MAX_ROWS,
+    matchHeader,
+    parseImportRows,
+    parsePlacing,
+    parseShowDate,
+    parseShowType,
+    TEMPLATE_COLUMNS,
+    templateCsv,
+} from "../import";
 
 describe("show results import: dates", () => {
     it("reads ISO, European day-first, month names and bare years", () => {
@@ -55,7 +64,18 @@ describe("show results import: headers and rows", () => {
 
     it("parses a good row into a record with defaults filled", () => {
         const { records, problems } = parseImportRows([
-            { "Show name": "Spring Fling", "Show date": "23/03/2024", "Photo or live": "", Division: "Halter", Class: "Stock Horse Mare", Placing: "1", "Class size": "12", "Card program": "NAN", "Card color": "green", "Card year": "" },
+            {
+                "Show name": "Spring Fling",
+                "Show date": "23/03/2024",
+                "Photo or live": "",
+                Division: "Halter",
+                Class: "Stock Horse Mare",
+                Placing: "1",
+                "Class size": "12",
+                "Card program": "NAN",
+                "Card color": "green",
+                "Card year": "",
+            },
         ]);
         expect(problems).toEqual([]);
         expect(records).toHaveLength(1);
@@ -96,7 +116,10 @@ describe("show results import: headers and rows", () => {
     it("refuses a file without the required columns", () => {
         const { records, problems } = parseImportRows([{ Judge: "x" }]);
         expect(records).toEqual([]);
-        expect(problems.map((p) => p.message)).toEqual([`The file has no "Show name" column.`, `The file has no "Placing" column.`]);
+        expect(problems.map((p) => p.message)).toEqual([
+            `The file has no "Show name" column.`,
+            `The file has no "Placing" column.`,
+        ]);
     });
 
     it("caps the row count and says so", () => {

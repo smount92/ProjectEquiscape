@@ -64,7 +64,7 @@ function RequestCard({
         >
             {/* The photo, mounted on the leaf rather than bleeding to
                 its edges — the ledger's red margin line stays visible. */}
-            <div className="border-forest/25 relative aspect-square overflow-hidden rounded-md border bg-[var(--muted)]">
+            <div className="relative aspect-square overflow-hidden rounded-md border border-forest/25 bg-[var(--muted)]">
                 {imageUrl ? (
                     <img
                         src={imageUrl}
@@ -77,19 +77,17 @@ function RequestCard({
             </div>
 
             <div>
-                <span className={`stamp ${resolved ? "" : "stamp-red"}`}>
-                    {resolved ? "Identified" : "Open"}
-                </span>
+                <span className={`stamp ${resolved ? "" : "stamp-red"}`}>{resolved ? "Identified" : "Open"}</span>
             </div>
 
             <Link
                 href={`/community/help-id/${request.id}`}
-                className="text-secondary-foreground line-clamp-2 text-sm leading-relaxed no-underline after:absolute after:inset-0 after:content-['']"
+                className="line-clamp-2 text-sm leading-relaxed text-secondary-foreground no-underline after:absolute after:inset-0 after:content-['']"
             >
                 {description}
             </Link>
 
-            <div className="text-muted-foreground border-forest/15 mt-auto flex items-center justify-between border-t pt-2 text-xs">
+            <div className="mt-auto flex items-center justify-between border-t border-forest/15 pt-2 text-xs text-muted-foreground">
                 <Link
                     href={`/profile/${encodeURIComponent(request.userName)}`}
                     className="relative z-10 hover:underline"
@@ -134,10 +132,7 @@ export default async function HelpIdPage() {
     const userIds = [...new Set(rawList.map((r) => r.user_id))];
     const userNameMap = new Map<string, string>();
     if (userIds.length > 0) {
-        const { data: usersData } = await supabase
-            .from("users")
-            .select("id, alias_name")
-            .in("id", userIds);
+        const { data: usersData } = await supabase.from("users").select("id, alias_name").in("id", userIds);
         if (usersData) {
             for (const u of usersData as { id: string; alias_name: string }[]) {
                 userNameMap.set(u.id, u.alias_name);
@@ -196,7 +191,7 @@ export default async function HelpIdPage() {
             {/* Open Requests */}
             {openRequests.length > 0 && (
                 <section className="mt-12">
-                    <h2 className="text-forest mb-5 font-serif text-lg font-bold tracking-[0.14em] uppercase">
+                    <h2 className="mb-5 font-serif text-lg font-bold tracking-[0.14em] text-forest uppercase">
                         Open requests ({openRequests.length})
                     </h2>
                     <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-6">
@@ -216,7 +211,7 @@ export default async function HelpIdPage() {
             {/* Resolved Requests */}
             {resolvedRequests.length > 0 && (
                 <section className="mt-12">
-                    <h2 className="text-muted-foreground mb-5 font-serif text-lg font-bold tracking-[0.14em] uppercase">
+                    <h2 className="mb-5 font-serif text-lg font-bold tracking-[0.14em] text-muted-foreground uppercase">
                         Identified ({resolvedRequests.length})
                     </h2>
                     <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-6">
@@ -238,9 +233,7 @@ export default async function HelpIdPage() {
                     <p className="mb-4 text-[2rem]" aria-hidden="true">
                         🔍
                     </p>
-                    <p className="text-secondary-foreground">
-                        No ID requests yet. Be the first to submit one!
-                    </p>
+                    <p className="text-secondary-foreground">No ID requests yet. Be the first to submit one!</p>
                 </div>
             )}
         </ExplorerLayout>

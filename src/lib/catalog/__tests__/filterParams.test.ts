@@ -38,9 +38,7 @@ describe("parseCatalogSearchParams", () => {
     });
 
     it("drops unknown type/sort values instead of trusting them", () => {
-        expect(
-            parseCatalogSearchParams({ type: "spaceship", sort: "priciest" }),
-        ).toEqual({ sort: "name-az", page: 1 });
+        expect(parseCatalogSearchParams({ type: "spaceship", sort: "priciest" })).toEqual({ sort: "name-az", page: 1 });
     });
 
     it("clamps page to a sane positive integer", () => {
@@ -89,9 +87,7 @@ describe("buildCatalogSearchParams", () => {
             sort: "maker",
             page: "5",
         });
-        const back = parseCatalogSearchParams(
-            Object.fromEntries(buildCatalogSearchParams(filters).entries()),
-        );
+        const back = parseCatalogSearchParams(Object.fromEntries(buildCatalogSearchParams(filters).entries()));
         expect(back).toEqual(filters);
     });
 });
@@ -180,9 +176,7 @@ describe("advanced (attributes) filters", () => {
             material: "Pewter",
             sort: "newest",
         });
-        const back = parseCatalogSearchParams(
-            Object.fromEntries(buildCatalogSearchParams(filters).entries()),
-        );
+        const back = parseCatalogSearchParams(Object.fromEntries(buildCatalogSearchParams(filters).entries()));
         expect(back).toEqual(filters);
     });
 
@@ -208,9 +202,7 @@ describe("advanced (attributes) filters", () => {
         const chip = activeCatalogChips(filters).find((c) => c.key === "runType");
         expect(chip?.label).toBe("Web Special");
         expect(removeCatalogFilter(filters, "runType").runType).toBeUndefined();
-        const back = parseCatalogSearchParams(
-            Object.fromEntries(buildCatalogSearchParams(filters).entries()),
-        );
+        const back = parseCatalogSearchParams(Object.fromEntries(buildCatalogSearchParams(filters).entries()));
         expect(back).toEqual(filters);
     });
 
@@ -250,7 +242,9 @@ describe("best match is the default for a search (223)", () => {
 
     it("omits whichever sort is the default for that URL, and keeps an explicit one", () => {
         expect(buildCatalogSearchParams({ q: "smoky", sort: "relevance", page: 1 }).toString()).toBe("q=smoky");
-        expect(buildCatalogSearchParams({ q: "smoky", sort: "name-az", page: 1 }).toString()).toBe("q=smoky&sort=name-az");
+        expect(buildCatalogSearchParams({ q: "smoky", sort: "name-az", page: 1 }).toString()).toBe(
+            "q=smoky&sort=name-az",
+        );
         expect(buildCatalogSearchParams({ sort: "name-az", page: 1 }).toString()).toBe("");
     });
 

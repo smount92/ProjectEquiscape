@@ -25,11 +25,7 @@ export const size = PLACING_OG_SIZE;
 export const contentType = "image/png";
 export const alt = "A show placing on Model Horse Hub";
 
-export default async function OpengraphImage({
-    params,
-}: {
-    params: Promise<{ id: string; entryId: string }>;
-}) {
+export default async function OpengraphImage({ params }: { params: Promise<{ id: string; entryId: string }> }) {
     const { id, entryId } = await params;
 
     const anon = createAnonClient();
@@ -54,19 +50,17 @@ export default async function OpengraphImage({
         : null;
 
     return new ImageResponse(
-        (
-            <PlacingOgCard
-                horseName={data.horseName}
-                placeText={placeLabel(data.place)}
-                ribbonColor={ribbonHex(data.place) ?? "#B8860B"}
-                place={data.place}
-                className={data.className}
-                showTitle={data.show.title}
-                fieldLine={placingFieldLine(data.place, data.totalEntries)}
-                photoUrl={photoDataUri}
-                dateLabel={dateLabel}
-            />
-        ),
+        <PlacingOgCard
+            horseName={data.horseName}
+            placeText={placeLabel(data.place)}
+            ribbonColor={ribbonHex(data.place) ?? "#B8860B"}
+            place={data.place}
+            className={data.className}
+            showTitle={data.show.title}
+            fieldLine={placingFieldLine(data.place, data.totalEntries)}
+            photoUrl={photoDataUri}
+            dateLabel={dateLabel}
+        />,
         size,
     );
 }

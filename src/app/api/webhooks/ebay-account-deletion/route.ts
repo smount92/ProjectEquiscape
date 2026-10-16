@@ -17,10 +17,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { logger } from "@/lib/logger";
-import {
-    challengeResponseFor,
-    isValidVerificationToken,
-} from "@/lib/ebay/accountDeletion";
+import { challengeResponseFor, isValidVerificationToken } from "@/lib/ebay/accountDeletion";
 
 function endpointUrl(): string {
     const configured = (process.env.EBAY_DELETION_ENDPOINT_URL ?? "").trim();

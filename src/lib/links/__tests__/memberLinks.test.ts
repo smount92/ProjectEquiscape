@@ -24,7 +24,10 @@ describe("member links", () => {
     });
 
     it("renders in the order of the slots, with the feedback glyph", () => {
-        const entries = linkEntries({ feedback: "https://a.b/c", facebook: "https://www.facebook.com/x" }, PROFILE_LINK_KEYS);
+        const entries = linkEntries(
+            { feedback: "https://a.b/c", facebook: "https://www.facebook.com/x" },
+            PROFILE_LINK_KEYS,
+        );
         expect(entries.map((e) => e.key)).toEqual(["facebook", "feedback"]);
         expect(entries[1]).toMatchObject({ label: "Feedback board", glyph: "🤝", href: "https://a.b/c" });
     });

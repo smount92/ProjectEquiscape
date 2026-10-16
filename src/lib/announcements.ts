@@ -33,10 +33,7 @@ type UntypedSelect = (table: string) => {
             col: string,
             vals: string[],
         ) => {
-            order: (
-                col: string,
-                opts: { ascending: boolean },
-            ) => PromiseLike<{ data: unknown; error: unknown }>;
+            order: (col: string, opts: { ascending: boolean }) => PromiseLike<{ data: unknown; error: unknown }>;
         };
     };
 };

@@ -68,16 +68,16 @@ function SignupPageInner() {
     if (success) {
         return (
             <FocusLayout title="Check Your Email">
-                <div className="animate-fade-in-up border-input bg-card relative w-full max-w-[440px] overflow-hidden rounded-xl border shadow-lg">
-                    <div className="border-input border-b px-8 pt-8 pb-6 text-center">
+                <div className="animate-fade-in-up relative w-full max-w-[440px] overflow-hidden rounded-xl border border-input bg-card shadow-lg">
+                    <div className="border-b border-input px-8 pt-8 pb-6 text-center">
                         <div className="mb-3 text-4xl" aria-hidden="true">
                             ✉️
                         </div>
-                        <p className="text-secondary-foreground mt-2 text-sm leading-relaxed">
+                        <p className="mt-2 text-sm leading-relaxed text-secondary-foreground">
                             We&apos;ve sent a confirmation link to your email address. Click the link to activate your
                             account and start building your Digital Stable!
                         </p>
-                        <p className="text-muted-foreground mt-3 text-xs leading-relaxed">
+                        <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
                             Can&apos;t find it? Check your spam folder — and confirm soon, since the link expires.
                         </p>
                     </div>
@@ -88,7 +88,7 @@ function SignupPageInner() {
                                     type="button"
                                     onClick={handleResend}
                                     disabled={resendStatus === "sending" || resendStatus === "sent"}
-                                    className="border-input text-secondary-foreground hover:bg-muted hover:text-foreground w-full cursor-pointer rounded-lg border bg-transparent px-6 py-3 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-60"
+                                    className="w-full cursor-pointer rounded-lg border border-input bg-transparent px-6 py-3 text-sm font-semibold text-secondary-foreground transition-all hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-60"
                                     id="resend-confirmation"
                                 >
                                     {resendStatus === "sending"
@@ -98,7 +98,7 @@ function SignupPageInner() {
                                           : "Resend confirmation email"}
                                 </button>
                                 {resendStatus === "error" && resendError && (
-                                    <p className="text-destructive mt-2 text-xs" role="alert" id="resend-error">
+                                    <p className="mt-2 text-xs text-destructive" role="alert" id="resend-error">
                                         {resendError}
                                     </p>
                                 )}
@@ -106,7 +106,7 @@ function SignupPageInner() {
                         )}
                         <Link
                             href="/login"
-                            className="bg-forest hover:bg-forest-dark inline-block w-full cursor-pointer rounded-lg border-0 px-6 py-3 text-center text-sm font-semibold text-white no-underline shadow-sm transition-all hover:shadow-md"
+                            className="inline-block w-full cursor-pointer rounded-lg border-0 bg-forest px-6 py-3 text-center text-sm font-semibold text-white no-underline shadow-sm transition-all hover:bg-forest-dark hover:shadow-md"
                             id="back-to-login"
                         >
                             Back to Sign In
@@ -119,8 +119,13 @@ function SignupPageInner() {
 
     return (
         <FocusLayout noHeader>
-            <PageMasthead compact icon="🐴" title="Join the Stable" subtitle="Create your account and start cataloging your collection" />
-            <div className="animate-fade-in-up border-input bg-card relative w-full max-w-[440px] overflow-hidden rounded-xl border shadow-lg">
+            <PageMasthead
+                compact
+                icon="🐴"
+                title="Join the Stable"
+                subtitle="Create your account and start cataloging your collection"
+            />
+            <div className="animate-fade-in-up relative w-full max-w-[440px] overflow-hidden rounded-xl border border-input bg-card shadow-lg">
                 {/* Body */}
                 <div className="px-8 pt-6 pb-8">
                     {error && (
@@ -148,14 +153,14 @@ function SignupPageInner() {
 
                     {/* Privacy Callout */}
                     <div
-                        className="border-forest/20 bg-forest/5 mb-6 flex items-start gap-3 rounded-lg border p-4"
+                        className="mb-6 flex items-start gap-3 rounded-lg border border-forest/20 bg-forest/5 p-4"
                         role="note"
                         aria-label="Privacy information"
                     >
                         <span className="mt-0.5 text-lg" aria-hidden="true">
                             🛡️
                         </span>
-                        <p className="text-secondary-foreground text-sm leading-relaxed">
+                        <p className="text-sm leading-relaxed text-secondary-foreground">
                             <strong className="text-foreground">Your real name is private.</strong> Your alias is how
                             the community will know you. Only you can see your personal details — we take your privacy
                             seriously. And your data is never trapped here: we back up nightly, and you can export your
@@ -168,7 +173,7 @@ function SignupPageInner() {
                         <div className="mb-5">
                             <label
                                 htmlFor="signup-alias"
-                                className="text-foreground mb-1.5 block text-sm font-semibold"
+                                className="mb-1.5 block text-sm font-semibold text-foreground"
                             >
                                 Choose Your Alias *
                             </label>
@@ -176,7 +181,7 @@ function SignupPageInner() {
                                 id="signup-alias"
                                 name="aliasName"
                                 type="text"
-                                className="border-input bg-card focus:border-forest focus:ring-forest/20 w-full rounded-lg border px-4 py-3 text-sm transition-colors focus:ring-2 focus:outline-none"
+                                className="w-full rounded-lg border border-input bg-card px-4 py-3 text-sm transition-colors focus:border-forest focus:ring-2 focus:ring-forest/20 focus:outline-none"
                                 placeholder="e.g. StableQueen42"
                                 required
                                 minLength={3}
@@ -184,7 +189,7 @@ function SignupPageInner() {
                                 autoFocus
                                 autoComplete="username"
                             />
-                            <span className="text-muted-foreground mt-1.5 block text-xs">
+                            <span className="mt-1.5 block text-xs text-muted-foreground">
                                 This is your public display name (3–30 characters). Choose wisely!
                             </span>
                         </div>
@@ -192,7 +197,7 @@ function SignupPageInner() {
                         <div className="mb-5">
                             <label
                                 htmlFor="signup-email"
-                                className="text-foreground mb-1.5 block text-sm font-semibold"
+                                className="mb-1.5 block text-sm font-semibold text-foreground"
                             >
                                 Email Address *
                             </label>
@@ -200,12 +205,12 @@ function SignupPageInner() {
                                 id="signup-email"
                                 name="email"
                                 type="email"
-                                className="border-input bg-card focus:border-forest focus:ring-forest/20 w-full rounded-lg border px-4 py-3 text-sm transition-colors focus:ring-2 focus:outline-none"
+                                className="w-full rounded-lg border border-input bg-card px-4 py-3 text-sm transition-colors focus:border-forest focus:ring-2 focus:ring-forest/20 focus:outline-none"
                                 placeholder="you@example.com"
                                 required
                                 autoComplete="email"
                             />
-                            <span className="text-muted-foreground mt-1.5 block text-xs">
+                            <span className="mt-1.5 block text-xs text-muted-foreground">
                                 We&apos;ll send a confirmation link. Your email is never shared.
                             </span>
                         </div>
@@ -213,7 +218,7 @@ function SignupPageInner() {
                         <div className="mb-5">
                             <label
                                 htmlFor="signup-password"
-                                className="text-foreground mb-1.5 block text-sm font-semibold"
+                                className="mb-1.5 block text-sm font-semibold text-foreground"
                             >
                                 Password *
                             </label>
@@ -222,7 +227,7 @@ function SignupPageInner() {
                                     id="signup-password"
                                     name="password"
                                     type={showPassword ? "text" : "password"}
-                                    className="border-input bg-card focus:border-forest focus:ring-forest/20 w-full rounded-lg border px-4 py-3 pr-12 text-sm transition-colors focus:ring-2 focus:outline-none"
+                                    className="w-full rounded-lg border border-input bg-card px-4 py-3 pr-12 text-sm transition-colors focus:border-forest focus:ring-2 focus:ring-forest/20 focus:outline-none"
                                     placeholder="At least 6 characters"
                                     required
                                     minLength={6}
@@ -232,7 +237,7 @@ function SignupPageInner() {
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
                                     aria-label={showPassword ? "Hide password" : "Show password"}
-                                    className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 flex -translate-y-1/2 items-center border-none bg-transparent p-1 transition-colors"
+                                    className="absolute top-1/2 right-3 flex -translate-y-1/2 items-center border-none bg-transparent p-1 text-muted-foreground transition-colors hover:text-foreground"
                                 >
                                     {showPassword ? (
                                         <svg
@@ -270,7 +275,7 @@ function SignupPageInner() {
                         <div className="mb-6">
                             <label
                                 htmlFor="signup-confirm-password"
-                                className="text-foreground mb-1.5 block text-sm font-semibold"
+                                className="mb-1.5 block text-sm font-semibold text-foreground"
                             >
                                 Confirm Password *
                             </label>
@@ -278,7 +283,7 @@ function SignupPageInner() {
                                 id="signup-confirm-password"
                                 name="confirmPassword"
                                 type={showPassword ? "text" : "password"}
-                                className="border-input bg-card focus:border-forest focus:ring-forest/20 w-full rounded-lg border px-4 py-3 text-sm transition-colors focus:ring-2 focus:outline-none"
+                                className="w-full rounded-lg border border-input bg-card px-4 py-3 text-sm transition-colors focus:border-forest focus:ring-2 focus:ring-forest/20 focus:outline-none"
                                 placeholder="Re-enter your password"
                                 required
                                 autoComplete="new-password"
@@ -287,7 +292,7 @@ function SignupPageInner() {
 
                         <button
                             type="submit"
-                            className="bg-forest hover:bg-forest-dark w-full cursor-pointer rounded-lg border-0 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
+                            className="w-full cursor-pointer rounded-lg border-0 bg-forest px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-forest-dark hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60"
                             disabled={isPending}
                             id="signup-submit"
                         >
@@ -295,10 +300,10 @@ function SignupPageInner() {
                         </button>
                     </form>
 
-                    <div className="border-input text-muted-foreground mt-6 border-t pt-5 text-center text-sm">
+                    <div className="mt-6 border-t border-input pt-5 text-center text-sm text-muted-foreground">
                         <p>
                             Already have an account?{" "}
-                            <Link href="/login" className="text-forest font-semibold hover:underline" id="go-to-login">
+                            <Link href="/login" className="font-semibold text-forest hover:underline" id="go-to-login">
                                 Sign in here
                             </Link>
                         </p>

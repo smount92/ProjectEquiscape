@@ -13,15 +13,7 @@ import { render, screen } from "@testing-library/react";
 import PassportMasthead from "@/components/passport/PassportMasthead";
 
 vi.mock("next/link", () => ({
-    default: ({
-        children,
-        href,
-        ...props
-    }: {
-        children: React.ReactNode;
-        href: string;
-        [key: string]: unknown;
-    }) => (
+    default: ({ children, href, ...props }: { children: React.ReactNode; href: string; [key: string]: unknown }) => (
         <a href={href} {...props}>
             {children}
         </a>
@@ -54,10 +46,7 @@ describe("PassportMasthead", () => {
             />,
         );
         expect(screen.getByText("Public Passport · Model Horse Hub")).toBeInTheDocument();
-        expect(screen.getByRole("link", { name: "@maggie" })).toHaveAttribute(
-            "href",
-            "/profile/maggie",
-        );
+        expect(screen.getByRole("link", { name: "@maggie" })).toHaveAttribute("href", "/profile/maggie");
         expect(screen.getByRole("link", { name: "Breyer — Weather Girl" })).toHaveAttribute(
             "href",
             "/reference/breyer/weather-girl",
@@ -74,23 +63,16 @@ describe("PassportMasthead", () => {
             />,
         );
         expect(screen.getByText("Breyer — Weather Girl")).toBeInTheDocument();
-        expect(
-            screen.queryByRole("link", { name: "Breyer — Weather Girl" }),
-        ).not.toBeInTheDocument();
+        expect(screen.queryByRole("link", { name: "Breyer — Weather Girl" })).not.toBeInTheDocument();
 
-        rerender(
-            <PassportMasthead horseName="Ledger Lines" ownerAlias="maggie" referenceName={null} />,
-        );
+        rerender(<PassportMasthead horseName="Ledger Lines" ownerAlias="maggie" referenceName={null} />);
         expect(screen.queryByText(/Breyer/)).not.toBeInTheDocument();
         expect(screen.getByRole("link", { name: "@maggie" })).toBeInTheDocument();
     });
 
     it("keeps the back-breadcrumb to the Show Ring", () => {
         render(<PassportMasthead horseName="Ledger Lines" ownerAlias="maggie" />);
-        expect(screen.getByRole("link", { name: /Show Ring/ })).toHaveAttribute(
-            "href",
-            "/community",
-        );
+        expect(screen.getByRole("link", { name: /Show Ring/ })).toHaveAttribute("href", "/community");
     });
 
     // Favorites = public likes (owner ruling): the tally rides the
@@ -98,16 +80,12 @@ describe("PassportMasthead", () => {
     // must not announce a zero.
     describe("favorite tally", () => {
         it("shows the count when the horse has likes", () => {
-            render(
-                <PassportMasthead horseName="Ledger Lines" ownerAlias="maggie" favoriteCount={12} />,
-            );
+            render(<PassportMasthead horseName="Ledger Lines" ownerAlias="maggie" favoriteCount={12} />);
             expect(screen.getByTestId("passport-favorite-count")).toHaveTextContent("12 favorites");
         });
 
         it("says 'favorite' singular at one", () => {
-            render(
-                <PassportMasthead horseName="Ledger Lines" ownerAlias="maggie" favoriteCount={1} />,
-            );
+            render(<PassportMasthead horseName="Ledger Lines" ownerAlias="maggie" favoriteCount={1} />);
             expect(screen.getByTestId("passport-favorite-count")).toHaveTextContent("1 favorite");
         });
 
@@ -117,13 +95,7 @@ describe("PassportMasthead", () => {
             );
             expect(screen.queryByTestId("passport-favorite-count")).not.toBeInTheDocument();
 
-            rerender(
-                <PassportMasthead
-                    horseName="Ledger Lines"
-                    ownerAlias="maggie"
-                    favoriteCount={null}
-                />,
-            );
+            rerender(<PassportMasthead horseName="Ledger Lines" ownerAlias="maggie" favoriteCount={null} />);
             expect(screen.queryByTestId("passport-favorite-count")).not.toBeInTheDocument();
 
             rerender(<PassportMasthead horseName="Ledger Lines" ownerAlias="maggie" />);
@@ -131,9 +103,7 @@ describe("PassportMasthead", () => {
         });
 
         it("still leaves exactly one h1 — the horse's name", () => {
-            render(
-                <PassportMasthead horseName="Ledger Lines" ownerAlias="maggie" favoriteCount={4} />,
-            );
+            render(<PassportMasthead horseName="Ledger Lines" ownerAlias="maggie" favoriteCount={4} />);
             const h1s = screen.getAllByRole("heading", { level: 1 });
             expect(h1s).toHaveLength(1);
             expect(h1s[0]).toHaveTextContent("Ledger Lines");

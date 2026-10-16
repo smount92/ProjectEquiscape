@@ -19,10 +19,7 @@ export default function Loading() {
                 <div className="skeleton-hero" />
                 <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-6">
                     {Array.from({ length: 8 }, (_, i) => (
-                        <div
-                            key={i}
-                            className="bg-card/50 border-input h-44 rounded-lg border shadow-md"
-                        />
+                        <div key={i} className="h-44 rounded-lg border border-input bg-card/50 shadow-md" />
                     ))}
                 </div>
             </div>

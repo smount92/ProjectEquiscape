@@ -54,9 +54,7 @@ export default function SupporterButton({ priceLabel }: { priceLabel: string }) 
                     </span>
                 )}
             </button>
-            {error && (
-                <p className="mt-2 text-center text-sm text-destructive">{error}</p>
-            )}
+            {error && <p className="mt-2 text-center text-sm text-destructive">{error}</p>}
         </div>
     );
 }

@@ -29,11 +29,7 @@ export const GALLERY_STATUSES: ShowStatus[] = [
 ];
 
 /** From results_review onward, blind browsing lifts. */
-export const REVEAL_STATUSES: ShowStatus[] = [
-    "results_review",
-    "completed",
-    "archived",
-];
+export const REVEAL_STATUSES: ShowStatus[] = ["results_review", "completed", "archived"];
 
 /** Placings become public with the completed transition. */
 export const RESULTS_STATUSES: ShowStatus[] = ["completed", "archived"];

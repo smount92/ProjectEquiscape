@@ -16,12 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-    SERVICE_SCALES,
-    SERVICE_TYPES,
-    priceRangeLabel,
-    type StudioService,
-} from "@/lib/studio/services";
+import { SERVICE_SCALES, SERVICE_TYPES, priceRangeLabel, type StudioService } from "@/lib/studio/services";
 import { DEFAULT_TERMS, type StudioTerms } from "@/lib/studio/terms";
 import { LINK_META, type StudioLinks } from "@/lib/studio/links";
 import { slugifyStudio } from "@/lib/studio/slug";
@@ -39,13 +34,7 @@ import StudioListingToggle from "@/components/studio/StudioListingToggle";
 // One vocabulary: the pick-lists use the rate card's words (lib/studio/
 // services), plus the few things that are specialties but not billable
 // services. Older stored spellings are folded at render (lib/studio/facets).
-const SPECIALTIES = [
-    ...SERVICE_TYPES.filter((t) => t !== "Other"),
-    "Body mods",
-    "Glazework",
-    "Props",
-    "Other animals",
-];
+const SPECIALTIES = [...SERVICE_TYPES.filter((t) => t !== "Other"), "Body mods", "Glazework", "Props", "Other animals"];
 
 const MEDIUMS = [
     "Airbrush acrylics",
@@ -59,7 +48,6 @@ const MEDIUMS = [
 ];
 
 const SCALES = [...SERVICE_SCALES];
-
 
 const SITE_HOST = (process.env.NEXT_PUBLIC_APP_URL ?? "https://modelhorsehub.com").replace(/^https?:\/\//, "");
 
@@ -114,13 +102,7 @@ export default function StudioSettings({
 
 // ── Identity ──────────────────────────────────────────────────────────
 
-function StudioForm({
-    profile,
-    ownBarns,
-}: {
-    profile: ArtistProfile | null;
-    ownBarns: OwnBarn[];
-}) {
+function StudioForm({ profile, ownBarns }: { profile: ArtistProfile | null; ownBarns: OwnBarn[] }) {
     const router = useRouter();
     const [name, setName] = useState(profile?.studioName ?? "");
     const [slug, setSlug] = useState(profile?.studioSlug ?? "");
@@ -157,7 +139,16 @@ function StudioForm({
         form.set("studioSlug", autoSlug);
         form.set("bioArtist", bio);
         form.set("region", region);
-        form.set("alsoKnownAs", JSON.stringify(alsoKnownAs.split(",").map((n) => n.trim()).filter(Boolean).slice(0, 10)));
+        form.set(
+            "alsoKnownAs",
+            JSON.stringify(
+                alsoKnownAs
+                    .split(",")
+                    .map((n) => n.trim())
+                    .filter(Boolean)
+                    .slice(0, 10),
+            ),
+        );
         form.set("paypalMeLink", paypal);
         form.set("specialties", JSON.stringify(canonicalFacets([...specialties, ...pricedSkills])));
         form.set("mediums", JSON.stringify(mediums));
@@ -166,9 +157,7 @@ function StudioForm({
         form.set("barnGroupId", barnId);
         form.set("links", JSON.stringify(links));
 
-        const result = isNew
-            ? await createArtistProfile(form)
-            : await updateArtistProfile(form);
+        const result = isNew ? await createArtistProfile(form) : await updateArtistProfile(form);
         setBusy(false);
 
         if (!result.success) {
@@ -189,7 +178,7 @@ function StudioForm({
 
     return (
         <form onSubmit={submit} className="grid gap-6">
-            <div className="bg-card border-input rounded-lg border p-6 shadow-md">
+            <div className="rounded-lg border border-input bg-card p-6 shadow-md">
                 <h2 className="mb-4 font-serif text-lg font-bold">Your studio</h2>
 
                 <label className="mb-4 block">
@@ -211,14 +200,13 @@ function StudioForm({
                         onChange={(e) => setSlug(e.target.value)}
                         placeholder={slugifyStudio(name) || "willow-creek-studio"}
                     />
-                    <span className="text-muted-foreground mt-1 block text-xs">
-                        {SITE_HOST}/studio/<strong>{autoSlug || "your-studio"}</strong> — this
-                        is the link you&rsquo;ll paste into groups, so keep it short.
+                    <span className="mt-1 block text-xs text-muted-foreground">
+                        {SITE_HOST}/studio/<strong>{autoSlug || "your-studio"}</strong> — this is the link you&rsquo;ll
+                        paste into groups, so keep it short.
                     </span>
                     {slugWillChange && (
-                        <span className="text-warning mt-1 block text-xs font-semibold">
-                            Changing this breaks any link to /studio/{profile!.studioSlug} you have
-                            already shared.
+                        <span className="mt-1 block text-xs font-semibold text-warning">
+                            Changing this breaks any link to /studio/{profile!.studioSlug} you have already shared.
                         </span>
                     )}
                 </label>
@@ -243,7 +231,7 @@ function StudioForm({
                         onChange={(e) => setRegion(e.target.value)}
                         placeholder="e.g. Ohio, USA — or Kent, UK"
                     />
-                    <span className="text-secondary-foreground mt-1 block text-xs">
+                    <span className="mt-1 block text-xs text-secondary-foreground">
                         Collectors search the directory by place: who is near them, who ships from their country.
                     </span>
                 </label>
@@ -257,10 +245,10 @@ function StudioForm({
                         onChange={(e) => setAlsoKnownAs(e.target.value)}
                         placeholder="e.g. Amanda Mount, Black Fox Farm"
                     />
-                    <span className="text-secondary-foreground mt-1 block text-xs">
-                        Passports that credit their artist by one of these names count as your work: those horses join your wall
-                        with their show records, marked as a passport credit rather than a logged work record. Your studio name and
-                        alias always count. Up to 10 names, separated by commas.
+                    <span className="mt-1 block text-xs text-secondary-foreground">
+                        Passports that credit their artist by one of these names count as your work: those horses join
+                        your wall with their show records, marked as a passport credit rather than a logged work record.
+                        Your studio name and alias always count. Up to 10 names, separated by commas.
                     </span>
                 </label>
 
@@ -274,9 +262,9 @@ function StudioForm({
                         onChange={(e) => setPaypal(e.target.value)}
                         placeholder="https://paypal.me/yourname"
                     />
-                    <span className="text-muted-foreground mt-1 block text-xs">
-                        Shown to commissioners once terms are agreed. Model Horse Hub never
-                        handles the money — you two arrange it directly.
+                    <span className="mt-1 block text-xs text-muted-foreground">
+                        Shown to commissioners once terms are agreed. Model Horse Hub never handles the money — you two
+                        arrange it directly.
                     </span>
                 </label>
 
@@ -288,24 +276,21 @@ function StudioForm({
                     <div className="grid gap-2 sm:grid-cols-2">
                         {LINK_META.map((meta) => (
                             <label key={meta.key} className="block">
-                                <span className="text-muted-foreground mb-1 block text-xs">
+                                <span className="mb-1 block text-xs text-muted-foreground">
                                     {meta.glyph} {meta.label}
                                 </span>
                                 <Input
                                     type="text"
                                     value={links[meta.key] ?? ""}
-                                    onChange={(e) =>
-                                        setLinks((prev) => ({ ...prev, [meta.key]: e.target.value }))
-                                    }
+                                    onChange={(e) => setLinks((prev) => ({ ...prev, [meta.key]: e.target.value }))}
                                     placeholder={meta.placeholder}
                                     maxLength={200}
                                 />
                             </label>
                         ))}
                     </div>
-                    <span className="text-muted-foreground mt-1 block text-xs">
-                        Shown on your studio page with an icon each. A handle is enough — we build
-                        the link.
+                    <span className="mt-1 block text-xs text-muted-foreground">
+                        Shown on your studio page with an icon each. A handle is enough — we build the link.
                     </span>
                 </div>
 
@@ -315,18 +300,20 @@ function StudioForm({
                             The studio&rsquo;s barn <span className="text-muted-foreground">(optional)</span>
                         </span>
                         <select
-                            className="border-input bg-card flex h-10 w-full rounded-md border px-3 py-2 text-sm"
+                            className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm"
                             value={barnId}
                             onChange={(e) => setBarnId(e.target.value)}
                         >
                             <option value="">— none —</option>
                             {ownBarns.map((b) => (
-                                <option key={b.id} value={b.id}>{b.name}</option>
+                                <option key={b.id} value={b.id}>
+                                    {b.name}
+                                </option>
                             ))}
                         </select>
-                        <span className="text-muted-foreground mt-1 block text-xs">
-                            A barn you run, shown on your studio page as its community room —
-                            clients and followers gather there between commissions.
+                        <span className="mt-1 block text-xs text-muted-foreground">
+                            A barn you run, shown on your studio page as its community room — clients and followers
+                            gather there between commissions.
                         </span>
                     </label>
                 )}
@@ -334,7 +321,7 @@ function StudioForm({
 
             {profile && <StudioListingToggle listed={profile.portfolioVisible} />}
 
-            <div className="bg-card border-input rounded-lg border p-6 shadow-md">
+            <div className="rounded-lg border border-input bg-card p-6 shadow-md">
                 <h2 className="mb-4 font-serif text-lg font-bold">What you do</h2>
                 <PickList
                     label="Specialties"
@@ -344,17 +331,12 @@ function StudioForm({
                     locked={pricedSkills}
                     lockedNote="Priced under Rates — remove it there to drop it here"
                 />
-                <PickList
-                    label="Mediums"
-                    options={MEDIUMS}
-                    selected={mediums}
-                    onChange={setMediums}
-                />
+                <PickList label="Mediums" options={MEDIUMS} selected={mediums} onChange={setMediums} />
                 <PickList label="Scales" options={SCALES} selected={scales} onChange={setScales} />
             </div>
 
             {error && (
-                <p className="text-destructive border-destructive/30 bg-destructive/10 rounded-md border px-4 py-3 text-sm">
+                <p className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
                     {error}
                 </p>
             )}
@@ -363,7 +345,7 @@ function StudioForm({
                 <Button type="submit" size="wide" disabled={busy || !name.trim()}>
                     {busy ? "Saving…" : isNew ? "Open your studio" : "Save changes"}
                 </Button>
-                {saved && <span className="text-success text-sm">✓ Saved</span>}
+                {saved && <span className="text-sm text-success">✓ Saved</span>}
                 {!isNew && profile && (
                     <Button asChild type="button" variant="outline" size="wide">
                         <Link href={`/studio/${profile.studioSlug}`}>View your page</Link>
@@ -372,11 +354,10 @@ function StudioForm({
             </div>
 
             {isNew && (
-                <p className="text-muted-foreground text-xs leading-relaxed">
-                    Your studio opens <strong>closed</strong> to commissions. Add your rates and
-                    terms first, then open intake from your dashboard when you&rsquo;re ready —
-                    announcing yourself as open before you have terms is how artists end up with a
-                    queue they never agreed to.
+                <p className="text-xs leading-relaxed text-muted-foreground">
+                    Your studio opens <strong>closed</strong> to commissions. Add your rates and terms first, then open
+                    intake from your dashboard when you&rsquo;re ready — announcing yourself as open before you have
+                    terms is how artists end up with a queue they never agreed to.
                 </p>
             )}
         </form>
@@ -415,13 +396,7 @@ function PickList({
                             disabled={isLocked}
                             title={isLocked ? lockedNote : undefined}
                             aria-pressed={on}
-                            onClick={() =>
-                                onChange(
-                                    on
-                                        ? selected.filter((s) => s !== option)
-                                        : [...selected, option],
-                                )
-                            }
+                            onClick={() => onChange(on ? selected.filter((s) => s !== option) : [...selected, option])}
                         >
                             {option}
                         </button>
@@ -479,36 +454,29 @@ function ServicesEditor({ profile }: { profile: ArtistProfile }) {
 
     return (
         <div className="grid gap-6">
-            <div className="bg-card border-input rounded-lg border p-6 shadow-md">
+            <div className="rounded-lg border border-input bg-card p-6 shadow-md">
                 <h2 className="mb-1 font-serif text-lg font-bold">Your rate card</h2>
-                <p className="text-muted-foreground mb-4 text-sm leading-relaxed">
-                    Price by scale — a Stablemate and a Traditional aren&rsquo;t the same job.
-                    Ranges are fine and expected; you send the real quote once you&rsquo;ve seen
-                    the references. Keep prep as its own line if you bill it separately.
+                <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
+                    Price by scale — a Stablemate and a Traditional aren&rsquo;t the same job. Ranges are fine and
+                    expected; you send the real quote once you&rsquo;ve seen the references. Keep prep as its own line
+                    if you bill it separately.
                 </p>
 
                 {services.length === 0 ? (
-                    <p className="text-muted-foreground mb-4 text-sm">
+                    <p className="mb-4 text-sm text-muted-foreground">
                         Nothing listed yet. Add your first service below.
                     </p>
                 ) : (
                     <div className="mb-4 grid gap-4">
                         {services.map((service) => (
-                            <div
-                                key={service.id}
-                                className="border-input bg-muted/40 rounded-lg border p-4"
-                            >
+                            <div key={service.id} className="rounded-lg border border-input bg-muted/40 p-4">
                                 <div className="mb-3 grid gap-3 sm:grid-cols-2">
                                     <label className="block">
-                                        <span className="mb-1 block text-xs font-semibold">
-                                            Work type
-                                        </span>
+                                        <span className="mb-1 block text-xs font-semibold">Work type</span>
                                         <select
-                                            className="border-input bg-card h-10 w-full rounded-md border px-3 text-sm"
+                                            className="h-10 w-full rounded-md border border-input bg-card px-3 text-sm"
                                             value={service.type}
-                                            onChange={(e) =>
-                                                update(service.id, { type: e.target.value })
-                                            }
+                                            onChange={(e) => update(service.id, { type: e.target.value })}
                                         >
                                             {SERVICE_TYPES.map((t) => (
                                                 <option key={t} value={t}>
@@ -517,22 +485,16 @@ function ServicesEditor({ profile }: { profile: ArtistProfile }) {
                                             ))}
                                             {!SERVICE_TYPES.includes(
                                                 service.type as (typeof SERVICE_TYPES)[number],
-                                            ) && (
-                                                <option value={service.type}>{service.type}</option>
-                                            )}
+                                            ) && <option value={service.type}>{service.type}</option>}
                                         </select>
                                     </label>
 
                                     <label className="block">
-                                        <span className="mb-1 block text-xs font-semibold">
-                                            Scale
-                                        </span>
+                                        <span className="mb-1 block text-xs font-semibold">Scale</span>
                                         <select
-                                            className="border-input bg-card h-10 w-full rounded-md border px-3 text-sm"
+                                            className="h-10 w-full rounded-md border border-input bg-card px-3 text-sm"
                                             value={service.scale}
-                                            onChange={(e) =>
-                                                update(service.id, { scale: e.target.value })
-                                            }
+                                            onChange={(e) => update(service.id, { scale: e.target.value })}
                                         >
                                             {SERVICE_SCALES.map((s) => (
                                                 <option key={s} value={s}>
@@ -545,9 +507,7 @@ function ServicesEditor({ profile }: { profile: ArtistProfile }) {
 
                                 <div className="mb-3 grid gap-3 sm:grid-cols-2">
                                     <label className="block">
-                                        <span className="mb-1 block text-xs font-semibold">
-                                            From
-                                        </span>
+                                        <span className="mb-1 block text-xs font-semibold">From</span>
                                         <Input
                                             type="number"
                                             min={0}
@@ -555,9 +515,7 @@ function ServicesEditor({ profile }: { profile: ArtistProfile }) {
                                             value={service.priceMin ?? ""}
                                             onChange={(e) =>
                                                 update(service.id, {
-                                                    priceMin: e.target.value
-                                                        ? Number(e.target.value)
-                                                        : null,
+                                                    priceMin: e.target.value ? Number(e.target.value) : null,
                                                 })
                                             }
                                             placeholder="500"
@@ -572,9 +530,7 @@ function ServicesEditor({ profile }: { profile: ArtistProfile }) {
                                             value={service.priceMax ?? ""}
                                             onChange={(e) =>
                                                 update(service.id, {
-                                                    priceMax: e.target.value
-                                                        ? Number(e.target.value)
-                                                        : null,
+                                                    priceMax: e.target.value ? Number(e.target.value) : null,
                                                 })
                                             }
                                             placeholder="1200"
@@ -589,9 +545,7 @@ function ServicesEditor({ profile }: { profile: ArtistProfile }) {
                                     <Input
                                         type="text"
                                         value={service.note ?? ""}
-                                        onChange={(e) =>
-                                            update(service.id, { note: e.target.value || null })
-                                        }
+                                        onChange={(e) => update(service.id, { note: e.target.value || null })}
                                         placeholder="e.g. prep quoted separately; appaloosa +$150"
                                     />
                                 </label>
@@ -601,24 +555,20 @@ function ServicesEditor({ profile }: { profile: ArtistProfile }) {
                                         <input
                                             type="checkbox"
                                             checked={service.open}
-                                            onChange={(e) =>
-                                                update(service.id, { open: e.target.checked })
-                                            }
+                                            onChange={(e) => update(service.id, { open: e.target.checked })}
                                             className="h-4 w-4"
                                         />
                                         Taking this work
                                     </label>
                                     <div className="flex items-center gap-3">
-                                        <span className="text-muted-foreground text-xs">
+                                        <span className="text-xs text-muted-foreground">
                                             {priceRangeLabel(service.priceMin, service.priceMax)}
                                         </span>
                                         <button
                                             type="button"
-                                            className="text-destructive text-xs hover:underline"
+                                            className="text-xs text-destructive hover:underline"
                                             onClick={() =>
-                                                setServices((prev) =>
-                                                    prev.filter((s) => s.id !== service.id),
-                                                )
+                                                setServices((prev) => prev.filter((s) => s.id !== service.id))
                                             }
                                         >
                                             Remove
@@ -636,7 +586,7 @@ function ServicesEditor({ profile }: { profile: ArtistProfile }) {
             </div>
 
             {error && (
-                <p className="text-destructive border-destructive/30 bg-destructive/10 rounded-md border px-4 py-3 text-sm">
+                <p className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
                     {error}
                 </p>
             )}
@@ -645,7 +595,7 @@ function ServicesEditor({ profile }: { profile: ArtistProfile }) {
                 <Button size="wide" onClick={save} disabled={busy}>
                     {busy ? "Saving…" : "Save rate card"}
                 </Button>
-                {saved && <span className="text-success text-sm">✓ Saved</span>}
+                {saved && <span className="text-sm text-success">✓ Saved</span>}
             </div>
         </div>
     );
@@ -684,22 +634,21 @@ function TermsEditor({ profile }: { profile: ArtistProfile }) {
 
     return (
         <div className="grid gap-6">
-            <div className="bg-card border-input rounded-lg border p-6 shadow-md">
+            <div className="rounded-lg border border-input bg-card p-6 shadow-md">
                 <h2 className="mb-1 font-serif text-lg font-bold">Your commission terms</h2>
-                <p className="text-muted-foreground mb-4 text-sm leading-relaxed">
-                    Written once, shown to every commissioner before they request, and attached to
-                    every quote you send. When someone accepts, this exact version is frozen onto
-                    their commission — change these whenever you like without touching agreements
-                    you&rsquo;ve already made.
+                <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
+                    Written once, shown to every commissioner before they request, and attached to every quote you send.
+                    When someone accepts, this exact version is frozen onto their commission — change these whenever you
+                    like without touching agreements you&rsquo;ve already made.
                 </p>
                 {!profile.termsSetAt && (
                     <p
-                        className="border-warning/40 bg-warning/10 mb-6 rounded-md border px-4 py-3 text-sm"
+                        className="mb-6 rounded-md border border-warning/40 bg-warning/10 px-4 py-3 text-sm"
                         data-testid="terms-are-defaults"
                     >
-                        These are the site&rsquo;s <strong>standard terms</strong>, pre-filled from
-                        common practice. Your page labels them as standard until you save your
-                        own — read them through and press Save to make them yours.
+                        These are the site&rsquo;s <strong>standard terms</strong>, pre-filled from common practice.
+                        Your page labels them as standard until you save your own — read them through and press Save to
+                        make them yours.
                     </p>
                 )}
                 {profile.termsSetAt && <div className="mb-2" />}
@@ -720,9 +669,7 @@ function TermsEditor({ profile }: { profile: ArtistProfile }) {
                         <input
                             type="checkbox"
                             checked={terms.depositRefundableBeforeStart}
-                            onChange={(e) =>
-                                set("depositRefundableBeforeStart", e.target.checked)
-                            }
+                            onChange={(e) => set("depositRefundableBeforeStart", e.target.checked)}
                             className="h-4 w-4"
                         />
                         Refundable until work begins
@@ -749,34 +696,21 @@ function TermsEditor({ profile }: { profile: ArtistProfile }) {
                             step={5}
                             className="max-w-[120px]"
                             value={terms.extraRevisionFee ?? ""}
-                            onChange={(e) =>
-                                set(
-                                    "extraRevisionFee",
-                                    e.target.value ? Number(e.target.value) : null,
-                                )
-                            }
+                            onChange={(e) => set("extraRevisionFee", e.target.value ? Number(e.target.value) : null)}
                             placeholder="quoted"
                         />
                         <span className="text-sm">each</span>
                     </div>
                 </Field>
 
-                <Field
-                    label="Turnaround"
-                    hint="A range, not a promise. 1–4 months is normal for this kind of work."
-                >
+                <Field label="Turnaround" hint="A range, not a promise. 1–4 months is normal for this kind of work.">
                     <div className="flex flex-wrap items-center gap-3">
                         <Input
                             type="number"
                             min={0}
                             className="max-w-[100px]"
                             value={terms.turnaroundMinDays ?? ""}
-                            onChange={(e) =>
-                                set(
-                                    "turnaroundMinDays",
-                                    e.target.value ? Number(e.target.value) : null,
-                                )
-                            }
+                            onChange={(e) => set("turnaroundMinDays", e.target.value ? Number(e.target.value) : null)}
                             placeholder="30"
                         />
                         <span className="text-sm">to</span>
@@ -785,12 +719,7 @@ function TermsEditor({ profile }: { profile: ArtistProfile }) {
                             min={0}
                             className="max-w-[100px]"
                             value={terms.turnaroundMaxDays ?? ""}
-                            onChange={(e) =>
-                                set(
-                                    "turnaroundMaxDays",
-                                    e.target.value ? Number(e.target.value) : null,
-                                )
-                            }
+                            onChange={(e) => set("turnaroundMaxDays", e.target.value ? Number(e.target.value) : null)}
                             placeholder="120"
                         />
                         <span className="text-sm">days</span>
@@ -856,7 +785,7 @@ function TermsEditor({ profile }: { profile: ArtistProfile }) {
             </div>
 
             {error && (
-                <p className="text-destructive border-destructive/30 bg-destructive/10 rounded-md border px-4 py-3 text-sm">
+                <p className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
                     {error}
                 </p>
             )}
@@ -865,27 +794,17 @@ function TermsEditor({ profile }: { profile: ArtistProfile }) {
                 <Button size="wide" onClick={save} disabled={busy}>
                     {busy ? "Saving…" : "Save terms"}
                 </Button>
-                {saved && <span className="text-success text-sm">✓ Saved</span>}
+                {saved && <span className="text-sm text-success">✓ Saved</span>}
             </div>
         </div>
     );
 }
 
-function Field({
-    label,
-    hint,
-    children,
-}: {
-    label: string;
-    hint?: string;
-    children: React.ReactNode;
-}) {
+function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
     return (
-        <div className="border-input/60 mb-5 border-b pb-5 last:mb-0 last:border-b-0 last:pb-0">
+        <div className="mb-5 border-b border-input/60 pb-5 last:mb-0 last:border-b-0 last:pb-0">
             <span className="mb-1 block text-sm font-semibold">{label}</span>
-            {hint && (
-                <p className="text-muted-foreground mb-2 text-xs leading-relaxed">{hint}</p>
-            )}
+            {hint && <p className="mb-2 text-xs leading-relaxed text-muted-foreground">{hint}</p>}
             {children}
         </div>
     );

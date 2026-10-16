@@ -14,12 +14,7 @@ vi.mock("@/app/actions/activity", () => ({
     createActivityEvent: vi.fn().mockResolvedValue(undefined),
 }));
 
-import {
-    addShowRecord,
-    updateShowRecord,
-    savePedigree,
-    deleteShowRecord,
-} from "@/app/actions/provenance";
+import { addShowRecord, updateShowRecord, savePedigree, deleteShowRecord } from "@/app/actions/provenance";
 
 describe("provenance.ts — Show Records & Pedigree", () => {
     beforeEach(() => {

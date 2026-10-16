@@ -74,7 +74,7 @@ export default function JudgeClassHeader({
                     >
                         <span aria-hidden="true">‹</span>
                     </button>
-                    <h2 className="min-w-0 flex-1 truncate text-center font-serif text-base font-bold text-engraved-light sm:text-lg">
+                    <h2 className="text-engraved-light min-w-0 flex-1 truncate text-center font-serif text-base font-bold sm:text-lg">
                         {navLabel(active, activeIndex)}
                     </h2>
                     <button

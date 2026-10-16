@@ -33,7 +33,9 @@ describe("seller terms", () => {
 
     it("recognises the pre-paste failure and strips only its own columns", () => {
         expect(isMissingSellerColumn({ code: "42703", message: "column users.ships_to does not exist" })).toBe(true);
-        expect(isMissingSellerColumn({ code: "PGRST204", message: "Could not find the 'looking_for' column of 'users'" })).toBe(true);
+        expect(
+            isMissingSellerColumn({ code: "PGRST204", message: "Could not find the 'looking_for' column of 'users'" }),
+        ).toBe(true);
         expect(isMissingSellerColumn({ code: "42703", message: "column users.bio does not exist" })).toBe(false);
         expect(withoutSellerColumns({ bio: "hi", country: "PL", open_to_trades: true })).toEqual({ bio: "hi" });
     });

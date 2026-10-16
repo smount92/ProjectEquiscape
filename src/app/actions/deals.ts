@@ -10,11 +10,7 @@ import { sanitizeText } from "@/lib/utils/validation";
 import { checkRateLimit } from "@/lib/utils/rateLimit";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import {
-    dealDb,
-    getDealColumnSupport,
-    isMissingSchema,
-} from "@/lib/deals/columnSupport";
+import { dealDb, getDealColumnSupport, isMissingSchema } from "@/lib/deals/columnSupport";
 import {
     agreedPrice,
     applyAgreement,
@@ -74,8 +70,7 @@ import type { MessageKind } from "@/lib/deals/transcript";
 
 type ActionResult = { success: boolean; error?: string };
 
-const NOT_APPLIED =
-    "The deal room needs a database update that hasn't been applied yet.";
+const NOT_APPLIED = "The deal room needs a database update that hasn't been applied yet.";
 
 // ── Shared load ───────────────────────────────────────────────────────
 
@@ -100,9 +95,7 @@ interface LoadedDeal {
     } | null;
 }
 
-type LoadResult =
-    | { ok: true; deal: LoadedDeal }
-    | { ok: false; error: string };
+type LoadResult = { ok: true; deal: LoadedDeal } | { ok: false; error: string };
 
 /**
  * One read that answers "who is the caller here, and what is the deal".
@@ -113,11 +106,7 @@ type LoadResult =
  * has been labelling sellers as buyers: buyer_id means "whoever clicked
  * first", and it is never used to decide a role here.
  */
-async function loadDeal(
-    supabase: SupabaseClient,
-    conversationId: string,
-    userId: string,
-): Promise<LoadResult> {
+async function loadDeal(supabase: SupabaseClient, conversationId: string, userId: string): Promise<LoadResult> {
     const { data: convoRaw, error } = await dealDb(supabase)
         .from("conversations")
         .select("id, buyer_id, seller_id, horse_id, deal_terms, deal_kind, commission_id, disputed_at")
@@ -173,9 +162,7 @@ async function loadDeal(
     const commissionId = (convo.commission_id as string | null) ?? null;
     const horseId = (convo.horse_id as string | null) ?? null;
     const storedKind = convo.deal_kind as DealKind | null | undefined;
-    const kind =
-        storedKind ??
-        (txn ? inferKind({ commissionId, horseId }) : commissionId ? "commission" : null);
+    const kind = storedKind ?? (txn ? inferKind({ commissionId, horseId }) : commissionId ? "commission" : null);
 
     return {
         ok: true,
@@ -221,16 +208,14 @@ async function writeDealEvent(
     content: string,
     payload: Record<string, unknown>,
 ): Promise<void> {
-    const { error } = await dealDb(supabase)
-        .from("messages")
-        .insert({
-            conversation_id: conversationId,
-            sender_id: senderId,
-            content,
-            kind,
-            payload,
-            is_read: false,
-        });
+    const { error } = await dealDb(supabase).from("messages").insert({
+        conversation_id: conversationId,
+        sender_id: senderId,
+        content,
+        kind,
+        payload,
+        is_read: false,
+    });
     if (!error) return;
     if (isMissingSchema(error)) {
         // Pre-173: no kind/payload columns. The sentence still belongs in
@@ -250,17 +235,10 @@ async function writeDealEvent(
 }
 
 /** Bell notification, deferred and never fatal. */
-function notifyOther(
-    userId: string,
-    actorId: string,
-    conversationId: string,
-    content: string,
-): void {
+function notifyOther(userId: string, actorId: string, conversationId: string, content: string): void {
     after(async () => {
         try {
-            const { createNotification } = await import(
-                "@/lib/notifications/createNotification"
-            );
+            const { createNotification } = await import("@/lib/notifications/createNotification");
             await createNotification({
                 userId,
                 type: "offer",
@@ -283,11 +261,7 @@ function revalidateThread(conversationId: string): void {
 
 /** The name the transcript uses for the actor. */
 async function aliasOf(supabase: SupabaseClient, userId: string): Promise<string> {
-    const { data } = await supabase
-        .from("users")
-        .select("alias_name")
-        .eq("id", userId)
-        .maybeSingle();
+    const { data } = await supabase.from("users").select("alias_name").eq("id", userId).maybeSingle();
     return (data as { alias_name: string } | null)?.alias_name ?? "Someone";
 }
 
@@ -357,12 +331,7 @@ export async function proposeTerms(
         },
     );
 
-    notifyOther(
-        deal.otherId,
-        user.id,
-        conversationId,
-        `@${alias} updated the terms of your deal — take a look`,
-    );
+    notifyOther(deal.otherId, user.id, conversationId, `@${alias} updated the terms of your deal — take a look`);
     revalidateThread(conversationId);
     return { success: true, terms: edit.terms };
 }
@@ -374,9 +343,7 @@ export async function proposeTerms(
  * transaction's metadata so the deal strip, the Blue Book and the vault
  * hand-off all read the same number.
  */
-export async function agreeToTerms(
-    conversationId: string,
-): Promise<ActionResult & { fullyAgreed?: boolean }> {
+export async function agreeToTerms(conversationId: string): Promise<ActionResult & { fullyAgreed?: boolean }> {
     const { supabase, user } = await requireAuth();
 
     const support = await getDealColumnSupport(supabase);
@@ -446,9 +413,7 @@ export async function agreeToTerms(
 }
 
 /** Take your own confirmation back while the other side is still deciding. */
-export async function withdrawTermsAgreement(
-    conversationId: string,
-): Promise<ActionResult> {
+export async function withdrawTermsAgreement(conversationId: string): Promise<ActionResult> {
     const { supabase, user } = await requireAuth();
 
     const support = await getDealColumnSupport(supabase);
@@ -478,12 +443,7 @@ export async function withdrawTermsAgreement(
         `@${alias} took their agreement back — the terms are open again`,
         { revision: applied.terms.revision, withdrawn: true, complete: false },
     );
-    notifyOther(
-        deal.otherId,
-        user.id,
-        conversationId,
-        `@${alias} withdrew their agreement to your deal terms`,
-    );
+    notifyOther(deal.otherId, user.id, conversationId, `@${alias} withdrew their agreement to your deal terms`);
 
     revalidateThread(conversationId);
     return { success: true };
@@ -587,20 +547,12 @@ export async function savePaymentPlan(
         },
     );
 
-    notifyOther(
-        deal.otherId,
-        user.id,
-        conversationId,
-        `@${alias} set a ${inserts.length}-payment plan on your deal`,
-    );
+    notifyOther(deal.otherId, user.id, conversationId, `@${alias} set a ${inserts.length}-payment plan on your deal`);
     revalidateThread(conversationId);
     return { success: true, count: inserts.length };
 }
 
-async function loadInstallments(
-    supabase: SupabaseClient,
-    conversationId: string,
-): Promise<Installment[]> {
+async function loadInstallments(supabase: SupabaseClient, conversationId: string): Promise<Installment[]> {
     const { data, error } = await dealDb(supabase)
         .from("payment_installments")
         .select("id, seq, amount, due_date, marked_sent_at, confirmed_at, note")
@@ -665,9 +617,7 @@ export async function markInstallmentSent(
         row.conversationId,
         user.id,
         "payment_sent",
-        `@${alias} marked payment ${row.installment.seq} as sent — ${formatMoney(
-            row.installment.amount,
-        )}`,
+        `@${alias} marked payment ${row.installment.seq} as sent — ${formatMoney(row.installment.amount)}`,
         {
             seq: row.installment.seq,
             amount: row.installment.amount,
@@ -737,9 +687,7 @@ export async function confirmInstallmentReceived(
         row.conversationId,
         user.id,
         "payment_confirmed",
-        `@${alias} confirmed payment ${row.installment.seq} received — ${formatMoney(
-            row.installment.amount,
-        )}`,
+        `@${alias} confirmed payment ${row.installment.seq} received — ${formatMoney(row.installment.amount)}`,
         {
             seq: row.installment.seq,
             amount: row.installment.amount,
@@ -754,9 +702,7 @@ export async function confirmInstallmentReceived(
         row.conversationId,
         summary.allConfirmed
             ? `Payment ${row.installment.seq} confirmed — the plan is paid in full`
-            : `Payment ${row.installment.seq} confirmed · ${formatMoney(
-                  summary.remaining,
-              )} still outstanding`,
+            : `Payment ${row.installment.seq} confirmed · ${formatMoney(summary.remaining)} still outstanding`,
     );
     revalidateThread(row.conversationId);
     return { success: true, allConfirmed: summary.allConfirmed };
@@ -806,11 +752,7 @@ function stampFor(onDate: string | null | undefined): string {
  * deal dies there. Either party may counter while the offer stands; the
  * side whose number is standing cannot counter themselves.
  */
-export async function counterOffer(
-    transactionId: string,
-    amount: number,
-    message?: string,
-): Promise<ActionResult> {
+export async function counterOffer(transactionId: string, amount: number, message?: string): Promise<ActionResult> {
     const { supabase, user } = await requireAuth();
 
     if (!Number.isFinite(amount) || amount <= 0) {
@@ -876,12 +818,7 @@ export async function counterOffer(
     );
 
     if (otherId) {
-        notifyOther(
-            otherId,
-            user.id,
-            txn.conversation_id,
-            `@${alias} countered at ${formatMoney(amount)}`,
-        );
+        notifyOther(otherId, user.id, txn.conversation_id, `@${alias} countered at ${formatMoney(amount)}`);
     }
     revalidateThread(txn.conversation_id);
     return { success: true };
@@ -894,10 +831,7 @@ export async function counterOffer(
  * goes through respondToOffer / respond_to_offer_atomic, which was only
  * just repaired in migration 172 and is left alone.
  */
-export async function respondToCounter(
-    transactionId: string,
-    action: "accept" | "decline",
-): Promise<ActionResult> {
+export async function respondToCounter(transactionId: string, action: "accept" | "decline"): Promise<ActionResult> {
     const { supabase, user } = await requireAuth();
 
     const { data: txnRaw } = await supabase
@@ -988,8 +922,7 @@ export async function respondToCounter(
             horseId: txn.horse_id,
             keepTransactionId: transactionId,
             actorId: user.id,
-            horseName:
-                (horseRow as { custom_name: string } | null)?.custom_name || "the horse",
+            horseName: (horseRow as { custom_name: string } | null)?.custom_name || "the horse",
         });
     }
 
@@ -1021,10 +954,7 @@ export async function respondToCounter(
  * export. Both parties keep every other right they had, including
  * leaving a review.
  */
-export async function raiseDispute(
-    conversationId: string,
-    reason: string,
-): Promise<ActionResult> {
+export async function raiseDispute(conversationId: string, reason: string): Promise<ActionResult> {
     const { supabase, user } = await requireAuth();
 
     const support = await getDealColumnSupport(supabase);
@@ -1076,9 +1006,7 @@ export async function raiseDispute(
 }
 
 /** Stand the dispute down. Only the person who raised it may. */
-export async function standDownDispute(
-    conversationId: string,
-): Promise<ActionResult> {
+export async function standDownDispute(conversationId: string): Promise<ActionResult> {
     const { supabase, user } = await requireAuth();
 
     const support = await getDealColumnSupport(supabase);
@@ -1114,25 +1042,15 @@ export async function standDownDispute(
     if (error) return { success: false, error: error.message };
 
     const alias = await aliasOf(supabase, user.id);
-    await writeDealEvent(
-        supabase,
-        conversationId,
-        user.id,
-        "dispute",
-        `@${alias} stood the dispute down`,
-        { resolved: true },
-    );
+    await writeDealEvent(supabase, conversationId, user.id, "dispute", `@${alias} stood the dispute down`, {
+        resolved: true,
+    });
 
     // Audit C8: raising a dispute notified; lifting the freeze did not,
     // so the other side had no way to learn their terms and ledger were
     // editable again.
     const otherId = user.id === c.buyer_id ? c.seller_id : c.buyer_id;
-    notifyOther(
-        otherId,
-        user.id,
-        conversationId,
-        `@${alias} stood the dispute down — your deal is no longer frozen`,
-    );
+    notifyOther(otherId, user.id, conversationId, `@${alias} stood the dispute down — your deal is no longer frozen`);
 
     revalidateThread(conversationId);
     return { success: true };
@@ -1155,9 +1073,7 @@ export async function standDownDispute(
  *
  * Only the buyer, only for a horse they now own, and only once.
  */
-export async function recordSaleInVault(
-    conversationId: string,
-): Promise<ActionResult & { amount?: number }> {
+export async function recordSaleInVault(conversationId: string): Promise<ActionResult & { amount?: number }> {
     const { supabase, user } = await requireAuth();
 
     const loaded = await loadDeal(supabase, conversationId, user.id);
@@ -1214,9 +1130,7 @@ export async function recordSaleInVault(
     if (typeof currentPrice === "number" && currentPrice > 0) {
         return {
             success: false,
-            error: `This horse's vault already records a purchase price of ${formatMoney(
-                currentPrice,
-            )}.`,
+            error: `This horse's vault already records a purchase price of ${formatMoney(currentPrice)}.`,
         };
     }
 
@@ -1233,9 +1147,7 @@ export async function recordSaleInVault(
             .eq("horse_id", deal.horseId);
         writeError = error;
     } else {
-        const { error } = await supabase
-            .from("financial_vault")
-            .insert({ horse_id: deal.horseId, ...patch } as never);
+        const { error } = await supabase.from("financial_vault").insert({ horse_id: deal.horseId, ...patch } as never);
         writeError = error;
     }
     if (writeError) return { success: false, error: writeError.message };
@@ -1299,17 +1211,11 @@ export async function markThreadRead(conversationId: string): Promise<ActionResu
     return { success: true };
 }
 
-export async function setThreadMuted(
-    conversationId: string,
-    muted: boolean,
-): Promise<ActionResult> {
+export async function setThreadMuted(conversationId: string, muted: boolean): Promise<ActionResult> {
     return setThreadFlag(conversationId, { muted });
 }
 
-export async function setThreadArchived(
-    conversationId: string,
-    archived: boolean,
-): Promise<ActionResult> {
+export async function setThreadArchived(conversationId: string, archived: boolean): Promise<ActionResult> {
     return setThreadFlag(conversationId, { archived });
 }
 
@@ -1347,10 +1253,7 @@ async function setThreadFlag(
  * thread which commission it is about, so the deal room can render the
  * same agreement vocabulary over it.
  */
-export async function attachCommissionToThread(
-    conversationId: string,
-    commissionId: string,
-): Promise<ActionResult> {
+export async function attachCommissionToThread(conversationId: string, commissionId: string): Promise<ActionResult> {
     const { supabase, user } = await requireAuth();
 
     const support = await getDealColumnSupport(supabase);
@@ -1387,9 +1290,7 @@ export async function attachCommissionToThread(
  * dashboard's "sales needing attention" panel) can speak the vocabulary
  * without duplicating the mapping.
  */
-export async function getDealStage(
-    conversationId: string,
-): Promise<{ stage: string; role: string } | null> {
+export async function getDealStage(conversationId: string): Promise<{ stage: string; role: string } | null> {
     const { supabase, user } = await requireAuth();
     const loaded = await loadDeal(supabase, conversationId, user.id);
     if (!loaded.ok) return null;

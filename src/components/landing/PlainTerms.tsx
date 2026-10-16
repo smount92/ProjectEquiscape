@@ -20,33 +20,32 @@ export default function PlainTerms() {
                     </h2>
                 </div>
 
-                <p className="text-secondary-foreground mb-4 text-base leading-[1.7]">
-                    The free tier covers the hobby: catalog the herd, enter shows, host shows, list
-                    horses, read the Blue Book. Pro buys extra photo slots, price-history charts,
-                    printable show tags and a monthly ledger of what the collection has been doing.
+                <p className="mb-4 text-base leading-[1.7] text-secondary-foreground">
+                    The free tier covers the hobby: catalog the herd, enter shows, host shows, list horses, read the
+                    Blue Book. Pro buys extra photo slots, price-history charts, printable show tags and a monthly
+                    ledger of what the collection has been doing.
                 </p>
-                <p className="text-secondary-foreground mb-4 text-base leading-[1.7]">
-                    Nothing that makes a record worth believing is in it. Show results, condition
-                    grades, ownership history and card verification are free permanently — a proof
-                    behind a paywall is not a proof.
+                <p className="mb-4 text-base leading-[1.7] text-secondary-foreground">
+                    Nothing that makes a record worth believing is in it. Show results, condition grades, ownership
+                    history and card verification are free permanently — a proof behind a paywall is not a proof.
                 </p>
-                <p className="text-secondary-foreground mb-0 text-base leading-[1.7]">
-                    Your photos are not training data, and they are not for sale. The Registry was
-                    assembled with ordinary import scripts against public hobby sources, not by
-                    pointing a scraper at somebody&rsquo;s gallery.
+                <p className="mb-0 text-base leading-[1.7] text-secondary-foreground">
+                    Your photos are not training data, and they are not for sale. The Registry was assembled with
+                    ordinary import scripts against public hobby sources, not by pointing a scraper at somebody&rsquo;s
+                    gallery.
                 </p>
 
                 <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2">
                     <Link
                         href="/upgrade"
-                        className="text-forest text-xs font-semibold tracking-[0.08em] uppercase no-underline hover:underline"
+                        className="text-xs font-semibold tracking-[0.08em] text-forest uppercase no-underline hover:underline"
                         id="terms-upgrade-link"
                     >
                         See what Pro adds →
                     </Link>
                     <Link
                         href="/about#ai-data-policy"
-                        className="text-forest text-xs font-semibold tracking-[0.08em] uppercase no-underline hover:underline"
+                        className="text-xs font-semibold tracking-[0.08em] text-forest uppercase no-underline hover:underline"
                         id="terms-policy-link"
                     >
                         AI, data &amp; copyright policy →

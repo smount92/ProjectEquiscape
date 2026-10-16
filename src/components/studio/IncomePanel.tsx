@@ -40,7 +40,7 @@ export default function IncomePanel({ summary }: { summary: IncomeSummary }) {
 
             {hasHistory ? (
                 <>
-                    <div className="border-input bg-muted/30 mb-4 rounded-md border p-4">
+                    <div className="mb-4 rounded-md border border-input bg-muted/30 p-4">
                         <div className="mb-2 flex items-end justify-between gap-1">
                             {series.map((bucket) => (
                                 <div
@@ -49,38 +49,35 @@ export default function IncomePanel({ summary }: { summary: IncomeSummary }) {
                                     title={`${bucket.label}: ${formatMoney(bucket.total)}`}
                                 >
                                     <div
-                                        className={`w-full rounded-t-sm ${
-                                            bucket.total > 0 ? "bg-studio" : "bg-input"
-                                        }`}
+                                        className={`w-full rounded-t-sm ${bucket.total > 0 ? "bg-studio" : "bg-input"}`}
                                         style={{
                                             height: `${Math.max(2, (bucket.total / peak) * 72)}px`,
                                         }}
                                     />
-                                    <span className="text-muted-foreground text-[0.6rem]">
+                                    <span className="text-[0.6rem] text-muted-foreground">
                                         {bucket.label.slice(0, 1)}
                                     </span>
                                 </div>
                             ))}
                         </div>
-                        <div className="text-muted-foreground flex justify-between text-[0.65rem]">
+                        <div className="flex justify-between text-[0.65rem] text-muted-foreground">
                             <span>{series[0]?.label}</span>
                             <span>{series[series.length - 1]?.label}</span>
                         </div>
                     </div>
 
                     {summary.bestMonth && summary.bestMonth.total > 0 && (
-                        <p className="text-secondary-foreground mb-4 text-sm">
+                        <p className="mb-4 text-sm text-secondary-foreground">
                             Your best month was <strong>{summary.bestMonth.label}</strong> —{" "}
-                            {formatMoney(summary.bestMonth.total)} across{" "}
-                            {summary.bestMonth.count} commission
+                            {formatMoney(summary.bestMonth.total)} across {summary.bestMonth.count} commission
                             {summary.bestMonth.count === 1 ? "" : "s"}.
                         </p>
                     )}
                 </>
             ) : (
-                <p className="text-muted-foreground mb-4 text-sm leading-relaxed">
-                    Nothing completed yet. Once you finish a commission its agreed price lands
-                    here, and the monthly view fills in as you go.
+                <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
+                    Nothing completed yet. Once you finish a commission its agreed price lands here, and the monthly
+                    view fills in as you go.
                 </p>
             )}
 
@@ -93,40 +90,26 @@ export default function IncomePanel({ summary }: { summary: IncomeSummary }) {
                     />
                 )}
                 {summary.depositsOutstanding > 0 && (
-                    <LedgerRow
-                        label="Deposits not yet received"
-                        value={formatMoney(summary.depositsOutstanding)}
-                    />
+                    <LedgerRow label="Deposits not yet received" value={formatMoney(summary.depositsOutstanding)} />
                 )}
                 {summary.balanceOutstanding > 0 && (
-                    <LedgerRow
-                        label="Balances still owed"
-                        value={formatMoney(summary.balanceOutstanding)}
-                    />
+                    <LedgerRow label="Balances still owed" value={formatMoney(summary.balanceOutstanding)} />
                 )}
             </div>
 
-            <div className="border-input mt-4 border-t pt-4">
+            <div className="mt-4 border-t border-input pt-4">
                 <OffPlatformNote />
             </div>
         </Panel>
     );
 }
 
-function Stat({
-    label,
-    value,
-    hint,
-}: {
-    label: string;
-    value: string;
-    hint?: string;
-}) {
+function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
     return (
-        <div className="border-input bg-muted/40 rounded-md border p-4">
-            <div className="text-muted-foreground mb-1 text-xs">{label}</div>
+        <div className="rounded-md border border-input bg-muted/40 p-4">
+            <div className="mb-1 text-xs text-muted-foreground">{label}</div>
             <div className="font-serif text-xl font-bold tabular-nums">{value}</div>
-            {hint && <div className="text-muted-foreground mt-0.5 text-xs">{hint}</div>}
+            {hint && <div className="mt-0.5 text-xs text-muted-foreground">{hint}</div>}
         </div>
     );
 }

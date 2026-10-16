@@ -30,16 +30,8 @@
  * dropped rather than rendering a broken card.
  */
 
-import {
-    summarizeShowRecords,
-    type HorseRecordSummary,
-    type RecordSummaryInputRow,
-} from "@/lib/market/recordSummary";
-import {
-    findPriceBand,
-    LISTINGS_PAGE_SIZE,
-    type ListingFilters,
-} from "@/lib/market/listingFilters";
+import { summarizeShowRecords, type HorseRecordSummary, type RecordSummaryInputRow } from "@/lib/market/recordSummary";
+import { findPriceBand, LISTINGS_PAGE_SIZE, type ListingFilters } from "@/lib/market/listingFilters";
 import type { MarketListing } from "@/app/market/listings";
 
 /** Server-side clamp, mirrored here so the two never disagree. */
@@ -63,10 +55,7 @@ export interface MarketListingRpcArgs {
  * [min, max) pair because the band vocabulary is a client concern —
  * the function only knows about numbers.
  */
-export function buildMarketListingRpcArgs(
-    filters: ListingFilters,
-    page: number,
-): MarketListingRpcArgs {
+export function buildMarketListingRpcArgs(filters: ListingFilters, page: number): MarketListingRpcArgs {
     const safePage = Number.isFinite(page) && page >= 1 ? Math.floor(page) : 1;
     const band = findPriceBand(filters.price);
     const limit = Math.min(LISTINGS_PAGE_SIZE, MARKET_RPC_MAX_LIMIT);
@@ -125,10 +114,7 @@ function count(value: unknown): number | null {
  * a horse with no records so the card renders nothing — never a hollow
  * "0 placings".
  */
-export function parseRecordAggregate(
-    horseId: string,
-    raw: unknown,
-): HorseRecordSummary | null {
+export function parseRecordAggregate(horseId: string, raw: unknown): HorseRecordSummary | null {
     if (!Array.isArray(raw) || raw.length === 0) return null;
     const rows: RecordSummaryInputRow[] = [];
     for (const item of raw) {

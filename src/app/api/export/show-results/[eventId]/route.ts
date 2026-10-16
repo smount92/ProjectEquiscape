@@ -3,10 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { escapeCSV } from "@/lib/utils/csv";
 import { NextResponse } from "next/server";
 
-export async function GET(
-    _request: Request,
-    { params }: { params: Promise<{ eventId: string }> }
-) {
+export async function GET(_request: Request, { params }: { params: Promise<{ eventId: string }> }) {
     // Auth follows the export-route conventions (see the v2 twin,
     // show-results-v2): this route previously had NO auth check and
     // handed out exhibitor aliases via the service role to anyone
@@ -34,8 +31,11 @@ export async function GET(
     }
 
     const ev = eventData as {
-        id: string; name: string; show_status: string;
-        starts_at: string; sanctioning_body: string | null;
+        id: string;
+        name: string;
+        show_status: string;
+        starts_at: string;
+        sanctioning_body: string | null;
     };
 
     if (ev.show_status !== "closed") {
@@ -70,7 +70,7 @@ export async function GET(
     // would (audit S2): horses that went private or were deleted
     // after competing must not leak names into the CSV. Mirrors the
     // hardened twin in actions/shows.ts.
-    const horseIds = [...new Set((entries as { horse_id: string }[]).map(e => e.horse_id))];
+    const horseIds = [...new Set((entries as { horse_id: string }[]).map((e) => e.horse_id))];
     const { data: horses } = await admin
         .from("user_horses")
         .select("id, custom_name")
@@ -81,30 +81,67 @@ export async function GET(
     (horses ?? []).forEach((h: { id: string; custom_name: string }) => horseNameMap.set(h.id, h.custom_name));
 
     // Batch-fetch class + division names
-    const classIds = [...new Set((entries as { class_id: string | null }[]).filter(e => e.class_id).map(e => e.class_id!))];
+    const classIds = [
+        ...new Set((entries as { class_id: string | null }[]).filter((e) => e.class_id).map((e) => e.class_id!)),
+    ];
     const classMap = new Map<string, { className: string; classNumber: string | null; divisionName: string }>();
     if (classIds.length > 0) {
         const { data: classRows } = await admin
             .from("event_classes")
             .select("id, name, class_number, event_divisions!division_id(name)")
             .in("id", classIds);
-        (classRows ?? []).forEach((cr: { id: string; name: string; class_number: string | null; event_divisions: { name: string } | { name: string }[] | null }) => {
-            const divObj = Array.isArray(cr.event_divisions) ? cr.event_divisions[0] : cr.event_divisions;
-            classMap.set(cr.id, { className: cr.name, classNumber: cr.class_number, divisionName: divObj?.name || "General" });
-        });
+        (classRows ?? []).forEach(
+            (cr: {
+                id: string;
+                name: string;
+                class_number: string | null;
+                event_divisions: { name: string } | { name: string }[] | null;
+            }) => {
+                const divObj = Array.isArray(cr.event_divisions) ? cr.event_divisions[0] : cr.event_divisions;
+                classMap.set(cr.id, {
+                    className: cr.name,
+                    classNumber: cr.class_number,
+                    divisionName: divObj?.name || "General",
+                });
+            },
+        );
     }
 
     // Build CSV
-    const headers = ["Event", "Date", "Sanctioning Body", "Division", "Class #", "Class", "Placement", "Horse", "Exhibitor"];
+    const headers = [
+        "Event",
+        "Date",
+        "Sanctioning Body",
+        "Division",
+        "Class #",
+        "Class",
+        "Placement",
+        "Horse",
+        "Exhibitor",
+    ];
 
     const PLACE_ORDER: Record<string, number> = {
-        "Grand Champion": 0, "Reserve Grand Champion": 1,
-        Champion: 2, "Reserve Champion": 3,
-        "1st": 4, "2nd": 5, "3rd": 6,
-        "4th": 7, "5th": 8, "6th": 9, HM: 10,
+        "Grand Champion": 0,
+        "Reserve Grand Champion": 1,
+        Champion: 2,
+        "Reserve Champion": 3,
+        "1st": 4,
+        "2nd": 5,
+        "3rd": 6,
+        "4th": 7,
+        "5th": 8,
+        "6th": 9,
+        HM: 10,
     };
 
-    const rows = (entries as { horse_id: string; class_id: string | null; placing: string; users: { alias_name: string } | { alias_name: string }[] | null }[])
+    const rows = (
+        entries as {
+            horse_id: string;
+            class_id: string | null;
+            placing: string;
+            users: { alias_name: string } | { alias_name: string }[] | null;
+        }[]
+    )
         .sort((a, b) => {
             const classA = a.class_id ? classMap.get(a.class_id) : null;
             const classB = b.class_id ? classMap.get(b.class_id) : null;
@@ -114,9 +151,9 @@ export async function GET(
             if (clsComp !== 0) return clsComp;
             return (PLACE_ORDER[a.placing] ?? 99) - (PLACE_ORDER[b.placing] ?? 99);
         })
-        .map(e => {
+        .map((e) => {
             const classInfo = e.class_id ? classMap.get(e.class_id) : null;
-            const alias = Array.isArray(e.users) ? (e.users[0]?.alias_name || "") : (e.users?.alias_name || "");
+            const alias = Array.isArray(e.users) ? e.users[0]?.alias_name || "" : e.users?.alias_name || "";
             return [
                 escapeCSV(ev.name),
                 escapeCSV(showDate),
@@ -133,7 +170,10 @@ export async function GET(
     const bom = "\uFEFF";
     const csv = bom + headers.join(",") + "\n" + rows.join("\n");
 
-    const safeFilename = ev.name.replace(/[^a-zA-Z0-9 ]/g, "").trim().replace(/\s+/g, "_");
+    const safeFilename = ev.name
+        .replace(/[^a-zA-Z0-9 ]/g, "")
+        .trim()
+        .replace(/\s+/g, "_");
 
     return new NextResponse(csv, {
         status: 200,

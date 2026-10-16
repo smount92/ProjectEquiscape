@@ -56,9 +56,7 @@ describe("resolver — resolveShowRoute", () => {
 
     it("junk ids go legacy WITHOUT querying the database", async () => {
         const calls: string[] = [];
-        expect(await resolveShowRoute(stubClient([], calls), "junk-id")).toBe(
-            "legacy",
-        );
+        expect(await resolveShowRoute(stubClient([], calls), "junk-id")).toBe("legacy");
         expect(calls).toEqual([]);
     });
 

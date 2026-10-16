@@ -57,7 +57,9 @@ export async function linkSetPurchase(input: z.input<typeof linkSchema>): Promis
     if (readErr) {
         return { success: false, error: isMissingSetColumn(readErr) ? SET_MIGRATION_NOTICE : readErr.message };
     }
-    const found = ((existing ?? []) as { purchase_group_id: string | null }[]).find((r) => r.purchase_group_id)?.purchase_group_id;
+    const found = ((existing ?? []) as { purchase_group_id: string | null }[]).find(
+        (r) => r.purchase_group_id,
+    )?.purchase_group_id;
     const groupId = found ?? randomUUID();
     const label = parsed.data.label?.trim() || null;
 
@@ -102,7 +104,11 @@ export async function getSetPurchase(horseId: string): Promise<SetPurchase | nul
         .eq("horse_id", horseId)
         .maybeSingle();
     if (error || !mine) return null;
-    const row = mine as { purchase_group_id: string | null; purchase_group_label: string | null; purchase_price: number | null };
+    const row = mine as {
+        purchase_group_id: string | null;
+        purchase_group_label: string | null;
+        purchase_price: number | null;
+    };
     if (!row.purchase_group_id) return null;
 
     const { data: members } = await supabase
@@ -111,7 +117,9 @@ export async function getSetPurchase(horseId: string): Promise<SetPurchase | nul
         .eq("purchase_group_id", row.purchase_group_id)
         .eq("user_horses.owner_id", user.id)
         .is("user_horses.deleted_at", null);
-    const list = ((members ?? []) as unknown as { horse_id: string; user_horses: { custom_name: string } | null }[]).map((m) => ({
+    const list = (
+        (members ?? []) as unknown as { horse_id: string; user_horses: { custom_name: string } | null }[]
+    ).map((m) => ({
         id: m.horse_id,
         name: m.user_horses?.custom_name ?? "—",
     }));

@@ -215,9 +215,7 @@ describe("POST /api/webhooks/stripe — supporter", () => {
     it("non-supporter subscription.deleted still runs the existing pro tier logic", async () => {
         mockListUsers.mockResolvedValueOnce({
             data: {
-                users: [
-                    { id: "user-9", app_metadata: { stripe_customer_id: "cus_9", tier: "pro" } },
-                ],
+                users: [{ id: "user-9", app_metadata: { stripe_customer_id: "cus_9", tier: "pro" } }],
             },
         });
         mockConstructEvent.mockReturnValueOnce({

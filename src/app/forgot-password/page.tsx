@@ -1,114 +1,114 @@
 "use client";
 
-import { useActionState } from"react";
-import Link from"next/link";
-import { forgotPasswordAction, type AuthFormState } from"@/app/auth/actions";
+import { useActionState } from "react";
+import Link from "next/link";
+import { forgotPasswordAction, type AuthFormState } from "@/app/auth/actions";
 import { Input } from "@/components/ui/input";
-import FocusLayout from"@/components/layouts/FocusLayout";
-import PageMasthead from"@/components/layouts/PageMasthead";
+import FocusLayout from "@/components/layouts/FocusLayout";
+import PageMasthead from "@/components/layouts/PageMasthead";
 import { Button } from "@/components/ui/button";
 
 const initialState: AuthFormState = { error: null, success: false };
 
 export default function ForgotPasswordPage() {
- const [state, formAction, isPending] = useActionState(forgotPasswordAction, initialState);
+    const [state, formAction, isPending] = useActionState(forgotPasswordAction, initialState);
 
- if (state.success) {
- return (
-  <FocusLayout title="Check Your Email">
-  <div className="bg-card border-input animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border shadow-md transition-all">
-   <div className="px-6 py-6">
-   <div aria-hidden="true" className="mb-4 text-[3rem]">
-    ✉️
-   </div>
-   <h2>Check Your Email</h2>
-   <p className="mt-4">
-    If an account exists with that email, we&apos;ve sent you a password reset link. Check your
-    inbox and spam folder.
-   </p>
-   </div>
-   <Button asChild><Link
-   href="/login"
-   id="back-to-login"
-   >
-   Back to Sign In
-   </Link></Button>
-  </div>
-  </FocusLayout>
- );
- }
+    if (state.success) {
+        return (
+            <FocusLayout title="Check Your Email">
+                <div className="animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border border-input bg-card shadow-md transition-all">
+                    <div className="px-6 py-6">
+                        <div aria-hidden="true" className="mb-4 text-[3rem]">
+                            ✉️
+                        </div>
+                        <h2>Check Your Email</h2>
+                        <p className="mt-4">
+                            If an account exists with that email, we&apos;ve sent you a password reset link. Check your
+                            inbox and spam folder.
+                        </p>
+                    </div>
+                    <Button asChild>
+                        <Link href="/login" id="back-to-login">
+                            Back to Sign In
+                        </Link>
+                    </Button>
+                </div>
+            </FocusLayout>
+        );
+    }
 
- return (
- <FocusLayout noHeader>
-  <PageMasthead compact icon="🔑" title="Reset Password" subtitle="Enter your email and we'll send you a reset link" />
-  <div className="bg-card border-input animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border shadow-md transition-all">
-  {state.error && (
-   <div
-   className="text-destructive mt-2 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm"
-   role="alert"
-   id="forgot-error"
-   >
-   <svg
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    aria-hidden="true"
-   >
-    <circle cx="12" cy="12" r="10" />
-    <line x1="15" y1="9" x2="9" y2="15" />
-    <line x1="9" y1="9" x2="15" y2="15" />
-   </svg>
-   {state.error}
-   </div>
-  )}
+    return (
+        <FocusLayout noHeader>
+            <PageMasthead
+                compact
+                icon="🔑"
+                title="Reset Password"
+                subtitle="Enter your email and we'll send you a reset link"
+            />
+            <div className="animate-fade-in-up relative w-full max-w-[460px] overflow-hidden rounded-lg border border-input bg-card shadow-md transition-all">
+                {state.error && (
+                    <div
+                        className="mt-2 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm text-destructive"
+                        role="alert"
+                        id="forgot-error"
+                    >
+                        <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            aria-hidden="true"
+                        >
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="15" y1="9" x2="9" y2="15" />
+                            <line x1="9" y1="9" x2="15" y2="15" />
+                        </svg>
+                        {state.error}
+                    </div>
+                )}
 
-  <form action={formAction} noValidate>
-   <div className="mb-6">
-   <label htmlFor="forgot-email" className="text-foreground mb-1 block text-sm font-semibold">
-    Email Address
-   </label>
-   <Input
-    id="forgot-email"
-    name="email"
-    type="email"
-    placeholder="you@example.com"
-    required
-    autoComplete="email"
-    autoFocus
-   />
-   </div>
+                <form action={formAction} noValidate>
+                    <div className="mb-6">
+                        <label htmlFor="forgot-email" className="mb-1 block text-sm font-semibold text-foreground">
+                            Email Address
+                        </label>
+                        <Input
+                            id="forgot-email"
+                            name="email"
+                            type="email"
+                            placeholder="you@example.com"
+                            required
+                            autoComplete="email"
+                            autoFocus
+                        />
+                    </div>
 
-   <Button
-   type="submit"
-   disabled={isPending}
-   id="forgot-submit"
-   >
-   {isPending ? (
-    <>
-    <span
-     className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
-     aria-hidden="true"
-    />
-    Sending...
-    </>
-   ) : (
-    "Send Reset Link"
-   )}
-   </Button>
-  </form>
+                    <Button type="submit" disabled={isPending} id="forgot-submit">
+                        {isPending ? (
+                            <>
+                                <span
+                                    className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
+                                    aria-hidden="true"
+                                />
+                                Sending...
+                            </>
+                        ) : (
+                            "Send Reset Link"
+                        )}
+                    </Button>
+                </form>
 
-  <div className="text-muted-foreground mt-8 text-center text-sm">
-   <p>
-   Remember your password?{""}
-   <Link href="/login" id="go-to-login">
-    Sign in here
-   </Link>
-   </p>
-  </div>
-  </div>
- </FocusLayout>
- );
+                <div className="mt-8 text-center text-sm text-muted-foreground">
+                    <p>
+                        Remember your password?{""}
+                        <Link href="/login" id="go-to-login">
+                            Sign in here
+                        </Link>
+                    </p>
+                </div>
+            </div>
+        </FocusLayout>
+    );
 }

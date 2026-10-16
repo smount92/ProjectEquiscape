@@ -45,9 +45,7 @@ export function mapMoldCustomRows(rows: unknown): MoldCustom[] {
             horseId: row.horse_id,
             customName: row.custom_name,
             finishingArtist:
-                typeof row.finishing_artist === "string" && row.finishing_artist.trim()
-                    ? row.finishing_artist
-                    : null,
+                typeof row.finishing_artist === "string" && row.finishing_artist.trim() ? row.finishing_artist : null,
             finishingArtistVerified: row.finishing_artist_verified === true,
             imageUrl: typeof row.image_url === "string" && row.image_url ? row.image_url : null,
         });

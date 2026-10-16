@@ -1,1167 +1,1153 @@
 "use client";
 
-import { useState, useEffect, useCallback, type ReactNode } from"react";
+import { useState, useEffect, useCallback, type ReactNode } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { useRouter, useParams } from "next/navigation";
+import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
 import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-} from "@/components/ui/dialog";
-import { useRouter, useParams } from"next/navigation";
-import Link from"next/link";
-import { createClient } from"@/lib/supabase/client";
-import {
- getEventDivisions,
- createDivision,
- updateDivision,
- deleteDivision,
- createClass,
- updateClass,
- deleteClass,
- reorderDivisions,
- reorderClasses,
- copyDivisionsFromEvent,
-} from"@/app/actions/competition";
-import type { Division } from"@/app/actions/competition";
-import { updateEvent, getEventJudges, addEventJudge, removeEventJudge, searchUsers } from"@/app/actions/events";
-import { isLegacyShowEvent } from"@/components/events/eventTypes";
+    getEventDivisions,
+    createDivision,
+    updateDivision,
+    deleteDivision,
+    createClass,
+    updateClass,
+    deleteClass,
+    reorderDivisions,
+    reorderClasses,
+    copyDivisionsFromEvent,
+} from "@/app/actions/competition";
+import type { Division } from "@/app/actions/competition";
+import { updateEvent, getEventJudges, addEventJudge, removeEventJudge, searchUsers } from "@/app/actions/events";
+import { isLegacyShowEvent } from "@/components/events/eventTypes";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import ExplorerLayout from"@/components/layouts/ExplorerLayout";
+import ExplorerLayout from "@/components/layouts/ExplorerLayout";
 import { Button } from "@/components/ui/button";
 import {
- FileEdit,
- ClipboardList,
- Gavel,
- Settings,
- Pencil,
- Trash2,
- ChevronUp,
- ChevronDown,
- Star,
- Save,
+    FileEdit,
+    ClipboardList,
+    Gavel,
+    Settings,
+    Pencil,
+    Trash2,
+    ChevronUp,
+    ChevronDown,
+    Star,
+    Save,
 } from "lucide-react";
 
-type TabId ="details" |"classes" |"judges";
+type TabId = "details" | "classes" | "judges";
 
 interface EventData {
- name: string;
- description: string;
- startsAt: string;
- endsAt: string;
- timezone: string;
- isAllDay: boolean;
- isVirtual: boolean;
- locationName: string;
- locationAddress: string;
- region: string;
- virtualUrl: string;
- judgingMethod:"community_vote" |"expert_judge";
+    name: string;
+    description: string;
+    startsAt: string;
+    endsAt: string;
+    timezone: string;
+    isAllDay: boolean;
+    isVirtual: boolean;
+    locationName: string;
+    locationAddress: string;
+    region: string;
+    virtualUrl: string;
+    judgingMethod: "community_vote" | "expert_judge";
 }
 
 interface JudgeInfo {
- id: string;
- userId: string;
- aliasName: string;
- avatarUrl: string | null;
+    id: string;
+    userId: string;
+    aliasName: string;
+    avatarUrl: string | null;
 }
 
 export default function ManageEventPage() {
- const router = useRouter();
- const params = useParams();
- const eventId = params.id as string;
- const supabase = createClient();
+    const router = useRouter();
+    const params = useParams();
+    const eventId = params.id as string;
+    const supabase = createClient();
 
- const [activeTab, setActiveTab] = useState<TabId>("details");
- const [isLoading, setIsLoading] = useState(true);
- const [eventName, setEventName] = useState("");
- /**
-  * Classes and judges are LEGACY show machinery. Events are now
-  * listings for outside-MHH happenings, so those tabs only appear for
-  * the `live_show` / `photo_show` rows created before the rework —
-  * pulling them entirely would strand hosts mid-show. New shows are
-  * run from /shows/host.
-  */
- const [eventType, setEventType] = useState("other");
- const [divisions, setDivisions] = useState<Division[]>([]);
- const [error, setError] = useState<string | null>(null);
- const [isSaving, setIsSaving] = useState(false);
+    const [activeTab, setActiveTab] = useState<TabId>("details");
+    const [isLoading, setIsLoading] = useState(true);
+    const [eventName, setEventName] = useState("");
+    /**
+     * Classes and judges are LEGACY show machinery. Events are now
+     * listings for outside-MHH happenings, so those tabs only appear for
+     * the `live_show` / `photo_show` rows created before the rework —
+     * pulling them entirely would strand hosts mid-show. New shows are
+     * run from /shows/host.
+     */
+    const [eventType, setEventType] = useState("other");
+    const [divisions, setDivisions] = useState<Division[]>([]);
+    const [error, setError] = useState<string | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
 
- // Event details state
- const [eventData, setEventData] = useState<EventData>({
- name:"",
- description:"",
- startsAt:"",
- endsAt:"",
- timezone:"America/New_York",
- isAllDay: false,
- isVirtual: false,
- locationName:"",
- locationAddress:"",
- region:"",
- virtualUrl:"",
- judgingMethod:"community_vote",
- });
- const [detailsSaved, setDetailsSaved] = useState(false);
+    // Event details state
+    const [eventData, setEventData] = useState<EventData>({
+        name: "",
+        description: "",
+        startsAt: "",
+        endsAt: "",
+        timezone: "America/New_York",
+        isAllDay: false,
+        isVirtual: false,
+        locationName: "",
+        locationAddress: "",
+        region: "",
+        virtualUrl: "",
+        judgingMethod: "community_vote",
+    });
+    const [detailsSaved, setDetailsSaved] = useState(false);
 
- // Judge state
- const [judges, setJudges] = useState<JudgeInfo[]>([]);
- const [newJudgeAlias, setNewJudgeAlias] = useState("");
- const [judgeError, setJudgeError] = useState("");
- const [judgeSuccess, setJudgeSuccess] = useState("");
- const [coiWarnings, setCoiWarnings] = useState<string[]>([]);
- const [userSuggestions, setUserSuggestions] = useState<
- { id: string; aliasName: string; avatarUrl: string | null }[]
- >([]);
- const [isSearching, setIsSearching] = useState(false);
+    // Judge state
+    const [judges, setJudges] = useState<JudgeInfo[]>([]);
+    const [newJudgeAlias, setNewJudgeAlias] = useState("");
+    const [judgeError, setJudgeError] = useState("");
+    const [judgeSuccess, setJudgeSuccess] = useState("");
+    const [coiWarnings, setCoiWarnings] = useState<string[]>([]);
+    const [userSuggestions, setUserSuggestions] = useState<
+        { id: string; aliasName: string; avatarUrl: string | null }[]
+    >([]);
+    const [isSearching, setIsSearching] = useState(false);
 
- // Inline editing state (class list)
- const [editingDivision, setEditingDivision] = useState<string | null>(null);
- const [editingClass, setEditingClass] = useState<string | null>(null);
- const [editName, setEditName] = useState("");
- const [editClassNumber, setEditClassNumber] = useState("");
+    // Inline editing state (class list)
+    const [editingDivision, setEditingDivision] = useState<string | null>(null);
+    const [editingClass, setEditingClass] = useState<string | null>(null);
+    const [editName, setEditName] = useState("");
+    const [editClassNumber, setEditClassNumber] = useState("");
 
- // New item state
- const [newDivisionName, setNewDivisionName] = useState("");
- const [addingClassToDivision, setAddingClassToDivision] = useState<string | null>(null);
- const [newClassName, setNewClassName] = useState("");
- const [newClassNumber, setNewClassNumber] = useState("");
+    // New item state
+    const [newDivisionName, setNewDivisionName] = useState("");
+    const [addingClassToDivision, setAddingClassToDivision] = useState<string | null>(null);
+    const [newClassName, setNewClassName] = useState("");
+    const [newClassNumber, setNewClassNumber] = useState("");
 
- // Copy from modal
- const [showCopyModal, setShowCopyModal] = useState(false);
- const [userEvents, setUserEvents] = useState<{ id: string; name: string }[]>([]);
- const [selectedSourceEvent, setSelectedSourceEvent] = useState("");
+    // Copy from modal
+    const [showCopyModal, setShowCopyModal] = useState(false);
+    const [userEvents, setUserEvents] = useState<{ id: string; name: string }[]>([]);
+    const [selectedSourceEvent, setSelectedSourceEvent] = useState("");
 
- const loadData = useCallback(async () => {
- const {
- data: { user },
- } = await supabase.auth.getUser();
- if (!user) {
- router.push("/login");
- return;
- }
+    const loadData = useCallback(async () => {
+        const {
+            data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) {
+            router.push("/login");
+            return;
+        }
 
- const { data: event } = await supabase
- .from("events")
- .select(
-"id, name, event_type, description, starts_at, ends_at, timezone, is_all_day, is_virtual, location_name, location_address, region, virtual_url, judging_method, created_by",
- )
- .eq("id", eventId)
- .single();
+        const { data: event } = await supabase
+            .from("events")
+            .select(
+                "id, name, event_type, description, starts_at, ends_at, timezone, is_all_day, is_virtual, location_name, location_address, region, virtual_url, judging_method, created_by",
+            )
+            .eq("id", eventId)
+            .single();
 
- if (!event || (event as { created_by: string }).created_by !== user.id) {
- setError("Event not found or you don't have permission to manage it.");
- setIsLoading(false);
- return;
- }
+        if (!event || (event as { created_by: string }).created_by !== user.id) {
+            setError("Event not found or you don't have permission to manage it.");
+            setIsLoading(false);
+            return;
+        }
 
- const ev = event as Record<string, unknown>;
- setEventName(ev.name as string);
- setEventType((ev.event_type as string) ||"other");
- setEventData({
- name: (ev.name as string) ||"",
- description: (ev.description as string) ||"",
- startsAt: (ev.starts_at as string) ||"",
- endsAt: (ev.ends_at as string) ||"",
- timezone: (ev.timezone as string) ||"America/New_York",
- isAllDay: (ev.is_all_day as boolean) || false,
- isVirtual: (ev.is_virtual as boolean) || false,
- locationName: (ev.location_name as string) ||"",
- locationAddress: (ev.location_address as string) ||"",
- region: (ev.region as string) ||"",
- virtualUrl: (ev.virtual_url as string) ||"",
- judgingMethod: (ev.judging_method as"community_vote" |"expert_judge") ||"community_vote",
- });
+        const ev = event as Record<string, unknown>;
+        setEventName(ev.name as string);
+        setEventType((ev.event_type as string) || "other");
+        setEventData({
+            name: (ev.name as string) || "",
+            description: (ev.description as string) || "",
+            startsAt: (ev.starts_at as string) || "",
+            endsAt: (ev.ends_at as string) || "",
+            timezone: (ev.timezone as string) || "America/New_York",
+            isAllDay: (ev.is_all_day as boolean) || false,
+            isVirtual: (ev.is_virtual as boolean) || false,
+            locationName: (ev.location_name as string) || "",
+            locationAddress: (ev.location_address as string) || "",
+            region: (ev.region as string) || "",
+            virtualUrl: (ev.virtual_url as string) || "",
+            judgingMethod: (ev.judging_method as "community_vote" | "expert_judge") || "community_vote",
+        });
 
- // Divisions and judges exist only on legacy show rows — skip the
- // round-trips entirely for ordinary event listings.
- if (isLegacyShowEvent((ev.event_type as string) ||"")) {
- const divs = await getEventDivisions(eventId);
- setDivisions(divs);
+        // Divisions and judges exist only on legacy show rows — skip the
+        // round-trips entirely for ordinary event listings.
+        if (isLegacyShowEvent((ev.event_type as string) || "")) {
+            const divs = await getEventDivisions(eventId);
+            setDivisions(divs);
 
- const judgeList = await getEventJudges(eventId);
- setJudges(judgeList);
- }
+            const judgeList = await getEventJudges(eventId);
+            setJudges(judgeList);
+        }
 
- setIsLoading(false);
- }, [eventId, router, supabase]);
+        setIsLoading(false);
+    }, [eventId, router, supabase]);
 
- useEffect(() => {
- // eslint-disable-next-line react-hooks/set-state-in-effect -- load on mount and clear stale suggestions; both are intended
- loadData();
- }, [loadData]);
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- load on mount and clear stale suggestions; both are intended
+        loadData();
+    }, [loadData]);
 
- // ── Debounced user search for judge autocomplete ──
- useEffect(() => {
- if (newJudgeAlias.trim().length < 2) {
- // eslint-disable-next-line react-hooks/set-state-in-effect -- load on mount and clear stale suggestions; both are intended
- setUserSuggestions([]);
- return;
- }
- const timer = setTimeout(async () => {
- setIsSearching(true);
- const results = await searchUsers(newJudgeAlias);
- setUserSuggestions(results);
- setIsSearching(false);
- }, 300);
- return () => clearTimeout(timer);
- }, [newJudgeAlias]);
+    // ── Debounced user search for judge autocomplete ──
+    useEffect(() => {
+        if (newJudgeAlias.trim().length < 2) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect -- load on mount and clear stale suggestions; both are intended
+            setUserSuggestions([]);
+            return;
+        }
+        const timer = setTimeout(async () => {
+            setIsSearching(true);
+            const results = await searchUsers(newJudgeAlias);
+            setUserSuggestions(results);
+            setIsSearching(false);
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [newJudgeAlias]);
 
- // ── Event Details Save ──
+    // ── Event Details Save ──
 
- const handleSaveDetails = async () => {
- setIsSaving(true);
- setError(null);
- setDetailsSaved(false);
- const result = await updateEvent(eventId, {
- name: eventData.name,
- description: eventData.description,
- startsAt: eventData.startsAt,
- endsAt: eventData.endsAt || undefined,
- timezone: eventData.timezone,
- isAllDay: eventData.isAllDay,
- isVirtual: eventData.isVirtual,
- locationName: eventData.locationName,
- locationAddress: eventData.locationAddress,
- region: eventData.region,
- virtualUrl: eventData.virtualUrl,
- judgingMethod: eventData.judgingMethod,
- });
- if (result.success) {
- setEventName(eventData.name);
- setDetailsSaved(true);
- setTimeout(() => setDetailsSaved(false), 3000);
- } else {
- setError(result.error ||"Failed to update event.");
- }
- setIsSaving(false);
- };
+    const handleSaveDetails = async () => {
+        setIsSaving(true);
+        setError(null);
+        setDetailsSaved(false);
+        const result = await updateEvent(eventId, {
+            name: eventData.name,
+            description: eventData.description,
+            startsAt: eventData.startsAt,
+            endsAt: eventData.endsAt || undefined,
+            timezone: eventData.timezone,
+            isAllDay: eventData.isAllDay,
+            isVirtual: eventData.isVirtual,
+            locationName: eventData.locationName,
+            locationAddress: eventData.locationAddress,
+            region: eventData.region,
+            virtualUrl: eventData.virtualUrl,
+            judgingMethod: eventData.judgingMethod,
+        });
+        if (result.success) {
+            setEventName(eventData.name);
+            setDetailsSaved(true);
+            setTimeout(() => setDetailsSaved(false), 3000);
+        } else {
+            setError(result.error || "Failed to update event.");
+        }
+        setIsSaving(false);
+    };
 
- // ── Judge Management ──
+    // ── Judge Management ──
 
- const handleAddJudge = async () => {
- if (!newJudgeAlias.trim()) return;
- setJudgeError("");
- setJudgeSuccess("");
- setCoiWarnings([]);
- const result = await addEventJudge(eventId, newJudgeAlias.trim());
- if (result.success) {
- setNewJudgeAlias("");
- setJudgeSuccess("Judge added!");
- if (result.coiWarnings && result.coiWarnings.length > 0) {
- setCoiWarnings(result.coiWarnings);
- }
- setTimeout(() => setJudgeSuccess(""), 5000);
- const judgeList = await getEventJudges(eventId);
- setJudges(judgeList);
- } else {
- setJudgeError(result.error ||"Failed to add judge.");
- }
- };
+    const handleAddJudge = async () => {
+        if (!newJudgeAlias.trim()) return;
+        setJudgeError("");
+        setJudgeSuccess("");
+        setCoiWarnings([]);
+        const result = await addEventJudge(eventId, newJudgeAlias.trim());
+        if (result.success) {
+            setNewJudgeAlias("");
+            setJudgeSuccess("Judge added!");
+            if (result.coiWarnings && result.coiWarnings.length > 0) {
+                setCoiWarnings(result.coiWarnings);
+            }
+            setTimeout(() => setJudgeSuccess(""), 5000);
+            const judgeList = await getEventJudges(eventId);
+            setJudges(judgeList);
+        } else {
+            setJudgeError(result.error || "Failed to add judge.");
+        }
+    };
 
- const handleRemoveJudge = async (judgeId: string) => {
- if (!confirm("Remove this judge?")) return;
- const result = await removeEventJudge(judgeId);
- if (result.success) {
- const judgeList = await getEventJudges(eventId);
- setJudges(judgeList);
- } else {
- setJudgeError(result.error ||"Failed to remove judge.");
- }
- };
+    const handleRemoveJudge = async (judgeId: string) => {
+        if (!confirm("Remove this judge?")) return;
+        const result = await removeEventJudge(judgeId);
+        if (result.success) {
+            const judgeList = await getEventJudges(eventId);
+            setJudges(judgeList);
+        } else {
+            setJudgeError(result.error || "Failed to remove judge.");
+        }
+    };
 
- // ── Division CRUD ──
+    // ── Division CRUD ──
 
- const handleAddDivision = async () => {
- if (!newDivisionName.trim()) return;
- setIsSaving(true);
- const result = await createDivision({
- eventId,
- name: newDivisionName.trim(),
- sortOrder: divisions.length,
- });
- if (result.success) {
- setNewDivisionName("");
- await loadData();
- } else {
- setError(result.error ||"Failed to create division.");
- }
- setIsSaving(false);
- };
+    const handleAddDivision = async () => {
+        if (!newDivisionName.trim()) return;
+        setIsSaving(true);
+        const result = await createDivision({
+            eventId,
+            name: newDivisionName.trim(),
+            sortOrder: divisions.length,
+        });
+        if (result.success) {
+            setNewDivisionName("");
+            await loadData();
+        } else {
+            setError(result.error || "Failed to create division.");
+        }
+        setIsSaving(false);
+    };
 
- const handleSaveDivision = async (divId: string) => {
- if (!editName.trim()) return;
- setIsSaving(true);
- await updateDivision(divId, { name: editName.trim() });
- setEditingDivision(null);
- await loadData();
- setIsSaving(false);
- };
+    const handleSaveDivision = async (divId: string) => {
+        if (!editName.trim()) return;
+        setIsSaving(true);
+        await updateDivision(divId, { name: editName.trim() });
+        setEditingDivision(null);
+        await loadData();
+        setIsSaving(false);
+    };
 
- const handleDeleteDivision = async (divId: string, divName: string) => {
- if (!confirm(`Delete division"${divName}" and all its classes? This cannot be undone.`)) return;
- setIsSaving(true);
- await deleteDivision(divId);
- await loadData();
- setIsSaving(false);
- };
+    const handleDeleteDivision = async (divId: string, divName: string) => {
+        if (!confirm(`Delete division"${divName}" and all its classes? This cannot be undone.`)) return;
+        setIsSaving(true);
+        await deleteDivision(divId);
+        await loadData();
+        setIsSaving(false);
+    };
 
- const handleMoveDivision = async (index: number, direction: -1 | 1) => {
- const newOrder = [...divisions];
- const swapIndex = index + direction;
- if (swapIndex < 0 || swapIndex >= newOrder.length) return;
- [newOrder[index], newOrder[swapIndex]] = [newOrder[swapIndex], newOrder[index]];
- setDivisions(newOrder);
- await reorderDivisions(newOrder.map((d) => d.id));
- };
+    const handleMoveDivision = async (index: number, direction: -1 | 1) => {
+        const newOrder = [...divisions];
+        const swapIndex = index + direction;
+        if (swapIndex < 0 || swapIndex >= newOrder.length) return;
+        [newOrder[index], newOrder[swapIndex]] = [newOrder[swapIndex], newOrder[index]];
+        setDivisions(newOrder);
+        await reorderDivisions(newOrder.map((d) => d.id));
+    };
 
- // ── Class CRUD ──
+    // ── Class CRUD ──
 
- const handleAddClass = async (divisionId: string) => {
- if (!newClassName.trim()) return;
- setIsSaving(true);
- const division = divisions.find((d) => d.id === divisionId);
- const result = await createClass({
- divisionId,
- name: newClassName.trim(),
- classNumber: newClassNumber.trim() || undefined,
- sortOrder: division?.classes.length || 0,
- });
- if (result.success) {
- setNewClassName("");
- setNewClassNumber("");
- setAddingClassToDivision(null);
- await loadData();
- } else {
- setError(result.error ||"Failed to create class.");
- }
- setIsSaving(false);
- };
+    const handleAddClass = async (divisionId: string) => {
+        if (!newClassName.trim()) return;
+        setIsSaving(true);
+        const division = divisions.find((d) => d.id === divisionId);
+        const result = await createClass({
+            divisionId,
+            name: newClassName.trim(),
+            classNumber: newClassNumber.trim() || undefined,
+            sortOrder: division?.classes.length || 0,
+        });
+        if (result.success) {
+            setNewClassName("");
+            setNewClassNumber("");
+            setAddingClassToDivision(null);
+            await loadData();
+        } else {
+            setError(result.error || "Failed to create class.");
+        }
+        setIsSaving(false);
+    };
 
- const handleSaveClass = async (classId: string) => {
- if (!editName.trim()) return;
- setIsSaving(true);
- await updateClass(classId, {
- name: editName.trim(),
- classNumber: editClassNumber.trim() || undefined,
- });
- setEditingClass(null);
- await loadData();
- setIsSaving(false);
- };
+    const handleSaveClass = async (classId: string) => {
+        if (!editName.trim()) return;
+        setIsSaving(true);
+        await updateClass(classId, {
+            name: editName.trim(),
+            classNumber: editClassNumber.trim() || undefined,
+        });
+        setEditingClass(null);
+        await loadData();
+        setIsSaving(false);
+    };
 
- const handleDeleteClass = async (classId: string, className: string) => {
- if (!confirm(`Delete class"${className}"? Entries in this class will also be removed.`)) return;
- setIsSaving(true);
- await deleteClass(classId);
- await loadData();
- setIsSaving(false);
- };
+    const handleDeleteClass = async (classId: string, className: string) => {
+        if (!confirm(`Delete class"${className}"? Entries in this class will also be removed.`)) return;
+        setIsSaving(true);
+        await deleteClass(classId);
+        await loadData();
+        setIsSaving(false);
+    };
 
- const handleToggleNan = async (classId: string, current: boolean) => {
- await updateClass(classId, { isNanQualifying: !current });
- await loadData();
- };
+    const handleToggleNan = async (classId: string, current: boolean) => {
+        await updateClass(classId, { isNanQualifying: !current });
+        await loadData();
+    };
 
- const handleMoveClass = async (divisionId: string, index: number, direction: -1 | 1) => {
- const div = divisions.find((d) => d.id === divisionId);
- if (!div) return;
- const newOrder = [...div.classes];
- const swapIndex = index + direction;
- if (swapIndex < 0 || swapIndex >= newOrder.length) return;
- [newOrder[index], newOrder[swapIndex]] = [newOrder[swapIndex], newOrder[index]];
- await reorderClasses(newOrder.map((c) => c.id));
- await loadData();
- };
+    const handleMoveClass = async (divisionId: string, index: number, direction: -1 | 1) => {
+        const div = divisions.find((d) => d.id === divisionId);
+        if (!div) return;
+        const newOrder = [...div.classes];
+        const swapIndex = index + direction;
+        if (swapIndex < 0 || swapIndex >= newOrder.length) return;
+        [newOrder[index], newOrder[swapIndex]] = [newOrder[swapIndex], newOrder[index]];
+        await reorderClasses(newOrder.map((c) => c.id));
+        await loadData();
+    };
 
- // ── Copy from event ──
+    // ── Copy from event ──
 
- const loadUserEvents = async () => {
- const {
- data: { user },
- } = await supabase.auth.getUser();
- if (!user) return;
- const { data } = await supabase
- .from("events")
- .select("id, name")
- .eq("created_by", user.id)
- .neq("id", eventId)
- .order("created_at", { ascending: false })
- .limit(20);
- setUserEvents((data || []) as { id: string; name: string }[]);
- setShowCopyModal(true);
- };
+    const loadUserEvents = async () => {
+        const {
+            data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) return;
+        const { data } = await supabase
+            .from("events")
+            .select("id, name")
+            .eq("created_by", user.id)
+            .neq("id", eventId)
+            .order("created_at", { ascending: false })
+            .limit(20);
+        setUserEvents((data || []) as { id: string; name: string }[]);
+        setShowCopyModal(true);
+    };
 
- const handleCopy = async () => {
- if (!selectedSourceEvent) return;
- setIsSaving(true);
- setShowCopyModal(false);
- const result = await copyDivisionsFromEvent(selectedSourceEvent, eventId);
- if (result.success) {
- await loadData();
- } else {
- setError(result.error ||"Failed to copy.");
- }
- setIsSaving(false);
- };
+    const handleCopy = async () => {
+        if (!selectedSourceEvent) return;
+        setIsSaving(true);
+        setShowCopyModal(false);
+        const result = await copyDivisionsFromEvent(selectedSourceEvent, eventId);
+        if (result.success) {
+            await loadData();
+        } else {
+            setError(result.error || "Failed to copy.");
+        }
+        setIsSaving(false);
+    };
 
- // ── Render ──
+    // ── Render ──
 
- if (isLoading) {
- return (
- <ExplorerLayout title="Manage Event" description="Update what people see on your event listing.">
- <div
- className="bg-card border-input rounded-lg border p-12 text-center shadow-md transition-all"
- >
- <div
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input border-t-[var(--primary)] bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all"
- />
- <p>Loading event…</p>
- </div>
- </ExplorerLayout>
- );
- }
+    if (isLoading) {
+        return (
+            <ExplorerLayout title="Manage Event" description="Update what people see on your event listing.">
+                <div className="rounded-lg border border-input bg-card p-12 text-center shadow-md transition-all">
+                    <div className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-input border-t-[var(--primary)] bg-transparent px-6 py-2 text-sm font-semibold no-underline transition-all" />
+                    <p>Loading event…</p>
+                </div>
+            </ExplorerLayout>
+        );
+    }
 
- if (error && !eventName) {
- return (
- <ExplorerLayout title="Manage Event" description="Update what people see on your event listing.">
- <div
- className="bg-card border-input rounded-lg border p-12 text-center shadow-md transition-all"
- >
- <p className="text-destructive">{error}</p>
- <Button asChild variant="outline" size="wide"><Link
- href="/community/events"
- >
- ← Back to Events
- </Link></Button>
- </div>
- </ExplorerLayout>
- );
- }
+    if (error && !eventName) {
+        return (
+            <ExplorerLayout title="Manage Event" description="Update what people see on your event listing.">
+                <div className="rounded-lg border border-input bg-card p-12 text-center shadow-md transition-all">
+                    <p className="text-destructive">{error}</p>
+                    <Button asChild variant="outline" size="wide">
+                        <Link href="/community/events">← Back to Events</Link>
+                    </Button>
+                </div>
+            </ExplorerLayout>
+        );
+    }
 
- const totalClasses = divisions.reduce((sum, d) => sum + d.classes.length, 0);
- const totalEntries = divisions.reduce((sum, d) => sum + d.classes.reduce((s, c) => s + (c.entryCount || 0), 0), 0);
+    const totalClasses = divisions.reduce((sum, d) => sum + d.classes.length, 0);
+    const totalEntries = divisions.reduce((sum, d) => sum + d.classes.reduce((s, c) => s + (c.entryCount || 0), 0), 0);
 
- const isLegacyShow = isLegacyShowEvent(eventType);
+    const isLegacyShow = isLegacyShowEvent(eventType);
 
- const tabs: { id: TabId; label: string; icon: ReactNode; hidden?: boolean }[] = [
- { id:"details", label:"Edit Details", icon: <FileEdit className="h-4 w-4" /> },
- { id:"classes", label:"Class List", icon: <ClipboardList className="h-4 w-4" />, hidden: !isLegacyShow },
- { id:"judges", label:"Judges", icon: <Gavel className="h-4 w-4" />, hidden: !isLegacyShow || eventData.judgingMethod !=="expert_judge" },
- ];
+    const tabs: { id: TabId; label: string; icon: ReactNode; hidden?: boolean }[] = [
+        { id: "details", label: "Edit Details", icon: <FileEdit className="h-4 w-4" /> },
+        { id: "classes", label: "Class List", icon: <ClipboardList className="h-4 w-4" />, hidden: !isLegacyShow },
+        {
+            id: "judges",
+            label: "Judges",
+            icon: <Gavel className="h-4 w-4" />,
+            hidden: !isLegacyShow || eventData.judgingMethod !== "expert_judge",
+        },
+    ];
 
- return (
- <ExplorerLayout title="Manage Event" description="Update what people see on your event listing.">
- <div className="animate-fade-in-up">
- {/* Header */}
- <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
- <div>
- <Link href={`/community/events/${eventId}`} className="text-muted-foreground mb-1 inline-block text-sm">
- ← Back to Event
- </Link>
- <h1 className="inline-flex items-center gap-2"><Settings className="h-5 w-5" /> Manage Event</h1>
- <p className="text-secondary-foreground">{eventName}</p>
- </div>
- {isLegacyShow && (
- <div className="flex gap-2">
- <span className="rounded-md bg-[var(--primary)] px-2 py-0.5 text-xs font-bold text-white">
- {divisions.length} Division{divisions.length !== 1 ?"s" :""} · {totalClasses} Class
- {totalClasses !== 1 ?"es" :""} · {totalEntries} Entr{totalEntries !== 1 ?"ies" :"y"}
- </span>
- </div>
- )}
- </div>
+    return (
+        <ExplorerLayout title="Manage Event" description="Update what people see on your event listing.">
+            <div className="animate-fade-in-up">
+                {/* Header */}
+                <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
+                    <div>
+                        <Link
+                            href={`/community/events/${eventId}`}
+                            className="mb-1 inline-block text-sm text-muted-foreground"
+                        >
+                            ← Back to Event
+                        </Link>
+                        <h1 className="inline-flex items-center gap-2">
+                            <Settings className="h-5 w-5" /> Manage Event
+                        </h1>
+                        <p className="text-secondary-foreground">{eventName}</p>
+                    </div>
+                    {isLegacyShow && (
+                        <div className="flex gap-2">
+                            <span className="rounded-md bg-[var(--primary)] px-2 py-0.5 text-xs font-bold text-white">
+                                {divisions.length} Division{divisions.length !== 1 ? "s" : ""} · {totalClasses} Class
+                                {totalClasses !== 1 ? "es" : ""} · {totalEntries} Entr{totalEntries !== 1 ? "ies" : "y"}
+                            </span>
+                        </div>
+                    )}
+                </div>
 
- {/* Tab Bar */}
- <div className="flex gap-[var(--space-xs)] mb-[var(--space-xl)] overflow-x-auto border-b border-border pb-0 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
- {tabs
- .filter((t) => !t.hidden)
- .map((tab) => (
- <button
- key={tab.id}
- onClick={() => setActiveTab(tab.id)}
- className={`inline-flex cursor-pointer items-center gap-2 border-0 border-b-2 bg-transparent px-[var(--space-md)] py-[var(--space-sm)] text-sm transition-all duration-200 ${
- activeTab === tab.id
- ? "border-b-[var(--primary)] font-semibold text-foreground"
- : "border-b-transparent font-normal text-muted-foreground"
- }`}
- >
- {tab.icon} {tab.label}
- </button>
- ))}
- </div>
+                {/* Tab Bar */}
+                <div className="mb-[var(--space-xl)] flex gap-[var(--space-xs)] overflow-x-auto border-b border-border pb-0 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                    {tabs
+                        .filter((t) => !t.hidden)
+                        .map((tab) => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id)}
+                                className={`inline-flex cursor-pointer items-center gap-2 border-0 border-b-2 bg-transparent px-[var(--space-md)] py-[var(--space-sm)] text-sm transition-all duration-200 ${
+                                    activeTab === tab.id
+                                        ? "border-b-[var(--primary)] font-semibold text-foreground"
+                                        : "border-b-transparent font-normal text-muted-foreground"
+                                }`}
+                            >
+                                {tab.icon} {tab.label}
+                            </button>
+                        ))}
+                </div>
 
- {error && (
- <div className="text-destructive mt-2 mb-6 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm">
- ⚠️ {error}
- <button
- onClick={() => setError(null)}
- className="ml-auto cursor-pointer border-0 bg-transparent text-inherit"
- >
- ✕
- </button>
- </div>
- )}
+                {error && (
+                    <div className="mt-2 mb-6 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm text-destructive">
+                        ⚠️ {error}
+                        <button
+                            onClick={() => setError(null)}
+                            className="ml-auto cursor-pointer border-0 bg-transparent text-inherit"
+                        >
+                            ✕
+                        </button>
+                    </div>
+                )}
 
- {/* ═══════════════════════════════════════ */}
- {/* TAB: Edit Details */}
- {/* ═══════════════════════════════════════ */}
- {activeTab ==="details" && (
- <div className="bg-card border-input rounded-lg border p-8 shadow-md transition-all">
- <div className="flex flex-col gap-6">
- <div className="mb-6">
- <label className="text-foreground mb-1 block text-sm font-semibold">Event Name</label>
- <Input
- 
- value={eventData.name}
- onChange={(e) => setEventData((prev) => ({ ...prev, name: e.target.value }))}
- placeholder="Event name"
- />
- </div>
+                {/* ═══════════════════════════════════════ */}
+                {/* TAB: Edit Details */}
+                {/* ═══════════════════════════════════════ */}
+                {activeTab === "details" && (
+                    <div className="rounded-lg border border-input bg-card p-8 shadow-md transition-all">
+                        <div className="flex flex-col gap-6">
+                            <div className="mb-6">
+                                <label className="mb-1 block text-sm font-semibold text-foreground">Event Name</label>
+                                <Input
+                                    value={eventData.name}
+                                    onChange={(e) => setEventData((prev) => ({ ...prev, name: e.target.value }))}
+                                    placeholder="Event name"
+                                />
+                            </div>
 
- <div className="mb-6">
- <label className="text-foreground mb-1 block text-sm font-semibold">Description</label>
- <Textarea
- 
- value={eventData.description}
- onChange={(e) => setEventData((prev) => ({ ...prev, description: e.target.value }))}
- placeholder="Describe your event…"
- rows={3}
- />
- </div>
+                            <div className="mb-6">
+                                <label className="mb-1 block text-sm font-semibold text-foreground">Description</label>
+                                <Textarea
+                                    value={eventData.description}
+                                    onChange={(e) => setEventData((prev) => ({ ...prev, description: e.target.value }))}
+                                    placeholder="Describe your event…"
+                                    rows={3}
+                                />
+                            </div>
 
- <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
- <div className="mb-6">
- <label className="text-foreground mb-1 block text-sm font-semibold">Starts At</label>
- <Input
- type="datetime-local"
- 
- value={eventData.startsAt ? eventData.startsAt.slice(0, 16) :""}
- onChange={(e) =>
- setEventData((prev) => ({ ...prev, startsAt: e.target.value }))
- }
- />
- </div>
- <div className="mb-6">
- <label className="text-foreground mb-1 block text-sm font-semibold">
- Ends At (optional)
- </label>
- <Input
- type="datetime-local"
- 
- value={eventData.endsAt ? eventData.endsAt.slice(0, 16) :""}
- onChange={(e) => setEventData((prev) => ({ ...prev, endsAt: e.target.value }))}
- />
- </div>
- </div>
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <div className="mb-6">
+                                    <label className="mb-1 block text-sm font-semibold text-foreground">
+                                        Starts At
+                                    </label>
+                                    <Input
+                                        type="datetime-local"
+                                        value={eventData.startsAt ? eventData.startsAt.slice(0, 16) : ""}
+                                        onChange={(e) =>
+                                            setEventData((prev) => ({ ...prev, startsAt: e.target.value }))
+                                        }
+                                    />
+                                </div>
+                                <div className="mb-6">
+                                    <label className="mb-1 block text-sm font-semibold text-foreground">
+                                        Ends At (optional)
+                                    </label>
+                                    <Input
+                                        type="datetime-local"
+                                        value={eventData.endsAt ? eventData.endsAt.slice(0, 16) : ""}
+                                        onChange={(e) => setEventData((prev) => ({ ...prev, endsAt: e.target.value }))}
+                                    />
+                                </div>
+                            </div>
 
- <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
- <div className="mb-6">
- <label className="text-foreground mb-1 block text-sm font-semibold">Region</label>
- <Input
- 
- value={eventData.region}
- onChange={(e) => setEventData((prev) => ({ ...prev, region: e.target.value }))}
- placeholder="e.g. Northeast US"
- />
- </div>
- <div className="mb-6">
- <label className="text-foreground mb-1 block text-sm font-semibold">Timezone</label>
- <select
- className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
- value={eventData.timezone}
- onChange={(e) =>
- setEventData((prev) => ({ ...prev, timezone: e.target.value }))
- }
- title="Timezone"
- >
- <option value="America/New_York">Eastern</option>
- <option value="America/Chicago">Central</option>
- <option value="America/Denver">Mountain</option>
- <option value="America/Los_Angeles">Pacific</option>
- <option value="Europe/London">UK/GMT</option>
- </select>
- </div>
- </div>
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <div className="mb-6">
+                                    <label className="mb-1 block text-sm font-semibold text-foreground">Region</label>
+                                    <Input
+                                        value={eventData.region}
+                                        onChange={(e) => setEventData((prev) => ({ ...prev, region: e.target.value }))}
+                                        placeholder="e.g. Northeast US"
+                                    />
+                                </div>
+                                <div className="mb-6">
+                                    <label className="mb-1 block text-sm font-semibold text-foreground">Timezone</label>
+                                    <select
+                                        className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
+                                        value={eventData.timezone}
+                                        onChange={(e) =>
+                                            setEventData((prev) => ({ ...prev, timezone: e.target.value }))
+                                        }
+                                        title="Timezone"
+                                    >
+                                        <option value="America/New_York">Eastern</option>
+                                        <option value="America/Chicago">Central</option>
+                                        <option value="America/Denver">Mountain</option>
+                                        <option value="America/Los_Angeles">Pacific</option>
+                                        <option value="Europe/London">UK/GMT</option>
+                                    </select>
+                                </div>
+                            </div>
 
- <div className="flex flex-wrap gap-6">
- <label
- className="flex cursor-pointer items-center gap-1"
- >
- <Input
- type="checkbox"
- checked={eventData.isAllDay}
- onChange={(e) =>
- setEventData((prev) => ({ ...prev, isAllDay: e.target.checked }))
- }
- />
- All-day event
- </label>
- <label
- className="flex cursor-pointer items-center gap-1"
- >
- <Input
- type="checkbox"
- checked={eventData.isVirtual}
- onChange={(e) =>
- setEventData((prev) => ({ ...prev, isVirtual: e.target.checked }))
- }
- />
- Virtual event
- </label>
- </div>
+                            <div className="flex flex-wrap gap-6">
+                                <label className="flex cursor-pointer items-center gap-1">
+                                    <Input
+                                        type="checkbox"
+                                        checked={eventData.isAllDay}
+                                        onChange={(e) =>
+                                            setEventData((prev) => ({ ...prev, isAllDay: e.target.checked }))
+                                        }
+                                    />
+                                    All-day event
+                                </label>
+                                <label className="flex cursor-pointer items-center gap-1">
+                                    <Input
+                                        type="checkbox"
+                                        checked={eventData.isVirtual}
+                                        onChange={(e) =>
+                                            setEventData((prev) => ({ ...prev, isVirtual: e.target.checked }))
+                                        }
+                                    />
+                                    Virtual event
+                                </label>
+                            </div>
 
- {!eventData.isVirtual && (
- <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
- <div className="mb-6">
- <label className="text-foreground mb-1 block text-sm font-semibold">
- Location Name
- </label>
- <Input
- 
- value={eventData.locationName}
- onChange={(e) =>
- setEventData((prev) => ({ ...prev, locationName: e.target.value }))
- }
- placeholder="Venue name"
- />
- </div>
- <div className="mb-6">
- <label className="text-foreground mb-1 block text-sm font-semibold">
- Location Address
- </label>
- <Input
- 
- value={eventData.locationAddress}
- onChange={(e) =>
- setEventData((prev) => ({ ...prev, locationAddress: e.target.value }))
- }
- placeholder="Full address"
- />
- </div>
- </div>
- )}
+                            {!eventData.isVirtual && (
+                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                    <div className="mb-6">
+                                        <label className="mb-1 block text-sm font-semibold text-foreground">
+                                            Location Name
+                                        </label>
+                                        <Input
+                                            value={eventData.locationName}
+                                            onChange={(e) =>
+                                                setEventData((prev) => ({ ...prev, locationName: e.target.value }))
+                                            }
+                                            placeholder="Venue name"
+                                        />
+                                    </div>
+                                    <div className="mb-6">
+                                        <label className="mb-1 block text-sm font-semibold text-foreground">
+                                            Location Address
+                                        </label>
+                                        <Input
+                                            value={eventData.locationAddress}
+                                            onChange={(e) =>
+                                                setEventData((prev) => ({ ...prev, locationAddress: e.target.value }))
+                                            }
+                                            placeholder="Full address"
+                                        />
+                                    </div>
+                                </div>
+                            )}
 
- {/* The outbound link — an event points at something that lives
+                            {/* The outbound link — an event points at something that lives
  elsewhere, so this matters whether or not it's "virtual". */}
- <div className="mb-6">
- <label className="text-foreground mb-1 block text-sm font-semibold">Link</label>
- <Input
- type="url"
- value={eventData.virtualUrl}
- onChange={(e) =>
- setEventData((prev) => ({ ...prev, virtualUrl: e.target.value }))
- }
- placeholder="https://facebook.com/events/…"
- />
- <p className="text-muted-foreground mt-1 text-xs">
- Where the event actually lives — this becomes the big button on the listing.
- </p>
- </div>
+                            <div className="mb-6">
+                                <label className="mb-1 block text-sm font-semibold text-foreground">Link</label>
+                                <Input
+                                    type="url"
+                                    value={eventData.virtualUrl}
+                                    onChange={(e) => setEventData((prev) => ({ ...prev, virtualUrl: e.target.value }))}
+                                    placeholder="https://facebook.com/events/…"
+                                />
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                    Where the event actually lives — this becomes the big button on the listing.
+                                </p>
+                            </div>
 
- {/* Judging Method — legacy shows only */}
- {isLegacyShow && (
- <div className="mb-6">
- <label className="text-foreground mb-1 block text-sm font-semibold">Judging Method</label>
- <div className="flex gap-4">
- <label
- className="flex cursor-pointer items-center gap-1 rounded-md px-3 py-2"
- >
- <Input
- type="radio"
- name="judging"
- value="community_vote"
- checked={eventData.judgingMethod ==="community_vote"}
- onChange={() =>
- setEventData((prev) => ({ ...prev, judgingMethod:"community_vote" }))
- }
- />
- 🗳️ Community Vote
- </label>
- <label
- className="flex cursor-pointer items-center gap-1 rounded-md px-3 py-2"
- >
- <Input
- type="radio"
- name="judging"
- value="expert_judge"
- checked={eventData.judgingMethod ==="expert_judge"}
- onChange={() =>
- setEventData((prev) => ({ ...prev, judgingMethod:"expert_judge" }))
- }
- />
- 🏅 Expert Judge
- </label>
- </div>
- </div>
- )}
+                            {/* Judging Method — legacy shows only */}
+                            {isLegacyShow && (
+                                <div className="mb-6">
+                                    <label className="mb-1 block text-sm font-semibold text-foreground">
+                                        Judging Method
+                                    </label>
+                                    <div className="flex gap-4">
+                                        <label className="flex cursor-pointer items-center gap-1 rounded-md px-3 py-2">
+                                            <Input
+                                                type="radio"
+                                                name="judging"
+                                                value="community_vote"
+                                                checked={eventData.judgingMethod === "community_vote"}
+                                                onChange={() =>
+                                                    setEventData((prev) => ({
+                                                        ...prev,
+                                                        judgingMethod: "community_vote",
+                                                    }))
+                                                }
+                                            />
+                                            🗳️ Community Vote
+                                        </label>
+                                        <label className="flex cursor-pointer items-center gap-1 rounded-md px-3 py-2">
+                                            <Input
+                                                type="radio"
+                                                name="judging"
+                                                value="expert_judge"
+                                                checked={eventData.judgingMethod === "expert_judge"}
+                                                onChange={() =>
+                                                    setEventData((prev) => ({ ...prev, judgingMethod: "expert_judge" }))
+                                                }
+                                            />
+                                            🏅 Expert Judge
+                                        </label>
+                                    </div>
+                                </div>
+                            )}
 
- <div className="flex items-center gap-2">
- <Button
- onClick={handleSaveDetails}
- disabled={isSaving || !eventData.name.trim()}
- >
- {isSaving ?"Saving…" : <><Save className="h-4 w-4" /> Save Details</>}
- </Button>
- {detailsSaved && <span className="text-sm text-success">✅ Saved!</span>}
- </div>
- </div>
- </div>
- )}
+                            <div className="flex items-center gap-2">
+                                <Button onClick={handleSaveDetails} disabled={isSaving || !eventData.name.trim()}>
+                                    {isSaving ? (
+                                        "Saving…"
+                                    ) : (
+                                        <>
+                                            <Save className="h-4 w-4" /> Save Details
+                                        </>
+                                    )}
+                                </Button>
+                                {detailsSaved && <span className="text-sm text-success">✅ Saved!</span>}
+                            </div>
+                        </div>
+                    </div>
+                )}
 
- {/* ═══════════════════════════════════════ */}
- {/* TAB: Class List (existing content) */}
- {/* ═══════════════════════════════════════ */}
- {activeTab ==="classes" && isLegacyShow && (
- <>
- {/* Division Tree */}
- <div className="flex flex-col gap-4">
- {divisions.map((div, divIndex) => (
- <div
- key={div.id}
- className="bg-card border-input overflow-hidden rounded-lg border shadow-md transition-all"
- >
- {/* Division Header */}
- <div className="bg-muted border-input flex flex-wrap items-center gap-2 border-b px-6 py-4">
- <div className="division-reorder max-sm:hidden">
- <button
- className="border-input text-muted-foreground hover:border-success hover:text-forest flex h-[18px] w-[24px] cursor-pointer items-center justify-center rounded-sm border bg-transparent p-0 font-sans text-[0.6rem] transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-[0.3]"
- onClick={() => handleMoveDivision(divIndex, -1)}
- disabled={divIndex === 0}
- title="Move up"
- >
- <ChevronUp className="h-3 w-3" />
- </button>
- <button
- className="border-input text-muted-foreground hover:border-success hover:text-forest flex h-[18px] w-[24px] cursor-pointer items-center justify-center rounded-sm border bg-transparent p-0 font-sans text-[0.6rem] transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-[0.3]"
- onClick={() => handleMoveDivision(divIndex, 1)}
- disabled={divIndex === divisions.length - 1}
- title="Move down"
- >
- <ChevronDown className="h-3 w-3" />
- </button>
- </div>
+                {/* ═══════════════════════════════════════ */}
+                {/* TAB: Class List (existing content) */}
+                {/* ═══════════════════════════════════════ */}
+                {activeTab === "classes" && isLegacyShow && (
+                    <>
+                        {/* Division Tree */}
+                        <div className="flex flex-col gap-4">
+                            {divisions.map((div, divIndex) => (
+                                <div
+                                    key={div.id}
+                                    className="overflow-hidden rounded-lg border border-input bg-card shadow-md transition-all"
+                                >
+                                    {/* Division Header */}
+                                    <div className="flex flex-wrap items-center gap-2 border-b border-input bg-muted px-6 py-4">
+                                        <div className="division-reorder max-sm:hidden">
+                                            <button
+                                                className="flex h-[18px] w-[24px] cursor-pointer items-center justify-center rounded-sm border border-input bg-transparent p-0 font-sans text-[0.6rem] text-muted-foreground transition-all duration-150 hover:border-success hover:text-forest disabled:cursor-not-allowed disabled:opacity-[0.3]"
+                                                onClick={() => handleMoveDivision(divIndex, -1)}
+                                                disabled={divIndex === 0}
+                                                title="Move up"
+                                            >
+                                                <ChevronUp className="h-3 w-3" />
+                                            </button>
+                                            <button
+                                                className="flex h-[18px] w-[24px] cursor-pointer items-center justify-center rounded-sm border border-input bg-transparent p-0 font-sans text-[0.6rem] text-muted-foreground transition-all duration-150 hover:border-success hover:text-forest disabled:cursor-not-allowed disabled:opacity-[0.3]"
+                                                onClick={() => handleMoveDivision(divIndex, 1)}
+                                                disabled={divIndex === divisions.length - 1}
+                                                title="Move down"
+                                            >
+                                                <ChevronDown className="h-3 w-3" />
+                                            </button>
+                                        </div>
 
- {editingDivision === div.id ? (
- <div className="flex flex-1 items-center gap-1">
- <Input
- 
- value={editName}
- onChange={(e) => setEditName(e.target.value)}
- onKeyDown={(e) => e.key ==="Enter" && handleSaveDivision(div.id)}
- autoFocus
- placeholder="Division name"
- />
- <Button
- onClick={() => handleSaveDivision(div.id)}
- disabled={isSaving}
- >
- Save
- </Button>
- <Button variant="outline" size="wide"
- onClick={() => setEditingDivision(null)}
- >
- Cancel
- </Button>
- </div>
- ) : (
- <>
- <span className="text-foreground text-base font-bold">
- 📋 {div.name}
- </span>
- <span className="text-muted-foreground ml-1 text-xs">
- {div.classes.length} class{div.classes.length !== 1 ?"es" :""}
- </span>
- <div className="ml-auto flex items-center gap-1">
- <button
- className="cursor-pointer rounded-sm border-0 bg-transparent p-[4px] text-[0.9rem] transition-colors"
- onClick={() => {
- setEditingDivision(div.id);
- setEditName(div.name);
- }}
- title="Edit"
- >
- <Pencil className="h-3.5 w-3.5" />
- </button>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-destructive/30 bg-transparent px-6 py-2 text-sm font-semibold text-destructive no-underline transition-all hover:bg-destructive/10"
- onClick={() => handleDeleteDivision(div.id, div.name)}
- title="Delete"
- >
- <Trash2 className="h-4 w-4" />
- </button>
- <Button variant="outline" size="wide"
- onClick={() => {
- setAddingClassToDivision(div.id);
- setNewClassName("");
- setNewClassNumber("");
- }}
- >
- + Class
- </Button>
- </div>
- </>
- )}
- </div>
+                                        {editingDivision === div.id ? (
+                                            <div className="flex flex-1 items-center gap-1">
+                                                <Input
+                                                    value={editName}
+                                                    onChange={(e) => setEditName(e.target.value)}
+                                                    onKeyDown={(e) => e.key === "Enter" && handleSaveDivision(div.id)}
+                                                    autoFocus
+                                                    placeholder="Division name"
+                                                />
+                                                <Button onClick={() => handleSaveDivision(div.id)} disabled={isSaving}>
+                                                    Save
+                                                </Button>
+                                                <Button
+                                                    variant="outline"
+                                                    size="wide"
+                                                    onClick={() => setEditingDivision(null)}
+                                                >
+                                                    Cancel
+                                                </Button>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <span className="text-base font-bold text-foreground">
+                                                    📋 {div.name}
+                                                </span>
+                                                <span className="ml-1 text-xs text-muted-foreground">
+                                                    {div.classes.length} class{div.classes.length !== 1 ? "es" : ""}
+                                                </span>
+                                                <div className="ml-auto flex items-center gap-1">
+                                                    <button
+                                                        className="cursor-pointer rounded-sm border-0 bg-transparent p-[4px] text-[0.9rem] transition-colors"
+                                                        onClick={() => {
+                                                            setEditingDivision(div.id);
+                                                            setEditName(div.name);
+                                                        }}
+                                                        title="Edit"
+                                                    >
+                                                        <Pencil className="h-3.5 w-3.5" />
+                                                    </button>
+                                                    <button
+                                                        className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-destructive/30 bg-transparent px-6 py-2 text-sm font-semibold text-destructive no-underline transition-all hover:bg-destructive/10"
+                                                        onClick={() => handleDeleteDivision(div.id, div.name)}
+                                                        title="Delete"
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </button>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="wide"
+                                                        onClick={() => {
+                                                            setAddingClassToDivision(div.id);
+                                                            setNewClassName("");
+                                                            setNewClassNumber("");
+                                                        }}
+                                                    >
+                                                        + Class
+                                                    </Button>
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
 
- {/* Classes */}
- <div className="px-0 py-1">
- {div.classes.map((cls, clsIndex) => (
- <div key={cls.id} className="group flex flex-wrap items-center gap-2 border-b-0 py-1">
- <div className="flex flex-col gap-[2px]">
- <button
- className="border-input text-muted-foreground hover:border-success hover:text-forest flex h-[18px] w-[24px] cursor-pointer items-center justify-center rounded-sm border bg-transparent p-0 font-sans text-[0.6rem] transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-[0.3]"
- onClick={() => handleMoveClass(div.id, clsIndex, -1)}
- disabled={clsIndex === 0}
- >
- <ChevronUp className="h-3 w-3" />
- </button>
- <button
- className="border-input text-muted-foreground hover:border-success hover:text-forest flex h-[18px] w-[24px] cursor-pointer items-center justify-center rounded-sm border bg-transparent p-0 font-sans text-[0.6rem] transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-[0.3]"
- onClick={() => handleMoveClass(div.id, clsIndex, 1)}
- disabled={clsIndex === div.classes.length - 1}
- >
- <ChevronDown className="h-3 w-3" />
- </button>
- </div>
+                                    {/* Classes */}
+                                    <div className="px-0 py-1">
+                                        {div.classes.map((cls, clsIndex) => (
+                                            <div
+                                                key={cls.id}
+                                                className="group flex flex-wrap items-center gap-2 border-b-0 py-1"
+                                            >
+                                                <div className="flex flex-col gap-[2px]">
+                                                    <button
+                                                        className="flex h-[18px] w-[24px] cursor-pointer items-center justify-center rounded-sm border border-input bg-transparent p-0 font-sans text-[0.6rem] text-muted-foreground transition-all duration-150 hover:border-success hover:text-forest disabled:cursor-not-allowed disabled:opacity-[0.3]"
+                                                        onClick={() => handleMoveClass(div.id, clsIndex, -1)}
+                                                        disabled={clsIndex === 0}
+                                                    >
+                                                        <ChevronUp className="h-3 w-3" />
+                                                    </button>
+                                                    <button
+                                                        className="flex h-[18px] w-[24px] cursor-pointer items-center justify-center rounded-sm border border-input bg-transparent p-0 font-sans text-[0.6rem] text-muted-foreground transition-all duration-150 hover:border-success hover:text-forest disabled:cursor-not-allowed disabled:opacity-[0.3]"
+                                                        onClick={() => handleMoveClass(div.id, clsIndex, 1)}
+                                                        disabled={clsIndex === div.classes.length - 1}
+                                                    >
+                                                        <ChevronDown className="h-3 w-3" />
+                                                    </button>
+                                                </div>
 
- {editingClass === cls.id ? (
- <div className="flex flex-1 items-center gap-1">
- <Input
- className="w-[60px]"
- value={editClassNumber}
- onChange={(e) => setEditClassNumber(e.target.value)}
- placeholder="#"
- />
- <Input
- 
- value={editName}
- onChange={(e) => setEditName(e.target.value)}
- onKeyDown={(e) =>
- e.key ==="Enter" && handleSaveClass(cls.id)
- }
- autoFocus
- placeholder="Class name"
- />
- <Button
- onClick={() => handleSaveClass(cls.id)}
- disabled={isSaving}
- >
- Save
- </Button>
- <Button variant="outline" size="wide"
- onClick={() => setEditingClass(null)}
- >
- Cancel
- </Button>
- </div>
- ) : (
- <>
- <span className="text-muted-foreground min-w-[40px] font-mono text-xs font-semibold">
- {cls.classNumber ||"—"}
- </span>
- <span className="flex-1 text-[var(--secondary-foreground)]">
- {cls.name}
- </span>
- {cls.isNanQualifying && (
- <span
- className="bg-warning/15 inline-flex items-center gap-[2px] rounded-full px-[6px] py-[1px] text-xs font-semibold whitespace-nowrap text-warning"
- title="NAN Qualifying"
- >
- <Star className="h-3 w-3 fill-current" /> NAN
- </span>
- )}
- {(cls.entryCount || 0) > 0 && (
- <span className="text-forest inline-flex items-center rounded-full bg-[var(--color-forest-glow)] px-[6px] py-[1px] text-xs font-semibold whitespace-nowrap">
- {cls.entryCount} entr
- {cls.entryCount === 1 ?"y" :"ies"}
- </span>
- )}
- <div className="flex gap-[2px] opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100 sm:focus-within:opacity-100">
- <button
- className="cursor-pointer rounded-sm border-0 bg-transparent p-[4px] text-[0.9rem] transition-colors"
- onClick={() =>
- handleToggleNan(cls.id, cls.isNanQualifying)
- }
- title={cls.isNanQualifying ?"Remove NAN" :"Mark NAN"}
- >
- {cls.isNanQualifying ? <Star className="h-3.5 w-3.5 fill-current" /> : <Star className="h-3.5 w-3.5" />}
- </button>
- <button
- className="cursor-pointer rounded-sm border-0 bg-transparent p-[4px] text-[0.9rem] transition-colors"
- onClick={() => {
- setEditingClass(cls.id);
- setEditName(cls.name);
- setEditClassNumber(cls.classNumber ||"");
- }}
- title="Edit"
- >
- <Pencil className="h-3.5 w-3.5" />
- </button>
- <button
- className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-destructive/30 bg-transparent px-6 py-2 text-sm font-semibold text-destructive no-underline transition-all hover:bg-destructive/10"
- onClick={() => handleDeleteClass(cls.id, cls.name)}
- title="Delete"
- >
- <Trash2 className="h-4 w-4" />
- </button>
- </div>
- </>
- )}
- </div>
- ))}
+                                                {editingClass === cls.id ? (
+                                                    <div className="flex flex-1 items-center gap-1">
+                                                        <Input
+                                                            className="w-[60px]"
+                                                            value={editClassNumber}
+                                                            onChange={(e) => setEditClassNumber(e.target.value)}
+                                                            placeholder="#"
+                                                        />
+                                                        <Input
+                                                            value={editName}
+                                                            onChange={(e) => setEditName(e.target.value)}
+                                                            onKeyDown={(e) =>
+                                                                e.key === "Enter" && handleSaveClass(cls.id)
+                                                            }
+                                                            autoFocus
+                                                            placeholder="Class name"
+                                                        />
+                                                        <Button
+                                                            onClick={() => handleSaveClass(cls.id)}
+                                                            disabled={isSaving}
+                                                        >
+                                                            Save
+                                                        </Button>
+                                                        <Button
+                                                            variant="outline"
+                                                            size="wide"
+                                                            onClick={() => setEditingClass(null)}
+                                                        >
+                                                            Cancel
+                                                        </Button>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <span className="min-w-[40px] font-mono text-xs font-semibold text-muted-foreground">
+                                                            {cls.classNumber || "—"}
+                                                        </span>
+                                                        <span className="flex-1 text-[var(--secondary-foreground)]">
+                                                            {cls.name}
+                                                        </span>
+                                                        {cls.isNanQualifying && (
+                                                            <span
+                                                                className="inline-flex items-center gap-[2px] rounded-full bg-warning/15 px-[6px] py-[1px] text-xs font-semibold whitespace-nowrap text-warning"
+                                                                title="NAN Qualifying"
+                                                            >
+                                                                <Star className="h-3 w-3 fill-current" /> NAN
+                                                            </span>
+                                                        )}
+                                                        {(cls.entryCount || 0) > 0 && (
+                                                            <span className="inline-flex items-center rounded-full bg-[var(--color-forest-glow)] px-[6px] py-[1px] text-xs font-semibold whitespace-nowrap text-forest">
+                                                                {cls.entryCount} entr
+                                                                {cls.entryCount === 1 ? "y" : "ies"}
+                                                            </span>
+                                                        )}
+                                                        <div className="flex gap-[2px] opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100 sm:focus-within:opacity-100">
+                                                            <button
+                                                                className="cursor-pointer rounded-sm border-0 bg-transparent p-[4px] text-[0.9rem] transition-colors"
+                                                                onClick={() =>
+                                                                    handleToggleNan(cls.id, cls.isNanQualifying)
+                                                                }
+                                                                title={cls.isNanQualifying ? "Remove NAN" : "Mark NAN"}
+                                                            >
+                                                                {cls.isNanQualifying ? (
+                                                                    <Star className="h-3.5 w-3.5 fill-current" />
+                                                                ) : (
+                                                                    <Star className="h-3.5 w-3.5" />
+                                                                )}
+                                                            </button>
+                                                            <button
+                                                                className="cursor-pointer rounded-sm border-0 bg-transparent p-[4px] text-[0.9rem] transition-colors"
+                                                                onClick={() => {
+                                                                    setEditingClass(cls.id);
+                                                                    setEditName(cls.name);
+                                                                    setEditClassNumber(cls.classNumber || "");
+                                                                }}
+                                                                title="Edit"
+                                                            >
+                                                                <Pencil className="h-3.5 w-3.5" />
+                                                            </button>
+                                                            <button
+                                                                className="inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-2 rounded-md border border-destructive/30 bg-transparent px-6 py-2 text-sm font-semibold text-destructive no-underline transition-all hover:bg-destructive/10"
+                                                                onClick={() => handleDeleteClass(cls.id, cls.name)}
+                                                                title="Delete"
+                                                            >
+                                                                <Trash2 className="h-4 w-4" />
+                                                            </button>
+                                                        </div>
+                                                    </>
+                                                )}
+                                            </div>
+                                        ))}
 
- {/* Add class inline form */}
- {addingClassToDivision === div.id && (
- <div className="bg-muted animate-fade-in-up border-b-0">
- <Input
- className="w-[60px]"
- value={newClassNumber}
- onChange={(e) => setNewClassNumber(e.target.value)}
- placeholder="#"
- />
- <Input
- className="flex-1"
- value={newClassName}
- onChange={(e) => setNewClassName(e.target.value)}
- onKeyDown={(e) => e.key ==="Enter" && handleAddClass(div.id)}
- autoFocus
- placeholder="Class name (e.g. Arabian/Part-Arabian)"
- />
- <Button
- onClick={() => handleAddClass(div.id)}
- disabled={isSaving || !newClassName.trim()}
- >
- Add
- </Button>
- <Button variant="outline" size="wide"
- onClick={() => setAddingClassToDivision(null)}
- >
- Cancel
- </Button>
- </div>
- )}
+                                        {/* Add class inline form */}
+                                        {addingClassToDivision === div.id && (
+                                            <div className="animate-fade-in-up border-b-0 bg-muted">
+                                                <Input
+                                                    className="w-[60px]"
+                                                    value={newClassNumber}
+                                                    onChange={(e) => setNewClassNumber(e.target.value)}
+                                                    placeholder="#"
+                                                />
+                                                <Input
+                                                    className="flex-1"
+                                                    value={newClassName}
+                                                    onChange={(e) => setNewClassName(e.target.value)}
+                                                    onKeyDown={(e) => e.key === "Enter" && handleAddClass(div.id)}
+                                                    autoFocus
+                                                    placeholder="Class name (e.g. Arabian/Part-Arabian)"
+                                                />
+                                                <Button
+                                                    onClick={() => handleAddClass(div.id)}
+                                                    disabled={isSaving || !newClassName.trim()}
+                                                >
+                                                    Add
+                                                </Button>
+                                                <Button
+                                                    variant="outline"
+                                                    size="wide"
+                                                    onClick={() => setAddingClassToDivision(null)}
+                                                >
+                                                    Cancel
+                                                </Button>
+                                            </div>
+                                        )}
 
- {div.classes.length === 0 && addingClassToDivision !== div.id && (
- <div className="text-muted-foreground italic border-b-0">
- No classes yet — click &quot;+ Class&quot; to add one
- </div>
- )}
- </div>
- </div>
- ))}
- </div>
+                                        {div.classes.length === 0 && addingClassToDivision !== div.id && (
+                                            <div className="border-b-0 text-muted-foreground italic">
+                                                No classes yet — click &quot;+ Class&quot; to add one
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
 
- {/* Add Division */}
- <div className="bg-card border-input mt-6 rounded-lg border p-6 shadow-md transition-all">
- <div className="flex items-center gap-2">
- <Input
- className="flex-1"
- value={newDivisionName}
- onChange={(e) => setNewDivisionName(e.target.value)}
- onKeyDown={(e) => e.key ==="Enter" && handleAddDivision()}
- placeholder="New division name (e.g. OF Plastic Halter)"
- />
- <Button
- onClick={handleAddDivision}
- disabled={isSaving || !newDivisionName.trim()}
- >
- + Add Division
- </Button>
- </div>
- </div>
+                        {/* Add Division */}
+                        <div className="mt-6 rounded-lg border border-input bg-card p-6 shadow-md transition-all">
+                            <div className="flex items-center gap-2">
+                                <Input
+                                    className="flex-1"
+                                    value={newDivisionName}
+                                    onChange={(e) => setNewDivisionName(e.target.value)}
+                                    onKeyDown={(e) => e.key === "Enter" && handleAddDivision()}
+                                    placeholder="New division name (e.g. OF Plastic Halter)"
+                                />
+                                <Button onClick={handleAddDivision} disabled={isSaving || !newDivisionName.trim()}>
+                                    + Add Division
+                                </Button>
+                            </div>
+                        </div>
 
- {/* Quick Actions */}
- <div className="mt-6 flex flex-wrap gap-2">
- <Button variant="outline" size="wide"
- onClick={loadUserEvents}
- disabled={isSaving}
- >
- 📋 Copy From Another Event…
- </Button>
- </div>
- </>
- )}
+                        {/* Quick Actions */}
+                        <div className="mt-6 flex flex-wrap gap-2">
+                            <Button variant="outline" size="wide" onClick={loadUserEvents} disabled={isSaving}>
+                                📋 Copy From Another Event…
+                            </Button>
+                        </div>
+                    </>
+                )}
 
- {/* ═══════════════════════════════════════ */}
- {/* TAB: Judges */}
- {/* ═══════════════════════════════════════ */}
- {activeTab ==="judges" && isLegacyShow && (
- <div className="bg-card border-input rounded-lg border p-8 shadow-md transition-all">
- <h3 className="mb-4">
- 🧑‍⚖️ <span className="text-forest">Assigned Judges</span>
- </h3>
- <p className="text-secondary-foreground mb-6 text-sm">
- Add users by their alias to grant them access to the Expert Judging Panel. They&apos;ll be
- able to assign placings during the &quot;Judging&quot; phase.
- </p>
+                {/* ═══════════════════════════════════════ */}
+                {/* TAB: Judges */}
+                {/* ═══════════════════════════════════════ */}
+                {activeTab === "judges" && isLegacyShow && (
+                    <div className="rounded-lg border border-input bg-card p-8 shadow-md transition-all">
+                        <h3 className="mb-4">
+                            🧑‍⚖️ <span className="text-forest">Assigned Judges</span>
+                        </h3>
+                        <p className="mb-6 text-sm text-secondary-foreground">
+                            Add users by their alias to grant them access to the Expert Judging Panel. They&apos;ll be
+                            able to assign placings during the &quot;Judging&quot; phase.
+                        </p>
 
- {/* Add Judge Form */}
- <div className="relative mb-6">
- <div className="gap-2" style={{ display:"flex", alignItems:"center" }}>
- <div className="relative max-w-[300] flex-1">
- <Input
- 
- value={newJudgeAlias}
- onChange={(e) => {
- setNewJudgeAlias(e.target.value);
- setJudgeError("");
- }}
- onKeyDown={(e) => e.key ==="Enter" && handleAddJudge()}
- placeholder="Search by user alias…"
- autoComplete="off"
- />
- {/* Autocomplete dropdown */}
- {userSuggestions.length > 0 && newJudgeAlias.trim().length >= 2 && (
- <div
- className="absolute top-full left-0 right-0 z-50 mt-1 max-h-[240px] overflow-auto rounded-md border border-input bg-card shadow-lg"
- >
- {userSuggestions.map((u) => (
- <button
- key={u.id}
- type="button"
- onClick={() => {
- setNewJudgeAlias(u.aliasName);
- setUserSuggestions([]);
- }}
- className="flex w-full cursor-pointer items-center gap-[var(--space-sm)] border-0 border-b border-input bg-transparent px-[var(--space-md)] py-[var(--space-sm)] text-left text-sm text-foreground hover:bg-muted"
- >
- <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--color-forest-glow)] text-xs">
- {u.avatarUrl ? (
- // eslint-disable-next-line @next/next/no-img-element
- <img
- src={u.avatarUrl}
- alt={u.aliasName}
- className="h-full w-full object-cover"
- />
- ) : (
-"👤"
- )}
- </div>
- <span>@{u.aliasName}</span>
- </button>
- ))}
- </div>
- )}
- {isSearching && (
- <div
- className="text-muted-foreground absolute top-1/2 right-2 -translate-y-1/2 text-xs"
- >
- Searching…
- </div>
- )}
- </div>
- <Button
- onClick={handleAddJudge}
- disabled={!newJudgeAlias.trim()}
- >
- + Add Judge
- </Button>
- </div>
- <p className="text-muted-foreground mt-[4] text-xs">
- Type 2+ characters to search. Click a result to select, then &ldquo;Add Judge&rdquo;.
- </p>
- </div>
+                        {/* Add Judge Form */}
+                        <div className="relative mb-6">
+                            <div className="gap-2" style={{ display: "flex", alignItems: "center" }}>
+                                <div className="relative max-w-[300] flex-1">
+                                    <Input
+                                        value={newJudgeAlias}
+                                        onChange={(e) => {
+                                            setNewJudgeAlias(e.target.value);
+                                            setJudgeError("");
+                                        }}
+                                        onKeyDown={(e) => e.key === "Enter" && handleAddJudge()}
+                                        placeholder="Search by user alias…"
+                                        autoComplete="off"
+                                    />
+                                    {/* Autocomplete dropdown */}
+                                    {userSuggestions.length > 0 && newJudgeAlias.trim().length >= 2 && (
+                                        <div className="absolute top-full right-0 left-0 z-50 mt-1 max-h-[240px] overflow-auto rounded-md border border-input bg-card shadow-lg">
+                                            {userSuggestions.map((u) => (
+                                                <button
+                                                    key={u.id}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setNewJudgeAlias(u.aliasName);
+                                                        setUserSuggestions([]);
+                                                    }}
+                                                    className="flex w-full cursor-pointer items-center gap-[var(--space-sm)] border-0 border-b border-input bg-transparent px-[var(--space-md)] py-[var(--space-sm)] text-left text-sm text-foreground hover:bg-muted"
+                                                >
+                                                    <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--color-forest-glow)] text-xs">
+                                                        {u.avatarUrl ? (
+                                                            // eslint-disable-next-line @next/next/no-img-element
+                                                            <img
+                                                                src={u.avatarUrl}
+                                                                alt={u.aliasName}
+                                                                className="h-full w-full object-cover"
+                                                            />
+                                                        ) : (
+                                                            "👤"
+                                                        )}
+                                                    </div>
+                                                    <span>@{u.aliasName}</span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                    {isSearching && (
+                                        <div className="absolute top-1/2 right-2 -translate-y-1/2 text-xs text-muted-foreground">
+                                            Searching…
+                                        </div>
+                                    )}
+                                </div>
+                                <Button onClick={handleAddJudge} disabled={!newJudgeAlias.trim()}>
+                                    + Add Judge
+                                </Button>
+                            </div>
+                            <p className="mt-[4] text-xs text-muted-foreground">
+                                Type 2+ characters to search. Click a result to select, then &ldquo;Add Judge&rdquo;.
+                            </p>
+                        </div>
 
- {judgeError && <div className="mt-2 text-sm text-destructive mb-4">{judgeError}</div>}
- {judgeSuccess && <div className="mb-4 text-sm text-success">✅ {judgeSuccess}</div>}
+                        {judgeError && <div className="mt-2 mb-4 text-sm text-destructive">{judgeError}</div>}
+                        {judgeSuccess && <div className="mb-4 text-sm text-success">✅ {judgeSuccess}</div>}
 
- {coiWarnings.length > 0 && (
- <div className="mb-4 rounded-lg border border-warning/30 bg-warning/10 p-4 text-sm text-warning">
- <strong>⚠️ Potential Conflict of Interest:</strong>
- <ul className="mt-1 mb-0 list-disc pl-5">
- {coiWarnings.map((c, i) => <li key={i}>{c}</li>)}
- </ul>
- <p className="mt-2 mb-0 text-xs text-warning">
- This is a warning only — the host can still proceed. Helping maintain show fairness per NAMHSA guidelines.
- </p>
- </div>
- )}
+                        {coiWarnings.length > 0 && (
+                            <div className="mb-4 rounded-lg border border-warning/30 bg-warning/10 p-4 text-sm text-warning">
+                                <strong>⚠️ Potential Conflict of Interest:</strong>
+                                <ul className="mt-1 mb-0 list-disc pl-5">
+                                    {coiWarnings.map((c, i) => (
+                                        <li key={i}>{c}</li>
+                                    ))}
+                                </ul>
+                                <p className="mt-2 mb-0 text-xs text-warning">
+                                    This is a warning only — the host can still proceed. Helping maintain show fairness
+                                    per NAMHSA guidelines.
+                                </p>
+                            </div>
+                        )}
 
- {/* Judge List */}
- {judges.length === 0 ? (
- <div className="p-8 text-center text-muted-foreground">
- No judges assigned yet. Add judges by their user alias above.
- </div>
- ) : (
- <div className="flex flex-col gap-2">
- {judges.map((judge) => (
- <div
- key={judge.id}
- className="flex items-center gap-[var(--space-md)] rounded-sm bg-muted px-[var(--space-md)] py-[var(--space-sm)]"
- >
- <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--color-forest-glow)] text-base">
- {judge.avatarUrl ? (
- // eslint-disable-next-line @next/next/no-img-element
- <img
- src={judge.avatarUrl}
- alt={judge.aliasName}
- className="h-full w-full object-cover"
- />
- ) : (
-"🧑‍⚖️"
- )}
- </div>
- <div className="flex-1">
- <div className="text-sm font-semibold">@{judge.aliasName}</div>
- </div>
- <Button variant="destructive-outline" size="wide" className="text-xs"
- onClick={() => handleRemoveJudge(judge.id)}
- >
- Remove
- </Button>
- </div>
- ))}
- </div>
- )}
- </div>
- )}
+                        {/* Judge List */}
+                        {judges.length === 0 ? (
+                            <div className="p-8 text-center text-muted-foreground">
+                                No judges assigned yet. Add judges by their user alias above.
+                            </div>
+                        ) : (
+                            <div className="flex flex-col gap-2">
+                                {judges.map((judge) => (
+                                    <div
+                                        key={judge.id}
+                                        className="flex items-center gap-[var(--space-md)] rounded-sm bg-muted px-[var(--space-md)] py-[var(--space-sm)]"
+                                    >
+                                        <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--color-forest-glow)] text-base">
+                                            {judge.avatarUrl ? (
+                                                // eslint-disable-next-line @next/next/no-img-element
+                                                <img
+                                                    src={judge.avatarUrl}
+                                                    alt={judge.aliasName}
+                                                    className="h-full w-full object-cover"
+                                                />
+                                            ) : (
+                                                "🧑‍⚖️"
+                                            )}
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="text-sm font-semibold">@{judge.aliasName}</div>
+                                        </div>
+                                        <Button
+                                            variant="destructive-outline"
+                                            size="wide"
+                                            className="text-xs"
+                                            onClick={() => handleRemoveJudge(judge.id)}
+                                        >
+                                            Remove
+                                        </Button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
 
- <Dialog open={showCopyModal} onOpenChange={setShowCopyModal}>
- <DialogContent className="sm:max-w-md">
- <DialogHeader>
- <DialogTitle>📋 Copy Division Tree From…</DialogTitle>
- <DialogDescription>
- This will copy all divisions and classes from the selected event. Existing divisions
- in this event will NOT be removed.
- </DialogDescription>
- </DialogHeader>
- {userEvents.length === 0 ? (
- <p className="text-muted-foreground">No other events found.</p>
- ) : (
- <>
- <select
- className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 mb-4"
- value={selectedSourceEvent}
- onChange={(e) => setSelectedSourceEvent(e.target.value)}
- title="Source event"
- >
- <option value="">Select an event…</option>
- {userEvents.map((ev) => (
- <option key={ev.id} value={ev.id}>
- {ev.name}
- </option>
- ))}
- </select>
- <div className="flex justify-end gap-2">
- <Button variant="outline" size="wide"
- onClick={() => setShowCopyModal(false)}
- >
- Cancel
- </Button>
- <Button
- onClick={handleCopy}
- disabled={!selectedSourceEvent}
- >
- Copy Classes
- </Button>
- </div>
- </>
- )}
- </DialogContent>
- </Dialog>
- </div>
- </ExplorerLayout>
- );
+                <Dialog open={showCopyModal} onOpenChange={setShowCopyModal}>
+                    <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                            <DialogTitle>📋 Copy Division Tree From…</DialogTitle>
+                            <DialogDescription>
+                                This will copy all divisions and classes from the selected event. Existing divisions in
+                                this event will NOT be removed.
+                            </DialogDescription>
+                        </DialogHeader>
+                        {userEvents.length === 0 ? (
+                            <p className="text-muted-foreground">No other events found.</p>
+                        ) : (
+                            <>
+                                <select
+                                    className="mb-4 flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
+                                    value={selectedSourceEvent}
+                                    onChange={(e) => setSelectedSourceEvent(e.target.value)}
+                                    title="Source event"
+                                >
+                                    <option value="">Select an event…</option>
+                                    {userEvents.map((ev) => (
+                                        <option key={ev.id} value={ev.id}>
+                                            {ev.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                <div className="flex justify-end gap-2">
+                                    <Button variant="outline" size="wide" onClick={() => setShowCopyModal(false)}>
+                                        Cancel
+                                    </Button>
+                                    <Button onClick={handleCopy} disabled={!selectedSourceEvent}>
+                                        Copy Classes
+                                    </Button>
+                                </div>
+                            </>
+                        )}
+                    </DialogContent>
+                </Dialog>
+            </div>
+        </ExplorerLayout>
+    );
 }

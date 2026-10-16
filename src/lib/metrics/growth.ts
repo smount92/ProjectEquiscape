@@ -24,7 +24,11 @@ export function dayLabels(days: number, now: Date = new Date()): string[] {
 }
 
 /** Count of stamps per day across the window; days with nothing are 0. */
-export function bucketByDay(stamps: readonly (string | null | undefined)[], days: number, now: Date = new Date()): number[] {
+export function bucketByDay(
+    stamps: readonly (string | null | undefined)[],
+    days: number,
+    now: Date = new Date(),
+): number[] {
     const labels = dayLabels(days, now);
     const index = new Map(labels.map((d, i) => [d, i]));
     const counts = new Array<number>(labels.length).fill(0);
@@ -37,7 +41,11 @@ export function bucketByDay(stamps: readonly (string | null | undefined)[], days
 }
 
 /** Stamps that fall in the window of the same length immediately before this one. */
-export function countPriorWindow(stamps: readonly (string | null | undefined)[], days: number, now: Date = new Date()): number {
+export function countPriorWindow(
+    stamps: readonly (string | null | undefined)[],
+    days: number,
+    now: Date = new Date(),
+): number {
     const end = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) - (days - 1) * 86_400_000;
     const start = end - days * 86_400_000;
     let n = 0;

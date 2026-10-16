@@ -21,25 +21,9 @@
  * quotation. The one editorial act is ordering.
  */
 
-import {
-    boxLines,
-    formatMoney,
-    formatStamp,
-    isFullyAgreed,
-    boxTitle,
-    type DealTerms,
-} from "./terms";
-import {
-    installmentState,
-    installmentStateLabel,
-    ledgerSummary,
-    type Installment,
-} from "./ledger";
-import {
-    describeEvent,
-    isEventKind,
-    type MessageKind,
-} from "./transcript";
+import { boxLines, formatMoney, formatStamp, isFullyAgreed, boxTitle, type DealTerms } from "./terms";
+import { installmentState, installmentStateLabel, ledgerSummary, type Installment } from "./ledger";
+import { describeEvent, isEventKind, type MessageKind } from "./transcript";
 import { dealNoun, roleLabel, stageLabel, type DealKind, type DealStage } from "./vocabulary";
 
 // ── Inputs ────────────────────────────────────────────────────────────
@@ -224,9 +208,7 @@ export function buildEvidencePack(input: EvidenceInput): EvidencePack {
                     row.dueDate ? formatStamp(row.dueDate) : "—",
                     row.markedSentAt ? formatStamp(row.markedSentAt) : "—",
                     row.confirmedAt ? formatStamp(row.confirmedAt) : "—",
-                    installmentStateLabel(
-                        installmentState(row, new Date(input.generatedAt)),
-                    ),
+                    installmentStateLabel(installmentState(row, new Date(input.generatedAt))),
                 ]),
             },
             rows: [
@@ -272,9 +254,7 @@ export function buildEvidencePack(input: EvidenceInput): EvidencePack {
             note: "Structured entries written by the platform as each action was taken.",
             lines: events.map((m) => {
                 const d = describeEvent(m.kind, m.payload, { actorName: nameFor(m.senderId) }, m.content);
-                const detail = d.lines
-                    .map((l) => (l.label ? `${l.label}: ${l.value}` : l.value))
-                    .join("; ");
+                const detail = d.lines.map((l) => (l.label ? `${l.label}: ${l.value}` : l.value)).join("; ");
                 return `${formatStamp(m.createdAt)} — ${d.headline}${detail ? ` (${detail})` : ""}`;
             }),
         });
@@ -322,9 +302,7 @@ function partyLine(p: EvidenceParty): string {
         );
     }
     if (typeof p.completedTransfers === "number") {
-        bits.push(
-            `${p.completedTransfers} completed transfer${p.completedTransfers === 1 ? "" : "s"} on record`,
-        );
+        bits.push(`${p.completedTransfers} completed transfer${p.completedTransfers === 1 ? "" : "s"} on record`);
     }
     return bits.join(" · ");
 }

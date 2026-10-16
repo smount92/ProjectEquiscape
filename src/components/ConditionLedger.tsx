@@ -26,15 +26,12 @@ export default function ConditionLedger({ entries }: { entries: ConditionLedgerE
 
             <ol className="m-0 flex list-none flex-col gap-0 p-0">
                 {entries.map((entry) => (
-                    <li
-                        key={entry.id}
-                        className="border-b border-dashed border-border-tan/20 py-3 last:border-0"
-                    >
+                    <li key={entry.id} className="border-b border-dashed border-border-tan/20 py-3 last:border-0">
                         <div className="flex flex-wrap items-center justify-between gap-2">
                             <span className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
                                 {entry.oldCondition ? (
                                     <>
-                                        <span className="text-secondary-foreground font-normal">
+                                        <span className="font-normal text-secondary-foreground">
                                             {entry.oldCondition}
                                         </span>
                                         <ArrowRight size={13} strokeWidth={1.75} aria-label="changed to" />
@@ -42,7 +39,7 @@ export default function ConditionLedger({ entries }: { entries: ConditionLedgerE
                                     </>
                                 ) : (
                                     <>
-                                        <span className="text-secondary-foreground font-normal">Graded</span>
+                                        <span className="font-normal text-secondary-foreground">Graded</span>
                                         <ArrowRight size={13} strokeWidth={1.75} aria-label="as" />
                                         <span>{entry.newCondition}</span>
                                     </>
@@ -51,7 +48,7 @@ export default function ConditionLedger({ entries }: { entries: ConditionLedgerE
                             {entry.changedAt && (
                                 <time
                                     dateTime={entry.changedAt}
-                                    className="text-secondary-foreground text-xs whitespace-nowrap"
+                                    className="text-xs whitespace-nowrap text-secondary-foreground"
                                 >
                                     {new Date(entry.changedAt).toLocaleDateString("en-US", {
                                         month: "short",
@@ -62,7 +59,7 @@ export default function ConditionLedger({ entries }: { entries: ConditionLedgerE
                             )}
                         </div>
                         {entry.note && (
-                            <p className="text-secondary-foreground m-0 mt-1 text-sm leading-[1.6] italic">
+                            <p className="m-0 mt-1 text-sm leading-[1.6] text-secondary-foreground italic">
                                 {entry.note}
                             </p>
                         )}
@@ -70,7 +67,7 @@ export default function ConditionLedger({ entries }: { entries: ConditionLedgerE
                 ))}
             </ol>
 
-            <p className="text-muted-foreground m-0 mt-3 text-xs">
+            <p className="m-0 mt-3 text-xs text-muted-foreground">
                 Logged automatically whenever you change this model&rsquo;s grade. Visible to you.
             </p>
         </div>

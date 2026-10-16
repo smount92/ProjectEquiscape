@@ -82,10 +82,7 @@ export function isPaypalCertUrl(rawUrl: string): boolean {
  * sent; a round-trip through JSON.parse/stringify can reorder keys or
  * reformat numbers and produce a false FAILURE on a genuine event.
  */
-export async function verifyWebhookSignature(
-    headers: SignatureHeaders,
-    rawBody: string,
-): Promise<boolean> {
+export async function verifyWebhookSignature(headers: SignatureHeaders, rawBody: string): Promise<boolean> {
     const webhookId = process.env.PAYPAL_WEBHOOK_ID;
     if (!webhookId) {
         logger.error("PayPalWebhook", "PAYPAL_WEBHOOK_ID is not set — refusing to verify");

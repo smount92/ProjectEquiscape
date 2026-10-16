@@ -94,11 +94,7 @@ export function qualifierChip(program: QualifierProgram, card: string | null, ye
 }
 
 /** The chip's hover text: colour, meaning, card ID, validity. */
-export function qualifierTitle(
-    program: QualifierProgram,
-    card: string | null,
-    cardId: string | null,
-): string {
+export function qualifierTitle(program: QualifierProgram, card: string | null, cardId: string | null): string {
     const info = programInfo(program);
     const c = cardInfo(program, card);
     return [c?.label ?? "Card", cardId ? `#${cardId}` : null, info.validity].filter(Boolean).join(" · ");

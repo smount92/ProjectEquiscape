@@ -48,10 +48,7 @@ async function safeRead(
 ): Promise<Row[]> {
     if (ids.length === 0) return [];
     try {
-        const { data, error } = await metricsDb(client)
-            .from(table)
-            .select(columns)
-            .in(column, ids);
+        const { data, error } = await metricsDb(client).from(table).select(columns).in(column, ids);
         if (error) {
             if (!isMissingMetricsSchema(error)) {
                 console.error(`[Insights] name lookup on ${table} failed:`, error.message);
@@ -64,8 +61,7 @@ async function safeRead(
     }
 }
 
-const str = (v: unknown): string | null =>
-    typeof v === "string" && v.length > 0 ? v : null;
+const str = (v: unknown): string | null => (typeof v === "string" && v.length > 0 ? v : null);
 
 /**
  * Resolve every id in one batch. Anything that cannot be resolved — a
@@ -92,28 +88,15 @@ export async function resolveEntityNames(
     const profileIds = byType.get("profile") ?? [];
 
     // One round of reads, all in flight together.
-    const [horses, showsV2, showsLegacy, barns, studios, references, profiles] =
-        await Promise.all([
-            safeRead(client, "user_horses", "id, custom_name", "id", [...new Set(horseIds)]),
-            safeRead(client, "shows", "id, title", "id", showIds),
-            safeRead(client, "events", "id, name", "id", showIds),
-            safeRead(client, "groups", "id, name, slug", "id", barnIds),
-            safeRead(
-                client,
-                "artist_profiles",
-                "user_id, studio_name, studio_slug",
-                "user_id",
-                studioIds,
-            ),
-            safeRead(
-                client,
-                "catalog_items",
-                "id, title, maker, maker_slug, slug",
-                "id",
-                referenceIds,
-            ),
-            safeRead(client, "users", "id, alias_name", "id", profileIds),
-        ]);
+    const [horses, showsV2, showsLegacy, barns, studios, references, profiles] = await Promise.all([
+        safeRead(client, "user_horses", "id, custom_name", "id", [...new Set(horseIds)]),
+        safeRead(client, "shows", "id, title", "id", showIds),
+        safeRead(client, "events", "id, name", "id", showIds),
+        safeRead(client, "groups", "id, name, slug", "id", barnIds),
+        safeRead(client, "artist_profiles", "user_id, studio_name, studio_slug", "user_id", studioIds),
+        safeRead(client, "catalog_items", "id, title, maker, maker_slug, slug", "id", referenceIds),
+        safeRead(client, "users", "id, alias_name", "id", profileIds),
+    ]);
 
     const map: EntityNameMap = {};
 

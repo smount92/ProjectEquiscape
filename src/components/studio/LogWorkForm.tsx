@@ -77,13 +77,13 @@ export default function LogWorkForm({
     const [summary, setSummary] = useState("");
     const [claimedStart, setClaimedStart] = useState("");
     const [dateCompleted, setDateCompleted] = useState("");
-    const [buckets, setBuckets] = useState<Bucket[]>(() =>
-        bucketsFromPreset(DISCIPLINE_PRESETS[0].stages),
-    );
+    const [buckets, setBuckets] = useState<Bucket[]>(() => bucketsFromPreset(DISCIPLINE_PRESETS[0].stages));
     const [busy, setBusy] = useState(false);
     const [progress, setProgress] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [doneHorse, setDoneHorse] = useState<{ id: string; name: string; failed: number; skipped: number } | null>(null);
+    const [doneHorse, setDoneHorse] = useState<{ id: string; name: string; failed: number; skipped: number } | null>(
+        null,
+    );
     /** Something the member should know that isn't an error: a photo cap hit, a stage left off. */
     const [notice, setNotice] = useState<string | null>(null);
     const previewUrls = useRef(new Map<File, string>());
@@ -111,9 +111,7 @@ export default function LogWorkForm({
         setExternal(results.filter((r) => !horses.some((h) => h.id === r.id)));
     };
 
-    const chosen =
-        horses.find((h) => h.id === horseId) ??
-        (chosenExternal?.id === horseId ? chosenExternal : null);
+    const chosen = horses.find((h) => h.id === horseId) ?? (chosenExternal?.id === horseId ? chosenExternal : null);
     const totalPhotos = buckets.reduce((n, b) => n + b.files.length, 0);
 
     const preview = (f: File) => {
@@ -128,17 +126,19 @@ export default function LogWorkForm({
     const switchDiscipline = (key: string) => {
         const preset = DISCIPLINE_PRESETS.find((d) => d.key === key);
         if (!preset) return;
-        if (totalPhotos > 0 && !window.confirm("Switch the ladder? Photos already placed stay in their buckets; empty buckets are replaced.")) {
+        if (
+            totalPhotos > 0 &&
+            !window.confirm(
+                "Switch the ladder? Photos already placed stay in their buckets; empty buckets are replaced.",
+            )
+        ) {
             return;
         }
         setDiscipline(key);
         // The ladder says what the work was; the rate-card type follows.
         const wt = WORK_TYPE_FOR_DISCIPLINE[key];
         if (wt) setWorkType(wt);
-        setBuckets((prev) => [
-            ...prev.filter((b) => b.files.length > 0),
-            ...bucketsFromPreset(preset.stages),
-        ]);
+        setBuckets((prev) => [...prev.filter((b) => b.files.length > 0), ...bucketsFromPreset(preset.stages)]);
     };
 
     const patchBucket = (id: number, patch: Partial<Bucket>) =>
@@ -160,9 +160,7 @@ export default function LogWorkForm({
         }
         setBuckets((prev) =>
             prev.map((b) =>
-                b.id === id
-                    ? { ...b, files: [...b.files, ...picked].slice(0, MAX_IMAGES_PER_MOMENT) }
-                    : b,
+                b.id === id ? { ...b, files: [...b.files, ...picked].slice(0, MAX_IMAGES_PER_MOMENT) } : b,
             ),
         );
     };
@@ -193,7 +191,9 @@ export default function LogWorkForm({
             if (!rec.success || !rec.logId) throw new Error(rec.error ?? "Could not create the record.");
 
             const supabase = createClient();
-            const moments: { images: { path: string; stage: string; caption?: string; claimedDate?: string | null }[] }[] = [];
+            const moments: {
+                images: { path: string; stage: string; caption?: string; claimedDate?: string | null }[];
+            }[] = [];
             let uploadedCount = 0;
             const failed: string[] = [];
             for (const bucket of buckets) {
@@ -237,7 +237,9 @@ export default function LogWorkForm({
                 skipped = res.skipped ?? 0;
             }
             if (failed.length > 0) {
-                setError(`${failed.length} photo${failed.length === 1 ? "" : "s"} failed to upload: ${failed.join(", ")}.`);
+                setError(
+                    `${failed.length} photo${failed.length === 1 ? "" : "s"} failed to upload: ${failed.join(", ")}.`,
+                );
             }
             setDoneHorse({ id: horseId, name: chosen.name, failed: failed.length, skipped });
             setProgress(null);
@@ -251,36 +253,39 @@ export default function LogWorkForm({
 
     if (doneHorse) {
         return (
-            <div className="border-input bg-card rounded-2xl border p-6 text-center">
-                <p className="text-foreground m-0 font-serif text-xl font-bold">
+            <div className="rounded-2xl border border-input bg-card p-6 text-center">
+                <p className="m-0 font-serif text-xl font-bold text-foreground">
                     {doneHorse.failed > 0
                         ? `✓ ${doneHorse.name}'s work record is filed — but ${doneHorse.failed} photo${doneHorse.failed === 1 ? "" : "s"} didn't upload.`
                         : `✓ ${doneHorse.name}'s work record is on your wall.`}
                 </p>
                 {doneHorse.failed > 0 && (
-                    <p className="text-destructive mt-2 text-sm">
-                        The record and its credit are saved without those photos. Try them again
-                        from The Making, or send us a message if it keeps happening.
+                    <p className="mt-2 text-sm text-destructive">
+                        The record and its credit are saved without those photos. Try them again from The Making, or
+                        send us a message if it keeps happening.
                     </p>
                 )}
                 {doneHorse.skipped > 0 && (
-                    <p className="text-muted-foreground mt-2 text-sm">
-                        {doneHorse.skipped} stage{doneHorse.skipped === 1 ? " was" : "s were"} left off
-                        — a reel holds 40 stages at most.
+                    <p className="mt-2 text-sm text-muted-foreground">
+                        {doneHorse.skipped} stage{doneHorse.skipped === 1 ? " was" : "s were"} left off — a reel holds
+                        40 stages at most.
                     </p>
                 )}
-                <p className="text-secondary-foreground mt-2 text-sm">
+                <p className="mt-2 text-sm text-secondary-foreground">
                     {studioName} is credited
                     {chosen?.ownedByMe
                         ? " — when this horse is parked and claimed, the new owner's claim confirms it."
                         : " — the owner has been asked to confirm it."}
                 </p>
                 <div className="mt-4 flex flex-wrap justify-center gap-3">
-                    <Link href={`/community/${doneHorse.id}/making`} className="text-forest font-semibold hover:underline">
+                    <Link
+                        href={`/community/${doneHorse.id}/making`}
+                        className="font-semibold text-forest hover:underline"
+                    >
                         See The Making →
                     </Link>
                     {studioSlug && (
-                        <Link href={`/studio/${studioSlug}`} className="text-forest font-semibold hover:underline">
+                        <Link href={`/studio/${studioSlug}`} className="font-semibold text-forest hover:underline">
                             See it on your page →
                         </Link>
                     )}
@@ -293,7 +298,8 @@ export default function LogWorkForm({
                             setSummary("");
                             setClaimedStart("");
                             setDateCompleted("");
-                            const preset = DISCIPLINE_PRESETS.find((d) => d.key === discipline) ?? DISCIPLINE_PRESETS[0];
+                            const preset =
+                                DISCIPLINE_PRESETS.find((d) => d.key === discipline) ?? DISCIPLINE_PRESETS[0];
                             setBuckets(bucketsFromPreset(preset.stages));
                         }}
                     >
@@ -307,20 +313,22 @@ export default function LogWorkForm({
     return (
         <div className="flex flex-col gap-6">
             {/* ── 1. The horse ── */}
-            <section className="border-input bg-card rounded-2xl border p-5">
-                <h2 className="text-foreground mt-0 mb-1 font-serif text-lg font-bold">1 · Which horse?</h2>
-                <p className="text-muted-foreground mt-0 mb-3 text-sm">
-                    Yours or a client&rsquo;s — a work on someone else&rsquo;s horse asks their owner to
-                    confirm the credit. Not in a stable yet?{" "}
-                    <Link href="/add-horse" className="text-forest hover:underline">Add the horse first</Link>,
-                    then park it for its owner.
+            <section className="rounded-2xl border border-input bg-card p-5">
+                <h2 className="mt-0 mb-1 font-serif text-lg font-bold text-foreground">1 · Which horse?</h2>
+                <p className="mt-0 mb-3 text-sm text-muted-foreground">
+                    Yours or a client&rsquo;s — a work on someone else&rsquo;s horse asks their owner to confirm the
+                    credit. Not in a stable yet?{" "}
+                    <Link href="/add-horse" className="text-forest hover:underline">
+                        Add the horse first
+                    </Link>
+                    , then park it for its owner.
                 </p>
                 <input
                     type="text"
                     value={filter}
                     onChange={(e) => setFilter(e.target.value)}
                     placeholder="Search by name…"
-                    className="border-input bg-background mb-3 w-full rounded-md border px-3 py-2 text-sm"
+                    className="mb-3 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                 />
                 <div className="grid max-h-64 grid-cols-2 gap-2 overflow-y-auto sm:grid-cols-3 md:grid-cols-4">
                     {shown.map((h) => (
@@ -338,23 +346,25 @@ export default function LogWorkForm({
                                 // eslint-disable-next-line @next/next/no-img-element
                                 <img src={h.thumbUrl} alt="" className="h-9 w-9 shrink-0 rounded-md object-cover" />
                             ) : (
-                                <span className="bg-muted flex h-9 w-9 shrink-0 items-center justify-center rounded-md">🐴</span>
+                                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted">
+                                    🐴
+                                </span>
                             )}
                             <span className="min-w-0 truncate">{h.name}</span>
                         </button>
                     ))}
                     {shown.length === 0 && (
-                        <p className="text-muted-foreground col-span-full m-0 text-sm">No horses match.</p>
+                        <p className="col-span-full m-0 text-sm text-muted-foreground">No horses match.</p>
                     )}
                 </div>
 
                 {filter.trim().length >= 2 && (
-                    <div className="border-border-tan/30 mt-3 border-t border-dashed pt-3">
+                    <div className="mt-3 border-t border-dashed border-border-tan/30 pt-3">
                         <button
                             type="button"
                             onClick={() => void searchEverywhere()}
                             disabled={searchingAll}
-                            className="text-forest text-sm font-semibold hover:underline disabled:opacity-50"
+                            className="text-sm font-semibold text-forest hover:underline disabled:opacity-50"
                         >
                             {searchingAll ? "Searching…" : `🔎 Search all of MHH for “${filter.trim()}”`}
                         </button>
@@ -381,20 +391,28 @@ export default function LogWorkForm({
                                     >
                                         {h.thumbUrl ? (
                                             // eslint-disable-next-line @next/next/no-img-element
-                                            <img src={h.thumbUrl} alt="" className="h-9 w-9 shrink-0 rounded-md object-cover" />
+                                            <img
+                                                src={h.thumbUrl}
+                                                alt=""
+                                                className="h-9 w-9 shrink-0 rounded-md object-cover"
+                                            />
                                         ) : (
-                                            <span className="bg-muted flex h-9 w-9 shrink-0 items-center justify-center rounded-md">🐴</span>
+                                            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted">
+                                                🐴
+                                            </span>
                                         )}
                                         <span className="min-w-0">
                                             <span className="block truncate">{h.name}</span>
                                             {h.ownerAlias && (
-                                                <span className="text-muted-foreground block truncate text-xs">@{h.ownerAlias}</span>
+                                                <span className="block truncate text-xs text-muted-foreground">
+                                                    @{h.ownerAlias}
+                                                </span>
                                             )}
                                         </span>
                                     </button>
                                 ))}
                                 {external.length === 0 && (
-                                    <p className="text-muted-foreground col-span-full m-0 text-sm">
+                                    <p className="col-span-full m-0 text-sm text-muted-foreground">
                                         Nothing visible by that name anywhere on MHH.
                                     </p>
                                 )}
@@ -405,18 +423,20 @@ export default function LogWorkForm({
             </section>
 
             {/* ── 2. The work ── */}
-            <section className="border-input bg-card rounded-2xl border p-5">
-                <h2 className="text-foreground mt-0 mb-3 font-serif text-lg font-bold">2 · What was the work?</h2>
+            <section className="rounded-2xl border border-input bg-card p-5">
+                <h2 className="mt-0 mb-3 font-serif text-lg font-bold text-foreground">2 · What was the work?</h2>
                 <div className="grid gap-3 sm:grid-cols-2">
                     <label className="text-sm font-medium">
                         Work type
                         <select
                             value={workType}
                             onChange={(e) => setWorkType(e.target.value)}
-                            className="border-input bg-background mt-1 block w-full rounded-md border px-3 py-2 text-sm"
+                            className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                         >
                             {SERVICE_TYPES.map((t) => (
-                                <option key={t} value={t}>{t}</option>
+                                <option key={t} value={t}>
+                                    {t}
+                                </option>
                             ))}
                         </select>
                     </label>
@@ -429,7 +449,7 @@ export default function LogWorkForm({
                                 placeholder="2019 or 2019-03"
                                 value={claimedStart}
                                 onChange={(e) => setClaimedStart(e.target.value)}
-                                className="border-input bg-background mt-1 block w-full rounded-md border px-3 py-2 text-sm"
+                                className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                             />
                         </label>
                         <label className="text-sm font-medium">
@@ -440,7 +460,7 @@ export default function LogWorkForm({
                                 placeholder="2019-11 or 2019-11-04"
                                 value={dateCompleted}
                                 onChange={(e) => setDateCompleted(e.target.value)}
-                                className="border-input bg-background mt-1 block w-full rounded-md border px-3 py-2 text-sm"
+                                className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                             />
                         </label>
                     </div>
@@ -453,50 +473,54 @@ export default function LogWorkForm({
                         value={summary}
                         onChange={(e) => setSummary(e.target.value)}
                         placeholder="What she started as, what she became…"
-                        className="border-input bg-background mt-1 block w-full rounded-md border px-3 py-2 text-sm"
+                        className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                     />
                 </label>
-                <p className="text-muted-foreground mt-2 mb-0 text-xs">
-                    Dates are your record of when the work happened — they display as your claim, with
-                    today as the honest logging date underneath.
+                <p className="mt-2 mb-0 text-xs text-muted-foreground">
+                    Dates are your record of when the work happened — they display as your claim, with today as the
+                    honest logging date underneath.
                 </p>
             </section>
 
             {/* ── 3. The reel ── */}
-            <section className="border-input bg-card rounded-2xl border p-5">
+            <section className="rounded-2xl border border-input bg-card p-5">
                 <div className="mb-1 flex flex-wrap items-baseline justify-between gap-2">
-                    <h2 className="text-foreground m-0 font-serif text-lg font-bold">3 · The making-of reel</h2>
+                    <h2 className="m-0 font-serif text-lg font-bold text-foreground">3 · The making-of reel</h2>
                     <label className="text-sm font-medium">
-                        <span className="text-muted-foreground mr-2 text-xs font-semibold tracking-wide uppercase">Ladder</span>
+                        <span className="mr-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                            Ladder
+                        </span>
                         <select
                             value={discipline}
                             onChange={(e) => switchDiscipline(e.target.value)}
-                            className="border-input bg-background rounded-md border px-2 py-1.5 text-sm"
+                            className="rounded-md border border-input bg-background px-2 py-1.5 text-sm"
                         >
                             {DISCIPLINE_PRESETS.map((d) => (
-                                <option key={d.key} value={d.key}>{d.label}</option>
+                                <option key={d.key} value={d.key}>
+                                    {d.label}
+                                </option>
                             ))}
                         </select>
                     </label>
                 </div>
-                <p className="text-muted-foreground mt-0 mb-3 text-sm">
-                    The ladder is a suggestion — rename any stage in your own words, add stages,
-                    delete what you don&rsquo;t need. Each stage takes up to {MAX_IMAGES_PER_MOMENT} photos,
-                    one caption, one date. Even two photos tell a story.
+                <p className="mt-0 mb-3 text-sm text-muted-foreground">
+                    The ladder is a suggestion — rename any stage in your own words, add stages, delete what you
+                    don&rsquo;t need. Each stage takes up to {MAX_IMAGES_PER_MOMENT} photos, one caption, one date. Even
+                    two photos tell a story.
                 </p>
                 <div className="grid gap-3 md:grid-cols-2">
                     {buckets.map((b) => (
-                        <div key={b.id} className="border-input bg-background rounded-xl border p-3">
+                        <div key={b.id} className="rounded-xl border border-input bg-background p-3">
                             <div className="flex items-center gap-2">
                                 <input
                                     type="text"
                                     value={b.label}
                                     maxLength={MAX_STAGE_LABEL}
                                     onChange={(e) => patchBucket(b.id, { label: e.target.value })}
-                                    className="text-foreground min-w-0 flex-1 rounded-md border border-transparent bg-transparent px-1 py-0.5 font-serif text-sm font-bold hover:border-input focus:border-input focus:outline-none"
+                                    className="min-w-0 flex-1 rounded-md border border-transparent bg-transparent px-1 py-0.5 font-serif text-sm font-bold text-foreground hover:border-input focus:border-input focus:outline-none"
                                     aria-label="Stage name"
                                 />
-                                <label className="text-forest shrink-0 cursor-pointer text-sm font-semibold hover:underline">
+                                <label className="shrink-0 cursor-pointer text-sm font-semibold text-forest hover:underline">
                                     + photos
                                     <input
                                         type="file"
@@ -516,7 +540,7 @@ export default function LogWorkForm({
                                     type="button"
                                     aria-label={`Remove stage ${b.label}`}
                                     onClick={() => setBuckets((prev) => prev.filter((x) => x.id !== b.id))}
-                                    className="text-muted-foreground hover:text-destructive shrink-0 px-1 text-sm"
+                                    className="shrink-0 px-1 text-sm text-muted-foreground hover:text-destructive"
                                 >
                                     ×
                                 </button>
@@ -527,14 +551,18 @@ export default function LogWorkForm({
                                         {b.files.map((f, i) => (
                                             <span key={i} className="relative">
                                                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                <img src={preview(f)} alt="" className="h-14 w-14 rounded-md object-cover" />
+                                                <img
+                                                    src={preview(f)}
+                                                    alt=""
+                                                    className="h-14 w-14 rounded-md object-cover"
+                                                />
                                                 <button
                                                     type="button"
                                                     onClick={() =>
                                                         patchBucket(b.id, { files: b.files.filter((_, k) => k !== i) })
                                                     }
                                                     aria-label="Remove photo"
-                                                    className="bg-card border-input absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full border text-xs leading-none"
+                                                    className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full border border-input bg-card text-xs leading-none"
                                                 >
                                                     ×
                                                 </button>
@@ -548,14 +576,14 @@ export default function LogWorkForm({
                                             value={b.caption}
                                             onChange={(e) => patchBucket(b.id, { caption: e.target.value })}
                                             placeholder="Notes for this stage — what happened, what you'd want the owner to know…"
-                                            className="border-input bg-card rounded-md border px-2 py-1.5 text-sm"
+                                            className="rounded-md border border-input bg-card px-2 py-1.5 text-sm"
                                             aria-label={`Notes for ${b.label || "this stage"}`}
                                         />
                                         <input
                                             type="date"
                                             value={b.date}
                                             onChange={(e) => patchBucket(b.id, { date: e.target.value })}
-                                            className="border-input bg-card self-start rounded-md border px-2 py-1.5 text-sm"
+                                            className="self-start rounded-md border border-input bg-card px-2 py-1.5 text-sm"
                                             aria-label={`When ${b.label || "this stage"} happened`}
                                         />
                                     </div>
@@ -572,25 +600,28 @@ export default function LogWorkForm({
                             { id: nextBucketId++, label: "", files: [], caption: "", date: "" },
                         ])
                     }
-                    className="text-forest mt-3 text-sm font-semibold hover:underline"
+                    className="mt-3 text-sm font-semibold text-forest hover:underline"
                 >
                     + Add a stage of your own
                 </button>
             </section>
 
-            {error && <p className="text-destructive m-0 text-sm font-medium">{error}</p>}
+            {error && <p className="m-0 text-sm font-medium text-destructive">{error}</p>}
             {notice && (
-                <p className="border-warning/40 bg-warning/10 m-0 rounded-md border px-3 py-2 text-sm" role="status">
+                <p className="m-0 rounded-md border border-warning/40 bg-warning/10 px-3 py-2 text-sm" role="status">
                     {notice}
                 </p>
             )}
             <div className="flex items-center gap-4">
                 <Button onClick={submit} disabled={busy || !horseId}>
-                    {busy ? (progress ?? "Saving…") : `File the work record${totalPhotos ? ` + ${totalPhotos} photo${totalPhotos === 1 ? "" : "s"}` : ""}`}
+                    {busy
+                        ? (progress ?? "Saving…")
+                        : `File the work record${totalPhotos ? ` + ${totalPhotos} photo${totalPhotos === 1 ? "" : "s"}` : ""}`}
                 </Button>
                 {chosen && (
-                    <span className="text-muted-foreground text-sm">
-                        for <b>{chosen.name}</b>{chosen.ownedByMe ? "" : " (owner will be asked to confirm)"}
+                    <span className="text-sm text-muted-foreground">
+                        for <b>{chosen.name}</b>
+                        {chosen.ownedByMe ? "" : " (owner will be asked to confirm)"}
                     </span>
                 )}
             </div>

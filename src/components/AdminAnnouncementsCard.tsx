@@ -9,12 +9,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 
-import {
-    createAnnouncement,
-    deleteAnnouncement,
-    listAnnouncements,
-    type AdminAnnouncement,
-} from "@/app/actions/admin";
+import { createAnnouncement, deleteAnnouncement, listAnnouncements, type AdminAnnouncement } from "@/app/actions/admin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -64,8 +59,8 @@ export default function AdminAnnouncementsCard() {
         <section className="rounded-lg border border-input bg-card p-5">
             <h2 className="mt-0 mb-1 text-base font-bold text-foreground">📣 Announcement banner</h2>
             <p className="mt-0 mb-4 text-xs text-muted-foreground">
-                Shows site-wide under the header until its end date (or until retired).
-                Members can dismiss each announcement once read.
+                Shows site-wide under the header until its end date (or until retired). Members can dismiss each
+                announcement once read.
             </p>
 
             <div className="flex flex-col gap-2">

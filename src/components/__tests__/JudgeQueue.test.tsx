@@ -26,11 +26,7 @@ const ringActions = vi.hoisted(() => ({
 }));
 vi.mock("@/app/actions/shows-v2-ring", () => ringActions);
 
-function queueEntry(
-    id: string,
-    name: string,
-    overrides: Partial<JudgeQueueEntry> = {},
-): JudgeQueueEntry {
+function queueEntry(id: string, name: string, overrides: Partial<JudgeQueueEntry> = {}): JudgeQueueEntry {
     return {
         id,
         horseName: name,
@@ -92,10 +88,7 @@ function queueData(overrides: Partial<JudgeQueueData> = {}): JudgeQueueData {
 function twoOpenClasses(): JudgeQueueData {
     const data = queueData();
     data.classes[1].status = "scheduled";
-    data.classes[1].entries = [
-        queueEntry("entry-d", "Sandstorm Strike"),
-        queueEntry("entry-e", "Prairie Rose"),
-    ];
+    data.classes[1].entries = [queueEntry("entry-d", "Sandstorm Strike"), queueEntry("entry-e", "Prairie Rose")];
     return data;
 }
 
@@ -118,9 +111,7 @@ afterEach(() => {
 describe("JudgeQueue — class header navigation", () => {
     it("shows the class position, entry count and placed progress", () => {
         render(<JudgeQueue queue={queueData()} />);
-        expect(screen.getByTestId("judge-progress")).toHaveTextContent(
-            "Class 1 of 2 · 3 entries · 1 placed ✓",
-        );
+        expect(screen.getByTestId("judge-progress")).toHaveTextContent("Class 1 of 2 · 3 entries · 1 placed ✓");
         expect(screen.getByRole("heading", { name: "1 · OF Quarter Horse" })).toBeInTheDocument();
     });
 
@@ -172,9 +163,10 @@ describe("JudgeQueue — pinning ribbons (sparse tray model)", () => {
 
         const chips = screen.getAllByTestId("place-chip");
         expect(chips.map((chip) => chip.textContent)).toEqual(["2nd", "1st", "3rd"]);
-        expect(
-            screen.getByRole("button", { name: "Copper Penny — 1st place. Tap to remove." }),
-        ).toHaveAttribute("aria-pressed", "true");
+        expect(screen.getByRole("button", { name: "Copper Penny — 1st place. Tap to remove." })).toHaveAttribute(
+            "aria-pressed",
+            "true",
+        );
     });
 
     it("re-tapping a placed horse frees ONLY its ribbon — nobody shifts", () => {
@@ -201,9 +193,7 @@ describe("JudgeQueue — pinning ribbons (sparse tray model)", () => {
         fireEvent.click(a); // 2nd
         fireEvent.click(c); // 3rd
 
-        expect(screen.getByTestId("tray-slot-2")).toHaveAccessibleName(
-            "2nd place — Dash of Cash. Tap to clear.",
-        );
+        expect(screen.getByTestId("tray-slot-2")).toHaveAccessibleName("2nd place — Dash of Cash. Tap to clear.");
         fireEvent.click(screen.getByTestId("tray-slot-2"));
 
         const chips = screen.getAllByTestId("place-chip");
@@ -230,9 +220,7 @@ describe("JudgeQueue — pinning ribbons (sparse tray model)", () => {
         fireEvent.click(screen.getByTestId("tray-slot-4"));
         expect(screen.getByTestId("tray-refusal")).toBeEmptyDOMElement();
         fireEvent.click(entries[6]);
-        expect(screen.getByTestId("tray-slot-4")).toHaveAccessibleName(
-            "4th place — Horse G. Tap to clear.",
-        );
+        expect(screen.getByTestId("tray-slot-4")).toHaveAccessibleName("4th place — Horse G. Tap to clear.");
     });
 
     it("pre-fills the tray from recorded placings, gaps preserved", () => {
@@ -247,9 +235,7 @@ describe("JudgeQueue — pinning ribbons (sparse tray model)", () => {
         expect(chips.map((chip) => chip.textContent)).toEqual(["3rd", "1st"]);
         // 2nd is open — the next tap takes it, not 4th.
         fireEvent.click(screen.getAllByTestId("judge-entry")[2]);
-        expect(screen.getByTestId("tray-slot-2")).toHaveAccessibleName(
-            "2nd place — Midnight Oil. Tap to clear.",
-        );
+        expect(screen.getByTestId("tray-slot-2")).toHaveAccessibleName("2nd place — Midnight Oil. Tap to clear.");
     });
 
     it("blind judging: no owner aliases in a blind payload render", () => {
@@ -338,9 +324,7 @@ describe("JudgeQueue — autosave", () => {
         vi.useFakeTimers();
         render(<JudgeQueue queue={queueData()} />);
         fireEvent.click(screen.getAllByTestId("judge-entry")[1]); // Copper Penny → 1st
-        fireEvent.click(
-            screen.getByRole("button", { name: "Add critique for Copper Penny" }),
-        );
+        fireEvent.click(screen.getByRole("button", { name: "Add critique for Copper Penny" }));
         fireEvent.change(screen.getByLabelText("Placing note for Copper Penny"), {
             target: { value: "Gorgeous shading." },
         });
@@ -370,9 +354,7 @@ describe("JudgeQueue — autosave", () => {
             await vi.advanceTimersByTimeAsync(1000);
         });
 
-        expect(screen.getByRole("alert")).toHaveTextContent(
-            /only be recorded while the show is judging/i,
-        );
+        expect(screen.getByRole("alert")).toHaveTextContent(/only be recorded while the show is judging/i);
         // Tray state preserved through the failure.
         const chips = screen.getAllByTestId("place-chip");
         expect(chips.map((chip) => chip.textContent)).toEqual(["2nd", "1st"]);
@@ -452,21 +434,15 @@ describe("JudgeQueue — Class done", () => {
             }),
         );
         await waitFor(() =>
-            expect(screen.getByTestId("judge-progress")).toHaveTextContent(
-                "Class 2 of 2 · 2 entries · 1 placed ✓",
-            ),
+            expect(screen.getByTestId("judge-progress")).toHaveTextContent("Class 2 of 2 · 2 entries · 1 placed ✓"),
         );
-        expect(screen.getByTestId("judge-toast")).toHaveTextContent(
-            "1 · OF Quarter Horse done ✓",
-        );
+        expect(screen.getByTestId("judge-toast")).toHaveTextContent("1 · OF Quarter Horse done ✓");
     });
 
     it("an empty class keeps the mark-done-and-move-on affordance", () => {
         render(<JudgeQueue queue={queueData()} />);
         fireEvent.click(screen.getByTestId("next-class")); // class-2, no entries
-        expect(
-            screen.getByText(/No live entries in this class — mark it done and move on/i),
-        ).toBeInTheDocument();
+        expect(screen.getByText(/No live entries in this class — mark it done and move on/i)).toBeInTheDocument();
         expect(screen.getByTestId("class-done")).toBeInTheDocument();
         expect(screen.queryAllByTestId("tray-slot-1")).toHaveLength(0);
     });
@@ -480,9 +456,7 @@ describe("JudgeQueue — Class done", () => {
                 "All 2 classes judged 🎉 — championship callbacks are ready.",
             ),
         );
-        expect(actions.recordPlacings).toHaveBeenCalledWith(
-            expect.objectContaining({ markDone: true }),
-        );
+        expect(actions.recordPlacings).toHaveBeenCalledWith(expect.objectContaining({ markDone: true }));
     });
 });
 
@@ -507,9 +481,7 @@ describe("JudgeQueue — gating and the championship round", () => {
         ];
         render(<JudgeQueue queue={data} />);
         // The section round is open with the 1st-place entry as candidate.
-        expect(screen.getByTestId("ladder-progress")).toHaveTextContent(
-            "0 of 3 callbacks decided",
-        );
+        expect(screen.getByTestId("ladder-progress")).toHaveTextContent("0 of 3 callbacks decided");
         const candidates = screen.getAllByTestId("callback-candidate");
         expect(candidates).toHaveLength(1);
         expect(candidates[0]).toHaveTextContent("Dash of Cash");

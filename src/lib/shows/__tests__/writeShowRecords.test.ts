@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-    buildShowRecords,
-    resolveShowRecordDate,
-    type PublishShowInput,
-} from "../writeShowRecords";
+import { buildShowRecords, resolveShowRecordDate, type PublishShowInput } from "../writeShowRecords";
 
 /** A one-division / one-section / two-class online show. */
 function baseInput(overrides: Partial<PublishShowInput> = {}): PublishShowInput {
@@ -97,9 +93,7 @@ describe("buildShowRecords — the vocabulary → trophy-case mapping", () => {
     it("never writes participation rows (place NULL)", () => {
         const { rows } = buildShowRecords(
             baseInput({
-                placings: [
-                    { entryId: "entry-1", classId: "class-1", place: null, note: "Nice try." },
-                ],
+                placings: [{ entryId: "entry-1", classId: "class-1", place: null, note: "Nice try." }],
             }),
         );
         expect(rows).toEqual([]);

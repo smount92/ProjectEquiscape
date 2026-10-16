@@ -11,13 +11,7 @@ import BannerCropModal from "@/components/groups/BannerCropModal";
  * barn's banner after creation. The create form covers new barns; this
  * is the retroactive path for the ones that existed before banners did.
  */
-export default function BarnBannerControl({
-    groupId,
-    hasBanner,
-}: {
-    groupId: string;
-    hasBanner: boolean;
-}) {
+export default function BarnBannerControl({ groupId, hasBanner }: { groupId: string; hasBanner: boolean }) {
     const router = useRouter();
     const { toast } = useToast();
     const fileRef = useRef<HTMLInputElement>(null);
@@ -83,7 +77,7 @@ export default function BarnBannerControl({
             )}
             <button
                 type="button"
-                className="text-muted-foreground hover:text-foreground underline disabled:opacity-50"
+                className="text-muted-foreground underline hover:text-foreground disabled:opacity-50"
                 disabled={busy}
                 onClick={() => fileRef.current?.click()}
             >
@@ -92,7 +86,7 @@ export default function BarnBannerControl({
             {hasBanner && !busy && (
                 <button
                     type="button"
-                    className="text-muted-foreground hover:text-foreground underline"
+                    className="text-muted-foreground underline hover:text-foreground"
                     onClick={() => void handleRemove()}
                 >
                     Remove

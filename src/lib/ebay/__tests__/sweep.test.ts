@@ -4,12 +4,24 @@ import type { EbayListing } from "@/lib/ebay/client";
 
 const TARGETS: SweepTarget[] = [
     { id: "alborozo", title: "Alborozo", maker: "Breyer", modelNumber: "712053", scale: "Traditional (1:9)" },
-    { id: "notorious", title: "Notoriously Framed", maker: "Breyer", modelNumber: "712393", scale: "Traditional (1:9)" },
+    {
+        id: "notorious",
+        title: "Notoriously Framed",
+        maker: "Breyer",
+        modelNumber: "712393",
+        scale: "Traditional (1:9)",
+    },
 ];
 
 const listing = (price: number, title = "Breyer Alborozo 712053", over: Partial<EbayListing> = {}): EbayListing => ({
-    itemId: `v1|${price}|0`, title, price, currency: "USD",
-    condition: "Used", itemWebUrl: `https://ebay.com/itm/${price}`, itemAffiliateWebUrl: null, ...over,
+    itemId: `v1|${price}|0`,
+    title,
+    price,
+    currency: "USD",
+    condition: "Used",
+    itemWebUrl: `https://ebay.com/itm/${price}`,
+    itemAffiliateWebUrl: null,
+    ...over,
 });
 
 describe("median", () => {
@@ -36,10 +48,11 @@ describe("summarise", () => {
     });
 
     it("drops a foreign currency rather than averaging across rates we do not have", () => {
-        const s = summarise("alborozo", [
-            listing(100), listing(200), listing(300),
-            listing(90, "Breyer Alborozo 712053", { currency: "GBP" }),
-        ], "b");
+        const s = summarise(
+            "alborozo",
+            [listing(100), listing(200), listing(300), listing(90, "Breyer Alborozo 712053", { currency: "GBP" })],
+            "b",
+        );
         expect(s?.sampleSize).toBe(3);
         expect(s?.currency).toBe("USD");
     });
@@ -64,7 +77,9 @@ describe("sweep", () => {
     // queue every week (the bug behind three Mondays of 5, 7, 1 signals).
     it("remembers every model it asked about, whatever the answer", async () => {
         const search = vi.fn(async (q: string) =>
-            /712053/.test(q) ? [listing(100), listing(200), listing(300)] : [listing(50, "Breyer Notoriously Framed 712393")],
+            /712053/.test(q)
+                ? [listing(100), listing(200), listing(300)]
+                : [listing(50, "Breyer Notoriously Framed 712393")],
         );
         const out = await sweep(TARGETS, { search });
         expect(out.perTarget).toEqual({ alborozo: "signal", notorious: "no-match" });
@@ -82,14 +97,22 @@ describe("sweep", () => {
 
     it("runs the slice through parallel workers with the same result as sequential", async () => {
         const many: SweepTarget[] = Array.from({ length: 9 }, (_, i) => ({
-            id: `m${i}`, title: `Model ${i}`, maker: "Breyer", modelNumber: `71${1000 + i}`, scale: null,
+            id: `m${i}`,
+            title: `Model ${i}`,
+            maker: "Breyer",
+            modelNumber: `71${1000 + i}`,
+            scale: null,
         }));
         const search = vi.fn(async (q: string) => {
             const n = q.match(/71\d{4}/)?.[0] ?? "";
             const idx = Number(n.slice(2)) - 1000;
             // Every third model has a market; the rest have one listing.
             return idx % 3 === 0
-                ? [listing(10, `Breyer Model ${idx} ${n}`), listing(20, `Breyer Model ${idx} ${n}`), listing(30, `Breyer Model ${idx} ${n}`)]
+                ? [
+                      listing(10, `Breyer Model ${idx} ${n}`),
+                      listing(20, `Breyer Model ${idx} ${n}`),
+                      listing(30, `Breyer Model ${idx} ${n}`),
+                  ]
                 : [listing(5, `Breyer Model ${idx} ${n}`)];
         });
         const sequential = await sweep(many, { search });
@@ -105,7 +128,11 @@ describe("sweep", () => {
 
     it("a rate limit stops every worker from pulling new targets", async () => {
         const many: SweepTarget[] = Array.from({ length: 12 }, (_, i) => ({
-            id: `m${i}`, title: `Model ${i}`, maker: "Breyer", modelNumber: `71${1000 + i}`, scale: null,
+            id: `m${i}`,
+            title: `Model ${i}`,
+            maker: "Breyer",
+            modelNumber: `71${1000 + i}`,
+            scale: null,
         }));
         let calls = 0;
         const search = vi.fn(async () => {
@@ -164,7 +191,8 @@ describe("sweep", () => {
     });
 
     it("keeps going after one model errors", async () => {
-        const search = vi.fn()
+        const search = vi
+            .fn()
             .mockRejectedValueOnce(new Error("eBay search failed (500)"))
             .mockResolvedValueOnce([
                 listing(50, "Breyer Notoriously Framed 712393"),
@@ -187,10 +215,9 @@ describe("sweep", () => {
 
     it("skips a target with no model number without calling eBay", async () => {
         const search = vi.fn(async () => []);
-        const out = await sweep(
-            [{ id: "x", title: "Mystery", maker: "Breyer", modelNumber: null, scale: null }],
-            { search }
-        );
+        const out = await sweep([{ id: "x", title: "Mystery", maker: "Breyer", modelNumber: null, scale: null }], {
+            search,
+        });
         expect(search).not.toHaveBeenCalled();
         expect(out.signals).toHaveLength(0);
     });

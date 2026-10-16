@@ -22,21 +22,39 @@ describe("resin identity", () => {
     });
 
     it("writes the makeup as one line", () => {
-        expect(resinMakeupLine(resinIdentityFrom({ resin_material: "cast_resin", resin_body: "hollow" }))).toBe("Cast resin · hollow");
+        expect(resinMakeupLine(resinIdentityFrom({ resin_material: "cast_resin", resin_body: "hollow" }))).toBe(
+            "Cast resin · hollow",
+        );
         expect(resinMakeupLine(resinIdentityFrom({ resin_body: "solid" }))).toBe("Solid");
         expect(resinMakeupLine(resinIdentityFrom({}))).toBeNull();
     });
 
     it("recognises only the pre-paste failure, and only for these columns", () => {
-        expect(isMissingResinColumn({ code: "42703", message: "column user_horses.cast_by does not exist" })).toBe(true);
-        expect(isMissingResinColumn({ code: "PGRST204", message: "Could not find the 'prep_artist' column of 'user_horses' in the schema cache" })).toBe(true);
-        expect(isMissingResinColumn({ code: "42703", message: "column user_horses.hoofprint does not exist" })).toBe(false);
+        expect(isMissingResinColumn({ code: "42703", message: "column user_horses.cast_by does not exist" })).toBe(
+            true,
+        );
+        expect(
+            isMissingResinColumn({
+                code: "PGRST204",
+                message: "Could not find the 'prep_artist' column of 'user_horses' in the schema cache",
+            }),
+        ).toBe(true);
+        expect(isMissingResinColumn({ code: "42703", message: "column user_horses.hoofprint does not exist" })).toBe(
+            false,
+        );
         expect(isMissingResinColumn({ code: "23505", message: "duplicate key value violates cast_by" })).toBe(false);
         expect(isMissingResinColumn(null)).toBe(false);
     });
 
     it("strips the four columns and nothing else", () => {
-        expect(withoutResinColumns({ custom_name: "Smoky", cast_by: "MVS", resin_body: "hollow", finish_type: "Artist Resin" })).toEqual({
+        expect(
+            withoutResinColumns({
+                custom_name: "Smoky",
+                cast_by: "MVS",
+                resin_body: "hollow",
+                finish_type: "Artist Resin",
+            }),
+        ).toEqual({
             custom_name: "Smoky",
             finish_type: "Artist Resin",
         });

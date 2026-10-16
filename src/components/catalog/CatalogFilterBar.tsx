@@ -18,13 +18,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -41,16 +35,14 @@ import {
 import { RUN_TYPES } from "@/lib/catalog/taxonomy";
 
 const SORT_LABELS: Record<CatalogSort, string> = {
-    "relevance": "Best match",
+    relevance: "Best match",
     "name-az": "Name A→Z",
     "name-za": "Name Z→A",
-    "maker": "Maker",
-    "newest": "Newest",
+    maker: "Maker",
+    newest: "Newest",
 };
 
-const TYPE_LABELS: Record<string, string> = Object.fromEntries(
-    CATALOG_TYPE_OPTIONS.map((t) => [t.value, t.label]),
-);
+const TYPE_LABELS: Record<string, string> = Object.fromEntries(CATALOG_TYPE_OPTIONS.map((t) => [t.value, t.label]));
 
 const ALL = "__all__";
 
@@ -135,7 +127,15 @@ export default function CatalogFilterBar({
         setLastQ(filters.q);
         setSearchInput(filters.q ?? "");
     }
-    const advKey = [filters.yearFrom, filters.yearTo, filters.color, filters.model, filters.medium, filters.material, filters.runType].join("|");
+    const advKey = [
+        filters.yearFrom,
+        filters.yearTo,
+        filters.color,
+        filters.model,
+        filters.medium,
+        filters.material,
+        filters.runType,
+    ].join("|");
     const [lastAdvKey, setLastAdvKey] = useState(advKey);
     if (lastAdvKey !== advKey) {
         setLastAdvKey(advKey);
@@ -157,10 +157,7 @@ export default function CatalogFilterBar({
     };
 
     /** Any filter change resets to page 1 — the result set changed. */
-    const setOrClear = (
-        key: "maker" | "manufacturer" | "artist" | "scale" | "type",
-        value: string | undefined,
-    ) => {
+    const setOrClear = (key: "maker" | "manufacturer" | "artist" | "scale" | "type", value: string | undefined) => {
         const next = { ...filters, page: 1 };
         if (value === undefined) delete next[key];
         else next[key] = value;
@@ -373,7 +370,10 @@ export default function CatalogFilterBar({
                     className="mt-3 flex flex-wrap items-end gap-3 border-t border-dashed border-[color:var(--color-border-tan,#CBC3A4)] pt-3"
                 >
                     <div className="flex flex-col gap-1">
-                        <label htmlFor="catalog-year-from" className="font-serif text-[0.65rem] tracking-widest text-muted-foreground uppercase">
+                        <label
+                            htmlFor="catalog-year-from"
+                            className="font-serif text-[0.65rem] tracking-widest text-muted-foreground uppercase"
+                        >
                             Release year
                         </label>
                         <div className="flex items-center gap-1.5">
@@ -407,7 +407,10 @@ export default function CatalogFilterBar({
                         </div>
                     </div>
                     <div className="flex flex-col gap-1">
-                        <label htmlFor="catalog-color" className="font-serif text-[0.65rem] tracking-widest text-muted-foreground uppercase">
+                        <label
+                            htmlFor="catalog-color"
+                            className="font-serif text-[0.65rem] tracking-widest text-muted-foreground uppercase"
+                        >
                             Color
                         </label>
                         <Input
@@ -422,7 +425,10 @@ export default function CatalogFilterBar({
                         />
                     </div>
                     <div className="flex flex-col gap-1">
-                        <label htmlFor="catalog-model" className="font-serif text-[0.65rem] tracking-widest text-muted-foreground uppercase">
+                        <label
+                            htmlFor="catalog-model"
+                            className="font-serif text-[0.65rem] tracking-widest text-muted-foreground uppercase"
+                        >
                             Model #
                         </label>
                         <Input
@@ -437,7 +443,10 @@ export default function CatalogFilterBar({
                         />
                     </div>
                     <div className="flex flex-col gap-1">
-                        <label htmlFor="catalog-medium" className="font-serif text-[0.65rem] tracking-widest text-muted-foreground uppercase">
+                        <label
+                            htmlFor="catalog-medium"
+                            className="font-serif text-[0.65rem] tracking-widest text-muted-foreground uppercase"
+                        >
                             Resin medium
                         </label>
                         <Input
@@ -453,13 +462,13 @@ export default function CatalogFilterBar({
                     </div>
                     {(materials.length > 0 || material) && (
                         <div className="flex flex-col gap-1">
-                            <label htmlFor="catalog-material" className="font-serif text-[0.65rem] tracking-widest text-muted-foreground uppercase">
+                            <label
+                                htmlFor="catalog-material"
+                                className="font-serif text-[0.65rem] tracking-widest text-muted-foreground uppercase"
+                            >
                                 Material
                             </label>
-                            <Select
-                                value={material || ALL}
-                                onValueChange={(v) => setMaterial(v === ALL ? "" : v)}
-                            >
+                            <Select value={material || ALL} onValueChange={(v) => setMaterial(v === ALL ? "" : v)}>
                                 <SelectTrigger
                                     id="catalog-material"
                                     size="sm"
@@ -482,13 +491,13 @@ export default function CatalogFilterBar({
                     {/* Run — a fixed vocabulary (RUN_TYPES), so unlike Material
                         this needs no facet query: the options are the list. */}
                     <div className="flex flex-col gap-1">
-                        <label htmlFor="catalog-run-type" className="font-serif text-[0.65rem] tracking-widest text-muted-foreground uppercase">
+                        <label
+                            htmlFor="catalog-run-type"
+                            className="font-serif text-[0.65rem] tracking-widest text-muted-foreground uppercase"
+                        >
                             Run
                         </label>
-                        <Select
-                            value={runType || ALL}
-                            onValueChange={(v) => setRunType(v === ALL ? "" : v)}
-                        >
+                        <Select value={runType || ALL} onValueChange={(v) => setRunType(v === ALL ? "" : v)}>
                             <SelectTrigger
                                 id="catalog-run-type"
                                 size="sm"

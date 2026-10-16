@@ -6,11 +6,7 @@
  */
 
 import { z } from "zod";
-import {
-    SHOWRING_FINISH_OPTIONS,
-    SHOWRING_SORTS,
-    SHOWRING_TRADE_OPTIONS,
-} from "./filterParams";
+import { SHOWRING_FINISH_OPTIONS, SHOWRING_SORTS, SHOWRING_TRADE_OPTIONS } from "./filterParams";
 
 /** The filterable dimensions of the Show Ring page query. */
 export const showRingFiltersSchema = z.object({

@@ -1,18 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import {
-    AXIS_GLOSS,
-    feeText,
-    friendlyClassStatus,
-    friendlyEntryStatus,
-    friendlyShowStatus,
-} from "../plainWords";
-import type {
-    ClassStatus,
-    DivisionAxis,
-    EntryStatus,
-    ShowStatus,
-} from "../types";
+import { AXIS_GLOSS, feeText, friendlyClassStatus, friendlyEntryStatus, friendlyShowStatus } from "../plainWords";
+import type { ClassStatus, DivisionAxis, EntryStatus, ShowStatus } from "../types";
 
 /** The full unions, spelled out — a new status must join BOTH the
  *  type and this list, so the exhaustive walk below stays honest. */
@@ -28,21 +17,8 @@ const SHOW_STATUSES: ShowStatus[] = [
     "archived",
 ];
 const ENTRY_STATUSES: EntryStatus[] = ["entered", "scratched", "placed"];
-const CLASS_STATUSES: ClassStatus[] = [
-    "scheduled",
-    "called",
-    "judging",
-    "placed",
-    "combined",
-    "cancelled",
-];
-const AXES: DivisionAxis[] = [
-    "halter",
-    "performance",
-    "workmanship",
-    "collectibility",
-    "other",
-];
+const CLASS_STATUSES: ClassStatus[] = ["scheduled", "called", "judging", "placed", "combined", "cancelled"];
+const AXES: DivisionAxis[] = ["halter", "performance", "workmanship", "collectibility", "other"];
 
 describe("friendlyShowStatus", () => {
     it("covers every show status with a non-empty, underscore-free phrase", () => {

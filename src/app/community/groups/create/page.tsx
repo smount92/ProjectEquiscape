@@ -74,7 +74,7 @@ export default function CreateGroupPage() {
             <PageMasthead compact icon="🏚️" title="Start a Barn" backHref="/community/groups" backLabel="Barns" />
             <form onSubmit={handleSubmit}>
                 <div className="mb-6">
-                    <label className="text-foreground mb-1 block text-sm font-semibold">Barn Name *</label>
+                    <label className="mb-1 block text-sm font-semibold text-foreground">Barn Name *</label>
                     <Input
                         value={name}
                         onChange={(e) => autoSlug(e.target.value)}
@@ -84,7 +84,7 @@ export default function CreateGroupPage() {
                 </div>
 
                 <div className="mb-6">
-                    <label className="text-foreground mb-1 block text-sm font-semibold">URL Slug</label>
+                    <label className="mb-1 block text-sm font-semibold text-foreground">URL Slug</label>
                     <Input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="pnw-collectors" />
                     <small className="text-muted-foreground">
                         modelhorsehub.com/community/groups/{slug || "your-slug"}
@@ -92,7 +92,7 @@ export default function CreateGroupPage() {
                 </div>
 
                 <div className="mb-6">
-                    <label className="text-foreground mb-1 block text-sm font-semibold">Description</label>
+                    <label className="mb-1 block text-sm font-semibold text-foreground">Description</label>
                     <Textarea
                         className="w-full resize-y"
                         rows={3}
@@ -104,9 +104,9 @@ export default function CreateGroupPage() {
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div className="mb-6">
-                        <label className="text-foreground mb-1 block text-sm font-semibold">Barn Type *</label>
+                        <label className="mb-1 block text-sm font-semibold text-foreground">Barn Type *</label>
                         <select
-                            className="border-input bg-card ring-offset-background focus:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-offset-2 focus:outline-none"
+                            className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
                             value={groupType}
                             onChange={(e) => setGroupType(e.target.value)}
                             title="Barn type"
@@ -119,7 +119,7 @@ export default function CreateGroupPage() {
                         </select>
                     </div>
                     <div className="mb-6">
-                        <label className="text-foreground mb-1 block text-sm font-semibold">Region</label>
+                        <label className="mb-1 block text-sm font-semibold text-foreground">Region</label>
                         <Input
                             value={region}
                             onChange={(e) => setRegion(e.target.value)}
@@ -129,7 +129,7 @@ export default function CreateGroupPage() {
                 </div>
 
                 <div className="mb-6">
-                    <label className="text-foreground mb-1 block text-sm font-semibold">Privacy</label>
+                    <label className="mb-1 block text-sm font-semibold text-foreground">Privacy</label>
                     <div className="flex gap-2">
                         <button
                             type="button"
@@ -148,7 +148,7 @@ export default function CreateGroupPage() {
                             🔒 Private
                         </button>
                     </div>
-                    <small className="text-muted-foreground mt-1 block">
+                    <small className="mt-1 block text-muted-foreground">
                         {isPrivate
                             ? "Listed in the directory with a Private badge. The notice board and member list stay hidden, and joining needs your approval."
                             : "Anyone can find this barn, read the notice board, and join."}
@@ -157,15 +157,15 @@ export default function CreateGroupPage() {
 
                 {/* Banner image — the face of the card in the directory. */}
                 <div className="mt-4">
-                    <label className="text-foreground mb-1 block text-sm font-semibold" htmlFor="barn-banner">
-                        Banner image <span className="text-muted-foreground font-normal">(optional)</span>
+                    <label className="mb-1 block text-sm font-semibold text-foreground" htmlFor="barn-banner">
+                        Banner image <span className="font-normal text-muted-foreground">(optional)</span>
                     </label>
                     {bannerPreview && (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
                             src={bannerPreview}
                             alt="Banner preview"
-                            className="border-input mb-2 aspect-[4/1] h-auto w-full rounded-md border object-cover"
+                            className="mb-2 aspect-[4/1] h-auto w-full rounded-md border border-input object-cover"
                         />
                     )}
                     <input
@@ -204,13 +204,13 @@ export default function CreateGroupPage() {
                             }}
                         />
                     )}
-                    <small className="text-muted-foreground mt-1 block">
+                    <small className="mt-1 block text-muted-foreground">
                         Shown across the top of your barn&rsquo;s card. Under 3MB.
                     </small>
                 </div>
 
                 {error && (
-                    <p className="text-destructive border-destructive/30 bg-destructive/10 mt-2 flex items-center gap-2 rounded-md border px-4 py-2 text-sm">
+                    <p className="mt-2 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm text-destructive">
                         {error}
                     </p>
                 )}

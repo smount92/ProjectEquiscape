@@ -147,9 +147,7 @@ export default function AddHorseEngine() {
 
     // ── Leaves for this category ──────────────────────────────────
     const leaves = useMemo<{ key: LeafKey; label: string; icon: string }[]>(() => {
-        const list: { key: LeafKey; label: string; icon: string }[] = [
-            { key: "gallery", label: "Photos", icon: "📸" },
-        ];
+        const list: { key: LeafKey; label: string; icon: string }[] = [{ key: "gallery", label: "Photos", icon: "📸" }];
         if (config.showReferenceStep) list.push({ key: "reference", label: "Reference", icon: "🔗" });
         list.push({ key: "identity", label: "Details", icon: "🏷️" });
         list.push({ key: "vault", label: "Sign Off", icon: "📜" });
@@ -168,7 +166,9 @@ export default function AddHorseEngine() {
 
     // ── Boot: tier, watermark prefs, ?catalog= preselect ───────────
     useEffect(() => {
-        getMyTier().then(setViewerTier).catch(() => setViewerTier(null));
+        getMyTier()
+            .then(setViewerTier)
+            .catch(() => setViewerTier(null));
         getProfile()
             .then((profile) => {
                 if (profile) {
@@ -440,12 +440,7 @@ export default function AddHorseEngine() {
                 })}
             </div>
 
-            <StepRail
-                steps={railSteps}
-                current={step}
-                furthestReachable={furthestReachable}
-                onJump={goTo}
-            />
+            <StepRail steps={railSteps} current={step} furthestReachable={furthestReachable} onJump={goTo} />
 
             {submitError && (
                 <div
@@ -537,10 +532,7 @@ export default function AddHorseEngine() {
                         <LeafHeading note="Optional — group this horse with others in your stable.">
                             Collections
                         </LeafHeading>
-                        <CollectionPicker
-                            selectedCollectionIds={collectionIds}
-                            onSelect={setCollectionIds}
-                        />
+                        <CollectionPicker selectedCollectionIds={collectionIds} onSelect={setCollectionIds} />
                     </LedgerLeaf>
 
                     <LedgerLeaf tab="Marketplace">
@@ -568,11 +560,10 @@ export default function AddHorseEngine() {
                                 🛡️
                             </span>
                             <p className="m-0 text-sm">
-                                <strong>Only you will ever see this.</strong> Purchase
-                                prices, valuations and insurance notes are protected by Row
-                                Level Security — no other member, not even someone viewing
-                                your public horses, can reach them. They are wiped
-                                automatically if this horse ever changes hands.
+                                <strong>Only you will ever see this.</strong> Purchase prices, valuations and insurance
+                                notes are protected by Row Level Security — no other member, not even someone viewing
+                                your public horses, can reach them. They are wiped automatically if this horse ever
+                                changes hands.
                             </p>
                         </div>
 
@@ -581,11 +572,7 @@ export default function AddHorseEngine() {
 
                     {/* The finished document, right above the signature. */}
                     <LedgerLeaf tab="The Passport">
-                        <PassportReview
-                            context={form.context}
-                            reference={reference}
-                            photos={photos}
-                        />
+                        <PassportReview context={form.context} reference={reference} photos={photos} />
                     </LedgerLeaf>
                 </div>
             )}
@@ -593,12 +580,7 @@ export default function AddHorseEngine() {
             {/* ── Nav. The ids below are the e2e contract. ── */}
             <div className="mt-8 flex items-center justify-between gap-4">
                 {step > 0 ? (
-                    <Button
-                        variant="outline"
-                        size="wide"
-                        onClick={goBack}
-                        id={NAV_IDS[leaf.key].back}
-                    >
+                    <Button variant="outline" size="wide" onClick={goBack} id={NAV_IDS[leaf.key].back}>
                         ← Back
                     </Button>
                 ) : (
@@ -637,9 +619,7 @@ export default function AddHorseEngine() {
  */
 function domIdFor(name: string): string {
     const spec = getFieldSpec(name);
-    return (
-        (spec && getDomId(spec, "create-full")) ?? `fe-${name.replace(/_/g, "-")}`
-    );
+    return (spec && getDomId(spec, "create-full")) ?? `fe-${name.replace(/_/g, "-")}`;
 }
 
 function GroupFields({
@@ -671,13 +651,7 @@ function GroupFields({
 }
 
 /** The per-category attributes leaf — only drawn when the category has any. */
-function AttributeLeaf({
-    form,
-    label,
-}: {
-    form: ReturnType<typeof useHorseForm>;
-    label: string;
-}) {
+function AttributeLeaf({ form, label }: { form: ReturnType<typeof useHorseForm>; label: string }) {
     const fields = getGroupFields(form.context, "attributes");
     if (fields.length === 0) return null;
     return (

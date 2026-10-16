@@ -8,15 +8,17 @@ export async function GET() {
 
         const headers = ["Horse Name", "NAN Year", "Card Type", "Show Name", "Placement", "Class", "Status"];
 
-        const rows = records.map(r => [
-            escapeCSV(r.horseName),
-            escapeCSV(String(r.nanYear)),
-            escapeCSV(r.cardType),
-            escapeCSV(r.showName),
-            escapeCSV(r.placement),
-            escapeCSV(r.className),
-            escapeCSV(r.isExpired ? "Expired" : "Active"),
-        ].join(","));
+        const rows = records.map((r) =>
+            [
+                escapeCSV(r.horseName),
+                escapeCSV(String(r.nanYear)),
+                escapeCSV(r.cardType),
+                escapeCSV(r.showName),
+                escapeCSV(r.placement),
+                escapeCSV(r.className),
+                escapeCSV(r.isExpired ? "Expired" : "Active"),
+            ].join(","),
+        );
 
         const bom = "\uFEFF";
         const csv = bom + headers.join(",") + "\n" + rows.join("\n");

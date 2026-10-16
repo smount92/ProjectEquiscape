@@ -3,12 +3,7 @@
 import { z } from "zod";
 import { requireAuth } from "@/lib/auth";
 import { sanitizeText } from "@/lib/utils/validation";
-import {
-    normalizeFinishType,
-    normalizeCondition,
-    normalizePrice,
-    CONDITION_GRADES,
-} from "@/lib/csv-import/validation";
+import { normalizeFinishType, normalizeCondition, normalizePrice, CONDITION_GRADES } from "@/lib/csv-import/validation";
 
 // ============================================================
 // CSV Import — Server Action (matching is client-side)
@@ -74,9 +69,7 @@ function isMissingFunctionError(err: { code?: string; message?: string }): boole
  * pre-check and migration 144), so invalid rows come back as structured
  * errors instead of aborting the batch.
  */
-export async function executeBatchImport(
-    input: z.infer<typeof importInputSchema>,
-): Promise<BatchImportResult> {
+export async function executeBatchImport(input: z.infer<typeof importInputSchema>): Promise<BatchImportResult> {
     try {
         const parsed = importInputSchema.safeParse(input);
         if (!parsed.success) {
@@ -107,10 +100,8 @@ export async function executeBatchImport(
                 fail(`Finish Type must be OF, Custom, or Artist Resin — got '${row.finishType.trim()}'.`);
             if (condition === null)
                 fail(`Condition must be one of ${CONDITION_GRADES.join(", ")} — got '${row.condition.trim()}'.`);
-            if (!purchase.ok)
-                fail(`Purchase Price must be a number — got '${row.purchasePrice.trim()}'.`);
-            if (!estimated.ok)
-                fail(`Estimated Value must be a number — got '${row.estimatedValue.trim()}'.`);
+            if (!purchase.ok) fail(`Purchase Price must be a number — got '${row.purchasePrice.trim()}'.`);
+            if (!estimated.ok) fail(`Estimated Value must be a number — got '${row.estimatedValue.trim()}'.`);
 
             if (!name || finish === null || condition === null || !purchase.ok || !estimated.ok) {
                 continue;
@@ -222,9 +213,7 @@ export async function getExistingHorseNames(): Promise<string[]> {
             .eq("owner_id", user.id)
             .is("deleted_at", null)
             .limit(5000);
-        return ((data ?? []) as { custom_name: string | null }[])
-            .map((r) => r.custom_name ?? "")
-            .filter(Boolean);
+        return ((data ?? []) as { custom_name: string | null }[]).map((r) => r.custom_name ?? "").filter(Boolean);
     } catch {
         // Dedupe is a courtesy check — never block the import flow on it.
         return [];

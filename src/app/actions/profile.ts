@@ -7,11 +7,7 @@ import { normalizeMemberLinks, PROFILE_LINK_KEYS, type MemberLinks } from "@/lib
 import { revalidatePath } from "next/cache";
 import { AuthError, requireAuth } from "@/lib/auth";
 import { getPublicImageUrls } from "@/lib/utils/storage";
-import {
-    MAX_FEATURED,
-    sanitizeCustomization,
-    type ProfileCustomization,
-} from "@/app/profile/customization";
+import { MAX_FEATURED, sanitizeCustomization, type ProfileCustomization } from "@/app/profile/customization";
 import { fetchProfileCustomization } from "@/app/profile/reads";
 
 const PAGE_SIZE = 24;
@@ -54,8 +50,7 @@ export async function updateBio(bio: string): Promise<{ success: boolean; error?
 }
 
 /** The notice an owner sees until migration 229 is pasted. */
-const LINKS_MIGRATION_NOTICE =
-    "Profile links need a database update (migration 229) before they can be saved.";
+const LINKS_MIGRATION_NOTICE = "Profile links need a database update (migration 229) before they can be saved.";
 
 function isMissingLinksColumn(error: { code?: string; message?: string } | null): boolean {
     return !!error && (error.code === "42703" || error.code === "PGRST204") && (error.message ?? "").includes("links");
@@ -66,7 +61,9 @@ function isMissingLinksColumn(error: { code?: string; message?: string } | null)
  * was typed is normalised to https URLs for the profile's slots; junk
  * is dropped, never stored.
  */
-export async function updateProfileLinks(input: unknown): Promise<{ success: boolean; error?: string; links?: MemberLinks }> {
+export async function updateProfileLinks(
+    input: unknown,
+): Promise<{ success: boolean; error?: string; links?: MemberLinks }> {
     const supabase = await createClient();
     const {
         data: { user },
@@ -74,7 +71,10 @@ export async function updateProfileLinks(input: unknown): Promise<{ success: boo
     if (!user) return { success: false, error: "Not authenticated" };
 
     const links = normalizeMemberLinks(input, PROFILE_LINK_KEYS);
-    const { error } = await supabase.from("users").update({ links } as never).eq("id", user.id);
+    const { error } = await supabase
+        .from("users")
+        .update({ links } as never)
+        .eq("id", user.id);
     if (error) {
         if (isMissingLinksColumn(error)) return { success: false, error: LINKS_MIGRATION_NOTICE };
         return { success: false, error: error.message };
@@ -97,12 +97,15 @@ export async function loadMoreProfileHorses(
 
     let query = supabase
         .from("user_horses")
-        .select(`
+        .select(
+            `
             id, custom_name, finish_type, condition_grade, created_at, trade_status, listing_price, marketplace_notes,
             user_collections(name),
             catalog_items:catalog_id(title, maker, item_type),
             horse_images(image_url, angle_profile)
-        `, { count: "exact" })
+        `,
+            { count: "exact" },
+        )
         .eq("owner_id", userId)
         .eq("visibility", "public");
     if (collectionId) {
@@ -120,22 +123,24 @@ export async function loadMoreProfileHorses(
     const thumbnailPaths: string[] = [];
     horses.forEach((horse) => {
         const thumb = horse.horse_images?.find(
-            (img: { angle_profile: string }) => img.angle_profile === "Primary_Thumbnail"
+            (img: { angle_profile: string }) => img.angle_profile === "Primary_Thumbnail",
         );
         const first = horse.horse_images?.[0];
-        const url = (thumb as { image_url: string } | undefined)?.image_url
-            || (first as { image_url: string } | undefined)?.image_url;
+        const url =
+            (thumb as { image_url: string } | undefined)?.image_url ||
+            (first as { image_url: string } | undefined)?.image_url;
         if (url) thumbnailPaths.push(url);
     });
     const signedUrlMap = getPublicImageUrls(thumbnailPaths);
 
     const cards: ProfileHorseCard[] = horses.map((horse) => {
         const thumb = horse.horse_images?.find(
-            (img: { angle_profile: string }) => img.angle_profile === "Primary_Thumbnail"
+            (img: { angle_profile: string }) => img.angle_profile === "Primary_Thumbnail",
         );
         const firstImage = horse.horse_images?.[0];
-        const imageUrl = (thumb as { image_url: string } | undefined)?.image_url
-            || (firstImage as { image_url: string } | undefined)?.image_url;
+        const imageUrl =
+            (thumb as { image_url: string } | undefined)?.image_url ||
+            (firstImage as { image_url: string } | undefined)?.image_url;
         const signedUrl = imageUrl ? signedUrlMap.get(imageUrl) : undefined;
 
         return {
@@ -250,9 +255,7 @@ export async function getMyCustomization(): Promise<MyCustomization | null> {
  * boundary, and pinning someone else's horse to your shelf would be
  * a small but real lie about who owns what.
  */
-export async function saveProfileCustomization(
-    input: unknown,
-): Promise<{ success: boolean; error?: string }> {
+export async function saveProfileCustomization(input: unknown): Promise<{ success: boolean; error?: string }> {
     try {
         const { supabase, user } = await requireAuth();
         const clean = sanitizeCustomization(input);
@@ -337,9 +340,7 @@ export async function uploadProfileBanner(
             await supabase.storage.from(BANNER_BUCKET).remove([existing.bannerPath]);
         }
 
-        const { data: signed } = await supabase.storage
-            .from(BANNER_BUCKET)
-            .createSignedUrl(path, 3600);
+        const { data: signed } = await supabase.storage.from(BANNER_BUCKET).createSignedUrl(path, 3600);
 
         return { success: true, path, url: signed?.signedUrl };
     } catch (err) {

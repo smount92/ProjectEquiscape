@@ -34,9 +34,7 @@ describe("the required rule", () => {
     });
 
     it("drops the condition grade for a work in progress — and only that", () => {
-        const required = names(
-            getRequiredFields(ctx("model", "create-full", { life_stage: "in_progress" })),
-        );
+        const required = names(getRequiredFields(ctx("model", "create-full", { life_stage: "in_progress" })));
         expect(required).toEqual(["custom_name", "finish_type"]);
     });
 
@@ -50,9 +48,7 @@ describe("the required rule", () => {
     it.each(["tack", "prop", "diorama", "other_model"] as AssetCategory[])(
         "requires only a name for %s",
         (category) => {
-            expect(names(getRequiredFields(ctx(category, "create-full", {})))).toEqual([
-                "custom_name",
-            ]);
+            expect(names(getRequiredFields(ctx(category, "create-full", {})))).toEqual(["custom_name"]);
         },
     );
 
@@ -90,9 +86,7 @@ describe("missing-field reporting", () => {
     });
 
     it("treats whitespace as empty", () => {
-        const missing = getMissingRequiredFields(
-            ctx("tack", "create-full", { custom_name: "   " }),
-        );
+        const missing = getMissingRequiredFields(ctx("tack", "create-full", { custom_name: "   " }));
         expect(names(missing)).toEqual(["custom_name"]);
     });
 
@@ -107,9 +101,7 @@ describe("missing-field reporting", () => {
     });
 
     it("blocks submit while anything required is empty", () => {
-        expect(canSubmit(ctx("model", "create-full", { custom_name: "x", finish_type: "OF" }))).toBe(
-            false,
-        );
+        expect(canSubmit(ctx("model", "create-full", { custom_name: "x", finish_type: "OF" }))).toBe(false);
     });
 });
 
@@ -143,9 +135,7 @@ describe("per-category visibility", () => {
 
     it("hides the maker credit for other models only", () => {
         expect(isFieldVisible(getFieldSpec("sculptor")!, ctx("tack", "create-full"))).toBe(true);
-        expect(isFieldVisible(getFieldSpec("sculptor")!, ctx("other_model", "create-full"))).toBe(
-            false,
-        );
+        expect(isFieldVisible(getFieldSpec("sculptor")!, ctx("other_model", "create-full"))).toBe(false);
     });
 
     it("shows the show-bio block for models only", () => {
@@ -217,23 +207,15 @@ describe("mode filtering", () => {
 describe("disabled states", () => {
     it("disables the condition grade on a work in progress", () => {
         const spec = getFieldSpec("condition_grade")!;
-        expect(isFieldDisabled(spec, ctx("model", "create-full", { life_stage: "in_progress" }))).toBe(
-            true,
-        );
-        expect(isFieldDisabled(spec, ctx("model", "create-full", { life_stage: "completed" }))).toBe(
-            false,
-        );
+        expect(isFieldDisabled(spec, ctx("model", "create-full", { life_stage: "in_progress" }))).toBe(true);
+        expect(isFieldDisabled(spec, ctx("model", "create-full", { life_stage: "completed" }))).toBe(false);
     });
 
     it("disables both money fields once the item is marked a trade", () => {
         for (const name of ["purchase_price", "estimated_current_value"]) {
             const spec = getFieldSpec(name)!;
-            expect(isFieldDisabled(spec, ctx("model", "create-full", { is_trade: true })), name).toBe(
-                true,
-            );
-            expect(isFieldDisabled(spec, ctx("model", "create-full", { is_trade: false })), name).toBe(
-                false,
-            );
+            expect(isFieldDisabled(spec, ctx("model", "create-full", { is_trade: true })), name).toBe(true);
+            expect(isFieldDisabled(spec, ctx("model", "create-full", { is_trade: false })), name).toBe(false);
         }
     });
 });

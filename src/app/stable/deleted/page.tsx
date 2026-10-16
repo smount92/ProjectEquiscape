@@ -49,10 +49,10 @@ export default async function RecentlyDeletedPage() {
 
             {horses.length === 0 ? (
                 <div className="ledger-paper px-6 py-10 text-center">
-                    <p className="text-foreground m-0 font-serif text-lg font-bold">Nothing deleted</p>
-                    <p className="text-secondary-foreground mx-auto mt-2 mb-5 max-w-md text-sm leading-relaxed">
-                        When you delete a model, it lands here instead of vanishing — so a mistake stays a mistake
-                        and not a loss.
+                    <p className="m-0 font-serif text-lg font-bold text-foreground">Nothing deleted</p>
+                    <p className="mx-auto mt-2 mb-5 max-w-md text-sm leading-relaxed text-secondary-foreground">
+                        When you delete a model, it lands here instead of vanishing — so a mistake stays a mistake and
+                        not a loss.
                     </p>
                     <Button asChild variant="outline">
                         <Link href="/dashboard">Back to the Stable</Link>
@@ -60,18 +60,17 @@ export default async function RecentlyDeletedPage() {
                 </div>
             ) : (
                 <>
-                    <div className="border-input bg-card mb-6 rounded-lg border px-5 py-4">
-                        <p className="text-secondary-foreground m-0 text-sm leading-relaxed">
+                    <div className="mb-6 rounded-lg border border-input bg-card px-5 py-4">
+                        <p className="m-0 text-sm leading-relaxed text-secondary-foreground">
                             These models are hidden from your stable, the market and every public page, but their
-                            records — show results, ownership history, condition history — were never deleted.
-                            Restoring one brings it back <strong>private</strong> and{" "}
-                            <strong>not for sale</strong>; you decide from there whether to publish or list it
-                            again.
+                            records — show results, ownership history, condition history — were never deleted. Restoring
+                            one brings it back <strong>private</strong> and <strong>not for sale</strong>; you decide
+                            from there whether to publish or list it again.
                         </p>
-                        <p className="text-secondary-foreground m-0 mt-2 text-sm leading-relaxed">
-                            <strong>Photos aren&rsquo;t recoverable.</strong> Deleting a model erases its
-                            photographs from storage for good, and no restore can bring them back — you&rsquo;ll
-                            need to re-upload them.
+                        <p className="m-0 mt-2 text-sm leading-relaxed text-secondary-foreground">
+                            <strong>Photos aren&rsquo;t recoverable.</strong> Deleting a model erases its photographs
+                            from storage for good, and no restore can bring them back — you&rsquo;ll need to re-upload
+                            them.
                         </p>
                     </div>
 

@@ -64,7 +64,7 @@ export async function getInsuranceReportData(collectionId?: string): Promise<{
             .select(
                 `id, custom_name, finish_type, condition_grade, asset_category,
          catalog_items:catalog_id(title, maker, item_type),
-         horse_images(image_url, angle_profile)`
+         horse_images(image_url, angle_profile)`,
             )
             .eq("owner_id", user.id)
             .is("deleted_at", null)
@@ -106,7 +106,7 @@ export async function getInsuranceReportData(collectionId?: string): Promise<{
                     .select(
                         `id, custom_name, finish_type, condition_grade, asset_category,
                  catalog_items:catalog_id(title, maker, item_type),
-                 horse_images(image_url, angle_profile)`
+                 horse_images(image_url, angle_profile)`,
                     )
                     .in("id", extraIds)
                     .eq("owner_id", user.id)
@@ -130,14 +130,11 @@ export async function getInsuranceReportData(collectionId?: string): Promise<{
             .select("horse_id, purchase_price, estimated_current_value")
             .in("horse_id", horseIds);
 
-        const vaultMap = new Map<
-            string,
-            { purchase_price: number | null; estimated_current_value: number | null }
-        >();
+        const vaultMap = new Map<string, { purchase_price: number | null; estimated_current_value: number | null }>();
         (rawVaults ?? []).forEach(
             (v: { horse_id: string; purchase_price: number | null; estimated_current_value: number | null }) => {
                 vaultMap.set(v.horse_id, v);
-            }
+            },
         );
 
         // Build report data with base64 images
@@ -148,9 +145,7 @@ export async function getInsuranceReportData(collectionId?: string): Promise<{
         const base64Map = new Map<string, string>();
         const adminStorage = getAdminClient().storage.from("horse-images");
         for (const horse of horses) {
-            const thumb = horse.horse_images?.find(
-                (img) => img.angle_profile === "Primary_Thumbnail"
-            );
+            const thumb = horse.horse_images?.find((img) => img.angle_profile === "Primary_Thumbnail");
             const imageUrl = thumb?.image_url || horse.horse_images?.[0]?.image_url;
             if (!imageUrl) continue;
 
@@ -159,7 +154,10 @@ export async function getInsuranceReportData(collectionId?: string): Promise<{
                 const { data: blob, error: dlError } = await adminStorage.download(path);
 
                 if (dlError || !blob) {
-                    console.error(`[InsuranceReport] Download failed for ${horse.custom_name}:`, dlError?.message, { path, imageUrl });
+                    console.error(`[InsuranceReport] Download failed for ${horse.custom_name}:`, dlError?.message, {
+                        path,
+                        imageUrl,
+                    });
                     continue;
                 }
 

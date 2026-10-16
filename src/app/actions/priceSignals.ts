@@ -26,13 +26,11 @@ export async function reportWrongModelMatch(input: {
         const { supabase, user } = await requireAuth();
         const note = sanitizeText(input.note ?? "").slice(0, 500) || null;
 
-        const { error } = await supabase
-            .from("catalog_price_signal_flags" as never)
-            .insert({
-                catalog_item_id: input.catalogItemId,
-                reporter_id: user.id,
-                note,
-            } as never);
+        const { error } = await supabase.from("catalog_price_signal_flags" as never).insert({
+            catalog_item_id: input.catalogItemId,
+            reporter_id: user.id,
+            note,
+        } as never);
 
         if (error) {
             const e = error as { code?: string; message?: string };
@@ -51,9 +49,7 @@ export async function reportWrongModelMatch(input: {
         const catalogItemId = input.catalogItemId;
         after(async () => {
             try {
-                const { createNotification } = await import(
-                    "@/lib/notifications/createNotification"
-                );
+                const { createNotification } = await import("@/lib/notifications/createNotification");
                 const admin = getAdminClient();
                 const { data: item } = await admin
                     .from("catalog_items")
@@ -61,9 +57,7 @@ export async function reportWrongModelMatch(input: {
                     .eq("id", catalogItemId)
                     .maybeSingle();
                 const title = (item as { title: string } | null)?.title ?? "a catalog entry";
-                const { adminNotificationTargets } = await import(
-                    "@/lib/notifications/adminTargets"
-                );
+                const { adminNotificationTargets } = await import("@/lib/notifications/adminTargets");
                 const adminIds = await adminNotificationTargets(admin);
                 for (const id of adminIds) {
                     await createNotification({

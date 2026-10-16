@@ -103,7 +103,10 @@ const report = (over: Partial<StoredReport> = {}): StoredReport => ({
     // Distinct by default: each call is a different sale unless a test
     // deliberately shares a sourceUrl to mean "same listing".
     sourceUrl: `https://www.ebay.com/itm/${++saleSeq}`,
-    price: 400, currency: "USD", selfReported: false, ...over,
+    price: 400,
+    currency: "USD",
+    selfReported: false,
+    ...over,
 });
 
 describe("summarising into a sold price", () => {
@@ -257,8 +260,12 @@ describe("outlier rejection", () => {
 describe("who may report a sale", () => {
     const days = (n: number) => new Date(NOW.getTime() - n * 86_400_000).toISOString();
     const account = (over: Partial<ReporterAccount> = {}): ReporterAccount => ({
-        createdAt: days(30), accountStatus: "active",
-        isTestAccount: false, isSuspended: false, deletedAt: null, ...over,
+        createdAt: days(30),
+        accountStatus: "active",
+        isTestAccount: false,
+        isSuspended: false,
+        deletedAt: null,
+        ...over,
     });
 
     it("lets an established member report", () => {

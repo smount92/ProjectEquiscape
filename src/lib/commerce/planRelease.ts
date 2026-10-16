@@ -76,10 +76,7 @@ export async function stampPaidAtFromLedger(
  * the seller's release path re-derives the same answer from the ledger,
  * so a missed stamp costs a query and not a sale.
  */
-export async function stampTransactionPaid(
-    supabase: SupabaseClient,
-    transactionId: string,
-): Promise<string | null> {
+export async function stampTransactionPaid(supabase: SupabaseClient, transactionId: string): Promise<string | null> {
     const stamp = new Date().toISOString();
     const { error } = await supabase
         .from("transactions")

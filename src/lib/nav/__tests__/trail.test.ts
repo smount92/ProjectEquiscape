@@ -43,7 +43,9 @@ describe("navigation trail", () => {
         // Back: the passport leaves the stack, but trailLeft still names it
         expect(trailLeft(before, trailTraverse(before, "/dashboard?page=3"))).toBe("/stable/abc");
         // Forward
-        expect(trailLeft(["/dashboard?page=3"], trailPush(["/dashboard?page=3"], "/stable/abc"))).toBe("/dashboard?page=3");
+        expect(trailLeft(["/dashboard?page=3"], trailPush(["/dashboard?page=3"], "/stable/abc"))).toBe(
+            "/dashboard?page=3",
+        );
         // A repeat of the top or an empty start leaves nothing
         expect(trailLeft(["/x"], trailPush(["/x"], "/x"))).toBeNull();
         expect(trailLeft([], ["/x"])).toBeNull();

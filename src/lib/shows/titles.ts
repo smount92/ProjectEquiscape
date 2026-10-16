@@ -75,20 +75,13 @@ export function titleEligibleCards(cards: TitleCardInput[]): TitleCardInput[] {
  * currently-supported titles — the caller diffs against existing
  * grants (ON CONFLICT DO NOTHING makes re-runs idempotent anyway).
  */
-export function evaluateHorseTitles(input: {
-    cards: TitleCardInput[];
-    careerPoints: number;
-}): HorseTitleGrant[] {
+export function evaluateHorseTitles(input: { cards: TitleCardInput[]; careerPoints: number }): HorseTitleGrant[] {
     const grants: HorseTitleGrant[] = [];
 
     const eligible = titleEligibleCards(input.cards);
     const shows = new Set(eligible.map((c) => c.showId));
     const judges = new Set(eligible.flatMap((c) => c.judgeIds));
-    if (
-        eligible.length >= CH_CARDS_REQUIRED &&
-        shows.size >= CH_SHOWS_REQUIRED &&
-        judges.size >= CH_JUDGES_REQUIRED
-    ) {
+    if (eligible.length >= CH_CARDS_REQUIRED && shows.size >= CH_SHOWS_REQUIRED && judges.size >= CH_JUDGES_REQUIRED) {
         grants.push({
             code: "CH",
             evidence: {
@@ -154,9 +147,7 @@ export interface ExhibitorDistinctionGrant {
     evidence: Record<string, unknown>;
 }
 
-export function evaluateExhibitorDistinctions(input: {
-    careerPoints: number;
-}): ExhibitorDistinctionGrant[] {
+export function evaluateExhibitorDistinctions(input: { careerPoints: number }): ExhibitorDistinctionGrant[] {
     return STAR_THRESHOLDS.filter((t) => input.careerPoints >= t.points).map((t) => ({
         code: t.code,
         evidence: { careerPoints: input.careerPoints, threshold: t.points },
@@ -221,10 +212,7 @@ export function horseTitleProgress(input: {
             3,
     );
 
-    const pointsProgress = (
-        code: HorseTitleCode,
-        threshold: number,
-    ): TitleProgress => ({
+    const pointsProgress = (code: HorseTitleCode, threshold: number): TitleProgress => ({
         code,
         label: HORSE_TITLE_LABELS[code],
         earned: granted.has(code),

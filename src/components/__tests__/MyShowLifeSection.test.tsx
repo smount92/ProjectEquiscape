@@ -46,9 +46,7 @@ function life(overrides: Partial<MyShowLife> = {}): MyShowLife {
 
 describe("MyShowLifeSection", () => {
     it("renders nothing at zero data — members who don't show are never nagged", () => {
-        const { container } = render(
-            <MyShowLifeSection life={{ activeEntries: [], recentResults: [] }} />,
-        );
+        const { container } = render(<MyShowLifeSection life={{ activeEntries: [], recentResults: [] }} />);
         expect(container).toBeEmptyDOMElement();
     });
 
@@ -57,19 +55,14 @@ describe("MyShowLifeSection", () => {
         expect(screen.getByText("My show life")).toBeInTheDocument();
         expect(screen.getByText("Autumn Classic Online")).toBeInTheDocument();
         expect(screen.getByText(/entries close in 3 days/i)).toBeInTheDocument();
-        expect(
-            screen.getByText(/5 entries · Breed Halter, Collectibility, Performance \+2 more/),
-        ).toBeInTheDocument();
+        expect(screen.getByText(/5 entries · Breed Halter, Collectibility, Performance \+2 more/)).toBeInTheDocument();
         expect(document.getElementById("show-life-s1")).toHaveAttribute("href", "/shows/s1");
     });
 
     it("lists recent results best-first with place labels and show links", () => {
         render(<MyShowLifeSection life={life()} />);
         expect(screen.getByText("Recent results")).toBeInTheDocument();
-        expect(screen.getByRole("link", { name: "Spring Fling" })).toHaveAttribute(
-            "href",
-            "/shows/s2",
-        );
+        expect(screen.getByRole("link", { name: "Spring Fling" })).toHaveAttribute("href", "/shows/s2");
         expect(screen.getByText("1st")).toBeInTheDocument();
         expect(screen.getByText(/— Breed Halter · Ruffian/)).toBeInTheDocument();
         expect(screen.getByText("4th")).toBeInTheDocument();

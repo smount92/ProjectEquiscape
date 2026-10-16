@@ -55,9 +55,7 @@ export default function RingBoard({ initial }: { initial: RingBoardData }) {
     return (
         <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 p-4 sm:p-8">
             <header className="text-center">
-                <h1 className="m-0 font-serif text-2xl font-bold text-foreground sm:text-4xl">
-                    {board.show.title}
-                </h1>
+                <h1 className="m-0 font-serif text-2xl font-bold text-foreground sm:text-4xl">{board.show.title}</h1>
                 <p className="m-0 mt-2 text-sm text-muted-foreground sm:text-lg">
                     {board.placedCount} of {board.totalCount} classes placed
                 </p>
@@ -65,19 +63,14 @@ export default function RingBoard({ initial }: { initial: RingBoardData }) {
 
             {!running ? (
                 <section className="leather-panel stitched rounded-lg p-8 text-center">
-                    <p className="m-0 text-xl font-bold text-(--leather-text) sm:text-3xl">
-                        The ring is quiet
-                    </p>
+                    <p className="m-0 text-xl font-bold text-(--leather-text) sm:text-3xl">The ring is quiet</p>
                     <p className="m-0 mt-2 text-sm text-(--leather-text-soft) sm:text-lg">
                         Results light up here while the show runs.
                     </p>
                 </section>
             ) : (
-                <section
-                    className="leather-panel stitched rounded-lg p-6 text-center sm:p-10"
-                    aria-label="Now judging"
-                >
-                    <p className="m-0 text-sm font-semibold tracking-widest uppercase text-(--leather-text-muted) sm:text-lg">
+                <section className="leather-panel stitched rounded-lg p-6 text-center sm:p-10" aria-label="Now judging">
+                    <p className="m-0 text-sm font-semibold tracking-widest text-(--leather-text-muted) uppercase sm:text-lg">
                         Now judging
                     </p>
                     {board.nowJudging ? (
@@ -93,13 +86,11 @@ export default function RingBoard({ initial }: { initial: RingBoardData }) {
                             </p>
                         </>
                     ) : (
-                        <p className="m-0 mt-2 text-2xl font-bold text-(--leather-text) sm:text-4xl">
-                            Between classes
-                        </p>
+                        <p className="m-0 mt-2 text-2xl font-bold text-(--leather-text) sm:text-4xl">Between classes</p>
                     )}
                     {board.onDeck && (
                         <p className="m-0 mt-6 text-sm text-(--leather-text-soft) sm:text-2xl">
-                            <span className="font-semibold tracking-widest uppercase text-(--leather-text-muted)">
+                            <span className="font-semibold tracking-widest text-(--leather-text-muted) uppercase">
                                 On deck:
                             </span>{" "}
                             <span className="text-(--leather-text)" data-testid="board-on-deck">
@@ -125,25 +116,19 @@ export default function RingBoard({ initial }: { initial: RingBoardData }) {
                                 <span className="ledger-tab">{classLine(result)}</span>
                                 <ol className="m-0 flex list-none flex-col gap-1.5 p-0">
                                     {result.placings.map((p) => (
-                                        <li
-                                            key={`${p.place}-${p.entryNumber}`}
-                                            className="flex items-baseline gap-3"
-                                        >
+                                        <li key={`${p.place}-${p.entryNumber}`} className="flex items-baseline gap-3">
                                             <span className="inline-flex items-center gap-1.5 font-semibold text-foreground sm:text-xl">
                                                 <span
                                                     aria-hidden="true"
                                                     className="inline-block h-3 w-3 rounded-full border border-border"
                                                     style={{
-                                                        backgroundColor:
-                                                            ribbonHex(p.place) ?? undefined,
+                                                        backgroundColor: ribbonHex(p.place) ?? undefined,
                                                     }}
                                                 />
                                                 {placeLabel(p.place)}
                                             </span>
                                             <span className="font-mono text-lg font-bold sm:text-2xl">
-                                                {p.entryNumber !== null
-                                                    ? `#${p.entryNumber}`
-                                                    : "—"}
+                                                {p.entryNumber !== null ? `#${p.entryNumber}` : "—"}
                                             </span>
                                             <span className="truncate text-sm text-muted-foreground sm:text-lg">
                                                 {p.horseName}

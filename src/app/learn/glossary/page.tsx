@@ -35,7 +35,10 @@ export async function generateMetadata(): Promise<Metadata> {
 
 /** Section headings become their own anchors, for the jump nav. */
 function sectionId(heading: string): string {
-    return `section-${heading.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`;
+    return `section-${heading
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "")}`;
 }
 
 function glossaryJsonLd(baseUrl: string) {
@@ -73,11 +76,10 @@ export default function GlossaryPage() {
                 />
 
                 <p className="mb-8 text-base leading-relaxed text-secondary-foreground">
-                    Every hobby has a dialect, and ours is older than the internet. None of it is
-                    meant to keep you out — it&apos;s just faster to say <strong>LSQ</strong> than
-                    &ldquo;good enough to place at a live show.&rdquo; Here is what collectors and
-                    showers actually mean, term by term. Link to any entry directly — every
-                    definition has its own anchor.
+                    Every hobby has a dialect, and ours is older than the internet. None of it is meant to keep you out
+                    — it&apos;s just faster to say <strong>LSQ</strong> than &ldquo;good enough to place at a live
+                    show.&rdquo; Here is what collectors and showers actually mean, term by term. Link to any entry
+                    directly — every definition has its own anchor.
                 </p>
 
                 <nav aria-label="Jump to a section" className="mb-8 flex flex-wrap gap-x-4 gap-y-2">
@@ -85,7 +87,7 @@ export default function GlossaryPage() {
                         <a
                             key={section.heading}
                             href={`#${sectionId(section.heading)}`}
-                            className="text-forest text-xs font-semibold tracking-[0.08em] uppercase no-underline hover:underline"
+                            className="text-xs font-semibold tracking-[0.08em] text-forest uppercase no-underline hover:underline"
                         >
                             {section.heading} →
                         </a>
@@ -93,11 +95,7 @@ export default function GlossaryPage() {
                 </nav>
 
                 {GLOSSARY_SECTIONS.map((section) => (
-                    <section
-                        key={section.heading}
-                        id={sectionId(section.heading)}
-                        className="mb-10 scroll-mt-24"
-                    >
+                    <section key={section.heading} id={sectionId(section.heading)} className="mb-10 scroll-mt-24">
                         <div className="brass-heading mb-4">
                             <span className="brass-heading-bar" aria-hidden="true" />
                             <h2 className="m-0 text-lg text-foreground">{section.heading}</h2>
@@ -107,9 +105,7 @@ export default function GlossaryPage() {
                                 {section.entries.map((entry) => (
                                     <div key={entry.id} id={entry.id} className="scroll-mt-24">
                                         <dt className="mb-1 flex flex-wrap items-baseline gap-2">
-                                            <span className="text-base font-bold text-foreground">
-                                                {entry.term}
-                                            </span>
+                                            <span className="text-base font-bold text-foreground">{entry.term}</span>
                                             <a
                                                 href={`#${entry.id}`}
                                                 className="text-xs font-semibold text-muted-foreground no-underline opacity-60 transition-opacity hover:opacity-100"
@@ -129,19 +125,14 @@ export default function GlossaryPage() {
                 ))}
 
                 <div className="ledger-paper mb-12 p-6 text-center md:p-8">
-                    <h2 className="mb-2 text-lg font-bold text-foreground">
-                        Ready to use the vocabulary?
-                    </h2>
+                    <h2 className="mb-2 text-lg font-bold text-foreground">Ready to use the vocabulary?</h2>
                     <p className="mx-auto mb-4 max-w-[520px] text-sm leading-relaxed text-secondary-foreground">
-                        The gentlest way into showing is an online photo show — no travel, no
-                        packing boxes, and every term above starts making sense the first time you
-                        enter.
+                        The gentlest way into showing is an online photo show — no travel, no packing boxes, and every
+                        term above starts making sense the first time you enter.
                     </p>
                     <div className="flex flex-wrap justify-center gap-3">
                         <Button asChild>
-                            <Link href="/learn/enter-your-first-photo-show">
-                                Enter your first photo show
-                            </Link>
+                            <Link href="/learn/enter-your-first-photo-show">Enter your first photo show</Link>
                         </Button>
                         <Button asChild variant="outline">
                             <Link href="/shows">Browse shows</Link>

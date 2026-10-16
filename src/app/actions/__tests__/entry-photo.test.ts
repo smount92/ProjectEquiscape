@@ -59,9 +59,7 @@ describe("entry-photo — addShowPhotoToHorse", () => {
 
     it("rejects unauthenticated users", async () => {
         mockClient.auth.getUser.mockResolvedValueOnce({ data: { user: null } });
-        await expect(addShowPhotoToHorse({ horseId: HORSE, path: PATH })).rejects.toThrow(
-            AuthError,
-        );
+        await expect(addShowPhotoToHorse({ horseId: HORSE, path: PATH })).rejects.toThrow(AuthError);
     });
 
     it("rejects a path outside the horse's own folder", async () => {

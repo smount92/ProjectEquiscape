@@ -20,7 +20,10 @@ export default function StatsStrap({ stats }: { stats: PublicStats }) {
         entries.push({ value: stats.publicHorses, label: stats.publicHorses === 1 ? "Public horse" : "Public horses" });
     }
     if (statIsPresentable(stats.showsCompleted)) {
-        entries.push({ value: stats.showsCompleted, label: stats.showsCompleted === 1 ? "Show judged" : "Shows judged" });
+        entries.push({
+            value: stats.showsCompleted,
+            label: stats.showsCompleted === 1 ? "Show judged" : "Shows judged",
+        });
     }
     if (statIsPresentable(stats.listingsForSale)) {
         entries.push({ value: stats.listingsForSale, label: "For sale now" });
@@ -30,11 +33,7 @@ export default function StatsStrap({ stats }: { stats: PublicStats }) {
 
     return (
         <section className="px-8 py-8" id="stats">
-            <div
-                className="stats-strap mx-auto max-w-5xl"
-                role="group"
-                aria-label="Live counts from the database"
-            >
+            <div className="stats-strap mx-auto max-w-5xl" role="group" aria-label="Live counts from the database">
                 {entries.map(({ value, label }) => (
                     <div key={label}>
                         <div className="stat-num">{value.toLocaleString("en-US")}</div>
@@ -42,7 +41,7 @@ export default function StatsStrap({ stats }: { stats: PublicStats }) {
                     </div>
                 ))}
             </div>
-            <p className="text-muted-foreground mx-auto mt-3 max-w-5xl text-center text-xs">
+            <p className="mx-auto mt-3 max-w-5xl text-center text-xs text-muted-foreground">
                 Counted from the database, not written into the page. Refreshed hourly.
             </p>
         </section>

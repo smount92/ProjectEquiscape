@@ -43,11 +43,7 @@ function entry(id: string, ownerId: string, horseId: string, classId: string, st
 describe("buildEntrantResults", () => {
     it("includes EVERY distinct live-entry owner — placed and unplaced", () => {
         const results = buildEntrantResults({
-            entries: [
-                entry("e1", "alice", "h1", "c1"),
-                entry("e2", "bob", "h2", "c1"),
-                entry("e3", "bob", "h3", "c2"),
-            ],
+            entries: [entry("e1", "alice", "h1", "c1"), entry("e2", "bob", "h2", "c1"), entry("e3", "bob", "h3", "c2")],
             placings: [{ entryId: "e1", place: 1 }],
             classNamesById,
             horseNamesById,
@@ -59,10 +55,7 @@ describe("buildEntrantResults", () => {
 
     it("sorts an owner's placements best-first and resolves names", () => {
         const results = buildEntrantResults({
-            entries: [
-                entry("e1", "alice", "h1", "c1"),
-                entry("e2", "alice", "h2", "c2"),
-            ],
+            entries: [entry("e1", "alice", "h1", "c1"), entry("e2", "alice", "h2", "c2")],
             placings: [
                 { entryId: "e2", place: 4 },
                 { entryId: "e1", place: 2 },
@@ -78,10 +71,7 @@ describe("buildEntrantResults", () => {
 
     it("ignores scratched entries and participation (null-place) rows", () => {
         const results = buildEntrantResults({
-            entries: [
-                entry("e1", "alice", "h1", "c1", "scratched"),
-                entry("e2", "bob", "h2", "c1"),
-            ],
+            entries: [entry("e1", "alice", "h1", "c1", "scratched"), entry("e2", "bob", "h2", "c1")],
             placings: [
                 { entryId: "e1", place: 1 }, // scratched — never notifies
                 { entryId: "e2", place: null }, // participation, not a placement
@@ -103,9 +93,7 @@ describe("buildResultsNotificationPlans", () => {
             results: [
                 {
                     ownerId: "alice",
-                    placements: [
-                        { horseId: "h1", horseName: "Ruffian", place: 1, className: "Breed Halter" },
-                    ],
+                    placements: [{ horseId: "h1", horseName: "Ruffian", place: 1, className: "Breed Halter" }],
                 },
             ],
         });
@@ -116,9 +104,7 @@ describe("buildResultsNotificationPlans", () => {
             // Anchored: the reader lands on the results region.
             linkUrl: "/shows/show-1#results",
         });
-        expect(plan.content).toBe(
-            "🏆 Ruffian placed 1st in Breed Halter at Summer Classic",
-        );
+        expect(plan.content).toBe("🏆 Ruffian placed 1st in Breed Halter at Summer Classic");
     });
 
     it(`lists at most ${MAX_LISTED_PLACEMENTS} placements then "and N more"`, () => {
@@ -291,9 +277,7 @@ describe("buildJudgingOpenPlans", () => {
             actorId: null,
             linkUrl: "/shows/host/show-1/judge",
         });
-        expect(plans[0].content).toBe(
-            "⚖️ Judging is open for Summer Classic — your queue is ready.",
-        );
+        expect(plans[0].content).toBe("⚖️ Judging is open for Summer Classic — your queue is ready.");
     });
 
     it("builds nothing for a show with no judges", () => {
@@ -355,9 +339,7 @@ describe("deriveAnnouncementRecipients", () => {
     });
 
     it("is empty for a show with no live entries", () => {
-        expect(
-            deriveAnnouncementRecipients([{ ownerId: "carol", status: "scratched" }]),
-        ).toEqual([]);
+        expect(deriveAnnouncementRecipients([{ ownerId: "carol", status: "scratched" }])).toEqual([]);
     });
 });
 
@@ -412,22 +394,14 @@ describe("Batch 2 schema additions", () => {
     it("scratchEntrySchema accepts an optional short reason and rejects a long one", () => {
         const entryId = "6b2e0d3c-2222-4444-8888-aaaaaaaaaaaa";
         expect(scratchEntrySchema.safeParse({ entryId }).success).toBe(true);
-        expect(
-            scratchEntrySchema.safeParse({ entryId, reason: "double-entered" }).success,
-        ).toBe(true);
-        expect(
-            scratchEntrySchema.safeParse({ entryId, reason: "x".repeat(201) }).success,
-        ).toBe(false);
+        expect(scratchEntrySchema.safeParse({ entryId, reason: "double-entered" }).success).toBe(true);
+        expect(scratchEntrySchema.safeParse({ entryId, reason: "x".repeat(201) }).success).toBe(false);
     });
 
     it("announceToEntrantsSchema bounds the message to 1–1000 chars", () => {
         const showId = "6b2e0d3c-2222-4444-8888-aaaaaaaaaaaa";
-        expect(
-            announceToEntrantsSchema.safeParse({ showId, message: "Ring 2 at noon." }).success,
-        ).toBe(true);
+        expect(announceToEntrantsSchema.safeParse({ showId, message: "Ring 2 at noon." }).success).toBe(true);
         expect(announceToEntrantsSchema.safeParse({ showId, message: "  " }).success).toBe(false);
-        expect(
-            announceToEntrantsSchema.safeParse({ showId, message: "x".repeat(1001) }).success,
-        ).toBe(false);
+        expect(announceToEntrantsSchema.safeParse({ showId, message: "x".repeat(1001) }).success).toBe(false);
     });
 });

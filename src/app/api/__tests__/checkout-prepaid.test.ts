@@ -171,10 +171,8 @@ describe("POST /api/checkout/paypal/prepaid — prepaid orders", () => {
 
     it("points the return leg at the route that CAPTURES", async () => {
         await POST(request({ term: "pro-12" }));
-        const ctx = (
-            (orderBodies[0].payment_source as Record<string, Record<string, Record<string, string>>>)
-                .paypal.experience_context
-        );
+        const ctx = (orderBodies[0].payment_source as Record<string, Record<string, Record<string, string>>>).paypal
+            .experience_context;
         expect(ctx.return_url).toBe("https://modelhorsehub.com/api/checkout/paypal/prepaid/return");
     });
 

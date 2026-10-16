@@ -65,9 +65,7 @@ function nonEmpty(v: string | string[] | undefined, max: number): string | undef
  * dropped (never trusted): finish/trade/sort must be in their
  * vocabularies.
  */
-export function parseShowRingSearchParams(
-    params: Record<string, string | string[] | undefined>,
-): ShowRingFilters {
+export function parseShowRingSearchParams(params: Record<string, string | string[] | undefined>): ShowRingFilters {
     const filters: ShowRingFilters = { sort: "newest" };
 
     const q = nonEmpty(params.q, 100);
@@ -143,10 +141,7 @@ export function countActiveShowRingFilters(filters: ShowRingFilters): number {
 }
 
 /** Remove one filter (chip ✕). Returns a new object. */
-export function removeShowRingFilter(
-    filters: ShowRingFilters,
-    key: ShowRingFilterChip["key"],
-): ShowRingFilters {
+export function removeShowRingFilter(filters: ShowRingFilters, key: ShowRingFilterChip["key"]): ShowRingFilters {
     const next = { ...filters };
     delete next[key];
     return next;

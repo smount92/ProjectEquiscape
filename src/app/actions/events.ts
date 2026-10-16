@@ -7,11 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { sanitizeText } from "@/lib/utils/validation";
-import {
-    EVENT_TYPE_DB_FALLBACK,
-    isCreatableEventType,
-    isLegacyShowEvent,
-} from "@/components/events/eventTypes";
+import { EVENT_TYPE_DB_FALLBACK, isCreatableEventType, isLegacyShowEvent } from "@/components/events/eventTypes";
 
 // ============================================================
 // EVENTS — Server Actions
@@ -36,11 +32,13 @@ const EVENT_LIST_COLUMNS =
  * @param query - Partial alias to search for
  * @returns Matching users with id and alias
  */
-export async function searchUsers(query: string): Promise<{
-    id: string;
-    aliasName: string;
-    avatarUrl: string | null;
-}[]> {
+export async function searchUsers(query: string): Promise<
+    {
+        id: string;
+        aliasName: string;
+        avatarUrl: string | null;
+    }[]
+> {
     if (!query || query.trim().length < 2) return [];
     const supabase = await createClient();
     const { data } = await supabase
@@ -145,11 +143,7 @@ export async function createEvent(data: {
         rsvp_count: 1, // Creator auto-RSVPs
     });
 
-    let { data: event, error } = await supabase
-        .from("events")
-        .insert(row(data.eventType))
-        .select("id")
-        .single();
+    let { data: event, error } = await supabase.from("events").insert(row(data.eventType)).select("id").single();
 
     // Pre-168 databases reject 'external_show' / 'club' via the
     // event_type CHECK constraint (23514). Store the nearest legal
@@ -161,11 +155,7 @@ export async function createEvent(data: {
             "Events",
             `event_type '${data.eventType}' rejected by CHECK constraint — storing '${fallback}' (migration 168 not applied)`,
         );
-        ({ data: event, error } = await supabase
-            .from("events")
-            .insert(row(fallback))
-            .select("id")
-            .single());
+        ({ data: event, error } = await supabase.from("events").insert(row(fallback)).select("id").single());
     }
 
     if (error) return { success: false, error: error.message };
@@ -200,7 +190,9 @@ export async function getEvents(filters?: {
     limit?: number;
 }): Promise<MHHEvent[]> {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
     const now = new Date().toISOString();
     const wantsPast = filters?.past === true;
 
@@ -230,27 +222,20 @@ export async function getEvents(filters?: {
     const { data: events } = await query;
     if (!events || events.length === 0) return [];
 
-
-
     // Get group names
-    const groupIds = [...new Set(
-        (events as { group_id: string | null }[])
-            .map(e => e.group_id)
-            .filter(Boolean) as string[]
-    )];
+    const groupIds = [
+        ...new Set((events as { group_id: string | null }[]).map((e) => e.group_id).filter(Boolean) as string[]),
+    ];
     const groupNames = new Map<string, string>();
     if (groupIds.length > 0) {
-        const { data: groups } = await supabase
-            .from("groups")
-            .select("id, name")
-            .in("id", groupIds);
+        const { data: groups } = await supabase.from("groups").select("id, name").in("id", groupIds);
         (groups || []).forEach((g: { id: string; name: string }) => groupNames.set(g.id, g.name));
     }
 
     // Get user's RSVPs
     const rsvpMap = new Map<string, string>();
     if (user) {
-        const eventIds = (events as { id: string }[]).map(e => e.id);
+        const eventIds = (events as { id: string }[]).map((e) => e.id);
         const { data: rsvps } = await supabase
             .from("event_rsvps")
             .select("event_id, status")
@@ -261,7 +246,7 @@ export async function getEvents(filters?: {
         }
     }
 
-    return (events as Record<string, unknown>[]).map(e => ({
+    return (events as Record<string, unknown>[]).map((e) => ({
         id: e.id as string,
         name: e.name as string,
         description: e.description as string | null,
@@ -276,7 +261,7 @@ export async function getEvents(filters?: {
         region: e.region as string | null,
         virtualUrl: e.virtual_url as string | null,
         groupId: e.group_id as string | null,
-        groupName: e.group_id ? (groupNames.get(e.group_id as string) || null) : null,
+        groupName: e.group_id ? groupNames.get(e.group_id as string) || null : null,
         showId: e.show_id as string | null,
         createdBy: e.created_by as string,
         creatorAlias: (e as { users?: { alias_name: string } | null }).users?.alias_name || "Unknown",
@@ -291,13 +276,11 @@ export async function getEvents(filters?: {
 /** Get single event */
 export async function getEvent(eventId: string): Promise<MHHEvent | null> {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
 
-    const { data } = await supabase
-        .from("events")
-        .select("*")
-        .eq("id", eventId)
-        .maybeSingle();
+    const { data } = await supabase.from("events").select("*").eq("id", eventId).maybeSingle();
 
     if (!data) return null;
     const e = data as Record<string, unknown>;
@@ -362,18 +345,19 @@ export async function getEvent(eventId: string): Promise<MHHEvent | null> {
 /** Set RSVP status */
 export async function rsvpEvent(
     eventId: string,
-    status: "going" | "interested" | "not_going"
+    status: "going" | "interested" | "not_going",
 ): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
     // Upsert RSVP
-    const { error } = await supabase
-        .from("event_rsvps")
-        .upsert({
+    const { error } = await supabase.from("event_rsvps").upsert(
+        {
             event_id: eventId,
             user_id: user.id,
             status,
-        }, { onConflict: "event_id,user_id" });
+        },
+        { onConflict: "event_id,user_id" },
+    );
 
     if (error) return { success: false, error: error.message };
 
@@ -384,7 +368,10 @@ export async function rsvpEvent(
         .eq("event_id", eventId)
         .in("status", ["going", "interested"]);
 
-    await supabase.from("events").update({ rsvp_count: count || 0 }).eq("id", eventId);
+    await supabase
+        .from("events")
+        .update({ rsvp_count: count || 0 })
+        .eq("id", eventId);
 
     revalidatePath("/community/events");
     revalidatePath(`/community/events/${eventId}`);
@@ -404,7 +391,7 @@ export async function getUpcomingEvents(): Promise<MHHEvent[]> {
 
     if (!rsvps || rsvps.length === 0) return [];
 
-    const eventIds = (rsvps as { event_id: string }[]).map(r => r.event_id);
+    const eventIds = (rsvps as { event_id: string }[]).map((r) => r.event_id);
     const rsvpMap = new Map<string, string>();
     for (const r of rsvps as { event_id: string; status: string }[]) {
         rsvpMap.set(r.event_id, r.status);
@@ -420,7 +407,7 @@ export async function getUpcomingEvents(): Promise<MHHEvent[]> {
 
     if (!events || events.length === 0) return [];
 
-    return (events as Record<string, unknown>[]).map(e => ({
+    return (events as Record<string, unknown>[]).map((e) => ({
         id: e.id as string,
         name: e.name as string,
         description: e.description as string | null,
@@ -466,15 +453,10 @@ export async function deleteEvent(eventId: string): Promise<{ success: boolean; 
     // nonexistent image_url column, errored silently, and leaked
     // every file (same bug class deletePost fixed).
     try {
-        const { data: photos } = await supabase
-            .from("event_photos")
-            .select("image_path")
-            .eq("event_id", eventId);
+        const { data: photos } = await supabase.from("event_photos").select("image_path").eq("event_id", eventId);
 
         if (photos && photos.length > 0) {
-            const paths = (photos as { image_path: string }[])
-                .map(p => p.image_path)
-                .filter(Boolean);
+            const paths = (photos as { image_path: string }[]).map((p) => p.image_path).filter(Boolean);
 
             if (paths.length > 0) {
                 await supabase.storage.from("horse-images").remove(paths);
@@ -482,29 +464,26 @@ export async function deleteEvent(eventId: string): Promise<{ success: boolean; 
         }
 
         // Also clean up any media_attachments (posts within this event)
-        const { data: eventPosts } = await supabase
-            .from("posts")
-            .select("id")
-            .eq("event_id", eventId);
+        const { data: eventPosts } = await supabase.from("posts").select("id").eq("event_id", eventId);
 
         if (eventPosts && eventPosts.length > 0) {
-            const postIds = (eventPosts as { id: string }[]).map(p => p.id);
+            const postIds = (eventPosts as { id: string }[]).map((p) => p.id);
             const { data: media } = await supabase
                 .from("media_attachments")
                 .select("storage_path")
                 .in("post_id", postIds);
 
             if (media && media.length > 0) {
-                const mediaPaths = (media as { storage_path: string }[])
-                    .map(m => m.storage_path)
-                    .filter(Boolean);
+                const mediaPaths = (media as { storage_path: string }[]).map((m) => m.storage_path).filter(Boolean);
 
                 if (mediaPaths.length > 0) {
                     await supabase.storage.from("horse-images").remove(mediaPaths);
                 }
             }
         }
-    } catch (err) { logger.error("Events", "Background task failed", err); }
+    } catch (err) {
+        logger.error("Events", "Background task failed", err);
+    }
 
     // Delete RSVPs first
     await supabase.from("event_rsvps").delete().eq("event_id", eventId);
@@ -531,16 +510,12 @@ export async function updateEvent(
         region?: string;
         virtualUrl?: string;
         judgingMethod?: "community_vote" | "expert_judge";
-    }
+    },
 ): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
     // Verify ownership
-    const { data: event } = await supabase
-        .from("events")
-        .select("created_by")
-        .eq("id", eventId)
-        .single();
+    const { data: event } = await supabase.from("events").select("created_by").eq("id", eventId).single();
 
     if (!event || (event as { created_by: string }).created_by !== user.id) {
         return { success: false, error: "Not authorized — only the event creator can edit." };
@@ -562,10 +537,7 @@ export async function updateEvent(
 
     if (Object.keys(updates).length === 0) return { success: true };
 
-    const { error } = await supabase
-        .from("events")
-        .update(updates)
-        .eq("id", eventId);
+    const { error } = await supabase.from("events").update(updates).eq("id", eventId);
 
     if (error) return { success: false, error: error.message };
 
@@ -581,12 +553,14 @@ export async function updateEvent(
 /**
  * Get all judges assigned to an event.
  */
-export async function getEventJudges(eventId: string): Promise<{
-    id: string;
-    userId: string;
-    aliasName: string;
-    avatarUrl: string | null;
-}[]> {
+export async function getEventJudges(eventId: string): Promise<
+    {
+        id: string;
+        userId: string;
+        aliasName: string;
+        avatarUrl: string | null;
+    }[]
+> {
     const supabase = await createClient();
 
     const { data } = await supabase
@@ -613,16 +587,12 @@ export async function getEventJudges(eventId: string): Promise<{
  */
 export async function addEventJudge(
     eventId: string,
-    userAlias: string
+    userAlias: string,
 ): Promise<{ success: boolean; error?: string; coiWarnings?: string[] }> {
     const { supabase, user } = await requireAuth();
 
     // Verify ownership
-    const { data: event } = await supabase
-        .from("events")
-        .select("created_by")
-        .eq("id", eventId)
-        .single();
+    const { data: event } = await supabase.from("events").select("created_by").eq("id", eventId).single();
 
     if (!event || (event as { created_by: string }).created_by !== user.id) {
         return { success: false, error: "Only the event creator can assign judges." };
@@ -644,12 +614,10 @@ export async function addEventJudge(
     const coiResult = await checkJudgeCOI(judgeId, eventId);
 
     // Insert
-    const { error } = await supabase
-        .from("event_judges")
-        .insert({
-            event_id: eventId,
-            user_id: judgeId,
-        });
+    const { error } = await supabase.from("event_judges").insert({
+        event_id: eventId,
+        user_id: judgeId,
+    });
 
     if (error) {
         if (error.code === "23505") return { success: false, error: "This user is already a judge." };
@@ -665,7 +633,11 @@ export async function addEventJudge(
         try {
             const supabaseDeferred = await createClient();
             const { data: ev } = await supabaseDeferred.from("events").select("name").eq("id", eventId).single();
-            const { data: actor } = await supabaseDeferred.from("users").select("alias_name").eq("id", assignerId).single();
+            const { data: actor } = await supabaseDeferred
+                .from("users")
+                .select("alias_name")
+                .eq("id", assignerId)
+                .single();
             const alias = (actor as { alias_name: string } | null)?.alias_name || "Someone";
             const showName = (ev as { name: string } | null)?.name || "a show";
             const { createNotification } = await import("@/lib/notifications/createNotification");
@@ -676,7 +648,9 @@ export async function addEventJudge(
                 content: `@${alias} assigned you as an expert judge for "${showName}"`,
                 linkUrl: `/shows/${eventId}`,
             });
-        } catch (err) { logger.error("Events", "Background task failed", err); }
+        } catch (err) {
+            logger.error("Events", "Background task failed", err);
+        }
     });
 
     return { success: true, coiWarnings: coiResult.hasConflict ? coiResult.conflicts : undefined };
@@ -685,36 +659,23 @@ export async function addEventJudge(
 /**
  * Remove a judge from an event.
  */
-export async function removeEventJudge(
-    judgeId: string
-): Promise<{ success: boolean; error?: string }> {
+export async function removeEventJudge(judgeId: string): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
     // Fetch the judge record to verify the event ownership
-    const { data: judge } = await supabase
-        .from("event_judges")
-        .select("event_id")
-        .eq("id", judgeId)
-        .single();
+    const { data: judge } = await supabase.from("event_judges").select("event_id").eq("id", judgeId).single();
 
     if (!judge) return { success: false, error: "Judge record not found." };
 
     const eventId = (judge as { event_id: string }).event_id;
 
-    const { data: event } = await supabase
-        .from("events")
-        .select("created_by")
-        .eq("id", eventId)
-        .single();
+    const { data: event } = await supabase.from("events").select("created_by").eq("id", eventId).single();
 
     if (!event || (event as { created_by: string }).created_by !== user.id) {
         return { success: false, error: "Only the event creator can remove judges." };
     }
 
-    const { error } = await supabase
-        .from("event_judges")
-        .delete()
-        .eq("id", judgeId);
+    const { error } = await supabase.from("event_judges").delete().eq("id", judgeId);
 
     if (error) return { success: false, error: error.message };
 
@@ -729,10 +690,7 @@ export async function removeEventJudge(
 /**
  * Add a comment to an event.
  */
-export async function addEventComment(
-    eventId: string,
-    content: string
-): Promise<{ success: boolean; error?: string }> {
+export async function addEventComment(eventId: string, content: string): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
     if (!content.trim()) return { success: false, error: "Comment cannot be empty." };
     if (content.trim().length > 500) return { success: false, error: "Comment is too long (500 char max)." };
@@ -752,9 +710,17 @@ export async function addEventComment(
     after(async () => {
         try {
             const supabaseDeferred = await createClient();
-            const { data: event } = await supabaseDeferred.from("events").select("created_by, name").eq("id", eventId).single();
+            const { data: event } = await supabaseDeferred
+                .from("events")
+                .select("created_by, name")
+                .eq("id", eventId)
+                .single();
             if (event && (event as { created_by: string }).created_by !== userId) {
-                const { data: actor } = await supabaseDeferred.from("users").select("alias_name").eq("id", userId).single();
+                const { data: actor } = await supabaseDeferred
+                    .from("users")
+                    .select("alias_name")
+                    .eq("id", userId)
+                    .single();
                 const alias = (actor as { alias_name: string } | null)?.alias_name || "Someone";
                 const { createNotification } = await import("@/lib/notifications/createNotification");
                 await createNotification({
@@ -767,7 +733,9 @@ export async function addEventComment(
                 const { parseAndNotifyMentions } = await import("@/app/actions/mentions");
                 await parseAndNotifyMentions(trimmedContent, userId, alias, `/community/events/${eventId}`);
             }
-        } catch (err) { logger.error("Events", "Background task failed", err); }
+        } catch (err) {
+            logger.error("Events", "Background task failed", err);
+        }
     });
 
     return { success: true };
@@ -776,15 +744,10 @@ export async function addEventComment(
 /**
  * Delete an event comment.
  */
-export async function deleteEventComment(
-    commentId: string
-): Promise<{ success: boolean; error?: string }> {
+export async function deleteEventComment(commentId: string): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
-    const { error } = await supabase
-        .from("event_comments")
-        .delete()
-        .eq("id", commentId);
+    const { error } = await supabase.from("event_comments").delete().eq("id", commentId);
 
     if (error) return { success: false, error: error.message };
     revalidatePath("/community/events");
@@ -857,7 +820,7 @@ export async function getEventAttendees(eventId: string): Promise<EventAttendee[
 export async function addEventPhoto(
     eventId: string,
     imagePath: string,
-    caption?: string
+    caption?: string,
 ): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
@@ -889,10 +852,10 @@ export async function getEventPhotos(eventId: string) {
     // Batch public URLs
     if (photos.length === 0) return [];
     const { getPublicImageUrls } = await import("@/lib/utils/storage");
-    const paths = photos.map(p => p.image_path);
+    const paths = photos.map((p) => p.image_path);
     const urlMap = getPublicImageUrls(paths);
 
-    return photos.map(p => ({
+    return photos.map((p) => ({
         id: p.id,
         imageUrl: urlMap.get(p.image_path) || "",
         caption: p.caption,
@@ -905,9 +868,7 @@ export async function getEventPhotos(eventId: string) {
 /**
  * Delete an event photo.
  */
-export async function deleteEventPhoto(
-    photoId: string
-): Promise<{ success: boolean; error?: string }> {
+export async function deleteEventPhoto(photoId: string): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
     // Fetch the bucket-relative path before deleting (image_path —
@@ -925,7 +886,9 @@ export async function deleteEventPhoto(
                 await supabase.storage.from("horse-images").remove([path]);
             }
         }
-    } catch (err) { logger.error("Events", "Background task failed", err); }
+    } catch (err) {
+        logger.error("Events", "Background task failed", err);
+    }
 
     const { error } = await supabase.from("event_photos").delete().eq("id", photoId);
     if (error) return { success: false, error: error.message };

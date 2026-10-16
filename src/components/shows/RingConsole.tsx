@@ -28,18 +28,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import {
-    combineClasses,
-    recordPlacings,
-    splitClass,
-    updateClass,
-} from "@/app/actions/shows-v2";
-import {
-    enqueueSave,
-    flushQueue,
-    loadQueue,
-    type PendingPlacingSave,
-} from "@/lib/shows/retryQueue";
+import { combineClasses, recordPlacings, splitClass, updateClass } from "@/app/actions/shows-v2";
+import { enqueueSave, flushQueue, loadQueue, type PendingPlacingSave } from "@/lib/shows/retryQueue";
 import { deriveRunOrder, type RingClass, type RingConsoleData } from "@/lib/shows/ring";
 import { MAX_PLACE, placeLabel, ribbonHex } from "@/lib/shows/placings";
 import { formatStatus } from "@/lib/shows/stateMachine";
@@ -73,9 +63,7 @@ export default function RingConsole({ data }: { data: RingConsoleData }) {
 
     // ── Optimistic status overlay: queued offline saves flip the
     // class locally so the run order advances without the server. ──
-    const [statusOverlay, setStatusOverlay] = useState<Map<string, ClassStatus>>(
-        () => new Map(),
-    );
+    const [statusOverlay, setStatusOverlay] = useState<Map<string, ClassStatus>>(() => new Map());
     const classes = useMemo<RingClass[]>(
         () =>
             data.classes.map((c) => ({
@@ -105,9 +93,7 @@ export default function RingConsole({ data }: { data: RingConsoleData }) {
             if (result.rejected.length > 0) {
                 // The server REFUSED these saves — they are dropped, not
                 // retried; the steward re-records against fresh state.
-                setQueueNotice(
-                    `A queued save was refused and dropped: ${result.rejected[0].error}`,
-                );
+                setQueueNotice(`A queued save was refused and dropped: ${result.rejected[0].error}`);
             }
             if (result.flushed.length > 0) router.refresh();
         } finally {
@@ -166,9 +152,7 @@ export default function RingConsole({ data }: { data: RingConsoleData }) {
     const { currentIndex, onDeckIndex } = deriveRunOrder(classes);
     const current = currentIndex !== null ? classes[currentIndex] : null;
     const onDeck = onDeckIndex !== null ? classes[onDeckIndex] : null;
-    const judgeable = classes.filter(
-        (c) => c.status !== "cancelled" && c.status !== "combined",
-    );
+    const judgeable = classes.filter((c) => c.status !== "cancelled" && c.status !== "combined");
     const placedCount = judgeable.filter((c) => c.status === "placed").length;
 
     const [callError, setCallError] = useState<string | null>(null);
@@ -201,8 +185,7 @@ export default function RingConsole({ data }: { data: RingConsoleData }) {
                         {pending.length} save{pending.length === 1 ? "" : "s"} pending
                     </span>
                     <span className="text-sm text-secondary-foreground">
-                        Recorded here, waiting for signal — they retry automatically when
-                        you&apos;re back online.
+                        Recorded here, waiting for signal — they retry automatically when you&apos;re back online.
                     </span>
                     <Button variant="outline" size="sm" onClick={() => void runFlush()}>
                         Retry now
@@ -216,19 +199,15 @@ export default function RingConsole({ data }: { data: RingConsoleData }) {
             )}
 
             {/* ── NOW JUDGING masthead ── */}
-            <section
-                className="leather-panel stitched rounded-lg p-5 sm:p-6"
-                aria-label="Now judging"
-            >
+            <section className="leather-panel stitched rounded-lg p-5 sm:p-6" aria-label="Now judging">
                 {!running ? (
                     <div className="flex flex-col gap-2">
                         {/* Friendly guidance — the ring opens with the show. */}
-                        <span className="text-xs font-semibold tracking-wide uppercase text-(--leather-text-muted)">
+                        <span className="text-xs font-semibold tracking-wide text-(--leather-text-muted) uppercase">
                             The ring is quiet
                         </span>
                         <p className="m-0 text-lg font-bold text-(--leather-text)">
-                            This show is {formatStatus(show.status)} — the ring console opens
-                            when it&apos;s running.
+                            This show is {formatStatus(show.status)} — the ring console opens when it&apos;s running.
                         </p>
                         <p className="m-0 text-sm text-(--leather-text-soft)">
                             {canManage
@@ -238,7 +217,7 @@ export default function RingConsole({ data }: { data: RingConsoleData }) {
                     </div>
                 ) : current ? (
                     <div className="flex flex-col gap-1">
-                        <span className="text-xs font-semibold tracking-wide uppercase text-(--leather-text-muted)">
+                        <span className="text-xs font-semibold tracking-wide text-(--leather-text-muted) uppercase">
                             Now judging
                         </span>
                         <p
@@ -248,14 +227,13 @@ export default function RingConsole({ data }: { data: RingConsoleData }) {
                             {classLabel(current)}
                         </p>
                         <p className="m-0 text-sm text-(--leather-text-soft)">
-                            {current.divisionName} · {current.sectionName} ·{" "}
-                            {current.entries.length} entr
+                            {current.divisionName} · {current.sectionName} · {current.entries.length} entr
                             {current.entries.length === 1 ? "y" : "ies"}
                         </p>
                     </div>
                 ) : (
                     <div className="flex flex-col gap-1">
-                        <span className="text-xs font-semibold tracking-wide uppercase text-(--leather-text-muted)">
+                        <span className="text-xs font-semibold tracking-wide text-(--leather-text-muted) uppercase">
                             Now judging
                         </span>
                         <p className="m-0 text-lg font-bold text-(--leather-text)">
@@ -270,9 +248,7 @@ export default function RingConsole({ data }: { data: RingConsoleData }) {
                     </span>
                     {onDeck && (
                         <span className="text-sm text-(--leather-text-soft)">
-                            <span className="font-semibold uppercase text-(--leather-text-muted)">
-                                On deck:
-                            </span>{" "}
+                            <span className="font-semibold text-(--leather-text-muted) uppercase">On deck:</span>{" "}
                             <span className="text-(--leather-text)" data-testid="on-deck">
                                 {classLabel(onDeck)}
                             </span>
@@ -327,9 +303,7 @@ export default function RingConsole({ data }: { data: RingConsoleData }) {
                             <li
                                 key={cls.classId}
                                 className={`flex min-h-12 flex-wrap items-center gap-x-3 gap-y-1 rounded-md border px-3 py-2 ${
-                                    isCurrent
-                                        ? "border-forest ring-1 ring-forest"
-                                        : "border-input"
+                                    isCurrent ? "border-forest ring-1 ring-forest" : "border-input"
                                 } ${dead ? "opacity-50" : ""}`}
                                 data-testid="run-order-row"
                             >
@@ -452,15 +426,14 @@ function RingPlacingRecorder({
             <div className="flex flex-wrap items-center gap-3">
                 <span className="ledger-tab !mb-0">Record Placings</span>
                 <span className="text-sm text-muted-foreground">
-                    Tap leg tags (the number card each horse wears) in placing order — first
-                    tap is 1st. Tap again to remove.
+                    Tap leg tags (the number card each horse wears) in placing order — first tap is 1st. Tap again to
+                    remove.
                 </span>
             </div>
 
             {cls.entries.length === 0 ? (
                 <p className="mt-3 text-sm text-muted-foreground">
-                    No live entries on the table for this class — save &amp; mark it done to
-                    move on.
+                    No live entries on the table for this class — save &amp; mark it done to move on.
                 </p>
             ) : (
                 <ul className="mt-4 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3 lg:grid-cols-4">
@@ -478,18 +451,14 @@ function RingPlacingRecorder({
                                             : `Entry ${entry.entryNumber ?? "untagged"} ${entry.horseName} — tap to place`
                                     }
                                     className={`flex min-h-24 w-full cursor-pointer flex-col items-start justify-between gap-1 rounded-lg border-2 bg-card p-3 text-left transition-all ${
-                                        place !== null
-                                            ? "border-forest ring-2 ring-forest"
-                                            : "border-input"
+                                        place !== null ? "border-forest ring-2 ring-forest" : "border-input"
                                     }`}
                                     onClick={() => toggleEntry(entry.id)}
                                 >
                                     <span className="flex w-full items-start justify-between gap-2">
                                         {/* THE LEG TAG — how the steward knows the horse. */}
                                         <span className="font-mono text-3xl font-bold text-foreground">
-                                            {entry.entryNumber !== null
-                                                ? `#${entry.entryNumber}`
-                                                : "—"}
+                                            {entry.entryNumber !== null ? `#${entry.entryNumber}` : "—"}
                                         </span>
                                         {place !== null && (
                                             <span
@@ -500,17 +469,14 @@ function RingPlacingRecorder({
                                                     aria-hidden="true"
                                                     className="inline-block h-2.5 w-2.5 rounded-full border border-border"
                                                     style={{
-                                                        backgroundColor:
-                                                            ribbonHex(place) ?? undefined,
+                                                        backgroundColor: ribbonHex(place) ?? undefined,
                                                     }}
                                                 />
                                                 {placeLabel(place)}
                                             </span>
                                         )}
                                     </span>
-                                    <span className="truncate text-xs text-muted-foreground">
-                                        {entry.horseName}
-                                    </span>
+                                    <span className="truncate text-xs text-muted-foreground">{entry.horseName}</span>
                                 </button>
                             </li>
                         );
@@ -530,12 +496,7 @@ function RingPlacingRecorder({
             )}
 
             <div className="mt-4 flex flex-wrap items-center gap-3">
-                <Button
-                    size="wide"
-                    onClick={() => save(true)}
-                    disabled={saving !== null}
-                    data-testid="ring-save-done"
-                >
+                <Button size="wide" onClick={() => save(true)} disabled={saving !== null} data-testid="ring-save-done">
                     {saving === "done" ? "Saving…" : "Save & class done"}
                 </Button>
                 <Button
@@ -556,12 +517,7 @@ function RingPlacingRecorder({
                     refuse illegal states with their own reasons). */}
                 {canManage && (
                     <span className="ml-auto flex gap-2">
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setDialog("split")}
-                            data-testid="open-split"
-                        >
+                        <Button variant="ghost" size="sm" onClick={() => setDialog("split")} data-testid="open-split">
                             Split class…
                         </Button>
                         <Button
@@ -605,15 +561,7 @@ function RingPlacingRecorder({
 // Split / combine dialogs — minimal, driving the existing actions.
 // ══════════════════════════════════════════════════════════════
 
-function SplitDialog({
-    cls,
-    onClose,
-    onDone,
-}: {
-    cls: RingClass;
-    onClose: () => void;
-    onDone: () => void;
-}) {
+function SplitDialog({ cls, onClose, onDone }: { cls: RingClass; onClose: () => void; onDone: () => void }) {
     const [name, setName] = useState(`${cls.className} B`);
     const [moving, setMoving] = useState<Set<string>>(() => new Set());
     const [busy, setBusy] = useState(false);
@@ -649,18 +597,13 @@ function SplitDialog({
                 <DialogHeader>
                     <DialogTitle>Split {classLabel(cls)}</DialogTitle>
                     <DialogDescription>
-                        Tap the leg tags that MOVE to the new class; the rest stay. The
-                        original class stays in the classlist — it&rsquo;s kept for the
-                        records.
+                        Tap the leg tags that MOVE to the new class; the rest stay. The original class stays in the
+                        classlist — it&rsquo;s kept for the records.
                     </DialogDescription>
                 </DialogHeader>
                 <label className="flex flex-col gap-1 text-sm font-medium">
                     New class name
-                    <Input
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        maxLength={120}
-                    />
+                    <Input value={name} onChange={(e) => setName(e.target.value)} maxLength={120} />
                 </label>
                 <ul className="grid max-h-60 list-none grid-cols-2 gap-2 overflow-y-auto p-0 sm:grid-cols-3">
                     {cls.entries.map((entry) => (
@@ -669,18 +612,14 @@ function SplitDialog({
                                 type="button"
                                 aria-pressed={moving.has(entry.id)}
                                 className={`flex min-h-12 w-full cursor-pointer items-baseline gap-2 rounded-md border-2 bg-card px-3 py-2 text-left ${
-                                    moving.has(entry.id)
-                                        ? "border-forest ring-1 ring-forest"
-                                        : "border-input"
+                                    moving.has(entry.id) ? "border-forest ring-1 ring-forest" : "border-input"
                                 }`}
                                 onClick={() => toggle(entry.id)}
                             >
                                 <span className="font-mono text-lg font-bold">
                                     {entry.entryNumber !== null ? `#${entry.entryNumber}` : "—"}
                                 </span>
-                                <span className="truncate text-xs text-muted-foreground">
-                                    {entry.horseName}
-                                </span>
+                                <span className="truncate text-xs text-muted-foreground">{entry.horseName}</span>
                             </button>
                         </li>
                     ))}
@@ -753,18 +692,13 @@ function CombineDialog({
                 <DialogHeader>
                     <DialogTitle>Combine {classLabel(cls)}</DialogTitle>
                     <DialogDescription>
-                        Pick the classes to fold together with this one. Entries move to the
-                        combined class; the original classes close but stay in the classlist
-                        — kept for the records.
+                        Pick the classes to fold together with this one. Entries move to the combined class; the
+                        original classes close but stay in the classlist — kept for the records.
                     </DialogDescription>
                 </DialogHeader>
                 <label className="flex flex-col gap-1 text-sm font-medium">
                     Combined class name
-                    <Input
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        maxLength={120}
-                    />
+                    <Input value={name} onChange={(e) => setName(e.target.value)} maxLength={120} />
                 </label>
                 {candidates.length === 0 ? (
                     <p className="text-sm text-muted-foreground">
@@ -784,9 +718,7 @@ function CombineDialog({
                                     }`}
                                     onClick={() => toggle(candidate.classId)}
                                 >
-                                    <span className="text-sm font-semibold">
-                                        {classLabel(candidate)}
-                                    </span>
+                                    <span className="text-sm font-semibold">{classLabel(candidate)}</span>
                                     <span className="text-xs text-muted-foreground">
                                         {candidate.entries.length} entr
                                         {candidate.entries.length === 1 ? "y" : "ies"}

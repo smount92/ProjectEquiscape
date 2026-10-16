@@ -102,10 +102,10 @@ export default async function DealsNeedingAttention() {
 
     return (
         <div
-            className="bg-card border-input rounded-lg border p-6 shadow-md transition-all"
+            className="rounded-lg border border-input bg-card p-6 shadow-md transition-all"
             id="deals-needing-attention"
         >
-            <h3 className="text-secondary-foreground mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest uppercase">
+            <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest text-secondary-foreground uppercase">
                 <Handshake size={14} strokeWidth={1.5} /> Deals Needing You
             </h3>
             <div className="flex flex-col gap-2">
@@ -113,12 +113,12 @@ export default async function DealsNeedingAttention() {
                     <Link
                         key={row.key}
                         href={row.href}
-                        className="hover:border-input block rounded-md border border-transparent bg-black/[0.02] px-3 py-2 no-underline transition-colors hover:bg-black/[0.06] hover:no-underline"
+                        className="block rounded-md border border-transparent bg-black/[0.02] px-3 py-2 no-underline transition-colors hover:border-input hover:bg-black/[0.06] hover:no-underline"
                     >
-                        <p className="text-foreground m-0 truncate text-sm font-semibold">
+                        <p className="m-0 truncate text-sm font-semibold text-foreground">
                             {row.subject ?? `@${row.who}`}
                         </p>
-                        <p className="text-muted-foreground m-0 text-xs">
+                        <p className="m-0 text-xs text-muted-foreground">
                             {row.move}
                             {row.subject ? ` · @${row.who}` : ""}
                         </p>

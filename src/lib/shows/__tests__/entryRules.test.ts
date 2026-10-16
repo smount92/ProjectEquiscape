@@ -61,9 +61,7 @@ describe("entryRules — validateEntry", () => {
         ];
 
         it("refuses a NEW entrant once the show is full", () => {
-            const r = validateEntry(
-                input({ show: { ...show, capacity: 2 }, existingEntries: others }),
-            );
+            const r = validateEntry(input({ show: { ...show, capacity: 2 }, existingEntries: others }));
             expect(r.ok).toBe(false);
             expect(errorsOf(r).join(" ")).toMatch(/full/i);
         });
@@ -71,25 +69,17 @@ describe("entryRules — validateEntry", () => {
         it("existing entrants keep adding classes; scratched rows free a table", () => {
             const mine = { ...others[0], ownerId: "user-1" };
             expect(
-                validateEntry(
-                    input({ show: { ...show, capacity: 2 }, existingEntries: [mine, others[1]] }),
-                ).ok,
+                validateEntry(input({ show: { ...show, capacity: 2 }, existingEntries: [mine, others[1]] })).ok,
             ).toBe(true);
             const scratched = { ...others[0], status: "scratched" as const };
             expect(
-                validateEntry(
-                    input({ show: { ...show, capacity: 2 }, existingEntries: [scratched, others[1]] }),
-                ).ok,
+                validateEntry(input({ show: { ...show, capacity: 2 }, existingEntries: [scratched, others[1]] })).ok,
             ).toBe(true);
         });
 
         it("null/zero capacity never caps", () => {
-            expect(
-                validateEntry(input({ show: { ...show, capacity: null }, existingEntries: others })).ok,
-            ).toBe(true);
-            expect(
-                validateEntry(input({ show: { ...show, capacity: 0 }, existingEntries: others })).ok,
-            ).toBe(true);
+            expect(validateEntry(input({ show: { ...show, capacity: null }, existingEntries: others })).ok).toBe(true);
+            expect(validateEntry(input({ show: { ...show, capacity: 0 }, existingEntries: others })).ok).toBe(true);
         });
     });
 
@@ -135,10 +125,12 @@ describe("entryRules — validateEntry", () => {
             expect(r.ok).toBe(true);
         });
         it("no deadline set → status alone governs", () => {
-            const r = validateEntry(input({
-                show: { ...show, entriesCloseAt: null },
-                now: new Date("2030-01-01T00:00:00Z"),
-            }));
+            const r = validateEntry(
+                input({
+                    show: { ...show, entriesCloseAt: null },
+                    now: new Date("2030-01-01T00:00:00Z"),
+                }),
+            );
             expect(r.ok).toBe(true);
         });
     });
@@ -159,17 +151,21 @@ describe("entryRules — validateEntry", () => {
 
     describe("ownership and proxy", () => {
         it("rejects entering a horse you do not own", () => {
-            const r = validateEntry(input({
-                candidate: { horseId: "horse-1", ownerId: "user-2" },
-                horse: { ...horse, ownerId: "user-1" },
-            }));
+            const r = validateEntry(
+                input({
+                    candidate: { horseId: "horse-1", ownerId: "user-2" },
+                    horse: { ...horse, ownerId: "user-1" },
+                }),
+            );
             expect(r.ok).toBe(false);
             expect(errorsOf(r).join(" ")).toMatch(/own/i);
         });
         it("proxy showing: handler ≠ owner is legal", () => {
-            const r = validateEntry(input({
-                candidate: { horseId: "horse-1", ownerId: "user-1", handlerId: "user-99" },
-            }));
+            const r = validateEntry(
+                input({
+                    candidate: { horseId: "horse-1", ownerId: "user-1", handlerId: "user-99" },
+                }),
+            );
             expect(r).toEqual({ ok: true });
         });
     });
@@ -190,49 +186,61 @@ describe("entryRules — validateEntry", () => {
         });
 
         it("a scratched halter entry does not block re-entering halter", () => {
-            const r = validateEntry(input({
-                existingEntries: [{ ...existingHalterEntry, status: "scratched" }],
-            }));
+            const r = validateEntry(
+                input({
+                    existingEntries: [{ ...existingHalterEntry, status: "scratched" }],
+                }),
+            );
             expect(r).toEqual({ ok: true });
         });
 
         it("the SAME horse may still enter performance/workmanship/collectibility", () => {
             for (const axis of ["performance", "workmanship", "collectibility", "other"] as const) {
-                const r = validateEntry(input({
-                    targetClass: { ...halterClass, id: "class-x", divisionAxis: axis },
-                    existingEntries: [existingHalterEntry],
-                }));
+                const r = validateEntry(
+                    input({
+                        targetClass: { ...halterClass, id: "class-x", divisionAxis: axis },
+                        existingEntries: [existingHalterEntry],
+                    }),
+                );
                 expect(r).toEqual({ ok: true });
             }
         });
 
         it("a DIFFERENT horse in halter is unaffected", () => {
-            const r = validateEntry(input({
-                existingEntries: [{ ...existingHalterEntry, horseId: "horse-2" }],
-            }));
+            const r = validateEntry(
+                input({
+                    existingEntries: [{ ...existingHalterEntry, horseId: "horse-2" }],
+                }),
+            );
             expect(r).toEqual({ ok: true });
         });
 
         it("existing performance entries do not block a first halter entry", () => {
-            const r = validateEntry(input({
-                existingEntries: [{ ...existingHalterEntry, divisionAxis: "performance" }],
-            }));
+            const r = validateEntry(
+                input({
+                    existingEntries: [{ ...existingHalterEntry, divisionAxis: "performance" }],
+                }),
+            );
             expect(r).toEqual({ ok: true });
         });
     });
 
     describe("duplicate entry", () => {
         it("rejects the same horse twice in one class", () => {
-            const r = validateEntry(input({
-                targetClass: { ...halterClass, divisionAxis: "performance" },
-                existingEntries: [{
-                    classId: halterClass.id,
-                    horseId: "horse-1",
-                    ownerId: "user-1",
-                    status: "entered",
-                    divisionAxis: "performance",
-                }],
-            }));
+            const r = validateEntry(
+                input({
+                    targetClass: { ...halterClass, divisionAxis: "performance" },
+                    existingEntries: [
+                        {
+                            classId: halterClass.id,
+                            horseId: "horse-1",
+                            ownerId: "user-1",
+                            status: "entered",
+                            divisionAxis: "performance",
+                        },
+                    ],
+                }),
+            );
             expect(r.ok).toBe(false);
             expect(errorsOf(r).join(" ")).toMatch(/already entered in this class/i);
         });
@@ -254,80 +262,100 @@ describe("entryRules — validateEntry", () => {
         });
 
         it("rejects when the entrant is at the cap", () => {
-            const r = validateEntry(input({
-                targetClass: perfClass,
-                existingEntries: [mkEntry("horse-2"), mkEntry("horse-3")],
-            }));
+            const r = validateEntry(
+                input({
+                    targetClass: perfClass,
+                    existingEntries: [mkEntry("horse-2"), mkEntry("horse-3")],
+                }),
+            );
             expect(r.ok).toBe(false);
             expect(errorsOf(r).join(" ")).toMatch(/at most 2/i);
         });
         it("allows under the cap", () => {
-            const r = validateEntry(input({
-                targetClass: perfClass,
-                existingEntries: [mkEntry("horse-2")],
-            }));
+            const r = validateEntry(
+                input({
+                    targetClass: perfClass,
+                    existingEntries: [mkEntry("horse-2")],
+                }),
+            );
             expect(r).toEqual({ ok: true });
         });
         it("other entrants' entries do not count against my cap", () => {
-            const r = validateEntry(input({
-                targetClass: perfClass,
-                existingEntries: [mkEntry("horse-8", "user-9"), mkEntry("horse-9", "user-9")],
-            }));
+            const r = validateEntry(
+                input({
+                    targetClass: perfClass,
+                    existingEntries: [mkEntry("horse-8", "user-9"), mkEntry("horse-9", "user-9")],
+                }),
+            );
             expect(r).toEqual({ ok: true });
         });
         it("scratched entries do not count against the cap", () => {
-            const r = validateEntry(input({
-                targetClass: perfClass,
-                existingEntries: [
-                    { ...mkEntry("horse-2"), status: "scratched" },
-                    { ...mkEntry("horse-3"), status: "scratched" },
-                ],
-            }));
+            const r = validateEntry(
+                input({
+                    targetClass: perfClass,
+                    existingEntries: [
+                        { ...mkEntry("horse-2"), status: "scratched" },
+                        { ...mkEntry("horse-3"), status: "scratched" },
+                    ],
+                }),
+            );
             expect(r).toEqual({ ok: true });
         });
     });
 
     describe("scale and finish eligibility", () => {
         it("rejects a scale outside allowed_scales", () => {
-            const r = validateEntry(input({
-                targetClass: { ...halterClass, allowedScales: ["Stablemate", "Classic"] },
-            }));
+            const r = validateEntry(
+                input({
+                    targetClass: { ...halterClass, allowedScales: ["Stablemate", "Classic"] },
+                }),
+            );
             expect(r.ok).toBe(false);
             expect(errorsOf(r).join(" ")).toMatch(/Stablemate, Classic/);
         });
         it("accepts a matching scale", () => {
-            const r = validateEntry(input({
-                targetClass: { ...halterClass, allowedScales: ["Traditional"] },
-            }));
+            const r = validateEntry(
+                input({
+                    targetClass: { ...halterClass, allowedScales: ["Traditional"] },
+                }),
+            );
             expect(r).toEqual({ ok: true });
         });
         it("rejects unknown scale when the class restricts scales", () => {
-            const r = validateEntry(input({
-                horse: { ...horse, scale: null },
-                targetClass: { ...halterClass, allowedScales: ["Traditional"] },
-            }));
+            const r = validateEntry(
+                input({
+                    horse: { ...horse, scale: null },
+                    targetClass: { ...halterClass, allowedScales: ["Traditional"] },
+                }),
+            );
             expect(r.ok).toBe(false);
         });
         it("rejects a finish outside allowed_finishes", () => {
-            const r = validateEntry(input({
-                targetClass: { ...halterClass, allowedFinishes: ["CM", "AR"] },
-            }));
+            const r = validateEntry(
+                input({
+                    targetClass: { ...halterClass, allowedFinishes: ["CM", "AR"] },
+                }),
+            );
             expect(r.ok).toBe(false);
             expect(errorsOf(r).join(" ")).toMatch(/CM, AR/);
         });
         it("empty arrays mean unrestricted", () => {
-            const r = validateEntry(input({
-                targetClass: { ...halterClass, allowedScales: [], allowedFinishes: [] },
-            }));
+            const r = validateEntry(
+                input({
+                    targetClass: { ...halterClass, allowedScales: [], allowedFinishes: [] },
+                }),
+            );
             expect(r).toEqual({ ok: true });
         });
     });
 
     it("collects MULTIPLE violations in one pass", () => {
-        const r = validateEntry(input({
-            show: { ...show, status: "entries_closed" },
-            targetClass: { ...halterClass, status: "cancelled", allowedFinishes: ["CM"] },
-        }));
+        const r = validateEntry(
+            input({
+                show: { ...show, status: "entries_closed" },
+                targetClass: { ...halterClass, status: "cancelled", allowedFinishes: ["CM"] },
+            }),
+        );
         expect(r.ok).toBe(false);
         expect(errorsOf(r).length).toBeGreaterThanOrEqual(3);
     });
@@ -336,7 +364,14 @@ describe("entryRules — validateEntry", () => {
 describe("entryRules — the same photo under two stable records (online shows)", () => {
     const otherHalterClass: ClassFacts = { ...halterClass, id: "class-app" };
     const samePhotoElsewhere: ExistingEntry[] = [
-        { classId: "class-qh", horseId: "horse-2", ownerId: "user-1", status: "entered", divisionAxis: "halter", photoId: "photo-1" },
+        {
+            classId: "class-qh",
+            horseId: "horse-2",
+            ownerId: "user-1",
+            status: "entered",
+            divisionAxis: "halter",
+            photoId: "photo-1",
+        },
     ];
 
     it("refuses the photo a second halter class under a different horse", () => {

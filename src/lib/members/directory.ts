@@ -74,9 +74,7 @@ export function aliasIlikePattern(q: string): string {
  * dropped rather than trusted: sort must be in the vocabulary, page is
  * clamped to a sane integer, and q is sanitized + length-gated.
  */
-export function parseMemberSearchParams(
-    params: Record<string, string | string[] | undefined>,
-): MemberFilters {
+export function parseMemberSearchParams(params: Record<string, string | string[] | undefined>): MemberFilters {
     const filters: MemberFilters = { sort: DEFAULT_MEMBER_SORT, page: 1 };
 
     const q = sanitizeAliasQuery(first(params.q));
@@ -217,10 +215,7 @@ const DAY_MS = 86_400_000;
  * Returns null when we have no ping for this person — a card should say
  * nothing rather than guess.
  */
-export function formatLastActive(
-    iso: string | null | undefined,
-    now: Date = new Date(),
-): string | null {
+export function formatLastActive(iso: string | null | undefined, now: Date = new Date()): string | null {
     if (!iso) return null;
     const d = new Date(iso);
     if (Number.isNaN(d.getTime())) return null;

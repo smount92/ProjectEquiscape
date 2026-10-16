@@ -75,10 +75,7 @@ export async function POST(request: Request) {
     }
 
     if (!planIdFor(plan)) {
-        return NextResponse.json(
-            { error: "PayPal billing is not yet configured. Contact support." },
-            { status: 500 },
-        );
+        return NextResponse.json({ error: "PayPal billing is not yet configured. Contact support." }, { status: 500 });
     }
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://modelhorsehub.com";

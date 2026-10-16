@@ -144,20 +144,23 @@ export function normalizeTerm(raw: string): string {
 }
 
 export function identityLine(m: Pick<LinkerMold, "maker" | "scale" | "generation" | "sculptor" | "year">): string {
-    const scale = m.scale ? shortScale(m.scale) + (m.generation ? " " + m.generation : "") : m.generation ?? null;
+    const scale = m.scale ? shortScale(m.scale) + (m.generation ? " " + m.generation : "") : (m.generation ?? null);
     return [m.maker, scale, m.sculptor, m.year ? String(m.year) : null].filter(Boolean).join(" · ");
 }
 
 /** Molds that print the same identity line cannot be told apart by it. */
-export function markAmbiguous<T extends Pick<LinkerMold, "maker" | "scale" | "generation" | "sculptor" | "year" | "title">>(
-    molds: T[],
-): (T & { ambiguous: boolean })[] {
+export function markAmbiguous<
+    T extends Pick<LinkerMold, "maker" | "scale" | "generation" | "sculptor" | "year" | "title">,
+>(molds: T[]): (T & { ambiguous: boolean })[] {
     const seen = new Map<string, number>();
     for (const m of molds) {
         const k = m.title.toLowerCase() + "|" + identityLine(m).toLowerCase();
         seen.set(k, (seen.get(k) ?? 0) + 1);
     }
-    return molds.map((m) => ({ ...m, ambiguous: (seen.get(m.title.toLowerCase() + "|" + identityLine(m).toLowerCase()) ?? 0) > 1 }));
+    return molds.map((m) => ({
+        ...m,
+        ambiguous: (seen.get(m.title.toLowerCase() + "|" + identityLine(m).toLowerCase()) ?? 0) > 1,
+    }));
 }
 
 const SET_WORDS = /\b(set|assortment|collection|gift set|play set|playset|family|pack)\b/i;
@@ -272,7 +275,10 @@ export function scaleMatches(rowScale: string | null, chosen: string | null): bo
  * leading number, when it is not the mold's name and not a set. Null when
  * the release is just "the mold in this colour".
  */
-export function releaseName(release: Pick<LinkerRelease, "title" | "setName" | "isSetPiece">, moldTitle: string | null | undefined): string | null {
+export function releaseName(
+    release: Pick<LinkerRelease, "title" | "setName" | "isSetPiece">,
+    moldTitle: string | null | undefined,
+): string | null {
     if (release.setName || release.isSetPiece) return null;
     const name = splitNumberFromTitle(release.title).title;
     if (!name) return null;
@@ -281,11 +287,19 @@ export function releaseName(release: Pick<LinkerRelease, "title" | "setName" | "
 }
 
 /** What the linked banner says. */
-export function linkedLabel(mold: Pick<LinkerMold, "title" | "scale" | "generation"> | null, release: LinkerRelease | null): string {
+export function linkedLabel(
+    mold: Pick<LinkerMold, "title" | "scale" | "generation"> | null,
+    release: LinkerRelease | null,
+): string {
     if (!mold && !release) return "";
-    const moldBit = mold ? mold.title + (mold.scale ? " (" + shortScale(mold.scale) + (mold.generation ? " " + mold.generation : "") + ")" : "") : "";
+    const moldBit = mold
+        ? mold.title +
+          (mold.scale ? " (" + shortScale(mold.scale) + (mold.generation ? " " + mold.generation : "") + ")" : "")
+        : "";
     if (!release) return moldBit + ", mold only";
-    const rel = [release.model ? "#" + release.model : null, releaseName(release, mold?.title), release.look].filter(Boolean).join(" · ");
+    const rel = [release.model ? "#" + release.model : null, releaseName(release, mold?.title), release.look]
+        .filter(Boolean)
+        .join(" · ");
     return [moldBit, rel || release.title].filter(Boolean).join(" · ");
 }
 

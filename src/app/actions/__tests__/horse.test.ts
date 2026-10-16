@@ -16,7 +16,9 @@ vi.mock("next/cache", () => ({
     revalidateTag: vi.fn(),
 }));
 vi.mock("next/server", () => ({
-    after: vi.fn((fn: () => void) => { /* no-op in tests */ }),
+    after: vi.fn((fn: () => void) => {
+        /* no-op in tests */
+    }),
 }));
 vi.mock("@/lib/utils/validation", () => ({
     sanitizeText: vi.fn((s: string) => s.trim()),
@@ -25,7 +27,15 @@ vi.mock("@/app/actions/activity", () => ({
     createActivityEvent: vi.fn().mockResolvedValue(undefined),
 }));
 
-import { bulkDeleteHorses, bulkUpdateHorses, createHorseRecord, deleteHorse, finalizeHorseImages, quickAddHorse, updateHorseAction } from "@/app/actions/horse";
+import {
+    bulkDeleteHorses,
+    bulkUpdateHorses,
+    createHorseRecord,
+    deleteHorse,
+    finalizeHorseImages,
+    quickAddHorse,
+    updateHorseAction,
+} from "@/app/actions/horse";
 
 describe("horse.ts — CRUD", () => {
     beforeEach(() => {
@@ -39,7 +49,9 @@ describe("horse.ts — CRUD", () => {
     describe("createHorseRecord", () => {
         it("rejects unauthenticated users", async () => {
             mockClient.auth.getUser.mockResolvedValueOnce({ data: { user: null } });
-            await expect(createHorseRecord({ customName: "Test", finishType: "OF", isPublic: true })).rejects.toThrow(AuthError);
+            await expect(createHorseRecord({ customName: "Test", finishType: "OF", isPublic: true })).rejects.toThrow(
+                AuthError,
+            );
         });
 
         it("rejects missing name", async () => {
@@ -49,7 +61,12 @@ describe("horse.ts — CRUD", () => {
         });
 
         it("rejects model category without finishType", async () => {
-            const result = await createHorseRecord({ customName: "Test", finishType: "", isPublic: true, assetCategory: "model" });
+            const result = await createHorseRecord({
+                customName: "Test",
+                finishType: "",
+                isPublic: true,
+                assetCategory: "model",
+            });
             expect(result.success).toBe(false);
             expect(result.error).toMatch(/finish type/i);
         });
@@ -112,10 +129,12 @@ describe("horse.ts — CRUD", () => {
                 lifeStage: "in_progress",
                 conditionGrade: "Mint",
             });
-            expect(mockClient._mockQuery.insert).toHaveBeenCalledWith(expect.objectContaining({
-                condition_grade: null,
-                life_stage: "in_progress",
-            }));
+            expect(mockClient._mockQuery.insert).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    condition_grade: null,
+                    life_stage: "in_progress",
+                }),
+            );
         });
     });
 
@@ -129,10 +148,12 @@ describe("horse.ts — CRUD", () => {
                     condition_grade: "Mint",
                 },
             });
-            expect(mockClient._mockQuery.update).toHaveBeenCalledWith(expect.objectContaining({
-                life_stage: "in_progress",
-                condition_grade: null,
-            }));
+            expect(mockClient._mockQuery.update).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    life_stage: "in_progress",
+                    condition_grade: null,
+                }),
+            );
         });
 
         it("refuses to let an owner set their own Verified Artist badge", async () => {
@@ -147,10 +168,7 @@ describe("horse.ts — CRUD", () => {
 
             // The name and artist are the owner's to state; the badge that
             // says a human checked the claim is not.
-            const written = mockClient._mockQuery.update.mock.calls.at(-1)?.[0] as Record<
-                string,
-                unknown
-            >;
+            const written = mockClient._mockQuery.update.mock.calls.at(-1)?.[0] as Record<string, unknown>;
             expect(written).toMatchObject({ custom_name: "My Resin" });
             expect(written).not.toHaveProperty("finishing_artist_verified");
         });
@@ -553,10 +571,7 @@ describe("server-side validation — the boundary that wasn't there", () => {
                 isPublic: true,
                 attributes: { smuggled: "value" },
             });
-            const insert = mockClient._mockQuery.insert.mock.calls.at(-1)?.[0] as Record<
-                string,
-                unknown
-            >;
+            const insert = mockClient._mockQuery.insert.mock.calls.at(-1)?.[0] as Record<string, unknown>;
             expect(insert.attributes).toBeUndefined();
         });
     });
@@ -761,9 +776,8 @@ describe("finalizeHorseImages — tier limits never eat the batch", () => {
 
     /** Queue ONE implicit-await result (count reads, inserts) in order. */
     function queueThen(result: Record<string, unknown>) {
-        mockClient._mockQuery.then.mockImplementationOnce(((
-            resolve: (value: unknown) => unknown,
-        ) => Promise.resolve({ error: null, ...result }).then(resolve)) as never);
+        mockClient._mockQuery.then.mockImplementationOnce(((resolve: (value: unknown) => unknown) =>
+            Promise.resolve({ error: null, ...result }).then(resolve)) as never);
     }
 
     function asUser(tier?: string) {

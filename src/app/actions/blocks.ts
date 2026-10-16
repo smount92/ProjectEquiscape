@@ -33,11 +33,7 @@ export async function blockUser(targetId: string): Promise<{ success: boolean; e
 export async function unblockUser(targetId: string): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
-    const { error } = await supabase
-        .from("user_blocks")
-        .delete()
-        .eq("blocker_id", user.id)
-        .eq("blocked_id", targetId);
+    const { error } = await supabase.from("user_blocks").delete().eq("blocker_id", user.id).eq("blocked_id", targetId);
 
     if (error) return { success: false, error: error.message };
     revalidatePath("/feed");
@@ -52,10 +48,7 @@ export async function unblockUser(targetId: string): Promise<{ success: boolean;
 export async function getBlockedUserIds(): Promise<string[]> {
     const { supabase, user } = await requireAuth();
 
-    const { data } = await supabase
-        .from("user_blocks")
-        .select("blocked_id")
-        .eq("blocker_id", user.id);
+    const { data } = await supabase.from("user_blocks").select("blocked_id").eq("blocker_id", user.id);
 
     return (data ?? []).map((b: { blocked_id: string }) => b.blocked_id);
 }
@@ -66,14 +59,18 @@ export async function getBlockedUserIds(): Promise<string[]> {
  */
 export async function isBlocked(targetId: string): Promise<boolean> {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return false;
 
     // Check both directions — either user blocked the other
     const { data } = await supabase
         .from("user_blocks")
         .select("blocker_id")
-        .or(`and(blocker_id.eq.${user.id},blocked_id.eq.${targetId}),and(blocker_id.eq.${targetId},blocked_id.eq.${user.id})`)
+        .or(
+            `and(blocker_id.eq.${user.id},blocked_id.eq.${targetId}),and(blocker_id.eq.${targetId},blocked_id.eq.${user.id})`,
+        )
         .limit(1);
 
     return (data ?? []).length > 0;

@@ -1,11 +1,6 @@
 import { describe, it, expect } from "vitest";
 
-import {
-    EVIDENCE_DISCLAIMER,
-    buildEvidencePack,
-    evidencePackToText,
-    type EvidenceInput,
-} from "../evidence";
+import { EVIDENCE_DISCLAIMER, buildEvidencePack, evidencePackToText, type EvidenceInput } from "../evidence";
 import { emptyTerms, type DealTerms } from "../terms";
 import type { Installment } from "../ledger";
 
@@ -115,8 +110,7 @@ const input = (patch: Partial<EvidenceInput> = {}): EvidenceInput => ({
     ...patch,
 });
 
-const section = (pack: ReturnType<typeof buildEvidencePack>, id: string) =>
-    pack.sections.find((s) => s.id === id);
+const section = (pack: ReturnType<typeof buildEvidencePack>, id: string) => pack.sections.find((s) => s.id === id);
 
 describe("evidence pack", () => {
     it("leads with the disclaimer, which is load-bearing rather than boilerplate", () => {
@@ -143,11 +137,7 @@ describe("evidence pack", () => {
 
     it("uses the right role words for a commission", () => {
         const pack = buildEvidencePack(input({ kind: "commission" }));
-        expect(section(pack, "parties")?.rows?.map((r) => r.label)).toEqual([
-            "Artist",
-            "Commissioner",
-            "Record id",
-        ]);
+        expect(section(pack, "parties")?.rows?.map((r) => r.label)).toEqual(["Artist", "Commissioner", "Record id"]);
         expect(pack.subtitle).toMatch(/Commission between/);
     });
 
@@ -179,14 +169,7 @@ describe("evidence pack", () => {
 
     it("tables the ledger with both dated statements per row", () => {
         const ledger = section(buildEvidencePack(input()), "ledger");
-        expect(ledger!.table!.headers).toEqual([
-            "#",
-            "Amount",
-            "Due",
-            "Marked sent",
-            "Confirmed received",
-            "State",
-        ]);
+        expect(ledger!.table!.headers).toEqual(["#", "Amount", "Due", "Marked sent", "Confirmed received", "State"]);
         expect(ledger!.table!.rows).toHaveLength(4);
         expect(ledger!.table!.rows[0][5]).toBe("Received");
         expect(ledger!.table!.rows[1][5]).toBe("Marked sent");

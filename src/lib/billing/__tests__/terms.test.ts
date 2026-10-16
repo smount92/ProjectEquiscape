@@ -25,18 +25,8 @@ afterEach(() => {
 
 describe("the shipped catalogue", () => {
     it("offers four terms per tier, shortest first", () => {
-        expect(termsForTier("pro").map((t) => t.key)).toEqual([
-            "pro-1",
-            "pro-3",
-            "pro-6",
-            "pro-12",
-        ]);
-        expect(termsForTier("studio").map((t) => t.key)).toEqual([
-            "studio-1",
-            "studio-3",
-            "studio-6",
-            "studio-12",
-        ]);
+        expect(termsForTier("pro").map((t) => t.key)).toEqual(["pro-1", "pro-3", "pro-6", "pro-12"]);
+        expect(termsForTier("studio").map((t) => t.key)).toEqual(["studio-1", "studio-3", "studio-6", "studio-12"]);
     });
 
     it("prices every term as a two-decimal string, which is what PayPal wants", () => {

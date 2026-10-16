@@ -12,7 +12,8 @@ import { ebayApiBase, ebayCompsLive, ebayConfigured, ebayMarketplace } from "@/l
    PayPal client is tested. Nothing here reaches eBay. */
 
 const okToken = (expiresIn = 7200) => ({
-    ok: true, status: 200,
+    ok: true,
+    status: 200,
     json: async () => ({ access_token: "tok-abc", expires_in: expiresIn }),
 });
 
@@ -82,7 +83,10 @@ describe("the application token", () => {
     it("shares one mint between concurrent callers", async () => {
         let release: (v: unknown) => void = () => {};
         (fetch as ReturnType<typeof vi.fn>).mockImplementation(
-            () => new Promise((r) => { release = r; }),
+            () =>
+                new Promise((r) => {
+                    release = r;
+                }),
         );
         const t0 = Date.now();
         const all = Promise.all([getAppToken(t0), getAppToken(t0), getAppToken(t0), getAppToken(t0)]);
@@ -102,7 +106,9 @@ describe("the application token", () => {
 
     it("never puts the secret in the error when auth fails", async () => {
         (fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
-            ok: false, status: 401, json: async () => ({ error: "invalid_client" }),
+            ok: false,
+            status: 401,
+            json: async () => ({ error: "invalid_client" }),
         });
         await expect(getAppToken()).rejects.toThrow(/401/);
         await expect(getAppToken()).rejects.not.toThrow(/csecret/);
@@ -111,9 +117,13 @@ describe("the application token", () => {
 
 describe("searching active listings", () => {
     const listing = (over: Record<string, unknown> = {}) => ({
-        itemId: "v1|123|0", title: "Breyer Alborozo 712053",
+        itemId: "v1|123|0",
+        title: "Breyer Alborozo 712053",
         price: { value: "129.99", currency: "USD" },
-        condition: "Used", itemWebUrl: "https://ebay.com/itm/123", itemAffiliateWebUrl: null, ...over,
+        condition: "Used",
+        itemWebUrl: "https://ebay.com/itm/123",
+        itemAffiliateWebUrl: null,
+        ...over,
     });
 
     async function withResults(items: unknown[]) {

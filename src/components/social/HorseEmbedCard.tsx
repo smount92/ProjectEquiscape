@@ -29,13 +29,24 @@ export default function HorseEmbedCard({ horseId }: HorseEmbedCardProps) {
 
     useEffect(() => {
         let cancelled = false;
-        getHorseEmbedData(horseId).then((result: { name: string; refName: string | null; thumbnailUrl: string | null; tradeStatus: string } | null) => {
-            if (!cancelled) {
-                setData(result);
-                setLoading(false);
-            }
-        });
-        return () => { cancelled = true; };
+        getHorseEmbedData(horseId).then(
+            (
+                result: {
+                    name: string;
+                    refName: string | null;
+                    thumbnailUrl: string | null;
+                    tradeStatus: string;
+                } | null,
+            ) => {
+                if (!cancelled) {
+                    setData(result);
+                    setLoading(false);
+                }
+            },
+        );
+        return () => {
+            cancelled = true;
+        };
     }, [horseId]);
 
     if (loading) {
@@ -81,9 +92,7 @@ export default function HorseEmbedCard({ horseId }: HorseEmbedCardProps) {
                         </Badge>
                     )}
                 </div>
-                {data.refName && (
-                    <p className="mt-0.5 truncate text-xs text-muted-foreground">{data.refName}</p>
-                )}
+                {data.refName && <p className="mt-0.5 truncate text-xs text-muted-foreground">{data.refName}</p>}
             </div>
         </Link>
     );

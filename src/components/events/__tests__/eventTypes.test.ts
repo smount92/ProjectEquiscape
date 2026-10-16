@@ -55,8 +55,15 @@ describe("event type catalog", () => {
     it("maps every post-168 value to a pre-168 value the CHECK already allows", () => {
         // Values legal in migration 046's constraint.
         const pre168 = new Set([
-            "live_show", "photo_show", "swap_meet", "meetup",
-            "breyerfest", "studio_opening", "auction", "workshop", "other",
+            "live_show",
+            "photo_show",
+            "swap_meet",
+            "meetup",
+            "breyerfest",
+            "studio_opening",
+            "auction",
+            "workshop",
+            "other",
         ]);
 
         for (const t of CREATABLE_EVENT_TYPES) {

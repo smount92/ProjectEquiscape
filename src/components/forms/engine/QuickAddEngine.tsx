@@ -165,8 +165,7 @@ export default function QuickAddEngine() {
 
         try {
             const name = displayName() || "Unnamed Horse";
-            const visibility =
-                (form.values.visibility as "public" | "unlisted" | "private") ?? "public";
+            const visibility = (form.values.visibility as "public" | "unlisted" | "private") ?? "public";
 
             const created = await createHorseRecord({
                 ...(toActionInput(form.values) as Record<string, unknown>),
@@ -340,10 +339,7 @@ export default function QuickAddEngine() {
                         />
                     ))}
 
-                    <CollectionPicker
-                        selectedCollectionIds={collectionIds}
-                        onSelect={setCollectionIds}
-                    />
+                    <CollectionPicker selectedCollectionIds={collectionIds} onSelect={setCollectionIds} />
 
                     {/* One photo makes it show-ready. */}
                     <div className="mb-5">
@@ -380,9 +376,7 @@ export default function QuickAddEngine() {
                                 )}
                             </label>
                             <div className="text-sm text-muted-foreground">
-                                <p className="m-0">
-                                    Optional. One clear side shot makes this horse show-ready.
-                                </p>
+                                <p className="m-0">Optional. One clear side shot makes this horse show-ready.</p>
                                 {photo && (
                                     <button
                                         type="button"
@@ -419,11 +413,7 @@ export default function QuickAddEngine() {
                             disabled={adding || !canAdd || unchangedSinceAdd}
                             id="quick-add-submit"
                         >
-                            {adding
-                                ? "Adding…"
-                                : unchangedSinceAdd
-                                  ? "✅ Added"
-                                  : "🐴 Add to Stable"}
+                            {adding ? "Adding…" : unchangedSinceAdd ? "✅ Added" : "🐴 Add to Stable"}
                         </Button>
                         {reference && recent.length > 0 && (
                             <Button variant="outline" size="wide" onClick={duplicate} id="quick-duplicate">
@@ -460,11 +450,7 @@ export default function QuickAddEngine() {
                                 </div>
                             ))}
                         </dl>
-                        <Button
-                            variant="outline"
-                            className="mt-5 w-full"
-                            onClick={() => router.push("/dashboard")}
-                        >
+                        <Button variant="outline" className="mt-5 w-full" onClick={() => router.push("/dashboard")}>
                             ← Back to Dashboard ({recent.length} added)
                         </Button>
                     </LedgerLeaf>

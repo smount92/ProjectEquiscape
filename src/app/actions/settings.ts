@@ -42,7 +42,9 @@ export async function getProfile(): Promise<{
 
     const { data } = await supabase
         .from("users")
-        .select("alias_name, bio, avatar_url, notification_prefs, default_horse_public, watermark_photos, watermark_text, currency_symbol, show_badges, show_photos_on_reference, exhibitor_number")
+        .select(
+            "alias_name, bio, avatar_url, notification_prefs, default_horse_public, watermark_photos, watermark_text, currency_symbol, show_badges, show_photos_on_reference, exhibitor_number",
+        )
         .eq("id", user.id)
         .single();
 
@@ -64,9 +66,7 @@ export async function getProfile(): Promise<{
     // Generate signed URL for avatar if stored as a storage path
     let resolvedAvatarUrl = d.avatar_url;
     if (d.avatar_url && !d.avatar_url.startsWith("http")) {
-        const { data: signedData } = await supabase.storage
-            .from("avatars")
-            .createSignedUrl(d.avatar_url, 3600);
+        const { data: signedData } = await supabase.storage.from("avatars").createSignedUrl(d.avatar_url, 3600);
         resolvedAvatarUrl = signedData?.signedUrl || null;
     }
 
@@ -224,16 +224,10 @@ export async function updateProfile(data: {
 
     if (Object.keys(updates).length === 0) return { success: true };
 
-    let { error } = await supabase
-        .from("users")
-        .update(updates)
-        .eq("id", user.id);
+    let { error } = await supabase.from("users").update(updates).eq("id", user.id);
     if (error && isMissingSellerColumn(error)) {
         // Migration 218 not pasted yet: save everything else.
-        ({ error } = await supabase
-            .from("users")
-            .update(withoutSellerColumns(updates))
-            .eq("id", user.id));
+        ({ error } = await supabase.from("users").update(withoutSellerColumns(updates)).eq("id", user.id));
     }
     if (error && isMissingVisibilityColumn(error)) {
         // Migration 234 not pasted yet: the on/off setting still saves.
@@ -255,14 +249,11 @@ export async function updateProfile(data: {
  * @param prefs - Notification preference flags
  */
 export async function updateNotificationPrefs(
-    prefs: Record<string, boolean>
+    prefs: Record<string, boolean>,
 ): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
-    const { error } = await supabase
-        .from("users")
-        .update({ notification_prefs: prefs })
-        .eq("id", user.id);
+    const { error } = await supabase.from("users").update({ notification_prefs: prefs }).eq("id", user.id);
 
     if (error) return { success: false, error: error.message };
     return { success: true };
@@ -325,9 +316,7 @@ export async function changePassword(data: {
  * Stores in Supabase Storage and updates the user's avatar_url.
  * @param formData - FormData containing the avatar file
  */
-export async function uploadAvatar(
-    formData: FormData
-): Promise<{ success: boolean; url?: string; error?: string }> {
+export async function uploadAvatar(formData: FormData): Promise<{ success: boolean; url?: string; error?: string }> {
     const { supabase, user } = await requireAuth();
 
     const file = formData.get("avatar") as File;
@@ -365,10 +354,7 @@ export async function uploadAvatar(
     if (uploadError) return { success: false, error: uploadError.message };
 
     // Store the storage path in DB (not a full URL — we generate signed URLs on read)
-    const { error: dbError } = await supabase
-        .from("users")
-        .update({ avatar_url: path })
-        .eq("id", user.id);
+    const { error: dbError } = await supabase.from("users").update({ avatar_url: path }).eq("id", user.id);
 
     if (dbError) return { success: false, error: dbError.message };
 
@@ -380,9 +366,7 @@ export async function uploadAvatar(
     revalidatePath("/community");
 
     // Generate a signed URL for immediate display
-    const { data: signedData } = await supabase.storage
-        .from("avatars")
-        .createSignedUrl(path, 3600);
+    const { data: signedData } = await supabase.storage.from("avatars").createSignedUrl(path, 3600);
     return { success: true, url: signedData?.signedUrl || path };
 }
 
@@ -390,9 +374,20 @@ export async function uploadAvatar(
 
 import { getAdminClient } from "@/lib/supabase/admin";
 import { isCountryCode } from "@/lib/geo/countries";
-import { isMissingSellerColumn, LOOKING_FOR_MAX, readSellerTerms, SHIPS_MAX, withoutSellerColumns } from "@/lib/sellers/sellerTerms";
+import {
+    isMissingSellerColumn,
+    LOOKING_FOR_MAX,
+    readSellerTerms,
+    SHIPS_MAX,
+    withoutSellerColumns,
+} from "@/lib/sellers/sellerTerms";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { isHorseVisibility, isMissingVisibilityColumn, readDefaultVisibility, type HorseVisibility } from "@/lib/stable/defaultVisibility";
+import {
+    isHorseVisibility,
+    isMissingVisibilityColumn,
+    readDefaultVisibility,
+    type HorseVisibility,
+} from "@/lib/stable/defaultVisibility";
 
 /** Where this member's new horses start (Settings › Privacy & Defaults). */
 export async function getDefaultHorseVisibility(): Promise<HorseVisibility> {
@@ -429,7 +424,13 @@ async function windDownHostedShows(hostId: string): Promise<void> {
         const midFlight = shows.filter((s) => MID_FLIGHT_STATUSES.includes(s.status as string));
 
         if (drafts.length > 0) {
-            await admin.from("shows").delete().in("id", drafts.map((s) => s.id));
+            await admin
+                .from("shows")
+                .delete()
+                .in(
+                    "id",
+                    drafts.map((s) => s.id),
+                );
         }
 
         // House pattern: createNotification is server-only — dynamic
@@ -518,7 +519,7 @@ export async function deleteAccount(): Promise<{ success: boolean; error?: strin
     // Disable the auth account (prevents login)
     const { error: authError } = await adminClient.auth.admin.updateUserById(
         user.id,
-        { ban_duration: "876000h" } // ~100 years = effectively permanent
+        { ban_duration: "876000h" }, // ~100 years = effectively permanent
     );
 
     if (authError) {

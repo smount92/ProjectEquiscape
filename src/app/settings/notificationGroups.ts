@@ -69,10 +69,7 @@ export function isNotifPrefOn(prefs: Record<string, boolean>, key: string): bool
  * Flip the EFFECTIVE value, so the first tap on a never-saved pref turns
  * it off rather than appearing to "re-enable" something already on.
  */
-export function toggledPrefs(
-    prefs: Record<string, boolean>,
-    key: string,
-): Record<string, boolean> {
+export function toggledPrefs(prefs: Record<string, boolean>, key: string): Record<string, boolean> {
     return { ...prefs, [key]: !isNotifPrefOn(prefs, key) };
 }
 

@@ -83,9 +83,7 @@ describe("resolveEntityNames", () => {
         const { client } = stubClient({
             groups: [{ id: "b1", name: "Sunrise Barn", slug: "sunrise" }],
             artist_profiles: [{ user_id: "s1", studio_name: "Gilt", studio_slug: "gilt" }],
-            catalog_items: [
-                { id: "c1", title: "Ideal", maker: "Breyer", maker_slug: "breyer", slug: "ideal" },
-            ],
+            catalog_items: [{ id: "c1", title: "Ideal", maker: "Breyer", maker_slug: "breyer", slug: "ideal" }],
             users: [{ id: "p1", alias_name: "amanda" }],
         });
 

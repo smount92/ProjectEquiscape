@@ -93,12 +93,8 @@ describe("isMissingMetricsSchema", () => {
     });
 
     it("recognises the message forms PostgREST sends", () => {
-        expect(
-            isMissingMetricsSchema({ message: 'relation "object_view_daily" does not exist' }),
-        ).toBe(true);
-        expect(
-            isMissingMetricsSchema({ message: "Could not find the function in the schema cache" }),
-        ).toBe(true);
+        expect(isMissingMetricsSchema({ message: 'relation "object_view_daily" does not exist' })).toBe(true);
+        expect(isMissingMetricsSchema({ message: "Could not find the function in the schema cache" })).toBe(true);
     });
 
     it("does not swallow a real failure", () => {
@@ -118,9 +114,7 @@ describe("viewStatsLabel", () => {
     });
 
     it("reads naturally for one view", () => {
-        expect(viewStatsLabel({ weekViews: 1, weekViewers: 1, allTimeViews: 1 })).toBe(
-            "1 view this week (1 all-time)",
-        );
+        expect(viewStatsLabel({ weekViews: 1, weekViewers: 1, allTimeViews: 1 })).toBe("1 view this week (1 all-time)");
     });
 
     it("pairs a quiet week with the all-time total", () => {

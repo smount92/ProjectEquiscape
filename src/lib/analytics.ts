@@ -10,10 +10,7 @@
  * Keep event names snake_case and stable; they become the conversion funnel in
  * GA. Currently wired: `sign_up`, `want_click` (MOVE-1 demand signal).
  */
-export function track(
-    event: string,
-    params?: Record<string, string | number | boolean | null | undefined>,
-): void {
+export function track(event: string, params?: Record<string, string | number | boolean | null | undefined>): void {
     if (typeof window === "undefined") return;
     const gtag = (window as unknown as { gtag?: (...args: unknown[]) => void }).gtag;
     if (typeof gtag !== "function") return;

@@ -101,11 +101,7 @@ export async function setShowFollow(
 
     // RLS scopes the delete to the caller's own row; the explicit
     // user_id filter makes that intent visible at the call site too.
-    const { error } = await db
-        .from("show_followers")
-        .delete()
-        .eq("show_id", showId)
-        .eq("user_id", user.id);
+    const { error } = await db.from("show_followers").delete().eq("show_id", showId).eq("user_id", user.id);
     if (error) {
         if (isMissingSchema(error)) {
             return { success: false, error: "Following shows isn't available yet." };

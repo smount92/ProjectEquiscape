@@ -57,7 +57,12 @@ export default function HorseCard({
                 <span className="relative block">
                     {image ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={image} alt="" className="aspect-square w-full rounded-md object-cover" loading="lazy" />
+                        <img
+                            src={image}
+                            alt=""
+                            className="aspect-square w-full rounded-md object-cover"
+                            loading="lazy"
+                        />
                     ) : (
                         <span
                             className="flex aspect-square w-full items-center justify-center rounded-md bg-muted text-3xl"

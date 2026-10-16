@@ -25,10 +25,7 @@ function Stat({ num, label }: { num: string; label: string }) {
 }
 
 export default function MySeasonCard({ season }: { season: MySeason }) {
-    const quiet =
-        season.points === 0 &&
-        season.liveCards === 0 &&
-        season.careerPoints === 0;
+    const quiet = season.points === 0 && season.liveCards === 0 && season.careerPoints === 0;
     if (quiet) return null;
 
     return (
@@ -47,8 +44,7 @@ export default function MySeasonCard({ season }: { season: MySeason }) {
                     {season.nextStar && (
                         <p className="mt-1 mb-0 text-xs text-muted-foreground">
                             {season.nextStar.pointsNeeded} career point
-                            {season.nextStar.pointsNeeded === 1 ? "" : "s"} to{" "}
-                            {season.nextStar.label}
+                            {season.nextStar.pointsNeeded === 1 ? "" : "s"} to {season.nextStar.label}
                         </p>
                     )}
                 </div>

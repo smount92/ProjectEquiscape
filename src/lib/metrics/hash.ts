@@ -65,11 +65,7 @@ export function dailySalt(secret: string, day: string): string {
  * and a phone that changes IP mid-session counts twice. It is good enough
  * to stop a single reader inflating a number and nothing more.
  */
-export function viewerKey(input: {
-    userId?: string | null;
-    ip?: string | null;
-    userAgent?: string | null;
-}): string {
+export function viewerKey(input: { userId?: string | null; ip?: string | null; userAgent?: string | null }): string {
     if (input.userId) return `u:${input.userId}`;
     const ip = input.ip?.trim() || "unknown";
     const ua = input.userAgent?.trim() || "unknown";

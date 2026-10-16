@@ -46,9 +46,7 @@ describe("deal vocabulary", () => {
     it("treats settled and closed as terminal, and nothing else", () => {
         expect([...TERMINAL_STAGES].sort()).toEqual(["closed", "settled"]);
         for (const stage of DEAL_STAGES) {
-            expect(isTerminalStage(stage)).toBe(
-                stage === "settled" || stage === "closed",
-            );
+            expect(isTerminalStage(stage)).toBe(stage === "settled" || stage === "closed");
         }
     });
 
@@ -64,9 +62,7 @@ describe("deal vocabulary", () => {
 
     it("splits pending_payment on paid_at, which is what the deal strip reads", () => {
         expect(stageForTransaction({ status: "pending_payment", paidAt: null })).toBe("agreed");
-        expect(
-            stageForTransaction({ status: "pending_payment", paidAt: "2026-08-01T00:00:00Z" }),
-        ).toBe("paying");
+        expect(stageForTransaction({ status: "pending_payment", paidAt: "2026-08-01T00:00:00Z" })).toBe("paying");
     });
 
     it("maps the Safe-Trade ladder end to end", () => {
@@ -78,22 +74,26 @@ describe("deal vocabulary", () => {
     });
 
     it("lets a dispute override any status, including a completed one", () => {
-        expect(
-            stageForTransaction({ status: "completed", disputedAt: "2026-08-01T00:00:00Z" }),
-        ).toBe("disputed");
-        expect(
-            stageForTransaction({ status: "offer_made", disputedAt: "2026-08-01T00:00:00Z" }),
-        ).toBe("disputed");
+        expect(stageForTransaction({ status: "completed", disputedAt: "2026-08-01T00:00:00Z" })).toBe("disputed");
+        expect(stageForTransaction({ status: "offer_made", disputedAt: "2026-08-01T00:00:00Z" })).toBe("disputed");
     });
 
     it("maps every commission status, legacy values included", () => {
         const known = new Set<string>(DEAL_STAGES);
         const statuses = [
-            "requested", "quoted", "accepted", "in_progress",
-            "awaiting_approval", "completed", "delivered",
-            "declined", "cancelled",
+            "requested",
+            "quoted",
+            "accepted",
+            "in_progress",
+            "awaiting_approval",
+            "completed",
+            "delivered",
+            "declined",
+            "cancelled",
             // legacy, read-only per migration 170
-            "review", "revision", "shipping",
+            "review",
+            "revision",
+            "shipping",
         ];
         for (const status of statuses) {
             expect(known.has(stageForCommission(status))).toBe(true);

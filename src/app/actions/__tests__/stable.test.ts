@@ -57,9 +57,9 @@ describe("getStablePage", () => {
         const result = await getStablePage({ finish: "OF" });
         expect(result.success).toBe(true);
         expect(eqCalls()).toEqual(expect.arrayContaining([["owner_id", "user-1"]]));
-        expect(
-            (mockClient._mockQuery.is as ReturnType<typeof vi.fn>).mock.calls,
-        ).toEqual(expect.arrayContaining([["deleted_at", null]]));
+        expect((mockClient._mockQuery.is as ReturnType<typeof vi.fn>).mock.calls).toEqual(
+            expect.arrayContaining([["deleted_at", null]]),
+        );
         expect(eqCalls()).toEqual(expect.arrayContaining([["finish_type", "OF"]]));
     });
 
@@ -98,7 +98,15 @@ describe("getStablePage", () => {
         mockClient.rpc.mockImplementation((fn: string) =>
             Promise.resolve(
                 fn === "get_stable_facets"
-                    ? { data: { makers: ["Breyer"], scales: ["Traditional"], finishes: ["OF"], categories: ["model"] }, error: null }
+                    ? {
+                          data: {
+                              makers: ["Breyer"],
+                              scales: ["Traditional"],
+                              finishes: ["OF"],
+                              categories: ["model"],
+                          },
+                          error: null,
+                      }
                     : { data: null, error: null },
             ),
         );
@@ -136,7 +144,12 @@ describe("getStablePage paging", () => {
         const result = await getStablePage({ page: 50 });
         expect(result.success).toBe(true);
         // asked for 2352–2399, then served the last page: 412 at 48 = 9 pages
-        expect(rangeCalls()).toEqual(expect.arrayContaining([[2352, 2399], [384, 431]]));
+        expect(rangeCalls()).toEqual(
+            expect.arrayContaining([
+                [2352, 2399],
+                [384, 431],
+            ]),
+        );
         if (result.success) {
             expect(result).toMatchObject({ page: 9, pageCount: 9, totalCount: 412 });
         }
@@ -147,7 +160,11 @@ describe("getStablePage paging", () => {
         range.mockImplementation((from: number) => {
             mockClient._setImplicitResolve(
                 from >= 412
-                    ? ({ data: null, count: null, error: { code: "PGRST103", message: "Requested range not satisfiable" } } as never)
+                    ? ({
+                          data: null,
+                          count: null,
+                          error: { code: "PGRST103", message: "Requested range not satisfiable" },
+                      } as never)
                     : ({ data: [], count: 412, error: null } as never),
             );
             return mockClient._mockQuery;
@@ -158,7 +175,12 @@ describe("getStablePage paging", () => {
             if (result.success) {
                 expect(result).toMatchObject({ page: 5, per: 96, pageCount: 5, totalCount: 412 });
             }
-            expect(rangeCalls()).toEqual(expect.arrayContaining([[1824, 1919], [384, 479]]));
+            expect(rangeCalls()).toEqual(
+                expect.arrayContaining([
+                    [1824, 1919],
+                    [384, 479],
+                ]),
+            );
         } finally {
             range.mockReset();
             range.mockReturnValue(mockClient._mockQuery);
@@ -277,7 +299,13 @@ describe("saved views CRUD", () => {
 
     it("saveStableView upserts under the caller's user_id", async () => {
         mockClient._mockQuery.single.mockResolvedValueOnce({
-            data: { id: VIEW_ID, user_id: "user-1", name: "OF Breyers", params: { finish: "OF" }, created_at: "2026-07-10" },
+            data: {
+                id: VIEW_ID,
+                user_id: "user-1",
+                name: "OF Breyers",
+                params: { finish: "OF" },
+                created_at: "2026-07-10",
+            },
             error: null,
         });
         const result = await saveStableView({ name: "OF Breyers", params: { finish: "OF" } });

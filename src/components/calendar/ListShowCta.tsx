@@ -12,23 +12,11 @@ import { useState } from "react";
 import Link from "next/link";
 
 import { submitExternalShow } from "@/app/actions/external-shows";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const VENUE_OPTIONS = [
     { value: "online_photo", label: "Online photo show" },
@@ -63,9 +51,7 @@ export default function ListShowCta({ isAuthed }: { isAuthed: boolean }) {
     if (!isAuthed) {
         return (
             <Button asChild variant="outline">
-                <Link href={`/login?redirectTo=${encodeURIComponent("/calendar")}`}>
-                    List a show
-                </Link>
+                <Link href={`/login?redirectTo=${encodeURIComponent("/calendar")}`}>List a show</Link>
             </Button>
         );
     }
@@ -118,8 +104,8 @@ export default function ListShowCta({ isAuthed }: { isAuthed: boolean }) {
                     <DialogHeader>
                         <DialogTitle>🗓️ List a show on the calendar</DialogTitle>
                         <DialogDescription>
-                            Know an upcoming show — a Facebook photo show, an OMHPS or MEPSA
-                            round, a live hall? Add it so the whole hobby can find it.
+                            Know an upcoming show — a Facebook photo show, an OMHPS or MEPSA round, a live hall? Add it
+                            so the whole hobby can find it.
                         </DialogDescription>
                     </DialogHeader>
 
@@ -128,12 +114,10 @@ export default function ListShowCta({ isAuthed }: { isAuthed: boolean }) {
                             <div className="mb-3 text-4xl" aria-hidden="true">
                                 ✅
                             </div>
-                            <p className="mb-1 font-semibold text-foreground">
-                                Submitted for review
-                            </p>
+                            <p className="mb-1 font-semibold text-foreground">Submitted for review</p>
                             <p className="mb-4 text-sm text-secondary-foreground">
-                                We curate every listing to keep the calendar trustworthy —
-                                it will appear once a curator approves it.
+                                We curate every listing to keep the calendar trustworthy — it will appear once a curator
+                                approves it.
                             </p>
                             <div className="flex justify-center gap-2">
                                 <Button variant="outline" onClick={() => setSubmitted(false)}>
@@ -179,7 +163,10 @@ export default function ListShowCta({ isAuthed }: { isAuthed: boolean }) {
 
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div>
-                                    <label htmlFor="ext-venue" className="mb-1 block text-sm font-semibold text-foreground">
+                                    <label
+                                        htmlFor="ext-venue"
+                                        className="mb-1 block text-sm font-semibold text-foreground"
+                                    >
                                         Show type
                                     </label>
                                     <Select value={venueType} onValueChange={setVenueType}>
@@ -196,7 +183,10 @@ export default function ListShowCta({ isAuthed }: { isAuthed: boolean }) {
                                     </Select>
                                 </div>
                                 <div>
-                                    <label htmlFor="ext-platform" className="mb-1 block text-sm font-semibold text-foreground">
+                                    <label
+                                        htmlFor="ext-platform"
+                                        className="mb-1 block text-sm font-semibold text-foreground"
+                                    >
                                         Where it lives
                                     </label>
                                     <Select value={platform} onValueChange={setPlatform}>
@@ -231,7 +221,10 @@ export default function ListShowCta({ isAuthed }: { isAuthed: boolean }) {
 
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div>
-                                    <label htmlFor="ext-starts" className="mb-1 block text-sm font-semibold text-foreground">
+                                    <label
+                                        htmlFor="ext-starts"
+                                        className="mb-1 block text-sm font-semibold text-foreground"
+                                    >
                                         Show date
                                     </label>
                                     <Input
@@ -244,7 +237,10 @@ export default function ListShowCta({ isAuthed }: { isAuthed: boolean }) {
                                     />
                                 </div>
                                 <div>
-                                    <label htmlFor="ext-closes" className="mb-1 block text-sm font-semibold text-foreground">
+                                    <label
+                                        htmlFor="ext-closes"
+                                        className="mb-1 block text-sm font-semibold text-foreground"
+                                    >
                                         Entries close{" "}
                                         <span className="font-normal text-muted-foreground">(optional)</span>
                                     </label>
@@ -260,7 +256,10 @@ export default function ListShowCta({ isAuthed }: { isAuthed: boolean }) {
 
                             {venueType === "live" && (
                                 <div>
-                                    <label htmlFor="ext-location" className="mb-1 block text-sm font-semibold text-foreground">
+                                    <label
+                                        htmlFor="ext-location"
+                                        className="mb-1 block text-sm font-semibold text-foreground"
+                                    >
                                         Location
                                     </label>
                                     <Input
@@ -275,8 +274,7 @@ export default function ListShowCta({ isAuthed }: { isAuthed: boolean }) {
 
                             <div>
                                 <label htmlFor="ext-desc" className="mb-1 block text-sm font-semibold text-foreground">
-                                    Details{" "}
-                                    <span className="font-normal text-muted-foreground">(optional)</span>
+                                    Details <span className="font-normal text-muted-foreground">(optional)</span>
                                 </label>
                                 <Textarea
                                     id="ext-desc"

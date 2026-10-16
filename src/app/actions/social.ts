@@ -36,10 +36,7 @@ export async function toggleFavorite(horseId: string): Promise<{
 
         if (existing) {
             // Remove favorite
-            await supabase
-                .from("horse_favorites")
-                .delete()
-                .eq("id", existing.id);
+            await supabase.from("horse_favorites").delete().eq("id", existing.id);
         } else {
             // Add favorite
             await supabase.from("horse_favorites").insert({
@@ -58,16 +55,8 @@ export async function toggleFavorite(horseId: string): Promise<{
                 try {
                     const supabaseDeferred = await createClient();
                     const [{ data: horse }, { data: actor }] = await Promise.all([
-                        supabaseDeferred
-                            .from("user_horses")
-                            .select("owner_id, custom_name")
-                            .eq("id", horseId)
-                            .single(),
-                        supabaseDeferred
-                            .from("users")
-                            .select("alias_name")
-                            .eq("id", actorId)
-                            .single(),
+                        supabaseDeferred.from("user_horses").select("owner_id, custom_name").eq("id", horseId).single(),
+                        supabaseDeferred.from("users").select("alias_name").eq("id", actorId).single(),
                     ]);
                     if (!horse) return;
                     const owner = (horse as { owner_id: string }).owner_id;

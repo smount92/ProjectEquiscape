@@ -1,11 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
-import {
-    getBarnJoinRequests,
-    getGroup,
-    getGroupChannels,
-    getGroupMembers,
-} from "@/app/actions/groups";
+import { getBarnJoinRequests, getGroup, getGroupChannels, getGroupMembers } from "@/app/actions/groups";
 import { getGroupBoard } from "@/app/actions/groups-forum";
 import { GROUP_TYPE_LABELS } from "@/lib/constants/groups";
 import { getPosts } from "@/app/actions/posts";
@@ -49,9 +44,8 @@ export default async function GroupDetailPage({ params }: { params: Promise<{ sl
 
     // Board failure (e.g. migration 122 not applied) degrades to the
     // flat feed inside GroupDetailClient rather than breaking the barn.
-    const board = boardResult && boardResult.success
-        ? { threads: boardResult.threads, hasMore: boardResult.hasMore }
-        : null;
+    const board =
+        boardResult && boardResult.success ? { threads: boardResult.threads, hasMore: boardResult.hasMore } : null;
 
     return (
         // noHeader: the leather masthead below IS this page's header.
@@ -66,7 +60,7 @@ export default async function GroupDetailPage({ params }: { params: Promise<{ sl
                     <img
                         src={group.bannerUrl}
                         alt=""
-                        className="border-input mb-4 aspect-[4/1] h-auto w-full rounded-xl border object-cover shadow-sm"
+                        className="mb-4 aspect-[4/1] h-auto w-full rounded-xl border border-input object-cover shadow-sm"
                     />
                 )}
                 <GroupMasthead
@@ -110,7 +104,7 @@ export default async function GroupDetailPage({ params }: { params: Promise<{ sl
                         ) : (
                             <div className="ledger-card text-center">
                                 <span className="ledger-tab">Notice Board</span>
-                                <p className="text-secondary-foreground m-0 text-sm">
+                                <p className="m-0 text-sm text-secondary-foreground">
                                     {group.isPrivate
                                         ? "This is a private barn. Ask to join and an owner or moderator will let you in."
                                         : "Join this barn to read the notice board and post."}

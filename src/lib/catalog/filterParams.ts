@@ -35,9 +35,7 @@ export const CATALOG_TYPE_OPTIONS = CATALOG_CATEGORIES;
 const TYPE_VALUES = CATALOG_TYPE_OPTIONS.map((t) => t.value) as readonly string[];
 /** run_type is a closed vocabulary — an unknown ?run= value is dropped. */
 const RUN_TYPE_VALUES = RUN_TYPES as readonly string[];
-const TYPE_LABELS: Record<string, string> = Object.fromEntries(
-    CATALOG_TYPE_OPTIONS.map((t) => [t.value, t.label]),
-);
+const TYPE_LABELS: Record<string, string> = Object.fromEntries(CATALOG_TYPE_OPTIONS.map((t) => [t.value, t.label]));
 
 /** Model-horse release years realistically fall in this range. */
 const MIN_YEAR = 1900;
@@ -92,9 +90,7 @@ function yearOrUndef(v: string | string[] | undefined): number | undefined {
  * dropped (never trusted): type/sort must be in their vocabularies, page
  * and years are clamped to sane integers.
  */
-export function parseCatalogSearchParams(
-    params: Record<string, string | string[] | undefined>,
-): CatalogFilters {
+export function parseCatalogSearchParams(params: Record<string, string | string[] | undefined>): CatalogFilters {
     const q = nonEmpty(params.q, 100);
     const filters: CatalogFilters = { sort: defaultCatalogSort(q), page: 1 };
     if (q) filters.q = q;
@@ -250,8 +246,7 @@ export function activeCatalogChips(filters: CatalogFilters): CatalogFilterChip[]
     const chips: CatalogFilterChip[] = [];
     if (filters.q) chips.push({ key: "q", label: `“${filters.q}”` });
     if (filters.maker) chips.push({ key: "maker", label: filters.maker });
-    if (filters.manufacturer)
-        chips.push({ key: "manufacturer", label: filters.manufacturer });
+    if (filters.manufacturer) chips.push({ key: "manufacturer", label: filters.manufacturer });
     if (filters.artist) chips.push({ key: "artist", label: `by ${filters.artist}` });
     if (filters.scale) chips.push({ key: "scale", label: filters.scale });
     if (filters.type) chips.push({ key: "type", label: TYPE_LABELS[filters.type] ?? filters.type });
@@ -277,10 +272,7 @@ export function countActiveCatalogFilters(filters: CatalogFilters): number {
  * Remove one filter (chip ✕). Returns a new object and resets to page 1
  * (the filtered result set changes, so the old page number is meaningless).
  */
-export function removeCatalogFilter(
-    filters: CatalogFilters,
-    key: CatalogFilterChip["key"],
-): CatalogFilters {
+export function removeCatalogFilter(filters: CatalogFilters, key: CatalogFilterChip["key"]): CatalogFilters {
     const next = { ...filters, page: 1 };
     if (key === "year") {
         delete next.yearFrom;

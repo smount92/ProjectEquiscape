@@ -22,10 +22,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
  * browser client); the query is identical and viewer-scoped either way,
  * so it is never cached.
  */
-export async function countUnreadMessages(
-    supabase: SupabaseClient,
-    userId: string,
-): Promise<number> {
+export async function countUnreadMessages(supabase: SupabaseClient, userId: string): Promise<number> {
     const { count } = await supabase
         .from("messages")
         .select("id, conversations!inner(id)", { count: "exact", head: true })

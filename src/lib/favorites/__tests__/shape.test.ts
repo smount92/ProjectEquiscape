@@ -1,11 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-    shapeFavorites,
-    pickImagePath,
-    isHorseAvailable,
-    type RawFavoriteRow,
-    type RawFavoriteHorse,
-} from "../shape";
+import { shapeFavorites, pickImagePath, isHorseAvailable, type RawFavoriteRow, type RawFavoriteHorse } from "../shape";
 
 function horse(overrides: Partial<RawFavoriteHorse> = {}): RawFavoriteHorse {
     return {
@@ -103,9 +97,7 @@ describe("shapeFavorites", () => {
     });
 
     it("treats a soft-deleted horse as unavailable even if still public", () => {
-        const entries = shapeFavorites([
-            row({ user_horses: horse({ deleted_at: "2026-07-15T00:00:00Z" }) }),
-        ]);
+        const entries = shapeFavorites([row({ user_horses: horse({ deleted_at: "2026-07-15T00:00:00Z" }) })]);
         expect(entries[0].kind).toBe("unavailable");
     });
 

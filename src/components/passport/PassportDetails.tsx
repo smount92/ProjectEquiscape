@@ -20,9 +20,7 @@ export function DetailRow({ label, children }: { label: ReactNode; children: Rea
     return (
         <div className="flex items-center justify-between border-b border-white/20 px-0 py-[5px]">
             <span className="text-sm font-medium text-secondary-foreground">{label}</span>
-            <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
-                {children}
-            </span>
+            <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">{children}</span>
         </div>
     );
 }
@@ -40,10 +38,7 @@ export function LedgerBlock({
     testId?: string;
 }) {
     return (
-        <div
-            className="rounded-lg border border-input bg-card/40 p-4 shadow-md transition-all"
-            data-testid={testId}
-        >
+        <div className="rounded-lg border border-input bg-card/40 p-4 shadow-md transition-all" data-testid={testId}>
             <h3>
                 <span aria-hidden="true">{icon}</span> {title}
             </h3>

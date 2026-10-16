@@ -12,7 +12,9 @@ import Stripe from "stripe";
 // a friendly message. Mirrors /api/checkout/studio-pro.
 export async function POST() {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -21,7 +23,7 @@ export async function POST() {
     if (!priceId || !process.env.STRIPE_SECRET_KEY) {
         return NextResponse.json(
             { error: "The Supporter tier is not yet configured. Contact support." },
-            { status: 500 }
+            { status: 500 },
         );
     }
 
@@ -32,7 +34,7 @@ export async function POST() {
     if (badge.isSupporter) {
         return NextResponse.json(
             { error: "You're already a Supporter — thank you for keeping the lights on!" },
-            { status: 400 }
+            { status: 400 },
         );
     }
 
@@ -68,9 +70,6 @@ export async function POST() {
         return NextResponse.json({ url: session.url });
     } catch (err) {
         Sentry.captureException(err, { tags: { domain: "commerce" } });
-        return NextResponse.json(
-            { error: "Failed to create checkout session." },
-            { status: 500 }
-        );
+        return NextResponse.json({ error: "Failed to create checkout session." }, { status: 500 });
     }
 }

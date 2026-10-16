@@ -13,14 +13,9 @@ import { describe, it, expect } from "vitest";
    containing one, and nothing would ever report it.
    ────────────────────────────────────────────────────── */
 
-const SQL = readFileSync(
-    path.join(process.cwd(), "supabase/migrations/188_catalog_sort_key.sql"),
-    "utf8"
-);
+const SQL = readFileSync(path.join(process.cwd(), "supabase/migrations/188_catalog_sort_key.sql"), "utf8");
 
-const TRANSLATE_CALLS = [
-    ...SQL.matchAll(/translate\(\s*title,\s*'([^']+)',\s*'([^']+)'\)/g),
-];
+const TRANSLATE_CALLS = [...SQL.matchAll(/translate\(\s*title,\s*'([^']+)',\s*'([^']+)'\)/g)];
 
 describe("the accent fold", () => {
     it("is used at all", () => {
@@ -56,7 +51,8 @@ describe("the accent fold", () => {
 
     it("never maps a character to itself, which would mean a mis-aligned pair", () => {
         const [, from, to] = TRANSLATE_CALLS[0];
-        const src = [...from], dst = [...to];
+        const src = [...from],
+            dst = [...to];
         for (let i = 0; i < src.length; i++) expect(dst[i]).not.toBe(src[i]);
     });
 });
@@ -90,14 +86,16 @@ describe("the filing rule", () => {
 describe("what the order should come out as", () => {
     const key = (t: string) => {
         const s = t
-            .replace(/[ÀÁÂÃÄÅ]/g, "A").replace(/[àáâãäå]/g, "a")
-            .replace(/[ÈÉÊË]/g, "E").replace(/[èéêë]/g, "e")
-            .replace(/[ÒÓÔÕÖ]/g, "O").replace(/[òóôõö]/g, "o")
+            .replace(/[ÀÁÂÃÄÅ]/g, "A")
+            .replace(/[àáâãäå]/g, "a")
+            .replace(/[ÈÉÊË]/g, "E")
+            .replace(/[èéêë]/g, "e")
+            .replace(/[ÒÓÔÕÖ]/g, "O")
+            .replace(/[òóôõö]/g, "o")
             .replace(/^[^\p{L}\p{N}]+/u, "");
         return (/^\p{L}/u.test(s) ? "1" : "2") + s.toLowerCase();
     };
-    const order = (titles: string[]) =>
-        [...titles].sort((a, b) => key(a).localeCompare(key(b), "en"));
+    const order = (titles: string[]) => [...titles].sort((a, b) => key(a).localeCompare(key(b), "en"));
 
     it("files a quoted nickname under its first letter, not ahead of A", () => {
         const sorted = order(['"Commander" The Five Gaiter', "Adios", "Zephyr"]);
@@ -115,12 +113,7 @@ describe("what the order should come out as", () => {
     });
 
     it("opens the catalog on a horse", () => {
-        const page1 = order([
-            '"Quelle Surprise!"',
-            "1993 Grayingham Lucky Lad",
-            "A Class Act",
-            "'A' for Arabian",
-        ]);
+        const page1 = order(['"Quelle Surprise!"', "1993 Grayingham Lucky Lad", "A Class Act", "'A' for Arabian"]);
         expect(page1[0]).toBe("A Class Act");
     });
 });

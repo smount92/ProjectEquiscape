@@ -55,12 +55,22 @@ describe("validateAccomplishment", () => {
 
 describe("accomplishmentLine", () => {
     it("joins what's known with middle dots, words before dates", () => {
-        expect(accomplishmentLine({ organization: "Express", result: "2nd of 9", happenedOn: "2024-05-18", dateText: null })).toBe(
-            "Express · 2nd of 9 · May 18, 2024",
-        );
-        expect(accomplishmentLine({ organization: "FTRA", result: null, happenedOn: "2024-01-01", dateText: "Spring 2024" })).toBe(
-            "FTRA · Spring 2024",
-        );
+        expect(
+            accomplishmentLine({
+                organization: "Express",
+                result: "2nd of 9",
+                happenedOn: "2024-05-18",
+                dateText: null,
+            }),
+        ).toBe("Express · 2nd of 9 · May 18, 2024");
+        expect(
+            accomplishmentLine({
+                organization: "FTRA",
+                result: null,
+                happenedOn: "2024-01-01",
+                dateText: "Spring 2024",
+            }),
+        ).toBe("FTRA · Spring 2024");
         expect(accomplishmentLine({ organization: null, result: null, happenedOn: null, dateText: null })).toBe("");
     });
 });

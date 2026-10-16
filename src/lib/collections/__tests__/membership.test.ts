@@ -4,7 +4,8 @@ import { folderHorseIds, horseFolderIds, setHorsesFolders, unionIds } from "@/li
 /** A chainable stand-in for the Supabase query builder that resolves to `result`. */
 function chain(result: unknown) {
     const b: Record<string, unknown> = {};
-    for (const m of ["select", "eq", "is", "in", "limit", "delete", "insert", "update", "upsert"]) b[m] = vi.fn(() => b);
+    for (const m of ["select", "eq", "is", "in", "limit", "delete", "insert", "update", "upsert"])
+        b[m] = vi.fn(() => b);
     b.maybeSingle = vi.fn(() => Promise.resolve(result));
     b.then = (resolve: (v: unknown) => unknown) => Promise.resolve(result).then(resolve);
     return b;

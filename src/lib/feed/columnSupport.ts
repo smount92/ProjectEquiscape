@@ -34,9 +34,7 @@ export function resetPostColumnSupport(): void {
     inflight = null;
 }
 
-export async function getPostColumnSupport(
-    supabase: SupabaseClient,
-): Promise<PostColumnSupport> {
+export async function getPostColumnSupport(supabase: SupabaseClient): Promise<PostColumnSupport> {
     if (cached && Date.now() - cachedAt < TTL_MS) return cached;
     if (inflight) return inflight;
 

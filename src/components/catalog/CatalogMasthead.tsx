@@ -47,16 +47,10 @@ export default function CatalogMasthead({
                     </span>
                 </div>
                 <div className="z-[1] ml-auto flex flex-wrap gap-2">
-                    <Link
-                        href="/catalog/changelog"
-                        className="btn-ghostleather !px-4 !py-2 !text-xs"
-                    >
+                    <Link href="/catalog/changelog" className="btn-ghostleather !px-4 !py-2 !text-xs">
                         <FileText size={14} strokeWidth={1.5} /> Changelog
                     </Link>
-                    <Link
-                        href="/catalog/suggestions"
-                        className="btn-ghostleather !px-4 !py-2 !text-xs"
-                    >
+                    <Link href="/catalog/suggestions" className="btn-ghostleather !px-4 !py-2 !text-xs">
                         <Lightbulb size={14} strokeWidth={1.5} /> Suggestions
                     </Link>
                     <Link
@@ -71,10 +65,8 @@ export default function CatalogMasthead({
                 className="relative z-[1] mt-3 mb-0 max-w-[62ch] text-sm leading-relaxed italic"
                 style={{ color: "var(--leather-text)" }}
             >
-                The community-maintained record of every model — Breyer, Stone, and artist resins.
-                Search by name or maker to find a model&apos;s page, or dig into color and year
-                under Advanced.
-                {" "}
+                The community-maintained record of every model — Breyer, Stone, and artist resins. Search by name or
+                maker to find a model&apos;s page, or dig into color and year under Advanced.{" "}
                 <Link
                     href="/reference"
                     className="font-bold whitespace-nowrap not-italic no-underline hover:underline"

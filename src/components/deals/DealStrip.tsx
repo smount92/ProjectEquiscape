@@ -56,20 +56,11 @@ interface DealStripProps {
     frozen: boolean;
 }
 
-export default function DealStrip({
-    transaction,
-    party,
-    stage,
-    planComplete,
-    hasPlan,
-    frozen,
-}: DealStripProps) {
+export default function DealStrip({ transaction, party, stage, planComplete, hasPlan, frozen }: DealStripProps) {
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState("");
     const [countering, setCountering] = useState(false);
-    const [counterAmount, setCounterAmount] = useState(
-        transaction.offerAmount ? String(transaction.offerAmount) : "",
-    );
+    const [counterAmount, setCounterAmount] = useState(transaction.offerAmount ? String(transaction.offerAmount) : "");
     const [counterNote, setCounterNote] = useState("");
     const router = useRouter();
 
@@ -105,9 +96,7 @@ export default function DealStrip({
     if (stage === "closed") {
         return (
             <Strip tone="muted" id="offer-card">
-                <span className="text-muted-foreground text-sm font-semibold">
-                    This deal ended without completing
-                </span>
+                <span className="text-sm font-semibold text-muted-foreground">This deal ended without completing</span>
                 {amount !== null && <Amount value={amount} muted />}
             </Strip>
         );
@@ -116,7 +105,7 @@ export default function DealStrip({
     if (stage === "settled") {
         return (
             <Strip tone="good" id="offer-card">
-                <span className="text-success text-sm font-semibold">🏁 Sale complete</span>
+                <span className="text-sm font-semibold text-success">🏁 Sale complete</span>
                 {amount !== null && <Amount value={amount} />}
             </Strip>
         );
@@ -124,7 +113,7 @@ export default function DealStrip({
 
     return (
         <div
-            className="border-input bg-card animate-fade-in-up mb-4 rounded-lg border p-4 shadow-md sm:p-6"
+            className="animate-fade-in-up mb-4 rounded-lg border border-input bg-card p-4 shadow-md sm:p-6"
             id="offer-card"
         >
             <div className="flex flex-wrap items-center justify-between gap-3">
@@ -136,15 +125,15 @@ export default function DealStrip({
             </div>
 
             {transaction.offerMessage && (
-                <p className="text-muted-foreground mt-2 text-sm leading-relaxed italic">
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground italic">
                     &ldquo;{transaction.offerMessage}&rdquo;
                 </p>
             )}
 
             {frozen ? (
-                <p className="text-muted-foreground mt-3 text-sm">
-                    This deal is disputed. The record is frozen so both sides keep the same copy of
-                    what happened — export it from the record panel below.
+                <p className="mt-3 text-sm text-muted-foreground">
+                    This deal is disputed. The record is frozen so both sides keep the same copy of what happened —
+                    export it from the record panel below.
                 </p>
             ) : (
                 <>
@@ -154,9 +143,7 @@ export default function DealStrip({
                             <OfferExpiry createdAt={transaction.createdAt} />
                             {mineIsStanding ? (
                                 <div className="flex flex-wrap items-center gap-2">
-                                    <p className="text-muted-foreground m-0 text-sm">
-                                        ⏳ Waiting on the other side.
-                                    </p>
+                                    <p className="m-0 text-sm text-muted-foreground">⏳ Waiting on the other side.</p>
                                     {isBuyer && (
                                         <Button
                                             variant="outline"
@@ -171,9 +158,7 @@ export default function DealStrip({
                                         <Button
                                             variant="destructive-outline"
                                             size="wide"
-                                            onClick={() =>
-                                                run(() => cancelTransaction(transaction.id))
-                                            }
+                                            onClick={() => run(() => cancelTransaction(transaction.id))}
                                             disabled={busy}
                                         >
                                             Withdraw
@@ -181,11 +166,8 @@ export default function DealStrip({
                                     )}
                                 </div>
                             ) : countering ? (
-                                <div className="border-input bg-muted/40 mt-2 rounded-lg border p-4">
-                                    <label
-                                        className="mb-1 block text-sm font-semibold"
-                                        htmlFor="counter-amount"
-                                    >
+                                <div className="mt-2 rounded-lg border border-input bg-muted/40 p-4">
+                                    <label className="mb-1 block text-sm font-semibold" htmlFor="counter-amount">
                                         Your counter
                                     </label>
                                     <div className="flex flex-wrap items-center gap-2">
@@ -194,7 +176,7 @@ export default function DealStrip({
                                             type="number"
                                             min="1"
                                             step="0.01"
-                                            className="border-input bg-card h-9 w-32 rounded-md border px-3 text-sm"
+                                            className="h-9 w-32 rounded-md border border-input bg-card px-3 text-sm"
                                             value={counterAmount}
                                             onChange={(e) => setCounterAmount(e.target.value)}
                                         />
@@ -202,7 +184,7 @@ export default function DealStrip({
                                             type="text"
                                             maxLength={500}
                                             placeholder="A line about why (optional)"
-                                            className="border-input bg-card h-9 min-w-[180px] flex-1 rounded-md border px-3 text-sm"
+                                            className="h-9 min-w-[180px] flex-1 rounded-md border border-input bg-card px-3 text-sm"
                                             value={counterNote}
                                             onChange={(e) => setCounterNote(e.target.value)}
                                         />
@@ -268,42 +250,34 @@ export default function DealStrip({
                     {transaction.status === "pending_payment" && (
                         <div className="mt-4 flex flex-wrap items-center gap-2">
                             {hasPlan ? (
-                                <p className="text-muted-foreground m-0 text-sm">
+                                <p className="m-0 text-sm text-muted-foreground">
                                     {planComplete
                                         ? "Every payment is confirmed — the seller can release the horse."
                                         : "Payments are tracked in the ledger below."}
                                 </p>
                             ) : isBuyer && !transaction.paidAt ? (
                                 <>
-                                    <p className="text-muted-foreground m-0 w-full text-sm">
-                                        Offer accepted. Pay the seller directly — Model Horse Hub
-                                        never holds funds — then say so here.
+                                    <p className="m-0 w-full text-sm text-muted-foreground">
+                                        Offer accepted. Pay the seller directly — Model Horse Hub never holds funds —
+                                        then say so here.
                                     </p>
-                                    <Button
-                                        onClick={() => run(() => markPaymentSent(transaction.id))}
-                                        disabled={busy}
-                                    >
+                                    <Button onClick={() => run(() => markPaymentSent(transaction.id))} disabled={busy}>
                                         {busy ? "…" : "💳 External payment sent"}
                                     </Button>
                                 </>
                             ) : isBuyer ? (
-                                <p className="text-muted-foreground m-0 text-sm">
-                                    💳 Payment marked as sent. Waiting for the seller to confirm it
-                                    arrived.
+                                <p className="m-0 text-sm text-muted-foreground">
+                                    💳 Payment marked as sent. Waiting for the seller to confirm it arrived.
                                 </p>
                             ) : null}
 
                             {isSeller && (transaction.paidAt || planComplete) && (
                                 <>
-                                    <p className="text-muted-foreground m-0 w-full text-sm">
-                                        {planComplete
-                                            ? "The plan is paid in full."
-                                            : "The buyer says they have paid."}
+                                    <p className="m-0 w-full text-sm text-muted-foreground">
+                                        {planComplete ? "The plan is paid in full." : "The buyer says they have paid."}
                                     </p>
                                     <Button
-                                        onClick={() =>
-                                            run(() => verifyFundsAndRelease(transaction.id))
-                                        }
+                                        onClick={() => run(() => verifyFundsAndRelease(transaction.id))}
                                         disabled={busy}
                                     >
                                         {busy ? "Verifying…" : "✅ Confirm payment & release"}
@@ -311,7 +285,7 @@ export default function DealStrip({
                                 </>
                             )}
                             {isSeller && !transaction.paidAt && !planComplete && !hasPlan && (
-                                <p className="text-muted-foreground m-0 text-sm">
+                                <p className="m-0 text-sm text-muted-foreground">
                                     ⏳ Waiting for the buyer to send payment.
                                 </p>
                             )}
@@ -332,11 +306,9 @@ export default function DealStrip({
                     {transaction.status === "funds_verified" && (
                         <div className="mt-4">
                             {isBuyer && transaction.pin ? (
-                                <div className="border-success bg-success/10 mt-2 rounded-lg border-2 p-6 text-center">
-                                    <span className="text-muted-foreground mb-1 block text-xs">
-                                        🔑 Your claim PIN
-                                    </span>
-                                    <strong className="text-success block font-mono text-2xl font-extrabold tracking-[0.15em]">
+                                <div className="mt-2 rounded-lg border-2 border-success bg-success/10 p-6 text-center">
+                                    <span className="mb-1 block text-xs text-muted-foreground">🔑 Your claim PIN</span>
+                                    <strong className="block font-mono text-2xl font-extrabold tracking-[0.15em] text-success">
                                         {transaction.pin}
                                     </strong>
                                     <Button asChild variant="outline" size="wide">
@@ -344,12 +316,12 @@ export default function DealStrip({
                                     </Button>
                                 </div>
                             ) : isBuyer ? (
-                                <p className="text-muted-foreground m-0 text-sm">
+                                <p className="m-0 text-sm text-muted-foreground">
                                     ✅ Funds confirmed. Your claim PIN is in your notifications.
                                 </p>
                             ) : (
                                 <div className="flex flex-wrap items-center gap-2">
-                                    <p className="text-muted-foreground m-0 text-sm">
+                                    <p className="m-0 text-sm text-muted-foreground">
                                         ✅ PIN released to the buyer. Transfer in progress.
                                     </p>
                                     <Button
@@ -367,7 +339,7 @@ export default function DealStrip({
                 </>
             )}
 
-            {error && <p className="text-destructive mt-3 mb-0 text-sm">{error}</p>}
+            {error && <p className="mt-3 mb-0 text-sm text-destructive">{error}</p>}
         </div>
     );
 }
@@ -396,9 +368,7 @@ function OfferExpiry({ createdAt }: { createdAt: string | null }) {
     const lapsing = countdown.hoursLeft < 24;
     return (
         <p
-            className={`m-0 mb-3 text-xs font-semibold ${
-                lapsing ? "text-destructive" : "text-muted-foreground"
-            }`}
+            className={`m-0 mb-3 text-xs font-semibold ${lapsing ? "text-destructive" : "text-muted-foreground"}`}
             title={`Expires ${new Date(countdown.expiresAt).toLocaleString()}`}
             suppressHydrationWarning
         >
@@ -407,15 +377,7 @@ function OfferExpiry({ createdAt }: { createdAt: string | null }) {
     );
 }
 
-function Strip({
-    children,
-    tone,
-    id,
-}: {
-    children: React.ReactNode;
-    tone: "muted" | "good";
-    id?: string;
-}) {
+function Strip({ children, tone, id }: { children: React.ReactNode; tone: "muted" | "good"; id?: string }) {
     return (
         <div
             id={id}
@@ -430,9 +392,7 @@ function Strip({
 
 function Amount({ value, muted = false }: { value: number; muted?: boolean }) {
     return (
-        <span
-            className={`font-serif text-xl font-bold ${muted ? "text-muted-foreground" : "text-saddle"}`}
-        >
+        <span className={`font-serif text-xl font-bold ${muted ? "text-muted-foreground" : "text-saddle"}`}>
             {formatMoney(value)}
         </span>
     );

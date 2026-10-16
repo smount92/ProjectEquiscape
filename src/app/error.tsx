@@ -55,12 +55,11 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
                         A new version went live under this tab
                     </h1>
                     <p
-                        className="relative z-[1] mx-auto m-0 mt-3 max-w-md text-sm leading-relaxed"
+                        className="relative z-[1] m-0 mx-auto mt-3 max-w-md text-sm leading-relaxed"
                         style={{ color: "var(--leather-text-soft)" }}
                     >
-                        This page was open when Model Horse Hub changed, so the button you pressed
-                        talked to the old version. Reload once and carry on &mdash; nothing you had
-                        already saved is lost.
+                        This page was open when Model Horse Hub changed, so the button you pressed talked to the old
+                        version. Reload once and carry on &mdash; nothing you had already saved is lost.
                     </p>
                 </div>
 
@@ -95,11 +94,11 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
                     This page didn&rsquo;t load
                 </h1>
                 <p
-                    className="relative z-[1] mx-auto m-0 mt-3 max-w-md text-sm leading-relaxed"
+                    className="relative z-[1] m-0 mx-auto mt-3 max-w-md text-sm leading-relaxed"
                     style={{ color: "var(--leather-text-soft)" }}
                 >
-                    The error has been logged and we can see it. Nothing you were looking at has been
-                    lost — try again, and if it keeps happening, tell us.
+                    The error has been logged and we can see it. Nothing you were looking at has been lost — try again,
+                    and if it keeps happening, tell us.
                 </p>
             </div>
 
@@ -117,16 +116,16 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
                     </Button>
                 </div>
 
-                <p className="text-muted-foreground m-0 mt-4 text-xs">
+                <p className="m-0 mt-4 text-xs text-muted-foreground">
                     Still stuck?{" "}
-                    <Link href="/contact" className="text-forest font-semibold">
+                    <Link href="/contact" className="font-semibold text-forest">
                         Tell us what broke
                     </Link>
                     {error.digest ? (
                         <>
                             {" "}
                             and quote reference{" "}
-                            <span className="text-secondary-foreground font-mono">{error.digest}</span>
+                            <span className="font-mono text-secondary-foreground">{error.digest}</span>
                         </>
                     ) : null}
                     .

@@ -38,11 +38,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { getPublicHorseCards } from "@/lib/shows/publicCards";
 import { getPublicHorseRecords } from "@/lib/shows/publicRecords";
-import {
-    sortRecordsBestFirst,
-    summarizeShowRecords,
-    type MarketRecordDetailRow,
-} from "@/lib/market/recordSummary";
+import { sortRecordsBestFirst, summarizeShowRecords, type MarketRecordDetailRow } from "@/lib/market/recordSummary";
 import type { MarketHorseRecord } from "@/app/actions/market";
 
 /** Bound the trophy-case read for one horse (campaigners included). */
@@ -128,8 +124,7 @@ export async function getPublicMarketHorseRecord(
             getPublicHorseCards(horseId),
         ]);
 
-        const records =
-            publicRecords.length > 0 ? publicRecords : await fetchViaSession(horseId);
+        const records = publicRecords.length > 0 ? publicRecords : await fetchViaSession(horseId);
 
         const summary =
             summarizeShowRecords(

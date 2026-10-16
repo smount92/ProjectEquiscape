@@ -11,14 +11,7 @@ import { useMemo, useState } from "react";
 import { formatMoney } from "@/lib/money/format";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { StableCard } from "@/lib/stable/types";
 import { finishBadgeClass, tradeBadgeClass } from "@/lib/stable/badges";
 
@@ -108,8 +101,7 @@ export default function StableLedgerTable({
         });
     }, [horses, sortKey, sortDir]);
 
-    const headerClass =
-        "cursor-pointer select-none text-muted-foreground transition-colors hover:text-forest";
+    const headerClass = "cursor-pointer select-none text-muted-foreground transition-colors hover:text-forest";
 
     return (
         <div className="w-full overflow-hidden rounded-xl border border-input bg-card shadow-sm">
@@ -128,10 +120,16 @@ export default function StableLedgerTable({
                             <TableHead onClick={() => toggleSort("finish")} className={headerClass}>
                                 Finish{sortIndicator("finish")}
                             </TableHead>
-                            <TableHead onClick={() => toggleSort("condition")} className={`${headerClass} max-md:hidden`}>
+                            <TableHead
+                                onClick={() => toggleSort("condition")}
+                                className={`${headerClass} max-md:hidden`}
+                            >
                                 Condition{sortIndicator("condition")}
                             </TableHead>
-                            <TableHead onClick={() => toggleSort("collection")} className={`${headerClass} max-md:hidden`}>
+                            <TableHead
+                                onClick={() => toggleSort("collection")}
+                                className={`${headerClass} max-md:hidden`}
+                            >
                                 Collection{sortIndicator("collection")}
                             </TableHead>
                             <TableHead onClick={() => toggleSort("trade")} className={`${headerClass} max-md:hidden`}>
@@ -190,7 +188,10 @@ export default function StableLedgerTable({
                                             {horse.customName}
                                         </Link>
                                         {horse.showRecordCount > 0 && (
-                                            <span className="ml-1.5 text-xs text-warning" title={`${horse.showRecordCount} show placings`}>
+                                            <span
+                                                className="ml-1.5 text-xs text-warning"
+                                                title={`${horse.showRecordCount} show placings`}
+                                            >
                                                 🏆{horse.showRecordCount}
                                             </span>
                                         )}
@@ -199,7 +200,10 @@ export default function StableLedgerTable({
                                         <span className="block truncate">{horse.refName}</span>
                                     </TableCell>
                                     <TableCell>
-                                        <Badge variant="secondary" className={`text-xs ${finishBadgeClass(horse.finishType)}`}>
+                                        <Badge
+                                            variant="secondary"
+                                            className={`text-xs ${finishBadgeClass(horse.finishType)}`}
+                                        >
                                             {horse.finishType || "—"}
                                         </Badge>
                                     </TableCell>

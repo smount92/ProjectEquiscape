@@ -8,13 +8,7 @@ import PayPalButton from "@/components/PayPalButton";
 import PrepaidTermButtons, { type TermOption } from "@/components/PrepaidTermButtons";
 import { paypalPathLive } from "@/lib/paypal/flag";
 import { formatPaidThrough } from "@/lib/entitlement/clock";
-import {
-    fixedTermTotal,
-    prepaidTermsEnabled,
-    termPlanId,
-    termsForTier,
-    type TermTier,
-} from "@/lib/billing/terms";
+import { fixedTermTotal, prepaidTermsEnabled, termPlanId, termsForTier, type TermTier } from "@/lib/billing/terms";
 import SupporterButton from "@/components/SupporterButton";
 import SupporterLedgerToggle from "@/components/SupporterLedgerToggle";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
@@ -77,7 +71,8 @@ async function getSupporterPriceLabel(): Promise<string | null> {
 
 export const metadata = {
     title: "Upgrade to MHH Pro",
-    description: "Sales-history charts, expanded photo storage and market-valued insurance reports — while every trust feature stays free.",
+    description:
+        "Sales-history charts, expanded photo storage and market-valued insurance reports — while every trust feature stays free.",
 };
 
 // Ordered by concrete value today (audit 2026-08: lead with what a
@@ -107,7 +102,8 @@ const PRO_FEATURES: { icon: LucideIcon; title: string; description: string }[] =
     {
         icon: BarChart3,
         title: "Blue Book PRO",
-        description: "Sales-history charts on every reference page — built from real Hub sales, growing richer with every one logged",
+        description:
+            "Sales-history charts on every reference page — built from real Hub sales, growing richer with every one logged",
     },
     {
         icon: Sparkles,
@@ -136,7 +132,8 @@ const STUDIO_FEATURES: { icon: LucideIcon; title: string; description: string }[
     {
         icon: BarChart3,
         title: "Everything in MHH Pro",
-        description: "Blue Book PRO, Photo Suite+, Smart Insurance Reports, the Monthly Stablemaster Report — all included",
+        description:
+            "Blue Book PRO, Photo Suite+, Smart Insurance Reports, the Monthly Stablemaster Report — all included",
     },
 ];
 
@@ -223,7 +220,7 @@ function termOptionsFor(tier: TermTier): TermOption[] {
 function MatrixMark({ value }: { value: MatrixCell }) {
     if (value === true) {
         return (
-            <span className="text-forest font-bold" title="Included">
+            <span className="font-bold text-forest" title="Included">
                 ✓<span className="sr-only">Included</span>
             </span>
         );
@@ -235,7 +232,7 @@ function MatrixMark({ value }: { value: MatrixCell }) {
             </span>
         );
     }
-    return <span className="text-foreground text-xs font-semibold">{value}</span>;
+    return <span className="text-xs font-semibold text-foreground">{value}</span>;
 }
 
 /** The visitor's version of every buy button: an account first. */
@@ -254,13 +251,11 @@ function SignUpToUpgrade({ tone }: { tone: "leather" | "ledger" }) {
     );
 }
 
-export default async function UpgradePage({
-    searchParams,
-}: {
-    searchParams: Promise<{ status?: string }>;
-}) {
+export default async function UpgradePage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
     // Readable signed out (outside review, 2026-09-22): the prices are the
     // point of the page, and the FAQ links here. Checkout still needs an
     // account, so the buttons become "create an account" for a visitor.
@@ -303,7 +298,13 @@ export default async function UpgradePage({
         <ExplorerLayout noHeader>
             <PageMasthead
                 icon="💎"
-                title={isPro(tier) ? (tier === "studio" ? "You're on Studio Pro" : "You're on MHH Pro") : "Upgrade to MHH Pro"}
+                title={
+                    isPro(tier)
+                        ? tier === "studio"
+                            ? "You're on Studio Pro"
+                            : "You're on MHH Pro"
+                        : "Upgrade to MHH Pro"
+                }
                 subtitle={
                     isPro(tier)
                         ? "Thank you for supporting Model Horse Hub"
@@ -314,9 +315,9 @@ export default async function UpgradePage({
                 stamp, like every other receipt on the site. */}
             {status === "success" && (
                 <div className="animate-fade-in-up ledger-card mb-8 text-center">
-                    <PartyPopper className="text-forest mx-auto h-8 w-8" />
+                    <PartyPopper className="mx-auto h-8 w-8 text-forest" />
                     <h2 className="mt-2 font-serif text-xl font-bold">Welcome to MHH Pro</h2>
-                    <p className="text-secondary-foreground mt-1 text-sm">
+                    <p className="mt-1 text-sm text-secondary-foreground">
                         Your account has been upgraded. Log out and back in to activate all Pro features.
                     </p>
                     <span className="stamp mt-3 inline-block">Paid</span>
@@ -326,9 +327,9 @@ export default async function UpgradePage({
                 <div className="animate-fade-in-up ledger-card mb-8 text-center">
                     <Lamp className="mx-auto h-8 w-8 text-(--ink-brass)" />
                     <h2 className="mt-2 font-serif text-xl font-bold">The lights stay on. Thank you.</h2>
-                    <p className="text-secondary-foreground mt-1 text-sm">
-                        Your brass plaque will appear on your profile within a minute or two. It unlocks
-                        nothing — and that&apos;s exactly the point.
+                    <p className="mt-1 text-sm text-secondary-foreground">
+                        Your brass plaque will appear on your profile within a minute or two. It unlocks nothing — and
+                        that&apos;s exactly the point.
                     </p>
                     <span className="stamp mt-3 inline-block">Supporter</span>
                 </div>
@@ -339,14 +340,14 @@ export default async function UpgradePage({
                 whole site where the wrong word actually matters. */}
             {status === "term-success" && (
                 <div className="animate-fade-in-up ledger-card mb-8 text-center">
-                    <PartyPopper className="text-forest mx-auto h-8 w-8" />
+                    <PartyPopper className="mx-auto h-8 w-8 text-forest" />
                     <h2 className="mt-2 font-serif text-xl font-bold">Paid up. Nothing renews.</h2>
-                    <p className="text-secondary-foreground mt-1 text-sm">
+                    <p className="mt-1 text-sm text-secondary-foreground">
                         {paidThroughLabel
                             ? `Your membership runs through ${paidThroughLabel}.`
                             : "Your membership is active."}{" "}
-                        That was a one-off payment — there is no subscription, nothing to cancel, and
-                        you will not be charged again. Log out and back in to activate everything.
+                        That was a one-off payment — there is no subscription, nothing to cancel, and you will not be
+                        charged again. Log out and back in to activate everything.
                     </p>
                     <span className="stamp mt-3 inline-block">Paid</span>
                 </div>
@@ -354,7 +355,7 @@ export default async function UpgradePage({
             {status === "cancelled" && (
                 <div className="animate-fade-in-up ledger-card mb-8 text-center">
                     <span className="stamp stamp-red inline-block">Cancelled</span>
-                    <p className="text-secondary-foreground mt-3 text-sm">
+                    <p className="mt-3 text-sm text-secondary-foreground">
                         Checkout was cancelled. No charges were made.
                     </p>
                 </div>
@@ -364,19 +365,19 @@ export default async function UpgradePage({
                 plainly beats showing a success page that isn't true yet. */}
             {status === "paypal-pending" && (
                 <div className="animate-fade-in-up ledger-card mb-8 text-center">
-                    <Hourglass className="text-muted-foreground mx-auto h-8 w-8" />
+                    <Hourglass className="mx-auto h-8 w-8 text-muted-foreground" />
                     <h2 className="mt-2 font-serif text-xl font-bold">PayPal is still confirming</h2>
-                    <p className="text-secondary-foreground mt-1 text-sm">
-                        Your subscription hasn&apos;t come back as active yet. This usually takes a few
-                        seconds — refresh this page shortly. If it hasn&apos;t changed within an hour,
-                        contact support and we&apos;ll sort it out. You will not be charged twice.
+                    <p className="mt-1 text-sm text-secondary-foreground">
+                        Your subscription hasn&apos;t come back as active yet. This usually takes a few seconds —
+                        refresh this page shortly. If it hasn&apos;t changed within an hour, contact support and
+                        we&apos;ll sort it out. You will not be charged twice.
                     </p>
                 </div>
             )}
 
             {/* Current plan — stamped, not badged */}
             <div className="animate-fade-in-up mb-6 flex items-center justify-center gap-2 text-center">
-                <span className="text-muted-foreground font-serif text-[0.7rem] tracking-[0.18em] uppercase">
+                <span className="font-serif text-[0.7rem] tracking-[0.18em] text-muted-foreground uppercase">
                     Current plan
                 </span>
                 <span className="stamp">{tierLabel}</span>
@@ -388,9 +389,9 @@ export default async function UpgradePage({
                 counterpart of selling something that ends. */}
             {isPro(tier) && paidThroughLabel && (
                 <div className="animate-fade-in-up -mt-4 mb-6 text-center">
-                    <p className="text-muted-foreground text-xs">
-                        Paid through {paidThroughLabel} — nothing renews. Buy another term any time
-                        and the months are added on.
+                    <p className="text-xs text-muted-foreground">
+                        Paid through {paidThroughLabel} — nothing renews. Buy another term any time and the months are
+                        added on.
                     </p>
                 </div>
             )}
@@ -398,11 +399,11 @@ export default async function UpgradePage({
             {/* The honest pitch — this hobby has watched its volunteer-run
                 sites go dark; "keep the lights on" IS the product. */}
             <div className="animate-fade-in-up mx-auto mb-12 max-w-[640px] text-center">
-                <p className="text-secondary-foreground text-sm leading-relaxed">
-                    Pro is how the lights stay on. Everything that keeps this hobby safe and fair —
-                    your stable, showing, provenance, condition records — is free for everyone,
-                    forever. Pro adds the power-user toolkit, and every subscription pays the
-                    hosting bills that keep Model Horse Hub independent and ad-free.
+                <p className="text-sm leading-relaxed text-secondary-foreground">
+                    Pro is how the lights stay on. Everything that keeps this hobby safe and fair — your stable,
+                    showing, provenance, condition records — is free for everyone, forever. Pro adds the power-user
+                    toolkit, and every subscription pays the hosting bills that keep Model Horse Hub independent and
+                    ad-free.
                 </p>
             </div>
 
@@ -416,13 +417,13 @@ export default async function UpgradePage({
                 <div className="ledger-card h-full">
                     <span className="ledger-tab">Free</span>
                     <div className="mb-4 flex items-baseline gap-1">
-                        <span className="text-forest font-serif text-3xl font-bold">$0</span>
-                        <span className="text-muted-foreground text-sm">/forever</span>
+                        <span className="font-serif text-3xl font-bold text-forest">$0</span>
+                        <span className="text-sm text-muted-foreground">/forever</span>
                     </div>
                     <ul className="space-y-3">
                         {FREE_FEATURES.map((feature) => (
                             <li key={feature} className="flex items-start gap-2 text-sm">
-                                <span className="text-forest mt-0.5 font-bold">✓</span>
+                                <span className="mt-0.5 font-bold text-forest">✓</span>
                                 <span>{feature}</span>
                             </li>
                         ))}
@@ -437,10 +438,7 @@ export default async function UpgradePage({
                 {/* Pro tier — leather panel, brass plaque, engraved ink.
                     Text here rides the --leather-text ramp; default ink
                     is invisible on this material. */}
-                <div
-                    className="leather-panel stitched relative h-full p-8"
-                    style={{ color: "var(--leather-text)" }}
-                >
+                <div className="leather-panel stitched relative h-full p-8" style={{ color: "var(--leather-text)" }}>
                     <div className="brass-plaque absolute -top-3 left-1/2 z-[1] inline-flex -translate-x-1/2 items-center gap-1 px-4 py-1 font-serif text-[0.7rem] font-bold tracking-[0.14em] uppercase">
                         <Sparkles className="h-3 w-3" /> Most popular
                     </div>
@@ -464,10 +462,7 @@ export default async function UpgradePage({
                                 <feature.icon className="mt-0.5 h-4 w-4 shrink-0 text-(--brass-hi)" />
                                 <div>
                                     <span className="font-semibold">{feature.title}</span>
-                                    <span style={{ color: "var(--leather-text-soft)" }}>
-                                        {" "}
-                                        — {feature.description}
-                                    </span>
+                                    <span style={{ color: "var(--leather-text-soft)" }}> — {feature.description}</span>
                                 </div>
                             </li>
                         ))}
@@ -485,14 +480,14 @@ export default async function UpgradePage({
                                 <SignUpToUpgrade tone="leather" />
                             ) : (
                                 <>
-                            <UpgradeButton />
-                            <PayPalButton plan="pro" enabled={paypalLive} variant="leather" />
-                            <PrepaidTermButtons
-                                tier="pro"
-                                enabled={termsLive}
-                                terms={proTerms}
-                                variant="leather"
-                            />
+                                    <UpgradeButton />
+                                    <PayPalButton plan="pro" enabled={paypalLive} variant="leather" />
+                                    <PrepaidTermButtons
+                                        tier="pro"
+                                        enabled={termsLive}
+                                        terms={proTerms}
+                                        variant="leather"
+                                    />
                                 </>
                             )}
                         </div>
@@ -502,10 +497,7 @@ export default async function UpgradePage({
                 {/* Studio Pro tier — a ledger leaf with the studio
                     thread, so the artist tier reads as a specialism
                     rather than a bigger Pro. */}
-                <div
-                    className="ledger-card h-full"
-                    style={{ borderTopColor: "var(--color-studio)" }}
-                >
+                <div className="ledger-card h-full" style={{ borderTopColor: "var(--color-studio)" }}>
                     <span
                         className="ledger-tab"
                         style={{ background: "linear-gradient(180deg, #6A4A98, var(--color-studio))" }}
@@ -513,15 +505,15 @@ export default async function UpgradePage({
                         Studio Pro
                     </span>
                     <div className="mb-4 flex items-baseline gap-1">
-                        <span className="text-studio font-serif text-3xl font-bold">$10</span>
-                        <span className="text-muted-foreground text-sm">/month</span>
+                        <span className="font-serif text-3xl font-bold text-studio">$10</span>
+                        <span className="text-sm text-muted-foreground">/month</span>
                     </div>
                     <ul className="space-y-3">
                         {STUDIO_FEATURES.map((feature) => (
                             <li key={feature.title} className="flex items-start gap-2 text-sm">
-                                <feature.icon className="text-studio mt-0.5 h-4 w-4 shrink-0" />
+                                <feature.icon className="mt-0.5 h-4 w-4 shrink-0 text-studio" />
                                 <div>
-                                    <span className="text-foreground font-semibold">{feature.title}</span>
+                                    <span className="font-semibold text-foreground">{feature.title}</span>
                                     <span className="text-secondary-foreground"> — {feature.description}</span>
                                 </div>
                             </li>
@@ -538,14 +530,14 @@ export default async function UpgradePage({
                                 <SignUpToUpgrade tone="ledger" />
                             ) : (
                                 <>
-                            <StudioProButton />
-                            <PayPalButton plan="studio" enabled={paypalLive} variant="ledger" />
-                            <PrepaidTermButtons
-                                tier="studio"
-                                enabled={termsLive}
-                                terms={studioTerms}
-                                variant="ledger"
-                            />
+                                    <StudioProButton />
+                                    <PayPalButton plan="studio" enabled={paypalLive} variant="ledger" />
+                                    <PrepaidTermButtons
+                                        tier="studio"
+                                        enabled={termsLive}
+                                        terms={studioTerms}
+                                        variant="ledger"
+                                    />
                                 </>
                             )}
                         </div>
@@ -570,14 +562,13 @@ export default async function UpgradePage({
                                 <span className="font-serif text-[0.7rem] font-bold tracking-[0.18em] text-(--ink-brass) uppercase">
                                     Supporter — {supporterPriceLabel}
                                 </span>
-                                <p className="text-secondary-foreground mt-1 text-sm">
-                                    Keeps the lights on. Unlocks nothing — the Hub stays free. Brass plaque on
-                                    your profile, our eternal gratitude, and a line in the ledger if you want
-                                    it.
+                                <p className="mt-1 text-sm text-secondary-foreground">
+                                    Keeps the lights on. Unlocks nothing — the Hub stays free. Brass plaque on your
+                                    profile, our eternal gratitude, and a line in the ledger if you want it.
                                 </p>
                                 <p className="mt-1 text-xs text-muted-foreground">
-                                    Annual, cancel anytime. Every feature stays free for everyone — that&apos;s
-                                    the point.
+                                    Annual, cancel anytime. Every feature stays free for everyone — that&apos;s the
+                                    point.
                                 </p>
                             </div>
                             <div className="w-full shrink-0 md:w-[280px]">
@@ -591,8 +582,10 @@ export default async function UpgradePage({
                                         </div>
                                         <SupporterLedgerToggle initialListed={supporterBadge.showInLedger} />
                                     </div>
+                                ) : signedOut ? (
+                                    <SignUpToUpgrade tone="ledger" />
                                 ) : (
-                                    signedOut ? <SignUpToUpgrade tone="ledger" /> : <SupporterButton priceLabel={supporterPriceLabel} />
+                                    <SupporterButton priceLabel={supporterPriceLabel} />
                                 )}
                             </div>
                         </div>
@@ -625,11 +618,11 @@ export default async function UpgradePage({
                                 <tbody key={section.group}>
                                     <tr>
                                         <td colSpan={4} className="pt-5 pb-1">
-                                            <span className="text-forest font-serif text-[0.78rem] font-bold tracking-[0.16em] uppercase">
+                                            <span className="font-serif text-[0.78rem] font-bold tracking-[0.16em] text-forest uppercase">
                                                 {section.group}
                                             </span>
                                             {section.note && (
-                                                <span className="text-muted-foreground block text-xs">
+                                                <span className="block text-xs text-muted-foreground">
                                                     {section.note}
                                                 </span>
                                             )}
@@ -657,13 +650,12 @@ export default async function UpgradePage({
 
                 {/* The house principle, said plainly under the table it
                     describes. */}
-                <div className="border-input bg-card/50 mt-6 rounded-lg border p-6 text-xs backdrop-blur-sm">
+                <div className="mt-6 rounded-lg border border-input bg-card/50 p-6 text-xs backdrop-blur-sm">
                     <p>
-                        🤝 Trust is never a paid feature. A horse&apos;s show record, its condition and
-                        flaw notes, its Hoofprint provenance and the Blue Book&apos;s real sale history
-                        stay free for every collector — including the ones deciding whether to buy from
-                        you. Paying for Pro must never make anyone else&apos;s horse look more
-                        trustworthy than it is.
+                        🤝 Trust is never a paid feature. A horse&apos;s show record, its condition and flaw notes, its
+                        Hoofprint provenance and the Blue Book&apos;s real sale history stay free for every collector —
+                        including the ones deciding whether to buy from you. Paying for Pro must never make anyone
+                        else&apos;s horse look more trustworthy than it is.
                     </p>
                 </div>
             </div>
@@ -677,35 +669,36 @@ export default async function UpgradePage({
                     <div className="ledger-card">
                         <h3 className="font-serif font-bold">Can I cancel anytime?</h3>
                         <p className="mt-1 text-sm text-secondary-foreground">
-                            Yes! Cancel from your Stripe billing portal anytime. Your Pro features stay active until the end of the billing period.
+                            Yes! Cancel from your Stripe billing portal anytime. Your Pro features stay active until the
+                            end of the billing period.
                         </p>
                     </div>
                     {termsLive && (
                         <div className="ledger-card">
-                            <h3 className="font-serif font-bold">
-                                Do I have to sign up for a recurring payment?
-                            </h3>
+                            <h3 className="font-serif font-bold">Do I have to sign up for a recurring payment?</h3>
                             <p className="mt-1 text-sm text-secondary-foreground">
-                                No. You can buy 3, 6 or 12 months with a single PayPal payment. There
-                                is no subscription behind it, nothing stored to charge you later and
-                                nothing to remember to cancel — when the months run out, your account
-                                goes back to Free and every horse, photo and record stays exactly
-                                where it is. If you buy another term before the first one ends, the
-                                new months are added on to the time you have left rather than
-                                replacing it.
+                                No. You can buy 3, 6 or 12 months with a single PayPal payment. There is no subscription
+                                behind it, nothing stored to charge you later and nothing to remember to cancel — when
+                                the months run out, your account goes back to Free and every horse, photo and record
+                                stays exactly where it is. If you buy another term before the first one ends, the new
+                                months are added on to the time you have left rather than replacing it.
                             </p>
                         </div>
                     )}
                     <div className="ledger-card">
                         <h3 className="font-serif font-bold">Will I lose my data if I downgrade?</h3>
                         <p className="mt-1 text-sm text-secondary-foreground">
-                            Never. All your horses, photos, and provenance data are safe. Extra detail photos become view-only until you re-subscribe.
+                            Never. All your horses, photos, and provenance data are safe. Extra detail photos become
+                            view-only until you re-subscribe.
                         </p>
                     </div>
                     <div className="ledger-card">
                         <h3 className="font-serif font-bold">What&apos;s the difference between Pro and Studio Pro?</h3>
                         <p className="mt-1 text-sm text-secondary-foreground">
-                            Pro is for collectors — sales-history charts, extra detail photos, market-valued insurance reports and the monthly Stablemaster ledger. Studio Pro includes all of that and lifts the studio bench cap: every studio is free to open and carries up to three active commissions, Studio Pro carries as many as you can paint.
+                            Pro is for collectors — sales-history charts, extra detail photos, market-valued insurance
+                            reports and the monthly Stablemaster ledger. Studio Pro includes all of that and lifts the
+                            studio bench cap: every studio is free to open and carries up to three active commissions,
+                            Studio Pro carries as many as you can paint.
                         </p>
                     </div>
                     {supporterPriceLabel && (
@@ -713,18 +706,18 @@ export default async function UpgradePage({
                             <h3 className="font-serif font-bold">What does Supporter unlock?</h3>
                             <p className="mt-1 text-sm text-secondary-foreground">
                                 Nothing — on purpose. This hobby has watched platforms paywall their way into
-                                irrelevance or vanish overnight, and we&apos;re not doing either. Supporter is
-                                for people who want Model Horse Hub to still be here next year: the money keeps
-                                the servers running, and every feature stays free for everyone. You get a brass
-                                plaque on your profile, a line in the Supporters&apos; Ledger if you opt in, and
-                                our genuine gratitude.
+                                irrelevance or vanish overnight, and we&apos;re not doing either. Supporter is for
+                                people who want Model Horse Hub to still be here next year: the money keeps the servers
+                                running, and every feature stays free for everyone. You get a brass plaque on your
+                                profile, a line in the Supporters&apos; Ledger if you opt in, and our genuine gratitude.
                             </p>
                         </div>
                     )}
                     <div className="ledger-card">
                         <h3 className="font-serif font-bold">Do you offer beta tester discounts?</h3>
                         <p className="mt-1 text-sm text-secondary-foreground">
-                            Yes! Early supporters receive a promo code for 6 months free. Enter it at checkout to apply the discount automatically.
+                            Yes! Early supporters receive a promo code for 6 months free. Enter it at checkout to apply
+                            the discount automatically.
                         </p>
                     </div>
                 </div>
@@ -732,7 +725,10 @@ export default async function UpgradePage({
 
             {/* Back link */}
             <div className="mt-12 text-center">
-                <Link href="/dashboard" className="text-sm text-muted-foreground no-underline hover:text-secondary-foreground">
+                <Link
+                    href="/dashboard"
+                    className="text-sm text-muted-foreground no-underline hover:text-secondary-foreground"
+                >
                     ← Back to Dashboard
                 </Link>
             </div>

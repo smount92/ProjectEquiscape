@@ -10,13 +10,7 @@ import { Button } from "@/components/ui/button";
  * Anyone holding the link can read it, it does not expire, and it
  * cannot be revoked short of asking us — so the button says so.
  */
-export default function GuestLinkButton({
-    commissionId,
-    guestToken,
-}: {
-    commissionId: string;
-    guestToken: string;
-}) {
+export default function GuestLinkButton({ commissionId, guestToken }: { commissionId: string; guestToken: string }) {
     const [copied, setCopied] = useState(false);
 
     const handleCopy = async () => {

@@ -23,14 +23,7 @@ import { friendlyClassStatus, friendlyEntryStatus } from "@/lib/shows/plainWords
 import { placeLabel, ribbonHex } from "@/lib/shows/placings";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export function classLabel(cls: { classNumber: string | null; name: string }): string {
     return cls.classNumber ? `${cls.classNumber} · ${cls.name}` : cls.name;
@@ -114,14 +107,10 @@ export function MyEntriesCard({
                                     {entry.handlerAlias ? (
                                         <span>
                                             shown by{" "}
-                                            <Link
-                                                href={`/profile/${encodeURIComponent(entry.handlerAlias)}`}
-                                            >
+                                            <Link href={`/profile/${encodeURIComponent(entry.handlerAlias)}`}>
                                                 @{entry.handlerAlias}
                                             </Link>{" "}
-                                            <span className="text-xs text-muted-foreground">
-                                                (proxy)
-                                            </span>
+                                            <span className="text-xs text-muted-foreground">(proxy)</span>
                                         </span>
                                     ) : (
                                         "—"
@@ -143,9 +132,7 @@ export function MyEntriesCard({
                                                     aria-hidden="true"
                                                     className="inline-block h-2.5 w-2.5 rounded-full border border-border"
                                                     style={{
-                                                        backgroundColor:
-                                                            ribbonHex(entry.place) ??
-                                                            undefined,
+                                                        backgroundColor: ribbonHex(entry.place) ?? undefined,
                                                     }}
                                                 />
                                                 {placeLabel(entry.place)}
@@ -181,11 +168,7 @@ export function MyEntriesCard({
                                                     </Link>
                                                 </Button>
                                             ) : (
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => onReenter(cls)}
-                                                >
+                                                <Button variant="outline" size="sm" onClick={() => onReenter(cls)}>
                                                     Re-enter
                                                 </Button>
                                             ))}
@@ -205,8 +188,7 @@ export function MyEntriesCard({
             )}
             {entriesOpen && (
                 <p className="mt-2 text-xs text-muted-foreground">
-                    Scratch to withdraw a horse. You can enter it again later; the
-                    withdrawn entry stays on the record.
+                    Scratch to withdraw a horse. You can enter it again later; the withdrawn entry stays on the record.
                 </p>
             )}
         </section>
@@ -261,10 +243,13 @@ function QualifyingGateBadge({ cls, showYear }: { cls: ConsoleClass; showYear?: 
     }
     const needs: string[] = [];
     if (entriesShort > 0) needs.push(`${entriesShort} more entr${entriesShort === 1 ? "y" : "ies"}`);
-    if (exhibitorsShort > 0)
-        needs.push(`${exhibitorsShort} more exhibitor${exhibitorsShort === 1 ? "" : "s"}`);
+    if (exhibitorsShort > 0) needs.push(`${exhibitorsShort} more exhibitor${exhibitorsShort === 1 ? "" : "s"}`);
     return (
-        <Badge variant="outline" className="h-auto max-w-full whitespace-normal" title="Qualification cards mint when the class has real competition">
+        <Badge
+            variant="outline"
+            className="h-auto max-w-full whitespace-normal"
+            title="Qualification cards mint when the class has real competition"
+        >
             🎖️ {needs.join(" & ")} mints cards
         </Badge>
     );
@@ -290,35 +275,23 @@ export function PublicClassRow({
             <span className="w-10 shrink-0 text-right font-mono text-xs text-muted-foreground">
                 {cls.classNumber ?? "—"}
             </span>
-            <span
-                className={`text-sm font-medium text-foreground ${cancelled ? "line-through" : ""}`}
-            >
-                {cls.name}
-            </span>
+            <span className={`text-sm font-medium text-foreground ${cancelled ? "line-through" : ""}`}>{cls.name}</span>
             {cls.status !== "scheduled" && (
-                <span className={`stamp ${cancelled ? "stamp-red" : ""}`}>
-                    {friendlyClassStatus(cls.status)}
-                </span>
+                <span className={`stamp ${cancelled ? "stamp-red" : ""}`}>{friendlyClassStatus(cls.status)}</span>
             )}
-            {cls.isQualifying && showIsQualifying && (
-                <QualifyingGateBadge cls={cls} showYear={showYear} />
-            )}
-            {cls.maxPerEntrant !== null && (
-                <Badge variant="secondary">Up to {cls.maxPerEntrant} of your horses</Badge>
-            )}
+            {cls.isQualifying && showIsQualifying && <QualifyingGateBadge cls={cls} showYear={showYear} />}
+            {cls.maxPerEntrant !== null && <Badge variant="secondary">Up to {cls.maxPerEntrant} of your horses</Badge>}
             {(cls.allowedScales?.length ?? 0) > 0 && (
-                <span className="text-xs text-muted-foreground">
-                    {cls.allowedScales!.join("/")}
-                </span>
+                <span className="text-xs text-muted-foreground">{cls.allowedScales!.join("/")}</span>
             )}
             {(cls.allowedFinishes?.length ?? 0) > 0 && (
-                <span className="text-xs text-muted-foreground">
-                    {cls.allowedFinishes!.join("/")}
-                </span>
+                <span className="text-xs text-muted-foreground">{cls.allowedFinishes!.join("/")}</span>
             )}
             <span className="text-xs text-muted-foreground">
                 {cls.entryCount} entered
-                {cls.exhibitorCount > 0 ? ` · ${cls.exhibitorCount} exhibitor${cls.exhibitorCount === 1 ? "" : "s"}` : ""}
+                {cls.exhibitorCount > 0
+                    ? ` · ${cls.exhibitorCount} exhibitor${cls.exhibitorCount === 1 ? "" : "s"}`
+                    : ""}
             </span>
             {classRoomHref && (
                 <Link

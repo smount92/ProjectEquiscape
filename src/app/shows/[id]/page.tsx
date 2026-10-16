@@ -36,11 +36,7 @@ const GENERIC_METADATA: Metadata = {
     description: "Show details, classlist, entries, and results.",
 };
 
-export async function generateMetadata({
-    params,
-}: {
-    params: Promise<{ id: string }>;
-}): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
     const { id } = await params;
     const canonical = `${APP_URL}/shows/${id}`;
 
@@ -58,8 +54,7 @@ export async function generateMetadata({
         if (!show || show.status === "draft") return GENERIC_METADATA;
 
         const aliases = await getAliases(anon, [show.host_id as string]);
-        const hostAlias =
-            aliases instanceof Map ? (aliases.get(show.host_id as string) ?? "unknown") : "unknown";
+        const hostAlias = aliases instanceof Map ? (aliases.get(show.host_id as string) ?? "unknown") : "unknown";
 
         const fmt = (iso: string | null) =>
             iso ? new Date(iso).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : null;
@@ -117,11 +112,7 @@ export async function generateMetadata({
     };
 }
 
-export default async function ShowDetailPage({
-    params,
-}: {
-    params: Promise<{ id: string }>;
-}) {
+export default async function ShowDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const supabase = await createClient();
 

@@ -92,15 +92,13 @@ export default function ProgramAccordion({
                                     {division.axis}
                                 </Badge>
                                 <span className="ml-auto text-xs text-muted-foreground tabular-nums">
-                                    {classCount} class{classCount === 1 ? "" : "es"} ·{" "}
-                                    {entryCount} entr{entryCount === 1 ? "y" : "ies"}
+                                    {classCount} class{classCount === 1 ? "" : "es"} · {entryCount} entr
+                                    {entryCount === 1 ? "y" : "ies"}
                                 </span>
                             </summary>
                             <div className="border-t border-input px-3 pt-2 pb-3">
                                 {/* What the axis word MEANS — visible, never a tooltip. */}
-                                <p className="mt-0 mb-0 text-xs text-muted-foreground">
-                                    {AXIS_GLOSS[division.axis]}
-                                </p>
+                                <p className="mt-0 mb-0 text-xs text-muted-foreground">{AXIS_GLOSS[division.axis]}</p>
                                 <ul className="mt-3 flex list-none flex-col gap-4 p-0">
                                     {division.sections.map((section) => (
                                         <li key={section.id}>
@@ -113,22 +111,24 @@ export default function ProgramAccordion({
                                                 </h4>
                                                 <ul className="mt-1 flex list-none flex-col p-0">
                                                     {/* Cancelled classes are not on the program an entrant reads. */}
-                                                    {section.classes.filter((cls) => cls.status !== "cancelled").map((cls) => (
-                                                        <PublicClassRow
-                                                            key={cls.id}
-                                                            cls={cls}
-                                                            canEnter={canEnter}
-                                                            showId={showId}
-                                                            onEnter={onEnter}
-                                                            showYear={showYear}
-                                                            showIsQualifying={showIsQualifying}
-                                                            classRoomHref={
-                                                                classRooms
-                                                                    ? `/shows/${showId}/class/${cls.id}`
-                                                                    : undefined
-                                                            }
-                                                        />
-                                                    ))}
+                                                    {section.classes
+                                                        .filter((cls) => cls.status !== "cancelled")
+                                                        .map((cls) => (
+                                                            <PublicClassRow
+                                                                key={cls.id}
+                                                                cls={cls}
+                                                                canEnter={canEnter}
+                                                                showId={showId}
+                                                                onEnter={onEnter}
+                                                                showYear={showYear}
+                                                                showIsQualifying={showIsQualifying}
+                                                                classRoomHref={
+                                                                    classRooms
+                                                                        ? `/shows/${showId}/class/${cls.id}`
+                                                                        : undefined
+                                                                }
+                                                            />
+                                                        ))}
                                                     {section.classes.length === 0 && (
                                                         <li className="py-1.5 text-sm text-muted-foreground italic">
                                                             No classes yet.

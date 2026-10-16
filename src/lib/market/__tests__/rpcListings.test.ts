@@ -92,9 +92,7 @@ describe("buildMarketListingRpcArgs", () => {
     });
 
     it("never asks for more rows than the function will serve", () => {
-        expect(buildMarketListingRpcArgs({}, 1).p_limit).toBeLessThanOrEqual(
-            MARKET_RPC_MAX_LIMIT,
-        );
+        expect(buildMarketListingRpcArgs({}, 1).p_limit).toBeLessThanOrEqual(MARKET_RPC_MAX_LIMIT);
     });
 });
 
@@ -190,20 +188,15 @@ describe("mapMarketListingRpcRows", () => {
     });
 
     it("only trusts an explicit true for the trusted-seller flag", () => {
-        expect(mapMarketListingRpcRows([row({ is_trusted_seller: true })]).listings[0]
-            .isTrustedSeller).toBe(true);
-        expect(mapMarketListingRpcRows([row({ is_trusted_seller: null })]).listings[0]
-            .isTrustedSeller).toBe(false);
-        expect(mapMarketListingRpcRows([row({ is_trusted_seller: "yes" })]).listings[0]
-            .isTrustedSeller).toBe(false);
+        expect(mapMarketListingRpcRows([row({ is_trusted_seller: true })]).listings[0].isTrustedSeller).toBe(true);
+        expect(mapMarketListingRpcRows([row({ is_trusted_seller: null })]).listings[0].isTrustedSeller).toBe(false);
+        expect(mapMarketListingRpcRows([row({ is_trusted_seller: "yes" })]).listings[0].isTrustedSeller).toBe(false);
     });
 
     it("summarizes the row's record aggregate onto the card", () => {
         const { listings } = mapMarketListingRpcRows([
             row({
-                records: [
-                    { placing: "1st", ribbon_color: null, verification_tier: "host_verified" },
-                ],
+                records: [{ placing: "1st", ribbon_color: null, verification_tier: "host_verified" }],
             }),
         ]);
         expect(listings[0].recordSummary).toEqual({
@@ -232,13 +225,7 @@ describe("mapMarketListingRpcRows", () => {
     });
 
     it("drops rows with no id or no owner instead of rendering broken cards", () => {
-        const { listings } = mapMarketListingRpcRows([
-            row(),
-            row({ id: null }),
-            row({ owner_id: "" }),
-            null,
-            "junk",
-        ]);
+        const { listings } = mapMarketListingRpcRows([row(), row({ id: null }), row({ owner_id: "" }), null, "junk"]);
         expect(listings).toHaveLength(1);
         expect(listings[0].id).toBe("h-1");
     });

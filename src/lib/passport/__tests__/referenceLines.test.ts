@@ -41,18 +41,40 @@ describe("referenceLines", () => {
         });
         expect(typed.name).toBe("M1 Giorgio (not yet filed in the Registry)");
         expect(typed.moldKnown).toBe(false);
-        const bare = referenceLines({ item_type: "plastic_release", title: "Seize The Day Surprise", maker: "Breyer", scale: null, attributes: {} });
+        const bare = referenceLines({
+            item_type: "plastic_release",
+            title: "Seize The Day Surprise",
+            maker: "Breyer",
+            scale: null,
+            attributes: {},
+        });
         expect(bare.name).toBe("Not recorded for this release yet");
         expect(bare.scale).toBe("Unknown");
     });
 
     it("leaves molds and resins as they were", () => {
-        expect(referenceLines({ item_type: "plastic_mold", title: "Silky Sullivan", maker: "Breyer", scale: "Classic (1:12)", attributes: { release_year_start: 1975 } })).toMatchObject({
+        expect(
+            referenceLines({
+                item_type: "plastic_mold",
+                title: "Silky Sullivan",
+                maker: "Breyer",
+                scale: "Classic (1:12)",
+                attributes: { release_year_start: 1975 },
+            }),
+        ).toMatchObject({
             type: "Mold",
             name: "Silky Sullivan",
             extra: "First released 1975",
         });
-        expect(referenceLines({ item_type: "artist_resin", title: "Mona", maker: "Sarah Minkiewicz-Breunig", scale: "Traditional (1:9)", attributes: { cast_medium: "Resin" } })).toMatchObject({
+        expect(
+            referenceLines({
+                item_type: "artist_resin",
+                title: "Mona",
+                maker: "Sarah Minkiewicz-Breunig",
+                scale: "Traditional (1:9)",
+                attributes: { cast_medium: "Resin" },
+            }),
+        ).toMatchObject({
             type: "Artist Resin",
             name: "Mona",
             extra: "Resin",

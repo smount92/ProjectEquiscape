@@ -37,15 +37,8 @@ function save(classId: string, markDone = true): PendingPlacingSave {
 describe("retryQueue — load/enqueue/dedupe", () => {
     it("loads empty for missing or corrupt storage", () => {
         expect(loadQueue(memoryStorage(), "show-1")).toEqual([]);
-        expect(
-            loadQueue(memoryStorage({ [queueStorageKey("show-1")]: "{not json" }), "show-1"),
-        ).toEqual([]);
-        expect(
-            loadQueue(
-                memoryStorage({ [queueStorageKey("show-1")]: '{"an":"object"}' }),
-                "show-1",
-            ),
-        ).toEqual([]);
+        expect(loadQueue(memoryStorage({ [queueStorageKey("show-1")]: "{not json" }), "show-1")).toEqual([]);
+        expect(loadQueue(memoryStorage({ [queueStorageKey("show-1")]: '{"an":"object"}' }), "show-1")).toEqual([]);
         // Wrong-shaped items are filtered, valid ones survive.
         expect(
             loadQueue(

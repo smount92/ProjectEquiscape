@@ -113,7 +113,9 @@ export async function POST(request: NextRequest) {
                 const metadata = session.metadata || {};
 
                 if (!userId) {
-                    logger.error("StripeWebhook", "checkout.session.completed missing client_reference_id", { sessionId: session.id });
+                    logger.error("StripeWebhook", "checkout.session.completed missing client_reference_id", {
+                        sessionId: session.id,
+                    });
                     break;
                 }
 
@@ -125,8 +127,10 @@ export async function POST(request: NextRequest) {
                         .from("user_horses")
                         .update({ is_promoted_until: promotedUntil.toISOString() })
                         .eq("id", metadata.horse_id);
-                    logger.error("StripeWebhook", `Horse ${metadata.horse_id} promoted until ${promotedUntil.toISOString()}`);
-
+                    logger.error(
+                        "StripeWebhook",
+                        `Horse ${metadata.horse_id} promoted until ${promotedUntil.toISOString()}`,
+                    );
                 } else if (metadata.type === "boost_iso") {
                     const boostedUntil = new Date();
                     boostedUntil.setHours(boostedUntil.getHours() + 48);
@@ -134,8 +138,10 @@ export async function POST(request: NextRequest) {
                         .from("user_wishlists")
                         .update({ is_boosted_until: boostedUntil.toISOString() })
                         .eq("id", metadata.wishlist_item_id);
-                    logger.error("StripeWebhook", `ISO ${metadata.wishlist_item_id} boosted until ${boostedUntil.toISOString()}`);
-
+                    logger.error(
+                        "StripeWebhook",
+                        `ISO ${metadata.wishlist_item_id} boosted until ${boostedUntil.toISOString()}`,
+                    );
                 } else if (metadata.type === "insurance_report") {
                     await admin.from("purchased_reports").insert({
                         user_id: metadata.supabase_user_id,
@@ -143,7 +149,6 @@ export async function POST(request: NextRequest) {
                         report_type: "insurance",
                     });
                     logger.error("StripeWebhook", `Insurance report purchased for horse ${metadata.horse_id}`);
-
                 } else if (metadata.type === "studio_pro") {
                     // MERGE app_metadata — a bare object here erased every
                     // other key (audit N5; is_suspended now lives there, so
@@ -165,11 +170,9 @@ export async function POST(request: NextRequest) {
                         tier: "studio",
                         status: "active",
                         stripeCustomerId: session.customer as string,
-                        stripeSubscriptionId:
-                            typeof session.subscription === "string" ? session.subscription : null,
+                        stripeSubscriptionId: typeof session.subscription === "string" ? session.subscription : null,
                     });
                     logger.error("StripeWebhook", `User ${userId} upgraded to Studio Pro`);
-
                 } else if (metadata.type === "supporter") {
                     // Supporter ("keep the lights on", cosmetic only) is a flag
                     // on public.users — deliberately NOT app_metadata.tier, so
@@ -191,11 +194,14 @@ export async function POST(request: NextRequest) {
                         // 500 so Stripe retries — e.g. env enabled before
                         // migration 142 is applied; the paid flag must not be
                         // silently dropped.
-                        logger.error("StripeWebhook", `Failed to set supporter flag for ${userId}`, supporterWriteError);
+                        logger.error(
+                            "StripeWebhook",
+                            `Failed to set supporter flag for ${userId}`,
+                            supporterWriteError,
+                        );
                         return NextResponse.json({ error: "Supporter update failed" }, { status: 500 });
                     }
                     logger.error("StripeWebhook", `User ${userId} became a Supporter`, { sessionId: session.id });
-
                 } else {
                     // Default: MHH Pro subscription upgrade (merge — see
                     // studio branch note).
@@ -213,8 +219,7 @@ export async function POST(request: NextRequest) {
                         tier: "pro",
                         status: "active",
                         stripeCustomerId: session.customer as string,
-                        stripeSubscriptionId:
-                            typeof session.subscription === "string" ? session.subscription : null,
+                        stripeSubscriptionId: typeof session.subscription === "string" ? session.subscription : null,
                     });
                     logger.error("StripeWebhook", `User ${userId} upgraded to Pro`, { sessionId: session.id });
                 }
@@ -224,10 +229,7 @@ export async function POST(request: NextRequest) {
             // ── Subscription status change ──
             case "customer.subscription.updated":
             case "customer.subscription.deleted": {
-                const result = await handleSubscriptionChange(
-                    admin,
-                    event.data.object as Stripe.Subscription,
-                );
+                const result = await handleSubscriptionChange(admin, event.data.object as Stripe.Subscription);
                 if (!result.ok) {
                     return NextResponse.json({ error: result.error }, { status: 500 });
                 }
@@ -325,16 +327,14 @@ async function handleSubscriptionChange(
     const supporterPriceId = process.env.STRIPE_SUPPORTER_PRICE_ID;
     const isSupporterSubscription =
         subscription.metadata?.type === "supporter" ||
-        (!!supporterPriceId &&
-            subscription.items?.data?.some((item) => item.price?.id === supporterPriceId));
+        (!!supporterPriceId && subscription.items?.data?.some((item) => item.price?.id === supporterPriceId));
     if (isSupporterSubscription) {
         const supporterUserId = subscription.metadata?.supabase_user_id;
-        const supporterActive =
-            subscription.status === "active" || subscription.status === "trialing";
+        const supporterActive = subscription.status === "active" || subscription.status === "trialing";
         if (!supporterUserId) {
             logger.error(
                 "StripeWebhook",
-                `Supporter subscription ${subscription.id} missing supabase_user_id metadata`
+                `Supporter subscription ${subscription.id} missing supabase_user_id metadata`,
             );
             return { ok: true };
         }
@@ -350,15 +350,14 @@ async function handleSubscriptionChange(
             logger.error(
                 "StripeWebhook",
                 `Failed to update supporter flag for ${supporterUserId}`,
-                supporterSubWriteError
+                supporterSubWriteError,
             );
             return { ok: false, error: "Supporter update failed" };
         }
-        logger.error(
-            "StripeWebhook",
-            `User ${supporterUserId} is_supporter set to ${supporterActive}`,
-            { subscriptionId: subscription.id, status: subscription.status }
-        );
+        logger.error("StripeWebhook", `User ${supporterUserId} is_supporter set to ${supporterActive}`, {
+            subscriptionId: subscription.id,
+            status: subscription.status,
+        });
         return { ok: true };
     }
 
@@ -370,21 +369,17 @@ async function handleSubscriptionChange(
     const studioPriceId = process.env.STRIPE_STUDIO_PRO_PRICE_ID;
     const isStudioSubscription =
         subscription.metadata?.type === "studio_pro" ||
-        (!!studioPriceId &&
-            subscription.items?.data?.some((item) => item.price?.id === studioPriceId));
+        (!!studioPriceId && subscription.items?.data?.some((item) => item.price?.id === studioPriceId));
     if (isStudioSubscription) {
         const studioUserId = subscription.metadata?.supabase_user_id;
-        const studioActive =
-            subscription.status === "active" || subscription.status === "trialing";
+        const studioActive = subscription.status === "active" || subscription.status === "trialing";
         const studioStatus = normalizeSubscriptionStatus(subscription.status, studioActive);
         if (!studioUserId) {
             // Pre-fix subscriptions carry no subscription metadata —
             // fall back to the customer-id scan below, but with the
             // STUDIO tier, never "pro".
             const { data: scanUsers } = await admin.auth.admin.listUsers({ perPage: 1000 });
-            const studioUser = scanUsers?.users?.find(
-                (u) => u.app_metadata?.stripe_customer_id === customerId
-            );
+            const studioUser = scanUsers?.users?.find((u) => u.app_metadata?.stripe_customer_id === customerId);
             if (!studioUser) {
                 logger.error("StripeWebhook", `No user found for studio customer ${customerId}`);
                 return { ok: true };
@@ -434,9 +429,7 @@ async function handleSubscriptionChange(
     // Look up user by stored stripe_customer_id in app_metadata
     // We need to find the user — iterate auth users (admin API)
     const { data: users } = await admin.auth.admin.listUsers({ perPage: 1000 });
-    const user = users?.users?.find(
-        (u) => u.app_metadata?.stripe_customer_id === customerId
-    );
+    const user = users?.users?.find((u) => u.app_metadata?.stripe_customer_id === customerId);
 
     if (!user) {
         logger.error("StripeWebhook", `No user found for Stripe customer ${customerId}`);

@@ -49,13 +49,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const AXIS_OPTIONS: { value: DivisionAxis; label: string }[] = [
     { value: "halter", label: "Halter" },
@@ -212,14 +206,7 @@ interface InlineAddFormProps {
     extra?: React.ReactNode;
 }
 
-function InlineAddForm({
-    placeholder,
-    buttonLabel,
-    pending,
-    onAdd,
-    withNumber,
-    extra,
-}: InlineAddFormProps) {
+function InlineAddForm({ placeholder, buttonLabel, pending, onAdd, withNumber, extra }: InlineAddFormProps) {
     const [name, setName] = useState("");
     const [number, setNumber] = useState("");
     return (
@@ -272,16 +259,12 @@ interface ClassEditDialogProps {
 function ClassEditDialog({ cls, open, onClose, onSaved, setError }: ClassEditDialogProps) {
     const [name, setName] = useState(cls.name);
     const [classNumber, setClassNumber] = useState(cls.classNumber ?? "");
-    const [maxPerEntrant, setMaxPerEntrant] = useState(
-        cls.maxPerEntrant !== null ? String(cls.maxPerEntrant) : "",
-    );
+    const [maxPerEntrant, setMaxPerEntrant] = useState(cls.maxPerEntrant !== null ? String(cls.maxPerEntrant) : "");
     const [scales, setScales] = useState((cls.allowedScales ?? []).join(", "));
     // Drop any legacy non-canonical finish (e.g. "CM") — it could never
     // match a horse, so unchecking it here is the repair.
     const [finishes, setFinishes] = useState<string[]>(
-        (cls.allowedFinishes ?? []).filter((f) =>
-            (FINISH_OPTIONS as readonly string[]).includes(f),
-        ),
+        (cls.allowedFinishes ?? []).filter((f) => (FINISH_OPTIONS as readonly string[]).includes(f)),
     );
     const [isQualifying, setIsQualifying] = useState(cls.isQualifying);
     const [saving, setSaving] = useState(false);
@@ -317,9 +300,7 @@ function ClassEditDialog({ cls, open, onClose, onSaved, setError }: ClassEditDia
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>Class settings</DialogTitle>
-                    <DialogDescription>
-                        Caps and eligibility for “{cls.name}”.
-                    </DialogDescription>
+                    <DialogDescription>Caps and eligibility for “{cls.name}”.</DialogDescription>
                 </DialogHeader>
                 <div className="flex flex-col gap-4">
                     <label className="flex flex-col gap-1.5 text-sm font-semibold">
@@ -360,23 +341,16 @@ function ClassEditDialog({ cls, open, onClose, onSaved, setError }: ClassEditDia
                         />
                     </label>
                     <fieldset className="flex flex-col gap-1.5">
-                        <legend className="text-sm font-semibold">
-                            Allowed finishes (none checked = any)
-                        </legend>
+                        <legend className="text-sm font-semibold">Allowed finishes (none checked = any)</legend>
                         <div className="flex flex-wrap gap-x-4 gap-y-1.5 pt-1.5">
                             {FINISH_OPTIONS.map((finish) => (
-                                <label
-                                    key={finish}
-                                    className="flex items-center gap-2 text-sm font-medium"
-                                >
+                                <label key={finish} className="flex items-center gap-2 text-sm font-medium">
                                     <input
                                         type="checkbox"
                                         checked={finishes.includes(finish)}
                                         onChange={(e) =>
                                             setFinishes((prev) =>
-                                                e.target.checked
-                                                    ? [...prev, finish]
-                                                    : prev.filter((f) => f !== finish),
+                                                e.target.checked ? [...prev, finish] : prev.filter((f) => f !== finish),
                                             )
                                         }
                                         className="size-5 min-h-6 min-w-6 accent-forest"
@@ -458,13 +432,9 @@ function ClassRow({
             <span className="w-10 shrink-0 text-right font-mono text-xs text-muted-foreground">
                 {cls.classNumber ?? "—"}
             </span>
-            <span className={`text-sm font-medium text-foreground ${cancelled ? "line-through" : ""}`}>
-                {cls.name}
-            </span>
+            <span className={`text-sm font-medium text-foreground ${cancelled ? "line-through" : ""}`}>{cls.name}</span>
             {cls.status !== "scheduled" && (
-                <span className={`stamp ${cancelled ? "stamp-red" : ""}`}>
-                    {friendlyClassStatus(cls.status)}
-                </span>
+                <span className={`stamp ${cancelled ? "stamp-red" : ""}`}>{friendlyClassStatus(cls.status)}</span>
             )}
             {/* Same badge the public show page uses (PublicClassRow),
                 so hosts see the flag without opening Edit. */}
@@ -473,13 +443,9 @@ function ClassRow({
             ) : (
                 <Badge variant="outline">non-qualifying</Badge>
             )}
-            {cls.maxPerEntrant !== null && (
-                <Badge variant="secondary">max {cls.maxPerEntrant}/entrant</Badge>
-            )}
+            {cls.maxPerEntrant !== null && <Badge variant="secondary">max {cls.maxPerEntrant}/entrant</Badge>}
             {(entriesExist || cls.entryCount > 0) && (
-                <span className="text-xs text-muted-foreground">
-                    {cls.entryCount} entered
-                </span>
+                <span className="text-xs text-muted-foreground">{cls.entryCount} entered</span>
             )}
             {canEdit && (
                 <span className="ml-auto inline-flex items-center gap-1">
@@ -502,12 +468,7 @@ function ClassRow({
                             Delete
                         </Button>
                     ) : (
-                        <Button
-                            variant="destructive-outline"
-                            size="sm"
-                            disabled={pending}
-                            onClick={onCancelClass}
-                        >
+                        <Button variant="destructive-outline" size="sm" disabled={pending} onClick={onCancelClass}>
                             Cancel class
                         </Button>
                     )}
@@ -576,9 +537,8 @@ export default function ClasslistBuilder({
         <div className="flex flex-col gap-6">
             {!mutable && (
                 <p className="ledger-card text-sm text-muted-foreground" role="note">
-                    The show has reached &ldquo;{friendlyShowStatus(showStatus)}&rdquo; — the
-                    classlist is frozen and shown read-only. Results stay tied to the classlist
-                    exactly as it ran.
+                    The show has reached &ldquo;{friendlyShowStatus(showStatus)}&rdquo; — the classlist is frozen and
+                    shown read-only. Results stay tied to the classlist exactly as it ran.
                 </p>
             )}
             {mutable && !canManage && (
@@ -597,7 +557,15 @@ export default function ClasslistBuilder({
                 <ShowDefaultsCard
                     showId={showId}
                     classCount={divisions.reduce(
-                        (n, d) => n + d.sections.reduce((m, sec) => m + sec.classes.filter((c) => c.status !== "cancelled" && c.status !== "combined").length, 0),
+                        (n, d) =>
+                            n +
+                            d.sections.reduce(
+                                (m, sec) =>
+                                    m +
+                                    sec.classes.filter((c) => c.status !== "cancelled" && c.status !== "combined")
+                                        .length,
+                                0,
+                            ),
                         0,
                     )}
                     pending={pending}
@@ -609,9 +577,8 @@ export default function ClasslistBuilder({
                 <div className="ledger-card flex flex-col items-center gap-4 py-10 text-center">
                     <span className="ledger-tab">Empty Classlist</span>
                     <p className="max-w-md text-sm text-muted-foreground">
-                        Start from a template — the full NAMHSA core classlist, one of its
-                        divisions, or a small virtual-show starter — then tailor it, or build
-                        your own from scratch below.
+                        Start from a template — the full NAMHSA core classlist, one of its divisions, or a small
+                        virtual-show starter — then tailor it, or build your own from scratch below.
                     </p>
                     {canEdit && (
                         <ul className="grid w-full max-w-2xl list-none grid-cols-1 gap-3 p-0 sm:grid-cols-2">
@@ -638,18 +605,14 @@ export default function ClasslistBuilder({
                                                 {countTemplateClasses(template)} classes
                                             </span>
                                         </span>
-                                        <span className="text-xs text-muted-foreground">
-                                            {template.description}
-                                        </span>
+                                        <span className="text-xs text-muted-foreground">{template.description}</span>
                                     </button>
                                 </li>
                             ))}
                         </ul>
                     )}
                     {canEdit && <CopyClasslistPicker showId={showId} pending={pending} run={run} />}
-                    {canEdit && pending && (
-                        <p className="text-sm text-muted-foreground">Loading template…</p>
-                    )}
+                    {canEdit && pending && <p className="text-sm text-muted-foreground">Loading template…</p>}
                 </div>
             ) : (
                 <ul className="flex list-none flex-col gap-6 p-0">
@@ -661,13 +624,9 @@ export default function ClasslistBuilder({
                                         name={division.name}
                                         label={division.name}
                                         disabled={pending}
-                                        display={
-                                            <span className="ledger-tab !mb-0">{division.name}</span>
-                                        }
+                                        display={<span className="ledger-tab !mb-0">{division.name}</span>}
                                         onRename={(name) =>
-                                            run(() =>
-                                                updateDivision({ divisionId: division.id, name }),
-                                            )
+                                            run(() => updateDivision({ divisionId: division.id, name }))
                                         }
                                     />
                                 ) : (
@@ -687,7 +646,13 @@ export default function ClasslistBuilder({
                                                 size="sm"
                                                 disabled={pending}
                                                 className="text-destructive"
-                                                onClick={() => setDeleting({ kind: "division", id: division.id, name: division.name })}
+                                                onClick={() =>
+                                                    setDeleting({
+                                                        kind: "division",
+                                                        id: division.id,
+                                                        name: division.name,
+                                                    })
+                                                }
                                                 aria-label={`Remove division ${division.name}`}
                                             >
                                                 Remove division
@@ -705,24 +670,31 @@ export default function ClasslistBuilder({
                                             canEdit={canEdit}
                                             pending={pending}
                                             entriesExist={entriesExist}
-                                            onMoveSection={(dir) =>
-                                                moveNode("section", division.sections, sIndex, dir)
-                                            }
+                                            onMoveSection={(dir) => moveNode("section", division.sections, sIndex, dir)}
                                             onMoveClass={(cIndex, dir) =>
                                                 moveNode("class", section.classes, cIndex, dir)
                                             }
                                             onAddClass={(name, classNumber) =>
-                                                run(() => addClass({ sectionId: section.id, name, classNumber, sortOrder: section.classes.length }))
+                                                run(() =>
+                                                    addClass({
+                                                        sectionId: section.id,
+                                                        name,
+                                                        classNumber,
+                                                        sortOrder: section.classes.length,
+                                                    }),
+                                                )
                                             }
                                             onRenameSection={(name) =>
-                                                run(() =>
-                                                    updateSection({ sectionId: section.id, name }),
-                                                )
+                                                run(() => updateSection({ sectionId: section.id, name }))
                                             }
                                             onEditClass={setEditingClass}
                                             onCancelClass={setCancellingClass}
-                                            onDeleteClass={(cls) => setDeleting({ kind: "class", id: cls.id, name: cls.name })}
-                                            onDeleteSection={() => setDeleting({ kind: "section", id: section.id, name: section.name })}
+                                            onDeleteClass={(cls) =>
+                                                setDeleting({ kind: "class", id: cls.id, name: cls.name })
+                                            }
+                                            onDeleteSection={() =>
+                                                setDeleting({ kind: "section", id: section.id, name: section.name })
+                                            }
                                             onRestoreClass={(cls) =>
                                                 run(() =>
                                                     updateClass({
@@ -759,7 +731,9 @@ export default function ClasslistBuilder({
                 </ul>
             )}
 
-            {canEdit && <AddDivisionForm pending={pending} run={run} showId={showId} divisionCount={divisions.length} />}
+            {canEdit && (
+                <AddDivisionForm pending={pending} run={run} showId={showId} divisionCount={divisions.length} />
+            )}
 
             {editingClass && (
                 <ClassEditDialog
@@ -781,16 +755,11 @@ export default function ClasslistBuilder({
                         <DialogHeader>
                             <DialogTitle>Cancel “{cancellingClass.name}”?</DialogTitle>
                             <DialogDescription>
-                                Cancel class — entrants&rsquo; entries stay recorded as history.
-                                Restore is available.
+                                Cancel class — entrants&rsquo; entries stay recorded as history. Restore is available.
                             </DialogDescription>
                         </DialogHeader>
                         <DialogFooter>
-                            <Button
-                                variant="outline"
-                                onClick={() => setCancellingClass(null)}
-                                disabled={pending}
-                            >
+                            <Button variant="outline" onClick={() => setCancellingClass(null)} disabled={pending}>
                                 Keep class
                             </Button>
                             <Button
@@ -818,7 +787,9 @@ export default function ClasslistBuilder({
                 <Dialog open onOpenChange={(o) => !o && setDeleting(null)}>
                     <DialogContent>
                         <DialogHeader>
-                            <DialogTitle>Remove {deleting.kind} “{deleting.name}”?</DialogTitle>
+                            <DialogTitle>
+                                Remove {deleting.kind} “{deleting.name}”?
+                            </DialogTitle>
                             <DialogDescription>
                                 {deleting.kind === "class"
                                     ? "Nothing is entered in it, so it goes for good. A class with entries is cancelled instead, never deleted."
@@ -887,9 +858,7 @@ function SectionBlock({
     onRestoreClass: (cls: ConsoleClass) => void;
 }) {
     const heading = (
-        <h4 className="font-serif text-sm font-bold tracking-wide text-forest uppercase">
-            {section.name}
-        </h4>
+        <h4 className="font-serif text-sm font-bold tracking-wide text-forest uppercase">{section.name}</h4>
     );
     return (
         <section aria-label={section.name} className="border-l-2 border-forest/30 pl-4">
@@ -905,9 +874,7 @@ function SectionBlock({
                 ) : (
                     heading
                 )}
-                {canEdit && (
-                    <ReorderButtons disabled={pending} onMove={onMoveSection} label={section.name} />
-                )}
+                {canEdit && <ReorderButtons disabled={pending} onMove={onMoveSection} label={section.name} />}
                 {canEdit && sectionEntryCount(section) === 0 && (
                     <Button
                         variant="ghost"
@@ -1005,9 +972,7 @@ function AddDivisionForm({
                 placeholder="Division name (e.g. OF Plastic Halter)"
                 buttonLabel="Add division"
                 pending={pending}
-                onAdd={(name) =>
-                    run(() => addDivision({ showId, name, axis, sortOrder: divisionCount }))
-                }
+                onAdd={(name) => run(() => addDivision({ showId, name, axis, sortOrder: divisionCount }))}
                 extra={
                     <Select value={axis} onValueChange={(v) => setAxis(v as DivisionAxis)}>
                         <SelectTrigger className="h-9 w-44" size="sm" aria-label="Division axis">
@@ -1024,9 +989,8 @@ function AddDivisionForm({
                 }
             />
             <p className="mt-2 text-xs text-muted-foreground">
-                Axis controls the one-breed-halter-class-per-horse rule — a horse may enter one
-                halter class per show, but any number of performance/workmanship/collectibility
-                classes.
+                Axis controls the one-breed-halter-class-per-horse rule — a horse may enter one halter class per show,
+                but any number of performance/workmanship/collectibility classes.
             </p>
         </div>
     );

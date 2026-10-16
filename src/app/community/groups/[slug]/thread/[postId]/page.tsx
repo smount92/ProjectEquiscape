@@ -12,11 +12,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     return { title: group ? `Thread — ${group.name}` : "Barn Thread" };
 }
 
-export default async function GroupThreadPage({
-    params,
-}: {
-    params: Promise<{ slug: string; postId: string }>;
-}) {
+export default async function GroupThreadPage({ params }: { params: Promise<{ slug: string; postId: string }> }) {
     const { slug, postId } = await params;
     const supabase = await createClient();
     const {
@@ -33,11 +29,7 @@ export default async function GroupThreadPage({
     if (!result.success || result.thread.groupId !== group.id) notFound();
 
     // Viewer identity for the composer + optimistic replies
-    const { data: me } = await supabase
-        .from("users")
-        .select("alias_name, avatar_url")
-        .eq("id", user.id)
-        .single();
+    const { data: me } = await supabase.from("users").select("alias_name, avatar_url").eq("id", user.id).single();
     const viewer = me as { alias_name: string; avatar_url: string | null } | null;
     let viewerAvatar = viewer?.avatar_url ?? null;
     if (viewerAvatar) {

@@ -16,7 +16,7 @@ describe("buildCorrectionUpdate", () => {
                 maker: change("Breyer", "Stone"),
                 scale: change("Traditional", "Classic"),
             },
-            { color_description: "Bay" }
+            { color_description: "Bay" },
         );
 
         expect(columnUpdates).toEqual({
@@ -38,7 +38,7 @@ describe("buildCorrectionUpdate", () => {
                 color_description: "Bay",
                 release_year_start: 1998,
                 model_number: "1100",
-            }
+            },
         );
 
         expect(columnUpdates).toEqual({});
@@ -57,7 +57,7 @@ describe("buildCorrectionUpdate", () => {
                 maker: change("Breyer", "Peter Stone"),
                 release_year_start: change(1998, 1999),
             },
-            { release_year_start: 1998 }
+            { release_year_start: 1998 },
         );
 
         expect(columnUpdates).toEqual({ maker: "Peter Stone" });
@@ -65,10 +65,7 @@ describe("buildCorrectionUpdate", () => {
     });
 
     it("treats missing existing attributes as an empty object", () => {
-        const { attributes } = buildCorrectionUpdate(
-            { cast_medium: change(null, "resin") },
-            null
-        );
+        const { attributes } = buildCorrectionUpdate({ cast_medium: change(null, "resin") }, null);
         expect(attributes).toEqual({ cast_medium: "resin" });
     });
 
@@ -79,7 +76,7 @@ describe("buildCorrectionUpdate", () => {
                 junk: "not-an-object",
                 empty: null,
             } as Record<string, unknown>,
-            {}
+            {},
         );
         expect(columnUpdates).toEqual({ title: "B" });
         expect(attributes).toBeNull();
@@ -92,7 +89,7 @@ describe("correctionTouchesAttributes", () => {
             correctionTouchesAttributes({
                 title: change("a", "b"),
                 maker: change("c", "d"),
-            })
+            }),
         ).toBe(false);
     });
 
@@ -101,7 +98,7 @@ describe("correctionTouchesAttributes", () => {
             correctionTouchesAttributes({
                 title: change("a", "b"),
                 color_description: change("Bay", "Chestnut"),
-            })
+            }),
         ).toBe(true);
     });
 });

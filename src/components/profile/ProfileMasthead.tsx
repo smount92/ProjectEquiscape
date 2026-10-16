@@ -90,13 +90,13 @@ export default function ProfileMasthead({
                 <h1 className="text-engraved-light mb-1 font-serif text-[clamp(1.5rem,4vw,2.3rem)] font-bold tracking-[0.13em] text-balance uppercase">
                     {alias}
                     {isOwnProfile && (
-                        <span className="bg-forest ml-3 inline-flex rounded-sm px-2 py-[2px] align-middle text-xs font-bold tracking-wider text-white uppercase">
+                        <span className="ml-3 inline-flex rounded-sm bg-forest px-2 py-[2px] align-middle text-xs font-bold tracking-wider text-white uppercase">
                             You
                         </span>
                     )}
                 </h1>
 
-                <div className="font-serif text-[0.78rem] tracking-[0.2em] uppercase text-(--leather-text-soft)">
+                <div className="font-serif text-[0.78rem] tracking-[0.2em] text-(--leather-text-soft) uppercase">
                     @{alias}
                     {pronouns && <> · {pronouns}</>} · Member since {memberSince}
                 </div>
@@ -115,7 +115,7 @@ export default function ProfileMasthead({
                 {badges}
 
                 {bio && (
-                    <p className="mx-auto mt-3 mb-0 max-w-[52ch] text-[0.92rem] italic text-(--leather-text)">
+                    <p className="mx-auto mt-3 mb-0 max-w-[52ch] text-[0.92rem] text-(--leather-text) italic">
                         {/* A pasted https link in the bio is a link (member ask, 2026-10-11). */}
                         <LinkifiedText text={bio} />
                     </p>
@@ -124,9 +124,7 @@ export default function ProfileMasthead({
                 <OutboundLinks links={links} className="mt-3" />
 
                 {actions && (
-                    <div className="masthead-cta mt-5 flex flex-wrap items-center justify-center gap-3">
-                        {actions}
-                    </div>
+                    <div className="masthead-cta mt-5 flex flex-wrap items-center justify-center gap-3">{actions}</div>
                 )}
             </div>
         </header>

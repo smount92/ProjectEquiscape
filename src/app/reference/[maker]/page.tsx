@@ -93,21 +93,14 @@ export default async function MakerHubPage({ params }: Props) {
 
     return (
         <FocusLayout noHeader>
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
-            />
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
-            />
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }} />
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
             <CatalogSubMasthead
                 icon="🏷️"
                 title={summary.maker}
                 subtitle={
                     <>
-                        {summary.count.toLocaleString()} model{summary.count === 1 ? "" : "s"} on
-                        record
+                        {summary.count.toLocaleString()} model{summary.count === 1 ? "" : "s"} on record
                     </>
                 }
                 backHref="/reference"
@@ -117,12 +110,9 @@ export default async function MakerHubPage({ params }: Props) {
             <div className="flex flex-col gap-8">
                 <div className="flex flex-wrap items-baseline gap-x-4 gap-y-2">
                     <p className="m-0 text-secondary-foreground">
-                        The community-maintained record of every{" "}
-                        <b className="text-foreground">{summary.maker}</b> model —{" "}
-                        <b className="text-foreground tabular-nums">
-                            {summary.count.toLocaleString()}
-                        </b>{" "}
-                        entr{summary.count === 1 ? "y" : "ies"} and counting.
+                        The community-maintained record of every <b className="text-foreground">{summary.maker}</b>{" "}
+                        model — <b className="text-foreground tabular-nums">{summary.count.toLocaleString()}</b> entr
+                        {summary.count === 1 ? "y" : "ies"} and counting.
                     </p>
                     <Link
                         href={catalogSearchHref}
@@ -141,10 +131,7 @@ export default async function MakerHubPage({ params }: Props) {
                 {molds.length > 0 && (
                     <section>
                         <h2 className="mb-3 font-serif text-xl font-bold text-foreground">
-                            Molds{" "}
-                            <span className="text-sm font-normal text-muted-foreground">
-                                ({molds.length})
-                            </span>
+                            Molds <span className="text-sm font-normal text-muted-foreground">({molds.length})</span>
                         </h2>
                         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
                             {molds.map((m) => (
@@ -162,7 +149,9 @@ export default async function MakerHubPage({ params }: Props) {
                                     <span className="min-w-0">
                                         <span className="font-semibold text-foreground">{m.title}</span>
                                         {m.scale && (
-                                            <span className="block text-xs text-muted-foreground">{shortScale(m.scale)}</span>
+                                            <span className="block text-xs text-muted-foreground">
+                                                {shortScale(m.scale)}
+                                            </span>
                                         )}
                                     </span>
                                     {m.releaseCount > 0 && (
@@ -179,9 +168,7 @@ export default async function MakerHubPage({ params }: Props) {
                 {/* RECENT ADDITIONS */}
                 {recent.length > 0 && (
                     <section>
-                        <h2 className="mb-3 font-serif text-xl font-bold text-foreground">
-                            Recent additions
-                        </h2>
+                        <h2 className="mb-3 font-serif text-xl font-bold text-foreground">Recent additions</h2>
                         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
                             {recent.map((r) => (
                                 <Link
@@ -205,9 +192,7 @@ export default async function MakerHubPage({ params }: Props) {
                 {/* OTHER MAKERS */}
                 {otherMakers.length > 0 && (
                     <section>
-                        <h2 className="mb-3 font-serif text-xl font-bold text-foreground">
-                            More makers
-                        </h2>
+                        <h2 className="mb-3 font-serif text-xl font-bold text-foreground">More makers</h2>
                         <div className="flex flex-wrap gap-2">
                             {otherMakers.map((m) => (
                                 <Link

@@ -45,11 +45,10 @@ export default async function CustomizeProfilePage() {
                 subtitle="Trim, nameplate, banner and the horses that lead your stable"
             />
             <div className="mx-auto w-full max-w-[680px]">
-                <p className="text-secondary-foreground mb-8 text-sm">
+                <p className="mb-8 text-sm text-secondary-foreground">
                     Everything here is cosmetic and public — it changes how{" "}
-                    <Link href={`/profile/${encodeURIComponent(me.alias_name)}`}>your profile</Link>{" "}
-                    looks to other collectors. Nothing here hides you from anyone or changes what the
-                    show record says.
+                    <Link href={`/profile/${encodeURIComponent(me.alias_name)}`}>your profile</Link> looks to other
+                    collectors. Nothing here hides you from anyone or changes what the show record says.
                 </p>
                 <ProfileCustomizer
                     alias={me.alias_name}

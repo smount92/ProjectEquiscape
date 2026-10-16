@@ -109,10 +109,7 @@ function RecordRow({ record }: { record: MarketRecordDetailRow }) {
                 {record.className && <span>{record.className}</span>}
                 <span>
                     {record.showId ? (
-                        <Link
-                            href={`/shows/${record.showId}`}
-                            className="text-forest no-underline hover:underline"
-                        >
+                        <Link href={`/shows/${record.showId}`} className="text-forest no-underline hover:underline">
                             {record.showName}
                         </Link>
                     ) : (
@@ -171,19 +168,14 @@ export default function HorseRecordChip({
                 >
                     <span aria-hidden="true">🏆</span>
                     <span className="truncate">{chipLabel}</span>
-                    {verifiedLabel && (
-                        <span className="font-medium text-warning">· ✅ {verifiedLabel}</span>
-                    )}
+                    {verifiedLabel && <span className="font-medium text-warning">· ✅ {verifiedLabel}</span>}
                 </button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle className="font-serif text-lg">
-                        🏆 {horseName} — Show Record
-                    </DialogTitle>
+                    <DialogTitle className="font-serif text-lg">🏆 {horseName} — Show Record</DialogTitle>
                     <DialogDescription>
-                        Competitive record on Model Horse Hub. Records follow the horse when it
-                        changes hands.
+                        Competitive record on Model Horse Hub. Records follow the horse when it changes hands.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -224,8 +216,7 @@ export default function HorseRecordChip({
 
                         {(record.summary?.total ?? 0) > record.topRecords.length && (
                             <p className="text-xs text-muted-foreground italic">
-                                Best {record.topRecords.length} of {record.summary?.total} results
-                                shown.
+                                Best {record.topRecords.length} of {record.summary?.total} results shown.
                             </p>
                         )}
 

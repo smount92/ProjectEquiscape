@@ -17,13 +17,7 @@
  */
 
 import { useState } from "react";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import {
     activeShowRingChips,
@@ -37,8 +31,8 @@ import {
 import type { ShowRingFacetOptions } from "@/lib/showring/types";
 
 const SORT_LABELS: Record<ShowRingSort, string> = {
-    "newest": "Newest",
-    "oldest": "Oldest",
+    newest: "Newest",
+    oldest: "Oldest",
 };
 
 const ALL = "__all__";
@@ -58,10 +52,7 @@ function FacetSelect({
 }) {
     if (options.length === 0 && !value) return null;
     return (
-        <Select
-            value={value ?? ALL}
-            onValueChange={(v) => onChange(v === ALL ? undefined : v)}
-        >
+        <Select value={value ?? ALL} onValueChange={(v) => onChange(v === ALL ? undefined : v)}>
             <SelectTrigger
                 id={id}
                 size="sm"

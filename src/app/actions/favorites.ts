@@ -19,16 +19,9 @@ import { z } from "zod";
 
 import { requireAuth } from "@/lib/auth";
 import { getPublicImageUrls } from "@/lib/utils/storage";
-import {
-    FAVORITES_PAGE_SIZE,
-    shapeFavorites,
-    type FavoriteEntry,
-    type RawFavoriteRow,
-} from "@/lib/favorites/shape";
+import { FAVORITES_PAGE_SIZE, shapeFavorites, type FavoriteEntry, type RawFavoriteRow } from "@/lib/favorites/shape";
 
-type ActionResult<T = object> =
-    | ({ success: true } & T)
-    | { success: false; error: string };
+type ActionResult<T = object> = ({ success: true } & T) | { success: false; error: string };
 
 const getFavoritesPageSchema = z.object({
     offset: z.number().int().min(0).max(100_000).default(0),

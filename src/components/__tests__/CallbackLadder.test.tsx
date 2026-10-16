@@ -38,9 +38,7 @@ function ladderClasses(): LadderClassInfo[] {
             sectionId: "section-1",
             divisionId: "division-1",
             status: "placed",
-            entries: [
-                { id: "e3", horseName: "Midnight Oil", entryNumber: 12, photoUrl: null, place: 1 },
-            ],
+            entries: [{ id: "e3", horseName: "Midnight Oil", entryNumber: 12, photoUrl: null, place: 1 }],
         },
         {
             classId: "class-3",
@@ -100,10 +98,7 @@ describe("CallbackLadder", () => {
         fireEvent.click(dash); // Champion
         fireEvent.click(midnight); // Reserve
         const chips = screen.getAllByTestId("champion-chip");
-        expect(chips.map((c) => c.textContent)).toEqual([
-            "Section Champion",
-            "Section Reserve Champion",
-        ]);
+        expect(chips.map((c) => c.textContent)).toEqual(["Section Champion", "Section Reserve Champion"]);
 
         fireEvent.click(screen.getByTestId("save-callback"));
         await waitFor(() =>
@@ -143,17 +138,13 @@ describe("CallbackLadder", () => {
             },
         ]);
         expect(screen.getByTestId("round-decided")).toBeInTheDocument();
-        expect(screen.getByTestId("ladder-progress")).toHaveTextContent(
-            "1 of 4 callbacks decided",
-        );
+        expect(screen.getByTestId("ladder-progress")).toHaveTextContent("1 of 4 callbacks decided");
 
         // Change the pick: add a reserve, save, get the server refusal.
         const [, midnight] = screen.getAllByTestId("callback-candidate");
         fireEvent.click(midnight);
         fireEvent.click(screen.getByTestId("save-callback"));
-        expect(
-            await screen.findByText(/must be one of this section's 1st-place entries/i),
-        ).toBeInTheDocument();
+        expect(await screen.findByText(/must be one of this section's 1st-place entries/i)).toBeInTheDocument();
     });
 
     it("read-only outside recording windows", () => {

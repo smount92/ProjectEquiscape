@@ -70,7 +70,7 @@ describe("notifyHorsePublic — announce once", () => {
         await notifyHorsePublic(CALL);
 
         expect(createActivityEvent).toHaveBeenCalledWith(
-            expect.objectContaining({ eventType: "new_horse", horseId: "h1" })
+            expect.objectContaining({ eventType: "new_horse", horseId: "h1" }),
         );
     });
 

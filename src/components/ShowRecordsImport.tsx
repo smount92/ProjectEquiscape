@@ -12,8 +12,22 @@ import { useMemo, useRef, useState } from "react";
 import Papa from "papaparse";
 
 import { importShowRecords, undoShowRecordsImport } from "@/app/actions/records-import";
-import { IMPORT_MAX_ROWS, parseImportRows, TEMPLATE_COLUMNS, TEMPLATE_PATH, type ImportedRecord } from "@/lib/records/import";
-import { applyHeaderMap, findDuplicates, guessHeaderMap, headerMapStorageKey, mapHasRequired, type HeaderMap, type RecordFingerprintInput } from "@/lib/records/importTools";
+import {
+    IMPORT_MAX_ROWS,
+    parseImportRows,
+    TEMPLATE_COLUMNS,
+    TEMPLATE_PATH,
+    type ImportedRecord,
+} from "@/lib/records/import";
+import {
+    applyHeaderMap,
+    findDuplicates,
+    guessHeaderMap,
+    headerMapStorageKey,
+    mapHasRequired,
+    type HeaderMap,
+    type RecordFingerprintInput,
+} from "@/lib/records/importTools";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -75,7 +89,13 @@ export default function ShowRecordsImport({
     const [dragging, setDragging] = useState(false);
     const [includeDuplicates, setIncludeDuplicates] = useState(false);
     const [busy, setBusy] = useState(false);
-    const [done, setDone] = useState<{ imported: number; skipped: number; duplicates: number; batchId: string | null; warning?: string } | null>(null);
+    const [done, setDone] = useState<{
+        imported: number;
+        skipped: number;
+        duplicates: number;
+        batchId: string | null;
+        warning?: string;
+    } | null>(null);
     const [undone, setUndone] = useState<number | null>(null);
     const [error, setError] = useState<string | null>(null);
 
@@ -96,7 +116,10 @@ export default function ShowRecordsImport({
     // Rows on the template's headers, the parse, and the duplicate set — all derived.
     const rows = useMemo(() => applyHeaderMap(rawRows, map), [rawRows, map]);
     const parsed = useMemo(() => (rows.length ? parseImportRows(rows) : null), [rows]);
-    const dupes = useMemo(() => (parsed ? findDuplicates(parsed.records, existing) : new Set<number>()), [parsed, existing]);
+    const dupes = useMemo(
+        () => (parsed ? findDuplicates(parsed.records, existing) : new Set<number>()),
+        [parsed, existing],
+    );
     const fatal = parsed?.problems.filter((p) => p.rowNumber === 0) ?? [];
     const rowProblems = parsed?.problems.filter((p) => p.rowNumber > 0) ?? [];
     const problemByRow = new Map(rowProblems.map((p) => [p.rowNumber, p.message]));
@@ -131,7 +154,9 @@ export default function ShowRecordsImport({
         setHeaders(hs);
         setMap(guess);
         // Show the mapping only when the file is not our template.
-        setShowMapping(!hs.every((h) => TEMPLATE_COLUMNS.some((c) => c.header.toLowerCase() === h.trim().toLowerCase())));
+        setShowMapping(
+            !hs.every((h) => TEMPLATE_COLUMNS.some((c) => c.header.toLowerCase() === h.trim().toLowerCase())),
+        );
     };
 
     const setMapping = (fileHeader: string, key: keyof ImportedRecord | "") => {
@@ -214,8 +239,8 @@ export default function ShowRecordsImport({
                     <DialogHeader>
                         <DialogTitle>Import show results for {horseName}</DialogTitle>
                         <DialogDescription>
-                            One row per placing. Only the show name and the placing are needed; every other column can stay blank.
-                            Rows land as self-reported records, the same as the form.
+                            One row per placing. Only the show name and the placing are needed; every other column can
+                            stay blank. Rows land as self-reported records, the same as the form.
                         </DialogDescription>
                     </DialogHeader>
 
@@ -229,12 +254,13 @@ export default function ShowRecordsImport({
                                 <p className="m-0 text-base font-semibold">
                                     {done.imported} placing{done.imported === 1 ? "" : "s"} added to {horseName}.
                                     {done.duplicates > 0 && ` ${done.duplicates} already on the horse, skipped.`}
-                                    {done.skipped > 0 && ` ${done.skipped} row${done.skipped === 1 ? " was" : "s were"} skipped.`}
+                                    {done.skipped > 0 &&
+                                        ` ${done.skipped} row${done.skipped === 1 ? " was" : "s were"} skipped.`}
                                 </p>
                             )}
-                            {done.warning && <p className="text-warning m-0 text-sm">{done.warning}</p>}
+                            {done.warning && <p className="m-0 text-sm text-warning">{done.warning}</p>}
                             {rowProblems.length > 0 && undone === null && (
-                                <ul className="text-secondary-foreground m-0 list-disc pl-5 text-sm">
+                                <ul className="m-0 list-disc pl-5 text-sm text-secondary-foreground">
                                     {rowProblems.slice(0, 20).map((p) => (
                                         <li key={`${p.rowNumber}-${p.message}`}>
                                             Row {p.rowNumber}: {p.message}
@@ -242,11 +268,16 @@ export default function ShowRecordsImport({
                                     ))}
                                 </ul>
                             )}
-                            {error && <p className="text-destructive m-0 text-sm">{error}</p>}
+                            {error && <p className="m-0 text-sm text-destructive">{error}</p>}
                             <div className="flex flex-wrap items-center justify-between gap-2">
                                 <div>
                                     {done.batchId && undone === null && (
-                                        <Button variant="outline" onClick={undo} disabled={busy} id="undo-show-records-import">
+                                        <Button
+                                            variant="outline"
+                                            onClick={undo}
+                                            disabled={busy}
+                                            id="undo-show-records-import"
+                                        >
                                             {busy ? "Undoing…" : "↩ Undo this import"}
                                         </Button>
                                     )}
@@ -259,15 +290,18 @@ export default function ShowRecordsImport({
                                 </div>
                             </div>
                             {done.batchId && undone === null && (
-                                <p className="text-muted-foreground m-0 text-xs">Undo removes exactly the placings this file added, for seven days.</p>
+                                <p className="m-0 text-xs text-muted-foreground">
+                                    Undo removes exactly the placings this file added, for seven days.
+                                </p>
                             )}
                         </div>
                     ) : (
                         <div className="flex flex-col gap-4">
-                            <div className="border-input bg-muted/40 flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3">
+                            <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-input bg-muted/40 p-3">
                                 <div className="text-sm">
-                                    <strong>1.</strong> Fill in the template, one placing per row — or use a sheet you already keep.
-                                    <span className="text-muted-foreground block text-xs">
+                                    <strong>1.</strong> Fill in the template, one placing per row — or use a sheet you
+                                    already keep.
+                                    <span className="block text-xs text-muted-foreground">
                                         Dates like 23/03/2024 or 2024-03-23; placings like 1, 1st, Blue, Champion, HM.
                                     </span>
                                 </div>
@@ -303,10 +337,14 @@ export default function ShowRecordsImport({
                                 <p className="m-0 mb-2">
                                     <strong>2.</strong> Upload the filled-in file.
                                 </p>
-                                <Button type="button" onClick={() => fileRef.current?.click()} id="import-show-records-choose">
+                                <Button
+                                    type="button"
+                                    onClick={() => fileRef.current?.click()}
+                                    id="import-show-records-choose"
+                                >
                                     📂 Choose a file
                                 </Button>
-                                <p className="text-muted-foreground m-0 mt-2 text-xs">
+                                <p className="m-0 mt-2 text-xs text-muted-foreground">
                                     {fileName ? (
                                         <>
                                             Selected: <strong className="text-foreground">{fileName}</strong>
@@ -317,17 +355,26 @@ export default function ShowRecordsImport({
                                 </p>
                             </div>
 
-                            {parseError && <p className="text-destructive m-0 text-sm">{parseError}</p>}
+                            {parseError && <p className="m-0 text-sm text-destructive">{parseError}</p>}
 
                             {headers.length > 0 && (
-                                <div className="border-input rounded-lg border p-3 text-sm">
+                                <div className="rounded-lg border border-input p-3 text-sm">
                                     <div className="flex flex-wrap items-center justify-between gap-2">
                                         <span>
-                                            <strong>Columns:</strong>{" "}
-                                            {Object.values(map).filter(Boolean).length} of {headers.length} matched
-                                            {!mapHasRequired(map) && <span className="text-destructive"> — Show name and Placing must both be matched</span>}
+                                            <strong>Columns:</strong> {Object.values(map).filter(Boolean).length} of{" "}
+                                            {headers.length} matched
+                                            {!mapHasRequired(map) && (
+                                                <span className="text-destructive">
+                                                    {" "}
+                                                    — Show name and Placing must both be matched
+                                                </span>
+                                            )}
                                         </span>
-                                        <button type="button" className="text-forest text-xs font-semibold hover:underline" onClick={() => setShowMapping((v) => !v)}>
+                                        <button
+                                            type="button"
+                                            className="text-xs font-semibold text-forest hover:underline"
+                                            onClick={() => setShowMapping((v) => !v)}
+                                        >
                                             {showMapping ? "Hide mapping" : "Check mapping"}
                                         </button>
                                     </div>
@@ -335,14 +382,19 @@ export default function ShowRecordsImport({
                                         <div className="mt-2 grid gap-1.5 sm:grid-cols-2" data-testid="import-mapping">
                                             {headers.map((h) => (
                                                 <label key={h} className="flex items-center gap-2 text-xs">
-                                                    <span className="text-secondary-foreground w-[45%] truncate" title={h}>
+                                                    <span
+                                                        className="w-[45%] truncate text-secondary-foreground"
+                                                        title={h}
+                                                    >
                                                         {h}
                                                     </span>
                                                     <span aria-hidden="true">→</span>
                                                     <select
-                                                        className="border-input bg-card text-foreground h-8 flex-1 rounded-md border px-2 text-xs"
+                                                        className="h-8 flex-1 rounded-md border border-input bg-card px-2 text-xs text-foreground"
                                                         value={map[h] ?? ""}
-                                                        onChange={(e) => setMapping(h, e.target.value as keyof ImportedRecord | "")}
+                                                        onChange={(e) =>
+                                                            setMapping(h, e.target.value as keyof ImportedRecord | "")
+                                                        }
                                                     >
                                                         <option value="">Ignore</option>
                                                         {TEMPLATE_COLUMNS.map((c) => (
@@ -359,7 +411,7 @@ export default function ShowRecordsImport({
                             )}
 
                             {parsed && fatal.length > 0 && mapHasRequired(map) && (
-                                <div className="border-destructive/40 bg-destructive/10 rounded-lg border p-3 text-sm">
+                                <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm">
                                     {fatal.map((p) => (
                                         <p key={p.message} className="m-0">
                                             {p.message}
@@ -373,10 +425,13 @@ export default function ShowRecordsImport({
                                     <p className="m-0 text-sm">
                                         <strong>3.</strong> {fileName}: {ready} placing{ready === 1 ? "" : "s"} ready
                                         {dupes.size > 0 && !includeDuplicates && `, ${dupes.size} already on the horse`}
-                                        {rowProblems.length > 0 && `, ${rowProblems.length} row${rowProblems.length === 1 ? "" : "s"} to fix`}
-                                        <span className="text-muted-foreground block text-xs">Fix a cell right here; the row re-checks as you type.</span>
+                                        {rowProblems.length > 0 &&
+                                            `, ${rowProblems.length} row${rowProblems.length === 1 ? "" : "s"} to fix`}
+                                        <span className="block text-xs text-muted-foreground">
+                                            Fix a cell right here; the row re-checks as you type.
+                                        </span>
                                     </p>
-                                    <div className="border-input max-h-[40vh] overflow-auto rounded-lg border">
+                                    <div className="max-h-[40vh] overflow-auto rounded-lg border border-input">
                                         <table className="w-full text-xs" data-testid="import-preview">
                                             <thead className="sticky top-0">
                                                 <tr className="bg-muted text-left">
@@ -394,17 +449,27 @@ export default function ShowRecordsImport({
                                                     const rowNumber = i + 2;
                                                     const problem = problemByRow.get(rowNumber);
                                                     const isDupe = dupes.has(rowNumber);
-                                                    const blank = TEMPLATE_COLUMNS.every((c) => !(row[c.header] ?? "").trim());
+                                                    const blank = TEMPLATE_COLUMNS.every(
+                                                        (c) => !(row[c.header] ?? "").trim(),
+                                                    );
                                                     if (blank) return null;
                                                     return (
-                                                        <tr key={rowNumber} className={`border-input border-t ${problem ? "bg-destructive/5" : isDupe ? "bg-muted/40" : ""}`} data-row={rowNumber}>
-                                                            <td className="text-muted-foreground px-2 py-1">{rowNumber}</td>
+                                                        <tr
+                                                            key={rowNumber}
+                                                            className={`border-t border-input ${problem ? "bg-destructive/5" : isDupe ? "bg-muted/40" : ""}`}
+                                                            data-row={rowNumber}
+                                                        >
+                                                            <td className="px-2 py-1 text-muted-foreground">
+                                                                {rowNumber}
+                                                            </td>
                                                             {EDITABLE.map((c) => (
                                                                 <td key={c.key} className={`px-1 py-0.5 ${c.width}`}>
                                                                     <input
-                                                                        className="border-input bg-card text-foreground h-7 w-full rounded border px-1.5 text-xs"
+                                                                        className="h-7 w-full rounded border border-input bg-card px-1.5 text-xs text-foreground"
                                                                         value={row[headerOf(c.key)] ?? ""}
-                                                                        onChange={(e) => editCell(rowNumber, c.key, e.target.value)}
+                                                                        onChange={(e) =>
+                                                                            editCell(rowNumber, c.key, e.target.value)
+                                                                        }
                                                                         aria-label={`Row ${rowNumber} ${c.label}`}
                                                                     />
                                                                 </td>
@@ -413,7 +478,11 @@ export default function ShowRecordsImport({
                                                                 {problem ? (
                                                                     <span className="text-destructive">{problem}</span>
                                                                 ) : isDupe ? (
-                                                                    <span className="text-secondary-foreground">{includeDuplicates ? "Already on the horse — importing anyway" : "Already on the horse — skipped"}</span>
+                                                                    <span className="text-secondary-foreground">
+                                                                        {includeDuplicates
+                                                                            ? "Already on the horse — importing anyway"
+                                                                            : "Already on the horse — skipped"}
+                                                                    </span>
                                                                 ) : (
                                                                     <span className="text-success">Ready</span>
                                                                 )}
@@ -426,21 +495,33 @@ export default function ShowRecordsImport({
                                     </div>
                                     {dupes.size > 0 && (
                                         <label className="flex items-center gap-2 text-xs">
-                                            <input type="checkbox" checked={includeDuplicates} onChange={(e) => setIncludeDuplicates(e.target.checked)} id="import-include-duplicates" />
-                                            Import the {dupes.size} placing{dupes.size === 1 ? "" : "s"} the horse already has anyway
+                                            <input
+                                                type="checkbox"
+                                                checked={includeDuplicates}
+                                                onChange={(e) => setIncludeDuplicates(e.target.checked)}
+                                                id="import-include-duplicates"
+                                            />
+                                            Import the {dupes.size} placing{dupes.size === 1 ? "" : "s"} the horse
+                                            already has anyway
                                         </label>
                                     )}
-                                    {error && <p className="text-destructive m-0 text-sm">{error}</p>}
+                                    {error && <p className="m-0 text-sm text-destructive">{error}</p>}
                                     <div className="flex items-center justify-end gap-2">
                                         <Button variant="outline" onClick={() => setOpen(false)}>
                                             Cancel
                                         </Button>
-                                        <Button onClick={submit} disabled={busy || ready === 0} id="import-show-records-go">
+                                        <Button
+                                            onClick={submit}
+                                            disabled={busy || ready === 0}
+                                            id="import-show-records-go"
+                                        >
                                             {busy ? "Importing…" : `Import ${ready} placing${ready === 1 ? "" : "s"}`}
                                         </Button>
                                     </div>
                                     {rowProblems.length > 0 && (
-                                        <p className="text-muted-foreground m-0 text-xs">Rows with a problem are skipped until they are fixed.</p>
+                                        <p className="m-0 text-xs text-muted-foreground">
+                                            Rows with a problem are skipped until they are fixed.
+                                        </p>
                                     )}
                                 </div>
                             )}

@@ -83,7 +83,9 @@ export interface LedgerYearGroup {
 }
 
 /** Newest year first, undated last; records inside keep the order given. */
-export function groupByYear<T extends LedgerRecord>(records: readonly T[]): { year: number | null; label: string; records: T[] }[] {
+export function groupByYear<T extends LedgerRecord>(
+    records: readonly T[],
+): { year: number | null; label: string; records: T[] }[] {
     const buckets = new Map<number | null, T[]>();
     for (const r of records) {
         const y = recordYear(r);

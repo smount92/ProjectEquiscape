@@ -204,7 +204,9 @@ export default function ClassPane({
                                     aria-pressed={view === key}
                                     onClick={() => setView(key)}
                                     className={`min-h-8 cursor-pointer rounded px-2.5 text-xs font-semibold ${
-                                        view === key ? "bg-forest text-primary-foreground" : "text-foreground hover:bg-muted"
+                                        view === key
+                                            ? "bg-forest text-primary-foreground"
+                                            : "text-foreground hover:bg-muted"
                                     }`}
                                 >
                                     {label}
@@ -223,7 +225,8 @@ export default function ClassPane({
                     ) : view === "az" ? (
                         <section className="mt-4" data-testid="az-horses" aria-label="All horses A to Z">
                             <p className="m-0 mb-2 text-xs text-muted-foreground">
-                                Every horse, A to Z. The note on a card is a forecast; the host&rsquo;s rules decide at entry.
+                                Every horse, A to Z. The note on a card is a forecast; the host&rsquo;s rules decide at
+                                entry.
                             </p>
                             <div className={GRID}>{az.map(card)}</div>
                         </section>

@@ -48,8 +48,8 @@ export default function SupporterLedgerToggle({
                 <span>
                     <span className="font-semibold text-foreground">{label}</span>
                     <span className="block text-xs text-secondary-foreground">
-                        Your alias and the month you first supported, on the About page. Off by default — the
-                        plaque on your profile stays either way.
+                        Your alias and the month you first supported, on the About page. Off by default — the plaque on
+                        your profile stays either way.
                     </span>
                 </span>
             </label>

@@ -53,10 +53,7 @@ export default async function ReferenceIndexPage() {
 
     return (
         <FocusLayout noHeader>
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
-            />
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }} />
             <CatalogSubMasthead
                 icon="🏷️"
                 title="Browse by Maker"
@@ -72,9 +69,8 @@ export default async function ReferenceIndexPage() {
 
             <div className="flex flex-col gap-6">
                 <p className="m-0 max-w-[62ch] text-secondary-foreground">
-                    The reference catalog is the community-maintained record of every model —
-                    Breyer, Stone, artist resins, and beyond. Pick a maker to browse its molds,
-                    releases, and Blue Book values.
+                    The reference catalog is the community-maintained record of every model — Breyer, Stone, artist
+                    resins, and beyond. Pick a maker to browse its molds, releases, and Blue Book values.
                 </p>
 
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">

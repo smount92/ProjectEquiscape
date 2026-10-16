@@ -10,11 +10,7 @@ import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import { intakeFor, slotState } from "@/lib/studio/pipeline";
 
-export async function generateMetadata({
-    params,
-}: {
-    params: Promise<{ slug: string }>;
-}): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
     const { slug } = await params;
     const profile = await getArtistProfileBySlug(slug);
     return {
@@ -23,11 +19,7 @@ export async function generateMetadata({
     };
 }
 
-export default async function RequestCommissionPage({
-    params,
-}: {
-    params: Promise<{ slug: string }>;
-}) {
+export default async function RequestCommissionPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
 
     const supabase = await createClient();
@@ -39,11 +31,7 @@ export default async function RequestCommissionPage({
     const profile = await getArtistProfileBySlug(slug);
     if (!profile) notFound();
 
-    const slots = slotState(
-        await getSlotUsage(profile.userId),
-        profile.maxSlots,
-        profile.status,
-    );
+    const slots = slotState(await getSlotUsage(profile.userId), profile.maxSlots, profile.status);
     const intake = intakeFor(slots, profile.waitlistOpen);
 
     const masthead = (
@@ -62,12 +50,11 @@ export default async function RequestCommissionPage({
         return (
             <FocusLayout noHeader>
                 {masthead}
-                <div className="bg-card border-input rounded-lg border p-8 text-center shadow-md">
+                <div className="rounded-lg border border-input bg-card p-8 text-center shadow-md">
                     <div className="mb-3 text-[2.5rem]">🎨</div>
                     <h2 className="mb-2 font-serif text-xl font-bold">This is your studio</h2>
-                    <p className="text-secondary-foreground mb-6 text-sm">
-                        You can&rsquo;t commission yourself — but your dashboard has the requests
-                        waiting on you.
+                    <p className="mb-6 text-sm text-secondary-foreground">
+                        You can&rsquo;t commission yourself — but your dashboard has the requests waiting on you.
                     </p>
                     <Button asChild size="wide">
                         <Link href="/studio/dashboard">Open your dashboard</Link>
@@ -82,12 +69,12 @@ export default async function RequestCommissionPage({
         return (
             <FocusLayout noHeader>
                 {masthead}
-                <div className="bg-card border-input rounded-lg border p-8 text-center shadow-md">
+                <div className="rounded-lg border border-input bg-card p-8 text-center shadow-md">
                     <div className="mb-3 text-[2.5rem]">🚪</div>
                     <h2 className="mb-2 font-serif text-xl font-bold">
                         {profile.studioName} isn&rsquo;t taking commissions
                     </h2>
-                    <p className="text-secondary-foreground mb-2 text-sm leading-relaxed">
+                    <p className="mb-2 text-sm leading-relaxed text-secondary-foreground">
                         {profile.statusNote ||
                             "Artists close intake while they work through the bench. It's worth checking back."}
                     </p>

@@ -39,8 +39,18 @@ export const PAPER_KINDS: { value: PaperKind; label: string; glyph: string; hint
         hint: "The family tree as issued or as you keep it.",
     },
     // 214 — what gets attached to a show record or an accomplishment.
-    { value: "qualification_card", label: "Qualification card", glyph: "🎫", hint: "A NAN or OMEQ card as the show issued it." },
-    { value: "show_photo", label: "Show photo", glyph: "📷", hint: "A photo from the show — the table, the ribbon, the callback." },
+    {
+        value: "qualification_card",
+        label: "Qualification card",
+        glyph: "🎫",
+        hint: "A NAN or OMEQ card as the show issued it.",
+    },
+    {
+        value: "show_photo",
+        label: "Show photo",
+        glyph: "📷",
+        hint: "A photo from the show — the table, the ribbon, the callback.",
+    },
     { value: "award", label: "Award", glyph: "🏆", hint: "A certificate, a plaque, a race chart." },
     { value: "other", label: "Other papers", glyph: "🗂️", hint: "Anything else that belongs with the horse." },
 ];
@@ -50,22 +60,14 @@ export const RECORD_PAPER_KINDS: PaperKind[] = ["qualification_card", "show_phot
 /** The kinds that make sense on an accomplishment. */
 export const ACCOMPLISHMENT_PAPER_KINDS: PaperKind[] = ["award", "show_photo", "other"];
 
-export const PAPER_KIND_LABELS: Record<string, string> = Object.fromEntries(
-    PAPER_KINDS.map((k) => [k.value, k.label]),
-);
+export const PAPER_KIND_LABELS: Record<string, string> = Object.fromEntries(PAPER_KINDS.map((k) => [k.value, k.label]));
 
 export function isPaperKind(x: unknown): x is PaperKind {
     return typeof x === "string" && PAPER_KINDS.some((k) => k.value === x);
 }
 
 /** Mirrors the bucket's allowed_mime_types (213). */
-export const PAPER_MIMES = new Set([
-    "image/jpeg",
-    "image/png",
-    "image/webp",
-    "image/gif",
-    "application/pdf",
-]);
+export const PAPER_MIMES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif", "application/pdf"]);
 /** Mirrors the bucket's file_size_limit and the byte_size CHECK. */
 export const MAX_PAPER_BYTES = 10 * 1024 * 1024;
 /** Enough for a certificate, its registry papers and a chart or two. */

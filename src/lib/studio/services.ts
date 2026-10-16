@@ -106,21 +106,15 @@ export function coerceServices(raw: unknown): StudioService[] {
 }
 
 /** "$500 – $1,200", "From $150", "Up to $600", or "Ask". */
-export function priceRangeLabel(
-    min: number | null | undefined,
-    max: number | null | undefined,
-): string {
-    if (min != null && max != null)
-        return min === max ? formatMoney(min) : `${formatMoney(min)} – ${formatMoney(max)}`;
+export function priceRangeLabel(min: number | null | undefined, max: number | null | undefined): string {
+    if (min != null && max != null) return min === max ? formatMoney(min) : `${formatMoney(min)} – ${formatMoney(max)}`;
     if (min != null) return `From ${formatMoney(min)}`;
     if (max != null) return `Up to ${formatMoney(max)}`;
     return "Ask";
 }
 
 export function serviceLabel(service: StudioService): string {
-    return service.scale && service.scale !== "Any scale"
-        ? `${service.type} · ${service.scale}`
-        : service.type;
+    return service.scale && service.scale !== "Any scale" ? `${service.type} · ${service.scale}` : service.type;
 }
 
 /**

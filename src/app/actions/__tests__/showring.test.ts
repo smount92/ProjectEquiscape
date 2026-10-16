@@ -45,8 +45,7 @@ function chainResolving(data: unknown) {
     q.eq = vi.fn(() => q);
     q.in = vi.fn(() => q);
     q.limit = vi.fn(() => q);
-    q.then = (resolve: (v: unknown) => void) =>
-        Promise.resolve({ data, error: null }).then(resolve);
+    q.then = (resolve: (v: unknown) => void) => Promise.resolve({ data, error: null }).then(resolve);
     return q;
 }
 
@@ -81,16 +80,12 @@ describe("getShowRingPage", () => {
         const result = await getShowRingPage({});
         expect(result.success).toBe(true);
         expect(eqCalls()).toEqual(expect.arrayContaining([["visibility", "public"]]));
-        expect((mockClient._mockQuery.is as MockFn).mock.calls).toEqual(
-            expect.arrayContaining([["deleted_at", null]]),
-        );
+        expect((mockClient._mockQuery.is as MockFn).mock.calls).toEqual(expect.arrayContaining([["deleted_at", null]]));
     });
 
     it("excludes blocked users IN SQL, not by post-filtering the page", async () => {
         mockClient.from.mockImplementation((table: string) =>
-            table === "user_blocks"
-                ? chainResolving([{ blocked_id: BLOCKED_ID }])
-                : mockClient._mockQuery,
+            table === "user_blocks" ? chainResolving([{ blocked_id: BLOCKED_ID }]) : mockClient._mockQuery,
         );
         const result = await getShowRingPage({});
         expect(result.success).toBe(true);
@@ -223,7 +218,12 @@ describe("getShowRingPage", () => {
         });
         const recordsChain = chainResolving([
             { horse_id: "h-1", placing: "1st", ribbon_color: "Blue", verification_tier: "platform_generated" },
-            { horse_id: "h-1", placing: "Grand Champion", ribbon_color: "Purple", verification_tier: "platform_generated" },
+            {
+                horse_id: "h-1",
+                placing: "Grand Champion",
+                ribbon_color: "Purple",
+                verification_tier: "platform_generated",
+            },
             { horse_id: "h-1", placing: "4th", ribbon_color: "White", verification_tier: "self_reported" },
         ]);
         let recordsQueries = 0;
@@ -262,9 +262,7 @@ describe("loadMoreShowRing", () => {
     it("pages with the requested offset (append semantics)", async () => {
         const result = await loadMoreShowRing({ offset: 24 });
         expect(result.success).toBe(true);
-        expect((mockClient._mockQuery.range as MockFn).mock.calls).toEqual(
-            expect.arrayContaining([[24, 47]]),
-        );
+        expect((mockClient._mockQuery.range as MockFn).mock.calls).toEqual(expect.arrayContaining([[24, 47]]));
     });
 
     it("applies the same filters as the first page (one shared core)", async () => {

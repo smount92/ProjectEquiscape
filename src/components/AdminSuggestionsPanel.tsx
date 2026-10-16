@@ -37,11 +37,7 @@ const TYPE_LABEL: Record<string, string> = {
 
 type Decision = "approve" | "reject" | "dismiss";
 
-export default function AdminSuggestionsPanel({
-    suggestions,
-}: {
-    suggestions: LegacySuggestionRow[];
-}) {
+export default function AdminSuggestionsPanel({ suggestions }: { suggestions: LegacySuggestionRow[] }) {
     const [items, setItems] = useState(suggestions);
     const [isPending, startTransition] = useTransition();
     const [working, setWorking] = useState<{ id: string; decision: Decision } | null>(null);
@@ -65,8 +61,7 @@ export default function AdminSuggestionsPanel({
     // Self-retiring: a drained queue renders nothing, not an empty state.
     if (items.length === 0) return null;
 
-    const busy = (id: string, decision: Decision) =>
-        isPending && working?.id === id && working.decision === decision;
+    const busy = (id: string, decision: Decision) => isPending && working?.id === id && working.decision === decision;
     const rowBusy = (id: string) => isPending && working?.id === id;
 
     return (
@@ -79,11 +74,10 @@ export default function AdminSuggestionsPanel({
                     </span>
                 </h3>
                 <p className="mt-0 mb-0 text-xs text-muted-foreground">
-                    The old <span className="font-mono">database_suggestions</span> pipeline. No new
-                    submissions arrive here. <strong>Approve</strong> mints a catalog entry (and
-                    skips it if an identical one already exists);{" "}
-                    <strong>Reject</strong> declines it; <strong>Dismiss</strong> clears junk with
-                    no side effects whatsoever. This section disappears when the last row goes.
+                    The old <span className="font-mono">database_suggestions</span> pipeline. No new submissions arrive
+                    here. <strong>Approve</strong> mints a catalog entry (and skips it if an identical one already
+                    exists); <strong>Reject</strong> declines it; <strong>Dismiss</strong> clears junk with no side
+                    effects whatsoever. This section disappears when the last row goes.
                 </p>
             </div>
 
@@ -100,8 +94,7 @@ export default function AdminSuggestionsPanel({
                 <div key={s.id} className="rounded-lg border border-input bg-card px-4 py-3">
                     <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                         <span className="text-sm font-semibold text-foreground">
-                            {TYPE_EMOJI[s.suggestionType] ?? "📝"}{" "}
-                            {TYPE_LABEL[s.suggestionType] ?? s.suggestionType}
+                            {TYPE_EMOJI[s.suggestionType] ?? "📝"} {TYPE_LABEL[s.suggestionType] ?? s.suggestionType}
                             {s.name ? ` — ${s.name}` : ""}
                         </span>
                         <span className="text-xs whitespace-nowrap text-muted-foreground">
@@ -119,11 +112,7 @@ export default function AdminSuggestionsPanel({
                         </div>
                     )}
                     <div className="flex flex-wrap gap-2">
-                        <Button
-                            size="sm"
-                            onClick={() => resolve(s.id, "approve")}
-                            disabled={rowBusy(s.id)}
-                        >
+                        <Button size="sm" onClick={() => resolve(s.id, "approve")} disabled={rowBusy(s.id)}>
                             {busy(s.id, "approve") ? "…" : "✅ Approve"}
                         </Button>
                         <Button

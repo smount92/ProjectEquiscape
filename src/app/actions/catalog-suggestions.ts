@@ -3,7 +3,13 @@
 import { requireAuth } from "@/lib/auth";
 import { stripGeneration } from "@/lib/linker/model";
 import { fieldLabel } from "@/lib/catalog/editableFields";
-import { namedMolds, placeReleasesUnderMolds, searchName, termImpliesStablemate, type CandidateRow } from "@/lib/catalog/moldSearch";
+import {
+    namedMolds,
+    placeReleasesUnderMolds,
+    searchName,
+    termImpliesStablemate,
+    type CandidateRow,
+} from "@/lib/catalog/moldSearch";
 import { parseCatalogQuery } from "@/lib/catalog/queryParse";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/logger";
@@ -161,10 +167,7 @@ const CATALOG_NAME_SORT_COLUMN = "sort_key";
 
 /** True when the failure is only that migration 188 has not been pasted yet. */
 function isMissingSortKey(error: { code?: string; message?: string }): boolean {
-    return (
-        error.code === "42703" ||
-        Boolean(error.message && error.message.includes(CATALOG_NAME_SORT_COLUMN))
-    );
+    return error.code === "42703" || Boolean(error.message && error.message.includes(CATALOG_NAME_SORT_COLUMN));
 }
 
 export async function getCatalogItems(filters: CatalogFilters) {
@@ -216,14 +219,24 @@ export async function getCatalogItems(filters: CatalogFilters) {
                 const { data: kids } = await supabase
                     .from("catalog_items")
                     .select("id, parent_id, title, attributes")
-                    .in("parent_id", named.map((m) => m.id))
+                    .in(
+                        "parent_id",
+                        named.map((m) => m.id),
+                    )
                     .eq("item_type", "plastic_release")
                     .limit(1000);
                 const byMold = new Map<string, string[]>(named.map((m) => [m.id, []]));
-                const sorted = ((kids ?? []) as { id: string; parent_id: string; title: string; attributes: Record<string, unknown> | null }[]).sort(
+                const sorted = (
+                    (kids ?? []) as {
+                        id: string;
+                        parent_id: string;
+                        title: string;
+                        attributes: Record<string, unknown> | null;
+                    }[]
+                ).sort(
                     (a, b) =>
-                        Number(a.attributes?.release_year_start ?? 9999) - Number(b.attributes?.release_year_start ?? 9999) ||
-                        a.title.localeCompare(b.title),
+                        Number(a.attributes?.release_year_start ?? 9999) -
+                            Number(b.attributes?.release_year_start ?? 9999) || a.title.localeCompare(b.title),
                 );
                 for (const k of sorted) byMold.get(k.parent_id)?.push(k.id);
                 searchIds = placeReleasesUnderMolds(rows, byMold, {
@@ -282,9 +295,7 @@ export async function getCatalogItems(filters: CatalogFilters) {
                 if (sigError) throw new Error(sigError.message);
                 const flagged = new Set(flaggedIds);
                 const priced = new Set(
-                    (sigs ?? [])
-                        .map((r) => String(r.catalog_item_id))
-                        .filter((id) => !flagged.has(id)),
+                    (sigs ?? []).map((r) => String(r.catalog_item_id)).filter((id) => !flagged.has(id)),
                 );
                 searchIds = searchIds.filter((id) => priced.has(id));
             } catch {
@@ -317,11 +328,9 @@ export async function getCatalogItems(filters: CatalogFilters) {
         const columns: string = pricedJoin
             ? `${CATALOG_BROWSE_COLUMNS}, catalog_price_signals!inner(catalog_item_id)`
             : CATALOG_BROWSE_COLUMNS;
-        let query = supabase
-            .from("catalog_items")
-            .select(columns, {
-                count: searchIds || pricedJoin ? "exact" : "estimated",
-            });
+        let query = supabase.from("catalog_items").select(columns, {
+            count: searchIds || pricedJoin ? "exact" : "estimated",
+        });
         if (relevance) query = query.limit(Math.max(FUZZY_CANDIDATE_LIMIT, searchIds?.length ?? 0));
         else query = query.range(from, from + pageSize - 1);
         if (pricedJoin && flaggedIds.length > 0) {
@@ -346,20 +355,14 @@ export async function getCatalogItems(filters: CatalogFilters) {
         // for the realistic range; rows lacking the key are naturally excluded.
         if (filters.yearFrom !== undefined)
             query = query.gte("attributes->>release_year_start", String(filters.yearFrom));
-        if (filters.yearTo !== undefined)
-            query = query.lte("attributes->>release_year_start", String(filters.yearTo));
-        if (filters.color)
-            query = query.ilike("attributes->>color_description", `%${filters.color}%`);
-        if (filters.model)
-            query = query.ilike("attributes->>model_number", `%${filters.model}%`);
-        if (filters.medium)
-            query = query.ilike("attributes->>cast_medium", `%${filters.medium}%`);
-        if (filters.material)
-            query = query.eq("attributes->>material", filters.material);
+        if (filters.yearTo !== undefined) query = query.lte("attributes->>release_year_start", String(filters.yearTo));
+        if (filters.color) query = query.ilike("attributes->>color_description", `%${filters.color}%`);
+        if (filters.model) query = query.ilike("attributes->>model_number", `%${filters.model}%`);
+        if (filters.medium) query = query.ilike("attributes->>cast_medium", `%${filters.medium}%`);
+        if (filters.material) query = query.eq("attributes->>material", filters.material);
         // Run type is a closed vocabulary, so exact-match (not ilike): the
         // point of the fixed list is that every "Web Special" row matches.
-        if (filters.runType)
-            query = query.eq("attributes->>run_type", filters.runType);
+        if (filters.runType) query = query.eq("attributes->>run_type", filters.runType);
 
         // A name sort files by sort_key (188), never by the raw title: a
         // leading quotation mark or an accented initial would otherwise
@@ -389,8 +392,7 @@ export async function getCatalogItems(filters: CatalogFilters) {
     if (error && pricedJoin && /catalog_price_signals/i.test(error.message ?? "")) {
         return { success: true as const, items: [], total: 0, page, pageSize };
     }
-    if (error)
-        return { success: false as const, error: error.message };
+    if (error) return { success: false as const, error: error.message };
     if (relevance && searchIds) {
         const rank = new Map(searchIds.map((id, i) => [id, i]));
         const ordered = [...((data ?? []) as unknown as { id: string }[])].sort(
@@ -415,13 +417,8 @@ export async function getCatalogItems(filters: CatalogFilters) {
 
 export async function getCatalogItem(id: string) {
     const supabase = await createClient();
-    const { data, error } = await supabase
-        .from("catalog_items")
-        .select("*")
-        .eq("id", id)
-        .single();
-    if (error)
-        return { success: false as const, error: error.message };
+    const { data, error } = await supabase.from("catalog_items").select("*").eq("id", id).single();
+    if (error) return { success: false as const, error: error.message };
     return { success: true as const, item: data };
 }
 
@@ -482,8 +479,7 @@ export async function createSuggestion(input: SuggestionInput) {
                 approved_suggestions_count: number;
             } | null
         )?.approved_suggestions_count ?? 0;
-    const alias =
-        (profile as { alias_name: string } | null)?.alias_name ?? "Unknown";
+    const alias = (profile as { alias_name: string } | null)?.alias_name ?? "Unknown";
 
     let autoApprove = false;
     if (input.suggestionType === "correction" && input.fieldChanges) {
@@ -543,11 +539,7 @@ export async function createSuggestion(input: SuggestionInput) {
 
     // If auto-approved, apply immediately
     if (autoApprove && data) {
-        const applied = await applyApprovedSuggestion(
-            data.id as string,
-            user.id,
-            alias
-        );
+        const applied = await applyApprovedSuggestion(data.id as string, user.id, alias);
         // Could not be written: it is back in the queue for a person.
         if (!applied.ok) autoApprove = false;
     }
@@ -566,12 +558,8 @@ export async function createSuggestion(input: SuggestionInput) {
         const changedKeys = input.fieldChanges ? Object.keys(input.fieldChanges).join(", ") : "";
         after(async () => {
             try {
-                const { createNotification } = await import(
-                    "@/lib/notifications/createNotification"
-                );
-                const { adminNotificationTargets } = await import(
-                    "@/lib/notifications/adminTargets"
-                );
+                const { createNotification } = await import("@/lib/notifications/createNotification");
+                const { adminNotificationTargets } = await import("@/lib/notifications/adminTargets");
                 const adminIds = await adminNotificationTargets(getAdminClient());
                 const content = wasAutoApproved
                     ? `⚡ Auto-applied: @${alias} changed ${changedKeys || "an entry"} — already live. Review or revert.`
@@ -637,7 +625,10 @@ export async function revertSuggestion(input: {
     const s = suggestion as CatalogSuggestion;
 
     if (s.suggestion_type !== "correction" || !s.catalog_item_id) {
-        return { success: false, error: "Only applied corrections can be reverted here. For an addition, use removal." };
+        return {
+            success: false,
+            error: "Only applied corrections can be reverted here. For an addition, use removal.",
+        };
     }
     if (s.status !== "approved" && s.status !== "auto_approved") {
         return { success: false, error: "This suggestion was never applied." };
@@ -651,8 +642,12 @@ export async function revertSuggestion(input: {
     if (!item) return { success: false, error: "The catalog entry no longer exists." };
 
     const row = item as {
-        id: string; title: string; maker: string | null; scale: string | null;
-        item_type: string; attributes: Record<string, unknown> | null;
+        id: string;
+        title: string;
+        maker: string | null;
+        scale: string | null;
+        item_type: string;
+        attributes: Record<string, unknown> | null;
     };
     const attrs = { ...(row.attributes ?? {}) };
     const columnUpdates: Record<string, unknown> = {};
@@ -664,9 +659,7 @@ export async function revertSuggestion(input: {
         if (typeof value !== "object" || value === null || !("to" in value)) continue;
         const { from, to } = value as { from?: unknown; to: unknown };
         const isColumn = CATALOG_REAL_COLUMNS.has(key);
-        const current = isColumn
-            ? (row as unknown as Record<string, unknown>)[key]
-            : attrs[key];
+        const current = isColumn ? (row as unknown as Record<string, unknown>)[key] : attrs[key];
 
         // The guard: only revert what the correction actually left behind.
         if (String(current ?? "") !== String(normalizeFactValue(key, to) ?? "")) {
@@ -676,7 +669,11 @@ export async function revertSuggestion(input: {
 
         const restored = from == null ? "" : String(from);
         // A value the Registry's lists no longer accept can't be put back.
-        if (restored && (key === "scale" || key === "run_type" || key === "material") && canonicalVocabulary(key, restored) === null) {
+        if (
+            restored &&
+            (key === "scale" || key === "run_type" || key === "material") &&
+            canonicalVocabulary(key, restored) === null
+        ) {
             drifted.push(key);
             continue;
         }
@@ -709,10 +706,7 @@ export async function revertSuggestion(input: {
 
     const updates: Record<string, unknown> = { ...columnUpdates };
     if (attributesTouched) updates.attributes = JSON.parse(JSON.stringify(attrs));
-    const { error: updateError } = await admin
-        .from("catalog_items")
-        .update(updates)
-        .eq("id", row.id);
+    const { error: updateError } = await admin.from("catalog_items").update(updates).eq("id", row.id);
     if (updateError) return { success: false, error: updateError.message };
 
     // The revert is itself a change, so it goes in the public changelog —
@@ -746,9 +740,7 @@ export async function revertSuggestion(input: {
         .select("approved_suggestions_count")
         .eq("id", s.user_id)
         .single();
-    const currentCount =
-        (authorRow as { approved_suggestions_count: number } | null)
-            ?.approved_suggestions_count ?? 0;
+    const currentCount = (authorRow as { approved_suggestions_count: number } | null)?.approved_suggestions_count ?? 0;
     await admin
         .from("users")
         .update({ approved_suggestions_count: Math.max(0, currentCount - 1) })
@@ -758,9 +750,7 @@ export async function revertSuggestion(input: {
     const suggestionId = s.id;
     after(async () => {
         try {
-            const { createNotification } = await import(
-                "@/lib/notifications/createNotification"
-            );
+            const { createNotification } = await import("@/lib/notifications/createNotification");
             await createNotification({
                 userId: authorId,
                 type: "system",
@@ -780,10 +770,7 @@ export async function revertSuggestion(input: {
     return { success: true, reverted, drifted };
 }
 
-export async function getSuggestions(
-    statusFilter?: string,
-    page: number = 1
-) {
+export async function getSuggestions(statusFilter?: string, page: number = 1) {
     const supabase = await createClient();
     const admin = getAdminClient();
     const pageSize = 20;
@@ -801,20 +788,31 @@ export async function getSuggestions(
     }
 
     const { data, count, error } = await query;
-    if (error)
-        return { success: false as const, error: error.message };
+    if (error) return { success: false as const, error: error.message };
 
     // Enrich with user data from public.users
     const rows = (data ?? []) as CatalogSuggestion[];
     const userIds = [...new Set(rows.map((r) => r.user_id))];
-    const userMap: Record<string, { alias_name: string; avatar_url: string | null; approved_suggestions_count: number }> = {};
+    const userMap: Record<
+        string,
+        { alias_name: string; avatar_url: string | null; approved_suggestions_count: number }
+    > = {};
     if (userIds.length > 0) {
         const { data: users } = await admin
             .from("users")
             .select("id, alias_name, avatar_url, approved_suggestions_count")
             .in("id", userIds);
-        for (const u of (users ?? []) as { id: string; alias_name: string; avatar_url: string | null; approved_suggestions_count: number }[]) {
-            userMap[u.id] = { alias_name: u.alias_name, avatar_url: u.avatar_url, approved_suggestions_count: u.approved_suggestions_count };
+        for (const u of (users ?? []) as {
+            id: string;
+            alias_name: string;
+            avatar_url: string | null;
+            approved_suggestions_count: number;
+        }[]) {
+            userMap[u.id] = {
+                alias_name: u.alias_name,
+                avatar_url: u.avatar_url,
+                approved_suggestions_count: u.approved_suggestions_count,
+            };
         }
     }
 
@@ -835,14 +833,9 @@ export async function getSuggestion(id: string) {
     const admin = getAdminClient();
 
     // Two-step fetch: FK goes to auth.users, PostgREST can't join
-    const { data: suggestion, error } = await supabase
-        .from("catalog_suggestions")
-        .select("*")
-        .eq("id", id)
-        .single();
+    const { data: suggestion, error } = await supabase.from("catalog_suggestions").select("*").eq("id", id).single();
 
-    if (error)
-        return { success: false as const, error: error.message };
+    if (error) return { success: false as const, error: error.message };
 
     // Enrich with user data
     const s = suggestion as CatalogSuggestion;
@@ -866,11 +859,7 @@ export async function getSuggestion(id: string) {
     // Get catalog item if correction
     let catalogItem = null;
     if (s && s.catalog_item_id) {
-        const { data: item } = await supabase
-            .from("catalog_items")
-            .select("*")
-            .eq("id", s.catalog_item_id!)
-            .single();
+        const { data: item } = await supabase.from("catalog_items").select("*").eq("id", s.catalog_item_id!).single();
         catalogItem = item;
     }
 
@@ -884,26 +873,17 @@ export async function getSuggestion(id: string) {
 
 // ── VOTING ──
 
-export async function voteSuggestion(
-    suggestionId: string,
-    voteType: "up" | "down"
-) {
+export async function voteSuggestion(suggestionId: string, voteType: "up" | "down") {
     const { supabase, user } = await requireAuth();
 
     // Delete existing vote first (toggle/switch)
-    await supabase
-        .from("catalog_suggestion_votes")
-        .delete()
-        .eq("suggestion_id", suggestionId)
-        .eq("user_id", user.id);
+    await supabase.from("catalog_suggestion_votes").delete().eq("suggestion_id", suggestionId).eq("user_id", user.id);
 
-    const { error } = await supabase
-        .from("catalog_suggestion_votes")
-        .insert({
-            suggestion_id: suggestionId,
-            user_id: user.id,
-            vote_type: voteType,
-        });
+    const { error } = await supabase.from("catalog_suggestion_votes").insert({
+        suggestion_id: suggestionId,
+        user_id: user.id,
+        vote_type: voteType,
+    });
 
     if (error) return { success: false, error: error.message };
 
@@ -917,11 +897,7 @@ export async function voteSuggestion(
 export async function removeVote(suggestionId: string) {
     const { supabase, user } = await requireAuth();
 
-    await supabase
-        .from("catalog_suggestion_votes")
-        .delete()
-        .eq("suggestion_id", suggestionId)
-        .eq("user_id", user.id);
+    await supabase.from("catalog_suggestion_votes").delete().eq("suggestion_id", suggestionId).eq("user_id", user.id);
 
     await updateVoteCounts(suggestionId);
     revalidatePath(`/catalog/suggestions/${suggestionId}`);
@@ -936,17 +912,10 @@ async function updateVoteCounts(suggestionId: string) {
         .select("vote_type")
         .eq("suggestion_id", suggestionId);
 
-    const ups = (votes ?? []).filter(
-        (v: { vote_type: string }) => v.vote_type === "up"
-    ).length;
-    const downs = (votes ?? []).filter(
-        (v: { vote_type: string }) => v.vote_type === "down"
-    ).length;
+    const ups = (votes ?? []).filter((v: { vote_type: string }) => v.vote_type === "up").length;
+    const downs = (votes ?? []).filter((v: { vote_type: string }) => v.vote_type === "down").length;
 
-    await admin
-        .from("catalog_suggestions")
-        .update({ upvotes: ups, downvotes: downs })
-        .eq("id", suggestionId);
+    await admin.from("catalog_suggestions").update({ upvotes: ups, downvotes: downs }).eq("id", suggestionId);
 }
 
 export async function getUserVote(suggestionId: string) {
@@ -963,22 +932,16 @@ export async function getUserVote(suggestionId: string) {
         .eq("user_id", user.id)
         .maybeSingle();
 
-    return data
-        ? (data as { vote_type: string }).vote_type
-        : null;
+    return data ? (data as { vote_type: string }).vote_type : null;
 }
 
 // ── COMMENTS ──
 
-export async function addSuggestionComment(
-    suggestionId: string,
-    body: string
-) {
+export async function addSuggestionComment(suggestionId: string, body: string) {
     const { supabase, user } = await requireAuth();
 
     const sanitized = sanitizeText(body).trim();
-    if (!sanitized)
-        return { success: false, error: "Comment cannot be empty." };
+    if (!sanitized) return { success: false, error: "Comment cannot be empty." };
     if (sanitized.length > 2000)
         return {
             success: false,
@@ -986,23 +949,15 @@ export async function addSuggestionComment(
         };
 
     const admin = getAdminClient();
-    const { data: profile } = await admin
-        .from("users")
-        .select("alias_name")
-        .eq("id", user.id)
-        .single();
-    const alias =
-        (profile as { alias_name: string } | null)?.alias_name ??
-        "Unknown";
+    const { data: profile } = await admin.from("users").select("alias_name").eq("id", user.id).single();
+    const alias = (profile as { alias_name: string } | null)?.alias_name ?? "Unknown";
 
-    const { error } = await supabase
-        .from("catalog_suggestion_comments")
-        .insert({
-            suggestion_id: suggestionId,
-            user_id: user.id,
-            user_alias: alias,
-            body: sanitized,
-        });
+    const { error } = await supabase.from("catalog_suggestion_comments").insert({
+        suggestion_id: suggestionId,
+        user_id: user.id,
+        user_alias: alias,
+        body: sanitized,
+    });
 
     if (error) return { success: false, error: error.message };
     revalidatePath(`/catalog/suggestions/${suggestionId}`);
@@ -1011,10 +966,7 @@ export async function addSuggestionComment(
 
 export async function deleteSuggestionComment(commentId: string) {
     const { supabase } = await requireAuth();
-    const { error } = await supabase
-        .from("catalog_suggestion_comments")
-        .delete()
-        .eq("id", commentId);
+    const { error } = await supabase.from("catalog_suggestion_comments").delete().eq("id", commentId);
     if (error) return { success: false, error: error.message };
     return { success: true };
 }
@@ -1038,20 +990,13 @@ export async function reviewSuggestion(decision: ReviewDecision) {
         .eq("id", decision.suggestionId)
         .single();
 
-    if (!suggestion)
-        return { success: false, error: "Suggestion not found." };
+    if (!suggestion) return { success: false, error: "Suggestion not found." };
 
     const s = suggestion as CatalogSuggestion;
 
     // Get contributor alias
-    const { data: contributorProfile } = await admin
-        .from("users")
-        .select("alias_name")
-        .eq("id", s.user_id)
-        .single();
-    const contributorAlias =
-        (contributorProfile as { alias_name: string } | null)
-            ?.alias_name ?? "Unknown";
+    const { data: contributorProfile } = await admin.from("users").select("alias_name").eq("id", s.user_id).single();
+    const contributorAlias = (contributorProfile as { alias_name: string } | null)?.alias_name ?? "Unknown";
 
     if (decision.decision === "approved" && s.suggestion_type === "addition") {
         const existing = await findExistingMold(admin, (s.field_changes ?? {}) as Record<string, unknown>);
@@ -1077,14 +1022,16 @@ export async function reviewSuggestion(decision: ReviewDecision) {
             const change = (s.field_changes as Record<string, { to?: unknown }>)?.registry_notes;
             const to = typeof change?.to === "string" ? change.to.trim() : "";
             if (to) {
-                await (admin as unknown as {
-                    from: (t: string) => {
-                        upsert: (
-                            row: Record<string, unknown>,
-                            opts: { onConflict: string },
-                        ) => Promise<{ error: unknown }>;
-                    };
-                })
+                await (
+                    admin as unknown as {
+                        from: (t: string) => {
+                            upsert: (
+                                row: Record<string, unknown>,
+                                opts: { onConflict: string },
+                            ) => Promise<{ error: unknown }>;
+                        };
+                    }
+                )
                     .from("artists")
                     .upsert(
                         { name: artistName, registry_notes: to, updated_at: new Date().toISOString() },
@@ -1093,14 +1040,13 @@ export async function reviewSuggestion(decision: ReviewDecision) {
                 revalidateTag(REFERENCE_PAGES_CACHE_TAG, "max");
             }
         } else {
-            const applied = await applyApprovedSuggestion(
-                decision.suggestionId,
-                s.user_id,
-                contributorAlias
-            );
+            const applied = await applyApprovedSuggestion(decision.suggestionId, s.user_id, contributorAlias);
             if (!applied.ok) {
                 revalidatePath("/admin");
-                return { success: false, error: `It could not be applied, so it is back in the queue: ${applied.error}.` };
+                return {
+                    success: false,
+                    error: `It could not be applied, so it is back in the queue: ${applied.error}.`,
+                };
             }
         }
     }
@@ -1110,15 +1056,9 @@ export async function reviewSuggestion(decision: ReviewDecision) {
     const adminUserId = user.id;
     after(async () => {
         try {
-            const { createNotification } = await import(
-                "@/lib/notifications/createNotification"
-            );
-            const emoji =
-                decision.decision === "approved" ? "✅" : "❌";
-            const verb =
-                decision.decision === "approved"
-                    ? "approved"
-                    : "not approved";
+            const { createNotification } = await import("@/lib/notifications/createNotification");
+            const emoji = decision.decision === "approved" ? "✅" : "❌";
+            const verb = decision.decision === "approved" ? "approved" : "not approved";
             await createNotification({
                 userId: suggestionUserId,
                 type: "system",
@@ -1165,15 +1105,11 @@ async function unapply(
 async function applyApprovedSuggestion(
     suggestionId: string,
     userId: string,
-    alias: string
+    alias: string,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
     const admin = getAdminClient();
 
-    const { data: suggestion } = await admin
-        .from("catalog_suggestions")
-        .select("*")
-        .eq("id", suggestionId)
-        .single();
+    const { data: suggestion } = await admin.from("catalog_suggestions").select("*").eq("id", suggestionId).single();
 
     if (!suggestion) return { ok: false, error: "that suggestion no longer exists" };
 
@@ -1204,10 +1140,7 @@ async function applyApprovedSuggestion(
                 )?.attributes ?? null;
         }
 
-        const { columnUpdates, attributes } = buildCorrectionUpdate(
-            fieldChanges,
-            existingAttributes
-        );
+        const { columnUpdates, attributes } = buildCorrectionUpdate(fieldChanges, existingAttributes);
 
         const updates: CatalogItemUpdate = { ...columnUpdates };
         // Taxonomy v2: corrections are free-text — normalize scale so
@@ -1216,15 +1149,10 @@ async function applyApprovedSuggestion(
             updates.scale = canonicalVocabulary("scale", updates.scale) ?? updates.scale;
         }
         if (attributes) {
-            (updates as Record<string, unknown>).attributes = JSON.parse(
-                JSON.stringify(attributes)
-            );
+            (updates as Record<string, unknown>).attributes = JSON.parse(JSON.stringify(attributes));
         }
         if (Object.keys(updates).length > 0) {
-            const { error: applyError } = await admin
-                .from("catalog_items")
-                .update(updates)
-                .eq("id", s.catalog_item_id);
+            const { error: applyError } = await admin.from("catalog_items").update(updates).eq("id", s.catalog_item_id);
             if (applyError) return unapply(admin, suggestionId, applyError);
         }
         const changes = Object.entries(s.field_changes)
@@ -1286,37 +1214,43 @@ async function applyApprovedSuggestion(
             // A release filed under a mold is that mold's scale.
             scale: parentId?.scale ?? canonicalVocabulary("scale", fc.scale),
             ...(parentId ? { parent_id: parentId.id } : {}),
-            attributes: JSON.parse(JSON.stringify({
-                ...(fc.year ? { release_year_start: normalizeFactValue("release_year_start", fc.year) } : {}),
-                ...(fc.color ? { color_description: normalizeFactValue("color_description", fc.color) } : {}),
-                ...(fc.model_number ? { model_number: fc.model_number } : {}),
-                ...(canonicalVocabulary("material", fc.material) ? { material: canonicalVocabulary("material", fc.material) } : {}),
-                // Original retail price (Amanda, 2026-08-23): what the maker
-                // charged at release. Pairs with the Blue Book on reference
-                // pages — original price beside today's market range.
-                ...(fc.retail_price ? { retail_price: fc.retail_price } : {}),
-                // Run type must be one of RUN_TYPES — free text here would
-                // defeat the whole point (the browse filter groups on the
-                // exact string). Anything else is dropped, not stored.
-                ...(canonicalVocabulary("run_type", fc.run_type) ? { run_type: canonicalVocabulary("run_type", fc.run_type) } : {}),
-                // Pieces made: a positive integer as a plain string, matching
-                // the 74 imported rows. "~2500" / "2,500" / "0" are dropped.
-                ...(runCount ? { run_count: runCount } : {}),
-                // What the model depicts. Gender is closed (the horse forms'
-                // GENDER_GROUPS); breed is open — see normalizeCatalogBreed.
-                ...(breed ? { breed } : {}),
-                ...(isCatalogGender(fc.gender) ? { gender: fc.gender } : {}),
-                // Sculptor is credit, not maker — factory pieces have a
-                // company maker AND a named sculpting artist (the North
-                // Light lesson: conflating them misfiled 20 sculpts as
-                // artist resins under "Guy Pocock/Anne Godfrey").
-                ...(fc.sculptor ? { sculptor: fc.sculptor } : {}),
-                // The form collects the parent mold's name for releases —
-                // this used to be dropped on apply. Kept as an attribute so
-                // admins can wire parent_id from it later.
-                ...(fc.mold_name && fc.title ? { mold_name: fc.mold_name } : {}),
-                ...(typeof fc.set_name === "string" && fc.set_name.trim() ? { set_name: fc.set_name.trim() } : {}),
-            })),
+            attributes: JSON.parse(
+                JSON.stringify({
+                    ...(fc.year ? { release_year_start: normalizeFactValue("release_year_start", fc.year) } : {}),
+                    ...(fc.color ? { color_description: normalizeFactValue("color_description", fc.color) } : {}),
+                    ...(fc.model_number ? { model_number: fc.model_number } : {}),
+                    ...(canonicalVocabulary("material", fc.material)
+                        ? { material: canonicalVocabulary("material", fc.material) }
+                        : {}),
+                    // Original retail price (Amanda, 2026-08-23): what the maker
+                    // charged at release. Pairs with the Blue Book on reference
+                    // pages — original price beside today's market range.
+                    ...(fc.retail_price ? { retail_price: fc.retail_price } : {}),
+                    // Run type must be one of RUN_TYPES — free text here would
+                    // defeat the whole point (the browse filter groups on the
+                    // exact string). Anything else is dropped, not stored.
+                    ...(canonicalVocabulary("run_type", fc.run_type)
+                        ? { run_type: canonicalVocabulary("run_type", fc.run_type) }
+                        : {}),
+                    // Pieces made: a positive integer as a plain string, matching
+                    // the 74 imported rows. "~2500" / "2,500" / "0" are dropped.
+                    ...(runCount ? { run_count: runCount } : {}),
+                    // What the model depicts. Gender is closed (the horse forms'
+                    // GENDER_GROUPS); breed is open — see normalizeCatalogBreed.
+                    ...(breed ? { breed } : {}),
+                    ...(isCatalogGender(fc.gender) ? { gender: fc.gender } : {}),
+                    // Sculptor is credit, not maker — factory pieces have a
+                    // company maker AND a named sculpting artist (the North
+                    // Light lesson: conflating them misfiled 20 sculpts as
+                    // artist resins under "Guy Pocock/Anne Godfrey").
+                    ...(fc.sculptor ? { sculptor: fc.sculptor } : {}),
+                    // The form collects the parent mold's name for releases —
+                    // this used to be dropped on apply. Kept as an attribute so
+                    // admins can wire parent_id from it later.
+                    ...(fc.mold_name && fc.title ? { mold_name: fc.mold_name } : {}),
+                    ...(typeof fc.set_name === "string" && fc.set_name.trim() ? { set_name: fc.set_name.trim() } : {}),
+                }),
+            ),
         };
         const { data: newItem, error: insertError } = await admin
             .from("catalog_items")
@@ -1324,9 +1258,7 @@ async function applyApprovedSuggestion(
             .select("id")
             .single();
         if (insertError) return unapply(admin, suggestionId, insertError);
-        catalogItemId = newItem
-            ? (newItem as { id: string }).id
-            : null;
+        catalogItemId = newItem ? (newItem as { id: string }).id : null;
         changeSummary = `📗 New entry added: ${insertPayload.title}`;
     } else if (s.suggestion_type === "photo") {
         changeSummary = "📸 Reference photo added";
@@ -1371,11 +1303,7 @@ async function applyApprovedSuggestion(
     });
 
     // Check curator thresholds
-    const { data: profile } = await admin
-        .from("users")
-        .select("approved_suggestions_count")
-        .eq("id", userId)
-        .single();
+    const { data: profile } = await admin.from("users").select("approved_suggestions_count").eq("id", userId).single();
 
     const count =
         (
@@ -1395,20 +1323,16 @@ async function applyApprovedSuggestion(
 
     for (const { threshold, badgeId } of badgesToCheck) {
         if (count >= threshold) {
-            await admin.from("user_badges").upsert(
-                { user_id: userId, badge_id: badgeId },
-                { onConflict: "user_id,badge_id" }
-            );
+            await admin
+                .from("user_badges")
+                .upsert({ user_id: userId, badge_id: badgeId }, { onConflict: "user_id,badge_id" });
         }
     }
 
     // Update trusted curator flag. Tied to Silver — the same rank that
     // unlocks auto-approval, so "trusted" means one thing site-wide.
     if (count >= SILVER_THRESHOLD) {
-        await admin
-            .from("users")
-            .update({ is_trusted_curator: true })
-            .eq("id", userId);
+        await admin.from("users").update({ is_trusted_curator: true }).eq("id", userId);
     }
 
     // ── Revalidate what the change just made stale ──
@@ -1438,7 +1362,7 @@ async function applyApprovedSuggestion(
                     title: r.title,
                     maker_slug: r.maker_slug,
                     slug: r.slug,
-                })
+                }),
             );
         }
     }
@@ -1459,8 +1383,7 @@ export async function getChangelog(page: number = 1) {
         .order("created_at", { ascending: false })
         .range(from, from + pageSize - 1);
 
-    if (error)
-        return { success: false as const, error: error.message };
+    if (error) return { success: false as const, error: error.message };
     return {
         success: true as const,
         entries: data ?? [],
@@ -1475,9 +1398,7 @@ export async function getTopCurators(limit: number = 5) {
 
     const { data, error } = await supabase
         .from("users")
-        .select(
-            "id, alias_name, avatar_url, approved_suggestions_count"
-        )
+        .select("id, alias_name, avatar_url, approved_suggestions_count")
         .gt("approved_suggestions_count", 0)
         .order("approved_suggestions_count", { ascending: false })
         .limit(limit);
@@ -1513,7 +1434,8 @@ export async function suggestArtistNotes(input: {
     if (!artistName || artistName.length > 120) return { success: false, error: "Unknown artist." };
     if (!notes || notes.length < 20) return { success: false, error: "Notes need at least a couple of sentences." };
     if (notes.length > 4000) return { success: false, error: "Notes are capped at 4,000 characters." };
-    if (!reason || reason.length < 5) return { success: false, error: "Add a short line on where this knowledge comes from." };
+    if (!reason || reason.length < 5)
+        return { success: false, error: "Add a short line on where this knowledge comes from." };
 
     // The artist must exist as a maker in the catalog — notes hang off
     // real bodies of work, not arbitrary names.
@@ -1527,13 +1449,18 @@ export async function suggestArtistNotes(input: {
     // Current notes become the "from" so the review diff reads honestly.
     let from = "";
     try {
-        const { data: existing } = await (admin as unknown as {
-            from: (t: string) => {
-                select: (c: string) => {
-                    eq: (k: string, v: string) => { maybeSingle: () => Promise<{ data: { registry_notes: string | null } | null }> };
+        const { data: existing } = await (
+            admin as unknown as {
+                from: (t: string) => {
+                    select: (c: string) => {
+                        eq: (
+                            k: string,
+                            v: string,
+                        ) => { maybeSingle: () => Promise<{ data: { registry_notes: string | null } | null }> };
+                    };
                 };
-            };
-        })
+            }
+        )
             .from("artists")
             .select("registry_notes")
             .eq("name", artistName)
@@ -1543,13 +1470,20 @@ export async function suggestArtistNotes(input: {
         /* pre-200: the insert below will fail with the honest error */
     }
 
-    const { data, error } = await (supabase as unknown as {
-        from: (t: string) => {
-            insert: (row: Record<string, unknown>) => {
-                select: (c: string) => { single: () => Promise<{ data: { id: string } | null; error: { code?: string; message?: string } | null }> };
+    const { data, error } = await (
+        supabase as unknown as {
+            from: (t: string) => {
+                insert: (row: Record<string, unknown>) => {
+                    select: (c: string) => {
+                        single: () => Promise<{
+                            data: { id: string } | null;
+                            error: { code?: string; message?: string } | null;
+                        }>;
+                    };
+                };
             };
-        };
-    })
+        }
+    )
         .from("catalog_suggestions")
         .insert({
             user_id: user.id,
@@ -1608,8 +1542,13 @@ async function resolveParentMold(
 ): Promise<{ id: string; scale: string | null } | null> {
     if (itemType !== "plastic_release") return null;
     if (typeof raw === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(raw)) {
-        const { data } = await admin.from("catalog_items").select("id, scale").eq("id", raw).eq("item_type", "plastic_mold").maybeSingle();
-        if (data) return { id: (data as { id: string }).id, scale: ((data as { scale: string | null }).scale ?? null) };
+        const { data } = await admin
+            .from("catalog_items")
+            .select("id, scale")
+            .eq("id", raw)
+            .eq("item_type", "plastic_mold")
+            .maybeSingle();
+        if (data) return { id: (data as { id: string }).id, scale: (data as { scale: string | null }).scale ?? null };
     }
     // The old suggestion form sends the mold as typed text ("G1 Arabian
     // Stallion"). Resolve it the way the linker does: same maker, same
@@ -1620,7 +1559,11 @@ async function resolveParentMold(
     // releases sat with no parent before this (2026-10-14).
     const name = typeof typed?.moldName === "string" ? stripGeneration(typed.moldName).trim() : "";
     if (!name) return null;
-    let query = admin.from("catalog_items").select("id, scale, created_at").eq("item_type", "plastic_mold").ilike("title", name);
+    let query = admin
+        .from("catalog_items")
+        .select("id, scale, created_at")
+        .eq("item_type", "plastic_mold")
+        .ilike("title", name);
     if (typed?.maker) query = query.ilike("maker", typed.maker);
     const scale = normalizeScale(typed?.scale ?? null);
     if (scale) query = query.eq("scale", scale);
@@ -1631,12 +1574,18 @@ async function resolveParentMold(
     const { data: kids } = await admin
         .from("catalog_items")
         .select("parent_id")
-        .in("parent_id", candidates.map((c) => c.id))
+        .in(
+            "parent_id",
+            candidates.map((c) => c.id),
+        )
         .eq("item_type", "plastic_release")
         .limit(5000);
     const counts = new Map<string, number>();
-    for (const k of (kids ?? []) as { parent_id: string }[]) counts.set(k.parent_id, (counts.get(k.parent_id) ?? 0) + 1);
-    candidates.sort((a, b) => (counts.get(b.id) ?? 0) - (counts.get(a.id) ?? 0) || a.created_at.localeCompare(b.created_at));
+    for (const k of (kids ?? []) as { parent_id: string }[])
+        counts.set(k.parent_id, (counts.get(k.parent_id) ?? 0) + 1);
+    candidates.sort(
+        (a, b) => (counts.get(b.id) ?? 0) - (counts.get(a.id) ?? 0) || a.created_at.localeCompare(b.created_at),
+    );
     return { id: candidates[0].id, scale: candidates[0].scale ?? null };
 }
 

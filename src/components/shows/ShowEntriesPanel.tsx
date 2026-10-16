@@ -24,17 +24,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { restoreEntry, scratchEntry, setFeePaid } from "@/app/actions/shows-v2";
-import {
-    barEntrant,
-    liftBar,
-    removeEntrantFromShow,
-    strikeEntryFromResults,
-} from "@/app/actions/shows-v4";
-import type {
-    ConsoleBarredEntrant,
-    ConsoleDivision,
-    ConsoleEntry,
-} from "@/lib/shows/console";
+import { barEntrant, liftBar, removeEntrantFromShow, strikeEntryFromResults } from "@/app/actions/shows-v4";
+import type { ConsoleBarredEntrant, ConsoleDivision, ConsoleEntry } from "@/lib/shows/console";
 import { friendlyEntryStatus } from "@/lib/shows/plainWords";
 import type { ShowStatus, StaffRole } from "@/lib/shows/types";
 import { Badge } from "@/components/ui/badge";
@@ -47,14 +38,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 
 /** Roles the scratch action's staff door admits (mirrors
@@ -146,10 +130,7 @@ export default function ShowEntriesPanel({
     // Mirrors scratchEntry's staff door: any live entry, until the
     // show completes. The action is the authority; this only decides
     // whether to OFFER the button.
-    const canScratch =
-        SCRATCH_ROLES.includes(viewerRole) &&
-        showStatus !== "completed" &&
-        showStatus !== "archived";
+    const canScratch = SCRATCH_ROLES.includes(viewerRole) && showStatus !== "completed" && showStatus !== "archived";
 
     // v4: once results exist, the door changes — scratch closes and
     // STRIKE opens (host/co-host): removes the placing, voids the card,
@@ -157,9 +138,7 @@ export default function ShowEntriesPanel({
     // note. The publish escape hatch, previously SQL-only.
     const strikeMode =
         (viewerRole === "host" || viewerRole === "co_host") &&
-        (showStatus === "results_review" ||
-            showStatus === "completed" ||
-            showStatus === "archived");
+        (showStatus === "results_review" || showStatus === "completed" || showStatus === "archived");
 
     const openScratch = (entry: ConsoleEntry) => {
         setScratchError(null);
@@ -184,9 +163,7 @@ export default function ShowEntriesPanel({
     // The bar door is narrower than the scratch door: host/co-host
     // only, never on your own entry (mirrors barEntrant's checks).
     const canBar = (target: ConsoleEntry | null): boolean =>
-        !!target &&
-        (viewerRole === "host" || viewerRole === "co_host") &&
-        target.ownerId !== viewerId;
+        !!target && (viewerRole === "host" || viewerRole === "co_host") && target.ownerId !== viewerId;
 
     const handleScratch = async () => {
         if (!scratchTarget) return;
@@ -357,14 +334,11 @@ export default function ShowEntriesPanel({
                 Bar List
             </span>
             {barred.length === 0 ? (
-                <p className="mb-2 text-xs text-muted-foreground">
-                    No one is barred from this show.
-                </p>
+                <p className="mb-2 text-xs text-muted-foreground">No one is barred from this show.</p>
             ) : (
                 <>
                     <p className="mb-2 text-xs text-muted-foreground">
-                        These members cannot enter this show. Reasons are staff-only — the
-                        member is never shown them.
+                        These members cannot enter this show. Reasons are staff-only — the member is never shown them.
                     </p>
                     <ul className="flex flex-col gap-2" data-testid="bar-list">
                         {barred.map((row) => (
@@ -375,9 +349,7 @@ export default function ShowEntriesPanel({
                                 <span className="text-sm">
                                     <span className="font-semibold">@{row.alias}</span>
                                     {row.reason && (
-                                        <span className="block text-xs text-muted-foreground">
-                                            {row.reason}
-                                        </span>
+                                        <span className="block text-xs text-muted-foreground">{row.reason}</span>
                                     )}
                                 </span>
                                 {canModerate && (
@@ -407,14 +379,11 @@ export default function ShowEntriesPanel({
                         Remove an entrant from this show…
                     </summary>
                     <p className="mt-2 text-xs text-muted-foreground">
-                        Deletes every entry that member holds here — entered and scratched
-                        alike — and bars them from entering again. For a single mistaken
-                        entry, scratch it instead.
+                        Deletes every entry that member holds here — entered and scratched alike — and bars them from
+                        entering again. For a single mistaken entry, scratch it instead.
                     </p>
                     {ownerRows.filter((o) => o.ownerId !== viewerId).length === 0 ? (
-                        <p className="mt-2 text-xs text-muted-foreground">
-                            No other entrants to remove.
-                        </p>
+                        <p className="mt-2 text-xs text-muted-foreground">No other entrants to remove.</p>
                     ) : (
                         <ul className="mt-2 flex flex-col gap-2" data-testid="remove-entrant-list">
                             {ownerRows
@@ -427,10 +396,8 @@ export default function ShowEntriesPanel({
                                         <span className="text-sm">
                                             <span className="font-semibold">@{owner.alias}</span>
                                             <span className="block text-xs text-muted-foreground">
-                                                {owner.count}{" "}
-                                                {owner.count === 1 ? "entry" : "entries"} in{" "}
-                                                {owner.classCount}{" "}
-                                                {owner.classCount === 1 ? "class" : "classes"}
+                                                {owner.count} {owner.count === 1 ? "entry" : "entries"} in{" "}
+                                                {owner.classCount} {owner.classCount === 1 ? "class" : "classes"}
                                                 {barredIds.has(owner.ownerId) && " · already barred"}
                                             </span>
                                         </span>
@@ -462,9 +429,7 @@ export default function ShowEntriesPanel({
         >
             <DialogContent className="sm:max-w-[440px]">
                 <DialogHeader>
-                    <DialogTitle>
-                        {removeTarget && `Remove @${removeTarget.alias} from this show?`}
-                    </DialogTitle>
+                    <DialogTitle>{removeTarget && `Remove @${removeTarget.alias} from this show?`}</DialogTitle>
                     <DialogDescription>
                         {removeTarget &&
                             `This deletes all ${removeTarget.count} ${
@@ -491,7 +456,7 @@ export default function ShowEntriesPanel({
                         placeholder="e.g. Joke entries, asked to stop"
                         disabled={removing}
                     />
-                    <span className="self-end text-xs tabular-nums text-muted-foreground">
+                    <span className="self-end text-xs text-muted-foreground tabular-nums">
                         {removeReason.length}/200
                     </span>
                 </label>
@@ -689,8 +654,7 @@ export default function ShowEntriesPanel({
                                     <TableCell>
                                         {entry.handlerAlias ? (
                                             <span>
-                                                @{entry.handlerAlias}{" "}
-                                                <Badge variant="outline">proxy</Badge>
+                                                @{entry.handlerAlias} <Badge variant="outline">proxy</Badge>
                                             </span>
                                         ) : (
                                             "—"
@@ -698,9 +662,7 @@ export default function ShowEntriesPanel({
                                     </TableCell>
                                     <TableCell>{classLabels.get(entry.classId) ?? "—"}</TableCell>
                                     <TableCell>
-                                        <span
-                                            className={`stamp ${isScratched ? "stamp-red" : ""}`}
-                                        >
+                                        <span className={`stamp ${isScratched ? "stamp-red" : ""}`}>
                                             {friendlyEntryStatus(entry.status)}
                                         </span>
                                     </TableCell>
@@ -792,7 +754,7 @@ export default function ShowEntriesPanel({
                             placeholder="e.g. Entered twice in the same class"
                             disabled={scratching}
                         />
-                        <span className="self-end text-xs tabular-nums text-muted-foreground">
+                        <span className="self-end text-xs text-muted-foreground tabular-nums">
                             {scratchReason.length}/200
                         </span>
                     </label>
@@ -811,8 +773,8 @@ export default function ShowEntriesPanel({
                                     Also bar @{scratchTarget?.ownerAlias} from this show
                                 </span>
                                 <span className="block text-xs text-muted-foreground">
-                                    Scratches ALL of their entries and blocks re-entry while
-                                    entries are open. Reversible from the bar list.
+                                    Scratches ALL of their entries and blocks re-entry while entries are open.
+                                    Reversible from the bar list.
                                 </span>
                             </span>
                         </label>

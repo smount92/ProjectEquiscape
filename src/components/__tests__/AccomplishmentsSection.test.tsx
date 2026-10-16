@@ -89,19 +89,32 @@ beforeEach(() => {
 
 describe("AccomplishmentsSection", () => {
     it("renders nothing for a visitor when the ledger is empty", () => {
-        const { container } = render(<AccomplishmentsSection horseId={HORSE} horseName="Brooksong" items={[]} isOwner={false} />);
+        const { container } = render(
+            <AccomplishmentsSection horseId={HORSE} horseName="Brooksong" items={[]} isOwner={false} />,
+        );
         expect(container).toBeEmptyDOMElement();
     });
 
     it("shows the ledger with live links and attached papers, no controls for a visitor", () => {
-        render(<AccomplishmentsSection horseId={HORSE} horseName="Brooksong" items={ITEMS} papers={PAPERS} isOwner={false} />);
+        render(
+            <AccomplishmentsSection
+                horseId={HORSE}
+                horseName="Brooksong"
+                items={ITEMS}
+                papers={PAPERS}
+                isOwner={false}
+            />,
+        );
         expect(screen.getByText("Autumn Classic (6 furlongs)")).toBeInTheDocument();
         expect(screen.getByText("Express · 2nd of 9 · May 18, 2024")).toBeInTheDocument();
         // A link typed into the detail is clickable.
         const chart = screen.getByRole("link", { name: /example.org\/charts/ });
         expect(chart).toHaveAttribute("href", "https://example.org/charts/autumn-classic");
         // The outbound link shows its host.
-        expect(screen.getByRole("link", { name: /example.org ↗/ })).toHaveAttribute("href", "https://example.org/results");
+        expect(screen.getByRole("link", { name: /example.org ↗/ })).toHaveAttribute(
+            "href",
+            "https://example.org/results",
+        );
         // The race chart is framed under its row.
         expect(screen.getByTestId("paper-thumbs")).toBeInTheDocument();
         expect(screen.queryByRole("button", { name: /Attach/ })).not.toBeInTheDocument();

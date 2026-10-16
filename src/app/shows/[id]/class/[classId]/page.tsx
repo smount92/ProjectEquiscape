@@ -34,11 +34,7 @@ export async function generateMetadata({
     };
 }
 
-export default async function ClassRoomRoute({
-    params,
-}: {
-    params: Promise<{ id: string; classId: string }>;
-}) {
+export default async function ClassRoomRoute({ params }: { params: Promise<{ id: string; classId: string }> }) {
     const { id, classId } = await params;
 
     const result = await getClassRoom({ classId });

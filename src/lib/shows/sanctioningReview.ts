@@ -143,7 +143,12 @@ export function buildSanctioningChecks(i: SanctioningCheckInput): SanctioningChe
     checks.push(
         i.aboutMd?.trim()
             ? { key: "about", level: "ok", label: "About written", detail: "Read it below." }
-            : { key: "about", level: "info", label: "No about text", detail: "Not required, but a blank show page reads thin." },
+            : {
+                  key: "about",
+                  level: "info",
+                  label: "No about text",
+                  detail: "Not required, but a blank show page reads thin.",
+              },
     );
 
     // A judge on staff — judged shows need one eventually; the host
@@ -151,7 +156,12 @@ export function buildSanctioningChecks(i: SanctioningCheckInput): SanctioningChe
     if (i.judging === "judged") {
         checks.push(
             i.judgeCount > 0
-                ? { key: "judge", level: "ok", label: plural(i.judgeCount, "judge") + " on staff", detail: "Named in the staff list below." }
+                ? {
+                      key: "judge",
+                      level: "ok",
+                      label: plural(i.judgeCount, "judge") + " on staff",
+                      detail: "Named in the staff list below.",
+                  }
                 : {
                       key: "judge",
                       level: "info",

@@ -151,9 +151,7 @@ describe("Deal room — deals.ts", () => {
         mockClient.auth.getUser.mockResolvedValue({ data: { user: null } });
         await expect(proposeTerms(CONVO, [])).rejects.toThrow(AuthError);
         await expect(agreeToTerms(CONVO)).rejects.toThrow(AuthError);
-        await expect(savePaymentPlan(CONVO, [{ amount: 1, dueDate: null }])).rejects.toThrow(
-            AuthError,
-        );
+        await expect(savePaymentPlan(CONVO, [{ amount: 1, dueDate: null }])).rejects.toThrow(AuthError);
         await expect(raiseDispute(CONVO, "a real reason here")).rejects.toThrow(AuthError);
     });
 
@@ -521,9 +519,7 @@ describe("Deal room — deals.ts", () => {
         expect((await agreeToTerms(CONVO)).error).toMatch(/disputed/i);
 
         queueLoad(disputed);
-        expect(
-            (await savePaymentPlan(CONVO, [{ amount: 1, dueDate: null }])).error,
-        ).toMatch(/disputed/i);
+        expect((await savePaymentPlan(CONVO, [{ amount: 1, dueDate: null }])).error).toMatch(/disputed/i);
     });
 
     it("refuses to dispute the same deal twice", async () => {
@@ -566,10 +562,7 @@ describe("Deal room — deals.ts", () => {
     });
 
     it("refuses to file the same purchase twice", async () => {
-        queueLoad(
-            convoRow(),
-            txnRow({ status: "completed", metadata: { vault_recorded_at: "2026-09-01T00:00:00Z" } }),
-        );
+        queueLoad(convoRow(), txnRow({ status: "completed", metadata: { vault_recorded_at: "2026-09-01T00:00:00Z" } }));
         const result = await recordSaleInVault(CONVO);
         expect(result.success).toBe(false);
         expect(result.error).toMatch(/already in the horse's vault/i);

@@ -10,7 +10,9 @@ import Stripe from "stripe";
 
 export async function POST() {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -19,8 +21,13 @@ export async function POST() {
     const tier = await getUserTier();
     if (isPro(tier)) {
         return NextResponse.json(
-            { error: tier === "studio" ? "Studio Pro already includes everything in MHH Pro!" : "You're already on MHH Pro! No need to upgrade again." },
-            { status: 400 }
+            {
+                error:
+                    tier === "studio"
+                        ? "Studio Pro already includes everything in MHH Pro!"
+                        : "You're already on MHH Pro! No need to upgrade again.",
+            },
+            { status: 400 },
         );
     }
 
@@ -28,10 +35,7 @@ export async function POST() {
     const priceId = process.env.STRIPE_PRO_PRICE_ID;
 
     if (!stripeKey || !priceId) {
-        return NextResponse.json(
-            { error: "Stripe is not configured. Contact support." },
-            { status: 500 }
-        );
+        return NextResponse.json({ error: "Stripe is not configured. Contact support." }, { status: 500 });
     }
 
     const stripe = new Stripe(stripeKey, {
@@ -61,9 +65,6 @@ export async function POST() {
     } catch (err) {
         const Sentry = await import("@sentry/nextjs");
         Sentry.captureException(err, { tags: { domain: "commerce" }, level: "error" });
-        return NextResponse.json(
-            { error: "Failed to create checkout session." },
-            { status: 500 }
-        );
+        return NextResponse.json({ error: "Failed to create checkout session." }, { status: 500 });
     }
 }

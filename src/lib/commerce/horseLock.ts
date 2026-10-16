@@ -42,11 +42,7 @@ import { logger } from "@/lib/logger";
  */
 
 /** Statuses that mean a sale on this horse is already under way. */
-export const LIVE_SALE_STATUSES = [
-    "pending_payment",
-    "funds_verified",
-    "completed",
-] as const;
+export const LIVE_SALE_STATUSES = ["pending_payment", "funds_verified", "completed"] as const;
 
 /** The trade_status the accept paths stamp on a horse that is spoken for. */
 export const PENDING_SALE = "Pending Sale";
@@ -93,8 +89,7 @@ export async function assertHorseAvailable(input: {
     if (rivals && rivals.length > 0) {
         return {
             ok: false,
-            reason:
-                "Another sale on this horse is already under way. Cancel that one first if it fell through.",
+            reason: "Another sale on this horse is already under way. Cancel that one first if it fell through.",
         };
     }
 
@@ -108,8 +103,7 @@ export async function assertHorseAvailable(input: {
     if (tradeStatus === PENDING_SALE) {
         return {
             ok: false,
-            reason:
-                "This horse is already marked Pending Sale. Cancel that sale first if it fell through.",
+            reason: "This horse is already marked Pending Sale. Cancel that sale first if it fell through.",
         };
     }
 
@@ -172,9 +166,7 @@ export async function cancelSiblingOffers(input: {
         // Dynamic import inside try/catch: createNotification is
         // server-only and a notify failure must never break the sale.
         try {
-            const { createNotification } = await import(
-                "@/lib/notifications/createNotification"
-            );
+            const { createNotification } = await import("@/lib/notifications/createNotification");
             await createNotification({
                 userId: other.party_b_id,
                 type: "offer",

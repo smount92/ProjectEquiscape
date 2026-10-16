@@ -5,13 +5,7 @@ import { useRouter } from "next/navigation";
 import { createOwnerCredit } from "@/app/actions/work-records";
 import { SERVICE_TYPES } from "@/lib/studio/services";
 import { Button } from "@/components/ui/button";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 /**
  * "Add a credit" — the owner records a link of the chain. The hobby
@@ -75,7 +69,7 @@ export default function OwnerCreditDialog({
                 <button
                     type="button"
                     onClick={() => setOpen(true)}
-                    className="text-forest text-sm font-semibold hover:underline"
+                    className="text-sm font-semibold text-forest hover:underline"
                 >
                     {label}
                 </button>
@@ -85,9 +79,8 @@ export default function OwnerCreditDialog({
                     <DialogHeader>
                         <DialogTitle>Credit an artist</DialogTitle>
                         <DialogDescription>
-                            Who did what to this horse — one credit per pair of hands.
-                            Sculpted, cast, prepped, painted, haired, restored: each is
-                            its own entry, so the whole chain gets its due.
+                            Who did what to this horse — one credit per pair of hands. Sculpted, cast, prepped, painted,
+                            haired, restored: each is its own entry, so the whole chain gets its due.
                         </DialogDescription>
                     </DialogHeader>
                     <div className="flex flex-col gap-3">
@@ -96,10 +89,12 @@ export default function OwnerCreditDialog({
                             <select
                                 value={workType}
                                 onChange={(e) => setWorkType(e.target.value)}
-                                className="border-input bg-card mt-1 block w-full rounded-md border px-3 py-2 text-sm"
+                                className="mt-1 block w-full rounded-md border border-input bg-card px-3 py-2 text-sm"
                             >
                                 {SERVICE_TYPES.map((t) => (
-                                    <option key={t} value={t}>{t}</option>
+                                    <option key={t} value={t}>
+                                        {t}
+                                    </option>
                                 ))}
                             </select>
                         </label>
@@ -111,7 +106,7 @@ export default function OwnerCreditDialog({
                                 maxLength={80}
                                 onChange={(e) => setArtistName(e.target.value)}
                                 placeholder="Their name or studio — on MHH or not"
-                                className="border-input bg-card mt-1 block w-full rounded-md border px-3 py-2 text-sm"
+                                className="mt-1 block w-full rounded-md border border-input bg-card px-3 py-2 text-sm"
                             />
                         </label>
                         <div className="grid grid-cols-2 gap-3">
@@ -121,7 +116,7 @@ export default function OwnerCreditDialog({
                                     type="date"
                                     value={date}
                                     onChange={(e) => setDate(e.target.value)}
-                                    className="border-input bg-card mt-1 block w-full rounded-md border px-3 py-2 text-sm"
+                                    className="mt-1 block w-full rounded-md border border-input bg-card px-3 py-2 text-sm"
                                 />
                             </label>
                         </div>
@@ -133,14 +128,14 @@ export default function OwnerCreditDialog({
                                 value={summary}
                                 onChange={(e) => setSummary(e.target.value)}
                                 placeholder="What was done, anything worth remembering…"
-                                className="border-input bg-card mt-1 block w-full rounded-md border px-3 py-2 text-sm"
+                                className="mt-1 block w-full rounded-md border border-input bg-card px-3 py-2 text-sm"
                             />
                         </label>
-                        {error && <p className="text-destructive m-0 text-sm">{error}</p>}
+                        {error && <p className="m-0 text-sm text-destructive">{error}</p>}
                         <div className="flex justify-end gap-3">
                             <button
                                 type="button"
-                                className="text-muted-foreground hover:text-foreground text-sm underline"
+                                className="text-sm text-muted-foreground underline hover:text-foreground"
                                 onClick={() => setOpen(false)}
                             >
                                 Cancel

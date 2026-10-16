@@ -30,17 +30,13 @@ describe("share copy", () => {
     });
 
     it("says 'live show' for live mode and drops the field when unknown", () => {
-        expect(
-            placingShareDescription({ ...facts, mode: "live", totalEntries: null }),
-        ).toBe(
+        expect(placingShareDescription({ ...facts, mode: "live", totalEntries: null })).toBe(
             "Rain Dancer won 1st in Stock Breeds at Summer Classic, a Model Horse Hub live show.",
         );
     });
 
     it("never brags 'of 1 entries' — a field of one reads as plain place", () => {
-        expect(placingShareDescription({ ...facts, totalEntries: 1 })).toContain(
-            "won 1st in Stock Breeds",
-        );
+        expect(placingShareDescription({ ...facts, totalEntries: 1 })).toContain("won 1st in Stock Breeds");
         expect(placingFieldLine(3, 1)).toBe("3rd place");
         expect(placingFieldLine(3, 12)).toBe("3rd of 12 entries");
     });
@@ -81,19 +77,12 @@ describe("resolvePlacingHrefs (trophy-case record → placing page)", () => {
     });
 
     it("resolves nothing for championship records (synthetic class names)", () => {
-        expect(
-            resolvePlacingHrefs([record({ className: "Grand Championship" })], [entry()]),
-        ).toEqual({});
+        expect(resolvePlacingHrefs([record({ className: "Grand Championship" })], [entry()])).toEqual({});
     });
 
     it("drops ambiguous matches instead of guessing", () => {
         // Data drift: the same horse somehow twice in one class.
-        expect(
-            resolvePlacingHrefs(
-                [record()],
-                [entry(), entry({ entryId: "entry-2" })],
-            ),
-        ).toEqual({});
+        expect(resolvePlacingHrefs([record()], [entry(), entry({ entryId: "entry-2" })])).toEqual({});
     });
 
     it("keeps shows separate — same class name in two shows", () => {

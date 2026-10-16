@@ -117,7 +117,7 @@ export default function GroupBoard({
         startPosting(async () => {
             const result = await createThread({
                 groupId,
-                channelId: (formChannel || activeChannel) || undefined,
+                channelId: formChannel || activeChannel || undefined,
                 title,
                 content,
             });
@@ -133,13 +133,19 @@ export default function GroupBoard({
         startSavingChannel(async () => {
             const result = await createGroupChannel(groupId, newChannelName);
             if (result.success && result.channelId) {
-                setChannels((prev) => [...prev, {
-                    id: result.channelId!,
-                    name: newChannelName.trim(),
-                    slug: newChannelName.trim().toLowerCase().replace(/[^a-z0-9-]/g, "-"),
-                    description: null,
-                    sortOrder: prev.length,
-                }]);
+                setChannels((prev) => [
+                    ...prev,
+                    {
+                        id: result.channelId!,
+                        name: newChannelName.trim(),
+                        slug: newChannelName
+                            .trim()
+                            .toLowerCase()
+                            .replace(/[^a-z0-9-]/g, "-"),
+                        description: null,
+                        sortOrder: prev.length,
+                    },
+                ]);
                 setNewChannelName("");
                 setChannelFormOpen(false);
             } else if (!result.success) {
@@ -181,7 +187,7 @@ export default function GroupBoard({
                     ))}
                     {isAdmin && !channelFormOpen && (
                         <button
-                            className="text-muted-foreground hover:text-foreground min-h-[44px] cursor-pointer border-none bg-transparent px-2 py-1.5 text-xs sm:min-h-0"
+                            className="min-h-[44px] cursor-pointer border-none bg-transparent px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground sm:min-h-0"
                             onClick={() => setChannelFormOpen(true)}
                             title="Add a channel"
                         >
@@ -197,17 +203,33 @@ export default function GroupBoard({
                                 maxLength={40}
                                 onChange={(e) => setNewChannelName(e.target.value)}
                             />
-                            <Button size="sm" className="text-xs" disabled={isSavingChannel || !newChannelName.trim()} onClick={handleAddChannel}>
+                            <Button
+                                size="sm"
+                                className="text-xs"
+                                disabled={isSavingChannel || !newChannelName.trim()}
+                                onClick={handleAddChannel}
+                            >
                                 Add
                             </Button>
-                            <Button size="sm" variant="outline" className="text-xs" onClick={() => setChannelFormOpen(false)}>
+                            <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-xs"
+                                onClick={() => setChannelFormOpen(false)}
+                            >
                                 ✕
                             </Button>
                         </span>
                     )}
                 </div>
                 {!composerOpen && (
-                    <button className="btn-brass" onClick={() => { setComposerOpen(true); setFormChannel(activeChannel ?? ""); }}>
+                    <button
+                        className="btn-brass"
+                        onClick={() => {
+                            setComposerOpen(true);
+                            setFormChannel(activeChannel ?? "");
+                        }}
+                    >
                         + New Thread
                     </button>
                 )}
@@ -227,28 +249,33 @@ export default function GroupBoard({
                         />
                         {channels.length > 0 && (
                             <select
-                                className="border-input bg-card text-foreground min-h-[44px] rounded-md border px-3 py-2 text-sm sm:min-h-0"
+                                className="min-h-[44px] rounded-md border border-input bg-card px-3 py-2 text-sm text-foreground sm:min-h-0"
                                 value={formChannel}
                                 onChange={(e) => setFormChannel(e.target.value)}
                                 aria-label="Channel"
                             >
                                 <option value="">No channel</option>
                                 {channels.map((ch) => (
-                                    <option key={ch.id} value={ch.id}>{ch.name}</option>
+                                    <option key={ch.id} value={ch.id}>
+                                        {ch.name}
+                                    </option>
                                 ))}
                             </select>
                         )}
                         <textarea
                             ref={contentRef}
-                            className="border-input bg-card text-foreground min-h-[96px] w-full resize-none rounded-md border px-3 py-2 text-sm"
+                            className="min-h-[96px] w-full resize-none rounded-md border border-input bg-card px-3 py-2 text-sm text-foreground"
                             placeholder="What's on your mind? (2000 characters, room to breathe)"
                             value={content}
                             maxLength={2000}
-                            onChange={(e) => { setContent(e.target.value); autoGrow(); }}
+                            onChange={(e) => {
+                                setContent(e.target.value);
+                                autoGrow();
+                            }}
                             aria-label="Thread content"
                         />
                         {content.length > 1600 && (
-                            <span className="text-muted-foreground text-right text-xs">{content.length}/2000</span>
+                            <span className="text-right text-xs text-muted-foreground">{content.length}/2000</span>
                         )}
                         <div className="flex items-center justify-end gap-2">
                             <Button variant="outline" onClick={() => setComposerOpen(false)} disabled={isPosting}>
@@ -266,12 +293,12 @@ export default function GroupBoard({
                 </div>
             )}
 
-            {error && <p className="text-destructive mb-3 text-sm">{error}</p>}
+            {error && <p className="mb-3 text-sm text-destructive">{error}</p>}
 
             {/* The ledger thread list */}
             <div className="ledger-card !p-0" aria-busy={isLoading}>
                 {threads.length === 0 && !isLoading && (
-                    <p className="text-muted-foreground px-8 py-10 text-center text-sm italic">
+                    <p className="px-8 py-10 text-center text-sm text-muted-foreground italic">
                         Nothing on the board yet. Pin up the first notice!
                     </p>
                 )}
@@ -290,13 +317,17 @@ export default function GroupBoard({
                         }}
                     >
                         {t.isPinned ? (
-                            <span className="justify-self-center text-sm" title="Pinned" aria-label="Pinned">📌</span>
+                            <span className="justify-self-center text-sm" title="Pinned" aria-label="Pinned">
+                                📌
+                            </span>
                         ) : t.unread ? (
                             <UnreadDot />
                         ) : (
                             <span aria-hidden="true" />
                         )}
-                        <span className={`truncate text-[0.95rem] ${t.unread || t.isPinned ? "text-foreground font-bold" : "text-secondary-foreground font-normal"}`}>
+                        <span
+                            className={`truncate text-[0.95rem] ${t.unread || t.isPinned ? "font-bold text-foreground" : "font-normal text-secondary-foreground"}`}
+                        >
                             {t.displayTitle}
                             {t.status && (
                                 <>
@@ -306,17 +337,19 @@ export default function GroupBoard({
                             )}
                         </span>
                         <span className="row-span-2 text-right">
-                            <span className="text-forest block text-base font-bold tabular-nums">{t.repliesCount}</span>
-                            <span className="text-muted-foreground block text-[0.6rem] tracking-[0.16em] uppercase">
+                            <span className="block text-base font-bold text-forest tabular-nums">{t.repliesCount}</span>
+                            <span className="block text-[0.6rem] tracking-[0.16em] text-muted-foreground uppercase">
                                 {t.repliesCount === 1 ? "reply" : "replies"}
                             </span>
-                            <span className="text-muted-foreground block text-[0.68rem] italic">{timeAgo(t.lastActivity)}</span>
+                            <span className="block text-[0.68rem] text-muted-foreground italic">
+                                {timeAgo(t.lastActivity)}
+                            </span>
                         </span>
-                        <span className="text-muted-foreground col-start-2 truncate text-xs">
+                        <span className="col-start-2 truncate text-xs text-muted-foreground">
                             started by{" "}
                             <Link
                                 href={`/profile/${encodeURIComponent(t.authorAlias)}`}
-                                className="text-saddle font-bold hover:underline"
+                                className="font-bold text-saddle hover:underline"
                                 onClick={(e) => e.stopPropagation()}
                             >
                                 @{t.authorAlias}
@@ -324,10 +357,11 @@ export default function GroupBoard({
                             {t.isPinned && " · pinned"}
                             {t.lastReplyAlias && (
                                 <>
-                                    {" "}· last reply{" "}
+                                    {" "}
+                                    · last reply{" "}
                                     <Link
                                         href={`/profile/${encodeURIComponent(t.lastReplyAlias)}`}
-                                        className="text-saddle font-bold hover:underline"
+                                        className="font-bold text-saddle hover:underline"
                                         onClick={(e) => e.stopPropagation()}
                                     >
                                         @{t.lastReplyAlias}
@@ -342,7 +376,12 @@ export default function GroupBoard({
 
             {hasMore && (
                 <div className="mt-3 flex justify-center">
-                    <Button variant="outline" size="wide" disabled={isLoading} onClick={() => loadBoard(activeChannel, threads.length, true)}>
+                    <Button
+                        variant="outline"
+                        size="wide"
+                        disabled={isLoading}
+                        onClick={() => loadBoard(activeChannel, threads.length, true)}
+                    >
                         {isLoading ? "Loading…" : "Load more threads"}
                     </Button>
                 </div>

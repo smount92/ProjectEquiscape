@@ -49,13 +49,9 @@ export default function MemberFollowButton({
             onClick={onClick}
             disabled={isPending}
             aria-pressed={isFollowing}
-            aria-label={
-                isFollowing ? `Unfollow ${aliasName}` : `Follow ${aliasName}`
-            }
+            aria-label={isFollowing ? `Unfollow ${aliasName}` : `Follow ${aliasName}`}
             title={failed ? "That didn't go through — try again" : undefined}
-            className={`studio-chip shrink-0 ${isFollowing ? "active" : ""} ${
-                isPending ? "opacity-60" : ""
-            }`}
+            className={`studio-chip shrink-0 ${isFollowing ? "active" : ""} ${isPending ? "opacity-60" : ""}`}
         >
             {isFollowing ? "✓ Following" : "+ Follow"}
         </button>

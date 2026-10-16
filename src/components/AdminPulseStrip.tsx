@@ -38,23 +38,11 @@ function fmt(n: number | null): string {
     return n === null ? "—" : n.toLocaleString();
 }
 
-function StatTile({
-    label,
-    value,
-    sub,
-}: {
-    label: string;
-    value: string;
-    sub?: string;
-}) {
+function StatTile({ label, value, sub }: { label: string; value: string; sub?: string }) {
     return (
         <div className="rounded-lg border border-input bg-card px-4 py-3">
-            <div className="font-serif text-2xl leading-none font-bold text-foreground tabular-nums">
-                {value}
-            </div>
-            <div className="mt-1.5 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-                {label}
-            </div>
+            <div className="font-serif text-2xl leading-none font-bold text-foreground tabular-nums">{value}</div>
+            <div className="mt-1.5 text-xs font-semibold tracking-wide text-muted-foreground uppercase">{label}</div>
             {sub && <div className="mt-0.5 text-xs text-muted-foreground">{sub}</div>}
         </div>
     );
@@ -127,15 +115,11 @@ export default function AdminPulseStrip({ pulse, onJump }: PulseStripProps) {
             </div>
 
             {/* Band 1 — the house */}
-            <div className="mb-4 grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(150px,1fr))]">
+            <div className="mb-4 grid [grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] gap-3">
                 <StatTile
                     label="Members"
                     value={fmt(pulse.totalMembers)}
-                    sub={
-                        pulse.newMembers7d === null
-                            ? undefined
-                            : `+${pulse.newMembers7d} in 7 days`
-                    }
+                    sub={pulse.newMembers7d === null ? undefined : `+${pulse.newMembers7d} in 7 days`}
                 />
                 <StatTile label="Horses" value={fmt(pulse.totalHorses)} sub="in the database" />
                 <StatTile label="Posts" value={fmt(pulse.posts7d)} sub="last 7 days" />
@@ -144,25 +128,21 @@ export default function AdminPulseStrip({ pulse, onJump }: PulseStripProps) {
                     label="Open shows"
                     value={fmt(pulse.openShows)}
                     sub={
-                        pulse.openShowEntries === null
-                            ? undefined
-                            : `${pulse.openShowEntries.toLocaleString()} entries`
+                        pulse.openShowEntries === null ? undefined : `${pulse.openShowEntries.toLocaleString()} entries`
                     }
                 />
             </div>
 
             {/* Band 2 — waiting on you */}
             <div className="mb-2 flex items-baseline gap-2">
-                <h3 className="m-0 text-xs font-bold tracking-wide text-muted-foreground uppercase">
-                    Waiting on you
-                </h3>
+                <h3 className="m-0 text-xs font-bold tracking-wide text-muted-foreground uppercase">Waiting on you</h3>
                 <span className="text-xs text-muted-foreground">
                     {totalWaiting === 0
                         ? "nothing in the queues"
                         : `${totalWaiting.toLocaleString()} item${totalWaiting === 1 ? "" : "s"}`}
                 </span>
             </div>
-            <div className="grid gap-2 [grid-template-columns:repeat(auto-fit,minmax(210px,1fr))]">
+            <div className="grid [grid-template-columns:repeat(auto-fit,minmax(210px,1fr))] gap-2">
                 {queues.map((q) => (
                     <QueueTile key={q.key} spec={q} onJump={onJump} />
                 ))}
@@ -170,8 +150,8 @@ export default function AdminPulseStrip({ pulse, onJump }: PulseStripProps) {
 
             {barnRequests > 0 && (
                 <p className="mt-2 mb-0 text-xs text-muted-foreground">
-                    Also: {barnRequests} pending join request{barnRequests === 1 ? "" : "s"} on
-                    barns you staff — those are handled on the barn&rsquo;s own page, not here.
+                    Also: {barnRequests} pending join request{barnRequests === 1 ? "" : "s"} on barns you staff — those
+                    are handled on the barn&rsquo;s own page, not here.
                 </p>
             )}
         </section>

@@ -285,6 +285,4 @@ export const GLOSSARY_SECTIONS: GlossarySection[] = [
 ];
 
 /** Flat list for JSON-LD and tests. */
-export const GLOSSARY_ENTRIES: GlossaryEntry[] = GLOSSARY_SECTIONS.flatMap(
-    (section) => section.entries,
-);
+export const GLOSSARY_ENTRIES: GlossaryEntry[] = GLOSSARY_SECTIONS.flatMap((section) => section.entries);

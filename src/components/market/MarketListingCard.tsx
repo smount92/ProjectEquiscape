@@ -51,7 +51,6 @@ export default function MarketListingCard({ listing }: { listing: MarketListing 
                 {/* Photo + price stamp */}
                 <div className="relative aspect-[4/3] overflow-hidden rounded-xl border border-input bg-muted">
                     {listing.thumbnailUrl ? (
-                         
                         <ThumbImage
                             src={listing.thumbnailUrl}
                             alt={listing.customName}
@@ -59,9 +58,7 @@ export default function MarketListingCard({ listing }: { listing: MarketListing 
                             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                         />
                     ) : (
-                        <div className="flex h-full w-full items-center justify-center text-3xl opacity-40">
-                            🐎
-                        </div>
+                        <div className="flex h-full w-full items-center justify-center text-3xl opacity-40">🐎</div>
                     )}
 
                     <span
@@ -73,7 +70,7 @@ export default function MarketListingCard({ listing }: { listing: MarketListing 
                     </span>
 
                     {listing.conditionGrade && (
-                        <span className="absolute top-2 right-2 lit-paper rounded-full bg-(--paper-lit) px-2 py-0.5 text-[0.65rem] font-semibold text-secondary-foreground shadow-sm">
+                        <span className="lit-paper absolute top-2 right-2 rounded-full bg-(--paper-lit) px-2 py-0.5 text-[0.65rem] font-semibold text-secondary-foreground shadow-sm">
                             {listing.conditionGrade}
                         </span>
                     )}
@@ -81,22 +78,14 @@ export default function MarketListingCard({ listing }: { listing: MarketListing 
 
                 {/* Identity */}
                 <div className="mt-3 px-1">
-                    <h3 className="truncate font-serif text-lg font-bold text-foreground">
-                        {listing.customName}
-                    </h3>
-                    <p className="truncate text-sm text-secondary-foreground">
-                        {listing.refName ?? "Unlisted mold"}
-                    </p>
+                    <h3 className="truncate font-serif text-lg font-bold text-foreground">{listing.customName}</h3>
+                    <p className="truncate text-sm text-secondary-foreground">{listing.refName ?? "Unlisted mold"}</p>
 
                     <div className="mt-2 flex flex-wrap items-center gap-1.5">
                         {listing.finishType && (
-                            <Badge className={finishBadgeClass(listing.finishType)}>
-                                {listing.finishType}
-                            </Badge>
+                            <Badge className={finishBadgeClass(listing.finishType)}>{listing.finishType}</Badge>
                         )}
-                        {listing.scale && (
-                            <span className="text-xs text-secondary-foreground">{listing.scale}</span>
-                        )}
+                        {listing.scale && <span className="text-xs text-secondary-foreground">{listing.scale}</span>}
                     </div>
 
                     {notes && (
@@ -104,10 +93,7 @@ export default function MarketListingCard({ listing }: { listing: MarketListing 
                             className="mt-2 truncate rounded-md bg-muted px-2 py-1 text-xs text-secondary-foreground"
                             title={notes}
                         >
-                            📝{" "}
-                            {notes.length > NOTES_PREVIEW_CHARS
-                                ? `${notes.slice(0, NOTES_PREVIEW_CHARS)}…`
-                                : notes}
+                            📝 {notes.length > NOTES_PREVIEW_CHARS ? `${notes.slice(0, NOTES_PREVIEW_CHARS)}…` : notes}
                         </p>
                     )}
                 </div>

@@ -100,11 +100,7 @@ export async function getCatalogItem(id: string): Promise<CatalogItem | null> {
 
     // If it's a release, fetch parent mold title
     if (item.parentId) {
-        const { data: parent } = await supabase
-            .from("catalog_items")
-            .select("title")
-            .eq("id", item.parentId)
-            .single();
+        const { data: parent } = await supabase.from("catalog_items").select("title").eq("id", item.parentId).single();
         if (parent) item.parentTitle = (parent as { title: string }).title;
     }
 
@@ -171,7 +167,7 @@ export async function searchCatalogFuzzy(term: string, maxResults = 20) {
  * @param rows - Parsed CSV rows with name and optional moldName
  */
 export async function matchCsvRowsBatch(
-    rows: { name: string; moldName?: string }[]
+    rows: { name: string; moldName?: string }[],
 ): Promise<{ matches: { rowIndex: number; catalogId: string | null; catalogName: string | null }[] }> {
     const supabase = await createClient();
     const matches = await Promise.all(
@@ -187,7 +183,7 @@ export async function matchCsvRowsBatch(
                 catalogId: best?.id ?? null,
                 catalogName: best?.title ?? null,
             };
-        })
+        }),
     );
     return { matches };
 }

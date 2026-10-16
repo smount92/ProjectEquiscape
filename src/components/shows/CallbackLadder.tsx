@@ -19,11 +19,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { recordCallback } from "@/app/actions/shows-v2-ring";
-import {
-    buildCallbackLadder,
-    type CallbackRecord,
-    type LadderRound,
-} from "@/lib/shows/callbacks";
+import { buildCallbackLadder, type CallbackRecord, type LadderRound } from "@/lib/shows/callbacks";
 import { championHex, championLabel } from "@/lib/shows/placings";
 import type { CallbackScope, ClassStatus, Place } from "@/lib/shows/types";
 import { Badge } from "@/components/ui/badge";
@@ -89,11 +85,7 @@ export default function CallbackLadder({
         return map;
     }, [classes]);
 
-    const rounds = [
-        ...ladder.sections,
-        ...ladder.divisions,
-        ...(ladder.show ? [ladder.show] : []),
-    ];
+    const rounds = [...ladder.sections, ...ladder.divisions, ...(ladder.show ? [ladder.show] : [])];
     if (rounds.length === 0) return null;
 
     const decided = rounds.filter((r) => r.state === "decided").length;
@@ -109,9 +101,8 @@ export default function CallbackLadder({
                 </span>
             </div>
             <p className="mt-2 text-sm text-muted-foreground">
-                Section champions come from the 1st-place entries; division champions from
-                the section champions; the grand champion from the division champions. Tap
-                Champion first, then Reserve.
+                Section champions come from the 1st-place entries; division champions from the section champions; the
+                grand champion from the division champions. Tap Champion first, then Reserve.
             </p>
             <div className="mt-4 flex flex-col gap-4">
                 {rounds.map((round) => (
@@ -163,9 +154,7 @@ function CallbackRound({
     const [error, setError] = useState<string | null>(null);
 
     const waiting = round.state === "waiting";
-    const dirty =
-        order[0] !== (round.championEntryId ?? undefined) ||
-        (order[1] ?? null) !== round.reserveEntryId;
+    const dirty = order[0] !== (round.championEntryId ?? undefined) || (order[1] ?? null) !== round.reserveEntryId;
 
     const toggle = (entryId: string) => {
         if (!canRecord || waiting) return;
@@ -200,20 +189,14 @@ function CallbackRound({
     return (
         <div
             className={`rounded-lg border p-3 ${
-                round.state === "open"
-                    ? "border-forest bg-card"
-                    : "border-input bg-card"
+                round.state === "open" ? "border-forest bg-card" : "border-input bg-card"
             }`}
             data-testid="callback-round"
             data-scope={round.scope}
         >
             <div className="flex flex-wrap items-center gap-2">
-                <Badge variant={round.scope === "show" ? "default" : "secondary"}>
-                    {scopeBadge(round.scope)}
-                </Badge>
-                <h3 className="m-0 text-base font-bold text-foreground">
-                    {roundTitle(round)}
-                </h3>
+                <Badge variant={round.scope === "show" ? "default" : "secondary"}>{scopeBadge(round.scope)}</Badge>
+                <h3 className="m-0 text-base font-bold text-foreground">{roundTitle(round)}</h3>
                 {round.state === "decided" && (
                     <span className="stamp" data-testid="round-decided">
                         Decided ✓
@@ -237,8 +220,7 @@ function CallbackRound({
                             const entry = entryById.get(entryId);
                             if (!entry) return null;
                             const pickIndex = order.indexOf(entryId);
-                            const kind =
-                                pickIndex === 0 ? "champion" : pickIndex === 1 ? "reserve" : null;
+                            const kind = pickIndex === 0 ? "champion" : pickIndex === 1 ? "reserve" : null;
                             return (
                                 <li key={entryId}>
                                     <button
@@ -251,9 +233,7 @@ function CallbackRound({
                                                 : `${entry.horseName} — tap to pick`
                                         }
                                         className={`relative min-h-16 w-full cursor-pointer overflow-hidden rounded-lg border-2 bg-card p-0 text-left transition-all ${
-                                            kind !== null
-                                                ? "border-forest ring-2 ring-forest"
-                                                : "border-input"
+                                            kind !== null ? "border-forest ring-2 ring-forest" : "border-input"
                                         } ${!canRecord ? "cursor-default opacity-80" : ""}`}
                                         onClick={() => toggle(entryId)}
                                         disabled={!canRecord}
@@ -309,11 +289,7 @@ function CallbackRound({
                                 disabled={saving || order.length === 0 || !dirty}
                                 data-testid="save-callback"
                             >
-                                {saving
-                                    ? "Saving…"
-                                    : order.length === 2
-                                      ? "Save champion & reserve"
-                                      : "Save champion"}
+                                {saving ? "Saving…" : order.length === 2 ? "Save champion & reserve" : "Save champion"}
                             </Button>
                             {order.length === 1 && (
                                 <span className="text-xs text-muted-foreground">

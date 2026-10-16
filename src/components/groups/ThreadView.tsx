@@ -53,7 +53,10 @@ function ThreadPostBlock({
 
     const handleSave = async () => {
         const content = draft.trim();
-        if (!content) { setEditError("A post can't be empty."); return; }
+        if (!content) {
+            setEditError("A post can't be empty.");
+            return;
+        }
         setSaving(true);
         setEditError(null);
         const result = await updatePost(post.id, content);
@@ -68,7 +71,7 @@ function ThreadPostBlock({
 
     return (
         <div
-            className={`border-input border-b px-4 py-3.5 sm:px-5 ${isOp ? "bg-[color-mix(in_srgb,var(--brass,#B08D3E)_6%,transparent)]" : "sm:pl-12"}`}
+            className={`border-b border-input px-4 py-3.5 sm:px-5 ${isOp ? "bg-[color-mix(in_srgb,var(--brass,#B08D3E)_6%,transparent)]" : "sm:pl-12"}`}
             data-testid={isOp ? "thread-op" : "thread-reply"}
         >
             <PostHeader
@@ -80,14 +83,14 @@ function ThreadPostBlock({
             {editing ? (
                 <div className="mt-1.5 flex flex-col gap-2">
                     <textarea
-                        className="border-input bg-card w-full rounded-md border px-3 py-2 text-sm"
+                        className="w-full rounded-md border border-input bg-card px-3 py-2 text-sm"
                         value={draft}
                         rows={4}
                         maxLength={10000}
                         onChange={(e) => setDraft(e.target.value)}
                         aria-label="Edit your post"
                     />
-                    {editError && <p className="text-destructive text-xs">{editError}</p>}
+                    {editError && <p className="text-xs text-destructive">{editError}</p>}
                     <div className="flex gap-2">
                         <Button size="sm" onClick={handleSave} disabled={saving}>
                             {saving ? "Saving…" : "Save"}
@@ -96,7 +99,11 @@ function ThreadPostBlock({
                             size="sm"
                             variant="outline"
                             disabled={saving}
-                            onClick={() => { setDraft(post.content); setEditing(false); setEditError(null); }}
+                            onClick={() => {
+                                setDraft(post.content);
+                                setEditing(false);
+                                setEditError(null);
+                            }}
                         >
                             Cancel
                         </Button>
@@ -117,7 +124,7 @@ function ThreadPostBlock({
                 {canEdit && !editing && (
                     <button
                         type="button"
-                        className="text-muted-foreground hover:text-foreground text-xs underline"
+                        className="text-xs text-muted-foreground underline hover:text-foreground"
                         onClick={() => setEditing(true)}
                     >
                         ✏️ Edit
@@ -193,7 +200,7 @@ export default function ThreadView({
             <div className="mb-3 flex items-center justify-between gap-2">
                 <BackLink
                     href={`/community/groups/${groupSlug}`}
-                    className="text-muted-foreground hover:text-foreground text-sm no-underline"
+                    className="text-sm text-muted-foreground no-underline hover:text-foreground"
                 >
                     ← Back to the notice board
                 </BackLink>
@@ -205,7 +212,7 @@ export default function ThreadView({
                 )}
             </div>
 
-            <div className="border-input bg-card overflow-hidden rounded-lg border shadow-sm">
+            <div className="overflow-hidden rounded-lg border border-input bg-card shadow-sm">
                 {/* Forest header: breadcrumbs + title */}
                 <div className="bg-[linear-gradient(180deg,#37664F,var(--color-forest-dark,#1E3D31))] px-4 py-3.5 sm:px-5">
                     <div
@@ -248,7 +255,7 @@ export default function ThreadView({
                     />
                 ))}
                 {hasMore && (
-                    <div className="border-input flex justify-center border-b px-4 py-3">
+                    <div className="flex justify-center border-b border-input px-4 py-3">
                         <Button variant="outline" size="wide" disabled={isLoadingMore} onClick={loadMoreReplies}>
                             {isLoadingMore ? "Loading…" : "Load more replies"}
                         </Button>
@@ -256,7 +263,7 @@ export default function ThreadView({
                 )}
 
                 {/* Growing composer — 2000 chars, no more 500-character squeeze */}
-                <div className="bg-secondary/40 flex gap-2.5 px-4 py-3 sm:px-5">
+                <div className="flex gap-2.5 bg-secondary/40 px-4 py-3 sm:px-5">
                     <UserAvatar src={currentUserAvatar} alias={currentUserAlias} size="xs" />
                     <div className="min-w-0 flex-1">
                         {/* MentionTextarea completes @names as you type —
@@ -264,7 +271,7 @@ export default function ThreadView({
                             missing because one letter differed from the real
                             alias. Same component the feed composer uses. */}
                         <MentionTextarea
-                            className="border-input bg-card text-foreground min-h-[64px] w-full resize-none rounded-md border px-3 py-2 text-sm"
+                            className="min-h-[64px] w-full resize-none rounded-md border border-input bg-card px-3 py-2 text-sm text-foreground"
                             placeholder="Write a reply…"
                             value={text}
                             maxLength={2000}
@@ -273,7 +280,7 @@ export default function ThreadView({
                             aria-label="Write a reply"
                         />
                         <div className="mt-1.5 flex items-center justify-between gap-2">
-                            <span className="text-muted-foreground text-xs">
+                            <span className="text-xs text-muted-foreground">
                                 {text.length > 1600 ? `${text.length}/2000` : ""}
                             </span>
                             <button
@@ -284,7 +291,7 @@ export default function ThreadView({
                                 {isPending ? "Posting…" : "Reply"}
                             </button>
                         </div>
-                        {error && <p className="text-destructive mt-1 text-xs">{error}</p>}
+                        {error && <p className="mt-1 text-xs text-destructive">{error}</p>}
                     </div>
                 </div>
             </div>

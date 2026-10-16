@@ -37,10 +37,7 @@ export default function WantButton({ catalogId }: { catalogId: string }) {
         const loginHref = here ? `/login?redirectTo=${encodeURIComponent(here)}` : "/login";
         return (
             <Button asChild>
-                <a
-                    href={loginHref}
-                    onClick={() => track("want_click", { catalog_id: catalogId, logged_in: false })}
-                >
+                <a href={loginHref} onClick={() => track("want_click", { catalog_id: catalogId, logged_in: false })}>
                     ＋ I want this
                 </a>
             </Button>

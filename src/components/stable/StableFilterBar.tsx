@@ -12,13 +12,7 @@
  */
 
 import { useState, useEffect } from "react";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -38,8 +32,8 @@ import type { SavedView, StableFacetOptions } from "@/lib/stable/types";
 import { deleteStableView, saveStableView } from "@/app/actions/stable";
 
 const SORT_LABELS: Record<StableSort, string> = {
-    "newest": "Newest",
-    "oldest": "Oldest",
+    newest: "Newest",
+    oldest: "Oldest",
     "name-az": "Name A→Z",
     "name-za": "Name Z→A",
 };
@@ -63,10 +57,7 @@ function FacetSelect({
 }) {
     if (options.length === 0 && !value) return null;
     return (
-        <Select
-            value={value ?? ALL}
-            onValueChange={(v) => onChange(v === ALL ? undefined : v)}
-        >
+        <Select value={value ?? ALL} onValueChange={(v) => onChange(v === ALL ? undefined : v)}>
             <SelectTrigger
                 id={id}
                 size="sm"

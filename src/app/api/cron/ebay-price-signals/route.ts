@@ -105,12 +105,13 @@ export async function GET(request: NextRequest) {
         // of a listing title. The shorter ones ("85") are matchable only
         // when a seller writes "#85", which is too rare to spend a request
         // on.
-        const catalog = await readAll((from, to) =>
-            admin
-                .from("catalog_items")
-                .select("id, title, maker, scale, attributes")
-                .not("attributes->>model_number", "is", null)
-                .range(from, to) as unknown as Promise<LooseResult<Record<string, unknown>>>,
+        const catalog = await readAll(
+            (from, to) =>
+                admin
+                    .from("catalog_items")
+                    .select("id, title, maker, scale, attributes")
+                    .not("attributes->>model_number", "is", null)
+                    .range(from, to) as unknown as Promise<LooseResult<Record<string, unknown>>>,
         );
         if ("error" in catalog) throw new Error(`catalog read failed: ${catalog.error.message}`);
         const rows = catalog as {
@@ -123,15 +124,14 @@ export async function GET(request: NextRequest) {
 
         const signals = () => admin.from("catalog_price_signals");
 
-        const seen = await readAll((from, to) =>
-            signals().select("catalog_item_id, observed_at").range(from, to) as unknown as Promise<
-                LooseResult<Record<string, unknown>>
-            >,
+        const seen = await readAll(
+            (from, to) =>
+                signals().select("catalog_item_id, observed_at").range(from, to) as unknown as Promise<
+                    LooseResult<Record<string, unknown>>
+                >,
         );
         if ("error" in seen) throw new Error(`signals read failed: ${seen.error.message}`);
-        const lastSignal = new Map(
-            seen.map((s) => [s.catalog_item_id as string, s.observed_at as string]),
-        );
+        const lastSignal = new Map(seen.map((s) => [s.catalog_item_id as string, s.observed_at as string]));
 
         // The attempt ledger (211). null before the paste: the planner
         // then rotates the never-read pool by day instead.
@@ -203,9 +203,8 @@ export async function GET(request: NextRequest) {
         // manual runs (still behind CRON_SECRET): exactly N, due or not,
         // capped inside the function's budget (2,000 ≈ 3.5 min measured).
         const requested = Number(request.nextUrl.searchParams.get("limit"));
-        const sliceSize = Number.isFinite(requested) && requested > 0
-            ? Math.min(requested, 2000)
-            : Math.min(SLICE, plan.dueCount);
+        const sliceSize =
+            Number.isFinite(requested) && requested > 0 ? Math.min(requested, 2000) : Math.min(SLICE, plan.dueCount);
 
         // ?ids=a,b,c re-sweeps exactly those models (matching-rule fixes,
         // resolved wrong-model flags) without spending the whole budget.
@@ -213,7 +212,12 @@ export async function GET(request: NextRequest) {
         // result — the response's `swept` count is the receipt.
         const idsParam = request.nextUrl.searchParams.get("ids");
         const onlyIds = idsParam
-            ? new Set(idsParam.split(",").map((s) => s.trim()).filter(Boolean))
+            ? new Set(
+                  idsParam
+                      .split(",")
+                      .map((s) => s.trim())
+                      .filter(Boolean),
+              )
             : null;
         const pool = onlyIds ? plan.ordered.filter((c) => onlyIds.has(c.id)) : plan.ordered;
 
@@ -236,15 +240,13 @@ export async function GET(request: NextRequest) {
                 source: "ebay-browse",
                 observed_at: now.toISOString(),
             };
-            let { error: upsertError } = await signals()
-                .upsert(row, { onConflict: "catalog_item_id" });
+            let { error: upsertError } = await signals().upsert(row, { onConflict: "catalog_item_id" });
             // Pre-196 the listings column does not exist; the aggregate is
             // still worth keeping rather than failing the whole write.
             if (upsertError && (upsertError.code === "PGRST204" || /listings/.test(upsertError.message ?? ""))) {
                 const { listings: _dropped, ...withoutListings } = row;
                 void _dropped;
-                ({ error: upsertError } = await signals()
-                    .upsert(withoutListings, { onConflict: "catalog_item_id" }));
+                ({ error: upsertError } = await signals().upsert(withoutListings, { onConflict: "catalog_item_id" }));
             }
             if (upsertError) {
                 Sentry.captureException(upsertError, { tags: { domain: "cron" } });
@@ -277,8 +279,9 @@ export async function GET(request: NextRequest) {
             }));
         for (let i = 0; i < historyRows.length; i += 500) {
             const chunk = historyRows.slice(i, i + 500);
-            const { error: histError } = await loose("catalog_price_history")
-                .upsert(chunk, { onConflict: "catalog_item_id,source,observed_on" });
+            const { error: histError } = await loose("catalog_price_history").upsert(chunk, {
+                onConflict: "catalog_item_id,source,observed_on",
+            });
             if (histError) {
                 if (!missingTable(histError, "catalog_price_history")) {
                     Sentry.captureException(histError, { tags: { domain: "cron" } });
@@ -297,8 +300,10 @@ export async function GET(request: NextRequest) {
         let attemptsRecorded = 0;
         for (let i = 0; i < attempts.length; i += 500) {
             const chunk = attempts.slice(i, i + 500);
-            const { error: attemptError } = await loose("catalog_price_sweeps")
-                .upsert(chunk as unknown as Record<string, unknown>[], { onConflict: "catalog_item_id" });
+            const { error: attemptError } = await loose("catalog_price_sweeps").upsert(
+                chunk as unknown as Record<string, unknown>[],
+                { onConflict: "catalog_item_id" },
+            );
             if (attemptError) {
                 if (!missingTable(attemptError, "catalog_price_sweeps")) {
                     Sentry.captureException(attemptError, { tags: { domain: "cron" } });

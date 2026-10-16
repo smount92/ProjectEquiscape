@@ -63,9 +63,7 @@ function consoleData(overrides: Partial<RingConsoleData> = {}): RingConsoleData 
                 sectionName: "Stock",
                 divisionId: "division-1",
                 divisionName: "OF Plastic Halter",
-                entries: [
-                    { id: "e4", entryNumber: 3, horseName: "River Song", place: null },
-                ],
+                entries: [{ id: "e4", entryNumber: 3, horseName: "River Song", place: null }],
             },
         ],
         sections: [{ id: "section-1", name: "Stock", divisionId: "division-1" }],
@@ -84,13 +82,9 @@ beforeEach(() => {
 describe("RingConsole — the board", () => {
     it("shows NOW JUDGING huge with ON DECK next", () => {
         render(<RingConsole data={consoleData()} />);
-        expect(screen.getByTestId("now-judging")).toHaveTextContent(
-            "14 · OF Stock Foals",
-        );
+        expect(screen.getByTestId("now-judging")).toHaveTextContent("14 · OF Stock Foals");
         expect(screen.getByTestId("on-deck")).toHaveTextContent("15 · OF Stock Mares");
-        expect(screen.getByTestId("ring-progress")).toHaveTextContent(
-            "0 of 2 classes placed",
-        );
+        expect(screen.getByTestId("ring-progress")).toHaveTextContent("0 of 2 classes placed");
     });
 
     it("guides instead of recording when the show isn't running", () => {
@@ -154,9 +148,7 @@ describe("RingConsole — the placing recorder", () => {
         render(<RingConsole data={consoleData()} />);
         fireEvent.click(screen.getAllByTestId("ring-entry")[0]);
         fireEvent.click(screen.getByTestId("ring-save-done"));
-        expect(
-            await screen.findByText(/only be recorded while the show is running/i),
-        ).toBeInTheDocument();
+        expect(await screen.findByText(/only be recorded while the show is running/i)).toBeInTheDocument();
         expect(screen.queryByTestId("pending-saves")).not.toBeInTheDocument();
         expect(loadQueue(window.localStorage, SHOW_ID)).toEqual([]);
     });
@@ -188,9 +180,7 @@ describe("RingConsole — Barn Mode (offline queue)", () => {
 
         // Optimistic overlay: the class flipped to placed locally, so
         // the run order advanced to the next class.
-        expect(screen.getByTestId("ring-progress")).toHaveTextContent(
-            "1 of 2 classes placed",
-        );
+        expect(screen.getByTestId("ring-progress")).toHaveTextContent("1 of 2 classes placed");
     });
 
     it("'Retry now' flushes the queue when the network returns", async () => {
@@ -218,9 +208,7 @@ describe("RingConsole — Barn Mode (offline queue)", () => {
                 markDone: true,
             }),
         );
-        await waitFor(() =>
-            expect(screen.queryByTestId("pending-saves")).not.toBeInTheDocument(),
-        );
+        await waitFor(() => expect(screen.queryByTestId("pending-saves")).not.toBeInTheDocument());
         expect(loadQueue(window.localStorage, SHOW_ID)).toEqual([]);
     });
 });

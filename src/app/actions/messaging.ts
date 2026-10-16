@@ -8,11 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { sanitizeText } from "@/lib/utils/validation";
 import { checkRateLimit } from "@/lib/utils/rateLimit";
-import {
-    dealDb,
-    getDealColumnSupport,
-    isMissingSchema,
-} from "@/lib/deals/columnSupport";
+import { dealDb, getDealColumnSupport, isMissingSchema } from "@/lib/deals/columnSupport";
 import type { Database } from "@/lib/types/database.generated";
 
 type ConversationInsert = Database["public"]["Tables"]["conversations"]["Insert"];
@@ -74,9 +70,7 @@ async function eitherBlocked(
     const { data: rows } = await supabase
         .from("user_blocks")
         .select("blocker_id")
-        .or(
-            `and(blocker_id.eq.${a},blocked_id.eq.${b}),and(blocker_id.eq.${b},blocked_id.eq.${a})`,
-        )
+        .or(`and(blocker_id.eq.${a},blocked_id.eq.${b}),and(blocker_id.eq.${b},blocked_id.eq.${a})`)
         .limit(1);
     return !!rows && rows.length > 0;
 }
@@ -107,11 +101,7 @@ export async function createOrFindConversation(
     }
 
     // Check if a conversation already exists for this pair + horse
-    let query = supabase
-        .from("conversations")
-        .select("id")
-        .eq("buyer_id", user.id)
-        .eq("seller_id", sellerId);
+    let query = supabase.from("conversations").select("id").eq("buyer_id", user.id).eq("seller_id", sellerId);
 
     if (horseId) {
         query = query.eq("horse_id", horseId);
@@ -127,11 +117,7 @@ export async function createOrFindConversation(
     }
 
     // Also check reverse (the other side may have started this thread)
-    let reverseQuery = supabase
-        .from("conversations")
-        .select("id")
-        .eq("buyer_id", sellerId)
-        .eq("seller_id", user.id);
+    let reverseQuery = supabase.from("conversations").select("id").eq("buyer_id", sellerId).eq("seller_id", user.id);
 
     if (horseId) {
         reverseQuery = reverseQuery.eq("horse_id", horseId);
@@ -228,7 +214,7 @@ async function enrolParticipants(
 export async function sendMessage(
     conversationId: string,
     content: string,
-    attachments?: { storagePath: string; caption?: string }[]
+    attachments?: { storagePath: string; caption?: string }[],
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
     const supabase = await createClient();
     const {
@@ -333,9 +319,7 @@ export async function sendMessage(
             caption: att.caption || null,
         }));
 
-        const { error: mediaError } = await supabase
-            .from("media_attachments")
-            .insert(mediaInserts);
+        const { error: mediaError } = await supabase.from("media_attachments").insert(mediaInserts);
 
         if (mediaError) {
             logger.error("Messaging", "Failed to insert media attachments", mediaError);
@@ -348,10 +332,7 @@ export async function sendMessage(
     // doesn't know about.
     const support = await getDealColumnSupport(supabase);
     if (!support.conversationDeal) {
-        await supabase
-            .from("conversations")
-            .update({ updated_at: new Date().toISOString() })
-            .eq("id", conversationId);
+        await supabase.from("conversations").update({ updated_at: new Date().toISOString() }).eq("id", conversationId);
     }
 
     // ── Notifications, OFF the write path ──
@@ -371,23 +352,16 @@ export async function sendMessage(
                 supabaseAdmin.from("users").select("alias_name").eq("id", senderId).single(),
                 supabaseAdmin.from("users").select("alias_name").eq("id", recipientId).single(),
                 horseId
-                    ? supabaseAdmin
-                          .from("user_horses")
-                          .select("custom_name")
-                          .eq("id", horseId)
-                          .single()
+                    ? supabaseAdmin.from("user_horses").select("custom_name").eq("id", horseId).single()
                     : Promise.resolve({ data: null }),
             ]);
 
-            const senderAlias =
-                (senderProfile?.data as { alias_name?: string } | null)?.alias_name || "Someone";
+            const senderAlias = (senderProfile?.data as { alias_name?: string } | null)?.alias_name || "Someone";
 
             // In-app bell. Prefs-gated, self-guarded, deep-links the thread.
             // createNotification is server-only — dynamic import inside the
             // try/catch, never a static one.
-            const { createNotification } = await import(
-                "@/lib/notifications/createNotification"
-            );
+            const { createNotification } = await import("@/lib/notifications/createNotification");
             await createNotification({
                 userId: recipientId,
                 type: "message",
@@ -406,12 +380,9 @@ export async function sendMessage(
             const { sendNewMessageNotification } = await import("@/lib/email");
             await sendNewMessageNotification({
                 toEmail: recipientEmail,
-                recipientName:
-                    (recipientProfile?.data as { alias_name?: string } | null)?.alias_name ||
-                    "Collector",
+                recipientName: (recipientProfile?.data as { alias_name?: string } | null)?.alias_name || "Collector",
                 senderName: senderAlias,
-                horseName:
-                    (horseData?.data as { custom_name?: string } | null)?.custom_name || null,
+                horseName: (horseData?.data as { custom_name?: string } | null)?.custom_name || null,
                 messageSnippet: snippet,
                 conversationId,
             });
@@ -495,7 +466,7 @@ export async function editMessage(
  * Verifies the requesting user is a conversation participant.
  */
 export async function getConversationAttachments(
-    conversationId: string
+    conversationId: string,
 ): Promise<Record<string, { url: string; caption: string | null }[]>> {
     const supabase = await createClient();
     const {
@@ -515,10 +486,7 @@ export async function getConversationAttachments(
     if (c.buyer_id !== user.id && c.seller_id !== user.id) return {};
 
     // Get all message IDs
-    const { data: msgs } = await supabase
-        .from("messages")
-        .select("id")
-        .eq("conversation_id", conversationId);
+    const { data: msgs } = await supabase.from("messages").select("id").eq("conversation_id", conversationId);
 
     if (!msgs || msgs.length === 0) return {};
     const messageIds = msgs.map((m: { id: string }) => m.id);
@@ -534,7 +502,7 @@ export async function getConversationAttachments(
     // Batch-sign all attachment URLs using admin client
     // (user-scoped client can only read own folder; admin bypasses storage RLS
     //  — safe because we already verified conversation membership above)
-    const storagePaths = (rawAttachments as { storage_path: string }[]).map(a => a.storage_path);
+    const storagePaths = (rawAttachments as { storage_path: string }[]).map((a) => a.storage_path);
     const supabaseAdmin = getAdminClient();
     const { data: signedUrls } = await supabaseAdmin.storage
         .from("chat-attachments")
@@ -570,9 +538,7 @@ export async function getConversationAttachments(
  * rendering. Writes the participant row (the single source of unread
  * truth) and keeps the legacy boolean in step.
  */
-export async function markConversationRead(
-    conversationId: string
-): Promise<{ success: boolean }> {
+export async function markConversationRead(conversationId: string): Promise<{ success: boolean }> {
     const supabase = await createClient();
     const {
         data: { user },
@@ -641,7 +607,7 @@ export async function markConversationRead(
  * than deleted.
  */
 export async function markTransactionComplete(
-    conversationId: string
+    conversationId: string,
 ): Promise<{ success: boolean; error?: string; awaitingOther?: boolean }> {
     const supabase = await createClient();
     const {
@@ -694,12 +660,8 @@ export async function markTransactionComplete(
 
     const iAmBuyer = c.buyer_id === user.id;
     const otherId = iAmBuyer ? c.seller_id : c.buyer_id;
-    const myStamp = iAmBuyer
-        ? c.completion_confirmed_by_buyer_at
-        : c.completion_confirmed_by_seller_at;
-    const theirStamp = iAmBuyer
-        ? c.completion_confirmed_by_seller_at
-        : c.completion_confirmed_by_buyer_at;
+    const myStamp = iAmBuyer ? c.completion_confirmed_by_buyer_at : c.completion_confirmed_by_seller_at;
+    const theirStamp = iAmBuyer ? c.completion_confirmed_by_seller_at : c.completion_confirmed_by_buyer_at;
 
     if (myStamp && !theirStamp) {
         return { success: true, awaitingOther: true };
@@ -708,15 +670,11 @@ export async function markTransactionComplete(
     const now = new Date().toISOString();
     const bothConfirmed = !!theirStamp;
     const patch: Record<string, string> = {
-        [iAmBuyer ? "completion_confirmed_by_buyer_at" : "completion_confirmed_by_seller_at"]:
-            myStamp ?? now,
+        [iAmBuyer ? "completion_confirmed_by_buyer_at" : "completion_confirmed_by_seller_at"]: myStamp ?? now,
     };
     if (bothConfirmed) patch.transaction_status = "completed";
 
-    const { error } = await dealDb(supabase)
-        .from("conversations")
-        .update(patch)
-        .eq("id", conversationId);
+    const { error } = await dealDb(supabase).from("conversations").update(patch).eq("id", conversationId);
 
     if (error) return { success: false, error: error.message };
 
@@ -745,7 +703,9 @@ export async function markTransactionComplete(
             horseId: c.horse_id || undefined,
             status: "completed",
         });
-    } catch (err) { logger.error("Messaging", "Background task failed", err); }
+    } catch (err) {
+        logger.error("Messaging", "Background task failed", err);
+    }
 
     notifyCounterparty(
         otherId,
@@ -758,15 +718,8 @@ export async function markTransactionComplete(
 }
 
 /** The name a notification uses for the actor. */
-async function aliasOfUser(
-    supabase: Awaited<ReturnType<typeof createClient>>,
-    userId: string,
-): Promise<string> {
-    const { data } = await supabase
-        .from("users")
-        .select("alias_name")
-        .eq("id", userId)
-        .maybeSingle();
+async function aliasOfUser(supabase: Awaited<ReturnType<typeof createClient>>, userId: string): Promise<string> {
+    const { data } = await supabase.from("users").select("alias_name").eq("id", userId).maybeSingle();
     return (data as { alias_name: string } | null)?.alias_name ?? "Someone";
 }
 
@@ -774,17 +727,10 @@ async function aliasOfUser(
  * Bell notification, deferred and never fatal — createNotification is
  * server-only, so it is imported dynamically inside the try/catch.
  */
-function notifyCounterparty(
-    userId: string,
-    actorId: string,
-    conversationId: string,
-    content: string,
-): void {
+function notifyCounterparty(userId: string, actorId: string, conversationId: string, content: string): void {
     after(async () => {
         try {
-            const { createNotification } = await import(
-                "@/lib/notifications/createNotification"
-            );
+            const { createNotification } = await import("@/lib/notifications/createNotification");
             await createNotification({
                 userId,
                 type: "offer",

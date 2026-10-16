@@ -66,12 +66,11 @@ describe("evaluateHorseTitles — CH (3 cards / 3 shows / 2 judges)", () => {
 describe("evaluateHorseTitles — career-point marks", () => {
     it(`ROM at ${ROM_POINTS}, Superior at ${SUPERIOR_POINTS} (both granted at 75+)`, () => {
         expect(evaluateHorseTitles({ cards: [], careerPoints: ROM_POINTS - 1 })).toEqual([]);
-        expect(
-            evaluateHorseTitles({ cards: [], careerPoints: ROM_POINTS }).map((g) => g.code),
-        ).toEqual(["ROM"]);
-        expect(
-            evaluateHorseTitles({ cards: [], careerPoints: SUPERIOR_POINTS }).map((g) => g.code),
-        ).toEqual(["ROM", "SUP"]);
+        expect(evaluateHorseTitles({ cards: [], careerPoints: ROM_POINTS }).map((g) => g.code)).toEqual(["ROM"]);
+        expect(evaluateHorseTitles({ cards: [], careerPoints: SUPERIOR_POINTS }).map((g) => g.code)).toEqual([
+            "ROM",
+            "SUP",
+        ]);
     });
 });
 
@@ -87,10 +86,7 @@ describe("titlePrefix — the name plaque", () => {
 
 describe("horseTitleProgress — the ladder", () => {
     it("names exactly what CH is missing", () => {
-        const progress = evaluateAndProgress(
-            [card("s1", ["j1"]), card("s2", ["j1"])],
-            10,
-        );
+        const progress = evaluateAndProgress([card("s1", ["j1"]), card("s2", ["j1"])], 10);
         const ch = progress.find((p) => p.code === "CH")!;
         expect(ch.earned).toBe(false);
         expect(ch.remaining).toContain("1 more card");
@@ -113,9 +109,7 @@ describe("horseTitleProgress — the ladder", () => {
             careerPoints: 100,
             grantedCodes: ["CH", "ROM", "SUP"],
         });
-        expect(progress.every((p) => p.earned && p.fraction === 1 && p.remaining === null)).toBe(
-            true,
-        );
+        expect(progress.every((p) => p.earned && p.fraction === 1 && p.remaining === null)).toBe(true);
     });
 });
 
@@ -142,9 +136,11 @@ describe("nextStarProgress", () => {
 describe("exhibitor distinctions — cumulative stars", () => {
     it("grants every threshold reached, in order", () => {
         expect(evaluateExhibitorDistinctions({ careerPoints: 49 })).toEqual([]);
-        expect(
-            evaluateExhibitorDistinctions({ careerPoints: 400 }).map((g) => g.code),
-        ).toEqual(["STAR_1", "STAR_2", "STAR_3"]);
+        expect(evaluateExhibitorDistinctions({ careerPoints: 400 }).map((g) => g.code)).toEqual([
+            "STAR_1",
+            "STAR_2",
+            "STAR_3",
+        ]);
     });
 
     it("highestStar picks the top earned grade", () => {

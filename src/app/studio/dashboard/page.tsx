@@ -2,12 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import {
-    getArtistCommissions,
-    getArtistPortfolio,
-    getArtistProfile,
-    getSlotUsage,
-} from "@/app/actions/art-studio";
+import { getArtistCommissions, getArtistPortfolio, getArtistProfile, getSlotUsage } from "@/app/actions/art-studio";
 import { linkEntries } from "@/lib/studio/links";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
 import PageMasthead from "@/components/layouts/PageMasthead";
@@ -141,11 +136,14 @@ export default async function StudioDashboardPage() {
                                             {step.done ? "☑️" : "⬜"}
                                         </span>
                                         <span className={step.done ? "text-muted-foreground line-through" : ""}>
-                                            <Link href={step.href} className="text-forest font-semibold hover:underline">
+                                            <Link
+                                                href={step.href}
+                                                className="font-semibold text-forest hover:underline"
+                                            >
                                                 {step.label}
                                             </Link>
                                             {!step.done && (
-                                                <span className="text-muted-foreground block text-xs">{step.why}</span>
+                                                <span className="block text-xs text-muted-foreground">{step.why}</span>
                                             )}
                                         </span>
                                     </li>
@@ -159,11 +157,7 @@ export default async function StudioDashboardPage() {
 
                 <div className="grid gap-6 self-start">
                     <div id="intake" />
-                    <Panel
-                        title="Intake"
-                        icon="🚪"
-                        actions={<StudioStatusPill status={slots.effectiveStatus} />}
-                    >
+                    <Panel title="Intake" icon="🚪" actions={<StudioStatusPill status={slots.effectiveStatus} />}>
                         <IntakeControls
                             status={profile.status}
                             maxSlots={profile.maxSlots}
@@ -174,10 +168,9 @@ export default async function StudioDashboardPage() {
                     </Panel>
 
                     <Panel title="Your terms" icon="📜">
-                        <p className="text-secondary-foreground mb-4 text-sm leading-relaxed">
-                            These attach to every quote you send, and the version a commissioner
-                            accepts is frozen onto their commission — so changing them here never
-                            rewrites an agreement you already made.
+                        <p className="mb-4 text-sm leading-relaxed text-secondary-foreground">
+                            These attach to every quote you send, and the version a commissioner accepts is frozen onto
+                            their commission — so changing them here never rewrites an agreement you already made.
                         </p>
                         <Button asChild variant="outline" size="wide">
                             <Link href="/studio/setup?tab=terms">Edit terms & rates →</Link>

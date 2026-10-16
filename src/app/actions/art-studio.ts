@@ -21,13 +21,7 @@ import {
     type Party,
     type StudioStatus,
 } from "@/lib/studio/pipeline";
-import {
-    coerceTerms,
-    depositFor,
-    snapshotTerms,
-    type StudioTerms,
-    type TermsSnapshot,
-} from "@/lib/studio/terms";
+import { coerceTerms, depositFor, snapshotTerms, type StudioTerms, type TermsSnapshot } from "@/lib/studio/terms";
 import { coerceServices, studioPriceRange, type StudioService } from "@/lib/studio/services";
 import { resolveAvatarUrls } from "@/lib/utils/avatars.server";
 import { getPublicImageUrl } from "@/lib/utils/storage";
@@ -246,7 +240,10 @@ function parseArrayField(formData: FormData, field: string): string[] {
         const parsed = JSON.parse(raw);
         return Array.isArray(parsed) ? parsed.map(String) : [];
     } catch {
-        return raw.split(",").map((s) => s.trim()).filter(Boolean);
+        return raw
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean);
     }
 }
 
@@ -338,8 +335,7 @@ function mapArtistProfile(p: Row, alias: string, avatarUrl: string | null): Arti
     });
 
     const rawStatus = String(p.status ?? "closed");
-    const status: StudioStatus =
-        rawStatus === "open" || rawStatus === "waitlist" ? rawStatus : "closed";
+    const status: StudioStatus = rawStatus === "open" || rawStatus === "waitlist" ? rawStatus : "closed";
 
     return {
         userId: String(p.user_id),
@@ -398,17 +394,13 @@ function mapCommission(c: Row): Commission {
         agreedPrice,
         quoteNote: str(c.quote_note),
         termsSnapshot: snapshot,
-        depositAmount:
-            num(c.deposit_amount) ??
-            (snapshot ? depositFor(agreedPrice, snapshot.depositPercent) : null),
+        depositAmount: num(c.deposit_amount) ?? (snapshot ? depositFor(agreedPrice, snapshot.depositPercent) : null),
         depositPaid: c.deposit_paid === true,
         finalPaid: c.final_paid === true,
         paymentNote: str(c.payment_note),
         revisionsUsed: typeof c.revisions_used === "number" ? c.revisions_used : 0,
         revisionsIncluded:
-            typeof c.revisions_included === "number"
-                ? c.revisions_included
-                : (snapshot?.revisionsIncluded ?? 0),
+            typeof c.revisions_included === "number" ? c.revisions_included : (snapshot?.revisionsIncluded ?? 0),
         modelReceived: c.model_received === true,
         trackingNote: str(c.tracking_note),
         status,
@@ -428,8 +420,7 @@ function mapCommission(c: Row): Commission {
     };
 }
 
-const COMMISSION_SELECT =
-    "*, client:users!client_id(alias_name), artist:users!artist_id(alias_name)";
+const COMMISSION_SELECT = "*, client:users!client_id(alias_name), artist:users!artist_id(alias_name)";
 
 // ============================================================
 // ARTIST PROFILES
@@ -439,37 +430,28 @@ async function loadOwner(
     supabase: Awaited<ReturnType<typeof createClient>>,
     userId: string,
 ): Promise<{ alias: string; avatarUrl: string | null }> {
-    let { data } = await supabase
-        .from("users")
-        .select("alias_name, avatar_url")
-        .eq("id", userId)
-        .maybeSingle();
+    let { data } = await supabase.from("users").select("alias_name, avatar_url").eq("id", userId).maybeSingle();
     if (!data) {
         // Anon viewer: users is authenticated-only, so the storefront
         // read "@Unknown" for the logged-out world it exists to reach.
         // The 203 DEFINER card serves alias + avatar for
         // portfolio-visible studios only. Null pre-paste.
-        const { data: card } = await (supabase.rpc as unknown as (
-            fn: string,
-            args: Record<string, unknown>,
-        ) => PromiseLike<{ data: unknown }>)("get_studio_owner_card", { p_user: userId });
+        const { data: card } = await (
+            supabase.rpc as unknown as (fn: string, args: Record<string, unknown>) => PromiseLike<{ data: unknown }>
+        )("get_studio_owner_card", { p_user: userId });
         if (card) data = card as { alias_name: string; avatar_url: string | null };
     }
     const u = data as { alias_name: string; avatar_url: string | null } | null;
     if (!u) return { alias: "Unknown", avatarUrl: null };
     const resolved = u.avatar_url
-        ? (await resolveAvatarUrls([u.avatar_url])).get(u.avatar_url) ?? u.avatar_url
+        ? ((await resolveAvatarUrls([u.avatar_url])).get(u.avatar_url) ?? u.avatar_url)
         : null;
     return { alias: u.alias_name ?? "Unknown", avatarUrl: resolved };
 }
 
 export async function getArtistProfile(userId: string): Promise<ArtistProfile | null> {
     const supabase = await createClient();
-    const { data } = await supabase
-        .from("artist_profiles")
-        .select("*")
-        .eq("user_id", userId)
-        .maybeSingle();
+    const { data } = await supabase.from("artist_profiles").select("*").eq("user_id", userId).maybeSingle();
     if (!data) return null;
     const owner = await loadOwner(supabase, userId);
     return mapArtistProfile(data as Row, owner.alias, owner.avatarUrl);
@@ -506,9 +488,12 @@ async function slotUsageFor(
     if (artistUserIds.length === 0) return out;
 
     try {
-        const { data, error } = await supabase.rpc("studio_slot_usage" as never, {
-            p_artist_ids: artistUserIds,
-        } as never);
+        const { data, error } = await supabase.rpc(
+            "studio_slot_usage" as never,
+            {
+                p_artist_ids: artistUserIds,
+            } as never,
+        );
         if (!error && Array.isArray(data)) {
             for (const row of data as Row[]) {
                 out.set(String(row.artist_id), Number(row.slots_used ?? 0));
@@ -525,7 +510,7 @@ async function slotUsageFor(
         .in("artist_id", artistUserIds)
         // Legacy statuses included so a v1 row still occupies its slot.
         .in("status", [...ACTIVE_STATUSES, "review", "revision", "shipping"]);
-    for (const row of ((rows as Row[] | null) ?? [])) {
+    for (const row of (rows as Row[] | null) ?? []) {
         const id = String(row.artist_id);
         out.set(id, (out.get(id) ?? 0) + 1);
     }
@@ -539,9 +524,7 @@ export async function getSlotUsage(artistUserId: string): Promise<number> {
     return usage.get(artistUserId) ?? 0;
 }
 
-export async function createArtistProfile(
-    formData: FormData,
-): Promise<ActionResult & { slug?: string }> {
+export async function createArtistProfile(formData: FormData): Promise<ActionResult & { slug?: string }> {
     const { supabase, user } = await requireAuth();
 
     const studioName = str(formData.get("studioName"));
@@ -549,7 +532,10 @@ export async function createArtistProfile(
 
     const slug = slugify(str(formData.get("studioSlug")) || studioName);
     if (!slug) {
-        return { success: false, error: "That studio name can't be turned into a web address — try adding a letter or number." };
+        return {
+            success: false,
+            error: "That studio name can't be turned into a web address — try adding a letter or number.",
+        };
     }
     if (isReservedStudioSlug(slug)) {
         return { success: false, error: `The address “${slug}” is reserved — pick another web address.` };
@@ -671,7 +657,11 @@ export async function updateArtistProfile(formData: FormData): Promise<ActionRes
         }
     }
 
-    const save = () => supabase.from("artist_profiles").update(patch as never).eq("user_id", user.id);
+    const save = () =>
+        supabase
+            .from("artist_profiles")
+            .update(patch as never)
+            .eq("user_id", user.id);
     let { error } = await save();
     if (missingColumn(error)) {
         // Pre-216 — the credit names land once their column exists.
@@ -923,9 +913,7 @@ export async function browseArtists(): Promise<DirectoryEntry[]> {
     ]);
 
     const avatarMap = await resolveAvatarUrls(
-        rows
-            .map((r) => (r.owner as { avatar_url: string | null } | null)?.avatar_url)
-            .filter((u): u is string => !!u),
+        rows.map((r) => (r.owner as { avatar_url: string | null } | null)?.avatar_url).filter((u): u is string => !!u),
     );
 
     const entries = rows.map((r) => {
@@ -968,7 +956,7 @@ async function countFinishedByArtist(
             .from("customization_logs")
             .select("artist_user_id")
             .in("artist_user_id", userIds);
-        for (const row of ((data as Row[] | null) ?? [])) {
+        for (const row of (data as Row[] | null) ?? []) {
             const id = String(row.artist_user_id);
             out.set(id, (out.get(id) ?? 0) + 1);
         }
@@ -994,10 +982,7 @@ async function countFinishedByArtist(
  *   with 170's columns   — join customization_logs by artist_user_id
  *   without 170          — match user_horses.finishing_artist by alias
  */
-export async function getArtistPortfolio(
-    artistUserId: string,
-    artistAlias: string,
-): Promise<FinishedHorse[]> {
+export async function getArtistPortfolio(artistUserId: string, artistAlias: string): Promise<FinishedHorse[]> {
     const supabase = await createClient();
 
     // Logged-out viewers can't pass the invoker-rights view's RLS, so
@@ -1007,10 +992,9 @@ export async function getArtistPortfolio(
     // (which anon also can't read — honest either way).
     const { data: auth } = await supabase.auth.getUser();
     if (!auth?.user) {
-        const { data: wall } = await (supabase.rpc as unknown as (
-            fn: string,
-            args: Record<string, unknown>,
-        ) => PromiseLike<{ data: unknown }>)("get_studio_wall", { p_user: artistUserId });
+        const { data: wall } = await (
+            supabase.rpc as unknown as (fn: string, args: Record<string, unknown>) => PromiseLike<{ data: unknown }>
+        )("get_studio_wall", { p_user: artistUserId });
         if (Array.isArray(wall) && wall.length > 0) {
             return (wall as Row[]).map((r) => ({
                 horseId: String(r.horse_id),
@@ -1053,22 +1037,22 @@ export async function getArtistPortfolio(
                 return (data as Row[])
                     .filter((r) => r.disavowed_at == null && r.horse_deleted_at == null)
                     .map((r) => ({
-                    horseId: String(r.horse_id),
-                    logId: r.log_id == null ? null : String(r.log_id),
-                    horseName: String(r.horse_name ?? "Unnamed"),
-                    workType: str(r.work_type),
-                    dateCompleted: (r.date_completed as string | null) ?? null,
-                    imageUrls: (r.image_urls as string[]) ?? [],
-                    isPublic: r.is_public !== false,
-                    // 212: one answer — commission stamp, the counterparty's
-                    // confirmation, or the owner's own record. Pre-paste
-                    // the column is absent and the old stamp stands.
-                    verified: r.credit_verified === true || r.finishing_artist_verified === true,
-                    showCount: Number(r.show_count ?? 0),
-                    nanQualifyingCount: Number(r.nan_qualifying_count ?? 0),
-                    bestPlacing: r.best_placing == null ? null : Number(r.best_placing),
-                    titles: (r.titles as string[]) ?? [],
-                }));
+                        horseId: String(r.horse_id),
+                        logId: r.log_id == null ? null : String(r.log_id),
+                        horseName: String(r.horse_name ?? "Unnamed"),
+                        workType: str(r.work_type),
+                        dateCompleted: (r.date_completed as string | null) ?? null,
+                        imageUrls: (r.image_urls as string[]) ?? [],
+                        isPublic: r.is_public !== false,
+                        // 212: one answer — commission stamp, the counterparty's
+                        // confirmation, or the owner's own record. Pre-paste
+                        // the column is absent and the old stamp stands.
+                        verified: r.credit_verified === true || r.finishing_artist_verified === true,
+                        showCount: Number(r.show_count ?? 0),
+                        nanQualifyingCount: Number(r.nan_qualifying_count ?? 0),
+                        bestPlacing: r.best_placing == null ? null : Number(r.best_placing),
+                        titles: (r.titles as string[]) ?? [],
+                    }));
             }
         }
 
@@ -1083,7 +1067,7 @@ export async function getArtistPortfolio(
                 .eq("artist_user_id", artistUserId)
                 .order("date_completed", { ascending: false })
                 .limit(60);
-            for (const row of ((data as Row[] | null) ?? [])) {
+            for (const row of (data as Row[] | null) ?? []) {
                 logs.set(String(row.horse_id), row);
             }
             horseIds = [...logs.keys()];
@@ -1123,15 +1107,12 @@ async function decorateHorses(
     const visibleIds = horses.map((h) => String(h.id));
 
     const [{ data: recordRows }, { data: titleRows }] = await Promise.all([
-        supabase
-            .from("show_records")
-            .select("horse_id, placing, is_nan_qualifying")
-            .in("horse_id", visibleIds),
+        supabase.from("show_records").select("horse_id, placing, is_nan_qualifying").in("horse_id", visibleIds),
         supabase.from("horse_titles").select("horse_id, title_code").in("horse_id", visibleIds),
     ]);
 
     const records = new Map<string, { count: number; nan: number; best: number | null }>();
-    for (const row of ((recordRows as Row[] | null) ?? [])) {
+    for (const row of (recordRows as Row[] | null) ?? []) {
         const id = String(row.horse_id);
         const entry = records.get(id) ?? { count: 0, nan: 0, best: null };
         entry.count += 1;
@@ -1147,7 +1128,7 @@ async function decorateHorses(
     }
 
     const titles = new Map<string, string[]>();
-    for (const row of ((titleRows as Row[] | null) ?? [])) {
+    for (const row of (titleRows as Row[] | null) ?? []) {
         const id = String(row.horse_id);
         titles.set(id, [...(titles.get(id) ?? []), String(row.title_code)]);
     }
@@ -1204,10 +1185,7 @@ export async function getClientCommissions(): Promise<Commission[]> {
     return ((data as Row[] | null) ?? []).map(mapCommission);
 }
 
-export async function getCommission(
-    commissionId: string,
-    opts?: { guestToken?: string },
-): Promise<Commission | null> {
+export async function getCommission(commissionId: string, opts?: { guestToken?: string }): Promise<Commission | null> {
     // Token-validated guests read via the admin client — the RLS
     // policies are TO authenticated, so the anon share-link audience
     // could never pass them (see getCommissionUpdates).
@@ -1223,11 +1201,7 @@ export async function getCommission(
         if (!tokenRow) return null;
         supabase = admin as unknown as Awaited<ReturnType<typeof createClient>>;
     }
-    const { data } = await supabase
-        .from("commissions")
-        .select(COMMISSION_SELECT)
-        .eq("id", commissionId)
-        .maybeSingle();
+    const { data } = await supabase.from("commissions").select(COMMISSION_SELECT).eq("id", commissionId).maybeSingle();
     return data ? mapCommission(data as Row) : null;
 }
 
@@ -1267,7 +1241,9 @@ export async function getCommissionUpdates(
 
     const mapped = rows.map((u) => {
         const author = u.author as { alias_name: string; avatar_url: string | null } | null;
-        const meta = (u.metadata ?? {}) as { checkpoint?: { title?: string; acked_by?: string | null; acked_at?: string | null } };
+        const meta = (u.metadata ?? {}) as {
+            checkpoint?: { title?: string; acked_by?: string | null; acked_at?: string | null };
+        };
         return {
             id: String(u.id),
             commissionId: String(u.commission_id),
@@ -1302,14 +1278,13 @@ export async function getCommissionUpdates(
     if (toSign.length > 0) {
         try {
             const admin = getAdminClient();
-            const { data: signed } = await admin.storage
-                .from("workbench")
-                .createSignedUrls(toSign, 60 * 60);
+            const { data: signed } = await admin.storage.from("workbench").createSignedUrls(toSign, 60 * 60);
             const signedMap = new Map(
                 (signed ?? []).filter((s) => s.signedUrl).map((s) => [s.path as string, s.signedUrl]),
             );
             for (const u of mapped) {
-                u.imageUrls = u.imageUrls.map((p) => (p.startsWith("http") ? p : (signedMap.get(p) ?? "")))
+                u.imageUrls = u.imageUrls
+                    .map((p) => (p.startsWith("http") ? p : (signedMap.get(p) ?? "")))
                     .filter(Boolean);
             }
         } catch (err) {
@@ -1317,9 +1292,7 @@ export async function getCommissionUpdates(
         }
     }
 
-    const avatarMap = await resolveAvatarUrls(
-        mapped.map((u) => u.authorAvatarUrl).filter((u): u is string => !!u),
-    );
+    const avatarMap = await resolveAvatarUrls(mapped.map((u) => u.authorAvatarUrl).filter((u): u is string => !!u));
     for (const update of mapped) {
         if (update.authorAvatarUrl) {
             update.authorAvatarUrl = avatarMap.get(update.authorAvatarUrl) ?? update.authorAvatarUrl;
@@ -1337,20 +1310,12 @@ async function loadParty(
     supabase: Awaited<ReturnType<typeof createClient>>,
     commissionId: string,
     userId: string,
-): Promise<
-    | { ok: true; row: Row; party: Party; status: CommissionStatus }
-    | { ok: false; error: string }
-> {
-    const { data } = await supabase
-        .from("commissions")
-        .select("*")
-        .eq("id", commissionId)
-        .maybeSingle();
+): Promise<{ ok: true; row: Row; party: Party; status: CommissionStatus } | { ok: false; error: string }> {
+    const { data } = await supabase.from("commissions").select("*").eq("id", commissionId).maybeSingle();
     if (!data) return { ok: false, error: "That commission no longer exists." };
     const row = data as Row;
 
-    const party: Party | null =
-        row.artist_id === userId ? "artist" : row.client_id === userId ? "client" : null;
+    const party: Party | null = row.artist_id === userId ? "artist" : row.client_id === userId ? "client" : null;
     if (!party) return { ok: false, error: "You aren't part of this commission." };
 
     return { ok: true, row, party, status: normalizeStatus(String(row.status)) };
@@ -1678,11 +1643,9 @@ export async function transitionCommission(
                 .maybeSingle();
             const terms = coerceTerms({
                 deposit_percent: (profile as Row | null)?.deposit_percent,
-                deposit_refundable_before_start: (profile as Row | null)
-                    ?.deposit_refundable_before_start,
+                deposit_refundable_before_start: (profile as Row | null)?.deposit_refundable_before_start,
                 revisions_included:
-                    (row.revisions_included as number | null) ??
-                    (profile as Row | null)?.revisions_included,
+                    (row.revisions_included as number | null) ?? (profile as Row | null)?.revisions_included,
                 extra_revision_fee: (profile as Row | null)?.extra_revision_fee,
                 kill_fee_percent: (profile as Row | null)?.kill_fee_percent,
                 turnaround_min_days: (profile as Row | null)?.turnaround_min_days,
@@ -1757,8 +1720,7 @@ export async function transitionCommission(
     }
 
     // Both sides always hear about it. Whoever did not act gets the ping.
-    const other =
-        party === "artist" ? (row.client_id as string | null) : (row.artist_id as string);
+    const other = party === "artist" ? (row.client_id as string | null) : (row.artist_id as string);
     if (other) {
         await notify({
             userId: other,
@@ -1774,11 +1736,7 @@ export async function transitionCommission(
     return { success: true };
 }
 
-function commissionNotice(
-    to: CommissionStatus,
-    type: string,
-    isRevision?: boolean,
-): string {
+function commissionNotice(to: CommissionStatus, type: string, isRevision?: boolean): string {
     if (isRevision) return `A revision was requested on your ${type} commission.`;
     switch (to) {
         case "accepted":
@@ -1835,8 +1793,9 @@ async function runDeliveryHooks(
         const clientIdForNote = row.client_id as string | null;
         await notify({
             userId: artistIdForNote,
-            actorId: actorId === artistIdForNote ? clientIdForNote ?? "" : actorId,
-            content: "Delivered — but no horse was linked, so no verified credit or provenance entry was written. Ask the commissioner to link the horse and message us to move the record.",
+            actorId: actorId === artistIdForNote ? (clientIdForNote ?? "") : actorId,
+            content:
+                "Delivered — but no horse was linked, so no verified credit or provenance entry was written. Ask the commissioner to link the horse and message us to move the record.",
             linkUrl: `/studio/commission/${commissionId}`,
             emailSubject: "Delivered without a linked horse — your credit didn't land",
         });
@@ -1844,7 +1803,8 @@ async function runDeliveryHooks(
             await notify({
                 userId: clientIdForNote,
                 actorId: actorId,
-                content: "Your commission was delivered without a linked horse, so nothing landed on a passport. Link the horse from your stable and message us — we'll attach the record.",
+                content:
+                    "Your commission was delivered without a linked horse, so nothing landed on a passport. Link the horse from your stable and message us — we'll attach the record.",
                 linkUrl: `/studio/commission/${commissionId}`,
                 emailSubject: "Link your horse so the finished work lands on its passport",
             });
@@ -1858,17 +1818,16 @@ async function runDeliveryHooks(
     // SECURITY DEFINER that touches exactly the two credit columns.
     let artistAlias: string | null = null;
     try {
-        const { data: artistUser } = await supabase
-            .from("users")
-            .select("alias_name")
-            .eq("id", artistId)
-            .maybeSingle();
+        const { data: artistUser } = await supabase.from("users").select("alias_name").eq("id", artistId).maybeSingle();
         artistAlias = (artistUser as { alias_name: string } | null)?.alias_name ?? null;
 
         if (actorId === artistId) {
-            const { error } = await supabase.rpc("stamp_finishing_artist" as never, {
-                p_commission_id: commissionId,
-            } as never);
+            const { error } = await supabase.rpc(
+                "stamp_finishing_artist" as never,
+                {
+                    p_commission_id: commissionId,
+                } as never,
+            );
             if (error) logger.error("ArtStudio", "Artist stamp unavailable", error.message);
         }
     } catch (err) {
@@ -1897,7 +1856,7 @@ async function runDeliveryHooks(
         const images: string[] = [];
         const notes: string[] = [];
         const momentRows: Patch[] = [];
-        for (const wip of ((wipRows as Row[] | null) ?? [])) {
+        for (const wip of (wipRows as Row[] | null) ?? []) {
             const rawUrls = (wip.image_urls as string[]) ?? [];
             // Legacy rows carry full public URLs (pre-203 uploads went
             // straight to the public bucket) — those were always
@@ -1942,9 +1901,7 @@ async function runDeliveryHooks(
             horse_id: horseId,
             work_type: String(row.commission_type),
             artist_alias: artistAlias,
-            materials_used: notes.length
-                ? notes.join(" • ")
-                : `${row.commission_type} commission completed`,
+            materials_used: notes.length ? notes.join(" • ") : `${row.commission_type} commission completed`,
             date_completed: new Date().toISOString().slice(0, 10),
             image_urls: images,
         };
@@ -2009,10 +1966,7 @@ export async function addCommissionUpdate(
 
     // Only the artist keeps private notes; a client "private" note would be
     // invisible to the only other person in the conversation.
-    const visible =
-        party === "artist" && data.updateType !== "checkpoint"
-            ? data.isVisibleToClient !== false
-            : true;
+    const visible = party === "artist" && data.updateType !== "checkpoint" ? data.isVisibleToClient !== false : true;
 
     const insertRow: Patch = {
         commission_id: commissionId,
@@ -2028,14 +1982,15 @@ export async function addCommissionUpdate(
     const withMeta: Patch = {
         ...insertRow,
         is_public: party === "artist" && visible ? data.isPublic === true : false,
-        ...(data.updateType === "checkpoint"
-            ? { metadata: { checkpoint: { title: str(data.title) } } }
-            : {}),
+        ...(data.updateType === "checkpoint" ? { metadata: { checkpoint: { title: str(data.title) } } } : {}),
     };
     let { error } = await supabase.from("commission_updates").insert(withMeta as never);
     if (error && (error.code === "42703" || error.code === "PGRST204")) {
         if (data.updateType === "checkpoint") {
-            return { success: false, error: "Checkpoints aren't switched on for this site yet — post it as a message for now." };
+            return {
+                success: false,
+                error: "Checkpoints aren't switched on for this site yet — post it as a message for now.",
+            };
         }
         ({ error } = await supabase.from("commission_updates").insert(insertRow as never));
     }
@@ -2047,8 +2002,7 @@ export async function addCommissionUpdate(
         .eq("id", commissionId);
 
     if (visible) {
-        const other =
-            party === "artist" ? (row.client_id as string | null) : (row.artist_id as string);
+        const other = party === "artist" ? (row.client_id as string | null) : (row.artist_id as string);
         const label =
             data.updateType === "wip_photo"
                 ? "posted a work-in-progress photo"
@@ -2083,10 +2037,7 @@ export async function addCommissionUpdate(
  * the admin client after the party check, so neither side can forge
  * or unwind the other's signature.
  */
-export async function ackCheckpoint(
-    commissionId: string,
-    updateId: string,
-): Promise<ActionResult> {
+export async function ackCheckpoint(commissionId: string, updateId: string): Promise<ActionResult> {
     const { supabase, user } = await requireAuth();
 
     const loaded = await loadParty(supabase, commissionId, user.id);
@@ -2148,7 +2099,10 @@ export async function markModelReceived(
 
     const support = await getStudioColumnSupport(supabase as never);
     if (!support.commissionAgreement) {
-        return { success: false, error: "Shipping notes aren't switched on for this site yet — mention it in the thread for now." };
+        return {
+            success: false,
+            error: "Shipping notes aren't switched on for this site yet — mention it in the thread for now.",
+        };
     }
 
     const now = new Date().toISOString();
@@ -2226,8 +2180,7 @@ export async function recordPayment(
 
     // The artist's tick is the commissioner's receipt — say so.
     const clientId = loaded.row.client_id as string | null;
-    const acknowledged =
-        input.depositPaid === true ? "deposit" : input.finalPaid === true ? "final payment" : null;
+    const acknowledged = input.depositPaid === true ? "deposit" : input.finalPaid === true ? "final payment" : null;
     if (clientId && acknowledged) {
         await notify({
             userId: clientId,
@@ -2242,10 +2195,7 @@ export async function recordPayment(
     return { success: true };
 }
 
-export async function linkHorseToCommission(
-    commissionId: string,
-    horseId: string,
-): Promise<ActionResult> {
+export async function linkHorseToCommission(commissionId: string, horseId: string): Promise<ActionResult> {
     const { supabase, user } = await requireAuth();
 
     const loaded = await loadParty(supabase, commissionId, user.id);
@@ -2287,8 +2237,7 @@ export async function linkHorseToCommission(
         .eq("id", commissionId);
     if (error) return { success: false, error: error.message };
 
-    const other =
-        loaded.party === "artist" ? clientId : (loaded.row.artist_id as string | null);
+    const other = loaded.party === "artist" ? clientId : (loaded.row.artist_id as string | null);
     if (other) {
         await notify({
             userId: other,
@@ -2319,9 +2268,7 @@ export async function linkHorseToCommission(
  *
  * Additive: repeated commissions on the same horse accumulate.
  */
-export async function recordCommissionInVault(
-    commissionId: string,
-): Promise<ActionResult & { total?: number }> {
+export async function recordCommissionInVault(commissionId: string): Promise<ActionResult & { total?: number }> {
     const { supabase, user } = await requireAuth();
 
     const loaded = await loadParty(supabase, commissionId, user.id);
@@ -2368,11 +2315,7 @@ export async function recordCommissionInVault(
         return { success: false, error: "This commission has no agreed price to record." };
     }
 
-    const { data: vaultRow } = await supabase
-        .from("financial_vault")
-        .select("*")
-        .eq("horse_id", horseId)
-        .maybeSingle();
+    const { data: vaultRow } = await supabase.from("financial_vault").select("*").eq("horse_id", horseId).maybeSingle();
 
     const existing = vaultRow as Row | null;
     const previous = num(existing?.commission_cost) ?? 0;
@@ -2390,13 +2333,11 @@ export async function recordCommissionInVault(
             .eq("horse_id", horseId);
         writeError = error;
     } else {
-        const { error } = await supabase
-            .from("financial_vault")
-            .insert({
-                horse_id: horseId,
-                commission_cost: total,
-                commission_notes: notes,
-            } as Patch as never);
+        const { error } = await supabase.from("financial_vault").insert({
+            horse_id: horseId,
+            commission_cost: total,
+            commission_notes: notes,
+        } as Patch as never);
         writeError = error;
     }
 

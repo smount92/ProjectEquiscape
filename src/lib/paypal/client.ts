@@ -48,12 +48,7 @@ export class PaypalApiError extends Error {
      */
     readonly issue: string | null;
 
-    constructor(
-        message: string,
-        status: number,
-        debugId: string | null = null,
-        issue: string | null = null,
-    ) {
+    constructor(message: string, status: number, debugId: string | null = null, issue: string | null = null) {
         super(message);
         this.name = "PaypalApiError";
         this.status = status;
@@ -220,12 +215,7 @@ export async function paypalFetch<T>(
             issue,
             debugId,
         });
-        throw new PaypalApiError(
-            name ?? `PayPal returned ${response.status}`,
-            response.status,
-            debugId,
-            issue,
-        );
+        throw new PaypalApiError(name ?? `PayPal returned ${response.status}`, response.status, debugId, issue);
     }
 
     // 204s carry no body; callers that expect nothing get undefined.

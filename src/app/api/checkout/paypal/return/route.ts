@@ -95,9 +95,7 @@ export async function GET(request: Request) {
             return redirectTo("/upgrade?status=paypal-pending");
         }
 
-        return redirectTo(
-            tier === "studio" ? "/studio/dashboard?upgraded=success" : "/upgrade?status=success",
-        );
+        return redirectTo(tier === "studio" ? "/studio/dashboard?upgraded=success" : "/upgrade?status=success");
     } catch (err) {
         const Sentry = await import("@sentry/nextjs");
         Sentry.captureException(err, {

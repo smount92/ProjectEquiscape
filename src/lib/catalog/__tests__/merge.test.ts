@@ -5,7 +5,9 @@ const DUP = { id: "11111111-1111-4111-8111-111111111111", title: "Adios (dup)", 
 const KEEP = { id: "22222222-2222-4222-8222-222222222222", title: "Adios", maker: "Breyer" };
 
 /** A client that records every repoint and delete. */
-function client(opts: { movedPerTable?: number; failTable?: string; wishlists?: { user_id: string; catalog_id: string }[] } = {}) {
+function client(
+    opts: { movedPerTable?: number; failTable?: string; wishlists?: { user_id: string; catalog_id: string }[] } = {},
+) {
     const updates: [string, Record<string, unknown>, string][] = [];
     const inserted: Record<string, unknown>[] = [];
     const upserted: Record<string, unknown>[] = [];
@@ -16,9 +18,11 @@ function client(opts: { movedPerTable?: number; failTable?: string; wishlists?: 
         from: (table) => ({
             select: () => ({
                 eq: (col, val) => {
-                    const rows = table === "user_wishlists" ? (opts.wishlists ?? []).filter((w) => w.catalog_id === val) : [];
+                    const rows =
+                        table === "user_wishlists" ? (opts.wishlists ?? []).filter((w) => w.catalog_id === val) : [];
                     return {
-                        then: (resolve: (v: { data: unknown }) => unknown) => Promise.resolve({ data: rows }).then(resolve),
+                        then: (resolve: (v: { data: unknown }) => unknown) =>
+                            Promise.resolve({ data: rows }).then(resolve),
                         maybeSingle: async () => ({ data: val === KEEP.id || val === "adios" ? KEEP : null }),
                     };
                 },
@@ -28,7 +32,10 @@ function client(opts: { movedPerTable?: number; failTable?: string; wishlists?: 
                     select: async () => {
                         updates.push([table, row, val]);
                         if (opts.failTable === table) return { data: null, error: { message: "boom" } };
-                        return { data: Array.from({ length: opts.movedPerTable ?? 1 }, (_, i) => ({ id: `${i}` })), error: null };
+                        return {
+                            data: Array.from({ length: opts.movedPerTable ?? 1 }, (_, i) => ({ id: `${i}` })),
+                            error: null,
+                        };
                     },
                 }),
             }),
@@ -68,7 +75,11 @@ describe("mergeCatalogItemsCore", () => {
             expect(Object.values(row)).toEqual([KEEP.id]);
             expect(from).toBe(DUP.id);
         }
-        expect(c.inserted[0]).toMatchObject({ catalog_item_id: KEEP.id, change_type: "removal", contributor_alias: "Admin" });
+        expect(c.inserted[0]).toMatchObject({
+            catalog_item_id: KEEP.id,
+            change_type: "removal",
+            contributor_alias: "Admin",
+        });
         expect(c.deleted).toEqual([DUP.id]);
         if (result.success) expect(result.moved).toBe(2 * MERGE_REPOINTS.length);
     });

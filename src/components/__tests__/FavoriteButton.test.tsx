@@ -8,15 +8,7 @@ import { ToastProvider } from "@/lib/context/ToastContext";
 // The global setup mocks next/link to render NOTHING — the toast's
 // "View your Favorites →" action is a Link, so render a real anchor.
 vi.mock("next/link", () => ({
-    default: ({
-        children,
-        href,
-        ...props
-    }: {
-        children: React.ReactNode;
-        href: string;
-        [key: string]: unknown;
-    }) => (
+    default: ({ children, href, ...props }: { children: React.ReactNode; href: string; [key: string]: unknown }) => (
         <a href={href} {...props}>
             {children}
         </a>

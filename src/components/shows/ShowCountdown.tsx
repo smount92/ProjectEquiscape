@@ -42,15 +42,10 @@ export default function ShowCountdown({
 }) {
     const router = useRouter();
     const refreshedAtZero = useRef(false);
-    const nowSeconds = useSyncExternalStore(
-        subscribeToClock,
-        clockSecondsSnapshot,
-        clockServerSnapshot,
-    );
+    const nowSeconds = useSyncExternalStore(subscribeToClock, clockSecondsSnapshot, clockServerSnapshot);
 
     const targetMs = new Date(target).getTime();
-    const remaining =
-        nowSeconds === null || Number.isNaN(targetMs) ? null : targetMs - nowSeconds * 1000;
+    const remaining = nowSeconds === null || Number.isNaN(targetMs) ? null : targetMs - nowSeconds * 1000;
 
     useEffect(() => {
         if (remaining === null || remaining > 0 || refreshedAtZero.current) return;
@@ -69,10 +64,7 @@ export default function ShowCountdown({
                 ? "Opening any moment…"
                 : `Opens in ${Math.floor(remaining / 3_600_000)}h ${String(
                       Math.floor((remaining % 3_600_000) / 60_000),
-                  ).padStart(2, "0")}m ${String(Math.floor((remaining % 60_000) / 1000)).padStart(
-                      2,
-                      "0",
-                  )}s`}
+                  ).padStart(2, "0")}m ${String(Math.floor((remaining % 60_000) / 1000)).padStart(2, "0")}s`}
         </span>
     );
 }

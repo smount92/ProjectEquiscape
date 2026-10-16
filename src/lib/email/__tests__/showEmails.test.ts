@@ -13,18 +13,11 @@ import {
     renderEmailQuote,
     renderEmailStats,
 } from "../layout";
-import {
-    buildDeadlineEmailBody,
-    buildResultsEmailBody,
-    chunk,
-    EMAIL_BATCH_SIZE,
-} from "../showEmails";
+import { buildDeadlineEmailBody, buildResultsEmailBody, chunk, EMAIL_BATCH_SIZE } from "../showEmails";
 
 describe("escapeEmailHtml", () => {
     it("escapes the four HTML metacharacters", () => {
-        expect(escapeEmailHtml(`<b>"Tom & Jerry"</b>`)).toBe(
-            "&lt;b&gt;&quot;Tom &amp; Jerry&quot;&lt;/b&gt;",
-        );
+        expect(escapeEmailHtml(`<b>"Tom & Jerry"</b>`)).toBe("&lt;b&gt;&quot;Tom &amp; Jerry&quot;&lt;/b&gt;");
     });
 });
 
@@ -85,9 +78,7 @@ describe("renderBrandedEmail", () => {
             footerNote: "You wrote to us.",
         };
         expect(renderBrandedEmail(input)).toContain("Notification settings");
-        expect(renderBrandedEmail({ ...input, hideSettingsLink: true })).not.toContain(
-            "Notification settings",
-        );
+        expect(renderBrandedEmail({ ...input, hideSettingsLink: true })).not.toContain("Notification settings");
     });
 });
 
@@ -130,9 +121,7 @@ describe("htmlToPlainText", () => {
     });
 
     it("un-escapes entities so the text part reads as the member wrote it", () => {
-        expect(htmlToPlainText(escapeEmailHtml(`Tom & "Jerry" <both>`))).toBe(
-            `Tom & "Jerry" <both>`,
-        );
+        expect(htmlToPlainText(escapeEmailHtml(`Tom & "Jerry" <both>`))).toBe(`Tom & "Jerry" <both>`);
     });
 
     it("turns <br /> into a line break and drops no words", () => {
@@ -177,9 +166,7 @@ describe("renderBrandedEmailText", () => {
 
     it("spells the CTA out as a label and an absolute URL", () => {
         // A text part whose only link is "/shows/show-1" is unclickable.
-        expect(renderBrandedEmailText(card)).toMatch(
-            /See the full results: https?:\/\/[^\s]+\/shows\/show-1/,
-        );
+        expect(renderBrandedEmailText(card)).toMatch(/See the full results: https?:\/\/[^\s]+\/shows\/show-1/);
     });
 
     it("omits the CTA line when the card has no button", () => {
@@ -189,9 +176,7 @@ describe("renderBrandedEmailText", () => {
 
     it("honours hideSettingsLink, same as the HTML part", () => {
         expect(renderBrandedEmailText(card)).toContain("Notification settings:");
-        expect(renderBrandedEmailText({ ...card, hideSettingsLink: true })).not.toContain(
-            "Notification settings",
-        );
+        expect(renderBrandedEmailText({ ...card, hideSettingsLink: true })).not.toContain("Notification settings");
     });
 });
 
@@ -283,7 +268,10 @@ describe("chunk", () => {
 
     it("EMAIL_BATCH_SIZE matches the Resend batch API cap", () => {
         expect(EMAIL_BATCH_SIZE).toBe(100);
-        const groups = chunk(Array.from({ length: 250 }, (_, i) => i), EMAIL_BATCH_SIZE);
+        const groups = chunk(
+            Array.from({ length: 250 }, (_, i) => i),
+            EMAIL_BATCH_SIZE,
+        );
         expect(groups.map((g) => g.length)).toEqual([100, 100, 50]);
     });
 });

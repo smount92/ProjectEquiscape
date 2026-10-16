@@ -102,10 +102,7 @@ export const SEARCH_TYPE_FILTERS = [
 
 export type SearchTypeFilterKey = (typeof SEARCH_TYPE_FILTERS)[number]["key"];
 
-export function applyTypeFilter<T extends RankableItem>(
-    results: readonly T[],
-    key: SearchTypeFilterKey,
-): T[] {
+export function applyTypeFilter<T extends RankableItem>(results: readonly T[], key: SearchTypeFilterKey): T[] {
     const def = SEARCH_TYPE_FILTERS.find((f) => f.key === key);
     if (!def || !def.types) return [...results];
     return results.filter((r) => def.types.has(r.itemType));

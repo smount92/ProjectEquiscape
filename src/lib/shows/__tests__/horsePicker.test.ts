@@ -156,7 +156,11 @@ describe("horsePicker — breed-aware (host request, 2026-09-05)", () => {
         const smallArab = horse({ id: "b5", name: "Tiny", breed: "Arabian", scale: "Stablemate" });
         const tradArab = horse({ id: "b6", name: "Big", breed: "Arabian", scale: "Traditional" });
         const tradQh = horse({ id: "b7", name: "Chics", breed: "Quarter Horse", scale: "Traditional" });
-        const ranked = filterAndRankHorses([smallArab, tradQh, tradArab], { name: "Arabian", allowedScales: ["Traditional"] }, "");
+        const ranked = filterAndRankHorses(
+            [smallArab, tradQh, tradArab],
+            { name: "Arabian", allowedScales: ["Traditional"] },
+            "",
+        );
         expect(ranked.map((p) => p.horse.id)).toEqual(["b6", "b7", "b5"]);
     });
 });

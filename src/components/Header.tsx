@@ -1,45 +1,45 @@
 "use client";
 
-import Link from"next/link";
-import { useSimpleMode } from"@/lib/context/SimpleModeContext";
-import { createClient } from"@/lib/supabase/client";
-import { useRouter, usePathname } from"next/navigation";
-import { useEffect, useState, useCallback, useRef } from"react";
-import NotificationBell from"@/components/NotificationBell";
-import ThemeToggle from"@/components/ThemeToggle";
+import Link from "next/link";
+import { useSimpleMode } from "@/lib/context/SimpleModeContext";
+import { createClient } from "@/lib/supabase/client";
+import { useRouter, usePathname } from "next/navigation";
+import { useEffect, useState, useCallback, useRef } from "react";
+import NotificationBell from "@/components/NotificationBell";
+import ThemeToggle from "@/components/ThemeToggle";
 import NavTrail from "@/components/nav/NavTrail";
 import AppBackButton from "@/components/nav/AppBackButton";
-import { getHeaderData } from"@/app/actions/header";
+import { getHeaderData } from "@/app/actions/header";
 import { onNotFoundPage } from "@/lib/notFoundPage";
 import { useNotifications } from "@/lib/context/NotificationProvider";
 import {
- Home,
- Trophy,
- Newspaper,
- Users,
- Camera,
- Palette,
- Search,
- Building2,
- Calendar,
- CalendarDays,
- TrendingUp,
- Package,
- Settings,
- User,
- Zap,
- LogOut,
- Eye,
- EyeOff,
- Mail,
- ChevronDown,
- MoreHorizontal,
- BookOpen,
- Bookmark,
- Heart,
- Gem,
- Bell,
-} from"lucide-react";
+    Home,
+    Trophy,
+    Newspaper,
+    Users,
+    Camera,
+    Palette,
+    Search,
+    Building2,
+    Calendar,
+    CalendarDays,
+    TrendingUp,
+    Package,
+    Settings,
+    User,
+    Zap,
+    LogOut,
+    Eye,
+    EyeOff,
+    Mail,
+    ChevronDown,
+    MoreHorizontal,
+    BookOpen,
+    Bookmark,
+    Heart,
+    Gem,
+    Bell,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 // Priority-ordered nav links — highest priority first. The first five
@@ -47,17 +47,17 @@ import { Button } from "@/components/ui/button";
 // The Paddock; the rest are rooms inside the Paddock and collapse
 // into "More" first as the viewport narrows.
 const NAV_LINKS = [
- { href:"/dashboard", label:"Stable", Icon: Home, id:"nav-stable" },
- { href:"/shows", label:"Shows", Icon: Camera, id:"nav-shows" },
- { href:"/market", label:"Market", Icon: TrendingUp, id:"nav-market" },
- { href:"/feed", label:"The Paddock", Icon: Newspaper, id:"nav-feed" },
- { href:"/catalog", label:"Registry", Icon: BookOpen, id:"nav-catalog" },
- { href:"/community", label:"Show Ring", Icon: Trophy, id:"nav-community" },
- { href:"/community/groups", label:"Barns", Icon: Building2, id:"nav-groups" },
- { href:"/community/events", label:"Events", Icon: Calendar, id:"nav-events" },
- { href:"/calendar", label:"Calendar", Icon: CalendarDays, id:"nav-calendar" },
- { href:"/community/help-id", label:"Help ID", Icon: Search, id:"nav-helpid" },
- { href:"/discover", label:"Members", Icon: Users, id:"nav-discover" },
+    { href: "/dashboard", label: "Stable", Icon: Home, id: "nav-stable" },
+    { href: "/shows", label: "Shows", Icon: Camera, id: "nav-shows" },
+    { href: "/market", label: "Market", Icon: TrendingUp, id: "nav-market" },
+    { href: "/feed", label: "The Paddock", Icon: Newspaper, id: "nav-feed" },
+    { href: "/catalog", label: "Registry", Icon: BookOpen, id: "nav-catalog" },
+    { href: "/community", label: "Show Ring", Icon: Trophy, id: "nav-community" },
+    { href: "/community/groups", label: "Barns", Icon: Building2, id: "nav-groups" },
+    { href: "/community/events", label: "Events", Icon: Calendar, id: "nav-events" },
+    { href: "/calendar", label: "Calendar", Icon: CalendarDays, id: "nav-calendar" },
+    { href: "/community/help-id", label: "Help ID", Icon: Search, id: "nav-helpid" },
+    { href: "/discover", label: "Members", Icon: Users, id: "nav-discover" },
 ];
 
 // The studio item depends on who is looking: an artist gets their own
@@ -65,939 +65,950 @@ const NAV_LINKS = [
 // to "open a studio" setup, so the place to FIND an artist had no way in
 // from the nav (2026-09-19).
 const getStudioLink = (artistSlug: string | null) => ({
- href: artistSlug ?"/studio/dashboard" :"/studio",
- label: artistSlug ?"My Studio" :"Art Studios",
- Icon: Palette,
- id:"nav-studio",
+    href: artistSlug ? "/studio/dashboard" : "/studio",
+    label: artistSlug ? "My Studio" : "Art Studios",
+    Icon: Palette,
+    id: "nav-studio",
 });
 
 export default function Header() {
- const { isSimpleMode, toggleSimpleMode } = useSimpleMode();
- // Immediately check localStorage for auth token to prevent flash
- const [user, setUser] = useState<{ id: string; email?: string } | null>(() => {
- if (typeof window !=="undefined") {
- const storageKey = Object.keys(localStorage).find((k) => k.startsWith("sb-") && k.endsWith("-auth-token"));
- if (storageKey) {
- try {
- const stored = JSON.parse(localStorage.getItem(storageKey) ||"{}");
- if (stored?.user?.id) return { id: stored.user.id, email: stored.user.email };
- } catch {
- /* ignore */
- }
- }
- }
- return null;
- });
- const { unreadMessages, unreadNotifications } = useNotifications();
- const [aliasName, setAliasName] = useState<string | null>(null);
- const [isAdmin, setIsAdmin] = useState(false);
- const [artistSlug, setArtistSlug] = useState<string | null>(null);
- const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
- const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
- const [userMenuOpen, setUserMenuOpen] = useState(false);
- const [moreMenuOpen, setMoreMenuOpen] = useState(false);
- const [visibleCount, setVisibleCount] = useState(NAV_LINKS.length + 1); // +1 for Art Studio
- const navRef = useRef<HTMLElement>(null);
- const hamburgerRef = useRef<HTMLButtonElement>(null);
- // Who the server tree was last refreshed for; a refresh is only worth
- // it when that changes (see onAuthStateChange below).
- const refreshedForRef = useRef<string | null>(null);
- const userMenuRef = useRef<HTMLDivElement>(null);
- const moreMenuRef = useRef<HTMLDivElement>(null);
- const primaryNavRef = useRef<HTMLDivElement>(null);
- const router = useRouter();
- const pathname = usePathname();
- const supabase = createClient();
+    const { isSimpleMode, toggleSimpleMode } = useSimpleMode();
+    // Immediately check localStorage for auth token to prevent flash
+    const [user, setUser] = useState<{ id: string; email?: string } | null>(() => {
+        if (typeof window !== "undefined") {
+            const storageKey = Object.keys(localStorage).find((k) => k.startsWith("sb-") && k.endsWith("-auth-token"));
+            if (storageKey) {
+                try {
+                    const stored = JSON.parse(localStorage.getItem(storageKey) || "{}");
+                    if (stored?.user?.id) return { id: stored.user.id, email: stored.user.email };
+                } catch {
+                    /* ignore */
+                }
+            }
+        }
+        return null;
+    });
+    const { unreadMessages, unreadNotifications } = useNotifications();
+    const [aliasName, setAliasName] = useState<string | null>(null);
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [artistSlug, setArtistSlug] = useState<string | null>(null);
+    const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [userMenuOpen, setUserMenuOpen] = useState(false);
+    const [moreMenuOpen, setMoreMenuOpen] = useState(false);
+    const [visibleCount, setVisibleCount] = useState(NAV_LINKS.length + 1); // +1 for Art Studio
+    const navRef = useRef<HTMLElement>(null);
+    const hamburgerRef = useRef<HTMLButtonElement>(null);
+    // Who the server tree was last refreshed for; a refresh is only worth
+    // it when that changes (see onAuthStateChange below).
+    const refreshedForRef = useRef<string | null>(null);
+    const userMenuRef = useRef<HTMLDivElement>(null);
+    const moreMenuRef = useRef<HTMLDivElement>(null);
+    const primaryNavRef = useRef<HTMLDivElement>(null);
+    const router = useRouter();
+    const pathname = usePathname();
+    const supabase = createClient();
 
- const fetchHeaderInfo = useCallback(async () => {
- // On a not-found page a server action POSTs to a URL that answers 404,
- // and Next hard-reloads to recover — forever (2026-09-19). The header
- // keeps whatever it already knows there.
- if (onNotFoundPage()) return;
- try {
- const data = await getHeaderData();
- setUser(data.user);
- setAliasName(data.aliasName);
- setAvatarUrl(data.avatarUrl ?? null);
- setIsAdmin(data.isAdmin ?? false);
- setArtistSlug(data.artistStudioSlug ?? null);
- } catch {
- // Silently fail if server action throws
- }
- }, []);
+    const fetchHeaderInfo = useCallback(async () => {
+        // On a not-found page a server action POSTs to a URL that answers 404,
+        // and Next hard-reloads to recover — forever (2026-09-19). The header
+        // keeps whatever it already knows there.
+        if (onNotFoundPage()) return;
+        try {
+            const data = await getHeaderData();
+            setUser(data.user);
+            setAliasName(data.aliasName);
+            setAvatarUrl(data.avatarUrl ?? null);
+            setIsAdmin(data.isAdmin ?? false);
+            setArtistSlug(data.artistStudioSlug ?? null);
+        } catch {
+            // Silently fail if server action throws
+        }
+    }, []);
 
- useEffect(() => {
- const initAuth = async () => {
- const {
- data: { session },
- } = await supabase.auth.getSession();
- if (session?.user) {
- setUser({ id: session.user.id, email: session.user.email ?? undefined });
- fetchHeaderInfo();
- }
- };
- initAuth();
+    useEffect(() => {
+        const initAuth = async () => {
+            const {
+                data: { session },
+            } = await supabase.auth.getSession();
+            if (session?.user) {
+                setUser({ id: session.user.id, email: session.user.email ?? undefined });
+                fetchHeaderInfo();
+            }
+        };
+        initAuth();
 
- const {
- data: { subscription },
- } = supabase.auth.onAuthStateChange(async (event, session) => {
- // INITIAL_SESSION fires on every subscription, i.e. on every mount, and
- // initAuth above already handles it. Refreshing the server tree on it
- // meant a second render of every page — and on a 404 page, whose
- // server-action POSTs answer 404, a remount → refresh → remount loop
- // that never stopped (2026-09-19).
- if (event === "INITIAL_SESSION") return;
- if (session?.user) {
- setUser({ id: session.user.id, email: session.user.email ?? undefined });
- // Force Next.js to re-run server components so the server-side
- // cookie is read by getHeaderData() — once per change of who is
- // signed in, not on every token refresh.
- if (refreshedForRef.current !== session.user.id) {
- refreshedForRef.current = session.user.id;
- router.refresh();
- }
- fetchHeaderInfo();
- } else {
- refreshedForRef.current = null;
- setUser(null);
- setAliasName(null);
- setAvatarUrl(null);
- setIsAdmin(false);
- setArtistSlug(null);
- }
- });
+        const {
+            data: { subscription },
+        } = supabase.auth.onAuthStateChange(async (event, session) => {
+            // INITIAL_SESSION fires on every subscription, i.e. on every mount, and
+            // initAuth above already handles it. Refreshing the server tree on it
+            // meant a second render of every page — and on a 404 page, whose
+            // server-action POSTs answer 404, a remount → refresh → remount loop
+            // that never stopped (2026-09-19).
+            if (event === "INITIAL_SESSION") return;
+            if (session?.user) {
+                setUser({ id: session.user.id, email: session.user.email ?? undefined });
+                // Force Next.js to re-run server components so the server-side
+                // cookie is read by getHeaderData() — once per change of who is
+                // signed in, not on every token refresh.
+                if (refreshedForRef.current !== session.user.id) {
+                    refreshedForRef.current = session.user.id;
+                    router.refresh();
+                }
+                fetchHeaderInfo();
+            } else {
+                refreshedForRef.current = null;
+                setUser(null);
+                setAliasName(null);
+                setAvatarUrl(null);
+                setIsAdmin(false);
+                setArtistSlug(null);
+            }
+        });
 
- return () => subscription.unsubscribe();
- }, [supabase, fetchHeaderInfo, router]);
+        return () => subscription.unsubscribe();
+    }, [supabase, fetchHeaderInfo, router]);
 
- // Server-action login sets the session cookie server-side and soft-redirects,
- // so the browser client never fires SIGNED_IN and this layout-mounted Header
- // keeps its stale anon state until a hard refresh. On every route change while
- // we still think the viewer is anonymous, re-check the session locally
- // (getSession is a cookie parse — no network) and hydrate if one appeared.
- useEffect(() => {
- if (user) return;
- let cancelled = false;
- supabase.auth.getSession().then(({ data: { session } }) => {
- if (cancelled || !session?.user) return;
- setUser({ id: session.user.id, email: session.user.email ?? undefined });
- fetchHeaderInfo();
- });
- return () => {
- cancelled = true;
- };
- // eslint-disable-next-line react-hooks/exhaustive-deps -- pathname is the trigger; user guards re-entry
- }, [pathname]);
+    // Server-action login sets the session cookie server-side and soft-redirects,
+    // so the browser client never fires SIGNED_IN and this layout-mounted Header
+    // keeps its stale anon state until a hard refresh. On every route change while
+    // we still think the viewer is anonymous, re-check the session locally
+    // (getSession is a cookie parse — no network) and hydrate if one appeared.
+    useEffect(() => {
+        if (user) return;
+        let cancelled = false;
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (cancelled || !session?.user) return;
+            setUser({ id: session.user.id, email: session.user.email ?? undefined });
+            fetchHeaderInfo();
+        });
+        return () => {
+            cancelled = true;
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- pathname is the trigger; user guards re-entry
+    }, [pathname]);
 
+    const handleSignOut = () => {
+        supabase.auth.signOut().catch(() => {});
+        window.location.href = "/login";
+    };
 
+    // Close mobile menu on outside click
+    useEffect(() => {
+        if (!mobileMenuOpen) return;
+        const handleClickOutside = (e: MouseEvent) => {
+            const target = e.target as Node;
+            // The hamburger is outside the nav, so its own press counted as an
+            // outside click: mousedown closed the menu, then the button's click
+            // toggled it straight back open, and the X never seemed to work
+            // (owner, 2026-09-27). Its click handler owns that decision.
+            if (hamburgerRef.current?.contains(target)) return;
+            if (navRef.current && !navRef.current.contains(target)) {
+                setMobileMenuOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [mobileMenuOpen]);
 
- const handleSignOut = () => {
- supabase.auth.signOut().catch(() => {});
- window.location.href ="/login";
- };
+    // Close mobile menu on route change (fixes touch devices where onClick can race)
+    useEffect(() => {
+        setMobileMenuOpen(false);
+    }, [pathname]);
 
- // Close mobile menu on outside click
- useEffect(() => {
- if (!mobileMenuOpen) return;
- const handleClickOutside = (e: MouseEvent) => {
- const target = e.target as Node;
- // The hamburger is outside the nav, so its own press counted as an
- // outside click: mousedown closed the menu, then the button's click
- // toggled it straight back open, and the X never seemed to work
- // (owner, 2026-09-27). Its click handler owns that decision.
- if (hamburgerRef.current?.contains(target)) return;
- if (navRef.current && !navRef.current.contains(target)) {
- setMobileMenuOpen(false);
- }
- };
- document.addEventListener("mousedown", handleClickOutside);
- return () => document.removeEventListener("mousedown", handleClickOutside);
- }, [mobileMenuOpen]);
+    // Close user menu on outside click
+    useEffect(() => {
+        if (!userMenuOpen) return;
+        const handleClickOutside = (e: MouseEvent) => {
+            if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+                setUserMenuOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [userMenuOpen]);
 
- // Close mobile menu on route change (fixes touch devices where onClick can race)
- useEffect(() => {
- setMobileMenuOpen(false);
- }, [pathname]);
+    // Close"More" menu on outside click
+    useEffect(() => {
+        if (!moreMenuOpen) return;
+        const handleClickOutside = (e: MouseEvent) => {
+            if (moreMenuRef.current && !moreMenuRef.current.contains(e.target as Node)) {
+                setMoreMenuOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [moreMenuOpen]);
 
- // Close user menu on outside click
- useEffect(() => {
- if (!userMenuOpen) return;
- const handleClickOutside = (e: MouseEvent) => {
- if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
- setUserMenuOpen(false);
- }
- };
- document.addEventListener("mousedown", handleClickOutside);
- return () => document.removeEventListener("mousedown", handleClickOutside);
- }, [userMenuOpen]);
+    // ── Priority+ nav: measure available space and progressively collapse ──
+    useEffect(() => {
+        if (!user) return;
+        const container = primaryNavRef.current;
+        if (!container) return;
 
- // Close"More" menu on outside click
- useEffect(() => {
- if (!moreMenuOpen) return;
- const handleClickOutside = (e: MouseEvent) => {
- if (moreMenuRef.current && !moreMenuRef.current.contains(e.target as Node)) {
- setMoreMenuOpen(false);
- }
- };
- document.addEventListener("mousedown", handleClickOutside);
- return () => document.removeEventListener("mousedown", handleClickOutside);
- }, [moreMenuOpen]);
+        const measure = () => {
+            const containerWidth = container.offsetWidth;
+            const children = Array.from(container.children) as HTMLElement[];
+            let usedWidth = 0;
+            let fitCount = 0;
+            const moreButtonWidth = 80; // reserve space for"More" button
 
- // ── Priority+ nav: measure available space and progressively collapse ──
- useEffect(() => {
- if (!user) return;
- const container = primaryNavRef.current;
- if (!container) return;
+            for (const child of children) {
+                if (child.dataset.navItem !== "true") continue;
+                // Temporarily make it visible to measure
+                const w = child.scrollWidth;
+                usedWidth += w + 2; // 2px gap
+                if (usedWidth < containerWidth - moreButtonWidth) {
+                    fitCount++;
+                } else {
+                    break;
+                }
+            }
+            setVisibleCount(fitCount);
+        };
 
- const measure = () => {
- const containerWidth = container.offsetWidth;
- const children = Array.from(container.children) as HTMLElement[];
- let usedWidth = 0;
- let fitCount = 0;
- const moreButtonWidth = 80; // reserve space for"More" button
+        const observer = new ResizeObserver(measure);
+        observer.observe(container);
+        // Measure on mount
+        requestAnimationFrame(measure);
 
- for (const child of children) {
- if (child.dataset.navItem !=="true") continue;
- // Temporarily make it visible to measure
- const w = child.scrollWidth;
- usedWidth += w + 2; // 2px gap
- if (usedWidth < containerWidth - moreButtonWidth) {
- fitCount++;
- } else {
- break;
- }
- }
- setVisibleCount(fitCount);
- };
+        return () => observer.disconnect();
+    }, [user]);
 
- const observer = new ResizeObserver(measure);
- observer.observe(container);
- // Measure on mount
- requestAnimationFrame(measure);
+    const closeMobileMenu = () => setMobileMenuOpen(false);
 
- return () => observer.disconnect();
- }, [user]);
+    // Build full nav list including Art Studio
+    const allLinks = [...NAV_LINKS];
+    // Art Studio lives with the Paddock's inner rooms, under More.
+    allLinks.splice(5, 0, getStudioLink(artistSlug));
+    const totalLinks = allLinks.length;
+    // The bar holds THE FIVE ROOMS and nothing else, however wide the
+    // screen — the inner rooms (Show Ring, Barns, Events, Help ID,
+    // Members, Art Studio) always live under More. The ResizeObserver
+    // still shrinks below five on narrow viewports.
+    const shownCount = Math.min(visibleCount, 5);
+    const hasOverflow = shownCount < totalLinks;
+    const overflowLinks = allLinks.slice(shownCount);
 
- const closeMobileMenu = () => setMobileMenuOpen(false);
-
- // Build full nav list including Art Studio
- const allLinks = [...NAV_LINKS];
- // Art Studio lives with the Paddock's inner rooms, under More.
- allLinks.splice(5, 0, getStudioLink(artistSlug));
- const totalLinks = allLinks.length;
- // The bar holds THE FIVE ROOMS and nothing else, however wide the
- // screen — the inner rooms (Show Ring, Barns, Events, Help ID,
- // Members, Art Studio) always live under More. The ResizeObserver
- // still shrinks below five on narrow viewports.
- const shownCount = Math.min(visibleCount, 5);
- const hasOverflow = shownCount < totalLinks;
- const overflowLinks = allLinks.slice(shownCount);
-
- return (
- <header
- className="leather-band sticky top-0 z-[100] flex h-[var(--header-height)] items-center justify-between px-8 py-0 transition-all max-sm:px-4"
- role="banner"
- >
- {/* The session's navigation trail, and the installed app's Back
+    return (
+        <header
+            className="leather-band sticky top-0 z-[100] flex h-[var(--header-height)] items-center justify-between px-8 py-0 transition-all max-sm:px-4"
+            role="banner"
+        >
+            {/* The session's navigation trail, and the installed app's Back
      (a browser tab has its own; an app window has none). */}
- <NavTrail />
- <AppBackButton />
- <Link
- href={user ?"/dashboard" :"/"}
- className="text-foreground mr-6 flex shrink-0 items-center gap-2 text-lg font-extrabold tracking-[-0.02em] no-underline"
- aria-label="Model Horse Hub — Home"
- >
- {/* eslint-disable-next-line @next/next/no-img-element */}
-  <img src="/logo.png" alt="Model Horse Hub" className="h-8 w-auto" />
-  <span className="sr-only">MHH</span>
- </Link>
+            <NavTrail />
+            <AppBackButton />
+            <Link
+                href={user ? "/dashboard" : "/"}
+                className="mr-6 flex shrink-0 items-center gap-2 text-lg font-extrabold tracking-[-0.02em] text-foreground no-underline"
+                aria-label="Model Horse Hub — Home"
+            >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/logo.png" alt="Model Horse Hub" className="h-8 w-auto" />
+                <span className="sr-only">MHH</span>
+            </Link>
 
- {/* ── Hamburger Button (mobile only) ── */}
- {user && (
- <button
- ref={hamburgerRef}
- className="leather-icon-btn relative hidden max-md:flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-md border border-input bg-transparent text-muted-foreground transition-all"
- onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
- aria-label={mobileMenuOpen ?"Close menu" :"Open menu"}
- aria-expanded={mobileMenuOpen ? "true" : "false"}
- >
- {unreadMessages > 0 && !mobileMenuOpen && (
- <span className="absolute -top-1 -right-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">{unreadMessages > 9 ? "9+" : unreadMessages}</span>
- )}
- {mobileMenuOpen ? (
- <svg
- width="20"
- height="20"
- viewBox="0 0 24 24"
- fill="none"
- stroke="currentColor"
- strokeWidth="2"
- strokeLinecap="round"
- strokeLinejoin="round"
- >
- <line x1="18" y1="6" x2="6" y2="18" />
- <line x1="6" y1="6" x2="18" y2="18" />
- </svg>
- ) : (
- <svg
- width="20"
- height="20"
- viewBox="0 0 24 24"
- fill="none"
- stroke="currentColor"
- strokeWidth="2"
- strokeLinecap="round"
- strokeLinejoin="round"
- >
- <line x1="3" y1="6" x2="21" y2="6" />
- <line x1="3" y1="12" x2="21" y2="12" />
- <line x1="3" y1="18" x2="21" y2="18" />
- </svg>
- )}
- </button>
- )}
+            {/* ── Hamburger Button (mobile only) ── */}
+            {user && (
+                <button
+                    ref={hamburgerRef}
+                    className="leather-icon-btn relative hidden h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-md border border-input bg-transparent text-muted-foreground transition-all max-md:flex"
+                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                    aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+                    aria-expanded={mobileMenuOpen ? "true" : "false"}
+                >
+                    {unreadMessages > 0 && !mobileMenuOpen && (
+                        <span className="absolute -top-1 -right-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                            {unreadMessages > 9 ? "9+" : unreadMessages}
+                        </span>
+                    )}
+                    {mobileMenuOpen ? (
+                        <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        >
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                    ) : (
+                        <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        >
+                            <line x1="3" y1="6" x2="21" y2="6" />
+                            <line x1="3" y1="12" x2="21" y2="12" />
+                            <line x1="3" y1="18" x2="21" y2="18" />
+                        </svg>
+                    )}
+                </button>
+            )}
 
- {/* ═══════════════════════════════════════════════════════════ */}
- {/* DESKTOP NAVIGATION — Priority+ progressive collapse */}
- {/* ═══════════════════════════════════════════════════════════ */}
- {user && (
- <div className="hidden md:flex min-w-0 flex-1 items-center justify-end gap-4">
- {/* Primary text links — measured by ResizeObserver */}
- <nav
- className="leather-nav relative flex min-w-0 flex-1 items-center gap-[2px] overflow-hidden"
- aria-label="Main navigation"
- ref={primaryNavRef}
- >
- {allLinks.map((link, i) => (
- <Link
- key={link.id}
- href={link.href}
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id={link.id}
- aria-current={pathname === link.href ? "page" : undefined}
- data-nav-item="true"
- style={
- i >= shownCount
- ? { position:"absolute", visibility:"hidden", pointerEvents:"none" }
- : undefined
- }
- >
- <link.Icon size={16} strokeWidth={1.5} /> {link.label}
- </Link>
- ))}
- </nav>
+            {/* ═══════════════════════════════════════════════════════════ */}
+            {/* DESKTOP NAVIGATION — Priority+ progressive collapse */}
+            {/* ═══════════════════════════════════════════════════════════ */}
+            {user && (
+                <div className="hidden min-w-0 flex-1 items-center justify-end gap-4 md:flex">
+                    {/* Primary text links — measured by ResizeObserver */}
+                    <nav
+                        className="leather-nav relative flex min-w-0 flex-1 items-center gap-[2px] overflow-hidden"
+                        aria-label="Main navigation"
+                        ref={primaryNavRef}
+                    >
+                        {allLinks.map((link, i) => (
+                            <Link
+                                key={link.id}
+                                href={link.href}
+                                className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+                                id={link.id}
+                                aria-current={pathname === link.href ? "page" : undefined}
+                                data-nav-item="true"
+                                style={
+                                    i >= shownCount
+                                        ? { position: "absolute", visibility: "hidden", pointerEvents: "none" }
+                                        : undefined
+                                }
+                            >
+                                <link.Icon size={16} strokeWidth={1.5} /> {link.label}
+                            </Link>
+                        ))}
+                    </nav>
 
- {/*"More" dropdown for overflow items */}
- {hasOverflow && (
- <div className="relative shrink-0" ref={moreMenuRef}>
- <button
- className="leather-nav-link flex cursor-pointer items-center gap-1 rounded-md border-0 bg-transparent px-2 py-1 font-[inherit] text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- onClick={() => setMoreMenuOpen(!moreMenuOpen)}
- aria-expanded={moreMenuOpen ? "true" : "false"}
- aria-label="More navigation links"
- >
- <MoreHorizontal size={16} strokeWidth={1.5} /> More
- <ChevronDown size={12} strokeWidth={2} className="ml-[2]" />
- </button>
- {moreMenuOpen && (
- <div className="absolute right-0 top-[calc(100%+8px)] z-[200] flex min-w-[200px] flex-col rounded-lg border border-input bg-card p-1 shadow-lg">
- {overflowLinks.map((link) => (
- <Link
- key={link.id}
- href={link.href}
- className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-muted-foreground no-underline transition-all"
- onClick={() => setMoreMenuOpen(false)}
- >
- <link.Icon size={16} strokeWidth={1.5} /> {link.label}
- </Link>
- ))}
- </div>
- )}
- </div>
- )}
+                    {/*"More" dropdown for overflow items */}
+                    {hasOverflow && (
+                        <div className="relative shrink-0" ref={moreMenuRef}>
+                            <button
+                                className="leather-nav-link flex cursor-pointer items-center gap-1 rounded-md border-0 bg-transparent px-2 py-1 font-[inherit] text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+                                onClick={() => setMoreMenuOpen(!moreMenuOpen)}
+                                aria-expanded={moreMenuOpen ? "true" : "false"}
+                                aria-label="More navigation links"
+                            >
+                                <MoreHorizontal size={16} strokeWidth={1.5} /> More
+                                <ChevronDown size={12} strokeWidth={2} className="ml-[2]" />
+                            </button>
+                            {moreMenuOpen && (
+                                <div className="absolute top-[calc(100%+8px)] right-0 z-[200] flex min-w-[200px] flex-col rounded-lg border border-input bg-card p-1 shadow-lg">
+                                    {overflowLinks.map((link) => (
+                                        <Link
+                                            key={link.id}
+                                            href={link.href}
+                                            className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-muted-foreground no-underline transition-all"
+                                            onClick={() => setMoreMenuOpen(false)}
+                                        >
+                                            <link.Icon size={16} strokeWidth={1.5} /> {link.label}
+                                        </Link>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
 
- {/* Icon action buttons */}
- <div className="flex items-center gap-1">
- <ThemeToggle />
- <NotificationBell />
- <Link
- href="/inbox"
- className="leather-icon-btn bg-card border-input relative flex h-[36px] w-[36px] items-center justify-center rounded-full border text-base text-muted-foreground no-underline transition-all"
- title="Inbox"
- id="nav-inbox-icon"
- >
- <svg
- width="18"
- height="18"
- viewBox="0 0 24 24"
- fill="none"
- stroke="currentColor"
- strokeWidth="2"
- strokeLinecap="round"
- strokeLinejoin="round"
- aria-hidden="true"
- >
- <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
- <polyline points="22,6 12,13 2,6" />
- </svg>
- {unreadMessages > 0 && (
- <span className="inbox-unread-badge">{unreadMessages > 9 ?"9+" : unreadMessages}</span>
- )}
- </Link>
- <Link
- href="/wishlist"
- className="leather-icon-btn bg-card border-input relative flex h-[36px] w-[36px] items-center justify-center rounded-full border text-base text-muted-foreground no-underline transition-all"
- title="Want List"
- id="nav-wishlist-icon"
- >
- <Bookmark size={18} strokeWidth={1.5} />
- </Link>
- </div>
+                    {/* Icon action buttons */}
+                    <div className="flex items-center gap-1">
+                        <ThemeToggle />
+                        <NotificationBell />
+                        <Link
+                            href="/inbox"
+                            className="leather-icon-btn relative flex h-[36px] w-[36px] items-center justify-center rounded-full border border-input bg-card text-base text-muted-foreground no-underline transition-all"
+                            title="Inbox"
+                            id="nav-inbox-icon"
+                        >
+                            <svg
+                                width="18"
+                                height="18"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                aria-hidden="true"
+                            >
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                                <polyline points="22,6 12,13 2,6" />
+                            </svg>
+                            {unreadMessages > 0 && (
+                                <span className="inbox-unread-badge">{unreadMessages > 9 ? "9+" : unreadMessages}</span>
+                            )}
+                        </Link>
+                        <Link
+                            href="/wishlist"
+                            className="leather-icon-btn relative flex h-[36px] w-[36px] items-center justify-center rounded-full border border-input bg-card text-base text-muted-foreground no-underline transition-all"
+                            title="Want List"
+                            id="nav-wishlist-icon"
+                        >
+                            <Bookmark size={18} strokeWidth={1.5} />
+                        </Link>
+                    </div>
 
- {/* User menu dropdown */}
- <div className="relative" ref={userMenuRef}>
- <button
- className="flex cursor-pointer items-center gap-1 rounded-full border-0 bg-transparent p-1 transition-all"
- onClick={() => setUserMenuOpen(!userMenuOpen)}
- aria-expanded={userMenuOpen ? "true" : "false"}
- aria-label="User menu"
- >
- <span className="brass-ring inline-flex h-[32px] w-[32px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-[rgb(245_245_244)] font-bold text-[var(--paper-lit-ink-soft)]">
- {avatarUrl ? (
- // eslint-disable-next-line @next/next/no-img-element
- <img
- src={avatarUrl}
- alt={aliasName ||"User"}
- width={32}
- height={32}
- className="h-[32px] w-[32px] rounded-full object-cover"
- referrerPolicy="no-referrer"
- />
- ) : aliasName ? (
- aliasName.charAt(0).toUpperCase()
- ) : (
-"U"
- )}
- </span>
- <svg
- width="12"
- height="12"
- viewBox="0 0 24 24"
- fill="none"
- stroke="currentColor"
- strokeWidth="2"
- strokeLinecap="round"
- strokeLinejoin="round"
- aria-hidden="true"
- className={`header-chevron ${userMenuOpen ?"header-chevron-open" :""}`}
- >
- <polyline points="6 9 12 15 18 9" />
- </svg>
- </button>
- {userMenuOpen && (
- <div className="absolute right-0 top-[calc(100%+8px)] z-[200] flex min-w-[200px] flex-col rounded-lg border border-input bg-card p-1 shadow-lg">
- <Link
- href={aliasName ? `/profile/${encodeURIComponent(aliasName)}` :"/settings"}
- className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-muted-foreground no-underline transition-all"
- onClick={() => setUserMenuOpen(false)}
- >
- <User size={16} strokeWidth={1.5} /> My Profile
- </Link>
- <Link
- href="/favorites"
- className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-favorites"
- onClick={() => setUserMenuOpen(false)}
- >
- <Heart size={16} strokeWidth={1.5} /> Favorites
- </Link>
- <Link
- href="/settings"
- className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-muted-foreground no-underline transition-all"
- onClick={() => setUserMenuOpen(false)}
- >
- <Settings size={16} strokeWidth={1.5} /> Settings
- </Link>
- <Link
- href="/claim"
- className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-muted-foreground no-underline transition-all"
- onClick={() => setUserMenuOpen(false)}
- >
- <Package size={16} strokeWidth={1.5} /> Claim
- </Link>
- <Link
- href="/studio/my-commissions"
- className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-muted-foreground no-underline transition-all"
- onClick={() => setUserMenuOpen(false)}
- >
- <Palette size={16} strokeWidth={1.5} /> My Commissions
- </Link>
- {isAdmin && (
- <Link
- href="/admin"
- className="text-forest flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-muted-foreground no-underline transition-all"
- onClick={() => setUserMenuOpen(false)}
- >
- <Zap size={16} strokeWidth={1.5} /> Admin
- </Link>
- )}
- <Link
-  href="/upgrade"
-  className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-amber-600 no-underline transition-all hover:bg-amber-50"
-  onClick={() => setUserMenuOpen(false)}
- >
-  <Gem size={16} strokeWidth={1.5} /> Upgrade to Pro
- </Link>
- <div className="mx-1 my-1 h-px bg-border" />
- <button
- className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-muted-foreground no-underline transition-all"
- onClick={() => {
- setUserMenuOpen(false);
- toggleSimpleMode();
- }}
- >
- {isSimpleMode ? (
- <>
- <Eye size={16} strokeWidth={1.5} /> Simple Mode: ON
- </>
- ) : (
- <>
- <EyeOff size={16} strokeWidth={1.5} /> Simple Mode
- </>
- )}
- </button>
- <button
- className="text-muted-foreground flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-muted-foreground no-underline transition-all"
- onClick={() => {
- setUserMenuOpen(false);
- handleSignOut();
- }}
- >
- <LogOut size={16} strokeWidth={1.5} /> Sign Out
- </button>
- </div>
- )}
- </div>
- </div>
- )}
+                    {/* User menu dropdown */}
+                    <div className="relative" ref={userMenuRef}>
+                        <button
+                            className="flex cursor-pointer items-center gap-1 rounded-full border-0 bg-transparent p-1 transition-all"
+                            onClick={() => setUserMenuOpen(!userMenuOpen)}
+                            aria-expanded={userMenuOpen ? "true" : "false"}
+                            aria-label="User menu"
+                        >
+                            <span className="brass-ring inline-flex h-[32px] w-[32px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-[rgb(245_245_244)] font-bold text-[var(--paper-lit-ink-soft)]">
+                                {avatarUrl ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img
+                                        src={avatarUrl}
+                                        alt={aliasName || "User"}
+                                        width={32}
+                                        height={32}
+                                        className="h-[32px] w-[32px] rounded-full object-cover"
+                                        referrerPolicy="no-referrer"
+                                    />
+                                ) : aliasName ? (
+                                    aliasName.charAt(0).toUpperCase()
+                                ) : (
+                                    "U"
+                                )}
+                            </span>
+                            <svg
+                                width="12"
+                                height="12"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                aria-hidden="true"
+                                className={`header-chevron ${userMenuOpen ? "header-chevron-open" : ""}`}
+                            >
+                                <polyline points="6 9 12 15 18 9" />
+                            </svg>
+                        </button>
+                        {userMenuOpen && (
+                            <div className="absolute top-[calc(100%+8px)] right-0 z-[200] flex min-w-[200px] flex-col rounded-lg border border-input bg-card p-1 shadow-lg">
+                                <Link
+                                    href={aliasName ? `/profile/${encodeURIComponent(aliasName)}` : "/settings"}
+                                    className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-muted-foreground no-underline transition-all"
+                                    onClick={() => setUserMenuOpen(false)}
+                                >
+                                    <User size={16} strokeWidth={1.5} /> My Profile
+                                </Link>
+                                <Link
+                                    href="/favorites"
+                                    className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-muted-foreground no-underline transition-all"
+                                    id="nav-favorites"
+                                    onClick={() => setUserMenuOpen(false)}
+                                >
+                                    <Heart size={16} strokeWidth={1.5} /> Favorites
+                                </Link>
+                                <Link
+                                    href="/settings"
+                                    className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-muted-foreground no-underline transition-all"
+                                    onClick={() => setUserMenuOpen(false)}
+                                >
+                                    <Settings size={16} strokeWidth={1.5} /> Settings
+                                </Link>
+                                <Link
+                                    href="/claim"
+                                    className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-muted-foreground no-underline transition-all"
+                                    onClick={() => setUserMenuOpen(false)}
+                                >
+                                    <Package size={16} strokeWidth={1.5} /> Claim
+                                </Link>
+                                <Link
+                                    href="/studio/my-commissions"
+                                    className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-muted-foreground no-underline transition-all"
+                                    onClick={() => setUserMenuOpen(false)}
+                                >
+                                    <Palette size={16} strokeWidth={1.5} /> My Commissions
+                                </Link>
+                                {isAdmin && (
+                                    <Link
+                                        href="/admin"
+                                        className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-forest text-muted-foreground no-underline transition-all"
+                                        onClick={() => setUserMenuOpen(false)}
+                                    >
+                                        <Zap size={16} strokeWidth={1.5} /> Admin
+                                    </Link>
+                                )}
+                                <Link
+                                    href="/upgrade"
+                                    className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-amber-600 no-underline transition-all hover:bg-amber-50"
+                                    onClick={() => setUserMenuOpen(false)}
+                                >
+                                    <Gem size={16} strokeWidth={1.5} /> Upgrade to Pro
+                                </Link>
+                                <div className="mx-1 my-1 h-px bg-border" />
+                                <button
+                                    className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-muted-foreground no-underline transition-all"
+                                    onClick={() => {
+                                        setUserMenuOpen(false);
+                                        toggleSimpleMode();
+                                    }}
+                                >
+                                    {isSimpleMode ? (
+                                        <>
+                                            <Eye size={16} strokeWidth={1.5} /> Simple Mode: ON
+                                        </>
+                                    ) : (
+                                        <>
+                                            <EyeOff size={16} strokeWidth={1.5} /> Simple Mode
+                                        </>
+                                    )}
+                                </button>
+                                <button
+                                    className="flex w-full cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent px-4 py-2 text-left text-sm whitespace-nowrap text-muted-foreground no-underline transition-all"
+                                    onClick={() => {
+                                        setUserMenuOpen(false);
+                                        handleSignOut();
+                                    }}
+                                >
+                                    <LogOut size={16} strokeWidth={1.5} /> Sign Out
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
 
- {/* ═══════════════════════════════════════════════════════════ */}
- {/* MOBILE NAVIGATION — Full menu in hamburger dropdown */}
- {/* ═══════════════════════════════════════════════════════════ */}
- {user && (
- <nav
- ref={navRef}
- className={`leather-menu absolute left-0 top-[var(--header-height)] z-[150] flex max-h-[calc(100dvh-var(--header-height))] w-full flex-col gap-1 overflow-y-auto border-b border-input bg-secondary px-4 py-3 shadow-lg transition-all md:hidden ${mobileMenuOpen ?"" :"hidden"}`}
- aria-label="Mobile navigation"
- >
- {/* The five rooms, in the order the desktop bar walks them. */}
- <span className="mb-0.5 px-2 text-[0.65rem] font-bold tracking-[0.14em] uppercase text-muted-foreground" aria-hidden="true">The rooms</span>
- <Link
- href="/dashboard"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-stable-m"
- onClick={closeMobileMenu}
- >
- <Home size={16} strokeWidth={1.5} /> Digital Stable
- </Link>
- <Link
- href="/shows"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-shows-m"
- onClick={closeMobileMenu}
- >
- <Camera size={16} strokeWidth={1.5} /> Shows
- </Link>
- <Link
- href="/market"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-market-m"
- onClick={closeMobileMenu}
- >
- <TrendingUp size={16} strokeWidth={1.5} /> Market
- </Link>
- <Link
- href="/feed"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-feed-m"
- onClick={closeMobileMenu}
- >
- <Newspaper size={16} strokeWidth={1.5} /> The Paddock
- </Link>
- <Link
- href="/catalog"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-catalog-m"
- onClick={closeMobileMenu}
- >
- <BookOpen size={16} strokeWidth={1.5} /> Registry
- </Link>
- {/* The inner rooms — what the desktop bar keeps under More. */}
- <span className="mt-3 mb-0.5 px-2 text-[0.65rem] font-bold tracking-[0.14em] uppercase text-muted-foreground" aria-hidden="true">Inside the Paddock</span>
- {/* Short on purpose: Barns, Events, Members and Art Studios are one
+            {/* ═══════════════════════════════════════════════════════════ */}
+            {/* MOBILE NAVIGATION — Full menu in hamburger dropdown */}
+            {/* ═══════════════════════════════════════════════════════════ */}
+            {user && (
+                <nav
+                    ref={navRef}
+                    className={`leather-menu absolute top-[var(--header-height)] left-0 z-[150] flex max-h-[calc(100dvh-var(--header-height))] w-full flex-col gap-1 overflow-y-auto border-b border-input bg-secondary px-4 py-3 shadow-lg transition-all md:hidden ${mobileMenuOpen ? "" : "hidden"}`}
+                    aria-label="Mobile navigation"
+                >
+                    {/* The five rooms, in the order the desktop bar walks them. */}
+                    <span
+                        className="mb-0.5 px-2 text-[0.65rem] font-bold tracking-[0.14em] text-muted-foreground uppercase"
+                        aria-hidden="true"
+                    >
+                        The rooms
+                    </span>
+                    <Link
+                        href="/dashboard"
+                        className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+                        id="nav-stable-m"
+                        onClick={closeMobileMenu}
+                    >
+                        <Home size={16} strokeWidth={1.5} /> Digital Stable
+                    </Link>
+                    <Link
+                        href="/shows"
+                        className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+                        id="nav-shows-m"
+                        onClick={closeMobileMenu}
+                    >
+                        <Camera size={16} strokeWidth={1.5} /> Shows
+                    </Link>
+                    <Link
+                        href="/market"
+                        className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+                        id="nav-market-m"
+                        onClick={closeMobileMenu}
+                    >
+                        <TrendingUp size={16} strokeWidth={1.5} /> Market
+                    </Link>
+                    <Link
+                        href="/feed"
+                        className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+                        id="nav-feed-m"
+                        onClick={closeMobileMenu}
+                    >
+                        <Newspaper size={16} strokeWidth={1.5} /> The Paddock
+                    </Link>
+                    <Link
+                        href="/catalog"
+                        className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+                        id="nav-catalog-m"
+                        onClick={closeMobileMenu}
+                    >
+                        <BookOpen size={16} strokeWidth={1.5} /> Registry
+                    </Link>
+                    {/* The inner rooms — what the desktop bar keeps under More. */}
+                    <span
+                        className="mt-3 mb-0.5 px-2 text-[0.65rem] font-bold tracking-[0.14em] text-muted-foreground uppercase"
+                        aria-hidden="true"
+                    >
+                        Inside the Paddock
+                    </span>
+                    {/* Short on purpose: Barns, Events, Members and Art Studios are one
      tap away inside the Paddock, and a phone menu that scrolls is a
      menu people miss the end of (owner, 2026-09-27). */}
- <Link
- href="/community"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-community-m"
- onClick={closeMobileMenu}
- >
- <Trophy size={16} strokeWidth={1.5} /> Show Ring
- </Link>
- <Link
- href="/calendar"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-calendar-m"
- onClick={closeMobileMenu}
- >
- <CalendarDays size={16} strokeWidth={1.5} /> Calendar
- </Link>
- <Link
- href="/community/help-id"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-helpid-m"
- onClick={closeMobileMenu}
- >
- <Search size={16} strokeWidth={1.5} /> Help ID
- </Link>
- {artistSlug && (
- <Link
- href="/studio/dashboard"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-studio-m"
- onClick={closeMobileMenu}
- >
- <Palette size={16} strokeWidth={1.5} /> My Studio
- </Link>
- )}
- {/* The member's own doors. */}
- <span className="mt-3 mb-0.5 px-2 text-[0.65rem] font-bold tracking-[0.14em] uppercase text-muted-foreground" aria-hidden="true">Yours</span>
- <Link
- href={aliasName ? `/profile/${encodeURIComponent(aliasName)}` :"/settings"}
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-profile-m"
- onClick={closeMobileMenu}
- >
- <User size={16} strokeWidth={1.5} /> My Profile
- </Link>
- <Link
- href="/inbox"
- className="relative flex items-center gap-1 gap-[4px] rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-inbox-m"
- onClick={closeMobileMenu}
- >
- <Mail size={16} strokeWidth={1.5} />
- Inbox
- {unreadMessages > 0 && (
- <span className="inbox-unread-badge">{unreadMessages > 9 ?"9+" : unreadMessages}</span>
- )}
- </Link>
- {/* On a phone the bell's dropdown is position:fixed inside a menu
+                    <Link
+                        href="/community"
+                        className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+                        id="nav-community-m"
+                        onClick={closeMobileMenu}
+                    >
+                        <Trophy size={16} strokeWidth={1.5} /> Show Ring
+                    </Link>
+                    <Link
+                        href="/calendar"
+                        className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+                        id="nav-calendar-m"
+                        onClick={closeMobileMenu}
+                    >
+                        <CalendarDays size={16} strokeWidth={1.5} /> Calendar
+                    </Link>
+                    <Link
+                        href="/community/help-id"
+                        className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+                        id="nav-helpid-m"
+                        onClick={closeMobileMenu}
+                    >
+                        <Search size={16} strokeWidth={1.5} /> Help ID
+                    </Link>
+                    {artistSlug && (
+                        <Link
+                            href="/studio/dashboard"
+                            className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+                            id="nav-studio-m"
+                            onClick={closeMobileMenu}
+                        >
+                            <Palette size={16} strokeWidth={1.5} /> My Studio
+                        </Link>
+                    )}
+                    {/* The member's own doors. */}
+                    <span
+                        className="mt-3 mb-0.5 px-2 text-[0.65rem] font-bold tracking-[0.14em] text-muted-foreground uppercase"
+                        aria-hidden="true"
+                    >
+                        Yours
+                    </span>
+                    <Link
+                        href={aliasName ? `/profile/${encodeURIComponent(aliasName)}` : "/settings"}
+                        className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+                        id="nav-profile-m"
+                        onClick={closeMobileMenu}
+                    >
+                        <User size={16} strokeWidth={1.5} /> My Profile
+                    </Link>
+                    <Link
+                        href="/inbox"
+                        className="relative flex items-center gap-1 gap-[4px] rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+                        id="nav-inbox-m"
+                        onClick={closeMobileMenu}
+                    >
+                        <Mail size={16} strokeWidth={1.5} />
+                        Inbox
+                        {unreadMessages > 0 && (
+                            <span className="inbox-unread-badge">{unreadMessages > 9 ? "9+" : unreadMessages}</span>
+                        )}
+                    </Link>
+                    {/* On a phone the bell's dropdown is position:fixed inside a menu
      that is itself positioned, so it opened wherever the menu had
      scrolled to — often off-screen ("opens to a spot you cannot
      read", 2026-09-27). The menu links to the full page instead. */}
- <Link
- href="/notifications"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-notifications-m"
- onClick={closeMobileMenu}
- >
- <Bell size={16} strokeWidth={1.5} /> Notifications
- {unreadNotifications > 0 && (
- <span className="inbox-unread-badge">{unreadNotifications > 9 ? "9+" : unreadNotifications}</span>
- )}
- </Link>
- <Link
- href="/wishlist"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-wishlist-m"
- onClick={closeMobileMenu}
- >
- <Bookmark size={16} strokeWidth={1.5} /> Want List
- </Link>
- <Link
- href="/favorites"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-favorites-m"
- onClick={closeMobileMenu}
- >
- <Heart size={16} strokeWidth={1.5} /> Favorites
- </Link>
- <Link
- href="/claim"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-claim-m"
- onClick={closeMobileMenu}
- >
- <Package size={16} strokeWidth={1.5} /> Claim
- </Link>
- <Link
- href="/settings"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-settings-m"
- onClick={closeMobileMenu}
- >
- <Settings size={16} strokeWidth={1.5} /> Settings
- </Link>
- <ThemeToggle />
- {isAdmin && (
- <Link
- href="/admin"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-bold whitespace-nowrap text-[#f59e0b] no-underline transition-all"
- id="nav-admin-m"
- onClick={closeMobileMenu}
- >
- Admin <Zap size={16} strokeWidth={1.5} />
- </Link>
- )}
- {/* ── Mobile-only: Upgrade + Sign Out + Simple Mode ── */}
- <div className="mt-2 flex flex-col gap-1 border-t border-input pt-2">
- <Link
-  href="/upgrade"
-  className="flex items-center gap-1 rounded-md bg-gradient-to-r from-amber-50 to-orange-50 px-2 py-1.5 text-sm font-semibold whitespace-nowrap text-amber-700 no-underline transition-all"
-  id="nav-upgrade-m"
-  onClick={closeMobileMenu}
- >
-  <Gem size={16} strokeWidth={1.5} /> 💎 Upgrade to Pro
- </Link>
- <button
- className="flex w-full cursor-pointer items-center justify-start gap-2 rounded-md border-0 bg-transparent px-2 py-1 text-left text-sm text-muted-foreground transition-all"
- onClick={() => {
- closeMobileMenu();
- handleSignOut();
- }}
- >
- <LogOut size={16} strokeWidth={1.5} /> Sign Out
- </button>
- <button
- className="border-input bg-card relative flex h-auto w-full cursor-pointer items-center justify-start gap-2 rounded-full border px-2 py-1 text-sm text-muted-foreground transition-all"
- onClick={() => toggleSimpleMode()}
- aria-pressed={isSimpleMode ? "true" : "false"}
- >
- {isSimpleMode ? (
- <>
- <Eye size={16} strokeWidth={1.5} /> Simple Mode: ON
- </>
- ) : (
- <>
- <EyeOff size={16} strokeWidth={1.5} /> Simple Mode: OFF
- </>
- )}
- </button>
- </div>
- </nav>
- )}
+                    <Link
+                        href="/notifications"
+                        className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+                        id="nav-notifications-m"
+                        onClick={closeMobileMenu}
+                    >
+                        <Bell size={16} strokeWidth={1.5} /> Notifications
+                        {unreadNotifications > 0 && (
+                            <span className="inbox-unread-badge">
+                                {unreadNotifications > 9 ? "9+" : unreadNotifications}
+                            </span>
+                        )}
+                    </Link>
+                    <Link
+                        href="/wishlist"
+                        className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+                        id="nav-wishlist-m"
+                        onClick={closeMobileMenu}
+                    >
+                        <Bookmark size={16} strokeWidth={1.5} /> Want List
+                    </Link>
+                    <Link
+                        href="/favorites"
+                        className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+                        id="nav-favorites-m"
+                        onClick={closeMobileMenu}
+                    >
+                        <Heart size={16} strokeWidth={1.5} /> Favorites
+                    </Link>
+                    <Link
+                        href="/claim"
+                        className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+                        id="nav-claim-m"
+                        onClick={closeMobileMenu}
+                    >
+                        <Package size={16} strokeWidth={1.5} /> Claim
+                    </Link>
+                    <Link
+                        href="/settings"
+                        className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+                        id="nav-settings-m"
+                        onClick={closeMobileMenu}
+                    >
+                        <Settings size={16} strokeWidth={1.5} /> Settings
+                    </Link>
+                    <ThemeToggle />
+                    {isAdmin && (
+                        <Link
+                            href="/admin"
+                            className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-bold whitespace-nowrap text-[#f59e0b] no-underline transition-all"
+                            id="nav-admin-m"
+                            onClick={closeMobileMenu}
+                        >
+                            Admin <Zap size={16} strokeWidth={1.5} />
+                        </Link>
+                    )}
+                    {/* ── Mobile-only: Upgrade + Sign Out + Simple Mode ── */}
+                    <div className="mt-2 flex flex-col gap-1 border-t border-input pt-2">
+                        <Link
+                            href="/upgrade"
+                            className="flex items-center gap-1 rounded-md bg-gradient-to-r from-amber-50 to-orange-50 px-2 py-1.5 text-sm font-semibold whitespace-nowrap text-amber-700 no-underline transition-all"
+                            id="nav-upgrade-m"
+                            onClick={closeMobileMenu}
+                        >
+                            <Gem size={16} strokeWidth={1.5} /> 💎 Upgrade to Pro
+                        </Link>
+                        <button
+                            className="flex w-full cursor-pointer items-center justify-start gap-2 rounded-md border-0 bg-transparent px-2 py-1 text-left text-sm text-muted-foreground transition-all"
+                            onClick={() => {
+                                closeMobileMenu();
+                                handleSignOut();
+                            }}
+                        >
+                            <LogOut size={16} strokeWidth={1.5} /> Sign Out
+                        </button>
+                        <button
+                            className="relative flex h-auto w-full cursor-pointer items-center justify-start gap-2 rounded-full border border-input bg-card px-2 py-1 text-sm text-muted-foreground transition-all"
+                            onClick={() => toggleSimpleMode()}
+                            aria-pressed={isSimpleMode ? "true" : "false"}
+                        >
+                            {isSimpleMode ? (
+                                <>
+                                    <Eye size={16} strokeWidth={1.5} /> Simple Mode: ON
+                                </>
+                            ) : (
+                                <>
+                                    <EyeOff size={16} strokeWidth={1.5} /> Simple Mode: OFF
+                                </>
+                            )}
+                        </button>
+                    </div>
+                </nav>
+            )}
 
- {/* ── Public Navigation (not signed in) ── */}
- {!user && (
- <nav
- className="leather-nav flex flex-row items-center gap-4 max-md:hidden"
- aria-label="Public navigation"
- >
- <Link
- href="/shows"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-shows-public"
- >
- <Camera size={16} strokeWidth={1.5} /> Shows
- </Link>
- <Link
- href="/catalog"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-catalog-public"
- >
- <BookOpen size={16} strokeWidth={1.5} /> Registry
- </Link>
- <Link
- href="/about"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-about"
- >
- About
- </Link>
- </nav>
- )}
+            {/* ── Public Navigation (not signed in) ── */}
+            {!user && (
+                <nav
+                    className="leather-nav flex flex-row items-center gap-4 max-md:hidden"
+                    aria-label="Public navigation"
+                >
+                    <Link
+                        href="/shows"
+                        className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+                        id="nav-shows-public"
+                    >
+                        <Camera size={16} strokeWidth={1.5} /> Shows
+                    </Link>
+                    <Link
+                        href="/catalog"
+                        className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+                        id="nav-catalog-public"
+                    >
+                        <BookOpen size={16} strokeWidth={1.5} /> Registry
+                    </Link>
+                    <Link
+                        href="/about"
+                        className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+                        id="nav-about"
+                    >
+                        About
+                    </Link>
+                </nav>
+            )}
 
- {/* ── Mobile navigation for logged-out users ── */}
- {!user && (
- <nav
- ref={navRef}
- className={`leather-menu absolute left-0 top-[var(--header-height)] z-[150] flex max-h-[calc(100dvh-var(--header-height))] w-full flex-col gap-1 overflow-y-auto border-b border-input bg-secondary px-4 py-3 shadow-lg transition-all md:hidden ${mobileMenuOpen ?"" :"hidden"}`}
- aria-label="Mobile navigation"
- >
- <Link
- href="/shows"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-shows-public-m"
- onClick={closeMobileMenu}
- >
- <Camera size={16} strokeWidth={1.5} /> Shows
- </Link>
- <Link
- href="/catalog"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-catalog-public-m"
- onClick={closeMobileMenu}
- >
- <BookOpen size={16} strokeWidth={1.5} /> Registry
- </Link>
- <Link
- href="/about"
- className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
- id="nav-about-m"
- onClick={closeMobileMenu}
- >
- About
- </Link>
- <div className="mt-2 flex flex-col gap-2 border-t border-input pt-3">
- <Button asChild variant="ghost"><Link
- href="/login"
- id="header-login-button-m"
- onClick={closeMobileMenu}
- >
- Log In
- </Link></Button>
- <Button asChild><Link
- href="/signup"
- id="header-signup-button-m"
- onClick={closeMobileMenu}
- >
- Create Free Account
- </Link></Button>
- <button
- className="border-input bg-card relative flex h-auto w-full cursor-pointer items-center justify-start gap-2 rounded-full border px-2 py-1 text-sm text-muted-foreground transition-all"
- onClick={() => toggleSimpleMode()}
- aria-pressed={isSimpleMode ? "true" : "false"}
- >
- {isSimpleMode ? (
- <>
- <Eye size={16} strokeWidth={1.5} /> Simple Mode: ON
- </>
- ) : (
- <>
- <EyeOff size={16} strokeWidth={1.5} /> Simple Mode: OFF
- </>
- )}
- </button>
- </div>
- </nav>
- )}
+            {/* ── Mobile navigation for logged-out users ── */}
+            {!user && (
+                <nav
+                    ref={navRef}
+                    className={`leather-menu absolute top-[var(--header-height)] left-0 z-[150] flex max-h-[calc(100dvh-var(--header-height))] w-full flex-col gap-1 overflow-y-auto border-b border-input bg-secondary px-4 py-3 shadow-lg transition-all md:hidden ${mobileMenuOpen ? "" : "hidden"}`}
+                    aria-label="Mobile navigation"
+                >
+                    <Link
+                        href="/shows"
+                        className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+                        id="nav-shows-public-m"
+                        onClick={closeMobileMenu}
+                    >
+                        <Camera size={16} strokeWidth={1.5} /> Shows
+                    </Link>
+                    <Link
+                        href="/catalog"
+                        className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+                        id="nav-catalog-public-m"
+                        onClick={closeMobileMenu}
+                    >
+                        <BookOpen size={16} strokeWidth={1.5} /> Registry
+                    </Link>
+                    <Link
+                        href="/about"
+                        className="flex items-center gap-1 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap text-muted-foreground no-underline transition-all"
+                        id="nav-about-m"
+                        onClick={closeMobileMenu}
+                    >
+                        About
+                    </Link>
+                    <div className="mt-2 flex flex-col gap-2 border-t border-input pt-3">
+                        <Button asChild variant="ghost">
+                            <Link href="/login" id="header-login-button-m" onClick={closeMobileMenu}>
+                                Log In
+                            </Link>
+                        </Button>
+                        <Button asChild>
+                            <Link href="/signup" id="header-signup-button-m" onClick={closeMobileMenu}>
+                                Create Free Account
+                            </Link>
+                        </Button>
+                        <button
+                            className="relative flex h-auto w-full cursor-pointer items-center justify-start gap-2 rounded-full border border-input bg-card px-2 py-1 text-sm text-muted-foreground transition-all"
+                            onClick={() => toggleSimpleMode()}
+                            aria-pressed={isSimpleMode ? "true" : "false"}
+                        >
+                            {isSimpleMode ? (
+                                <>
+                                    <Eye size={16} strokeWidth={1.5} /> Simple Mode: ON
+                                </>
+                            ) : (
+                                <>
+                                    <EyeOff size={16} strokeWidth={1.5} /> Simple Mode: OFF
+                                </>
+                            )}
+                        </button>
+                    </div>
+                </nav>
+            )}
 
- {/* ── Auth actions for logged-out users (+ mobile hamburger) ── */}
- {!user && (
- <div className="flex shrink-0 items-center gap-4 max-md:gap-2">
- {/* Log In stays visible on mobile — hiding it in the hamburger
+            {/* ── Auth actions for logged-out users (+ mobile hamburger) ── */}
+            {!user && (
+                <div className="flex shrink-0 items-center gap-4 max-md:gap-2">
+                    {/* Log In stays visible on mobile — hiding it in the hamburger
      made returning members think there was no way in
      (user-reported). Signup label compacts to fit both.
      Color: the global `a` rule paints bare links forest — invisible
      on the leather band (user-reported). The band's own text token
      keeps it legible in every theme that repaints the band. */}
- <Button
- asChild
- variant="ghost"
- className="text-[color:var(--leather-text)] hover:bg-white/10 hover:text-[color:var(--leather-text)]"
- ><Link
- href="/login"
- id="header-login-button"
- >
- Log In
- </Link></Button>
- <Button asChild><Link
- href="/signup"
- id="header-signup-button"
- >
- <span className="max-md:hidden">Create Free Account</span>
- <span className="md:hidden">Sign Up</span>
- </Link></Button>
- <button
- ref={hamburgerRef}
- className="leather-icon-btn relative hidden max-md:flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-md border border-input bg-transparent text-muted-foreground transition-all"
- onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
- aria-label={mobileMenuOpen ?"Close menu" :"Open menu"}
- aria-expanded={mobileMenuOpen ? "true" : "false"}
- id="public-hamburger"
- >
- {mobileMenuOpen ? (
- <svg
- width="20"
- height="20"
- viewBox="0 0 24 24"
- fill="none"
- stroke="currentColor"
- strokeWidth="2"
- strokeLinecap="round"
- strokeLinejoin="round"
- >
- <line x1="18" y1="6" x2="6" y2="18" />
- <line x1="6" y1="6" x2="18" y2="18" />
- </svg>
- ) : (
- <svg
- width="20"
- height="20"
- viewBox="0 0 24 24"
- fill="none"
- stroke="currentColor"
- strokeWidth="2"
- strokeLinecap="round"
- strokeLinejoin="round"
- >
- <line x1="3" y1="6" x2="21" y2="6" />
- <line x1="3" y1="12" x2="21" y2="12" />
- <line x1="3" y1="18" x2="21" y2="18" />
- </svg>
- )}
- </button>
- <button
- className="border-input bg-card relative flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-full border text-[1.2rem] text-muted-foreground transition-all max-md:hidden"
- onClick={toggleSimpleMode}
- aria-pressed={isSimpleMode ? "true" : "false"}
- aria-label={
- isSimpleMode
- ?"Disable Simple Mode (high contrast and large text)"
- :"Enable Simple Mode (high contrast and large text)"
- }
- title={isSimpleMode ?"Simple Mode: ON" :"Simple Mode: OFF"}
- id="simple-mode-toggle"
- >
- {isSimpleMode ? (
- <svg
- width="20"
- height="20"
- viewBox="0 0 24 24"
- fill="none"
- stroke="currentColor"
- strokeWidth="2"
- strokeLinecap="round"
- strokeLinejoin="round"
- aria-hidden="true"
- >
- <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
- <circle cx="12" cy="12" r="3" />
- </svg>
- ) : (
- <svg
- width="20"
- height="20"
- viewBox="0 0 24 24"
- fill="none"
- stroke="currentColor"
- strokeWidth="2"
- strokeLinecap="round"
- strokeLinejoin="round"
- aria-hidden="true"
- >
- <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
- <line x1="1" y1="1" x2="23" y2="23" />
- </svg>
- )}
- <span className="bg-card border-input pointer-events-none absolute right-0 bottom-[-36px] rounded-sm border px-[10px] py-[4px] whitespace-nowrap text-muted-foreground text-[var(--font-size-xs)] opacity-0 transition-opacity">
- {isSimpleMode ?"Simple Mode: ON" :"Simple Mode: OFF"}
- </span>
- </button>
- </div>
- )}
- </header>
- );
+                    <Button
+                        asChild
+                        variant="ghost"
+                        className="text-[color:var(--leather-text)] hover:bg-white/10 hover:text-[color:var(--leather-text)]"
+                    >
+                        <Link href="/login" id="header-login-button">
+                            Log In
+                        </Link>
+                    </Button>
+                    <Button asChild>
+                        <Link href="/signup" id="header-signup-button">
+                            <span className="max-md:hidden">Create Free Account</span>
+                            <span className="md:hidden">Sign Up</span>
+                        </Link>
+                    </Button>
+                    <button
+                        ref={hamburgerRef}
+                        className="leather-icon-btn relative hidden h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-md border border-input bg-transparent text-muted-foreground transition-all max-md:flex"
+                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                        aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+                        aria-expanded={mobileMenuOpen ? "true" : "false"}
+                        id="public-hamburger"
+                    >
+                        {mobileMenuOpen ? (
+                            <svg
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            >
+                                <line x1="18" y1="6" x2="6" y2="18" />
+                                <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                        ) : (
+                            <svg
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            >
+                                <line x1="3" y1="6" x2="21" y2="6" />
+                                <line x1="3" y1="12" x2="21" y2="12" />
+                                <line x1="3" y1="18" x2="21" y2="18" />
+                            </svg>
+                        )}
+                    </button>
+                    <button
+                        className="relative flex h-[40px] w-[40px] cursor-pointer items-center justify-center rounded-full border border-input bg-card text-[1.2rem] text-muted-foreground transition-all max-md:hidden"
+                        onClick={toggleSimpleMode}
+                        aria-pressed={isSimpleMode ? "true" : "false"}
+                        aria-label={
+                            isSimpleMode
+                                ? "Disable Simple Mode (high contrast and large text)"
+                                : "Enable Simple Mode (high contrast and large text)"
+                        }
+                        title={isSimpleMode ? "Simple Mode: ON" : "Simple Mode: OFF"}
+                        id="simple-mode-toggle"
+                    >
+                        {isSimpleMode ? (
+                            <svg
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                aria-hidden="true"
+                            >
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+                        ) : (
+                            <svg
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                aria-hidden="true"
+                            >
+                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                                <line x1="1" y1="1" x2="23" y2="23" />
+                            </svg>
+                        )}
+                        <span className="pointer-events-none absolute right-0 bottom-[-36px] rounded-sm border border-input bg-card px-[10px] py-[4px] whitespace-nowrap text-[var(--font-size-xs)] text-muted-foreground opacity-0 transition-opacity">
+                            {isSimpleMode ? "Simple Mode: ON" : "Simple Mode: OFF"}
+                        </span>
+                    </button>
+                </div>
+            )}
+        </header>
+    );
 }

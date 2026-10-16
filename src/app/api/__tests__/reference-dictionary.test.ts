@@ -18,9 +18,33 @@ describe("GET /api/reference-dictionary", () => {
         // The route paginates — first page returns data, second returns empty
         mockClient._setImplicitResolve({
             data: [
-                { id: "r1", item_type: "plastic_release", parent_id: "m1", title: "Adios", maker: "Breyer", scale: "Traditional", attributes: { model_number: "30", color_description: "Palomino" } },
-                { id: "m1", item_type: "plastic_mold", parent_id: null, title: "Adios", maker: "Breyer", scale: "Traditional", attributes: {} },
-                { id: "a1", item_type: "artist_resin", parent_id: null, title: "Fjord", maker: "Jane Smith", scale: "1:9", attributes: {} },
+                {
+                    id: "r1",
+                    item_type: "plastic_release",
+                    parent_id: "m1",
+                    title: "Adios",
+                    maker: "Breyer",
+                    scale: "Traditional",
+                    attributes: { model_number: "30", color_description: "Palomino" },
+                },
+                {
+                    id: "m1",
+                    item_type: "plastic_mold",
+                    parent_id: null,
+                    title: "Adios",
+                    maker: "Breyer",
+                    scale: "Traditional",
+                    attributes: {},
+                },
+                {
+                    id: "a1",
+                    item_type: "artist_resin",
+                    parent_id: null,
+                    title: "Fjord",
+                    maker: "Jane Smith",
+                    scale: "1:9",
+                    attributes: {},
+                },
             ],
             error: null,
         });
@@ -37,8 +61,24 @@ describe("GET /api/reference-dictionary", () => {
     it("releases have compressed keys (i, n, m, c, mn, mf)", async () => {
         mockClient._setImplicitResolve({
             data: [
-                { id: "r1", item_type: "plastic_release", parent_id: "m1", title: "Adios Release", maker: "Breyer", scale: "Traditional", attributes: { model_number: "30", color_description: "Palomino" } },
-                { id: "m1", item_type: "plastic_mold", parent_id: null, title: "Adios Mold", maker: "Breyer", scale: "Traditional", attributes: {} },
+                {
+                    id: "r1",
+                    item_type: "plastic_release",
+                    parent_id: "m1",
+                    title: "Adios Release",
+                    maker: "Breyer",
+                    scale: "Traditional",
+                    attributes: { model_number: "30", color_description: "Palomino" },
+                },
+                {
+                    id: "m1",
+                    item_type: "plastic_mold",
+                    parent_id: null,
+                    title: "Adios Mold",
+                    maker: "Breyer",
+                    scale: "Traditional",
+                    attributes: {},
+                },
             ],
             error: null,
         });
@@ -58,7 +98,15 @@ describe("GET /api/reference-dictionary", () => {
     it("resins have compressed keys (i, n, s)", async () => {
         mockClient._setImplicitResolve({
             data: [
-                { id: "a1", item_type: "artist_resin", parent_id: null, title: "Fjord", maker: "Jane Smith", scale: "1:9", attributes: {} },
+                {
+                    id: "a1",
+                    item_type: "artist_resin",
+                    parent_id: null,
+                    title: "Fjord",
+                    maker: "Jane Smith",
+                    scale: "1:9",
+                    attributes: {},
+                },
             ],
             error: null,
         });

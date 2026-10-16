@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from"react";
-import Link from"next/link";
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-const COOKIE_CONSENT_KEY ="mhh-cookie-consent";
+const COOKIE_CONSENT_KEY = "mhh-cookie-consent";
 
 /**
  * CookieConsent — GDPR/CCPA-compliant cookie notice.
@@ -14,78 +14,78 @@ const COOKIE_CONSENT_KEY ="mhh-cookie-consent";
  * No advertising cookies, no third-party trackers.
  */
 export default function CookieConsent() {
- const [visible, setVisible] = useState(false);
+    const [visible, setVisible] = useState(false);
 
- useEffect(() => {
- // Don't show if user has already consented
- const consent = localStorage.getItem(COOKIE_CONSENT_KEY);
- // A stored decline must be RE-APPLIED every load — the old code set
- // the ga-disable flag only in the click handler, so the opt-out
- // silently lapsed on the next visit (audit truth-pass #6). The
- // inline script in layout.tsx sets it before GA loads; this is the
- // belt for client-side navigations.
- if (consent === "declined" && typeof window !== "undefined") {
- // @ts-expect-error — gtag global
- window["ga-disable-G-7DWKBT1JV9"] = true;
- }
- if (!consent) {
- // Small delay so it doesn't flash on initial load
- const timer = setTimeout(() => setVisible(true), 1500);
- return () => clearTimeout(timer);
- }
- }, []);
+    useEffect(() => {
+        // Don't show if user has already consented
+        const consent = localStorage.getItem(COOKIE_CONSENT_KEY);
+        // A stored decline must be RE-APPLIED every load — the old code set
+        // the ga-disable flag only in the click handler, so the opt-out
+        // silently lapsed on the next visit (audit truth-pass #6). The
+        // inline script in layout.tsx sets it before GA loads; this is the
+        // belt for client-side navigations.
+        if (consent === "declined" && typeof window !== "undefined") {
+            // @ts-expect-error — gtag global
+            window["ga-disable-G-7DWKBT1JV9"] = true;
+        }
+        if (!consent) {
+            // Small delay so it doesn't flash on initial load
+            const timer = setTimeout(() => setVisible(true), 1500);
+            return () => clearTimeout(timer);
+        }
+    }, []);
 
- const handleAccept = () => {
- localStorage.setItem(COOKIE_CONSENT_KEY,"accepted");
- setVisible(false);
- };
+    const handleAccept = () => {
+        localStorage.setItem(COOKIE_CONSENT_KEY, "accepted");
+        setVisible(false);
+    };
 
- const handleDecline = () => {
- localStorage.setItem(COOKIE_CONSENT_KEY,"declined");
- // Disable GA if declined
- if (typeof window !=="undefined") {
- // @ts-expect-error — gtag global
- window["ga-disable-G-7DWKBT1JV9"] = true;
- }
- setVisible(false);
- };
+    const handleDecline = () => {
+        localStorage.setItem(COOKIE_CONSENT_KEY, "declined");
+        // Disable GA if declined
+        if (typeof window !== "undefined") {
+            // @ts-expect-error — gtag global
+            window["ga-disable-G-7DWKBT1JV9"] = true;
+        }
+        setVisible(false);
+    };
 
- if (!visible) return null;
+    if (!visible) return null;
 
- return (
- <div
- className="border-input animate-fade-in-up fixed right-0 bottom-0 left-0 z-[9999] border-t bg-black/90 px-8 py-4 shadow-[0_-4px_30px_rgba(0,0,0,0.3)]"
- role="dialog"
- aria-label="Cookie consent"
- >
- <div className="mx-auto flex max-w-[var(--max-width)] items-center justify-between gap-8 max-md:flex-col max-md:gap-4 max-md:text-center">
- {/* A near-black strip in every theme, so the inks are the leather ramp, not the page tokens (2026-09-19: page inks read 1.2–2.1:1 here). */}
- <div className="[&_p]:text-[var(--leather-text-soft)] [&_p:first-child]:text-[var(--leather-text)] [&_a]:text-[var(--brass-hi)] min-w-0 flex-1 [&_p]:m-0 [&_p]:text-sm [&_p]:leading-relaxed [&_p:first-child]:mb-1">
- <p>
- <strong>🍪 Cookies &amp; Privacy</strong>
- </p>
- <p>
- We use essential cookies for authentication and Google Analytics to understand how the site is
- used. No advertising or tracking cookies. See our <Link href="/privacy">Privacy Policy</Link>{""}
- for details.
- </p>
- </div>
- <div className="flex shrink-0 gap-2 max-md:w-full max-md:justify-center">
- <Button
- onClick={handleAccept}
- id="cookie-accept"
- >
- Accept
- </Button>
- <Button variant="outline" size="wide"
- onClick={handleDecline}
- id="cookie-decline"
- className="border-[var(--leather-text-soft)] text-[var(--leather-text)] hover:bg-[var(--leather-text)]/10 hover:text-[var(--leather-text)]"
- >
- Decline Analytics
- </Button>
- </div>
- </div>
- </div>
- );
+    return (
+        <div
+            className="animate-fade-in-up fixed right-0 bottom-0 left-0 z-[9999] border-t border-input bg-black/90 px-8 py-4 shadow-[0_-4px_30px_rgba(0,0,0,0.3)]"
+            role="dialog"
+            aria-label="Cookie consent"
+        >
+            <div className="mx-auto flex max-w-[var(--max-width)] items-center justify-between gap-8 max-md:flex-col max-md:gap-4 max-md:text-center">
+                {/* A near-black strip in every theme, so the inks are the leather ramp, not the page tokens (2026-09-19: page inks read 1.2–2.1:1 here). */}
+                <div className="min-w-0 flex-1 [&_a]:text-[var(--brass-hi)] [&_p]:m-0 [&_p]:text-sm [&_p]:leading-relaxed [&_p]:text-[var(--leather-text-soft)] [&_p:first-child]:mb-1 [&_p:first-child]:text-[var(--leather-text)]">
+                    <p>
+                        <strong>🍪 Cookies &amp; Privacy</strong>
+                    </p>
+                    <p>
+                        We use essential cookies for authentication and Google Analytics to understand how the site is
+                        used. No advertising or tracking cookies. See our <Link href="/privacy">Privacy Policy</Link>
+                        {""}
+                        for details.
+                    </p>
+                </div>
+                <div className="flex shrink-0 gap-2 max-md:w-full max-md:justify-center">
+                    <Button onClick={handleAccept} id="cookie-accept">
+                        Accept
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="wide"
+                        onClick={handleDecline}
+                        id="cookie-decline"
+                        className="border-[var(--leather-text-soft)] text-[var(--leather-text)] hover:bg-[var(--leather-text)]/10 hover:text-[var(--leather-text)]"
+                    >
+                        Decline Analytics
+                    </Button>
+                </div>
+            </div>
+        </div>
+    );
 }

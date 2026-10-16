@@ -85,18 +85,14 @@ function baseSchema(spec: FieldSpec, label: string): z.ZodType {
 
         case "number":
         case "money": {
-            let s = z
-                .number({ error: `${label} must be a number.` })
-                .finite(`${label} must be a number.`);
+            let s = z.number({ error: `${label} must be a number.` }).finite(`${label} must be a number.`);
             if (spec.min !== undefined) s = s.min(spec.min, `${label} cannot be negative.`);
             if (spec.max !== undefined) s = s.max(spec.max, `${label} is too large.`);
             return s;
         }
 
         case "date":
-            return z
-                .string()
-                .regex(/^\d{4}-\d{2}-\d{2}$/, `${label} must be a date (YYYY-MM-DD).`);
+            return z.string().regex(/^\d{4}-\d{2}-\d{2}$/, `${label} must be a date (YYYY-MM-DD).`);
 
         case "select":
         case "segmented": {
@@ -121,10 +117,7 @@ function baseSchema(spec: FieldSpec, label: string): z.ZodType {
         default: {
             let s = z.string({ error: `${label} must be text.` });
             if (spec.maxLength !== undefined) {
-                s = s.max(
-                    spec.maxLength,
-                    `${label} is too long (max ${spec.maxLength} characters).`,
-                );
+                s = s.max(spec.maxLength, `${label} is too long (max ${spec.maxLength} characters).`);
             }
             return s;
         }
@@ -159,9 +152,7 @@ export function buildFormSchema(context: FieldContext): z.ZodObject<z.ZodRawShap
 
 // ── Validation with human error messages ──────────────────────────────
 
-export type ValidationResult =
-    | { ok: true; data: FormValues }
-    | { ok: false; problems: FieldProblem[] };
+export type ValidationResult = { ok: true; data: FormValues } | { ok: false; problems: FieldProblem[] };
 
 function problemsFromZod(error: z.ZodError, category: AssetCategory): FieldProblem[] {
     return error.issues.map((issue) => {
@@ -289,9 +280,7 @@ export type UpdateCategory = AssetCategory | "any";
 /** Categories in which this field can ever be required. */
 function requiredInEveryCategory(spec: FieldSpec): boolean {
     if (!spec.requiredWhen) return false;
-    return spec.categories.every((category) =>
-        spec.requiredWhen!({ category, mode: "edit", values: {} }),
-    );
+    return spec.categories.every((category) => spec.requiredWhen!({ category, mode: "edit", values: {} }));
 }
 
 /**
@@ -329,8 +318,7 @@ export function validateUpdateInput(
     // SENDS one, it may not send it empty.
     for (const spec of HORSE_FIELDS) {
         if (!(spec.name in merged)) continue;
-        const required =
-            category === "any" ? requiredInEveryCategory(spec) : isFieldRequired(spec, context);
+        const required = category === "any" ? requiredInEveryCategory(spec) : isFieldRequired(spec, context);
         if (!required) continue;
         if (normalized[spec.name] === undefined) {
             const label = resolveLabel(spec, labelCategory);

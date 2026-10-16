@@ -18,13 +18,7 @@ import { evidencePackToText, type EvidencePack } from "@/lib/deals/evidence";
  * The PDF renderer is ~1.5 MB, so it is lazy-loaded on click, exactly
  * as InsuranceReportButton does.
  */
-export default function EvidencePackActions({
-    pack,
-    filenameHint,
-}: {
-    pack: EvidencePack;
-    filenameHint: string;
-}) {
+export default function EvidencePackActions({ pack, filenameHint }: { pack: EvidencePack; filenameHint: string }) {
     const [status, setStatus] = useState<"idle" | "building" | "copied" | "error">("idle");
     const [error, setError] = useState("");
 
@@ -40,9 +34,7 @@ export default function EvidencePackActions({
             const url = URL.createObjectURL(blob);
             const link = document.createElement("a");
             link.href = url;
-            link.download = `MHH_Deal_Record_${filenameHint}_${new Date()
-                .toISOString()
-                .slice(0, 10)}.pdf`;
+            link.download = `MHH_Deal_Record_${filenameHint}_${new Date().toISOString().slice(0, 10)}.pdf`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -79,7 +71,7 @@ export default function EvidencePackActions({
                 </Button>
             </div>
             {status === "error" && (
-                <p className="text-destructive border-destructive/30 bg-destructive/10 mt-3 mb-0 rounded-md border px-4 py-2 text-sm">
+                <p className="mt-3 mb-0 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm text-destructive">
                     {error}
                 </p>
             )}

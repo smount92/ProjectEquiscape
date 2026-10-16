@@ -71,10 +71,7 @@ export default function NotificationBell() {
         // phones (the bell isn't flush right — icons sit after it),
         // worse still under Simple Mode's larger rem.
         const width = Math.min(352, window.innerWidth - 16);
-        const right = Math.min(
-            Math.max(8, window.innerWidth - r.right),
-            Math.max(8, window.innerWidth - width - 8),
-        );
+        const right = Math.min(Math.max(8, window.innerWidth - r.right), Math.max(8, window.innerWidth - width - 8));
         setRect({ top: r.bottom + 8, right, width });
     }, []);
 
@@ -147,15 +144,13 @@ export default function NotificationBell() {
                 ref={panelRef}
                 role="dialog"
                 aria-label="Notifications"
-                className="border-input bg-card fixed z-[100] overflow-hidden rounded-xl border shadow-lg"
+                className="fixed z-[100] overflow-hidden rounded-xl border border-input bg-card shadow-lg"
                 style={{ top: rect.top, right: rect.right, width: rect.width }}
             >
                 {/* Leather header band — the same material as a page masthead,
                     at dropdown scale. */}
                 <div className="leather-band flex items-center justify-between gap-3 px-4 py-2.5">
-                    <span
-                        className="text-engraved-light font-serif text-[0.75rem] font-bold tracking-[0.16em] uppercase"
-                    >
+                    <span className="text-engraved-light font-serif text-[0.75rem] font-bold tracking-[0.16em] uppercase">
                         Notifications
                     </span>
                     {unreadNotifications > 0 && (
@@ -172,17 +167,13 @@ export default function NotificationBell() {
 
                 <div className="max-h-[min(26rem,60vh)] overflow-y-auto">
                     {loading && items === null ? (
-                        <p className="text-secondary-foreground px-4 py-8 text-center text-sm">
-                            Looking…
-                        </p>
+                        <p className="px-4 py-8 text-center text-sm text-secondary-foreground">Looking…</p>
                     ) : !items || items.length === 0 ? (
                         <div className="px-4 py-8 text-center">
                             <div className="mb-2 text-2xl" aria-hidden="true">
                                 🔔
                             </div>
-                            <p className="text-secondary-foreground text-sm">
-                                Nothing has come in yet.
-                            </p>
+                            <p className="text-sm text-secondary-foreground">Nothing has come in yet.</p>
                         </div>
                     ) : (
                         items.map((n) => {
@@ -192,8 +183,8 @@ export default function NotificationBell() {
                                     key={n.id}
                                     href={resolveNotificationHref(n)}
                                     onClick={() => setOpen(false)}
-                                    className={`border-input flex items-start gap-2.5 border-b px-3 py-2.5 text-inherit no-underline transition-colors last:border-b-0 hover:bg-black/[0.04] ${
-                                        n.isRead ? "" : "border-l-forest bg-forest/[0.06] border-l-[3px]"
+                                    className={`flex items-start gap-2.5 border-b border-input px-3 py-2.5 text-inherit no-underline transition-colors last:border-b-0 hover:bg-black/[0.04] ${
+                                        n.isRead ? "" : "border-l-[3px] border-l-forest bg-forest/[0.06]"
                                     }`}
                                 >
                                     <span className="mt-0.5 shrink-0 text-base" aria-hidden="true">
@@ -205,7 +196,7 @@ export default function NotificationBell() {
                                         >
                                             {n.content || "Something happened — open to see."}
                                         </span>
-                                        <span className="text-muted-foreground font-serif text-[0.68rem] tracking-[0.1em] uppercase">
+                                        <span className="font-serif text-[0.68rem] tracking-[0.1em] text-muted-foreground uppercase">
                                             {kind.label} · {timeAgo(n.createdAt)}
                                         </span>
                                     </span>
@@ -218,7 +209,7 @@ export default function NotificationBell() {
                 <Link
                     href="/notifications"
                     onClick={() => setOpen(false)}
-                    className="border-input text-forest block border-t px-4 py-2.5 text-center text-xs font-semibold no-underline hover:underline"
+                    className="block border-t border-input px-4 py-2.5 text-center text-xs font-semibold text-forest no-underline hover:underline"
                 >
                     See all notifications →
                 </Link>
@@ -233,14 +224,10 @@ export default function NotificationBell() {
                 onClick={toggle}
                 aria-haspopup="dialog"
                 aria-expanded={open ? "true" : "false"}
-                aria-label={
-                    unreadNotifications > 0
-                        ? `Notifications, ${unreadNotifications} unread`
-                        : "Notifications"
-                }
+                aria-label={unreadNotifications > 0 ? `Notifications, ${unreadNotifications} unread` : "Notifications"}
                 title="Notifications"
                 id="nav-notifications"
-                className="leather-icon-btn bg-card border-input text-muted-foreground relative flex h-[36px] w-[36px] shrink-0 cursor-pointer items-center justify-center rounded-full border transition-all"
+                className="leather-icon-btn relative flex h-[36px] w-[36px] shrink-0 cursor-pointer items-center justify-center rounded-full border border-input bg-card text-muted-foreground transition-all"
             >
                 <svg
                     width="18"

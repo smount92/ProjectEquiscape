@@ -49,12 +49,8 @@ describe("payment ledger", () => {
 
     it("calls a payment due today 'due', not 'past due', anywhere in the world", () => {
         expect(installmentState(row({ dueDate: "2026-09-15" }), NOW)).toBe("due");
-        expect(
-            installmentState(row({ dueDate: "2026-09-15" }), new Date("2026-09-15T23:59:00Z")),
-        ).toBe("due");
-        expect(
-            installmentState(row({ dueDate: "2026-09-15" }), new Date("2026-09-16T00:01:00Z")),
-        ).toBe("overdue");
+        expect(installmentState(row({ dueDate: "2026-09-15" }), new Date("2026-09-15T23:59:00Z"))).toBe("due");
+        expect(installmentState(row({ dueDate: "2026-09-15" }), new Date("2026-09-16T00:01:00Z"))).toBe("overdue");
     });
 
     it("reads a row with no due date as scheduled rather than overdue", () => {
@@ -63,15 +59,12 @@ describe("payment ledger", () => {
     });
 
     it("lets sent and confirmed outrank the calendar — a paid row is never 'past due'", () => {
-        expect(
-            installmentState(row({ dueDate: "2020-01-01", markedSentAt: "2026-01-01T00:00:00Z" }), NOW),
-        ).toBe("sent");
-        expect(
-            installmentState(
-                { ...row({ dueDate: "2020-01-01" }), confirmedAt: "2026-01-01T00:00:00Z" },
-                NOW,
-            ),
-        ).toBe("confirmed");
+        expect(installmentState(row({ dueDate: "2020-01-01", markedSentAt: "2026-01-01T00:00:00Z" }), NOW)).toBe(
+            "sent",
+        );
+        expect(installmentState({ ...row({ dueDate: "2020-01-01" }), confirmedAt: "2026-01-01T00:00:00Z" }, NOW)).toBe(
+            "confirmed",
+        );
     });
 
     it("counts whole days past due", () => {
@@ -156,9 +149,9 @@ describe("payment ledger", () => {
 
     it("numbers rows from 1 and never emits fewer than one", () => {
         expect(buildPlan({ total: 50, count: 0, startDate: null, cadence: "weekly" })).toHaveLength(1);
-        expect(
-            buildPlan({ total: 50, count: 3, startDate: null, cadence: "weekly" }).map((r) => r.seq),
-        ).toEqual([1, 2, 3]);
+        expect(buildPlan({ total: 50, count: 3, startDate: null, cadence: "weekly" }).map((r) => r.seq)).toEqual([
+            1, 2, 3,
+        ]);
     });
 
     it("produces zero-amount rows rather than NaN when the total is missing", () => {
@@ -221,11 +214,8 @@ describe("payment ledger", () => {
         expect(canUnmarkSent(row({ markedSentAt: "2026-09-01T00:00:00Z" }), "b", "b").ok).toBe(true);
         expect(canUnmarkSent(row(), "b", "b").ok).toBe(false);
         expect(
-            canUnmarkSent(
-                row({ markedSentAt: "2026-09-01T00:00:00Z", confirmedAt: "2026-09-02T00:00:00Z" }),
-                "b",
-                "b",
-            ).ok,
+            canUnmarkSent(row({ markedSentAt: "2026-09-01T00:00:00Z", confirmedAt: "2026-09-02T00:00:00Z" }), "b", "b")
+                .ok,
         ).toBe(false);
     });
 
@@ -235,9 +225,7 @@ describe("payment ledger", () => {
         if (result.ok) return;
         expect(result.reason).toMatch(/dispute/i);
         expect(canMarkSent(row({ confirmedAt: "2026-09-01T00:00:00Z" }), "b", "b").ok).toBe(false);
-        expect(canConfirmReceived(row({ confirmedAt: "2026-09-01T00:00:00Z" }), "a", "b").ok).toBe(
-            false,
-        );
+        expect(canConfirmReceived(row({ confirmedAt: "2026-09-01T00:00:00Z" }), "a", "b").ok).toBe(false);
     });
 
     it("refuses to mark the same payment sent twice", () => {
@@ -319,9 +307,7 @@ describe("payment ledger", () => {
     });
 
     it("says so when there is no plan and when one is paid off", () => {
-        expect(ledgerHeadline(ledgerSummary([], NOW), formatMoney, formatDate)).toBe(
-            "No payment plan",
-        );
+        expect(ledgerHeadline(ledgerSummary([], NOW), formatMoney, formatDate)).toBe("No payment plan");
         expect(
             ledgerHeadline(
                 ledgerSummary([row({ amount: 250, confirmedAt: "2026-01-01T00:00:00Z" })], NOW),

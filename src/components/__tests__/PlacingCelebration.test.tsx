@@ -14,15 +14,7 @@ import type { PublicPlacingData } from "@/lib/shows/placingShareRead";
 // The global setup's next/link mock renders null — this suite
 // asserts hrefs, so restore Link as a plain anchor.
 vi.mock("next/link", () => ({
-    default: ({
-        children,
-        href,
-        ...props
-    }: {
-        children: React.ReactNode;
-        href: string;
-        [key: string]: unknown;
-    }) => (
+    default: ({ children, href, ...props }: { children: React.ReactNode; href: string; [key: string]: unknown }) => (
         <a href={href} {...props}>
             {children}
         </a>
@@ -74,42 +66,27 @@ describe("PlacingCelebration", () => {
             "src",
             "https://cdn.example/photo.webp",
         );
-        expect(screen.getByRole("link", { name: "@maggie" })).toHaveAttribute(
-            "href",
-            "/profile/maggie",
-        );
+        expect(screen.getByRole("link", { name: "@maggie" })).toHaveAttribute("href", "/profile/maggie");
     });
 
     it("falls back to the 🐴 block when the entry has no photo", () => {
-        render(
-            <PlacingCelebration
-                data={placing({ photoUrl: null })}
-                authed={true}
-                shareUrl={SHARE_URL}
-            />,
-        );
+        render(<PlacingCelebration data={placing({ photoUrl: null })} authed={true} shareUrl={SHARE_URL} />);
         expect(screen.getByLabelText("No entry photo")).toBeInTheDocument();
         expect(screen.queryByRole("img")).not.toBeInTheDocument();
     });
 
     it("links the permanent record (passport) and the full results anchor", () => {
         render(<PlacingCelebration data={placing()} authed={true} shareUrl={SHARE_URL} />);
-        expect(
-            screen.getByRole("link", { name: /Rain Dancer’s permanent record/ }),
-        ).toHaveAttribute("href", "/community/horse-1");
-        expect(screen.getByRole("link", { name: /See full results/ })).toHaveAttribute(
+        expect(screen.getByRole("link", { name: /Rain Dancer’s permanent record/ })).toHaveAttribute(
             "href",
-            "/shows/show-1#results",
+            "/community/horse-1",
         );
+        expect(screen.getByRole("link", { name: /See full results/ })).toHaveAttribute("href", "/shows/show-1#results");
     });
 
     it("pitches MHH + free account (with redirect back) to anon only", () => {
-        const { rerender } = render(
-            <PlacingCelebration data={placing()} authed={false} shareUrl={SHARE_URL} />,
-        );
-        expect(screen.getByTestId("placing-anon-cta")).toHaveTextContent(
-            "What is Model Horse Hub?",
-        );
+        const { rerender } = render(<PlacingCelebration data={placing()} authed={false} shareUrl={SHARE_URL} />);
+        expect(screen.getByTestId("placing-anon-cta")).toHaveTextContent("What is Model Horse Hub?");
         expect(screen.getByRole("link", { name: "Create free account" })).toHaveAttribute(
             "href",
             `/signup?redirectTo=${encodeURIComponent("/shows/show-1/placing/entry-1")}`,
@@ -120,12 +97,8 @@ describe("PlacingCelebration", () => {
     });
 
     it("3rd place renders the yellow rosette with ink text", () => {
-        render(
-            <PlacingCelebration data={placing({ place: 3 })} authed={true} shareUrl={SHARE_URL} />,
-        );
-        expect(
-            screen.getByRole("heading", { level: 1, name: /3rd · Stock Breeds/ }),
-        ).toBeInTheDocument();
+        render(<PlacingCelebration data={placing({ place: 3 })} authed={true} shareUrl={SHARE_URL} />);
+        expect(screen.getByRole("heading", { level: 1, name: /3rd · Stock Breeds/ })).toBeInTheDocument();
         const rosette = screen.getByTestId("placing-rosette");
         expect(rosette).toHaveTextContent("3rd");
         // Ribbon convention color, never themed — inline by design

@@ -22,12 +22,7 @@
  * the vocabularies cannot drift apart.
  */
 
-import {
-    CANONICAL_SCALES,
-    CATALOG_CATEGORIES,
-    CATALOG_GENDERS,
-    RUN_TYPES,
-} from "@/lib/catalog/taxonomy";
+import { CANONICAL_SCALES, CATALOG_CATEGORIES, CATALOG_GENDERS, RUN_TYPES } from "@/lib/catalog/taxonomy";
 
 export type FieldKind = "text" | "textarea" | "select" | "number";
 
@@ -55,7 +50,13 @@ export interface EditableField {
  * the hobby treats as distinct from Breyer's cellulose acetate.
  */
 export const MATERIAL_OPTIONS = [
-    "Plastic", "Rubber/PVC/Vinyl", "Resin", "Pewter", "China/Ceramic", "Metal", "Other",
+    "Plastic",
+    "Rubber/PVC/Vinyl",
+    "Resin",
+    "Pewter",
+    "China/Ceramic",
+    "Metal",
+    "Other",
 ] as const;
 
 /**
@@ -66,49 +67,68 @@ export const MATERIAL_OPTIONS = [
  * above `color_description` concludes the form is for someone else.
  */
 export const CATALOG_EDITABLE_FIELDS: readonly EditableField[] = [
-    { key: "title", label: "Name", kind: "text",
-      help: "The model's name as the maker released it." },
-    { key: "maker", label: "Maker", kind: "text",
-      help: "Breyer, Peter Stone, North Light, or the artist's name." },
-    { key: "item_type", label: "Type", kind: "select",
-      options: CATALOG_CATEGORIES.map((c) => c.value) },
+    { key: "title", label: "Name", kind: "text", help: "The model's name as the maker released it." },
+    { key: "maker", label: "Maker", kind: "text", help: "Breyer, Peter Stone, North Light, or the artist's name." },
+    { key: "item_type", label: "Type", kind: "select", options: CATALOG_CATEGORIES.map((c) => c.value) },
     { key: "scale", label: "Scale", kind: "select", options: CANONICAL_SCALES },
-    { key: "model_number", label: "Model number", kind: "text",
-      placeholder: "e.g. 712053",
-      help: "The maker's own number. The single most useful field for identifying a model." },
-    { key: "color_description", label: "Colour and markings", kind: "textarea",
-      placeholder: "Bay pinto, blaze, four stockings",
-      help: "Base colour first, then markings. Plain hobby terms." },
+    {
+        key: "model_number",
+        label: "Model number",
+        kind: "text",
+        placeholder: "e.g. 712053",
+        help: "The maker's own number. The single most useful field for identifying a model.",
+    },
+    {
+        key: "color_description",
+        label: "Colour and markings",
+        kind: "textarea",
+        placeholder: "Bay pinto, blaze, four stockings",
+        help: "Base colour first, then markings. Plain hobby terms.",
+    },
     { key: "release_year_start", label: "First released", kind: "number", placeholder: "1998" },
-    { key: "release_year_end", label: "Last released", kind: "number", placeholder: "2004",
-      help: "Leave blank if it was a single year." },
+    {
+        key: "release_year_end",
+        label: "Last released",
+        kind: "number",
+        placeholder: "2004",
+        help: "Leave blank if it was a single year.",
+    },
     { key: "run_type", label: "Run type", kind: "select", options: RUN_TYPES },
     { key: "run_count", label: "Pieces made", kind: "number", placeholder: "1500" },
-    { key: "retail_price", label: "Original retail price", kind: "text", placeholder: "59.99",
-      help: "What it cost new, in US dollars. Not what it sells for now." },
+    {
+        key: "retail_price",
+        label: "Original retail price",
+        kind: "text",
+        placeholder: "59.99",
+        help: "What it cost new, in US dollars. Not what it sells for now.",
+    },
     { key: "material", label: "Material", kind: "select", options: MATERIAL_OPTIONS },
-    { key: "mold_name", label: "Mold", kind: "text",
-      help: "The sculpture this paint job was applied to." },
-    { key: "sculptor", label: "Sculptor", kind: "text",
-      help: "Who sculpted the mold." },
-    { key: "breed", label: "Breed", kind: "text",
-      help: "Free text on purpose — there is no closed breed list good enough to lock you into." },
+    { key: "mold_name", label: "Mold", kind: "text", help: "The sculpture this paint job was applied to." },
+    { key: "sculptor", label: "Sculptor", kind: "text", help: "Who sculpted the mold." },
+    {
+        key: "breed",
+        label: "Breed",
+        kind: "text",
+        help: "Free text on purpose — there is no closed breed list good enough to lock you into.",
+    },
     { key: "gender", label: "Gender", kind: "select", options: CATALOG_GENDERS },
     // The annotated-registry field: stories live here, facts live in the
     // fields above. Deliberately NOT in SILVER_AUTO_FIELDS — prose is
     // always reviewed by a human before it goes live.
-    { key: "registry_notes", label: "Registry notes", kind: "textarea",
-      placeholder: "Identification tips, variations lore, the story of this model…",
-      help: "A few short paragraphs in your own words. Facts like years and numbers belong in the fields above — this is for the knowledge that doesn't fit a field." },
+    {
+        key: "registry_notes",
+        label: "Registry notes",
+        kind: "textarea",
+        placeholder: "Identification tips, variations lore, the story of this model…",
+        help: "A few short paragraphs in your own words. Facts like years and numbers belong in the fields above — this is for the knowledge that doesn't fit a field.",
+    },
 ];
 
 /**
  * Pipeline plumbing rather than catalog fact. The reference page hides
  * these, so offering them invites corrections nobody can ever see.
  */
-export const HIDDEN_ATTRIBUTES: ReadonlySet<string> = new Set([
-    "source", "source_id", "source_note",
-]);
+export const HIDDEN_ATTRIBUTES: ReadonlySet<string> = new Set(["source", "source_id", "source_note"]);
 
 export interface FieldEdit {
     key: string;
@@ -184,11 +204,13 @@ export function changedFields(fields: FieldEdit[]): FieldEdit[] {
 
 /** Which curated fields this entry is still missing — drives the nudge. */
 export function missingFieldLabels(item: EditableSource): string[] {
-    return CATALOG_EDITABLE_FIELDS
-        // Scale has its own prompt in the Details table (ruling Q26), so it is
-        // not asked for twice.
-        .filter((f) => !REAL_COLUMN_KEYS.has(f.key) && valueFor(item, f.key) === "")
-        .map((f) => f.label);
+    return (
+        CATALOG_EDITABLE_FIELDS
+            // Scale has its own prompt in the Details table (ruling Q26), so it is
+            // not asked for twice.
+            .filter((f) => !REAL_COLUMN_KEYS.has(f.key) && valueFor(item, f.key) === "")
+            .map((f) => f.label)
+    );
 }
 
 /** The label a member reads for a catalog field key ("color_description" → "Colour and markings"). */
@@ -206,5 +228,8 @@ export function fieldLabel(key: string): string {
  * the same as new ones.
  */
 export function humanizeChangeSummary(summary: string): string {
-    return summary.replace(/(^|[\s,:])([a-z]+(?:_[a-z]+)+|title|maker|scale|material|breed|gender|sculptor)(?=:\s)/g, (_m, pre: string, key: string) => `${pre}${fieldLabel(key)}`);
+    return summary.replace(
+        /(^|[\s,:])([a-z]+(?:_[a-z]+)+|title|maker|scale|material|breed|gender|sculptor)(?=:\s)/g,
+        (_m, pre: string, key: string) => `${pre}${fieldLabel(key)}`,
+    );
 }

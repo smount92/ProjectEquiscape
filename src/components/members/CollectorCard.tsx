@@ -14,11 +14,7 @@ import Link from "next/link";
 
 import UserAvatar from "@/components/social/UserAvatar";
 import type { MemberCard } from "@/app/discover/queries";
-import {
-    formatLastActive,
-    formatMemberSince,
-    formatPublicModelCount,
-} from "@/lib/members/directory";
+import { formatLastActive, formatMemberSince, formatPublicModelCount } from "@/lib/members/directory";
 
 import MemberFollowButton from "./MemberFollowButton";
 
@@ -38,25 +34,20 @@ export default function CollectorCard({ member }: { member: MemberCard }) {
     return (
         <article className="ledger-card flex h-full w-full flex-col gap-3">
             <div className="flex flex-wrap items-start gap-3">
-                <UserAvatar
-                    src={member.avatarUrl}
-                    alias={member.aliasName}
-                    size="lg"
-                    href={profileHref}
-                />
+                <UserAvatar src={member.avatarUrl} alias={member.aliasName} size="lg" href={profileHref} />
                 <div className="min-w-0 flex-1 basis-40">
                     <Link
                         href={profileHref}
-                        className="text-foreground block truncate font-serif text-base font-bold no-underline hover:underline"
+                        className="block truncate font-serif text-base font-bold text-foreground no-underline hover:underline"
                     >
                         {member.aliasName}
                         {member.isVerified && (
-                            <span className="text-forest ml-1" title="Verified" aria-label="Verified">
+                            <span className="ml-1 text-forest" title="Verified" aria-label="Verified">
                                 ✓
                             </span>
                         )}
                     </Link>
-                    <div className="text-muted-foreground mt-0.5 flex flex-wrap items-center gap-x-2 text-xs">
+                    <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-muted-foreground">
                         {memberSince && <span>{memberSince}</span>}
                         {memberSince && lastActive && <span aria-hidden="true">·</span>}
                         {lastActive && <span className="text-forest">{lastActive}</span>}
@@ -73,9 +64,7 @@ export default function CollectorCard({ member }: { member: MemberCard }) {
                 )}
             </div>
 
-            {member.bio && (
-                <p className="text-secondary-foreground m-0 line-clamp-2 text-sm">{member.bio}</p>
-            )}
+            {member.bio && <p className="m-0 line-clamp-2 text-sm text-secondary-foreground">{member.bio}</p>}
 
             {(member.hasStudio ||
                 member.isSupporter ||
@@ -92,26 +81,21 @@ export default function CollectorCard({ member }: { member: MemberCard }) {
                         </span>
                     )}
                     {member.badges.map((badge) => (
-                        <span
-                            key={badge.id}
-                            className={`stamp ${TIER_TONE[badge.tier ?? 0] ?? ""}`}
-                            title={badge.name}
-                        >
-                            <span aria-hidden="true">{badge.icon}</span>{" "}
-                            <span className="sr-only">Badge:</span>
+                        <span key={badge.id} className={`stamp ${TIER_TONE[badge.tier ?? 0] ?? ""}`} title={badge.name}>
+                            <span aria-hidden="true">{badge.icon}</span> <span className="sr-only">Badge:</span>
                             {badge.name}
                         </span>
                     ))}
                 </div>
             )}
 
-            <div className="border-forest/15 mt-auto flex items-baseline justify-between gap-2 border-t pt-2">
-                <span className="text-secondary-foreground text-sm tabular-nums">
+            <div className="mt-auto flex items-baseline justify-between gap-2 border-t border-forest/15 pt-2">
+                <span className="text-sm text-secondary-foreground tabular-nums">
                     {formatPublicModelCount(member.publicHorseCount)}
                 </span>
                 <Link
                     href={profileHref}
-                    className="text-forest text-xs font-semibold tracking-[0.08em] uppercase no-underline hover:underline"
+                    className="text-xs font-semibold tracking-[0.08em] text-forest uppercase no-underline hover:underline"
                 >
                     Stable →
                 </Link>

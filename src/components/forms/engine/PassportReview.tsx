@@ -30,10 +30,8 @@ export default function PassportReview({
     photos: PhotoStudioValue;
 }) {
     const name = (context.values.custom_name as string)?.trim();
-    const primary =
-        photos.slots.Primary_Thumbnail ?? Object.values(photos.slots).find(Boolean);
-    const photoCount =
-        Object.keys(photos.slots).length + photos.extras.length + photos.flaws.length;
+    const primary = photos.slots.Primary_Thumbnail ?? Object.values(photos.slots).find(Boolean);
+    const photoCount = Object.keys(photos.slots).length + photos.extras.length + photos.flaws.length;
     const grade = getConditionGrade(context.values.condition_grade as string);
 
     const publicGroups: FieldGroup[] = ["identity", "attributes", "showbio", "market"];
@@ -43,9 +41,7 @@ export default function PassportReview({
         // The name is the passport's title, not one of its lines.
         .filter((spec) => spec.name !== "custom_name");
 
-    const vaultFields = getGroupFields(context, "vault").filter((spec) =>
-        filled(context.values[spec.name]),
-    );
+    const vaultFields = getGroupFields(context, "vault").filter((spec) => filled(context.values[spec.name]));
 
     const visibility = context.values.visibility as string | undefined;
 
@@ -89,14 +85,10 @@ export default function PassportReview({
                     <div className="flex flex-wrap items-center gap-2">
                         {grade && <span className="stamp">{grade.label}</span>}
                         {visibility && (
-                            <span className={visibility === "public" ? "stamp" : "stamp stamp-red"}>
-                                {visibility}
-                            </span>
+                            <span className={visibility === "public" ? "stamp" : "stamp stamp-red"}>{visibility}</span>
                         )}
                         <span className="text-xs text-muted-foreground">
-                            {photoCount === 0
-                                ? "no photos"
-                                : `${photoCount} photo${photoCount === 1 ? "" : "s"}`}
+                            {photoCount === 0 ? "no photos" : `${photoCount} photo${photoCount === 1 ? "" : "s"}`}
                         </span>
                     </div>
                 </div>
@@ -115,8 +107,8 @@ export default function PassportReview({
                 </dl>
             ) : (
                 <p className="mb-6 text-sm text-muted-foreground">
-                    Nothing beyond the name yet — that is a perfectly good place to start.
-                    You can fill the rest in whenever you like.
+                    Nothing beyond the name yet — that is a perfectly good place to start. You can fill the rest in
+                    whenever you like.
                 </p>
             )}
 
@@ -136,8 +128,8 @@ export default function PassportReview({
                         ))}
                     </dl>
                     <p className="mt-3 text-xs text-muted-foreground">
-                        Row Level Security keeps this off every public surface. Nobody who
-                        views this horse can see any of it.
+                        Row Level Security keeps this off every public surface. Nobody who views this horse can see any
+                        of it.
                     </p>
                 </div>
             )}
@@ -170,9 +162,7 @@ function display(spec: FieldSpec, value: unknown): string {
     const raw = String(value);
     if (spec.type === "money") {
         const n = Number(raw);
-        return Number.isFinite(n)
-            ? n.toLocaleString("en-US", { style: "currency", currency: "USD" })
-            : raw;
+        return Number.isFinite(n) ? n.toLocaleString("en-US", { style: "currency", currency: "USD" }) : raw;
     }
     if (spec.type === "select" || spec.type === "segmented") {
         // Prefer the option's own wording, minus the gloss the dropdown adds.

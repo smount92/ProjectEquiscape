@@ -136,14 +136,16 @@ describe("the state machine", () => {
 
 describe("availableTransitions", () => {
     it("offers each party only their own moves", () => {
-        expect(availableTransitions("quoted", "client").map((t) => t.to).sort()).toEqual([
-            "accepted",
-            "declined",
-        ]);
-        expect(availableTransitions("quoted", "artist").map((t) => t.to).sort()).toEqual([
-            "declined",
-            "quoted",
-        ]);
+        expect(
+            availableTransitions("quoted", "client")
+                .map((t) => t.to)
+                .sort(),
+        ).toEqual(["accepted", "declined"]);
+        expect(
+            availableTransitions("quoted", "artist")
+                .map((t) => t.to)
+                .sort(),
+        ).toEqual(["declined", "quoted"]);
     });
 
     it("offers nothing at all once the commission is closed", () => {

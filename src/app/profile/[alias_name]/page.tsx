@@ -33,11 +33,7 @@ import RecentPosts from "@/components/profile/RecentPosts";
 import { EmptyNote, SectionHeading } from "@/components/profile/ProfileSection";
 import { fetchMembershipDisplay, fetchSupporterBadge } from "@/lib/supporter";
 import { getExhibitorCardCount, getExhibitorStar } from "@/lib/shows/horseTitles";
-import {
-    applyFeaturedOrder,
-    sectionVisible,
-    themeStyle,
-} from "@/app/profile/customization";
+import { applyFeaturedOrder, sectionVisible, themeStyle } from "@/app/profile/customization";
 import {
     fetchProfileBarns,
     fetchProfileCustomization,
@@ -135,7 +131,10 @@ export default async function ProfilePage({
 
     // Outbound links (229) — read on its own so a pre-229 database still
     // renders the profile.
-    const profileLinks = await readProfileLinks(supabase as unknown as Parameters<typeof readProfileLinks>[0], profileUser.id);
+    const profileLinks = await readProfileLinks(
+        supabase as unknown as Parameters<typeof readProfileLinks>[0],
+        profileUser.id,
+    );
 
     // Tombstoned accounts are gone for everyone. The anon path already
     // enforced this; the member path did not, so a deleted member's
@@ -191,8 +190,8 @@ export default async function ProfilePage({
                 />
                 <div className="mt-6">
                     <EmptyNote icon="⛔" title="This account is suspended">
-                        Their stable and show record are hidden while a moderator reviews the
-                        account. Nothing here reflects on the horses themselves.
+                        Their stable and show record are hidden while a moderator reviews the account. Nothing here
+                        reflects on the horses themselves.
                     </EmptyNote>
                 </div>
             </div>
@@ -211,9 +210,7 @@ export default async function ProfilePage({
 
     let bannerUrl: string | null = null;
     if (custom.bannerPath) {
-        const { data: signedBanner } = await supabase.storage
-            .from("avatars")
-            .createSignedUrl(custom.bannerPath, 3600);
+        const { data: signedBanner } = await supabase.storage.from("avatars").createSignedUrl(custom.bannerPath, 3600);
         bannerUrl = signedBanner?.signedUrl ?? null;
     }
 
@@ -288,9 +285,7 @@ export default async function ProfilePage({
     // used to link to /stable/collection/[id], which is the owner's own
     // room and a 404 for everyone else (artist report, 2026-09-20).
     const folderParam = typeof sp.collection === "string" ? sp.collection : null;
-    const openFolder = folderParam
-        ? ((publicCollections ?? []).find((c) => c.id === folderParam) ?? null)
-        : null;
+    const openFolder = folderParam ? ((publicCollections ?? []).find((c) => c.id === folderParam) ?? null) : null;
 
     // The member's country for the masthead (218), if they chose to show one.
     const profileSeller = (await readSellerTerms(supabase, [profileUser.id])).get(profileUser.id) ?? null;
@@ -410,8 +405,7 @@ export default async function ProfilePage({
     const showRecords = (rawRecords ?? []).map((r) => ({
         id: r.id,
         horseId: r.horse_id,
-        horseName:
-            (r.user_horses as unknown as { custom_name: string } | null)?.custom_name ?? "—",
+        horseName: (r.user_horses as unknown as { custom_name: string } | null)?.custom_name ?? "—",
         showName: r.show_name,
         showId: r.show_id,
         className: r.class_name || r.division || null,
@@ -530,9 +524,7 @@ export default async function ProfilePage({
 
     const recentRecords = showRecords.slice(0, 8);
 
-    const forSaleCards = profileCards.filter(
-        (h) => h.tradeStatus === "For Sale" || h.tradeStatus === "Open to Offers",
-    );
+    const forSaleCards = profileCards.filter((h) => h.tradeStatus === "For Sale" || h.tradeStatus === "Open to Offers");
 
     const hasMoreHorses = (shelfCount ?? 0) > PROFILE_PAGE_SIZE;
 
@@ -541,21 +533,15 @@ export default async function ProfilePage({
     // because a block is "I don't want to read them", not "they were
     // never at that show".
     const [season, stableTitles, barns, posts] = await Promise.all([
-        sectionVisible(custom, "season")
-            ? fetchProfileSeason(supabase, profileUser.id)
-            : Promise.resolve(null),
+        sectionVisible(custom, "season") ? fetchProfileSeason(supabase, profileUser.id) : Promise.resolve(null),
         sectionVisible(custom, "season")
             ? fetchStableTitles(
                   supabase,
                   allCards.map((c) => ({ id: c.id, customName: c.customName })),
               )
             : Promise.resolve([]),
-        sectionVisible(custom, "barns")
-            ? fetchProfileBarns(supabase, profileUser.id)
-            : Promise.resolve([]),
-        sectionVisible(custom, "posts") && !blocked
-            ? fetchProfilePosts(supabase, profileUser.id)
-            : Promise.resolve([]),
+        sectionVisible(custom, "barns") ? fetchProfileBarns(supabase, profileUser.id) : Promise.resolve([]),
+        sectionVisible(custom, "posts") && !blocked ? fetchProfilePosts(supabase, profileUser.id) : Promise.resolve([]),
     ]);
 
     const strapStats: { num: string; label: string }[] = [
@@ -636,38 +622,33 @@ export default async function ProfilePage({
                     </span>
                 </div>
             )}
-            {(horse.tradeStatus === "For Sale" || horse.tradeStatus === "Open to Offers") &&
-                horse.marketplaceNotes && (
-                    <div
-                        className="mt-1 truncate px-1 text-center text-[0.65rem] text-muted-foreground"
-                        title={horse.marketplaceNotes}
-                    >
-                        📝{" "}
-                        {horse.marketplaceNotes.length > 50
-                            ? horse.marketplaceNotes.slice(0, 50) + "…"
-                            : horse.marketplaceNotes}
-                    </div>
-                )}
-            {!isOwnProfile &&
-                (horse.tradeStatus === "For Sale" || horse.tradeStatus === "Open to Offers") && (
-                    <div className="mt-2 px-1">
-                        <MessageSellerButton
-                            sellerId={profileUser.id}
-                            horseId={horse.id}
-                            horseName={horse.customName}
-                            tradeStatus={horse.tradeStatus}
-                            askingPrice={horse.listingPrice}
-                        />
-                    </div>
-                )}
+            {(horse.tradeStatus === "For Sale" || horse.tradeStatus === "Open to Offers") && horse.marketplaceNotes && (
+                <div
+                    className="mt-1 truncate px-1 text-center text-[0.65rem] text-muted-foreground"
+                    title={horse.marketplaceNotes}
+                >
+                    📝{" "}
+                    {horse.marketplaceNotes.length > 50
+                        ? horse.marketplaceNotes.slice(0, 50) + "…"
+                        : horse.marketplaceNotes}
+                </div>
+            )}
+            {!isOwnProfile && (horse.tradeStatus === "For Sale" || horse.tradeStatus === "Open to Offers") && (
+                <div className="mt-2 px-1">
+                    <MessageSellerButton
+                        sellerId={profileUser.id}
+                        horseId={horse.id}
+                        horseName={horse.customName}
+                        tradeStatus={horse.tradeStatus}
+                        askingPrice={horse.listingPrice}
+                    />
+                </div>
+            )}
         </Link>
     );
 
     return (
-        <div
-            className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 md:py-10 lg:px-8"
-            style={rootStyle}
-        >
+        <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 md:py-10 lg:px-8" style={rootStyle}>
             <ViewBeacon entityType="profile" entityId={profileUser.id} />
             <ProfileMasthead
                 alias={profileUser.alias_name}
@@ -698,10 +679,7 @@ export default async function ProfilePage({
                         />
                         {!isOwnProfile && (
                             <span className="msg-slot">
-                                <MessageUserButton
-                                    targetUserId={profileUser.id}
-                                    targetAlias={profileUser.alias_name}
-                                />
+                                <MessageUserButton targetUserId={profileUser.id} targetAlias={profileUser.alias_name} />
                             </span>
                         )}
                         {isOwnProfile && (
@@ -717,11 +695,7 @@ export default async function ProfilePage({
             />
 
             {/* ── GREEN STRAP STATS ── */}
-            <div
-                className="stats-strap relative -mt-4 mx-6 sm:mx-10"
-                role="group"
-                aria-label="Stable statistics"
-            >
+            <div className="stats-strap relative mx-6 -mt-4 sm:mx-10" role="group" aria-label="Stable statistics">
                 {strapStats.map((stat) => (
                     <div key={stat.label}>
                         <div className="stat-num">{stat.num}</div>
@@ -742,18 +716,14 @@ export default async function ProfilePage({
                     text={`Check out @${profileUser.alias_name}'s model horse collection on Model Horse Hub!`}
                     variant="icon"
                 />
-                {ratingSummary.count > 0 && (
-                    <RatingBadge average={ratingSummary.average} count={ratingSummary.count} />
-                )}
+                {ratingSummary.count > 0 && <RatingBadge average={ratingSummary.average} count={ratingSummary.count} />}
                 {(completedTxCount ?? 0) > 0 && (
                     <span className="text-sm text-muted-foreground">
                         ✅ {completedTxCount} transaction{completedTxCount !== 1 ? "s" : ""} completed
                     </span>
                 )}
                 {followStats.followingCount > 0 && (
-                    <span className="text-sm text-muted-foreground">
-                        {followStats.followingCount} following
-                    </span>
+                    <span className="text-sm text-muted-foreground">{followStats.followingCount} following</span>
                 )}
                 {studioSlug && (
                     <Link
@@ -789,7 +759,7 @@ export default async function ProfilePage({
                             <Link
                                 key={col.id}
                                 href={`/profile/${encodeURIComponent(profileUser.alias_name)}?collection=${col.id}#stable`}
-                                className={`ledger-tab !mb-0 no-underline transition-all hover:translate-y-[-1px]${openFolder?.id === col.id ? " active" : ""}`}
+                                className={`ledger-tab !mb-0 no-underline transition-all hover:translate-y-[-1px]${openFolder?.id === col.id ? "active" : ""}`}
                                 aria-current={openFolder?.id === col.id ? "page" : undefined}
                             >
                                 📁 {col.name}
@@ -848,19 +818,13 @@ export default async function ProfilePage({
                                 <Link
                                     key={star.id}
                                     href={`/community/${star.id}`}
-                                    className={
-                                        starCards.length > 3 ? "polaroid w-[220px]" : "polaroid"
-                                    }
+                                    className={starCards.length > 3 ? "polaroid w-[220px]" : "polaroid"}
                                     id={`star-card-${star.id}`}
                                 >
                                     <div className="polaroid-photo">
                                         {star.thumbnailUrl ? (
                                             // eslint-disable-next-line @next/next/no-img-element
-                                            <img
-                                                src={star.thumbnailUrl}
-                                                alt={star.customName}
-                                                loading="lazy"
-                                            />
+                                            <img src={star.thumbnailUrl} alt={star.customName} loading="lazy" />
                                         ) : (
                                             <span>No Photo</span>
                                         )}
@@ -870,9 +834,7 @@ export default async function ProfilePage({
                                         {star.refName}
                                         {star.finishType ? ` · ${star.finishType}` : ""}
                                     </div>
-                                    {star.starLine && (
-                                        <div className="polaroid-star">{star.starLine}</div>
-                                    )}
+                                    {star.starLine && <div className="polaroid-star">{star.starLine}</div>}
                                 </Link>
                             ))}
                         </div>
@@ -894,7 +856,7 @@ export default async function ProfilePage({
 
             {/* Breadcrumb */}
             <nav
-                className="text-muted-foreground animate-fade-in-up mt-8 flex items-center gap-2 text-sm"
+                className="animate-fade-in-up mt-8 flex items-center gap-2 text-sm text-muted-foreground"
                 aria-label="Breadcrumb"
             >
                 <Link href="/discover">Members</Link>
@@ -933,17 +895,12 @@ export default async function ProfilePage({
                         }
                     >
                         {isOwnProfile
-                            ? 'Open a horse, choose Edit, and set its Visibility to Public — it appears here, and in any public folder you have put it in.'
+                            ? "Open a horse, choose Edit, and set its Visibility to Public — it appears here, and in any public folder you have put it in."
                             : "Check back later — they may share some soon!"}
                     </EmptyNote>
                 ) : (
                     <div className="shelfwrap">
-                        <div
-                            className="shelf-strip"
-                            tabIndex={0}
-                            role="region"
-                            aria-label="Public horses shelf"
-                        >
+                        <div className="shelf-strip" tabIndex={0} role="region" aria-label="Public horses shelf">
                             {profileCards.map(renderPolaroid)}
                         </div>
                         {hasMoreHorses && (
@@ -960,20 +917,12 @@ export default async function ProfilePage({
 
             {/* ── ON THE BLOCK — what they're selling ── */}
             {sectionVisible(custom, "market") && (
-                <ForSaleStrip
-                    alias={profileUser.alias_name}
-                    isOwnProfile={isOwnProfile}
-                    cards={forSaleCards}
-                />
+                <ForSaleStrip alias={profileUser.alias_name} isOwnProfile={isOwnProfile} cards={forSaleCards} />
             )}
 
             {/* ── THEIR BARNS ── */}
             {sectionVisible(custom, "barns") && (
-                <BarnsStrip
-                    alias={profileUser.alias_name}
-                    isOwnProfile={isOwnProfile}
-                    barns={barns}
-                />
+                <BarnsStrip alias={profileUser.alias_name} isOwnProfile={isOwnProfile} barns={barns} />
             )}
 
             {/* ── FROM THE FEED ── */}
@@ -1036,9 +985,7 @@ export default async function ProfilePage({
                                                 {rec.placing ? (
                                                     <span
                                                         className={
-                                                            isWinningPlacing(rec.placing)
-                                                                ? "stamp"
-                                                                : "stamp stamp-red"
+                                                            isWinningPlacing(rec.placing) ? "stamp" : "stamp stamp-red"
                                                         }
                                                     >
                                                         {placingWithField(rec.placing, rec.totalEntries)}
@@ -1068,7 +1015,7 @@ export default async function ProfilePage({
                         <h2 className="m-0 text-lg">⭐ Reviews ({ratingSummary.count})</h2>
                     </div>
                     {ratingSummary.ratings.map((r) => (
-                        <div key={r.id} className="border-input border-b py-4 last:border-b-0">
+                        <div key={r.id} className="border-b border-input py-4 last:border-b-0">
                             <div className="mb-1 flex items-center justify-between max-sm:flex-col max-sm:items-start max-sm:gap-1">
                                 <span className="text-sm text-secondary-foreground">
                                     <Link
@@ -1089,7 +1036,7 @@ export default async function ProfilePage({
                                 </span>
                             </div>
                             {r.reviewText && (
-                                <p className="mt-1 text-sm italic text-secondary-foreground">
+                                <p className="mt-1 text-sm text-secondary-foreground italic">
                                     &ldquo;{r.reviewText}&rdquo;
                                 </p>
                             )}

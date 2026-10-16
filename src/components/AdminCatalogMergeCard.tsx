@@ -66,8 +66,8 @@ export default function AdminCatalogMergeCard({ prefill }: { prefill?: MergePref
         <div className="rounded-lg border border-input bg-card p-4">
             <h3 className="m-0 mb-1 text-base font-bold">Merge catalog duplicates</h3>
             <p className="m-0 mb-3 text-sm text-muted-foreground">
-                Deletes the duplicate and repoints every reference (horses, wishlists, suggestions,
-                child molds) to the canonical entry. Paste catalog ids or slugs.
+                Deletes the duplicate and repoints every reference (horses, wishlists, suggestions, child molds) to the
+                canonical entry. Paste catalog ids or slugs.
             </p>
             <div className="flex flex-col gap-2 sm:flex-row">
                 <Input
@@ -86,12 +86,7 @@ export default function AdminCatalogMergeCard({ prefill }: { prefill?: MergePref
                 />
             </div>
             <div className="mt-3">
-                <Button
-                    variant="destructive-outline"
-                    size="sm"
-                    disabled={pending}
-                    onClick={() => void run()}
-                >
+                <Button variant="destructive-outline" size="sm" disabled={pending} onClick={() => void run()}>
                     {pending ? "Merging…" : "Merge"}
                 </Button>
             </div>

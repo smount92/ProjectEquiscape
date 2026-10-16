@@ -276,12 +276,7 @@ export const getReferenceMarketHistory = unstable_cache(
 
 // ── The Ledger: mold timeline ────────────────────────────────────
 
-import {
-    buildArtistCareer,
-    buildMoldTimeline,
-    type ArtistCareer,
-    type MoldTimeline,
-} from "@/lib/catalog/timeline";
+import { buildArtistCareer, buildMoldTimeline, type ArtistCareer, type MoldTimeline } from "@/lib/catalog/timeline";
 
 export interface MoldTimelineData {
     timeline: MoldTimeline;
@@ -340,15 +335,25 @@ export const getMoldTimelineData = unstable_cache(
                 const sig = supabase as unknown as {
                     from: (t: string) => {
                         select: (c: string) => {
-                            in: (k: string, v: string[]) => PromiseLike<{ data: Record<string, unknown>[] | null }> & {
+                            in: (
+                                k: string,
+                                v: string[],
+                            ) => PromiseLike<{ data: Record<string, unknown>[] | null }> & {
                                 eq: (k2: string, v2: string) => PromiseLike<{ data: Record<string, unknown>[] | null }>;
                             };
                         };
                     };
                 };
                 const [{ data: sigs }, { data: flags }] = await Promise.all([
-                    sig.from("catalog_price_signals").select("catalog_item_id, asking_median").in("catalog_item_id", ids),
-                    sig.from("catalog_price_signal_flags").select("catalog_item_id").in("catalog_item_id", ids).eq("status", "active"),
+                    sig
+                        .from("catalog_price_signals")
+                        .select("catalog_item_id, asking_median")
+                        .in("catalog_item_id", ids),
+                    sig
+                        .from("catalog_price_signal_flags")
+                        .select("catalog_item_id")
+                        .in("catalog_item_id", ids)
+                        .eq("status", "active"),
                 ]);
                 const flagged = new Set((flags ?? []).map((f) => String(f.catalog_item_id)));
                 for (const s of sigs ?? []) {
@@ -407,8 +412,13 @@ export const getArtistCareerData = unstable_cache(
     async (makerName: string): Promise<ArtistCareerData> => {
         const supabase = createAnonClient();
         const own: {
-            id: string; title: string; maker_slug: string | null; slug: string | null;
-            item_type: string; scale: string | null; attributes: Record<string, unknown> | null;
+            id: string;
+            title: string;
+            maker_slug: string | null;
+            slug: string | null;
+            item_type: string;
+            scale: string | null;
+            attributes: Record<string, unknown> | null;
         }[] = [];
         for (let from = 0; from < 5000; from += 1000) {
             const { data } = await supabase
@@ -422,8 +432,7 @@ export const getArtistCareerData = unstable_cache(
         }
 
         const isArtist =
-            own.length > 0 &&
-            !own.some((r) => r.item_type === "plastic_mold" || r.item_type === "plastic_release");
+            own.length > 0 && !own.some((r) => r.item_type === "plastic_mold" || r.item_type === "plastic_release");
 
         const { data: fac } = await supabase
             .from("catalog_items")
@@ -431,24 +440,35 @@ export const getArtistCareerData = unstable_cache(
             .ilike("attributes->>sculptor", `%${makerName}%`)
             .neq("maker", makerName)
             .limit(500);
-        const factory = ((fac ?? []) as unknown as {
-            id: string; title: string; maker: string; maker_slug: string | null; slug: string | null;
-            item_type: string; scale: string | null; attributes: Record<string, unknown> | null;
-        }[]);
+        const factory = (fac ?? []) as unknown as {
+            id: string;
+            title: string;
+            maker: string;
+            maker_slug: string | null;
+            slug: string | null;
+            item_type: string;
+            scale: string | null;
+            attributes: Record<string, unknown> | null;
+        }[];
 
         // Curated facts (200). Tolerant: pre-migration the table is
         // missing and the stat block shows computed facts only.
         let meta: ArtistMeta | null = null;
         try {
-            const { data: a } = await (supabase as unknown as {
-                from: (t: string) => {
-                    select: (c: string) => {
-                        eq: (k: string, v: string) => {
-                            maybeSingle: () => Promise<{ data: Record<string, unknown> | null }>;
+            const { data: a } = await (
+                supabase as unknown as {
+                    from: (t: string) => {
+                        select: (c: string) => {
+                            eq: (
+                                k: string,
+                                v: string,
+                            ) => {
+                                maybeSingle: () => Promise<{ data: Record<string, unknown> | null }>;
+                            };
                         };
                     };
-                };
-            })
+                }
+            )
                 .from("artists")
                 .select("studio_name, disciplines, active_from, active_to, website, registry_notes")
                 .eq("name", makerName)
@@ -469,12 +489,23 @@ export const getArtistCareerData = unstable_cache(
 
         const career = buildArtistCareer(
             own.map((r) => ({
-                id: r.id, title: r.title, makerSlug: r.maker_slug, slug: r.slug,
-                attributes: r.attributes, itemType: r.item_type, scale: r.scale,
+                id: r.id,
+                title: r.title,
+                makerSlug: r.maker_slug,
+                slug: r.slug,
+                attributes: r.attributes,
+                itemType: r.item_type,
+                scale: r.scale,
             })),
             factory.map((r) => ({
-                id: r.id, title: r.title, makerSlug: r.maker_slug, slug: r.slug,
-                attributes: r.attributes, itemType: r.item_type, scale: r.scale, maker: r.maker,
+                id: r.id,
+                title: r.title,
+                makerSlug: r.maker_slug,
+                slug: r.slug,
+                attributes: r.attributes,
+                itemType: r.item_type,
+                scale: r.scale,
+                maker: r.maker,
             })),
         );
 
@@ -518,13 +549,22 @@ export const getMoldSetMentions = unstable_cache(
         if (scale) query = query.eq("scale", scale);
         const [{ data: sets }, { data: own }] = await Promise.all([
             query,
-            supabase.from("catalog_items").select("title, attributes").eq("parent_id", moldId).eq("item_type", "plastic_release").limit(1000),
+            supabase
+                .from("catalog_items")
+                .select("title, attributes")
+                .eq("parent_id", moldId)
+                .eq("item_type", "plastic_release")
+                .limit(1000),
         ]);
         // A piece already catalogued counts whether its number sits in the
         // number field or, as members long had to type it, at the front of the title.
         const ownNumbers = new Set(
             ((own ?? []) as { title: string; attributes: Record<string, unknown> | null }[])
-                .map((r) => String(r.attributes?.model_number ?? splitNumberFromTitle(r.title).model ?? "").replace(/^#/, "").toLowerCase())
+                .map((r) =>
+                    String(r.attributes?.model_number ?? splitNumberFromTitle(r.title).model ?? "")
+                        .replace(/^#/, "")
+                        .toLowerCase(),
+                )
                 .filter(Boolean),
         );
         const seen = new Map<string, MoldSetMention>();
@@ -539,7 +579,10 @@ export const getMoldSetMentions = unstable_cache(
         }[]) {
             if (r.parent_id === moldId) continue;
             if (!mentionsMold(r.title, name)) continue;
-            const model = String(r.attributes?.model_number ?? "").replace(/^#/, "").trim() || null;
+            const model =
+                String(r.attributes?.model_number ?? "")
+                    .replace(/^#/, "")
+                    .trim() || null;
             if (model && ownNumbers.has(model.toLowerCase())) continue;
             const setName = setLabel(r.title) ?? r.title;
             const key = `${(model ?? "").toLowerCase()}|${setName.toLowerCase().replace(/s\b/g, "")}`;
@@ -549,10 +592,18 @@ export const getMoldSetMentions = unstable_cache(
                 setName,
                 modelNumber: model,
                 year: Number.isFinite(y) && y > 1900 ? y : null,
-                setHref: referenceHref({ id: r.id, maker: r.maker, title: r.title, maker_slug: r.maker_slug, slug: r.slug }),
+                setHref: referenceHref({
+                    id: r.id,
+                    maker: r.maker,
+                    title: r.title,
+                    maker_slug: r.maker_slug,
+                    slug: r.slug,
+                }),
             });
         }
-        return [...seen.values()].sort((a, b) => (a.year ?? 9999) - (b.year ?? 9999) || a.setName.localeCompare(b.setName));
+        return [...seen.values()].sort(
+            (a, b) => (a.year ?? 9999) - (b.year ?? 9999) || a.setName.localeCompare(b.setName),
+        );
     },
     ["reference:mold-sets:v2"],
     { revalidate: REVALIDATE, tags: [REFERENCE_PAGES_CACHE_TAG] },
@@ -560,12 +611,23 @@ export const getMoldSetMentions = unstable_cache(
 
 // ── Old addresses (migration 233) ──
 
-type HistoryRow = { item: { maker_slug: string | null; slug: string | null } | { maker_slug: string | null; slug: string | null }[] | null };
+type HistoryRow = {
+    item:
+        | { maker_slug: string | null; slug: string | null }
+        | { maker_slug: string | null; slug: string | null }[]
+        | null;
+};
 type HistoryClient = {
     from: (t: string) => {
         select: (c: string) => {
-            eq: (k: string, v: string) => {
-                eq: (k: string, v: string) => { maybeSingle: () => PromiseLike<{ data: HistoryRow | null; error: unknown }> };
+            eq: (
+                k: string,
+                v: string,
+            ) => {
+                eq: (
+                    k: string,
+                    v: string,
+                ) => { maybeSingle: () => PromiseLike<{ data: HistoryRow | null; error: unknown }> };
                 limit: (n: number) => PromiseLike<{ data: HistoryRow[] | null; error: unknown }>;
             };
         };

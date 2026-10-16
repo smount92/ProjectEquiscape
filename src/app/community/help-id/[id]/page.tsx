@@ -53,11 +53,7 @@ export default async function HelpIdDetailPage({ params }: PageProps) {
         created_at: string;
     };
 
-    const { data: reqUser } = await supabase
-        .from("users")
-        .select("alias_name")
-        .eq("id", req.user_id)
-        .single();
+    const { data: reqUser } = await supabase.from("users").select("alias_name").eq("id", req.user_id).single();
     const requesterName = (reqUser as { alias_name: string } | null)?.alias_name ?? "Unknown";
 
     const signedImageUrl = req.image_url ? getPublicImageUrl(req.image_url) : null;
@@ -80,10 +76,7 @@ export default async function HelpIdDetailPage({ params }: PageProps) {
     const sugUserIds = [...new Set(sugRows.map((s) => s.user_id))];
     const sugUserMap = new Map<string, string>();
     if (sugUserIds.length > 0) {
-        const { data: sugUsers } = await supabase
-            .from("users")
-            .select("id, alias_name")
-            .in("id", sugUserIds);
+        const { data: sugUsers } = await supabase.from("users").select("id, alias_name").in("id", sugUserIds);
         if (sugUsers) {
             for (const u of sugUsers as { id: string; alias_name: string }[]) {
                 sugUserMap.set(u.id, u.alias_name);
@@ -134,9 +127,7 @@ export default async function HelpIdDetailPage({ params }: PageProps) {
                 <PageMasthead
                     icon={isResolved ? "✅" : "🔍"}
                     title="Mystery Model"
-                    subtitle={`Submitted by ${requesterName} on ${new Date(
-                        req.created_at
-                    ).toLocaleDateString()}`}
+                    subtitle={`Submitted by ${requesterName} on ${new Date(req.created_at).toLocaleDateString()}`}
                     backHref="/community/help-id"
                     backLabel="Help ID"
                 />
@@ -146,7 +137,7 @@ export default async function HelpIdDetailPage({ params }: PageProps) {
                     <span className={`stamp ${isResolved ? "" : "stamp-red"} mb-3 inline-block`}>
                         {isResolved ? "Identified" : "Open"}
                     </span>
-                    <div className="border-forest/25 overflow-hidden rounded-md border bg-[var(--muted)]">
+                    <div className="overflow-hidden rounded-md border border-forest/25 bg-[var(--muted)]">
                         {signedImageUrl ? (
                             <img
                                 src={signedImageUrl}
@@ -154,9 +145,7 @@ export default async function HelpIdDetailPage({ params }: PageProps) {
                                 className="block h-auto max-h-[500px] w-full object-contain"
                             />
                         ) : (
-                            <div className="flex h-[300px] items-center justify-center text-6xl">
-                                🐴
-                            </div>
+                            <div className="flex h-[300px] items-center justify-center text-6xl">🐴</div>
                         )}
                     </div>
                 </div>
@@ -164,7 +153,7 @@ export default async function HelpIdDetailPage({ params }: PageProps) {
             rightContent={
                 <div>
                     <span className="ledger-tab">Description</span>
-                    <p className="text-secondary-foreground leading-[1.7]">
+                    <p className="leading-[1.7] text-secondary-foreground">
                         {req.description || "No description provided."}
                     </p>
                 </div>

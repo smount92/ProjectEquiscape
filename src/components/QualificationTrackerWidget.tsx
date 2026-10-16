@@ -18,28 +18,20 @@ export default async function QualificationTrackerWidget() {
     if (!tracker) return null;
 
     const year = new Date().getFullYear();
-    const activeTotal = QUALIFIER_PROGRAMS.reduce(
-        (n, p) => n + tracker.programs[p.value].activeCards,
-        0,
-    );
+    const activeTotal = QUALIFIER_PROGRAMS.reduce((n, p) => n + tracker.programs[p.value].activeCards, 0);
 
     return (
-        <details
-            className="rounded-xl border border-input bg-card p-6 shadow-sm"
-            id="qualification-tracker"
-            open
-        >
+        <details className="rounded-xl border border-input bg-card p-6 shadow-sm" id="qualification-tracker" open>
             <summary className="flex cursor-pointer list-none items-center gap-2 text-xs font-semibold tracking-widest text-foreground uppercase select-none [&::-webkit-details-marker]:hidden">
                 🎫 Qualification cards {year}
-                <span className="ml-auto text-xs font-normal normal-case tracking-normal text-muted-foreground">
+                <span className="ml-auto text-xs font-normal tracking-normal text-muted-foreground normal-case">
                     {activeTotal} active card{activeTotal === 1 ? "" : "s"}
                 </span>
             </summary>
 
             <p className="mt-3 mb-1 text-xs text-muted-foreground italic">
-                Your own record of the cards your horses have earned. Official NAN cards are
-                issued by NAMHSA; OMEQ cards by USOMHS through the show host. Add one from any
-                horse&rsquo;s show records.
+                Your own record of the cards your horses have earned. Official NAN cards are issued by NAMHSA; OMEQ
+                cards by USOMHS through the show host. Add one from any horse&rsquo;s show records.
             </p>
 
             {QUALIFIER_PROGRAMS.map((p) => {
@@ -67,9 +59,7 @@ export default async function QualificationTrackerWidget() {
                         </h3>
 
                         {section.horses.length === 0 ? (
-                            <p className="m-0 mt-1 text-xs text-muted-foreground">
-                                No {p.short} cards recorded yet.
-                            </p>
+                            <p className="m-0 mt-1 text-xs text-muted-foreground">No {p.short} cards recorded yet.</p>
                         ) : (
                             <div className="mt-1 flex flex-col gap-1">
                                 {section.horses.slice(0, 8).map((h) => (

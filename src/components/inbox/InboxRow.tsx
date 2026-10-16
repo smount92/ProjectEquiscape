@@ -18,23 +18,14 @@ import type { InboxThread } from "@/app/inbox/reads";
  * stage as a stamp and its role as a chip, and a plain conversation
  * carries neither, so the two are told apart before you read a word.
  */
-export default function InboxRow({
-    thread,
-    muteEnabled,
-}: {
-    thread: InboxThread;
-    muteEnabled: boolean;
-}) {
+export default function InboxRow({ thread, muteEnabled }: { thread: InboxThread; muteEnabled: boolean }) {
     const [busy, setBusy] = useState(false);
     const router = useRouter();
 
     const isDeal = thread.dealKind !== null || thread.stage !== null;
     const unread = thread.unreadCount > 0;
 
-    const toggle = async (
-        e: React.MouseEvent,
-        fn: () => Promise<{ success: boolean }>,
-    ) => {
+    const toggle = async (e: React.MouseEvent, fn: () => Promise<{ success: boolean }>) => {
         e.preventDefault();
         e.stopPropagation();
         setBusy(true);
@@ -44,14 +35,10 @@ export default function InboxRow({
     };
 
     return (
-        <div
-            className={`border-input relative border-b last:border-b-0 ${
-                unread ? "bg-success/10" : ""
-            }`}
-        >
+        <div className={`relative border-b border-input last:border-b-0 ${unread ? "bg-success/10" : ""}`}>
             <Link
                 href={`/inbox/${thread.id}`}
-                className="text-foreground flex items-center gap-4 px-6 py-4 no-underline transition-all hover:bg-black/[0.03] max-md:gap-2 max-md:px-4 max-md:py-3"
+                className="flex items-center gap-4 px-6 py-4 text-foreground no-underline transition-all hover:bg-black/[0.03] max-md:gap-2 max-md:px-4 max-md:py-3"
                 id={`inbox-item-${thread.id}`}
             >
                 {thread.subjectThumbUrl ? (
@@ -62,47 +49,39 @@ export default function InboxRow({
                         className="h-11 w-11 shrink-0 rounded-md object-cover max-md:h-9 max-md:w-9"
                     />
                 ) : (
-                    <UserAvatar
-                        src={thread.otherAvatarUrl}
-                        alias={thread.otherAlias}
-                        size="sm"
-                    />
+                    <UserAvatar src={thread.otherAvatarUrl} alias={thread.otherAlias} size="sm" />
                 )}
 
                 <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                        <span
-                            className={`text-sm font-semibold ${unread ? "text-forest" : "text-foreground"}`}
-                        >
+                        <span className={`text-sm font-semibold ${unread ? "text-forest" : "text-foreground"}`}>
                             @{thread.otherAlias}
                         </span>
                         {thread.roleLabel && (
-                            <span className="border-input bg-muted text-muted-foreground inline-block rounded-full border px-2 py-[1px] text-[0.65rem] font-semibold">
+                            <span className="inline-block rounded-full border border-input bg-muted px-2 py-[1px] text-[0.65rem] font-semibold text-muted-foreground">
                                 {thread.roleLabel}
                             </span>
                         )}
                         {thread.disputed ? (
-                            <span className="border-warning/40 bg-warning/10 text-warning inline-block rounded-full border px-2 py-[1px] text-[0.65rem] font-semibold">
+                            <span className="inline-block rounded-full border border-warning/40 bg-warning/10 px-2 py-[1px] text-[0.65rem] font-semibold text-warning">
                                 Disputed
                             </span>
                         ) : (
                             thread.stage && (
-                                <span className="border-forest/25 bg-forest/5 text-forest inline-block rounded-full border px-2 py-[1px] text-[0.65rem] font-semibold">
+                                <span className="inline-block rounded-full border border-forest/25 bg-forest/5 px-2 py-[1px] text-[0.65rem] font-semibold text-forest">
                                     {stageLabel(thread.stage)}
                                 </span>
                             )
                         )}
                         {thread.muted && (
-                            <span className="text-muted-foreground text-[0.65rem]" title="Muted">
+                            <span className="text-[0.65rem] text-muted-foreground" title="Muted">
                                 🔕
                             </span>
                         )}
-                        <span className="text-muted-foreground ml-auto shrink-0 text-xs">
-                            {timeAgo(thread.lastAt)}
-                        </span>
+                        <span className="ml-auto shrink-0 text-xs text-muted-foreground">{timeAgo(thread.lastAt)}</span>
                     </div>
 
-                    <div className="text-muted-foreground mt-[2px] flex items-center gap-1 text-xs">
+                    <div className="mt-[2px] flex items-center gap-1 text-xs text-muted-foreground">
                         {thread.subjectTitle ? (
                             <>
                                 {isDeal ? "🤝" : "🐴"} {thread.subjectTitle}
@@ -112,12 +91,10 @@ export default function InboxRow({
                         )}
                     </div>
 
-                    <div className="text-secondary-foreground mt-1 overflow-hidden text-xs text-ellipsis whitespace-nowrap">
+                    <div className="mt-1 overflow-hidden text-xs text-ellipsis whitespace-nowrap text-secondary-foreground">
                         {thread.preview ? (
                             <>
-                                {thread.previewIsMine && (
-                                    <span className="text-foreground font-semibold">You: </span>
-                                )}
+                                {thread.previewIsMine && <span className="font-semibold text-foreground">You: </span>}
                                 {thread.preview}
                             </>
                         ) : (
@@ -127,7 +104,7 @@ export default function InboxRow({
                 </div>
 
                 {unread && (
-                    <div className="bg-forest flex h-6 min-w-[24px] shrink-0 items-center justify-center rounded-full px-1.5 text-[0.7rem] font-bold text-white">
+                    <div className="flex h-6 min-w-[24px] shrink-0 items-center justify-center rounded-full bg-forest px-1.5 text-[0.7rem] font-bold text-white">
                         {thread.unreadCount}
                     </div>
                 )}
@@ -145,9 +122,7 @@ export default function InboxRow({
                     <RowButton
                         title={thread.archived ? "Move back to inbox" : "Archive"}
                         disabled={busy}
-                        onClick={(e) =>
-                            toggle(e, () => setThreadArchived(thread.id, !thread.archived))
-                        }
+                        onClick={(e) => toggle(e, () => setThreadArchived(thread.id, !thread.archived))}
                     >
                         {thread.archived ? "📥" : "🗄️"}
                     </RowButton>
@@ -170,7 +145,7 @@ function RowButton({
 }) {
     return (
         <button
-            className="border-input bg-card hover:bg-muted flex h-7 w-7 items-center justify-center rounded-full border text-xs transition-colors disabled:opacity-40"
+            className="flex h-7 w-7 items-center justify-center rounded-full border border-input bg-card text-xs transition-colors hover:bg-muted disabled:opacity-40"
             title={title}
             aria-label={title}
             onClick={onClick}

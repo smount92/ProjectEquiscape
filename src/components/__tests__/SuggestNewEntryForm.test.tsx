@@ -34,7 +34,9 @@ describe("SuggestNewEntryForm — a mold is asked for its name once", () => {
         render(<SuggestNewEntryForm />);
         fireEvent.change(screen.getByLabelText(/entry type/i), { target: { value: "plastic_mold" } });
         fireEvent.change(screen.getByLabelText(/^mold name/i), { target: { value: "Family Arabian Stallion" } });
-        fireEvent.change(screen.getByLabelText(/reason|why/i), { target: { value: "Missing mold from the 1960s line." } });
+        fireEvent.change(screen.getByLabelText(/reason|why/i), {
+            target: { value: "Missing mold from the 1960s line." },
+        });
         fireEvent.click(screen.getByRole("button", { name: /submit/i }));
         await waitFor(() => expect(createSuggestion).toHaveBeenCalled());
         const input = createSuggestion.mock.calls[0][0] as { fieldChanges: Record<string, unknown> };

@@ -23,11 +23,7 @@ vi.mock("@/lib/supabase/admin", () => ({
     getAdminClient: vi.fn(() => ({ from: fromMock })),
 }));
 
-import {
-    BULK_NOTIFICATION_CAP,
-    createNotification,
-    createNotificationsBulk,
-} from "../createNotification";
+import { BULK_NOTIFICATION_CAP, createNotification, createNotificationsBulk } from "../createNotification";
 
 /** Prefs rows the users-table query returns. */
 function stubPrefs(rows: { id: string; notification_prefs: Record<string, boolean> | null }[]) {

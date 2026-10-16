@@ -60,7 +60,16 @@ type Draft = {
     isPublic: boolean;
 };
 
-const EMPTY: Draft = { kind: "racing", organization: "", title: "", result: "", when: "", detail: "", linkUrl: "", isPublic: true };
+const EMPTY: Draft = {
+    kind: "racing",
+    organization: "",
+    title: "",
+    result: "",
+    when: "",
+    detail: "",
+    linkUrl: "",
+    isPublic: true,
+};
 
 function fromView(a: AccomplishmentView): Draft {
     return {
@@ -133,7 +142,7 @@ export default function AccomplishmentsSection({ horseId, horseName, items, pape
     };
 
     const form = (
-        <div className="border-input mt-2 grid gap-3 rounded-md border px-3 py-3" data-testid="accomplishment-form">
+        <div className="mt-2 grid gap-3 rounded-md border border-input px-3 py-3" data-testid="accomplishment-form">
             <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label="Kind of accomplishment">
                 {ACCOMPLISHMENT_KINDS.map((k) => (
                     <button
@@ -144,7 +153,9 @@ export default function AccomplishmentsSection({ horseId, horseName, items, pape
                         title={k.hint}
                         onClick={() => set("kind", k.value)}
                         className={`cursor-pointer rounded-full border px-2.5 py-1 text-xs ${
-                            draft.kind === k.value ? "border-forest bg-forest/10 text-forest font-semibold" : "border-input text-secondary-foreground"
+                            draft.kind === k.value
+                                ? "border-forest bg-forest/10 font-semibold text-forest"
+                                : "border-input text-secondary-foreground"
                         }`}
                     >
                         {k.glyph} {k.label}
@@ -152,15 +163,56 @@ export default function AccomplishmentsSection({ horseId, horseName, items, pape
                 ))}
             </div>
             <div className="grid gap-3 sm:grid-cols-2">
-                <Input value={draft.organization} onChange={(e) => set("organization", e.target.value)} maxLength={MAX_ORG} placeholder="Organization — e.g. Express, FTRA" aria-label="Organization" />
-                <Input value={draft.when} onChange={(e) => set("when", e.target.value)} maxLength={MAX_DATE_TEXT} placeholder="When — 2024, 2024-05 or Spring 2024" aria-label="When" />
+                <Input
+                    value={draft.organization}
+                    onChange={(e) => set("organization", e.target.value)}
+                    maxLength={MAX_ORG}
+                    placeholder="Organization — e.g. Express, FTRA"
+                    aria-label="Organization"
+                />
+                <Input
+                    value={draft.when}
+                    onChange={(e) => set("when", e.target.value)}
+                    maxLength={MAX_DATE_TEXT}
+                    placeholder="When — 2024, 2024-05 or Spring 2024"
+                    aria-label="When"
+                />
             </div>
-            <Input value={draft.title} onChange={(e) => set("title", e.target.value)} maxLength={MAX_TITLE} placeholder="Title — e.g. Autumn Classic (6 furlongs)" aria-label="Title" />
-            <Input value={draft.result} onChange={(e) => set("result", e.target.value)} maxLength={MAX_RESULT} placeholder="Result — e.g. 2nd of 9, Reserve Champion" aria-label="Result" />
-            <Textarea value={draft.detail} onChange={(e) => set("detail", e.target.value.slice(0, MAX_DETAIL))} rows={3} maxLength={MAX_DETAIL} placeholder="The story, the chart, who ran it. Links become clickable." aria-label="Detail" />
-            <Input value={draft.linkUrl} onChange={(e) => set("linkUrl", e.target.value)} placeholder="Link — the results page, the club's write-up (optional)" aria-label="Link" />
+            <Input
+                value={draft.title}
+                onChange={(e) => set("title", e.target.value)}
+                maxLength={MAX_TITLE}
+                placeholder="Title — e.g. Autumn Classic (6 furlongs)"
+                aria-label="Title"
+            />
+            <Input
+                value={draft.result}
+                onChange={(e) => set("result", e.target.value)}
+                maxLength={MAX_RESULT}
+                placeholder="Result — e.g. 2nd of 9, Reserve Champion"
+                aria-label="Result"
+            />
+            <Textarea
+                value={draft.detail}
+                onChange={(e) => set("detail", e.target.value.slice(0, MAX_DETAIL))}
+                rows={3}
+                maxLength={MAX_DETAIL}
+                placeholder="The story, the chart, who ran it. Links become clickable."
+                aria-label="Detail"
+            />
+            <Input
+                value={draft.linkUrl}
+                onChange={(e) => set("linkUrl", e.target.value)}
+                placeholder="Link — the results page, the club's write-up (optional)"
+                aria-label="Link"
+            />
             <label className="flex cursor-pointer items-center gap-2 text-sm">
-                <input type="checkbox" checked={draft.isPublic} onChange={(e) => set("isPublic", e.target.checked)} className="h-4 w-4" />
+                <input
+                    type="checkbox"
+                    checked={draft.isPublic}
+                    onChange={(e) => set("isPublic", e.target.checked)}
+                    className="h-4 w-4"
+                />
                 Show on the public passport
             </label>
             <div className="flex flex-wrap justify-end gap-2">
@@ -172,7 +224,7 @@ export default function AccomplishmentsSection({ horseId, horseName, items, pape
                 </Button>
             </div>
             {error && (
-                <p role="alert" className="text-destructive m-0 text-sm font-semibold">
+                <p role="alert" className="m-0 text-sm font-semibold text-destructive">
                     {error}
                 </p>
             )}
@@ -199,7 +251,7 @@ export default function AccomplishmentsSection({ horseId, horseName, items, pape
                     </Button>
                 )}
             </div>
-            <p className="text-secondary-foreground m-0 mb-3 text-xs leading-relaxed">
+            <p className="m-0 mb-3 text-xs leading-relaxed text-secondary-foreground">
                 {isOwner
                     ? "Race records, performance days, breedings, awards — what the show ring doesn't cover. Attach the chart or the certificate to any of them."
                     : "Race records, performance days, breedings and awards — what the show ring doesn't cover."}
@@ -208,7 +260,7 @@ export default function AccomplishmentsSection({ horseId, horseName, items, pape
             {editing === "new" && form}
 
             {items.length === 0 && editing === null && (
-                <p className="text-secondary-foreground m-0 py-4 text-center text-sm">
+                <p className="m-0 py-4 text-center text-sm text-secondary-foreground">
                     Nothing here yet. A race with the Express, a breeding granted, a year-end award — add the first.
                 </p>
             )}
@@ -218,7 +270,7 @@ export default function AccomplishmentsSection({ horseId, horseName, items, pape
                     const attached = papers.filter((p) => p.accomplishmentId === a.id);
                     const line = accomplishmentLine(a);
                     return (
-                        <li key={a.id} className="border-input/60 border-b pb-3 last:border-b-0 last:pb-0">
+                        <li key={a.id} className="border-b border-input/60 pb-3 last:border-b-0 last:pb-0">
                             {editing === a.id ? (
                                 form
                             ) : (
@@ -226,17 +278,27 @@ export default function AccomplishmentsSection({ horseId, horseName, items, pape
                                     <div className="flex flex-wrap items-baseline gap-x-2">
                                         <span aria-hidden="true">{ACCOMPLISHMENT_GLYPHS[a.kind] ?? "📌"}</span>
                                         <span className="font-semibold">{a.title}</span>
-                                        <span className="text-secondary-foreground text-xs">{ACCOMPLISHMENT_LABELS[a.kind] ?? "Other"}</span>
-                                        {isOwner && !a.isPublic && <span className="text-secondary-foreground text-xs">· 🔒 only you</span>}
+                                        <span className="text-xs text-secondary-foreground">
+                                            {ACCOMPLISHMENT_LABELS[a.kind] ?? "Other"}
+                                        </span>
+                                        {isOwner && !a.isPublic && (
+                                            <span className="text-xs text-secondary-foreground">· 🔒 only you</span>
+                                        )}
                                     </div>
-                                    {line && <div className="text-secondary-foreground mt-0.5 text-sm">{line}</div>}
+                                    {line && <div className="mt-0.5 text-sm text-secondary-foreground">{line}</div>}
                                     {a.detail && (
-                                        <p className="text-secondary-foreground m-0 mt-1 text-sm leading-relaxed whitespace-pre-wrap">
+                                        <p className="m-0 mt-1 text-sm leading-relaxed whitespace-pre-wrap text-secondary-foreground">
                                             <LinkifiedText text={a.detail} />
                                         </p>
                                     )}
                                     {a.linkUrl && (
-                                        <a href={a.linkUrl} target="_blank" rel="noopener noreferrer nofollow" className="text-forest mt-1 inline-block text-xs font-semibold hover:underline" title={a.linkUrl}>
+                                        <a
+                                            href={a.linkUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer nofollow"
+                                            className="mt-1 inline-block text-xs font-semibold text-forest hover:underline"
+                                            title={a.linkUrl}
+                                        >
                                             {linkHost(a.linkUrl)} ↗
                                         </a>
                                     )}
@@ -246,7 +308,12 @@ export default function AccomplishmentsSection({ horseId, horseName, items, pape
                                             <Button variant="ghost" size="sm" onClick={() => start(a)} disabled={busy}>
                                                 Edit
                                             </Button>
-                                            <Button variant="ghost" size="sm" onClick={() => setAttaching(a)} disabled={busy}>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => setAttaching(a)}
+                                                disabled={busy}
+                                            >
                                                 📎 Attach a paper
                                             </Button>
                                             <Button variant="ghost" size="sm" onClick={() => remove(a)} disabled={busy}>
@@ -262,7 +329,7 @@ export default function AccomplishmentsSection({ horseId, horseName, items, pape
             </ul>
 
             {error && editing === null && (
-                <p role="alert" className="text-destructive mt-2 text-sm font-semibold">
+                <p role="alert" className="mt-2 text-sm font-semibold text-destructive">
                     {error}
                 </p>
             )}

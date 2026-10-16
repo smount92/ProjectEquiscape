@@ -12,9 +12,7 @@ test.describe("Accessibility Audit", () => {
             .disableRules(["color-contrast", "link-in-text-block"]) // Dark theme + forest-on-stone links cause false positives
             .analyze();
 
-        const critical = results.violations.filter(
-            (v) => v.impact === "critical" || v.impact === "serious"
-        );
+        const critical = results.violations.filter((v) => v.impact === "critical" || v.impact === "serious");
 
         if (critical.length > 0) {
             console.log(
@@ -27,8 +25,8 @@ test.describe("Accessibility Audit", () => {
                         nodes: v.nodes.length,
                     })),
                     null,
-                    2
-                )
+                    2,
+                ),
             );
         }
         expect(critical).toHaveLength(0);
@@ -43,9 +41,7 @@ test.describe("Accessibility Audit", () => {
             .disableRules(["color-contrast", "link-in-text-block"])
             .analyze();
 
-        const critical = results.violations.filter(
-            (v) => v.impact === "critical" || v.impact === "serious"
-        );
+        const critical = results.violations.filter((v) => v.impact === "critical" || v.impact === "serious");
 
         if (critical.length > 0) {
             console.log(
@@ -53,8 +49,8 @@ test.describe("Accessibility Audit", () => {
                 JSON.stringify(
                     critical.map((v) => ({ id: v.id, impact: v.impact, nodes: v.nodes.length })),
                     null,
-                    2
-                )
+                    2,
+                ),
             );
         }
         expect(critical).toHaveLength(0);
@@ -70,9 +66,7 @@ test.describe("Accessibility Audit", () => {
             .disableRules(["color-contrast", "link-in-text-block"])
             .analyze();
 
-        const critical = results.violations.filter(
-            (v) => v.impact === "critical" || v.impact === "serious"
-        );
+        const critical = results.violations.filter((v) => v.impact === "critical" || v.impact === "serious");
 
         if (critical.length > 0) {
             console.log(
@@ -80,8 +74,8 @@ test.describe("Accessibility Audit", () => {
                 JSON.stringify(
                     critical.map((v) => ({ id: v.id, impact: v.impact, nodes: v.nodes.length })),
                     null,
-                    2
-                )
+                    2,
+                ),
             );
         }
         expect(critical).toHaveLength(0);
@@ -96,9 +90,7 @@ test.describe("Accessibility Audit", () => {
             .disableRules(["color-contrast", "link-in-text-block"])
             .analyze();
 
-        const critical = results.violations.filter(
-            (v) => v.impact === "critical" || v.impact === "serious"
-        );
+        const critical = results.violations.filter((v) => v.impact === "critical" || v.impact === "serious");
 
         if (critical.length > 0) {
             console.log(
@@ -106,8 +98,8 @@ test.describe("Accessibility Audit", () => {
                 JSON.stringify(
                     critical.map((v) => ({ id: v.id, impact: v.impact, nodes: v.nodes.length })),
                     null,
-                    2
-                )
+                    2,
+                ),
             );
         }
         expect(critical).toHaveLength(0);
@@ -133,9 +125,7 @@ test.describe("Accessibility Audit", () => {
                 .disableRules(["color-contrast", "link-in-text-block"])
                 .analyze();
 
-            const critical = results.violations.filter(
-                (v) => v.impact === "critical" || v.impact === "serious"
-            );
+            const critical = results.violations.filter((v) => v.impact === "critical" || v.impact === "serious");
 
             if (critical.length > 0) {
                 console.log(
@@ -143,8 +133,8 @@ test.describe("Accessibility Audit", () => {
                     JSON.stringify(
                         critical.map((v) => ({ id: v.id, impact: v.impact, nodes: v.nodes.length })),
                         null,
-                        2
-                    )
+                        2,
+                    ),
                 );
             }
             expect(critical).toHaveLength(0);
@@ -159,18 +149,11 @@ test.describe("Accessibility Audit", () => {
             await page.goto(route);
             await page.waitForLoadState("networkidle");
 
-            const results = await new AxeBuilder({ page })
-                .withRules(["color-contrast"])
-                .analyze();
+            const results = await new AxeBuilder({ page }).withRules(["color-contrast"]).analyze();
 
-            const serious = results.violations.filter(
-                (v) => v.impact === "critical" || v.impact === "serious"
-            );
+            const serious = results.violations.filter((v) => v.impact === "critical" || v.impact === "serious");
 
-            expect(
-                serious,
-                `Serious contrast violations on ${route}`
-            ).toHaveLength(0);
+            expect(serious, `Serious contrast violations on ${route}`).toHaveLength(0);
         }
     });
 });

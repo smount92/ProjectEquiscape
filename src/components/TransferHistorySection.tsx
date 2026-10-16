@@ -1,55 +1,55 @@
-import Link from"next/link";
-import { getTransferHistory } from"@/app/actions/hoofprint";
+import Link from "next/link";
+import { getTransferHistory } from "@/app/actions/hoofprint";
 
 export default async function TransferHistorySection() {
- const history = await getTransferHistory();
- if (history.length === 0) return null;
+    const history = await getTransferHistory();
+    if (history.length === 0) return null;
 
- return (
- <details className="mt-6 rounded-xl border border-input bg-card p-4 shadow-sm" id="transfer-history">
- <summary className="flex cursor-pointer list-none items-center gap-2 px-2 py-2 text-base font-bold text-foreground select-none [&::-webkit-details-marker]:hidden">
- 📤 <span>Transfer History</span>
- <span className="ml-auto inline-flex h-[20px] min-w-[20px] items-center justify-center rounded-full bg-muted px-[6px] py-0 text-xs font-semibold">
- {history.length}
- </span>
- </summary>
- <div className="grid-cols-[repeat(auto-fill,minmax(240px,1fr))] mt-2 grid gap-4 px-2 pb-2">
- {history.map((item) => (
- <Link
- key={item.id}
- href={`/community/${item.horseId}`}
- className="bg-card border-input rounded-lg border shadow-md transition-all hover:opacity-[0.85]"
- >
- {item.horseThumbnail ? (
- <img
- src={item.horseThumbnail}
- alt={item.horseName ||"Transferred horse"}
- className="transfer-ghost-thumb"
- />
- ) : (
- <div className="transfer-ghost-thumb transfer-ghost-placeholder">🐴</div>
- )}
- <div className="flex min-w-0 flex-col gap-[2px]">
- <span className="overflow-hidden text-sm font-bold text-ellipsis whitespace-nowrap">
- {item.horseName ||"Unknown Horse"}
- </span>
- <span className="text-muted-foreground text-xs">
- Transferred{""}
- {new Date(item.releasedAt).toLocaleDateString("en-US", {
- month:"short",
- day:"numeric",
- year:"numeric",
- })}
- </span>
- {item.isPricePublic && item.salePrice && (
- <span className="text-xs font-semibold text-amber-500">
- Sale: ${item.salePrice.toLocaleString("en-US", { minimumFractionDigits: 2 })}
- </span>
- )}
- </div>
- </Link>
- ))}
- </div>
- </details>
- );
+    return (
+        <details className="mt-6 rounded-xl border border-input bg-card p-4 shadow-sm" id="transfer-history">
+            <summary className="flex cursor-pointer list-none items-center gap-2 px-2 py-2 text-base font-bold text-foreground select-none [&::-webkit-details-marker]:hidden">
+                📤 <span>Transfer History</span>
+                <span className="ml-auto inline-flex h-[20px] min-w-[20px] items-center justify-center rounded-full bg-muted px-[6px] py-0 text-xs font-semibold">
+                    {history.length}
+                </span>
+            </summary>
+            <div className="mt-2 grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-4 px-2 pb-2">
+                {history.map((item) => (
+                    <Link
+                        key={item.id}
+                        href={`/community/${item.horseId}`}
+                        className="rounded-lg border border-input bg-card shadow-md transition-all hover:opacity-[0.85]"
+                    >
+                        {item.horseThumbnail ? (
+                            <img
+                                src={item.horseThumbnail}
+                                alt={item.horseName || "Transferred horse"}
+                                className="transfer-ghost-thumb"
+                            />
+                        ) : (
+                            <div className="transfer-ghost-thumb transfer-ghost-placeholder">🐴</div>
+                        )}
+                        <div className="flex min-w-0 flex-col gap-[2px]">
+                            <span className="overflow-hidden text-sm font-bold text-ellipsis whitespace-nowrap">
+                                {item.horseName || "Unknown Horse"}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                                Transferred{""}
+                                {new Date(item.releasedAt).toLocaleDateString("en-US", {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                })}
+                            </span>
+                            {item.isPricePublic && item.salePrice && (
+                                <span className="text-xs font-semibold text-amber-500">
+                                    Sale: ${item.salePrice.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                                </span>
+                            )}
+                        </div>
+                    </Link>
+                ))}
+            </div>
+        </details>
+    );
 }

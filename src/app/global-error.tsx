@@ -18,13 +18,7 @@ import { useEffect } from "react";
  * Hexes mirror globals.css: --leather-deep #3E2414, --leather #5C3A20,
  * --leather-hi #7A4E2C, --leather-text #EFDDBB, --brass #B08D3E.
  */
-export default function GlobalError({
-    error,
-    reset,
-}: {
-    error: Error & { digest?: string };
-    reset: () => void;
-}) {
+export default function GlobalError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
     useEffect(() => {
         Sentry.captureException(error);
     }, [error]);
@@ -50,8 +44,7 @@ export default function GlobalError({
                             borderRadius: 12,
                             padding: "28px 24px",
                             textAlign: "center",
-                            background:
-                                "linear-gradient(180deg, #7A4E2C 0%, #5C3A20 55%, #3E2414 100%)",
+                            background: "linear-gradient(180deg, #7A4E2C 0%, #5C3A20 55%, #3E2414 100%)",
                             boxShadow: "0 6px 18px rgba(62, 36, 20, 0.35)",
                         }}
                     >
@@ -85,8 +78,8 @@ export default function GlobalError({
                                 color: "#D8BE92",
                             }}
                         >
-                            Something failed before the page could be built. It has been logged and
-                            we can see it — nothing of yours has been lost.
+                            Something failed before the page could be built. It has been logged and we can see it —
+                            nothing of yours has been lost.
                         </p>
                     </div>
 
@@ -131,9 +124,7 @@ export default function GlobalError({
                             {error.digest ? (
                                 <>
                                     {" · reference "}
-                                    <span style={{ fontFamily: "ui-monospace, monospace" }}>
-                                        {error.digest}
-                                    </span>
+                                    <span style={{ fontFamily: "ui-monospace, monospace" }}>{error.digest}</span>
                                 </>
                             ) : null}
                         </p>

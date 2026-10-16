@@ -102,8 +102,18 @@ export interface CalendarMonth {
 }
 
 const MONTH_NAMES = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December",
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
 ] as const;
 
 export const PLATFORM_LABELS: Record<ExternalPlatform, string> = {
@@ -271,21 +281,14 @@ export function fromCommunityEvent(event: CommunityEventLike): CalendarEntry | n
 }
 
 /** Venue filter ("All" = undefined). */
-export function filterByVenue(
-    entries: CalendarEntry[],
-    venue: ExternalVenueType | undefined,
-): CalendarEntry[] {
+export function filterByVenue(entries: CalendarEntry[], venue: ExternalVenueType | undefined): CalendarEntry[] {
     if (!venue) return entries;
     return entries.filter((e) => e.venue === venue);
 }
 
 /** Chronological, ties broken by title then id so order is stable. */
 function compareEntries(a: CalendarEntry, b: CalendarEntry): number {
-    return (
-        a.date.localeCompare(b.date) ||
-        a.title.localeCompare(b.title) ||
-        a.id.localeCompare(b.id)
-    );
+    return a.date.localeCompare(b.date) || a.title.localeCompare(b.title) || a.id.localeCompare(b.id);
 }
 
 /**
@@ -294,10 +297,7 @@ function compareEntries(a: CalendarEntry, b: CalendarEntry): number {
  * group into months. Months with nothing in them simply don't
  * exist — empty months collapse by construction.
  */
-export function buildCalendarMonths(
-    entries: CalendarEntry[],
-    today: string,
-): CalendarMonth[] {
+export function buildCalendarMonths(entries: CalendarEntry[], today: string): CalendarMonth[] {
     const upcoming = entries.filter((e) => e.date >= today).sort(compareEntries);
 
     const months: CalendarMonth[] = [];
@@ -410,11 +410,7 @@ export function monthKeyOf(isoDate: string): string {
  * show still belongs on the day it ran when you are looking at the
  * shape of the month. Days carry `isPast` so the view can tone them.
  */
-export function buildMonthGrid(
-    entries: CalendarEntry[],
-    monthKey: string,
-    today: string,
-): CalendarGrid {
+export function buildMonthGrid(entries: CalendarEntry[], monthKey: string, today: string): CalendarGrid {
     const year = Number(monthKey.slice(0, 4));
     const month = Number(monthKey.slice(5, 7));
 

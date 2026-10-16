@@ -43,9 +43,7 @@ export default function JudgingProgressCard({
     if (status !== "judging" && status !== "results_review") return null;
 
     const classes = divisions.flatMap((d) => d.sections.flatMap((s) => s.classes));
-    const judgeable = classes.filter(
-        (c) => c.status !== "cancelled" && c.status !== "combined",
-    );
+    const judgeable = classes.filter((c) => c.status !== "cancelled" && c.status !== "combined");
     const placed = judgeable.filter((c) => c.status === "placed").length;
 
     const handleFinalize = async () => {
@@ -90,23 +88,17 @@ export default function JudgingProgressCard({
                 <div className="flex flex-col gap-3">
                     {status === "judging" ? (
                         <p className="m-0 text-sm text-muted-foreground">
-                            Community voting is open on the public show page — the tally is
-                            live on the entry gallery.
+                            Community voting is open on the public show page — the tally is live on the entry gallery.
                         </p>
                     ) : (
                         <>
                             <p className="m-0 text-sm text-muted-foreground">
-                                Voting is closed. Derive the provisional placings from the
-                                vote tally (top 6 per class, ties to the earliest entry),
-                                review them, then complete the show to publish.
+                                Voting is closed. Derive the provisional placings from the vote tally (top 6 per class,
+                                ties to the earliest entry), review them, then complete the show to publish.
                             </p>
                             {canManage && (
                                 <div>
-                                    <Button
-                                        onClick={handleFinalize}
-                                        disabled={finalizing}
-                                        data-testid="finalize-votes"
-                                    >
+                                    <Button onClick={handleFinalize} disabled={finalizing} data-testid="finalize-votes">
                                         {finalizing ? "Deriving…" : "Derive placings from votes"}
                                     </Button>
                                 </div>

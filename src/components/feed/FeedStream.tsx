@@ -127,14 +127,14 @@ export default function FeedStream({
                 headings do. */}
             <div className="brass-heading mt-8 mb-4">
                 <span className="brass-heading-bar" aria-hidden="true" />
-                <h3 className="text-secondary-foreground m-0 text-sm">
+                <h3 className="m-0 text-sm text-secondary-foreground">
                     {label} ({items.length}
                     {cursor ? "+" : ""})
                 </h3>
             </div>
 
             {items.length === 0 ? (
-                <p className="ledger-card text-muted-foreground m-0 text-sm italic">
+                <p className="ledger-card m-0 text-sm text-muted-foreground italic">
                     {emptyMessage ?? "Nothing here yet — be the first to post!"}
                 </p>
             ) : (

@@ -100,10 +100,7 @@ export function mergeAudience(input: {
  * the caller is always a fire-and-forget fan-out, and a notification
  * failure must never break a status transition.
  */
-export async function loadShowAudience(
-    client: SupabaseClient,
-    showId: string,
-): Promise<ShowAudience> {
+export async function loadShowAudience(client: SupabaseClient, showId: string): Promise<ShowAudience> {
     const empty: ShowAudience = {
         entrantIds: [],
         followerIds: [],
@@ -119,16 +116,11 @@ export async function loadShowAudience(
             .eq("show_id", showId)
             .order("created_at", { ascending: true });
         if (entriesError) {
-            logger.error(
-                "ShowAudience",
-                `Entrant load failed for ${showId}: ${entriesError.message}`,
-            );
+            logger.error("ShowAudience", `Entrant load failed for ${showId}: ${entriesError.message}`);
             return empty;
         }
 
-        const entrantIds = (entryRows ?? [])
-            .filter((e) => e.status !== "scratched")
-            .map((e) => e.owner_id as string);
+        const entrantIds = (entryRows ?? []).filter((e) => e.status !== "scratched").map((e) => e.owner_id as string);
 
         // Feature-detected: pre-184 this is a 42P01 and the follower
         // half stays empty, which is exactly today's behaviour.
@@ -140,10 +132,7 @@ export async function loadShowAudience(
             .eq("show_id", showId);
         if (followersError) {
             if (!isMissingSchema(followersError)) {
-                logger.error(
-                    "ShowAudience",
-                    `Follower load failed for ${showId}: ${followersError.message}`,
-                );
+                logger.error("ShowAudience", `Follower load failed for ${showId}: ${followersError.message}`);
             }
         } else {
             followSupported = true;

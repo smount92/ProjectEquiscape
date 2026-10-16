@@ -58,11 +58,7 @@ describe("groupByStage — the artist's order, not ours", () => {
     });
 
     it("floats the catch-all 'progress' bucket last", () => {
-        const groups = groupByStage([
-            { stage: "progress" },
-            { stage: "Base coat" },
-            { stage: "Finished" },
-        ]);
+        const groups = groupByStage([{ stage: "progress" }, { stage: "Base coat" }, { stage: "Finished" }]);
         expect(groups.map(([s]) => s)).toEqual(["Base coat", "Finished", "progress"]);
     });
 
@@ -86,19 +82,18 @@ describe("isValidMakingPath — the D5 lesson", () => {
 
 describe("creditLabel — a claim is labeled a claim", () => {
     it("counterparty confirmation verifies any record", () => {
-        expect(
-            creditLabel({ recordedBy: "artist", ownerConfirmedAt: "2026-09-01", artistIsOwner: false }),
-        ).toEqual({ label: "Confirmed by owner", verified: true });
+        expect(creditLabel({ recordedBy: "artist", ownerConfirmedAt: "2026-09-01", artistIsOwner: false })).toEqual({
+            label: "Confirmed by owner",
+            verified: true,
+        });
     });
     it("commission-born records are born verified", () => {
-        expect(
-            creditLabel({ recordedBy: "commission", ownerConfirmedAt: null, artistIsOwner: false }).verified,
-        ).toBe(true);
+        expect(creditLabel({ recordedBy: "commission", ownerConfirmedAt: null, artistIsOwner: false }).verified).toBe(
+            true,
+        );
     });
     it("the artist's own horse needs no counter-signature", () => {
-        expect(
-            creditLabel({ recordedBy: "artist", ownerConfirmedAt: null, artistIsOwner: true }).verified,
-        ).toBe(true);
+        expect(creditLabel({ recordedBy: "artist", ownerConfirmedAt: null, artistIsOwner: true }).verified).toBe(true);
     });
     it("an unconfirmed artist claim on someone else's horse stays a claim", () => {
         const c = creditLabel({ recordedBy: "artist", ownerConfirmedAt: null, artistIsOwner: false });
@@ -106,9 +101,7 @@ describe("creditLabel — a claim is labeled a claim", () => {
         expect(c.label).toMatch(/awaiting owner/i);
     });
     it("an owner naming an artist is unverified until the artist confirms", () => {
-        expect(
-            creditLabel({ recordedBy: "owner", ownerConfirmedAt: null, artistIsOwner: false }).verified,
-        ).toBe(false);
+        expect(creditLabel({ recordedBy: "owner", ownerConfirmedAt: null, artistIsOwner: false }).verified).toBe(false);
     });
 });
 

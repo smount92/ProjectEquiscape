@@ -111,19 +111,11 @@ export async function getMySeason(): Promise<MySeason | null> {
                 .select("id, is_stakes, status")
                 .eq("current_owner_id", user.id)
                 .in("status", ["issued", "transferred"]),
-            supabase
-                .from("exhibitor_career")
-                .select("career_points")
-                .eq("user_id", user.id)
-                .maybeSingle(),
-            supabase
-                .from("exhibitor_distinctions")
-                .select("distinction_code")
-                .eq("user_id", user.id),
+            supabase.from("exhibitor_career").select("career_points").eq("user_id", user.id).maybeSingle(),
+            supabase.from("exhibitor_distinctions").select("distinction_code").eq("user_id", user.id),
         ]);
         const cards = cardsRes.data ?? [];
-        const careerPoints =
-            (careerRes.data as { career_points: number } | null)?.career_points ?? 0;
+        const careerPoints = (careerRes.data as { career_points: number } | null)?.career_points ?? 0;
         const next = nextStarProgress({
             careerPoints,
             grantedCodes: (distinctionsRes.data ?? []).map((d) => d.distinction_code as string),
@@ -134,8 +126,7 @@ export async function getMySeason(): Promise<MySeason | null> {
             rank: myRow?.rank ?? null,
             points: myRow?.points ?? 0,
             liveCards: cards.length,
-            stakesCards: cards.filter((c) => (c as { is_stakes: boolean | null }).is_stakes === true)
-                .length,
+            stakesCards: cards.filter((c) => (c as { is_stakes: boolean | null }).is_stakes === true).length,
             careerPoints,
             nextStar: next ? { label: next.label, pointsNeeded: next.pointsNeeded } : null,
         };
@@ -233,9 +224,7 @@ export async function getStandings(params: GetStandingsParams): Promise<GetStand
             if (res.error) return { success: false, error: res.error.message };
         }
         if (callbacksRes.error) return { success: false, error: callbacksRes.error.message };
-        const placings = placingChunks.flatMap(
-            (res) => (res.data ?? []) as unknown as StandingsPlacingRow[],
-        );
+        const placings = placingChunks.flatMap((res) => (res.data ?? []) as unknown as StandingsPlacingRow[]);
         const callbacks = (callbacksRes.data ?? []) as unknown as StandingsCallbackRow[];
 
         // 5. Display names — RLS may hide private horses; the points
@@ -250,9 +239,7 @@ export async function getStandings(params: GetStandingsParams): Promise<GetStand
                 ),
             ),
             Promise.all(
-                chunks(ownerIds, IN_CHUNK).map((ids) =>
-                    supabase.from("users").select("id, alias_name").in("id", ids),
-                ),
+                chunks(ownerIds, IN_CHUNK).map((ids) => supabase.from("users").select("id, alias_name").in("id", ids)),
             ),
         ]);
         const horseNamesById = new Map<string, string>();
@@ -307,7 +294,8 @@ async function standingsClient() {
         const { supabase } = await requireAuth();
         return supabase;
     } catch (err) {
-        if (err instanceof AuthError) return getAdminClient() as unknown as Awaited<ReturnType<typeof requireAuth>>["supabase"];
+        if (err instanceof AuthError)
+            return getAdminClient() as unknown as Awaited<ReturnType<typeof requireAuth>>["supabase"];
         throw err;
     }
 }

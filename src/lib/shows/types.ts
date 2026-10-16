@@ -30,13 +30,7 @@ export type ShowStatus =
     | "completed"
     | "archived";
 
-export type ClassStatus =
-    | "scheduled"
-    | "called"
-    | "judging"
-    | "placed"
-    | "combined"
-    | "cancelled";
+export type ClassStatus = "scheduled" | "called" | "judging" | "placed" | "combined" | "cancelled";
 
 export type EntryStatus = "entered" | "scratched" | "placed";
 
@@ -44,12 +38,7 @@ export type StaffRole = "host" | "co_host" | "steward" | "judge";
 
 export type CardStatus = "issued" | "transferred" | "redeemed" | "void";
 
-export type DivisionAxis =
-    | "halter"
-    | "performance"
-    | "workmanship"
-    | "collectibility"
-    | "other";
+export type DivisionAxis = "halter" | "performance" | "workmanship" | "collectibility" | "other";
 
 export type CallbackScope = "section" | "division" | "show";
 
@@ -92,10 +81,7 @@ export type ShowCallbackRow = Omit<Tables["show_callbacks"]["Row"], "scope"> & {
     scope: CallbackScope;
 };
 
-export type QualificationCardRow = Omit<
-    Tables["qualification_cards"]["Row"],
-    "earned_place" | "status"
-> & {
+export type QualificationCardRow = Omit<Tables["qualification_cards"]["Row"], "earned_place" | "status"> & {
     /** The short code IS the primary key (8-char URL-safe) — `id`. */
     earned_place: 1 | 2;
     status: CardStatus;

@@ -33,15 +33,7 @@
 
 // ── Box types ─────────────────────────────────────────────────────────
 
-export const TERM_BOX_TYPES = [
-    "price",
-    "payment_plan",
-    "shipping",
-    "rules",
-    "deadline",
-    "items",
-    "custom",
-] as const;
+export const TERM_BOX_TYPES = ["price", "payment_plan", "shipping", "rules", "deadline", "items", "custom"] as const;
 
 export type TermBoxType = (typeof TERM_BOX_TYPES)[number];
 
@@ -114,14 +106,7 @@ export interface CustomBox extends BoxBase {
     text: string;
 }
 
-export type TermBox =
-    | PriceBox
-    | PaymentPlanBox
-    | ShippingBox
-    | RulesBox
-    | DeadlineBox
-    | ItemsBox
-    | CustomBox;
+export type TermBox = PriceBox | PaymentPlanBox | ShippingBox | RulesBox | DeadlineBox | ItemsBox | CustomBox;
 
 const TYPE_NAMES: Record<TermBoxType, string> = {
     price: "Agreed price",
@@ -254,9 +239,7 @@ let boxCounter = 0;
 /** A collision-resistant id without pulling in a uuid dependency. */
 export function newBoxId(): string {
     boxCounter = (boxCounter + 1) % 100000;
-    return `box_${Date.now().toString(36)}_${boxCounter.toString(36)}_${Math.random()
-        .toString(36)
-        .slice(2, 8)}`;
+    return `box_${Date.now().toString(36)}_${boxCounter.toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
 /**
@@ -288,8 +271,7 @@ export function coerceBox(raw: unknown): TermBox | null {
             };
         case "shipping": {
             const paidByRaw = r.paidBy ?? r.paid_by;
-            const paidBy =
-                paidByRaw === "a" || paidByRaw === "b" || paidByRaw === "split" ? paidByRaw : null;
+            const paidBy = paidByRaw === "a" || paidByRaw === "b" || paidByRaw === "split" ? paidByRaw : null;
             return {
                 ...base,
                 type: "shipping",
@@ -337,8 +319,7 @@ export function coerceTerms(raw: unknown): DealTerms {
     }
 
     const revRaw = r.revision;
-    const revision =
-        typeof revRaw === "number" && Number.isFinite(revRaw) && revRaw >= 0 ? Math.round(revRaw) : 0;
+    const revision = typeof revRaw === "number" && Number.isFinite(revRaw) && revRaw >= 0 ? Math.round(revRaw) : 0;
 
     const updatedBy = r.updatedBy ?? r.updated_by;
 
@@ -398,13 +379,7 @@ export function isBoxEmpty(box: TermBox): boolean {
         case "payment_plan":
             return box.installmentCount === null && !box.missedPaymentTerms;
         case "shipping":
-            return (
-                !box.method &&
-                box.cost === null &&
-                !box.paidBy &&
-                box.insured === null &&
-                !box.expectedShipDate
-            );
+            return !box.method && box.cost === null && !box.paidBy && box.insured === null && !box.expectedShipDate;
         case "rules":
         case "custom":
             return box.text.trim().length === 0;
@@ -417,9 +392,7 @@ export function isBoxEmpty(box: TermBox): boolean {
 
 // ── Editing and agreeing ──────────────────────────────────────────────
 
-export type TermsEditResult =
-    | { ok: true; terms: DealTerms }
-    | { ok: false; reason: string };
+export type TermsEditResult = { ok: true; terms: DealTerms } | { ok: false; reason: string };
 
 /**
  * Replace the boxes.
@@ -429,12 +402,7 @@ export type TermsEditResult =
  * other has signed is not a contract. This is the single most important
  * function in the module.
  */
-export function applyEdit(
-    terms: DealTerms,
-    boxes: TermBox[],
-    by: "a" | "b",
-    now: Date = new Date(),
-): TermsEditResult {
+export function applyEdit(terms: DealTerms, boxes: TermBox[], by: "a" | "b", now: Date = new Date()): TermsEditResult {
     if (isFullyAgreed(terms)) {
         return {
             ok: false,
@@ -461,11 +429,7 @@ export function applyEdit(
 }
 
 /** Confirm the current revision as one party. Idempotent. */
-export function applyAgreement(
-    terms: DealTerms,
-    by: "a" | "b",
-    now: Date = new Date(),
-): TermsEditResult {
+export function applyAgreement(terms: DealTerms, by: "a" | "b", now: Date = new Date()): TermsEditResult {
     if (terms.boxes.length === 0) {
         return { ok: false, reason: "There is nothing to agree to yet — add a box first." };
     }
@@ -484,10 +448,7 @@ export function applyAgreement(
 }
 
 /** Withdraw your own confirmation, while the other side is still deciding. */
-export function withdrawAgreement(
-    terms: DealTerms,
-    by: "a" | "b",
-): TermsEditResult {
+export function withdrawAgreement(terms: DealTerms, by: "a" | "b"): TermsEditResult {
     if (isFullyAgreed(terms)) {
         return { ok: false, reason: "Both sides have agreed — these terms are settled." };
     }
@@ -533,12 +494,7 @@ export function boxLines(
             if (box.paidBy) {
                 out.push({
                     label: "Paid by",
-                    value:
-                        box.paidBy === "split"
-                            ? "Split between both"
-                            : box.paidBy === "a"
-                              ? labels.a
-                              : labels.b,
+                    value: box.paidBy === "split" ? "Split between both" : box.paidBy === "a" ? labels.a : labels.b,
                 });
             }
             if (box.insured !== null) {

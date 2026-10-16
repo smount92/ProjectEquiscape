@@ -69,39 +69,36 @@ function MatchmakerPanel({
                 )}
             </div>
 
-            <p className="text-secondary-foreground mt-0 mb-3 text-base leading-[1.7]">
-                Put a mold, a release or a resin on this list and Matchmaker watches the whole
-                marketplace for it. The moment a collector sets a matching horse For Sale or Open to
-                Offers, it appears against your entry — with the asking price, the seller, and a way
-                to message them.
+            <p className="mt-0 mb-3 text-base leading-[1.7] text-secondary-foreground">
+                Put a mold, a release or a resin on this list and Matchmaker watches the whole marketplace for it. The
+                moment a collector sets a matching horse For Sale or Open to Offers, it appears against your entry —
+                with the asking price, the seller, and a way to message them.
             </p>
-            <p className="text-secondary-foreground mb-4 text-base leading-[1.7]">
-                You stop refreshing the market every morning, and you stop finding out about the
-                grail three days after somebody else bought it.
+            <p className="mb-4 text-base leading-[1.7] text-secondary-foreground">
+                You stop refreshing the market every morning, and you stop finding out about the grail three days after
+                somebody else bought it.
             </p>
 
             {totalMatches > 0 ? (
-                <p className="text-forest m-0 text-sm font-semibold">
-                    🔥 {totalMatches} listing{totalMatches === 1 ? " is" : "s are"} up right now
-                    against your list. Look for the orange badge on the entries below.
+                <p className="m-0 text-sm font-semibold text-forest">
+                    🔥 {totalMatches} listing{totalMatches === 1 ? " is" : "s are"} up right now against your list. Look
+                    for the orange badge on the entries below.
                 </p>
             ) : itemCount > 0 ? (
-                <p className="text-muted-foreground m-0 text-sm">
-                    Nothing on your list is for sale this minute. That&rsquo;s the usual answer — the
-                    point is that you no longer have to keep checking.
+                <p className="m-0 text-sm text-muted-foreground">
+                    Nothing on your list is for sale this minute. That&rsquo;s the usual answer — the point is that you
+                    no longer have to keep checking.
                 </p>
             ) : (
-                <p className="text-muted-foreground m-0 text-sm">
-                    Nothing to watch yet. Add the first model below.
-                </p>
+                <p className="m-0 text-sm text-muted-foreground">Nothing to watch yet. Add the first model below.</p>
             )}
 
             {noteOnlyCount > 0 && (
-                <p className="text-muted-foreground mt-3 mb-0 text-sm">
-                    {noteOnlyCount} of your entr{noteOnlyCount === 1 ? "y is a" : "ies are"} free-text
-                    note{noteOnlyCount === 1 ? "" : "s"} rather than a Registry entry, so Matchmaker
-                    can&rsquo;t watch for {noteOnlyCount === 1 ? "it" : "them"}. If the model turns
-                    up in the Registry later, re-add it from there and it starts working.
+                <p className="mt-3 mb-0 text-sm text-muted-foreground">
+                    {noteOnlyCount} of your entr{noteOnlyCount === 1 ? "y is a" : "ies are"} free-text note
+                    {noteOnlyCount === 1 ? "" : "s"} rather than a Registry entry, so Matchmaker can&rsquo;t watch for{" "}
+                    {noteOnlyCount === 1 ? "it" : "them"}. If the model turns up in the Registry later, re-add it from
+                    there and it starts working.
                 </p>
             )}
         </section>
@@ -115,12 +112,11 @@ function AddPanel() {
             <span className="ledger-tab" id="add-heading">
                 Adding to the list
             </span>
-            <p className="text-secondary-foreground mt-0 mb-4 text-sm leading-relaxed">
-                Type a name below. The search runs against the Registry — base molds, OF releases and
-                artist resins — and picking a result puts it straight on the list. If the model
-                isn&rsquo;t cataloged yet, add the name as a plain note instead; Matchmaker
-                can&rsquo;t watch a note, but you&rsquo;ll have it written down. You can also add
-                from any Registry page with the bookmark button.
+            <p className="mt-0 mb-4 text-sm leading-relaxed text-secondary-foreground">
+                Type a name below. The search runs against the Registry — base molds, OF releases and artist resins —
+                and picking a result puts it straight on the list. If the model isn&rsquo;t cataloged yet, add the name
+                as a plain note instead; Matchmaker can&rsquo;t watch a note, but you&rsquo;ll have it written down. You
+                can also add from any Registry page with the bookmark button.
             </p>
             <WishlistSearch />
         </section>
@@ -137,33 +133,27 @@ function WantCard({ item }: { item: WantListItem }) {
     return (
         <li className="flex">
             <article
-                className="ledger-card group hover:border-forest/50 relative flex flex-1 flex-col py-5 pr-5 transition-all hover:-translate-y-0.5 hover:shadow-lg"
+                className="ledger-card group relative flex flex-1 flex-col py-5 pr-5 transition-all hover:-translate-y-0.5 hover:border-forest/50 hover:shadow-lg"
                 id={`wishlist-${item.id}`}
             >
                 <div className="min-w-0 flex-1 pr-6">
                     {href ? (
                         <Link href={href} className="text-foreground no-underline">
-                            <h3 className="hover:text-forest m-0 font-serif text-base font-bold">
+                            <h3 className="m-0 font-serif text-base font-bold hover:text-forest">
                                 {icon} {title}
                             </h3>
                         </Link>
                     ) : (
-                        <h3 className="text-foreground m-0 font-serif text-base font-bold">
+                        <h3 className="m-0 font-serif text-base font-bold text-foreground">
                             {icon} {title}
                         </h3>
                     )}
 
-                    {item.maker && <p className="text-forest m-0 mt-1 text-sm">{item.maker}</p>}
-                    {item.scale && (
-                        <p className="text-muted-foreground m-0 text-sm">📏 {item.scale}</p>
-                    )}
-                    {item.notes && (
-                        <p className="text-muted-foreground m-0 mt-2 text-sm italic">
-                            📝 {item.notes}
-                        </p>
-                    )}
+                    {item.maker && <p className="m-0 mt-1 text-sm text-forest">{item.maker}</p>}
+                    {item.scale && <p className="m-0 text-sm text-muted-foreground">📏 {item.scale}</p>}
+                    {item.notes && <p className="m-0 mt-2 text-sm text-muted-foreground italic">📝 {item.notes}</p>}
 
-                    <p className="text-muted-foreground m-0 mt-2 text-xs">
+                    <p className="m-0 mt-2 text-xs text-muted-foreground">
                         Added {formatAdded(item.created_at)}
                         {!item.catalog_id && " · not in the Registry, so not watched"}
                     </p>
@@ -183,11 +173,11 @@ function WantCard({ item }: { item: WantListItem }) {
 function MarketPointers() {
     return (
         <div className="mt-8 grid gap-4 md:grid-cols-2">
-            <div className="border-input bg-card/50 rounded-lg border p-6 backdrop-blur-sm">
+            <div className="rounded-lg border border-input bg-card/50 p-6 backdrop-blur-sm">
                 <h3 className="mb-1 font-serif text-lg font-bold">Not waiting? Go look.</h3>
-                <p className="text-secondary-foreground mb-4 text-sm">
-                    Every horse for sale on Model Horse Hub, each one opening onto its passport —
-                    show record, condition, ownership history and the message-the-seller flow.
+                <p className="mb-4 text-sm text-secondary-foreground">
+                    Every horse for sale on Model Horse Hub, each one opening onto its passport — show record,
+                    condition, ownership history and the message-the-seller flow.
                 </p>
                 <Button asChild variant="outline" size="wide">
                     <Link href="/market" id="wishlist-market-link">
@@ -195,11 +185,11 @@ function MarketPointers() {
                     </Link>
                 </Button>
             </div>
-            <div className="border-input bg-card/50 rounded-lg border p-6 backdrop-blur-sm">
+            <div className="rounded-lg border border-input bg-card/50 p-6 backdrop-blur-sm">
                 <h3 className="mb-1 font-serif text-lg font-bold">What should it cost?</h3>
-                <p className="text-secondary-foreground mb-4 text-sm">
-                    The Blue Book gives average, median and range from completed sales, so you know
-                    whether the one that just turned up is a fair ask. Free, always.
+                <p className="mb-4 text-sm text-secondary-foreground">
+                    The Blue Book gives average, median and range from completed sales, so you know whether the one that
+                    just turned up is a fair ask. Free, always.
                 </p>
                 <Button asChild variant="outline" size="wide">
                     <Link href="/market/guide" id="wishlist-bluebook-link">
@@ -246,11 +236,7 @@ export default async function WishlistPage() {
                     }
                 />
 
-                <MatchmakerPanel
-                    itemCount={items.length}
-                    totalMatches={totalMatches}
-                    noteOnlyCount={noteOnlyCount}
-                />
+                <MatchmakerPanel itemCount={items.length} totalMatches={totalMatches} noteOnlyCount={noteOnlyCount} />
 
                 <AddPanel />
 
@@ -262,10 +248,9 @@ export default async function WishlistPage() {
                         <h2 id="empty-heading" className="mb-2 font-serif text-xl font-bold">
                             Nothing on the list yet
                         </h2>
-                        <p className="text-secondary-foreground mx-auto m-0 max-w-[460px] text-sm leading-relaxed">
-                            The resin you have been chasing for six years and the OF you need to
-                            finish a run go on the same list. Search for one above, or tap the
-                            bookmark on any Registry entry.
+                        <p className="m-0 mx-auto max-w-[460px] text-sm leading-relaxed text-secondary-foreground">
+                            The resin you have been chasing for six years and the OF you need to finish a run go on the
+                            same list. Search for one above, or tap the bookmark on any Registry entry.
                         </p>
                         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
                             <Button asChild variant="outline" size="wide">

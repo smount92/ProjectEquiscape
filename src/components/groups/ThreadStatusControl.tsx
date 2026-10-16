@@ -35,7 +35,7 @@ export function ThreadStatusControl({ postId, status }: { postId: string; status
         <label className="flex items-center gap-2 text-xs">
             <span className="text-muted-foreground">Mark</span>
             <select
-                className="border-input bg-card text-foreground h-9 rounded-md border px-2 text-xs"
+                className="h-9 rounded-md border border-input bg-card px-2 text-xs text-foreground"
                 value={current ?? ""}
                 onChange={(e) => pick(e.target.value)}
                 disabled={isPending}
@@ -55,7 +55,13 @@ export function ThreadStatusControl({ postId, status }: { postId: string; status
 }
 
 /** The stamp itself, for the board row and the thread header. */
-export function ThreadStatusBadge({ status, compact = false }: { status: ThreadStatus | null | undefined; compact?: boolean }) {
+export function ThreadStatusBadge({
+    status,
+    compact = false,
+}: {
+    status: ThreadStatus | null | undefined;
+    compact?: boolean;
+}) {
     if (!status || !(status in THREAD_STATUS_LABEL)) return null;
     const meta = THREAD_STATUS_LABEL[status];
     return (

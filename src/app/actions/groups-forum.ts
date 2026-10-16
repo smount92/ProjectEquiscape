@@ -38,9 +38,7 @@ import { compareBoardThreads, deriveThreadTitle, isThreadUnread } from "@/lib/gr
 import type { BoardThread, ThreadPost, ThreadViewData } from "@/lib/groups/types";
 import { isThreadStatus, type ThreadStatus } from "@/lib/groups/threadStatus";
 
-type ActionResult<T = object> =
-    | ({ success: true } & T)
-    | { success: false; error: string };
+type ActionResult<T = object> = ({ success: true } & T) | { success: false; error: string };
 
 const BOARD_PAGE_SIZE = 25;
 const THREAD_REPLIES_PAGE_SIZE = 100;
@@ -53,11 +51,7 @@ const THREAD_REPLIES_PAGE_SIZE = 100;
 const PARTICIPANT_NOTIFY_CAP = 25;
 
 /** The viewer's role in a group, or null when not a member. */
-async function getMemberRole(
-    supabase: SupabaseClient,
-    groupId: string,
-    userId: string,
-): Promise<string | null> {
+async function getMemberRole(supabase: SupabaseClient, groupId: string, userId: string): Promise<string | null> {
     const { data } = await supabase
         .from("group_memberships")
         .select("role")
@@ -153,7 +147,10 @@ export async function getGroupBoard(
     });
     threads.sort(compareBoardThreads);
     // Thread marks (221) — their own tolerant read, so the board renders before the paste.
-    const marks = await readThreadStatuses(supabase as unknown as SupabaseClient, threads.map((t) => t.id));
+    const marks = await readThreadStatuses(
+        supabase as unknown as SupabaseClient,
+        threads.map((t) => t.id),
+    );
     for (const t of threads) t.status = marks.get(t.id) ?? null;
 
     // Resolve avatar storage paths → URLs
@@ -170,9 +167,7 @@ export async function getGroupBoard(
  * board visit AFTER the unread dots were computed — dots reflect
  * state at load; the next visit sees them cleared.
  */
-export async function markGroupRead(
-    input: z.input<typeof markGroupReadSchema>,
-): Promise<ActionResult> {
+export async function markGroupRead(input: z.input<typeof markGroupReadSchema>): Promise<ActionResult> {
     const parsed = markGroupReadSchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { supabase, user } = await requireAuth();
@@ -369,9 +364,7 @@ export async function createThread(
                 .eq("id", groupId)
                 .maybeSingle();
             const slug = (group as { slug: string } | null)?.slug;
-            const sourceUrl = slug
-                ? `/community/groups/${slug}/thread/${threadId}`
-                : "/community/groups";
+            const sourceUrl = slug ? `/community/groups/${slug}/thread/${threadId}` : "/community/groups";
             const { parseAndNotifyMentions } = await import("@/app/actions/mentions");
             await parseAndNotifyMentions(trimmed, userId, alias, sourceUrl);
 
@@ -393,9 +386,7 @@ export async function createThread(
                 .limit(PARTICIPANT_NOTIFY_CAP);
             const memberIds = ((members ?? []) as { user_id: string }[]).map((m) => m.user_id);
             if (memberIds.length > 0) {
-                const { createNotificationsBulk } = await import(
-                    "@/lib/notifications/createNotification"
-                );
+                const { createNotificationsBulk } = await import("@/lib/notifications/createNotification");
                 const threadTitle = deriveThreadTitle(sanitizeText(title), trimmed);
                 await createNotificationsBulk(
                     memberIds.map((id) => ({
@@ -429,7 +420,14 @@ export async function replyToThread(
         .eq("id", postId)
         .maybeSingle();
     if (!parent) return { success: false, error: "Thread not found." };
-    const p = parent as { id: string; author_id: string; parent_id: string | null; group_id: string | null; title: string | null; content: string };
+    const p = parent as {
+        id: string;
+        author_id: string;
+        parent_id: string | null;
+        group_id: string | null;
+        title: string | null;
+        content: string;
+    };
     if (p.parent_id || !p.group_id) return { success: false, error: "Thread not found." };
 
     const role = await getMemberRole(supabase, p.group_id, user.id);

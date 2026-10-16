@@ -46,11 +46,7 @@ import ExportButton from "@/components/ExportButton";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
 import PageMasthead from "@/components/layouts/PageMasthead";
 import { AlertTriangle, Trash2, Camera, Palette } from "lucide-react";
-import {
-    NOTIFICATION_PREF_GROUPS,
-    isNotifPrefOn,
-    toggledPrefs,
-} from "./notificationGroups";
+import { NOTIFICATION_PREF_GROUPS, isNotifPrefOn, toggledPrefs } from "./notificationGroups";
 
 /** The index rail across the head of the ledger. */
 const SECTIONS: { id: string; label: string }[] = [
@@ -87,13 +83,10 @@ function Leaf({
 function LeafHeading({ children }: { children: ReactNode }) {
     return (
         <div className="mt-6 mb-3 flex items-baseline gap-3 first:mt-0">
-            <h3 className="text-forest m-0 font-serif text-[0.95rem] font-bold tracking-[0.1em] whitespace-nowrap uppercase">
+            <h3 className="m-0 font-serif text-[0.95rem] font-bold tracking-[0.1em] whitespace-nowrap text-forest uppercase">
                 {children}
             </h3>
-            <span
-                className="from-forest/40 h-px flex-1 bg-gradient-to-r to-transparent"
-                aria-hidden="true"
-            />
+            <span className="h-px flex-1 bg-gradient-to-r from-forest/40 to-transparent" aria-hidden="true" />
         </div>
     );
 }
@@ -113,16 +106,12 @@ function ToggleRow({
     onToggle: () => void;
 }) {
     return (
-        <div className="border-input flex items-start justify-between gap-4 border-b py-3 last:border-b-0 max-sm:gap-2">
+        <div className="flex items-start justify-between gap-4 border-b border-input py-3 last:border-b-0 max-sm:gap-2">
             <div className="min-w-0">
-                <span className="text-foreground flex items-center gap-2 text-sm font-semibold">
+                <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
                     <span aria-hidden="true">{icon}</span> {label}
                 </span>
-                {hint && (
-                    <span className="text-muted-foreground mt-0.5 block text-xs leading-relaxed">
-                        {hint}
-                    </span>
-                )}
+                {hint && <span className="mt-0.5 block text-xs leading-relaxed text-muted-foreground">{hint}</span>}
             </div>
             <button
                 type="button"
@@ -139,7 +128,7 @@ function ToggleRow({
 /** The honest footnote under a group whose types always deliver. */
 function AlwaysOnNote({ children }: { children: ReactNode }) {
     return (
-        <p className="border-forest/40 text-secondary-foreground mt-3 border-l-2 pl-3 text-xs leading-relaxed">
+        <p className="mt-3 border-l-2 border-forest/40 pl-3 text-xs leading-relaxed text-secondary-foreground">
             {children}
         </p>
     );
@@ -170,9 +159,7 @@ export default function SettingsClient() {
     const [openToTrades, setOpenToTrades] = useState(false);
     const [lookingFor, setLookingFor] = useState("");
     const [exhibitorNumber, setExhibitorNumber] = useState("");
-    const [profileMsg, setProfileMsg] = useState<{ type: "success" | "error"; text: string } | null>(
-        null,
-    );
+    const [profileMsg, setProfileMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
     const [isSavingProfile, setIsSavingProfile] = useState(false);
     /**
      * updateProfile takes every field at once, so Profile, Privacy and
@@ -189,9 +176,7 @@ export default function SettingsClient() {
     const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
-    const [passwordMsg, setPasswordMsg] = useState<{ type: "success" | "error"; text: string } | null>(
-        null,
-    );
+    const [passwordMsg, setPasswordMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
     const [isSavingPassword, setIsSavingPassword] = useState(false);
 
     // Avatar upload
@@ -370,7 +355,7 @@ export default function SettingsClient() {
                 <p
                     className={`mt-2 text-sm font-medium ${
                         profileMsg.type === "success"
-                            ? "text-forest flex items-center gap-1 before:content-['✓']"
+                            ? "flex items-center gap-1 text-forest before:content-['✓']"
                             : "form-error"
                     }`}
                     role="status"
@@ -394,8 +379,8 @@ export default function SettingsClient() {
                 />
                 <div className="mx-auto max-w-[820px]">
                     <div className="ledger-card py-12 text-center">
-                        <div className="border-input border-t-forest mx-auto mb-6 h-9 w-9 animate-spin rounded-full border-[3px]" />
-                        <p className="text-secondary-foreground text-sm">Loading settings…</p>
+                        <div className="mx-auto mb-6 h-9 w-9 animate-spin rounded-full border-[3px] border-input border-t-forest" />
+                        <p className="text-sm text-secondary-foreground">Loading settings…</p>
                     </div>
                 </div>
             </ExplorerLayout>
@@ -429,8 +414,8 @@ export default function SettingsClient() {
 
                 {/* ═══ Profile basics ═══ */}
                 <Leaf id="profile" tab="Profile">
-                    <div className="border-input mb-6 flex items-center gap-6 border-b pb-6 max-sm:gap-4">
-                        <div className="border-input from-forest/5 to-saddle/5 hover:border-forest flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-[2.5px] bg-gradient-to-br text-[2rem] transition-colors [&_img]:h-full [&_img]:w-full [&_img]:object-cover">
+                    <div className="mb-6 flex items-center gap-6 border-b border-input pb-6 max-sm:gap-4">
+                        <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-[2.5px] border-input bg-gradient-to-br from-forest/5 to-saddle/5 text-[2rem] transition-colors hover:border-forest [&_img]:h-full [&_img]:w-full [&_img]:object-cover">
                             {avatarUrl ? (
                                 // eslint-disable-next-line @next/next/no-img-element
                                 <img src={avatarUrl} alt="Your avatar" />
@@ -461,11 +446,9 @@ export default function SettingsClient() {
                                 className="hidden"
                                 aria-label="Upload avatar"
                             />
-                            <p className="text-secondary-foreground mt-1 text-xs">
-                                Max 2MB. JPG, PNG, or WebP.
-                            </p>
+                            <p className="mt-1 text-xs text-secondary-foreground">Max 2MB. JPG, PNG, or WebP.</p>
                             {avatarError && (
-                                <p className="text-destructive mt-1 text-xs" role="alert">
+                                <p className="mt-1 text-xs text-destructive" role="alert">
                                     {avatarError}
                                 </p>
                             )}
@@ -473,10 +456,7 @@ export default function SettingsClient() {
                     </div>
 
                     <div className="mb-6">
-                        <label
-                            htmlFor="settings-alias"
-                            className="text-foreground mb-1 block text-sm font-semibold"
-                        >
+                        <label htmlFor="settings-alias" className="mb-1 block text-sm font-semibold text-foreground">
                             Display Name
                         </label>
                         <Input
@@ -487,39 +467,34 @@ export default function SettingsClient() {
                             maxLength={30}
                             minLength={3}
                         />
-                        <span className="text-muted-foreground mt-1 block text-xs">
+                        <span className="mt-1 block text-xs text-muted-foreground">
                             3–30 characters. Must be unique.
                         </span>
                     </div>
 
                     <div className="mb-6">
-                        <label
-                            htmlFor="settings-bio"
-                            className="text-foreground mb-1 block text-sm font-semibold"
-                        >
+                        <label htmlFor="settings-bio" className="mb-1 block text-sm font-semibold text-foreground">
                             Bio
                         </label>
                         <Textarea
                             id="settings-bio"
-                            className="border-input bg-card text-foreground focus:border-forest focus:ring-forest w-full resize-y rounded-lg border px-4 py-3 text-sm transition-colors focus:ring-1 focus:outline-none"
+                            className="w-full resize-y rounded-lg border border-input bg-card px-4 py-3 text-sm text-foreground transition-colors focus:border-forest focus:ring-1 focus:ring-forest focus:outline-none"
                             rows={3}
                             maxLength={500}
                             placeholder="Tell other collectors about yourself…"
                             value={bio}
                             onChange={(e) => setBio(e.target.value)}
                         />
-                        <span className="text-muted-foreground mt-1 block text-xs">
-                            {bio.length}/500
-                        </span>
+                        <span className="mt-1 block text-xs text-muted-foreground">{bio.length}/500</span>
                     </div>
 
                     <div className="mb-6">
-                        <label htmlFor="settings-country" className="text-foreground mb-1 block text-sm font-semibold">
+                        <label htmlFor="settings-country" className="mb-1 block text-sm font-semibold text-foreground">
                             Where you are
                         </label>
                         <select
                             id="settings-country"
-                            className="border-input bg-card text-foreground h-10 w-full rounded-md border px-3 text-sm"
+                            className="h-10 w-full rounded-md border border-input bg-card px-3 text-sm text-foreground"
                             value={country}
                             onChange={(e) => setCountry(e.target.value)}
                         >
@@ -530,19 +505,20 @@ export default function SettingsClient() {
                                 </option>
                             ))}
                         </select>
-                        <span className="text-muted-foreground mt-1 block text-xs">
-                            Optional. Country only — shown as a flag on your listings, passports and profile so buyers know which side of the ocean you are on.
+                        <span className="mt-1 block text-xs text-muted-foreground">
+                            Optional. Country only — shown as a flag on your listings, passports and profile so buyers
+                            know which side of the ocean you are on.
                         </span>
                     </div>
 
-                    <div className="border-input bg-card/50 mb-6 rounded-lg border p-4">
+                    <div className="mb-6 rounded-lg border border-input bg-card/50 p-4">
                         <h3 className="m-0 mb-1 font-serif text-base font-bold">Selling terms</h3>
-                        <p className="text-secondary-foreground mb-3 text-xs leading-relaxed">
+                        <p className="mb-3 text-xs leading-relaxed text-secondary-foreground">
                             Set once, shown on every horse you list, so a buyer never has to hunt through your profile.
                         </p>
                         <div className="grid gap-3 sm:grid-cols-2">
                             <label className="block">
-                                <span className="text-foreground mb-1 block text-sm font-semibold">Ships to</span>
+                                <span className="mb-1 block text-sm font-semibold text-foreground">Ships to</span>
                                 <Input
                                     id="settings-ships-to"
                                     value={shipsTo}
@@ -552,7 +528,9 @@ export default function SettingsClient() {
                                 />
                             </label>
                             <label className="block">
-                                <span className="text-foreground mb-1 block text-sm font-semibold">Ships to, except</span>
+                                <span className="mb-1 block text-sm font-semibold text-foreground">
+                                    Ships to, except
+                                </span>
                                 <Input
                                     id="settings-ships-not-to"
                                     value={shipsNotTo}
@@ -572,13 +550,13 @@ export default function SettingsClient() {
                             />
                             <span>
                                 <span className="font-semibold">Open to trades</span>
-                                <span className="text-muted-foreground block text-xs">
+                                <span className="block text-xs text-muted-foreground">
                                     Your Want List stays private. The line below is the one thing buyers see.
                                 </span>
                             </span>
                         </label>
                         <label className="mt-3 block">
-                            <span className="text-foreground mb-1 block text-sm font-semibold">Looking for</span>
+                            <span className="mb-1 block text-sm font-semibold text-foreground">Looking for</span>
                             <Input
                                 id="settings-looking-for"
                                 value={lookingFor}
@@ -591,10 +569,10 @@ export default function SettingsClient() {
 
                     {/* Themes and profile decoration live on their own page —
                         this leaf holds identity, not appearance. */}
-                    <div className="border-input bg-card/50 mb-6 rounded-lg border p-4">
-                        <p className="text-secondary-foreground mb-3 text-xs leading-relaxed">
-                            Profile themes, banners and the way your stable is laid out for visitors
-                            are set on the customization page, not here.
+                    <div className="mb-6 rounded-lg border border-input bg-card/50 p-4">
+                        <p className="mb-3 text-xs leading-relaxed text-secondary-foreground">
+                            Profile themes, banners and the way your stable is laid out for visitors are set on the
+                            customization page, not here.
                         </p>
                         <Button asChild variant="outline" size="wide">
                             <Link href="/profile/customize">
@@ -608,9 +586,9 @@ export default function SettingsClient() {
 
                 {/* ═══ Notifications ═══ */}
                 <Leaf id="notifications" tab="Notifications">
-                    <p className="text-secondary-foreground mb-2 text-sm leading-relaxed">
-                        These switch off the bell. Turning one off stops that kind of notification
-                        being written at all — it will not be waiting for you later.
+                    <p className="mb-2 text-sm leading-relaxed text-secondary-foreground">
+                        These switch off the bell. Turning one off stops that kind of notification being written at all
+                        — it will not be waiting for you later.
                     </p>
 
                     {NOTIFICATION_PREF_GROUPS.map((group) => (
@@ -618,9 +596,7 @@ export default function SettingsClient() {
                             <LeafHeading>
                                 <span aria-hidden="true">{group.icon}</span> {group.title}
                             </LeafHeading>
-                            <p className="text-muted-foreground -mt-1 mb-2 text-xs leading-relaxed">
-                                {group.blurb}
-                            </p>
+                            <p className="-mt-1 mb-2 text-xs leading-relaxed text-muted-foreground">{group.blurb}</p>
                             {group.toggles.map((t) => (
                                 <ToggleRow
                                     key={t.key}
@@ -635,9 +611,9 @@ export default function SettingsClient() {
                         </div>
                     ))}
 
-                    <p className="text-muted-foreground mt-6 text-xs">
+                    <p className="mt-6 text-xs text-muted-foreground">
                         Changes here save the moment you flip a switch.{" "}
-                        <Link href="/notifications" className="text-forest font-semibold no-underline hover:underline">
+                        <Link href="/notifications" className="font-semibold text-forest no-underline hover:underline">
                             See what has arrived →
                         </Link>
                     </p>
@@ -645,18 +621,17 @@ export default function SettingsClient() {
 
                 {/* ═══ Privacy & defaults ═══ */}
                 <Leaf id="privacy" tab="Privacy & Defaults">
-                    <p className="text-secondary-foreground mb-4 text-sm leading-relaxed">
-                        What the rest of the hobby can see, and what happens by default when you add
-                        a horse or a photo.
+                    <p className="mb-4 text-sm leading-relaxed text-secondary-foreground">
+                        What the rest of the hobby can see, and what happens by default when you add a horse or a photo.
                     </p>
 
-                    <fieldset className="border-input border-b py-3">
-                        <legend className="text-foreground flex items-center gap-2 text-sm font-semibold">
+                    <fieldset className="border-b border-input py-3">
+                        <legend className="flex items-center gap-2 text-sm font-semibold text-foreground">
                             <span aria-hidden="true">🐎</span> New horses start as
                         </legend>
-                        <span className="text-muted-foreground mt-0.5 block text-xs leading-relaxed">
-                            Used by Add Horse, Quick Add and spreadsheet import. You can still change any
-                            one horse as you add it.
+                        <span className="mt-0.5 block text-xs leading-relaxed text-muted-foreground">
+                            Used by Add Horse, Quick Add and spreadsheet import. You can still change any one horse as
+                            you add it.
                         </span>
                         <div className="mt-2 grid gap-2 sm:grid-cols-3">
                             {VISIBILITY_OPTIONS.map((opt) => (
@@ -677,8 +652,8 @@ export default function SettingsClient() {
                                         className="mt-0.5"
                                     />
                                     <span>
-                                        <span className="text-foreground block font-semibold">{opt.label}</span>
-                                        <span className="text-muted-foreground block text-xs">{opt.hint}</span>
+                                        <span className="block font-semibold text-foreground">{opt.label}</span>
+                                        <span className="block text-xs text-muted-foreground">{opt.hint}</span>
                                     </span>
                                 </label>
                             ))}
@@ -692,10 +667,10 @@ export default function SettingsClient() {
                         onToggle={() => setWatermarkPhotos(!watermarkPhotos)}
                     />
                     {watermarkPhotos && (
-                        <div className="border-input mt-3 mb-3 rounded-lg border border-dashed p-4">
+                        <div className="mt-3 mb-3 rounded-lg border border-dashed border-input p-4">
                             <label
                                 htmlFor="settings-watermark-text"
-                                className="text-foreground mb-1 block text-sm font-semibold"
+                                className="mb-1 block text-sm font-semibold text-foreground"
                             >
                                 ✍️ Custom watermark text
                             </label>
@@ -707,7 +682,7 @@ export default function SettingsClient() {
                                 maxLength={60}
                                 placeholder={`© @${aliasName} — ModelHorseHub`}
                             />
-                            <span className="text-muted-foreground mt-1 block text-xs">
+                            <span className="mt-1 block text-xs text-muted-foreground">
                                 Leave blank to use the default. Max 60 characters.
                             </span>
                         </div>
@@ -728,15 +703,12 @@ export default function SettingsClient() {
                     />
 
                     <div className="mt-6">
-                        <label
-                            htmlFor="settings-currency"
-                            className="text-foreground mb-1 block text-sm font-semibold"
-                        >
+                        <label htmlFor="settings-currency" className="mb-1 block text-sm font-semibold text-foreground">
                             💱 Preferred currency symbol
                         </label>
                         <select
                             id="settings-currency"
-                            className="border-input bg-card ring-offset-background focus:ring-ring flex h-10 w-full max-w-[220px] rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-offset-2 focus:outline-none"
+                            className="flex h-10 w-full max-w-[220px] rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
                             title="Select preferred currency"
                             value={currencySymbol}
                             onChange={(e) => setCurrencySymbol(e.target.value)}
@@ -752,30 +724,28 @@ export default function SettingsClient() {
                             <option value="₩">₩ — Korean Won</option>
                             <option value="zł">zł — Polish Zloty</option>
                         </select>
-                        <span className="text-muted-foreground mt-1 block text-xs">
-                            Shown on your vault, offers and listing prices. The Blue Book always
-                            quotes USD.
+                        <span className="mt-1 block text-xs text-muted-foreground">
+                            Shown on your vault, offers and listing prices. The Blue Book always quotes USD.
                         </span>
                     </div>
 
                     <div className="mt-6">
                         {saveControl("privacy", "Save Preferences")}
-                        <span className="text-muted-foreground mt-1 block text-xs">
-                            Profile, privacy and showing fields all save together — one button
-                            writes the lot.
+                        <span className="mt-1 block text-xs text-muted-foreground">
+                            Profile, privacy and showing fields all save together — one button writes the lot.
                         </span>
                     </div>
                 </Leaf>
 
                 {/* ═══ Showing ═══ */}
                 <Leaf id="showing" tab="Showing">
-                    <p className="text-secondary-foreground mb-4 text-sm leading-relaxed">
+                    <p className="mb-4 text-sm leading-relaxed text-secondary-foreground">
                         Details the show ring needs from you.
                     </p>
                     <div className="mb-4">
                         <label
                             htmlFor="settings-exhibitor"
-                            className="text-foreground mb-1 block text-sm font-semibold"
+                            className="mb-1 block text-sm font-semibold text-foreground"
                         >
                             🏷️ Exhibitor number
                         </label>
@@ -788,14 +758,14 @@ export default function SettingsClient() {
                             maxLength={10}
                             placeholder="e.g. 042"
                         />
-                        <span className="text-muted-foreground mt-1 block text-xs">
-                            Your regional exhibitor number for live shows. Printed into show tag
-                            horse numbers as XXX-YYY.
+                        <span className="mt-1 block text-xs text-muted-foreground">
+                            Your regional exhibitor number for live shows. Printed into show tag horse numbers as
+                            XXX-YYY.
                         </span>
                     </div>
                     {saveControl("showing", "Save")}
-                    <p className="text-muted-foreground mt-3 text-xs">
-                        <Link href="/shows" className="text-forest font-semibold no-underline hover:underline">
+                    <p className="mt-3 text-xs text-muted-foreground">
+                        <Link href="/shows" className="font-semibold text-forest no-underline hover:underline">
                             Browse shows →
                         </Link>
                     </p>
@@ -803,23 +773,22 @@ export default function SettingsClient() {
 
                 {/* ═══ Reports & exports ═══ */}
                 <Leaf id="reports" tab="Reports & Exports">
-                    <p className="text-secondary-foreground mb-4 text-sm leading-relaxed">
-                        Your collection, on paper. Both are generated from your live vault the
-                        moment you ask — nothing is filed away in advance.
+                    <p className="mb-4 text-sm leading-relaxed text-secondary-foreground">
+                        Your collection, on paper. Both are generated from your live vault the moment you ask — nothing
+                        is filed away in advance.
                     </p>
 
-                    <div className="border-input flex flex-col gap-5 border-b pb-5">
+                    <div className="flex flex-col gap-5 border-b border-input pb-5">
                         <div>
                             <InsuranceReportButton />
-                            <p className="text-secondary-foreground mt-1 text-xs leading-relaxed">
-                                A professional PDF with photos, condition grades and values — scoped
-                                to your whole stable or a single collection. Share it with your
-                                insurance agent.
+                            <p className="mt-1 text-xs leading-relaxed text-secondary-foreground">
+                                A professional PDF with photos, condition grades and values — scoped to your whole
+                                stable or a single collection. Share it with your insurance agent.
                             </p>
                         </div>
                         <div>
                             <ExportButton />
-                            <p className="text-secondary-foreground mt-1 text-xs leading-relaxed">
+                            <p className="mt-1 text-xs leading-relaxed text-secondary-foreground">
                                 Spreadsheet format, compatible with Excel and Google Sheets.
                             </p>
                         </div>
@@ -830,9 +799,8 @@ export default function SettingsClient() {
                         <Button asChild variant="outline" size="wide">
                             <Link href="/market/reports">My reports →</Link>
                         </Button>
-                        <p className="text-secondary-foreground mt-1 text-xs leading-relaxed">
-                            The record of paid one-off reports you have bought, with the date of
-                            each purchase.
+                        <p className="mt-1 text-xs leading-relaxed text-secondary-foreground">
+                            The record of paid one-off reports you have bought, with the date of each purchase.
                         </p>
                     </div>
                 </Leaf>
@@ -840,10 +808,9 @@ export default function SettingsClient() {
                 {/* ═══ Subscription ═══ */}
                 <Leaf id="subscription" tab="Subscription">
                     <p className="mb-4 text-sm leading-relaxed">
-                        <strong>MHH Pro</strong> adds advanced analytics, expanded photo storage and
-                        deeper collection reports. The trust record — verified show results,
-                        condition grades, Hoofprint provenance and the Blue Book — is free for
-                        everyone, always.
+                        <strong>MHH Pro</strong> adds advanced analytics, expanded photo storage and deeper collection
+                        reports. The trust record — verified show results, condition grades, Hoofprint provenance and
+                        the Blue Book — is free for everyone, always.
                     </p>
                     <Link href="/upgrade" className="btn-brass">
                         View plans &amp; upgrade
@@ -851,7 +818,7 @@ export default function SettingsClient() {
 
                     {/* Active supporters only. */}
                     {supporterLedger && (
-                        <div className="border-input mt-6 border-t pt-4">
+                        <div className="mt-6 border-t border-input pt-4">
                             <SupporterLedgerToggle
                                 initialListed={supporterLedger.listed}
                                 label="List me on the Supporters' Ledger (About page)"
@@ -861,7 +828,7 @@ export default function SettingsClient() {
 
                     {/* Pro/Studio members only. */}
                     {membershipDisplay && (
-                        <div className="border-input mt-6 border-t pt-4">
+                        <div className="mt-6 border-t border-input pt-4">
                             <MembershipDisplayToggle initialVisible={membershipDisplay.visible} />
                         </div>
                     )}
@@ -878,16 +845,16 @@ export default function SettingsClient() {
                         title="Email address"
                         aria-label="Email address"
                     />
-                    <span className="text-muted-foreground mt-1 block text-xs">
-                        Changing your email requires verification, which is not built yet. Contact
-                        us if you need it moved.
+                    <span className="mt-1 block text-xs text-muted-foreground">
+                        Changing your email requires verification, which is not built yet. Contact us if you need it
+                        moved.
                     </span>
 
                     <LeafHeading>Password</LeafHeading>
                     <div className="mb-4">
                         <label
                             htmlFor="settings-current-password"
-                            className="text-foreground mb-1 block text-sm font-semibold"
+                            className="mb-1 block text-sm font-semibold text-foreground"
                         >
                             Current password
                         </label>
@@ -905,7 +872,7 @@ export default function SettingsClient() {
                         <div>
                             <label
                                 htmlFor="settings-new-password"
-                                className="text-foreground mb-1 block text-sm font-semibold"
+                                className="mb-1 block text-sm font-semibold text-foreground"
                             >
                                 New password
                             </label>
@@ -922,7 +889,7 @@ export default function SettingsClient() {
                         <div>
                             <label
                                 htmlFor="settings-confirm-password"
-                                className="text-foreground mb-1 block text-sm font-semibold"
+                                className="mb-1 block text-sm font-semibold text-foreground"
                             >
                                 Confirm password
                             </label>
@@ -937,9 +904,7 @@ export default function SettingsClient() {
                     </div>
                     <Button
                         onClick={handleChangePassword}
-                        disabled={
-                            isSavingPassword || !currentPassword || !newPassword || !confirmPassword
-                        }
+                        disabled={isSavingPassword || !currentPassword || !newPassword || !confirmPassword}
                     >
                         {isSavingPassword ? "Changing…" : "Change Password"}
                     </Button>
@@ -947,7 +912,7 @@ export default function SettingsClient() {
                         <p
                             className={`mt-2 text-sm font-medium ${
                                 passwordMsg.type === "success"
-                                    ? "text-forest flex items-center gap-1 before:content-['✓']"
+                                    ? "flex items-center gap-1 text-forest before:content-['✓']"
                                     : "form-error"
                             }`}
                             role="status"
@@ -961,34 +926,28 @@ export default function SettingsClient() {
                     Its own leaf, ringed in red. Deliberately grave: the
                     consequences are spelled out before the field that unlocks
                     the button, and the button stays dead until DELETE is typed. */}
-                <section
-                    id="danger"
-                    className="ledger-card ring-destructive/50 scroll-mt-24 ring-1"
-                >
+                <section id="danger" className="ledger-card scroll-mt-24 ring-1 ring-destructive/50">
                     {/* Flat house red rather than the forest kraft: an inline
                         FLAT colour (never a gradient) so Simple Mode's no-gradient
                         rule still holds and Lamplight needs no override. */}
                     <span className="ledger-tab" style={{ background: "#9B3028" }}>
                         Danger Zone
                     </span>
-                    <h2 className="text-destructive mt-1 mb-3 flex items-center gap-2 font-serif text-lg font-bold tracking-tight">
+                    <h2 className="mt-1 mb-3 flex items-center gap-2 font-serif text-lg font-bold tracking-tight text-destructive">
                         <AlertTriangle className="h-5 w-5" aria-hidden="true" /> Delete this account
                     </h2>
                     <p className="mb-3 text-sm leading-relaxed">
-                        Permanently delete your account. This <strong>cannot be undone</strong>, and
-                        there is no grace period.
+                        Permanently delete your account. This <strong>cannot be undone</strong>, and there is no grace
+                        period.
                     </p>
-                    <ul className="text-secondary-foreground mb-4 list-disc pl-6 text-sm leading-[1.8]">
+                    <ul className="mb-4 list-disc pl-6 text-sm leading-[1.8] text-secondary-foreground">
                         <li>Your profile is anonymized as &ldquo;[Deleted Collector]&rdquo;</li>
                         <li>Your horses are orphaned — their Hoofprint history is preserved</li>
                         <li>Pending transfers and commissions are cancelled</li>
                         <li>You are signed out and cannot log in again</li>
                     </ul>
                     <div className="mb-4 max-w-[320px]">
-                        <label
-                            htmlFor="delete-confirm"
-                            className="text-foreground mb-1 block text-sm font-semibold"
-                        >
+                        <label htmlFor="delete-confirm" className="mb-1 block text-sm font-semibold text-foreground">
                             Type <strong>DELETE</strong> to confirm
                         </label>
                         <Input
@@ -1027,7 +986,7 @@ export default function SettingsClient() {
                     </Button>
                     {deleteError && (
                         <p
-                            className="text-destructive border-destructive/30 bg-destructive/10 mt-3 flex items-center gap-2 rounded-md border px-4 py-2 text-sm"
+                            className="mt-3 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm text-destructive"
                             role="alert"
                         >
                             {deleteError}

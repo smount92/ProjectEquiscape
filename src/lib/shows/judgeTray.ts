@@ -31,8 +31,7 @@ export type TraySlots = Readonly<Partial<Record<Place, string>>>;
 export const EMPTY_TRAY: TraySlots = Object.freeze({});
 
 /** Gentle refusal copy for the 7th tap (the 6-ribbon cap). */
-export const TRAY_FULL_MESSAGE =
-    `All ${MAX_PLACE} ribbons are pinned — tap a ribbon in the tray to take one back first.`;
+export const TRAY_FULL_MESSAGE = `All ${MAX_PLACE} ribbons are pinned — tap a ribbon in the tray to take one back first.`;
 
 /**
  * Rebuild the tray from saved placings (resume / corrections).
@@ -40,9 +39,7 @@ export const TRAY_FULL_MESSAGE =
  * duplicate entry the first row wins (the server guarantees
  * uniqueness — this is belt and braces, never a crash).
  */
-export function hydrateTray(
-    entries: readonly { id: string; place: Place | number | null }[],
-): TraySlots {
+export function hydrateTray(entries: readonly { id: string; place: Place | number | null }[]): TraySlots {
     const slots: Partial<Record<Place, string>> = {};
     const seen = new Set<string>();
     for (const entry of entries) {
@@ -123,10 +120,7 @@ export interface ServerPlacing {
  * as pinned, e.g. {1: a, 3: b} → [{a, 1st}, {b, 3rd}]). Notes ride
  * along only for placed entries; blank/whitespace notes are omitted.
  */
-export function toServerPlacings(
-    slots: TraySlots,
-    notes: Readonly<Record<string, string>> = {},
-): ServerPlacing[] {
+export function toServerPlacings(slots: TraySlots, notes: Readonly<Record<string, string>> = {}): ServerPlacing[] {
     const rows: ServerPlacing[] = [];
     for (const place of PLACES) {
         const entryId = slots[place];
@@ -245,11 +239,7 @@ export function autosaveReducer(state: AutosaveState, event: AutosaveEvent): Aut
 
 /** Should the caller fire a save right now? (Debounce already elapsed.) */
 export function needsSave(state: AutosaveState): boolean {
-    return (
-        state.inFlightVersion === null &&
-        state.version > state.savedVersion &&
-        state.status !== "error"
-    );
+    return state.inFlightVersion === null && state.version > state.savedVersion && state.status !== "error";
 }
 
 /**

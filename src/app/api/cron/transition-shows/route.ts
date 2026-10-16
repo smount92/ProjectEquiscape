@@ -5,10 +5,7 @@ import { getAdminClient } from "@/lib/supabase/admin";
 import * as Sentry from "@sentry/nextjs";
 
 import { canTransition } from "@/lib/shows/stateMachine";
-import {
-    buildDeadlinePlans,
-    isClosingWithin24h,
-} from "@/lib/shows/notifications";
+import { buildDeadlinePlans, isClosingWithin24h } from "@/lib/shows/notifications";
 import { runEntriesClosedFanout } from "@/lib/shows/notifications";
 import { loadShowAudience } from "@/lib/shows/followers";
 import { createNotificationsBulk } from "@/lib/notifications/createNotification";
@@ -62,7 +59,7 @@ export async function GET(request: NextRequest) {
         if (error) throw error;
 
         let legacyTransitioned = 0;
-        for (const show of (expiredShows ?? [])) {
+        for (const show of expiredShows ?? []) {
             // CAS guard: only update if still "open"
             const { error: updateError } = await admin
                 .from("events")
@@ -226,9 +223,7 @@ export async function GET(request: NextRequest) {
             // entered, and an inbox is a higher bar than a bell anyway.
             // Followers get the in-app nudge above; widening the email
             // would need its own copy and its own consent question.
-            const entrantsToNudge = toNudge.filter((id) =>
-                audience.entrantIds.includes(id),
-            );
+            const entrantsToNudge = toNudge.filter((id) => audience.entrantIds.includes(id));
             if (entrantsToNudge.length > 0) {
                 await sendEntriesClosingEmails({
                     showId,

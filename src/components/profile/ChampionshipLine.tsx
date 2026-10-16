@@ -58,9 +58,7 @@ export default function ChampionshipLine({
 
                 <div className="flex flex-wrap items-center justify-center divide-x divide-border-tan/30 sm:justify-start">
                     {season.rank !== null && <Stat num={`#${season.rank}`} label="Stable rank" />}
-                    {season.points !== null && (
-                        <Stat num={String(season.points)} label="Season pts" />
-                    )}
+                    {season.points !== null && <Stat num={String(season.points)} label="Season pts" />}
                     <Stat
                         num={
                             season.stakesCards > 0
@@ -70,12 +68,8 @@ export default function ChampionshipLine({
                         label="Cards held"
                     />
                     <Stat num={String(season.careerPoints)} label="Career pts" />
-                    {season.championships ? (
-                        <Stat num={String(season.championships)} label="Championships" />
-                    ) : null}
-                    {season.star && (
-                        <Stat num={"★".repeat(season.star.stars)} label={season.star.label} />
-                    )}
+                    {season.championships ? <Stat num={String(season.championships)} label="Championships" /> : null}
+                    {season.star && <Stat num={"★".repeat(season.star.stars)} label={season.star.label} />}
                 </div>
 
                 {season.nextStar && (
@@ -86,7 +80,7 @@ export default function ChampionshipLine({
                 )}
 
                 {titleRows.length > 0 && (
-                    <div className="border-input mt-4 border-t pt-3">
+                    <div className="mt-4 border-t border-input pt-3">
                         <h3 className="mb-2 text-[0.65rem] font-semibold tracking-widest text-secondary-foreground uppercase">
                             Titled horses
                         </h3>

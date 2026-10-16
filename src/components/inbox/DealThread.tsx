@@ -9,12 +9,7 @@ import { createClient } from "@/lib/supabase/client";
 import { UserAvatar } from "@/components/social";
 import { useNotifications } from "@/lib/context/NotificationProvider";
 import { RISKY_PAYMENT_REGEX } from "@/lib/safety";
-import {
-    coerceKind,
-    describeEvent,
-    isEventKind,
-    type MessageKind,
-} from "@/lib/deals/transcript";
+import { coerceKind, describeEvent, isEventKind, type MessageKind } from "@/lib/deals/transcript";
 
 /**
  * THE MIXED TRANSCRIPT.
@@ -90,10 +85,7 @@ export default function DealThread({
         setMessages(initialMessages);
     }, [initialMessages]);
 
-    const showPaymentWarning = useMemo(
-        () => RISKY_PAYMENT_REGEX.test(newMessage),
-        [newMessage],
-    );
+    const showPaymentWarning = useMemo(() => RISKY_PAYMENT_REGEX.test(newMessage), [newMessage]);
 
     /**
      * Optimistic edit: the bubble updates instantly (with its honest
@@ -110,9 +102,7 @@ export default function DealThread({
         setSavingEdit(true);
         const before = messages;
         setMessages((prev) =>
-            prev.map((m) =>
-                m.id === msg.id ? { ...m, content: next, editedAt: new Date().toISOString() } : m,
-            ),
+            prev.map((m) => (m.id === msg.id ? { ...m, content: next, editedAt: new Date().toISOString() } : m)),
         );
         const res = await editMessage(conversationId, msg.id, next);
         setSavingEdit(false);
@@ -141,11 +131,19 @@ export default function DealThread({
         toBottom();
         // The reader taking the wheel (or a thumb) ends the follow-up scrolls.
         let readerScrolled = false;
-        const mark = () => { readerScrolled = true; };
+        const mark = () => {
+            readerScrolled = true;
+        };
         stream.addEventListener("wheel", mark, { passive: true });
         stream.addEventListener("touchmove", mark, { passive: true });
-        const timers = [300, 1000, 2500].map((ms) => window.setTimeout(() => { if (!readerScrolled) toBottom(); }, ms));
-        const onImage = (e: Event) => { if ((e.target as HTMLElement)?.tagName === "IMG" && !readerScrolled) toBottom(); };
+        const timers = [300, 1000, 2500].map((ms) =>
+            window.setTimeout(() => {
+                if (!readerScrolled) toBottom();
+            }, ms),
+        );
+        const onImage = (e: Event) => {
+            if ((e.target as HTMLElement)?.tagName === "IMG" && !readerScrolled) toBottom();
+        };
         stream.addEventListener("load", onImage, true);
         return () => {
             timers.forEach(clearTimeout);
@@ -339,10 +337,10 @@ export default function DealThread({
                 thread's space through the load. */}
             <div
                 ref={streamRef}
-                className="bg-card border-input mb-4 flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto rounded-lg border p-4"
+                className="mb-4 flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto rounded-lg border border-input bg-card p-4"
             >
                 {messages.length === 0 ? (
-                    <div className="text-muted-foreground flex flex-1 flex-col items-center justify-center gap-2 py-12 text-center">
+                    <div className="flex flex-1 flex-col items-center justify-center gap-2 py-12 text-center text-muted-foreground">
                         <div className="text-5xl opacity-50">💬</div>
                         <p className="m-0">
                             Say hello to <strong>@{otherAlias}</strong>.
@@ -358,7 +356,7 @@ export default function DealThread({
                         return (
                             <div key={msg.id}>
                                 {showDate && (
-                                    <div className="text-muted-foreground py-2 text-center text-xs font-medium">
+                                    <div className="py-2 text-center text-xs font-medium text-muted-foreground">
                                         {new Date(msg.createdAt).toLocaleDateString("en-US", {
                                             weekday: "short",
                                             month: "short",
@@ -367,10 +365,7 @@ export default function DealThread({
                                     </div>
                                 )}
                                 {isEventKind(msg.kind) ? (
-                                    <EventLeaf
-                                        msg={msg}
-                                        actorName={msg.isMine ? "You" : `@${otherAlias}`}
-                                    />
+                                    <EventLeaf msg={msg} actorName={msg.isMine ? "You" : `@${otherAlias}`} />
                                 ) : editingId === msg.id ? (
                                     <EditBubble
                                         text={editText}
@@ -410,26 +405,26 @@ export default function DealThread({
             {/* Risky payment advisory — unchanged copy, it is honest and load-bearing */}
             {showPaymentWarning && (
                 <div
-                    className="border-warning/30 bg-warning/10 text-warning mx-4 mb-2 flex items-start gap-2 rounded-md border px-4 py-2 text-xs leading-relaxed"
+                    className="mx-4 mb-2 flex items-start gap-2 rounded-md border border-warning/30 bg-warning/10 px-4 py-2 text-xs leading-relaxed text-warning"
                     role="alert"
                 >
                     <span className="mt-px shrink-0 text-[1.2rem]">🛡️</span>
                     <span>
-                        <strong>Protect yourself:</strong> Always use PayPal Goods &amp; Services for
-                        off-platform payments. Venmo, Zelle, and PayPal Friends &amp; Family offer{" "}
+                        <strong>Protect yourself:</strong> Always use PayPal Goods &amp; Services for off-platform
+                        payments. Venmo, Zelle, and PayPal Friends &amp; Family offer{" "}
                         <strong>no buyer protection</strong>.
                     </span>
                 </div>
             )}
 
             {error && (
-                <div className="text-destructive border-destructive/30 bg-destructive/10 mx-4 mb-2 rounded-md border px-4 py-2 text-sm">
+                <div className="mx-4 mb-2 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm text-destructive">
                     {error}
                 </div>
             )}
 
             {pendingFiles.length > 0 && (
-                <div className="border-input bg-background mx-4 mb-2 flex items-center gap-2 overflow-x-auto rounded-lg border p-2">
+                <div className="mx-4 mb-2 flex items-center gap-2 overflow-x-auto rounded-lg border border-input bg-background p-2">
                     {pendingFiles.map((file, i) => (
                         <div key={i} className="relative shrink-0">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -439,39 +434,37 @@ export default function DealThread({
                                 className="h-16 w-16 rounded-md object-cover"
                             />
                             <button
-                                onClick={() =>
-                                    setPendingFiles((prev) => prev.filter((_, j) => j !== i))
-                                }
-                                className="bg-destructive absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] text-white"
+                                onClick={() => setPendingFiles((prev) => prev.filter((_, j) => j !== i))}
+                                className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] text-white"
                                 aria-label={`Remove ${file.name}`}
                             >
                                 ✕
                             </button>
                         </div>
                     ))}
-                    <span className="text-muted-foreground self-center text-xs">
+                    <span className="self-center text-xs text-muted-foreground">
                         {pendingFiles.length} photo{pendingFiles.length > 1 ? "s" : ""}
                     </span>
                 </div>
             )}
 
             {uploadProgress && (
-                <div className="text-muted-foreground mx-4 mb-2 flex items-center gap-2 text-xs">
-                    <span className="border-forest inline-block h-3 w-3 animate-spin rounded-full border-2 border-t-transparent" />
+                <div className="mx-4 mb-2 flex items-center gap-2 text-xs text-muted-foreground">
+                    <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-forest border-t-transparent" />
                     Uploading photos…
                 </div>
             )}
 
             {/* Composer */}
             {composerDisabledReason ? (
-                <div className="border-input bg-muted/40 text-muted-foreground shrink-0 rounded-lg border p-4 text-center text-sm">
+                <div className="shrink-0 rounded-lg border border-input bg-muted/40 p-4 text-center text-sm text-muted-foreground">
                     {composerDisabledReason}
                 </div>
             ) : (
-                <div className="bg-card border-input shrink-0 rounded-lg border p-4">
+                <div className="shrink-0 rounded-lg border border-input bg-card p-4">
                     <div className="flex items-end gap-2">
                         <label
-                            className="border-input bg-card text-muted-foreground hover:bg-background hover:text-foreground flex h-[42px] w-[42px] shrink-0 cursor-pointer items-center justify-center rounded-full border transition-all"
+                            className="flex h-[42px] w-[42px] shrink-0 cursor-pointer items-center justify-center rounded-full border border-input bg-card text-muted-foreground transition-all hover:bg-background hover:text-foreground"
                             title="Attach photo"
                         >
                             <input
@@ -502,7 +495,7 @@ export default function DealThread({
 
                         <textarea
                             ref={inputRef}
-                            className="border-input text-foreground font-inherit placeholder:text-muted-foreground focus:border-forest max-h-[40dvh] min-h-[42px] flex-1 resize-none overflow-y-auto rounded-lg border bg-card px-3.5 py-2.5 text-sm transition-colors focus:shadow-[0_0_0_3px_var(--color-forest-glow)] focus:outline-none"
+                            className="font-inherit max-h-[40dvh] min-h-[42px] flex-1 resize-none overflow-y-auto rounded-lg border border-input bg-card px-3.5 py-2.5 text-sm text-foreground transition-colors placeholder:text-muted-foreground focus:border-forest focus:shadow-[0_0_0_3px_var(--color-forest-glow)] focus:outline-none"
                             value={newMessage}
                             onChange={(e) => {
                                 setNewMessage(e.target.value);
@@ -510,18 +503,14 @@ export default function DealThread({
                                 e.target.style.height = `${e.target.scrollHeight + 2}px`;
                             }}
                             onKeyDown={handleKeyDown}
-                            placeholder={
-                                pendingFiles.length > 0
-                                    ? "Add a caption (optional)…"
-                                    : "Type a message…"
-                            }
+                            placeholder={pendingFiles.length > 0 ? "Add a caption (optional)…" : "Type a message…"}
                             rows={1}
                             maxLength={2000}
                             disabled={sending}
                             id="chat-message-input"
                         />
                         <button
-                            className="bg-forest flex h-[42px] w-[42px] shrink-0 cursor-pointer items-center justify-center rounded-full border-none text-white transition-all hover:enabled:scale-105 disabled:cursor-not-allowed disabled:opacity-40"
+                            className="flex h-[42px] w-[42px] shrink-0 cursor-pointer items-center justify-center rounded-full border-none bg-forest text-white transition-all hover:enabled:scale-105 disabled:cursor-not-allowed disabled:opacity-40"
                             onClick={handleSend}
                             disabled={(!newMessage.trim() && pendingFiles.length === 0) || sending}
                             aria-label="Send message"
@@ -550,7 +539,7 @@ export default function DealThread({
                             )}
                         </button>
                     </div>
-                    <div className="text-muted-foreground mt-1.5 text-center text-[0.6rem]">
+                    <div className="mt-1.5 text-center text-[0.6rem] text-muted-foreground">
                         Press Enter to send · Shift+Enter for new line · 📎 for photos
                     </div>
                 </div>
@@ -578,7 +567,7 @@ function EventLeaf({ msg, actorName }: { msg: ThreadMessage; actorName: string }
                 <div className="flex items-baseline gap-2">
                     <span aria-hidden="true">{d.icon}</span>
                     <span className="font-semibold">{d.headline}</span>
-                    <span className="text-muted-foreground ml-auto shrink-0 text-[0.65rem]">
+                    <span className="ml-auto shrink-0 text-[0.65rem] text-muted-foreground">
                         {formatTime(msg.createdAt)}
                     </span>
                 </div>
@@ -629,17 +618,15 @@ function ChatBubble({
             <div
                 className={`max-w-[75%] animate-[bubbleIn_0.2s_ease] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed shadow-sm max-md:max-w-[85%] ${
                     msg.isMine
-                        ? "bg-forest rounded-br-[4px] text-white"
-                        : "border-input bg-card text-foreground rounded-bl-[4px] border"
+                        ? "rounded-br-[4px] bg-forest text-white"
+                        : "rounded-bl-[4px] border border-input bg-card text-foreground"
                 }`}
             >
                 <div className="break-words whitespace-pre-wrap">{msg.content}</div>
 
                 {msg.attachments && msg.attachments.length > 0 && (
                     <div
-                        className={`mt-2 grid gap-1.5 ${
-                            msg.attachments.length === 1 ? "grid-cols-1" : "grid-cols-2"
-                        }`}
+                        className={`mt-2 grid gap-1.5 ${msg.attachments.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}
                     >
                         {msg.attachments.map((att, idx) => (
                             <a
@@ -669,7 +656,8 @@ function ChatBubble({
                     {formatTime(msg.createdAt)}
                     {msg.editedAt && (
                         <span className="block">
-                            edited: {new Date(msg.editedAt).toLocaleDateString("en-US", {
+                            edited:{" "}
+                            {new Date(msg.editedAt).toLocaleDateString("en-US", {
                                 month: "short",
                                 day: "numeric",
                             })}{" "}
@@ -684,7 +672,7 @@ function ChatBubble({
                     onClick={onEdit}
                     aria-label="Edit message"
                     title="Edit message"
-                    className="text-muted-foreground hover:text-foreground shrink-0 self-center rounded p-1 text-xs opacity-60 transition-opacity group-hover:opacity-100"
+                    className="shrink-0 self-center rounded p-1 text-xs text-muted-foreground opacity-60 transition-opacity group-hover:opacity-100 hover:text-foreground"
                 >
                     ✎
                 </button>
@@ -720,9 +708,8 @@ function EditBubble({
 }) {
     return (
         <div className="flex flex-row-reverse items-end gap-2">
-            <div className="border-forest bg-card w-full max-w-[75%] rounded-2xl rounded-br-[4px] border-2 p-2 shadow-sm max-md:max-w-[85%]">
+            <div className="w-full max-w-[75%] rounded-2xl rounded-br-[4px] border-2 border-forest bg-card p-2 shadow-sm max-md:max-w-[85%]">
                 <textarea
-                     
                     autoFocus
                     rows={Math.min(6, Math.max(2, text.split("\n").length))}
                     value={text}
@@ -735,7 +722,7 @@ function EditBubble({
                         }
                         if (e.key === "Escape") onCancel();
                     }}
-                    className="text-foreground w-full resize-none bg-transparent px-1.5 py-1 text-sm leading-relaxed focus:outline-none"
+                    className="w-full resize-none bg-transparent px-1.5 py-1 text-sm leading-relaxed text-foreground focus:outline-none"
                     aria-label="Edit message"
                 />
                 <div className="flex items-center justify-end gap-3 px-1 pb-0.5">
@@ -743,7 +730,7 @@ function EditBubble({
                         type="button"
                         onClick={onCancel}
                         disabled={saving}
-                        className="text-muted-foreground hover:text-foreground text-xs underline"
+                        className="text-xs text-muted-foreground underline hover:text-foreground"
                     >
                         Cancel
                     </button>
@@ -751,7 +738,7 @@ function EditBubble({
                         type="button"
                         onClick={onSave}
                         disabled={saving}
-                        className="text-forest text-xs font-bold hover:underline disabled:opacity-50"
+                        className="text-xs font-bold text-forest hover:underline disabled:opacity-50"
                     >
                         {saving ? "Saving…" : "Save"}
                     </button>

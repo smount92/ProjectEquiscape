@@ -35,16 +35,15 @@ export default function ClientHorseLink({ commission }: { commission: Commission
     };
 
     return (
-        <div className="border-input bg-muted/40 rounded-lg border p-4" data-testid="client-horse-link">
+        <div className="rounded-lg border border-input bg-muted/40 p-4" data-testid="client-horse-link">
             <h3 className="mb-1 font-serif text-base font-bold">🐎 Which horse is this for?</h3>
-            <p className="text-muted-foreground mb-3 text-sm leading-relaxed">
-                Link the horse from your stable now, before delivery. That&rsquo;s what puts the
-                artist&rsquo;s verified credit and the making-of on its passport, and lets you file
-                the cost into its vault.
+            <p className="mb-3 text-sm leading-relaxed text-muted-foreground">
+                Link the horse from your stable now, before delivery. That&rsquo;s what puts the artist&rsquo;s verified
+                credit and the making-of on its passport, and lets you file the cost into its vault.
             </p>
             <HorseLinker commission={commission} busy={busy} onLink={link} />
             {error && (
-                <p className="text-destructive mt-2 text-sm font-semibold" role="alert">
+                <p className="mt-2 text-sm font-semibold text-destructive" role="alert">
                     {error}
                 </p>
             )}

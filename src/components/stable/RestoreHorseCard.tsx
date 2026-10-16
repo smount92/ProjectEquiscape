@@ -24,12 +24,7 @@ export interface RestoreHorseCardProps {
  *    and asks for a name inline, rather than restoring a horse called
  *    "[Deleted]" and leaving the member to find the edit form.
  */
-export default function RestoreHorseCard({
-    id,
-    recoveredName,
-    referenceName,
-    deletedAt,
-}: RestoreHorseCardProps) {
+export default function RestoreHorseCard({ id, recoveredName, referenceName, deletedAt }: RestoreHorseCardProps) {
     const router = useRouter();
     const [name, setName] = useState("");
     const [busy, setBusy] = useState(false);
@@ -61,7 +56,7 @@ export default function RestoreHorseCard({
                         Name not recoverable
                     </p>
                 )}
-                <p className="text-secondary-foreground m-0 text-sm">
+                <p className="m-0 text-sm text-secondary-foreground">
                     {referenceName ?? "No catalog reference"}
                     {" · deleted "}
                     {new Date(deletedAt).toLocaleDateString("en-US", {
@@ -71,12 +66,12 @@ export default function RestoreHorseCard({
                     })}
                 </p>
                 {needsName && (
-                    <p className="text-muted-foreground m-0 mt-1 text-xs">
+                    <p className="m-0 mt-1 text-xs text-muted-foreground">
                         This one was deleted before we started keeping names. Give it a name now, or restore it and
                         rename it on the passport.
                     </p>
                 )}
-                {error && <p className="text-destructive m-0 mt-1 text-xs">{error}</p>}
+                {error && <p className="m-0 mt-1 text-xs text-destructive">{error}</p>}
             </div>
 
             <div className="flex shrink-0 flex-wrap items-center gap-2">
@@ -93,7 +88,7 @@ export default function RestoreHorseCard({
                         maxLength={100}
                         onChange={(e) => setName(e.target.value)}
                         placeholder="Name it…"
-                        className="border-input bg-card text-foreground w-44 rounded-md border px-3 py-2 text-sm"
+                        className="w-44 rounded-md border border-input bg-card px-3 py-2 text-sm text-foreground"
                     />
                 )}
                 <Button onClick={handleRestore} disabled={busy} id={`restore-${id}`}>

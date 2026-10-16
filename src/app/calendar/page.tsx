@@ -82,11 +82,7 @@ type CalendarSearchParams = { venue?: string; view?: string; month?: string };
 const EVENT_FETCH_LIMIT = 100;
 
 /** Build a /calendar URL, carrying the params that should survive. */
-function calendarHref(params: {
-    venue?: string | null;
-    view?: string | null;
-    month?: string | null;
-}): string {
+function calendarHref(params: { venue?: string | null; view?: string | null; month?: string | null }): string {
     const query = new URLSearchParams();
     if (params.venue) query.set("venue", params.venue);
     if (params.view) query.set("view", params.view);
@@ -167,7 +163,7 @@ function EntryRow({ entry, today }: { entry: CalendarEntry; today: string }) {
 
     return (
         <li className="flex flex-wrap items-baseline gap-x-3 gap-y-1 py-2.5">
-            <span className="w-16 shrink-0 font-serif text-sm font-bold tabular-nums text-forest">
+            <span className="w-16 shrink-0 font-serif text-sm font-bold text-forest tabular-nums">
                 {shortDate(entry.date)}
             </span>
             <div className="min-w-0 flex-1">
@@ -179,15 +175,13 @@ function EntryRow({ entry, today }: { entry: CalendarEntry; today: string }) {
                         show that isn't one. */}
                     {entry.kind === "event" && (
                         <span
-                            className="border-input text-secondary-foreground inline-flex items-center rounded-full border px-2 py-[2px] text-[0.7rem] font-semibold"
+                            className="inline-flex items-center rounded-full border border-input px-2 py-[2px] text-[0.7rem] font-semibold text-secondary-foreground"
                             title="A community event — not a show entry"
                         >
                             {entry.icon} Community event
                         </span>
                     )}
-                    {entry.statusLabel && (
-                        <span className="text-xs text-muted-foreground">{entry.statusLabel}</span>
-                    )}
+                    {entry.statusLabel && <span className="text-xs text-muted-foreground">{entry.statusLabel}</span>}
                     {amber && (
                         <span
                             className="stamp"
@@ -224,11 +218,7 @@ function EntryRow({ entry, today }: { entry: CalendarEntry; today: string }) {
     );
 }
 
-export default async function CalendarPage({
-    searchParams,
-}: {
-    searchParams: Promise<CalendarSearchParams>;
-}) {
+export default async function CalendarPage({ searchParams }: { searchParams: Promise<CalendarSearchParams> }) {
     const params = await searchParams;
     const activeParam = params.venue && VENUE_PARAM[params.venue] ? params.venue : null;
     const venueFilter = activeParam ? VENUE_PARAM[activeParam] : undefined;
@@ -259,9 +249,7 @@ export default async function CalendarPage({
 
     /* the MHH layer is out — the rest of the calendar still stands */
     if (mhhSettled.status === "fulfilled" && mhhSettled.value.success) {
-        entries = entries.concat(
-            mhhSettled.value.shows.map(fromMhhShow).filter((e): e is CalendarEntry => e !== null),
-        );
+        entries = entries.concat(mhhSettled.value.shows.map(fromMhhShow).filter((e): e is CalendarEntry => e !== null));
     }
 
     /* the external layer is out (or pre-migration) */
@@ -272,9 +260,7 @@ export default async function CalendarPage({
     /* the events board is out — shows still fill the calendar */
     if (eventsSettled.status === "fulfilled") {
         entries = entries.concat(
-            eventsSettled.value
-                .map(fromCommunityEvent)
-                .filter((e): e is CalendarEntry => e !== null),
+            eventsSettled.value.map(fromCommunityEvent).filter((e): e is CalendarEntry => e !== null),
         );
     }
 
@@ -313,10 +299,7 @@ export default async function CalendarPage({
 
     return (
         <ExplorerLayout noHeader>
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-            />
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
             <div className="animate-fade-in-up mx-auto max-w-[900px]">
                 <PageMasthead
                     icon="🗓️"
@@ -326,11 +309,10 @@ export default async function CalendarPage({
                 />
 
                 <p className="mb-6 max-w-2xl text-sm leading-relaxed text-secondary-foreground">
-                    Model horse shows are announced in five different places — here, OMHPS,
-                    MEPSA, Facebook groups, and club sites. This calendar is the one place
-                    they all appear: shows hosted on Model Horse Hub link straight to their
-                    entry page, and community-submitted listings link out to wherever the
-                    show lives. Listings are curated before they appear.{" "}
+                    Model horse shows are announced in five different places — here, OMHPS, MEPSA, Facebook groups, and
+                    club sites. This calendar is the one place they all appear: shows hosted on Model Horse Hub link
+                    straight to their entry page, and community-submitted listings link out to wherever the show lives.
+                    Listings are curated before they appear.{" "}
                     {user ? (
                         <>
                             Gatherings from the{" "}
@@ -362,12 +344,7 @@ export default async function CalendarPage({
                         {FILTERS.map((f) => {
                             const active = f.param === activeParam;
                             return (
-                                <Button
-                                    key={f.label}
-                                    asChild
-                                    size="sm"
-                                    variant={active ? "default" : "outline"}
-                                >
+                                <Button key={f.label} asChild size="sm" variant={active ? "default" : "outline"}>
                                     <Link
                                         href={calendarHref({
                                             venue: f.param,
@@ -435,11 +412,7 @@ export default async function CalendarPage({
                             </span>
                             <ul className="m-0 list-none divide-y divide-forest/10 p-0">
                                 {month.entries.map((entry) => (
-                                    <EntryRow
-                                        key={`${entry.kind}-${entry.id}`}
-                                        entry={entry}
-                                        today={today}
-                                    />
+                                    <EntryRow key={`${entry.kind}-${entry.id}`} entry={entry} today={today} />
                                 ))}
                             </ul>
                         </section>
@@ -447,8 +420,8 @@ export default async function CalendarPage({
                 )}
 
                 <p className="mt-10 mb-2 text-xs text-muted-foreground">
-                    Missing a show? Any member can list one — it appears once a curator
-                    approves it. MHH-hosted shows join the calendar automatically. Browse{" "}
+                    Missing a show? Any member can list one — it appears once a curator approves it. MHH-hosted shows
+                    join the calendar automatically. Browse{" "}
                     <Link href="/shows" className="font-semibold text-forest underline decoration-2 underline-offset-2">
                         shows hosted here
                     </Link>

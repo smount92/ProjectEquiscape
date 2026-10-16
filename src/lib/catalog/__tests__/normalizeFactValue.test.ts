@@ -17,7 +17,9 @@ describe("normalizeFactValue: one tidy step before a Registry write", () => {
 
     it("keeps a period that ends an abbreviation", () => {
         expect(normalizeFactValue("title", "I.C.E.")).toBe("I.C.E.");
-        expect(normalizeFactValue("title", "JCPenney Holiday Catalog, later Bentley Sales Co.")).toBe("JCPenney Holiday Catalog, later Bentley Sales Co.");
+        expect(normalizeFactValue("title", "JCPenney Holiday Catalog, later Bentley Sales Co.")).toBe(
+            "JCPenney Holiday Catalog, later Bentley Sales Co.",
+        );
         expect(normalizeFactValue("title", "Dr. Peaches.")).toBe("Dr. Peaches");
         expect(hasTrailingPunctuation("Smart Chic Olena Jr.")).toBe(false);
         expect(hasTrailingPunctuation("Vanity,")).toBe(true);
@@ -62,7 +64,7 @@ describe("normalizeFactValue: one tidy step before a Registry write", () => {
                 color_description: { from: "", to: "palomino" },
                 release_year_start: { from: "", to: "2019" },
             },
-            { model_number: "1838" }
+            { model_number: "1838" },
         );
         expect(columnUpdates).toEqual({ title: "Montana Harvest" });
         expect(attributes).toEqual({ model_number: "1838", color_description: "Palomino", release_year_start: 2019 });

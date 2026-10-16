@@ -77,7 +77,12 @@ export default function BarnJoinButton({
                 <button
                     className="btn-ghostleather !px-4 !py-2 !text-xs"
                     disabled={isPending}
-                    onClick={() => run(() => cancelBarnJoinRequest(groupId), () => setRequested(false))}
+                    onClick={() =>
+                        run(
+                            () => cancelBarnJoinRequest(groupId),
+                            () => setRequested(false),
+                        )
+                    }
                     title="Withdraw your request to join"
                 >
                     {isPending ? "Withdrawing…" : "⏳ Request pending — withdraw"}
@@ -94,13 +99,19 @@ export default function BarnJoinButton({
                 onClick={() =>
                     run(
                         () => joinGroup(groupId),
-                        () => { if (isPrivate) setRequested(true); },
+                        () => {
+                            if (isPrivate) setRequested(true);
+                        },
                     )
                 }
             >
                 {isPending
-                    ? (isPrivate ? "Requesting…" : "Joining…")
-                    : (isPrivate ? "🔒 Request to Join" : "+ Join Barn")}
+                    ? isPrivate
+                        ? "Requesting…"
+                        : "Joining…"
+                    : isPrivate
+                      ? "🔒 Request to Join"
+                      : "+ Join Barn"}
             </button>
         </Wrap>
     );

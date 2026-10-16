@@ -6,9 +6,7 @@ import QualificationCardsSection, {
     type PassportQualificationCard,
 } from "@/components/shows/QualificationCardsSection";
 
-function card(
-    overrides: Partial<PassportQualificationCard> = {},
-): PassportQualificationCard {
+function card(overrides: Partial<PassportQualificationCard> = {}): PassportQualificationCard {
     return {
         code: "AbCd2345",
         earnedPlace: 1,
@@ -39,10 +37,7 @@ describe("QualificationCardsSection", () => {
 
     it("links each card to its public verification page", () => {
         render(<QualificationCardsSection cards={[card()]} />);
-        expect(screen.getByRole("link", { name: /verify this card/i })).toHaveAttribute(
-            "href",
-            "/cards/AbCd2345",
-        );
+        expect(screen.getByRole("link", { name: /verify this card/i })).toHaveAttribute("href", "/cards/AbCd2345");
     });
 
     it("badges each status distinctly (transferred and void)", () => {

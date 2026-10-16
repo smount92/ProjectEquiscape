@@ -19,9 +19,7 @@ export default function SupporterPlaque({ since }: { since: string | null }) {
                 <Lamp className="h-3 w-3" aria-hidden="true" />
                 Supporter
                 {sinceLabel && (
-                    <span className="font-normal normal-case tracking-normal opacity-80">
-                        · since {sinceLabel}
-                    </span>
+                    <span className="font-normal tracking-normal normal-case opacity-80">· since {sinceLabel}</span>
                 )}
             </span>
         </div>

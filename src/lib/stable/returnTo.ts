@@ -11,8 +11,7 @@
 
 import { pathOf, trailPrevious } from "@/lib/nav/trail";
 
-const PASSPORT_RE =
-    /^\/stable\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?:\/edit)?\/?$/i;
+const PASSPORT_RE = /^\/stable\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?:\/edit)?\/?$/i;
 
 /** The horse id of a passport (/stable/<uuid>) or its edit page; null for anything else. */
 export function passportHorseId(url: string | null | undefined): string | null {

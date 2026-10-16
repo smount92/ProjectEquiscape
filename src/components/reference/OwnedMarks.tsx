@@ -15,13 +15,7 @@ import { getOwnedCatalogIds } from "@/app/actions/owned";
  */
 const OwnedContext = createContext<ReadonlySet<string>>(new Set());
 
-export function OwnedProvider({
-    ids,
-    children,
-}: {
-    ids: string[];
-    children: React.ReactNode;
-}) {
+export function OwnedProvider({ ids, children }: { ids: string[]; children: React.ReactNode }) {
     const [owned, setOwned] = useState<ReadonlySet<string>>(new Set());
     useEffect(() => {
         let alive = true;
@@ -43,7 +37,7 @@ export function OwnedMark({ id }: { id: string }) {
     if (!owned.has(id)) return null;
     return (
         <span
-            className="border-forest/50 bg-forest/10 text-forest ml-2 inline-block rounded-full border px-2 py-px align-[2px] text-[0.65rem] font-bold"
+            className="ml-2 inline-block rounded-full border border-forest/50 bg-forest/10 px-2 py-px align-[2px] text-[0.65rem] font-bold text-forest"
             title="A horse in your stable is linked to this release."
         >
             🐴 in your stable

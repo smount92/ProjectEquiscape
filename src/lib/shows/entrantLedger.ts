@@ -181,9 +181,7 @@ export function horseBlocks(args: Pick<HorseVerdictArgs, "horse" | "cls" | "myLi
 
     // ONE breed-halter class per horse per show.
     if (cls.axis === "halter") {
-        const other = myLive.find(
-            (e) => e.horseId === horse.id && e.axis === "halter" && e.classId !== cls.id,
-        );
+        const other = myLive.find((e) => e.horseId === horse.id && e.axis === "halter" && e.classId !== cls.id);
         if (other) blocks.push({ code: "in_other_halter", otherClassId: other.classId });
     }
 
@@ -362,8 +360,7 @@ export function buildEntrantLedger(input: {
         const mineLive = mineHere.length;
         const cap = effectiveCap(cls.maxPerEntrant);
         const remaining = cap === null ? null : Math.max(0, cap - mineLive);
-        const state: ClassLedger["state"] =
-            cls.status !== "scheduled" ? "closed" : remaining === 0 ? "full" : "open";
+        const state: ClassLedger["state"] = cls.status !== "scheduled" ? "closed" : remaining === 0 ? "full" : "open";
 
         const verdictClass: VerdictClass = {
             id: cls.id,
@@ -373,9 +370,7 @@ export function buildEntrantLedger(input: {
             allowedScales: cls.allowedScales,
             allowedFinishes: cls.allowedFinishes,
         };
-        const verdicts = input.horses.map((horse) =>
-            horseVerdict({ horse, cls: verdictClass, myLive, classNameById }),
-        );
+        const verdicts = input.horses.map((horse) => horseVerdict({ horse, cls: verdictClass, myLive, classNameById }));
 
         const ok = verdicts.filter((v) => v.code === "ok");
         const applicable = [...ok.filter((v) => v.breedMatch), ...ok.filter((v) => !v.breedMatch)].map(

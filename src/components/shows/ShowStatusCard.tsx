@@ -77,9 +77,11 @@ const TRANSITION_CONFIRMATIONS: Partial<Record<ShowStatus, Partial<Record<ShowSt
         entries_open: "This reopens entries — entrants can add, change, or withdraw entries again.",
     },
     results_review: {
-        running: "This sends the show back to running — any placings already recorded for those classes will need to be redone.",
+        running:
+            "This sends the show back to running — any placings already recorded for those classes will need to be redone.",
         judging: "This sends the show back to judging — any placings already recorded will need to be redone.",
-        completed: "This finalizes results — they post to every horse's permanent record and qualification cards are issued. This cannot be undone.",
+        completed:
+            "This finalizes results — they post to every horse's permanent record and qualification cards are issued. This cannot be undone.",
     },
 };
 
@@ -99,9 +101,7 @@ function SummaryRow({ label, value }: { label: string; value: React.ReactNode })
     if (value === null || value === undefined || value === "") return null;
     return (
         <div className="flex flex-col gap-0.5">
-            <dt className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-                {label}
-            </dt>
+            <dt className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">{label}</dt>
             <dd className="text-sm text-foreground">{value}</dd>
         </div>
     );
@@ -115,12 +115,7 @@ interface ShowStatusCardProps {
     followerCount?: number;
 }
 
-export default function ShowStatusCard({
-    show,
-    entryCount,
-    canManage,
-    followerCount = 0,
-}: ShowStatusCardProps) {
+export default function ShowStatusCard({ show, entryCount, canManage, followerCount = 0 }: ShowStatusCardProps) {
     const router = useRouter();
     const { showToast, toastNode } = useShowToast();
     const [pending, setPending] = useState<ShowStatus | null>(null);
@@ -234,24 +229,23 @@ export default function ShowStatusCard({
 
                 {/* NAMHSA-format results file (Phase F): on-demand CSV,
                     host/co-host only — the route re-checks the role. */}
-                {canManage &&
-                    (show.status === "completed" || show.status === "archived") && (
-                        <div className="mt-4">
-                            <Button asChild variant="outline">
-                                <a
-                                    href={`/api/export/show-results-v2/${show.id}`}
-                                    download
-                                    data-testid="download-results-csv"
-                                >
-                                    Download results (CSV)
-                                </a>
-                            </Button>
-                            <p className="mt-2 text-xs text-muted-foreground">
-                                Searchable NAMHSA-format results — class names, entry
-                                counts, placings, owners, and championships.
-                            </p>
-                        </div>
-                    )}
+                {canManage && (show.status === "completed" || show.status === "archived") && (
+                    <div className="mt-4">
+                        <Button asChild variant="outline">
+                            <a
+                                href={`/api/export/show-results-v2/${show.id}`}
+                                download
+                                data-testid="download-results-csv"
+                            >
+                                Download results (CSV)
+                            </a>
+                        </Button>
+                        <p className="mt-2 text-xs text-muted-foreground">
+                            Searchable NAMHSA-format results — class names, entry counts, placings, owners, and
+                            championships.
+                        </p>
+                    </div>
+                )}
 
                 {canManage ? (
                     nextStatuses.length > 0 && (
@@ -297,8 +291,7 @@ export default function ShowStatusCard({
                             Delete draft
                         </Button>
                         <p className="mt-2 text-xs text-muted-foreground">
-                            Permanently removes this draft and its classlist — only drafts can be
-                            deleted.
+                            Permanently removes this draft and its classlist — only drafts can be deleted.
                         </p>
                     </div>
                 )}
@@ -318,9 +311,7 @@ export default function ShowStatusCard({
             >
                 <DialogContent className="sm:max-w-[440px]">
                     <DialogHeader>
-                        <DialogTitle>
-                            {confirmTarget && `${TRANSITION_LABELS[confirmTarget]}?`}
-                        </DialogTitle>
+                        <DialogTitle>{confirmTarget && `${TRANSITION_LABELS[confirmTarget]}?`}</DialogTitle>
                         <DialogDescription>
                             {confirmTarget && TRANSITION_CONFIRMATIONS[show.status]?.[confirmTarget]}
                         </DialogDescription>
@@ -361,8 +352,7 @@ export default function ShowStatusCard({
                     <DialogHeader>
                         <DialogTitle>Delete this draft?</DialogTitle>
                         <DialogDescription>
-                            This permanently deletes the draft and its classlist. This cannot be
-                            undone.
+                            This permanently deletes the draft and its classlist. This cannot be undone.
                         </DialogDescription>
                     </DialogHeader>
                     {error && (
@@ -371,20 +361,10 @@ export default function ShowStatusCard({
                         </p>
                     )}
                     <DialogFooter>
-                        <Button
-                            variant="outline"
-                            size="wide"
-                            onClick={() => setDeleteOpen(false)}
-                            disabled={deleting}
-                        >
+                        <Button variant="outline" size="wide" onClick={() => setDeleteOpen(false)} disabled={deleting}>
                             Cancel
                         </Button>
-                        <Button
-                            variant="destructive-outline"
-                            size="wide"
-                            onClick={handleDelete}
-                            disabled={deleting}
-                        >
+                        <Button variant="destructive-outline" size="wide" onClick={handleDelete} disabled={deleting}>
                             {deleting ? "Deleting…" : "Delete draft"}
                         </Button>
                     </DialogFooter>
@@ -397,14 +377,8 @@ export default function ShowStatusCard({
                     At a Glance
                 </span>
                 <dl className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3">
-                    <SummaryRow
-                        label="Mode"
-                        value={show.mode === "live" ? "Live show" : "Online photo show"}
-                    />
-                    <SummaryRow
-                        label="Judging"
-                        value={show.judging === "judged" ? "Judged" : "Community vote"}
-                    />
+                    <SummaryRow label="Mode" value={show.mode === "live" ? "Live show" : "Online photo show"} />
+                    <SummaryRow label="Judging" value={show.judging === "judged" ? "Judged" : "Community vote"} />
                     <SummaryRow
                         label="Qualifying"
                         value={
@@ -426,18 +400,9 @@ export default function ShowStatusCard({
                         </>
                     ) : (
                         <>
-                            <SummaryRow
-                                label="Entries open"
-                                value={formatDate(show.entriesOpenAt, true)}
-                            />
-                            <SummaryRow
-                                label="Entries close"
-                                value={formatDate(show.entriesCloseAt, true)}
-                            />
-                            <SummaryRow
-                                label="Judging ends"
-                                value={formatDate(show.judgingEndsAt, true)}
-                            />
+                            <SummaryRow label="Entries open" value={formatDate(show.entriesOpenAt, true)} />
+                            <SummaryRow label="Entries close" value={formatDate(show.entriesCloseAt, true)} />
+                            <SummaryRow label="Judging ends" value={formatDate(show.judgingEndsAt, true)} />
                         </>
                     )}
                     {show.mode === "online" && (
@@ -467,9 +432,8 @@ export default function ShowStatusCard({
                                     </span>
                                     {/* The rationale, visible — not a tooltip. */}
                                     <span className="text-xs text-muted-foreground">
-                                        While on, the public gallery hides owner names until
-                                        results publish — entries compete by number, like leg
-                                        tags at a live show.
+                                        While on, the public gallery hides owner names until results publish — entries
+                                        compete by number, like leg tags at a live show.
                                     </span>
                                 </span>
                             }
@@ -477,11 +441,7 @@ export default function ShowStatusCard({
                     )}
                     <SummaryRow
                         label="Entries"
-                        value={
-                            entryCount > 0
-                                ? `${entryCount} entr${entryCount === 1 ? "y" : "ies"}`
-                                : "None yet"
-                        }
+                        value={entryCount > 0 ? `${entryCount} entr${entryCount === 1 ? "y" : "ies"}` : "None yet"}
                     />
                     {/* Interest beyond the entry list (184). A COUNT and
                         only a count — who follows a show is private, and
@@ -497,9 +457,8 @@ export default function ShowStatusCard({
                                         {followerCount === 1 ? "" : "s"} following
                                     </span>
                                     <span className="text-xs text-muted-foreground">
-                                        They get told when entries close, judging starts and
-                                        results publish. Only you see this count, and never
-                                        who they are.
+                                        They get told when entries close, judging starts and results publish. Only you
+                                        see this count, and never who they are.
                                     </span>
                                 </span>
                             }

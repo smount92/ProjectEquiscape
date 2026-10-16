@@ -62,10 +62,8 @@ describe("studio facets", () => {
     });
 
     it("folds a bare scale name into its labelled form", () => {
-        expect(canonicalFacets(["Traditional (1:9)", "Traditional", "trad", "Classic", "Stablemate (1:32)", "SM"])).toEqual([
-            "Traditional (1:9)",
-            "Classic (1:12)",
-            "Stablemate (1:32)",
-        ]);
+        expect(
+            canonicalFacets(["Traditional (1:9)", "Traditional", "trad", "Classic", "Stablemate (1:32)", "SM"]),
+        ).toEqual(["Traditional (1:9)", "Classic (1:12)", "Stablemate (1:32)"]);
     });
 });

@@ -66,9 +66,7 @@ export default function HelpIdDetailClient({
 
     const handleUpvote = async (suggestionId: string) => {
         // Optimistic update
-        setSuggestions((prev) =>
-            prev.map((s) => (s.id === suggestionId ? { ...s, upvotes: s.upvotes + 1 } : s))
-        );
+        setSuggestions((prev) => prev.map((s) => (s.id === suggestionId ? { ...s, upvotes: s.upvotes + 1 } : s)));
         await upvoteSuggestion(suggestionId);
     };
 
@@ -107,40 +105,34 @@ export default function HelpIdDetailClient({
     return (
         <div>
             {/* Suggestion List */}
-            <h2 className="text-forest mt-12 mb-5 font-serif text-lg font-bold tracking-[0.14em] uppercase">
+            <h2 className="mt-12 mb-5 font-serif text-lg font-bold tracking-[0.14em] text-forest uppercase">
                 Suggestions ({suggestions.length})
             </h2>
 
             {suggestions.length === 0 ? (
                 <div className="ledger-card py-10 text-center">
-                    <p className="text-secondary-foreground">
-                        No suggestions yet. Be the first to help!
-                    </p>
+                    <p className="text-secondary-foreground">No suggestions yet. Be the first to help!</p>
                 </div>
             ) : (
                 <div className="flex flex-col gap-4">
                     {suggestions.map((s) => (
                         <article
                             key={s.id}
-                            className={`ledger-card ${
-                                s.isAccepted ? "ring-forest/45 shadow-lg ring-2" : ""
-                            }`}
+                            className={`ledger-card ${s.isAccepted ? "shadow-lg ring-2 ring-forest/45" : ""}`}
                             id={`suggestion-${s.id}`}
                         >
                             <div className="mb-3 flex flex-wrap items-center gap-3">
                                 <UserAvatar src={null} alias={s.userName} size="sm" />
-                                <span className="text-foreground text-sm font-semibold">
-                                    {s.userName}
-                                </span>
+                                <span className="text-sm font-semibold text-foreground">{s.userName}</span>
                                 {s.isAccepted && <span className="stamp">Accepted answer</span>}
-                                <span className="text-muted-foreground ml-auto text-xs tabular-nums">
+                                <span className="ml-auto text-xs text-muted-foreground tabular-nums">
                                     {new Date(s.created_at).toLocaleDateString()}
                                 </span>
                             </div>
 
                             <div className="mb-4">
                                 {s.releaseDisplay && (
-                                    <p className="text-forest mb-1 font-serif text-sm font-bold">
+                                    <p className="mb-1 font-serif text-sm font-bold text-forest">
                                         🏷️{" "}
                                         {s.catalogId ? (
                                             <Link
@@ -155,18 +147,14 @@ export default function HelpIdDetailClient({
                                     </p>
                                 )}
                                 {s.resinDisplay && (
-                                    <p className="text-forest mb-1 font-serif text-sm font-bold">
-                                        🎨 {s.resinDisplay}
-                                    </p>
+                                    <p className="mb-1 font-serif text-sm font-bold text-forest">🎨 {s.resinDisplay}</p>
                                 )}
                                 {s.free_text && (
-                                    <p className="text-secondary-foreground text-sm leading-[1.6]">
-                                        {s.free_text}
-                                    </p>
+                                    <p className="text-sm leading-[1.6] text-secondary-foreground">{s.free_text}</p>
                                 )}
                             </div>
 
-                            <div className="border-forest/15 flex flex-wrap items-center gap-3 border-t pt-3">
+                            <div className="flex flex-wrap items-center gap-3 border-t border-forest/15 pt-3">
                                 <Button
                                     variant="outline"
                                     className="text-muted-foreground"
@@ -177,11 +165,7 @@ export default function HelpIdDetailClient({
                                 </Button>
 
                                 {isOwner && !isResolved && (
-                                    <button
-                                        type="button"
-                                        className="btn-brass"
-                                        onClick={() => handleAccept(s.id)}
-                                    >
+                                    <button type="button" className="btn-brass" onClick={() => handleAccept(s.id)}>
                                         ✅ Accept this ID
                                     </button>
                                 )}
@@ -269,9 +253,7 @@ export default function HelpIdDetailClient({
             {isResolved && !hasAccepted && (
                 <div className="ledger-card mt-8 text-center">
                     <span className="stamp">Closed</span>
-                    <p className="text-secondary-foreground mt-3 text-sm">
-                        This request has been marked resolved.
-                    </p>
+                    <p className="mt-3 text-sm text-secondary-foreground">This request has been marked resolved.</p>
                 </div>
             )}
 

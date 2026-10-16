@@ -86,17 +86,13 @@ describe("fromMhhShow", () => {
     });
 
     it("places a live show on its show date", () => {
-        const entry = fromMhhShow(
-            makeMhhShow({ mode: "live", showDate: "2026-09-05", entriesCloseAt: null }),
-        );
+        const entry = fromMhhShow(makeMhhShow({ mode: "live", showDate: "2026-09-05", entriesCloseAt: null }));
         expect(entry!.date).toBe("2026-09-05");
         expect(entry!.venue).toBe("live");
     });
 
     it("falls back to showDate for an online show without a close date", () => {
-        const entry = fromMhhShow(
-            makeMhhShow({ entriesCloseAt: null, showDate: "2026-08-10" }),
-        );
+        const entry = fromMhhShow(makeMhhShow({ entriesCloseAt: null, showDate: "2026-08-10" }));
         expect(entry!.date).toBe("2026-08-10");
     });
 
@@ -157,9 +153,7 @@ describe("fromCommunityEvent — the events board on the calendar", () => {
         expect(external.venueLabel).toBe("Live show");
         expect(external.kindLabel).toBe("External Show");
 
-        const legacy = fromCommunityEvent(
-            makeEvent({ eventType: "photo_show", isVirtual: true }),
-        )!;
+        const legacy = fromCommunityEvent(makeEvent({ eventType: "photo_show", isVirtual: true }))!;
         expect(legacy.venueLabel).toBe("Online show");
     });
 
@@ -170,9 +164,7 @@ describe("fromCommunityEvent — the events board on the calendar", () => {
 
     it("drops the location for a virtual event and falls back to region", () => {
         expect(fromCommunityEvent(makeEvent({ isVirtual: true }))!.location).toBeNull();
-        expect(
-            fromCommunityEvent(makeEvent({ locationName: null }))!.location,
-        ).toBe("Minnesota");
+        expect(fromCommunityEvent(makeEvent({ locationName: null }))!.location).toBe("Minnesota");
     });
 
     it("never wears the closes-soon stamp — events have no entry deadline", () => {
@@ -361,9 +353,7 @@ describe("buildMonthGrid — the shape of a month", () => {
     });
 
     it("shows entries on borrowed squares from the neighbouring month", () => {
-        const entries = [
-            fromExternalShow(makeExternal({ id: "spill", starts_on: "2026-09-05" })),
-        ];
+        const entries = [fromExternalShow(makeExternal({ id: "spill", starts_on: "2026-09-05" }))];
         const grid = buildMonthGrid(entries, "2026-08", TODAY);
         const sep5 = grid.weeks.flat().find((d) => d.date === "2026-09-05")!;
         expect(sep5.inMonth).toBe(false);
@@ -372,9 +362,7 @@ describe("buildMonthGrid — the shape of a month", () => {
     });
 
     it("keeps the past — a grid is a picture of the month, not a queue", () => {
-        const entries = [
-            fromExternalShow(makeExternal({ id: "gone", starts_on: "2026-08-03" })),
-        ];
+        const entries = [fromExternalShow(makeExternal({ id: "gone", starts_on: "2026-08-03" }))];
         const grid = buildMonthGrid(entries, "2026-08", "2026-08-20");
         const aug3 = grid.weeks.flat().find((d) => d.date === "2026-08-03")!;
         expect(aug3.entries.map((e) => e.id)).toEqual(["gone"]);

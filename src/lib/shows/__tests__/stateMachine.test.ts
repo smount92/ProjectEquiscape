@@ -90,8 +90,14 @@ describe("stateMachine — show lifecycle", () => {
 
     it("archived is terminal for every target", () => {
         const targets: ShowStatus[] = [
-            "draft", "published", "entries_open", "entries_closed",
-            "running", "judging", "results_review", "completed",
+            "draft",
+            "published",
+            "entries_open",
+            "entries_closed",
+            "running",
+            "judging",
+            "results_review",
+            "completed",
         ];
         for (const to of targets) {
             expect(canTransition("archived", to, "live").ok).toBe(false);
@@ -176,18 +182,9 @@ describe("stateMachine — helpers", () => {
 describe("stateMachine — legalNextStatuses", () => {
     it("lists exactly the reachable statuses for the show's mode", () => {
         expect(legalNextStatuses("draft", "live")).toEqual(["published"]);
-        expect(legalNextStatuses("entries_closed", "live")).toEqual([
-            "entries_open",
-            "running",
-        ]);
-        expect(legalNextStatuses("entries_closed", "online")).toEqual([
-            "entries_open",
-            "judging",
-        ]);
-        expect(legalNextStatuses("results_review", "online")).toEqual([
-            "judging",
-            "completed",
-        ]);
+        expect(legalNextStatuses("entries_closed", "live")).toEqual(["entries_open", "running"]);
+        expect(legalNextStatuses("entries_closed", "online")).toEqual(["entries_open", "judging"]);
+        expect(legalNextStatuses("results_review", "online")).toEqual(["judging", "completed"]);
         expect(legalNextStatuses("archived", "live")).toEqual([]);
     });
 });

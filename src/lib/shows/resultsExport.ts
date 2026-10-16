@@ -100,11 +100,7 @@ export function buildShowResultsCsv(input: ResultsExportInput): string {
         placingsByClass.set(p.classId, list);
     }
 
-    const shared = [
-        escapeCsv(input.show.title),
-        escapeCsv(showDate ?? ""),
-        escapeCsv(input.show.hostAlias),
-    ];
+    const shared = [escapeCsv(input.show.title), escapeCsv(showDate ?? ""), escapeCsv(input.show.hostAlias)];
 
     const rows: string[] = [];
     const pushRow = (
@@ -137,23 +133,12 @@ export function buildShowResultsCsv(input: ResultsExportInput): string {
         const entryCount = liveCountByClass.get(cls.classId) ?? 0;
         if (entryCount === 0) continue; // classes nobody entered aren't results
 
-        const placed = (placingsByClass.get(cls.classId) ?? []).sort(
-            (a, b) => a.place - b.place,
-        );
+        const placed = (placingsByClass.get(cls.classId) ?? []).sort((a, b) => a.place - b.place);
 
         if (placed.length === 0) {
             // The class ran (had entries) but no placings were recorded —
             // still list it with its entry count, per the searchability rule.
-            pushRow(
-                cls.divisionName,
-                cls.sectionName,
-                cls.classNumber,
-                cls.className,
-                entryCount,
-                "",
-                "",
-                "",
-            );
+            pushRow(cls.divisionName, cls.sectionName, cls.classNumber, cls.className, entryCount, "", "", "");
             continue;
         }
 
@@ -177,9 +162,7 @@ export function buildShowResultsCsv(input: ResultsExportInput): string {
     const sectionById = new Map(input.classes.map((c) => [c.sectionId, c]));
     const divisionById = new Map(input.classes.map((c) => [c.divisionId, c]));
     const scopeOrder: Record<CallbackScope, number> = { section: 0, division: 1, show: 2 };
-    const orderedCallbacks = [...input.callbacks].sort(
-        (a, b) => scopeOrder[a.scope] - scopeOrder[b.scope],
-    );
+    const orderedCallbacks = [...input.callbacks].sort((a, b) => scopeOrder[a.scope] - scopeOrder[b.scope]);
 
     for (const cb of orderedCallbacks) {
         let division = "";

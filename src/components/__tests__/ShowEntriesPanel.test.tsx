@@ -13,11 +13,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 
 import ShowEntriesPanel from "@/components/shows/ShowEntriesPanel";
-import type {
-    ConsoleBarredEntrant,
-    ConsoleDivision,
-    ConsoleEntry,
-} from "@/lib/shows/console";
+import type { ConsoleBarredEntrant, ConsoleDivision, ConsoleEntry } from "@/lib/shows/console";
 import type { ShowStatus, StaffRole } from "@/lib/shows/types";
 
 const actions = vi.hoisted(() => ({
@@ -144,7 +140,10 @@ describe("ShowEntriesPanel — who gets the scratch button", () => {
 
     it("dims scratched entries and stamps them red — the audit trail stays visible", () => {
         renderPanel({
-            entries: [entry(), entry({ id: "723e4567-e89b-42d3-a456-426614174000", status: "scratched", horseName: "Silver Aspen" })],
+            entries: [
+                entry(),
+                entry({ id: "723e4567-e89b-42d3-a456-426614174000", status: "scratched", horseName: "Silver Aspen" }),
+            ],
         });
         const scratched = screen.getByTestId("entry-row-scratched");
         expect(scratched.className).toContain("opacity-60");
@@ -173,9 +172,7 @@ describe("ShowEntriesPanel — the scratch confirm flow", () => {
                 reason: "Model broke in transit",
             }),
         );
-        expect(
-            await screen.findByText("Entry scratched — the owner has been notified."),
-        ).toBeInTheDocument();
+        expect(await screen.findByText("Entry scratched — the owner has been notified.")).toBeInTheDocument();
     });
 
     it("omits the reason entirely when left blank and skips the notified copy for your own entry", async () => {
@@ -184,9 +181,7 @@ describe("ShowEntriesPanel — the scratch confirm flow", () => {
         expect(await screen.findByText(/this is your own entry/i)).toBeInTheDocument();
 
         fireEvent.click(screen.getByTestId("scratch-confirm"));
-        await waitFor(() =>
-            expect(actions.scratchEntry).toHaveBeenCalledWith({ entryId: ENTRY_ID }),
-        );
+        await waitFor(() => expect(actions.scratchEntry).toHaveBeenCalledWith({ entryId: ENTRY_ID }));
         expect(await screen.findByText("Entry scratched.")).toBeInTheDocument();
     });
 
@@ -200,9 +195,7 @@ describe("ShowEntriesPanel — the scratch confirm flow", () => {
         fireEvent.click(await screen.findByTestId("scratch-confirm"));
 
         expect(
-            await screen.findByText(
-                "This show's results are final — entries can no longer be scratched.",
-            ),
+            await screen.findByText("This show's results are final — entries can no longer be scratched."),
         ).toBeInTheDocument();
         // Dialog still open for a retry/cancel.
         expect(screen.getByText("Scratch Duns Blazing?")).toBeInTheDocument();
@@ -236,12 +229,8 @@ describe("ShowEntriesPanel — the bar list", () => {
         renderPanel({ barred: BARRED });
         fireEvent.click(screen.getByRole("button", { name: "Unbar @sloptrough" }));
 
-        await waitFor(() =>
-            expect(v4.liftBar).toHaveBeenCalledWith({ showId: SHOW_ID, userId: "owner-2" }),
-        );
-        expect(
-            await screen.findByText("@sloptrough may enter this show again."),
-        ).toBeInTheDocument();
+        await waitFor(() => expect(v4.liftBar).toHaveBeenCalledWith({ showId: SHOW_ID, userId: "owner-2" }));
+        expect(await screen.findByText("@sloptrough may enter this show again.")).toBeInTheDocument();
     });
 
     it("surfaces an unbar refusal verbatim", async () => {
@@ -253,9 +242,7 @@ describe("ShowEntriesPanel — the bar list", () => {
         fireEvent.click(screen.getByRole("button", { name: "Unbar @sloptrough" }));
 
         expect(
-            await screen.findByText(
-                "Only the host, a co-host, or the site admin can lift a bar.",
-            ),
+            await screen.findByText("Only the host, a co-host, or the site admin can lift a bar."),
         ).toBeInTheDocument();
     });
 
@@ -290,9 +277,7 @@ describe("ShowEntriesPanel — remove & bar", () => {
         unmount();
 
         renderPanel({ entries: TWO_ENTRIES, viewerId: "owner-1" });
-        expect(
-            screen.queryByRole("button", { name: /^Remove and bar/ }),
-        ).not.toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: /^Remove and bar/ })).not.toBeInTheDocument();
         expect(screen.getByText("No other entrants to remove.")).toBeInTheDocument();
     });
 
@@ -305,12 +290,8 @@ describe("ShowEntriesPanel — remove & bar", () => {
         renderPanel({ entries: TWO_ENTRIES });
         fireEvent.click(screen.getByRole("button", { name: "Remove and bar @pintopines" }));
 
-        expect(
-            await screen.findByText("Remove @pintopines from this show?"),
-        ).toBeInTheDocument();
-        expect(
-            screen.getByText(/deletes all 2 entries they hold across 1 class/i),
-        ).toBeInTheDocument();
+        expect(await screen.findByText("Remove @pintopines from this show?")).toBeInTheDocument();
+        expect(screen.getByText(/deletes all 2 entries they hold across 1 class/i)).toBeInTheDocument();
         expect(screen.getByText(/scratched entries included/i)).toBeInTheDocument();
 
         fireEvent.change(screen.getByPlaceholderText(/Joke entries/i), {
@@ -346,16 +327,13 @@ describe("ShowEntriesPanel — remove & bar", () => {
     it("surfaces the action's refusal verbatim and keeps the dialog open", async () => {
         v4.removeEntrantFromShow.mockResolvedValue({
             success: false,
-            error:
-                "This show's results are published — entries can no longer be removed. Strike the individual placings instead (Strike voids the card and cleans the record with it); the bar list still governs future shows.",
+            error: "This show's results are published — entries can no longer be removed. Strike the individual placings instead (Strike voids the card and cleans the record with it); the bar list still governs future shows.",
         });
         renderPanel({ entries: TWO_ENTRIES });
         fireEvent.click(screen.getByRole("button", { name: "Remove and bar @pintopines" }));
         fireEvent.click(await screen.findByTestId("remove-entrant-confirm"));
 
-        expect(
-            await screen.findByText(/entries can no longer be removed/i),
-        ).toBeInTheDocument();
+        expect(await screen.findByText(/entries can no longer be removed/i)).toBeInTheDocument();
         expect(screen.getByText("Remove @pintopines from this show?")).toBeInTheDocument();
     });
 });

@@ -110,7 +110,7 @@ export default function BlueBookFilters() {
                             key={value}
                             className={`cursor-pointer rounded-full border px-4 py-1.5 text-sm font-semibold whitespace-nowrap transition-all ${
                                 currentType === value
-                                    ? "bg-forest border-forest text-white"
+                                    ? "border-forest bg-forest text-white"
                                     : "border-input bg-card text-secondary-foreground hover:border-emerald-700 hover:text-foreground"
                             }`}
                             onClick={() => pushParams({ type: value === "all" ? null : value })}

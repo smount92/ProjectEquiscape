@@ -84,9 +84,7 @@ export function displayTitle(title: string | null | undefined): string {
     // acronym-like token ("POA", "ISH").
     if (!letters || letters !== letters.toUpperCase()) return t;
     if (t.length <= 4 && !/\s/.test(t)) return t;
-    return t
-        .toLowerCase()
-        .replace(/(^|[\s\-–—/("'.])([a-z])/g, (_, sep: string, ch: string) => sep + ch.toUpperCase());
+    return t.toLowerCase().replace(/(^|[\s\-–—/("'.])([a-z])/g, (_, sep: string, ch: string) => sep + ch.toUpperCase());
 }
 
 /**
@@ -97,11 +95,7 @@ export function displayTitle(title: string | null | undefined): string {
  * is community-data junk ("?", stray values), and fewer good chips beat
  * a full row of noise. The full list stays a dropdown away.
  */
-export function pickQuickChips(
-    facetValues: string[] | null | undefined,
-    preferred: string[],
-    limit: number,
-): string[] {
+export function pickQuickChips(facetValues: string[] | null | undefined, preferred: string[], limit: number): string[] {
     const values = (facetValues ?? []).filter((v) => typeof v === "string" && v.trim());
     const picks: string[] = [];
     for (const p of preferred) {
@@ -114,13 +108,7 @@ export function pickQuickChips(
 
 /** The makers most searched-for in the hobby — quick-chip preference order.
  *  ("Stone" dropped: migration 157 unifies it into "Peter Stone".) */
-export const PREFERRED_QUICK_MAKERS = [
-    "Breyer",
-    "Peter Stone",
-    "Hartland",
-    "Schleich",
-    "CollectA",
-] as const;
+export const PREFERRED_QUICK_MAKERS = ["Breyer", "Peter Stone", "Hartland", "Schleich", "CollectA"] as const;
 
 /** Scale preference order for the quick chips (Traditional first).
  *  Canonical Taxonomy-v2 spellings — pickQuickChips matches facet

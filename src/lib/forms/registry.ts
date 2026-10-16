@@ -54,13 +54,7 @@ import { RESIN_BODY_LABEL, RESIN_MATERIAL_LABEL } from "@/lib/passport/resinIden
 
 // ── Category sets ─────────────────────────────────────────────────────
 
-export const ALL_CATEGORIES: readonly AssetCategory[] = [
-    "model",
-    "tack",
-    "prop",
-    "diorama",
-    "other_model",
-] as const;
+export const ALL_CATEGORIES: readonly AssetCategory[] = ["model", "tack", "prop", "diorama", "other_model"] as const;
 
 const MODEL_ONLY: readonly AssetCategory[] = ["model"] as const;
 /** Everything with a human maker credit — `other_model` is factory output. */
@@ -75,9 +69,9 @@ export const FINISH_TYPE_OPTIONS: readonly FieldOption[] = [
     { value: "Artist Resin", label: "Artist Resin" },
 ] as const;
 
-export const RESIN_MATERIAL_OPTIONS: readonly FieldOption[] = (Object.entries(RESIN_MATERIAL_LABEL) as [string, string][]).map(
-    ([value, label]) => ({ value, label }),
-);
+export const RESIN_MATERIAL_OPTIONS: readonly FieldOption[] = (
+    Object.entries(RESIN_MATERIAL_LABEL) as [string, string][]
+).map(([value, label]) => ({ value, label }));
 export const RESIN_BODY_OPTIONS: readonly FieldOption[] = (Object.entries(RESIN_BODY_LABEL) as [string, string][]).map(
     ([value, label]) => ({ value, label }),
 );
@@ -371,8 +365,7 @@ export const HORSE_FIELDS: readonly FieldSpec[] = [
         maxLength: 500,
         table: "user_horses",
         inputKey: "publicNotes",
-        placeholder:
-            "Visible on your passport — e.g. comes with original box, factory rubs on near leg",
+        placeholder: "Visible on your passport — e.g. comes with original box, factory rubs on near leg",
         help: "These notes will be visible to anyone viewing this horse's passport.",
         modes: FULL_ONLY,
         domIds: { "create-full": "public-notes", edit: "edit-public-notes" },

@@ -25,18 +25,18 @@ for (let i = 0; i < ACCENTS_FROM.length; i++) ACCENT_MAP[ACCENTS_FROM[i]] = ACCE
 
 /** Lowercase → strip accents → non-alphanumeric to `-` → trim. */
 export function slugify(input: string | null | undefined): string {
-  const lowered = (input ?? "").toLowerCase();
-  let mapped = "";
-  for (const ch of lowered) mapped += ACCENT_MAP[ch] ?? ch;
-  return mapped.replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    const lowered = (input ?? "").toLowerCase();
+    let mapped = "";
+    for (const ch of lowered) mapped += ACCENT_MAP[ch] ?? ch;
+    return mapped.replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 }
 
 export interface ReferenceLinkable {
-  id: string;
-  maker: string | null;
-  title: string | null;
-  maker_slug?: string | null;
-  slug?: string | null;
+    id: string;
+    maker: string | null;
+    title: string | null;
+    maker_slug?: string | null;
+    slug?: string | null;
 }
 
 /**
@@ -45,10 +45,7 @@ export interface ReferenceLinkable {
  * always resolves even before the backfill/gen-types has run everywhere.
  */
 export function referenceHref(item: ReferenceLinkable): string {
-  const makerSlug = item.maker_slug || slugify(item.maker) || "unknown";
-  const slug =
-    item.slug ||
-    slugify(item.title) ||
-    `item-${item.id.slice(0, 8)}`;
-  return `/reference/${makerSlug}/${slug}`;
+    const makerSlug = item.maker_slug || slugify(item.maker) || "unknown";
+    const slug = item.slug || slugify(item.title) || `item-${item.id.slice(0, 8)}`;
+    return `/reference/${makerSlug}/${slug}`;
 }

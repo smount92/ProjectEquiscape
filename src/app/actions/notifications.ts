@@ -36,9 +36,7 @@ interface NotificationDisplay {
 /**
  * Get notifications for the current user, newest first.
  */
-export async function getNotifications(
-    limit: number = 50
-): Promise<NotificationDisplay[]> {
+export async function getNotifications(limit: number = 50): Promise<NotificationDisplay[]> {
     const supabase = await createClient();
     const {
         data: { user },
@@ -47,7 +45,9 @@ export async function getNotifications(
 
     const { data: rawNotifs } = await supabase
         .from("notifications")
-        .select("id, type, content, actor_id, horse_id, conversation_id, link_url, is_read, created_at, users!actor_id(alias_name)")
+        .select(
+            "id, type, content, actor_id, horse_id, conversation_id, link_url, is_read, created_at, users!actor_id(alias_name)",
+        )
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(limit);
@@ -72,14 +72,9 @@ export async function getNotifications(
 /**
  * Mark a single notification as read.
  */
-export async function markNotificationRead(
-    notificationId: string
-): Promise<{ success: boolean }> {
+export async function markNotificationRead(notificationId: string): Promise<{ success: boolean }> {
     const supabase = await createClient();
-    const { error } = await supabase
-        .from("notifications")
-        .update({ is_read: true })
-        .eq("id", notificationId);
+    const { error } = await supabase.from("notifications").update({ is_read: true }).eq("id", notificationId);
     return { success: !error };
 }
 
@@ -112,10 +107,7 @@ export async function clearNotifications(): Promise<{ success: boolean }> {
     } = await supabase.auth.getUser();
     if (!user) return { success: false };
 
-    const { error } = await supabase
-        .from("notifications")
-        .delete()
-        .eq("user_id", user.id);
+    const { error } = await supabase.from("notifications").delete().eq("user_id", user.id);
 
     return { success: !error };
 }

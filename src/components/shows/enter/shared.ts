@@ -55,15 +55,13 @@ export function indexClasses(divisions: ConsoleDivision[]): Map<string, ConsoleC
 }
 
 /** "Up to 3 of your horses · Traditional (1:9) only · OF only". */
-export function classLimitsText(cls: Pick<ConsoleClass, "maxPerEntrant" | "allowedScales" | "allowedFinishes">): string {
+export function classLimitsText(
+    cls: Pick<ConsoleClass, "maxPerEntrant" | "allowedScales" | "allowedFinishes">,
+): string {
     const parts: string[] = [];
     const cap = effectiveCap(cls.maxPerEntrant);
     parts.push(
-        cap === null
-            ? "Any number of your horses"
-            : cap === 1
-              ? "One of your horses"
-              : `Up to ${cap} of your horses`,
+        cap === null ? "Any number of your horses" : cap === 1 ? "One of your horses" : `Up to ${cap} of your horses`,
     );
     if (cls.allowedScales && cls.allowedScales.length > 0) {
         const scales = [...new Set(cls.allowedScales.map((s) => normalizeScale(s) ?? s.trim()))];

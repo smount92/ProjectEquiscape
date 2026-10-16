@@ -19,19 +19,11 @@
 import { NextResponse } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
-import {
-    getAliases,
-    getHorseNames,
-    getShowRole,
-    loadClassContexts,
-} from "@/lib/shows/queries";
+import { getAliases, getHorseNames, getShowRole, loadClassContexts } from "@/lib/shows/queries";
 import { buildShowResultsCsv } from "@/lib/shows/resultsExport";
 import type { CallbackScope, EntryStatus, Place, ShowMode } from "@/lib/shows/types";
 
-export async function GET(
-    _request: Request,
-    { params }: { params: Promise<{ showId: string }> },
-) {
+export async function GET(_request: Request, { params }: { params: Promise<{ showId: string }> }) {
     const { showId } = await params;
     const supabase = await createClient();
 
@@ -47,16 +39,10 @@ export async function GET(
         return NextResponse.json({ error: "Show not found" }, { status: 404 });
     }
     if (!ctx.role || (ctx.role !== "host" && ctx.role !== "co_host")) {
-        return NextResponse.json(
-            { error: "Only the host or a co-host can export results" },
-            { status: 403 },
-        );
+        return NextResponse.json({ error: "Only the host or a co-host can export results" }, { status: 403 });
     }
     if (ctx.show.status !== "completed" && ctx.show.status !== "archived") {
-        return NextResponse.json(
-            { error: "Results are not final — complete the show first" },
-            { status: 403 },
-        );
+        return NextResponse.json({ error: "Results are not final — complete the show first" }, { status: 403 });
     }
 
     // ── Show header fields ──
@@ -81,13 +67,7 @@ export async function GET(
         .eq("show_id", showId);
     if (eErr) return NextResponse.json({ error: eErr.message }, { status: 500 });
     const entries = (entryRows ?? []).map(
-        (e: {
-            id: string;
-            class_id: string;
-            horse_id: string;
-            owner_id: string;
-            status: string;
-        }) => ({
+        (e: { id: string; class_id: string; horse_id: string; owner_id: string; status: string }) => ({
             id: e.id,
             classId: e.class_id,
             horseId: e.horse_id,
@@ -104,13 +84,11 @@ export async function GET(
             .select("entry_id, class_id, place")
             .in("class_id", classIds);
         if (pErr) return NextResponse.json({ error: pErr.message }, { status: 500 });
-        placings = (placingRows ?? []).map(
-            (p: { entry_id: string; class_id: string; place: number | null }) => ({
-                entryId: p.entry_id,
-                classId: p.class_id,
-                place: (p.place as Place | null) ?? null,
-            }),
-        );
+        placings = (placingRows ?? []).map((p: { entry_id: string; class_id: string; place: number | null }) => ({
+            entryId: p.entry_id,
+            classId: p.class_id,
+            place: (p.place as Place | null) ?? null,
+        }));
     }
 
     const { data: callbackRows, error: cbErr } = await supabase
@@ -127,10 +105,7 @@ export async function GET(
     if (!(horseNames instanceof Map)) {
         return NextResponse.json({ error: horseNames.error }, { status: 500 });
     }
-    const aliases = await getAliases(supabase, [
-        ...entries.map((e) => e.ownerId),
-        show.host_id as string,
-    ]);
+    const aliases = await getAliases(supabase, [...entries.map((e) => e.ownerId), show.host_id as string]);
     if (!(aliases instanceof Map)) {
         return NextResponse.json({ error: aliases.error }, { status: 500 });
     }
@@ -178,8 +153,10 @@ export async function GET(
     });
 
     const safeFilename =
-        (show.title as string).replace(/[^a-zA-Z0-9 ]/g, "").trim().replace(/\s+/g, "_") ||
-        "show";
+        (show.title as string)
+            .replace(/[^a-zA-Z0-9 ]/g, "")
+            .trim()
+            .replace(/\s+/g, "_") || "show";
 
     return new NextResponse(csv, {
         status: 200,

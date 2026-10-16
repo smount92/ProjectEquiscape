@@ -10,12 +10,7 @@ import {
     turnaroundLabel,
     suggestedCompletion,
 } from "@/lib/studio/terms";
-import {
-    coerceServices,
-    priceRangeLabel,
-    serviceTypesOffered,
-    studioPriceRange,
-} from "@/lib/studio/services";
+import { coerceServices, priceRangeLabel, serviceTypesOffered, studioPriceRange } from "@/lib/studio/services";
 
 describe("coerceTerms", () => {
     it("returns the defaults for anything unusable", () => {
@@ -41,8 +36,7 @@ describe("coerceTerms", () => {
     });
 
     it("keeps an explicit false rather than falling back to the default true", () => {
-        expect(coerceTerms({ depositRefundableBeforeStart: false }).depositRefundableBeforeStart)
-            .toBe(false);
+        expect(coerceTerms({ depositRefundableBeforeStart: false }).depositRefundableBeforeStart).toBe(false);
         expect(coerceTerms({ clientShipsModel: false }).clientShipsModel).toBe(false);
     });
 
@@ -51,8 +45,7 @@ describe("coerceTerms", () => {
     });
 
     it("carries a v1 terms_text blob forward as the free-text addendum", () => {
-        expect(coerceTerms({ terms_text: "No rush orders, ever." }).extraNote)
-            .toBe("No rush orders, ever.");
+        expect(coerceTerms({ terms_text: "No rush orders, ever." }).extraNote).toBe("No rush orders, ever.");
     });
 
     it("rejects nonsense turnarounds rather than rendering them", () => {
@@ -116,22 +109,21 @@ describe("termsLines", () => {
     });
 
     it("says 'no deposit' rather than '0%'", () => {
-        const line = termsLines({ ...DEFAULT_TERMS, depositPercent: 0 })
-            .find((l) => l.label === "Deposit");
+        const line = termsLines({ ...DEFAULT_TERMS, depositPercent: 0 }).find((l) => l.label === "Deposit");
         expect(line?.value).toBe("No deposit required");
     });
 
     it("distinguishes a refundable deposit from a non-refundable one", () => {
         const refundable = termsLines(DEFAULT_TERMS).find((l) => l.label === "Deposit");
-        const not = termsLines({ ...DEFAULT_TERMS, depositRefundableBeforeStart: false })
-            .find((l) => l.label === "Deposit");
+        const not = termsLines({ ...DEFAULT_TERMS, depositRefundableBeforeStart: false }).find(
+            (l) => l.label === "Deposit",
+        );
         expect(refundable?.value).toMatch(/refundable until work begins/);
         expect(not?.value).toMatch(/non-refundable/);
     });
 
     it("names the extra-revision fee when there is one", () => {
-        const line = termsLines({ ...DEFAULT_TERMS, extraRevisionFee: 75 })
-            .find((l) => l.label === "Revisions");
+        const line = termsLines({ ...DEFAULT_TERMS, extraRevisionFee: 75 }).find((l) => l.label === "Revisions");
         expect(line?.value).toContain("$75");
     });
 
@@ -143,20 +135,16 @@ describe("termsLines", () => {
 
 describe("turnaroundLabel", () => {
     it("quotes long jobs in months, the way the hobby does", () => {
-        expect(turnaroundLabel({ turnaroundMinDays: 30, turnaroundMaxDays: 120 }))
-            .toBe("1–4 months");
+        expect(turnaroundLabel({ turnaroundMinDays: 30, turnaroundMaxDays: 120 })).toBe("1–4 months");
     });
 
     it("uses weeks and days for shorter work", () => {
-        expect(turnaroundLabel({ turnaroundMinDays: 3, turnaroundMaxDays: 10 }))
-            .toBe("3 days – 10 days");
-        expect(turnaroundLabel({ turnaroundMinDays: null, turnaroundMaxDays: 21 }))
-            .toBe("Up to 3 weeks");
+        expect(turnaroundLabel({ turnaroundMinDays: 3, turnaroundMaxDays: 10 })).toBe("3 days – 10 days");
+        expect(turnaroundLabel({ turnaroundMinDays: null, turnaroundMaxDays: 21 })).toBe("Up to 3 weeks");
     });
 
     it("says so plainly when nothing is stated", () => {
-        expect(turnaroundLabel({ turnaroundMinDays: null, turnaroundMaxDays: null }))
-            .toBe("Not stated");
+        expect(turnaroundLabel({ turnaroundMinDays: null, turnaroundMaxDays: null })).toBe("Not stated");
     });
 });
 
@@ -181,8 +169,7 @@ describe("coerceServices", () => {
     });
 
     it("drops entries with no work type rather than rendering blanks", () => {
-        expect(coerceServices([{ scale: "Traditional", priceMin: 500 }, { type: "Prep work" }]))
-            .toHaveLength(1);
+        expect(coerceServices([{ scale: "Traditional", priceMin: 500 }, { type: "Prep work" }])).toHaveLength(1);
     });
 
     it("defaults an unspecified scale and treats services as open", () => {

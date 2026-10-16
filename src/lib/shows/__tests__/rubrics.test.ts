@@ -55,7 +55,11 @@ describe("scoring math", () => {
     it("computes the mockup's number: Apparition = 83.5", () => {
         // theme 9×30, execution 8×25, craft 8×20, presentation 9×15, condition 7×10
         const total = weightedTotal(themed, {
-            theme: 9, execution: 8, craft: 8, presentation: 9, condition: 7,
+            theme: 9,
+            execution: 8,
+            craft: 8,
+            presentation: 9,
+            condition: 7,
         });
         expect(total).toBe(83.5);
     });
@@ -67,7 +71,11 @@ describe("scoring math", () => {
 
     it("cleanScores drops junk keys, out-of-band and non-integer values", () => {
         const cleaned = cleanScores(themed, {
-            theme: 9, execution: 11, craft: 0, presentation: 7.5, condition: 7,
+            theme: 9,
+            execution: 11,
+            craft: 0,
+            presentation: 7.5,
+            condition: 7,
             evil_key: 10,
         });
         expect(cleaned).toEqual({ theme: 9, condition: 7 });

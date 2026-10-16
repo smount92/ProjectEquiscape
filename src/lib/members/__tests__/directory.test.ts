@@ -131,11 +131,7 @@ describe("sortMemberRoster", () => {
     });
 
     it("sorts A–Z case-insensitively", () => {
-        expect(sortMemberRoster(roster, "az").map((e) => e.aliasName)).toEqual([
-            "amanda",
-            "Maggie",
-            "Zoe",
-        ]);
+        expect(sortMemberRoster(roster, "az").map((e) => e.aliasName)).toEqual(["amanda", "Maggie", "Zoe"]);
     });
 
     it("sorts newest-signup first", () => {
@@ -149,19 +145,11 @@ describe("sortMemberRoster", () => {
         ]);
         // 3 pinged most recently, then 1; 2 has no ping so it falls to the
         // tail — but it is still IN the list, so paging reaches everyone.
-        expect(sortMemberRoster(roster, "active", lastActive).map((e) => e.id)).toEqual([
-            "3",
-            "1",
-            "2",
-        ]);
+        expect(sortMemberRoster(roster, "active", lastActive).map((e) => e.id)).toEqual(["3", "1", "2"]);
     });
 
     it("degrades to newest-first when nobody has pinged", () => {
-        expect(sortMemberRoster(roster, "active", new Map()).map((e) => e.id)).toEqual([
-            "2",
-            "3",
-            "1",
-        ]);
+        expect(sortMemberRoster(roster, "active", new Map()).map((e) => e.id)).toEqual(["2", "3", "1"]);
         expect(sortMemberRoster(roster, "active").map((e) => e.id)).toEqual(["2", "3", "1"]);
     });
 

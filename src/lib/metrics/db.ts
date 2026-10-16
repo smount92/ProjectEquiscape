@@ -31,9 +31,7 @@ export const MISSING_RPC = "PGRST202";
 export const MISSING_RELATION = "PGRST205";
 
 /** True when the error means "175 has not been pasted yet", not "it broke". */
-export function isMissingMetricsSchema(
-    error: { code?: string; message?: string } | null | undefined,
-): boolean {
+export function isMissingMetricsSchema(error: { code?: string; message?: string } | null | undefined): boolean {
     if (!error) return false;
     if (
         error.code === UNDEFINED_TABLE ||

@@ -2,11 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import {
-    getArtistPortfolio,
-    getArtistProfileBySlug,
-    getSlotUsage,
-} from "@/app/actions/art-studio";
+import { getArtistPortfolio, getArtistProfileBySlug, getSlotUsage } from "@/app/actions/art-studio";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
 import PageMasthead from "@/components/layouts/PageMasthead";
 import ViewBeacon from "@/components/metrics/ViewBeacon";
@@ -46,11 +42,7 @@ import FollowButton from "@/components/FollowButton";
  * chip list and showed no work at all.
  */
 
-export async function generateMetadata({
-    params,
-}: {
-    params: Promise<{ slug: string }>;
-}): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
     const { slug } = await params;
     const profile = await getArtistProfileBySlug(slug);
     if (!profile) return { title: "Studio not found" };
@@ -92,11 +84,7 @@ export async function generateMetadata({
     };
 }
 
-export default async function StudioPage({
-    params,
-}: {
-    params: Promise<{ slug: string }>;
-}) {
+export default async function StudioPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
 
     const profile = await getArtistProfileBySlug(slug);
@@ -133,15 +121,17 @@ export default async function StudioPage({
     // Both tolerant — the artists table is 200, barn_group_id is 203.
     let registryLink: { slug: string; name: string } | null = null;
     try {
-        const { data: artistRow } = await (supabase as unknown as {
-            from: (t: string) => {
-                select: (c: string) => {
-                    or: (f: string) => {
-                        limit: (n: number) => PromiseLike<{ data: Record<string, unknown>[] | null }>;
+        const { data: artistRow } = await (
+            supabase as unknown as {
+                from: (t: string) => {
+                    select: (c: string) => {
+                        or: (f: string) => {
+                            limit: (n: number) => PromiseLike<{ data: Record<string, unknown>[] | null }>;
+                        };
                     };
                 };
-            };
-        })
+            }
+        )
             .from("artists")
             .select("slug, name, verified_user_id")
             .or(`verified_user_id.eq.${profile.userId},name.eq.${profile.ownerAlias.replace(/,/g, "")}`)
@@ -196,32 +186,28 @@ export default async function StudioPage({
             />
 
             {/* ── The decision bar: can I commission them, and how do I start ── */}
-            <div className="border-input bg-card mb-6 rounded-lg border p-6 shadow-md">
+            <div className="mb-6 rounded-lg border border-input bg-card p-6 shadow-md">
                 <div className="flex flex-wrap items-start justify-between gap-6">
                     <div className="min-w-[240px] flex-1">
                         <div className="mb-3 flex flex-wrap items-center gap-2">
                             <StudioStatusPill status={slots.effectiveStatus} />
                             {slots.effectiveStatus === "waitlist" && slots.full && (
-                                <span className="text-muted-foreground text-xs">
-                                    bench is full
-                                </span>
+                                <span className="text-xs text-muted-foreground">bench is full</span>
                             )}
                         </div>
 
                         {profile.region && (
-                            <p className="text-secondary-foreground mb-2 text-sm">
+                            <p className="mb-2 text-sm text-secondary-foreground">
                                 <span aria-hidden="true">📍</span> {profile.region}
                             </p>
                         )}
 
                         {profile.statusNote && (
-                            <p className="text-secondary-foreground mb-3 text-sm">
-                                {profile.statusNote}
-                            </p>
+                            <p className="mb-3 text-sm text-secondary-foreground">{profile.statusNote}</p>
                         )}
 
                         {profile.bioArtist && (
-                            <p className="text-secondary-foreground max-w-[60ch] text-sm leading-relaxed">
+                            <p className="max-w-[60ch] text-sm leading-relaxed text-secondary-foreground">
                                 {profile.bioArtist}
                             </p>
                         )}
@@ -242,7 +228,7 @@ export default async function StudioPage({
                                         href={l.href}
                                         target="_blank"
                                         rel="noopener noreferrer nofollow"
-                                        className="text-forest inline-flex items-center gap-1 text-sm font-semibold hover:underline"
+                                        className="inline-flex items-center gap-1 text-sm font-semibold text-forest hover:underline"
                                     >
                                         <span aria-hidden="true">{l.glyph}</span> {l.label}
                                     </a>
@@ -268,20 +254,15 @@ export default async function StudioPage({
                                 <>
                                     <Button asChild size="wide">
                                         <Link href={`/studio/${profile.studioSlug}/request`}>
-                                            {intake.asWaitlist
-                                                ? "Join the waitlist"
-                                                : "Request a commission"}
+                                            {intake.asWaitlist ? "Join the waitlist" : "Request a commission"}
                                         </Link>
                                     </Button>
-                                    <span className="text-muted-foreground text-xs">
-                                        {intake.reason}
-                                    </span>
+                                    <span className="text-xs text-muted-foreground">{intake.reason}</span>
                                 </>
                             ) : (
-                                <div className="border-input bg-muted rounded-md border px-4 py-3">
-                                    <p className="text-muted-foreground m-0 text-xs leading-relaxed">
-                                        {intake.reason} Follow @{profile.ownerAlias} to hear when
-                                        slots open.
+                                <div className="rounded-md border border-input bg-muted px-4 py-3">
+                                    <p className="m-0 text-xs leading-relaxed text-muted-foreground">
+                                        {intake.reason} Follow @{profile.ownerAlias} to hear when slots open.
                                     </p>
                                 </div>
                             )}
@@ -297,7 +278,7 @@ export default async function StudioPage({
                             )}
                             <Link
                                 href={`/profile/${encodeURIComponent(profile.ownerAlias)}`}
-                                className="text-muted-foreground text-center text-xs hover:underline"
+                                className="text-center text-xs text-muted-foreground hover:underline"
                             >
                                 @{profile.ownerAlias}&rsquo;s profile →
                             </Link>
@@ -311,30 +292,30 @@ export default async function StudioPage({
                 facts before the first work is logged. ── */}
             {(() => {
                 const tiles: [string, string][] = [
-                    ...(portfolio.length > 0 ? [[String(portfolio.length), "Works documented"] as [string, string]] : []),
+                    ...(portfolio.length > 0
+                        ? [[String(portfolio.length), "Works documented"] as [string, string]]
+                        : []),
                     ...(titlesWon > 0 ? [[String(titlesWon), "Titles won by works"] as [string, string]] : []),
                     ...(sinceYear ? [[String(sinceYear), "Working since"] as [string, string]] : []),
                     [turnaroundLabel(profile.terms), "Turnaround"],
                 ];
                 return tiles.length > 0 ? (
-                <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                    {tiles.map(([n, label]) => (
-                        <div key={label} className="border-input bg-card rounded-lg border px-4 py-3 shadow-sm">
-                            <div className="text-foreground font-serif text-xl font-bold tabular-nums">{n}</div>
-                            <div className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">{label}</div>
-                        </div>
-                    ))}
-                </div>
+                    <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                        {tiles.map(([n, label]) => (
+                            <div key={label} className="rounded-lg border border-input bg-card px-4 py-3 shadow-sm">
+                                <div className="font-serif text-xl font-bold text-foreground tabular-nums">{n}</div>
+                                <div className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                                    {label}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 ) : null;
             })()}
 
             {/* ── The works: what they've actually finished ── */}
             <div className="mb-6">
-                <ReceiptsWall
-                    horses={portfolio}
-                    studioName={profile.studioName}
-                    isOwner={isOwner}
-                />
+                <ReceiptsWall horses={portfolio} studioName={profile.studioName} isOwner={isOwner} />
             </div>
 
             {/* ── The joins: this studio elsewhere on the Hub ── */}
@@ -342,30 +323,28 @@ export default async function StudioPage({
                 <div className="mb-6 grid gap-6 lg:grid-cols-2">
                     {registryLink && (
                         <Panel title="In the Registry" icon="📖">
-                            <p className="text-secondary-foreground m-0 text-sm leading-relaxed">
+                            <p className="m-0 text-sm leading-relaxed text-secondary-foreground">
                                 <Link
                                     href={`/reference/${registryLink.slug}`}
-                                    className="text-forest font-semibold hover:underline"
+                                    className="font-semibold text-forest hover:underline"
                                 >
                                     {registryLink.name} in the Registry →
                                 </Link>{" "}
-                                — the career timeline, and every documented work on its
-                                mold&rsquo;s reference page.
+                                — the career timeline, and every documented work on its mold&rsquo;s reference page.
                             </p>
                         </Panel>
                     )}
                     {barn && (
                         <Panel title="The barn" icon="🏠">
-                            <p className="text-secondary-foreground m-0 text-sm leading-relaxed">
+                            <p className="m-0 text-sm leading-relaxed text-secondary-foreground">
                                 <Link
                                     href={`/community/barns/${barn.slug}`}
-                                    className="text-forest font-semibold hover:underline"
+                                    className="font-semibold text-forest hover:underline"
                                 >
                                     {barn.name} →
                                 </Link>{" "}
-                                — {barn.memberCount} member{barn.memberCount === 1 ? "" : "s"}.
-                                The studio&rsquo;s community room: follow along between
-                                commissions.
+                                — {barn.memberCount} member{barn.memberCount === 1 ? "" : "s"}. The studio&rsquo;s
+                                community room: follow along between commissions.
                             </p>
                         </Panel>
                     )}
@@ -379,9 +358,7 @@ export default async function StudioPage({
                     icon="🧾"
                     actions={
                         profile.priceLabel !== "Ask" ? (
-                            <span className="text-muted-foreground text-xs">
-                                {profile.priceLabel}
-                            </span>
+                            <span className="text-xs text-muted-foreground">{profile.priceLabel}</span>
                         ) : null
                     }
                 >
@@ -400,7 +377,7 @@ export default async function StudioPage({
                                         <>
                                             {serviceLabel(service)}
                                             {service.note && (
-                                                <span className="text-muted-foreground block text-xs">
+                                                <span className="block text-xs text-muted-foreground">
                                                     {service.note}
                                                 </span>
                                             )}
@@ -413,28 +390,18 @@ export default async function StudioPage({
                     )}
 
                     <div className="mt-4 grid">
-                        <LedgerRow
-                            label="Turnaround"
-                            value={turnaroundLabel(profile.terms)}
-                        />
+                        <LedgerRow label="Turnaround" value={turnaroundLabel(profile.terms)} />
                         {profile.mediums.length > 0 && (
-                            <LedgerRow
-                                label="Mediums"
-                                value={canonicalFacets(profile.mediums).join(", ")}
-                            />
+                            <LedgerRow label="Mediums" value={canonicalFacets(profile.mediums).join(", ")} />
                         )}
                         {profile.scalesOffered.length > 0 && (
-                            <LedgerRow
-                                label="Scales"
-                                value={canonicalFacets(profile.scalesOffered).join(", ")}
-                            />
+                            <LedgerRow label="Scales" value={canonicalFacets(profile.scalesOffered).join(", ")} />
                         )}
                     </div>
 
-                    <p className="text-muted-foreground mt-4 text-xs leading-relaxed">
-                        Ranges are a starting point. Coat complexity — pintos, appaloosa spots,
-                        dapples, roaning — and prep work move the final quote, which the artist
-                        sends after seeing your references.
+                    <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
+                        Ranges are a starting point. Coat complexity — pintos, appaloosa spots, dapples, roaning — and
+                        prep work move the final quote, which the artist sends after seeing your references.
                     </p>
                 </Panel>
 
@@ -444,7 +411,10 @@ export default async function StudioPage({
                     icon="📜"
                     actions={
                         !profile.termsSetAt ? (
-                            <span className="text-muted-foreground text-xs" title="Pre-filled from common practice; this studio hasn't written its own yet">
+                            <span
+                                className="text-xs text-muted-foreground"
+                                title="Pre-filled from common practice; this studio hasn't written its own yet"
+                            >
                                 standard terms
                             </span>
                         ) : null
@@ -452,17 +422,18 @@ export default async function StudioPage({
                 >
                     {!profile.termsSetAt && (
                         <div
-                            className="border-warning/50 bg-warning/10 mb-4 rounded-md border px-3 py-2 text-sm leading-relaxed"
+                            className="mb-4 rounded-md border border-warning/50 bg-warning/10 px-3 py-2 text-sm leading-relaxed"
                             role="note"
                         >
                             <strong className="text-warning">Standard terms, not this studio&rsquo;s own.</strong>{" "}
                             {isOwner ? (
                                 <>
                                     Pre-filled from common practice. Write yours under{" "}
-                                    <Link href="/studio/setup?tab=terms" className="text-forest font-semibold">
+                                    <Link href="/studio/setup?tab=terms" className="font-semibold text-forest">
                                         Settings → Terms
                                     </Link>{" "}
-                                    so clients are agreeing to your deposit, turnaround and revisions, not the site&rsquo;s.
+                                    so clients are agreeing to your deposit, turnaround and revisions, not the
+                                    site&rsquo;s.
                                 </>
                             ) : (
                                 "This studio hasn't written its own terms yet. Confirm deposit, turnaround and revisions when you request."
@@ -470,7 +441,7 @@ export default async function StudioPage({
                         </div>
                     )}
                     <TermsList terms={profile.terms} />
-                    <div className="border-input mt-4 border-t pt-4">
+                    <div className="mt-4 border-t border-input pt-4">
                         <OffPlatformNote />
                     </div>
                 </Panel>
@@ -490,24 +461,19 @@ export default async function StudioPage({
             )}
 
             {!user && (
-                <div className="border-input bg-card/60 mt-8 flex flex-wrap items-center justify-between gap-4 rounded-lg border p-6 backdrop-blur-sm">
+                <div className="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-input bg-card/60 p-6 backdrop-blur-sm">
                     <div>
-                        <h3 className="font-serif text-lg font-bold">
-                            Commission {profile.studioName}
-                        </h3>
-                        <p className="text-secondary-foreground text-sm">
-                            A free account lets you send a request, agree terms in writing, and
-                            follow the work in progress.
+                        <h3 className="font-serif text-lg font-bold">Commission {profile.studioName}</h3>
+                        <p className="text-sm text-secondary-foreground">
+                            A free account lets you send a request, agree terms in writing, and follow the work in
+                            progress.
                         </p>
                     </div>
                     <Button asChild size="wide">
-                        <Link href={`/signup?redirectTo=%2Fstudio%2F${profile.studioSlug}`}>
-                            Create a free account
-                        </Link>
+                        <Link href={`/signup?redirectTo=%2Fstudio%2F${profile.studioSlug}`}>Create a free account</Link>
                     </Button>
                 </div>
             )}
-
         </ExplorerLayout>
     );
 }

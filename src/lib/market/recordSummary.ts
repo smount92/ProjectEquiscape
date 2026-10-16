@@ -46,10 +46,7 @@ const CHAMPION_RE = /champion/i;
  * A championship row: the placing says so, or (legacy rows) the ribbon
  * does — the old trophy case stored "Grand Champion" as a ribbon color.
  */
-export function isChampionshipRecord(
-    placing: string | null,
-    ribbonColor: string | null,
-): boolean {
+export function isChampionshipRecord(placing: string | null, ribbonColor: string | null): boolean {
     return CHAMPION_RE.test(placing ?? "") || CHAMPION_RE.test(ribbonColor ?? "");
 }
 
@@ -64,9 +61,7 @@ export function isVerifiedTier(tier: string | null): boolean {
  * simply absent from the map — the card renders nothing for them
  * (empty-state honesty: never "0 placings").
  */
-export function summarizeShowRecords(
-    rows: RecordSummaryInputRow[],
-): Map<string, HorseRecordSummary> {
+export function summarizeShowRecords(rows: RecordSummaryInputRow[]): Map<string, HorseRecordSummary> {
     const byHorse = new Map<string, HorseRecordSummary>();
     for (const row of rows) {
         if (!row.horse_id) continue;

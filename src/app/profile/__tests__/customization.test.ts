@@ -132,12 +132,8 @@ describe("sanitizeCustomization", () => {
 
         it("treats a whitespace-only or invisible-only value as absent", () => {
             expect(sanitizeCustomization({ tagline: "   " }).tagline).toBeNull();
-            expect(
-                sanitizeCustomization({ tagline: String.fromCharCode(0x200b) }).tagline,
-            ).toBeNull();
-            expect(
-                sanitizeCustomization({ tagline: String.fromCharCode(0x0007) }).tagline,
-            ).toBeNull();
+            expect(sanitizeCustomization({ tagline: String.fromCharCode(0x200b) }).tagline).toBeNull();
+            expect(sanitizeCustomization({ tagline: String.fromCharCode(0x0007) }).tagline).toBeNull();
         });
 
         it("ignores non-strings", () => {
@@ -183,9 +179,7 @@ describe("sanitizeCustomization", () => {
                 { length: 20 },
                 (_, i) => `${String(i).padStart(8, "0")}-2222-3333-4444-555555555555`,
             );
-            expect(sanitizeCustomization({ featured: [...many, ...many] }).featured).toHaveLength(
-                MAX_FEATURED,
-            );
+            expect(sanitizeCustomization({ featured: [...many, ...many] }).featured).toHaveLength(MAX_FEATURED);
             expect(sanitizeCustomization({ featured: [UUID_A, UUID_A] }).featured).toEqual([UUID_A]);
         });
 
@@ -205,9 +199,7 @@ describe("sanitizeCustomization", () => {
         });
 
         it("accepts every declared section", () => {
-            expect(sanitizeCustomization({ hidden: [...PROFILE_SECTIONS] }).hidden).toEqual([
-                ...PROFILE_SECTIONS,
-            ]);
+            expect(sanitizeCustomization({ hidden: [...PROFILE_SECTIONS] }).hidden).toEqual([...PROFILE_SECTIONS]);
         });
     });
 
@@ -259,11 +251,7 @@ describe("applyFeaturedOrder", () => {
     });
 
     it("leads with the featured ids in the chosen order", () => {
-        expect(applyFeaturedOrder(horses, [UUID_C, UUID_A])).toEqual([
-            { id: UUID_C },
-            { id: UUID_A },
-            { id: UUID_B },
-        ]);
+        expect(applyFeaturedOrder(horses, [UUID_C, UUID_A])).toEqual([{ id: UUID_C }, { id: UUID_A }, { id: UUID_B }]);
     });
 
     it("silently drops ids that no longer resolve to a public horse", () => {

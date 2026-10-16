@@ -48,9 +48,7 @@ async function safeCount(run: () => Promise<number | null>): Promise<number | nu
 }
 
 async function countCatalogItems(supabase: AnonClient): Promise<number | null> {
-    const { count, error } = await supabase
-        .from("catalog_items")
-        .select("id", { count: "exact", head: true });
+    const { count, error } = await supabase.from("catalog_items").select("id", { count: "exact", head: true });
     return error ? null : (count ?? null);
 }
 

@@ -21,12 +21,7 @@ export const metadata = {
     description: "Call classes, record placings by leg tag, run the callbacks.",
 };
 
-export default async function RingConsolePage({
-    params,
-}: {
-    params: Promise<{ id: string }>;
-}) {
-
+export default async function RingConsolePage({ params }: { params: Promise<{ id: string }> }) {
     const supabase = await createClient();
     const {
         data: { user },
@@ -49,10 +44,7 @@ export default async function RingConsolePage({
                 <>
                     {/* Way back to the console — same link style as StaffBanner. */}
                     <div className="mb-3">
-                        <Link
-                            href={`/shows/host/${id}`}
-                            className="text-sm font-semibold text-forest hover:underline"
-                        >
+                        <Link href={`/shows/host/${id}`} className="text-sm font-semibold text-forest hover:underline">
                             ← Console
                         </Link>
                     </div>

@@ -89,10 +89,9 @@ export default function CreateEventPage() {
             <aside className="ledger-card mb-6">
                 <span className="ledger-tab">Hosting a show on MHH?</span>
                 <p className="m-0 text-sm leading-relaxed">
-                    Shows you run <em>here</em> — with entries, judging, results, points,
-                    cards and titles — are created in the Show Office, not on this form.
-                    Events are listings for things happening somewhere else, and they award
-                    nothing.
+                    Shows you run <em>here</em> — with entries, judging, results, points, cards and titles — are created
+                    in the Show Office, not on this form. Events are listings for things happening somewhere else, and
+                    they award nothing.
                 </p>
                 <Button asChild variant="outline" className="mt-3">
                     <Link href="/shows/host">Go to the Show Office →</Link>
@@ -101,10 +100,7 @@ export default function CreateEventPage() {
 
             <form onSubmit={handleSubmit} className="ledger-card">
                 <div className="mb-6">
-                    <label
-                        htmlFor="event-name"
-                        className="text-foreground mb-1 block text-sm font-semibold"
-                    >
+                    <label htmlFor="event-name" className="mb-1 block text-sm font-semibold text-foreground">
                         Event Name *
                     </label>
                     <Input
@@ -117,15 +113,12 @@ export default function CreateEventPage() {
                 </div>
 
                 <div className="mb-6">
-                    <label
-                        htmlFor="event-type"
-                        className="text-foreground mb-1 block text-sm font-semibold"
-                    >
+                    <label htmlFor="event-type" className="mb-1 block text-sm font-semibold text-foreground">
                         Event Type *
                     </label>
                     <select
                         id="event-type"
-                        className="border-input bg-card ring-offset-background focus:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-offset-2 focus:outline-none"
+                        className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
                         value={eventType}
                         onChange={(e) => setEventType(e.target.value)}
                     >
@@ -135,16 +128,11 @@ export default function CreateEventPage() {
                             </option>
                         ))}
                     </select>
-                    {selected && (
-                        <p className="text-muted-foreground mt-1 text-xs">{selected.blurb}</p>
-                    )}
+                    {selected && <p className="mt-1 text-xs text-muted-foreground">{selected.blurb}</p>}
                 </div>
 
                 <div className="mb-6">
-                    <label
-                        htmlFor="event-link"
-                        className="text-foreground mb-1 block text-sm font-semibold"
-                    >
+                    <label htmlFor="event-link" className="mb-1 block text-sm font-semibold text-foreground">
                         Link
                     </label>
                     <Input
@@ -154,18 +142,14 @@ export default function CreateEventPage() {
                         onChange={(e) => setLinkUrl(e.target.value)}
                         placeholder="https://facebook.com/events/…"
                     />
-                    <p className="text-muted-foreground mt-1 text-xs">
-                        Where the event actually lives — the Facebook event, the show
-                        packet, the club page, the sign-up form. This becomes the big button
-                        on the listing.
+                    <p className="mt-1 text-xs text-muted-foreground">
+                        Where the event actually lives — the Facebook event, the show packet, the club page, the sign-up
+                        form. This becomes the big button on the listing.
                     </p>
                 </div>
 
                 <div className="mb-6">
-                    <label
-                        htmlFor="event-description"
-                        className="text-foreground mb-1 block text-sm font-semibold"
-                    >
+                    <label htmlFor="event-description" className="mb-1 block text-sm font-semibold text-foreground">
                         Description
                     </label>
                     <Textarea
@@ -180,10 +164,7 @@ export default function CreateEventPage() {
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div className="mb-6">
-                        <label
-                            htmlFor="event-start"
-                            className="text-foreground mb-1 block text-sm font-semibold"
-                        >
+                        <label htmlFor="event-start" className="mb-1 block text-sm font-semibold text-foreground">
                             Start *
                         </label>
                         <Input
@@ -195,10 +176,7 @@ export default function CreateEventPage() {
                         />
                     </div>
                     <div className="mb-6">
-                        <label
-                            htmlFor="event-end"
-                            className="text-foreground mb-1 block text-sm font-semibold"
-                        >
+                        <label htmlFor="event-end" className="mb-1 block text-sm font-semibold text-foreground">
                             End
                         </label>
                         <Input
@@ -212,19 +190,11 @@ export default function CreateEventPage() {
 
                 <div className="my-3 flex flex-wrap gap-6">
                     <label className="flex cursor-pointer items-center gap-2">
-                        <input
-                            type="checkbox"
-                            checked={isAllDay}
-                            onChange={(e) => setIsAllDay(e.target.checked)}
-                        />
+                        <input type="checkbox" checked={isAllDay} onChange={(e) => setIsAllDay(e.target.checked)} />
                         All day
                     </label>
                     <label className="flex cursor-pointer items-center gap-2">
-                        <input
-                            type="checkbox"
-                            checked={isVirtual}
-                            onChange={(e) => setIsVirtual(e.target.checked)}
-                        />
+                        <input type="checkbox" checked={isVirtual} onChange={(e) => setIsVirtual(e.target.checked)} />
                         Online only (no physical venue)
                     </label>
                 </div>
@@ -232,10 +202,7 @@ export default function CreateEventPage() {
                 {!isVirtual && (
                     <>
                         <div className="mb-6">
-                            <label
-                                htmlFor="event-venue"
-                                className="text-foreground mb-1 block text-sm font-semibold"
-                            >
+                            <label htmlFor="event-venue" className="mb-1 block text-sm font-semibold text-foreground">
                                 Venue
                             </label>
                             <Input
@@ -246,10 +213,7 @@ export default function CreateEventPage() {
                             />
                         </div>
                         <div className="mb-6">
-                            <label
-                                htmlFor="event-address"
-                                className="text-foreground mb-1 block text-sm font-semibold"
-                            >
+                            <label htmlFor="event-address" className="mb-1 block text-sm font-semibold text-foreground">
                                 Address
                             </label>
                             <Input
@@ -263,10 +227,7 @@ export default function CreateEventPage() {
                 )}
 
                 <div className="mb-6">
-                    <label
-                        htmlFor="event-region"
-                        className="text-foreground mb-1 block text-sm font-semibold"
-                    >
+                    <label htmlFor="event-region" className="mb-1 block text-sm font-semibold text-foreground">
                         Region
                     </label>
                     <Input
@@ -275,7 +236,7 @@ export default function CreateEventPage() {
                         onChange={(e) => setRegion(e.target.value)}
                         placeholder="e.g. Pacific Northwest, Northeast, UK"
                     />
-                    <p className="text-muted-foreground mt-1 text-xs">
+                    <p className="mt-1 text-xs text-muted-foreground">
                         Helps people find things near them — useful even for online events.
                     </p>
                 </div>
@@ -283,7 +244,7 @@ export default function CreateEventPage() {
                 {error && (
                     <p
                         role="alert"
-                        className="text-destructive border-destructive/30 bg-destructive/10 mt-2 flex items-center gap-2 rounded-md border px-4 py-2 text-sm"
+                        className="mt-2 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm text-destructive"
                     >
                         {error}
                     </p>

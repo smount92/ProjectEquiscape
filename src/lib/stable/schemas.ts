@@ -48,11 +48,7 @@ export const getMatchingHorseIdsSchema = stableFiltersSchema;
 
 // ── Saved views ──
 
-const savedViewName = z
-    .string()
-    .trim()
-    .min(1, "Give the view a name.")
-    .max(60, "View names max out at 60 characters.");
+const savedViewName = z.string().trim().min(1, "Give the view a name.").max(60, "View names max out at 60 characters.");
 
 /**
  * Stored view params: the URL-param form of the filters. Only known

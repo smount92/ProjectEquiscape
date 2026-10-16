@@ -121,9 +121,7 @@ export async function getWantListBoard(userId: string): Promise<WantListBoard> {
 
         // One batched pass for the thumbnails, then group by catalog id so
         // several list entries pointing at the same reference share the work.
-        const thumbPaths = found
-            .map((m) => pickThumbnail(m.horse_images))
-            .filter((p): p is string => Boolean(p));
+        const thumbPaths = found.map((m) => pickThumbnail(m.horse_images)).filter((p): p is string => Boolean(p));
         const urlMap = getPublicImageUrls(thumbPaths);
 
         matchesByCatalogId = found.reduce((acc, m) => {

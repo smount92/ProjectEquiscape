@@ -73,11 +73,11 @@ export default function NotFound() {
                     This stall is empty
                 </h1>
                 <p
-                    className="relative z-[1] mx-auto m-0 mt-3 max-w-md text-sm leading-relaxed"
+                    className="relative z-[1] m-0 mx-auto mt-3 max-w-md text-sm leading-relaxed"
                     style={{ color: "var(--leather-text-soft)" }}
                 >
-                    Nothing lives at this address. The page may have moved, the show may have closed,
-                    or the link may have been mistyped somewhere along the way.
+                    Nothing lives at this address. The page may have moved, the show may have closed, or the link may
+                    have been mistyped somewhere along the way.
                 </p>
             </div>
 
@@ -89,29 +89,27 @@ export default function NotFound() {
                             <Link
                                 href={href}
                                 id={id}
-                                className="border-input flex flex-1 items-center gap-3 rounded-md border border-transparent bg-black/[0.02] px-4 py-3 no-underline transition-all hover:border-input hover:bg-black/[0.06] hover:no-underline"
+                                className="flex flex-1 items-center gap-3 rounded-md border border-input border-transparent bg-black/[0.02] px-4 py-3 no-underline transition-all hover:border-input hover:bg-black/[0.06] hover:no-underline"
                             >
-                                <span className="bg-forest/10 text-forest flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
+                                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-forest/10 text-forest">
                                     <Icon size={18} strokeWidth={1.5} aria-hidden="true" />
                                 </span>
                                 <span className="min-w-0">
-                                    <span className="text-foreground block font-serif text-sm font-bold">
-                                        {name}
-                                    </span>
-                                    <span className="text-secondary-foreground block text-xs">{blurb}</span>
+                                    <span className="block font-serif text-sm font-bold text-foreground">{name}</span>
+                                    <span className="block text-xs text-secondary-foreground">{blurb}</span>
                                 </span>
                             </Link>
                         </li>
                     ))}
                 </ul>
 
-                <p className="text-muted-foreground m-0 mt-4 text-xs">
+                <p className="m-0 mt-4 text-xs text-muted-foreground">
                     Looking for something specific?{" "}
-                    <Link href="/catalog" className="text-forest font-semibold">
+                    <Link href="/catalog" className="font-semibold text-forest">
                         Search the Registry
                     </Link>{" "}
                     or{" "}
-                    <Link href="/contact" className="text-forest font-semibold">
+                    <Link href="/contact" className="font-semibold text-forest">
                         tell us what broke
                     </Link>
                     .

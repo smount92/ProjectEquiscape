@@ -35,10 +35,7 @@ export function favoriteCountLabel(count: number): string {
  * Normalizes a raw count read into what the chip should show.
  * Pure — the network half lives in getPublicFavoriteCount.
  */
-export function publicFavoriteCount(
-    count: number | null | undefined,
-    error: unknown,
-): number | null {
+export function publicFavoriteCount(count: number | null | undefined, error: unknown): number | null {
     if (error) return null;
     if (typeof count !== "number" || !Number.isFinite(count)) return null;
     // 0 is ambiguous under RLS (see the module note) — say nothing.

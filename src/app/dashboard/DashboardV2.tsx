@@ -139,7 +139,7 @@ export default async function DashboardV2({
                 {/* ── SIDEBAR: widgets (fed by the one summary round-trip) ── */}
                 <aside className="space-y-6">
                     {summary.totalHorses > 0 && (
-                        <div className="bg-card rounded-lg border border-input p-6 shadow-md transition-all">
+                        <div className="rounded-lg border border-input bg-card p-6 shadow-md transition-all">
                             <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest text-secondary-foreground uppercase">
                                 <BarChart3 size={14} strokeWidth={1.5} /> Stable Overview
                             </h3>
@@ -158,9 +158,7 @@ export default async function DashboardV2({
                                     icon={<DollarSign size={14} strokeWidth={1.5} />}
                                     label="Vault Value"
                                     value={
-                                        summary.vaultTotal > 0
-                                            ? formatMoney(summary.vaultTotal, currencySymbol)
-                                            : "—"
+                                        summary.vaultTotal > 0 ? formatMoney(summary.vaultTotal, currencySymbol) : "—"
                                     }
                                 />
                                 <StatRow
@@ -178,7 +176,7 @@ export default async function DashboardV2({
                                         <span className="flex items-center gap-1.5 text-sm text-secondary-foreground">
                                             <BookOpen size={14} strokeWidth={1.5} /> Not in Registry
                                         </span>
-                                        <span className="text-forest text-sm font-bold">{unlinkedCount}</span>
+                                        <span className="text-sm font-bold text-forest">{unlinkedCount}</span>
                                     </Link>
                                 )}
                                 {(unreadMsgCount ?? 0) > 0 && (
@@ -190,14 +188,18 @@ export default async function DashboardV2({
                                         <span className="flex items-center gap-1.5 text-sm text-secondary-foreground">
                                             <Mail size={14} strokeWidth={1.5} /> Unread Messages
                                         </span>
-                                        <span className="text-forest text-sm font-bold">{unreadMsgCount}</span>
+                                        <span className="text-sm font-bold text-forest">{unreadMsgCount}</span>
                                     </Link>
                                 )}
                             </div>
                             <div className="mt-4 flex flex-wrap gap-2 border-t border-input pt-4">
                                 <ExportButton />
                                 <InsuranceReportButton />
-                                <Link href="/stable/collections" className="inline-flex items-center gap-1.5 rounded-md border border-input px-3 py-1.5 text-sm font-medium text-foreground no-underline hover:bg-black/[0.04]" id="folders-link">
+                                <Link
+                                    href="/stable/collections"
+                                    className="inline-flex items-center gap-1.5 rounded-md border border-input px-3 py-1.5 text-sm font-medium text-foreground no-underline hover:bg-black/[0.04]"
+                                    id="folders-link"
+                                >
                                     <FolderOpen size={14} strokeWidth={1.5} /> Folders
                                 </Link>
                             </div>
@@ -214,10 +216,14 @@ export default async function DashboardV2({
 
                     {/* Collections */}
                     {summary.collections.length > 0 && (
-                        <div className="bg-card rounded-lg border border-input p-6 shadow-md transition-all">
+                        <div className="rounded-lg border border-input bg-card p-6 shadow-md transition-all">
                             <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest text-secondary-foreground uppercase">
                                 <FolderOpen size={14} strokeWidth={1.5} /> Collections
-                                <Link href="/stable/collections" className="text-forest ml-auto text-[0.7rem] font-semibold tracking-normal normal-case hover:underline" id="manage-folders">
+                                <Link
+                                    href="/stable/collections"
+                                    className="ml-auto text-[0.7rem] font-semibold tracking-normal text-forest normal-case hover:underline"
+                                    id="manage-folders"
+                                >
                                     Manage
                                 </Link>
                             </h3>
@@ -232,12 +238,7 @@ export default async function DashboardV2({
                                         <span>{col.name}</span>
                                         <span className="text-xs whitespace-nowrap text-secondary-foreground">
                                             {col.count}
-                                            {col.value > 0 && (
-                                                <>
-                                                    {" "}
-                                                    · {formatMoney(col.value, currencySymbol)}
-                                                </>
-                                            )}
+                                            {col.value > 0 && <> · {formatMoney(col.value, currencySymbol)}</>}
                                         </span>
                                     </Link>
                                 ))}
@@ -263,12 +264,12 @@ export default async function DashboardV2({
                     <Link
                         href="/stable/deleted"
                         id="recently-deleted-link"
-                        className="bg-card border-input flex items-center justify-between rounded-lg border px-6 py-4 no-underline shadow-md transition-all hover:bg-black/[0.03] hover:no-underline"
+                        className="flex items-center justify-between rounded-lg border border-input bg-card px-6 py-4 no-underline shadow-md transition-all hover:bg-black/[0.03] hover:no-underline"
                     >
                         <span className="flex items-center gap-2 text-xs font-semibold tracking-widest text-secondary-foreground uppercase">
                             <Trash2 size={14} strokeWidth={1.5} /> Recently Deleted
                         </span>
-                        <span className="text-muted-foreground text-xs">Restore →</span>
+                        <span className="text-xs text-muted-foreground">Restore →</span>
                     </Link>
 
                     <Suspense fallback={null}>

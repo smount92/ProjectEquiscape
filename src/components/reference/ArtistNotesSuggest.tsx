@@ -4,13 +4,7 @@ import { useState, useTransition } from "react";
 import { suggestArtistNotes } from "@/app/actions/catalog-suggestions";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 /**
  * "Improve these notes" for artists — the same suggest→review door the
@@ -47,7 +41,7 @@ export default function ArtistNotesSuggest({
             <button
                 type="button"
                 onClick={() => setOpen(true)}
-                className="text-forest text-sm font-semibold hover:underline"
+                className="text-sm font-semibold text-forest hover:underline"
             >
                 {hasNotes ? "Improve these notes →" : "Write the first notes →"}
             </button>
@@ -56,14 +50,13 @@ export default function ArtistNotesSuggest({
                     <DialogHeader>
                         <DialogTitle>Registry notes — {artistName}</DialogTitle>
                         <DialogDescription>
-                            A few short paragraphs in your own words. Facts like years and
-                            counts belong on the works themselves — this is for the knowledge
-                            that doesn&rsquo;t fit a field. A curator reviews before anything
-                            publishes.
+                            A few short paragraphs in your own words. Facts like years and counts belong on the works
+                            themselves — this is for the knowledge that doesn&rsquo;t fit a field. A curator reviews
+                            before anything publishes.
                         </DialogDescription>
                     </DialogHeader>
                     {done ? (
-                        <p className="text-secondary-foreground text-sm">
+                        <p className="text-sm text-secondary-foreground">
                             ✅ Filed — thank you. A curator will review it shortly.
                         </p>
                     ) : (
@@ -77,17 +70,17 @@ export default function ArtistNotesSuggest({
                             />
                             <input
                                 type="text"
-                                className="border-input bg-card w-full rounded-md border px-3 py-2 text-sm"
+                                className="w-full rounded-md border border-input bg-card px-3 py-2 text-sm"
                                 value={reason}
                                 maxLength={200}
                                 onChange={(e) => setReason(e.target.value)}
                                 placeholder="Where does this knowledge come from?"
                             />
-                            {error && <p className="text-destructive m-0 text-sm">{error}</p>}
+                            {error && <p className="m-0 text-sm text-destructive">{error}</p>}
                             <div className="flex justify-end gap-3">
                                 <button
                                     type="button"
-                                    className="text-muted-foreground hover:text-foreground text-sm underline"
+                                    className="text-sm text-muted-foreground underline hover:text-foreground"
                                     onClick={() => setOpen(false)}
                                 >
                                     Cancel

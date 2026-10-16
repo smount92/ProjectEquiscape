@@ -30,10 +30,7 @@ export interface HorseTitleRow {
 /** Untyped read (tables enter generated types after 159). */
 type UntypedSelect = (table: string) => {
     select: (cols: string) => {
-        eq: (
-            col: string,
-            val: string,
-        ) => PromiseLike<{ data: unknown; error: unknown }>;
+        eq: (col: string, val: string) => PromiseLike<{ data: unknown; error: unknown }>;
     };
 };
 
@@ -82,19 +79,11 @@ export async function getOwnerHorseLadder(
     try {
         const [titlesRes, careerRes, cardsRes] = await Promise.all([
             supabase.from("horse_titles").select("title_code").eq("horse_id", horseId),
-            supabase
-                .from("horse_career")
-                .select("career_points")
-                .eq("horse_id", horseId)
-                .maybeSingle(),
-            supabase
-                .from("qualification_cards")
-                .select("show_id, class_id, status")
-                .eq("horse_id", horseId),
+            supabase.from("horse_career").select("career_points").eq("horse_id", horseId).maybeSingle(),
+            supabase.from("qualification_cards").select("show_id, class_id, status").eq("horse_id", horseId),
         ]);
         const grantedCodes = (titlesRes.data ?? []).map((r) => r.title_code as string);
-        const careerPoints =
-            (careerRes.data as { career_points: number } | null)?.career_points ?? 0;
+        const careerPoints = (careerRes.data as { career_points: number } | null)?.career_points ?? 0;
         const rawCards = (cardsRes.data ?? []) as {
             show_id: string;
             class_id: string;
@@ -112,9 +101,7 @@ export async function getOwnerHorseLadder(
                 .eq("horse_id", horseId)
                 .in("class_id", classIds);
             const entryIds = (entries ?? []).map((e) => e.id as string);
-            const entryToClass = new Map(
-                (entries ?? []).map((e) => [e.id as string, e.class_id as string]),
-            );
+            const entryToClass = new Map((entries ?? []).map((e) => [e.id as string, e.class_id as string]));
             if (entryIds.length > 0) {
                 const { data: placings } = await supabase
                     .from("show_placings")
@@ -165,9 +152,7 @@ export async function getExhibitorStar(
     try {
         const supabase = createAnonClient();
         const from = supabase.from.bind(supabase) as unknown as UntypedSelect;
-        const { data, error } = await from("exhibitor_distinctions")
-            .select("distinction_code")
-            .eq("user_id", userId);
+        const { data, error } = await from("exhibitor_distinctions").select("distinction_code").eq("user_id", userId);
         if (error || !Array.isArray(data)) return null;
         const codes = data
             .map((r) => (r as { distinction_code?: string }).distinction_code)

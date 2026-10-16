@@ -56,13 +56,31 @@ function loose(client: unknown) {
     return client as {
         from: (t: string) => {
             select: (c: string) => {
-                eq: (k: string, v: string) => {
-                    order: (k: string, o: { ascending: boolean; nullsFirst?: boolean }) => PromiseLike<{ data: Row[] | null; error: DbError }>;
+                eq: (
+                    k: string,
+                    v: string,
+                ) => {
+                    order: (
+                        k: string,
+                        o: { ascending: boolean; nullsFirst?: boolean },
+                    ) => PromiseLike<{ data: Row[] | null; error: DbError }>;
                 };
             };
-            insert: (row: Row) => { select: (c: string) => { single: () => PromiseLike<{ data: Row | null; error: DbError }> } };
-            update: (row: Row) => { eq: (k: string, v: string) => { select: (c: string) => PromiseLike<{ data: Row[] | null; error: DbError }> } };
-            delete: () => { eq: (k: string, v: string) => { select: (c: string) => PromiseLike<{ data: Row[] | null; error: DbError }> } };
+            insert: (row: Row) => {
+                select: (c: string) => { single: () => PromiseLike<{ data: Row | null; error: DbError }> };
+            };
+            update: (row: Row) => {
+                eq: (
+                    k: string,
+                    v: string,
+                ) => { select: (c: string) => PromiseLike<{ data: Row[] | null; error: DbError }> };
+            };
+            delete: () => {
+                eq: (
+                    k: string,
+                    v: string,
+                ) => { select: (c: string) => PromiseLike<{ data: Row[] | null; error: DbError }> };
+            };
         };
     };
 }
@@ -154,7 +172,10 @@ export async function createAccomplishment(
         .single();
     if (error || !data) {
         if (missingSchema(error)) {
-            return { success: false, error: "Accomplishments aren't switched on for this site yet — try again after the next update." };
+            return {
+                success: false,
+                error: "Accomplishments aren't switched on for this site yet — try again after the next update.",
+            };
         }
         logger.error("Accomplishments", "insert failed", { message: error?.message });
         return { success: false, error: "Could not save the accomplishment." };

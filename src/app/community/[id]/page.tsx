@@ -1,181 +1,185 @@
 import { referenceLines, type ReferenceRow } from "@/lib/passport/referenceLines";
-import { createClient } from"@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import LinkifiedText from "@/components/LinkifiedText";
-import { notFound } from"next/navigation";
-import Link from"next/link";
-import { getPublicImageUrls } from"@/lib/utils/storage";
-import HorseshoeIcon from"@/components/icons/HorseshoeIcon";
-import MarketValueBadge from"@/components/MarketValueBadge";
-import PassportGallery from"@/components/PassportGallery";
-import ShareButton from"@/components/ShareButton";
-import FavoriteButton from"@/components/FavoriteButton";
-import { getPosts } from"@/app/actions/posts";
-import UniversalFeed from"@/components/UniversalFeed";
-import ShowRecordTimeline from"@/components/ShowRecordTimeline";
-import PedigreeCard from"@/components/PedigreeCard";
-import PapersSection from"@/components/passport/PapersSection";
-import { listPapers } from"@/app/actions/papers";
-import { listAccomplishments } from"@/app/actions/accomplishments";
-import AccomplishmentsSection from"@/components/passport/AccomplishmentsSection";
-import HoofprintTimeline from"@/components/HoofprintTimeline";
-import TitlesSection from"@/components/shows/TitlesSection";
-import { getHorseTitles } from"@/lib/shows/horseTitles";
-import { titlePrefix } from"@/lib/shows/titles";
-import { getHoofprint } from"@/app/actions/hoofprint";
-import ReportButton from"@/components/ReportButton";
-import WishlistButton from"@/components/WishlistButton";
-import TrustedBadge from"@/components/TrustedBadge";
-import ExplorerLayout from"@/components/layouts/ExplorerLayout";
-import AssetDetailRenderer from"@/components/AssetDetailRenderer";
-import { getAssetConfig } from"@/lib/config/assetFields";
-import type { AssetCategory } from"@/lib/types/database";
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import { getPublicImageUrls } from "@/lib/utils/storage";
+import HorseshoeIcon from "@/components/icons/HorseshoeIcon";
+import MarketValueBadge from "@/components/MarketValueBadge";
+import PassportGallery from "@/components/PassportGallery";
+import ShareButton from "@/components/ShareButton";
+import FavoriteButton from "@/components/FavoriteButton";
+import { getPosts } from "@/app/actions/posts";
+import UniversalFeed from "@/components/UniversalFeed";
+import ShowRecordTimeline from "@/components/ShowRecordTimeline";
+import PedigreeCard from "@/components/PedigreeCard";
+import PapersSection from "@/components/passport/PapersSection";
+import { listPapers } from "@/app/actions/papers";
+import { listAccomplishments } from "@/app/actions/accomplishments";
+import AccomplishmentsSection from "@/components/passport/AccomplishmentsSection";
+import HoofprintTimeline from "@/components/HoofprintTimeline";
+import TitlesSection from "@/components/shows/TitlesSection";
+import { getHorseTitles } from "@/lib/shows/horseTitles";
+import { titlePrefix } from "@/lib/shows/titles";
+import { getHoofprint } from "@/app/actions/hoofprint";
+import ReportButton from "@/components/ReportButton";
+import WishlistButton from "@/components/WishlistButton";
+import TrustedBadge from "@/components/TrustedBadge";
+import ExplorerLayout from "@/components/layouts/ExplorerLayout";
+import AssetDetailRenderer from "@/components/AssetDetailRenderer";
+import { getAssetConfig } from "@/lib/config/assetFields";
+import type { AssetCategory } from "@/lib/types/database";
 import { Button } from "@/components/ui/button";
-import { referenceHref } from"@/lib/catalog/referenceUrl";
-import AnonPassport from"@/components/passport/AnonPassport";
+import { referenceHref } from "@/lib/catalog/referenceUrl";
+import AnonPassport from "@/components/passport/AnonPassport";
 import { resinIdentityFrom, resinMakeupLine } from "@/lib/passport/resinIdentity";
 import { colorText, readPendingColumns } from "@/lib/passport/pendingColumns";
 import { readSellerTerms } from "@/lib/sellers/sellerTerms";
-import PublicCardsSection from"@/components/shows/PublicCardsSection";
-import { PARCHMENT_INK } from"@/lib/theme/parchment";
-import ViewBeacon from"@/components/metrics/ViewBeacon";
-import PassportMasthead from"@/components/passport/PassportMasthead";
-import BuyerPanel from"@/components/passport/BuyerPanel";
-import { summarizeShowRecords } from"@/lib/market/recordSummary";
-import { getPublicHorseCards } from"@/lib/shows/publicCards";
-import { getMarketPrice } from"@/app/actions/market";
-import MakingChapter from"@/components/making/MakingChapter";
-import HorseDocuments from"@/components/passport/HorseDocuments";
-import { getHorseDocuments } from"@/lib/shows/queries";
-import { qualifierDisplayFields } from"@/lib/records/qualifiers";
-import { getMakingForHorse } from"@/app/actions/work-records";
+import PublicCardsSection from "@/components/shows/PublicCardsSection";
+import { PARCHMENT_INK } from "@/lib/theme/parchment";
+import ViewBeacon from "@/components/metrics/ViewBeacon";
+import PassportMasthead from "@/components/passport/PassportMasthead";
+import BuyerPanel from "@/components/passport/BuyerPanel";
+import { summarizeShowRecords } from "@/lib/market/recordSummary";
+import { getPublicHorseCards } from "@/lib/shows/publicCards";
+import { getMarketPrice } from "@/app/actions/market";
+import MakingChapter from "@/components/making/MakingChapter";
+import HorseDocuments from "@/components/passport/HorseDocuments";
+import { getHorseDocuments } from "@/lib/shows/queries";
+import { qualifierDisplayFields } from "@/lib/records/qualifiers";
+import { getMakingForHorse } from "@/app/actions/work-records";
 
 // Force fresh data on every request — prevents stale comments/favorites
 
 const ANGLE_LABELS: Record<string, string> = {
- Primary_Thumbnail:"Near-Side",
- Left_Side:"Left Side",
- Right_Side:"Off-Side",
- Front_Chest:"Front / Chest",
- Back_Hind:"Hindquarters",
- Belly_Makers_Mark:"Marks / Logos",
- Detail_Face_Eyes:"Face & Eyes",
- Detail_Ears:"Ears",
- Detail_Hooves:"Hooves",
- Flaw_Rub_Damage:"Flaws",
- extra_detail:"Detail",
- Other:"Other",
+    Primary_Thumbnail: "Near-Side",
+    Left_Side: "Left Side",
+    Right_Side: "Off-Side",
+    Front_Chest: "Front / Chest",
+    Back_Hind: "Hindquarters",
+    Belly_Makers_Mark: "Marks / Logos",
+    Detail_Face_Eyes: "Face & Eyes",
+    Detail_Ears: "Ears",
+    Detail_Hooves: "Hooves",
+    Flaw_Rub_Damage: "Flaws",
+    extra_detail: "Detail",
+    Other: "Other",
 };
 
 const ANGLE_ORDER: string[] = [
-"Primary_Thumbnail",
-"Right_Side",
-"Front_Chest",
-"Back_Hind",
-"Belly_Makers_Mark",
-"Left_Side",
-"Detail_Face_Eyes",
-"Detail_Ears",
-"Detail_Hooves",
-"Flaw_Rub_Damage",
-"extra_detail",
-"Other",
+    "Primary_Thumbnail",
+    "Right_Side",
+    "Front_Chest",
+    "Back_Hind",
+    "Belly_Makers_Mark",
+    "Left_Side",
+    "Detail_Face_Eyes",
+    "Detail_Ears",
+    "Detail_Hooves",
+    "Flaw_Rub_Damage",
+    "extra_detail",
+    "Other",
 ];
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
- const { id } = await params;
- const supabase = await createClient();
+    const { id } = await params;
+    const supabase = await createClient();
 
- // Both reads key off `id` alone — one wave, not two round trips.
- const [{ data: horse }, { data: img }] = await Promise.all([
- supabase
- .from("user_horses")
- .select("custom_name, finish_type, condition_grade, catalog_items:catalog_id(title, maker)")
- .eq("id", id)
- .in("visibility", ["public","unlisted"])
- .single(),
- // Primary thumbnail for the OG image.
- supabase
- .from("horse_images")
- .select("image_url")
- .eq("horse_id", id)
- .eq("angle_profile","Primary_Thumbnail")
- .single(),
- ]);
+    // Both reads key off `id` alone — one wave, not two round trips.
+    const [{ data: horse }, { data: img }] = await Promise.all([
+        supabase
+            .from("user_horses")
+            .select("custom_name, finish_type, condition_grade, catalog_items:catalog_id(title, maker)")
+            .eq("id", id)
+            .in("visibility", ["public", "unlisted"])
+            .single(),
+        // Primary thumbnail for the OG image.
+        supabase
+            .from("horse_images")
+            .select("image_url")
+            .eq("horse_id", id)
+            .eq("angle_profile", "Primary_Thumbnail")
+            .single(),
+    ]);
 
- if (!horse) {
- return {
- title:"Horse Not Found — The Show Ring",
- description:"This horse could not be found.",
- };
- }
+    if (!horse) {
+        return {
+            title: "Horse Not Found — The Show Ring",
+            description: "This horse could not be found.",
+        };
+    }
 
- const h = horse;
+    const h = horse;
 
- const title = `${h.custom_name}`;
- const catalogInfo = h.catalog_items ? `${h.catalog_items.maker} ${h.catalog_items.title}` :"";
- const description = [catalogInfo, h.finish_type, h.condition_grade].filter(Boolean).join(" ·");
+    const title = `${h.custom_name}`;
+    const catalogInfo = h.catalog_items ? `${h.catalog_items.maker} ${h.catalog_items.title}` : "";
+    const description = [catalogInfo, h.finish_type, h.condition_grade].filter(Boolean).join(" ·");
 
- // Build public image URL (horse-images bucket may be public or need signed URL)
- const imageUrl = img?.image_url || null;
+    // Build public image URL (horse-images bucket may be public or need signed URL)
+    const imageUrl = img?.image_url || null;
 
- return {
- title,
- description: description || `View ${h.custom_name} in the community showcase.`,
- openGraph: {
- title,
- description: description || `View ${h.custom_name} on Model Horse Hub`,
- images: imageUrl ? [{ url: imageUrl, width: 800, height: 600, alt: h.custom_name }] : [],
- type:"article" as const,
- siteName:"Model Horse Hub",
- },
- twitter: {
- card: (imageUrl ?"summary_large_image" :"summary") as"summary_large_image" |"summary",
- title,
- description: description || `View ${h.custom_name} on Model Horse Hub`,
- images: imageUrl ? [imageUrl] : [],
- },
- };
+    return {
+        title,
+        description: description || `View ${h.custom_name} in the community showcase.`,
+        openGraph: {
+            title,
+            description: description || `View ${h.custom_name} on Model Horse Hub`,
+            images: imageUrl ? [{ url: imageUrl, width: 800, height: 600, alt: h.custom_name }] : [],
+            type: "article" as const,
+            siteName: "Model Horse Hub",
+        },
+        twitter: {
+            card: (imageUrl ? "summary_large_image" : "summary") as "summary_large_image" | "summary",
+            title,
+            description: description || `View ${h.custom_name} on Model Horse Hub`,
+            images: imageUrl ? [imageUrl] : [],
+        },
+    };
 }
 
 export default async function PublicPassportPage({
- params,
- searchParams,
+    params,
+    searchParams,
 }: {
- params: Promise<{ id: string }>;
- searchParams: Promise<{ from?: string }>;
+    params: Promise<{ id: string }>;
+    searchParams: Promise<{ from?: string }>;
 }) {
- const { id: horseId } = await params;
- const { from } = await searchParams;
- // Arrived from the marketplace browse → the back breadcrumb returns
- // there instead of the Show Ring (the card link carries ?from=market).
- const cameFromMarket = from ==="market";
- const supabase = await createClient();
+    const { id: horseId } = await params;
+    const { from } = await searchParams;
+    // Arrived from the marketplace browse → the back breadcrumb returns
+    // there instead of the Show Ring (the card link carries ?from=market).
+    const cameFromMarket = from === "market";
+    const supabase = await createClient();
 
- // Auth check — needed for RLS (we redirect to login, not block)
- const {
- data: { user },
- } = await supabase.auth.getUser();
+    // Auth check — needed for RLS (we redirect to login, not block)
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
 
- // Logged-out visitors get a read-only public passport (get_public_passport
- // RPC); the full interactive passport below is unchanged for members.
- if (!user) {
- return (
- <>
- <ViewBeacon entityType="horse" entityId={horseId} secondaryType={cameFromMarket ?"listing" : undefined} />
- <AnonPassport horseId={horseId} backToMarket={cameFromMarket} />
- </>
- );
- }
+    // Logged-out visitors get a read-only public passport (get_public_passport
+    // RPC); the full interactive passport below is unchanged for members.
+    if (!user) {
+        return (
+            <>
+                <ViewBeacon
+                    entityType="horse"
+                    entityId={horseId}
+                    secondaryType={cameFromMarket ? "listing" : undefined}
+                />
+                <AnonPassport horseId={horseId} backToMarket={cameFromMarket} />
+            </>
+        );
+    }
 
- // ================================================================
- // PUBLIC QUERY: Fetch horse if visibility = 'public' or 'unlisted'
- // 🔒 financial_vault is NEVER queried here.
- // 🔒 Only alias_name from users — never email or full_name.
- // ================================================================
- const { data: rawHorse } = await supabase
- .from("user_horses")
- .select(
- `
+    // ================================================================
+    // PUBLIC QUERY: Fetch horse if visibility = 'public' or 'unlisted'
+    // 🔒 financial_vault is NEVER queried here.
+    // 🔒 Only alias_name from users — never email or full_name.
+    // ================================================================
+    const { data: rawHorse } = await supabase
+        .from("user_horses")
+        .select(
+            `
   id, owner_id, custom_name, finish_type, condition_grade, asset_category, attributes,
   is_public, created_at, finishing_artist, finishing_artist_verified, edition_number, edition_size, catalog_id,
  trade_status, listing_price,
@@ -183,787 +187,767 @@ export default async function PublicPassportPage({
  users!inner(alias_name),
  catalog_items:catalog_id(title, maker, scale, item_type, attributes, maker_slug, slug, parent:parent_id(id, title, maker, attributes, maker_slug, slug))
  `,
- )
- .eq("id", horseId)
- .in("visibility", ["public","unlisted"])
- .single();
+        )
+        .eq("id", horseId)
+        .in("visibility", ["public", "unlisted"])
+        .single();
 
- if (!rawHorse) {
- notFound();
- }
+    if (!rawHorse) {
+        notFound();
+    }
 
- // eslint-disable-next-line @typescript-eslint/no-explicit-any
- const horse = rawHorse as any;
- // Columns still awaiting their paste (217 resin identity, 219 color) —
- // one tolerant read, so a passport renders the same before and after.
- const pending = await readPendingColumns(supabase, horseId);
- const resin = resinIdentityFrom(pending);
- const resinMakeup = resinMakeupLine(resin);
- const horseColor = colorText(pending.color);
- // Seller terms (218) for the buyer panel — same tolerant read.
- const sellerTerms = (await readSellerTerms(supabase, [horse.owner_id])).get(horse.owner_id) ?? null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const horse = rawHorse as any;
+    // Columns still awaiting their paste (217 resin identity, 219 color) —
+    // one tolerant read, so a passport renders the same before and after.
+    const pending = await readPendingColumns(supabase, horseId);
+    const resin = resinIdentityFrom(pending);
+    const resinMakeup = resinMakeupLine(resin);
+    const horseColor = colorText(pending.color);
+    // Seller terms (218) for the buyer panel — same tolerant read.
+    const sellerTerms = (await readSellerTerms(supabase, [horse.owner_id])).get(horse.owner_id) ?? null;
 
- const isForSale = horse.trade_status === "For Sale" || horse.trade_status === "Open to Offers";
+    const isForSale = horse.trade_status === "For Sale" || horse.trade_status === "Open to Offers";
 
- // ================================================================
- // ONE WAVE. Everything below the horse row depends only on
- // horseId / user.id / columns we already hold, so it must not
- // stack round trips: this page used to serialize ~11 of them and
- // every hop multiplies queue time under pool contention.
- // ================================================================
- const [
- { data: rawImages },
- { count: favoriteCount },
- { data: userFav },
- comments,
- { data: rawRecords },
- { data: rawPedigree },
- { data: trustedData },
- publicCardsForCount,
- publicTitles,
- marketEstimate,
- hoofprint,
- ] = await Promise.all([
- // All images
- supabase
- .from("horse_images")
- .select("id, image_url, angle_profile, uploaded_at, short_slug")
- .eq("horse_id", horseId)
- .order("uploaded_at"),
- // Favorite count
- supabase
- .from("horse_favorites")
- .select("id", { count:"exact", head: true })
- .eq("horse_id", horseId),
- // Current user's favorite status
- supabase
- .from("horse_favorites")
- .select("id")
- .eq("horse_id", horseId)
- .eq("user_id", user.id)
- .maybeSingle(),
- // Comments — now via universal posts table
- getPosts({ horseId }, { includeReplies: true, limit: 50 }),
- // Show records
- supabase
- .from("show_records")
- .select(
- '*',
- )
- .eq("horse_id", horseId)
- .order("show_date", { ascending: false, nullsFirst: false }),
- // Pedigree
- supabase
- .from("horse_pedigrees")
- .select("*")
- .eq("horse_id", horseId)
- .maybeSingle(),
- // Is the owner a Community Trusted seller?
- supabase
- .from("mv_trusted_sellers")
- .select("user_id")
- .eq("user_id", horse.owner_id)
- .maybeSingle(),
- isForSale ? getPublicHorseCards(horseId) : Promise.resolve([]),
- getHorseTitles(horseId),
- // The estimate caption must never render orphaned: MarketValueBadge
- // hides itself client-side when the mold has no sales, so check the
- // volume server-side before rendering the adjacent-estimate block.
- isForSale && horse.catalog_id ? getMarketPrice(horse.catalog_id) : Promise.resolve(null),
- getHoofprint(horseId),
- ]);
+    // ================================================================
+    // ONE WAVE. Everything below the horse row depends only on
+    // horseId / user.id / columns we already hold, so it must not
+    // stack round trips: this page used to serialize ~11 of them and
+    // every hop multiplies queue time under pool contention.
+    // ================================================================
+    const [
+        { data: rawImages },
+        { count: favoriteCount },
+        { data: userFav },
+        comments,
+        { data: rawRecords },
+        { data: rawPedigree },
+        { data: trustedData },
+        publicCardsForCount,
+        publicTitles,
+        marketEstimate,
+        hoofprint,
+    ] = await Promise.all([
+        // All images
+        supabase
+            .from("horse_images")
+            .select("id, image_url, angle_profile, uploaded_at, short_slug")
+            .eq("horse_id", horseId)
+            .order("uploaded_at"),
+        // Favorite count
+        supabase.from("horse_favorites").select("id", { count: "exact", head: true }).eq("horse_id", horseId),
+        // Current user's favorite status
+        supabase.from("horse_favorites").select("id").eq("horse_id", horseId).eq("user_id", user.id).maybeSingle(),
+        // Comments — now via universal posts table
+        getPosts({ horseId }, { includeReplies: true, limit: 50 }),
+        // Show records
+        supabase
+            .from("show_records")
+            .select("*")
+            .eq("horse_id", horseId)
+            .order("show_date", { ascending: false, nullsFirst: false }),
+        // Pedigree
+        supabase.from("horse_pedigrees").select("*").eq("horse_id", horseId).maybeSingle(),
+        // Is the owner a Community Trusted seller?
+        supabase.from("mv_trusted_sellers").select("user_id").eq("user_id", horse.owner_id).maybeSingle(),
+        isForSale ? getPublicHorseCards(horseId) : Promise.resolve([]),
+        getHorseTitles(horseId),
+        // The estimate caption must never render orphaned: MarketValueBadge
+        // hides itself client-side when the mold has no sales, so check the
+        // volume server-side before rendering the adjacent-estimate block.
+        isForSale && horse.catalog_id ? getMarketPrice(horse.catalog_id) : Promise.resolve(null),
+        getHoofprint(horseId),
+    ]);
 
- const images = rawImages ?? [];
+    const images = rawImages ?? [];
 
- // Sort by angle priority
- images.sort((a, b) => {
- const aIdx = ANGLE_ORDER.indexOf(a.angle_profile);
- const bIdx = ANGLE_ORDER.indexOf(b.angle_profile);
- return (aIdx === -1 ? 99 : aIdx) - (bIdx === -1 ? 99 : bIdx);
- });
+    // Sort by angle priority
+    images.sort((a, b) => {
+        const aIdx = ANGLE_ORDER.indexOf(a.angle_profile);
+        const bIdx = ANGLE_ORDER.indexOf(b.angle_profile);
+        return (aIdx === -1 ? 99 : aIdx) - (bIdx === -1 ? 99 : bIdx);
+    });
 
- // Generate signed URLs
- const imageUrls = images.map((img) => img.image_url);
- const signedUrlMap = getPublicImageUrls(imageUrls);
+    // Generate signed URLs
+    const imageUrls = images.map((img) => img.image_url);
+    const signedUrlMap = getPublicImageUrls(imageUrls);
 
- const galleryImages = images.map((img) => ({
- signedUrl: signedUrlMap.get(img.image_url) || img.image_url,
- angle_profile: img.angle_profile,
- label: ANGLE_LABELS[img.angle_profile] || img.angle_profile,
- shortSlug: img.short_slug || null,
- }));
+    const galleryImages = images.map((img) => ({
+        signedUrl: signedUrlMap.get(img.image_url) || img.image_url,
+        angle_profile: img.angle_profile,
+        label: ANGLE_LABELS[img.angle_profile] || img.angle_profile,
+        shortSlug: img.short_slug || null,
+    }));
 
- // The Making — work records + reels (202; [] until pasted)
- const makingRecords = await getMakingForHorse(horseId);
- // Documentation — the horse's papers (148/209; RLS-gated)
- const horseDocuments = await getHorseDocuments(supabase, horseId);
+    // The Making — work records + reels (202; [] until pasted)
+    const makingRecords = await getMakingForHorse(horseId);
+    // Documentation — the horse's papers (148/209; RLS-gated)
+    const horseDocuments = await getHorseDocuments(supabase, horseId);
 
- // ================================================================
- // PROVENANCE: Show Records + Pedigree (read-only)
- // ================================================================
+    // ================================================================
+    // PROVENANCE: Show Records + Pedigree (read-only)
+    // ================================================================
 
- const showRecords = (rawRecords ?? []).map(
- (r) => ({
- id: r.id,
- showName: r.show_name,
- showId: r.show_id,
- showDate: r.show_date,
- division: r.division,
- className: r.class_name,
- placing: r.placing,
- ribbonColor: r.ribbon_color,
- judgeName: r.judge_name,
- isNan: r.is_nan,
- notes: r.notes,
- showLocation: r.show_location,
- sectionName: r.section_name,
- awardCategory: r.award_category,
- competitionLevel: r.competition_level,
- showDateText: r.show_date_text,
- verificationTier: r.verification_tier,
- totalEntries: (r as { total_entries?: number | null }).total_entries ?? null,
- ...qualifierDisplayFields(r as Record<string, unknown>),
- scoreTotal: (r as { score_total?: number | string | null }).score_total == null ? null : Number((r as { score_total?: number | string | null }).score_total),
- entryPhotoUrl: ((r as { entry_photo_url?: string | null }).entry_photo_url) ?? null,
- }),
- );
+    const showRecords = (rawRecords ?? []).map((r) => ({
+        id: r.id,
+        showName: r.show_name,
+        showId: r.show_id,
+        showDate: r.show_date,
+        division: r.division,
+        className: r.class_name,
+        placing: r.placing,
+        ribbonColor: r.ribbon_color,
+        judgeName: r.judge_name,
+        isNan: r.is_nan,
+        notes: r.notes,
+        showLocation: r.show_location,
+        sectionName: r.section_name,
+        awardCategory: r.award_category,
+        competitionLevel: r.competition_level,
+        showDateText: r.show_date_text,
+        verificationTier: r.verification_tier,
+        totalEntries: (r as { total_entries?: number | null }).total_entries ?? null,
+        ...qualifierDisplayFields(r as Record<string, unknown>),
+        scoreTotal:
+            (r as { score_total?: number | string | null }).score_total == null
+                ? null
+                : Number((r as { score_total?: number | string | null }).score_total),
+        entryPhotoUrl: (r as { entry_photo_url?: string | null }).entry_photo_url ?? null,
+    }));
 
- const pedigree = rawPedigree
- ? {
- id: rawPedigree.id,
- sireName: rawPedigree.sire_name,
- damName: rawPedigree.dam_name,
- sireId: rawPedigree.sire_id,
- damId: rawPedigree.dam_id,
- sculptor: rawPedigree.sculptor,
- castNumber: rawPedigree.cast_number,
-editionSize: rawPedigree.edition_size,
- lineageNotes: rawPedigree.lineage_notes,
- // 213 — absent before the paste; the card treats undefined as none.
- sireUrl: (rawPedigree as { sire_url?: string | null }).sire_url ?? null,
- damUrl: (rawPedigree as { dam_url?: string | null }).dam_url ?? null,
- bredBy: (rawPedigree as { bred_by?: string | null }).bred_by ?? null,
- }
- : null;
+    const pedigree = rawPedigree
+        ? {
+              id: rawPedigree.id,
+              sireName: rawPedigree.sire_name,
+              damName: rawPedigree.dam_name,
+              sireId: rawPedigree.sire_id,
+              damId: rawPedigree.dam_id,
+              sculptor: rawPedigree.sculptor,
+              castNumber: rawPedigree.cast_number,
+              editionSize: rawPedigree.edition_size,
+              lineageNotes: rawPedigree.lineage_notes,
+              // 213 — absent before the paste; the card treats undefined as none.
+              sireUrl: (rawPedigree as { sire_url?: string | null }).sire_url ?? null,
+              damUrl: (rawPedigree as { dam_url?: string | null }).dam_url ?? null,
+              bredBy: (rawPedigree as { bred_by?: string | null }).bred_by ?? null,
+          }
+        : null;
 
- // Papers (213): RLS-gated read + server-signed URLs; [] before the paste.
- const papers = await listPapers(horseId);
- // Other accomplishments (214): [] before the paste.
- const accomplishments = await listAccomplishments(horseId);
- // Names for the "attached to" tag in the Papers folder.
- const attachedLabels: Record<string, string> = {};
- for (const r of showRecords) attachedLabels[r.id] = r.showName;
- for (const a of accomplishments) attachedLabels[a.id] = a.title;
+    // Papers (213): RLS-gated read + server-signed URLs; [] before the paste.
+    const papers = await listPapers(horseId);
+    // Other accomplishments (214): [] before the paste.
+    const accomplishments = await listAccomplishments(horseId);
+    // Names for the "attached to" tag in the Papers folder.
+    const attachedLabels: Record<string, string> = {};
+    for (const r of showRecords) attachedLabels[r.id] = r.showName;
+    for (const a of accomplishments) attachedLabels[a.id] = a.title;
 
- // Reference display info
- const cat = horse.catalog_items;
- const attrs = (cat?.attributes ?? {}) as Record<string, unknown>;
- // One owner for the Mold/Manufacturer/Scale lines (lib/passport/referenceLines).
- const refInfo = cat ? referenceLines(cat as unknown as ReferenceRow) : null;
+    // Reference display info
+    const cat = horse.catalog_items;
+    const attrs = (cat?.attributes ?? {}) as Record<string, unknown>;
+    // One owner for the Mold/Manufacturer/Scale lines (lib/passport/referenceLines).
+    const refInfo = cat ? referenceLines(cat as unknown as ReferenceRow) : null;
 
- // Link to this model's public reference-catalog entry.
- const refHref =
- horse.catalog_id && cat
- ? referenceHref({
- id: horse.catalog_id,
- maker: cat.maker,
- title: cat.title,
- maker_slug: cat.maker_slug,
- slug: cat.slug,
- })
- : null;
+    // Link to this model's public reference-catalog entry.
+    const refHref =
+        horse.catalog_id && cat
+            ? referenceHref({
+                  id: horse.catalog_id,
+                  maker: cat.maker,
+                  title: cat.title,
+                  maker_slug: cat.maker_slug,
+                  slug: cat.slug,
+              })
+            : null;
 
- const releaseInfo =
- cat && cat.item_type ==="plastic_release"
- ? {
- name: cat.title,
- modelNumber: attrs.model_number as string | null,
- color: attrs.color_description as string | null,
- yearStart: attrs.release_year_start as number | null,
- yearEnd: attrs.release_year_end as number | null,
- }
- : null;
+    const releaseInfo =
+        cat && cat.item_type === "plastic_release"
+            ? {
+                  name: cat.title,
+                  modelNumber: attrs.model_number as string | null,
+                  color: attrs.color_description as string | null,
+                  yearStart: attrs.release_year_start as number | null,
+                  yearEnd: attrs.release_year_end as number | null,
+              }
+            : null;
 
- const ownerAlias = horse.users?.alias_name ??"Unknown";
-  const isOwnHorse = horse.owner_id === user.id;
-  const assetCat = (horse.asset_category || "model") as AssetCategory;
-  const assetConfig = getAssetConfig(assetCat);
-  const horseAttributes = (horse.attributes ?? {}) as Record<string, unknown>;
+    const ownerAlias = horse.users?.alias_name ?? "Unknown";
+    const isOwnHorse = horse.owner_id === user.id;
+    const assetCat = (horse.asset_category || "model") as AssetCategory;
+    const assetConfig = getAssetConfig(assetCat);
+    const horseAttributes = (horse.attributes ?? {}) as Record<string, unknown>;
 
- const isTrustedSeller = !!trustedData;
+    const isTrustedSeller = !!trustedData;
 
- const recordSummary =
- summarizeShowRecords(
- (rawRecords ?? []).map((r) => ({
- horse_id: horseId,
- placing: r.placing,
- ribbon_color: r.ribbon_color,
- verification_tier: r.verification_tier,
- })),
- ).get(horseId) ?? null;
- const cardsCount = publicCardsForCount.length;
- const refName = refInfo ? `${refInfo.maker} — ${refInfo.name}` : null;
- const publicNamePrefix = titlePrefix(publicTitles.map((t) => t.code));
- const hasMarketEstimate = !!marketEstimate && marketEstimate.transactionVolume > 0;
+    const recordSummary =
+        summarizeShowRecords(
+            (rawRecords ?? []).map((r) => ({
+                horse_id: horseId,
+                placing: r.placing,
+                ribbon_color: r.ribbon_color,
+                verification_tier: r.verification_tier,
+            })),
+        ).get(horseId) ?? null;
+    const cardsCount = publicCardsForCount.length;
+    const refName = refInfo ? `${refInfo.maker} — ${refInfo.name}` : null;
+    const publicNamePrefix = titlePrefix(publicTitles.map((t) => t.code));
+    const hasMarketEstimate = !!marketEstimate && marketEstimate.transactionVolume > 0;
 
- return (
- <ExplorerLayout noHeader>
- <ViewBeacon entityType="horse" entityId={horseId} secondaryType={cameFromMarket && isForSale ?"listing" : undefined} />
- {/* The stolen/missing banner stays above EVERYTHING */}
- {horse.trade_status ==="Stolen/Missing" && (
- <div className="mb-4 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 p-4">
- <span className="text-[1.3em]">🚨</span>
- <div>
- <strong className="text-destructive">Stolen / Missing</strong>
- <p className="mt-1 text-muted-foreground text-sm">
- This model has been flagged by its owner. Transfers and offers are blocked.
- </p>
- </div>
- </div>
- )}
- <PassportMasthead
- horseName={
- publicNamePrefix ? `${publicNamePrefix} ${horse.custom_name}` : horse.custom_name
- }
- ownerAlias={ownerAlias}
- referenceName={refName}
- referenceHref={refHref}
- backHref={cameFromMarket ?"/market" :"/community"}
- backLabel={cameFromMarket ?"Marketplace" :"Show Ring"}
- // Favorites are public LIKES (owner ruling) — the tally belongs
- // where everyone sees it, not buried in the action bar. Display
- // only; FavoriteButton below still owns the toggle + live count.
- favoriteCount={favoriteCount ?? 0}
- />
+    return (
+        <ExplorerLayout noHeader>
+            <ViewBeacon
+                entityType="horse"
+                entityId={horseId}
+                secondaryType={cameFromMarket && isForSale ? "listing" : undefined}
+            />
+            {/* The stolen/missing banner stays above EVERYTHING */}
+            {horse.trade_status === "Stolen/Missing" && (
+                <div className="mb-4 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 p-4">
+                    <span className="text-[1.3em]">🚨</span>
+                    <div>
+                        <strong className="text-destructive">Stolen / Missing</strong>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                            This model has been flagged by its owner. Transfers and offers are blocked.
+                        </p>
+                    </div>
+                </div>
+            )}
+            <PassportMasthead
+                horseName={publicNamePrefix ? `${publicNamePrefix} ${horse.custom_name}` : horse.custom_name}
+                ownerAlias={ownerAlias}
+                referenceName={refName}
+                referenceHref={refHref}
+                backHref={cameFromMarket ? "/market" : "/community"}
+                backLabel={cameFromMarket ? "Marketplace" : "Show Ring"}
+                // Favorites are public LIKES (owner ruling) — the tally belongs
+                // where everyone sees it, not buried in the action bar. Display
+                // only; FavoriteButton below still owns the toggle + live count.
+                favoriteCount={favoriteCount ?? 0}
+            />
 
- {/* Two-column layout: Gallery | Ledger Card */}
- <div className="animate-fade-in-up grid grid-cols-1 gap-8 lg:grid-cols-[5fr_7fr] lg:items-start lg:gap-12">
- {/* Left: the gallery, and only the gallery — pinned under the header
+            {/* Two-column layout: Gallery | Ledger Card */}
+            <div className="animate-fade-in-up grid grid-cols-1 gap-8 lg:grid-cols-[5fr_7fr] lg:items-start lg:gap-12">
+                {/* Left: the gallery, and only the gallery — pinned under the header
      while the ledger scrolls beside it (same as the owner's page). */}
- <div className="lg:sticky lg:top-[calc(var(--header-height,64px)+1rem)] lg:self-start">
- <div className="overflow-hidden rounded-2xl shadow-md" id="passport-photos">
- <PassportGallery images={galleryImages} />
- </div>
- </div>
+                <div className="lg:sticky lg:top-[calc(var(--header-height,64px)+1rem)] lg:self-start">
+                    <div className="overflow-hidden rounded-2xl shadow-md" id="passport-photos">
+                        <PassportGallery images={galleryImages} />
+                    </div>
+                </div>
 
- {/* Right: The Ledger Card */}
- <div className="flex flex-col gap-2 rounded-3xl border border-input bg-[#C8B596] px-6 py-8 shadow-sm md:px-10" style={PARCHMENT_INK}>
- {/* Buyer panel — the ONE honest commerce surface (the masthead
+                {/* Right: The Ledger Card */}
+                <div
+                    className="flex flex-col gap-2 rounded-3xl border border-input bg-[#C8B596] px-6 py-8 shadow-sm md:px-10"
+                    style={PARCHMENT_INK}
+                >
+                    {/* Buyer panel — the ONE honest commerce surface (the masthead
      carries the name + reference). The market ESTIMATE sits
      adjacent but visually distinct: asking price and estimate
      must never read as the same number. */}
- {isForSale && (
- <>
- <BuyerPanel
- horseId={horseId}
- horseName={horse.custom_name}
- tradeStatus={horse.trade_status as"For Sale" |"Open to Offers"}
- listingPrice={horse.listing_price}
- conditionGrade={horse.condition_grade}
- recordSummary={recordSummary}
- cardsCount={cardsCount}
- variant="member"
- sellerId={horse.owner_id}
- seller={sellerTerms}
- isOwner={isOwnHorse}
- hoofprintHref="#passport-hoofprint"
- />
- {hasMarketEstimate && horse.catalog_id && (
- <div data-testid="market-estimate">
- <MarketValueBadge catalogId={horse.catalog_id} />
- <p className="mt-1 mb-0 text-xs text-muted-foreground italic">
- Market estimate from recent sales of this reference — not the asking price above.
- </p>
- </div>
- )}
- </>
- )}
+                    {isForSale && (
+                        <>
+                            <BuyerPanel
+                                horseId={horseId}
+                                horseName={horse.custom_name}
+                                tradeStatus={horse.trade_status as "For Sale" | "Open to Offers"}
+                                listingPrice={horse.listing_price}
+                                conditionGrade={horse.condition_grade}
+                                recordSummary={recordSummary}
+                                cardsCount={cardsCount}
+                                variant="member"
+                                sellerId={horse.owner_id}
+                                seller={sellerTerms}
+                                isOwner={isOwnHorse}
+                                hoofprintHref="#passport-hoofprint"
+                            />
+                            {hasMarketEstimate && horse.catalog_id && (
+                                <div data-testid="market-estimate">
+                                    <MarketValueBadge catalogId={horse.catalog_id} />
+                                    <p className="mt-1 mb-0 text-xs text-muted-foreground italic">
+                                        Market estimate from recent sales of this reference — not the asking price
+                                        above.
+                                    </p>
+                                </div>
+                            )}
+                        </>
+                    )}
 
- {/* Owner Pill */}
- <Link
- href={`/profile/${encodeURIComponent(ownerAlias)}`}
- className="py-1.5 pr-3.5 pl-1.5 bg-card border-input text-foreground inline-flex w-fit items-center gap-1 rounded-full border text-sm font-semibold no-underline shadow-md transition-all"
- >
- <span className="bg-muted border-input text-muted-foreground flex h-[28px] w-[28px] shrink-0 items-center justify-center rounded-full border">
- <svg
- width="14"
- height="14"
- viewBox="0 0 24 24"
- fill="none"
- stroke="currentColor"
- strokeWidth="2"
- strokeLinecap="round"
- strokeLinejoin="round"
- aria-hidden="true"
- >
- <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
- <circle cx="12" cy="7" r="4" />
- </svg>
- </span>
- <span>@{ownerAlias}</span>
- {isTrustedSeller && <TrustedBadge />}
- {isOwnHorse && (
- <span className="bg-forest inline-flex rounded-sm px-2 py-[2px] text-xs font-bold tracking-wider text-white uppercase">
- You
- </span>
- )}
- </Link>
+                    {/* Owner Pill */}
+                    <Link
+                        href={`/profile/${encodeURIComponent(ownerAlias)}`}
+                        className="inline-flex w-fit items-center gap-1 rounded-full border border-input bg-card py-1.5 pr-3.5 pl-1.5 text-sm font-semibold text-foreground no-underline shadow-md transition-all"
+                    >
+                        <span className="flex h-[28px] w-[28px] shrink-0 items-center justify-center rounded-full border border-input bg-muted text-muted-foreground">
+                            <svg
+                                width="14"
+                                height="14"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                aria-hidden="true"
+                            >
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                <circle cx="12" cy="7" r="4" />
+                            </svg>
+                        </span>
+                        <span>@{ownerAlias}</span>
+                        {isTrustedSeller && <TrustedBadge />}
+                        {isOwnHorse && (
+                            <span className="inline-flex rounded-sm bg-forest px-2 py-[2px] text-xs font-bold tracking-wider text-white uppercase">
+                                You
+                            </span>
+                        )}
+                    </Link>
 
- {!isOwnHorse && (
- <Link
- href={`/profile/${encodeURIComponent(ownerAlias)}`}
- className="text-muted-foreground text-sm no-underline transition-all"
- id="see-more-seller"
- >
- See all models from @{ownerAlias} →
- </Link>
- )}
+                    {!isOwnHorse && (
+                        <Link
+                            href={`/profile/${encodeURIComponent(ownerAlias)}`}
+                            className="text-sm text-muted-foreground no-underline transition-all"
+                            id="see-more-seller"
+                        >
+                            See all models from @{ownerAlias} →
+                        </Link>
+                    )}
 
- {/* The way back to the owner view. Same horse, two pages: this is
+                    {/* The way back to the owner view. Same horse, two pages: this is
      what everyone else sees, the stable page is where it gets
      edited. Only the owner is offered the door. */}
- {isOwnHorse && (
- <Link
- href={`/stable/${horseId}`}
- className="text-muted-foreground text-sm no-underline transition-all"
- id="back-to-private-passport"
- >
- ← Back to your stable copy (edit, vault, transfer)
- </Link>
- )}
+                    {isOwnHorse && (
+                        <Link
+                            href={`/stable/${horseId}`}
+                            className="text-sm text-muted-foreground no-underline transition-all"
+                            id="back-to-private-passport"
+                        >
+                            ← Back to your stable copy (edit, vault, transfer)
+                        </Link>
+                    )}
 
- {/* Model Details Card — two columns of rows on desktop */}
- <div className="bg-card/40 p-4 border-input rounded-lg border shadow-md transition-all lg:grid lg:grid-cols-2 lg:gap-x-8 lg:[&>h3]:col-span-2">
- <h3>
- <span aria-hidden="true">📋</span>{""}
- {(horse.asset_category ||"model") ==="model"
- ?"Model Details"
- : `${(horse.asset_category ||"model").charAt(0).toUpperCase() + (horse.asset_category ||"model").slice(1)} Details`}
- </h3>
+                    {/* Model Details Card — two columns of rows on desktop */}
+                    <div className="rounded-lg border border-input bg-card/40 p-4 shadow-md transition-all lg:grid lg:grid-cols-2 lg:gap-x-8 lg:[&>h3]:col-span-2">
+                        <h3>
+                            <span aria-hidden="true">📋</span>
+                            {""}
+                            {(horse.asset_category || "model") === "model"
+                                ? "Model Details"
+                                : `${(horse.asset_category || "model").charAt(0).toUpperCase() + (horse.asset_category || "model").slice(1)} Details`}
+                        </h3>
 
- {horse.asset_category && horse.asset_category !=="model" && (
- <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-secondary-foreground text-sm font-medium">
- Category
- </span>
- <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
-  {horse.asset_category ==="tack"
-  ?"🏇 Tack & Gear"
-  : horse.asset_category ==="prop"
-  ?"🌲 Prop"
-  : horse.asset_category ==="diorama"
-  ?"🎭 Diorama"
-  : "🐄 Other Model"}
- </span>
- </div>
- )}
+                        {horse.asset_category && horse.asset_category !== "model" && (
+                            <div className="flex items-center justify-between border-b border-white/20 px-0 py-[5px]">
+                                <span className="text-sm font-medium text-secondary-foreground">Category</span>
+                                <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
+                                    {horse.asset_category === "tack"
+                                        ? "🏇 Tack & Gear"
+                                        : horse.asset_category === "prop"
+                                          ? "🌲 Prop"
+                                          : horse.asset_category === "diorama"
+                                            ? "🎭 Diorama"
+                                            : "🐄 Other Model"}
+                                </span>
+                            </div>
+                        )}
 
- {horse.finish_type && (
- <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-secondary-foreground text-sm font-medium">
- Finish Type
- </span>
- <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
- {horse.finish_type}
- </span>
- </div>
- )}
+                        {horse.finish_type && (
+                            <div className="flex items-center justify-between border-b border-white/20 px-0 py-[5px]">
+                                <span className="text-sm font-medium text-secondary-foreground">Finish Type</span>
+                                <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
+                                    {horse.finish_type}
+                                </span>
+                            </div>
+                        )}
 
- {horse.condition_grade && (
- <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-secondary-foreground text-sm font-medium">
- Condition
- </span>
- <span className="text-success inline-flex items-center gap-[4px] rounded-full border border-success/30 bg-success/10 px-[10px] py-[2px] text-sm font-semibold">
- {horse.condition_grade}
- </span>
- </div>
- )}
+                        {horse.condition_grade && (
+                            <div className="flex items-center justify-between border-b border-white/20 px-0 py-[5px]">
+                                <span className="text-sm font-medium text-secondary-foreground">Condition</span>
+                                <span className="inline-flex items-center gap-[4px] rounded-full border border-success/30 bg-success/10 px-[10px] py-[2px] text-sm font-semibold text-success">
+                                    {horse.condition_grade}
+                                </span>
+                            </div>
+                        )}
 
- {refInfo ? (
- <>
- <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-secondary-foreground text-sm font-medium">
- {refInfo.type}
- </span>
- <span className={`text-foreground max-w-[60%] text-right text-sm font-semibold${refInfo.moldKnown ? "" : " italic opacity-70"}`}>
- {refInfo.name}
- </span>
- </div>
+                        {refInfo ? (
+                            <>
+                                <div className="flex items-center justify-between border-b border-white/20 px-0 py-[5px]">
+                                    <span className="text-sm font-medium text-secondary-foreground">
+                                        {refInfo.type}
+                                    </span>
+                                    <span
+                                        className={`max-w-[60%] text-right text-sm text-foreground font-semibold${refInfo.moldKnown ? "" : "italic opacity-70"}`}
+                                    >
+                                        {refInfo.name}
+                                    </span>
+                                </div>
 
- <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-secondary-foreground text-sm font-medium">
- {refInfo.type ==="Mold" ?"Manufacturer" :"Sculptor"}
- </span>
- <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
- {refInfo.maker}
- </span>
- </div>
+                                <div className="flex items-center justify-between border-b border-white/20 px-0 py-[5px]">
+                                    <span className="text-sm font-medium text-secondary-foreground">
+                                        {refInfo.type === "Mold" ? "Manufacturer" : "Sculptor"}
+                                    </span>
+                                    <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
+                                        {refInfo.maker}
+                                    </span>
+                                </div>
 
- <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-secondary-foreground text-sm font-medium">
- Scale
- </span>
- <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
- {refInfo.scale}
- </span>
- </div>
+                                <div className="flex items-center justify-between border-b border-white/20 px-0 py-[5px]">
+                                    <span className="text-sm font-medium text-secondary-foreground">Scale</span>
+                                    <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
+                                        {refInfo.scale}
+                                    </span>
+                                </div>
 
- {refInfo.extra && (
- <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-secondary-foreground text-sm font-medium">
- {refInfo.type ==="Mold" ?"Released" :"Medium"}
- </span>
- <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
- {refInfo.extra}
- </span>
- </div>
- )}
- </>
- ) : (
- <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-secondary-foreground text-sm font-medium">
- Reference
- </span>
- <span
- className="text-foreground max-w-[60%] text-right text-sm font-semibold italic opacity-60"
- >
- Not linked to database — Custom Entry
- </span>
- </div>
- )}
+                                {refInfo.extra && (
+                                    <div className="flex items-center justify-between border-b border-white/20 px-0 py-[5px]">
+                                        <span className="text-sm font-medium text-secondary-foreground">
+                                            {refInfo.type === "Mold" ? "Released" : "Medium"}
+                                        </span>
+                                        <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
+                                            {refInfo.extra}
+                                        </span>
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            <div className="flex items-center justify-between border-b border-white/20 px-0 py-[5px]">
+                                <span className="text-sm font-medium text-secondary-foreground">Reference</span>
+                                <span className="max-w-[60%] text-right text-sm font-semibold text-foreground italic opacity-60">
+                                    Not linked to database — Custom Entry
+                                </span>
+                            </div>
+                        )}
 
- {releaseInfo && (
- <>
- <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-secondary-foreground text-sm font-medium">
- Release
- </span>
- <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
- {releaseInfo.name}
- </span>
- </div>
+                        {releaseInfo && (
+                            <>
+                                <div className="flex items-center justify-between border-b border-white/20 px-0 py-[5px]">
+                                    <span className="text-sm font-medium text-secondary-foreground">Release</span>
+                                    <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
+                                        {releaseInfo.name}
+                                    </span>
+                                </div>
 
- {releaseInfo.modelNumber && (
- <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-secondary-foreground text-sm font-medium">
- Model #
- </span>
- <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
- #{releaseInfo.modelNumber}
- </span>
- </div>
- )}
+                                {releaseInfo.modelNumber && (
+                                    <div className="flex items-center justify-between border-b border-white/20 px-0 py-[5px]">
+                                        <span className="text-sm font-medium text-secondary-foreground">Model #</span>
+                                        <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
+                                            #{releaseInfo.modelNumber}
+                                        </span>
+                                    </div>
+                                )}
 
- {releaseInfo.color && (
- <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-secondary-foreground text-sm font-medium">
- Color
- </span>
- <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
- {releaseInfo.color}
- </span>
- </div>
- )}
+                                {releaseInfo.color && (
+                                    <div className="flex items-center justify-between border-b border-white/20 px-0 py-[5px]">
+                                        <span className="text-sm font-medium text-secondary-foreground">Color</span>
+                                        <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
+                                            {releaseInfo.color}
+                                        </span>
+                                    </div>
+                                )}
 
- {releaseInfo.yearStart && (
- <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-secondary-foreground text-sm font-medium">
- Release Years
- </span>
- <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
- {releaseInfo.yearStart}
- {releaseInfo.yearEnd && releaseInfo.yearEnd !== releaseInfo.yearStart
- ? `–${releaseInfo.yearEnd}`
- :""}
- </span>
- </div>
- )}
- </>
- )}
+                                {releaseInfo.yearStart && (
+                                    <div className="flex items-center justify-between border-b border-white/20 px-0 py-[5px]">
+                                        <span className="text-sm font-medium text-secondary-foreground">
+                                            Release Years
+                                        </span>
+                                        <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
+                                            {releaseInfo.yearStart}
+                                            {releaseInfo.yearEnd && releaseInfo.yearEnd !== releaseInfo.yearStart
+                                                ? `–${releaseInfo.yearEnd}`
+                                                : ""}
+                                        </span>
+                                    </div>
+                                )}
+                            </>
+                        )}
 
- {resinMakeup && (
- <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-secondary-foreground text-sm font-medium">
- 🧪 Resin
- </span>
- <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
- {resinMakeup}
- </span>
- </div>
- )}
- {resin.castBy && (
- <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-secondary-foreground text-sm font-medium">
- 🏭 Cast by
- </span>
- <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
- {resin.castBy}
- </span>
- </div>
- )}
- {resin.prepArtist && (
- <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-secondary-foreground text-sm font-medium">
- 🪚 Prepped by
- </span>
- <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
- {resin.prepArtist}
- </span>
- </div>
- )}
- {horse.finishing_artist && (
- <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-secondary-foreground text-sm font-medium">
- 🎨 Finished by
- </span>
- <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
- {horse.finishing_artist}
- {horse.finishing_artist_verified && (
- <span
- className="ml-1.5 inline-flex items-center gap-1 rounded-full bg-forest/10 px-2 py-0.5 text-xs font-semibold text-success"
- title="Verified via commission delivery"
- >
- ✅ Verified
- </span>
- )}
- </span>
- </div>
- )}
+                        {resinMakeup && (
+                            <div className="flex items-center justify-between border-b border-white/20 px-0 py-[5px]">
+                                <span className="text-sm font-medium text-secondary-foreground">🧪 Resin</span>
+                                <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
+                                    {resinMakeup}
+                                </span>
+                            </div>
+                        )}
+                        {resin.castBy && (
+                            <div className="flex items-center justify-between border-b border-white/20 px-0 py-[5px]">
+                                <span className="text-sm font-medium text-secondary-foreground">🏭 Cast by</span>
+                                <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
+                                    {resin.castBy}
+                                </span>
+                            </div>
+                        )}
+                        {resin.prepArtist && (
+                            <div className="flex items-center justify-between border-b border-white/20 px-0 py-[5px]">
+                                <span className="text-sm font-medium text-secondary-foreground">🪚 Prepped by</span>
+                                <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
+                                    {resin.prepArtist}
+                                </span>
+                            </div>
+                        )}
+                        {horse.finishing_artist && (
+                            <div className="flex items-center justify-between border-b border-white/20 px-0 py-[5px]">
+                                <span className="text-sm font-medium text-secondary-foreground">🎨 Finished by</span>
+                                <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
+                                    {horse.finishing_artist}
+                                    {horse.finishing_artist_verified && (
+                                        <span
+                                            className="ml-1.5 inline-flex items-center gap-1 rounded-full bg-forest/10 px-2 py-0.5 text-xs font-semibold text-success"
+                                            title="Verified via commission delivery"
+                                        >
+                                            ✅ Verified
+                                        </span>
+                                    )}
+                                </span>
+                            </div>
+                        )}
 
- {(horse.edition_number || horse.edition_size) && (
- <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-secondary-foreground text-sm font-medium">
- 📋 Edition
- </span>
- <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
- {horse.edition_number && horse.edition_size
- ? `${horse.edition_number} of ${horse.edition_size}`
- : horse.edition_size
- ? `Limited to ${horse.edition_size}`
- : `#${horse.edition_number}`}
- </span>
- </div>
- )}
+                        {(horse.edition_number || horse.edition_size) && (
+                            <div className="flex items-center justify-between border-b border-white/20 px-0 py-[5px]">
+                                <span className="text-sm font-medium text-secondary-foreground">📋 Edition</span>
+                                <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
+                                    {horse.edition_number && horse.edition_size
+                                        ? `${horse.edition_number} of ${horse.edition_size}`
+                                        : horse.edition_size
+                                          ? `Limited to ${horse.edition_size}`
+                                          : `#${horse.edition_number}`}
+                                </span>
+                            </div>
+                        )}
 
- <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-secondary-foreground text-sm font-medium">Added</span>
- <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
- {new Date(horse.created_at).toLocaleDateString("en-US", {
- year:"numeric",
- month:"long",
- day:"numeric",
- })}
- </span>
- </div>
- </div>
+                        <div className="flex items-center justify-between border-b border-white/20 px-0 py-[5px]">
+                            <span className="text-sm font-medium text-secondary-foreground">Added</span>
+                            <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
+                                {new Date(horse.created_at).toLocaleDateString("en-US", {
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                })}
+                            </span>
+                        </div>
+                    </div>
 
-  {/* Category-Specific Attributes */}
-  {assetCat !== "model" && Object.keys(horseAttributes).length > 0 && (
-  <div className="mt-2">
-  <AssetDetailRenderer category={assetCat} attributes={horseAttributes} />
-  </div>
-  )}
+                    {/* Category-Specific Attributes */}
+                    {assetCat !== "model" && Object.keys(horseAttributes).length > 0 && (
+                        <div className="mt-2">
+                            <AssetDetailRenderer category={assetCat} attributes={horseAttributes} />
+                        </div>
+                    )}
 
- {/* Finish Details */}
- {horse.finish_details && (
- <div className="bg-card/40 p-4 border-input rounded-lg border shadow-md transition-all">
- <h3>
- <span aria-hidden="true">✨</span> Finish
- </h3>
- <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-secondary-foreground text-sm font-medium">
- Finish Details
- </span>
- <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
- {horse.finish_details}
- </span>
- </div>
- </div>
- )}
+                    {/* Finish Details */}
+                    {horse.finish_details && (
+                        <div className="rounded-lg border border-input bg-card/40 p-4 shadow-md transition-all">
+                            <h3>
+                                <span aria-hidden="true">✨</span> Finish
+                            </h3>
+                            <div className="flex items-center justify-between border-b border-white/20 px-0 py-[5px]">
+                                <span className="text-sm font-medium text-secondary-foreground">Finish Details</span>
+                                <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
+                                    {horse.finish_details}
+                                </span>
+                            </div>
+                        </div>
+                    )}
 
-  {/* Show Bio — model only */}
-  {assetConfig.showShowBio && (horseColor || horse.assigned_breed || horse.assigned_gender || horse.assigned_age || horse.regional_id) && (
- <div className="bg-card/40 p-4 border-input rounded-lg border shadow-md transition-all">
- <h3>
- <span aria-hidden="true">🏅</span> Show Identity
- </h3>
- {horseColor && (
- <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted-foreground text-sm font-medium">
- Color
- </span>
- <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
- {horseColor}
- </span>
- </div>
- )}
- {horse.assigned_breed && (
- <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted-foreground text-sm font-medium">
- Breed
- </span>
- <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
- {horse.assigned_breed}
- </span>
- </div>
- )}
- {horse.assigned_gender && (
- <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted-foreground text-sm font-medium">
- Gender
- </span>
- <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
- {horse.assigned_gender}
- </span>
- </div>
- )}
- {horse.assigned_age && (
- <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted-foreground text-sm font-medium">
- Age
- </span>
- <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
- {horse.assigned_age}
- </span>
- </div>
- )}
- {horse.regional_id && (
- <div className="border-white/20 flex items-center justify-between border-b px-0 py-[5px]">
- <span className="text-muted-foreground text-sm font-medium">
- Regional ID
- </span>
- <span className="text-foreground max-w-[60%] text-right text-sm font-semibold">
- {horse.regional_id}
- </span>
- </div>
- )}
- </div>
- )}
+                    {/* Show Bio — model only */}
+                    {assetConfig.showShowBio &&
+                        (horseColor ||
+                            horse.assigned_breed ||
+                            horse.assigned_gender ||
+                            horse.assigned_age ||
+                            horse.regional_id) && (
+                            <div className="rounded-lg border border-input bg-card/40 p-4 shadow-md transition-all">
+                                <h3>
+                                    <span aria-hidden="true">🏅</span> Show Identity
+                                </h3>
+                                {horseColor && (
+                                    <div className="flex items-center justify-between border-b border-white/20 px-0 py-[5px]">
+                                        <span className="text-sm font-medium text-muted-foreground">Color</span>
+                                        <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
+                                            {horseColor}
+                                        </span>
+                                    </div>
+                                )}
+                                {horse.assigned_breed && (
+                                    <div className="flex items-center justify-between border-b border-white/20 px-0 py-[5px]">
+                                        <span className="text-sm font-medium text-muted-foreground">Breed</span>
+                                        <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
+                                            {horse.assigned_breed}
+                                        </span>
+                                    </div>
+                                )}
+                                {horse.assigned_gender && (
+                                    <div className="flex items-center justify-between border-b border-white/20 px-0 py-[5px]">
+                                        <span className="text-sm font-medium text-muted-foreground">Gender</span>
+                                        <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
+                                            {horse.assigned_gender}
+                                        </span>
+                                    </div>
+                                )}
+                                {horse.assigned_age && (
+                                    <div className="flex items-center justify-between border-b border-white/20 px-0 py-[5px]">
+                                        <span className="text-sm font-medium text-muted-foreground">Age</span>
+                                        <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
+                                            {horse.assigned_age}
+                                        </span>
+                                    </div>
+                                )}
+                                {horse.regional_id && (
+                                    <div className="flex items-center justify-between border-b border-white/20 px-0 py-[5px]">
+                                        <span className="text-sm font-medium text-muted-foreground">Regional ID</span>
+                                        <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
+                                            {horse.regional_id}
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+                        )}
 
- {/* Public Notes */}
- {horse.public_notes && (
- <div className="bg-card/40 p-4 border-input rounded-lg border shadow-md transition-all">
- <h3>
- <span aria-hidden="true">📝</span> Notes
- </h3>
- <p className="text-secondary-foreground m-0 leading-[1.6] whitespace-pre-wrap"><LinkifiedText text={horse.public_notes} /></p>
- </div>
- )}
+                    {/* Public Notes */}
+                    {horse.public_notes && (
+                        <div className="rounded-lg border border-input bg-card/40 p-4 shadow-md transition-all">
+                            <h3>
+                                <span aria-hidden="true">📝</span> Notes
+                            </h3>
+                            <p className="m-0 leading-[1.6] whitespace-pre-wrap text-secondary-foreground">
+                                <LinkifiedText text={horse.public_notes} />
+                            </p>
+                        </div>
+                    )}
 
- {/* Documentation — breed notes and reference links a judge can check */}
- <HorseDocuments horseId={horseId} documents={horseDocuments} isOwner={isOwnHorse} />
+                    {/* Documentation — breed notes and reference links a judge can check */}
+                    <HorseDocuments horseId={horseId} documents={horseDocuments} isOwner={isOwnHorse} />
 
- {/* 🔒 NO Financial Vault section — this is a PUBLIC view */}
+                    {/* 🔒 NO Financial Vault section — this is a PUBLIC view */}
 
- {/* Market Value Badge (for-sale horses get it adjacent to the
+                    {/* Market Value Badge (for-sale horses get it adjacent to the
      buyer panel above with its estimate framing) */}
- {!isForSale && horse.catalog_id && <MarketValueBadge catalogId={horse.catalog_id} />}
+                    {!isForSale && horse.catalog_id && <MarketValueBadge catalogId={horse.catalog_id} />}
 
- {/* Action Bar — split layout: icon row + full-width CTA */}
- <div className="passport-action-bar">
- <div className="flex flex-wrap items-center justify-center gap-1">
- <FavoriteButton
- horseId={horseId}
- initialIsFavorited={!!userFav}
- initialCount={favoriteCount ?? 0}
- />
- {horse.catalog_id && <WishlistButton catalogId={horse.catalog_id} />}
- <ShareButton
- title={`${horse.custom_name}`}
- text={`Check out ${horse.custom_name} on Model Horse Hub!`}
- label="Share"
- variant="full"
- />
- {!isOwnHorse && <ReportButton targetType="horse" targetId={horseId} />}
- {/* Contact actions live in the buyer panel — one honest panel,
+                    {/* Action Bar — split layout: icon row + full-width CTA */}
+                    <div className="passport-action-bar">
+                        <div className="flex flex-wrap items-center justify-center gap-1">
+                            <FavoriteButton
+                                horseId={horseId}
+                                initialIsFavorited={!!userFav}
+                                initialCount={favoriteCount ?? 0}
+                            />
+                            {horse.catalog_id && <WishlistButton catalogId={horse.catalog_id} />}
+                            <ShareButton
+                                title={`${horse.custom_name}`}
+                                text={`Check out ${horse.custom_name} on Model Horse Hub!`}
+                                label="Share"
+                                variant="full"
+                            />
+                            {!isOwnHorse && <ReportButton targetType="horse" targetId={horseId} />}
+                            {/* Contact actions live in the buyer panel — one honest panel,
      no duplicate CTAs in the icon row */}
- {isOwnHorse && (
- <Button asChild><Link
- href={`/stable/${horse.id}`}
- >
- 🔒 My Passport
- </Link></Button>
- )}
- </div>
-  {assetConfig.showHoofprint && (
-  <Button asChild variant="outline" size="wide"><Link
-  href={`/community/${horseId}/hoofprint`}
-  >
-  <HorseshoeIcon /> View Hoofprint
-  </Link></Button>
-  )}
- </div>
- </div>
- </div>
+                            {isOwnHorse && (
+                                <Button asChild>
+                                    <Link href={`/stable/${horse.id}`}>🔒 My Passport</Link>
+                                </Button>
+                            )}
+                        </div>
+                        {assetConfig.showHoofprint && (
+                            <Button asChild variant="outline" size="wide">
+                                <Link href={`/community/${horseId}/hoofprint`}>
+                                    <HorseshoeIcon /> View Hoofprint
+                                </Link>
+                            </Button>
+                        )}
+                    </div>
+                </div>
+            </div>
 
- {/* Provenance — Read Only (The Making sits here with the pedigree and papers) */}
- {(showRecords.length > 0 || pedigree || papers.length > 0 || accomplishments.length > 0 || makingRecords.length > 0 || isOwnHorse) && (
- <div className="animate-fade-in-up mt-8" id="passport-show-record">
- {showRecords.length > 0 && (
- <ShowRecordTimeline horseId={horseId} records={showRecords} isOwner={false} papers={papers} horseName={horse.custom_name} />
- )}
- {accomplishments.length > 0 && (
- <div className="mt-6">
- <AccomplishmentsSection horseId={horseId} horseName={horse.custom_name} items={accomplishments} papers={papers} isOwner={false} />
- </div>
- )}
- <div className="mt-6">
- <MakingChapter
- records={makingRecords}
- ownerId={horse.owner_id}
- horseId={horseId}
- showControls
- canAddCredit={isOwnHorse}
- />
- </div>
- {pedigree && (
- <div className="mt-6">
- <PedigreeCard horseId={horseId} pedigree={pedigree} isOwner={false} />
- </div>
- )}
- {papers.length > 0 && (
- <div className="mt-6">
- <PapersSection horseId={horseId} horseName={horse.custom_name} papers={papers} isOwner={false} attachedLabels={attachedLabels} />
- </div>
- )}
- </div>
- )}
+            {/* Provenance — Read Only (The Making sits here with the pedigree and papers) */}
+            {(showRecords.length > 0 ||
+                pedigree ||
+                papers.length > 0 ||
+                accomplishments.length > 0 ||
+                makingRecords.length > 0 ||
+                isOwnHorse) && (
+                <div className="animate-fade-in-up mt-8" id="passport-show-record">
+                    {showRecords.length > 0 && (
+                        <ShowRecordTimeline
+                            horseId={horseId}
+                            records={showRecords}
+                            isOwner={false}
+                            papers={papers}
+                            horseName={horse.custom_name}
+                        />
+                    )}
+                    {accomplishments.length > 0 && (
+                        <div className="mt-6">
+                            <AccomplishmentsSection
+                                horseId={horseId}
+                                horseName={horse.custom_name}
+                                items={accomplishments}
+                                papers={papers}
+                                isOwner={false}
+                            />
+                        </div>
+                    )}
+                    <div className="mt-6">
+                        <MakingChapter
+                            records={makingRecords}
+                            ownerId={horse.owner_id}
+                            horseId={horseId}
+                            showControls
+                            canAddCredit={isOwnHorse}
+                        />
+                    </div>
+                    {pedigree && (
+                        <div className="mt-6">
+                            <PedigreeCard horseId={horseId} pedigree={pedigree} isOwner={false} />
+                        </div>
+                    )}
+                    {papers.length > 0 && (
+                        <div className="mt-6">
+                            <PapersSection
+                                horseId={horseId}
+                                horseName={horse.custom_name}
+                                papers={papers}
+                                isOwner={false}
+                                attachedLabels={attachedLabels}
+                            />
+                        </div>
+                    )}
+                </div>
+            )}
 
- {/* MHH Titles (159) — public record; renders nothing when empty */}
- <TitlesSection titles={publicTitles} />
+            {/* MHH Titles (159) — public record; renders nothing when empty */}
+            <TitlesSection titles={publicTitles} />
 
- {/* MHH Qualification Cards — public trust section (anon-safe RPC,
+            {/* MHH Qualification Cards — public trust section (anon-safe RPC,
      migration 141). Renders nothing until the migration is applied
      or when the horse holds no live cards. */}
- <PublicCardsSection horseId={horseId} />
+            <PublicCardsSection horseId={horseId} />
 
- {/* 🐾 Hoofprint — Public Read-Only (fetched in the wave above;
+            {/* 🐾 Hoofprint — Public Read-Only (fetched in the wave above;
      awaiting it here used to add a 12th serialized round trip) */}
- {(hoofprint.timeline.length > 0 || hoofprint.ownershipChain.length > 0) && (
- <div className="animate-fade-in-up mt-8" id="passport-hoofprint">
- <HoofprintTimeline
- showRecordsListedElsewhere
- horseId={horseId}
- timeline={hoofprint.timeline}
- ownershipChain={hoofprint.ownershipChain}
- lifeStage={hoofprint.lifeStage}
- isOwner={false}
- />
- </div>
- )}
+            {(hoofprint.timeline.length > 0 || hoofprint.ownershipChain.length > 0) && (
+                <div className="animate-fade-in-up mt-8" id="passport-hoofprint">
+                    <HoofprintTimeline
+                        showRecordsListedElsewhere
+                        horseId={horseId}
+                        timeline={hoofprint.timeline}
+                        ownershipChain={hoofprint.ownershipChain}
+                        lifeStage={hoofprint.lifeStage}
+                        isOwner={false}
+                    />
+                </div>
+            )}
 
- {/* Comments */}
- <div className="animate-fade-in-up mt-8">
- <UniversalFeed
- initialPosts={comments}
- context={{ horseId }}
- currentUserId={user.id}
- showComposer={true}
- composerPlaceholder="Leave a comment on this model…"
- label="Comments"
- />
- </div>
- </ExplorerLayout>
- );
+            {/* Comments */}
+            <div className="animate-fade-in-up mt-8">
+                <UniversalFeed
+                    initialPosts={comments}
+                    context={{ horseId }}
+                    currentUserId={user.id}
+                    showComposer={true}
+                    composerPlaceholder="Leave a comment on this model…"
+                    label="Comments"
+                />
+            </div>
+        </ExplorerLayout>
+    );
 }

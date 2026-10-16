@@ -25,21 +25,78 @@ export interface TemplateColumn {
 
 /** The template, in order. The example row is what the download shows. */
 export const TEMPLATE_COLUMNS: readonly TemplateColumn[] = [
-    { header: "Show name", key: "showName", required: true, example: "Spring Fling Live 2024", help: "As printed on the results." },
-    { header: "Show date", key: "showDate", example: "23/03/2024", help: "23/03/2024, 23.03.2024, 2024-03-23, March 2024 or just 2024 all work." },
+    {
+        header: "Show name",
+        key: "showName",
+        required: true,
+        example: "Spring Fling Live 2024",
+        help: "As printed on the results.",
+    },
+    {
+        header: "Show date",
+        key: "showDate",
+        example: "23/03/2024",
+        help: "23/03/2024, 23.03.2024, 2024-03-23, March 2024 or just 2024 all work.",
+    },
     { header: "Photo or live", key: "showType", example: "live", help: "photo or live (P / L). Blank = photo." },
-    { header: "Show series", key: "sanctioningBody", example: "NAMHSA", help: "NAMHSA, OMHPS, MEPSA, a club — or blank." },
-    { header: "Division", key: "division", example: "Halter", help: "Halter, Performance, Workmanship, Collectibility, Fun…" },
-    { header: "Section", key: "sectionName", example: "OF Breyer Traditional", help: "OF Breyer, OF Stone, CM, AR, Mini, Trad — whatever the show called it." },
-    { header: "Class", key: "className", example: "Stock Horse Mare", help: "The class name, or its number if that is all you have." },
-    { header: "Placing", key: "placing", required: true, example: "1st", help: "1, 1st, First, Blue, Champion, Reserve, HM, Top 5, Participant…" },
+    {
+        header: "Show series",
+        key: "sanctioningBody",
+        example: "NAMHSA",
+        help: "NAMHSA, OMHPS, MEPSA, a club — or blank.",
+    },
+    {
+        header: "Division",
+        key: "division",
+        example: "Halter",
+        help: "Halter, Performance, Workmanship, Collectibility, Fun…",
+    },
+    {
+        header: "Section",
+        key: "sectionName",
+        example: "OF Breyer Traditional",
+        help: "OF Breyer, OF Stone, CM, AR, Mini, Trad — whatever the show called it.",
+    },
+    {
+        header: "Class",
+        key: "className",
+        example: "Stock Horse Mare",
+        help: "The class name, or its number if that is all you have.",
+    },
+    {
+        header: "Placing",
+        key: "placing",
+        required: true,
+        example: "1st",
+        help: "1, 1st, First, Blue, Champion, Reserve, HM, Top 5, Participant…",
+    },
     { header: "Class size", key: "classSize", example: "12", help: "Models in the class. Leave blank if unknown." },
-    { header: "Award", key: "awardCategory", example: "", help: "Champion, Reserve Champion, Grand, Supreme, Section Champion — beyond the placing itself." },
-    { header: "Level", key: "competitionLevel", example: "", help: "Novice, Open, Youth, Pro — if the show ran levels." },
+    {
+        header: "Award",
+        key: "awardCategory",
+        example: "",
+        help: "Champion, Reserve Champion, Grand, Supreme, Section Champion — beyond the placing itself.",
+    },
+    {
+        header: "Level",
+        key: "competitionLevel",
+        example: "",
+        help: "Novice, Open, Youth, Pro — if the show ran levels.",
+    },
     { header: "Judge", key: "judgeName", example: "", help: "The judge's name if known." },
     { header: "Location", key: "showLocation", example: "Warsaw, PL", help: "City, venue or online host." },
-    { header: "Card program", key: "qualifierProgram", example: "", help: "NAN or OMEQ if the placing earned a qualification card; blank otherwise." },
-    { header: "Card color", key: "qualifierCard", example: "", help: "NAN: green (breed / halter), yellow (collectibility / workmanship), pink (performance). OMEQ: blue / orange / purple." },
+    {
+        header: "Card program",
+        key: "qualifierProgram",
+        example: "",
+        help: "NAN or OMEQ if the placing earned a qualification card; blank otherwise.",
+    },
+    {
+        header: "Card color",
+        key: "qualifierCard",
+        example: "",
+        help: "NAN: green (breed / halter), yellow (collectibility / workmanship), pink (performance). OMEQ: blue / orange / purple.",
+    },
     { header: "Card year", key: "qualifierYear", example: "", help: "The year on the card. Blank = the show's year." },
     { header: "Card id", key: "qualifierCardId", example: "", help: "The number printed on the card, if any." },
     { header: "Notes", key: "notes", example: "", help: "Anything else worth keeping with the placing." },
@@ -86,28 +143,81 @@ export interface ImportParseResult {
     missingHeaders: string[];
 }
 
-const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+const norm = (s: string) =>
+    s
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, " ")
+        .trim();
 
 /** Header aliases people actually type, on top of the template's own. */
 const HEADER_ALIASES: Record<string, keyof ImportedRecord> = {
-    show: "showName", "show name": "showName", event: "showName",
-    date: "showDate", "show date": "showDate", when: "showDate",
-    "photo or live": "showType", type: "showType", "show type": "showType", "photo live": "showType", format: "showType",
-    "show series": "sanctioningBody", series: "sanctioningBody", sanctioning: "sanctioningBody", "sanctioning body": "sanctioningBody", organisation: "sanctioningBody", organization: "sanctioningBody",
-    division: "division", "division section": "division",
-    section: "sectionName", "section name": "sectionName",
-    class: "className", "class name": "className", "class number": "className",
-    placing: "placing", placement: "placing", place: "placing", result: "placing", ribbon: "placing",
-    "class size": "classSize", entries: "classSize", "number of entries": "classSize", "of entries": "classSize", "no of entries": "classSize", "entries in class": "classSize", "in class": "classSize", "size of class": "classSize", of: "classSize", "out of": "classSize",
-    award: "awardCategory", championship: "awardCategory", champion: "awardCategory",
-    level: "competitionLevel", "competition level": "competitionLevel",
-    judge: "judgeName", "judge name": "judgeName",
-    location: "showLocation", venue: "showLocation", "place of show": "showLocation", "show location": "showLocation", where: "showLocation",
-    "card program": "qualifierProgram", program: "qualifierProgram", card: "qualifierProgram", "nan omhps": "qualifierProgram", "nan card": "qualifierProgram",
-    "card color": "qualifierCard", "card colour": "qualifierCard", colour: "qualifierCard", color: "qualifierCard",
+    show: "showName",
+    "show name": "showName",
+    event: "showName",
+    date: "showDate",
+    "show date": "showDate",
+    when: "showDate",
+    "photo or live": "showType",
+    type: "showType",
+    "show type": "showType",
+    "photo live": "showType",
+    format: "showType",
+    "show series": "sanctioningBody",
+    series: "sanctioningBody",
+    sanctioning: "sanctioningBody",
+    "sanctioning body": "sanctioningBody",
+    organisation: "sanctioningBody",
+    organization: "sanctioningBody",
+    division: "division",
+    "division section": "division",
+    section: "sectionName",
+    "section name": "sectionName",
+    class: "className",
+    "class name": "className",
+    "class number": "className",
+    placing: "placing",
+    placement: "placing",
+    place: "placing",
+    result: "placing",
+    ribbon: "placing",
+    "class size": "classSize",
+    entries: "classSize",
+    "number of entries": "classSize",
+    "of entries": "classSize",
+    "no of entries": "classSize",
+    "entries in class": "classSize",
+    "in class": "classSize",
+    "size of class": "classSize",
+    of: "classSize",
+    "out of": "classSize",
+    award: "awardCategory",
+    championship: "awardCategory",
+    champion: "awardCategory",
+    level: "competitionLevel",
+    "competition level": "competitionLevel",
+    judge: "judgeName",
+    "judge name": "judgeName",
+    location: "showLocation",
+    venue: "showLocation",
+    "place of show": "showLocation",
+    "show location": "showLocation",
+    where: "showLocation",
+    "card program": "qualifierProgram",
+    program: "qualifierProgram",
+    card: "qualifierProgram",
+    "nan omhps": "qualifierProgram",
+    "nan card": "qualifierProgram",
+    "card color": "qualifierCard",
+    "card colour": "qualifierCard",
+    colour: "qualifierCard",
+    color: "qualifierCard",
     "card year": "qualifierYear",
-    "card id": "qualifierCardId", "card number": "qualifierCardId", "ticket number": "qualifierCardId",
-    notes: "notes", note: "notes", comments: "notes",
+    "card id": "qualifierCardId",
+    "card number": "qualifierCardId",
+    "ticket number": "qualifierCardId",
+    notes: "notes",
+    note: "notes",
+    comments: "notes",
 };
 
 export function matchHeader(header: string): keyof ImportedRecord | null {
@@ -119,8 +229,30 @@ export function matchHeader(header: string): keyof ImportedRecord | null {
 }
 
 const MONTHS: Record<string, number> = {
-    jan: 1, january: 1, feb: 2, february: 2, mar: 3, march: 3, apr: 4, april: 4, may: 5, jun: 6, june: 6,
-    jul: 7, july: 7, aug: 8, august: 8, sep: 9, sept: 9, september: 9, oct: 10, october: 10, nov: 11, november: 11, dec: 12, december: 12,
+    jan: 1,
+    january: 1,
+    feb: 2,
+    february: 2,
+    mar: 3,
+    march: 3,
+    apr: 4,
+    april: 4,
+    may: 5,
+    jun: 6,
+    june: 6,
+    jul: 7,
+    july: 7,
+    aug: 8,
+    august: 8,
+    sep: 9,
+    sept: 9,
+    september: 9,
+    oct: 10,
+    october: 10,
+    nov: 11,
+    november: 11,
+    dec: 12,
+    december: 12,
 };
 
 function iso(y: number, m: number, d: number): string | null {
@@ -146,7 +278,9 @@ export function parseShowDate(raw: string): { showDate: string | null; showDateT
     m = t.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})$/);
     if (m) {
         // Day-first unless that is impossible (13/05 is a day; 05/13 must be US).
-        const a = +m[1], b = +m[2], y = +m[3];
+        const a = +m[1],
+            b = +m[2],
+            y = +m[3];
         const d = a > 12 ? iso(y, b, a) : b > 12 ? iso(y, a, b) : iso(y, b, a);
         return d ? { showDate: d, showDateText: null, ok: true } : { showDate: null, showDateText: t, ok: false };
     }
@@ -160,29 +294,90 @@ export function parseShowDate(raw: string): { showDate: string | null; showDateT
     }
     m = t.match(/^([a-z]+)\.?\s+(\d{4})$/i);
     if (m && MONTHS[m[1].toLowerCase()]) {
-        return { showDate: `${m[2]}-${String(MONTHS[m[1].toLowerCase()]).padStart(2, "0")}-01`, showDateText: t, ok: true };
+        return {
+            showDate: `${m[2]}-${String(MONTHS[m[1].toLowerCase()]).padStart(2, "0")}-01`,
+            showDateText: t,
+            ok: true,
+        };
     }
     m = t.match(/^(19|20)\d{2}$/);
     if (m) return { showDate: `${t}-01-01`, showDateText: t, ok: true };
     return { showDate: null, showDateText: t, ok: false };
 }
 
-const ORDINALS: Record<string, number> = { first: 1, second: 2, third: 3, fourth: 4, fifth: 5, sixth: 6, seventh: 7, eighth: 8, ninth: 9, tenth: 10 };
-const RIBBON_BY_PLACE: Record<number, string> = { 1: "Blue", 2: "Red", 3: "Yellow", 4: "White", 5: "Pink", 6: "Green", 7: "Purple", 8: "Brown", 9: "Gray", 10: "Light Blue" };
-const PLACE_BY_RIBBON: Record<string, number> = { blue: 1, red: 2, yellow: 3, white: 4, pink: 5, green: 6, purple: 7, brown: 8, gray: 9, grey: 9, "light blue": 10 };
+const ORDINALS: Record<string, number> = {
+    first: 1,
+    second: 2,
+    third: 3,
+    fourth: 4,
+    fifth: 5,
+    sixth: 6,
+    seventh: 7,
+    eighth: 8,
+    ninth: 9,
+    tenth: 10,
+};
+const RIBBON_BY_PLACE: Record<number, string> = {
+    1: "Blue",
+    2: "Red",
+    3: "Yellow",
+    4: "White",
+    5: "Pink",
+    6: "Green",
+    7: "Purple",
+    8: "Brown",
+    9: "Gray",
+    10: "Light Blue",
+};
+const PLACE_BY_RIBBON: Record<string, number> = {
+    blue: 1,
+    red: 2,
+    yellow: 3,
+    white: 4,
+    pink: 5,
+    green: 6,
+    purple: 7,
+    brown: 8,
+    gray: 9,
+    grey: 9,
+    "light blue": 10,
+};
 const NAMED_PLACINGS: Record<string, string> = {
-    "grand champion": "Grand Champion", grand: "Grand Champion", gc: "Grand Champion",
-    "reserve grand champion": "Reserve Grand Champion", "reserve grand": "Reserve Grand Champion", rgc: "Reserve Grand Champion",
-    champion: "Champion", ch: "Champion", "section champion": "Champion",
-    "reserve champion": "Reserve Champion", reserve: "Reserve Champion", res: "Reserve Champion", rc: "Reserve Champion",
-    "honorable mention": "Honorable Mention", "honourable mention": "Honorable Mention", hm: "Honorable Mention",
-    "top 3": "Top 3", "top 5": "Top 5", "top 10": "Top 10", "top ten": "Top 10", "top five": "Top 5", "top three": "Top 3",
-    participant: "Participant", participation: "Participant", entered: "Participant", nq: "Participant",
-    supreme: "Supreme Champion", "supreme champion": "Supreme Champion", "overall champion": "Supreme Champion",
-    "reserve supreme": "Reserve Supreme Champion", "reserve supreme champion": "Reserve Supreme Champion",
+    "grand champion": "Grand Champion",
+    grand: "Grand Champion",
+    gc: "Grand Champion",
+    "reserve grand champion": "Reserve Grand Champion",
+    "reserve grand": "Reserve Grand Champion",
+    rgc: "Reserve Grand Champion",
+    champion: "Champion",
+    ch: "Champion",
+    "section champion": "Champion",
+    "reserve champion": "Reserve Champion",
+    reserve: "Reserve Champion",
+    res: "Reserve Champion",
+    rc: "Reserve Champion",
+    "honorable mention": "Honorable Mention",
+    "honourable mention": "Honorable Mention",
+    hm: "Honorable Mention",
+    "top 3": "Top 3",
+    "top 5": "Top 5",
+    "top 10": "Top 10",
+    "top ten": "Top 10",
+    "top five": "Top 5",
+    "top three": "Top 3",
+    participant: "Participant",
+    participation: "Participant",
+    entered: "Participant",
+    nq: "Participant",
+    supreme: "Supreme Champion",
+    "supreme champion": "Supreme Champion",
+    "overall champion": "Supreme Champion",
+    "reserve supreme": "Reserve Supreme Champion",
+    "reserve supreme champion": "Reserve Supreme Champion",
 };
 
-const ordinal = (n: number) => `${n}${n % 100 >= 11 && n % 100 <= 13 ? "th" : ["th", "st", "nd", "rd"][n % 10] ?? "th"}`;
+const ordinal = (n: number) =>
+    `${n}${n % 100 >= 11 && n % 100 <= 13 ? "th" : (["th", "st", "nd", "rd"][n % 10] ?? "th")}`;
 
 /** "1" / "1st" / "First" / "Blue" / "Champion" → the site's placing text plus the ribbon colour it implies. */
 export function parsePlacing(raw: string): { placing: string; ribbonColor: string | null } | null {
@@ -279,13 +474,19 @@ export function parseImportRows(rows: Record<string, string>[]): ImportParseResu
         let qualifierYear: number | null = null;
         if (progRaw && !/^(no|none|n|-|blank)$/.test(progRaw)) {
             const candidate = progRaw.replace(/\s*card$/, "").replace(/\s+/g, "");
-            const p = candidate === "nan" || candidate === "namhsa" ? "nan" : candidate === "omeq" || candidate === "usomhs" || candidate === "omhps" ? "omeq" : candidate;
+            const p =
+                candidate === "nan" || candidate === "namhsa"
+                    ? "nan"
+                    : candidate === "omeq" || candidate === "usomhs" || candidate === "omhps"
+                      ? "omeq"
+                      : candidate;
             if (isQualifierProgram(p)) {
                 qualifierProgram = p;
                 const cardRaw = norm(cell("qualifierCard"));
                 const card = programInfo(p).cards.find((c) => c.value === cardRaw || norm(c.label).startsWith(cardRaw));
                 if (!cardRaw) fail(`Card program ${programInfo(p).short} needs a card color.`);
-                else if (!card) fail(`Card color "${cell("qualifierCard").trim()}" is not a ${programInfo(p).short} color.`);
+                else if (!card)
+                    fail(`Card color "${cell("qualifierCard").trim()}" is not a ${programInfo(p).short} color.`);
                 else qualifierCard = card.value;
                 const yearRaw = cell("qualifierYear").trim();
                 if (yearRaw) {
@@ -326,7 +527,10 @@ export function parseImportRows(rows: Record<string, string>[]): ImportParseResu
         });
     });
     if (rows.length > IMPORT_MAX_ROWS) {
-        problems.push({ rowNumber: 0, message: `Only the first ${IMPORT_MAX_ROWS} rows were read; split the rest into a second file.` });
+        problems.push({
+            rowNumber: 0,
+            message: `Only the first ${IMPORT_MAX_ROWS} rows were read; split the rest into a second file.`,
+        });
     }
     return { records, problems, unknownHeaders, missingHeaders };
 }
@@ -334,5 +538,10 @@ export function parseImportRows(rows: Record<string, string>[]): ImportParseResu
 /** The downloadable template: header row plus one example row. */
 export function templateCsv(): string {
     const esc = (v: string) => (/[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
-    return TEMPLATE_COLUMNS.map((c) => esc(c.header)).join(",") + "\n" + TEMPLATE_COLUMNS.map((c) => esc(c.example)).join(",") + "\n";
+    return (
+        TEMPLATE_COLUMNS.map((c) => esc(c.header)).join(",") +
+        "\n" +
+        TEMPLATE_COLUMNS.map((c) => esc(c.example)).join(",") +
+        "\n"
+    );
 }

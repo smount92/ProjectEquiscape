@@ -12,10 +12,10 @@ export default function ClosingCta() {
                         Bring the <span className="text-forest">herd over</span>
                     </h2>
                 </div>
-                <p className="text-secondary-foreground mx-auto mb-8 max-w-[500px] leading-relaxed">
-                    Start with one horse, or import the whole spreadsheet in an afternoon. No card
-                    asked for. And you can look around first — the shows, the market, the Blue Book and
-                    the Registry are all open without an account.
+                <p className="mx-auto mb-8 max-w-[500px] leading-relaxed text-secondary-foreground">
+                    Start with one horse, or import the whole spreadsheet in an afternoon. No card asked for. And you
+                    can look around first — the shows, the market, the Blue Book and the Registry are all open without
+                    an account.
                 </p>
                 <div className="flex flex-wrap items-center justify-center gap-3">
                     <Button asChild size="wide">

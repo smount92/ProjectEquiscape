@@ -127,8 +127,10 @@ async function fetchBarnPostStats(
             .is("parent_id", null)
             .in("group_id", remaining);
         for (const row of (data ?? []) as {
-            group_id: string; replies_count: number | null;
-            bumped_at: string | null; created_at: string;
+            group_id: string;
+            replies_count: number | null;
+            bumped_at: string | null;
+            created_at: string;
         }[]) {
             const cur = stats.get(row.group_id) ?? { postCount: 0, lastPostAt: null };
             cur.postCount += 1 + (row.replies_count ?? 0);
@@ -187,17 +189,17 @@ export async function createGroup(data: {
 
     if (!data.name.trim()) return { success: false, error: "Barn name is required." };
 
-    const slug = data.slug.trim().toLowerCase()
-        .replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+    const slug = data.slug
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9-]/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "");
 
     if (!slug) return { success: false, error: "Valid slug is required." };
 
     // Check slug uniqueness
-    const { data: existing } = await supabase
-        .from("groups")
-        .select("id")
-        .eq("slug", slug)
-        .maybeSingle();
+    const { data: existing } = await supabase.from("groups").select("id").eq("slug", slug).maybeSingle();
     if (existing) return { success: false, error: `Slug "${slug}" is already taken.` };
 
     // isPrivate is canonical; visibility is written too so a pre-167
@@ -209,15 +211,12 @@ export async function createGroup(data: {
         description: data.description?.trim() || null,
         group_type: data.groupType,
         region: data.region?.trim() || null,
-        visibility: isPrivate ? "private" : (data.visibility === "private" ? "public" : data.visibility || "public"),
+        visibility: isPrivate ? "private" : data.visibility === "private" ? "public" : data.visibility || "public",
         created_by: user.id,
         member_count: 1,
         // Only a path the uploader could actually write (their own folder)
         // is accepted — anything else is dropped rather than stored.
-        banner_url:
-            data.bannerPath && data.bannerPath.startsWith(`${user.id}/`)
-                ? data.bannerPath
-                : null,
+        banner_url: data.bannerPath && data.bannerPath.startsWith(`${user.id}/`) ? data.bannerPath : null,
     };
 
     let { data: group, error } = await barnDb(supabase)
@@ -228,11 +227,7 @@ export async function createGroup(data: {
 
     // Pre-167 fallback: no is_private column — visibility carries it.
     if (error && isMissingSchema(error)) {
-        ({ data: group, error } = await barnDb(supabase)
-            .from("groups")
-            .insert(base)
-            .select("id")
-            .single());
+        ({ data: group, error } = await barnDb(supabase).from("groups").insert(base).select("id").single());
     }
 
     if (error || !group) return { success: false, error: error?.message ?? "Failed to create barn." };
@@ -296,13 +291,11 @@ export async function updateBarnSettings(
 /** Get a barn by slug */
 export async function getGroup(slug: string): Promise<Group | null> {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
 
-    const { data } = await supabase
-        .from("groups")
-        .select("*")
-        .eq("slug", slug)
-        .maybeSingle();
+    const { data } = await supabase.from("groups").select("*").eq("slug", slug).maybeSingle();
 
     if (!data) return null;
 
@@ -381,13 +374,11 @@ export async function getGroup(slug: string): Promise<Group | null> {
 }
 
 /** Browse/search barns */
-export async function getGroups(filters?: {
-    groupType?: string;
-    region?: string;
-    search?: string;
-}): Promise<Group[]> {
+export async function getGroups(filters?: { groupType?: string; region?: string; search?: string }): Promise<Group[]> {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
 
     let query = supabase
         .from("groups")
@@ -410,7 +401,7 @@ export async function getGroups(filters?: {
     if (!data || data.length === 0) return [];
 
     // Compute actual member counts from group_memberships
-    const groupIds = (data as { id: string }[]).map(g => g.id);
+    const groupIds = (data as { id: string }[]).map((g) => g.id);
     const memberCountMap = new Map<string, number>();
     if (groupIds.length > 0) {
         const { data: countRows } = await supabase
@@ -450,34 +441,34 @@ export async function getGroups(filters?: {
 
     const postStats = await fetchBarnPostStats(supabase, groupIds);
 
-    return await Promise.all((data as Record<string, unknown>[]).map(async (g) => ({
-        id: g.id as string,
-        name: g.name as string,
-        slug: g.slug as string,
-        description: g.description as string | null,
-        groupType: g.group_type as string,
-        region: g.region as string | null,
-        visibility: g.visibility as string,
-        isPrivate: readIsPrivate(g),
-        bannerUrl: await signBarnBanner(supabase, g.banner_url as string | null),
-        isFeatured: (g as { is_featured?: boolean }).is_featured === true,
-        postCount: postStats.get(g.id as string)?.postCount ?? 0,
-        lastPostAt: postStats.get(g.id as string)?.lastPostAt ?? null,
-        iconUrl: g.icon_url as string | null,
-        memberCount: memberCountMap.get(g.id as string) || (g.member_count as number) || 0,
-        createdBy: g.created_by as string,
-        createdAt: g.created_at as string,
-        creatorAlias: (g as { users?: { alias_name: string } | null }).users?.alias_name || "Unknown",
-        isMember: membershipMap.has(g.id as string),
-        memberRole: membershipMap.get(g.id as string) || null,
-        joinRequestStatus: pendingRequests.has(g.id as string) ? ("pending" as const) : null,
-    }))).then((mapped) =>
+    return await Promise.all(
+        (data as Record<string, unknown>[]).map(async (g) => ({
+            id: g.id as string,
+            name: g.name as string,
+            slug: g.slug as string,
+            description: g.description as string | null,
+            groupType: g.group_type as string,
+            region: g.region as string | null,
+            visibility: g.visibility as string,
+            isPrivate: readIsPrivate(g),
+            bannerUrl: await signBarnBanner(supabase, g.banner_url as string | null),
+            isFeatured: (g as { is_featured?: boolean }).is_featured === true,
+            postCount: postStats.get(g.id as string)?.postCount ?? 0,
+            lastPostAt: postStats.get(g.id as string)?.lastPostAt ?? null,
+            iconUrl: g.icon_url as string | null,
+            memberCount: memberCountMap.get(g.id as string) || (g.member_count as number) || 0,
+            createdBy: g.created_by as string,
+            createdAt: g.created_at as string,
+            creatorAlias: (g as { users?: { alias_name: string } | null }).users?.alias_name || "Unknown",
+            isMember: membershipMap.has(g.id as string),
+            memberRole: membershipMap.get(g.id as string) || null,
+            joinRequestStatus: pendingRequests.has(g.id as string) ? ("pending" as const) : null,
+        })),
+    ).then((mapped) =>
         // Featured barns first (194), then the existing size order. On a
         // pre-194 database isFeatured is false everywhere, so this sorts
         // exactly as before.
-        mapped.sort(
-            (a, b) => Number(b.isFeatured) - Number(a.isFeatured) || b.memberCount - a.memberCount,
-        ),
+        mapped.sort((a, b) => Number(b.isFeatured) - Number(a.isFeatured) || b.memberCount - a.memberCount),
     );
 }
 
@@ -488,16 +479,10 @@ export async function getGroups(filters?: {
  * request for the owner/admin/moderator to approve — the resolved
  * value carries `pending: true` so the UI can say so.
  */
-export async function joinGroup(
-    groupId: string,
-): Promise<{ success: boolean; pending?: boolean; error?: string }> {
+export async function joinGroup(groupId: string): Promise<{ success: boolean; pending?: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
-    const { data: barn } = await supabase
-        .from("groups")
-        .select("*")
-        .eq("id", groupId)
-        .maybeSingle();
+    const { data: barn } = await supabase.from("groups").select("*").eq("id", groupId).maybeSingle();
     if (!barn) return { success: false, error: "Barn not found." };
 
     if (readIsPrivate(barn as Record<string, unknown>)) {
@@ -520,8 +505,14 @@ export async function joinGroup(
         // There is no increment_count function in the database (the typed
         // client caught it); this read-then-write was always what ran.
         const { data: g } = await supabase.from("groups").select("member_count").eq("id", groupId).single();
-        if (g) await supabase.from("groups").update({ member_count: (g.member_count || 0) + 1 }).eq("id", groupId);
-    } catch (err) { logger.error("Groups", "Background task failed", err); }
+        if (g)
+            await supabase
+                .from("groups")
+                .update({ member_count: (g.member_count || 0) + 1 })
+                .eq("id", groupId);
+    } catch (err) {
+        logger.error("Groups", "Background task failed", err);
+    }
 
     revalidatePath("/community/groups");
     return { success: true };
@@ -543,19 +534,21 @@ export async function leaveGroup(groupId: string): Promise<{ success: boolean; e
         return { success: false, error: "Barn owners cannot leave. Transfer ownership first." };
     }
 
-    const { error } = await supabase
-        .from("group_memberships")
-        .delete()
-        .eq("group_id", groupId)
-        .eq("user_id", user.id);
+    const { error } = await supabase.from("group_memberships").delete().eq("group_id", groupId).eq("user_id", user.id);
 
     if (error) return { success: false, error: error.message };
 
     // Decrement member count (best effort)
     try {
         const { data: g } = await supabase.from("groups").select("member_count").eq("id", groupId).single();
-        if (g) await supabase.from("groups").update({ member_count: Math.max(0, ((g as { member_count: number }).member_count || 1) - 1) }).eq("id", groupId);
-    } catch (err) { logger.error("Groups", "Background task failed", err); }
+        if (g)
+            await supabase
+                .from("groups")
+                .update({ member_count: Math.max(0, ((g as { member_count: number }).member_count || 1) - 1) })
+                .eq("id", groupId);
+    } catch (err) {
+        logger.error("Groups", "Background task failed", err);
+    }
 
     revalidatePath("/community/groups");
     return { success: true };
@@ -572,17 +565,13 @@ export async function getMyGroups(): Promise<Group[]> {
 
     if (!memberships || memberships.length === 0) return [];
 
-    const groupIds = (memberships as { group_id: string; role: string }[]).map(m => m.group_id);
+    const groupIds = (memberships as { group_id: string; role: string }[]).map((m) => m.group_id);
     const roleMap = new Map<string, string>();
     for (const m of memberships as { group_id: string; role: string }[]) {
         roleMap.set(m.group_id, m.role);
     }
 
-    const { data: groups } = await supabase
-        .from("groups")
-        .select("*")
-        .in("id", groupIds)
-        .order("name");
+    const { data: groups } = await supabase.from("groups").select("*").in("id", groupIds).order("name");
 
     if (!groups || groups.length === 0) return [];
 
@@ -600,28 +589,30 @@ export async function getMyGroups(): Promise<Group[]> {
 
     const postStats = await fetchBarnPostStats(supabase, groupIds);
 
-    return await Promise.all((groups as Record<string, unknown>[]).map(async (g) => ({
-        id: g.id as string,
-        name: g.name as string,
-        slug: g.slug as string,
-        description: g.description as string | null,
-        groupType: g.group_type as string,
-        region: g.region as string | null,
-        visibility: g.visibility as string,
-        isPrivate: readIsPrivate(g),
-        bannerUrl: await signBarnBanner(supabase, g.banner_url as string | null),
-        isFeatured: (g as { is_featured?: boolean }).is_featured === true,
-        postCount: postStats.get(g.id as string)?.postCount ?? 0,
-        lastPostAt: postStats.get(g.id as string)?.lastPostAt ?? null,
-        iconUrl: g.icon_url as string | null,
-        memberCount: memberCountMap2.get(g.id as string) || (g.member_count as number) || 0,
-        createdBy: g.created_by as string,
-        createdAt: g.created_at as string,
-        creatorAlias: "",
-        isMember: true,
-        memberRole: roleMap.get(g.id as string) || "member",
-        joinRequestStatus: null,
-    })));
+    return await Promise.all(
+        (groups as Record<string, unknown>[]).map(async (g) => ({
+            id: g.id as string,
+            name: g.name as string,
+            slug: g.slug as string,
+            description: g.description as string | null,
+            groupType: g.group_type as string,
+            region: g.region as string | null,
+            visibility: g.visibility as string,
+            isPrivate: readIsPrivate(g),
+            bannerUrl: await signBarnBanner(supabase, g.banner_url as string | null),
+            isFeatured: (g as { is_featured?: boolean }).is_featured === true,
+            postCount: postStats.get(g.id as string)?.postCount ?? 0,
+            lastPostAt: postStats.get(g.id as string)?.lastPostAt ?? null,
+            iconUrl: g.icon_url as string | null,
+            memberCount: memberCountMap2.get(g.id as string) || (g.member_count as number) || 0,
+            createdBy: g.created_by as string,
+            createdAt: g.created_at as string,
+            creatorAlias: "",
+            isMember: true,
+            memberRole: roleMap.get(g.id as string) || "member",
+            joinRequestStatus: null,
+        })),
+    );
 }
 
 // ── Private barns: request / approve ──
@@ -713,9 +704,7 @@ export async function requestToJoinBarn(
 }
 
 /** Withdraw your own pending request. */
-export async function cancelBarnJoinRequest(
-    groupId: string,
-): Promise<{ success: boolean; error?: string }> {
+export async function cancelBarnJoinRequest(groupId: string): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
     const { error } = await barnDb(supabase)
@@ -747,7 +736,7 @@ export async function getBarnJoinRequests(groupId: string): Promise<BarnJoinRequ
 
     if (error || !data) return [];
 
-    return (data as Record<string, unknown>[]).map(r => ({
+    return (data as Record<string, unknown>[]).map((r) => ({
         userId: r.user_id as string,
         alias: (r as { users?: { alias_name: string } | null }).users?.alias_name || "Unknown",
         message: (r.message as string | null) ?? null,
@@ -793,8 +782,14 @@ export async function decideBarnJoinRequest(
 
         try {
             const { data: g } = await supabase.from("groups").select("member_count").eq("id", groupId).single();
-            if (g) await supabase.from("groups").update({ member_count: ((g as { member_count: number }).member_count || 0) + 1 }).eq("id", groupId);
-        } catch (err) { logger.error("Barns", "Member count update failed", err); }
+            if (g)
+                await supabase
+                    .from("groups")
+                    .update({ member_count: ((g as { member_count: number }).member_count || 0) + 1 })
+                    .eq("id", groupId);
+        } catch (err) {
+            logger.error("Barns", "Member count update failed", err);
+        }
     }
 
     // Best effort: tell the requester either way.
@@ -806,9 +801,10 @@ export async function decideBarnJoinRequest(
             userId: targetUserId,
             type: "system",
             actorId: user.id,
-            content: decision === "approved"
-                ? `You're in — welcome to ${b?.name ?? "the barn"}!`
-                : `Your request to join ${b?.name ?? "that barn"} wasn't accepted.`,
+            content:
+                decision === "approved"
+                    ? `You're in — welcome to ${b?.name ?? "the barn"}!`
+                    : `Your request to join ${b?.name ?? "that barn"} wasn't accepted.`,
             linkUrl: b?.slug && decision === "approved" ? `/community/groups/${b.slug}` : "/community/groups",
         });
     } catch (err) {
@@ -834,14 +830,11 @@ export async function getGroupRegistry(groupId: string): Promise<RegistryEntry[]
     const supabase = await createClient();
 
     // Get group members
-    const { data: members } = await supabase
-        .from("group_memberships")
-        .select("user_id")
-        .eq("group_id", groupId);
+    const { data: members } = await supabase.from("group_memberships").select("user_id").eq("group_id", groupId);
 
     if (!members || members.length === 0) return [];
 
-    const memberIds = (members as { user_id: string }[]).map(m => m.user_id);
+    const memberIds = (members as { user_id: string }[]).map((m) => m.user_id);
 
     // Get public horses owned by group members
     const { data: horses } = await supabase
@@ -855,16 +848,15 @@ export async function getGroupRegistry(groupId: string): Promise<RegistryEntry[]
     if (!horses || horses.length === 0) return [];
 
     // Batch fetch owner aliases
-    const ownerIds = [...new Set((horses as { owner_id: string }[]).map(h => h.owner_id))];
-    const { data: users } = await supabase
-        .from("users")
-        .select("id, alias_name")
-        .in("id", ownerIds);
+    const ownerIds = [...new Set((horses as { owner_id: string }[]).map((h) => h.owner_id))];
+    const { data: users } = await supabase.from("users").select("id, alias_name").in("id", ownerIds);
 
     const aliasMap = new Map<string, string>();
     (users ?? []).forEach((u: { id: string; alias_name: string }) => aliasMap.set(u.id, u.alias_name));
 
-    return (horses as { id: string; custom_name: string; finish_type: string; owner_id: string; created_at: string }[]).map(h => ({
+    return (
+        horses as { id: string; custom_name: string; finish_type: string; owner_id: string; created_at: string }[]
+    ).map((h) => ({
         horseId: h.id,
         horseName: h.custom_name,
         ownerAlias: aliasMap.get(h.owner_id) || "Unknown",
@@ -907,15 +899,13 @@ export async function getGroupFiles(groupId: string): Promise<GroupFile[]> {
     // Legacy rows whose path has no object in storage simply fail to sign
     // and surface as downloadUrl: null (rendered as unavailable).
     const paths = (data as { file_url: string }[])
-        .map(f => f.file_url)
-        .filter(url => url.includes("/") && !url.startsWith("http"));
+        .map((f) => f.file_url)
+        .filter((url) => url.includes("/") && !url.startsWith("http"));
 
     const signedUrlMap = new Map<string, string>();
     if (paths.length > 0) {
         try {
-            const { data: signed } = await getAdminClient().storage
-                .from("group-files")
-                .createSignedUrls(paths, 3600);
+            const { data: signed } = await getAdminClient().storage.from("group-files").createSignedUrls(paths, 3600);
             for (const item of signed ?? []) {
                 if (item.signedUrl && item.path) signedUrlMap.set(item.path, item.signedUrl);
             }
@@ -924,7 +914,7 @@ export async function getGroupFiles(groupId: string): Promise<GroupFile[]> {
         }
     }
 
-    return (data as Record<string, unknown>[]).map(f => ({
+    return (data as Record<string, unknown>[]).map((f) => ({
         id: f.id as string,
         fileName: f.file_name as string,
         fileUrl: f.file_url as string,
@@ -946,7 +936,7 @@ export async function uploadGroupFile(
     filePath: string,
     fileName: string,
     fileSize: number,
-    description?: string
+    description?: string,
 ): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
@@ -977,10 +967,13 @@ export async function uploadGroupFile(
     if (!GROUP_FILE_ALLOWED_EXTENSIONS.includes(ext)) {
         return { success: false, error: "File type not allowed. Use PDF, Word, or image files." };
     }
-    const fileType = ["pdf"].includes(ext) ? "pdf"
-        : ["jpg", "jpeg", "png", "gif", "webp"].includes(ext) ? "image"
-            : ["doc", "docx"].includes(ext) ? "doc"
-                : "other";
+    const fileType = ["pdf"].includes(ext)
+        ? "pdf"
+        : ["jpg", "jpeg", "png", "gif", "webp"].includes(ext)
+          ? "image"
+          : ["doc", "docx"].includes(ext)
+            ? "doc"
+            : "other";
 
     const { error } = await supabase.from("group_files").insert({
         group_id: groupId,
@@ -998,18 +991,12 @@ export async function uploadGroupFile(
 }
 
 /** Delete a barn file */
-export async function deleteGroupFile(
-    fileId: string
-): Promise<{ success: boolean; error?: string }> {
+export async function deleteGroupFile(fileId: string): Promise<{ success: boolean; error?: string }> {
     const { supabase } = await requireAuth();
 
     // Fetch the storage path before deleting the row (RLS limits this to
     // rows the caller can see, and the delete below to uploader/admin/owner)
-    const { data: file } = await supabase
-        .from("group_files")
-        .select("file_url")
-        .eq("id", fileId)
-        .maybeSingle();
+    const { data: file } = await supabase.from("group_files").select("file_url").eq("id", fileId).maybeSingle();
 
     const { error } = await supabase.from("group_files").delete().eq("id", fileId);
     if (error) return { success: false, error: error.message };
@@ -1055,7 +1042,7 @@ export async function getGroupMembers(groupId: string): Promise<GroupMember[]> {
     const rolePriority: Record<string, number> = { owner: 0, admin: 1, moderator: 2, judge: 3, member: 4 };
 
     return (data as Record<string, unknown>[])
-        .map(m => ({
+        .map((m) => ({
             userId: m.user_id as string,
             alias: (m as { users?: { alias_name: string } | null }).users?.alias_name || "Unknown",
             role: m.role as string,
@@ -1068,7 +1055,7 @@ export async function getGroupMembers(groupId: string): Promise<GroupMember[]> {
 export async function updateMemberRole(
     groupId: string,
     targetUserId: string,
-    newRole: "admin" | "moderator" | "member"
+    newRole: "admin" | "moderator" | "member",
 ): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
@@ -1100,7 +1087,7 @@ export async function updateMemberRole(
 /** Remove a member from a barn (admin/owner) */
 export async function removeMember(
     groupId: string,
-    targetUserId: string
+    targetUserId: string,
 ): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
@@ -1129,7 +1116,8 @@ export async function removeMember(
 
     const targetRole = (targetMembership as { role: string } | null)?.role;
     if (targetRole === "owner") return { success: false, error: "Cannot remove the owner." };
-    if (targetRole === "admin" && callerRole !== "owner") return { success: false, error: "Only the owner can remove admins." };
+    if (targetRole === "admin" && callerRole !== "owner")
+        return { success: false, error: "Only the owner can remove admins." };
 
     const { error } = await supabase
         .from("group_memberships")
@@ -1142,25 +1130,25 @@ export async function removeMember(
     // Decrement member count
     try {
         const { data: g } = await supabase.from("groups").select("member_count").eq("id", groupId).single();
-        if (g) await supabase.from("groups").update({ member_count: Math.max(0, ((g as { member_count: number }).member_count || 1) - 1) }).eq("id", groupId);
-    } catch (err) { logger.error("Groups", "Background task failed", err); }
+        if (g)
+            await supabase
+                .from("groups")
+                .update({ member_count: Math.max(0, ((g as { member_count: number }).member_count || 1) - 1) })
+                .eq("id", groupId);
+    } catch (err) {
+        logger.error("Groups", "Background task failed", err);
+    }
 
     revalidatePath("/community/groups");
     return { success: true };
 }
 
 /** Toggle pin on a barn post */
-export async function togglePinPost(
-    postId: string
-): Promise<{ success: boolean; error?: string }> {
+export async function togglePinPost(postId: string): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
     // Get the post's group_id and current pin state
-    const { data: post } = await supabase
-        .from("posts")
-        .select("group_id, is_pinned")
-        .eq("id", postId)
-        .maybeSingle();
+    const { data: post } = await supabase.from("posts").select("group_id, is_pinned").eq("id", postId).maybeSingle();
 
     if (!post) return { success: false, error: "Post not found." };
     const p = post as { group_id: string | null; is_pinned: boolean };
@@ -1179,10 +1167,7 @@ export async function togglePinPost(
         return { success: false, error: "Only barn admins can pin posts." };
     }
 
-    const { error } = await supabase
-        .from("posts")
-        .update({ is_pinned: !p.is_pinned })
-        .eq("id", postId);
+    const { error } = await supabase.from("posts").update({ is_pinned: !p.is_pinned }).eq("id", postId);
 
     if (error) return { success: false, error: error.message };
     revalidatePath("/community/groups");
@@ -1247,20 +1232,22 @@ export async function getGroupChannels(groupId: string): Promise<GroupChannel[]>
 
     if (!data || data.length === 0) return [];
 
-    return (data as { id: string; name: string; slug: string; description: string | null; sort_order: number }[]).map(ch => ({
-        id: ch.id,
-        name: ch.name,
-        slug: ch.slug,
-        description: ch.description,
-        sortOrder: ch.sort_order,
-    }));
+    return (data as { id: string; name: string; slug: string; description: string | null; sort_order: number }[]).map(
+        (ch) => ({
+            id: ch.id,
+            name: ch.name,
+            slug: ch.slug,
+            description: ch.description,
+            sortOrder: ch.sort_order,
+        }),
+    );
 }
 
 /** Create a channel in a barn (admin/owner only) */
 export async function createGroupChannel(
     groupId: string,
     name: string,
-    description?: string
+    description?: string,
 ): Promise<{ success: boolean; channelId?: string; error?: string }> {
     const { supabase, user } = await requireAuth();
 
@@ -1279,7 +1266,12 @@ export async function createGroupChannel(
         return { success: false, error: "Only barn admins can create channels." };
     }
 
-    const slug = name.trim().toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+    const slug = name
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9-]/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "");
 
     const { data: channel, error } = await supabase
         .from("group_channels")
@@ -1302,9 +1294,7 @@ export async function createGroupChannel(
 }
 
 /** Delete a channel (admin/owner only) */
-export async function deleteGroupChannel(
-    channelId: string
-): Promise<{ success: boolean; error?: string }> {
+export async function deleteGroupChannel(channelId: string): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
     // Get channel's group and check how many channels exist
@@ -1368,9 +1358,7 @@ export async function uploadGroupBanner(
             .upload(path, file, { upsert: true, contentType: file.type });
         if (uploadError) return { success: false, error: uploadError.message };
 
-        const { data: signed } = await supabase.storage
-            .from("avatars")
-            .createSignedUrl(path, 3600);
+        const { data: signed } = await supabase.storage.from("avatars").createSignedUrl(path, 3600);
 
         return { success: true, path, url: signed?.signedUrl };
     } catch (err) {
@@ -1410,20 +1398,13 @@ export async function setGroupBanner(
 
     // Best-effort cleanup of the file being replaced, only when it lives
     // in this member's own folder — never delete another admin's upload.
-    const { data: current } = await supabase
-        .from("groups")
-        .select("banner_url")
-        .eq("id", groupId)
-        .maybeSingle();
+    const { data: current } = await supabase.from("groups").select("banner_url").eq("id", groupId).maybeSingle();
     const oldPath = (current as { banner_url: string | null } | null)?.banner_url;
     if (oldPath && !oldPath.startsWith("http") && oldPath.startsWith(`${user.id}/`) && oldPath !== bannerPath) {
         await supabase.storage.from("avatars").remove([oldPath]);
     }
 
-    const { error } = await supabase
-        .from("groups")
-        .update({ banner_url: bannerPath })
-        .eq("id", groupId);
+    const { error } = await supabase.from("groups").update({ banner_url: bannerPath }).eq("id", groupId);
     if (error) return { success: false, error: error.message };
 
     revalidatePath("/community/groups");

@@ -120,8 +120,7 @@ function userWith(app_metadata: Record<string, unknown>) {
 }
 
 function written(): Record<string, unknown> {
-    return (mockUpdateUserById.mock.calls[0][1] as { app_metadata: Record<string, unknown> })
-        .app_metadata;
+    return (mockUpdateUserById.mock.calls[0][1] as { app_metadata: Record<string, unknown> }).app_metadata;
 }
 
 /** A PAYMENT.CAPTURE.COMPLETED for a $27 six-month Pro term. */
@@ -603,9 +602,7 @@ describe("fixed-term subscriptions — the EXPIRED-on-final-charge trap", () => 
                 resource: { id: "SALE-1", billing_agreement_id: "I-FIXED-1" },
             }),
         );
-        expect(Date.parse(written().paid_through as string)).toBeGreaterThan(
-            Date.parse("2099-03-01T00:00:00Z"),
-        );
+        expect(Date.parse(written().paid_through as string)).toBeGreaterThan(Date.parse("2099-03-01T00:00:00Z"));
     });
 
     it("EXPIRED still downgrades once the clock has genuinely run out", async () => {
@@ -628,21 +625,20 @@ describe("fixed-term subscriptions — the EXPIRED-on-final-charge trap", () => 
 
 // ══════════════════════════════════════════════════════════════
 describe("signature verification covers the new events too", () => {
-    it.each([
-        "CHECKOUT.ORDER.APPROVED",
-        "PAYMENT.CAPTURE.COMPLETED",
-        "PAYMENT.CAPTURE.REFUNDED",
-    ])("%s is rejected unsigned, and captures nothing", async (eventType) => {
-        const res = await POST(
-            webhookRequest(
-                { id: "WH-FORGED", event_type: eventType, resource: { id: "ORDER-1", custom_id: "user-1|pro-6" } },
-                null,
-            ),
-        );
-        expect(res.status).toBe(400);
-        expect(captureCalls).toHaveLength(0);
-        expect(mockUpdateUserById).not.toHaveBeenCalled();
-    });
+    it.each(["CHECKOUT.ORDER.APPROVED", "PAYMENT.CAPTURE.COMPLETED", "PAYMENT.CAPTURE.REFUNDED"])(
+        "%s is rejected unsigned, and captures nothing",
+        async (eventType) => {
+            const res = await POST(
+                webhookRequest(
+                    { id: "WH-FORGED", event_type: eventType, resource: { id: "ORDER-1", custom_id: "user-1|pro-6" } },
+                    null,
+                ),
+            );
+            expect(res.status).toBe(400);
+            expect(captureCalls).toHaveLength(0);
+            expect(mockUpdateUserById).not.toHaveBeenCalled();
+        },
+    );
 
     it("a FAILURE verdict grants nothing for a capture", async () => {
         mockFetch.mockImplementation(async (input: unknown) => {

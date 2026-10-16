@@ -28,21 +28,12 @@
 import Link from "next/link";
 import { registryClaimLive } from "@/lib/stats/registryClaimLive";
 import type { Metadata } from "next";
-import {
-    BRONZE_THRESHOLD,
-    GOLD_THRESHOLD,
-    SILVER_THRESHOLD,
-} from "@/lib/catalog/corrections";
+import { BRONZE_THRESHOLD, GOLD_THRESHOLD, SILVER_THRESHOLD } from "@/lib/catalog/corrections";
 
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
 import PageMasthead from "@/components/layouts/PageMasthead";
 import { Button } from "@/components/ui/button";
-import {
-    CARD_GATE,
-    SEASON1_CARD_GATE,
-    SEASON1_FINAL_SHOW_YEAR,
-    STAKES_GATE,
-} from "@/lib/shows/cardIssuance";
+import { CARD_GATE, SEASON1_CARD_GATE, SEASON1_FINAL_SHOW_YEAR, STAKES_GATE } from "@/lib/shows/cardIssuance";
 import { BEST_RESULTS_CAP, MIN_EXHIBITORS_FOR_POINTS, POINTS_CAP } from "@/lib/shows/points";
 import {
     CH_CARDS_REQUIRED,
@@ -127,9 +118,7 @@ const FAQ_SECTIONS: FaqSection[] = [
                 // decision — prose that hard-codes a threshold goes stale the
                 // day someone recalibrates (the badge table did exactly that).
                 a: `Trust you earn by doing the work, one approved suggestion at a time. Your first approval makes you a Catalog Contributor 📘. ${BRONZE_THRESHOLD} make you a Bronze Curator 🥉. At ${SILVER_THRESHOLD} you reach Silver 🥈, and your factual fixes — colour, years, run details, original prices — start applying instantly instead of waiting for review. At ${GOLD_THRESHOLD} you're a Gold Curator 🥇 and everything you correct applies on the spot. Changes to a model's identity — its name, maker, or mold — always get a human look first, whatever your rank, and every auto-applied change still appears in the public changelog where anyone can challenge it.`,
-                links: [
-                    { href: "/catalog/suggestions", label: "Start contributing" },
-                ],
+                links: [{ href: "/catalog/suggestions", label: "Start contributing" }],
             },
             {
                 q: "How many photos can I upload per horse?",
@@ -359,22 +348,15 @@ export default async function FaqPage() {
     const registry = await registryClaimLive();
     return (
         <ExplorerLayout noHeader>
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
-            />
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
             <div className="animate-fade-in-up mx-auto max-w-[860px]">
-                <PageMasthead
-                    icon="❓"
-                    title="Questions & Answers"
-                    subtitle="Grouped the way the site is"
-                />
+                <PageMasthead icon="❓" title="Questions & Answers" subtitle="Grouped the way the site is" />
 
-                <div className="text-secondary-foreground mb-8 space-y-4 text-base leading-[1.7]">
+                <div className="mb-8 space-y-4 text-base leading-[1.7] text-secondary-foreground">
                     <p>
-                        Straight answers, room by room. If something here contradicts what the site
-                        actually does, that&apos;s a bug in this page — please{" "}
-                        <Link href="/contact" className="text-forest font-semibold hover:underline">
+                        Straight answers, room by room. If something here contradicts what the site actually does,
+                        that&apos;s a bug in this page — please{" "}
+                        <Link href="/contact" className="font-semibold text-forest hover:underline">
                             tell us
                         </Link>
                         .
@@ -384,7 +366,7 @@ export default async function FaqPage() {
                             <a
                                 key={section.id}
                                 href={`#${section.id}`}
-                                className="text-forest text-xs font-semibold tracking-[0.08em] uppercase no-underline hover:underline"
+                                className="text-xs font-semibold tracking-[0.08em] text-forest uppercase no-underline hover:underline"
                             >
                                 {section.heading} →
                             </a>
@@ -403,24 +385,21 @@ export default async function FaqPage() {
                             <span className="ledger-tab" id={`faq-${section.id}`}>
                                 {section.heading}
                             </span>
-                            <p className="text-muted-foreground mt-0 mb-4 text-sm">{section.blurb}</p>
+                            <p className="mt-0 mb-4 text-sm text-muted-foreground">{section.blurb}</p>
 
                             <div className="flex flex-col">
                                 {section.items.map((item) => (
-                                    <details
-                                        key={item.q}
-                                        className="border-forest/15 group border-t py-3 last:pb-0"
-                                    >
-                                        <summary className="text-foreground marker:content-[''] flex cursor-pointer list-none items-start justify-between gap-4 text-[0.95rem] font-bold [&::-webkit-details-marker]:hidden">
+                                    <details key={item.q} className="group border-t border-forest/15 py-3 last:pb-0">
+                                        <summary className="flex cursor-pointer list-none items-start justify-between gap-4 text-[0.95rem] font-bold text-foreground marker:content-[''] [&::-webkit-details-marker]:hidden">
                                             <span>{item.q}</span>
                                             <span
                                                 aria-hidden="true"
-                                                className="text-forest mt-0.5 shrink-0 text-sm transition-transform group-open:rotate-45"
+                                                className="mt-0.5 shrink-0 text-sm text-forest transition-transform group-open:rotate-45"
                                             >
                                                 +
                                             </span>
                                         </summary>
-                                        <div className="text-secondary-foreground pt-2 text-[0.95rem] leading-[1.75]">
+                                        <div className="pt-2 text-[0.95rem] leading-[1.75] text-secondary-foreground">
                                             <p className="m-0">{item.a.split("{{registry}}").join(registry)}</p>
                                             {item.links && (
                                                 <p className="m-0 mt-2 flex flex-wrap gap-x-5 gap-y-1">
@@ -428,7 +407,7 @@ export default async function FaqPage() {
                                                         <Link
                                                             key={link.href}
                                                             href={link.href}
-                                                            className="text-forest text-xs font-semibold tracking-[0.08em] uppercase no-underline hover:underline"
+                                                            className="text-xs font-semibold tracking-[0.08em] text-forest uppercase no-underline hover:underline"
                                                         >
                                                             {link.label} →
                                                         </Link>
@@ -444,12 +423,10 @@ export default async function FaqPage() {
                 </div>
 
                 <div className="ledger-card mt-6 mb-12 text-center">
-                    <h2 className="text-foreground mb-2 font-serif text-lg font-bold">
-                        Still stuck?
-                    </h2>
-                    <p className="text-secondary-foreground mx-auto mb-4 max-w-[520px] text-sm leading-relaxed">
-                        Ask us directly — it&apos;s two people reading, and questions that come up
-                        twice usually end up on this page.
+                    <h2 className="mb-2 font-serif text-lg font-bold text-foreground">Still stuck?</h2>
+                    <p className="mx-auto mb-4 max-w-[520px] text-sm leading-relaxed text-secondary-foreground">
+                        Ask us directly — it&apos;s two people reading, and questions that come up twice usually end up
+                        on this page.
                     </p>
                     <div className="flex flex-wrap justify-center gap-3">
                         <Button asChild>

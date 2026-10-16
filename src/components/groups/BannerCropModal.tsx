@@ -96,9 +96,7 @@ export default function BannerCropModal({
             const ctx = canvas.getContext("2d");
             if (!ctx) throw new Error("no canvas context");
             ctx.drawImage(img, -off.x / g.s, -off.y / g.s, g.W / g.s, g.H / g.s, 0, 0, OUT_W, OUT_H);
-            const blob = await new Promise<Blob | null>((resolve) =>
-                canvas.toBlob(resolve, "image/jpeg", 0.85),
-            );
+            const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.85));
             if (!blob) throw new Error("crop failed");
             onCropped(new File([blob], "banner.jpg", { type: "image/jpeg" }));
         } catch {
@@ -113,15 +111,14 @@ export default function BannerCropModal({
             aria-modal="true"
             aria-label="Crop banner image"
         >
-            <div className="bg-card w-full max-w-2xl rounded-xl p-4 shadow-xl">
-                <h2 className="text-foreground mb-1 font-serif text-lg font-semibold">Frame your banner</h2>
-                <p className="text-muted-foreground mb-3 text-xs">
-                    Drag to position, slide to zoom. This exact framing shows on the barn page and the
-                    directory card.
+            <div className="w-full max-w-2xl rounded-xl bg-card p-4 shadow-xl">
+                <h2 className="mb-1 font-serif text-lg font-semibold text-foreground">Frame your banner</h2>
+                <p className="mb-3 text-xs text-muted-foreground">
+                    Drag to position, slide to zoom. This exact framing shows on the barn page and the directory card.
                 </p>
                 <div
                     ref={frameRef}
-                    className="border-input relative w-full cursor-move touch-none overflow-hidden rounded-lg border select-none"
+                    className="relative w-full cursor-move touch-none overflow-hidden rounded-lg border border-input select-none"
                     style={{ aspectRatio: "4 / 1" }}
                     onPointerDown={onPointerDown}
                     onPointerMove={onPointerMove}
@@ -168,7 +165,7 @@ export default function BannerCropModal({
                 <div className="mt-4 flex justify-end gap-3 text-sm">
                     <button
                         type="button"
-                        className="text-muted-foreground hover:text-foreground underline"
+                        className="text-muted-foreground underline hover:text-foreground"
                         disabled={busy}
                         onClick={onCancel}
                     >
@@ -176,7 +173,7 @@ export default function BannerCropModal({
                     </button>
                     <button
                         type="button"
-                        className="bg-forest rounded-md px-4 py-1.5 font-semibold text-white disabled:opacity-50"
+                        className="rounded-md bg-forest px-4 py-1.5 font-semibold text-white disabled:opacity-50"
                         disabled={busy || !ready}
                         onClick={() => void exportCrop()}
                     >

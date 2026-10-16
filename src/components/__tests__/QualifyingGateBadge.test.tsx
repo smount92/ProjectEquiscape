@@ -57,9 +57,7 @@ describe("card-gate badge respects the show's sanctioning", () => {
     });
 
     it("still says nothing for a non-qualifying class at a sanctioned show", () => {
-        render(
-            <PublicClassRow cls={cls({ isQualifying: false })} canEnter={false} showIsQualifying />,
-        );
+        render(<PublicClassRow cls={cls({ isQualifying: false })} canEnter={false} showIsQualifying />);
         expect(screen.queryByText(/cards for 1st/i)).not.toBeInTheDocument();
     });
 

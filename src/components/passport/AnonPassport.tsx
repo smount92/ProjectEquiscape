@@ -226,7 +226,9 @@ export default async function AnonPassport({
     const cat = row.catalog;
     const ownerAlias = row.owner_alias ?? "Collector";
     // Seller terms (218) by alias — the passport RPC carries no owner id.
-    const seller = row.owner_alias ? await readSellerTermsByAlias(supabase as unknown as SupabaseClient, row.owner_alias) : null;
+    const seller = row.owner_alias
+        ? await readSellerTermsByAlias(supabase as unknown as SupabaseClient, row.owner_alias)
+        : null;
     const rawImages = row.images ?? [];
 
     const urlMap = getPublicImageUrls(rawImages.map((i) => i.image_url));
@@ -277,7 +279,8 @@ export default async function AnonPassport({
             .select("parent:parent_id(id, title, maker, attributes, maker_slug, slug)")
             .eq("id", horse.catalog_id)
             .maybeSingle();
-        parent = ((parentRow as { parent?: ReferenceParent | ReferenceParent[] | null } | null)?.parent ?? null) as ReferenceParent | null;
+        parent = ((parentRow as { parent?: ReferenceParent | ReferenceParent[] | null } | null)?.parent ??
+            null) as ReferenceParent | null;
         if (Array.isArray(parent)) parent = parent[0] ?? null;
     }
     const refInfo = cat ? referenceLines({ ...(cat as unknown as ReferenceRow), parent }) : null;
@@ -302,9 +305,7 @@ export default async function AnonPassport({
     return (
         <ExplorerLayout noHeader>
             <PassportMasthead
-                horseName={
-                    publicNamePrefix ? `${publicNamePrefix} ${horse.custom_name}` : horse.custom_name
-                }
+                horseName={publicNamePrefix ? `${publicNamePrefix} ${horse.custom_name}` : horse.custom_name}
                 ownerAlias={ownerAlias}
                 referenceName={cat ? `${cat.maker} — ${cat.title}` : null}
                 referenceHref={refHref}
@@ -318,11 +319,7 @@ export default async function AnonPassport({
                     <div className="overflow-hidden rounded-2xl shadow-md" id="passport-photos">
                         <PassportGallery images={galleryImages} />
                     </div>
-                    <MakingChapter
-                        records={makingRecords}
-                        ownerId={null}
-                        horseId={horseId}
-                    />
+                    <MakingChapter records={makingRecords} ownerId={null} horseId={horseId} />
                 </div>
 
                 {/* Ledger card (read-only). `self-start`, NOT min-h-[100%]:
@@ -407,9 +404,7 @@ export default async function AnonPassport({
                                         : "🐄 Other Model"}
                             </DetailRow>
                         )}
-                        {horse.finish_type && (
-                            <DetailRow label="Finish Type">{horse.finish_type}</DetailRow>
-                        )}
+                        {horse.finish_type && <DetailRow label="Finish Type">{horse.finish_type}</DetailRow>}
                         {horse.condition_grade && (
                             <DetailRow label="Condition">
                                 <span className="inline-flex items-center gap-[4px] rounded-full border border-success/30 bg-success/10 px-[10px] py-[2px] text-sm font-semibold text-success">
@@ -422,25 +417,19 @@ export default async function AnonPassport({
                                 <DetailRow label={refInfo.type}>
                                     <span className={refInfo.moldKnown ? "" : "italic opacity-70"}>{refInfo.name}</span>
                                 </DetailRow>
-                                <DetailRow
-                                    label={refInfo.type === "Mold" ? "Manufacturer" : "Sculptor"}
-                                >
+                                <DetailRow label={refInfo.type === "Mold" ? "Manufacturer" : "Sculptor"}>
                                     {refInfo.maker}
                                 </DetailRow>
                                 <DetailRow label="Scale">{refInfo.scale}</DetailRow>
                                 {refInfo.extra && (
-                                    <DetailRow
-                                        label={refInfo.type === "Mold" ? "Released" : "Medium"}
-                                    >
+                                    <DetailRow label={refInfo.type === "Mold" ? "Released" : "Medium"}>
                                         {refInfo.extra}
                                     </DetailRow>
                                 )}
                             </>
                         ) : (
                             <DetailRow label="Reference">
-                                <span className="italic opacity-60">
-                                    Not linked to database — Custom Entry
-                                </span>
+                                <span className="italic opacity-60">Not linked to database — Custom Entry</span>
                             </DetailRow>
                         )}
                         {releaseInfo && (
@@ -449,14 +438,11 @@ export default async function AnonPassport({
                                 {releaseInfo.modelNumber && (
                                     <DetailRow label="Model #">#{releaseInfo.modelNumber}</DetailRow>
                                 )}
-                                {releaseInfo.color && (
-                                    <DetailRow label="Color">{releaseInfo.color}</DetailRow>
-                                )}
+                                {releaseInfo.color && <DetailRow label="Color">{releaseInfo.color}</DetailRow>}
                                 {releaseInfo.yearStart && (
                                     <DetailRow label="Release Years">
                                         {releaseInfo.yearStart}
-                                        {releaseInfo.yearEnd &&
-                                        releaseInfo.yearEnd !== releaseInfo.yearStart
+                                        {releaseInfo.yearEnd && releaseInfo.yearEnd !== releaseInfo.yearStart
                                             ? `–${releaseInfo.yearEnd}`
                                             : ""}
                                     </DetailRow>
@@ -509,18 +495,10 @@ export default async function AnonPassport({
                     {hasShowIdentity && (
                         <LedgerBlock icon="🏅" title="Show Identity" testId="anon-show-identity">
                             {horse.color && <DetailRow label="Color">{horse.color}</DetailRow>}
-                            {horse.assigned_breed && (
-                                <DetailRow label="Breed">{horse.assigned_breed}</DetailRow>
-                            )}
-                            {horse.assigned_gender && (
-                                <DetailRow label="Gender">{horse.assigned_gender}</DetailRow>
-                            )}
-                            {horse.assigned_age && (
-                                <DetailRow label="Age">{horse.assigned_age}</DetailRow>
-                            )}
-                            {horse.regional_id && (
-                                <DetailRow label="Regional ID">{horse.regional_id}</DetailRow>
-                            )}
+                            {horse.assigned_breed && <DetailRow label="Breed">{horse.assigned_breed}</DetailRow>}
+                            {horse.assigned_gender && <DetailRow label="Gender">{horse.assigned_gender}</DetailRow>}
+                            {horse.assigned_age && <DetailRow label="Age">{horse.assigned_age}</DetailRow>}
+                            {horse.regional_id && <DetailRow label="Regional ID">{horse.regional_id}</DetailRow>}
                         </LedgerBlock>
                     )}
 
@@ -550,12 +528,8 @@ export default async function AnonPassport({
                 the horse has no records. Best placings first, tier
                 labels as visible text (no hover-only meaning). */}
             {topRecords.length > 0 && (
-                <section
-                    className="animate-fade-in-up mt-8"
-                    aria-label="Show record"
-                    id="passport-show-record"
-                >
-                    <div className="bg-card border-input rounded-lg border p-6 shadow-md">
+                <section className="animate-fade-in-up mt-8" aria-label="Show record" id="passport-show-record">
+                    <div className="rounded-lg border border-input bg-card p-6 shadow-md">
                         <h3 className="mb-1 font-serif text-lg font-bold text-foreground">
                             <span aria-hidden="true">🏆</span> Show Record
                         </h3>
@@ -624,8 +598,8 @@ export default async function AnonPassport({
                         isOwner={false}
                     />
                     <p className="mt-3 mb-0 text-xs text-muted-foreground italic">
-                        Every entry above is a record the Hub wrote itself — a transfer, a show
-                        result, a title, or a note from the owner.{" "}
+                        Every entry above is a record the Hub wrote itself — a transfer, a show result, a title, or a
+                        note from the owner.{" "}
                         <Link href={loginHref} className="text-forest hover:underline">
                             Log in
                         </Link>{" "}

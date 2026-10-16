@@ -60,22 +60,30 @@ export async function getPhotoShows(): Promise<ShowDisplay[]> {
 
     const { data: shows } = await supabase
         .from("events")
-        .select("id, name, description, event_type, show_status, show_theme, starts_at, ends_at, created_at, created_by, sanctioning_body, users!created_by(alias_name)")
+        .select(
+            "id, name, description, event_type, show_status, show_theme, starts_at, ends_at, created_at, created_by, sanctioning_body, users!created_by(alias_name)",
+        )
         .eq("event_type", "photo_show")
         .order("created_at", { ascending: false });
 
     if (!shows || shows.length === 0) return [];
 
     type EventRow = {
-        id: string; name: string; description: string | null;
-        show_status: string; show_theme: string | null;
-        starts_at: string; ends_at: string | null; created_at: string;
-        created_by: string; sanctioning_body: string | null;
+        id: string;
+        name: string;
+        description: string | null;
+        show_status: string;
+        show_theme: string | null;
+        starts_at: string;
+        ends_at: string | null;
+        created_at: string;
+        created_by: string;
+        sanctioning_body: string | null;
         users: { alias_name: string } | { alias_name: string }[] | null;
     };
 
     // Count entries per show
-    const eventIds = (shows as EventRow[]).map(s => s.id);
+    const eventIds = (shows as EventRow[]).map((s) => s.id);
     const { data: entries } = await supabase
         .from("event_entries")
         .select("event_id")
@@ -87,8 +95,7 @@ export async function getPhotoShows(): Promise<ShowDisplay[]> {
         countMap.set(e.event_id, (countMap.get(e.event_id) || 0) + 1);
     });
 
-
-    return (shows as EventRow[]).map(s => {
+    return (shows as EventRow[]).map((s) => {
         // Derive effective status: if entries closed but still marked open, treat as judging
         let effectiveStatus = s.show_status || "open";
         if (effectiveStatus === "open" && s.ends_at && new Date(s.ends_at) < new Date()) {
@@ -118,7 +125,9 @@ export async function getShowEntries(showId: string): Promise<{
     entries: ShowEntryDisplay[];
 }> {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
 
     // Fetch event (include judging_method for expert judge flow)
     const { data: eventData } = await supabase
@@ -130,19 +139,21 @@ export async function getShowEntries(showId: string): Promise<{
     if (!eventData) return { show: null, entries: [] };
 
     const s = eventData as {
-        id: string; name: string; description: string | null;
-        show_status: string; show_theme: string | null;
-        ends_at: string | null; created_at: string; created_by: string;
+        id: string;
+        name: string;
+        description: string | null;
+        show_status: string;
+        show_theme: string | null;
+        ends_at: string | null;
+        created_at: string;
+        created_by: string;
         judging_method: string | null;
     };
 
     // Auto-transition: open → judging when entry deadline has passed
     if (s.show_status === "open" && s.ends_at && new Date(s.ends_at) < new Date()) {
         const admin = getAdminClient();
-        await admin.from("events")
-            .update({ show_status: "judging" })
-            .eq("id", showId)
-            .eq("show_status", "open"); // CAS guard — only update if still open
+        await admin.from("events").update({ show_status: "judging" }).eq("id", showId).eq("show_status", "open"); // CAS guard — only update if still open
         s.show_status = "judging"; // Update in-memory for this render
     }
 
@@ -151,7 +162,9 @@ export async function getShowEntries(showId: string): Promise<{
     // Fetch entries with user alias via PostgREST join
     const { data: rawEntries } = await supabase
         .from("event_entries")
-        .select("id, horse_id, user_id, votes_count, created_at, placing, class_id, entry_image_path, caption, users!user_id(alias_name)")
+        .select(
+            "id, horse_id, user_id, votes_count, created_at, placing, class_id, entry_image_path, caption, users!user_id(alias_name)",
+        )
         .eq("event_id", showId)
         .eq("entry_type", "entered")
         .order("votes_count", { ascending: false });
@@ -160,13 +173,24 @@ export async function getShowEntries(showId: string): Promise<{
 
     if (entryList.length === 0) {
         return {
-            show: { id: s.id, title: s.name, description: s.description, theme: s.show_theme, status: s.show_status || "open", entryCount: 0, createdAt: s.created_at, endAt: s.ends_at, createdBy: s.created_by, judgingMethod: s.judging_method || "community_vote" },
+            show: {
+                id: s.id,
+                title: s.name,
+                description: s.description,
+                theme: s.show_theme,
+                status: s.show_status || "open",
+                entryCount: 0,
+                createdAt: s.created_at,
+                endAt: s.ends_at,
+                createdBy: s.created_by,
+                judgingMethod: s.judging_method || "community_vote",
+            },
             entries: [],
         };
     }
 
     // Batch-fetch horse names + finishes
-    const horseIds = [...new Set(entryList.map(e => e.horse_id))];
+    const horseIds = [...new Set(entryList.map((e) => e.horse_id))];
     const { data: horses } = await supabase
         .from("user_horses")
         .select("id, custom_name, finish_type")
@@ -178,7 +202,7 @@ export async function getShowEntries(showId: string): Promise<{
     });
 
     // Check if current user has voted on each entry
-    const entryIds = entryList.map(e => e.id);
+    const entryIds = entryList.map((e) => e.id);
     let votedSet = new Set<string>();
     if (user) {
         const { data: votes } = await supabase
@@ -209,20 +233,22 @@ export async function getShowEntries(showId: string): Promise<{
     const signedUrls = getPublicImageUrls(allThumbUrls);
 
     // Batch-fetch class names + division names for entries
-    const classIds = [...new Set(entryList.filter(e => e.class_id).map(e => e.class_id!))];
+    const classIds = [...new Set(entryList.filter((e) => e.class_id).map((e) => e.class_id!))];
     const classMap = new Map<string, { className: string; divisionName: string }>();
     if (classIds.length > 0) {
         const { data: classRows } = await supabase
             .from("event_classes")
             .select("id, name, event_divisions!division_id(name)")
             .in("id", classIds);
-        (classRows ?? []).forEach((cr: { id: string; name: string; event_divisions: { name: string } | { name: string }[] | null }) => {
-            const divObj = Array.isArray(cr.event_divisions) ? cr.event_divisions[0] : cr.event_divisions;
-            classMap.set(cr.id, { className: cr.name, divisionName: divObj?.name || "General" });
-        });
+        (classRows ?? []).forEach(
+            (cr: { id: string; name: string; event_divisions: { name: string } | { name: string }[] | null }) => {
+                const divObj = Array.isArray(cr.event_divisions) ? cr.event_divisions[0] : cr.event_divisions;
+                classMap.set(cr.id, { className: cr.name, divisionName: divObj?.name || "General" });
+            },
+        );
     }
 
-    let finalEntries = entryList.map(e => {
+    let finalEntries = entryList.map((e) => {
         // Entry image takes priority: custom entry photo > horse thumbnail
         let displayThumb: string | null = null;
         if (e.entry_image_path) {
@@ -245,8 +271,8 @@ export async function getShowEntries(showId: string): Promise<{
             hasVoted: votedSet.has(e.id),
             createdAt: e.created_at,
             placing: e.placing,
-            className: e.class_id ? (classMap.get(e.class_id)?.className || null) : null,
-            divisionName: e.class_id ? (classMap.get(e.class_id)?.divisionName || null) : null,
+            className: e.class_id ? classMap.get(e.class_id)?.className || null : null,
+            divisionName: e.class_id ? classMap.get(e.class_id)?.divisionName || null : null,
             classId: e.class_id || null,
             caption: e.caption || null,
         };
@@ -254,7 +280,7 @@ export async function getShowEntries(showId: string): Promise<{
 
     // For expert-judged closed shows, sort by placing (1st, 2nd, 3rd...) instead of votes
     if (isExpertJudged && s.show_status === "closed") {
-        const placingOrder: Record<string, number> = { "1st": 1, "2nd": 2, "3rd": 3, "HM": 4 };
+        const placingOrder: Record<string, number> = { "1st": 1, "2nd": 2, "3rd": 3, HM: 4 };
         finalEntries = finalEntries.sort((a, b) => {
             const aOrder = a.placing ? (placingOrder[a.placing] ?? 99) : 99;
             const bOrder = b.placing ? (placingOrder[b.placing] ?? 99) : 99;
@@ -263,7 +289,18 @@ export async function getShowEntries(showId: string): Promise<{
     }
 
     return {
-        show: { id: s.id, title: s.name, description: s.description, theme: s.show_theme, status: s.show_status || "open", entryCount: entryList.length, createdAt: s.created_at, endAt: s.ends_at, createdBy: s.created_by, judgingMethod: s.judging_method || "community_vote" },
+        show: {
+            id: s.id,
+            title: s.name,
+            description: s.description,
+            theme: s.show_theme,
+            status: s.show_status || "open",
+            entryCount: entryList.length,
+            createdAt: s.created_at,
+            endAt: s.ends_at,
+            createdBy: s.created_by,
+            judgingMethod: s.judging_method || "community_vote",
+        },
         entries: finalEntries,
     };
 }
@@ -276,16 +313,12 @@ export async function enterShow(
     horseId: string,
     classId?: string,
     entryImagePath?: string,
-    caption?: string
+    caption?: string,
 ): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
     // Verify show is open
-    const { data: event } = await supabase
-        .from("events")
-        .select("show_status, ends_at")
-        .eq("id", showId)
-        .single();
+    const { data: event } = await supabase.from("events").select("show_status, ends_at").eq("id", showId).single();
     if (!event) {
         return { success: false, error: "This show is not accepting entries." };
     }
@@ -342,7 +375,10 @@ export async function enterShow(
 
             const horseScale = (horseRef as { catalog_items: { scale: string } | null } | null)?.catalog_items?.scale;
             if (horseScale && !allowedScales.includes(horseScale)) {
-                return { success: false, error: `This class only accepts: ${allowedScales.join(", ")}. Your horse is a ${horseScale}.` };
+                return {
+                    success: false,
+                    error: `This class only accepts: ${allowedScales.join(", ")}. Your horse is a ${horseScale}.`,
+                };
             }
         }
     }
@@ -370,7 +406,9 @@ export async function enterShow(
         try {
             const { evaluateUserAchievements } = await import("@/lib/utils/achievements");
             await evaluateUserAchievements(showUserId, "show_entered");
-        } catch (err) { logger.error("Shows", "Background task failed", err); }
+        } catch (err) {
+            logger.error("Shows", "Background task failed", err);
+        }
     });
 
     return { success: true };
@@ -379,9 +417,7 @@ export async function enterShow(
 /**
  * Vote for a show entry (uses atomic RPC).
  */
-export async function voteForEntry(
-    entryId: string
-): Promise<{ success: boolean; newVotes?: number; error?: string }> {
+export async function voteForEntry(entryId: string): Promise<{ success: boolean; newVotes?: number; error?: string }> {
     const { supabase, user } = await requireAuth();
 
     // vote_for_entry is SECURITY DEFINER and now enforces auth.uid() == p_user_id
@@ -408,11 +444,7 @@ export async function voteForEntry(
     // Send notification on upvote
     if (result.action === "voted" && result.entry_owner) {
         try {
-            const { data: voter } = await supabase
-                .from("users")
-                .select("alias_name")
-                .eq("id", user.id)
-                .single();
+            const { data: voter } = await supabase.from("users").select("alias_name").eq("id", user.id).single();
             const voterAlias = (voter as { alias_name: string } | null)?.alias_name || "Someone";
 
             const { createNotification } = await import("@/lib/notifications/createNotification");
@@ -422,7 +454,9 @@ export async function voteForEntry(
                 actorId: user.id,
                 content: `@${voterAlias} voted for your show entry!`,
             });
-        } catch (err) { logger.error("Shows", "Background task failed", err); }
+        } catch (err) {
+            logger.error("Shows", "Background task failed", err);
+        }
     }
 
     revalidatePath("/shows");
@@ -432,10 +466,12 @@ export async function voteForEntry(
 /** Update show status. If closing, calls close_virtual_show RPC. */
 export async function updateShowStatus(
     showId: string,
-    newStatus: "open" | "judging" | "closed"
+    newStatus: "open" | "judging" | "closed",
 ): Promise<{ success: boolean; error?: string }> {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
     if (!user || user.email?.toLowerCase() !== process.env.ADMIN_EMAIL?.toLowerCase()) {
         return { success: false, error: "Unauthorized." };
     }
@@ -454,9 +490,7 @@ export async function updateShowStatus(
         const result = data as { success: boolean; error?: string };
         if (!result.success) return { success: false, error: result.error };
     } else {
-        const { error } = await admin.from("events")
-            .update({ show_status: newStatus })
-            .eq("id", showId);
+        const { error } = await admin.from("events").update({ show_status: newStatus }).eq("id", showId);
         if (error) return { success: false, error: error.message };
     }
 
@@ -470,11 +504,7 @@ export async function updateShowStatus(
         after(async () => {
             try {
                 const adminClient = getAdminClient();
-                const { data: show } = await adminClient
-                    .from("events")
-                    .select("name")
-                    .eq("id", closingShowId)
-                    .single();
+                const { data: show } = await adminClient.from("events").select("name").eq("id", closingShowId).single();
                 const showName = (show as { name: string } | null)?.name || "the show";
 
                 // Get entries with placing + horse names
@@ -487,18 +517,24 @@ export async function updateShowStatus(
                 if (!entries || entries.length === 0) return;
 
                 // Batch-fetch horse names
-                const horseIds = [...new Set((entries as { horse_id: string }[]).map(e => e.horse_id))];
+                const horseIds = [...new Set((entries as { horse_id: string }[]).map((e) => e.horse_id))];
                 const { data: horses } = await adminClient
                     .from("user_horses")
                     .select("id, custom_name")
                     .in("id", horseIds);
                 const horseNameMap = new Map<string, string>();
-                (horses ?? []).forEach((h: { id: string; custom_name: string }) => horseNameMap.set(h.id, h.custom_name));
+                (horses ?? []).forEach((h: { id: string; custom_name: string }) =>
+                    horseNameMap.set(h.id, h.custom_name),
+                );
 
                 const MEDAL_EMOJI: Record<string, string> = {
-                    "1st": "🥇", "2nd": "🥈", "3rd": "🥉",
-                    "Champion": "🏆", "Reserve Champion": "🥈",
-                    "Grand Champion": "🏆", "Reserve Grand Champion": "🥈",
+                    "1st": "🥇",
+                    "2nd": "🥈",
+                    "3rd": "🥉",
+                    Champion: "🏆",
+                    "Reserve Champion": "🥈",
+                    "Grand Champion": "🏆",
+                    "Reserve Grand Champion": "🥈",
                 };
 
                 const { createNotification } = await import("@/lib/notifications/createNotification");
@@ -527,7 +563,9 @@ export async function updateShowStatus(
                         });
                     }
                 }
-            } catch (err) { logger.error("Shows", "Background task failed", err); }
+            } catch (err) {
+                logger.error("Shows", "Background task failed", err);
+            }
         });
     }
 
@@ -537,11 +575,11 @@ export async function updateShowStatus(
 /**
  * Delete a show (now deletes from events).
  */
-export async function deleteShow(
-    showId: string
-): Promise<{ success: boolean; error?: string }> {
+export async function deleteShow(showId: string): Promise<{ success: boolean; error?: string }> {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
     if (!user || user.email?.toLowerCase() !== process.env.ADMIN_EMAIL?.toLowerCase()) {
         return { success: false, error: "Unauthorized." };
     }
@@ -557,25 +595,16 @@ export async function deleteShow(
 /**
  * Withdraw your own entry from a show.
  */
-export async function withdrawEntry(
-    entryId: string
-): Promise<{ success: boolean; error?: string }> {
+export async function withdrawEntry(entryId: string): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
-    const { data: entry } = await supabase
-        .from("event_entries")
-        .select("user_id")
-        .eq("id", entryId)
-        .single();
+    const { data: entry } = await supabase.from("event_entries").select("user_id").eq("id", entryId).single();
 
     if (!entry || (entry as { user_id: string }).user_id !== user.id) {
         return { success: false, error: "Not your entry." };
     }
 
-    const { error } = await supabase
-        .from("event_entries")
-        .delete()
-        .eq("id", entryId);
+    const { error } = await supabase.from("event_entries").delete().eq("id", entryId);
 
     if (error) return { success: false, error: error.message };
     return { success: true };
@@ -585,30 +614,32 @@ export async function withdrawEntry(
  * Batch-record show results from the Live Show Packer.
  * Creates show_records entries for each result.
  */
-export async function batchRecordResults(records: {
-    horseId: string;
-    showName: string;
-    showDate: string | null;
-    division: string | null;
-    className: string;
-    placing: string | null;
-    ribbonColor: string | null;
-    // Advanced fields
-    judgeName?: string | null;
-    isNan?: boolean | null;
-    notes?: string | null;
-    showLocation?: string | null;
-    sectionName?: string | null;
-    awardCategory?: string | null;
-    competitionLevel?: string | null;
-    showDateText?: string | null;
-}[]): Promise<{ success: boolean; error?: string; count?: number }> {
+export async function batchRecordResults(
+    records: {
+        horseId: string;
+        showName: string;
+        showDate: string | null;
+        division: string | null;
+        className: string;
+        placing: string | null;
+        ribbonColor: string | null;
+        // Advanced fields
+        judgeName?: string | null;
+        isNan?: boolean | null;
+        notes?: string | null;
+        showLocation?: string | null;
+        sectionName?: string | null;
+        awardCategory?: string | null;
+        competitionLevel?: string | null;
+        showDateText?: string | null;
+    }[],
+): Promise<{ success: boolean; error?: string; count?: number }> {
     const { supabase, user } = await requireAuth();
 
     if (records.length === 0) return { success: true, count: 0 };
 
     // Verify all horses belong to user
-    const horseIds = [...new Set(records.map(r => r.horseId))];
+    const horseIds = [...new Set(records.map((r) => r.horseId))];
     const { data: ownedHorses } = await supabase
         .from("user_horses")
         .select("id")
@@ -616,7 +647,7 @@ export async function batchRecordResults(records: {
         .in("id", horseIds);
 
     const ownedSet = new Set((ownedHorses ?? []).map((h: { id: string }) => h.id));
-    const validRecords = records.filter(r => ownedSet.has(r.horseId));
+    const validRecords = records.filter((r) => ownedSet.has(r.horseId));
 
     if (validRecords.length === 0) {
         return { success: false, error: "No valid horses found." };
@@ -632,12 +663,12 @@ export async function batchRecordResults(records: {
     const existingKeySet = new Set(
         (existingRecords ?? []).map(
             (er: { horse_id: string; show_name: string; class_name: string | null }) =>
-                `${er.horse_id}::${er.show_name}::${er.class_name ?? ""}`
-        )
+                `${er.horse_id}::${er.show_name}::${er.class_name ?? ""}`,
+        ),
     );
 
     // Filter out records that already exist
-    const newRecords = validRecords.filter(r => {
+    const newRecords = validRecords.filter((r) => {
         const key = `${r.horseId}::${r.showName}::${r.className || ""}`;
         return !existingKeySet.has(key);
     });
@@ -646,7 +677,7 @@ export async function batchRecordResults(records: {
         return { success: true, count: 0 }; // All records skipped as duplicates
     }
 
-    const inserts = newRecords.map(r => ({
+    const inserts = newRecords.map((r) => ({
         horse_id: r.horseId,
         user_id: user.id,
         show_name: r.showName,
@@ -680,7 +711,7 @@ export async function batchRecordResults(records: {
  */
 export async function saveExpertPlacings(
     eventId: string,
-    placings: { entryId: string; placing: string; notes?: string }[]
+    placings: { entryId: string; placing: string; notes?: string }[],
 ): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
@@ -732,8 +763,8 @@ export async function saveExpertPlacings(
         "4th": "White",
         "5th": "Pink",
         "6th": "Green",
-        "HM": "Green",
-        "Champion": "Grand Champion",
+        HM: "Green",
+        Champion: "Grand Champion",
         "Reserve Champion": "Reserve Grand Champion",
         "Grand Champion": "Grand Champion",
         "Reserve Grand Champion": "Reserve Grand Champion",
@@ -745,7 +776,7 @@ export async function saveExpertPlacings(
     let recordError: string | null = null;
     try {
         // Fetch placed entries with horse + user details
-        const entryIds = placings.map(p => p.entryId);
+        const entryIds = placings.map((p) => p.entryId);
         const { data: entries } = await supabase
             .from("event_entries")
             .select("id, horse_id, user_id, placing")
@@ -758,7 +789,12 @@ export async function saveExpertPlacings(
             // can't insert rows with another user's user_id (RLS blocks it)
             const admin = getAdminClient();
 
-            for (const entry of entries as { id: string; horse_id: string; user_id: string; placing: string | null }[]) {
+            for (const entry of entries as {
+                id: string;
+                horse_id: string;
+                user_id: string;
+                placing: string | null;
+            }[]) {
                 if (!entry.placing) continue;
 
                 const ribbonColor = PLACING_TO_RIBBON[entry.placing] || null;
@@ -773,7 +809,7 @@ export async function saveExpertPlacings(
                     .maybeSingle();
 
                 if (!existing) {
-                    const judgeNote = placings.find(p => p.entryId === entry.id)?.notes || undefined;
+                    const judgeNote = placings.find((p) => p.entryId === entry.id)?.notes || undefined;
                     const { error: insertError } = await admin.from("show_records").insert({
                         horse_id: entry.horse_id,
                         user_id: entry.user_id,
@@ -793,11 +829,14 @@ export async function saveExpertPlacings(
                     }
                 } else {
                     // Update judge_notes if provided
-                    const judgeNote = placings.find(p => p.entryId === entry.id)?.notes;
+                    const judgeNote = placings.find((p) => p.entryId === entry.id)?.notes;
                     if (judgeNote) {
-                        await admin.from("show_records").update({
-                            judge_notes: judgeNote,
-                        }).eq("id", (existing as { id: string }).id);
+                        await admin
+                            .from("show_records")
+                            .update({
+                                judge_notes: judgeNote,
+                            })
+                            .eq("id", (existing as { id: string }).id);
                     }
                 }
             }
@@ -826,7 +865,7 @@ export async function saveExpertPlacings(
 /** Override final placings for a closed or judging show (host only). */
 export async function overrideFinalPlacings(
     eventId: string,
-    placings: { entryId: string; placing: string; notes?: string }[]
+    placings: { entryId: string; placing: string; notes?: string }[],
 ): Promise<{ success: boolean; error?: string }> {
     const { user } = await requireAuth();
     const supabase = await createClient();
@@ -849,10 +888,17 @@ export async function overrideFinalPlacings(
     }
 
     const PLACING_TO_RIBBON: Record<string, string> = {
-        "1st": "Blue", "2nd": "Red", "3rd": "Yellow", "4th": "White",
-        "5th": "Pink", "6th": "Green", "HM": "Green",
-        "Champion": "Grand Champion", "Reserve Champion": "Reserve Grand Champion",
-        "Grand Champion": "Grand Champion", "Reserve Grand Champion": "Reserve Grand Champion",
+        "1st": "Blue",
+        "2nd": "Red",
+        "3rd": "Yellow",
+        "4th": "White",
+        "5th": "Pink",
+        "6th": "Green",
+        HM: "Green",
+        Champion: "Grand Champion",
+        "Reserve Champion": "Reserve Grand Champion",
+        "Grand Champion": "Grand Champion",
+        "Reserve Grand Champion": "Reserve Grand Champion",
     };
 
     const admin = getAdminClient();
@@ -896,16 +942,19 @@ export async function overrideFinalPlacings(
             if (existing) {
                 const existingNotes = (existing as { notes: string | null }).notes || "";
                 const auditNote = `${existingNotes}\n[Override by host on ${today}]`.trim();
-                const judgeNote = placings.find(p => p.entryId === entryId)?.notes;
-                await admin.from("show_records").update({
-                    placing,
-                    ribbon_color: PLACING_TO_RIBBON[placing] || null,
-                    notes: auditNote,
-                    ...(judgeNote ? { judge_notes: judgeNote } : {}),
-                }).eq("id", (existing as { id: string }).id);
+                const judgeNote = placings.find((p) => p.entryId === entryId)?.notes;
+                await admin
+                    .from("show_records")
+                    .update({
+                        placing,
+                        ribbon_color: PLACING_TO_RIBBON[placing] || null,
+                        notes: auditNote,
+                        ...(judgeNote ? { judge_notes: judgeNote } : {}),
+                    })
+                    .eq("id", (existing as { id: string }).id);
             } else {
                 const showDate = (ev as { starts_at: string }).starts_at?.split("T")[0];
-                const judgeNote = placings.find(p => p.entryId === entryId)?.notes;
+                const judgeNote = placings.find((p) => p.entryId === entryId)?.notes;
                 await admin.from("show_records").insert({
                     horse_id: horseId,
                     user_id: userId,
@@ -966,11 +1015,8 @@ export async function getShowHistory(): Promise<{
     if (error || !data) return { years: [], totalShows: 0, totalRibbons: 0 };
 
     // Get horse names
-    const horseIds = [...new Set((data as { horse_id: string }[]).map(r => r.horse_id))];
-    const { data: horses } = await supabase
-        .from("user_horses")
-        .select("id, custom_name")
-        .in("id", horseIds);
+    const horseIds = [...new Set((data as { horse_id: string }[]).map((r) => r.horse_id))];
+    const { data: horses } = await supabase.from("user_horses").select("id, custom_name").in("id", horseIds);
     const horseNameMap = new Map<string, string>();
     (horses ?? []).forEach((h: { id: string; custom_name: string }) => horseNameMap.set(h.id, h.custom_name));
 
@@ -978,7 +1024,14 @@ export async function getShowHistory(): Promise<{
     const yearMap = new Map<number, ShowHistoryRecord[]>();
     const showNames = new Set<string>();
 
-    for (const r of data as { horse_id: string; show_name: string; placing: string; total_entries?: number | null; ribbon_color: string | null; show_date: string }[]) {
+    for (const r of data as {
+        horse_id: string;
+        show_name: string;
+        placing: string;
+        total_entries?: number | null;
+        ribbon_color: string | null;
+        show_date: string;
+    }[]) {
         const year = new Date(r.show_date).getFullYear();
         const records = yearMap.get(year) || [];
         records.push({
@@ -1045,10 +1098,17 @@ export interface PublicShowResults {
 
 /** Placement ranking for the public results ledger. */
 const PUBLIC_RESULT_PLACE_ORDER: Record<string, number> = {
-    "Grand Champion": 0, "Reserve Grand Champion": 1,
-    Champion: 2, "Reserve Champion": 3,
-    "1st": 4, "2nd": 5, "3rd": 6,
-    "4th": 7, "5th": 8, "6th": 9, HM: 10,
+    "Grand Champion": 0,
+    "Reserve Grand Champion": 1,
+    Champion: 2,
+    "Reserve Champion": 3,
+    "1st": 4,
+    "2nd": 5,
+    "3rd": 6,
+    "4th": 7,
+    "5th": 8,
+    "6th": 9,
+    HM: 10,
 };
 
 type PublicResultEntryRow = {
@@ -1088,64 +1148,60 @@ const loadPublicShowResultsBody = unstable_cache(
 
         // 1 + 2: the division/class skeleton, then every placed entry in
         // the show in ONE read (was one query per class).
-        const [{ data: divRows }, { data: entryRows }, { count: totalEntries }] =
-            await Promise.all([
-                admin
-                    .from("event_divisions")
-                    .select("id, name, sort_order")
-                    .eq("event_id", eventId)
-                    .order("sort_order"),
-                admin
-                    .from("event_entries")
-                    .select("id, horse_id, class_id, user_id, placing, users!user_id(alias_name)")
-                    .eq("event_id", eventId)
-                    .eq("entry_type", "entered")
-                    .not("placing", "is", null)
-                    .order("placing"),
-                admin
-                    .from("event_entries")
-                    .select("id", { count: "exact", head: true })
-                    .eq("event_id", eventId)
-                    .eq("entry_type", "entered"),
-            ]);
+        const [{ data: divRows }, { data: entryRows }, { count: totalEntries }] = await Promise.all([
+            admin.from("event_divisions").select("id, name, sort_order").eq("event_id", eventId).order("sort_order"),
+            admin
+                .from("event_entries")
+                .select("id, horse_id, class_id, user_id, placing, users!user_id(alias_name)")
+                .eq("event_id", eventId)
+                .eq("entry_type", "entered")
+                .not("placing", "is", null)
+                .order("placing"),
+            admin
+                .from("event_entries")
+                .select("id", { count: "exact", head: true })
+                .eq("event_id", eventId)
+                .eq("entry_type", "entered"),
+        ]);
 
         const entries = (entryRows ?? []) as unknown as PublicResultEntryRow[];
 
         // 3: classes for every division at once.
         const divisionIds = ((divRows ?? []) as { id: string }[]).map((d) => d.id);
-        const { data: classRows } = divisionIds.length > 0
-            ? await admin
-                  .from("event_classes")
-                  .select("id, name, class_number, division_id, sort_order")
-                  .in("division_id", divisionIds)
-                  .order("sort_order")
-            : { data: [] };
+        const { data: classRows } =
+            divisionIds.length > 0
+                ? await admin
+                      .from("event_classes")
+                      .select("id, name, class_number, division_id, sort_order")
+                      .in("division_id", divisionIds)
+                      .order("sort_order")
+                : { data: [] };
 
         // 4 + 5: horse names (admin client, so filter what RLS would —
         // audit S2: horses that went private or were deleted after
         // competing must not leak name/photo here) and the thumbnails of
         // the ones that survived that filter.
         const horseIds = [...new Set(entries.map((e) => e.horse_id))];
-        const { data: horses } = horseIds.length > 0
-            ? await admin
-                  .from("user_horses")
-                  .select("id, custom_name")
-                  .in("id", horseIds)
-                  .in("visibility", ["public", "unlisted"])
-                  .is("deleted_at", null)
-            : { data: [] };
+        const { data: horses } =
+            horseIds.length > 0
+                ? await admin
+                      .from("user_horses")
+                      .select("id, custom_name")
+                      .in("id", horseIds)
+                      .in("visibility", ["public", "unlisted"])
+                      .is("deleted_at", null)
+                : { data: [] };
         const horseNameMap = new Map<string, string>();
-        (horses ?? []).forEach((h: { id: string; custom_name: string }) =>
-            horseNameMap.set(h.id, h.custom_name),
-        );
+        (horses ?? []).forEach((h: { id: string; custom_name: string }) => horseNameMap.set(h.id, h.custom_name));
         const visibleHorseIds = (horses ?? []).map((h: { id: string }) => h.id);
 
-        const { data: thumbRows } = visibleHorseIds.length > 0
-            ? await admin
-                  .from("horse_images")
-                  .select("horse_id, image_url, angle_profile")
-                  .in("horse_id", visibleHorseIds)
-            : { data: [] };
+        const { data: thumbRows } =
+            visibleHorseIds.length > 0
+                ? await admin
+                      .from("horse_images")
+                      .select("horse_id, image_url, angle_profile")
+                      .in("horse_id", visibleHorseIds)
+                : { data: [] };
 
         const imagesByHorse = new Map<string, { image_url: string; angle_profile: string }[]>();
         for (const r of (thumbRows ?? []) as { horse_id: string; image_url: string; angle_profile: string }[]) {
@@ -1183,12 +1239,12 @@ const loadPublicShowResultsBody = unstable_cache(
                 if (bucket) bucket.push(e);
                 else entriesByClass.set(e.class_id, [e]);
             }
-            const classesByDivision = new Map<
-                string,
-                { id: string; name: string; class_number: string | null }[]
-            >();
+            const classesByDivision = new Map<string, { id: string; name: string; class_number: string | null }[]>();
             for (const c of (classRows ?? []) as unknown as {
-                id: string; name: string; class_number: string | null; division_id: string;
+                id: string;
+                name: string;
+                class_number: string | null;
+                division_id: string;
             }[]) {
                 const bucket = classesByDivision.get(c.division_id);
                 if (bucket) bucket.push(c);
@@ -1257,16 +1313,23 @@ export async function getPublicShowResults(eventId: string): Promise<PublicShowR
     // cached null.
     const { data: eventData } = await admin
         .from("events")
-        .select("id, name, event_type, show_status, starts_at, ends_at, created_by, sanctioning_body, users!created_by(alias_name)")
+        .select(
+            "id, name, event_type, show_status, starts_at, ends_at, created_by, sanctioning_body, users!created_by(alias_name)",
+        )
         .eq("id", eventId)
         .single();
 
     if (!eventData) return null;
 
     const ev = eventData as {
-        id: string; name: string; event_type: string;
-        show_status: string; starts_at: string; ends_at: string | null;
-        created_by: string; sanctioning_body: string | null;
+        id: string;
+        name: string;
+        event_type: string;
+        show_status: string;
+        starts_at: string;
+        ends_at: string | null;
+        created_by: string;
+        sanctioning_body: string | null;
         users: { alias_name: string } | { alias_name: string }[] | null;
     };
 
@@ -1281,7 +1344,9 @@ export async function getPublicShowResults(eventId: string): Promise<PublicShowR
         event: {
             id: ev.id,
             name: ev.name,
-            date: ev.starts_at ? new Date(ev.starts_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "",
+            date: ev.starts_at
+                ? new Date(ev.starts_at).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
+                : "",
             host: hostAlias || "Unknown",
             type: ev.event_type,
             isSanctioned: ev.sanctioning_body === "namhsa",

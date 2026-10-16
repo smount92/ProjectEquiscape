@@ -2,11 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { searchAliases } from "@/app/actions/posts";
-import {
-    findMentionQuery,
-    applyMentionCompletion,
-    type MentionQuery,
-} from "@/lib/feed/mentionMatch";
+import { findMentionQuery, applyMentionCompletion, type MentionQuery } from "@/lib/feed/mentionMatch";
 import UserAvatar from "@/components/social/UserAvatar";
 
 interface Suggestion {
@@ -121,7 +117,7 @@ export default function MentionTextarea({
                 id={id}
                 className={
                     className ||
-                    "w-full min-h-[100px] resize-y rounded-md border border-input bg-transparent px-4 py-3 text-sm no-underline transition-all focus:border-forest focus:outline-none"
+                    "min-h-[100px] w-full resize-y rounded-md border border-input bg-transparent px-4 py-3 text-sm no-underline transition-all focus:border-forest focus:outline-none"
                 }
                 placeholder={placeholder}
                 value={value}
@@ -156,7 +152,7 @@ export default function MentionTextarea({
                     aria-label="Mention suggestions"
                     /* Same recipe as the reference search dropdown: lit
                        paper, input border, forest highlight row. */
-                    className="border-input bg-(--paper-lit) text-(--paper-lit-ink) absolute top-full left-2 z-30 mt-1 max-h-56 w-64 overflow-y-auto rounded-md border p-1 shadow-lg"
+                    className="absolute top-full left-2 z-30 mt-1 max-h-56 w-64 overflow-y-auto rounded-md border border-input bg-(--paper-lit) p-1 text-(--paper-lit-ink) shadow-lg"
                 >
                     {suggestions.map((s, i) => (
                         <li key={s.alias} role="option" aria-selected={i === highlighted}>
@@ -165,7 +161,7 @@ export default function MentionTextarea({
                                 className={`flex w-full cursor-pointer items-center gap-2 rounded-sm border-0 px-2 py-1.5 text-left text-sm ${
                                     i === highlighted
                                         ? "bg-forest font-semibold text-white"
-                                        : "text-foreground bg-transparent"
+                                        : "bg-transparent text-foreground"
                                 }`}
                                 onMouseEnter={() => setHighlighted(i)}
                                 onMouseDown={(e) => e.preventDefault()}

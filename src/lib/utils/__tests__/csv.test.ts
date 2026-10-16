@@ -20,9 +20,7 @@ describe("escapeCSV", () => {
     });
 
     it("neutralizes formula injection (leading = + - @)", () => {
-        expect(escapeCSV('=HYPERLINK("http://evil","x")')).toBe(
-            "\"'=HYPERLINK(\"\"http://evil\"\",\"\"x\"\")\""
-        );
+        expect(escapeCSV('=HYPERLINK("http://evil","x")')).toBe('"\'=HYPERLINK(""http://evil"",""x"")"');
         expect(escapeCSV("=SUM(1+1)")).toBe("'=SUM(1+1)");
         expect(escapeCSV("+1234")).toBe("'+1234");
         expect(escapeCSV("-cmd")).toBe("'-cmd");

@@ -32,13 +32,10 @@ export default function ScoreRadar({
         const a = -Math.PI / 2 + (i * 2 * Math.PI) / n;
         return [cx + Math.cos(a) * R * (v / 10), cy + Math.sin(a) * R * (v / 10)];
     };
-    const ringPoints = (v: number) =>
-        rubric.criteria.map((_, i) => pt(i, v).join(",")).join(" ");
+    const ringPoints = (v: number) => rubric.criteria.map((_, i) => pt(i, v).join(",")).join(" ");
 
     const entryPts = rubric.criteria.map((c, i) => pt(i, scores[c.key] ?? 0));
-    const avgPts = averages
-        ? rubric.criteria.map((c, i) => pt(i, averages[c.key] ?? 0))
-        : null;
+    const avgPts = averages ? rubric.criteria.map((c, i) => pt(i, averages[c.key] ?? 0)) : null;
 
     return (
         <svg
@@ -126,13 +123,17 @@ export default function ScoreRadar({
                     >
                         {line2 ? (
                             <>
-                                <tspan x={x} dy="-0.3em">{line1}</tspan>
+                                <tspan x={x} dy="-0.3em">
+                                    {line1}
+                                </tspan>
                                 <tspan x={x} dy="1.1em">
                                     {line2} · {scores[c.key] ?? "—"}
                                 </tspan>
                             </>
                         ) : (
-                            <>{c.label} · {scores[c.key] ?? "—"}</>
+                            <>
+                                {c.label} · {scores[c.key] ?? "—"}
+                            </>
                         )}
                     </text>
                 );

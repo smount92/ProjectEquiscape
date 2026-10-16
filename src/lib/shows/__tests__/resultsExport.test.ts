@@ -1,10 +1,6 @@
 import { describe, it, expect } from "vitest";
 
-import {
-    buildShowResultsCsv,
-    RESULTS_CSV_HEADERS,
-    type ResultsExportInput,
-} from "@/lib/shows/resultsExport";
+import { buildShowResultsCsv, RESULTS_CSV_HEADERS, type ResultsExportInput } from "@/lib/shows/resultsExport";
 
 function baseInput(overrides: Partial<ResultsExportInput> = {}): ResultsExportInput {
     return {

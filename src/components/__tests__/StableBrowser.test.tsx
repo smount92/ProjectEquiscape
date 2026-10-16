@@ -15,15 +15,7 @@ vi.mock("next/navigation", () => ({
 // The shared setup mocks Link to render nothing; the cards here must be
 // real anchors so ReturnToCard can find them by id.
 vi.mock("next/link", () => ({
-    default: ({
-        children,
-        href,
-        ...props
-    }: {
-        children: React.ReactNode;
-        href: string;
-        [key: string]: unknown;
-    }) => (
+    default: ({ children, href, ...props }: { children: React.ReactNode; href: string; [key: string]: unknown }) => (
         <a href={href} {...props}>
             {children}
         </a>

@@ -66,10 +66,15 @@ export async function setHorsesFolders(
     collectionIds: readonly string[],
 ): Promise<{ error?: string }> {
     if (horseIds.length === 0) return {};
-    const { error: delErr } = await supabase.from("horse_collections").delete().in("horse_id", [...horseIds]);
+    const { error: delErr } = await supabase
+        .from("horse_collections")
+        .delete()
+        .in("horse_id", [...horseIds]);
     if (delErr) return { error: delErr.message };
     if (collectionIds.length > 0) {
-        const rows = horseIds.flatMap((horse_id) => collectionIds.map((collection_id) => ({ horse_id, collection_id })));
+        const rows = horseIds.flatMap((horse_id) =>
+            collectionIds.map((collection_id) => ({ horse_id, collection_id })),
+        );
         const { error: insErr } = await supabase.from("horse_collections").insert(rows as never);
         if (insErr) return { error: insErr.message };
     }
@@ -83,12 +88,9 @@ export async function setHorsesFolders(
 }
 
 /** Add one horse to one folder without touching its other folders (new-horse paths). */
-export async function addHorseToFolder(
-    supabase: SupabaseClient,
-    horseId: string,
-    collectionId: string,
-): Promise<void> {
-    await supabase
-        .from("horse_collections")
-        .upsert({ horse_id: horseId, collection_id: collectionId } as never, { onConflict: "horse_id,collection_id", ignoreDuplicates: true });
+export async function addHorseToFolder(supabase: SupabaseClient, horseId: string, collectionId: string): Promise<void> {
+    await supabase.from("horse_collections").upsert({ horse_id: horseId, collection_id: collectionId } as never, {
+        onConflict: "horse_id,collection_id",
+        ignoreDuplicates: true,
+    });
 }

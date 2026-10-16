@@ -39,9 +39,7 @@ export type AddShowPhotoResult =
  * existing rows on the same angle before inserting (flaw-cap
  * pattern) and removes the orphaned upload when it refuses.
  */
-export async function addShowPhotoToHorse(
-    input: z.input<typeof addShowPhotoSchema>,
-): Promise<AddShowPhotoResult> {
+export async function addShowPhotoToHorse(input: z.input<typeof addShowPhotoSchema>): Promise<AddShowPhotoResult> {
     const parsed = addShowPhotoSchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { horseId, path } = parsed.data;

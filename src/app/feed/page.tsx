@@ -38,11 +38,7 @@ export const metadata = {
  * Rail data is read-only and fetched here, once, in the same
  * Promise.all as the stream — no per-item fetching downstream.
  */
-export default async function FeedPage({
-    searchParams,
-}: {
-    searchParams: Promise<{ tab?: string }>;
-}) {
+export default async function FeedPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
     const supabase = await createClient();
     const {
         data: { user },
@@ -90,15 +86,15 @@ export default async function FeedPage({
     // Collector-designated main shot, else the first photo — then one
     // batched signing pass for the whole strip. Blocked users' horses
     // are hidden here like everywhere else (fetched 8, shown ≤6).
-    const blockedOwnerIds = new Set(
-        (myBlocks as { blocked_id: string }[]).map((b) => b.blocked_id),
-    );
-    const ringRaw = (ringRows as unknown as {
-        id: string;
-        owner_id: string;
-        custom_name: string | null;
-        horse_images: { image_url: string; angle_profile: string | null }[] | null;
-    }[])
+    const blockedOwnerIds = new Set((myBlocks as { blocked_id: string }[]).map((b) => b.blocked_id));
+    const ringRaw = (
+        ringRows as unknown as {
+            id: string;
+            owner_id: string;
+            custom_name: string | null;
+            horse_images: { image_url: string; angle_profile: string | null }[] | null;
+        }[]
+    )
         .filter((h) => !blockedOwnerIds.has(h.owner_id))
         .slice(0, 6)
         .map((h) => {
@@ -118,8 +114,7 @@ export default async function FeedPage({
     /* Everyone / Following is a lens on one stream, so it gets the
        site's chip vocabulary (.studio-chip, as on the events board and
        the catalog filters) rather than two browser-default buttons. */
-    const scopeChip = (active: boolean) =>
-        `studio-chip no-underline ${active ? "active" : ""}`;
+    const scopeChip = (active: boolean) => `studio-chip no-underline ${active ? "active" : ""}`;
 
     return (
         // noHeader + frameless: the leather masthead below IS this
@@ -140,17 +135,11 @@ export default async function FeedPage({
                 <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[1.5fr_1fr] lg:gap-10">
                     {/* ── The stream ── */}
                     <div className="min-w-0">
-                        <nav
-                            aria-label="Feed scope"
-                            className="mb-5 flex flex-wrap items-center gap-1.5"
-                        >
+                        <nav aria-label="Feed scope" className="mb-5 flex flex-wrap items-center gap-1.5">
                             <Link href="/feed" className={scopeChip(scope === "everyone")}>
                                 <Globe className="h-3.5 w-3.5" aria-hidden="true" /> Everyone
                             </Link>
-                            <Link
-                                href="/feed?tab=following"
-                                className={scopeChip(scope === "following")}
-                            >
+                            <Link href="/feed?tab=following" className={scopeChip(scope === "following")}>
                                 <Users className="h-3.5 w-3.5" aria-hidden="true" /> Following
                             </Link>
                         </nav>
@@ -164,10 +153,7 @@ export default async function FeedPage({
                             currentUserAlias={me?.alias_name ?? "You"}
                             currentUserAvatar={myAvatar}
                             visibilityEnabled={capabilities.visibility}
-                            viewerIsAdmin={
-                                user.email?.toLowerCase() ===
-                                process.env.ADMIN_EMAIL?.toLowerCase()
-                            }
+                            viewerIsAdmin={user.email?.toLowerCase() === process.env.ADMIN_EMAIL?.toLowerCase()}
                             /* Following is a lens on the same stream, not a place to
                                write to — composing always posts to the one feed. */
                             showComposer={scope === "everyone"}

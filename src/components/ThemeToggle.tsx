@@ -16,36 +16,36 @@ import { useEffect, useState } from "react";
  * prefers-color-scheme while this is a preview.
  */
 export default function ThemeToggle() {
-  const [night, setNight] = useState(false);
+    const [night, setNight] = useState(false);
 
-  // The inline head script stamps data-theme before hydration; sync
-  // React state to it after mount (server HTML always renders "day").
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- mount-gate: the head script sets the theme before hydration
-    setNight(document.documentElement.dataset.theme === "night");
-  }, []);
+    // The inline head script stamps data-theme before hydration; sync
+    // React state to it after mount (server HTML always renders "day").
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- mount-gate: the head script sets the theme before hydration
+        setNight(document.documentElement.dataset.theme === "night");
+    }, []);
 
-  function toggle() {
-    const next = !night;
-    setNight(next);
-    document.documentElement.dataset.theme = next ? "night" : "";
-    try {
-      localStorage.setItem("mhh-theme", next ? "night" : "day");
-    } catch {
-      /* private browsing / storage disabled — theme just won't persist */
+    function toggle() {
+        const next = !night;
+        setNight(next);
+        document.documentElement.dataset.theme = next ? "night" : "";
+        try {
+            localStorage.setItem("mhh-theme", next ? "night" : "day");
+        } catch {
+            /* private browsing / storage disabled — theme just won't persist */
+        }
     }
-  }
 
-  return (
-    <button
-      type="button"
-      className="lamplight-toggle"
-      onClick={toggle}
-      aria-pressed={night}
-      title={night ? "Switch to daylight" : "Switch to lamplight"}
-      aria-label={night ? "Switch to daylight theme" : "Switch to lamplight night theme"}
-    >
-      <span aria-hidden="true">{night ? "☀️" : "🌙"}</span>
-    </button>
-  );
+    return (
+        <button
+            type="button"
+            className="lamplight-toggle"
+            onClick={toggle}
+            aria-pressed={night}
+            title={night ? "Switch to daylight" : "Switch to lamplight"}
+            aria-label={night ? "Switch to daylight theme" : "Switch to lamplight night theme"}
+        >
+            <span aria-hidden="true">{night ? "☀️" : "🌙"}</span>
+        </button>
+    );
 }

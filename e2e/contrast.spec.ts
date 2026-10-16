@@ -154,7 +154,9 @@ test.describe("contrast audit", () => {
     test.setTimeout(15 * 60 * 1000);
 
     test("every visible text reads at AA in day, night and Simple Mode", async ({ page }) => {
-        const baseline: { known: string[] } = existsSync(BASELINE_PATH) ? JSON.parse(readFileSync(BASELINE_PATH, "utf8")) : { known: [] };
+        const baseline: { known: string[] } = existsSync(BASELINE_PATH)
+            ? JSON.parse(readFileSync(BASELINE_PATH, "utf8"))
+            : { known: [] };
         const known = new Set(baseline.known);
         const rows: Row[] = [];
         const unverified: Row[] = [];
@@ -181,7 +183,14 @@ test.describe("contrast audit", () => {
                         const sig = signature(t.name, route, f);
                         rows.push({ ...f, theme: t.name, route, signature: sig, known: known.has(sig) });
                     }
-                    for (const f of report.unverified) unverified.push({ ...f, theme: t.name, route, signature: signature(t.name, route, f), known: false });
+                    for (const f of report.unverified)
+                        unverified.push({
+                            ...f,
+                            theme: t.name,
+                            route,
+                            signature: signature(t.name, route, f),
+                            known: false,
+                        });
                 }
                 await setTheme(page, null, false).catch(() => {});
             } catch (err) {
@@ -200,7 +209,12 @@ test.describe("contrast audit", () => {
         await page.waitForLoadState("networkidle", { timeout: 8000 }).catch(() => {});
         const href = await page
             .locator('a[href^="/stable/"]')
-            .evaluateAll((as) => (as as HTMLAnchorElement[]).map((a) => a.getAttribute("href") || "").find((h) => /^\/stable\/[0-9a-f-]{36}$/.test(h)) ?? null);
+            .evaluateAll(
+                (as) =>
+                    (as as HTMLAnchorElement[])
+                        .map((a) => a.getAttribute("href") || "")
+                        .find((h) => /^\/stable\/[0-9a-f-]{36}$/.test(h)) ?? null,
+            );
         if (href) {
             const id = href.split("/")[2];
             routes.push(`/stable/${id}`, `/stable/${id}/edit`, `/community/${id}`);
@@ -230,27 +244,47 @@ test.describe("contrast audit", () => {
             const byTheme = new Map<string, Row[]>();
             for (const r of list) byTheme.set(r.theme, [...(byTheme.get(r.theme) ?? []), r]);
             for (const [theme, items] of byTheme) {
-                md.push(`### ${theme}`, ``, `| ratio | needs | ink | ground | text | where | route |`, `|---|---|---|---|---|---|---|`);
-                for (const r of items) md.push(`| ${r.ratio} | ${r.required} | ${r.fg} | ${r.bg} | ${r.text.replace(/\|/g, "/")} | \`${r.path.replace(/\|/g, "/")}\` | ${r.route} |`);
+                md.push(
+                    `### ${theme}`,
+                    ``,
+                    `| ratio | needs | ink | ground | text | where | route |`,
+                    `|---|---|---|---|---|---|---|`,
+                );
+                for (const r of items)
+                    md.push(
+                        `| ${r.ratio} | ${r.required} | ${r.fg} | ${r.bg} | ${r.text.replace(/\|/g, "/")} | \`${r.path.replace(/\|/g, "/")}\` | ${r.route} |`,
+                    );
                 md.push(``);
             }
         };
         group("New failures", fresh);
         group("Known failures (in baseline)", stillKnown);
         group("Unverifiable (estimate only)", unverified);
-        if (fixed.length) md.push(`## Fixed — remove from e2e/contrast.baseline.json`, ``, ...fixed.map((s) => `- \`${s}\``), ``);
+        if (fixed.length)
+            md.push(`## Fixed — remove from e2e/contrast.baseline.json`, ``, ...fixed.map((s) => `- \`${s}\``), ``);
         if (skipped.length) md.push(`## Skipped`, ``, ...skipped.map((s) => `- ${s}`), ``);
         writeFileSync(resolve(OUT_DIR, "report.md"), md.join("\n"));
 
-        console.log(`[contrast] ${measured} measured · ${fresh.length} new failures · ${stillKnown.length} known · ${fixed.length} fixed · ${unverified.length} unverifiable · ${skipped.length} skipped`);
-        for (const r of fresh.slice(0, 40)) console.log(`  ${r.theme.padEnd(6)} ${String(r.ratio).padStart(5)} (needs ${r.required}) ${r.fg} on ${r.bg}  "${r.text}"  ${r.route}  ${r.path}`);
+        console.log(
+            `[contrast] ${measured} measured · ${fresh.length} new failures · ${stillKnown.length} known · ${fixed.length} fixed · ${unverified.length} unverifiable · ${skipped.length} skipped`,
+        );
+        for (const r of fresh.slice(0, 40))
+            console.log(
+                `  ${r.theme.padEnd(6)} ${String(r.ratio).padStart(5)} (needs ${r.required}) ${r.fg} on ${r.bg}  "${r.text}"  ${r.route}  ${r.path}`,
+            );
         if (fresh.length > 40) console.log(`  … ${fresh.length - 40} more in test-results/contrast/report.md`);
         for (const s of skipped) console.log(`  skipped: ${s}`);
 
         expect(measured, "nothing measured — is the server up and the walker intact?").toBeGreaterThan(200);
-        expect(skipped.filter((s) => s.includes("could not measure")), "pages that could not be measured").toEqual([]);
+        expect(
+            skipped.filter((s) => s.includes("could not measure")),
+            "pages that could not be measured",
+        ).toEqual([]);
         if (process.env.CONTRAST_REPORT_ONLY !== "1") {
-            expect(fresh.map((r) => `${r.theme} ${r.route} ${r.ratio}:1 ${r.fg}/${r.bg} "${r.text}" ${r.path}`), "new contrast failures — see test-results/contrast/report.md").toEqual([]);
+            expect(
+                fresh.map((r) => `${r.theme} ${r.route} ${r.ratio}:1 ${r.fg}/${r.bg} "${r.text}" ${r.path}`),
+                "new contrast failures — see test-results/contrast/report.md",
+            ).toEqual([]);
         }
     });
 });

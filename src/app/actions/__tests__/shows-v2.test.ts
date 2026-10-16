@@ -109,17 +109,19 @@ describe("shows-v2 — createShow", () => {
         mockClient._setImplicitResolve({ data: null, error: null }); // staff insert
         const result = await createShow({ title: "Spring Fling", mode: "live" });
         expect(result).toEqual({ success: true, showId: SHOW_ID });
-        expect(mockClient._mockQuery.insert).toHaveBeenCalledWith(expect.objectContaining({
-            host_id: "user-1",
-            title: "Spring Fling",
-            mode: "live",
-            judging: "judged",
-            status: "draft",
-            // Season 1 sanctioning gate: a non-admin host's request is
-            // recorded, never self-granted.
-            is_mhh_qualifying: false,
-            sanctioning_note: "[Host requested MHH sanctioning]",
-        }));
+        expect(mockClient._mockQuery.insert).toHaveBeenCalledWith(
+            expect.objectContaining({
+                host_id: "user-1",
+                title: "Spring Fling",
+                mode: "live",
+                judging: "judged",
+                status: "draft",
+                // Season 1 sanctioning gate: a non-admin host's request is
+                // recorded, never self-granted.
+                is_mhh_qualifying: false,
+                sanctioning_note: "[Host requested MHH sanctioning]",
+            }),
+        );
         expect(mockClient._mockQuery.insert).toHaveBeenCalledWith(
             expect.objectContaining({ show_id: SHOW_ID, user_id: "user-1", role: "host" }),
         );
@@ -170,16 +172,17 @@ describe("shows-v2 — updateShowSettings", () => {
     });
 
     it("refuses mode changes after draft", async () => {
-        mockClient._mockQuery.maybeSingle
-            .mockResolvedValueOnce({ data: showRow({ status: "published", mode: "live" }), error: null });
+        mockClient._mockQuery.maybeSingle.mockResolvedValueOnce({
+            data: showRow({ status: "published", mode: "live" }),
+            error: null,
+        });
         const result = await updateShowSettings({ showId: SHOW_ID, patch: { mode: "online" } });
         expect(result.success).toBe(false);
         if (!result.success) expect(result.error).toMatch(/draft/i);
     });
 
     it("maps camelCase patch to snake_case columns", async () => {
-        mockClient._mockQuery.maybeSingle
-            .mockResolvedValueOnce({ data: showRow(), error: null });
+        mockClient._mockQuery.maybeSingle.mockResolvedValueOnce({ data: showRow(), error: null });
         mockClient._setImplicitResolve({ data: null, error: null });
         const result = await updateShowSettings({
             showId: SHOW_ID,
@@ -263,8 +266,7 @@ describe("shows-v2 — updateShowSettings", () => {
 
 describe("shows-v2 — transitionShowStatus", () => {
     it("applies a legal transition", async () => {
-        mockClient._mockQuery.maybeSingle
-            .mockResolvedValueOnce({ data: showRow({ status: "draft" }), error: null });
+        mockClient._mockQuery.maybeSingle.mockResolvedValueOnce({ data: showRow({ status: "draft" }), error: null });
         // CAS flip returns the updated row (empty = lost the race).
         mockClient._setImplicitResolve({ data: [{ id: SHOW_ID }], error: null });
         const result = await transitionShowStatus({ showId: SHOW_ID, to: "published" });
@@ -273,8 +275,7 @@ describe("shows-v2 — transitionShowStatus", () => {
     });
 
     it("a concurrent transition loses the CAS flip instead of double-firing", async () => {
-        mockClient._mockQuery.maybeSingle
-            .mockResolvedValueOnce({ data: showRow({ status: "draft" }), error: null });
+        mockClient._mockQuery.maybeSingle.mockResolvedValueOnce({ data: showRow({ status: "draft" }), error: null });
         // Another writer flipped first: the CAS update matches 0 rows.
         mockClient._setImplicitResolve({ data: [], error: null });
         const result = await transitionShowStatus({ showId: SHOW_ID, to: "published" });
@@ -285,8 +286,7 @@ describe("shows-v2 — transitionShowStatus", () => {
     });
 
     it("refuses an illegal jump with the state machine's reason", async () => {
-        mockClient._mockQuery.maybeSingle
-            .mockResolvedValueOnce({ data: showRow({ status: "draft" }), error: null });
+        mockClient._mockQuery.maybeSingle.mockResolvedValueOnce({ data: showRow({ status: "draft" }), error: null });
         const result = await transitionShowStatus({ showId: SHOW_ID, to: "completed" });
         expect(result.success).toBe(false);
         if (!result.success) expect(result.error).toMatch(/cannot go from draft/i);
@@ -294,8 +294,10 @@ describe("shows-v2 — transitionShowStatus", () => {
     });
 
     it("enforces the mode gate (live show cannot enter judging)", async () => {
-        mockClient._mockQuery.maybeSingle
-            .mockResolvedValueOnce({ data: showRow({ status: "entries_closed", mode: "live" }), error: null });
+        mockClient._mockQuery.maybeSingle.mockResolvedValueOnce({
+            data: showRow({ status: "entries_closed", mode: "live" }),
+            error: null,
+        });
         const result = await transitionShowStatus({ showId: SHOW_ID, to: "judging" });
         expect(result.success).toBe(false);
         if (!result.success) expect(result.error).toMatch(/only online shows/i);
@@ -318,16 +320,17 @@ describe("shows-v2 — transitionShowStatus", () => {
 
 describe("shows-v2 — classlist structure", () => {
     it("addDivision inserts with axis for the manager", async () => {
-        mockClient._mockQuery.maybeSingle
-            .mockResolvedValueOnce({ data: showRow(), error: null });
+        mockClient._mockQuery.maybeSingle.mockResolvedValueOnce({ data: showRow(), error: null });
         mockClient._mockQuery.single.mockResolvedValueOnce({ data: { id: DIVISION_ID }, error: null });
         const result = await addDivision({ showId: SHOW_ID, name: "OF Plastic Halter", axis: "halter" });
         expect(result).toEqual({ success: true, divisionId: DIVISION_ID });
-        expect(mockClient._mockQuery.insert).toHaveBeenCalledWith(expect.objectContaining({
-            show_id: SHOW_ID,
-            name: "OF Plastic Halter",
-            axis: "halter",
-        }));
+        expect(mockClient._mockQuery.insert).toHaveBeenCalledWith(
+            expect.objectContaining({
+                show_id: SHOW_ID,
+                name: "OF Plastic Halter",
+                axis: "halter",
+            }),
+        );
     });
 
     it("addDivision refuses non-staff", async () => {
@@ -366,19 +369,23 @@ describe("shows-v2 — classlist structure", () => {
             maxPerEntrant: 2,
         });
         expect(result).toEqual({ success: true, classId: CLASS_ID });
-        expect(mockClient._mockQuery.insert).toHaveBeenCalledWith(expect.objectContaining({
-            section_id: SECTION_ID,
-            name: "Quarter Horse",
-            class_number: "110",
-            status: "scheduled",
-            max_per_entrant: 2,
-            is_qualifying: true,
-        }));
+        expect(mockClient._mockQuery.insert).toHaveBeenCalledWith(
+            expect.objectContaining({
+                section_id: SECTION_ID,
+                name: "Quarter Horse",
+                class_number: "110",
+                status: "scheduled",
+                max_per_entrant: 2,
+                is_qualifying: true,
+            }),
+        );
     });
 
     it("addDivision refuses once the classlist is frozen (completed show)", async () => {
-        mockClient._mockQuery.maybeSingle
-            .mockResolvedValueOnce({ data: showRow({ status: "completed" }), error: null });
+        mockClient._mockQuery.maybeSingle.mockResolvedValueOnce({
+            data: showRow({ status: "completed" }),
+            error: null,
+        });
         const result = await addDivision({ showId: SHOW_ID, name: "Too Late Division" });
         expect(result.success).toBe(false);
         if (!result.success) expect(result.error).toMatch(/no longer be edited/i);
@@ -397,8 +404,10 @@ describe("shows-v2 — classlist structure", () => {
     });
 
     it("reorderClasslist refuses once the classlist is frozen (results_review)", async () => {
-        mockClient._mockQuery.maybeSingle
-            .mockResolvedValueOnce({ data: showRow({ status: "results_review" }), error: null });
+        mockClient._mockQuery.maybeSingle.mockResolvedValueOnce({
+            data: showRow({ status: "results_review" }),
+            error: null,
+        });
         const result = await reorderClasslist({
             showId: SHOW_ID,
             kind: "class",
@@ -410,8 +419,7 @@ describe("shows-v2 — classlist structure", () => {
     });
 
     it("reorderClasslist calls the batch RPC once (no per-row loop)", async () => {
-        mockClient._mockQuery.maybeSingle
-            .mockResolvedValueOnce({ data: showRow(), error: null });
+        mockClient._mockQuery.maybeSingle.mockResolvedValueOnce({ data: showRow(), error: null });
         mockClient.rpc.mockResolvedValueOnce({ data: 2, error: null });
         const result = await reorderClasslist({
             showId: SHOW_ID,
@@ -762,16 +770,17 @@ describe("shows-v2 — loadNamhsaTemplate", () => {
     });
 
     it("refuses once entries are open", async () => {
-        mockClient._mockQuery.maybeSingle
-            .mockResolvedValueOnce({ data: showRow({ status: "entries_open" }), error: null });
+        mockClient._mockQuery.maybeSingle.mockResolvedValueOnce({
+            data: showRow({ status: "entries_open" }),
+            error: null,
+        });
         const result = await loadNamhsaTemplate({ showId: SHOW_ID });
         expect(result.success).toBe(false);
         if (!result.success) expect(result.error).toMatch(/before entries open/i);
     });
 
     it("inserts divisions → sections → classes as three batches", async () => {
-        mockClient._mockQuery.maybeSingle
-            .mockResolvedValueOnce({ data: showRow(), error: null });
+        mockClient._mockQuery.maybeSingle.mockResolvedValueOnce({ data: showRow(), error: null });
 
         const divisionRows = [
             { id: "d1", name: "Breed Halter" },
@@ -792,11 +801,14 @@ describe("shows-v2 — loadNamhsaTemplate", () => {
         ];
         mockClient._mockQuery.then
             .mockImplementationOnce((resolve: (v: unknown) => void) =>
-                Promise.resolve({ data: divisionRows, error: null }).then(resolve))
+                Promise.resolve({ data: divisionRows, error: null }).then(resolve),
+            )
             .mockImplementationOnce((resolve: (v: unknown) => void) =>
-                Promise.resolve({ data: sectionRows, error: null }).then(resolve))
+                Promise.resolve({ data: sectionRows, error: null }).then(resolve),
+            )
             .mockImplementationOnce((resolve: (v: unknown) => void) =>
-                Promise.resolve({ data: null, error: null }).then(resolve));
+                Promise.resolve({ data: null, error: null }).then(resolve),
+            );
 
         const result = await loadNamhsaTemplate({ showId: SHOW_ID });
         expect(result).toEqual({ success: true, divisions: 3, sections: 10, classes: 41 });
@@ -805,12 +817,14 @@ describe("shows-v2 — loadNamhsaTemplate", () => {
         const classBatch = mockClient._mockQuery.insert.mock.calls[2][0];
         expect(Array.isArray(classBatch)).toBe(true);
         expect(classBatch).toHaveLength(41);
-        expect(classBatch[0]).toEqual(expect.objectContaining({
-            section_id: "s1",
-            name: "Arabian",
-            class_number: "101",
-            status: "scheduled",
-        }));
+        expect(classBatch[0]).toEqual(
+            expect.objectContaining({
+                section_id: "s1",
+                name: "Arabian",
+                class_number: "101",
+                status: "scheduled",
+            }),
+        );
     });
 });
 
@@ -825,8 +839,7 @@ describe("shows-v2 — staff management (host only)", () => {
     });
 
     it("host adds a judge", async () => {
-        mockClient._mockQuery.maybeSingle
-            .mockResolvedValueOnce({ data: showRow(), error: null });
+        mockClient._mockQuery.maybeSingle.mockResolvedValueOnce({ data: showRow(), error: null });
         mockClient._mockQuery.single.mockResolvedValueOnce({ data: { id: "staff-1" }, error: null });
         const result = await addShowStaff({
             showId: SHOW_ID,
@@ -836,13 +849,15 @@ describe("shows-v2 — staff management (host only)", () => {
             coiNote: "Also entering the OF division",
         });
         expect(result).toEqual({ success: true, staffId: "staff-1" });
-        expect(mockClient._mockQuery.insert).toHaveBeenCalledWith(expect.objectContaining({
-            show_id: SHOW_ID,
-            user_id: OTHER_ID,
-            role: "judge",
-            coi_flag: true,
-            coi_note: "Also entering the OF division",
-        }));
+        expect(mockClient._mockQuery.insert).toHaveBeenCalledWith(
+            expect.objectContaining({
+                show_id: SHOW_ID,
+                user_id: OTHER_ID,
+                role: "judge",
+                coi_flag: true,
+                coi_note: "Also entering the OF division",
+            }),
+        );
     });
 
     it("zod refuses granting the host role", async () => {
@@ -860,8 +875,7 @@ describe("shows-v2 — staff management (host only)", () => {
         mockClient.auth.getUser.mockResolvedValue({
             data: { user: { id: HOST_UUID, email: "host@test.com" } },
         });
-        mockClient._mockQuery.maybeSingle
-            .mockResolvedValueOnce({ data: showRow({ host_id: HOST_UUID }), error: null });
+        mockClient._mockQuery.maybeSingle.mockResolvedValueOnce({ data: showRow({ host_id: HOST_UUID }), error: null });
         const result = await addShowStaff({ showId: SHOW_ID, userId: HOST_UUID, role: "steward" });
         expect(result.success).toBe(false);
         if (!result.success) expect(result.error).toMatch(/already the host/i);
@@ -869,8 +883,7 @@ describe("shows-v2 — staff management (host only)", () => {
     });
 
     it("duplicate staff insert maps the unique violation to a friendly error", async () => {
-        mockClient._mockQuery.maybeSingle
-            .mockResolvedValueOnce({ data: showRow(), error: null });
+        mockClient._mockQuery.maybeSingle.mockResolvedValueOnce({ data: showRow(), error: null });
         mockClient._mockQuery.single.mockResolvedValueOnce({
             data: null,
             error: { code: "23505", message: "duplicate key value" },
@@ -881,8 +894,7 @@ describe("shows-v2 — staff management (host only)", () => {
     });
 
     it("removeShowStaff refuses to remove the host row", async () => {
-        mockClient._mockQuery.maybeSingle
-            .mockResolvedValueOnce({ data: showRow({ host_id: "user-1" }), error: null });
+        mockClient._mockQuery.maybeSingle.mockResolvedValueOnce({ data: showRow({ host_id: "user-1" }), error: null });
         // removing self-as-host: userId must be a uuid, so use a uuid host
         const result = await removeShowStaff({ showId: SHOW_ID, userId: OTHER_ID });
         // OTHER_ID is not the host — allowed path; now test the host-protection path
@@ -906,8 +918,7 @@ describe("shows-v2 — staff management (host only)", () => {
 
 describe("shows-v2 — deleteShow (drafts only, host only)", () => {
     it("deletes a draft as the host", async () => {
-        mockClient._mockQuery.maybeSingle
-            .mockResolvedValueOnce({ data: showRow({ status: "draft" }), error: null });
+        mockClient._mockQuery.maybeSingle.mockResolvedValueOnce({ data: showRow({ status: "draft" }), error: null });
         mockClient._setImplicitResolve({ data: [{ id: SHOW_ID }], error: null });
         const result = await deleteShow({ showId: SHOW_ID });
         expect(result).toEqual({ success: true });
@@ -916,8 +927,7 @@ describe("shows-v2 — deleteShow (drafts only, host only)", () => {
     });
 
     it("reports failure when the delete silently affects zero rows", async () => {
-        mockClient._mockQuery.maybeSingle
-            .mockResolvedValueOnce({ data: showRow({ status: "draft" }), error: null });
+        mockClient._mockQuery.maybeSingle.mockResolvedValueOnce({ data: showRow({ status: "draft" }), error: null });
         mockClient._setImplicitResolve({ data: [], error: null });
         const result = await deleteShow({ showId: SHOW_ID });
         expect(result.success).toBe(false);
@@ -925,8 +935,10 @@ describe("shows-v2 — deleteShow (drafts only, host only)", () => {
     });
 
     it("refuses once the show has left draft", async () => {
-        mockClient._mockQuery.maybeSingle
-            .mockResolvedValueOnce({ data: showRow({ status: "published" }), error: null });
+        mockClient._mockQuery.maybeSingle.mockResolvedValueOnce({
+            data: showRow({ status: "published" }),
+            error: null,
+        });
         const result = await deleteShow({ showId: SHOW_ID });
         expect(result.success).toBe(false);
         if (!result.success) expect(result.error).toMatch(/only draft/i);
@@ -946,8 +958,7 @@ describe("shows-v2 — deleteShow (drafts only, host only)", () => {
 
 describe("shows-v2 — setFeePaid (manual fee checklist)", () => {
     it("marks an entrant paid via upsert as a manager", async () => {
-        mockClient._mockQuery.maybeSingle
-            .mockResolvedValueOnce({ data: showRow(), error: null });
+        mockClient._mockQuery.maybeSingle.mockResolvedValueOnce({ data: showRow(), error: null });
         mockClient._setImplicitResolve({ data: null, error: null });
         const result = await setFeePaid({ showId: SHOW_ID, userId: HOST_UUID, paid: true });
         expect(result).toEqual({ success: true });
@@ -957,8 +968,7 @@ describe("shows-v2 — setFeePaid (manual fee checklist)", () => {
     });
 
     it("unmarks via delete", async () => {
-        mockClient._mockQuery.maybeSingle
-            .mockResolvedValueOnce({ data: showRow(), error: null });
+        mockClient._mockQuery.maybeSingle.mockResolvedValueOnce({ data: showRow(), error: null });
         mockClient._setImplicitResolve({ data: null, error: null });
         const result = await setFeePaid({ showId: SHOW_ID, userId: HOST_UUID, paid: false });
         expect(result).toEqual({ success: true });
@@ -1050,7 +1060,10 @@ describe("deleteClass / deleteSection / deleteDivision", () => {
 
     it("refuses an empty-looking section whose classes still hold entries", async () => {
         mockClient._mockQuery.maybeSingle
-            .mockResolvedValueOnce({ data: { id: SECTION_ID, division_id: DIVISION_ID, name: "Light Breeds" }, error: null })
+            .mockResolvedValueOnce({
+                data: { id: SECTION_ID, division_id: DIVISION_ID, name: "Light Breeds" },
+                error: null,
+            })
             .mockResolvedValueOnce({ data: { id: SECTION_ID, division_id: DIVISION_ID }, error: null })
             .mockResolvedValueOnce({ data: { id: DIVISION_ID, show_id: SHOW_ID }, error: null })
             .mockResolvedValueOnce({ data: showRow({ status: "entries_open" }), error: null });

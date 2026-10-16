@@ -20,38 +20,36 @@ import { SERVICE_TYPES } from "@/lib/studio/services";
 /** Older spellings → the label the hobby uses now. Keys are lower-case. */
 const ALIASES: Record<string, string> = {
     prepping: "Prep work",
-    "prep": "Prep work",
-    "tack": "Tack making",
+    prep: "Prep work",
+    tack: "Tack making",
     hairing: "Hair / mane & tail",
-    "hair": "Hair / mane & tail",
+    hair: "Hair / mane & tail",
     "custom painting (of)": "Finishwork (repaint)",
     "custom painting (resin)": "Resin prep & finish",
-    "customizing": "Custom (sculpting)",
-    "sculpting": "Custom (sculpting)",
+    customizing: "Custom (sculpting)",
+    sculpting: "Custom (sculpting)",
     "etching/dremmeling": "Etching / dremel work",
     "etching/dremeling": "Etching / dremel work",
     "dolls and riders": "Dolls & riders",
     "doll / rider": "Dolls & riders",
     "micro mini": "Micro mini",
-    "micro": "Micro mini",
+    micro: "Micro mini",
     // Scales: the bare word and the labelled scale are one facet. Without
     // this the Scale dropdown listed "Traditional (1:9)" and "Traditional"
     // as two choices (2026-09-20).
-    "traditional": "Traditional (1:9)",
-    "trad": "Traditional (1:9)",
+    traditional: "Traditional (1:9)",
+    trad: "Traditional (1:9)",
     "1:8": "Large Traditional (1:8)",
     "large traditional": "Large Traditional (1:8)",
     "1:10": "Small Traditional (1:10)",
     "small traditional": "Small Traditional (1:10)",
-    "classic": "Classic (1:12)",
-    "stablemate": "Stablemate (1:32)",
-    "sm": "Stablemate (1:32)",
+    classic: "Classic (1:12)",
+    stablemate: "Stablemate (1:32)",
+    sm: "Stablemate (1:32)",
     "paddock pal": "Paddock Pal (1:24)",
 };
 
-const CANON_BY_KEY = new Map<string, string>(
-    [...SERVICE_TYPES].map((label) => [label.toLowerCase(), label]),
-);
+const CANON_BY_KEY = new Map<string, string>([...SERVICE_TYPES].map((label) => [label.toLowerCase(), label]));
 
 function key(value: string): string {
     return value.trim().toLowerCase().replace(/\s+/g, " ");

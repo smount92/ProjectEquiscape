@@ -58,10 +58,7 @@ export interface IncomeSummary {
     bestMonth: MonthBucket | null;
 }
 
-const MONTH_LABELS = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-];
+const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 function monthKeyOf(iso: string): { key: string; label: string } | null {
     // Parse the date parts directly rather than through Date(), so a plain
@@ -86,10 +83,7 @@ function round2(n: number): number {
  * Roll a set of commissions into the numbers an artist actually wants on a
  * dashboard. `now` is injectable so the trailing-12 window is testable.
  */
-export function summarizeIncome(
-    rows: IncomeRow[],
-    now: Date = new Date(),
-): IncomeSummary {
+export function summarizeIncome(rows: IncomeRow[], now: Date = new Date()): IncomeSummary {
     let earnedAllTime = 0;
     let earnedCount = 0;
     let earnedLast12 = 0;
@@ -108,9 +102,7 @@ export function summarizeIncome(
 
     for (const row of rows) {
         const status: CommissionStatus = normalizeStatus(row.status);
-        const price = row.agreedPrice != null && Number.isFinite(row.agreedPrice)
-            ? row.agreedPrice
-            : 0;
+        const price = row.agreedPrice != null && Number.isFinite(row.agreedPrice) ? row.agreedPrice : 0;
 
         if (EARNED_STATUSES.includes(status)) {
             earnedAllTime += price;
@@ -182,11 +174,7 @@ export function summarizeIncome(
  * visible as gaps rather than silently collapsed. A chart that skips the
  * quiet months lies about the shape of the year.
  */
-export function monthlySeries(
-    byMonth: MonthBucket[],
-    months = 12,
-    now: Date = new Date(),
-): MonthBucket[] {
+export function monthlySeries(byMonth: MonthBucket[], months = 12, now: Date = new Date()): MonthBucket[] {
     const lookup = new Map(byMonth.map((b) => [b.key, b]));
     const out: MonthBucket[] = [];
     for (let i = months - 1; i >= 0; i--) {

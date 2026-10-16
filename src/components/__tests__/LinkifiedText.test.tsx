@@ -23,33 +23,24 @@ describe("LinkifiedText", () => {
     });
 
     it("keeps the surrounding words intact", () => {
-        const { container } = render(
-            <LinkifiedText text="55 made https://flic.kr/p/583GMA — a lovely one" />,
-        );
+        const { container } = render(<LinkifiedText text="55 made https://flic.kr/p/583GMA — a lovely one" />);
         expect(container.textContent).toContain("55 made");
         expect(container.textContent).toContain("a lovely one");
     });
 
     it("links more than one URL", () => {
-        render(
-            <LinkifiedText text="https://flic.kr/p/583GMA and https://omhps.com/Model/Details/43ce" />,
-        );
+        render(<LinkifiedText text="https://flic.kr/p/583GMA and https://omhps.com/Model/Details/43ce" />);
         expect(screen.getAllByRole("link")).toHaveLength(2);
     });
 
     it("leaves a javascript: payload as inert text", () => {
-        const { container } = render(
-             
-            <LinkifiedText text="click javascript:alert('x') now" />,
-        );
+        const { container } = render(<LinkifiedText text="click javascript:alert('x') now" />);
         expect(screen.queryByRole("link")).toBeNull();
         expect(container.textContent).toContain("javascript:alert('x')");
     });
 
     it("does not render markup found in the text", () => {
-        const { container } = render(
-            <LinkifiedText text={'<img src=x onerror="alert(1)"> and <b>bold</b>'} />,
-        );
+        const { container } = render(<LinkifiedText text={'<img src=x onerror="alert(1)"> and <b>bold</b>'} />);
         expect(container.querySelector("img")).toBeNull();
         expect(container.querySelector("b")).toBeNull();
         // It survives as literal text, which is the point.
@@ -58,10 +49,7 @@ describe("LinkifiedText", () => {
 
     it("leaves sentence punctuation out of the href", () => {
         render(<LinkifiedText text="See https://omhps.com/Model/Details/43ce." />);
-        expect(screen.getByRole("link")).toHaveAttribute(
-            "href",
-            "https://omhps.com/Model/Details/43ce",
-        );
+        expect(screen.getByRole("link")).toHaveAttribute("href", "https://omhps.com/Model/Details/43ce");
     });
 
     it("shortens a long address for display but links the whole thing", () => {

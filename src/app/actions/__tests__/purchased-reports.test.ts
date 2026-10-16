@@ -13,7 +13,7 @@ import { getMyPurchasedReports } from "@/app/actions/purchased-reports";
 function queueReads(...results: { data: unknown; error: unknown }[]) {
     let i = 0;
     mockClient._mockQuery.then = vi.fn((resolve: (value: unknown) => void) =>
-        Promise.resolve(results[Math.min(i++, results.length - 1)]).then(resolve)
+        Promise.resolve(results[Math.min(i++, results.length - 1)]).then(resolve),
     );
 }
 
@@ -65,7 +65,7 @@ describe("getMyPurchasedReports", () => {
                     },
                 ],
                 error: null,
-            }
+            },
         );
 
         const reports = await getMyPurchasedReports();
@@ -103,7 +103,7 @@ describe("getMyPurchasedReports", () => {
                     },
                 ],
                 error: null,
-            }
+            },
         );
 
         const reports = await getMyPurchasedReports();
@@ -125,7 +125,7 @@ describe("getMyPurchasedReports", () => {
                 ],
                 error: null,
             },
-            { data: [], error: null }
+            { data: [], error: null },
         );
 
         const reports = await getMyPurchasedReports();

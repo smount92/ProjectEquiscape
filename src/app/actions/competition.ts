@@ -74,15 +74,11 @@ export async function getNanQualifications(horseId: string): Promise<NanQualific
     if (!data || data.length === 0) return [];
 
     // Get horse name
-    const { data: horse } = await supabase
-        .from("user_horses")
-        .select("custom_name")
-        .eq("id", horseId)
-        .single();
+    const { data: horse } = await supabase.from("user_horses").select("custom_name").eq("id", horseId).single();
 
     const horseName = (horse as { custom_name: string } | null)?.custom_name || "Unknown Horse";
 
-    return (data as Record<string, unknown>[]).map(r => ({
+    return (data as Record<string, unknown>[]).map((r) => ({
         horseId,
         horseName,
         nanYear: r.nan_year as number,
@@ -100,14 +96,11 @@ export async function getNanDashboard(): Promise<NanHorseSummary[]> {
     const { supabase, user } = await requireAuth();
 
     // Get all user's horses
-    const { data: horses } = await supabase
-        .from("user_horses")
-        .select("id, custom_name")
-        .eq("owner_id", user.id);
+    const { data: horses } = await supabase.from("user_horses").select("id, custom_name").eq("owner_id", user.id);
 
     if (!horses || horses.length === 0) return [];
 
-    const horseIds = (horses as { id: string }[]).map(h => h.id);
+    const horseIds = (horses as { id: string }[]).map((h) => h.id);
 
     // Get all NAN records for these horses
     const { data: nanRecords } = await supabase
@@ -118,7 +111,7 @@ export async function getNanDashboard(): Promise<NanHorseSummary[]> {
 
     // Build summary per horse
     const horseMap = new Map<string, string>();
-    (horses as { id: string; custom_name: string }[]).forEach(h => horseMap.set(h.id, h.custom_name));
+    (horses as { id: string; custom_name: string }[]).forEach((h) => horseMap.set(h.id, h.custom_name));
 
     const summaryMap = new Map<string, { qualifications: Map<string, number>; totalCards: number }>();
 
@@ -135,7 +128,7 @@ export async function getNanDashboard(): Promise<NanHorseSummary[]> {
     // Return all horses (even those with no cards)
     // NAMHSA 4-year expiry rule: cards older than 4 years are expired but still shown
     const currentYear = new Date().getFullYear();
-    return (horses as { id: string; custom_name: string }[]).map(h => {
+    return (horses as { id: string; custom_name: string }[]).map((h) => {
         const s = summaryMap.get(h.id);
         const qualifications: { year: number; cardType: string; count: number; isExpired: boolean }[] = [];
         let activeCards = 0;
@@ -165,20 +158,25 @@ export async function getNanDashboard(): Promise<NanHorseSummary[]> {
 
 /** Export all NAN cards for the current user as structured data (for CSV route) */
 export async function exportNanCards(): Promise<{
-    records: { horseName: string; nanYear: number; cardType: string; showName: string; placement: string; className: string | null; isExpired: boolean }[];
+    records: {
+        horseName: string;
+        nanYear: number;
+        cardType: string;
+        showName: string;
+        placement: string;
+        className: string | null;
+        isExpired: boolean;
+    }[];
 }> {
     const { supabase, user } = await requireAuth();
 
-    const { data: horses } = await supabase
-        .from("user_horses")
-        .select("id, custom_name")
-        .eq("owner_id", user.id);
+    const { data: horses } = await supabase.from("user_horses").select("id, custom_name").eq("owner_id", user.id);
 
     if (!horses || horses.length === 0) return { records: [] };
 
-    const horseIds = (horses as { id: string }[]).map(h => h.id);
+    const horseIds = (horses as { id: string }[]).map((h) => h.id);
     const horseNameMap = new Map<string, string>();
-    (horses as { id: string; custom_name: string }[]).forEach(h => horseNameMap.set(h.id, h.custom_name));
+    (horses as { id: string; custom_name: string }[]).forEach((h) => horseNameMap.set(h.id, h.custom_name));
 
     const { data: nanRecords } = await supabase
         .from("show_records")
@@ -191,7 +189,16 @@ export async function exportNanCards(): Promise<{
 
     const currentYear = new Date().getFullYear();
 
-    const records = (nanRecords as { horse_id: string; show_name: string; placing: string; class_name: string | null; nan_card_type: string; nan_year: number }[]).map(r => ({
+    const records = (
+        nanRecords as {
+            horse_id: string;
+            show_name: string;
+            placing: string;
+            class_name: string | null;
+            nan_card_type: string;
+            nan_year: number;
+        }[]
+    ).map((r) => ({
         horseName: horseNameMap.get(r.horse_id) || "Unknown",
         nanYear: r.nan_year,
         cardType: r.nan_card_type,
@@ -218,7 +225,7 @@ export async function exportNanCards(): Promise<{
  */
 export async function checkJudgeCOI(
     judgeUserId: string,
-    eventId: string
+    eventId: string,
 ): Promise<{ hasConflict: boolean; conflicts: string[] }> {
     const supabase = await createClient();
     const conflicts: string[] = [];
@@ -234,7 +241,7 @@ export async function checkJudgeCOI(
 
     if (ownEntries && ownEntries.length > 0) {
         const names = (ownEntries as { user_horses: { custom_name: string } }[])
-            .map(e => e.user_horses?.custom_name || "a horse")
+            .map((e) => e.user_horses?.custom_name || "a horse")
             .slice(0, 3);
         conflicts.push(`Judge owns ${names.length} entered horse${names.length > 1 ? "s" : ""}: ${names.join(", ")}`);
     }
@@ -250,7 +257,7 @@ export async function checkJudgeCOI(
         .eq("entry_type", "entered");
 
     if (entries && entries.length > 0) {
-        const horseIds = [...new Set((entries as { horse_id: string }[]).map(e => e.horse_id))];
+        const horseIds = [...new Set((entries as { horse_id: string }[]).map((e) => e.horse_id))];
 
         const { data: priorOwnership } = await supabase
             .from("horse_ownership_history")
@@ -262,18 +269,16 @@ export async function checkJudgeCOI(
 
         if (priorOwnership && priorOwnership.length > 0) {
             const names = (priorOwnership as { horse_name: string | null }[])
-                .map(h => h.horse_name || "a horse")
+                .map((h) => h.horse_name || "a horse")
                 .slice(0, 3);
-            conflicts.push(`Judge previously owned ${names.length} entered horse${names.length > 1 ? "s" : ""} (within 12 months): ${names.join(", ")}`);
+            conflicts.push(
+                `Judge previously owned ${names.length} entered horse${names.length > 1 ? "s" : ""} (within 12 months): ${names.join(", ")}`,
+            );
         }
     }
 
     // 3. Check: judge is the show host
-    const { data: event } = await supabase
-        .from("events")
-        .select("created_by")
-        .eq("id", eventId)
-        .single();
+    const { data: event } = await supabase.from("events").select("created_by").eq("id", eventId).single();
 
     if (event && (event as { created_by: string }).created_by === judgeUserId) {
         conflicts.push("Judge is the show host/creator");
@@ -322,8 +327,8 @@ export async function addShowRecord(data: {
         class_name: data.className || null,
         total_entries: data.totalEntries || null,
         is_nan_qualifying: data.isNanQualifying || false,
-        nan_card_type: data.isNanQualifying ? (data.nanCardType || null) : null,
-        nan_year: data.isNanQualifying ? (data.nanYear || new Date().getFullYear()) : null,
+        nan_card_type: data.isNanQualifying ? data.nanCardType || null : null,
+        nan_year: data.isNanQualifying ? data.nanYear || new Date().getFullYear() : null,
         notes: data.notes || null,
         verification_tier: "self_reported",
     });
@@ -336,18 +341,11 @@ export async function addShowRecord(data: {
 }
 
 /** Judge/admin verifies a show record */
-export async function verifyShowRecord(
-    recordId: string,
-    note?: string
-): Promise<{ success: boolean; error?: string }> {
+export async function verifyShowRecord(recordId: string, note?: string): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
     // Check user is judge or admin
-    const { data: profile } = await supabase
-        .from("users")
-        .select("role")
-        .eq("id", user.id)
-        .single();
+    const { data: profile } = await supabase.from("users").select("role").eq("id", user.id).single();
 
     const role = (profile as { role: string } | null)?.role;
     if (role !== "judge" && role !== "admin") {
@@ -383,7 +381,7 @@ export async function getShowStrings(): Promise<ShowString[]> {
     if (!strings || strings.length === 0) return [];
 
     // Get entry counts
-    const stringIds = (strings as { id: string }[]).map(s => s.id);
+    const stringIds = (strings as { id: string }[]).map((s) => s.id);
     const { data: entries } = await supabase
         .from("show_string_entries")
         .select("show_string_id")
@@ -394,7 +392,7 @@ export async function getShowStrings(): Promise<ShowString[]> {
         countMap.set(e.show_string_id, (countMap.get(e.show_string_id) || 0) + 1);
     }
 
-    return (strings as Record<string, unknown>[]).map(s => ({
+    return (strings as Record<string, unknown>[]).map((s) => ({
         id: s.id as string,
         name: s.name as string,
         showDate: s.show_date as string | null,
@@ -473,10 +471,7 @@ export async function addShowStringEntry(data: {
 export async function removeShowStringEntry(entryId: string): Promise<{ success: boolean; error?: string }> {
     const supabase = await createClient();
 
-    const { error } = await supabase
-        .from("show_string_entries")
-        .delete()
-        .eq("id", entryId);
+    const { error } = await supabase.from("show_string_entries").delete().eq("id", entryId);
 
     if (error) return { success: false, error: error.message };
 
@@ -497,19 +492,18 @@ export async function getShowStringEntries(showStringId: string): Promise<ShowSt
     if (!entries || entries.length === 0) return [];
 
     // Fetch horse names
-    const horseIds = [...new Set((entries as { horse_id: string }[]).map(e => e.horse_id))];
-    const { data: horses } = await supabase
-        .from("user_horses")
-        .select("id, custom_name")
-        .in("id", horseIds);
+    const horseIds = [...new Set((entries as { horse_id: string }[]).map((e) => e.horse_id))];
+    const { data: horses } = await supabase.from("user_horses").select("id, custom_name").in("id", horseIds);
 
     const nameMap = new Map<string, string>();
-    (horses || [] as { id: string; custom_name: string }[]).forEach((h: { id: string; custom_name: string }) =>
-        nameMap.set(h.id, h.custom_name)
+    (horses || ([] as { id: string; custom_name: string }[])).forEach((h: { id: string; custom_name: string }) =>
+        nameMap.set(h.id, h.custom_name),
     );
 
     // If any entries have class_id, fetch class names
-    const classIds = (entries as { class_id: string | null }[]).filter(e => e.class_id).map(e => e.class_id as string);
+    const classIds = (entries as { class_id: string | null }[])
+        .filter((e) => e.class_id)
+        .map((e) => e.class_id as string);
     const classNameMap = new Map<string, string>();
     if (classIds.length > 0) {
         const { data: classes } = await supabase
@@ -521,12 +515,14 @@ export async function getShowStringEntries(showStringId: string): Promise<ShowSt
         }
     }
 
-    return (entries as Record<string, unknown>[]).map(e => ({
+    return (entries as Record<string, unknown>[]).map((e) => ({
         id: e.id as string,
         showStringId: e.show_string_id as string,
         horseId: e.horse_id as string,
         horseName: nameMap.get(e.horse_id as string) || "Unknown Horse",
-        className: e.class_id ? (classNameMap.get(e.class_id as string) || e.class_name as string) : e.class_name as string,
+        className: e.class_id
+            ? classNameMap.get(e.class_id as string) || (e.class_name as string)
+            : (e.class_name as string),
         classId: e.class_id as string | null,
         division: e.division as string | null,
         timeSlot: e.time_slot as string | null,
@@ -543,7 +539,7 @@ export async function convertShowStringToResults(
         totalEntries?: number;
         isNanQualifying?: boolean;
         nanCardType?: string;
-    }[]
+    }[],
 ): Promise<{ success: boolean; count?: number; error?: string }> {
     const { supabase, user } = await requireAuth();
 
@@ -566,9 +562,23 @@ export async function convertShowStringToResults(
 
     if (!entries || entries.length === 0) return { success: false, error: "No entries in this show string." };
 
-    const entryMap = new Map<string, { horse_id: string; class_name: string; class_id: string | null; division: string | null }>();
-    for (const e of entries as { id: string; horse_id: string; class_name: string; class_id: string | null; division: string | null }[]) {
-        entryMap.set(e.id, { horse_id: e.horse_id, class_name: e.class_name, class_id: e.class_id, division: e.division });
+    const entryMap = new Map<
+        string,
+        { horse_id: string; class_name: string; class_id: string | null; division: string | null }
+    >();
+    for (const e of entries as {
+        id: string;
+        horse_id: string;
+        class_name: string;
+        class_id: string | null;
+        division: string | null;
+    }[]) {
+        entryMap.set(e.id, {
+            horse_id: e.horse_id,
+            class_name: e.class_name,
+            class_id: e.class_id,
+            division: e.division,
+        });
     }
 
     const showDate = ss.show_date || new Date().toISOString().split("T")[0];
@@ -576,8 +586,8 @@ export async function convertShowStringToResults(
 
     // Create show_records from results
     const records = results
-        .filter(r => entryMap.has(r.entryId))
-        .map(r => {
+        .filter((r) => entryMap.has(r.entryId))
+        .map((r) => {
             const entry = entryMap.get(r.entryId)!;
             return {
                 horse_id: entry.horse_id,
@@ -588,7 +598,7 @@ export async function convertShowStringToResults(
                 class_name: entry.class_name,
                 total_entries: r.totalEntries || null,
                 is_nan_qualifying: r.isNanQualifying || false,
-                nan_card_type: r.isNanQualifying ? (r.nanCardType || null) : null,
+                nan_card_type: r.isNanQualifying ? r.nanCardType || null : null,
                 nan_year: r.isNanQualifying ? nanYear : null,
                 verification_tier: "platform_generated",
             };
@@ -664,10 +674,7 @@ export async function detectConflicts(showStringId: string): Promise<{
 export async function deleteShowString(showStringId: string): Promise<{ success: boolean; error?: string }> {
     const supabase = await createClient();
 
-    const { error } = await supabase
-        .from("show_strings")
-        .delete()
-        .eq("id", showStringId);
+    const { error } = await supabase.from("show_strings").delete().eq("id", showStringId);
 
     if (error) return { success: false, error: error.message };
 
@@ -711,22 +718,21 @@ export async function getEventDivisions(eventId: string): Promise<Division[]> {
 
     if (!divisions || divisions.length === 0) return [];
 
-    const divisionIds = (divisions as { id: string }[]).map(d => d.id);
+    const divisionIds = (divisions as { id: string }[]).map((d) => d.id);
 
     const { data: classes } = await supabase
         .from("event_classes")
-        .select("id, division_id, name, class_number, description, is_nan_qualifying, max_entries, allowed_scales, sort_order")
+        .select(
+            "id, division_id, name, class_number, description, is_nan_qualifying, max_entries, allowed_scales, sort_order",
+        )
         .in("division_id", divisionIds)
         .order("sort_order", { ascending: true });
 
     // Get entry counts per class
-    const classIds = ((classes || []) as { id: string }[]).map(c => c.id);
+    const classIds = ((classes || []) as { id: string }[]).map((c) => c.id);
     const entryCountMap = new Map<string, number>();
     if (classIds.length > 0) {
-        const { data: entries } = await supabase
-            .from("event_entries")
-            .select("class_id")
-            .in("class_id", classIds);
+        const { data: entries } = await supabase.from("event_entries").select("class_id").in("class_id", classIds);
         for (const e of (entries || []) as { class_id: string }[]) {
             entryCountMap.set(e.class_id, (entryCountMap.get(e.class_id) || 0) + 1);
         }
@@ -750,7 +756,7 @@ export async function getEventDivisions(eventId: string): Promise<Division[]> {
         });
     }
 
-    return (divisions as Record<string, unknown>[]).map(d => ({
+    return (divisions as Record<string, unknown>[]).map((d) => ({
         id: d.id as string,
         eventId: d.event_id as string,
         name: d.name as string,
@@ -795,11 +801,14 @@ export async function createDivision(data: {
 }
 
 /** Update a division */
-export async function updateDivision(divisionId: string, data: {
-    name?: string;
-    description?: string;
-    sortOrder?: number;
-}): Promise<{ success: boolean; error?: string }> {
+export async function updateDivision(
+    divisionId: string,
+    data: {
+        name?: string;
+        description?: string;
+        sortOrder?: number;
+    },
+): Promise<{ success: boolean; error?: string }> {
     const supabase = await createClient();
 
     const update: Record<string, unknown> = {};
@@ -807,10 +816,7 @@ export async function updateDivision(divisionId: string, data: {
     if (data.description !== undefined) update.description = data.description.trim() || null;
     if (data.sortOrder !== undefined) update.sort_order = data.sortOrder;
 
-    const { error } = await supabase
-        .from("event_divisions")
-        .update(update)
-        .eq("id", divisionId);
+    const { error } = await supabase.from("event_divisions").update(update).eq("id", divisionId);
 
     if (error) return { success: false, error: error.message };
     return { success: true };
@@ -820,10 +826,7 @@ export async function updateDivision(divisionId: string, data: {
 export async function deleteDivision(divisionId: string): Promise<{ success: boolean; error?: string }> {
     const supabase = await createClient();
 
-    const { error } = await supabase
-        .from("event_divisions")
-        .delete()
-        .eq("id", divisionId);
+    const { error } = await supabase.from("event_divisions").delete().eq("id", divisionId);
 
     if (error) return { success: false, error: error.message };
     return { success: true };
@@ -862,15 +865,18 @@ export async function createClass(data: {
 }
 
 /** Update a class */
-export async function updateClass(classId: string, data: {
-    name?: string;
-    classNumber?: string;
-    description?: string;
-    isNanQualifying?: boolean;
-    maxEntries?: number;
-    allowedScales?: string[] | null;
-    sortOrder?: number;
-}): Promise<{ success: boolean; error?: string }> {
+export async function updateClass(
+    classId: string,
+    data: {
+        name?: string;
+        classNumber?: string;
+        description?: string;
+        isNanQualifying?: boolean;
+        maxEntries?: number;
+        allowedScales?: string[] | null;
+        sortOrder?: number;
+    },
+): Promise<{ success: boolean; error?: string }> {
     const supabase = await createClient();
 
     const update: Record<string, unknown> = {};
@@ -879,13 +885,11 @@ export async function updateClass(classId: string, data: {
     if (data.description !== undefined) update.description = data.description.trim() || null;
     if (data.isNanQualifying !== undefined) update.is_nan_qualifying = data.isNanQualifying;
     if (data.maxEntries !== undefined) update.max_entries = data.maxEntries || null;
-    if (data.allowedScales !== undefined) update.allowed_scales = data.allowedScales && data.allowedScales.length > 0 ? data.allowedScales : null;
+    if (data.allowedScales !== undefined)
+        update.allowed_scales = data.allowedScales && data.allowedScales.length > 0 ? data.allowedScales : null;
     if (data.sortOrder !== undefined) update.sort_order = data.sortOrder;
 
-    const { error } = await supabase
-        .from("event_classes")
-        .update(update)
-        .eq("id", classId);
+    const { error } = await supabase.from("event_classes").update(update).eq("id", classId);
 
     if (error) return { success: false, error: error.message };
     return { success: true };
@@ -895,10 +899,7 @@ export async function updateClass(classId: string, data: {
 export async function deleteClass(classId: string): Promise<{ success: boolean; error?: string }> {
     const supabase = await createClient();
 
-    const { error } = await supabase
-        .from("event_classes")
-        .delete()
-        .eq("id", classId);
+    const { error } = await supabase.from("event_classes").delete().eq("id", classId);
 
     if (error) return { success: false, error: error.message };
     return { success: true };
@@ -909,10 +910,7 @@ export async function reorderDivisions(divisionIds: string[]): Promise<{ success
     const supabase = await createClient();
 
     for (let i = 0; i < divisionIds.length; i++) {
-        const { error } = await supabase
-            .from("event_divisions")
-            .update({ sort_order: i })
-            .eq("id", divisionIds[i]);
+        const { error } = await supabase.from("event_divisions").update({ sort_order: i }).eq("id", divisionIds[i]);
         if (error) return { success: false, error: error.message };
     }
 
@@ -924,10 +922,7 @@ export async function reorderClasses(classIds: string[]): Promise<{ success: boo
     const supabase = await createClient();
 
     for (let i = 0; i < classIds.length; i++) {
-        const { error } = await supabase
-            .from("event_classes")
-            .update({ sort_order: i })
-            .eq("id", classIds[i]);
+        const { error } = await supabase.from("event_classes").update({ sort_order: i }).eq("id", classIds[i]);
         if (error) return { success: false, error: error.message };
     }
 
@@ -937,7 +932,7 @@ export async function reorderClasses(classIds: string[]): Promise<{ success: boo
 /** Copy division/class tree from another event */
 export async function copyDivisionsFromEvent(
     sourceEventId: string,
-    targetEventId: string
+    targetEventId: string,
 ): Promise<{ success: boolean; count?: number; error?: string }> {
     const { supabase, user } = await requireAuth();
 
@@ -984,7 +979,7 @@ export async function copyDivisionsFromEvent(
 
 /** Duplicate a show string with all its entries */
 export async function duplicateShowString(
-    stringId: string
+    stringId: string,
 ): Promise<{ success: boolean; newStringId?: string; error?: string }> {
     const { supabase, user } = await requireAuth();
 
@@ -1020,7 +1015,16 @@ export async function duplicateShowString(
         .eq("show_string_id", stringId);
 
     if (entries && entries.length > 0) {
-        const inserts = (entries as { horse_id: string; class_name: string; class_id: string | null; division: string | null; time_slot: string | null; notes: string | null }[]).map(e => ({
+        const inserts = (
+            entries as {
+                horse_id: string;
+                class_name: string;
+                class_id: string | null;
+                division: string | null;
+                time_slot: string | null;
+                notes: string | null;
+            }[]
+        ).map((e) => ({
             show_string_id: newId,
             horse_id: e.horse_id,
             class_name: e.class_name,
@@ -1043,7 +1047,7 @@ export async function updateShowString(
         name?: string;
         showDate?: string | null;
         notes?: string | null;
-    }
+    },
 ): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
@@ -1067,10 +1071,7 @@ export async function updateShowString(
 
     if (Object.keys(update).length === 0) return { success: true };
 
-    const { error } = await supabase
-        .from("show_strings")
-        .update(update)
-        .eq("id", showStringId);
+    const { error } = await supabase.from("show_strings").update(update).eq("id", showStringId);
 
     if (error) return { success: false, error: error.message };
 
@@ -1088,7 +1089,7 @@ export async function updateShowStringEntry(
         division?: string | null;
         timeSlot?: string | null;
         notes?: string | null;
-    }
+    },
 ): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
@@ -1100,8 +1101,14 @@ export async function updateShowStringEntry(
         .single();
 
     if (!entry) return { success: false, error: "Entry not found." };
-    const entryData = entry as unknown as { id: string; show_string_id: string; show_strings: { user_id: string }[] | { user_id: string } };
-    const ownerUserId = Array.isArray(entryData.show_strings) ? entryData.show_strings[0]?.user_id : entryData.show_strings?.user_id;
+    const entryData = entry as unknown as {
+        id: string;
+        show_string_id: string;
+        show_strings: { user_id: string }[] | { user_id: string };
+    };
+    const ownerUserId = Array.isArray(entryData.show_strings)
+        ? entryData.show_strings[0]?.user_id
+        : entryData.show_strings?.user_id;
     if (ownerUserId !== user.id) {
         return { success: false, error: "Not your show string." };
     }
@@ -1119,10 +1126,7 @@ export async function updateShowStringEntry(
 
     if (Object.keys(update).length === 0) return { success: true };
 
-    const { error } = await supabase
-        .from("show_string_entries")
-        .update(update)
-        .eq("id", entryId);
+    const { error } = await supabase.from("show_string_entries").update(update).eq("id", entryId);
 
     if (error) return { success: false, error: error.message };
 

@@ -6,8 +6,7 @@ describe("isStaleDeploymentError", () => {
     it("recognises the three shapes Next uses for a tab that outlived its deploy", () => {
         expect(
             isStaleDeploymentError({
-                message:
-                    "Failed to find Server Action. This request might be from an older or newer deployment.",
+                message: "Failed to find Server Action. This request might be from an older or newer deployment.",
             }),
         ).toBe(true);
         expect(
@@ -16,9 +15,7 @@ describe("isStaleDeploymentError", () => {
                 message: 'Server Action "4052e4c4" was not found on the server.',
             }),
         ).toBe(true);
-        expect(
-            isStaleDeploymentError({ message: "An unexpected response was received from the server." }),
-        ).toBe(true);
+        expect(isStaleDeploymentError({ message: "An unexpected response was received from the server." })).toBe(true);
     });
 
     it("leaves real errors alone", () => {

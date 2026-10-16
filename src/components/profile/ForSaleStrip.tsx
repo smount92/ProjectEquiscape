@@ -52,10 +52,7 @@ export default function ForSaleStrip({
             />
 
             {cards.length === 0 ? (
-                <EmptyNote
-                    icon="🤝"
-                    title={isOwnProfile ? "Nothing listed right now" : "Nothing for sale today"}
-                >
+                <EmptyNote icon="🤝" title={isOwnProfile ? "Nothing listed right now" : "Nothing for sale today"}>
                     {isOwnProfile
                         ? "Set a horse to For Sale or Open to Offers in your stable and its passport becomes the listing — record, condition and all."
                         : `@${alias} isn't selling at the moment. The Want List matchmaker will tell you if that changes.`}
@@ -81,11 +78,7 @@ export default function ForSaleStrip({
                                 <div className="polaroid-name">{card.customName}</div>
                                 <div className="polaroid-breed">{card.refName}</div>
                                 <div className="mt-1 text-center">
-                                    <span
-                                        className={
-                                            card.tradeStatus === "For Sale" ? "stamp stamp-red" : "stamp"
-                                        }
-                                    >
+                                    <span className={card.tradeStatus === "For Sale" ? "stamp stamp-red" : "stamp"}>
                                         {priceLabel(card)}
                                     </span>
                                 </div>

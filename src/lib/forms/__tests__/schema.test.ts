@@ -142,9 +142,7 @@ describe("validateForm — value constraints", () => {
         const result = validateForm(ctx("model", "create-full", values), values);
         expect(result.ok).toBe(false);
         if (result.ok) return;
-        expect(result.problems[0].message).toBe(
-            "Finish Type must be one of: OF, Custom, Artist Resin.",
-        );
+        expect(result.problems[0].message).toBe("Finish Type must be one of: OF, Custom, Artist Resin.");
     });
 
     it("enforces the length caps the browser showed but the server ignored", () => {
@@ -152,9 +150,7 @@ describe("validateForm — value constraints", () => {
         const result = validateForm(ctx("model", "create-full", values), values);
         expect(result.ok).toBe(false);
         if (result.ok) return;
-        expect(result.problems[0].message).toBe(
-            "Custom Name is too long (max 100 characters).",
-        );
+        expect(result.problems[0].message).toBe("Custom Name is too long (max 100 characters).");
     });
 
     it("caps public notes at 500", () => {
@@ -202,9 +198,7 @@ describe("validateForm — value constraints", () => {
         const result = validateForm(ctx("model", "create-full", values), values);
         expect(result.ok).toBe(false);
         if (result.ok) return;
-        expect(result.problems[0].message).toBe(
-            "Visibility must be one of: public, unlisted, private.",
-        );
+        expect(result.problems[0].message).toBe("Visibility must be one of: public, unlisted, private.");
     });
 
     it("never reports one field twice", () => {
@@ -222,9 +216,7 @@ describe("firstProblemMessage", () => {
     });
 
     it("passes a lone problem through unchanged", () => {
-        expect(firstProblemMessage([{ field: "a", label: "A", message: "A is required." }])).toBe(
-            "A is required.",
-        );
+        expect(firstProblemMessage([{ field: "a", label: "A", message: "A is required." }])).toBe("A is required.");
     });
 
     it("counts the rest without listing them", () => {
@@ -234,9 +226,7 @@ describe("firstProblemMessage", () => {
             { field: "c", label: "C", message: "C is required." },
         ];
         expect(firstProblemMessage(problems)).toBe("A is required. (2 more problems to fix)");
-        expect(firstProblemMessage(problems.slice(0, 2))).toBe(
-            "A is required. (1 more problem to fix)",
-        );
+        expect(firstProblemMessage(problems.slice(0, 2))).toBe("A is required. (1 more problem to fix)");
     });
 });
 
@@ -353,9 +343,13 @@ describe("validateUpdateInput — the edit boundary", () => {
     });
 
     it("validates vault values alongside horse columns", () => {
-        const result = validateUpdateInput("model", { custom_name: "Star" }, {
-            purchase_price: -10,
-        });
+        const result = validateUpdateInput(
+            "model",
+            { custom_name: "Star" },
+            {
+                purchase_price: -10,
+            },
+        );
         expect(result.ok).toBe(false);
         if (result.ok) return;
         expect(result.problems[0].field).toBe("purchase_price");
@@ -368,9 +362,7 @@ describe("validateUpdateInput — the edit boundary", () => {
 
     it("accepts the three legal trade statuses and the stolen flag", () => {
         for (const status of ["Not for Sale", "For Sale", "Open to Offers", "Stolen/Missing"]) {
-            expect(validateUpdateInput("model", { trade_status: status }, null).ok, status).toBe(
-                true,
-            );
+            expect(validateUpdateInput("model", { trade_status: status }, null).ok, status).toBe(true);
         }
     });
 

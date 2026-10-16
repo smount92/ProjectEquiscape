@@ -78,9 +78,7 @@ function isPlatformAdmin(email: string | undefined): boolean {
  * every live entry they hold at this show in the same motion — the
  * sloptrough fix: scratch no longer means "free to re-enter".
  */
-export async function barEntrant(
-    input: z.input<typeof barEntrantSchema>,
-): Promise<ActionResult> {
+export async function barEntrant(input: z.input<typeof barEntrantSchema>): Promise<ActionResult> {
     const parsed = barEntrantSchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { supabase, user } = await requireAuth();
@@ -116,19 +114,12 @@ export async function barEntrant(
         // row above still lands (it governs the future); for published
         // results, per-entry corrections go through Strike, which
         // voids the card and cleans the record with it.
-        const { data: showRow } = await supabase
-            .from("shows")
-            .select("status")
-            .eq("id", v.showId)
-            .maybeSingle();
-        const finalized = ["completed", "archived"].includes(
-            (showRow?.status as string) ?? "",
-        );
+        const { data: showRow } = await supabase.from("shows").select("status").eq("id", v.showId).maybeSingle();
+        const finalized = ["completed", "archived"].includes((showRow?.status as string) ?? "");
         if (finalized) {
             return {
                 success: false,
-                error:
-                    "This show's results are published — the bar is in place, but entries can only be removed one at a time with Strike (which also voids cards and cleans records).",
+                error: "This show's results are published — the bar is in place, but entries can only be removed one at a time with Strike (which also voids cards and cleans records).",
             };
         }
         const { data: rows, error: scratchError } = await supabase
@@ -237,8 +228,7 @@ export async function removeEntrantFromShow(
     if (status === "results_review" || status === "completed" || status === "archived") {
         return {
             success: false,
-            error:
-                "This show's results are published — entries can no longer be removed. Strike the individual placings instead (Strike voids the card and cleans the record with it); the bar list still governs future shows.",
+            error: "This show's results are published — entries can no longer be removed. Strike the individual placings instead (Strike voids the card and cleans the record with it); the bar list still governs future shows.",
         };
     }
 
@@ -297,10 +287,7 @@ export async function removeEntrantFromShow(
         // show_placings.entry_id is ON DELETE CASCADE (117), but the
         // judge queue and ring console read placings directly — clearing
         // them first means no window where the tray points at ghosts.
-        const { error: placingsError } = await db
-            .from("show_placings")
-            .delete()
-            .in("entry_id", entryIds);
+        const { error: placingsError } = await db.from("show_placings").delete().in("entry_id", entryIds);
         if (placingsError) return { success: false, error: placingsError.message };
 
         // .select() makes the delete self-verifying — an RLS-filtered
@@ -351,9 +338,7 @@ export async function removeEntrantFromShow(
  * that can remove an entrant can undo it). Does NOT restore removed
  * or scratched entries; the member simply may enter again.
  */
-export async function liftBar(
-    input: z.input<typeof liftBarSchema>,
-): Promise<ActionResult> {
+export async function liftBar(input: z.input<typeof liftBarSchema>): Promise<ActionResult> {
     const parsed = liftBarSchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { supabase, user } = await requireAuth();
@@ -374,11 +359,7 @@ export async function liftBar(
     // admin who holds no staff row would get a silent no-op.
     const db = isStaff ? supabase : getAdminClient();
 
-    const { error } = await db
-        .from("show_barred_entrants")
-        .delete()
-        .eq("show_id", v.showId)
-        .eq("user_id", v.userId);
+    const { error } = await db.from("show_barred_entrants").delete().eq("show_id", v.showId).eq("user_id", v.userId);
     if (error) return { success: false, error: error.message };
 
     revalidatePath(`/shows/${v.showId}`);
@@ -415,7 +396,10 @@ export async function listBarredEntrants(
     if (error) return { success: false, error: error.message };
 
     const rows = (data ?? []) as { user_id: string; reason: string | null; created_at: string }[];
-    const aliases = await getAliases(supabase, rows.map((r) => r.user_id));
+    const aliases = await getAliases(
+        supabase,
+        rows.map((r) => r.user_id),
+    );
     const aliasMap = "error" in aliases ? new Map<string, string>() : aliases;
 
     return {
@@ -438,9 +422,7 @@ export async function listBarredEntrants(
  * platform admin). The cards state machine has modeled this
  * transition since 117 — this is the first caller.
  */
-export async function voidCard(
-    input: z.input<typeof voidCardSchema>,
-): Promise<ActionResult> {
+export async function voidCard(input: z.input<typeof voidCardSchema>): Promise<ActionResult> {
     const parsed = voidCardSchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { supabase, user } = await requireAuth();
@@ -535,9 +517,7 @@ export async function voidCard(
  * explicit host/co-host/admin check above is the authorization; every
  * statement is scoped to this entry's ids.
  */
-export async function strikeEntryFromResults(
-    input: z.input<typeof strikeEntrySchema>,
-): Promise<ActionResult> {
+export async function strikeEntryFromResults(input: z.input<typeof strikeEntrySchema>): Promise<ActionResult> {
     const parsed = strikeEntrySchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { supabase, user } = await requireAuth();
@@ -551,8 +531,12 @@ export async function strikeEntryFromResults(
     if (entryError) return { success: false, error: entryError.message };
     if (!entry) return { success: false, error: "Entry not found." };
     const e = entry as {
-        id: string; show_id: string; class_id: string;
-        horse_id: string; owner_id: string; status: string;
+        id: string;
+        show_id: string;
+        class_id: string;
+        horse_id: string;
+        owner_id: string;
+        status: string;
     };
 
     const admin = isPlatformAdmin(user.email);
@@ -593,10 +577,7 @@ export async function strikeEntryFromResults(
     }
 
     // 2. Remove the placing row (galleries/ribbon rails recompute).
-    const { error: placingError } = await adminClient
-        .from("show_placings")
-        .delete()
-        .eq("entry_id", e.id);
+    const { error: placingError } = await adminClient.from("show_placings").delete().eq("entry_id", e.id);
     if (placingError) return { success: false, error: placingError.message };
 
     // 2b. Championship callbacks won BY THIS ENTRY are vacated (audit
@@ -624,10 +605,7 @@ export async function strikeEntryFromResults(
             patch.reserve_entry_id = null;
             vacatedLabels.push(championLabel("reserve", cb.scope));
         }
-        const { error: cbError } = await adminClient
-            .from("show_callbacks")
-            .update(patch)
-            .eq("id", cb.id);
+        const { error: cbError } = await adminClient.from("show_callbacks").update(patch).eq("id", cb.id);
         if (cbError) return { success: false, error: cbError.message };
     }
 
@@ -636,11 +614,7 @@ export async function strikeEntryFromResults(
     // vacated callbacks produced (audit H1: the old horse-wide delete
     // erased every class the horse placed in at this show — and
     // completed shows can never rewrite them).
-    const { data: classRow } = await adminClient
-        .from("show_classes")
-        .select("name")
-        .eq("id", e.class_id)
-        .maybeSingle();
+    const { data: classRow } = await adminClient.from("show_classes").select("name").eq("id", e.class_id).maybeSingle();
     const className = (classRow as { name: string } | null)?.name ?? null;
     if (className) {
         const { error: recordsError } = await adminClient
@@ -660,8 +634,7 @@ export async function strikeEntryFromResults(
             .eq("horse_id", e.horse_id)
             .in("placing", vacatedLabels)
             .eq("verification_tier", "platform_generated");
-        if (champRecordsError)
-            return { success: false, error: champRecordsError.message };
+        if (champRecordsError) return { success: false, error: champRecordsError.message };
     }
 
     // 4. Scratch the entry with the reason on its audit note —
@@ -706,9 +679,7 @@ export async function strikeEntryFromResults(
  * become visible to entrants/public only when the entry's class
  * publishes results — the read paths gate on results_published_at.
  */
-export async function writeCritique(
-    input: z.input<typeof writeCritiqueSchema>,
-): Promise<ActionResult> {
+export async function writeCritique(input: z.input<typeof writeCritiqueSchema>): Promise<ActionResult> {
     const parsed = writeCritiqueSchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { supabase, user } = await requireAuth();
@@ -760,9 +731,7 @@ export async function writeCritique(
  * DENORMALIZED onto the class row — what a class was judged against
  * never changes underneath it, even if we edit templates later.
  */
-export async function setClassRubric(
-    input: z.input<typeof setClassRubricSchema>,
-): Promise<ActionResult> {
+export async function setClassRubric(input: z.input<typeof setClassRubricSchema>): Promise<ActionResult> {
     const parsed = setClassRubricSchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { supabase, user } = await requireAuth();
@@ -775,9 +744,8 @@ export async function setClassRubric(
         .maybeSingle();
     if (clsError) return { success: false, error: clsError.message };
     if (!cls) return { success: false, error: "Class not found." };
-    const showId = (
-        cls as unknown as { show_sections: { show_divisions: { show_id: string } } }
-    ).show_sections.show_divisions.show_id;
+    const showId = (cls as unknown as { show_sections: { show_divisions: { show_id: string } } }).show_sections
+        .show_divisions.show_id;
 
     const roleResult = await getShowRole(supabase, showId, user.id);
     if ("error" in roleResult) return { success: false, error: roleResult.error };
@@ -870,10 +838,7 @@ export async function writeEntryScore(
 // Per-class result reveal — judging as cadence, not a dump
 // ══════════════════════════════════════════════════════════════
 
-async function setClassPublished(
-    input: { classId: string },
-    publishedAt: string | null,
-): Promise<ActionResult> {
+async function setClassPublished(input: { classId: string }, publishedAt: string | null): Promise<ActionResult> {
     const { supabase, user } = await requireAuth();
 
     const { data: cls, error: clsError } = await supabase
@@ -884,9 +849,8 @@ async function setClassPublished(
     if (clsError) return { success: false, error: clsError.message };
     if (!cls) return { success: false, error: "Class not found." };
 
-    const showId = (
-        cls as unknown as { show_sections: { show_divisions: { show_id: string } } }
-    ).show_sections.show_divisions.show_id;
+    const showId = (cls as unknown as { show_sections: { show_divisions: { show_id: string } } }).show_sections
+        .show_divisions.show_id;
 
     const roleResult = await getShowRole(supabase, showId, user.id);
     if ("error" in roleResult) return { success: false, error: roleResult.error };
@@ -935,9 +899,7 @@ async function setClassPublished(
                 .eq("class_id", input.classId);
             const owners = [
                 ...new Set(
-                    (entryOwners ?? [])
-                        .filter((e) => e.status !== "scratched")
-                        .map((e) => e.owner_id as string),
+                    (entryOwners ?? []).filter((e) => e.status !== "scratched").map((e) => e.owner_id as string),
                 ),
             ];
             const { data: clsName } = await supabase
@@ -970,18 +932,14 @@ async function setClassPublished(
 }
 
 /** Publish one placed class's results (rolling reveal). */
-export async function publishClassResults(
-    input: z.input<typeof publishClassResultsSchema>,
-): Promise<ActionResult> {
+export async function publishClassResults(input: z.input<typeof publishClassResultsSchema>): Promise<ActionResult> {
     const parsed = publishClassResultsSchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     return setClassPublished(parsed.data, new Date().toISOString());
 }
 
 /** Pull a class's results back (corrections during judging). */
-export async function unpublishClassResults(
-    input: z.input<typeof unpublishClassResultsSchema>,
-): Promise<ActionResult> {
+export async function unpublishClassResults(input: z.input<typeof unpublishClassResultsSchema>): Promise<ActionResult> {
     const parsed = unpublishClassResultsSchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     return setClassPublished(parsed.data, null);
@@ -1051,8 +1009,7 @@ export async function getClassRoom(
 
     // THIS class's results are public: rolling per-class reveal
     // (results_published_at) or the show-level publish.
-    const resultsPublished =
-        clsRow.results_published_at !== null || RESULTS_STATUSES.includes(status);
+    const resultsPublished = clsRow.results_published_at !== null || RESULTS_STATUSES.includes(status);
     const revealed = isOwnerRevealed(status, show.blind_browsing as boolean);
 
     // Judge's preview (owner ask, 2026-09-01): staff see the room
@@ -1117,26 +1074,33 @@ export async function getClassRoom(
         critique_text?: string | null;
         critique_photo_text?: string | null;
     };
-    const entries = ((entryRows ?? []) as unknown as EntryRow[]).filter(
-        (e) => e.status !== "scratched",
-    );
+    const entries = ((entryRows ?? []) as unknown as EntryRow[]).filter((e) => e.status !== "scratched");
 
     const photoUrls = await getEntryPhotoUrls(
         supabase,
         entries.flatMap((e) => (e.photo_id ? [e.photo_id] : [])),
     );
     if (!(photoUrls instanceof Map)) return { success: false, error: photoUrls.error };
-    const horseNames = await getHorseNames(supabase, entries.map((e) => e.horse_id));
+    const horseNames = await getHorseNames(
+        supabase,
+        entries.map((e) => e.horse_id),
+    );
     if (!(horseNames instanceof Map)) return { success: false, error: horseNames.error };
     // The identity line the judge already sees, now on the public
     // card too (MHI feedback, 2026-09). Blind-safe: describes the
     // horse, never the exhibitor.
-    const identities = await getHorseShowIdentities(supabase, entries.map((e) => e.horse_id));
+    const identities = await getHorseShowIdentities(
+        supabase,
+        entries.map((e) => e.horse_id),
+    );
     if (!(identities instanceof Map)) return { success: false, error: identities.error };
 
     let aliases = new Map<string, string>();
     if (revealed) {
-        const loaded = await getAliases(supabase, entries.map((e) => e.owner_id));
+        const loaded = await getAliases(
+            supabase,
+            entries.map((e) => e.owner_id),
+        );
         if (!(loaded instanceof Map)) return { success: false, error: loaded.error };
         aliases = loaded;
     }
@@ -1151,7 +1115,10 @@ export async function getClassRoom(
         const { data: voteRows, error: vErr } = await supabase
             .from("show_entry_votes")
             .select("entry_id, voter_id")
-            .in("entry_id", entries.map((e) => e.id));
+            .in(
+                "entry_id",
+                entries.map((e) => e.id),
+            );
         if (vErr) return { success: false, error: vErr.message };
         for (const v of voteRows ?? []) {
             const entryId = v.entry_id as string;
@@ -1165,7 +1132,10 @@ export async function getClassRoom(
         const { data: placingRows, error: pErr } = await supabase
             .from("show_placings")
             .select("entry_id, place")
-            .in("entry_id", entries.map((e) => e.id));
+            .in(
+                "entry_id",
+                entries.map((e) => e.id),
+            );
         if (pErr) return { success: false, error: pErr.message };
         for (const p of placingRows ?? []) {
             if (p.place !== null) placeByEntry.set(p.entry_id as string, p.place as number);
@@ -1222,9 +1192,10 @@ export async function getClassRoom(
             .select("id, kind, title, body_md")
             .in("id", docIds);
         const docs = new Map(
-            ((docRows ?? []) as { id: string; kind: string; title: string; body_md: string }[]).map(
-                (d) => [d.id, { kind: d.kind, title: d.title, bodyMd: d.body_md }],
-            ),
+            ((docRows ?? []) as { id: string; kind: string; title: string; body_md: string }[]).map((d) => [
+                d.id,
+                { kind: d.kind, title: d.title, bodyMd: d.body_md },
+            ]),
         );
         for (const e of entries) {
             if (e.document_id && docs.has(e.document_id)) {
@@ -1263,10 +1234,7 @@ export async function getClassRoom(
     const navLabel = (p: (typeof program)[number]) =>
         p.classNumber ? `Class ${p.classNumber} — ${p.className}` : p.className;
     const prev = currentIndex > 0 ? program[currentIndex - 1] : null;
-    const next =
-        currentIndex >= 0 && currentIndex < program.length - 1
-            ? program[currentIndex + 1]
-            : null;
+    const next = currentIndex >= 0 && currentIndex < program.length - 1 ? program[currentIndex + 1] : null;
 
     const roomEntries: ClassRoomEntry[] = entries.map((e) => ({
         id: e.id,
@@ -1278,9 +1246,7 @@ export async function getClassRoom(
         ownerAlias: revealed ? (aliases.get(e.owner_id) ?? "unknown") : null,
         ownerId: revealed ? e.owner_id : null,
         isOwn: !!user && e.owner_id === user.id,
-        place: reveal
-            ? ((placeByEntry.get(e.id) as ClassRoomEntry["place"]) ?? null)
-            : null,
+        place: reveal ? ((placeByEntry.get(e.id) as ClassRoomEntry["place"]) ?? null) : null,
         pointsEarned:
             resultsPublished && placeByEntry.has(e.id)
                 ? placementPoints(placeByEntry.get(e.id) ?? null, payableSize, distinctExhibitors)
@@ -1290,8 +1256,7 @@ export async function getClassRoom(
                 ? (cardByHorse.get(e.horse_id)?.code ?? null)
                 : null,
         cardIsStakes:
-            resultsPublished && (cardByHorse.get(e.horse_id)?.isStakes ?? false) &&
-            (placeByEntry.get(e.id) ?? 99) <= 2,
+            resultsPublished && (cardByHorse.get(e.horse_id)?.isStakes ?? false) && (placeByEntry.get(e.id) ?? 99) <= 2,
         critique: reveal ? (e.critique_text ?? null) : null,
         photoCritique: reveal ? (e.critique_photo_text ?? null) : null,
         scoreData: reveal
@@ -1315,9 +1280,7 @@ export async function getClassRoom(
         reveal && rubric
             ? classAverages(
                   rubric,
-                  roomEntries
-                      .map((r) => r.scoreData)
-                      .filter((s): s is Record<string, number> => !!s),
+                  roomEntries.map((r) => r.scoreData).filter((s): s is Record<string, number> => !!s),
               )
             : null;
 
@@ -1397,9 +1360,7 @@ export async function createHorseDocument(
     return { success: true, documentId: (inserted as { id: string }).id };
 }
 
-export async function updateHorseDocument(
-    input: z.input<typeof updateHorseDocumentSchema>,
-): Promise<ActionResult> {
+export async function updateHorseDocument(input: z.input<typeof updateHorseDocumentSchema>): Promise<ActionResult> {
     const parsed = updateHorseDocumentSchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { supabase, user } = await requireAuth();
@@ -1424,19 +1385,13 @@ export async function updateHorseDocument(
     return { success: true };
 }
 
-export async function deleteHorseDocument(
-    input: z.input<typeof deleteHorseDocumentSchema>,
-): Promise<ActionResult> {
+export async function deleteHorseDocument(input: z.input<typeof deleteHorseDocumentSchema>): Promise<ActionResult> {
     const parsed = deleteHorseDocumentSchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { supabase, user } = await requireAuth();
     const v = parsed.data;
 
-    const { error } = await supabase
-        .from("horse_documents")
-        .delete()
-        .eq("id", v.documentId)
-        .eq("owner_id", user.id);
+    const { error } = await supabase.from("horse_documents").delete().eq("id", v.documentId).eq("owner_id", user.id);
     if (error) return { success: false, error: error.message };
     return { success: true };
 }
@@ -1449,9 +1404,7 @@ export async function deleteHorseDocument(
  * rule anyway (documentation is part of the entry, not something
  * to swap under a judge mid-class).
  */
-export async function attachDocumentToEntry(
-    input: z.input<typeof attachDocumentToEntrySchema>,
-): Promise<ActionResult> {
+export async function attachDocumentToEntry(input: z.input<typeof attachDocumentToEntrySchema>): Promise<ActionResult> {
     const parsed = attachDocumentToEntrySchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { supabase, user } = await requireAuth();

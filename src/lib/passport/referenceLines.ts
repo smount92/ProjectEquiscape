@@ -103,7 +103,13 @@ export function moldLinkTarget(
     linked: { id: string; maker: string | null; title: string; maker_slug?: string | null; slug?: string | null },
 ): { id: string; maker: string | null; title: string; maker_slug?: string | null; slug?: string | null } {
     if (cat.item_type === "plastic_release" && cat.parent?.id && cat.parent.title) {
-        return { id: cat.parent.id, maker: cat.parent.maker ?? linked.maker, title: cat.parent.title, maker_slug: cat.parent.maker_slug ?? null, slug: cat.parent.slug ?? null };
+        return {
+            id: cat.parent.id,
+            maker: cat.parent.maker ?? linked.maker,
+            title: cat.parent.title,
+            maker_slug: cat.parent.maker_slug ?? null,
+            slug: cat.parent.slug ?? null,
+        };
     }
     return linked;
 }

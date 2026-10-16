@@ -143,9 +143,9 @@ export default function WishlistSearch() {
             )}
 
             {/* Search input */}
-            <div className="bg-muted border-input focus-within:border-forest flex items-center gap-2 rounded-lg border px-4 py-2 transition-colors">
+            <div className="flex items-center gap-2 rounded-lg border border-input bg-muted px-4 py-2 transition-colors focus-within:border-forest">
                 <svg
-                    className="text-muted-foreground shrink-0"
+                    className="shrink-0 text-muted-foreground"
                     width="18"
                     height="18"
                     viewBox="0 0 24 24"
@@ -161,7 +161,7 @@ export default function WishlistSearch() {
                 </svg>
                 <input
                     type="text"
-                    className="text-foreground placeholder:text-muted-foreground min-h-[36px] flex-1 border-0 bg-transparent text-sm outline-none"
+                    className="min-h-[36px] flex-1 border-0 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
                     placeholder="Search molds, releases and resins…"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
@@ -176,7 +176,7 @@ export default function WishlistSearch() {
                 {query && (
                     <button
                         type="button"
-                        className="bg-secondary text-muted-foreground hover:text-foreground flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 text-[0.7rem] transition-all"
+                        className="flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-full border-0 bg-secondary text-[0.7rem] text-muted-foreground transition-all hover:text-foreground"
                         onClick={() => {
                             setQuery("");
                             setShowDropdown(false);
@@ -192,40 +192,40 @@ export default function WishlistSearch() {
             {showDropdown && (
                 <div className="wishlist-search-dropdown animate-fade-in-up">
                     {loading ? (
-                        <div className="text-muted-foreground p-4 text-center text-sm">
-                            Searching…
-                        </div>
+                        <div className="p-4 text-center text-sm text-muted-foreground">Searching…</div>
                     ) : (
                         <>
                             {TYPE_GROUPS.map(({ key, label, types }) => {
-                                const group = results.filter((r) => (types ? types.includes(r.itemType) : !GROUPED.has(r.itemType)));
+                                const group = results.filter((r) =>
+                                    types ? types.includes(r.itemType) : !GROUPED.has(r.itemType),
+                                );
                                 if (group.length === 0) return null;
                                 return (
                                     <div key={key}>
-                                        <div className="text-secondary-foreground border-input bg-muted border-b px-4 py-2 text-xs font-bold tracking-[0.05em] uppercase">
+                                        <div className="border-b border-input bg-muted px-4 py-2 text-xs font-bold tracking-[0.05em] text-secondary-foreground uppercase">
                                             {label}
                                         </div>
                                         {group.map((item) => (
                                             <button
                                                 key={item.id}
                                                 type="button"
-                                                className="border-input hover:bg-muted flex w-full cursor-pointer items-center justify-between gap-3 border-0 border-b bg-transparent px-4 py-2 text-left transition-all"
+                                                className="flex w-full cursor-pointer items-center justify-between gap-3 border-0 border-b border-input bg-transparent px-4 py-2 text-left transition-all hover:bg-muted"
                                                 onClick={() => handleAdd(item)}
                                                 disabled={adding}
                                             >
                                                 <span className="min-w-0 flex-1">
-                                                    <span className="text-foreground block truncate text-sm font-semibold">
+                                                    <span className="block truncate text-sm font-semibold text-foreground">
                                                         {item.title}
                                                         {!!item.attributes.model_number && (
                                                             <> (#{String(item.attributes.model_number)})</>
                                                         )}
                                                     </span>
-                                                    <span className="text-muted-foreground block truncate text-xs">
+                                                    <span className="block truncate text-xs text-muted-foreground">
                                                         {item.maker}
                                                         {item.scale ? ` · ${item.scale}` : ""}
                                                     </span>
                                                 </span>
-                                                <span className="bg-success/10 text-success shrink-0 rounded-full px-2.5 py-[3px] text-xs font-bold">
+                                                <span className="shrink-0 rounded-full bg-success/10 px-2.5 py-[3px] text-xs font-bold text-success">
                                                     + Add
                                                 </span>
                                             </button>
@@ -236,20 +236,13 @@ export default function WishlistSearch() {
 
                             {/* No results — escape hatch */}
                             {noResults && (
-                                <div className="text-muted-foreground px-4 py-6 text-center text-sm">
-                                    <p className="mb-1">
-                                        Nothing in the Registry matches &ldquo;{query}&rdquo;.
-                                    </p>
+                                <div className="px-4 py-6 text-center text-sm text-muted-foreground">
+                                    <p className="mb-1">Nothing in the Registry matches &ldquo;{query}&rdquo;.</p>
                                     <p className="mb-3 text-xs">
-                                        Add it as a note instead — it will sit on your list, but
-                                        Matchmaker can only watch cataloged models.
+                                        Add it as a note instead — it will sit on your list, but Matchmaker can only
+                                        watch cataloged models.
                                     </p>
-                                    <Button
-                                        variant="outline"
-                                        size="wide"
-                                        onClick={handleCustomAdd}
-                                        disabled={adding}
-                                    >
+                                    <Button variant="outline" size="wide" onClick={handleCustomAdd} disabled={adding}>
                                         <svg
                                             width="16"
                                             height="16"

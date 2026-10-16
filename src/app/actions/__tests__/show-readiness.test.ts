@@ -14,9 +14,8 @@ import { getMyShowReadiness, listMyEntrantHorses } from "@/app/actions/show-read
 
 /** Queue ONE implicit-await result (list reads) in call order. */
 function queueThen(result: Record<string, unknown>) {
-    q.then.mockImplementationOnce(((
-        resolve: (value: unknown) => unknown,
-    ) => Promise.resolve({ error: null, ...result }).then(resolve)) as never);
+    q.then.mockImplementationOnce(((resolve: (value: unknown) => unknown) =>
+        Promise.resolve({ error: null, ...result }).then(resolve)) as never);
 }
 
 describe("show-readiness — getMyShowReadiness", () => {

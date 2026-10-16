@@ -51,12 +51,7 @@ describe("settings notification groups — coverage of the real taxonomy", () =>
     });
 
     it("keeps a group for each of Shows / Market / Social / Account", () => {
-        expect(NOTIFICATION_PREF_GROUPS.map((g) => g.id)).toEqual([
-            "shows",
-            "market",
-            "social",
-            "account",
-        ]);
+        expect(NOTIFICATION_PREF_GROUPS.map((g) => g.id)).toEqual(["shows", "market", "social", "account"]);
     });
 
     it("explains itself wherever a group has ungated types", () => {

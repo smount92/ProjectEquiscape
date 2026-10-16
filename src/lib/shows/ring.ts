@@ -13,13 +13,7 @@
  */
 
 import type { CallbackRecord } from "./callbacks";
-import type {
-    ClassStatus,
-    Place,
-    ShowMode,
-    ShowStatus,
-    StaffRole,
-} from "./types";
+import type { ClassStatus, Place, ShowMode, ShowStatus, StaffRole } from "./types";
 
 // ── /shows/host/[id]/ring — the console ──
 

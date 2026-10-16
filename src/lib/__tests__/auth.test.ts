@@ -6,7 +6,7 @@ vi.mock("@/lib/supabase/server", () => ({
     createClient: vi.fn(() =>
         Promise.resolve({
             auth: { getUser: mockGetUser },
-        })
+        }),
     ),
 }));
 

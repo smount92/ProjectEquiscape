@@ -52,11 +52,15 @@ beforeEach(() => {
     vi.clearAllMocks();
     mockClient._mockQuery.then = originalThen;
     (mockClient._mockQuery.single as unknown as { mockReset: () => void }).mockReset();
-    (mockClient._mockQuery.single as unknown as { mockResolvedValue: (v: unknown) => void })
-        .mockResolvedValue({ data: null, error: null });
+    (mockClient._mockQuery.single as unknown as { mockResolvedValue: (v: unknown) => void }).mockResolvedValue({
+        data: null,
+        error: null,
+    });
     (mockClient._mockQuery.maybeSingle as unknown as { mockReset: () => void }).mockReset();
-    (mockClient._mockQuery.maybeSingle as unknown as { mockResolvedValue: (v: unknown) => void })
-        .mockResolvedValue({ data: null, error: null });
+    (mockClient._mockQuery.maybeSingle as unknown as { mockResolvedValue: (v: unknown) => void }).mockResolvedValue({
+        data: null,
+        error: null,
+    });
     mockClient.rpc.mockReset();
     mockClient.rpc.mockResolvedValue({ data: null, error: null });
     mockClient.auth.getUser.mockResolvedValue({
@@ -97,7 +101,10 @@ describe("barns — createGroup privacy", () => {
     it("retries without is_private when migration 167 is not applied yet", async () => {
         maybeSingle().mockResolvedValueOnce({ data: null, error: null });
         // First insert: column does not exist.
-        single().mockResolvedValueOnce({ data: null, error: { code: "42703", message: "column groups.is_private does not exist" } });
+        single().mockResolvedValueOnce({
+            data: null,
+            error: { code: "42703", message: "column groups.is_private does not exist" },
+        });
         single().mockResolvedValueOnce({ data: { id: BARN_ID }, error: null });
 
         const result = await createGroup({
@@ -125,7 +132,10 @@ describe("barns — createGroup privacy", () => {
 
 describe("barns — joinGroup", () => {
     it("joins a public barn immediately", async () => {
-        maybeSingle().mockResolvedValueOnce({ data: { id: BARN_ID, is_private: false, visibility: "public" }, error: null });
+        maybeSingle().mockResolvedValueOnce({
+            data: { id: BARN_ID, is_private: false, visibility: "public" },
+            error: null,
+        });
 
         const result = await joinGroup(BARN_ID);
 
@@ -135,7 +145,10 @@ describe("barns — joinGroup", () => {
     });
 
     it("files a request instead of a membership for a private barn", async () => {
-        maybeSingle().mockResolvedValueOnce({ data: { id: BARN_ID, is_private: true, visibility: "private" }, error: null });
+        maybeSingle().mockResolvedValueOnce({
+            data: { id: BARN_ID, is_private: true, visibility: "private" },
+            error: null,
+        });
         maybeSingle().mockResolvedValueOnce({ data: null, error: null }); // not already a member
 
         const result = await joinGroup(BARN_ID);

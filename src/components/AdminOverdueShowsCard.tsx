@@ -27,11 +27,7 @@ import {
     type OverdueShowRow,
     type OverdueShowsReport,
 } from "@/app/actions/admin";
-import {
-    OVERDUE_REASON_LABELS,
-    OVERDUE_REASON_NOTES,
-    type OverdueReason,
-} from "@/lib/admin/overdueShows";
+import { OVERDUE_REASON_LABELS, OVERDUE_REASON_NOTES, type OverdueReason } from "@/lib/admin/overdueShows";
 import { Button } from "@/components/ui/button";
 
 /** Judging shows are the ones with entrants actively waiting on a result. */
@@ -88,9 +84,7 @@ export default function AdminOverdueShowsCard() {
             }
             setNotes((prev) => ({
                 ...prev,
-                [row.showId]: result.sent
-                    ? `Nudged @${row.hostAlias}.`
-                    : (result.note ?? "Nothing sent."),
+                [row.showId]: result.sent ? `Nudged @${row.hostAlias}.` : (result.note ?? "Nothing sent."),
             }));
             const next = await load();
             if (next) setReport(next);
@@ -132,20 +126,16 @@ export default function AdminOverdueShowsCard() {
         <div className="rounded-lg border border-input bg-card p-4">
             <h3 className="m-0 mb-1 text-base font-bold">
                 Overdue &amp; stalled shows{" "}
-                <span className="text-sm font-normal text-muted-foreground">
-                    ({report.rows.length})
-                </span>
+                <span className="text-sm font-normal text-muted-foreground">({report.rows.length})</span>
             </h3>
             <p className="m-0 mb-3 text-sm text-muted-foreground">
-                Shows the clock can&rsquo;t move on its own. No status control here on purpose —
-                forcing a flip would publish results that don&rsquo;t exist yet. Nudge the host, or
-                open their console.
+                Shows the clock can&rsquo;t move on its own. No status control here on purpose — forcing a flip would
+                publish results that don&rsquo;t exist yet. Nudge the host, or open their console.
             </p>
 
             {report.capped && (
                 <p className="m-0 mb-3 rounded-md border border-input bg-background px-3 py-2 text-xs text-secondary-foreground">
-                    At least one check filled its 50-row slot — there may be more than this behind
-                    the list.
+                    At least one check filled its 50-row slot — there may be more than this behind the list.
                 </p>
             )}
 
@@ -182,8 +172,7 @@ export default function AdminOverdueShowsCard() {
                                     {new Date(row.since).toLocaleDateString()}
                                     {row.nudgedAt && (
                                         <>
-                                            {" · "}nudged{" "}
-                                            {new Date(row.nudgedAt).toLocaleDateString()}
+                                            {" · "}nudged {new Date(row.nudgedAt).toLocaleDateString()}
                                         </>
                                     )}
                                 </div>

@@ -54,32 +54,44 @@ export default function CatalogResultsTable({
                     {items.map((item) => {
                         const st = statsMap.get(item.id);
                         return (
-                        <tr key={item.id} className="transition-colors hover:bg-muted/50">
-                            <td className="py-2 pr-4 font-semibold">
-                                <Link
-                                    href={referenceHref(item)}
-                                    className="text-foreground no-underline hover:text-forest hover:underline"
-                                >
-                                    {item.title}
-                                </Link>
-                            </td>
-                            <td className="py-2 pr-4 text-secondary-foreground">{item.maker}</td>
-                            <td className="py-2 pr-4 text-secondary-foreground">
-                                {TYPE_LABELS[item.item_type] ?? item.item_type}
-                            </td>
-                            <td className="py-2 pr-4 text-secondary-foreground">{item.scale ?? "—"}</td>
-                            <td className="py-2 pr-4 text-xs tabular-nums">
-                                {st && (st.owner > 0 || st.want > 0 || st.forSale > 0) ? (
-                                    <div className="flex items-center gap-2 whitespace-nowrap">
-                                        {st.owner > 0 && <span className="text-secondary-foreground" title="in collections">👥 {st.owner}</span>}
-                                        {st.want > 0 && <span className="text-forest" title="want this">⭐ {st.want}</span>}
-                                        {st.forSale > 0 && <span title="for sale" style={{ color: "var(--ink-warning)" }}>🏷️ {st.forSale}</span>}
-                                    </div>
-                                ) : (
-                                    <span className="text-muted-foreground">—</span>
-                                )}
-                            </td>
-                        </tr>
+                            <tr key={item.id} className="transition-colors hover:bg-muted/50">
+                                <td className="py-2 pr-4 font-semibold">
+                                    <Link
+                                        href={referenceHref(item)}
+                                        className="text-foreground no-underline hover:text-forest hover:underline"
+                                    >
+                                        {item.title}
+                                    </Link>
+                                </td>
+                                <td className="py-2 pr-4 text-secondary-foreground">{item.maker}</td>
+                                <td className="py-2 pr-4 text-secondary-foreground">
+                                    {TYPE_LABELS[item.item_type] ?? item.item_type}
+                                </td>
+                                <td className="py-2 pr-4 text-secondary-foreground">{item.scale ?? "—"}</td>
+                                <td className="py-2 pr-4 text-xs tabular-nums">
+                                    {st && (st.owner > 0 || st.want > 0 || st.forSale > 0) ? (
+                                        <div className="flex items-center gap-2 whitespace-nowrap">
+                                            {st.owner > 0 && (
+                                                <span className="text-secondary-foreground" title="in collections">
+                                                    👥 {st.owner}
+                                                </span>
+                                            )}
+                                            {st.want > 0 && (
+                                                <span className="text-forest" title="want this">
+                                                    ⭐ {st.want}
+                                                </span>
+                                            )}
+                                            {st.forSale > 0 && (
+                                                <span title="for sale" style={{ color: "var(--ink-warning)" }}>
+                                                    🏷️ {st.forSale}
+                                                </span>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <span className="text-muted-foreground">—</span>
+                                    )}
+                                </td>
+                            </tr>
                         );
                     })}
                 </tbody>

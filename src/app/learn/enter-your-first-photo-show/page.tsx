@@ -96,10 +96,7 @@ export default function FirstPhotoShowPage() {
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd(baseUrl)) }}
             />
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd()) }}
-            />
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd()) }} />
             <div className="animate-fade-in-up mx-auto max-w-[860px]">
                 <PageMasthead
                     icon="📸"
@@ -111,16 +108,15 @@ export default function FirstPhotoShowPage() {
 
                 <div className="mb-10 space-y-4 text-base leading-relaxed text-secondary-foreground">
                     <p>
-                        If you&apos;ve never shown a model horse, an online photo show is the
-                        gentlest way in. There&apos;s no travel, no packing a hundred horses into
-                        padded cases, no standing at a table at seven in the morning. You take one
-                        good photograph of one horse you love, enter it in a class, and a judge —
-                        or the community — tells you how it did. That&apos;s the whole ritual, and
+                        If you&apos;ve never shown a model horse, an online photo show is the gentlest way in.
+                        There&apos;s no travel, no packing a hundred horses into padded cases, no standing at a table at
+                        seven in the morning. You take one good photograph of one horse you love, enter it in a class,
+                        and a judge — or the community — tells you how it did. That&apos;s the whole ritual, and
                         it&apos;s been the hobby&apos;s welcome mat since photo shows ran by mail.
                     </p>
                     <p>
-                        Here&apos;s exactly how it works on Model Horse Hub, start to finish. New
-                        to the vocabulary? Keep the{" "}
+                        Here&apos;s exactly how it works on Model Horse Hub, start to finish. New to the vocabulary?
+                        Keep the{" "}
                         <Link
                             href="/learn/glossary"
                             className="font-semibold text-forest underline decoration-2 underline-offset-2"
@@ -137,29 +133,31 @@ export default function FirstPhotoShowPage() {
                     <div className="ledger-paper space-y-4 p-6 text-sm leading-relaxed text-secondary-foreground md:p-8">
                         <p>
                             Head to the{" "}
-                            <Link href="/shows" className="font-semibold text-forest underline decoration-2 underline-offset-2">
+                            <Link
+                                href="/shows"
+                                className="font-semibold text-forest underline decoration-2 underline-offset-2"
+                            >
                                 shows page
                             </Link>{" "}
-                            — browsing is open to everyone, no account needed. Shows are shelved by
-                            stage; the <strong>Open now</strong> shelf is the one you want: those
-                            shows are accepting entries at this moment.
+                            — browsing is open to everyone, no account needed. Shows are shelved by stage; the{" "}
+                            <strong>Open now</strong> shelf is the one you want: those shows are accepting entries at
+                            this moment.
                         </p>
                         <p className="m-0">On each show card, three things matter for a first-timer:</p>
                         <ul className="m-0 list-disc space-y-2 pl-5">
                             <li>
-                                <strong>Online</strong> vs. <strong>Live</strong> — online shows are
-                                photo shows (what this guide is for); live shows happen in person.
+                                <strong>Online</strong> vs. <strong>Live</strong> — online shows are photo shows (what
+                                this guide is for); live shows happen in person.
                             </li>
                             <li>
-                                <strong>The entry deadline</strong> — online shows take entries
-                                during a window. &ldquo;Entries close&rdquo; is the date that
-                                matters; after it, the show moves to judging.
+                                <strong>The entry deadline</strong> — online shows take entries during a window.
+                                &ldquo;Entries close&rdquo; is the date that matters; after it, the show moves to
+                                judging.
                             </li>
                             <li>
-                                <strong>🏅 MHH Sanctioned</strong> — placings at these shows earn
-                                Championship Series season points, and 1st and 2nd in qualifying
-                                classes earn a permanent qualification card for the horse. A lovely
-                                bonus, not a requirement to care about yet — the{" "}
+                                <strong>🏅 MHH Sanctioned</strong> — placings at these shows earn Championship Series
+                                season points, and 1st and 2nd in qualifying classes earn a permanent qualification card
+                                for the horse. A lovely bonus, not a requirement to care about yet — the{" "}
                                 <Link href="/shows/rules" className="text-forest hover:underline">
                                     showing rules
                                 </Link>{" "}
@@ -167,8 +165,8 @@ export default function FirstPhotoShowPage() {
                             </li>
                         </ul>
                         <p className="m-0">
-                            Open the show, read its rules and classlist, and find a class that fits
-                            a horse you own — a breed halter class is the classic first entry.
+                            Open the show, read its rules and classlist, and find a class that fits a horse you own — a
+                            breed halter class is the classic first entry.
                         </p>
                     </div>
                 </section>
@@ -179,30 +177,31 @@ export default function FirstPhotoShowPage() {
                     <div className="ledger-paper space-y-4 p-6 text-sm leading-relaxed text-secondary-foreground md:p-8">
                         <p>
                             Entering takes a free account and a horse in your{" "}
-                            <Link href="/dashboard" className="font-semibold text-forest underline decoration-2 underline-offset-2">
+                            <Link
+                                href="/dashboard"
+                                className="font-semibold text-forest underline decoration-2 underline-offset-2"
+                            >
                                 stable
                             </Link>
-                            . Add the model you want to show if it isn&apos;t there yet — the
-                            reference database fills in mold, maker, and scale for you.
+                            . Add the model you want to show if it isn&apos;t there yet — the reference database fills
+                            in mold, maker, and scale for you.
                         </p>
                         <ul className="m-0 list-disc space-y-2 pl-5">
                             <li>
-                                <strong>Make the horse public.</strong> Only public horses can enter
-                                shows — judges and other entrants need to be able to see what
-                                placed. You control visibility per horse from your stable.
+                                <strong>Make the horse public.</strong> Only public horses can enter shows — judges and
+                                other entrants need to be able to see what placed. You control visibility per horse from
+                                your stable.
                             </li>
                             <li>
-                                <strong>Give it a show identity.</strong> On the horse&apos;s edit
-                                page, assign a breed, gender, and age. That breed assignment is what
-                                a breed-halter judge weighs your model against — a thoughtful,
-                                realistic assignment matters more than an exotic one.
+                                <strong>Give it a show identity.</strong> On the horse&apos;s edit page, assign a breed,
+                                gender, and age. That breed assignment is what a breed-halter judge weighs your model
+                                against — a thoughtful, realistic assignment matters more than an exotic one.
                             </li>
                             <li>
-                                <strong>Check the class rules.</strong> Some classes are limited by
-                                scale or finish, and a horse enters only one breed halter class per
-                                show (entering breed halter declares the model&apos;s breed). Don&apos;t
-                                memorize any of this — if something isn&apos;t eligible, the entry
-                                form tells you exactly why.
+                                <strong>Check the class rules.</strong> Some classes are limited by scale or finish, and
+                                a horse enters only one breed halter class per show (entering breed halter declares the
+                                model&apos;s breed). Don&apos;t memorize any of this — if something isn&apos;t eligible,
+                                the entry form tells you exactly why.
                             </li>
                         </ul>
                     </div>
@@ -213,43 +212,38 @@ export default function FirstPhotoShowPage() {
                     <StepHeading number={3} title="Take a photo that can win" />
                     <div className="ledger-paper space-y-4 p-6 text-sm leading-relaxed text-secondary-foreground md:p-8">
                         <p>
-                            In an online show, the photograph <em>is</em> the entry. The judge can
-                            only place what they can see, so the craft is worth ten minutes of
-                            care:
+                            In an online show, the photograph <em>is</em> the entry. The judge can only place what they
+                            can see, so the craft is worth ten minutes of care:
                         </p>
                         <ul className="m-0 list-disc space-y-2 pl-5">
                             <li>
-                                <strong>Sharp side profile.</strong> For halter, the classic shot is
-                                the horse in full side view, in crisp focus. Tap to focus on the
-                                horse&apos;s body, and take several — pick the sharpest later.
+                                <strong>Sharp side profile.</strong> For halter, the classic shot is the horse in full
+                                side view, in crisp focus. Tap to focus on the horse&apos;s body, and take several —
+                                pick the sharpest later.
                             </li>
                             <li>
-                                <strong>Level camera, at the horse&apos;s height.</strong> Shoot
-                                from the model&apos;s eye level, not looking down at it. Looking
-                                down distorts the legs and back — the two things a halter judge
-                                studies hardest.
+                                <strong>Level camera, at the horse&apos;s height.</strong> Shoot from the model&apos;s
+                                eye level, not looking down at it. Looking down distorts the legs and back — the two
+                                things a halter judge studies hardest.
                             </li>
                             <li>
-                                <strong>A background suited to the class.</strong> For halter, plain
-                                and uncluttered — a sheet of card, a wall, outdoor grass — so
-                                nothing competes with the horse. For performance, the opposite: a
-                                realistic scene with footing, tack, and props that make the job
-                                believable.
+                                <strong>A background suited to the class.</strong> For halter, plain and uncluttered — a
+                                sheet of card, a wall, outdoor grass — so nothing competes with the horse. For
+                                performance, the opposite: a realistic scene with footing, tack, and props that make the
+                                job believable.
                             </li>
                             <li>
-                                <strong>The whole horse in frame.</strong> Ears to hooves, with a
-                                little room around it. Cropped-off feet are the most common
-                                first-show heartbreak.
+                                <strong>The whole horse in frame.</strong> Ears to hooves, with a little room around it.
+                                Cropped-off feet are the most common first-show heartbreak.
                             </li>
                             <li>
-                                <strong>Natural light.</strong> Daylight near a window (or outside,
-                                overcast) flatters paintwork; overhead room lighting flattens it and
-                                casts shadows.
+                                <strong>Natural light.</strong> Daylight near a window (or outside, overcast) flatters
+                                paintwork; overhead room lighting flattens it and casts shadows.
                             </li>
                         </ul>
                         <p className="m-0">
-                            You don&apos;t need a studio. A phone, daylight, and a steady hand have
-                            won plenty of classes.
+                            You don&apos;t need a studio. A phone, daylight, and a steady hand have won plenty of
+                            classes.
                         </p>
                     </div>
                 </section>
@@ -259,25 +253,23 @@ export default function FirstPhotoShowPage() {
                     <StepHeading number={4} title="Enter the class" />
                     <div className="ledger-paper space-y-4 p-6 text-sm leading-relaxed text-secondary-foreground md:p-8">
                         <p>
-                            While entries are open, every class on the show page has an{" "}
-                            <strong>Enter</strong> button. From there:
+                            While entries are open, every class on the show page has an <strong>Enter</strong> button.
+                            From there:
                         </p>
                         <ol className="m-0 list-decimal space-y-2 pl-5">
                             <li>Pick which of your horses is entering.</li>
                             <li>
-                                Pick the photo — choose from the horse&apos;s existing photos or
-                                upload the show photo right in the entry dialog. Show photos are
-                                free for every account, up to 5 per horse.
+                                Pick the photo — choose from the horse&apos;s existing photos or upload the show photo
+                                right in the entry dialog. Show photos are free for every account, up to 5 per horse.
                             </li>
                             <li>
-                                Optionally name a handler if another member is showing the horse for
-                                you (that&apos;s proxy showing — skip it for your first entry).
+                                Optionally name a handler if another member is showing the horse for you (that&apos;s
+                                proxy showing — skip it for your first entry).
                             </li>
                         </ol>
                         <p className="m-0">
-                            Enter as many classes as fit your horse. You can scratch (withdraw) an
-                            entry while entries are still open, so nothing is irreversible. Then the
-                            hard part: waiting for the deadline.
+                            Enter as many classes as fit your horse. You can scratch (withdraw) an entry while entries
+                            are still open, so nothing is irreversible. Then the hard part: waiting for the deadline.
                         </p>
                     </div>
                 </section>
@@ -288,38 +280,33 @@ export default function FirstPhotoShowPage() {
                     <div className="ledger-paper space-y-4 p-6 text-sm leading-relaxed text-secondary-foreground md:p-8">
                         <ul className="m-0 list-disc space-y-2 pl-5">
                             <li>
-                                <strong>Judging.</strong> When entries close, the show moves to
-                                judging — a judge places each class (or the community votes,
-                                depending on the show). You&apos;ll be notified as things happen;
-                                no need to refresh all week.
+                                <strong>Judging.</strong> When entries close, the show moves to judging — a judge places
+                                each class (or the community votes, depending on the show). You&apos;ll be notified as
+                                things happen; no need to refresh all week.
                             </li>
                             <li>
-                                <strong>Results, class by class.</strong> Every class on this site
-                                is a room you can walk into: the whole lineup with its photos, the
-                                rest of the classlist alongside it, the next class a step away.
-                                While the show is blind, no owner names are shown — you&apos;re
-                                looking at horses, not reputations. When a class&apos;s results
-                                publish, that room fills in with placings, points, cards and,
-                                if the judge left them, comments on your model and on your
-                                photograph. Classes reveal as they&apos;re finished, so you may get
-                                one result before another.
+                                <strong>Results, class by class.</strong> Every class on this site is a room you can
+                                walk into: the whole lineup with its photos, the rest of the classlist alongside it, the
+                                next class a step away. While the show is blind, no owner names are shown — you&apos;re
+                                looking at horses, not reputations. When a class&apos;s results publish, that room fills
+                                in with placings, points, cards and, if the judge left them, comments on your model and
+                                on your photograph. Classes reveal as they&apos;re finished, so you may get one result
+                                before another.
                             </li>
                             <li>
-                                <strong>The permanent record.</strong> Placings flow into each
-                                horse&apos;s show record on its passport automatically — no
-                                spreadsheet required. That record travels with the horse for life.
+                                <strong>The permanent record.</strong> Placings flow into each horse&apos;s show record
+                                on its passport automatically — no spreadsheet required. That record travels with the
+                                horse for life.
                             </li>
                             <li>
-                                <strong>Qualification cards.</strong> A 1st or 2nd in a qualifying
-                                class earns the horse an MHH Qualification Card with its own
-                                verification link — anyone can check it&apos;s real, and it
-                                transfers with the horse if you ever sell.
+                                <strong>Qualification cards.</strong> A 1st or 2nd in a qualifying class earns the horse
+                                an MHH Qualification Card with its own verification link — anyone can check it&apos;s
+                                real, and it transfers with the horse if you ever sell.
                             </li>
                         </ul>
                         <p className="m-0">
-                            And whatever the ribbons say: look at what placed above you, note one
-                            thing to try differently, and enter the next one. That loop — show,
-                            look, learn — is the actual hobby.
+                            And whatever the ribbons say: look at what placed above you, note one thing to try
+                            differently, and enter the next one. That loop — show, look, learn — is the actual hobby.
                         </p>
                     </div>
                 </section>
@@ -334,9 +321,7 @@ export default function FirstPhotoShowPage() {
                         {FAQ.map((item) => (
                             <div key={item.q}>
                                 <h3 className="mb-1 text-sm font-bold text-foreground">{item.q}</h3>
-                                <p className="m-0 text-sm leading-relaxed text-secondary-foreground">
-                                    {item.a}
-                                </p>
+                                <p className="m-0 text-sm leading-relaxed text-secondary-foreground">{item.a}</p>
                             </div>
                         ))}
                     </div>
@@ -347,8 +332,8 @@ export default function FirstPhotoShowPage() {
                         There&apos;s a table with your number on it
                     </h2>
                     <p className="mx-auto mb-4 max-w-[520px] text-sm leading-relaxed text-secondary-foreground">
-                        Find a show that&apos;s open, pick the horse you&apos;d grab first in a
-                        fire, and enter it in one class. That&apos;s a show career started.
+                        Find a show that&apos;s open, pick the horse you&apos;d grab first in a fire, and enter it in
+                        one class. That&apos;s a show career started.
                     </p>
                     <div className="flex flex-wrap justify-center gap-3">
                         <Button asChild>

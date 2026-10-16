@@ -88,9 +88,7 @@ export default function RibbonTray({
                     role="status"
                     aria-live="polite"
                     data-testid="tray-refusal"
-                    className={`text-center text-xs text-(--leather-text) ${
-                        refusal ? "mb-1.5" : "sr-only"
-                    }`}
+                    className={`text-center text-xs text-(--leather-text) ${refusal ? "mb-1.5" : "sr-only"}`}
                 >
                     {refusal}
                 </p>
@@ -144,9 +142,7 @@ export default function RibbonTray({
                                     <span
                                         aria-hidden="true"
                                         className={`font-serif text-[10px] leading-none tracking-wide ${
-                                            filled
-                                                ? "font-bold text-(--leather-text)"
-                                                : "text-(--leather-text-muted)"
+                                            filled ? "font-bold text-(--leather-text)" : "text-(--leather-text-muted)"
                                         }`}
                                     >
                                         {placeLabel(place)}
@@ -174,7 +170,7 @@ export default function RibbonTray({
                         data-testid="class-done"
                         disabled={doneSaving}
                         onClick={onDone}
-                        className="brass-plaque min-h-11 shrink-0 cursor-pointer px-4 font-serif text-sm font-bold tracking-wide text-engraved-brass transition-all hover:brightness-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--brass-hi) active:translate-y-px disabled:cursor-default disabled:opacity-60"
+                        className="brass-plaque text-engraved-brass min-h-11 shrink-0 cursor-pointer px-4 font-serif text-sm font-bold tracking-wide transition-all hover:brightness-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--brass-hi) active:translate-y-px disabled:cursor-default disabled:opacity-60"
                     >
                         {doneSaving ? "Saving…" : "Class done →"}
                     </button>

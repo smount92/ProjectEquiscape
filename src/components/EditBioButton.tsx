@@ -98,8 +98,8 @@ export default function EditBioButton({ currentBio, currentLinks = null }: EditB
                     </label>
                 ))}
                 <p className="m-0 text-xs text-muted-foreground">
-                    Shown as buttons under your bio. A handle, a pasted link or a bare domain all work; anything
-                    that isn&rsquo;t a web address is dropped.
+                    Shown as buttons under your bio. A handle, a pasted link or a bare domain all work; anything that
+                    isn&rsquo;t a web address is dropped.
                 </p>
             </fieldset>
 

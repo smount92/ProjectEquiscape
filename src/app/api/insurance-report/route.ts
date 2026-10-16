@@ -8,7 +8,9 @@ import { getAdminClient } from "@/lib/supabase/admin";
 
 export async function GET() {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     try {
@@ -19,11 +21,13 @@ export async function GET() {
         const selectHorses = (withSets: boolean) =>
             supabase
                 .from("user_horses")
-                .select(`
+                .select(
+                    `
                 id, custom_name, finish_type, condition_grade, trade_status, created_at, catalog_id,
                 catalog_items:catalog_id(title, maker, scale),
                 financial_vault(purchase_price, purchase_date, estimated_current_value, insurance_notes${withSets ? ", purchase_group_id, purchase_group_label" : ""})
-            `)
+            `,
+                )
                 .eq("owner_id", user.id)
                 .is("deleted_at", null)
                 .order("custom_name");
@@ -40,10 +44,21 @@ export async function GET() {
                 const g = h.financial_vault?.purchase_group_id;
                 if (g) sizes.set(g, (sizes.get(g) ?? 0) + 1);
             }
-            for (const h of (horses ?? []) as { id: string; financial_vault?: { purchase_price: number | null; purchase_group_id?: string | null; purchase_group_label?: string | null } | null }[]) {
+            for (const h of (horses ?? []) as {
+                id: string;
+                financial_vault?: {
+                    purchase_price: number | null;
+                    purchase_group_id?: string | null;
+                    purchase_group_label?: string | null;
+                } | null;
+            }[]) {
                 const g = h.financial_vault?.purchase_group_id;
                 if (!g) continue;
-                setInfo.set(h.id, { total: Number(h.financial_vault?.purchase_price ?? 0), members: sizes.get(g) ?? 1, label: h.financial_vault?.purchase_group_label ?? null });
+                setInfo.set(h.id, {
+                    total: Number(h.financial_vault?.purchase_price ?? 0),
+                    members: sizes.get(g) ?? 1,
+                    label: h.financial_vault?.purchase_group_label ?? null,
+                });
             }
         }
 
@@ -106,7 +121,7 @@ export async function GET() {
                 marketValueMap,
                 currencySymbol: (profile as { currency_symbol?: string | null } | null)?.currency_symbol || "$",
                 setInfo,
-            })
+            }),
         );
 
         return new NextResponse(new Uint8Array(buffer), {
@@ -120,9 +135,6 @@ export async function GET() {
     } catch (err) {
         const Sentry = await import("@sentry/nextjs");
         Sentry.captureException(err, { tags: { domain: "pdf" }, level: "error" });
-        return NextResponse.json(
-            { error: "Failed to generate insurance report." },
-            { status: 500 }
-        );
+        return NextResponse.json({ error: "Failed to generate insurance report." }, { status: 500 });
     }
 }

@@ -22,7 +22,9 @@ type UserHorseInsert = Database["public"]["Tables"]["user_horses"]["Insert"];
 export async function createIdRequest(formData: FormData): Promise<{ success: boolean; error?: string; id?: string }> {
     try {
         const supabase = await createClient();
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+            data: { user },
+        } = await supabase.auth.getUser();
         if (!user) return { success: false, error: "Not authenticated." };
 
         const description = formData.get("description") as string;
@@ -37,12 +39,10 @@ export async function createIdRequest(formData: FormData): Promise<{ success: bo
         const safeFileName = `help-id_${Date.now()}.webp`;
         const filePath = `${user.id}/help-id/${safeFileName}`;
 
-        const { error: uploadError } = await supabase.storage
-            .from("horse-images")
-            .upload(filePath, imageFile, {
-                contentType: imageFile.type || "image/webp",
-                upsert: false,
-            });
+        const { error: uploadError } = await supabase.storage.from("horse-images").upload(filePath, imageFile, {
+            contentType: imageFile.type || "image/webp",
+            upsert: false,
+        });
 
         if (uploadError) {
             return { success: false, error: `Upload failed: ${uploadError.message}` };
@@ -82,11 +82,13 @@ export async function createSuggestion(
     data: {
         catalogId?: string;
         freeText?: string;
-    }
+    },
 ): Promise<{ success: boolean; error?: string }> {
     try {
         const supabase = await createClient();
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+            data: { user },
+        } = await supabase.auth.getUser();
         if (!user) return { success: false, error: "Not authenticated." };
 
         if (!data.catalogId && !data.freeText) {
@@ -129,7 +131,9 @@ export async function createSuggestion(
                         content: `@${alias} suggested an identification for your Help ID request!`,
                     });
                 }
-            } catch (err) { logger.error("HelpId", "Background task failed", err); }
+            } catch (err) {
+                logger.error("HelpId", "Background task failed", err);
+            }
         });
 
         revalidatePath(`/community/help-id/${requestId}`);
@@ -143,12 +147,12 @@ export async function createSuggestion(
  * Upvote an identification suggestion.
  * @param suggestionId - UUID of the suggestion to upvote
  */
-export async function upvoteSuggestion(
-    suggestionId: string
-): Promise<{ success: boolean; error?: string }> {
+export async function upvoteSuggestion(suggestionId: string): Promise<{ success: boolean; error?: string }> {
     try {
         const supabase = await createClient();
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+            data: { user },
+        } = await supabase.auth.getUser();
         if (!user) return { success: false, error: "Not authenticated." };
 
         const { error } = await supabase.rpc("upvote_suggestion", {
@@ -169,11 +173,13 @@ export async function upvoteSuggestion(
  */
 export async function acceptSuggestion(
     requestId: string,
-    suggestionId: string
+    suggestionId: string,
 ): Promise<{ success: boolean; error?: string }> {
     try {
         const supabase = await createClient();
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+            data: { user },
+        } = await supabase.auth.getUser();
         if (!user) return { success: false, error: "Not authenticated." };
 
         // Verify ownership of the request
@@ -211,20 +217,24 @@ export async function acceptSuggestion(
  * @param horseId - UUID of the identified horse
  */
 export async function addIdentifiedHorse(
-    suggestionId: string
+    suggestionId: string,
 ): Promise<{ success: boolean; error?: string; horseId?: string }> {
     try {
         const supabase = await createClient();
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+            data: { user },
+        } = await supabase.auth.getUser();
         if (!user) return { success: false, error: "Not authenticated." };
 
         // Get the suggestion with catalog item reference
         const { data: suggestion } = await supabase
             .from("id_suggestions")
-            .select(`
+            .select(
+                `
                 id, catalog_id, free_text,
                 catalog_items:catalog_id(id, title, maker, item_type)
-            `)
+            `,
+            )
             .eq("id", suggestionId)
             .single();
 
@@ -267,11 +277,15 @@ export async function addIdentifiedHorse(
 
         // Transfer the photo from the Help ID request to the new horse
         try {
-            const { data: request } = await supabase.from('id_requests').select('image_url').eq('accepted_suggestion_id', suggestionId).single();
+            const { data: request } = await supabase
+                .from("id_requests")
+                .select("image_url")
+                .eq("accepted_suggestion_id", suggestionId)
+                .single();
             if (request?.image_url) {
                 const { getAdminClient } = await import("@/lib/supabase/admin");
                 const admin = getAdminClient();
-                const ext = request.image_url.split('.').pop() || 'webp';
+                const ext = request.image_url.split(".").pop() || "webp";
                 const newPath = `horses/${horse.id}/Primary_Thumbnail_${Date.now()}.${ext}`;
 
                 const { data: copyData } = await admin.storage.from("horse-images").copy(request.image_url, newPath);
@@ -279,11 +293,13 @@ export async function addIdentifiedHorse(
                     await admin.from("horse_images").insert({
                         horse_id: horse.id,
                         image_url: newPath,
-                        angle_profile: 'Primary_Thumbnail'
+                        angle_profile: "Primary_Thumbnail",
                     });
                 }
             }
-        } catch (err) { logger.error("HelpId", "Background task failed", err); }
+        } catch (err) {
+            logger.error("HelpId", "Background task failed", err);
+        }
 
         revalidatePath("/dashboard");
         return { success: true, horseId: horse.id };
@@ -318,7 +334,9 @@ export async function deleteIdRequest(requestId: string): Promise<{ success: boo
     if (r.image_url) {
         try {
             await supabase.storage.from("horse-images").remove([r.image_url]);
-        } catch (err) { logger.error("HelpId", "Background task failed", err); }
+        } catch (err) {
+            logger.error("HelpId", "Background task failed", err);
+        }
     }
 
     revalidatePath("/community/help-id");

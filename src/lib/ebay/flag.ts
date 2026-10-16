@@ -39,9 +39,7 @@ export function ebayCompsLive(): boolean {
  * data or burn a production rate limit by accident.
  */
 export function ebayApiBase(): string {
-    return process.env.EBAY_ENV === "production"
-        ? "https://api.ebay.com"
-        : "https://api.sandbox.ebay.com";
+    return process.env.EBAY_ENV === "production" ? "https://api.ebay.com" : "https://api.sandbox.ebay.com";
 }
 
 /**

@@ -25,13 +25,7 @@ import { termsLines, turnaroundLabel } from "@/lib/studio/terms";
  * The terms are shown here, above the button, because agreeing to terms
  * you were never shown is not agreement.
  */
-export default function RequestForm({
-    artist,
-    asWaitlist,
-}: {
-    artist: ArtistProfile;
-    asWaitlist: boolean;
-}) {
+export default function RequestForm({ artist, asWaitlist }: { artist: ArtistProfile; asWaitlist: boolean }) {
     const router = useRouter();
     const openServices = artist.services.filter((s) => s.open);
 
@@ -81,9 +75,7 @@ export default function RequestForm({
             return;
         }
         if (description.trim().length < 20) {
-            setError(
-                "Give the artist a bit more to go on — what horse, what colour, what you're picturing.",
-            );
+            setError("Give the artist a bit more to go on — what horse, what colour, what you're picturing.");
             return;
         }
 
@@ -113,22 +105,21 @@ export default function RequestForm({
     return (
         <form onSubmit={handleSubmit} className="grid gap-6">
             {asWaitlist && (
-                <div className="border-warning/40 bg-warning/10 rounded-lg border p-4 text-sm leading-relaxed">
-                    <strong>{artist.studioName}</strong>&rsquo;s bench is full, so this goes to
-                    their waitlist. They&rsquo;ll quote when a slot opens — waitlists here
-                    aren&rsquo;t first-come-first-served, so tell them what makes your project
-                    yours.
+                <div className="rounded-lg border border-warning/40 bg-warning/10 p-4 text-sm leading-relaxed">
+                    <strong>{artist.studioName}</strong>&rsquo;s bench is full, so this goes to their waitlist.
+                    They&rsquo;ll quote when a slot opens — waitlists here aren&rsquo;t first-come-first-served, so tell
+                    them what makes your project yours.
                 </div>
             )}
 
-            <div className="bg-card border-input rounded-lg border p-6 shadow-md">
+            <div className="rounded-lg border border-input bg-card p-6 shadow-md">
                 <h2 className="mb-4 font-serif text-lg font-bold">What are you after?</h2>
 
                 <label className="mb-4 block">
                     <span className="mb-1 block text-sm font-semibold">Service</span>
                     {openServices.length > 0 ? (
                         <select
-                            className="border-input bg-card ring-offset-background focus:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-offset-2 focus:outline-none"
+                            className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
                             value={serviceId}
                             onChange={(e) => setServiceId(e.target.value)}
                         >
@@ -156,26 +147,20 @@ export default function RequestForm({
                             placeholder="Describe the work you're after"
                         />
                     )}
-                    {service?.note && (
-                        <span className="text-muted-foreground mt-1 block text-xs">
-                            {service.note}
-                        </span>
-                    )}
+                    {service?.note && <span className="mt-1 block text-xs text-muted-foreground">{service.note}</span>}
                 </label>
 
                 <label className="mb-4 block">
-                    <span className="mb-1 block text-sm font-semibold">
-                        Describe the commission
-                    </span>
+                    <span className="mb-1 block text-sm font-semibold">Describe the commission</span>
                     <Textarea
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         rows={6}
                         placeholder="Which model, what colour and markings, whether it needs prep, and any deadline you're working to. The more you say here, the closer the artist's quote will be."
                     />
-                    <span className="text-muted-foreground mt-1 block text-xs">
-                        Coat complexity drives the price in this hobby — mention pinto markings,
-                        appaloosa spots, dapples or roaning if you want them.
+                    <span className="mt-1 block text-xs text-muted-foreground">
+                        Coat complexity drives the price in this hobby — mention pinto markings, appaloosa spots,
+                        dapples or roaning if you want them.
                     </span>
                 </label>
 
@@ -194,8 +179,7 @@ export default function RequestForm({
                 <div className="grid gap-4 sm:grid-cols-2">
                     <label className="block">
                         <span className="mb-1 block text-sm font-semibold">
-                            Your budget{" "}
-                            <span className="text-muted-foreground">(optional)</span>
+                            Your budget <span className="text-muted-foreground">(optional)</span>
                         </span>
                         <Input
                             type="number"
@@ -205,7 +189,7 @@ export default function RequestForm({
                             onChange={(e) => setBudget(e.target.value)}
                             placeholder="e.g. 800"
                         />
-                        <span className="text-muted-foreground mt-1 block text-xs">
+                        <span className="mt-1 block text-xs text-muted-foreground">
                             A guide, not an offer. The artist sends the actual quote.
                         </span>
                     </label>
@@ -215,7 +199,7 @@ export default function RequestForm({
                             Your horse <span className="text-muted-foreground">(optional)</span>
                         </span>
                         <select
-                            className="border-input bg-card ring-offset-background focus:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-offset-2 focus:outline-none"
+                            className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
                             value={horseId}
                             onChange={(e) => setHorseId(e.target.value)}
                         >
@@ -226,9 +210,9 @@ export default function RequestForm({
                                 </option>
                             ))}
                         </select>
-                        <span className="text-muted-foreground mt-1 block text-xs">
-                            Links the finished work to its passport, and lets you file the cost
-                            into its vault afterwards.
+                        <span className="mt-1 block text-xs text-muted-foreground">
+                            Links the finished work to its passport, and lets you file the cost into its vault
+                            afterwards.
                         </span>
                     </label>
                 </div>
@@ -236,63 +220,53 @@ export default function RequestForm({
 
             {/* Terms, before the button. Agreeing to terms you were never
                 shown is not agreement. */}
-            <div className="bg-card border-input rounded-lg border p-6 shadow-md">
-                <h2 className="mb-1 font-serif text-lg font-bold">
-                    {artist.studioName}&rsquo;s terms
-                </h2>
-                <p className="text-muted-foreground mb-4 text-xs leading-relaxed">
-                    You aren&rsquo;t agreeing to anything yet — these apply once you accept a
-                    quote, and the version you accept is saved with your commission even if the
-                    artist changes them later.
+            <div className="rounded-lg border border-input bg-card p-6 shadow-md">
+                <h2 className="mb-1 font-serif text-lg font-bold">{artist.studioName}&rsquo;s terms</h2>
+                <p className="mb-4 text-xs leading-relaxed text-muted-foreground">
+                    You aren&rsquo;t agreeing to anything yet — these apply once you accept a quote, and the version you
+                    accept is saved with your commission even if the artist changes them later.
                 </p>
                 <div className="grid">
                     {termsLines(artist.terms).map((line) => (
                         <div
                             key={line.label}
-                            className="border-input/60 flex flex-wrap items-baseline justify-between gap-2 border-b py-2 last:border-b-0"
+                            className="flex flex-wrap items-baseline justify-between gap-2 border-b border-input/60 py-2 last:border-b-0"
                         >
-                            <span className="text-muted-foreground text-sm">{line.label}</span>
+                            <span className="text-sm text-muted-foreground">{line.label}</span>
                             <span className="text-right text-sm font-semibold">{line.value}</span>
                         </div>
                     ))}
-                    <div className="border-input/60 flex flex-wrap items-baseline justify-between gap-2 border-b py-2 last:border-b-0">
-                        <span className="text-muted-foreground text-sm">Turnaround</span>
-                        <span className="text-right text-sm font-semibold">
-                            {turnaroundLabel(artist.terms)}
-                        </span>
+                    <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-input/60 py-2 last:border-b-0">
+                        <span className="text-sm text-muted-foreground">Turnaround</span>
+                        <span className="text-right text-sm font-semibold">{turnaroundLabel(artist.terms)}</span>
                     </div>
                 </div>
                 {artist.terms.extraNote && (
-                    <p className="text-secondary-foreground mt-4 text-sm leading-relaxed whitespace-pre-wrap">
+                    <p className="mt-4 text-sm leading-relaxed whitespace-pre-wrap text-secondary-foreground">
                         {artist.terms.extraNote}
                     </p>
                 )}
             </div>
 
             {error && (
-                <p className="text-destructive border-destructive/30 bg-destructive/10 rounded-md border px-4 py-3 text-sm">
+                <p className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
                     {error}
                 </p>
             )}
 
             <div className="flex flex-wrap items-center gap-3">
                 <Button type="submit" size="wide" disabled={saving}>
-                    {saving
-                        ? "Sending…"
-                        : asWaitlist
-                          ? "Join the waitlist"
-                          : "Send this request"}
+                    {saving ? "Sending…" : asWaitlist ? "Join the waitlist" : "Send this request"}
                 </Button>
                 <Button asChild type="button" variant="outline" size="wide">
                     <Link href={`/studio/${artist.studioSlug}`}>Back to the studio</Link>
                 </Button>
             </div>
 
-            <p className="text-muted-foreground text-xs leading-relaxed">
-                🤝 Sending a request costs nothing and commits you to nothing. The artist replies
-                with a quote — a price, a timeline and these terms — and only then do you decide.
-                Payment is arranged directly between the two of you; Model Horse Hub never handles
-                the money.
+            <p className="text-xs leading-relaxed text-muted-foreground">
+                🤝 Sending a request costs nothing and commits you to nothing. The artist replies with a quote — a
+                price, a timeline and these terms — and only then do you decide. Payment is arranged directly between
+                the two of you; Model Horse Hub never handles the money.
             </p>
         </form>
     );

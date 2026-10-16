@@ -25,11 +25,7 @@ import Link from "next/link";
 import MessageSellerButton from "@/components/MessageSellerButton";
 import { Button } from "@/components/ui/button";
 import { getConditionGrade, conditionToneVar } from "@/lib/conditionGrades";
-import {
-    recordChipLabel,
-    verifiedChipLabel,
-    type HorseRecordSummary,
-} from "@/lib/market/recordSummary";
+import { recordChipLabel, verifiedChipLabel, type HorseRecordSummary } from "@/lib/market/recordSummary";
 import { PARCHMENT_INK } from "@/lib/theme/parchment";
 import CountryTag from "@/components/CountryTag";
 import { hasSellerTerms, type SellerTerms } from "@/lib/sellers/sellerTerms";

@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-    SHOW_PHOTO_ANGLE,
-    SHOW_PHOTO_CAP,
-    isValidShowPhotoPath,
-} from "@/lib/shows/entryPhoto";
+import { SHOW_PHOTO_ANGLE, SHOW_PHOTO_CAP, isValidShowPhotoPath } from "@/lib/shows/entryPhoto";
 
 const HORSE = "123e4567-e89b-42d3-a456-426614174000";
 
@@ -23,9 +19,7 @@ describe("entryPhoto — show-photo constants", () => {
 
 describe("isValidShowPhotoPath", () => {
     it("accepts the client pipeline's own output shape", () => {
-        expect(isValidShowPhotoPath(`horses/${HORSE}/show_photo_1722500000000.webp`, HORSE)).toBe(
-            true,
-        );
+        expect(isValidShowPhotoPath(`horses/${HORSE}/show_photo_1722500000000.webp`, HORSE)).toBe(true);
     });
 
     it("rejects a path under a different horse's folder", () => {

@@ -14,15 +14,7 @@ import type { MyShowEntry } from "@/lib/shows/public";
 // The shared setup mocks next/link to return null, so no Link would
 // render at all. Use a real anchor here so href assertions mean something.
 vi.mock("next/link", () => ({
-    default: ({
-        children,
-        href,
-        ...props
-    }: {
-        children: React.ReactNode;
-        href: string;
-        [key: string]: unknown;
-    }) => (
+    default: ({ children, href, ...props }: { children: React.ReactNode; href: string; [key: string]: unknown }) => (
         <a href={href} {...props}>
             {children}
         </a>
@@ -88,13 +80,8 @@ describe("PublicClassRow entry control", () => {
     });
 
     it("names the class-room link 'See entries →'", () => {
-        render(
-            <PublicClassRow cls={cls()} canEnter={false} classRoomHref="/shows/s1/class/c1" />,
-        );
-        expect(screen.getByRole("link", { name: "See entries →" })).toHaveAttribute(
-            "href",
-            "/shows/s1/class/c1",
-        );
+        render(<PublicClassRow cls={cls()} canEnter={false} classRoomHref="/shows/s1/class/c1" />);
+        expect(screen.getByRole("link", { name: "See entries →" })).toHaveAttribute("href", "/shows/s1/class/c1");
         expect(screen.queryByText(/class room/i)).not.toBeInTheDocument();
     });
 });

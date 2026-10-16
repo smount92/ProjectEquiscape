@@ -40,7 +40,15 @@ export const DISCIPLINE_PRESETS: readonly {
     {
         key: "finishwork",
         label: "Finishwork / painting",
-        stages: ["Reference", "The blank", "Prepped & primed", "Base coat", "Shading", "Details & markings", "Finished"],
+        stages: [
+            "Reference",
+            "The blank",
+            "Prepped & primed",
+            "Base coat",
+            "Shading",
+            "Details & markings",
+            "Finished",
+        ],
     },
     {
         key: "custom",
@@ -138,11 +146,10 @@ export function isValidMakingPath(path: string, horseId: string): boolean {
  * applied to credit. A claim is labeled a claim until the other party
  * confirms it.
  */
-export function creditLabel(rec: {
-    recordedBy: string;
-    ownerConfirmedAt: string | null;
-    artistIsOwner: boolean;
-}): { label: string; verified: boolean } {
+export function creditLabel(rec: { recordedBy: string; ownerConfirmedAt: string | null; artistIsOwner: boolean }): {
+    label: string;
+    verified: boolean;
+} {
     if (rec.ownerConfirmedAt) return { label: "Confirmed by owner", verified: true };
     if (rec.recordedBy === "commission") return { label: "Commission — verified", verified: true };
     if (rec.artistIsOwner) return { label: "Recorded by the artist", verified: true };

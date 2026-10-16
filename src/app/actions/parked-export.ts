@@ -33,7 +33,9 @@ export async function parkHorse(horseId: string): Promise<{
 }> {
     try {
         const supabase = await createClient();
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+            data: { user },
+        } = await supabase.auth.getUser();
         if (!user) return { success: false, error: "Not authenticated." };
 
         // Verify ownership
@@ -73,10 +75,7 @@ export async function parkHorse(horseId: string): Promise<{
         }
 
         // Set horse to parked
-        await supabase
-            .from("user_horses")
-            .update({ life_stage: "parked" })
-            .eq("id", horseId);
+        await supabase.from("user_horses").update({ life_stage: "parked" }).eq("id", horseId);
 
         // Create transfer with long expiry (30 days for off-platform sales)
         const expiresAt = new Date();
@@ -115,15 +114,13 @@ export async function unparkHorse(horseId: string): Promise<{
 }> {
     try {
         const supabase = await createClient();
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+            data: { user },
+        } = await supabase.auth.getUser();
         if (!user) return { success: false, error: "Not authenticated." };
 
         // Verify ownership
-        const { data: horse } = await supabase
-            .from("user_horses")
-            .select("id, owner_id")
-            .eq("id", horseId)
-            .single();
+        const { data: horse } = await supabase.from("user_horses").select("id, owner_id").eq("id", horseId).single();
 
         if (!horse || (horse as { owner_id: string }).owner_id !== user.id) {
             return { success: false, error: "You don't own this horse." };
@@ -140,7 +137,10 @@ export async function unparkHorse(horseId: string): Promise<{
             .maybeSingle();
 
         if (activeTxn) {
-            return { success: false, error: "Cannot unpark a horse while an active transaction is pending. Please cancel the transaction first." };
+            return {
+                success: false,
+                error: "Cannot unpark a horse while an active transaction is pending. Please cancel the transaction first.",
+            };
         }
 
         // Cancel pending transfers with claim_pin
@@ -153,10 +153,7 @@ export async function unparkHorse(horseId: string): Promise<{
             .not("claim_pin", "is", null);
 
         // Restore life_stage
-        await supabase
-            .from("user_horses")
-            .update({ life_stage: "completed" })
-            .eq("id", horseId);
+        await supabase.from("user_horses").update({ life_stage: "completed" }).eq("id", horseId);
 
         revalidatePath(`/stable/${horseId}`);
         revalidatePath("/dashboard");
@@ -210,10 +207,13 @@ export async function getParkedHorseByPin(pin: string): Promise<{
                 await admin.from("posts").insert({
                     author_id: t.sender_id,
                     horse_id: t.horse_id,
-                    content: "⏰ Parked transfer expired. Horse has been automatically unparked and returned to your stable.",
+                    content:
+                        "⏰ Parked transfer expired. Horse has been automatically unparked and returned to your stable.",
                     ...(support.kind ? { kind: "audit" } : {}),
                 });
-            } catch (err) { logger.error("Transfer", "Background task failed", err); }
+            } catch (err) {
+                logger.error("Transfer", "Background task failed", err);
+            }
 
             return { success: false, error: "This claim PIN has expired." };
         }
@@ -244,7 +244,9 @@ export async function getParkedHorseByPin(pin: string): Promise<{
             if (imageUrl) {
                 photo = getPublicImageUrl(imageUrl);
             }
-        } catch (err) { logger.error("Transfer", "Background task failed", err); }
+        } catch (err) {
+            logger.error("Transfer", "Background task failed", err);
+        }
 
         // 5. Get counts (non-blocking)
         let timelineCount = 0;
@@ -262,7 +264,9 @@ export async function getParkedHorseByPin(pin: string): Promise<{
                 .select("id", { count: "exact", head: true })
                 .eq("horse_id", t.horse_id);
             ownerCount = (oc || 0) + 1;
-        } catch (err) { logger.error("Transfer", "Background task failed", err); }
+        } catch (err) {
+            logger.error("Transfer", "Background task failed", err);
+        }
 
         return {
             success: true,
@@ -296,7 +300,9 @@ export async function claimParkedHorse(pin: string): Promise<{
         }
 
         const supabase = await createClient();
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+            data: { user },
+        } = await supabase.auth.getUser();
         if (!user) return { success: false, error: "Not authenticated. Please log in or create an account first." };
 
         // Single atomic RPC — locks, validates, swaps ownership, clears vault
@@ -351,7 +357,9 @@ export async function claimParkedHorse(pin: string): Promise<{
                     },
                 });
             }
-        } catch (err) { logger.error("Transfer", "Background task failed", err); }
+        } catch (err) {
+            logger.error("Transfer", "Background task failed", err);
+        }
 
         // Close state machine: if this claim came from a commerce offer flow,
         // complete the funds_verified transaction
@@ -372,7 +380,9 @@ export async function claimParkedHorse(pin: string): Promise<{
                         .eq("id", (offerTxn as { id: string }).id);
                 }
             }
-        } catch (err) { logger.error("Transfer", "Background task failed", err); }
+        } catch (err) {
+            logger.error("Transfer", "Background task failed", err);
+        }
 
         // Notification (non-critical)
         try {
@@ -385,7 +395,9 @@ export async function claimParkedHorse(pin: string): Promise<{
                     horse_id: result.horse_id,
                 });
             }
-        } catch (err) { logger.error("Transfer", "Background task failed", err); }
+        } catch (err) {
+            logger.error("Transfer", "Background task failed", err);
+        }
 
         // Claiming the horse IS accepting it with its story: any work
         // records by the parker (the artist who parked it) flip to
@@ -399,7 +411,9 @@ export async function claimParkedHorse(pin: string): Promise<{
                     { p_horse: result.horse_id, p_parker: result.sender_id },
                 );
             }
-        } catch (err) { logger.error("Transfer", "Work-record confirm on claim failed", err); }
+        } catch (err) {
+            logger.error("Transfer", "Work-record confirm on claim failed", err);
+        }
 
         revalidatePath("/dashboard");
         revalidatePath(`/stable/${result.horse_id}`);
@@ -436,17 +450,21 @@ export async function getCoaData(horseId: string): Promise<{
 }> {
     try {
         const supabase = await createClient();
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+            data: { user },
+        } = await supabase.auth.getUser();
         if (!user) return { success: false, error: "Not authenticated." };
 
         // Verify ownership and get horse data
         const { data: horse } = await supabase
             .from("user_horses")
-            .select(`
+            .select(
+                `
                 id, owner_id, custom_name, finish_type, condition_grade,
                 catalog_items:catalog_id(title, maker, item_type),
                 horse_images(image_url, angle_profile)
-            `)
+            `,
+            )
             .eq("id", horseId)
             .single();
 
@@ -520,7 +538,9 @@ export async function getCoaData(horseId: string): Promise<{
                 ownerCount: (ownerCount || 0) + 1,
                 ownerAlias: profile?.alias_name || "Collector",
                 generatedAt: new Date().toLocaleDateString("en-US", {
-                    year: "numeric", month: "long", day: "numeric",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
                 }),
                 photoUrl,
             },

@@ -24,14 +24,10 @@ beforeEach(() => {
 describe("ShowAnnounceDialog", () => {
     it("previews the reach and sends the message to the action", async () => {
         render(<ShowAnnounceDialog showId={SHOW_ID} recipientCount={5} />);
-        expect(
-            screen.getByText(/goes to 5 entrants as an in-app notification/i),
-        ).toBeInTheDocument();
+        expect(screen.getByText(/goes to 5 entrants as an in-app notification/i)).toBeInTheDocument();
 
         fireEvent.click(screen.getByTestId("announce-open"));
-        expect(
-            await screen.findByText(/goes to 5 entrants — the distinct owners/i),
-        ).toBeInTheDocument();
+        expect(await screen.findByText(/goes to 5 entrants — the distinct owners/i)).toBeInTheDocument();
 
         const textarea = screen.getByLabelText("Announcement message");
         fireEvent.change(textarea, { target: { value: "Judging starts tomorrow!" } });
@@ -45,9 +41,7 @@ describe("ShowAnnounceDialog", () => {
             }),
         );
         // Toast reports the SERVER's count (4), not the preview (5).
-        expect(
-            await screen.findByText("Announcement sent to 4 entrants."),
-        ).toBeInTheDocument();
+        expect(await screen.findByText("Announcement sent to 4 entrants.")).toBeInTheDocument();
     });
 
     it("disables send while the message is empty and when there is no one to reach", () => {
@@ -61,9 +55,7 @@ describe("ShowAnnounceDialog", () => {
         unmount();
 
         render(<ShowAnnounceDialog showId={SHOW_ID} recipientCount={0} />);
-        expect(
-            screen.getByText(/no entrants yet — announcements reach the people entered/i),
-        ).toBeInTheDocument();
+        expect(screen.getByText(/no entrants yet — announcements reach the people entered/i)).toBeInTheDocument();
         fireEvent.click(screen.getByTestId("announce-open"));
         fireEvent.change(screen.getByLabelText("Announcement message"), {
             target: { value: "Anyone there?" },
@@ -82,9 +74,7 @@ describe("ShowAnnounceDialog", () => {
             target: { value: "Test" },
         });
         fireEvent.click(screen.getByTestId("announce-send"));
-        expect(
-            await screen.findByText("Only the host or a co-host can announce to entrants."),
-        ).toBeInTheDocument();
+        expect(await screen.findByText("Only the host or a co-host can announce to entrants.")).toBeInTheDocument();
         // Still composing — the message is not lost.
         expect(screen.getByLabelText("Announcement message")).toHaveValue("Test");
     });

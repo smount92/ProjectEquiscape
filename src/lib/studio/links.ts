@@ -19,7 +19,12 @@ export type LinkKey = Extract<AnyLinkKey, "instagram" | "facebook" | "website" |
 
 export type StudioLinks = Partial<Record<LinkKey, string>>;
 
-export const LINK_META = linkMeta(STUDIO_LINK_KEYS) as { key: LinkKey; label: string; glyph: string; placeholder: string }[];
+export const LINK_META = linkMeta(STUDIO_LINK_KEYS) as {
+    key: LinkKey;
+    label: string;
+    glyph: string;
+    placeholder: string;
+}[];
 
 /** Normalise whatever was stored or typed into clean https URLs. */
 export function normalizeStudioLinks(input: unknown): StudioLinks {
@@ -28,5 +33,10 @@ export function normalizeStudioLinks(input: unknown): StudioLinks {
 
 /** The links a page can render, in display order. */
 export function linkEntries(links: StudioLinks): { key: LinkKey; label: string; glyph: string; href: string }[] {
-    return entries(links as MemberLinks, STUDIO_LINK_KEYS) as { key: LinkKey; label: string; glyph: string; href: string }[];
+    return entries(links as MemberLinks, STUDIO_LINK_KEYS) as {
+        key: LinkKey;
+        label: string;
+        glyph: string;
+        href: string;
+    }[];
 }

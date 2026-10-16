@@ -55,7 +55,9 @@ describe("hardcoded palette classes", () => {
             `Hardcoded palette classes rose from ${BASELINE} to ${total}. Use theme tokens so night mode and Simple Mode stay readable, or raise BASELINE in this file on purpose.\n  ${top}`,
         ).toBeLessThanOrEqual(BASELINE);
         if (total < BASELINE) {
-            console.info(`[hardcoded-colors] ${total} < baseline ${BASELINE} — lower BASELINE in src/__tests__/hardcoded-colors.test.ts to lock the gain in.`);
+            console.info(
+                `[hardcoded-colors] ${total} < baseline ${BASELINE} — lower BASELINE in src/__tests__/hardcoded-colors.test.ts to lock the gain in.`,
+            );
         }
     });
 });

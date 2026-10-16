@@ -7,13 +7,16 @@ import type { SentryStatus } from "@/lib/sentry/issues";
  */
 export default function AdminErrorsCard({ status }: { status: SentryStatus | null }) {
     return (
-        <section className="border-input bg-card rounded-lg border p-5 shadow-sm" aria-labelledby="admin-errors-heading">
+        <section
+            className="rounded-lg border border-input bg-card p-5 shadow-sm"
+            aria-labelledby="admin-errors-heading"
+        >
             <h3 id="admin-errors-heading" className="mt-0 mb-1 flex items-center gap-2 text-base font-bold">
                 🚨 Errors (Sentry, last 24h)
             </h3>
 
             {!status || !status.configured ? (
-                <div className="text-secondary-foreground text-sm leading-relaxed">
+                <div className="text-sm leading-relaxed text-secondary-foreground">
                     <p className="m-0 mb-2">
                         Not connected yet. Sentry is recording errors, but this console cannot read them until three
                         server variables exist in Vercel (Settings → Environment Variables, production):
@@ -40,24 +43,37 @@ export default function AdminErrorsCard({ status }: { status: SentryStatus | nul
                     </p>
                 </div>
             ) : !status.ok ? (
-                <p className="text-destructive m-0 text-sm">{status.error}</p>
+                <p className="m-0 text-sm text-destructive">{status.error}</p>
             ) : status.issues.length === 0 ? (
-                <p className="text-secondary-foreground m-0 text-sm">Nothing unresolved in the last {status.period}. Quiet house.</p>
+                <p className="m-0 text-sm text-secondary-foreground">
+                    Nothing unresolved in the last {status.period}. Quiet house.
+                </p>
             ) : (
                 <ul className="m-0 list-none divide-y divide-input p-0">
                     {status.issues.map((i) => (
                         <li key={i.id} className="py-2 first:pt-0 last:pb-0">
                             <div className="flex flex-wrap items-baseline gap-x-2">
-                                <a href={i.permalink} target="_blank" rel="noopener noreferrer" className="text-forest font-semibold no-underline hover:underline">
+                                <a
+                                    href={i.permalink}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="font-semibold text-forest no-underline hover:underline"
+                                >
                                     {i.title}
                                 </a>
-                                <span className="text-secondary-foreground text-xs uppercase">{i.level}</span>
+                                <span className="text-xs text-secondary-foreground uppercase">{i.level}</span>
                             </div>
-                            <div className="text-secondary-foreground text-xs">
+                            <div className="text-xs text-secondary-foreground">
                                 {i.culprit && <span className="mr-2">{i.culprit}</span>}
                                 <span>
-                                    {i.count} event{i.count === 1 ? "" : "s"} · {i.userCount} user{i.userCount === 1 ? "" : "s"} · last{" "}
-                                    {new Date(i.lastSeen).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}
+                                    {i.count} event{i.count === 1 ? "" : "s"} · {i.userCount} user
+                                    {i.userCount === 1 ? "" : "s"} · last{" "}
+                                    {new Date(i.lastSeen).toLocaleString("en-US", {
+                                        month: "short",
+                                        day: "numeric",
+                                        hour: "numeric",
+                                        minute: "2-digit",
+                                    })}
                                 </span>
                             </div>
                         </li>

@@ -5,7 +5,15 @@ import type { EntrantHorse, MyShowEntry } from "@/lib/shows/public";
 import type { DivisionAxis } from "@/lib/shows/types";
 
 function horse(overrides: Partial<EntrantHorse> & { id: string }): EntrantHorse {
-    return { name: overrides.id, thumbnailUrl: null, scale: null, finish: null, breed: null, gender: null, ...overrides };
+    return {
+        name: overrides.id,
+        thumbnailUrl: null,
+        scale: null,
+        finish: null,
+        breed: null,
+        gender: null,
+        ...overrides,
+    };
 }
 
 function cls(overrides: Partial<ConsoleClass> & { id: string; name: string }): ConsoleClass {
@@ -79,7 +87,11 @@ describe("entrantLedger — buildEntrantLedger", () => {
     it("counts ignore scratched entries", () => {
         const l = buildEntrantLedger({
             divisions,
-            myEntries: [entry("c-wp", "h-chics", "scratched"), entry("c-wp", "h-zaf"), entry("c-paint", "h-dom", "scratched")],
+            myEntries: [
+                entry("c-wp", "h-chics", "scratched"),
+                entry("c-wp", "h-zaf"),
+                entry("c-paint", "h-dom", "scratched"),
+            ],
             horses,
         });
         expect(l.liveEntries).toBe(1);
@@ -132,7 +144,11 @@ describe("entrantLedger — buildEntrantLedger", () => {
     });
 
     it("remaining counts down under the cap and is null when uncapped", () => {
-        const l = buildEntrantLedger({ divisions, myEntries: [entry("c-wp", "h-zaf"), entry("c-arab", "h-zaf")], horses });
+        const l = buildEntrantLedger({
+            divisions,
+            myEntries: [entry("c-wp", "h-zaf"), entry("c-arab", "h-zaf")],
+            horses,
+        });
         expect(l.byClass["c-wp"].remaining).toBe(1);
         expect(l.byClass["c-wp"].state).toBe("open");
         expect(l.byClass["c-arab"].remaining).toBeNull();
@@ -151,7 +167,9 @@ describe("entrantLedger — buildEntrantLedger", () => {
         expect(l.byClass["c-paint"].applicable).toEqual(["h-dom", "h-chics", "h-zaf"]);
 
         const restricted = [
-            division("halter", "halter", 1, [cls({ id: "c-trad", name: "Arabian", allowedScales: ["Traditional (1:9)"] })]),
+            division("halter", "halter", 1, [
+                cls({ id: "c-trad", name: "Arabian", allowedScales: ["Traditional (1:9)"] }),
+            ]),
         ];
         const l2 = buildEntrantLedger({ divisions: restricted, myEntries: [entry("c-trad", "h-chics")], horses });
         const trad = l2.byClass["c-trad"];
@@ -242,7 +260,11 @@ describe("entrantLedger — horseVerdict", () => {
     });
 
     it("breedMatch uses the class name", () => {
-        const v = horseVerdict({ horse: { id: "h", scale: null, finish: null, breed: "Part-Arabian" }, cls: base, myLive: [] });
+        const v = horseVerdict({
+            horse: { id: "h", scale: null, finish: null, breed: "Part-Arabian" },
+            cls: base,
+            myLive: [],
+        });
         expect(v.breedMatch).toBe(true);
     });
 });

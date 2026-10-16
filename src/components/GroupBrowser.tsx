@@ -68,29 +68,29 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
     return (
         <div>
             {/* Tabs */}
-            <div className="border-input mb-6 flex gap-1 border-b">
+            <div className="mb-6 flex gap-1 border-b border-input">
                 <button
-                    className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-semibold transition-colors ${tab === "browse" ? "border-forest text-forest" : "text-secondary-foreground hover:text-foreground border-transparent"}`}
+                    className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-semibold transition-colors ${tab === "browse" ? "border-forest text-forest" : "border-transparent text-secondary-foreground hover:text-foreground"}`}
                     onClick={() => setTab("browse")}
                 >
                     🌐 All Barns
-                    <span className="bg-forest/10 text-forest rounded-full px-2 py-0.5 text-xs font-bold">
+                    <span className="rounded-full bg-forest/10 px-2 py-0.5 text-xs font-bold text-forest">
                         {allGroups.length}
                     </span>
                 </button>
                 <button
-                    className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-semibold transition-colors ${tab === "mine" ? "border-forest text-forest" : "text-secondary-foreground hover:text-foreground border-transparent"}`}
+                    className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-semibold transition-colors ${tab === "mine" ? "border-forest text-forest" : "border-transparent text-secondary-foreground hover:text-foreground"}`}
                     onClick={() => setTab("mine")}
                 >
                     ⭐ My Barns
-                    <span className="bg-forest/10 text-forest rounded-full px-2 py-0.5 text-xs font-bold">
+                    <span className="rounded-full bg-forest/10 px-2 py-0.5 text-xs font-bold text-forest">
                         {myGroups.length}
                     </span>
                 </button>
             </div>
 
             {/* Search */}
-            <div className="border-input bg-card sticky top-[calc(var(--header-height)+0.75rem)] z-[10] mb-8 flex items-center gap-2 rounded-xl border px-6 py-2 shadow-md transition-all max-sm:py-0">
+            <div className="sticky top-[calc(var(--header-height)+0.75rem)] z-[10] mb-8 flex items-center gap-2 rounded-xl border border-input bg-card px-6 py-2 shadow-md transition-all max-sm:py-0">
                 <Input
                     type="text"
                     placeholder="🔍 Search barns by name or description…"
@@ -118,7 +118,7 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
 
             {/* Barn Cards */}
             {filtered.length === 0 ? (
-                <div className="border-input bg-card flex flex-col items-center justify-center rounded-lg border p-8 text-center shadow-sm">
+                <div className="flex flex-col items-center justify-center rounded-lg border border-input bg-card p-8 text-center shadow-sm">
                     <p>
                         {tab === "mine"
                             ? "You haven't joined a barn yet. Browse the directory and find your people."
@@ -130,7 +130,7 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
                     {filtered.map((g) => (
                         <div
                             key={g.id}
-                            className="border-input bg-card flex flex-col overflow-hidden rounded-lg border transition-shadow hover:shadow-md"
+                            className="flex flex-col overflow-hidden rounded-lg border border-input bg-card transition-shadow hover:shadow-md"
                         >
                             {/* Banner — a barn with a face. The image is a
                                 signed URL from the avatars bucket; cards
@@ -142,7 +142,7 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
                                     aria-hidden="true"
                                     tabIndex={-1}
                                 >
-                                    { }
+                                    {}
                                     {/* aspect-[4/1] matches the barn page and the
                                         crop frame: same ratio everywhere = the
                                         same slice of the image everywhere. */}
@@ -155,92 +155,96 @@ export default function GroupBrowser({ allGroups, myGroups, typeLabels }: Props)
                                 </Link>
                             )}
                             <div className="flex flex-1 flex-col p-5">
-                            {/* Card Header */}
-                            <div className="mb-3 flex items-start gap-3">
-                                <span className="text-2xl">{TYPE_ICONS[g.groupType] || "📂"}</span>
-                                <div className="min-w-0 flex-1">
-                                    <span className="flex flex-wrap items-center gap-2">
-                                        <Link
-                                            href={`/community/groups/${g.slug}`}
-                                            className="text-forest text-base font-semibold hover:underline"
-                                        >
-                                            {g.name}
-                                        </Link>
-                                        {g.isFeatured && (
-                                            <span
-                                                className="stamp !text-[0.62rem]"
-                                                title="An official Model Horse Hub barn"
+                                {/* Card Header */}
+                                <div className="mb-3 flex items-start gap-3">
+                                    <span className="text-2xl">{TYPE_ICONS[g.groupType] || "📂"}</span>
+                                    <div className="min-w-0 flex-1">
+                                        <span className="flex flex-wrap items-center gap-2">
+                                            <Link
+                                                href={`/community/groups/${g.slug}`}
+                                                className="text-base font-semibold text-forest hover:underline"
                                             >
-                                                📌 Official
-                                            </span>
-                                        )}
-                                        {g.isPrivate && (
-                                            <span
-                                                className="stamp !text-[0.62rem]"
-                                                title="Private barn — members only"
-                                            >
-                                                🔒 Private
-                                            </span>
-                                        )}
-                                    </span>
-                                    <div className="text-secondary-foreground text-xs">
-                                        {typeLabels[g.groupType] || g.groupType}
-                                        {g.region && <> · {g.region}</>}
+                                                {g.name}
+                                            </Link>
+                                            {g.isFeatured && (
+                                                <span
+                                                    className="stamp !text-[0.62rem]"
+                                                    title="An official Model Horse Hub barn"
+                                                >
+                                                    📌 Official
+                                                </span>
+                                            )}
+                                            {g.isPrivate && (
+                                                <span
+                                                    className="stamp !text-[0.62rem]"
+                                                    title="Private barn — members only"
+                                                >
+                                                    🔒 Private
+                                                </span>
+                                            )}
+                                        </span>
+                                        <div className="text-xs text-secondary-foreground">
+                                            {typeLabels[g.groupType] || g.groupType}
+                                            {g.region && <> · {g.region}</>}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            {g.description && (
-                                <p className="text-secondary-foreground mb-3 text-sm leading-relaxed">
-                                    {g.description.slice(0, 120)}
-                                    {g.description.length > 120 ? "..." : ""}
-                                </p>
-                            )}
-                            {/* Card Footer */}
-                            <div className="border-input mt-auto flex items-center justify-between border-t pt-3">
-                                <span className="text-secondary-foreground text-xs">
-                                    👥 {g.memberCount} member{g.memberCount !== 1 ? "s" : ""}
-                                    {" · "}💬 {g.postCount} post{g.postCount !== 1 ? "s" : ""}
-                                    {g.lastPostAt && (
-                                        <>
-                                            {" · "}last post{" "}
-                                            {new Date(g.lastPostAt).toLocaleDateString("en-US", {
-                                                month: "short",
-                                                day: "numeric",
-                                            })}
-                                        </>
-                                    )}
-                                </span>
-                                {g.isMember ? (
-                                    <div className="flex items-center gap-2">
-                                        <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap text-[#22c55e]">
-                                            ✓ {g.memberRole || "Member"}
-                                        </span>
-                                        {g.memberRole !== "owner" && (
-                                            <button
-                                                className="border-input text-muted-foreground hover:text-foreground rounded-md border bg-transparent px-3 py-1 text-xs font-medium transition-colors"
-                                                onClick={() => handleLeave(g.id)}
-                                                disabled={busy === g.id}
-                                            >
-                                                Leave
-                                            </button>
-                                        )}
-                                    </div>
-                                ) : pending.has(g.id) ? (
-                                    <span className="text-muted-foreground text-xs font-semibold italic">
-                                        ⏳ Request pending
-                                    </span>
-                                ) : (
-                                    <button
-                                        className="bg-forest hover:bg-forest-dark rounded-md px-4 py-1.5 text-xs font-semibold text-white shadow-sm transition-all"
-                                        onClick={() => handleJoin(g)}
-                                        disabled={busy === g.id}
-                                    >
-                                        {busy === g.id
-                                            ? (g.isPrivate ? "Requesting..." : "Joining...")
-                                            : (g.isPrivate ? "🔒 Ask to Join" : "+ Join")}
-                                    </button>
+                                {g.description && (
+                                    <p className="mb-3 text-sm leading-relaxed text-secondary-foreground">
+                                        {g.description.slice(0, 120)}
+                                        {g.description.length > 120 ? "..." : ""}
+                                    </p>
                                 )}
-                            </div>
+                                {/* Card Footer */}
+                                <div className="mt-auto flex items-center justify-between border-t border-input pt-3">
+                                    <span className="text-xs text-secondary-foreground">
+                                        👥 {g.memberCount} member{g.memberCount !== 1 ? "s" : ""}
+                                        {" · "}💬 {g.postCount} post{g.postCount !== 1 ? "s" : ""}
+                                        {g.lastPostAt && (
+                                            <>
+                                                {" · "}last post{" "}
+                                                {new Date(g.lastPostAt).toLocaleDateString("en-US", {
+                                                    month: "short",
+                                                    day: "numeric",
+                                                })}
+                                            </>
+                                        )}
+                                    </span>
+                                    {g.isMember ? (
+                                        <div className="flex items-center gap-2">
+                                            <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap text-[#22c55e]">
+                                                ✓ {g.memberRole || "Member"}
+                                            </span>
+                                            {g.memberRole !== "owner" && (
+                                                <button
+                                                    className="rounded-md border border-input bg-transparent px-3 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+                                                    onClick={() => handleLeave(g.id)}
+                                                    disabled={busy === g.id}
+                                                >
+                                                    Leave
+                                                </button>
+                                            )}
+                                        </div>
+                                    ) : pending.has(g.id) ? (
+                                        <span className="text-xs font-semibold text-muted-foreground italic">
+                                            ⏳ Request pending
+                                        </span>
+                                    ) : (
+                                        <button
+                                            className="rounded-md bg-forest px-4 py-1.5 text-xs font-semibold text-white shadow-sm transition-all hover:bg-forest-dark"
+                                            onClick={() => handleJoin(g)}
+                                            disabled={busy === g.id}
+                                        >
+                                            {busy === g.id
+                                                ? g.isPrivate
+                                                    ? "Requesting..."
+                                                    : "Joining..."
+                                                : g.isPrivate
+                                                  ? "🔒 Ask to Join"
+                                                  : "+ Join"}
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     ))}

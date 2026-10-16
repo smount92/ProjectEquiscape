@@ -140,9 +140,7 @@ describe("derived field map matches the old literal", () => {
 
     it("adds no keys the legacy consumers don't expect", () => {
         for (const category of CATEGORIES) {
-            expect(Object.keys(getAssetConfig(category).fields).sort()).toEqual(
-                Object.keys(LEGACY[category]).sort(),
-            );
+            expect(Object.keys(getAssetConfig(category).fields).sort()).toEqual(Object.keys(LEGACY[category]).sort());
         }
     });
 
@@ -208,7 +206,10 @@ describe("layout config is untouched by the derivation", () => {
 
     it("gives every category a primary slot", () => {
         for (const c of CATEGORIES) {
-            expect(getGallerySlots(c).filter((s) => s.primary), c).toHaveLength(1);
+            expect(
+                getGallerySlots(c).filter((s) => s.primary),
+                c,
+            ).toHaveLength(1);
         }
     });
 

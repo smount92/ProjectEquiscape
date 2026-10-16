@@ -13,11 +13,11 @@ interface Props {
 }
 
 function formatDate(dateStr: string): string {
- return new Date(dateStr).toLocaleDateString("en-US", {
- month:"short",
- day:"numeric",
- year:"numeric",
- });
+    return new Date(dateStr).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+    });
 }
 
 /**
@@ -36,8 +36,8 @@ export default function ProfileLoadMore({ userId, initialOffset, totalCount, col
     const loadMore = () => {
         startTransition(async () => {
             const result = await loadMoreProfileHorses(userId, offset, collectionId);
-            setHorses(prev => [...prev, ...result.horses]);
-            setOffset(prev => prev + result.horses.length);
+            setHorses((prev) => [...prev, ...result.horses]);
+            setOffset((prev) => prev + result.horses.length);
             setHasMore(result.hasMore);
         });
     };
@@ -79,25 +79,31 @@ export default function ProfileLoadMore({ userId, initialOffset, totalCount, col
                             {horse.tradeStatus === "For Sale" && (
                                 <div className="mt-1 text-center">
                                     <span className="stamp stamp-red">
-                                        For Sale{horse.listingPrice ? ` $${horse.listingPrice.toLocaleString("en-US")}` : ""}
+                                        For Sale
+                                        {horse.listingPrice ? ` $${horse.listingPrice.toLocaleString("en-US")}` : ""}
                                     </span>
                                 </div>
                             )}
                             {horse.tradeStatus === "Open to Offers" && (
                                 <div className="mt-1 text-center">
                                     <span className="stamp">
-                                        Open to Offers{horse.listingPrice ? ` ~$${horse.listingPrice.toLocaleString("en-US")}` : ""}
+                                        Open to Offers
+                                        {horse.listingPrice ? ` ~$${horse.listingPrice.toLocaleString("en-US")}` : ""}
                                     </span>
                                 </div>
                             )}
                             {(horse.tradeStatus === "For Sale" || horse.tradeStatus === "Open to Offers") &&
                                 horse.marketplaceNotes && (
-                                <div className="mt-1 truncate px-1 text-center text-[0.65rem] text-muted-foreground" title={horse.marketplaceNotes}>
-                                    📝{horse.marketplaceNotes.length > 50
-                                        ? horse.marketplaceNotes.slice(0, 50) + "…"
-                                        : horse.marketplaceNotes}
-                                </div>
-                            )}
+                                    <div
+                                        className="mt-1 truncate px-1 text-center text-[0.65rem] text-muted-foreground"
+                                        title={horse.marketplaceNotes}
+                                    >
+                                        📝
+                                        {horse.marketplaceNotes.length > 50
+                                            ? horse.marketplaceNotes.slice(0, 50) + "…"
+                                            : horse.marketplaceNotes}
+                                    </div>
+                                )}
                         </Link>
                     ))}
                 </div>

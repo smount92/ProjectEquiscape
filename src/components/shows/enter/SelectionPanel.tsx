@@ -57,9 +57,17 @@ export default function SelectionPanel({
                     <li key={e.horseId} className="flex items-center gap-2 text-sm">
                         {e.photoUrl ? (
                             // eslint-disable-next-line @next/next/no-img-element
-                            <img src={e.photoUrl} alt="" className="h-7 w-7 shrink-0 rounded-md object-cover" loading="lazy" />
+                            <img
+                                src={e.photoUrl}
+                                alt=""
+                                className="h-7 w-7 shrink-0 rounded-md object-cover"
+                                loading="lazy"
+                            />
                         ) : (
-                            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-muted text-sm" aria-hidden="true">
+                            <span
+                                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-muted text-sm"
+                                aria-hidden="true"
+                            >
                                 🐴
                             </span>
                         )}
@@ -104,14 +112,14 @@ export default function SelectionPanel({
                     Tap your horses to pick them for this class.
                 </p>
             ) : (
-                <ul
-                    className={`m-0 min-h-0 list-none overflow-y-auto p-0 ${expanded ? "block" : "hidden lg:block"}`}
-                >
+                <ul className={`m-0 min-h-0 list-none overflow-y-auto p-0 ${expanded ? "block" : "hidden lg:block"}`}>
                     {children}
                 </ul>
             )}
 
-            {blockedReason && count > 0 && <p className="m-0 text-xs font-semibold text-destructive">{blockedReason}</p>}
+            {blockedReason && count > 0 && (
+                <p className="m-0 text-xs font-semibold text-destructive">{blockedReason}</p>
+            )}
             {!blockedReason && warning && count > 0 && (
                 <p className="m-0 text-xs font-semibold text-warning" data-testid="selection-warning">
                     ⚠ {warning}

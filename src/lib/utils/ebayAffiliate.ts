@@ -16,13 +16,8 @@
 export const EBAY_AFFILIATE_REL = "noopener noreferrer sponsored";
 
 /** Plain-language disclosure to render near any affiliate link (FTC). */
-export const EBAY_AFFILIATE_DISCLOSURE =
-    "MHH may earn a commission from eBay links.";
-export function buildEbaySearchUrl(
-    title: string,
-    maker?: string | null,
-    itemNumber?: string | null
-): string {
+export const EBAY_AFFILIATE_DISCLOSURE = "MHH may earn a commission from eBay links.";
+export function buildEbaySearchUrl(title: string, maker?: string | null, itemNumber?: string | null): string {
     const campaignId = process.env.NEXT_PUBLIC_EBAY_CAMPAIGN_ID;
 
     // Build a smart search query

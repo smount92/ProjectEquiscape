@@ -12,11 +12,7 @@ vi.mock("next/cache", () => ({
     revalidateTag: vi.fn(),
 }));
 
-import {
-    createCollectionAction,
-    deleteCollectionAction,
-    setHorseCollections,
-} from "@/app/actions/collections";
+import { createCollectionAction, deleteCollectionAction, setHorseCollections } from "@/app/actions/collections";
 
 describe("collections.ts — M:N Junction", () => {
     beforeEach(() => {

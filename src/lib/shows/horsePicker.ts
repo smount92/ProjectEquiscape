@@ -55,7 +55,11 @@ export interface PickerHorse {
  *  fails a restricted list. Finishes match exactly; scales compare
  *  through normalizeScale on BOTH sides (as entryRules does), so
  *  "Traditional" fits a "Traditional (1:9)" class. */
-function passes(value: string | null, allowed: string[] | null | undefined, normalize?: (v: string | null) => string | null): boolean {
+function passes(
+    value: string | null,
+    allowed: string[] | null | undefined,
+    normalize?: (v: string | null) => string | null,
+): boolean {
     if (!allowed || allowed.length === 0) return true;
     if (!normalize) return value !== null && allowed.includes(value);
     const norm = normalize(value);
@@ -77,7 +81,27 @@ function words(text: string | null | undefined): string[] {
  * Horse" horse matches class "Quarter Horse". Generic words that
  * appear in class names but name no breed are ignored.
  */
-const GENERIC = new Set(["horse", "horses", "other", "breed", "breeds", "halter", "class", "mare", "stallion", "gelding", "foal", "foals", "pony", "ponies", "light", "sport", "stock", "draft", "gaited"]);
+const GENERIC = new Set([
+    "horse",
+    "horses",
+    "other",
+    "breed",
+    "breeds",
+    "halter",
+    "class",
+    "mare",
+    "stallion",
+    "gelding",
+    "foal",
+    "foals",
+    "pony",
+    "ponies",
+    "light",
+    "sport",
+    "stock",
+    "draft",
+    "gaited",
+]);
 
 /**
  * Does the class's name name ANY breed at all? "101 Arabian" does;
@@ -106,10 +130,7 @@ export function matchesQuery(horse: EntrantHorse, query: string): boolean {
 }
 
 /** Annotate one horse against the class's soft restrictions. */
-export function annotateHorse(
-    horse: EntrantHorse,
-    cls: PickerClassRestrictions,
-): PickerHorse {
+export function annotateHorse(horse: EntrantHorse, cls: PickerClassRestrictions): PickerHorse {
     const mismatches: string[] = [];
     if (!passes(horse.scale, cls.allowedScales, normalizeScale)) {
         mismatches.push(`${cls.allowedScales!.join("/")} scale only`);

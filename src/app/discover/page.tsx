@@ -58,10 +58,7 @@ export default async function MembersPage({
     if (!user) redirect("/login?redirectTo=" + encodeURIComponent("/discover"));
 
     const filters = parseMemberSearchParams(await searchParams);
-    const { members, total, page, totalPages, rosterTruncated } = await getMembersDirectoryPage(
-        filters,
-        user.id,
-    );
+    const { members, total, page, totalPages, rosterTruncated } = await getMembersDirectoryPage(filters, user.id);
 
     const countLabel = filters.q
         ? `${total.toLocaleString()} ${total === 1 ? "match" : "matches"} for “${filters.q}”`
@@ -80,11 +77,9 @@ export default async function MembersPage({
             </div>
 
             <div className="mb-4 flex flex-wrap items-baseline gap-2">
-                <span className="text-forest font-serif text-2xl font-bold tabular-nums">
-                    {countLabel}
-                </span>
+                <span className="font-serif text-2xl font-bold text-forest tabular-nums">{countLabel}</span>
                 {page > 1 && (
-                    <span className="text-muted-foreground text-sm">
+                    <span className="text-sm text-muted-foreground">
                         · page {page} of {totalPages.toLocaleString()}
                     </span>
                 )}
@@ -98,14 +93,11 @@ export default async function MembersPage({
                     <h2 className="mb-2 font-serif text-lg font-bold">
                         {filters.q ? "Nobody by that name" : "Nobody here yet"}
                     </h2>
-                    <p className="text-muted-foreground m-0 text-sm">
+                    <p className="m-0 text-sm text-muted-foreground">
                         {filters.q ? (
                             <>
                                 No collector&rsquo;s name matches &ldquo;{filters.q}&rdquo;.{" "}
-                                <Link
-                                    href={membersHref({ sort: filters.sort })}
-                                    className="text-forest font-semibold"
-                                >
+                                <Link href={membersHref({ sort: filters.sort })} className="font-semibold text-forest">
                                     Clear the search
                                 </Link>{" "}
                                 to see the whole roster.
@@ -126,9 +118,9 @@ export default async function MembersPage({
             )}
 
             {rosterTruncated && (
-                <p className="text-muted-foreground mt-4 text-center text-xs">
-                    The community outgrew what &ldquo;recently active&rdquo; can rank in one pass —
-                    the tail of this list is ordered by join date.{" "}
+                <p className="mt-4 text-center text-xs text-muted-foreground">
+                    The community outgrew what &ldquo;recently active&rdquo; can rank in one pass — the tail of this
+                    list is ordered by join date.{" "}
                     <Link href={membersHref({ q: filters.q, sort: "az" })} className="text-forest">
                         Browse A&ndash;Z
                     </Link>{" "}
@@ -137,10 +129,7 @@ export default async function MembersPage({
             )}
 
             {totalPages > 1 && (
-                <nav
-                    className="mt-6 flex items-center justify-center gap-4"
-                    aria-label="Members pagination"
-                >
+                <nav className="mt-6 flex items-center justify-center gap-4" aria-label="Members pagination">
                     {page > 1 ? (
                         <Link
                             href={membersHref({ ...filters, page: page - 1 })}
@@ -150,11 +139,9 @@ export default async function MembersPage({
                             ← Previous
                         </Link>
                     ) : (
-                        <span className="text-muted-foreground px-4 py-2 text-xs opacity-40">
-                            ← Previous
-                        </span>
+                        <span className="px-4 py-2 text-xs text-muted-foreground opacity-40">← Previous</span>
                     )}
-                    <span className="text-muted-foreground text-sm">
+                    <span className="text-sm text-muted-foreground">
                         Page {page} of {totalPages.toLocaleString()}
                     </span>
                     {page < totalPages ? (
@@ -166,9 +153,7 @@ export default async function MembersPage({
                             Next →
                         </Link>
                     ) : (
-                        <span className="text-muted-foreground px-4 py-2 text-xs opacity-40">
-                            Next →
-                        </span>
+                        <span className="px-4 py-2 text-xs text-muted-foreground opacity-40">Next →</span>
                     )}
                 </nav>
             )}

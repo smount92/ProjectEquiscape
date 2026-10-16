@@ -11,11 +11,7 @@ import { HORSE_FIELDS, resolveLabel } from "./registry";
 import type { FieldContext, FieldGroup, FieldSpec, FormMode, FormValues } from "./types";
 
 /** Convenience constructor so callers don't rebuild the context by hand. */
-export function ctx(
-    category: AssetCategory,
-    mode: FormMode,
-    values: FormValues = {},
-): FieldContext {
+export function ctx(category: AssetCategory, mode: FormMode, values: FormValues = {}): FieldContext {
     return { category, mode, values };
 }
 
@@ -63,14 +59,7 @@ export function getGroupFields(context: FieldContext, group: FieldGroup): FieldS
 
 /** The groups a category actually uses, in canonical order. */
 export function getActiveGroups(context: FieldContext): FieldGroup[] {
-    const order: FieldGroup[] = [
-        "identity",
-        "attributes",
-        "showbio",
-        "market",
-        "visibility",
-        "vault",
-    ];
+    const order: FieldGroup[] = ["identity", "attributes", "showbio", "market", "visibility", "vault"];
     const present = new Set(getVisibleFields(context).map((f) => f.group));
     return order.filter((g) => present.has(g));
 }
@@ -96,9 +85,7 @@ export function hasValue(value: unknown): boolean {
  * This is what the step rail, the Next button, and the submit guard all
  * ask — one answer, one place.
  */
-export function getMissingRequiredFields(
-    context: FieldContext,
-): { name: string; label: string }[] {
+export function getMissingRequiredFields(context: FieldContext): { name: string; label: string }[] {
     return getRequiredFields(context)
         .filter((spec) => !hasValue(context.values[spec.name]))
         .map((spec) => ({ name: spec.name, label: resolveLabel(spec, context.category) }));

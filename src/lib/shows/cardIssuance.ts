@@ -41,9 +41,7 @@ export const STAKES_GATE = { entries: 15, exhibitors: 6 } as const;
 
 /** The gate in force for a show year (null = pre-season data: lenient). */
 export function cardGateFor(showYear: number | null): { entries: number; exhibitors: number } {
-    return showYear === null || showYear <= SEASON1_FINAL_SHOW_YEAR
-        ? SEASON1_CARD_GATE
-        : CARD_GATE;
+    return showYear === null || showYear <= SEASON1_FINAL_SHOW_YEAR ? SEASON1_CARD_GATE : CARD_GATE;
 }
 
 // ── The pure plan ──
@@ -90,8 +88,7 @@ export function buildCardIssuePlan(input: CardIssueInput): {
     skippedGated: number;
 } {
     // Host opted out — the whole show issues nothing.
-    if (!input.show.isMhhQualifying)
-        return { cards: [], skippedExisting: 0, skippedGated: 0 };
+    if (!input.show.isMhhQualifying) return { cards: [], skippedExisting: 0, skippedGated: 0 };
 
     const entryById = new Map(input.entries.map((e) => [e.id, e]));
     const classById = new Map(input.classes.map((c) => [c.id, c]));
@@ -107,9 +104,7 @@ export function buildCardIssuePlan(input: CardIssueInput): {
         liveByClass.set(e.classId, tally);
     }
     const gate = cardGateFor(input.show.showYear);
-    const alreadyIssued = new Set(
-        input.existingCards.map((c) => `${c.classId}::${c.horseId}`),
-    );
+    const alreadyIssued = new Set(input.existingCards.map((c) => `${c.classId}::${c.horseId}`));
     // One card per horse per class (matches UNIQUE(class_id, horse_id)).
     const planned = new Set<string>();
 
@@ -159,9 +154,7 @@ export function buildCardIssuePlan(input: CardIssueInput): {
             ownerId: entry.ownerId,
             classEntryCount: live.entries,
             classExhibitorCount: live.owners.size,
-            isStakes:
-                live.entries >= STAKES_GATE.entries &&
-                live.owners.size >= STAKES_GATE.exhibitors,
+            isStakes: live.entries >= STAKES_GATE.entries && live.owners.size >= STAKES_GATE.exhibitors,
         });
     }
 
@@ -283,12 +276,13 @@ export async function issueQualificationCardsForShow(
     const { data: placingRows, error: pErr } = await supabase
         .from("show_placings")
         .select("entry_id, class_id, place")
-        .in("class_id", classes.map((c) => c.id));
+        .in(
+            "class_id",
+            classes.map((c) => c.id),
+        );
     if (pErr) return { error: pErr.message };
 
-    const loadExisting = async (): Promise<
-        { classId: string; horseId: string }[] | { error: string }
-    > => {
+    const loadExisting = async (): Promise<{ classId: string; horseId: string }[] | { error: string }> => {
         // Host/co-host reads ride the managers branch of the cards
         // SELECT policy (118) — the publisher always sees this show's cards.
         // Voided cards don't occupy the slot (162): a void + corrected
@@ -308,9 +302,7 @@ export async function issueQualificationCardsForShow(
     const existing = await loadExisting();
     if ("error" in existing) return { error: existing.error };
 
-    const toInput = (
-        existingCards: { classId: string; horseId: string }[],
-    ): CardIssueInput => ({
+    const toInput = (existingCards: { classId: string; horseId: string }[]): CardIssueInput => ({
         show: {
             id: show.id as string,
             isMhhQualifying: show.is_mhh_qualifying as boolean,
@@ -318,13 +310,7 @@ export async function issueQualificationCardsForShow(
         },
         classes: classes.map((c) => ({ id: c.id, isQualifying: c.is_qualifying })),
         entries: (entryRows ?? []).map(
-            (e: {
-                id: string;
-                class_id: string;
-                horse_id: string;
-                owner_id: string;
-                status: string;
-            }) => ({
+            (e: { id: string; class_id: string; horse_id: string; owner_id: string; status: string }) => ({
                 id: e.id,
                 classId: e.class_id,
                 horseId: e.horse_id,
@@ -332,13 +318,11 @@ export async function issueQualificationCardsForShow(
                 status: e.status as EntryStatus,
             }),
         ),
-        placings: (placingRows ?? []).map(
-            (p: { entry_id: string; class_id: string; place: number | null }) => ({
-                entryId: p.entry_id,
-                classId: p.class_id,
-                place: (p.place as Place | null) ?? null,
-            }),
-        ),
+        placings: (placingRows ?? []).map((p: { entry_id: string; class_id: string; place: number | null }) => ({
+            entryId: p.entry_id,
+            classId: p.class_id,
+            place: (p.place as Place | null) ?? null,
+        })),
         existingCards,
     });
 
@@ -398,10 +382,7 @@ export async function issueQualificationCardsForShow(
         const codes = await assignCardCodes(
             plan.cards.length,
             async (candidates) => {
-                const { data, error } = await supabase
-                    .from("qualification_cards")
-                    .select("id")
-                    .in("id", candidates);
+                const { data, error } = await supabase.from("qualification_cards").select("id").in("id", candidates);
                 if (error) throw new Error(error.message);
                 return new Set((data ?? []).map((r: { id: string }) => r.id));
             },
@@ -424,9 +405,7 @@ export async function issueQualificationCardsForShow(
             is_stakes: card.isStakes,
         }));
 
-        const { error: insertError } = await supabase
-            .from("qualification_cards")
-            .insert(rows);
+        const { error: insertError } = await supabase.from("qualification_cards").insert(rows);
         if (insertError) {
             // 23505 = a concurrent publish (or code race) won — re-plan once.
             if ((insertError as { code?: string }).code === "23505") return "conflict";

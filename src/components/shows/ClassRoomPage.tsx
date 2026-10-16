@@ -89,19 +89,14 @@ function ProgramRail({ room }: { room: ClassRoomData }) {
 
 function ClassChipStrip({ room }: { room: ClassRoomData }) {
     return (
-        <nav
-            aria-label="All classes"
-            className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 lg:hidden"
-        >
+        <nav aria-label="All classes" className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 lg:hidden">
             {room.program.map((item) => (
                 <Link
                     key={item.classId}
                     href={`/shows/${room.show.id}/class/${item.classId}`}
                     aria-current={item.isCurrent ? "page" : undefined}
                     className={`shrink-0 rounded-full border border-input px-3 py-1 text-xs whitespace-nowrap ${
-                        item.isCurrent
-                            ? "bg-muted font-semibold"
-                            : "bg-card text-muted-foreground"
+                        item.isCurrent ? "bg-muted font-semibold" : "bg-card text-muted-foreground"
                     }`}
                 >
                     {item.classNumber ?? item.className} · {item.entryCount}
@@ -130,16 +125,20 @@ export default function ClassRoomPage({ room }: { room: ClassRoomData }) {
                     </h1>
                     <p className="m-0 text-sm text-(--leather-text-muted)">
                         {room.room.sectionName} · {room.room.divisionName} · {statusLine(room)}
-                        {!room.revealed && room.show.blindBrowsing && " · blind browsing — exhibitors revealed with results"}
+                        {!room.revealed &&
+                            room.show.blindBrowsing &&
+                            " · blind browsing — exhibitors revealed with results"}
                     </p>
                     {/* Season-felt: the field this class is — what a win here means. */}
                     {room.room.isQualifying && room.room.liveEntryCount > 0 && (
                         <p className="m-0 text-xs text-(--leather-text-muted)">
                             🏅 Qualifying class · {room.room.liveEntryCount}{" "}
-                            {room.room.liveEntryCount === 1 ? "entry" : "entries"} from{" "}
-                            {room.room.distinctExhibitors}{" "}
+                            {room.room.liveEntryCount === 1 ? "entry" : "entries"} from {room.room.distinctExhibitors}{" "}
                             {room.room.distinctExhibitors === 1 ? "exhibitor" : "exhibitors"} ·{" "}
-                            <Link href="/shows/rules" className="underline decoration-dotted hover:text-(--leather-text)">
+                            <Link
+                                href="/shows/rules"
+                                className="underline decoration-dotted hover:text-(--leather-text)"
+                            >
                                 how points &amp; cards work
                             </Link>
                         </p>
@@ -182,60 +181,64 @@ export default function ClassRoomPage({ room }: { room: ClassRoomData }) {
                     </aside>
 
                     <div className="flex min-w-0 flex-col gap-5">
-                {/* Staff preview: the judge's "what will they see" pass. */}
-                {room.staffPreview && (
-                    <div className="border-(--brass) bg-(--brass)/10 rounded-lg border border-dashed px-4 py-2.5 text-sm">
-                        👁 <b>Judge&rsquo;s preview</b> — you&rsquo;re seeing this room as entrants
-                        will when you publish. Placings, critiques and scorecards are live-editable
-                        until then; points and qualification cards mint at publish.
-                    </div>
-                )}
-                {/* Scored class, results out: the class recap — computed,
+                        {/* Staff preview: the judge's "what will they see" pass. */}
+                        {room.staffPreview && (
+                            <div className="rounded-lg border border-dashed border-(--brass) bg-(--brass)/10 px-4 py-2.5 text-sm">
+                                👁 <b>Judge&rsquo;s preview</b> — you&rsquo;re seeing this room as entrants will when
+                                you publish. Placings, critiques and scorecards are live-editable until then; points and
+                                qualification cards mint at publish.
+                            </div>
+                        )}
+                        {/* Scored class, results out: the class recap — computed,
                     never typed. Tells the whole field where the points
                     lived and died, which is the teaching half of scored
                     judging (the scorecards are the personal half). */}
-                {(room.room.resultsPublished || room.staffPreview) && room.rubric && room.scoreAverages && (() => {
-                    const totals = room.entries
-                        .map((e) => e.scoreTotal)
-                        .filter((t): t is number => t != null);
-                    if (totals.length === 0) return null;
-                    const avgTotal =
-                        Math.round((totals.reduce((a, b) => a + b, 0) / totals.length) * 10) / 10;
-                    const ranked = room.rubric.criteria
-                        .map((c) => ({ label: c.label, avg: room.scoreAverages?.[c.key] }))
-                        .filter((c): c is { label: string; avg: number } => c.avg != null)
-                        .sort((a, b) => b.avg - a.avg);
-                    const high = ranked[0];
-                    const low = ranked[ranked.length - 1];
-                    return (
-                        <div className="border-input bg-card rounded-lg border p-4">
-                            <h3 className="text-foreground m-0 font-serif text-base font-bold">
-                                📊 The class, in numbers
-                            </h3>
-                            <p className="text-secondary-foreground mt-1 mb-0 text-sm">
-                                {totals.length} scored {totals.length === 1 ? "entry" : "entries"} ·
-                                class average <b className="tabular-nums">{avgTotal}</b>/100
-                                {high && low && high.label !== low.label && (
-                                    <>
-                                        {" "}· strongest on <b>{high.label.toLowerCase()}</b> ({high.avg}),
-                                        points died on <b>{low.label.toLowerCase()}</b> ({low.avg})
-                                    </>
-                                )}
-                                .
-                            </p>
-                        </div>
-                    );
-                })()}
-                <ClassRoomLineup
-                    entries={room.entries}
-                    revealed={room.revealed}
-                    votingEnabled={room.votingEnabled}
-                    votingOpen={room.votingOpen}
-                    authed={room.authed}
-                    resultsPublished={room.room.resultsPublished || room.staffPreview}
-                    rubric={room.rubric}
-                    scoreAverages={room.scoreAverages}
-                />
+                        {(room.room.resultsPublished || room.staffPreview) &&
+                            room.rubric &&
+                            room.scoreAverages &&
+                            (() => {
+                                const totals = room.entries
+                                    .map((e) => e.scoreTotal)
+                                    .filter((t): t is number => t != null);
+                                if (totals.length === 0) return null;
+                                const avgTotal =
+                                    Math.round((totals.reduce((a, b) => a + b, 0) / totals.length) * 10) / 10;
+                                const ranked = room.rubric.criteria
+                                    .map((c) => ({ label: c.label, avg: room.scoreAverages?.[c.key] }))
+                                    .filter((c): c is { label: string; avg: number } => c.avg != null)
+                                    .sort((a, b) => b.avg - a.avg);
+                                const high = ranked[0];
+                                const low = ranked[ranked.length - 1];
+                                return (
+                                    <div className="rounded-lg border border-input bg-card p-4">
+                                        <h3 className="m-0 font-serif text-base font-bold text-foreground">
+                                            📊 The class, in numbers
+                                        </h3>
+                                        <p className="mt-1 mb-0 text-sm text-secondary-foreground">
+                                            {totals.length} scored {totals.length === 1 ? "entry" : "entries"} · class
+                                            average <b className="tabular-nums">{avgTotal}</b>/100
+                                            {high && low && high.label !== low.label && (
+                                                <>
+                                                    {" "}
+                                                    · strongest on <b>{high.label.toLowerCase()}</b> ({high.avg}),
+                                                    points died on <b>{low.label.toLowerCase()}</b> ({low.avg})
+                                                </>
+                                            )}
+                                            .
+                                        </p>
+                                    </div>
+                                );
+                            })()}
+                        <ClassRoomLineup
+                            entries={room.entries}
+                            revealed={room.revealed}
+                            votingEnabled={room.votingEnabled}
+                            votingOpen={room.votingOpen}
+                            authed={room.authed}
+                            resultsPublished={room.room.resultsPublished || room.staffPreview}
+                            rubric={room.rubric}
+                            scoreAverages={room.scoreAverages}
+                        />
                     </div>
                 </div>
             </div>

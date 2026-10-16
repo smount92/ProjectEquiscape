@@ -75,7 +75,7 @@ live Registry. Counts are the baseline; they should only go down.
 | Rule | Status | Today |
 |---|---|---|
 | ESLint passes | Enforced (CI fails on any error) | 0 errors; 68 warnings. Intended setState-in-effect sites carry a reason. |
-| Prettier formatting | Not run anywhere | 987 of 1,059 files differ from `.prettierrc`. |
+| Prettier formatting | Enforced (CI `npm run format:check`) | Formatted once on 2026-10-15; run `npm run format` before committing. |
 
 ---
 
@@ -156,7 +156,7 @@ Each step is a ticket on the Backlog board. Status as of Release 1 (2026-10-15):
 | Cache tags in one place, tested | MHH-012 | Done |
 | Hex colours ratcheted | MHH-013 | Done |
 | Database types regenerated | MHH-014 | Done; regenerate again after 233 |
-| Prettier: one formatting commit, then a CI check | MHH-018 | Awaiting owner (touches ~1,000 files) |
+| Prettier: one formatting commit, then a CI check | MHH-018 | Done |
 | Test files type-check | MHH-066 | Later |
 | Migrations checked automatically (numbering, re-runnable, probe) | MHH-015 | Done (`migration-standards.test.ts`) |
 | Registry vocabularies equal in code and database | MHH-010 | Done (`registry-vocabulary.test.ts`) |

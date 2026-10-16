@@ -1,232 +1,233 @@
-import { createClient } from"@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { BRONZE_THRESHOLD, CONTRIBUTOR_THRESHOLD, GOLD_THRESHOLD, SILVER_THRESHOLD } from "@/lib/catalog/corrections";
-import { getAdminClient } from"@/lib/supabase/admin";
-import Link from"next/link";
-import type { Metadata } from"next";
-import ExplorerLayout from"@/components/layouts/ExplorerLayout";
-import CatalogSubMasthead from"@/components/catalog/CatalogSubMasthead";
+import { getAdminClient } from "@/lib/supabase/admin";
+import Link from "next/link";
+import type { Metadata } from "next";
+import ExplorerLayout from "@/components/layouts/ExplorerLayout";
+import CatalogSubMasthead from "@/components/catalog/CatalogSubMasthead";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
- title:"Catalog Suggestions",
- description:
-"View community suggestions for the Model Horse Hub reference catalog. Vote, discuss, and help keep catalog data accurate.",
+    title: "Catalog Suggestions",
+    description:
+        "View community suggestions for the Model Horse Hub reference catalog. Vote, discuss, and help keep catalog data accurate.",
 };
 
-
 interface Props {
- searchParams: Promise<{ status?: string; item?: string }>;
+    searchParams: Promise<{ status?: string; item?: string }>;
 }
 
 export default async function SuggestionsPage({ searchParams }: Props) {
- const { status: statusFilter, item: itemFilter } = await searchParams;
- const supabase = await createClient();
+    const { status: statusFilter, item: itemFilter } = await searchParams;
+    const supabase = await createClient();
 
- // Two-step fetch: FK goes to auth.users not public.users, so PostgREST can't join
- let query = supabase
- .from("catalog_suggestions")
- .select(
-"id, user_id, catalog_item_id, suggestion_type, field_changes, reason, status, upvotes, downvotes, created_at",
- { count:"exact" },
- )
- .order("created_at", { ascending: false })
- .limit(50);
+    // Two-step fetch: FK goes to auth.users not public.users, so PostgREST can't join
+    let query = supabase
+        .from("catalog_suggestions")
+        .select(
+            "id, user_id, catalog_item_id, suggestion_type, field_changes, reason, status, upvotes, downvotes, created_at",
+            { count: "exact" },
+        )
+        .order("created_at", { ascending: false })
+        .limit(50);
 
- if (statusFilter && statusFilter !=="all") {
- query = query.eq("status", statusFilter);
- }
- if (itemFilter) {
- query = query.eq("catalog_item_id", itemFilter);
- }
+    if (statusFilter && statusFilter !== "all") {
+        query = query.eq("status", statusFilter);
+    }
+    if (itemFilter) {
+        query = query.eq("catalog_item_id", itemFilter);
+    }
 
- const { data: suggestions, count } = await query;
+    const { data: suggestions, count } = await query;
 
- // Enrich with user data from public.users via admin client
- const admin = getAdminClient();
- const userIds = [...new Set((suggestions ?? []).map((s) => s.user_id))];
- const userMap: Record<string, { alias_name: string; approved_suggestions_count: number }> = {};
- if (userIds.length > 0) {
- const { data: users } = await admin
- .from("users")
- .select("id, alias_name, approved_suggestions_count")
- .in("id", userIds);
- for (const u of users ?? []) {
- userMap[u.id] = { alias_name: u.alias_name, approved_suggestions_count: u.approved_suggestions_count };
- }
- }
+    // Enrich with user data from public.users via admin client
+    const admin = getAdminClient();
+    const userIds = [...new Set((suggestions ?? []).map((s) => s.user_id))];
+    const userMap: Record<string, { alias_name: string; approved_suggestions_count: number }> = {};
+    if (userIds.length > 0) {
+        const { data: users } = await admin
+            .from("users")
+            .select("id, alias_name, approved_suggestions_count")
+            .in("id", userIds);
+        for (const u of users ?? []) {
+            userMap[u.id] = { alias_name: u.alias_name, approved_suggestions_count: u.approved_suggestions_count };
+        }
+    }
 
- // Get comment counts per suggestion
- const suggestionIds = (suggestions ?? []).map((s) => s.id);
+    // Get comment counts per suggestion
+    const suggestionIds = (suggestions ?? []).map((s) => s.id);
 
- const commentCounts: Record<string, number> = {};
- if (suggestionIds.length > 0) {
- const { data: comments } = await supabase
- .from("catalog_suggestion_comments")
- .select("suggestion_id")
- .in("suggestion_id", suggestionIds);
- for (const c of comments ?? []) {
- commentCounts[c.suggestion_id] = (commentCounts[c.suggestion_id] || 0) + 1;
- }
- }
+    const commentCounts: Record<string, number> = {};
+    if (suggestionIds.length > 0) {
+        const { data: comments } = await supabase
+            .from("catalog_suggestion_comments")
+            .select("suggestion_id")
+            .in("suggestion_id", suggestionIds);
+        for (const c of comments ?? []) {
+            commentCounts[c.suggestion_id] = (commentCounts[c.suggestion_id] || 0) + 1;
+        }
+    }
 
- const currentStatus = statusFilter ??"all";
- const tabs = [
- { key:"all", label:"All" },
- { key:"pending", label:"🟡 Pending" },
- { key:"approved", label:"✅ Approved" },
- { key:"auto_approved", label:"⚡ Auto" },
- { key:"rejected", label:"❌ Rejected" },
- ];
+    const currentStatus = statusFilter ?? "all";
+    const tabs = [
+        { key: "all", label: "All" },
+        { key: "pending", label: "🟡 Pending" },
+        { key: "approved", label: "✅ Approved" },
+        { key: "auto_approved", label: "⚡ Auto" },
+        { key: "rejected", label: "❌ Rejected" },
+    ];
 
- // Friendly status labels — status.replace(/_/g,"") printed "autoapproved".
- const statusLabels: Record<string, string> = {
- pending:"Under review",
- under_review:"Under review",
- approved:"Approved",
- auto_approved:"Auto-approved",
- rejected:"Rejected",
- };
+    // Friendly status labels — status.replace(/_/g,"") printed "autoapproved".
+    const statusLabels: Record<string, string> = {
+        pending: "Under review",
+        under_review: "Under review",
+        approved: "Approved",
+        auto_approved: "Auto-approved",
+        rejected: "Rejected",
+    };
 
- return (
-  <ExplorerLayout noHeader>
- <CatalogSubMasthead
-  icon="💡"
-  title="Catalog Suggestions"
-  subtitle="Community proposals to the reference catalog"
-  actions={
-  <Link href="/catalog/suggestions/new" className="btn-brass inline-flex items-center gap-1.5 no-underline hover:no-underline">
-   📗 Suggest Entry
-  </Link>
-  }
- />
+    return (
+        <ExplorerLayout noHeader>
+            <CatalogSubMasthead
+                icon="💡"
+                title="Catalog Suggestions"
+                subtitle="Community proposals to the reference catalog"
+                actions={
+                    <Link
+                        href="/catalog/suggestions/new"
+                        className="btn-brass inline-flex items-center gap-1.5 no-underline hover:no-underline"
+                    >
+                        📗 Suggest Entry
+                    </Link>
+                }
+            />
 
- {/* Filter Tabs */}
- <div className="ref-filter-tabs">
- {tabs.map((tab) => (
- <Link
- key={tab.key}
- href={`/catalog/suggestions?status=${tab.key}${itemFilter ? `&item=${itemFilter}` :""}`}
- className={`ref-filter-tab ${currentStatus === tab.key ?"ref-filter-tab-active" :""}`}
- >
- {tab.label}
- </Link>
- ))}
- </div>
+            {/* Filter Tabs */}
+            <div className="ref-filter-tabs">
+                {tabs.map((tab) => (
+                    <Link
+                        key={tab.key}
+                        href={`/catalog/suggestions?status=${tab.key}${itemFilter ? `&item=${itemFilter}` : ""}`}
+                        className={`ref-filter-tab ${currentStatus === tab.key ? "ref-filter-tab-active" : ""}`}
+                    >
+                        {tab.label}
+                    </Link>
+                ))}
+            </div>
 
- {/* Results */}
- <p className="text-muted-foreground mb-2 text-sm">{count ?? 0} suggestions</p>
+            {/* Results */}
+            <p className="mb-2 text-sm text-muted-foreground">{count ?? 0} suggestions</p>
 
- {/* The medals appear beside every contributor's name; this is the only
+            {/* The medals appear beside every contributor's name; this is the only
      place they are explained. Numbers come from the same constants that
      award them. */}
- <p className="text-muted-foreground mb-3 text-xs">
- 📘 Contributor · 🥉 Bronze ({BRONZE_THRESHOLD} approved) · 🥈 Silver ({SILVER_THRESHOLD} — factual fixes apply instantly) · 🥇 Gold ({GOLD_THRESHOLD} — all corrections apply instantly) ·{" "}
- <Link href="/faq#collecting" className="underline hover:no-underline">How ranks work</Link>
- </p>
+            <p className="mb-3 text-xs text-muted-foreground">
+                📘 Contributor · 🥉 Bronze ({BRONZE_THRESHOLD} approved) · 🥈 Silver ({SILVER_THRESHOLD} — factual fixes
+                apply instantly) · 🥇 Gold ({GOLD_THRESHOLD} — all corrections apply instantly) ·{" "}
+                <Link href="/faq#collecting" className="underline hover:no-underline">
+                    How ranks work
+                </Link>
+            </p>
 
- <div className="flex flex-col gap-2">
- {(suggestions ?? [])?.map((s) => {
- const userData = userMap[s.user_id];
- const typeIcon =
- s.suggestion_type ==="correction"
- ?"🔧"
- : s.suggestion_type ==="addition"
- ?"📗"
- : s.suggestion_type ==="photo"
- ?"📸"
- : s.suggestion_type ==="duplicate"
- ?"🔁"
- :"🗑";
+            <div className="flex flex-col gap-2">
+                {(suggestions ?? [])?.map((s) => {
+                    const userData = userMap[s.user_id];
+                    const typeIcon =
+                        s.suggestion_type === "correction"
+                            ? "🔧"
+                            : s.suggestion_type === "addition"
+                              ? "📗"
+                              : s.suggestion_type === "photo"
+                                ? "📸"
+                                : s.suggestion_type === "duplicate"
+                                  ? "🔁"
+                                  : "🗑";
 
- const statusBadge =
- s.status ==="pending"
- ?"ref-status-pending"
- : s.status ==="approved"
- ?"ref-status-approved"
- : s.status ==="auto_approved"
- ?"ref-status-auto"
- : s.status ==="rejected"
- ?"ref-status-rejected"
- :"";
+                    const statusBadge =
+                        s.status === "pending"
+                            ? "ref-status-pending"
+                            : s.status === "approved"
+                              ? "ref-status-approved"
+                              : s.status === "auto_approved"
+                                ? "ref-status-auto"
+                                : s.status === "rejected"
+                                  ? "ref-status-rejected"
+                                  : "";
 
- // Build change summary
- let changeSummary ="";
- if (s.suggestion_type ==="correction" && s.field_changes) {
- const changes = Object.entries(s.field_changes)
- .map(([k, v]) => {
- const val = v as { from: string; to: string };
- return `${k}: ${val.from} → ${val.to}`;
- })
- .join(", ");
- changeSummary = changes;
- } else if (s.suggestion_type ==="addition") {
- changeSummary = `New: ${(s.field_changes as { title?: string })?.title ??"Untitled"}`;
- } else if (s.suggestion_type ==="duplicate") {
- changeSummary = `Duplicate of: ${(s.field_changes as { duplicate_of_title?: string })?.duplicate_of_title ||"another entry"}`;
- }
+                    // Build change summary
+                    let changeSummary = "";
+                    if (s.suggestion_type === "correction" && s.field_changes) {
+                        const changes = Object.entries(s.field_changes)
+                            .map(([k, v]) => {
+                                const val = v as { from: string; to: string };
+                                return `${k}: ${val.from} → ${val.to}`;
+                            })
+                            .join(", ");
+                        changeSummary = changes;
+                    } else if (s.suggestion_type === "addition") {
+                        changeSummary = `New: ${(s.field_changes as { title?: string })?.title ?? "Untitled"}`;
+                    } else if (s.suggestion_type === "duplicate") {
+                        changeSummary = `Duplicate of: ${(s.field_changes as { duplicate_of_title?: string })?.duplicate_of_title || "another entry"}`;
+                    }
 
- const curatorCount = userData?.approved_suggestions_count ?? 0;
- const curatorIcon =
- curatorCount >= GOLD_THRESHOLD
- ?"🥇"
- : curatorCount >= SILVER_THRESHOLD
- ?"🥈"
- : curatorCount >= BRONZE_THRESHOLD
- ?"🥉"
- : curatorCount >= CONTRIBUTOR_THRESHOLD
- ?"📘"
- :"";
+                    const curatorCount = userData?.approved_suggestions_count ?? 0;
+                    const curatorIcon =
+                        curatorCount >= GOLD_THRESHOLD
+                            ? "🥇"
+                            : curatorCount >= SILVER_THRESHOLD
+                              ? "🥈"
+                              : curatorCount >= BRONZE_THRESHOLD
+                                ? "🥉"
+                                : curatorCount >= CONTRIBUTOR_THRESHOLD
+                                  ? "📘"
+                                  : "";
 
- return (
- <Link
- key={s.id}
- href={`/catalog/suggestions/${s.id}`}
- className="bg-card border-input block rounded-lg border p-4 text-foreground no-underline shadow-md transition-all transition-transform"
- >
- <div className="mb-1 flex items-center justify-between">
- <span className="text-[1.2rem]">{typeIcon}</span>
- <span className={`ref-status-badge ${statusBadge}`}>{statusLabels[s.status] ?? s.status}</span>
- </div>
+                    return (
+                        <Link
+                            key={s.id}
+                            href={`/catalog/suggestions/${s.id}`}
+                            className="block rounded-lg border border-input bg-card p-4 text-foreground no-underline shadow-md transition-all transition-transform"
+                        >
+                            <div className="mb-1 flex items-center justify-between">
+                                <span className="text-[1.2rem]">{typeIcon}</span>
+                                <span className={`ref-status-badge ${statusBadge}`}>
+                                    {statusLabels[s.status] ?? s.status}
+                                </span>
+                            </div>
 
- <div className="text-sm text-secondary-foreground leading-relaxed">
- {changeSummary && (
- <p className="mb-[4px] text-sm font-medium">
- {changeSummary}
- </p>
- )}
- <p className="text-muted-foreground text-sm italic">
- &ldquo;{s.reason.slice(0, 120)}
- {s.reason.length > 120 ?"…" :""}&rdquo;
- </p>
- </div>
+                            <div className="text-sm leading-relaxed text-secondary-foreground">
+                                {changeSummary && <p className="mb-[4px] text-sm font-medium">{changeSummary}</p>}
+                                <p className="text-sm text-muted-foreground italic">
+                                    &ldquo;{s.reason.slice(0, 120)}
+                                    {s.reason.length > 120 ? "…" : ""}&rdquo;
+                                </p>
+                            </div>
 
- <div className="text-muted-foreground mt-2 flex items-center gap-4 text-sm">
- <span className="font-semibold">
- {curatorIcon} @{userData?.alias_name ??"Unknown"}
- </span>
- <span className="ml-auto">
- ▲ {s.upvotes} ▼ {s.downvotes}
- {(commentCounts[s.id] ?? 0) > 0 && <> · 💬 {commentCounts[s.id]}</>}
- </span>
- <span className="text-xs text-muted-foreground">
- {new Date(s.created_at).toLocaleDateString()}
- </span>
- </div>
- </Link>
- );
- })}
+                            <div className="mt-2 flex items-center gap-4 text-sm text-muted-foreground">
+                                <span className="font-semibold">
+                                    {curatorIcon} @{userData?.alias_name ?? "Unknown"}
+                                </span>
+                                <span className="ml-auto">
+                                    ▲ {s.upvotes} ▼ {s.downvotes}
+                                    {(commentCounts[s.id] ?? 0) > 0 && <> · 💬 {commentCounts[s.id]}</>}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                    {new Date(s.created_at).toLocaleDateString()}
+                                </span>
+                            </div>
+                        </Link>
+                    );
+                })}
 
- {(suggestions ?? []).length === 0 && (
- <div className="bg-card border-input text-muted-foreground rounded-lg border p-8 text-center shadow-md transition-all">
- <p>No suggestions yet. Be the first to contribute!</p>
- <Button asChild><Link
- href="/catalog"
- >
- Browse Catalog
- </Link></Button>
- </div>
- )}
- </div>
- </ExplorerLayout>
- );
+                {(suggestions ?? []).length === 0 && (
+                    <div className="rounded-lg border border-input bg-card p-8 text-center text-muted-foreground shadow-md transition-all">
+                        <p>No suggestions yet. Be the first to contribute!</p>
+                        <Button asChild>
+                            <Link href="/catalog">Browse Catalog</Link>
+                        </Button>
+                    </div>
+                )}
+            </div>
+        </ExplorerLayout>
+    );
 }

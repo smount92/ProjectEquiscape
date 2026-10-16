@@ -63,12 +63,7 @@ import { logger } from "@/lib/logger";
 import { metricsDb } from "@/lib/metrics/db";
 import { isMissingRevenueSchema } from "@/lib/metrics/revenue";
 import type { SubscriptionStatus } from "@/lib/metrics/revenue";
-import {
-    PAID_THROUGH_KEY,
-    extendedPaidThrough,
-    formatPaidThrough,
-    paidThroughMs,
-} from "@/lib/entitlement/clock";
+import { PAID_THROUGH_KEY, extendedPaidThrough, formatPaidThrough, paidThroughMs } from "@/lib/entitlement/clock";
 
 type AdminClient = ReturnType<typeof getAdminClient>;
 
@@ -202,7 +197,11 @@ async function mirrorPaypalState(
             p_stripe_subscription_id: null,
         });
         if (fallbackError && !isMissingRevenueSchema(fallbackError)) {
-            logger.error("PayPalWebhook", `subscription_state fallback mirror failed for ${args.userId}`, fallbackError);
+            logger.error(
+                "PayPalWebhook",
+                `subscription_state fallback mirror failed for ${args.userId}`,
+                fallbackError,
+            );
         }
     } catch (err) {
         logger.error("PayPalWebhook", `subscription_state mirror threw for ${args.userId}`, err);
@@ -352,11 +351,7 @@ export async function grantPaypalTier(
         // never bought a term — does not pay for a round trip to a
         // migration that may never be pasted. A clock being SET or
         // CLEARED is what makes the term-aware mirror worth asking for.
-        paidThrough: args.paidThrough
-            ? args.paidThrough
-            : _priorPaidThrough != null
-              ? null
-              : undefined,
+        paidThrough: args.paidThrough ? args.paidThrough : _priorPaidThrough != null ? null : undefined,
     });
 
     await warnOnDoubleSubscription(admin, args.userId, priorMetadata);
@@ -557,11 +552,7 @@ async function claimCapture(
 }
 
 /** Close the ledger row out. Best effort: the grant has already landed. */
-async function markCaptureApplied(
-    admin: AdminClient,
-    captureId: string,
-    paidThrough: string,
-): Promise<void> {
+async function markCaptureApplied(admin: AdminClient, captureId: string, paidThrough: string): Promise<void> {
     try {
         const { error } = await metricsDb(admin).rpc("mark_paypal_capture_applied", {
             p_capture_id: captureId,

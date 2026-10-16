@@ -4,9 +4,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://test.supabase.co");
 
 // Dynamic import after env stub to pick up the mocked value
-const { extractStoragePath, getPublicImageUrl, getPublicImageUrls } = await import(
-    "@/lib/utils/storage"
-);
+const { extractStoragePath, getPublicImageUrl, getPublicImageUrls } = await import("@/lib/utils/storage");
 
 describe("extractStoragePath", () => {
     it("passes through a relative path as-is", () => {
@@ -14,14 +12,12 @@ describe("extractStoragePath", () => {
     });
 
     it("extracts path from a public Supabase URL", () => {
-        const url =
-            "https://xxx.supabase.co/storage/v1/object/public/horse-images/horses/abc/thumb.webp";
+        const url = "https://xxx.supabase.co/storage/v1/object/public/horse-images/horses/abc/thumb.webp";
         expect(extractStoragePath(url)).toBe("horses/abc/thumb.webp");
     });
 
     it("extracts path from a signed Supabase URL (strips query params)", () => {
-        const url =
-            "https://xxx.supabase.co/storage/v1/object/sign/horse-images/horses/abc/thumb.webp?token=xxx";
+        const url = "https://xxx.supabase.co/storage/v1/object/sign/horse-images/horses/abc/thumb.webp?token=xxx";
         expect(extractStoragePath(url)).toBe("horses/abc/thumb.webp");
     });
 
@@ -38,14 +34,11 @@ describe("extractStoragePath", () => {
 describe("getPublicImageUrl", () => {
     it("generates correct public URL from relative path", () => {
         const result = getPublicImageUrl("horses/abc/thumb.webp");
-        expect(result).toBe(
-            "https://test.supabase.co/storage/v1/object/public/horse-images/horses/abc/thumb.webp"
-        );
+        expect(result).toBe("https://test.supabase.co/storage/v1/object/public/horse-images/horses/abc/thumb.webp");
     });
 
     it("generates correct public URL from full URL", () => {
-        const url =
-            "https://xxx.supabase.co/storage/v1/object/public/horse-images/horses/abc/thumb.webp";
+        const url = "https://xxx.supabase.co/storage/v1/object/public/horse-images/horses/abc/thumb.webp";
         const result = getPublicImageUrl(url);
         expect(result).toContain("/storage/v1/object/public/horse-images/horses/abc/thumb.webp");
     });

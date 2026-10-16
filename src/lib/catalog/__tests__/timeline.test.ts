@@ -1,13 +1,12 @@
 import { describe, expect, it } from "vitest";
-import {
-    buildArtistCareer,
-    buildMoldTimeline,
-    familyBase,
-    normalizeYear,
-} from "@/lib/catalog/timeline";
+import { buildArtistCareer, buildMoldTimeline, familyBase, normalizeYear } from "@/lib/catalog/timeline";
 
 const src = (title: string, attrs: Record<string, unknown> = {}) => ({
-    id: `id-${title}-${JSON.stringify(attrs).length}-${Math.abs(JSON.stringify(attrs).split("").reduce((a, c) => a + c.charCodeAt(0), 0))}`,
+    id: `id-${title}-${JSON.stringify(attrs).length}-${Math.abs(
+        JSON.stringify(attrs)
+            .split("")
+            .reduce((a, c) => a + c.charCodeAt(0), 0),
+    )}`,
     title,
     makerSlug: "breyer",
     slug: null,
@@ -38,7 +37,11 @@ describe("buildMoldTimeline", () => {
         expect(t.undated).toHaveLength(1);
         expect(t.firstYear).toBe(1960);
         expect(t.lastYear).toBe(2022);
-        expect(t.density).toEqual([["1960s", 1], ["1990s", 1], ["2020s", 1]]);
+        expect(t.density).toEqual([
+            ["1960s", 1],
+            ["1990s", 1],
+            ["2020s", 1],
+        ]);
     });
 
     it("clusters same number+title+year variants into one row (Ponokah rule)", () => {
@@ -91,7 +94,12 @@ describe("buildArtistCareer", () => {
         { ...src("Micro Nitro", {}), itemType: "artist_resin", scale: "Micro Mini" },
     ];
     const factory = [
-        { ...src("Chips Stock Horse", { release_year_start: 2004 }), itemType: "plastic_mold", scale: null, maker: "Peter Stone" },
+        {
+            ...src("Chips Stock Horse", { release_year_start: 2004 }),
+            itemType: "plastic_mold",
+            scale: null,
+            maker: "Peter Stone",
+        },
     ];
 
     it("braids both lanes chronologically", () => {

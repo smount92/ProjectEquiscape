@@ -11,15 +11,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("next/link", () => ({
-    default: ({
-        children,
-        href,
-        ...props
-    }: {
-        children: React.ReactNode;
-        href: string;
-        [key: string]: unknown;
-    }) => (
+    default: ({ children, href, ...props }: { children: React.ReactNode; href: string; [key: string]: unknown }) => (
         <a href={href} {...props}>
             {children}
         </a>
@@ -61,9 +53,7 @@ function thread(overrides: Partial<BoardThread> = {}): BoardThread {
     };
 }
 
-const CHANNELS = [
-    { id: "ch-1", name: "Show Talk", slug: "show-talk", description: null, sortOrder: 0 },
-];
+const CHANNELS = [{ id: "ch-1", name: "Show Talk", slug: "show-talk", description: null, sortOrder: 0 }];
 
 function renderBoard(threads: BoardThread[], props: Partial<Parameters<typeof GroupBoard>[0]> = {}) {
     return render(
@@ -150,9 +140,7 @@ describe("GroupBoard", () => {
                 content: "Pics inside, you will not believe it.",
             }),
         );
-        await waitFor(() =>
-            expect(mockPush).toHaveBeenCalledWith("/community/groups/pnw-breyer/thread/new-thread-1"),
-        );
+        await waitFor(() => expect(mockPush).toHaveBeenCalledWith("/community/groups/pnw-breyer/thread/new-thread-1"));
     });
 
     it("disables Post Thread until the title is long enough", async () => {

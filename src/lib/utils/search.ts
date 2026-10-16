@@ -14,5 +14,8 @@
  * injection and wildcard-abuse, and keeps the search results predictable.
  */
 export function sanitizeForOr(q: string): string {
-    return q.replace(/[,()%*\\]/g, " ").replace(/\s+/g, " ").trim();
+    return q
+        .replace(/[,()%*\\]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
 }

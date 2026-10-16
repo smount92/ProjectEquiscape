@@ -57,10 +57,7 @@ export function matchLongestAlias(candidate: string, aliases: readonly string[])
  * Resolve a list of greedy candidates to the set of real aliases
  * they mention. Order-preserving, de-duplicated case-insensitively.
  */
-export function resolveMentions(
-    candidates: readonly string[],
-    aliases: readonly string[],
-): string[] {
+export function resolveMentions(candidates: readonly string[], aliases: readonly string[]): string[] {
     const out: string[] = [];
     const seen = new Set<string>();
     for (const candidate of candidates) {
@@ -112,10 +109,7 @@ function isMentionBoundary(text: string, index: number): boolean {
  * `@"quoted name"` and a single `@word` still linkify — so callers
  * that have no alias list lose nothing.
  */
-export function splitMentionSegments(
-    text: string,
-    aliases: readonly string[] = [],
-): MentionSegment[] {
+export function splitMentionSegments(text: string, aliases: readonly string[] = []): MentionSegment[] {
     const segments: MentionSegment[] = [];
     let plainStart = 0;
     let i = 0;

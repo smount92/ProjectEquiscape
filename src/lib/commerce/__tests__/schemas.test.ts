@@ -145,14 +145,16 @@ describe("commerce schemas — createTransactionSchema", () => {
         expect(createTransactionSchema.safeParse(valid).success).toBe(true);
     });
     it("accepts all optional fields", () => {
-        expect(createTransactionSchema.safeParse({
-            ...valid,
-            type: "parked_sale",
-            horseId: UUID_A,
-            conversationId: UUID_B,
-            status: "completed",
-            metadata: { pin: "ABC123", sale_price: 50 },
-        }).success).toBe(true);
+        expect(
+            createTransactionSchema.safeParse({
+                ...valid,
+                type: "parked_sale",
+                horseId: UUID_A,
+                conversationId: UUID_B,
+                status: "completed",
+                metadata: { pin: "ABC123", sale_price: 50 },
+            }).success,
+        ).toBe(true);
     });
     it("rejects unknown types and statuses", () => {
         expect(createTransactionSchema.safeParse({ ...valid, type: "gift" }).success).toBe(false);

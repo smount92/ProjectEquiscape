@@ -30,11 +30,7 @@ export const metadata = {
  * the second complaint: a $400 sale in progress and someone asking
  * which mold a horse is looked identical.
  */
-export default async function InboxPage({
-    searchParams,
-}: {
-    searchParams: Promise<{ tab?: string }>;
-}) {
+export default async function InboxPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
     const supabase = await createClient();
     const {
         data: { user },
@@ -78,7 +74,7 @@ export default async function InboxPage({
         >
             {/* Tabs — deals and chats told apart, which they never were */}
             {(dealCount > 0 || archivedCount > 0) && support.participants && (
-                <div className="border-input mb-4 flex flex-wrap gap-2 border-b pb-3">
+                <div className="mb-4 flex flex-wrap gap-2 border-b border-input pb-3">
                     <Tab href="/inbox" active={view === "all"}>
                         All ({live.length})
                     </Tab>
@@ -94,7 +90,7 @@ export default async function InboxPage({
             )}
 
             {visible.length === 0 ? (
-                <div className="border-input bg-card rounded-lg border p-12 text-center shadow-md">
+                <div className="rounded-lg border border-input bg-card p-12 text-center shadow-md">
                     <div className="mb-4 text-[3rem]">✉️</div>
                     <h3 className="mb-2 font-serif text-xl font-bold">
                         {view === "archived"
@@ -103,7 +99,7 @@ export default async function InboxPage({
                               ? "No deals in progress"
                               : "Your inbox is empty"}
                     </h3>
-                    <p className="text-secondary-foreground mx-auto max-w-[440px]">
+                    <p className="mx-auto max-w-[440px] text-secondary-foreground">
                         {view === "all"
                             ? "Browse the Show Ring and message a seller about a model you're interested in — every deal you strike gets tracked here."
                             : "Threads you archive or deals you strike will appear here."}
@@ -118,7 +114,7 @@ export default async function InboxPage({
                     </div>
                 </div>
             ) : (
-                <div className="bg-card/80 border-input animate-fade-in-up flex flex-col overflow-hidden rounded-lg border backdrop-blur-md">
+                <div className="animate-fade-in-up flex flex-col overflow-hidden rounded-lg border border-input bg-card/80 backdrop-blur-md">
                     {visible.map((thread) => (
                         <InboxRow key={thread.id} thread={thread} muteEnabled={support.participants} />
                     ))}
@@ -126,24 +122,15 @@ export default async function InboxPage({
             )}
 
             {!support.conversationDeal && threads.length > 0 && (
-                <p className="text-muted-foreground mt-4 text-center text-xs">
-                    Deal tracking, agreed terms and payment plans arrive with the next database
-                    update.
+                <p className="mt-4 text-center text-xs text-muted-foreground">
+                    Deal tracking, agreed terms and payment plans arrive with the next database update.
                 </p>
             )}
         </ExplorerLayout>
     );
 }
 
-function Tab({
-    href,
-    active,
-    children,
-}: {
-    href: string;
-    active: boolean;
-    children: React.ReactNode;
-}) {
+function Tab({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) {
     return (
         <Link
             href={href}

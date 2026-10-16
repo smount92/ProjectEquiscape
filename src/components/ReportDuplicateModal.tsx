@@ -14,13 +14,7 @@ import { createSuggestion } from "@/app/actions/catalog-suggestions";
 import { searchCatalogAction } from "@/app/actions/reference";
 import { DUPLICATE_SUGGESTION_TYPE } from "@/lib/catalog/duplicates";
 import { useToast } from "@/lib/context/ToastContext";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -109,8 +103,8 @@ export default function ReportDuplicateModal({
                     <DialogHeader>
                         <DialogTitle>Is “{catalogItem.title}” a duplicate?</DialogTitle>
                         <DialogDescription>
-                            Find the entry that should stay. If an admin agrees, every horse, wishlist and
-                            photo linked to this entry moves to that one and this entry is removed.
+                            Find the entry that should stay. If an admin agrees, every horse, wishlist and photo linked
+                            to this entry moves to that one and this entry is removed.
                         </DialogDescription>
                     </DialogHeader>
 

@@ -51,7 +51,9 @@ export default function DoneView({ showId, ledger, myEntries, onKeepEntering, vi
                                         const cls = ledger.byClass[classId];
                                         return (
                                             <li key={classId} className="flex flex-wrap items-center gap-2">
-                                                <span>{cls ? classLabel(cls) : "A class no longer in the program"}</span>
+                                                <span>
+                                                    {cls ? classLabel(cls) : "A class no longer in the program"}
+                                                </span>
                                                 {classId === halter && <span className="stamp">Halter</span>}
                                             </li>
                                         );

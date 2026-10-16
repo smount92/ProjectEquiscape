@@ -39,21 +39,13 @@ export function LedgerLeaf({
  * A section heading inside a leaf: engraved forest smallcaps with a
  * hairline rule running out to the right margin.
  */
-export function LeafHeading({
-    children,
-    note,
-}: {
-    children: ReactNode;
-    note?: ReactNode;
-}) {
+export function LeafHeading({ children, note }: { children: ReactNode; note?: ReactNode }) {
     return (
         <>
             <div className="fe-leaf-heading">
                 <h2>{children}</h2>
             </div>
-            {note && (
-                <p className="-mt-3 mb-5 text-sm text-secondary-foreground">{note}</p>
-            )}
+            {note && <p className="-mt-3 mb-5 text-sm text-secondary-foreground">{note}</p>}
         </>
     );
 }

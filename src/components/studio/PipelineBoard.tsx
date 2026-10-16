@@ -4,11 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import type { Commission } from "@/app/actions/art-studio";
-import {
-    ballIsWith,
-    STATUS_LABELS,
-    type CommissionStatus,
-} from "@/lib/studio/pipeline";
+import { ballIsWith, STATUS_LABELS, type CommissionStatus } from "@/lib/studio/pipeline";
 import { formatMoney } from "@/lib/studio/terms";
 import { CommissionPill } from "./StudioBits";
 
@@ -76,7 +72,7 @@ export default function PipelineBoard({ commissions }: { commissions: Commission
                             >
                                 {col.label}
                                 {count > 0 && (
-                                    <span className="border-input bg-card text-muted-foreground ml-1.5 rounded-md border px-1.5 py-0.5 text-xs">
+                                    <span className="ml-1.5 rounded-md border border-input bg-card px-1.5 py-0.5 text-xs text-muted-foreground">
                                         {count}
                                     </span>
                                 )}
@@ -97,11 +93,9 @@ export default function PipelineBoard({ commissions }: { commissions: Commission
             </div>
 
             {shown.length === 0 ? (
-                <div className="border-input bg-card rounded-lg border p-10 text-center shadow-md">
-                    <p className="text-muted-foreground m-0 text-sm">
-                        {onlyMine
-                            ? "Nothing in this column is waiting on you."
-                            : emptyLine(active.key)}
+                <div className="rounded-lg border border-input bg-card p-10 text-center shadow-md">
+                    <p className="m-0 text-sm text-muted-foreground">
+                        {onlyMine ? "Nothing in this column is waiting on you." : emptyLine(active.key)}
                     </p>
                 </div>
             ) : (
@@ -142,31 +136,27 @@ function Card({ commission }: { commission: Commission }) {
     return (
         <Link
             href={`/studio/commission/${commission.id}`}
-            className="border-input bg-card flex flex-col rounded-lg border p-5 no-underline shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+            className="flex flex-col rounded-lg border border-input bg-card p-5 no-underline shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
         >
             <div className="mb-2 flex flex-wrap items-start justify-between gap-2">
                 <span className="font-serif text-sm font-bold">{commission.commissionType}</span>
                 <CommissionPill status={commission.status} />
             </div>
 
-            <div className="text-muted-foreground mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+            <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                 {commission.clientAlias && <span>@{commission.clientAlias}</span>}
                 {commission.agreedPrice != null && (
-                    <span className="font-serif tabular-nums">
-                        {formatMoney(commission.agreedPrice)}
-                    </span>
+                    <span className="font-serif tabular-nums">{formatMoney(commission.agreedPrice)}</span>
                 )}
-                {commission.isWaitlist && commission.status === "requested" && (
-                    <span>waitlist</span>
-                )}
+                {commission.isWaitlist && commission.status === "requested" && <span>waitlist</span>}
             </div>
 
-            <p className="text-secondary-foreground mb-3 line-clamp-2 text-sm leading-relaxed">
+            <p className="mb-3 line-clamp-2 text-sm leading-relaxed text-secondary-foreground">
                 {commission.description}
             </p>
 
-            <div className="border-input mt-auto flex flex-wrap items-center justify-between gap-2 border-t pt-2">
-                <span className={`text-xs ${stale ? "text-warning font-semibold" : "text-muted-foreground"}`}>
+            <div className="mt-auto flex flex-wrap items-center justify-between gap-2 border-t border-input pt-2">
+                <span className={`text-xs ${stale ? "font-semibold text-warning" : "text-muted-foreground"}`}>
                     {stale
                         ? `⏳ ${idle} days without an update`
                         : yourMove
@@ -174,15 +164,13 @@ function Card({ commission }: { commission: Commission }) {
                           : `Updated ${new Date(commission.lastUpdateAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`}
                 </span>
                 {commission.revisionsIncluded > 0 && commission.revisionsUsed > 0 && (
-                    <span className="text-muted-foreground text-xs">
+                    <span className="text-xs text-muted-foreground">
                         {commission.revisionsUsed}/{commission.revisionsIncluded} rev
                     </span>
                 )}
             </div>
 
-            <span className="sr-only">
-                {STATUS_LABELS[commission.status]} commission, open to view
-            </span>
+            <span className="sr-only">{STATUS_LABELS[commission.status]} commission, open to view</span>
         </Link>
     );
 }

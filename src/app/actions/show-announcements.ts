@@ -15,21 +15,13 @@
 import { z } from "zod";
 
 import { requireAuth } from "@/lib/auth";
-import {
-    announceToEntrantsSchema,
-    firstZodError,
-} from "@/lib/shows/schemas";
+import { announceToEntrantsSchema, firstZodError } from "@/lib/shows/schemas";
 import { getAliases, getShowRole } from "@/lib/shows/queries";
-import {
-    buildAnnouncementPlans,
-    deriveAnnouncementRecipients,
-} from "@/lib/shows/notifications";
+import { buildAnnouncementPlans, deriveAnnouncementRecipients } from "@/lib/shows/notifications";
 import { createNotificationsBulk } from "@/lib/notifications/createNotification";
 import type { StaffRole } from "@/lib/shows/types";
 
-type ActionResult<T = object> =
-    | ({ success: true } & T)
-    | { success: false; error: string };
+type ActionResult<T = object> = ({ success: true } & T) | { success: false; error: string };
 
 const ANNOUNCER_ROLES: StaffRole[] = ["host", "co_host"];
 
@@ -78,8 +70,7 @@ export async function announceToEntrants(
     }
 
     const aliases = await getAliases(supabase, [user.id]);
-    const hostAlias =
-        aliases instanceof Map ? (aliases.get(user.id) ?? "unknown") : "unknown";
+    const hostAlias = aliases instanceof Map ? (aliases.get(user.id) ?? "unknown") : "unknown";
 
     await createNotificationsBulk(
         buildAnnouncementPlans({

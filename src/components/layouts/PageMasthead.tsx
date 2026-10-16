@@ -32,11 +32,7 @@ export default function PageMasthead({
     compact?: boolean;
 }) {
     return (
-        <div
-            className={`leather-band stitched relative mb-6 rounded-xl ${
-                compact ? "px-5 py-4" : "px-6 py-5"
-            }`}
-        >
+        <div className={`leather-band stitched relative mb-6 rounded-xl ${compact ? "px-5 py-4" : "px-6 py-5"}`}>
             {/* BackLink, not a bare link: when the reader came from this
                 parent it returns them to it as they left it (filters,
                 scroll) through history; cold, it is an ordinary link. */}
@@ -90,9 +86,7 @@ export default function PageMasthead({
                     masthead to remember. Same class of bug as the banner
                     that inherited paper ink onto the forest band. */}
                 {actions && (
-                    <div
-                        className="z-[1] ml-auto flex flex-wrap gap-2 [&_a]:no-underline [&_button]:border-(--brass)/55 [&_a]:border-(--brass)/55 [&_button]:text-(--leather-text) [&_a]:text-(--leather-text) [&_button:hover]:bg-white/10 [&_a:hover]:bg-white/10 [&_button:hover]:text-(--brass-hi) [&_a:hover]:text-(--brass-hi)"
-                    >
+                    <div className="z-[1] ml-auto flex flex-wrap gap-2 [&_a]:border-(--brass)/55 [&_a]:text-(--leather-text) [&_a]:no-underline [&_a:hover]:bg-white/10 [&_a:hover]:text-(--brass-hi) [&_button]:border-(--brass)/55 [&_button]:text-(--leather-text) [&_button:hover]:bg-white/10 [&_button:hover]:text-(--brass-hi)">
                         {actions}
                     </div>
                 )}

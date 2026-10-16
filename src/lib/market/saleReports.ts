@@ -26,9 +26,14 @@
 
 /** Marketplaces a sale may be reported from, with a checkable link. */
 const ALLOWED_HOSTS = [
-    "ebay.com", "www.ebay.com", "ebay.co.uk", "ebay.ca",
-    "modelhorsesalespages.com", "www.modelhorsesalespages.com",
-    "etsy.com", "www.etsy.com",
+    "ebay.com",
+    "www.ebay.com",
+    "ebay.co.uk",
+    "ebay.ca",
+    "modelhorsesalespages.com",
+    "www.modelhorsesalespages.com",
+    "etsy.com",
+    "www.etsy.com",
 ];
 
 export type SaleReportRejection =
@@ -64,9 +69,7 @@ export interface ValidSaleReport {
     selfReported: boolean;
 }
 
-export type SaleReportValidation =
-    | { ok: true; report: ValidSaleReport }
-    | { ok: false; reason: SaleReportRejection };
+export type SaleReportValidation = { ok: true; report: ValidSaleReport } | { ok: false; reason: SaleReportRejection };
 
 /**
  * A model horse has never sold for a million dollars, and a sale of zero
@@ -91,10 +94,7 @@ export function marketplaceHost(rawUrl: string): string | null {
     }
 }
 
-export function validateSaleReport(
-    input: SaleReportInput,
-    now: Date = new Date()
-): SaleReportValidation {
+export function validateSaleReport(input: SaleReportInput, now: Date = new Date()): SaleReportValidation {
     if (!input.catalogItemId) return { ok: false, reason: "missing-catalog-item" };
     if (!input.sourceUrl || !input.sourceUrl.trim()) return { ok: false, reason: "missing-url" };
 
@@ -165,10 +165,7 @@ export type EligibilityResult =
     | { eligible: true }
     | { eligible: false; reason: "suspended" | "inactive-account" | "too-new"; daysRemaining?: number };
 
-export function saleReportEligibility(
-    account: ReporterAccount | null,
-    now: Date = new Date()
-): EligibilityResult {
+export function saleReportEligibility(account: ReporterAccount | null, now: Date = new Date()): EligibilityResult {
     // Absence is never permission.
     if (!account) return { eligible: false, reason: "inactive-account" };
     if (account.isSuspended) return { eligible: false, reason: "suspended" };

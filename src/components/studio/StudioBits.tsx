@@ -9,12 +9,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-import {
-    STATUS_LABELS,
-    STUDIO_STATUS_LABELS,
-    type CommissionStatus,
-    type StudioStatus,
-} from "@/lib/studio/pipeline";
+import { STATUS_LABELS, STUDIO_STATUS_LABELS, type CommissionStatus, type StudioStatus } from "@/lib/studio/pipeline";
 import { formatMoney, termsLines, type StudioTerms } from "@/lib/studio/terms";
 
 // ── Status pills ──────────────────────────────────────────────────────
@@ -48,16 +43,10 @@ const STUDIO_DOT: Record<StudioStatus, string> = {
     closed: "bg-muted-foreground",
 };
 
-export function StudioStatusPill({
-    status,
-    className = "",
-}: {
-    status: StudioStatus;
-    className?: string;
-}) {
+export function StudioStatusPill({ status, className = "" }: { status: StudioStatus; className?: string }) {
     return (
         <span
-            className={`border-input bg-card/70 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${className}`}
+            className={`inline-flex items-center gap-1.5 rounded-full border border-input bg-card/70 px-3 py-1 text-xs font-semibold ${className}`}
         >
             <span className={`inline-block h-2 w-2 rounded-full ${STUDIO_DOT[status]}`} />
             {STUDIO_STATUS_LABELS[status]}
@@ -81,7 +70,7 @@ export function Panel({
     className?: string;
 }) {
     return (
-        <section className={`bg-card border-input rounded-lg border p-6 shadow-md ${className}`}>
+        <section className={`rounded-lg border border-input bg-card p-6 shadow-md ${className}`}>
             {title && (
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
                     <h2 className="m-0 flex items-center gap-2 font-serif text-lg font-bold">
@@ -97,23 +86,13 @@ export function Panel({
 }
 
 /** A ledger line: label left, value right, hairline underneath. */
-export function LedgerRow({
-    label,
-    value,
-    hint,
-}: {
-    label: ReactNode;
-    value: ReactNode;
-    hint?: ReactNode;
-}) {
+export function LedgerRow({ label, value, hint }: { label: ReactNode; value: ReactNode; hint?: ReactNode }) {
     return (
-        <div className="border-input/60 flex flex-wrap items-baseline justify-between gap-2 border-b py-2 last:border-b-0">
-            <span className="text-muted-foreground text-sm">{label}</span>
+        <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-input/60 py-2 last:border-b-0">
+            <span className="text-sm text-muted-foreground">{label}</span>
             <span className="text-right text-sm font-semibold">
                 {value}
-                {hint && (
-                    <span className="text-muted-foreground ml-2 text-xs font-normal">{hint}</span>
-                )}
+                {hint && <span className="ml-2 text-xs font-normal text-muted-foreground">{hint}</span>}
             </span>
         </div>
     );
@@ -121,14 +100,14 @@ export function LedgerRow({
 
 export function Chip({ children }: { children: ReactNode }) {
     return (
-        <span className="border-input bg-muted text-muted-foreground inline-block rounded-full border px-2.5 py-0.5 text-xs font-semibold">
+        <span className="inline-block rounded-full border border-input bg-muted px-2.5 py-0.5 text-xs font-semibold text-muted-foreground">
             {children}
         </span>
     );
 }
 
 export function EmptyNote({ children }: { children: ReactNode }) {
-    return <p className="text-muted-foreground py-2 text-sm">{children}</p>;
+    return <p className="py-2 text-sm text-muted-foreground">{children}</p>;
 }
 
 // ── Slots ─────────────────────────────────────────────────────────────
@@ -137,15 +116,7 @@ export function EmptyNote({ children }: { children: ReactNode }) {
  * A filled/empty slot meter. Slots are capacity and transparency, not a
  * reservation queue — so this reads as information, never as a countdown.
  */
-export function SlotMeter({
-    used,
-    max,
-    label,
-}: {
-    used: number;
-    max: number;
-    label: string;
-}) {
+export function SlotMeter({ used, max, label }: { used: number; max: number; label: string }) {
     const pips = Math.min(max, 20);
     return (
         <div>
@@ -154,12 +125,12 @@ export function SlotMeter({
                     <span
                         key={i}
                         className={`h-2.5 w-6 rounded-sm ${
-                            i < used ? "bg-studio" : "border-input border bg-transparent"
+                            i < used ? "bg-studio" : "border border-input bg-transparent"
                         }`}
                     />
                 ))}
             </div>
-            <span className="text-muted-foreground text-xs">{label}</span>
+            <span className="text-xs text-muted-foreground">{label}</span>
         </div>
     );
 }
@@ -179,7 +150,7 @@ export function TermsList({ terms }: { terms: StudioTerms }) {
                 ))}
             </div>
             {terms.extraNote && (
-                <p className="text-secondary-foreground mt-4 text-sm leading-relaxed whitespace-pre-wrap">
+                <p className="mt-4 text-sm leading-relaxed whitespace-pre-wrap text-secondary-foreground">
                     {terms.extraNote}
                 </p>
             )}
@@ -196,9 +167,9 @@ export function TermsList({ terms }: { terms: StudioTerms }) {
  */
 export function OffPlatformNote({ className = "" }: { className?: string }) {
     return (
-        <p className={`text-muted-foreground text-xs leading-relaxed ${className}`}>
-            🤝 Model Horse Hub records what you agree — it never handles the money. Deposits and
-            payments are arranged directly between the commissioner and the artist.
+        <p className={`text-xs leading-relaxed text-muted-foreground ${className}`}>
+            🤝 Model Horse Hub records what you agree — it never handles the money. Deposits and payments are arranged
+            directly between the commissioner and the artist.
         </p>
     );
 }
@@ -222,15 +193,14 @@ export function RecordSummary({
     titles: string[];
 }) {
     if (showCount === 0 && titles.length === 0) {
-        return <span className="text-muted-foreground text-xs">No show record yet</span>;
+        return <span className="text-xs text-muted-foreground">No show record yet</span>;
     }
-    const ordinal = (n: number) =>
-        n === 1 ? "1st" : n === 2 ? "2nd" : n === 3 ? "3rd" : `${n}th`;
+    const ordinal = (n: number) => (n === 1 ? "1st" : n === 2 ? "2nd" : n === 3 ? "3rd" : `${n}th`);
 
     return (
         <div className="flex flex-wrap items-center gap-1.5 text-xs">
             {bestPlacing != null && (
-                <span className="border-tier-gold/40 bg-tier-gold/15 text-tier-gold rounded-full border px-2 py-0.5 font-semibold">
+                <span className="rounded-full border border-tier-gold/40 bg-tier-gold/15 px-2 py-0.5 font-semibold text-tier-gold">
                     🏆 Best {ordinal(bestPlacing)}
                 </span>
             )}
@@ -240,14 +210,14 @@ export function RecordSummary({
                 </span>
             )}
             {nanQualifyingCount > 0 && (
-                <span className="border-input bg-muted rounded-full border px-2 py-0.5 font-semibold">
+                <span className="rounded-full border border-input bg-muted px-2 py-0.5 font-semibold">
                     {nanQualifyingCount} NAN-qualifying
                 </span>
             )}
             {titles.map((t) => (
                 <span
                     key={t}
-                    className="border-tier-gold/40 bg-tier-gold/10 text-tier-gold rounded-full border px-2 py-0.5 font-semibold"
+                    className="rounded-full border border-tier-gold/40 bg-tier-gold/10 px-2 py-0.5 font-semibold text-tier-gold"
                 >
                     {t}
                 </span>
@@ -256,15 +226,9 @@ export function RecordSummary({
     );
 }
 
-export function StudioLink({
-    slug,
-    children,
-}: {
-    slug: string;
-    children: ReactNode;
-}) {
+export function StudioLink({ slug, children }: { slug: string; children: ReactNode }) {
     return (
-        <Link href={`/studio/${slug}`} className="text-forest font-semibold hover:underline">
+        <Link href={`/studio/${slug}`} className="font-semibold text-forest hover:underline">
             {children}
         </Link>
     );

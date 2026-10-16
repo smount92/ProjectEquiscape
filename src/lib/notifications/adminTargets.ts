@@ -12,9 +12,7 @@ import type { getAdminClient } from "@/lib/supabase/admin";
  * the source of truth for the revert gate, so the two mechanisms now
  * name the same person by construction.
  */
-export async function adminNotificationTargets(
-    admin: ReturnType<typeof getAdminClient>,
-): Promise<string[]> {
+export async function adminNotificationTargets(admin: ReturnType<typeof getAdminClient>): Promise<string[]> {
     const ids = new Set<string>();
     try {
         const { data: roleAdmins } = await admin.from("users").select("id").eq("role", "admin");
@@ -25,11 +23,7 @@ export async function adminNotificationTargets(
     const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase();
     if (adminEmail) {
         try {
-            const { data: owner } = await admin
-                .from("users")
-                .select("id")
-                .ilike("email", adminEmail)
-                .limit(1);
+            const { data: owner } = await admin.from("users").select("id").ilike("email", adminEmail).limit(1);
             for (const a of (owner ?? []) as { id: string }[]) ids.add(a.id);
         } catch {
             /* no email column or no match — role list stands alone */

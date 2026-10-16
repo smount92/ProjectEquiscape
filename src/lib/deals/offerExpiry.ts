@@ -59,10 +59,7 @@ export function offerExpiresAt(createdAt: string | null | undefined): Date | nul
  * offer is doomed, waiting on the next sweep; a "0 minutes left" ticker
  * would be theatre).
  */
-export function offerCountdown(
-    createdAt: string | null | undefined,
-    now: Date = new Date(),
-): OfferCountdown | null {
+export function offerCountdown(createdAt: string | null | undefined, now: Date = new Date()): OfferCountdown | null {
     const expiry = offerExpiresAt(createdAt);
     if (!expiry) return null;
 

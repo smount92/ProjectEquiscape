@@ -23,7 +23,10 @@ const row = {
     catalogId: null,
 };
 const ok = { data: { inserted: 1, errors: [] }, error: null };
-const missing = { data: null, error: { code: "PGRST202", message: "Could not find the function public.batch_import_horses_v3" } };
+const missing = {
+    data: null,
+    error: { code: "PGRST202", message: "Could not find the function public.batch_import_horses_v3" },
+};
 
 describe("executeBatchImport visibility", () => {
     beforeEach(() => rpc.mockReset());

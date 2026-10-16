@@ -23,16 +23,11 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://modelhorsehub.com";
  * fallback literal and all, into four files — so a domain change was
  * four edits and three chances to miss one.
  */
-export const EMAIL_FROM =
-    process.env.RESEND_FROM_EMAIL || "Model Horse Hub <noreply@modelhorsehub.com>";
+export const EMAIL_FROM = process.env.RESEND_FROM_EMAIL || "Model Horse Hub <noreply@modelhorsehub.com>";
 
 /** Escape HTML special characters to prevent XSS in email templates. */
 export function escapeEmailHtml(str: string): string {
-    return str
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
 export interface BrandedEmailInput {
@@ -139,13 +134,15 @@ export function htmlToPlainText(html: string): string {
         .replace(/<\/(div|tr|td)\s*>/gi, "\n")
         .replace(/<[^>]+>/g, "");
     for (const [pattern, char] of ENTITIES) text = text.replace(pattern, char);
-    return text
-        .split("\n")
-        .map((line) => line.replace(/[ \t]+/g, " ").trim())
-        // Any run of blank lines becomes exactly one.
-        .filter((line, i, all) => line !== "" || (i > 0 && all[i - 1] !== ""))
-        .join("\n")
-        .trim();
+    return (
+        text
+            .split("\n")
+            .map((line) => line.replace(/[ \t]+/g, " ").trim())
+            // Any run of blank lines becomes exactly one.
+            .filter((line, i, all) => line !== "" || (i > 0 && all[i - 1] !== ""))
+            .join("\n")
+            .trim()
+    );
 }
 
 /**
@@ -154,13 +151,7 @@ export function htmlToPlainText(html: string): string {
  * different stories — build the object once, render it twice.
  */
 export function renderBrandedEmailText(input: BrandedEmailInput): string {
-    const lines = [
-        "MODEL HORSE HUB",
-        "",
-        input.heading,
-        "",
-        htmlToPlainText(input.bodyHtml),
-    ];
+    const lines = ["MODEL HORSE HUB", "", input.heading, "", htmlToPlainText(input.bodyHtml)];
 
     if (input.ctaLabel && input.ctaUrl) {
         lines.push("", `${input.ctaLabel}: ${absoluteUrl(input.ctaUrl)}`);

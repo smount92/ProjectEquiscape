@@ -83,10 +83,7 @@ export function PlacingRosette({ place, size = 96 }: { place: Place; size?: numb
                         border: "3px solid rgba(255, 255, 255, 0.85)",
                     }}
                 >
-                    <span
-                        className="font-serif font-bold"
-                        style={{ color: ink, fontSize: size * 0.28 }}
-                    >
+                    <span className="font-serif font-bold" style={{ color: ink, fontSize: size * 0.28 }}>
                         {placeLabel(place)}
                     </span>
                 </span>
@@ -118,17 +115,14 @@ export default function PlacingCelebration({
     return (
         <div className="mx-auto flex w-full max-w-3xl flex-col gap-5">
             {/* ── Leather masthead: rosette + the headline sentence ── */}
-            <section
-                className="leather-panel stitched rounded-lg p-5 sm:p-6"
-                aria-label="Placing result"
-            >
+            <section className="leather-panel stitched rounded-lg p-5 sm:p-6" aria-label="Placing result">
                 <div className="flex flex-wrap items-start gap-4 sm:flex-nowrap sm:gap-6">
                     <PlacingRosette place={place} />
                     {/* min-w wraps the text block to its own full-width
                         line on narrow phones instead of crushing it
                         against the rosette. */}
                     <div className="min-w-[14rem] flex-1">
-                        <p className="m-0 text-xs font-semibold tracking-[0.18em] uppercase text-(--leather-text-muted)">
+                        <p className="m-0 text-xs font-semibold tracking-[0.18em] text-(--leather-text-muted) uppercase">
                             Model Horse Hub ·{" "}
                             {show.isMhhQualifying
                                 ? "MHH Championship Series result"
@@ -219,21 +213,14 @@ export default function PlacingCelebration({
             </div>
 
             {!authed && (
-                <section
-                    className="ledger-card"
-                    aria-label="About Model Horse Hub"
-                    data-testid="placing-anon-cta"
-                >
+                <section className="ledger-card" aria-label="About Model Horse Hub" data-testid="placing-anon-cta">
                     <span className="ledger-tab">What is Model Horse Hub?</span>
                     <p className="mt-0 mb-3 text-sm text-secondary-foreground">
-                        The digital home for the model horse hobby — free photo shows like this
-                        one, a permanent show record for every horse, and a community of
-                        collectors. Enter your own models in the next show.
+                        The digital home for the model horse hobby — free photo shows like this one, a permanent show
+                        record for every horse, and a community of collectors. Enter your own models in the next show.
                     </p>
                     <Button asChild>
-                        <Link href={`/signup?redirectTo=${encodeURIComponent(pagePath)}`}>
-                            Create free account
-                        </Link>
+                        <Link href={`/signup?redirectTo=${encodeURIComponent(pagePath)}`}>Create free account</Link>
                     </Button>
                 </section>
             )}

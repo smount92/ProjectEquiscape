@@ -116,7 +116,12 @@ export default async function ReferencePage({
     const activeCount = countActiveCatalogFilters(filters);
     // Unfiltered, the headline is the Registry's exact size (the browse
     // count is a planner estimate there, 11,821 against 11,855 real rows).
-    const registrySize = activeCount > 0 ? null : await getPublicStats().then((st) => st.catalogItems).catch(() => null);
+    const registrySize =
+        activeCount > 0
+            ? null
+            : await getPublicStats()
+                  .then((st) => st.catalogItems)
+                  .catch(() => null);
 
     // eBay asking medians for the visible page — one batched read, flag-
     // aware: a signal a member has reported as wrongly matched shows
@@ -129,7 +134,10 @@ export default async function ReferencePage({
             const sigDb = supabase as unknown as {
                 from: (t: string) => {
                     select: (c: string) => {
-                        in: (k: string, v: string[]) => PromiseLike<{ data: Record<string, unknown>[] | null }> & {
+                        in: (
+                            k: string,
+                            v: string[],
+                        ) => PromiseLike<{ data: Record<string, unknown>[] | null }> & {
                             eq: (k2: string, v2: string) => PromiseLike<{ data: Record<string, unknown>[] | null }>;
                         };
                     };
@@ -137,7 +145,11 @@ export default async function ReferencePage({
             };
             const [{ data: sigs }, { data: flags }] = await Promise.all([
                 sigDb.from("catalog_price_signals").select("catalog_item_id, asking_median").in("catalog_item_id", ids),
-                sigDb.from("catalog_price_signal_flags").select("catalog_item_id").in("catalog_item_id", ids).eq("status", "active"),
+                sigDb
+                    .from("catalog_price_signal_flags")
+                    .select("catalog_item_id")
+                    .in("catalog_item_id", ids)
+                    .eq("status", "active"),
             ]);
             const flagged = new Set((flags ?? []).map((f) => String(f.catalog_item_id)));
             for (const row of sigs ?? []) {
@@ -191,9 +203,7 @@ export default async function ReferencePage({
         for (const p of (parents ?? []) as { id: string; title: string }[]) parentTitles.set(p.id, p.title);
     }
     if (items.length > 0) {
-        const moldIds = items
-            .filter((i) => i.item_type === "plastic_mold")
-            .map((i) => i.id);
+        const moldIds = items.filter((i) => i.item_type === "plastic_mold").map((i) => i.id);
         const thumbsRpc = supabase.rpc.bind(supabase) as unknown as (
             fn: string,
             args: { p_ids: string[] },
@@ -213,45 +223,39 @@ export default async function ReferencePage({
                 }
             })(),
             moldIds.length > 0
-                ? supabase
-                      .from("catalog_items")
-                      .select("parent_id")
-                      .in("parent_id", moldIds)
-                      .limit(10_000)
+                ? supabase.from("catalog_items").select("parent_id").in("parent_id", moldIds).limit(10_000)
                 : Promise.resolve({ data: null }),
         ]);
         for (const t of thumbsRes.data ?? []) {
             if (t.catalog_id && t.image_url) thumbsMap.set(t.catalog_id, t.image_url);
         }
         for (const c of (childRes.data ?? []) as { parent_id: string | null }[]) {
-            if (c.parent_id)
-                releaseCounts.set(c.parent_id, (releaseCounts.get(c.parent_id) ?? 0) + 1);
+            if (c.parent_id) releaseCounts.set(c.parent_id, (releaseCounts.get(c.parent_id) ?? 0) + 1);
         }
     }
 
     // Sidebar data (unchanged from the previous catalog page).
-    const [{ data: curators }, { count: pendingSuggestions }, { count: recentChanges }] =
-        await Promise.all([
-            supabase
-                .from("users")
-                .select("id, alias_name, avatar_url, approved_suggestions_count")
-                .gt("approved_suggestions_count", 0)
-                .order("approved_suggestions_count", { ascending: false })
-                .limit(5),
-            supabase
-                .from("catalog_suggestions")
-                .select("id", { count: "estimated", head: true })
-                .eq("status", "pending"),
-            supabase
-                .from("catalog_changelog")
-                .select("id", { count: "estimated", head: true })
-                .gte("created_at", sevenDaysAgoIso()),
-        ]);
+    const [{ data: curators }, { count: pendingSuggestions }, { count: recentChanges }] = await Promise.all([
+        supabase
+            .from("users")
+            .select("id, alias_name, avatar_url, approved_suggestions_count")
+            .gt("approved_suggestions_count", 0)
+            .order("approved_suggestions_count", { ascending: false })
+            .limit(5),
+        supabase.from("catalog_suggestions").select("id", { count: "estimated", head: true }).eq("status", "pending"),
+        supabase
+            .from("catalog_changelog")
+            .select("id", { count: "estimated", head: true })
+            .gte("created_at", sevenDaysAgoIso()),
+    ]);
 
     return (
         <ExplorerLayout noHeader>
             {/* Leather landmark: the catalog masthead IS the page header */}
-            <CatalogMasthead totalCount={activeCount > 0 ? total : registrySize ?? total} filtered={activeCount > 0} />
+            <CatalogMasthead
+                totalCount={activeCount > 0 ? total : (registrySize ?? total)}
+                filtered={activeCount > 0}
+            />
 
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_280px]">
                 {/* Main: filter bar + results table + pagination.
@@ -271,11 +275,7 @@ export default async function ReferencePage({
                             [...PREFERRED_QUICK_MAKERS],
                             4,
                         )}
-                        quickScales={pickQuickChips(
-                            facets.scales,
-                            [...PREFERRED_QUICK_SCALES],
-                            3,
-                        )}
+                        quickScales={pickQuickChips(facets.scales, [...PREFERRED_QUICK_SCALES], 3)}
                     />
 
                     <div className="mt-3 mb-3 flex flex-wrap items-center gap-3 pl-1">
@@ -337,10 +337,7 @@ export default async function ReferencePage({
 
                     {/* Pagination — plain anchor links (SEO-crawlable, no client JS) */}
                     {totalPages > 1 && (
-                        <nav
-                            className="mt-6 flex items-center justify-center gap-4"
-                            aria-label="Catalog pagination"
-                        >
+                        <nav className="mt-6 flex items-center justify-center gap-4" aria-label="Catalog pagination">
                             {filters.page > 1 ? (
                                 <Link
                                     href={pageHref(filters, filters.page - 1)}
@@ -379,7 +376,10 @@ export default async function ReferencePage({
                             Community
                         </h3>
                         <div className="flex flex-col gap-2">
-                            <Link href="/catalog/suggestions" className="btn-ghostleather !justify-start !px-4 !py-2 !text-xs">
+                            <Link
+                                href="/catalog/suggestions"
+                                className="btn-ghostleather !justify-start !px-4 !py-2 !text-xs"
+                            >
                                 💡 View Suggestions
                                 {(pendingSuggestions ?? 0) > 0 && (
                                     <span className="ml-auto rounded-full bg-forest px-2 py-0.5 text-[0.7rem] font-bold text-white">
@@ -387,13 +387,22 @@ export default async function ReferencePage({
                                     </span>
                                 )}
                             </Link>
-                            <Link href="/catalog/suggestions/new" className="btn-brass !justify-start !px-4 !py-2 !text-xs no-underline hover:no-underline">
+                            <Link
+                                href="/catalog/suggestions/new"
+                                className="btn-brass !justify-start !px-4 !py-2 !text-xs no-underline hover:no-underline"
+                            >
                                 📗 Suggest New Entry
                             </Link>
-                            <Link href="/catalog/changelog" className="btn-ghostleather !justify-start !px-4 !py-2 !text-xs">
+                            <Link
+                                href="/catalog/changelog"
+                                className="btn-ghostleather !justify-start !px-4 !py-2 !text-xs"
+                            >
                                 📋 Changelog
                                 {(recentChanges ?? 0) > 0 && (
-                                    <span className="ml-auto text-[0.7rem]" style={{ color: "var(--leather-text-muted)" }}>
+                                    <span
+                                        className="ml-auto text-[0.7rem]"
+                                        style={{ color: "var(--leather-text-muted)" }}
+                                    >
                                         {recentChanges} this week
                                     </span>
                                 )}
@@ -418,11 +427,7 @@ export default async function ReferencePage({
                                     <li
                                         key={curator.id}
                                         className="flex items-center gap-2 py-2.5"
-                                        style={
-                                            i > 0
-                                                ? { borderTop: "1px dashed rgba(217,185,120,0.22)" }
-                                                : undefined
-                                        }
+                                        style={i > 0 ? { borderTop: "1px dashed rgba(217,185,120,0.22)" } : undefined}
                                     >
                                         <span className="min-w-[24px] text-center">
                                             {i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `#${i + 1}`}
@@ -444,15 +449,22 @@ export default async function ReferencePage({
                                     </li>
                                 ))}
                             </ul>
-                        {/* Where this data comes from. A catalog that cites its
+                            {/* Where this data comes from. A catalog that cites its
                             sources is easier to trust and easier to correct. */}
-                        <p className="mt-1 text-[0.7rem] leading-relaxed" style={{ color: "var(--leather-text-muted)" }}>
-                            Reference facts come from the hobby&apos;s published record and the makers&apos; own
-                            archives.{" "}
-                            <Link href="/faq#collecting" className="underline hover:no-underline" style={{ color: "var(--leather-text-soft)" }}>
-                                Where our information comes from
-                            </Link>
-                        </p>
+                            <p
+                                className="mt-1 text-[0.7rem] leading-relaxed"
+                                style={{ color: "var(--leather-text-muted)" }}
+                            >
+                                Reference facts come from the hobby&apos;s published record and the makers&apos; own
+                                archives.{" "}
+                                <Link
+                                    href="/faq#collecting"
+                                    className="underline hover:no-underline"
+                                    style={{ color: "var(--leather-text-soft)" }}
+                                >
+                                    Where our information comes from
+                                </Link>
+                            </p>
                         </div>
                     )}
                 </aside>

@@ -52,13 +52,7 @@ function setStoredMode(next: ViewMode): void {
     for (const l of listeners) l();
 }
 
-export default function CatalogViewToggle({
-    cards,
-    table,
-}: {
-    cards: ReactNode;
-    table: ReactNode;
-}) {
+export default function CatalogViewToggle({ cards, table }: { cards: ReactNode; table: ReactNode }) {
     const mode = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
     return (

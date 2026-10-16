@@ -106,9 +106,7 @@ describe("buildShowRingSearchParams", () => {
     });
 
     it("serializes hasRecords as records=1", () => {
-        expect(buildShowRingSearchParams({ hasRecords: true, sort: "newest" }).toString()).toBe(
-            "records=1",
-        );
+        expect(buildShowRingSearchParams({ hasRecords: true, sort: "newest" }).toString()).toBe("records=1");
     });
 });
 
@@ -132,14 +130,7 @@ describe("activeShowRingChips", () => {
             hasRecords: true,
             sort: "newest",
         });
-        expect(chips.map((c) => c.key)).toEqual([
-            "q",
-            "finish",
-            "maker",
-            "scale",
-            "trade",
-            "hasRecords",
-        ]);
+        expect(chips.map((c) => c.key)).toEqual(["q", "finish", "maker", "scale", "trade", "hasRecords"]);
         expect(chips.find((c) => c.key === "q")?.label).toBe("“chic”");
         expect(chips.find((c) => c.key === "hasRecords")?.label).toBe("Has show record");
     });

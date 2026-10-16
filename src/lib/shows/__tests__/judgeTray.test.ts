@@ -152,9 +152,7 @@ describe("judgeTray — hydration from saved placings", () => {
     it("round-trips through the server contract", () => {
         const slots: TraySlots = { 1: "a", 3: "c", 6: "f" };
         const rows = toServerPlacings(slots);
-        const back = hydrateTray(
-            rows.map((r) => ({ id: r.entryId, place: r.place })),
-        );
+        const back = hydrateTray(rows.map((r) => ({ id: r.entryId, place: r.place })));
         expect(back).toEqual(slots);
     });
 });
@@ -192,19 +190,13 @@ describe("judgeTray — server contract conversion", () => {
 
 describe("judgeTray — aria labels", () => {
     it("labels tray slots for filled and empty states", () => {
-        expect(slotAriaLabel(1, "Sandstorm Strike")).toBe(
-            "1st place — Sandstorm Strike. Tap to clear.",
-        );
+        expect(slotAriaLabel(1, "Sandstorm Strike")).toBe("1st place — Sandstorm Strike. Tap to clear.");
         expect(slotAriaLabel(1, null)).toBe("1st place — empty");
     });
 
     it("labels entry cards for placed and unplaced states", () => {
-        expect(entryAriaLabel("Sandstorm Strike", 1)).toBe(
-            "Sandstorm Strike — 1st place. Tap to remove.",
-        );
-        expect(entryAriaLabel("Sandstorm Strike", null)).toBe(
-            "Sandstorm Strike — tap to pin the next ribbon",
-        );
+        expect(entryAriaLabel("Sandstorm Strike", 1)).toBe("Sandstorm Strike — 1st place. Tap to remove.");
+        expect(entryAriaLabel("Sandstorm Strike", null)).toBe("Sandstorm Strike — tap to pin the next ribbon");
     });
 });
 
@@ -296,10 +288,11 @@ describe("judgeTray — autosave reducer", () => {
     });
 
     it("a stale success never regresses savedVersion", () => {
-        const s = autosaveReducer(
-            at({ status: "saving", version: 5, savedVersion: 4, inFlightVersion: 3 }),
-            { type: "saveSuccess", version: 3, atMs: 9 },
-        );
+        const s = autosaveReducer(at({ status: "saving", version: 5, savedVersion: 4, inFlightVersion: 3 }), {
+            type: "saveSuccess",
+            version: 3,
+            atMs: 9,
+        });
         expect(s.savedVersion).toBe(4);
         expect(s.status).toBe("dirty");
     });

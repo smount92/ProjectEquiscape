@@ -4,11 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
-import {
-    confirmInstallmentReceived,
-    markInstallmentSent,
-    savePaymentPlan,
-} from "@/app/actions/deals";
+import { confirmInstallmentReceived, markInstallmentSent, savePaymentPlan } from "@/app/actions/deals";
 import { formatDate, formatMoney, formatStamp } from "@/lib/deals/terms";
 import {
     buildPlan,
@@ -83,7 +79,7 @@ export default function PaymentPlanPanel({
 
     if (installments.length === 0) {
         return (
-            <section className="bg-card border-input rounded-lg border p-6 shadow-md" id="deal-ledger">
+            <section className="rounded-lg border border-input bg-card p-6 shadow-md" id="deal-ledger">
                 <Heading />
                 {building ? (
                     <PlanBuilder
@@ -96,20 +92,18 @@ export default function PaymentPlanPanel({
                         onCancel={() => setBuilding(false)}
                     />
                 ) : (
-                    <div className="text-secondary-foreground text-sm leading-relaxed">
+                    <div className="text-sm leading-relaxed text-secondary-foreground">
                         <p className="mb-3">
-                            Paying over time? Write the schedule down. Each payment becomes a row
-                            you both see: due, marked sent, confirmed received — with dates.
+                            Paying over time? Write the schedule down. Each payment becomes a row you both see: due,
+                            marked sent, confirmed received — with dates.
                         </p>
-                        <p className="text-muted-foreground mb-4 text-xs">
-                            Model Horse Hub never holds funds. This is a shared record of payments
-                            you make to each other directly.
+                        <p className="mb-4 text-xs text-muted-foreground">
+                            Model Horse Hub never holds funds. This is a shared record of payments you make to each
+                            other directly.
                         </p>
-                        {!readOnly && (
-                            <Button onClick={() => setBuilding(true)}>Set up a payment plan</Button>
-                        )}
+                        {!readOnly && <Button onClick={() => setBuilding(true)}>Set up a payment plan</Button>}
                         {readOnly && readOnlyReason && (
-                            <p className="text-muted-foreground m-0 text-xs">{readOnlyReason}</p>
+                            <p className="m-0 text-xs text-muted-foreground">{readOnlyReason}</p>
                         )}
                     </div>
                 )}
@@ -118,7 +112,7 @@ export default function PaymentPlanPanel({
     }
 
     return (
-        <section className="bg-card border-input rounded-lg border p-6 shadow-md" id="deal-ledger">
+        <section className="rounded-lg border border-input bg-card p-6 shadow-md" id="deal-ledger">
             <Heading />
 
             {/* Progress — by money confirmed, not by rows ticked */}
@@ -126,16 +120,16 @@ export default function PaymentPlanPanel({
                 <div className="mb-1 flex flex-wrap items-baseline justify-between gap-2">
                     <span className="font-serif text-base font-bold">
                         {formatMoney(summary.confirmedTotal)}{" "}
-                        <span className="text-muted-foreground font-sans text-sm font-normal">
+                        <span className="font-sans text-sm font-normal text-muted-foreground">
                             of {formatMoney(summary.total)} confirmed
                         </span>
                     </span>
-                    <span className="text-muted-foreground text-xs">
+                    <span className="text-xs text-muted-foreground">
                         {summary.confirmedCount} of {summary.count} payments
                     </span>
                 </div>
                 <div
-                    className="bg-muted h-2 w-full overflow-hidden rounded-full"
+                    className="h-2 w-full overflow-hidden rounded-full bg-muted"
                     role="progressbar"
                     aria-valuenow={summary.progressPct}
                     aria-valuemin={0}
@@ -143,7 +137,7 @@ export default function PaymentPlanPanel({
                     aria-label="Payments confirmed"
                 >
                     <div
-                        className="bg-forest h-full rounded-full transition-all"
+                        className="h-full rounded-full bg-forest transition-all"
                         style={{ width: `${summary.progressPct}%` }}
                     />
                 </div>
@@ -152,7 +146,7 @@ export default function PaymentPlanPanel({
             <div className="overflow-x-auto">
                 <table className="w-full min-w-[520px] text-sm">
                     <thead>
-                        <tr className="border-input text-muted-foreground border-b text-left text-xs">
+                        <tr className="border-b border-input text-left text-xs text-muted-foreground">
                             <th className="py-2 pr-2 font-semibold">#</th>
                             <th className="py-2 pr-2 font-semibold">Amount</th>
                             <th className="py-2 pr-2 font-semibold">Due</th>
@@ -166,23 +160,21 @@ export default function PaymentPlanPanel({
                             const state = installmentState(row);
                             const late = daysOverdue(row);
                             return (
-                                <tr key={row.id} className="border-input/60 border-b last:border-b-0">
-                                    <td className="text-muted-foreground py-2.5 pr-2">{row.seq}</td>
-                                    <td className="py-2.5 pr-2 font-semibold">
-                                        {formatMoney(row.amount)}
-                                    </td>
+                                <tr key={row.id} className="border-b border-input/60 last:border-b-0">
+                                    <td className="py-2.5 pr-2 text-muted-foreground">{row.seq}</td>
+                                    <td className="py-2.5 pr-2 font-semibold">{formatMoney(row.amount)}</td>
                                     <td className="py-2.5 pr-2">
                                         {formatDate(row.dueDate)}
                                         {late > 0 && (
-                                            <span className="text-muted-foreground block text-[0.65rem]">
+                                            <span className="block text-[0.65rem] text-muted-foreground">
                                                 {late} day{late === 1 ? "" : "s"} ago
                                             </span>
                                         )}
                                     </td>
-                                    <td className="text-muted-foreground py-2.5 pr-2 text-xs">
+                                    <td className="py-2.5 pr-2 text-xs text-muted-foreground">
                                         {row.markedSentAt ? formatStamp(row.markedSentAt) : "—"}
                                     </td>
-                                    <td className="text-muted-foreground py-2.5 pr-2 text-xs">
+                                    <td className="py-2.5 pr-2 text-xs text-muted-foreground">
                                         {row.confirmedAt ? formatStamp(row.confirmedAt) : "—"}
                                     </td>
                                     <td className="py-2.5 text-right">
@@ -195,9 +187,7 @@ export default function PaymentPlanPanel({
                                                 size="xs"
                                                 variant="outline"
                                                 disabled={busyId === row.id}
-                                                onClick={() =>
-                                                    act(row.id, () => markInstallmentSent(row.id))
-                                                }
+                                                onClick={() => act(row.id, () => markInstallmentSent(row.id))}
                                             >
                                                 {busyId === row.id ? "…" : "I sent this"}
                                             </Button>
@@ -205,11 +195,7 @@ export default function PaymentPlanPanel({
                                             <Button
                                                 size="xs"
                                                 disabled={busyId === row.id}
-                                                onClick={() =>
-                                                    act(row.id, () =>
-                                                        confirmInstallmentReceived(row.id),
-                                                    )
-                                                }
+                                                onClick={() => act(row.id, () => confirmInstallmentReceived(row.id))}
                                             >
                                                 {busyId === row.id ? "…" : "Received"}
                                             </Button>
@@ -224,7 +210,7 @@ export default function PaymentPlanPanel({
                 </table>
             </div>
 
-            <div className="border-input text-muted-foreground mt-4 border-t pt-3 text-xs leading-relaxed">
+            <div className="mt-4 border-t border-input pt-3 text-xs leading-relaxed text-muted-foreground">
                 {summary.allConfirmed ? (
                     <>Paid in full. Both sides have confirmed every payment.</>
                 ) : (
@@ -235,20 +221,17 @@ export default function PaymentPlanPanel({
                         {summary.overdue.length > 0 && (
                             <>
                                 {summary.overdue.length} payment
-                                {summary.overdue.length === 1 ? " is" : "s are"} past the date you
-                                agreed. Model Horse Hub doesn&apos;t act on that — what happens next
-                                is whatever your terms say.
+                                {summary.overdue.length === 1 ? " is" : "s are"} past the date you agreed. Model Horse
+                                Hub doesn&apos;t act on that — what happens next is whatever your terms say.
                             </>
                         )}
                     </>
                 )}
             </div>
 
-            {readOnly && readOnlyReason && (
-                <p className="text-muted-foreground mt-2 mb-0 text-xs">{readOnlyReason}</p>
-            )}
+            {readOnly && readOnlyReason && <p className="mt-2 mb-0 text-xs text-muted-foreground">{readOnlyReason}</p>}
             {error && (
-                <p className="text-destructive border-destructive/30 bg-destructive/10 mt-3 mb-0 rounded-md border px-4 py-2 text-sm">
+                <p className="mt-3 mb-0 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm text-destructive">
                     {error}
                 </p>
             )}
@@ -260,7 +243,7 @@ function Heading() {
     return (
         <div className="brass-heading mb-4">
             <span className="brass-heading-bar" aria-hidden="true" />
-            <h3 className="text-secondary-foreground m-0 text-sm">Payment ledger</h3>
+            <h3 className="m-0 text-sm text-secondary-foreground">Payment ledger</h3>
         </div>
     );
 }
@@ -344,7 +327,7 @@ function PlanBuilder({
         <div className="flex flex-col gap-4">
             <div className="grid gap-3 sm:grid-cols-4">
                 <div>
-                    <label className="text-muted-foreground mb-1 block text-xs" htmlFor="plan-total">
+                    <label className="mb-1 block text-xs text-muted-foreground" htmlFor="plan-total">
                         Total
                     </label>
                     <input
@@ -352,13 +335,13 @@ function PlanBuilder({
                         type="number"
                         min="0"
                         step="0.01"
-                        className="border-input bg-card h-9 w-full rounded-md border px-3 text-sm"
+                        className="h-9 w-full rounded-md border border-input bg-card px-3 text-sm"
                         value={total}
                         onChange={(e) => setTotal(e.target.value)}
                     />
                 </div>
                 <div>
-                    <label className="text-muted-foreground mb-1 block text-xs" htmlFor="plan-count">
+                    <label className="mb-1 block text-xs text-muted-foreground" htmlFor="plan-count">
                         Payments
                     </label>
                     <input
@@ -366,33 +349,30 @@ function PlanBuilder({
                         type="number"
                         min="1"
                         max="120"
-                        className="border-input bg-card h-9 w-full rounded-md border px-3 text-sm"
+                        className="h-9 w-full rounded-md border border-input bg-card px-3 text-sm"
                         value={count}
                         onChange={(e) => setCount(e.target.value)}
                     />
                 </div>
                 <div>
-                    <label className="text-muted-foreground mb-1 block text-xs" htmlFor="plan-start">
+                    <label className="mb-1 block text-xs text-muted-foreground" htmlFor="plan-start">
                         First due
                     </label>
                     <input
                         id="plan-start"
                         type="date"
-                        className="border-input bg-card h-9 w-full rounded-md border px-3 text-sm"
+                        className="h-9 w-full rounded-md border border-input bg-card px-3 text-sm"
                         value={start}
                         onChange={(e) => setStart(e.target.value)}
                     />
                 </div>
                 <div>
-                    <label
-                        className="text-muted-foreground mb-1 block text-xs"
-                        htmlFor="plan-cadence"
-                    >
+                    <label className="mb-1 block text-xs text-muted-foreground" htmlFor="plan-cadence">
                         Every
                     </label>
                     <select
                         id="plan-cadence"
-                        className="border-input bg-card h-9 w-full rounded-md border px-3 text-sm"
+                        className="h-9 w-full rounded-md border border-input bg-card px-3 text-sm"
                         value={cadence}
                         onChange={(e) => setCadence(e.target.value as PlanCadence)}
                     >
@@ -404,19 +384,19 @@ function PlanBuilder({
             </div>
 
             {rows && (
-                <div className="border-input bg-muted/40 rounded-lg border p-4">
-                    <div className="text-muted-foreground mb-2 text-xs font-semibold uppercase">
+                <div className="rounded-lg border border-input bg-muted/40 p-4">
+                    <div className="mb-2 text-xs font-semibold text-muted-foreground uppercase">
                         Change any row before you save
                     </div>
                     <div className="flex flex-col gap-2">
                         {rows.map((row, i) => (
                             <div key={i} className="flex flex-wrap items-center gap-2">
-                                <span className="text-muted-foreground w-6 text-xs">{i + 1}</span>
+                                <span className="w-6 text-xs text-muted-foreground">{i + 1}</span>
                                 <input
                                     type="number"
                                     min="0"
                                     step="0.01"
-                                    className="border-input bg-card h-9 w-28 rounded-md border px-3 text-sm"
+                                    className="h-9 w-28 rounded-md border border-input bg-card px-3 text-sm"
                                     value={row.amount}
                                     aria-label={`Payment ${i + 1} amount`}
                                     onChange={(e) =>
@@ -429,15 +409,13 @@ function PlanBuilder({
                                 />
                                 <input
                                     type="date"
-                                    className="border-input bg-card h-9 rounded-md border px-3 text-sm"
+                                    className="h-9 rounded-md border border-input bg-card px-3 text-sm"
                                     value={row.dueDate ?? ""}
                                     aria-label={`Payment ${i + 1} due date`}
                                     onChange={(e) =>
                                         setRows(
                                             rows.map((r, j) =>
-                                                j === i
-                                                    ? { ...r, dueDate: e.target.value || null }
-                                                    : r,
+                                                j === i ? { ...r, dueDate: e.target.value || null } : r,
                                             ),
                                         )
                                     }
@@ -454,12 +432,7 @@ function PlanBuilder({
                         <Button onClick={save} disabled={busy}>
                             {busy ? "Saving…" : "Save the plan"}
                         </Button>
-                        <Button
-                            variant="outline"
-                            size="wide"
-                            onClick={() => setRows(null)}
-                            disabled={busy}
-                        >
+                        <Button variant="outline" size="wide" onClick={() => setRows(null)} disabled={busy}>
                             Start over
                         </Button>
                     </>
@@ -472,7 +445,7 @@ function PlanBuilder({
             </div>
 
             {error && (
-                <p className="text-destructive border-destructive/30 bg-destructive/10 m-0 rounded-md border px-4 py-2 text-sm">
+                <p className="m-0 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm text-destructive">
                     {error}
                 </p>
             )}

@@ -9,8 +9,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-const UUID_RE =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** Both systems key on uuids; junk ids skip the DB entirely. */
 export function looksLikeUuid(id: string): boolean {
@@ -25,16 +24,9 @@ export type ShowRouteTarget = "v2" | "legacy";
  * legacy event id, DB hiccup) falls through to legacy — the legacy
  * page still notFound()s ids it doesn't know.
  */
-export async function resolveShowRoute(
-    supabase: SupabaseClient,
-    id: string,
-): Promise<ShowRouteTarget> {
+export async function resolveShowRoute(supabase: SupabaseClient, id: string): Promise<ShowRouteTarget> {
     if (!looksLikeUuid(id)) return "legacy";
-    const { data, error } = await supabase
-        .from("shows")
-        .select("id")
-        .eq("id", id)
-        .maybeSingle();
+    const { data, error } = await supabase.from("shows").select("id").eq("id", id).maybeSingle();
     if (error || !data) return "legacy";
     return "v2";
 }

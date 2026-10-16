@@ -110,12 +110,7 @@ const styles = StyleSheet.create({
 
 export default function DealRecord({ pack }: { pack: EvidencePack }) {
     return (
-        <Document
-            title={pack.title}
-            author="Model Horse Hub"
-            subject="Deal record"
-            creator="Model Horse Hub"
-        >
+        <Document title={pack.title} author="Model Horse Hub" subject="Deal record" creator="Model Horse Hub">
             <Page size="LETTER" style={styles.page} wrap>
                 <Text style={styles.brand}>MODEL HORSE HUB</Text>
                 <Text style={styles.title}>{pack.title}</Text>
@@ -138,10 +133,7 @@ export default function DealRecord({ pack }: { pack: EvidencePack }) {
                             <View>
                                 <View style={styles.tableHeader}>
                                     {section.table.headers.map((h, i) => (
-                                        <Text
-                                            key={i}
-                                            style={i === 0 ? styles.cellNarrow : styles.cell}
-                                        >
+                                        <Text key={i} style={i === 0 ? styles.cellNarrow : styles.cell}>
                                             {h}
                                         </Text>
                                     ))}
@@ -149,10 +141,7 @@ export default function DealRecord({ pack }: { pack: EvidencePack }) {
                                 {section.table.rows.map((row, i) => (
                                     <View key={i} style={styles.tableRow} wrap={false}>
                                         {row.map((cell, j) => (
-                                            <Text
-                                                key={j}
-                                                style={j === 0 ? styles.cellNarrow : styles.cell}
-                                            >
+                                            <Text key={j} style={j === 0 ? styles.cellNarrow : styles.cell}>
                                                 {cell}
                                             </Text>
                                         ))}
@@ -170,12 +159,8 @@ export default function DealRecord({ pack }: { pack: EvidencePack }) {
                 ))}
 
                 <View style={styles.footer} fixed>
-                    <Text>
-                        Model Horse Hub holds no funds and takes no position on this deal.
-                    </Text>
-                    <Text
-                        render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`}
-                    />
+                    <Text>Model Horse Hub holds no funds and takes no position on this deal.</Text>
+                    <Text render={({ pageNumber, totalPages }) => `${pageNumber} / ${totalPages}`} />
                 </View>
             </Page>
         </Document>

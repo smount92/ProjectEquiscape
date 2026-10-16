@@ -10,11 +10,7 @@ import {
     FINISH_TYPES,
     type CsvRowInput,
 } from "@/lib/csv-import/validation";
-import {
-    conditionGradeValues,
-    finishTypeValues,
-    matchImportHeader,
-} from "@/lib/forms/registry";
+import { conditionGradeValues, finishTypeValues, matchImportHeader } from "@/lib/forms/registry";
 
 /* ──────────────────────────────────────────────────────
    CSV import pre-validation — pure logic tests.
@@ -109,10 +105,7 @@ describe("validateCsvRows", () => {
     });
 
     it("numbers rows like the user's spreadsheet (header = row 1)", () => {
-        const errors = validateCsvRows([
-            goodRow,
-            { ...goodRow, name: "Prairie Rose", finish_type: "Chalky" },
-        ]);
+        const errors = validateCsvRows([goodRow, { ...goodRow, name: "Prairie Rose", finish_type: "Chalky" }]);
         expect(errors).toHaveLength(1);
         expect(errors[0].rowNumber).toBe(3); // second data row
         expect(errors[0].name).toBe("Prairie Rose");
@@ -120,9 +113,7 @@ describe("validateCsvRows", () => {
 
     it("writes the plain-English finish message (no enum spew)", () => {
         const errors = validateCsvRows([{ ...goodRow, finish_type: "Glossy" }]);
-        expect(errors[0].message).toBe(
-            "Finish Type must be OF, Custom, or Artist Resin — got 'Glossy'.",
-        );
+        expect(errors[0].message).toBe("Finish Type must be OF, Custom, or Artist Resin — got 'Glossy'.");
     });
 
     it("flags unknown conditions with the allowed list", () => {
@@ -143,19 +134,13 @@ describe("validateCsvRows", () => {
     });
 
     it("collects multiple errors on the same row", () => {
-        const errors = validateCsvRows([
-            { ...goodRow, finish_type: "Nope", estimated_value: "lots" },
-        ]);
+        const errors = validateCsvRows([{ ...goodRow, finish_type: "Nope", estimated_value: "lots" }]);
         expect(errors).toHaveLength(2);
         expect(errors.every((e) => e.rowNumber === 2)).toBe(true);
     });
 
     it("accepts synonym values without erroring (they normalize)", () => {
-        expect(
-            validateCsvRows([
-                { ...goodRow, finish_type: "Original Finish", condition: "NM" },
-            ]),
-        ).toEqual([]);
+        expect(validateCsvRows([{ ...goodRow, finish_type: "Original Finish", condition: "NM" }])).toEqual([]);
     });
 });
 
@@ -181,10 +166,7 @@ describe("findDuplicateNames", () => {
     });
 
     it("counts every colliding CSV row but lists each name once", () => {
-        const result = findDuplicateNames(
-            ["Midnight Dream", "midnight dream", "New Horse"],
-            stable,
-        );
+        const result = findDuplicateNames(["Midnight Dream", "midnight dream", "New Horse"], stable);
         expect(result.rowCount).toBe(2);
         expect(result.names).toEqual(["Midnight Dream"]);
     });

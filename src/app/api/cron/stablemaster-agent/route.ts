@@ -55,28 +55,24 @@ export async function GET(request: NextRequest) {
         // expires, so reading the raw flag here would keep delivering a
         // Pro-only feature to someone who is no longer Pro.
         const { data: users } = await admin.auth.admin.listUsers({ perPage: 1000 });
-        const proUsers = users?.users?.filter(
-            (u) => isPro(entitledTier(u.app_metadata)) && u.email
-        ) || [];
+        const proUsers = users?.users?.filter((u) => isPro(entitledTier(u.app_metadata)) && u.email) || [];
 
         for (const proUser of proUsers) {
             try {
                 // Fetch user profile
-                const { data: profile } = await admin
-                    .from("users")
-                    .select("alias_name")
-                    .eq("id", proUser.id)
-                    .single();
+                const { data: profile } = await admin.from("users").select("alias_name").eq("id", proUser.id).single();
                 const alias = (profile as { alias_name: string } | null)?.alias_name || "Collector";
 
                 // Fetch financial vault data with horse names and catalog info
                 const { data: horses } = await admin
                     .from("user_horses")
-                    .select(`
+                    .select(
+                        `
                         custom_name, catalog_id,
                         catalog_items:catalog_id(title, maker),
                         financial_vault(purchase_price, estimated_current_value)
-                    `)
+                    `,
+                    )
                     .eq("owner_id", proUser.id)
                     .is("deleted_at", null);
 
@@ -102,18 +98,25 @@ export async function GET(request: NextRequest) {
                 }
 
                 // Build portfolio summary for the digest
-                const portfolioSummary = horses.map((h: {
-                    custom_name: string;
-                    catalog_id: string | null;
-                    catalog_items: { title: string; maker: string } | null;
-                    financial_vault: { purchase_price: number | null; estimated_current_value: number | null } | null;
-                }) => ({
-                    name: h.custom_name,
-                    reference: h.catalog_items ? catalogDisplayName(h.catalog_items.maker, h.catalog_items.title) : "Custom",
-                    purchasePrice: h.financial_vault?.purchase_price || null,
-                    estimatedValue: h.financial_vault?.estimated_current_value || null,
-                    marketValue: h.catalog_id ? marketPrices[h.catalog_id] || null : null,
-                }));
+                const portfolioSummary = horses.map(
+                    (h: {
+                        custom_name: string;
+                        catalog_id: string | null;
+                        catalog_items: { title: string; maker: string } | null;
+                        financial_vault: {
+                            purchase_price: number | null;
+                            estimated_current_value: number | null;
+                        } | null;
+                    }) => ({
+                        name: h.custom_name,
+                        reference: h.catalog_items
+                            ? catalogDisplayName(h.catalog_items.maker, h.catalog_items.title)
+                            : "Custom",
+                        purchasePrice: h.financial_vault?.purchase_price || null,
+                        estimatedValue: h.financial_vault?.estimated_current_value || null,
+                        marketValue: h.catalog_id ? marketPrices[h.catalog_id] || null : null,
+                    }),
+                );
 
                 const totalPurchase = portfolioSummary.reduce((s, h) => s + (h.purchasePrice || 0), 0);
                 const totalEstimated = portfolioSummary.reduce((s, h) => s + (h.estimatedValue || 0), 0);

@@ -74,10 +74,7 @@ export interface AdminInsights {
 }
 
 function serviceClient() {
-    return createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    );
+    return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 }
 
 const EMPTY: AdminInsights = {
@@ -112,9 +109,7 @@ export async function getAdminInsights(): Promise<
 
         // The UTC day the series should start on. Computed here rather than
         // in SQL so the chart's x-axis and the RPC windows agree exactly.
-        const startDay = new Date(Date.now() - (SERIES_DAYS - 1) * 86_400_000)
-            .toISOString()
-            .slice(0, 10);
+        const startDay = new Date(Date.now() - (SERIES_DAYS - 1) * 86_400_000).toISOString().slice(0, 10);
 
         // Three reads, issued together. The two RPCs are service_role-only
         // (migration 175) and the table read relies on the service role
@@ -144,14 +139,12 @@ export async function getAdminInsights(): Promise<
             return { success: false, error: firstError.message };
         }
 
-        const activity: ActivityDay[] = ((seriesRes.data ?? []) as Record<string, unknown>[]).map(
-            (r) => ({
-                day: String(r.day ?? ""),
-                memberDau: num(r.member_dau),
-                anonDau: num(r.anon_dau),
-                views: num(r.views),
-            }),
-        );
+        const activity: ActivityDay[] = ((seriesRes.data ?? []) as Record<string, unknown>[]).map((r) => ({
+            day: String(r.day ?? ""),
+            memberDau: num(r.member_dau),
+            anonDau: num(r.anon_dau),
+            views: num(r.views),
+        }));
 
         const totals: EntityTotal[] = ((totalsRes.data ?? []) as Record<string, unknown>[])
             .filter((r) => isEntityType(r.etype))
@@ -266,13 +259,11 @@ export async function getRevenueInsights(): Promise<
             return { success: false, error: firstError.message };
         }
 
-        const rows: SubscriptionCount[] = ((subsRes.data ?? []) as Record<string, unknown>[]).map(
-            (r) => ({
-                tier: String(r.tier ?? ""),
-                status: String(r.status ?? ""),
-                subscribers: num(r.subscribers),
-            }),
-        );
+        const rows: SubscriptionCount[] = ((subsRes.data ?? []) as Record<string, unknown>[]).map((r) => ({
+            tier: String(r.tier ?? ""),
+            status: String(r.status ?? ""),
+            subscribers: num(r.subscribers),
+        }));
 
         return {
             success: true,
@@ -348,7 +339,9 @@ export async function getGrowthInsights(
     const r: GrowthRange = isGrowthRange(range) ? range : 30;
     const now = new Date();
     // Two windows back so the prior-window delta comes off the same rows.
-    const since = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) - (2 * r - 1) * 86_400_000).toISOString();
+    const since = new Date(
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) - (2 * r - 1) * 86_400_000,
+    ).toISOString();
     const db = serviceClient();
 
     const LIVE = ["For Sale", "Open to Offers"];
@@ -356,16 +349,57 @@ export async function getGrowthInsights(
 
     try {
         const [members, horses, records, listings, membersAll, horsesAll, recordsAll, listingsAll] = await Promise.all([
-            pageStamps((a, b) => db.from("users").select("created_at").neq("account_status", "deleted").gte("created_at", since).order("created_at", { ascending: false }).range(a, b)),
-            pageStamps((a, b) => db.from("user_horses").select("created_at").is("deleted_at", null).gte("created_at", since).order("created_at", { ascending: false }).range(a, b)),
-            pageStamps((a, b) => db.from("show_records").select("created_at").gte("created_at", since).order("created_at", { ascending: false }).range(a, b)),
-            pageStamps((a, b) => db.from("user_horses").select("created_at").is("deleted_at", null).in("trade_status", LIVE).gte("created_at", since).order("created_at", { ascending: false }).range(a, b)),
+            pageStamps((a, b) =>
+                db
+                    .from("users")
+                    .select("created_at")
+                    .neq("account_status", "deleted")
+                    .gte("created_at", since)
+                    .order("created_at", { ascending: false })
+                    .range(a, b),
+            ),
+            pageStamps((a, b) =>
+                db
+                    .from("user_horses")
+                    .select("created_at")
+                    .is("deleted_at", null)
+                    .gte("created_at", since)
+                    .order("created_at", { ascending: false })
+                    .range(a, b),
+            ),
+            pageStamps((a, b) =>
+                db
+                    .from("show_records")
+                    .select("created_at")
+                    .gte("created_at", since)
+                    .order("created_at", { ascending: false })
+                    .range(a, b),
+            ),
+            pageStamps((a, b) =>
+                db
+                    .from("user_horses")
+                    .select("created_at")
+                    .is("deleted_at", null)
+                    .in("trade_status", LIVE)
+                    .gte("created_at", since)
+                    .order("created_at", { ascending: false })
+                    .range(a, b),
+            ),
             db.from("users").select("id", { count: "exact", head: true }).neq("account_status", "deleted"),
             db.from("user_horses").select("id", { count: "exact", head: true }).is("deleted_at", null),
             db.from("show_records").select("id", { count: "exact", head: true }),
-            db.from("user_horses").select("id", { count: "exact", head: true }).is("deleted_at", null).in("trade_status", LIVE),
+            db
+                .from("user_horses")
+                .select("id", { count: "exact", head: true })
+                .is("deleted_at", null)
+                .in("trade_status", LIVE),
         ]);
-        const build = (key: GrowthSeries["key"], label: string, list: string[] | null, allTime: number | null): GrowthSeries => {
+        const build = (
+            key: GrowthSeries["key"],
+            label: string,
+            list: string[] | null,
+            allTime: number | null,
+        ): GrowthSeries => {
             const perDay = bucketByDay(list ?? [], r, now);
             return {
                 key,
@@ -441,7 +475,14 @@ export async function getRegistryInsights(): Promise<
     const since = new Date(Date.now() - 90 * 86_400_000).toISOString();
     try {
         const [changes, approved, items, pending, approvedAll, changesAll, ...viewRes] = await Promise.all([
-            pageStamps((a, b) => db.from("catalog_changelog").select("created_at").gte("created_at", since).order("created_at", { ascending: false }).range(a, b)),
+            pageStamps((a, b) =>
+                db
+                    .from("catalog_changelog")
+                    .select("created_at")
+                    .gte("created_at", since)
+                    .order("created_at", { ascending: false })
+                    .range(a, b),
+            ),
             (async () => {
                 const rows: { created_at: string; user_id: string }[] = [];
                 for (let from = 0; from < REGISTRY_ROW_CAP; from += PAGE) {
@@ -461,7 +502,10 @@ export async function getRegistryInsights(): Promise<
             })(),
             db.from("catalog_items").select("id", { count: "exact", head: true }),
             db.from("catalog_suggestions").select("id", { count: "exact", head: true }).eq("status", "pending"),
-            db.from("catalog_suggestions").select("id", { count: "exact", head: true }).in("status", ["approved", "auto_approved"]),
+            db
+                .from("catalog_suggestions")
+                .select("id", { count: "exact", head: true })
+                .in("status", ["approved", "auto_approved"]),
             db.from("catalog_changelog").select("id", { count: "exact", head: true }),
             ...REGISTRY_WINDOWS.map((d) => metrics.rpc("metrics_entity_totals", { p_days: d })),
         ]);

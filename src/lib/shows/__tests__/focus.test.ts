@@ -49,7 +49,18 @@ describe("show focus, derived from the program", () => {
 
     it("caps the scale chips", () => {
         const focus = deriveShowFocus([
-            { axis: "halter", classes: [cls(null, ["Traditional (1:9)", "Classic (1:12)", "Stablemate (1:32)", "Mini Whinnie (1:64)", "Pebbles (1:18)"])] },
+            {
+                axis: "halter",
+                classes: [
+                    cls(null, [
+                        "Traditional (1:9)",
+                        "Classic (1:12)",
+                        "Stablemate (1:32)",
+                        "Mini Whinnie (1:64)",
+                        "Pebbles (1:18)",
+                    ]),
+                ],
+            },
         ]);
         const chips = focusChips(focus);
         expect(chips.slice(0, 1)).toEqual(["Halter"]);

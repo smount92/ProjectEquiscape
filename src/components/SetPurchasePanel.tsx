@@ -41,22 +41,47 @@ export default function SetPurchasePanel({
         let cancelled = false;
         const t = setTimeout(() => {
             listMyHorsesForSet(query, horseId)
-                .then((rows) => { if (!cancelled) setOptions(rows); })
-                .catch(() => { if (!cancelled) setOptions([]); });
+                .then((rows) => {
+                    if (!cancelled) setOptions(rows);
+                })
+                .catch(() => {
+                    if (!cancelled) setOptions([]);
+                });
         }, 250);
-        return () => { cancelled = true; clearTimeout(t); };
+        return () => {
+            cancelled = true;
+            clearTimeout(t);
+        };
     }, [open, query, horseId]);
 
     const link = async () => {
         const n = Number(price);
-        if (!Number.isFinite(n) || n <= 0) { setError("Enter the price paid for the whole set."); return; }
-        if (chosen.length === 0) { setError("Pick at least one other horse from the set."); return; }
+        if (!Number.isFinite(n) || n <= 0) {
+            setError("Enter the price paid for the whole set.");
+            return;
+        }
+        if (chosen.length === 0) {
+            setError("Pick at least one other horse from the set.");
+            return;
+        }
         setBusy(true);
         setError(null);
-        const result = await linkSetPurchase({ horseIds: [horseId, ...chosen.map((c) => c.id)], price: n, label: label || undefined });
+        const result = await linkSetPurchase({
+            horseIds: [horseId, ...chosen.map((c) => c.id)],
+            price: n,
+            label: label || undefined,
+        });
         setBusy(false);
-        if (!result.success) { setError(result.error); return; }
-        setSet({ groupId: result.groupId, label: label.trim() || null, price: n, members: [{ id: horseId, name: horseName }, ...chosen] });
+        if (!result.success) {
+            setError(result.error);
+            return;
+        }
+        setSet({
+            groupId: result.groupId,
+            label: label.trim() || null,
+            price: n,
+            members: [{ id: horseId, name: horseName }, ...chosen],
+        });
         setOpen(false);
         router.refresh();
     };
@@ -66,7 +91,10 @@ export default function SetPurchasePanel({
         setError(null);
         const result = await unlinkSetPurchase(horseId);
         setBusy(false);
-        if (!result.success) { setError(result.error); return; }
+        if (!result.success) {
+            setError(result.error);
+            return;
+        }
         setSet(null);
         router.refresh();
     };
@@ -77,30 +105,49 @@ export default function SetPurchasePanel({
             {set ? (
                 <div className="mt-2 text-sm">
                     <p className="m-0">
-                        <strong>{set.label || `Set of ${set.members.length}`}</strong> · {formatMoney(set.price, currencySymbol, { decimals: 2 })} for the set ·
-                        this horse&apos;s share ≈ {formatMoney(shareOf(set.price, set.members.length), currencySymbol, { decimals: 2 })}
+                        <strong>{set.label || `Set of ${set.members.length}`}</strong> ·{" "}
+                        {formatMoney(set.price, currencySymbol, { decimals: 2 })} for the set · this horse&apos;s share
+                        ≈ {formatMoney(shareOf(set.price, set.members.length), currencySymbol, { decimals: 2 })}
                     </p>
                     <p className="mt-1 mb-0 text-muted-foreground">
                         With{" "}
-                        {set.members.filter((m) => m.id !== horseId).map((m, i, arr) => (
-                            <span key={m.id}>
-                                <Link href={`/stable/${m.id}`} className="underline underline-offset-2">{m.name}</Link>
-                                {i < arr.length - 1 ? ", " : ""}
-                            </span>
-                        ))}
+                        {set.members
+                            .filter((m) => m.id !== horseId)
+                            .map((m, i, arr) => (
+                                <span key={m.id}>
+                                    <Link href={`/stable/${m.id}`} className="underline underline-offset-2">
+                                        {m.name}
+                                    </Link>
+                                    {i < arr.length - 1 ? ", " : ""}
+                                </span>
+                            ))}
                         . The vault total counts the set once.
                     </p>
-                    <Button type="button" variant="outline" size="sm" className="mt-3" onClick={unlink} disabled={busy} id="set-purchase-unlink">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="mt-3"
+                        onClick={unlink}
+                        disabled={busy}
+                        id="set-purchase-unlink"
+                    >
                         Remove this horse from the set
                     </Button>
                 </div>
             ) : !open ? (
                 <div className="mt-2 flex flex-wrap items-center justify-between gap-3 text-sm text-muted-foreground">
                     <p className="m-0">
-                        Paid one price for several models? Link them, and the vault counts that price once
-                        instead of under every horse.
+                        Paid one price for several models? Link them, and the vault counts that price once instead of
+                        under every horse.
                     </p>
-                    <Button type="button" variant="outline" size="sm" onClick={() => setOpen(true)} id="set-purchase-open">
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setOpen(true)}
+                        id="set-purchase-open"
+                    >
                         Link horses bought together
                     </Button>
                 </div>
@@ -108,7 +155,12 @@ export default function SetPurchasePanel({
                 <div className="mt-3 flex flex-col gap-3 text-sm">
                     <label className="flex flex-col gap-1.5 font-semibold">
                         Other horses in the set
-                        <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search your stable by name…" id="set-purchase-search" />
+                        <Input
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
+                            placeholder="Search your stable by name…"
+                            id="set-purchase-search"
+                        />
                     </label>
                     {chosen.length > 0 && (
                         <div className="flex flex-wrap gap-1.5">
@@ -126,27 +178,46 @@ export default function SetPurchasePanel({
                         </div>
                     )}
                     <ul className="m-0 max-h-40 list-none overflow-y-auto rounded-md border border-input p-0">
-                        {options.filter((o) => !chosen.some((c) => c.id === o.id)).map((o) => (
-                            <li key={o.id}>
-                                <button
-                                    type="button"
-                                    onClick={() => setChosen((prev) => [...prev, o])}
-                                    className="w-full cursor-pointer border-0 bg-transparent px-3 py-1.5 text-left hover:bg-muted"
-                                >
-                                    + {o.name}
-                                </button>
-                            </li>
-                        ))}
-                        {options.length === 0 && <li className="px-3 py-1.5 text-muted-foreground">No other horses match.</li>}
+                        {options
+                            .filter((o) => !chosen.some((c) => c.id === o.id))
+                            .map((o) => (
+                                <li key={o.id}>
+                                    <button
+                                        type="button"
+                                        onClick={() => setChosen((prev) => [...prev, o])}
+                                        className="w-full cursor-pointer border-0 bg-transparent px-3 py-1.5 text-left hover:bg-muted"
+                                    >
+                                        + {o.name}
+                                    </button>
+                                </li>
+                            ))}
+                        {options.length === 0 && (
+                            <li className="px-3 py-1.5 text-muted-foreground">No other horses match.</li>
+                        )}
                     </ul>
                     <div className="grid gap-3 sm:grid-cols-2">
                         <label className="flex flex-col gap-1.5 font-semibold">
                             Price paid for the whole set ({currencySymbol})
-                            <Input type="number" inputMode="decimal" step="0.01" min={0} value={price} onChange={(e) => setPrice(e.target.value)} placeholder="120.00" id="set-purchase-price" />
+                            <Input
+                                type="number"
+                                inputMode="decimal"
+                                step="0.01"
+                                min={0}
+                                value={price}
+                                onChange={(e) => setPrice(e.target.value)}
+                                placeholder="120.00"
+                                id="set-purchase-price"
+                            />
                         </label>
                         <label className="flex flex-col gap-1.5 font-semibold">
                             What the set was (optional)
-                            <Input value={label} onChange={(e) => setLabel(e.target.value)} maxLength={80} placeholder="VC Classic Mustang Family" id="set-purchase-label" />
+                            <Input
+                                value={label}
+                                onChange={(e) => setLabel(e.target.value)}
+                                maxLength={80}
+                                placeholder="VC Classic Mustang Family"
+                                id="set-purchase-label"
+                            />
                         </label>
                     </div>
                     {error && <p className="m-0 text-destructive">{error}</p>}
@@ -154,7 +225,9 @@ export default function SetPurchasePanel({
                         <Button type="button" onClick={link} disabled={busy} id="set-purchase-link">
                             {busy ? "Linking…" : `Link ${chosen.length + 1} horses as one purchase`}
                         </Button>
-                        <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={busy}>Cancel</Button>
+                        <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={busy}>
+                            Cancel
+                        </Button>
                     </div>
                 </div>
             )}

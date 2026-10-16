@@ -34,7 +34,13 @@ describe("slugify", () => {
 describe("referenceHref", () => {
     it("prefers stored slugs", () => {
         expect(
-            referenceHref({ id: "abc", maker: "Breyer", title: "Midnattssol", maker_slug: "breyer", slug: "midnattssol" }),
+            referenceHref({
+                id: "abc",
+                maker: "Breyer",
+                title: "Midnattssol",
+                maker_slug: "breyer",
+                slug: "midnattssol",
+            }),
         ).toBe("/reference/breyer/midnattssol");
     });
 

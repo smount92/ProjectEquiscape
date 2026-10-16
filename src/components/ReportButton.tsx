@@ -1,101 +1,96 @@
 "use client";
 
-import { useState, useEffect } from"react";
-import { submitReport, getReportReasons } from"@/app/actions/moderation";
+import { useState, useEffect } from "react";
+import { submitReport, getReportReasons } from "@/app/actions/moderation";
 import { Button } from "@/components/ui/button";
 
 export default function ReportButton({
- targetType,
- targetId,
+    targetType,
+    targetId,
 }: {
- targetType:"post" |"horse" |"user" |"comment" |"message";
- targetId: string;
+    targetType: "post" | "horse" | "user" | "comment" | "message";
+    targetId: string;
 }) {
- const [showForm, setShowForm] = useState(false);
- const [reason, setReason] = useState("");
- const [details, setDetails] = useState("");
- const [saving, setSaving] = useState(false);
- const [done, setDone] = useState(false);
- const [error, setError] = useState("");
- const [reasons, setReasons] = useState<string[]>([]);
+    const [showForm, setShowForm] = useState(false);
+    const [reason, setReason] = useState("");
+    const [details, setDetails] = useState("");
+    const [saving, setSaving] = useState(false);
+    const [done, setDone] = useState(false);
+    const [error, setError] = useState("");
+    const [reasons, setReasons] = useState<string[]>([]);
 
- useEffect(() => {
- if (showForm && reasons.length === 0) {
- getReportReasons().then(setReasons);
- }
- }, [showForm, reasons.length]);
+    useEffect(() => {
+        if (showForm && reasons.length === 0) {
+            getReportReasons().then(setReasons);
+        }
+    }, [showForm, reasons.length]);
 
- const handleSubmit = async () => {
- if (!reason) return;
- setSaving(true);
- setError("");
- const result = await submitReport({
- targetType,
- targetId,
- reason,
- details: details.trim() || undefined,
- });
- if (result.success) {
- setDone(true);
- } else {
- setError(result.error ||"Failed to submit report.");
- }
- setSaving(false);
- };
+    const handleSubmit = async () => {
+        if (!reason) return;
+        setSaving(true);
+        setError("");
+        const result = await submitReport({
+            targetType,
+            targetId,
+            reason,
+            details: details.trim() || undefined,
+        });
+        if (result.success) {
+            setDone(true);
+        } else {
+            setError(result.error || "Failed to submit report.");
+        }
+        setSaving(false);
+    };
 
- if (done) {
- return <span className="text-muted-foreground text-xs">✅ Reported</span>;
- }
+    if (done) {
+        return <span className="text-xs text-muted-foreground">✅ Reported</span>;
+    }
 
- if (!showForm) {
- return (
- <button
- className="cursor-pointer border-none bg-transparent p-1 text-xs text-muted-foreground"
- onClick={() => setShowForm(true)}
- title="Report"
- >
- 🚩 Report
- </button>
- );
- }
+    if (!showForm) {
+        return (
+            <button
+                className="cursor-pointer border-none bg-transparent p-1 text-xs text-muted-foreground"
+                onClick={() => setShowForm(true)}
+                title="Report"
+            >
+                🚩 Report
+            </button>
+        );
+    }
 
- return (
- <div className="bg-card border-input mt-2 rounded-lg border p-4 shadow-md transition-all">
- <select
- className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 mb-2 text-sm"
- value={reason}
- onChange={(e) => setReason(e.target.value)}
- title="Report reason"
- >
- <option value="">Select a reason…</option>
- {reasons.map((r) => (
- <option key={r} value={r}>
- {r}
- </option>
- ))}
- </select>
- <textarea
- className="inline-flex min-h-[36px] w-full rounded-md border border-input bg-transparent px-4 py-2 text-sm no-underline transition-all mb-2"
- placeholder="Additional details (optional)"
- value={details}
- onChange={(e) => setDetails(e.target.value)}
- rows={2}
- maxLength={500}
- />
- {error && <p className="mb-1 text-xs text-[#ef4444]">{error}</p>}
- <div className="flex gap-1">
- <Button
- onClick={handleSubmit}
- disabled={saving || !reason}
- >
- {saving ?"…" :"Submit Report"}
- </Button>
- <Button variant="outline" size="wide"
- onClick={() => setShowForm(false)}
- >
- Cancel
- </Button>
- </div>
- </div>
- );
+    return (
+        <div className="mt-2 rounded-lg border border-input bg-card p-4 shadow-md transition-all">
+            <select
+                className="mb-2 flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                title="Report reason"
+            >
+                <option value="">Select a reason…</option>
+                {reasons.map((r) => (
+                    <option key={r} value={r}>
+                        {r}
+                    </option>
+                ))}
+            </select>
+            <textarea
+                className="mb-2 inline-flex min-h-[36px] w-full rounded-md border border-input bg-transparent px-4 py-2 text-sm no-underline transition-all"
+                placeholder="Additional details (optional)"
+                value={details}
+                onChange={(e) => setDetails(e.target.value)}
+                rows={2}
+                maxLength={500}
+            />
+            {error && <p className="mb-1 text-xs text-[#ef4444]">{error}</p>}
+            <div className="flex gap-1">
+                <Button onClick={handleSubmit} disabled={saving || !reason}>
+                    {saving ? "…" : "Submit Report"}
+                </Button>
+                <Button variant="outline" size="wide" onClick={() => setShowForm(false)}>
+                    Cancel
+                </Button>
+            </div>
+        </div>
+    );
 }

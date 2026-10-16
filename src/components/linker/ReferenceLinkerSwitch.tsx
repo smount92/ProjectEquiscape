@@ -47,16 +47,27 @@ export default function ReferenceLinkerSwitch(props: Props) {
                 {pref === "new" ? (
                     <>
                         <span>
-                            You&apos;re trying the <strong className="text-foreground">new linker</strong>. It runs on the same Registry; tell us where it hesitates.
+                            You&apos;re trying the <strong className="text-foreground">new linker</strong>. It runs on
+                            the same Registry; tell us where it hesitates.
                         </span>
-                        <button type="button" className="cursor-pointer border-0 bg-transparent p-0 text-xs font-semibold text-forest underline" onClick={() => choose("old")} data-testid="linker-return-old">
+                        <button
+                            type="button"
+                            className="cursor-pointer border-0 bg-transparent p-0 text-xs font-semibold text-forest underline"
+                            onClick={() => choose("old")}
+                            data-testid="linker-return-old"
+                        >
                             Return to the old linker
                         </button>
                     </>
                 ) : (
                     <>
                         <span>A new way to find your model is ready to try.</span>
-                        <button type="button" className="cursor-pointer border-0 bg-transparent p-0 text-xs font-semibold text-forest underline" onClick={() => choose("new")} data-testid="linker-try-new">
+                        <button
+                            type="button"
+                            className="cursor-pointer border-0 bg-transparent p-0 text-xs font-semibold text-forest underline"
+                            onClick={() => choose("new")}
+                            data-testid="linker-try-new"
+                        >
                             Try the new linker
                         </button>
                     </>

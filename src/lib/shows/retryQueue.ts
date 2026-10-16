@@ -71,11 +71,7 @@ function persist(storage: StorageLike, showId: string, queue: PendingPlacingSave
  * so only the latest slate per class matters — a newer save for the
  * same class replaces the queued one (keeping its queue position).
  */
-export function enqueueSave(
-    storage: StorageLike,
-    showId: string,
-    save: PendingPlacingSave,
-): PendingPlacingSave[] {
+export function enqueueSave(storage: StorageLike, showId: string, save: PendingPlacingSave): PendingPlacingSave[] {
     const queue = loadQueue(storage, showId);
     const at = queue.findIndex((q) => q.classId === save.classId);
     if (at >= 0) queue[at] = save;
@@ -85,11 +81,7 @@ export function enqueueSave(
 }
 
 /** Drop one class's queued save (e.g. it saved through live). */
-export function removeSave(
-    storage: StorageLike,
-    showId: string,
-    classId: string,
-): PendingPlacingSave[] {
+export function removeSave(storage: StorageLike, showId: string, classId: string): PendingPlacingSave[] {
     const queue = loadQueue(storage, showId).filter((q) => q.classId !== classId);
     persist(storage, showId, queue);
     return queue;
@@ -116,9 +108,7 @@ export interface FlushResult {
 export async function flushQueue(
     storage: StorageLike,
     showId: string,
-    sender: (
-        save: PendingPlacingSave,
-    ) => Promise<{ success: boolean; error?: string }>,
+    sender: (save: PendingPlacingSave) => Promise<{ success: boolean; error?: string }>,
 ): Promise<FlushResult> {
     const queue = loadQueue(storage, showId);
     const flushed: string[] = [];

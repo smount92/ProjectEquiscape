@@ -97,8 +97,7 @@ export default async function OpengraphImage({ params }: { params: Promise<{ id:
 
     // Host alias via the anon-granted RPC (same as the page).
     const aliases = await getAliases(anon, [show.host_id as string]);
-    const hostAlias =
-        aliases instanceof Map ? (aliases.get(show.host_id as string) ?? "unknown") : "unknown";
+    const hostAlias = aliases instanceof Map ? (aliases.get(show.host_id as string) ?? "unknown") : "unknown";
 
     // Enterable classlist size — the division→section→class chain,
     // cancelled/combined excluded (mirrors getPublicShows).
@@ -106,10 +105,7 @@ export default async function OpengraphImage({ params }: { params: Promise<{ id:
     const { data: divisionRows } = await anon.from("show_divisions").select("id").eq("show_id", id);
     const divisionIds = (divisionRows ?? []).map((d: { id: string }) => d.id);
     if (divisionIds.length > 0) {
-        const { data: sectionRows } = await anon
-            .from("show_sections")
-            .select("id")
-            .in("division_id", divisionIds);
+        const { data: sectionRows } = await anon.from("show_sections").select("id").in("division_id", divisionIds);
         const sectionIds = (sectionRows ?? []).map((s: { id: string }) => s.id);
         if (sectionIds.length > 0) {
             const { data: classRows } = await anon
@@ -147,111 +143,109 @@ export default async function OpengraphImage({ params }: { params: Promise<{ id:
         : null;
 
     return new ImageResponse(
-        (
+        <div
+            style={{
+                width: "100%",
+                height: "100%",
+                display: "flex",
+                backgroundColor: PARCHMENT,
+                padding: 40,
+            }}
+        >
             <div
                 style={{
-                    width: "100%",
-                    height: "100%",
+                    flex: 1,
                     display: "flex",
-                    backgroundColor: PARCHMENT,
-                    padding: 40,
+                    flexDirection: "column",
+                    justifyContent: "space-between",
+                    border: `4px solid ${FOREST}`,
+                    borderRadius: 18,
+                    padding: "44px 56px",
                 }}
             >
+                {/* Header row: wordmark + mode stamp */}
                 <div
                     style={{
-                        flex: 1,
                         display: "flex",
-                        flexDirection: "column",
+                        alignItems: "center",
                         justifyContent: "space-between",
-                        border: `4px solid ${FOREST}`,
-                        borderRadius: 18,
-                        padding: "44px 56px",
                     }}
                 >
-                    {/* Header row: wordmark + mode stamp */}
+                    <Wordmark />
+                    <div
+                        style={{
+                            display: "flex",
+                            border: `3px solid ${FOREST}`,
+                            borderRadius: 10,
+                            padding: "6px 22px",
+                            fontSize: 28,
+                            fontWeight: 700,
+                            letterSpacing: "0.14em",
+                            color: FOREST,
+                            transform: "rotate(-2deg)",
+                        }}
+                    >
+                        {isLive ? "LIVE SHOW" : "ONLINE SHOW"}
+                    </div>
+                </div>
+
+                {/* Title + host */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+                    <div
+                        style={{
+                            display: "flex",
+                            fontSize: show.title.length > 40 ? 56 : 68,
+                            fontWeight: 800,
+                            lineHeight: 1.1,
+                            color: INK,
+                        }}
+                    >
+                        {show.title}
+                    </div>
+                    <div
+                        style={{
+                            display: "flex",
+                            fontSize: 32,
+                            color: FOREST,
+                            fontWeight: 600,
+                        }}
+                    >
+                        Hosted by @{hostAlias}
+                    </div>
+                </div>
+
+                {/* Footer facts over a brass rule */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
+                    <div
+                        style={{
+                            display: "flex",
+                            height: 4,
+                            width: "100%",
+                            backgroundColor: BRASS,
+                            borderRadius: 2,
+                        }}
+                    />
                     <div
                         style={{
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "space-between",
+                            fontSize: 30,
+                            color: INK,
                         }}
                     >
-                        <Wordmark />
-                        <div
-                            style={{
-                                display: "flex",
-                                border: `3px solid ${FOREST}`,
-                                borderRadius: 10,
-                                padding: "6px 22px",
-                                fontSize: 28,
-                                fontWeight: 700,
-                                letterSpacing: "0.14em",
-                                color: FOREST,
-                                transform: "rotate(-2deg)",
-                            }}
-                        >
-                            {isLive ? "LIVE SHOW" : "ONLINE SHOW"}
+                        <div style={{ display: "flex" }}>
+                            {dateLabel
+                                ? `${isLive ? "Show date" : "Entries close"} — ${dateLabel}`
+                                : "Dates on the show page"}
                         </div>
-                    </div>
-
-                    {/* Title + host */}
-                    <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-                        <div
-                            style={{
-                                display: "flex",
-                                fontSize: show.title.length > 40 ? 56 : 68,
-                                fontWeight: 800,
-                                lineHeight: 1.1,
-                                color: INK,
-                            }}
-                        >
-                            {show.title}
-                        </div>
-                        <div
-                            style={{
-                                display: "flex",
-                                fontSize: 32,
-                                color: FOREST,
-                                fontWeight: 600,
-                            }}
-                        >
-                            Hosted by @{hostAlias}
-                        </div>
-                    </div>
-
-                    {/* Footer facts over a brass rule */}
-                    <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
-                        <div
-                            style={{
-                                display: "flex",
-                                height: 4,
-                                width: "100%",
-                                backgroundColor: BRASS,
-                                borderRadius: 2,
-                            }}
-                        />
-                        <div
-                            style={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                                fontSize: 30,
-                                color: INK,
-                            }}
-                        >
-                            <div style={{ display: "flex" }}>
-                                {dateLabel
-                                    ? `${isLive ? "Show date" : "Entries close"} — ${dateLabel}`
-                                    : "Dates on the show page"}
-                            </div>
-                            <div style={{ display: "flex", color: FOREST, fontWeight: 700 }}>
-                                {classCount} class{classCount === 1 ? "" : "es"}
-                            </div>
+                        <div style={{ display: "flex", color: FOREST, fontWeight: 700 }}>
+                            {classCount} class{classCount === 1 ? "" : "es"}
                         </div>
                     </div>
                 </div>
             </div>
-        ),
+        </div>,
         size,
     );
 }

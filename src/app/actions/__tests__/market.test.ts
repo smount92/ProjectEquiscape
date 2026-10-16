@@ -135,11 +135,7 @@ describe("searchMarketPrices", () => {
             ],
             error: null,
         });
-        catalogRows = [
-            catalogRow({ id: "cat-1" }),
-            catalogRow({ id: "cat-2" }),
-            catalogRow({ id: "cat-3" }),
-        ];
+        catalogRows = [catalogRow({ id: "cat-1" }), catalogRow({ id: "cat-2" }), catalogRow({ id: "cat-3" })];
 
         const of = await searchMarketPrices(undefined, { finishType: "OF" });
         expect(of.items.map((i) => i.catalogId).sort()).toEqual(["cat-1", "cat-3"]);

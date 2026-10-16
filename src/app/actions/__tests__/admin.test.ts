@@ -49,10 +49,8 @@ function makeQuery(result: MockResult): MockQuery {
     }
     q.single = vi.fn(async () => result);
     q.maybeSingle = vi.fn(async () => result);
-    (q as Record<string, unknown>).then = (
-        resolve: (v: MockResult) => unknown,
-        reject?: (e: unknown) => unknown,
-    ) => Promise.resolve(result).then(resolve, reject);
+    (q as Record<string, unknown>).then = (resolve: (v: MockResult) => unknown, reject?: (e: unknown) => unknown) =>
+        Promise.resolve(result).then(resolve, reject);
     return q;
 }
 
@@ -178,9 +176,7 @@ describe("resolveLegacySuggestion — the Content tab jam", () => {
         const result = await resolveLegacySuggestion("sug-1", "approve");
 
         expect(result.success).toBe(true);
-        const updateCall = queriesFor("database_suggestions").find((q) =>
-            q.update.mock.calls.length > 0,
-        );
+        const updateCall = queriesFor("database_suggestions").find((q) => q.update.mock.calls.length > 0);
         expect(updateCall).toBeDefined();
         const payload = updateCall!.update.mock.calls[0][0] as Record<string, unknown>;
         expect(payload).not.toHaveProperty("reviewed_at");
@@ -370,11 +366,7 @@ describe("getAdminPulse", () => {
     });
 
     it("counts open-show entries only for shows that are actually open", async () => {
-        queue(
-            "shows",
-            { data: [{ id: "show-1" }, { id: "show-2" }], error: null },
-            { count: 4, error: null },
-        );
+        queue("shows", { data: [{ id: "show-1" }, { id: "show-2" }], error: null }, { count: 4, error: null });
         queue("show_class_entries", { count: 37, error: null });
 
         const result = await getAdminPulse();
@@ -477,12 +469,7 @@ describe("getEnvFlagStatus", () => {
         expect(byKey.RESEND_API_KEY.present).toBe(false);
         expect(byKey.SUPABASE_SERVICE_ROLE_KEY.present).toBe(true);
         // No value-shaped field smuggled onto the row at all.
-        expect(Object.keys(byKey.STRIPE_SECRET_KEY)).toEqual([
-            "key",
-            "present",
-            "label",
-            "impact",
-        ]);
+        expect(Object.keys(byKey.STRIPE_SECRET_KEY)).toEqual(["key", "present", "label", "impact"]);
     });
 
     it("treats a blank key as not set — an empty string is not configuration", async () => {
@@ -490,9 +477,7 @@ describe("getEnvFlagStatus", () => {
         const result = await getEnvFlagStatus();
         expect(result.success).toBe(true);
         if (!result.success) return;
-        expect(result.status.secrets.find((s) => s.key === "STRIPE_SECRET_KEY")?.present).toBe(
-            false,
-        );
+        expect(result.status.secrets.find((s) => s.key === "STRIPE_SECRET_KEY")?.present).toBe(false);
     });
 
     it("reads each flag through the app's own gate — only the literal '1' is on", async () => {
@@ -580,10 +565,7 @@ describe("findCatalogDuplicates", () => {
         expect(queriesFor("user_wishlists")).toHaveLength(1);
         expect(queriesFor("catalog_changelog")).toHaveLength(1);
         // Every tally is a batched `in`.
-        expect(queriesFor("user_horses")[0].in).toHaveBeenCalledWith("catalog_id", [
-            "cat-original",
-            "cat-retry",
-        ]);
+        expect(queriesFor("user_horses")[0].in).toHaveBeenCalledWith("catalog_id", ["cat-original", "cat-retry"]);
     });
 
     it("is read-only — the merge action is the only write in this flow", async () => {
@@ -948,7 +930,13 @@ describe("getShowForSanctioningReview", () => {
         });
         queue("show_class_entries", { data: [], error: null });
         queue("users", { data: { alias_name: "mistymeadows" }, error: null });
-        queue("shows", { data: [{ id: SHOW, status: "draft" }, { id: "older", status: "completed" }], error: null });
+        queue("shows", {
+            data: [
+                { id: SHOW, status: "draft" },
+                { id: "older", status: "completed" },
+            ],
+            error: null,
+        });
         queue("show_staff", { data: [{ user_id: "host-1", role: "host" }], error: null });
 
         const result = await getShowForSanctioningReview(SHOW);

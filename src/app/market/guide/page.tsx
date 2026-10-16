@@ -137,14 +137,14 @@ export default async function BlueBookPage({
                 </Suspense>
 
                 {items.length === 0 ? (
-                    <div className="bg-card border-input rounded-lg border p-12 text-center shadow-md transition-all">
+                    <div className="rounded-lg border border-input bg-card p-12 text-center shadow-md transition-all">
                         <div className="mb-4 text-[3rem]">📊</div>
                         <h3 className="mb-2">
                             {query || itemType !== "all"
                                 ? "No matching price data"
                                 : "The Blue Book Grows With Every Sale"}
                         </h3>
-                        <p className="text-secondary-foreground mx-auto max-w-[400]">
+                        <p className="mx-auto max-w-[400] text-secondary-foreground">
                             {query || itemType !== "all"
                                 ? "Try broadening your search or changing the filter."
                                 : "Complete a transaction to contribute market data. Prices appear here after verified sales."}
@@ -153,7 +153,7 @@ export default async function BlueBookPage({
                 ) : (
                     <>
                         <div className="mb-4">
-                            <span className="text-muted-foreground text-sm">
+                            <span className="text-sm text-muted-foreground">
                                 {total} item{total !== 1 ? "s" : ""} with price data
                             </span>
                         </div>
@@ -162,16 +162,14 @@ export default async function BlueBookPage({
                             {items.map((item) => {
                                 const key = `${item.catalogId}::${item.finishType}::${item.lifeStage}`;
                                 const card = (
-                                    <div className="bg-card border-input rounded-lg border p-6 shadow-md transition-all transition-colors">
+                                    <div className="rounded-lg border border-input bg-card p-6 shadow-md transition-all transition-colors">
                                         <div className="flex items-center gap-3">
-                                            <span className="flex-shrink-0 text-2xl">
-                                                {typeIcon(item.itemType)}
-                                            </span>
+                                            <span className="flex-shrink-0 text-2xl">{typeIcon(item.itemType)}</span>
                                             <div className="min-w-0 flex-1">
-                                                <span className="text-foreground block truncate font-semibold">
+                                                <span className="block truncate font-semibold text-foreground">
                                                     {item.title}
                                                 </span>
-                                                <span className="text-muted-foreground block text-sm">
+                                                <span className="block text-sm text-muted-foreground">
                                                     {item.maker}
                                                     {item.scale ? ` · ${item.scale}` : ""}
                                                     {item.finishType ? ` · ${item.finishType}` : ""}
@@ -189,20 +187,20 @@ export default async function BlueBookPage({
                                         </div>
 
                                         <div className="mt-4">
-                                            <div className="text-forest text-lg font-bold">
+                                            <div className="text-lg font-bold text-forest">
                                                 {formatCurrency(item.lowestPrice)}
                                                 {item.lowestPrice !== item.highestPrice
                                                     ? ` – ${formatCurrency(item.highestPrice)}`
                                                     : ""}
                                             </div>
-                                            <div className="text-muted-foreground mt-[2px] text-sm">
+                                            <div className="mt-[2px] text-sm text-muted-foreground">
                                                 <span>Avg: {formatCurrency(item.averagePrice)}</span>
                                                 <span> · Median: {formatCurrency(item.medianPrice)}</span>
                                             </div>
                                         </div>
 
-                                        <div className="border-input mt-4 flex items-center justify-between border-t pt-4">
-                                            <span className="text-forest bg-success/10 inline-flex items-center rounded-full px-[8px] py-[2px] font-semibold">
+                                        <div className="mt-4 flex items-center justify-between border-t border-input pt-4">
+                                            <span className="inline-flex items-center rounded-full bg-success/10 px-[8px] py-[2px] font-semibold text-forest">
                                                 {item.transactionVolume} sale
                                                 {item.transactionVolume !== 1 ? "s" : ""}
                                             </span>
@@ -235,7 +233,7 @@ export default async function BlueBookPage({
                         </div>
 
                         {totalPages > 1 && (
-                            <div className="border-input mt-8 flex flex-wrap items-center justify-between gap-2 border-t pt-6">
+                            <div className="mt-8 flex flex-wrap items-center justify-between gap-2 border-t border-input pt-6">
                                 {page > 1 ? (
                                     <Button asChild variant="outline" size="wide">
                                         <Link href={buildPageUrl(page - 1)}>← Previous</Link>
@@ -245,7 +243,7 @@ export default async function BlueBookPage({
                                         ← Previous
                                     </Button>
                                 )}
-                                <span className="text-muted-foreground text-sm">
+                                <span className="text-sm text-muted-foreground">
                                     Page {page} of {totalPages} ({total} items)
                                 </span>
                                 {page < totalPages ? (
@@ -263,11 +261,11 @@ export default async function BlueBookPage({
                 )}
 
                 {/* Back to the listings the guide exists to price. */}
-                <div className="border-input bg-card/50 mt-10 rounded-lg border p-6 text-center backdrop-blur-sm">
+                <div className="mt-10 rounded-lg border border-input bg-card/50 p-6 text-center backdrop-blur-sm">
                     <h3 className="mb-1 font-serif text-lg font-bold">Shopping, not appraising?</h3>
-                    <p className="text-secondary-foreground mb-4 text-sm">
-                        Every horse for sale on Model Horse Hub carries its show record, condition and
-                        ownership history on its passport.
+                    <p className="mb-4 text-sm text-secondary-foreground">
+                        Every horse for sale on Model Horse Hub carries its show record, condition and ownership history
+                        on its passport.
                     </p>
                     <Button asChild variant="outline" size="wide">
                         <Link href="/market">Browse the marketplace →</Link>
@@ -277,20 +275,17 @@ export default async function BlueBookPage({
                 {/* Bought a one-off report? It has a home now — purchased
                     reports were recorded but never listed anywhere (audit). */}
                 <div className="mt-6 text-center">
-                    <Link
-                        href="/market/reports"
-                        className="text-muted-foreground text-xs no-underline hover:underline"
-                    >
+                    <Link href="/market/reports" className="text-xs text-muted-foreground no-underline hover:underline">
                         📄 My reports — the ones you&rsquo;ve purchased
                     </Link>
                 </div>
 
                 {/* Disclaimer */}
-                <div className="border-input bg-card/50 mt-6 rounded-lg border p-6 text-xs backdrop-blur-sm">
+                <div className="mt-6 rounded-lg border border-input bg-card/50 p-6 text-xs backdrop-blur-sm">
                     <p>
-                        📋 Prices based on completed transactions recorded on Model Horse Hub. This is not
-                        a professional appraisal. Market conditions vary. Always research current listings
-                        before buying or selling.
+                        📋 Prices based on completed transactions recorded on Model Horse Hub. This is not a
+                        professional appraisal. Market conditions vary. Always research current listings before buying
+                        or selling.
                     </p>
                 </div>
             </div>

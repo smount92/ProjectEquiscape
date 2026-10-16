@@ -35,10 +35,7 @@ describe("deriveReadinessState — the first-entry ramp", () => {
     });
 
     it("all horses private → the private bucket, with counts", () => {
-        const state = deriveReadinessState(
-            counts({ totalHorses: 3, publicHorses: 0, horsesWithPhotos: 2 }),
-            "online",
-        );
+        const state = deriveReadinessState(counts({ totalHorses: 3, publicHorses: 0, horsesWithPhotos: 2 }), "online");
         expect(state.kind).toBe("gaps");
         if (state.kind !== "gaps") return;
         expect(state.privateCount).toBe(3);
@@ -61,9 +58,7 @@ describe("deriveReadinessState — the first-entry ramp", () => {
         expect(state.kind).toBe("gaps");
         if (state.kind !== "gaps") return;
         expect(state.publicNoPhotoCount).toBe(2);
-        expect(state.messages).toEqual([
-            "2 public horses have no photo yet — online shows judge the photo.",
-        ]);
+        expect(state.messages).toEqual(["2 public horses have no photo yet — online shows judge the photo."]);
     });
 
     it("online: both buckets can appear together", () => {
@@ -81,10 +76,7 @@ describe("deriveReadinessState — the first-entry ramp", () => {
     });
 
     it("live mode never nags about photos", () => {
-        const state = deriveReadinessState(
-            counts({ totalHorses: 4, publicHorses: 0, horsesWithPhotos: 0 }),
-            "live",
-        );
+        const state = deriveReadinessState(counts({ totalHorses: 4, publicHorses: 0, horsesWithPhotos: 0 }), "live");
         expect(state.kind).toBe("gaps");
         if (state.kind !== "gaps") return;
         expect(state.messages.every((m) => !m.includes("photo"))).toBe(true);

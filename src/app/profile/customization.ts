@@ -329,10 +329,7 @@ function cleanSections(value: unknown): ProfileSection[] {
 export function sanitizeCustomization(raw: unknown): ProfileCustomization {
     if (!raw || typeof raw !== "object" || Array.isArray(raw)) return defaultCustomization();
     const input = raw as Record<string, unknown>;
-    const theme =
-        typeof input.theme === "string" && THEME_BY_ID.has(input.theme)
-            ? input.theme
-            : DEFAULT_THEME_ID;
+    const theme = typeof input.theme === "string" && THEME_BY_ID.has(input.theme) ? input.theme : DEFAULT_THEME_ID;
     return {
         theme,
         tagline: cleanLine(input.tagline, MAX_TAGLINE),
@@ -367,10 +364,7 @@ export function sectionVisible(c: ProfileCustomization, section: ProfileSection)
  * stored list is a wish, not a guarantee, so it never has to be
  * cleaned up when a horse changes hands.
  */
-export function applyFeaturedOrder<T extends { id: string }>(
-    horses: readonly T[],
-    featured: readonly string[],
-): T[] {
+export function applyFeaturedOrder<T extends { id: string }>(horses: readonly T[], featured: readonly string[]): T[] {
     if (featured.length === 0) return [...horses];
     const byId = new Map(horses.map((h) => [h.id, h]));
     const lead: T[] = [];

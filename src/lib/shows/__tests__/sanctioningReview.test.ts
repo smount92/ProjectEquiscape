@@ -23,8 +23,7 @@ function input(overrides: Partial<SanctioningCheckInput> = {}): SanctioningCheck
     };
 }
 
-const byKey = (checks: ReturnType<typeof buildSanctioningChecks>) =>
-    Object.fromEntries(checks.map((c) => [c.key, c]));
+const byKey = (checks: ReturnType<typeof buildSanctioningChecks>) => Object.fromEntries(checks.map((c) => [c.key, c]));
 
 describe("buildSanctioningChecks", () => {
     it("a complete judged online draft reads green, with the draft as information", () => {
@@ -88,9 +87,7 @@ describe("buildSanctioningChecks", () => {
     });
 
     it("a first-time host is information, never a warning", () => {
-        const c = byKey(
-            buildSanctioningChecks(input({ hostCompletedShows: 0, hostTotalShows: 1 })),
-        );
+        const c = byKey(buildSanctioningChecks(input({ hostCompletedShows: 0, hostTotalShows: 1 })));
         expect(c.host.level).toBe("info");
         expect(c.host.label).toBe("First show from this host");
     });

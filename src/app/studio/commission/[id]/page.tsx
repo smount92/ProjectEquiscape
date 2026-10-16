@@ -9,12 +9,7 @@ import PageMasthead from "@/components/layouts/PageMasthead";
 import RatingForm from "@/components/RatingForm";
 import ArtistControls from "@/components/studio/ArtistControls";
 import CommissionActions from "@/components/studio/CommissionActions";
-import {
-    CommissionPill,
-    LedgerRow,
-    OffPlatformNote,
-    Panel,
-} from "@/components/studio/StudioBits";
+import { CommissionPill, LedgerRow, OffPlatformNote, Panel } from "@/components/studio/StudioBits";
 import VaultHandoff from "@/components/studio/VaultHandoff";
 import ClientHorseLink from "@/components/studio/ClientHorseLink";
 import WipThread from "@/components/studio/WipThread";
@@ -83,12 +78,7 @@ export default async function CommissionPage({
 
     let party: Party | null = null;
     if (!isGuest && userId) {
-        party =
-            commission.artistId === userId
-                ? "artist"
-                : commission.clientId === userId
-                  ? "client"
-                  : null;
+        party = commission.artistId === userId ? "artist" : commission.clientId === userId ? "client" : null;
         if (!party) notFound();
     }
 
@@ -114,9 +104,7 @@ export default async function CommissionPage({
         createdAt: string;
     } | null = null;
     const targetId = isArtist ? commission.clientId : commission.artistId;
-    const targetAlias = isArtist
-        ? (commission.clientAlias ?? "the commissioner")
-        : commission.artistAlias;
+    const targetAlias = isArtist ? (commission.clientAlias ?? "the commissioner") : commission.artistAlias;
 
     if (!isGuest && (commission.status === "delivered" || commission.status === "received") && targetId && userId) {
         const { data: txn } = await supabase
@@ -150,9 +138,7 @@ export default async function CommissionPage({
         }
     }
 
-    const counterparty = isArtist
-        ? `@${commission.clientAlias ?? "guest"}`
-        : `@${commission.artistAlias}`;
+    const counterparty = isArtist ? `@${commission.clientAlias ?? "guest"}` : `@${commission.artistAlias}`;
 
     return (
         <ExplorerLayout noHeader>
@@ -161,33 +147,28 @@ export default async function CommissionPage({
                 icon="📜"
                 title={commission.commissionType}
                 subtitle={
-                    isGuest
-                        ? `Shared by @${commission.artistAlias}`
-                        : `${isArtist ? "For" : "With"} ${counterparty}`
+                    isGuest ? `Shared by @${commission.artistAlias}` : `${isArtist ? "For" : "With"} ${counterparty}`
                 }
                 backHref={isArtist ? "/studio/dashboard" : isGuest ? "/studio" : "/studio/my-commissions"}
                 backLabel={isArtist ? "Dashboard" : isGuest ? "The Art Studio" : "My commissions"}
                 actions={
                     isArtist && commission.guestToken ? (
-                        <GuestLinkButton
-                            commissionId={commission.id}
-                            guestToken={commission.guestToken}
-                        />
+                        <GuestLinkButton commissionId={commission.id} guestToken={commission.guestToken} />
                     ) : null
                 }
             />
 
             {/* ── Where it stands ── */}
-            <div className="border-input bg-card mb-6 rounded-lg border p-6 shadow-md">
+            <div className="mb-6 rounded-lg border border-input bg-card p-6 shadow-md">
                 <div className="mb-3 flex flex-wrap items-center gap-2">
                     <CommissionPill status={commission.status} />
                     {commission.isWaitlist && commission.status === "requested" && (
-                        <span className="text-muted-foreground text-xs">waitlist request</span>
+                        <span className="text-xs text-muted-foreground">waitlist request</span>
                     )}
                     {commission.modelReceived && (
-                        <span className="text-muted-foreground text-xs">📦 model received</span>
+                        <span className="text-xs text-muted-foreground">📦 model received</span>
                     )}
-                    <span className="text-muted-foreground ml-auto text-xs">
+                    <span className="ml-auto text-xs text-muted-foreground">
                         Opened{" "}
                         {new Date(commission.createdAt).toLocaleDateString("en-US", {
                             month: "short",
@@ -198,7 +179,7 @@ export default async function CommissionPage({
                 </div>
 
                 <div
-                    className="bg-muted h-1.5 overflow-hidden rounded-full"
+                    className="h-1.5 overflow-hidden rounded-full bg-muted"
                     role="progressbar"
                     aria-valuenow={Math.round(progress(commission.status) * 100)}
                     aria-valuemin={0}
@@ -206,7 +187,7 @@ export default async function CommissionPage({
                     aria-label="Commission progress"
                 >
                     <div
-                        className="bg-studio h-full rounded-full transition-all"
+                        className="h-full rounded-full bg-studio transition-all"
                         style={{ width: `${Math.max(4, progress(commission.status) * 100)}%` }}
                     />
                 </div>
@@ -214,7 +195,13 @@ export default async function CommissionPage({
 
             <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
                 <div className="grid gap-6">
-                    {party && <CommissionActions commission={commission} party={party} defaultCompletion={defaultCompletion} />}
+                    {party && (
+                        <CommissionActions
+                            commission={commission}
+                            party={party}
+                            defaultCompletion={defaultCompletion}
+                        />
+                    )}
 
                     {/* The commissioner links their own horse — the reliable
                         path (they always see their own stable). Offered until
@@ -264,13 +251,13 @@ export default async function CommissionPage({
                 <div className="grid gap-6">
                     {/* ── The brief ── */}
                     <Panel title="The brief" icon="📝">
-                        <p className="text-secondary-foreground m-0 text-sm leading-relaxed whitespace-pre-wrap">
+                        <p className="m-0 text-sm leading-relaxed whitespace-pre-wrap text-secondary-foreground">
                             {commission.description}
                         </p>
 
                         {commission.referenceImages.length > 0 && (
                             <div className="mt-4">
-                                <span className="text-muted-foreground mb-2 block text-xs font-semibold">
+                                <span className="mb-2 block text-xs font-semibold text-muted-foreground">
                                     References
                                 </span>
                                 <div className="flex flex-wrap gap-2">
@@ -280,7 +267,7 @@ export default async function CommissionPage({
                                             href={url}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="border-input block h-20 w-20 overflow-hidden rounded-md border"
+                                            className="block h-20 w-20 overflow-hidden rounded-md border border-input"
                                         >
                                             {/* eslint-disable-next-line @next/next/no-img-element */}
                                             <img
@@ -296,14 +283,9 @@ export default async function CommissionPage({
                         )}
 
                         <div className="mt-4 grid">
-                            {commission.serviceScale && (
-                                <LedgerRow label="Scale" value={commission.serviceScale} />
-                            )}
+                            {commission.serviceScale && <LedgerRow label="Scale" value={commission.serviceScale} />}
                             {commission.budgetAmount != null && (
-                                <LedgerRow
-                                    label="Their budget"
-                                    value={formatMoney(commission.budgetAmount)}
-                                />
+                                <LedgerRow label="Their budget" value={formatMoney(commission.budgetAmount)} />
                             )}
                             {commission.horseId && (
                                 <LedgerRow
@@ -322,16 +304,11 @@ export default async function CommissionPage({
                     </Panel>
 
                     {/* ── The agreement ── */}
-                    <Panel
-                        title={commission.acceptedAt ? "The agreement" : "The quote"}
-                        icon="🤝"
-                    >
+                    <Panel title={commission.acceptedAt ? "The agreement" : "The quote"} icon="🤝">
                         {commission.agreedPrice == null ? (
-                            <p className="text-muted-foreground m-0 text-sm">
+                            <p className="m-0 text-sm text-muted-foreground">
                                 No quote yet.{" "}
-                                {isArtist
-                                    ? "Send one and the commissioner decides."
-                                    : "The artist will send one."}
+                                {isArtist ? "Send one and the commissioner decides." : "The artist will send one."}
                             </p>
                         ) : (
                             <>
@@ -354,17 +331,12 @@ export default async function CommissionPage({
                                         />
                                     )}
                                     {commission.revisionsIncluded > 0 && (
-                                        <LedgerRow
-                                            label="Revisions"
-                                            value={revisions.label}
-                                        />
+                                        <LedgerRow label="Revisions" value={revisions.label} />
                                     )}
                                     {commission.acceptedAt && (
                                         <LedgerRow
                                             label="Agreed on"
-                                            value={new Date(
-                                                commission.acceptedAt,
-                                            ).toLocaleDateString("en-US", {
+                                            value={new Date(commission.acceptedAt).toLocaleDateString("en-US", {
                                                 month: "short",
                                                 day: "numeric",
                                                 year: "numeric",
@@ -374,7 +346,7 @@ export default async function CommissionPage({
                                 </div>
 
                                 {commission.quoteNote && (
-                                    <p className="text-secondary-foreground mt-4 text-sm leading-relaxed whitespace-pre-wrap">
+                                    <p className="mt-4 text-sm leading-relaxed whitespace-pre-wrap text-secondary-foreground">
                                         {commission.quoteNote}
                                     </p>
                                 )}
@@ -383,15 +355,13 @@ export default async function CommissionPage({
                                     changed their studio terms since; these
                                     are the ones that were agreed. */}
                                 {snapshot && (
-                                    <div className="border-input mt-4 border-t pt-4">
-                                        <div className="text-muted-foreground mb-2 text-xs font-semibold">
+                                    <div className="mt-4 border-t border-input pt-4">
+                                        <div className="mb-2 text-xs font-semibold text-muted-foreground">
                                             TERMS AS AGREED
                                             {snapshot.snapshotAt && (
                                                 <>
                                                     {" · "}
-                                                    {new Date(
-                                                        snapshot.snapshotAt,
-                                                    ).toLocaleDateString("en-US", {
+                                                    {new Date(snapshot.snapshotAt).toLocaleDateString("en-US", {
                                                         month: "short",
                                                         day: "numeric",
                                                         year: "numeric",
@@ -401,30 +371,23 @@ export default async function CommissionPage({
                                         </div>
                                         <div className="grid">
                                             {termsLines(snapshot).map((line) => (
-                                                <LedgerRow
-                                                    key={line.label}
-                                                    label={line.label}
-                                                    value={line.value}
-                                                />
+                                                <LedgerRow key={line.label} label={line.label} value={line.value} />
                                             ))}
-                                            <LedgerRow
-                                                label="Turnaround"
-                                                value={turnaroundLabel(snapshot)}
-                                            />
+                                            <LedgerRow label="Turnaround" value={turnaroundLabel(snapshot)} />
                                         </div>
                                     </div>
                                 )}
                             </>
                         )}
 
-                        <div className="border-input mt-4 border-t pt-4">
+                        <div className="mt-4 border-t border-input pt-4">
                             <OffPlatformNote />
                         </div>
                     </Panel>
 
                     {commission.closeReason && (
                         <Panel title="Why it ended" icon="📕">
-                            <p className="text-secondary-foreground m-0 text-sm leading-relaxed whitespace-pre-wrap">
+                            <p className="m-0 text-sm leading-relaxed whitespace-pre-wrap text-secondary-foreground">
                                 {commission.closeReason}
                             </p>
                         </Panel>
@@ -435,10 +398,10 @@ export default async function CommissionPage({
             </div>
 
             {isGuest && (
-                <div className="border-input bg-card/60 mt-8 rounded-lg border p-6 text-xs leading-relaxed backdrop-blur-sm">
+                <div className="mt-8 rounded-lg border border-input bg-card/60 p-6 text-xs leading-relaxed backdrop-blur-sm">
                     <p className="m-0">
-                        You&rsquo;re viewing this commission through a share link from @
-                        {commission.artistAlias}. It&rsquo;s read-only.{" "}
+                        You&rsquo;re viewing this commission through a share link from @{commission.artistAlias}.
+                        It&rsquo;s read-only.{" "}
                         <Link href="/signup" className="text-forest hover:underline">
                             A free Model Horse Hub account
                         </Link>{" "}

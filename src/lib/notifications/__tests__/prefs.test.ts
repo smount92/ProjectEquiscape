@@ -1,9 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-    isNotificationTypeEnabled,
-    NOTIFICATION_TYPE_PREF_KEYS,
-} from "../prefs";
+import { isNotificationTypeEnabled, NOTIFICATION_TYPE_PREF_KEYS } from "../prefs";
 
 describe("NOTIFICATION_TYPE_PREF_KEYS", () => {
     it("maps every settings-page pref key from at least one type", () => {
@@ -49,9 +46,7 @@ describe("isNotificationTypeEnabled", () => {
 
     it("mutes only on an explicit false", () => {
         expect(isNotificationTypeEnabled("show_result", { show_results: false })).toBe(false);
-        expect(isNotificationTypeEnabled("show_announcement", { show_announcements: false })).toBe(
-            false,
-        );
+        expect(isNotificationTypeEnabled("show_announcement", { show_announcements: false })).toBe(false);
     });
 
     it("defaults ON when the key is missing from saved prefs", () => {

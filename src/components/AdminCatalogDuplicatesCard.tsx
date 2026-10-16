@@ -41,14 +41,12 @@ const CONFIDENCE_COPY: Record<DuplicateConfidence, { label: string; blurb: strin
     },
     "placeholder-maker": {
         label: "Guessed maker",
-        blurb:
-            "Makers disagree and at least one is a placeholder or reads like free text — the exact shape the broken approve path produced.",
+        blurb: "Makers disagree and at least one is a placeholder or reads like free text — the exact shape the broken approve path produced.",
         tone: "border-forest/40 bg-forest/10 text-forest",
     },
     "different-maker": {
         label: "Two real makers",
-        blurb:
-            "Same title and category under two genuine makers. Often legitimate — two makers can sculpt the same subject. Your call.",
+        blurb: "Same title and category under two genuine makers. Often legitimate — two makers can sculpt the same subject. Your call.",
         tone: "border-input bg-card text-muted-foreground",
     },
 };
@@ -102,9 +100,9 @@ export default function AdminCatalogDuplicatesCard({
         <div className="rounded-lg border border-input bg-card p-4">
             <h3 className="m-0 mb-1 text-base font-bold">Possible duplicates</h3>
             <p className="m-0 mb-3 text-sm text-muted-foreground">
-                Groups catalog entries that share a title and category once case, punctuation and
-                accents are folded away. Read-only — merging still happens in the card below, with
-                its confirm dialog. Nothing here decides anything for you.
+                Groups catalog entries that share a title and category once case, punctuation and accents are folded
+                away. Read-only — merging still happens in the card below, with its confirm dialog. Nothing here decides
+                anything for you.
             </p>
 
             <div className="flex flex-wrap items-center gap-3">
@@ -113,8 +111,8 @@ export default function AdminCatalogDuplicatesCard({
                 </Button>
                 {report && (
                     <span className="text-xs text-muted-foreground">
-                        {report.scanned.toLocaleString()} entries examined ·{" "}
-                        {report.totalGroups} group{report.totalGroups === 1 ? "" : "s"} found
+                        {report.scanned.toLocaleString()} entries examined · {report.totalGroups} group
+                        {report.totalGroups === 1 ? "" : "s"} found
                         {report.groups.length < report.totalGroups && (
                             <> · showing the {report.groups.length} highest-signal</>
                         )}
@@ -130,9 +128,8 @@ export default function AdminCatalogDuplicatesCard({
 
             {report && report.scanCapped && (
                 <p className="m-0 mt-3 rounded-md border border-input bg-background px-3 py-2 text-xs text-secondary-foreground">
-                    The scan stopped at the newest {report.scanned.toLocaleString()} entries.
-                    Anything older than that was <strong>not examined</strong> — this is not a
-                    whole-catalog audit.
+                    The scan stopped at the newest {report.scanned.toLocaleString()} entries. Anything older than that
+                    was <strong>not examined</strong> — this is not a whole-catalog audit.
                 </p>
             )}
 
@@ -143,9 +140,7 @@ export default function AdminCatalogDuplicatesCard({
             )}
 
             {report && report.groups.length === 0 && !error && (
-                <p className="m-0 mt-3 text-sm text-muted-foreground">
-                    No duplicate groups in the entries examined.
-                </p>
+                <p className="m-0 mt-3 text-sm text-muted-foreground">No duplicate groups in the entries examined.</p>
             )}
 
             {report && report.groups.length > 0 && (
@@ -158,10 +153,7 @@ export default function AdminCatalogDuplicatesCard({
                             group.members.find((m) => m.keeper) ||
                             group.members[0];
                         return (
-                            <li
-                                key={group.key}
-                                className="rounded-lg border border-input bg-background px-4 py-3"
-                            >
+                            <li key={group.key} className="rounded-lg border border-input bg-background px-4 py-3">
                                 <div className="mb-1 flex flex-wrap items-center gap-2">
                                     <strong className="text-sm">{group.title}</strong>
                                     <span className="text-xs text-muted-foreground">

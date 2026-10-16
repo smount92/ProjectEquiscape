@@ -1,10 +1,10 @@
 export default function OfflinePage() {
     return (
-        <div className="flex min-h-dvh flex-col items-center justify-center gap-4 p-8 bg-background">
+        <div className="flex min-h-dvh flex-col items-center justify-center gap-4 bg-background p-8">
             <h1 className="text-3xl font-bold text-foreground">You&apos;re Offline</h1>
-            <p className="text-muted-foreground text-center max-w-md">
-                📡 No internet connection. Pages you&apos;ve previously visited are still
-                available from the cache. Reconnect to see the latest data.
+            <p className="max-w-md text-center text-muted-foreground">
+                📡 No internet connection. Pages you&apos;ve previously visited are still available from the cache.
+                Reconnect to see the latest data.
             </p>
         </div>
     );

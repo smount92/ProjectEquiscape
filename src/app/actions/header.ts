@@ -21,17 +21,9 @@ export async function getHeaderData() {
     // below genuinely depends on the profile row, so it stays a second
     // hop; it only fires for members who have an avatar.)
     const [{ data: profile }, { data: artistProfile }] = await Promise.all([
-        supabase
-            .from("users")
-            .select("alias_name, avatar_url")
-            .eq("id", user.id)
-            .single(),
+        supabase.from("users").select("alias_name, avatar_url").eq("id", user.id).single(),
         // Does the user have an artist profile? (for the nav link)
-        supabase
-            .from("artist_profiles")
-            .select("studio_slug")
-            .eq("user_id", user.id)
-            .maybeSingle(),
+        supabase.from("artist_profiles").select("studio_slug").eq("user_id", user.id).maybeSingle(),
     ]);
 
     const aliasName = profile?.alias_name ?? null;
@@ -39,9 +31,7 @@ export async function getHeaderData() {
 
     // Resolve storage path to signed URL (avatar_url is a storage path, not a URL)
     if (avatarUrl && !avatarUrl.startsWith("http")) {
-        const { data: signedAvatar } = await supabase.storage
-            .from("avatars")
-            .createSignedUrl(avatarUrl, 3600);
+        const { data: signedAvatar } = await supabase.storage.from("avatars").createSignedUrl(avatarUrl, 3600);
         avatarUrl = signedAvatar?.signedUrl || null;
     }
 
@@ -49,8 +39,8 @@ export async function getHeaderData() {
     const unreadCount = 0; // kept for backwards compatibility
 
     // Check admin status server-side (never expose admin email to client)
-    const isAdmin = !!user.email && !!process.env.ADMIN_EMAIL &&
-        user.email.toLowerCase() === process.env.ADMIN_EMAIL.toLowerCase();
+    const isAdmin =
+        !!user.email && !!process.env.ADMIN_EMAIL && user.email.toLowerCase() === process.env.ADMIN_EMAIL.toLowerCase();
 
     return {
         user: { id: user.id, email: user.email },

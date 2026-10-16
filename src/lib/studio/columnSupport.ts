@@ -54,9 +54,7 @@ export function resetStudioColumnSupport(): void {
     inflight = null;
 }
 
-export async function getStudioColumnSupport(
-    supabase: SupabaseClient,
-): Promise<StudioColumnSupport> {
+export async function getStudioColumnSupport(supabase: SupabaseClient): Promise<StudioColumnSupport> {
     if (cached && Date.now() - cachedAt < TTL_MS) return cached;
     if (inflight) return inflight;
 

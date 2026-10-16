@@ -112,12 +112,8 @@ describe("buildSettingsPatch — the diff is the patch", () => {
 
     it("parses capacity text and clears it with null", () => {
         const show = consoleShow({ mode: "live", capacity: 40 });
-        expect(
-            buildSettingsPatch(show, { ...initialValues(show), capacity: "55" }),
-        ).toEqual({ capacity: 55 });
-        expect(
-            buildSettingsPatch(show, { ...initialValues(show), capacity: "" }),
-        ).toEqual({ capacity: null });
+        expect(buildSettingsPatch(show, { ...initialValues(show), capacity: "55" })).toEqual({ capacity: 55 });
+        expect(buildSettingsPatch(show, { ...initialValues(show), capacity: "" })).toEqual({ capacity: null });
     });
 });
 
@@ -131,9 +127,7 @@ describe("ShowSettingsForm — draft locks and saving", () => {
         render(<ShowSettingsForm show={consoleShow({ status: "published" })} />);
         expect(screen.getByTestId("settings-mode")).toBeDisabled();
         expect(screen.getByTestId("settings-judging")).toBeDisabled();
-        expect(
-            screen.getAllByText(/locked — .* can only change while the show is a draft/i).length,
-        ).toBeGreaterThan(0);
+        expect(screen.getAllByText(/locked — .* can only change while the show is a draft/i).length).toBeGreaterThan(0);
     });
 
     it("refuses to save when nothing changed", async () => {
@@ -164,9 +158,7 @@ describe("ShowSettingsForm — draft locks and saving", () => {
             target: { value: "2027-04-01T09:00" },
         });
         fireEvent.click(screen.getByTestId("settings-save"));
-        expect(
-            await screen.findByText("Entries must open before they close."),
-        ).toBeInTheDocument();
+        expect(await screen.findByText("Entries must open before they close.")).toBeInTheDocument();
         expect(actions.updateShowSettings).not.toHaveBeenCalled();
     });
 
@@ -180,9 +172,7 @@ describe("ShowSettingsForm — draft locks and saving", () => {
             target: { value: "Autumn Gala Online" },
         });
         fireEvent.click(screen.getByTestId("settings-save"));
-        expect(
-            await screen.findByText("Only the host or a co-host can edit show settings."),
-        ).toBeInTheDocument();
+        expect(await screen.findByText("Only the host or a co-host can edit show settings.")).toBeInTheDocument();
     });
 });
 
@@ -197,9 +187,7 @@ describe("ShowSettingsForm — the post-open schedule confirm", () => {
         // Confirm dialog, not a save.
         expect(await screen.findByText("Change the schedule?")).toBeInTheDocument();
         expect(
-            screen.getByText(
-                /entrants will see the change, and the hourly clock enforces the new time/i,
-            ),
+            screen.getByText(/entrants will see the change, and the hourly clock enforces the new time/i),
         ).toBeInTheDocument();
         expect(actions.updateShowSettings).not.toHaveBeenCalled();
 

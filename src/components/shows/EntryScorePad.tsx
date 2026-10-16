@@ -4,14 +4,7 @@ import { useState } from "react";
 
 import { writeEntryScore } from "@/app/actions/shows-v4";
 import type { JudgeQueueEntry } from "@/lib/shows/gallery";
-import {
-    SCORE_ANCHORS,
-    SCORE_MAX,
-    SCORE_MIN,
-    isComplete,
-    weightedTotal,
-    type Rubric,
-} from "@/lib/shows/rubrics";
+import { SCORE_ANCHORS, SCORE_MAX, SCORE_MIN, isComplete, weightedTotal, type Rubric } from "@/lib/shows/rubrics";
 
 /**
  * The judge's score pad — five tap-scales and a running total, living
@@ -36,9 +29,7 @@ export default function EntryScorePad({
      *  re-lights its taps and the tray suggestion stays live. */
     onSaved?: (entryId: string, scores: Record<string, number>, total: number | null) => void;
 }) {
-    const [scores, setScores] = useState<Record<string, number>>(
-        () => initialScores ?? entry.scoreData ?? {},
-    );
+    const [scores, setScores] = useState<Record<string, number>>(() => initialScores ?? entry.scoreData ?? {});
     const [error, setError] = useState<string | null>(null);
     const [saving, setSaving] = useState(false);
 
@@ -61,10 +52,10 @@ export default function EntryScorePad({
     };
 
     return (
-        <div className="border-input bg-card rounded-md border p-3">
+        <div className="rounded-md border border-input bg-card p-3">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <span className="text-sm font-bold">🎯 Score — {rubric.name}</span>
-                <span className="text-muted-foreground text-xs tabular-nums">
+                <span className="text-xs text-muted-foreground tabular-nums">
                     {complete && total != null ? (
                         <>
                             weighted <b className="text-foreground">{total}</b>/100
@@ -75,50 +66,40 @@ export default function EntryScorePad({
                     {saving ? " · saving…" : ""}
                 </span>
             </div>
-            <p className="text-muted-foreground mt-1 mb-2 text-[0.72rem]">
+            <p className="mt-1 mb-2 text-[0.72rem] text-muted-foreground">
                 {SCORE_ANCHORS.map((a) => `${a.from}–${a.to} ${a.label.toLowerCase()}`).join(" · ")}
             </p>
             {rubric.criteria.map((c) => (
-                <div key={c.key} className="border-border-tan/30 border-b border-dashed py-2 last:border-b-0">
+                <div key={c.key} className="border-b border-dashed border-border-tan/30 py-2 last:border-b-0">
                     <div className="mb-1 flex items-baseline justify-between gap-2 text-sm">
                         <span className="font-semibold">
                             {c.label}
-                            <span className="text-muted-foreground ml-1 text-xs font-normal">{c.weight}%</span>
+                            <span className="ml-1 text-xs font-normal text-muted-foreground">{c.weight}%</span>
                         </span>
-                        {c.help && <span className="text-muted-foreground truncate text-xs">{c.help}</span>}
+                        {c.help && <span className="truncate text-xs text-muted-foreground">{c.help}</span>}
                     </div>
-                    <div
-                        className="flex flex-wrap gap-1"
-                        role="radiogroup"
-                        aria-label={`${c.label} score, 1 to 10`}
-                    >
-                        {Array.from({ length: SCORE_MAX - SCORE_MIN + 1 }, (_, i) => i + SCORE_MIN).map(
-                            (v) => (
-                                <button
-                                    key={v}
-                                    type="button"
-                                    role="radio"
-                                    aria-checked={scores[c.key] === v}
-                                    onClick={() => tap(c.key, v)}
-                                    className={`min-h-8 min-w-8 rounded-md border text-xs font-bold tabular-nums transition-colors ${
-                                        scores[c.key] === v
-                                            ? "border-transparent text-white"
-                                            : "border-input bg-background text-muted-foreground hover:border-forest"
-                                    }`}
-                                    style={
-                                        scores[c.key] === v
-                                            ? { background: "var(--chart-entry)" }
-                                            : undefined
-                                    }
-                                >
-                                    {v}
-                                </button>
-                            ),
-                        )}
+                    <div className="flex flex-wrap gap-1" role="radiogroup" aria-label={`${c.label} score, 1 to 10`}>
+                        {Array.from({ length: SCORE_MAX - SCORE_MIN + 1 }, (_, i) => i + SCORE_MIN).map((v) => (
+                            <button
+                                key={v}
+                                type="button"
+                                role="radio"
+                                aria-checked={scores[c.key] === v}
+                                onClick={() => tap(c.key, v)}
+                                className={`min-h-8 min-w-8 rounded-md border text-xs font-bold tabular-nums transition-colors ${
+                                    scores[c.key] === v
+                                        ? "border-transparent text-white"
+                                        : "border-input bg-background text-muted-foreground hover:border-forest"
+                                }`}
+                                style={scores[c.key] === v ? { background: "var(--chart-entry)" } : undefined}
+                            >
+                                {v}
+                            </button>
+                        ))}
                     </div>
                 </div>
             ))}
-            {error && <p className="text-destructive mt-2 mb-0 text-xs">{error}</p>}
+            {error && <p className="mt-2 mb-0 text-xs text-destructive">{error}</p>}
         </div>
     );
 }

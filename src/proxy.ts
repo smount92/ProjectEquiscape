@@ -15,18 +15,16 @@ export async function proxy(request: NextRequest) {
                     return request.cookies.getAll();
                 },
                 setAll(cookiesToSet) {
-                    cookiesToSet.forEach(({ name, value }) =>
-                        request.cookies.set(name, value)
-                    );
+                    cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
                     supabaseResponse = NextResponse.next({
                         request,
                     });
                     cookiesToSet.forEach(({ name, value, options }) =>
-                        supabaseResponse.cookies.set(name, value, options)
+                        supabaseResponse.cookies.set(name, value, options),
                     );
                 },
             },
-        }
+        },
     );
 
     // IMPORTANT: Do not add logic between createServerClient and
@@ -120,8 +118,7 @@ export async function proxy(request: NextRequest) {
     ];
 
     const isPublicRoute =
-        request.nextUrl.pathname === "/" ||
-        publicPaths.some((path) => request.nextUrl.pathname.startsWith(path));
+        request.nextUrl.pathname === "/" || publicPaths.some((path) => request.nextUrl.pathname.startsWith(path));
 
     // Protect all routes except public ones
     if (!user && !isPublicRoute) {

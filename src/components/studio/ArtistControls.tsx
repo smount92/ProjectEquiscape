@@ -3,12 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import {
-    linkHorseToCommission,
-    markModelReceived,
-    recordPayment,
-    type Commission,
-} from "@/app/actions/art-studio";
+import { linkHorseToCommission, markModelReceived, recordPayment, type Commission } from "@/app/actions/art-studio";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 import { formatMoney } from "@/lib/studio/terms";
@@ -45,28 +40,24 @@ export default function ArtistControls({ commission }: { commission: Commission 
     };
 
     return (
-        <div className="bg-card border-input rounded-lg border p-6 shadow-md">
+        <div className="rounded-lg border border-input bg-card p-6 shadow-md">
             <h2 className="mb-4 font-serif text-lg font-bold">🧾 Your records</h2>
 
             {/* ── Logistics. A flag, not a pipeline stage: v1 used one
                 `shipping` status for the model travelling BOTH ways. ── */}
-            <div className="border-input/60 border-b pb-4">
+            <div className="border-b border-input/60 pb-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                     <div>
                         <div className="text-sm font-semibold">The commissioner&rsquo;s model</div>
-                        <div className="text-muted-foreground text-xs">
-                            {commission.modelReceived
-                                ? "Marked as arrived with you"
-                                : "Not yet marked as arrived"}
+                        <div className="text-xs text-muted-foreground">
+                            {commission.modelReceived ? "Marked as arrived with you" : "Not yet marked as arrived"}
                         </div>
                     </div>
                     <Button
                         size="sm"
                         variant="outline"
                         disabled={busy}
-                        onClick={() =>
-                            act(() => markModelReceived(commission.id, !commission.modelReceived))
-                        }
+                        onClick={() => act(() => markModelReceived(commission.id, !commission.modelReceived))}
                     >
                         {commission.modelReceived ? "Mark not arrived" : "Mark arrived"}
                     </Button>
@@ -74,7 +65,7 @@ export default function ArtistControls({ commission }: { commission: Commission 
             </div>
 
             {/* ── Off-platform payment bookkeeping ── */}
-            <div className="border-input/60 border-b py-4">
+            <div className="border-b border-input/60 py-4">
                 <div className="mb-3 text-sm font-semibold">Payments received</div>
 
                 <div className="grid gap-2">
@@ -96,18 +87,13 @@ export default function ArtistControls({ commission }: { commission: Commission 
                         amount={balance}
                         paid={commission.finalPaid}
                         busy={busy}
-                        onToggle={() =>
-                            act(() =>
-                                recordPayment(commission.id, { finalPaid: !commission.finalPaid }),
-                            )
-                        }
+                        onToggle={() => act(() => recordPayment(commission.id, { finalPaid: !commission.finalPaid }))}
                     />
                 </div>
 
-                <p className="text-muted-foreground mt-3 text-xs leading-relaxed">
-                    These are your notes about money that moved elsewhere — Model Horse Hub never
-                    holds it. Ticking a box records it for your income summary and shows the
-                    commissioner you&rsquo;ve seen it.
+                <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+                    These are your notes about money that moved elsewhere — Model Horse Hub never holds it. Ticking a
+                    box records it for your income summary and shows the commissioner you&rsquo;ve seen it.
                 </p>
             </div>
 
@@ -115,24 +101,21 @@ export default function ArtistControls({ commission }: { commission: Commission 
             <div className="pt-4">
                 <div className="mb-2 text-sm font-semibold">Linked horse</div>
                 {commission.horseId ? (
-                    <p className="text-muted-foreground m-0 text-xs leading-relaxed">
-                        Linked. On delivery this stamps your verified artist credit on the horse
-                        and writes the work into its provenance — which is what puts it on your
-                        studio page with its show record.
+                    <p className="m-0 text-xs leading-relaxed text-muted-foreground">
+                        Linked. On delivery this stamps your verified artist credit on the horse and writes the work
+                        into its provenance — which is what puts it on your studio page with its show record.
                     </p>
                 ) : (
                     <HorseLinker
                         commission={commission}
                         busy={busy}
-                        onLink={(horseId) =>
-                            act(() => linkHorseToCommission(commission.id, horseId))
-                        }
+                        onLink={(horseId) => act(() => linkHorseToCommission(commission.id, horseId))}
                     />
                 )}
             </div>
 
             {error && (
-                <p className="text-destructive border-destructive/30 bg-destructive/10 mt-4 rounded-md border px-4 py-2 text-sm">
+                <p className="mt-4 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm text-destructive">
                     {error}
                 </p>
             )}
@@ -157,16 +140,9 @@ function PaymentRow({
         <div className="flex flex-wrap items-center justify-between gap-2">
             <span className="text-sm">
                 {label}
-                <span className="text-muted-foreground ml-2 font-serif tabular-nums">
-                    {formatMoney(amount)}
-                </span>
+                <span className="ml-2 font-serif text-muted-foreground tabular-nums">{formatMoney(amount)}</span>
             </span>
-            <Button
-                size="sm"
-                variant={paid ? "default" : "outline"}
-                disabled={busy}
-                onClick={onToggle}
-            >
+            <Button size="sm" variant={paid ? "default" : "outline"} disabled={busy} onClick={onToggle}>
                 {paid ? "✓ Received" : "Mark received"}
             </Button>
         </div>
@@ -217,16 +193,15 @@ export function HorseLinker({
     }, [commission.clientId]);
 
     if (loading) {
-        return <p className="text-muted-foreground m-0 text-xs">Loading their stable…</p>;
+        return <p className="m-0 text-xs text-muted-foreground">Loading their stable…</p>;
     }
 
     if (horses.length === 0) {
         return (
-            <p className="text-muted-foreground m-0 text-xs leading-relaxed">
-                None of their horses are visible to you (a private stable). The commissioner has
-                a &ldquo;Which horse is this for?&rdquo; box on their side of this page — once
-                they link it, delivery stamps your verified credit and writes the provenance
-                entry.
+            <p className="m-0 text-xs leading-relaxed text-muted-foreground">
+                None of their horses are visible to you (a private stable). The commissioner has a &ldquo;Which horse is
+                this for?&rdquo; box on their side of this page — once they link it, delivery stamps your verified
+                credit and writes the provenance entry.
             </p>
         );
     }
@@ -235,7 +210,7 @@ export function HorseLinker({
         <>
             <div className="flex flex-wrap items-center gap-2">
                 <select
-                    className="border-input bg-card ring-offset-background focus:ring-ring h-10 flex-1 rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-offset-2 focus:outline-none"
+                    className="h-10 flex-1 rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
                     value={selected}
                     onChange={(e) => setSelected(e.target.value)}
                     aria-label="Choose the horse this commission is for"
@@ -251,9 +226,9 @@ export function HorseLinker({
                     Link
                 </Button>
             </div>
-            <p className="text-muted-foreground mt-2 text-xs leading-relaxed">
-                On delivery this stamps your verified artist credit and writes the work into the
-                horse&rsquo;s provenance.
+            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                On delivery this stamps your verified artist credit and writes the work into the horse&rsquo;s
+                provenance.
             </p>
         </>
     );

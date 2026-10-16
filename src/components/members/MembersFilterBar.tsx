@@ -88,7 +88,7 @@ export default function MembersFilterBar({ q, sort }: { q: string; sort: MemberS
             </div>
 
             {q && (
-                <div className="border-input mt-3 flex flex-wrap items-center gap-2 border-t pt-3">
+                <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-input pt-3">
                     <Link
                         href={membersHref({ sort, page: 1 })}
                         scroll={false}

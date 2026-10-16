@@ -44,7 +44,7 @@ export async function loadMoreShowRing(
         finishType?: string;
         tradeStatus?: string;
         sortBy?: string;
-    }
+    },
 ): Promise<{ cards: ShowRingCard[]; hasMore: boolean }> {
     const supabase = await createClient();
     const {
@@ -62,7 +62,7 @@ export async function loadMoreShowRing(
             catalog_items:catalog_id(title, maker, scale, item_type),
             horse_images(image_url, angle_profile)
             `,
-            { count: "exact" }
+            { count: "exact" },
         )
         .eq("visibility", "public");
 
@@ -88,10 +88,7 @@ export async function loadMoreShowRing(
     const { data: rawHorses, count } = await query.range(offset, offset + PAGE_SIZE - 1);
 
     // Filter out blocked users
-    const { data: myBlocks } = await supabase
-        .from("user_blocks")
-        .select("blocked_id")
-        .eq("blocker_id", user.id);
+    const { data: myBlocks } = await supabase.from("user_blocks").select("blocked_id").eq("blocker_id", user.id);
     const blockedOwnerIds = new Set((myBlocks ?? []).map((b) => b.blocked_id));
 
     const horses = (rawHorses ?? []).filter((h) => !blockedOwnerIds.has(h.owner_id));
@@ -99,10 +96,13 @@ export async function loadMoreShowRing(
     // Generate signed URLs for thumbnails
     const thumbnailUrls: string[] = [];
     horses.forEach((horse) => {
-        const thumb = horse.horse_images?.find((img: { angle_profile: string }) => img.angle_profile === "Primary_Thumbnail");
+        const thumb = horse.horse_images?.find(
+            (img: { angle_profile: string }) => img.angle_profile === "Primary_Thumbnail",
+        );
         const first = horse.horse_images?.[0];
-        const url = (thumb as { image_url: string } | undefined)?.image_url
-            || (first as { image_url: string } | undefined)?.image_url;
+        const url =
+            (thumb as { image_url: string } | undefined)?.image_url ||
+            (first as { image_url: string } | undefined)?.image_url;
         if (url) thumbnailUrls.push(url);
     });
     const signedUrlMap = getPublicImageUrls(thumbnailUrls);
@@ -110,23 +110,26 @@ export async function loadMoreShowRing(
     // Social data: favorites + hoofprints
     const horseIds = horses.map((h) => h.id);
 
-    const { data: allFavs } = horseIds.length > 0
-        ? await supabase.from("horse_favorites").select("horse_id").in("horse_id", horseIds)
-        : { data: [] };
+    const { data: allFavs } =
+        horseIds.length > 0
+            ? await supabase.from("horse_favorites").select("horse_id").in("horse_id", horseIds)
+            : { data: [] };
 
     const favCountMap = new Map<string, number>();
     (allFavs ?? []).forEach((f) => {
         favCountMap.set(f.horse_id, (favCountMap.get(f.horse_id) || 0) + 1);
     });
 
-    const { data: userFavs } = horseIds.length > 0
-        ? await supabase.from("horse_favorites").select("horse_id").eq("user_id", user.id).in("horse_id", horseIds)
-        : { data: [] };
+    const { data: userFavs } =
+        horseIds.length > 0
+            ? await supabase.from("horse_favorites").select("horse_id").eq("user_id", user.id).in("horse_id", horseIds)
+            : { data: [] };
     const userFavSet = new Set((userFavs ?? []).map((f) => f.horse_id));
 
-    const { data: hoofprintData } = horseIds.length > 0
-        ? await supabase.from("v_horse_hoofprint").select("horse_id").in("horse_id", horseIds).eq("is_public", true)
-        : { data: [] };
+    const { data: hoofprintData } =
+        horseIds.length > 0
+            ? await supabase.from("v_horse_hoofprint").select("horse_id").in("horse_id", horseIds).eq("is_public", true)
+            : { data: [] };
     const hoofprintCountMap = new Map<string, number>();
     (hoofprintData ?? []).forEach((e) => {
         if (e.horse_id) hoofprintCountMap.set(e.horse_id, (hoofprintCountMap.get(e.horse_id) || 0) + 1);
@@ -134,16 +137,17 @@ export async function loadMoreShowRing(
 
     // Build cards
     const cards: ShowRingCard[] = horses.map((horse) => {
-        const thumb = horse.horse_images?.find((img: { angle_profile: string }) => img.angle_profile === "Primary_Thumbnail");
+        const thumb = horse.horse_images?.find(
+            (img: { angle_profile: string }) => img.angle_profile === "Primary_Thumbnail",
+        );
         const firstImage = horse.horse_images?.[0];
-        const imageUrl = (thumb as { image_url: string } | undefined)?.image_url
-            || (firstImage as { image_url: string } | undefined)?.image_url;
+        const imageUrl =
+            (thumb as { image_url: string } | undefined)?.image_url ||
+            (firstImage as { image_url: string } | undefined)?.image_url;
         const signedUrl = imageUrl ? signedUrlMap.get(imageUrl) : undefined;
 
         const catItem = horse.catalog_items as { title: string; maker: string; scale: string } | null;
-        const refName = catItem
-            ? `${catalogDisplayName(catItem.maker, catItem.title)}`
-            : "Unlisted Mold";
+        const refName = catItem ? `${catalogDisplayName(catItem.maker, catItem.title)}` : "Unlisted Mold";
         const ownerAlias = (horse.users as { alias_name: string })?.alias_name ?? "Unknown";
 
         return {

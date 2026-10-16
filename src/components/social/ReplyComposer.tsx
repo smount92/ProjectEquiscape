@@ -69,10 +69,7 @@ export default function ReplyComposer({
                     onKeyDown={handleKeyDown}
                     maxLength={maxLength}
                 />
-                <Button className="px-4"
-                    onClick={handleSubmit}
-                    disabled={isDisabled}
-                >
+                <Button className="px-4" onClick={handleSubmit} disabled={isDisabled}>
                     {submitting ? "…" : "Reply"}
                 </Button>
             </div>

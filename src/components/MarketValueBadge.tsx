@@ -1,88 +1,88 @@
 "use client";
 
-import { useState, useEffect } from"react";
-import { getMarketPrice } from"@/app/actions/market";
+import { useState, useEffect } from "react";
+import { getMarketPrice } from "@/app/actions/market";
 
 interface MarketValueBadgeProps {
- catalogId: string | null;
- compact?: boolean;
+    catalogId: string | null;
+    compact?: boolean;
 }
 
 const formatCurrency = (value: number) =>
- new Intl.NumberFormat("en-US", { style:"currency", currency:"USD", maximumFractionDigits: 0 }).format(value);
+    new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(value);
 
 export default function MarketValueBadge({ catalogId, compact = false }: MarketValueBadgeProps) {
- const [price, setPrice] = useState<{
- lowest: number;
- highest: number;
- average: number;
- median: number;
- volume: number;
- } | null>(null);
- const [loading, setLoading] = useState(true);
+    const [price, setPrice] = useState<{
+        lowest: number;
+        highest: number;
+        average: number;
+        median: number;
+        volume: number;
+    } | null>(null);
+    const [loading, setLoading] = useState(true);
 
- useEffect(() => {
- if (!catalogId) {
- // eslint-disable-next-line react-hooks/set-state-in-effect -- no catalog id means nothing to load; settle the loading flag
- setLoading(false);
- return;
- }
- let cancelled = false;
+    useEffect(() => {
+        if (!catalogId) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect -- no catalog id means nothing to load; settle the loading flag
+            setLoading(false);
+            return;
+        }
+        let cancelled = false;
 
- getMarketPrice(catalogId)
- .then((data) => {
- if (cancelled) return;
- if (data && data.transactionVolume > 0) {
- setPrice({
- lowest: data.lowestPrice,
- highest: data.highestPrice,
- average: data.averagePrice,
- median: data.medianPrice,
- volume: data.transactionVolume,
- });
- }
- setLoading(false);
- })
- .catch(() => {
- if (!cancelled) setLoading(false);
- });
+        getMarketPrice(catalogId)
+            .then((data) => {
+                if (cancelled) return;
+                if (data && data.transactionVolume > 0) {
+                    setPrice({
+                        lowest: data.lowestPrice,
+                        highest: data.highestPrice,
+                        average: data.averagePrice,
+                        median: data.medianPrice,
+                        volume: data.transactionVolume,
+                    });
+                }
+                setLoading(false);
+            })
+            .catch(() => {
+                if (!cancelled) setLoading(false);
+            });
 
- return () => {
- cancelled = true;
- };
- }, [catalogId]);
+        return () => {
+            cancelled = true;
+        };
+    }, [catalogId]);
 
- if (loading) return null;
- if (!price) return null;
+    if (loading) return null;
+    if (!price) return null;
 
- if (compact) {
- return (
- <span
- className="inline-flex items-center gap-[4px] rounded-full bg-[color-mix(in_srgb,var(--color-success)_12%,transparent)] px-[8px] py-[2px] text-xs font-semibold whitespace-nowrap text-success"
- title={`${price.volume} sale${price.volume !== 1 ?"s" :""} — Avg: ${formatCurrency(price.average)}`}
- >
- 📈 {formatCurrency(price.lowest)}
- {price.lowest !== price.highest ? `–${formatCurrency(price.highest)}` :""}
- </span>
- );
- }
+    if (compact) {
+        return (
+            <span
+                className="inline-flex items-center gap-[4px] rounded-full bg-[color-mix(in_srgb,var(--color-success)_12%,transparent)] px-[8px] py-[2px] text-xs font-semibold whitespace-nowrap text-success"
+                title={`${price.volume} sale${price.volume !== 1 ? "s" : ""} — Avg: ${formatCurrency(price.average)}`}
+            >
+                📈 {formatCurrency(price.lowest)}
+                {price.lowest !== price.highest ? `–${formatCurrency(price.highest)}` : ""}
+            </span>
+        );
+    }
 
- return (
- <div className="bg-muted border-input mt-6 rounded-lg border p-6">
- <h4 className="mb-2 flex items-center gap-1 text-sm font-semibold text-muted-foreground">
- <span aria-hidden="true">📈</span> Market Value
- </h4>
- <div className="text-forest text-lg font-bold">
- {formatCurrency(price.lowest)}
- {price.lowest !== price.highest ? ` – ${formatCurrency(price.highest)}` :""}
- </div>
- <div className="mt-1 flex flex-wrap gap-4 text-sm text-muted-foreground">
- <span>Avg: {formatCurrency(price.average)}</span>
- <span>Median: {formatCurrency(price.median)}</span>
- <span className="text-forest inline-flex items-center rounded-full bg-[var(--color-forest-glow)] px-[6px] py-[1px] text-xs font-semibold">
- {price.volume} sale{price.volume !== 1 ?"s" :""}
- </span>
- </div>
- </div>
- );
+    return (
+        <div className="mt-6 rounded-lg border border-input bg-muted p-6">
+            <h4 className="mb-2 flex items-center gap-1 text-sm font-semibold text-muted-foreground">
+                <span aria-hidden="true">📈</span> Market Value
+            </h4>
+            <div className="text-lg font-bold text-forest">
+                {formatCurrency(price.lowest)}
+                {price.lowest !== price.highest ? ` – ${formatCurrency(price.highest)}` : ""}
+            </div>
+            <div className="mt-1 flex flex-wrap gap-4 text-sm text-muted-foreground">
+                <span>Avg: {formatCurrency(price.average)}</span>
+                <span>Median: {formatCurrency(price.median)}</span>
+                <span className="inline-flex items-center rounded-full bg-[var(--color-forest-glow)] px-[6px] py-[1px] text-xs font-semibold text-forest">
+                    {price.volume} sale{price.volume !== 1 ? "s" : ""}
+                </span>
+            </div>
+        </div>
+    );
 }

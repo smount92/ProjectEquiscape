@@ -12,14 +12,14 @@ const PUBLIC_BASE = `${SUPABASE_URL}/storage/v1/object/public/horse-images`;
  * Extract the relative file path from a stored image URL or raw path.
  */
 export function extractStoragePath(imageUrl: string): string {
-  // Strip query params (signed URL tokens) before extracting path
-  const cleanUrl = imageUrl.split("?")[0];
-  const marker = "horse-images/";
-  const idx = cleanUrl.indexOf(marker);
-  if (idx !== -1) {
-    return cleanUrl.substring(idx + marker.length);
-  }
-  return cleanUrl;
+    // Strip query params (signed URL tokens) before extracting path
+    const cleanUrl = imageUrl.split("?")[0];
+    const marker = "horse-images/";
+    const idx = cleanUrl.indexOf(marker);
+    if (idx !== -1) {
+        return cleanUrl.substring(idx + marker.length);
+    }
+    return cleanUrl;
 }
 
 /**
@@ -27,8 +27,8 @@ export function extractStoragePath(imageUrl: string): string {
  * No API call needed — pure string concatenation.
  */
 export function getPublicImageUrl(imageUrl: string): string {
-  const path = extractStoragePath(imageUrl);
-  return `${PUBLIC_BASE}/${path}`;
+    const path = extractStoragePath(imageUrl);
+    return `${PUBLIC_BASE}/${path}`;
 }
 
 /**
@@ -37,11 +37,11 @@ export function getPublicImageUrl(imageUrl: string): string {
  * Synchronous — no `await` needed.
  */
 export function getPublicImageUrls(imageUrls: string[]): Map<string, string> {
-  const urlMap = new Map<string, string>();
-  for (const url of imageUrls) {
-    urlMap.set(url, getPublicImageUrl(url));
-  }
-  return urlMap;
+    const urlMap = new Map<string, string>();
+    for (const url of imageUrls) {
+        urlMap.set(url, getPublicImageUrl(url));
+    }
+    return urlMap;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -55,5 +55,5 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://modelhorsehub.com";
  * Example: https://modelhorsehub.com/photo/AbC12xyz
  */
 export function getFriendlyPhotoUrl(shortSlug: string): string {
-  return `${APP_URL}/photo/${shortSlug}`;
+    return `${APP_URL}/photo/${shortSlug}`;
 }

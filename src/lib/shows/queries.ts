@@ -13,14 +13,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { getPublicImageUrl } from "@/lib/utils/storage";
 import type { HorseDocumentView } from "@/lib/shows/documents";
 import type { ConsoleClass, ConsoleDivision, ConsoleSection } from "@/lib/shows/console";
-import type {
-    ClassStatus,
-    ShowJudging,
-    ShowMode,
-    ShowStatus,
-    StaffRole,
-    DivisionAxis,
-} from "./types";
+import type { ClassStatus, ShowJudging, ShowMode, ShowStatus, StaffRole, DivisionAxis } from "./types";
 import { colorText, selectWithPending } from "@/lib/passport/pendingColumns";
 
 export interface ShowCore {
@@ -81,16 +74,10 @@ export async function getAliases(
         return new Map(rpcData.map((r) => [r.id, r.alias_name ?? "unknown"]));
     }
 
-    const { data, error } = await supabase
-        .from("users")
-        .select("id, alias_name")
-        .in("id", unique);
+    const { data, error } = await supabase.from("users").select("id, alias_name").in("id", unique);
     if (error) return { error: error.message };
     return new Map(
-        (data ?? []).map((r: { id: string; alias_name: string | null }) => [
-            r.id,
-            r.alias_name ?? "unknown",
-        ]),
+        (data ?? []).map((r: { id: string; alias_name: string | null }) => [r.id, r.alias_name ?? "unknown"]),
     );
 }
 
@@ -142,16 +129,10 @@ export async function getHorseNames(
 ): Promise<Map<string, string> | { error: string }> {
     const unique = [...new Set(horseIds)];
     if (unique.length === 0) return new Map();
-    const { data, error } = await supabase
-        .from("user_horses")
-        .select("id, custom_name")
-        .in("id", unique);
+    const { data, error } = await supabase.from("user_horses").select("id, custom_name").in("id", unique);
     if (error) return { error: error.message };
     return new Map(
-        (data ?? []).map((r: { id: string; custom_name: string | null }) => [
-            r.id,
-            r.custom_name ?? "Unnamed horse",
-        ]),
+        (data ?? []).map((r: { id: string; custom_name: string | null }) => [r.id, r.custom_name ?? "Unnamed horse"]),
     );
 }
 
@@ -162,17 +143,9 @@ export async function getEntryPhotoUrls(
 ): Promise<Map<string, string> | { error: string }> {
     const unique = [...new Set(photoIds)];
     if (unique.length === 0) return new Map();
-    const { data, error } = await supabase
-        .from("horse_images")
-        .select("id, image_url")
-        .in("id", unique);
+    const { data, error } = await supabase.from("horse_images").select("id, image_url").in("id", unique);
     if (error) return { error: error.message };
-    return new Map(
-        (data ?? []).map((r: { id: string; image_url: string }) => [
-            r.id,
-            getPublicImageUrl(r.image_url),
-        ]),
-    );
+    return new Map((data ?? []).map((r: { id: string; image_url: string }) => [r.id, getPublicImageUrl(r.image_url)]));
 }
 
 /** Flat class context (skips cancelled/combined classes), ordered
@@ -212,7 +185,10 @@ export async function loadClassContexts(
     const { data: sectionRows, error: sErr } = await supabase
         .from("show_sections")
         .select("id, name, division_id, sort_order")
-        .in("division_id", divisions.map((d) => d.id))
+        .in(
+            "division_id",
+            divisions.map((d) => d.id),
+        )
         .order("sort_order", { ascending: true });
     if (sErr) return { error: sErr.message };
     const sections = (sectionRows ?? []) as { id: string; name: string; division_id: string }[];
@@ -223,7 +199,10 @@ export async function loadClassContexts(
     const { data: classRows, error: cErr } = await supabase
         .from("show_classes")
         .select("id, name, class_number, status, section_id, sort_order")
-        .in("section_id", sections.map((s) => s.id))
+        .in(
+            "section_id",
+            sections.map((s) => s.id),
+        )
         .order("sort_order", { ascending: true });
     if (cErr) return { error: cErr.message };
 
@@ -233,8 +212,7 @@ export async function loadClassContexts(
     // matches the published classlist; classes are already sorted.
     const divisionIndex = new Map(divisions.map((d, i) => [d.id, i]));
     const orderedSections = [...sections].sort(
-        (a, b) =>
-            (divisionIndex.get(a.division_id) ?? 0) - (divisionIndex.get(b.division_id) ?? 0),
+        (a, b) => (divisionIndex.get(a.division_id) ?? 0) - (divisionIndex.get(b.division_id) ?? 0),
     );
 
     const contexts: ClassContext[] = [];
@@ -273,10 +251,7 @@ export async function loadClassContexts(
  * attached to a visible show entry. Tolerant — a read error is an
  * empty list, never a broken passport.
  */
-export async function getHorseDocuments(
-    supabase: SupabaseClient,
-    horseId: string,
-): Promise<HorseDocumentView[]> {
+export async function getHorseDocuments(supabase: SupabaseClient, horseId: string): Promise<HorseDocumentView[]> {
     const { data, error } = await supabase
         .from("horse_documents")
         .select("id, kind, title, body_md, updated_at")
@@ -309,10 +284,7 @@ export async function getHorseDocuments(
 export async function loadShowProgram(
     supabase: SupabaseClient,
     showId: string,
-): Promise<
-    | { divisions: ConsoleDivision[]; entryCount: number; exhibitorCount: number }
-    | { error: string }
-> {
+): Promise<{ divisions: ConsoleDivision[]; entryCount: number; exhibitorCount: number } | { error: string }> {
     const { data: divisionRows, error: dErr } = await supabase
         .from("show_divisions")
         .select("id, name, axis, sort_order")

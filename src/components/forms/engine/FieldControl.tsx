@@ -52,9 +52,7 @@ export default function FieldControl({
     const disabled = isFieldDisabled(spec, context);
     const id = getDomId(spec, context.mode) ?? `fe-${spec.name.replace(/_/g, "-")}`;
 
-    const tone = invalid
-        ? "border-destructive ring-2 ring-destructive/50 bg-destructive/10"
-        : "";
+    const tone = invalid ? "border-destructive ring-2 ring-destructive/50 bg-destructive/10" : "";
     const shakeClass = shake && invalid ? "animate-shake" : "";
     const set = (v: unknown) => onChange(spec.name, v);
 
@@ -115,9 +113,7 @@ export default function FieldControl({
                                     {opt.label}
                                 </span>
                                 {opt.hint && (
-                                    <span className="text-center text-xs text-muted-foreground">
-                                        {opt.hint}
-                                    </span>
+                                    <span className="text-center text-xs text-muted-foreground">{opt.hint}</span>
                                 )}
                             </button>
                         );
@@ -137,11 +133,7 @@ export default function FieldControl({
                                 key={opt.value}
                                 type="button"
                                 onClick={() =>
-                                    set(
-                                        active
-                                            ? chosen.filter((c) => c !== opt.value)
-                                            : [...chosen, opt.value],
-                                    )
+                                    set(active ? chosen.filter((c) => c !== opt.value) : [...chosen, opt.value])
                                 }
                                 aria-pressed={active}
                                 className={`cursor-pointer rounded-full border px-3 py-1 text-sm transition-all ${
@@ -251,26 +243,16 @@ export default function FieldControl({
                         *
                     </span>
                 )}
-                {spec.glossaryAnchor && (
-                    <GlossaryLink anchor={spec.glossaryAnchor} term={label} />
-                )}
+                {spec.glossaryAnchor && <GlossaryLink anchor={spec.glossaryAnchor} term={label} />}
             </label>
 
             {control}
 
             {/* The condition ladder speaks for itself once a grade is picked. */}
-            {spec.name === "condition_grade" && typeof value === "string" && value && (
-                <ConditionGloss value={value} />
-            )}
+            {spec.name === "condition_grade" && typeof value === "string" && value && <ConditionGloss value={value} />}
 
-            {invalid && (
-                <span className="mt-1 block text-xs font-medium text-destructive">
-                    ⚠ {label} is required
-                </span>
-            )}
-            {spec.help && !invalid && (
-                <span className="mt-1 block text-xs text-muted-foreground">{spec.help}</span>
-            )}
+            {invalid && <span className="mt-1 block text-xs font-medium text-destructive">⚠ {label} is required</span>}
+            {spec.help && !invalid && <span className="mt-1 block text-xs text-muted-foreground">{spec.help}</span>}
         </div>
     );
 }
@@ -312,10 +294,7 @@ function ConditionGloss({ value }: { value: string }) {
     const grade = getConditionGrade(value);
     if (!grade) return null;
     return (
-        <p
-            className="mt-1.5 text-xs font-medium"
-            style={{ color: conditionToneVar(value) }}
-        >
+        <p className="mt-1.5 text-xs font-medium" style={{ color: conditionToneVar(value) }}>
             {grade.gloss} — an honest state, not a fault.
         </p>
     );

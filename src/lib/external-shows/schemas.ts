@@ -9,13 +9,7 @@
 import { z } from "zod";
 
 export const externalVenueTypeSchema = z.enum(["online_photo", "live", "mail_in"]);
-export const externalPlatformSchema = z.enum([
-    "facebook",
-    "omhps",
-    "mepsa",
-    "website",
-    "other",
-]);
+export const externalPlatformSchema = z.enum(["facebook", "omhps", "mepsa", "website", "other"]);
 
 export type ExternalVenueType = z.infer<typeof externalVenueTypeSchema>;
 export type ExternalPlatform = z.infer<typeof externalPlatformSchema>;

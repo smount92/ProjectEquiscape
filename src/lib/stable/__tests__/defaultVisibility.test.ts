@@ -40,7 +40,7 @@ describe("where new horses start", () => {
 
     it("falls back to the on/off setting before migration 234", async () => {
         const c = client([
-            { data: null, error: { code: "42703", message: 'column users.default_horse_visibility does not exist' } },
+            { data: null, error: { code: "42703", message: "column users.default_horse_visibility does not exist" } },
             { data: { default_horse_public: false }, error: null },
         ]);
         expect(await readDefaultVisibility(c, "u1")).toBe("private");
@@ -48,8 +48,15 @@ describe("where new horses start", () => {
     });
 
     it("spots the missing column error only", () => {
-        expect(isMissingVisibilityColumn({ code: "PGRST204", message: "Could not find the 'default_horse_visibility' column" })).toBe(true);
-        expect(isMissingVisibilityColumn({ code: "PGRST204", message: "Could not find the 'country' column" })).toBe(false);
+        expect(
+            isMissingVisibilityColumn({
+                code: "PGRST204",
+                message: "Could not find the 'default_horse_visibility' column",
+            }),
+        ).toBe(true);
+        expect(isMissingVisibilityColumn({ code: "PGRST204", message: "Could not find the 'country' column" })).toBe(
+            false,
+        );
         expect(isMissingVisibilityColumn(null)).toBe(false);
     });
 });

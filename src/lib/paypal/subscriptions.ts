@@ -176,9 +176,7 @@ export interface CreateSubscriptionArgs {
  * BILLING.SUBSCRIPTION.* event, and it is the only mapping back to a
  * member the webhook has. Without it the webhook grants nothing.
  */
-export async function createSubscription(
-    args: CreateSubscriptionArgs,
-): Promise<{ id: string; approveUrl: string }> {
+export async function createSubscription(args: CreateSubscriptionArgs): Promise<{ id: string; approveUrl: string }> {
     const planId = args.planIdOverride?.trim() || planIdFor(args.plan);
     if (!planId) {
         throw new Error(`PayPal plan id missing for ${args.plan}`);
@@ -228,9 +226,7 @@ export async function createSubscription(
     });
 
     const id = created?.id;
-    const approveUrl = (created?.links ?? []).find(
-        (link) => link?.rel?.toLowerCase() === "approve",
-    )?.href;
+    const approveUrl = (created?.links ?? []).find((link) => link?.rel?.toLowerCase() === "approve")?.href;
 
     if (!id || !approveUrl) {
         throw new Error("PayPal did not return a subscription id and approval link");
@@ -241,9 +237,7 @@ export async function createSubscription(
 
 /** Read a subscription back from PayPal. The authoritative status source. */
 export async function getSubscription(subscriptionId: string): Promise<PaypalSubscription> {
-    return paypalFetch<PaypalSubscription>(
-        `/v1/billing/subscriptions/${encodeURIComponent(subscriptionId)}`,
-    );
+    return paypalFetch<PaypalSubscription>(`/v1/billing/subscriptions/${encodeURIComponent(subscriptionId)}`);
 }
 
 /**

@@ -72,10 +72,7 @@ describe("compareBoardThreads", () => {
     const t = (isPinned: boolean, lastActivity: string) => ({ isPinned, lastActivity });
 
     it("orders pinned threads before unpinned ones regardless of bump time", () => {
-        const threads = [
-            t(false, "2026-07-09T12:00:00Z"),
-            t(true, "2026-05-02T00:00:00Z"),
-        ];
+        const threads = [t(false, "2026-07-09T12:00:00Z"), t(true, "2026-05-02T00:00:00Z")];
         threads.sort(compareBoardThreads);
         expect(threads[0].isPinned).toBe(true);
     });

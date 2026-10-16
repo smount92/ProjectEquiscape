@@ -26,10 +26,7 @@ const ORDINAL = /^(\d{1,3})(st|nd|rd|th)$/i;
  * plausible; "Champion · 12 in class" for a named award; the bare
  * placing when the field is unknown. Null when there is no placing.
  */
-export function placingWithField(
-    placing: string | null | undefined,
-    totalEntries: unknown,
-): string | null {
+export function placingWithField(placing: string | null | undefined, totalEntries: unknown): string | null {
     const text = (placing ?? "").trim();
     if (!text) return null;
     const size = fieldSize(totalEntries);

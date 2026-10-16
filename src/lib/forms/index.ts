@@ -69,4 +69,3 @@ export {
 export type { UpdateCategory, ValidationResult } from "./schema";
 
 export { cleanAttributeBag, packAttributes, unpackAttributes } from "./attributes";
-

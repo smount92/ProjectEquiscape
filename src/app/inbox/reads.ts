@@ -5,20 +5,10 @@ import { getPublicImageUrls } from "@/lib/utils/storage";
 import { resolveAvatarUrl } from "@/lib/utils/avatars.server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import {
-    dealDb,
-    getDealColumnSupport,
-    isMissingSchema,
-    type DealColumnSupport,
-} from "@/lib/deals/columnSupport";
+import { dealDb, getDealColumnSupport, isMissingSchema, type DealColumnSupport } from "@/lib/deals/columnSupport";
 import { coerceTerms, type DealTerms } from "@/lib/deals/terms";
 import { coerceInstallments, ledgerSummary, type Installment } from "@/lib/deals/ledger";
-import {
-    coerceKind,
-    coercePayload,
-    previewLine,
-    type MessageKind,
-} from "@/lib/deals/transcript";
+import { coerceKind, coercePayload, previewLine, type MessageKind } from "@/lib/deals/transcript";
 import {
     inferKind,
     isTerminalStage,
@@ -29,11 +19,7 @@ import {
     type DealParty,
     type DealStage,
 } from "@/lib/deals/vocabulary";
-import {
-    buildEvidencePack,
-    type EvidencePack,
-    type EvidenceParty,
-} from "@/lib/deals/evidence";
+import { buildEvidencePack, type EvidencePack, type EvidenceParty } from "@/lib/deals/evidence";
 
 /**
  * INBOX READS — the queries behind the deal room.
@@ -163,12 +149,9 @@ export async function loadInbox(userId: string): Promise<InboxData> {
     // One bounded query, not "every message you have ever received".
     const unread = new Map<string, number>();
     {
-        const marks = convoIds
-            .map((id) => participantMap.get(id)?.lastReadAt)
-            .filter(Boolean) as string[];
-        const earliest = marks.length === convoIds.length && marks.length > 0
-            ? marks.reduce((a, b) => (a < b ? a : b))
-            : null;
+        const marks = convoIds.map((id) => participantMap.get(id)?.lastReadAt).filter(Boolean) as string[];
+        const earliest =
+            marks.length === convoIds.length && marks.length > 0 ? marks.reduce((a, b) => (a < b ? a : b)) : null;
 
         let q = supabase
             .from("messages")
@@ -195,15 +178,10 @@ export async function loadInbox(userId: string): Promise<InboxData> {
     // ── Counterparties ───────────────────────────────────────
     const otherIds = [
         ...new Set(
-            convos.map((c) =>
-                (c.buyer_id as string) === userId ? (c.seller_id as string) : (c.buyer_id as string),
-            ),
+            convos.map((c) => ((c.buyer_id as string) === userId ? (c.seller_id as string) : (c.buyer_id as string))),
         ),
     ];
-    const { data: users } = await supabase
-        .from("users")
-        .select("id, alias_name, avatar_url")
-        .in("id", otherIds);
+    const { data: users } = await supabase.from("users").select("id, alias_name, avatar_url").in("id", otherIds);
     const userMap = new Map<string, { alias: string; avatar: string | null }>();
     for (const u of (users ?? []) as { id: string; alias_name: string; avatar_url: string | null }[]) {
         userMap.set(u.id, { alias: u.alias_name, avatar: u.avatar_url });
@@ -217,9 +195,7 @@ export async function loadInbox(userId: string): Promise<InboxData> {
     );
 
     // ── Subjects ─────────────────────────────────────────────
-    const horseIds = [
-        ...new Set(convos.map((c) => c.horse_id as string | null).filter(Boolean) as string[]),
-    ];
+    const horseIds = [...new Set(convos.map((c) => c.horse_id as string | null).filter(Boolean) as string[])];
     const horseMap = new Map<string, { name: string; thumb: string | null }>();
     if (horseIds.length > 0) {
         const { data: horses } = await supabase
@@ -342,8 +318,7 @@ export async function loadInbox(userId: string): Promise<InboxData> {
     // ── Assemble ─────────────────────────────────────────────
     const threads: InboxThread[] = convos.map((c) => {
         const id = c.id as string;
-        const otherId =
-            (c.buyer_id as string) === userId ? (c.seller_id as string) : (c.buyer_id as string);
+        const otherId = (c.buyer_id as string) === userId ? (c.seller_id as string) : (c.buyer_id as string);
         const other = userMap.get(otherId);
         const horse = c.horse_id ? horseMap.get(c.horse_id as string) : null;
         const txn = txnMap.get(id);
@@ -351,7 +326,7 @@ export async function loadInbox(userId: string): Promise<InboxData> {
         const fallback = previewMap.get(id);
 
         const kind =
-            ((c.deal_kind as DealKind | null) ?? null) ??
+            (c.deal_kind as DealKind | null) ??
             (txn ? inferKind({ horseId: (c.horse_id as string | null) ?? null }) : null);
 
         const disputed = !!c.disputed_at;
@@ -367,11 +342,7 @@ export async function loadInbox(userId: string): Promise<InboxData> {
 
         // The role label is derived from the TRANSACTION, never from
         // buyer_id — the bug that has been labelling sellers as buyers.
-        const party: DealParty | null = txn
-            ? userId === txn.partyAId
-                ? "a"
-                : "b"
-            : (part?.party ?? null);
+        const party: DealParty | null = txn ? (userId === txn.partyAId ? "a" : "b") : (part?.party ?? null);
         let role: string | null = null;
         if (txn && kind) {
             role = party === "a" ? labelA(kind) : labelB(kind);
@@ -410,8 +381,7 @@ export async function loadInbox(userId: string): Promise<InboxData> {
 
         const previewKind = coerceKind(c.last_message_kind ?? "chat");
         const previewSender = (c.last_message_sender as string | null) ?? fallback?.senderId ?? null;
-        const previewText =
-            (c.last_message_preview as string | null) ?? fallback?.content ?? "";
+        const previewText = (c.last_message_preview as string | null) ?? fallback?.content ?? "";
 
         return {
             id,
@@ -533,10 +503,7 @@ export interface DealRoom {
     legacyStatus: string;
 }
 
-export async function loadDealRoom(
-    conversationId: string,
-    userId: string,
-): Promise<DealRoom | null> {
+export async function loadDealRoom(conversationId: string, userId: string): Promise<DealRoom | null> {
     const supabase = await createClient();
     const support = await getDealColumnSupport(supabase);
 
@@ -612,8 +579,7 @@ export async function loadDealRoom(
     const commissionId = (convo.commission_id as string | null) ?? null;
     const horseId = (convo.horse_id as string | null) ?? null;
     const kind =
-        ((convo.deal_kind as DealKind | null) ?? null) ??
-        (txn || commissionId ? inferKind({ commissionId, horseId }) : null);
+        (convo.deal_kind as DealKind | null) ?? (txn || commissionId ? inferKind({ commissionId, horseId }) : null);
 
     // ── Trust signals + the rest ─────────────────────────────
     const [transfersRes, reviewsRes, mutualRes, myReviewRes, blockRes, subject, installments, partRow] =
@@ -654,9 +620,7 @@ export async function loadDealRoom(
 
     const ratings = (reviewsRes.data ?? []) as { stars: number }[];
     const avgRating =
-        ratings.length > 0
-            ? Math.round((ratings.reduce((s, r) => s + r.stars, 0) / ratings.length) * 10) / 10
-            : null;
+        ratings.length > 0 ? Math.round((ratings.reduce((s, r) => s + r.stars, 0) / ratings.length) * 10) / 10 : null;
 
     const rv = myReviewRes.data as {
         id: string;
@@ -668,9 +632,7 @@ export async function loadDealRoom(
     const disputedAt = (convo.disputed_at as string | null) ?? null;
     const meta = txn?.metadata ?? null;
     const offerFrom: DealParty =
-        meta && (meta.offer_from === "a" || meta.offer_from === "b")
-            ? (meta.offer_from as DealParty)
-            : "b";
+        meta && (meta.offer_from === "a" || meta.offer_from === "b") ? (meta.offer_from as DealParty) : "b";
 
     return {
         conversationId,
@@ -681,9 +643,7 @@ export async function loadDealRoom(
         otherId,
         otherAlias: otherRow?.alias_name ?? "Unknown",
         otherAvatarUrl: await resolveAvatarUrl(otherRow?.avatar_url ?? null),
-        myAvatarUrl: await resolveAvatarUrl(
-            (meRes.data as { avatar_url: string | null } | null)?.avatar_url ?? null,
-        ),
+        myAvatarUrl: await resolveAvatarUrl((meRes.data as { avatar_url: string | null } | null)?.avatar_url ?? null),
         otherMemberSince: otherRow?.created_at ?? null,
         otherTransferCount: transfersRes.count ?? 0,
         otherAvgRating: avgRating,
@@ -722,9 +682,7 @@ export async function loadDealRoom(
             : null,
         muted: (partRow.data as { muted?: boolean } | null)?.muted === true,
         archived: (partRow.data as { archived?: boolean } | null)?.archived === true,
-        existingReview: rv
-            ? { id: rv.id, stars: rv.stars, reviewText: rv.content, createdAt: rv.created_at }
-            : null,
+        existingReview: rv ? { id: rv.id, stars: rv.stars, reviewText: rv.content, createdAt: rv.created_at } : null,
         mutualTransfers: mutualRes.count ?? 0,
         legacyStatus: (convo.transaction_status as string | null) ?? "open",
     };
@@ -742,10 +700,7 @@ export async function loadDealRoom(
  * (a processor's reviewer wants to know who these two people are), the
  * per-message attachment counts, and the Safe-Trade timestamps in full.
  */
-export async function loadEvidencePack(
-    conversationId: string,
-    userId: string,
-): Promise<EvidencePack | null> {
+export async function loadEvidencePack(conversationId: string, userId: string): Promise<EvidencePack | null> {
     const supabase = await createClient();
     const room = await loadDealRoom(conversationId, userId);
     if (!room) return null;
@@ -878,10 +833,7 @@ async function loadEntries(
     }));
 }
 
-async function loadLedger(
-    supabase: SupabaseClient,
-    conversationId: string,
-): Promise<Installment[]> {
+async function loadLedger(supabase: SupabaseClient, conversationId: string): Promise<Installment[]> {
     const { data, error } = await dealDb(supabase)
         .from("payment_installments")
         .select("id, seq, amount, due_date, marked_sent_at, confirmed_at, note")
@@ -915,9 +867,7 @@ async function loadSubject(
         if (!h) return null;
         const imgs = h.horse_images ?? [];
         const thumb = imgs.find((i) => i.angle_profile === "Primary_Thumbnail") ?? imgs[0];
-        const url = thumb?.image_url
-            ? (getPublicImageUrls([thumb.image_url]).get(thumb.image_url) ?? null)
-            : null;
+        const url = thumb?.image_url ? (getPublicImageUrls([thumb.image_url]).get(thumb.image_url) ?? null) : null;
         return {
             horseId: h.id,
             commissionId: null,

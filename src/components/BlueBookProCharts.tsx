@@ -40,9 +40,7 @@ export default function BlueBookProCharts({
     transactionVolume,
 }: BlueBookProChartsProps) {
     const [hoveredPoint, setHoveredPoint] = useState<ChartDataPoint | null>(null);
-    const [resolvedTier, setResolvedTier] = useState<"free" | "pro" | "studio" | null>(
-        tierProp ?? null,
-    );
+    const [resolvedTier, setResolvedTier] = useState<"free" | "pro" | "studio" | null>(tierProp ?? null);
     useEffect(() => {
         if (tierProp) return;
         createClient()
@@ -70,25 +68,33 @@ export default function BlueBookProCharts({
                     <div>
                         <h3 className="text-lg font-bold text-foreground">{title}</h3>
                         <p className="text-sm text-secondary-foreground">
-                            Avg: {formatCurrency(averagePrice)} · Median: {formatCurrency(medianPrice)} · {transactionVolume} sale{transactionVolume !== 1 ? "s" : ""}
+                            Avg: {formatCurrency(averagePrice)} · Median: {formatCurrency(medianPrice)} ·{" "}
+                            {transactionVolume} sale{transactionVolume !== 1 ? "s" : ""}
                         </p>
                     </div>
                 </div>
 
                 {/* Blurred fake chart */}
                 <div className="relative">
-                    <div className="pointer-events-none select-none blur-[6px]" aria-hidden="true">
+                    <div className="pointer-events-none blur-[6px] select-none" aria-hidden="true">
                         <div className="flex h-[180px] items-end gap-1 rounded-lg bg-white/60 p-4">
                             {Array.from({ length: 24 }, (_, i) => (
                                 <div
                                     key={i}
                                     className="flex-1 rounded-t bg-gradient-to-t from-emerald-400 to-emerald-600"
-                                    style={{ height: `${30 + Math.sin(i * 0.8) * 25 + ((Math.abs(Math.sin(i * 12.9898) * 43758.5453) % 1) * 40)}%` }}
+                                    style={{
+                                        height: `${30 + Math.sin(i * 0.8) * 25 + (Math.abs(Math.sin(i * 12.9898) * 43758.5453) % 1) * 40}%`,
+                                    }}
                                 />
                             ))}
                         </div>
                         <div className="mt-2 flex justify-between text-xs text-muted-foreground">
-                            <span>2021</span><span>2022</span><span>2023</span><span>2024</span><span>2025</span><span>2026</span>
+                            <span>2021</span>
+                            <span>2022</span>
+                            <span>2023</span>
+                            <span>2024</span>
+                            <span>2025</span>
+                            <span>2026</span>
                         </div>
                     </div>
 
@@ -102,7 +108,7 @@ export default function BlueBookProCharts({
                         </p>
                         <Link
                             href="/upgrade"
-                            className="mt-3 inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 px-5 py-2 text-sm font-bold text-white shadow-md transition-all hover:from-amber-600 hover:to-orange-600 hover:shadow-lg no-underline"
+                            className="mt-3 inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 px-5 py-2 text-sm font-bold text-white no-underline shadow-md transition-all hover:from-amber-600 hover:to-orange-600 hover:shadow-lg"
                         >
                             💎 Upgrade to MHH Pro
                         </Link>
@@ -113,7 +119,7 @@ export default function BlueBookProCharts({
     }
 
     // ── Pro Tier: Full interactive chart ──
-    const maxPrice = Math.max(...historicalData.map(d => d.price), 1);
+    const maxPrice = Math.max(...historicalData.map((d) => d.price), 1);
     const chartWidth = 700;
     const chartHeight = 200;
     const padding = 40;
@@ -126,13 +132,12 @@ export default function BlueBookProCharts({
                     <div>
                         <h3 className="text-lg font-bold text-foreground">{title}</h3>
                         <p className="text-sm text-secondary-foreground">
-                            Avg: {formatCurrency(averagePrice)} · Median: {formatCurrency(medianPrice)} · {transactionVolume} sale{transactionVolume !== 1 ? "s" : ""}
+                            Avg: {formatCurrency(averagePrice)} · Median: {formatCurrency(medianPrice)} ·{" "}
+                            {transactionVolume} sale{transactionVolume !== 1 ? "s" : ""}
                         </p>
                     </div>
                 </div>
-                <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">
-                    💎 PRO
-                </span>
+                <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700">💎 PRO</span>
             </div>
 
             {historicalData.length > 0 ? (
@@ -143,11 +148,18 @@ export default function BlueBookProCharts({
                         onMouseLeave={() => setHoveredPoint(null)}
                     >
                         {/* Grid lines */}
-                        {[0, 0.25, 0.5, 0.75, 1].map(pct => {
+                        {[0, 0.25, 0.5, 0.75, 1].map((pct) => {
                             const y = chartHeight - pct * chartHeight;
                             return (
                                 <g key={pct}>
-                                    <line x1={padding} y1={y} x2={chartWidth - 10} y2={y} stroke="#e5e7eb" strokeWidth="1" />
+                                    <line
+                                        x1={padding}
+                                        y1={y}
+                                        x2={chartWidth - 10}
+                                        y2={y}
+                                        stroke="#e5e7eb"
+                                        strokeWidth="1"
+                                    />
                                     <text x={0} y={y + 4} fontSize="10" fill="#9ca3af">
                                         {formatCurrency(maxPrice * pct)}
                                     </text>
@@ -157,7 +169,8 @@ export default function BlueBookProCharts({
 
                         {/* Data points */}
                         {historicalData.map((d, i) => {
-                            const x = padding + (i / Math.max(historicalData.length - 1, 1)) * (chartWidth - padding - 10);
+                            const x =
+                                padding + (i / Math.max(historicalData.length - 1, 1)) * (chartWidth - padding - 10);
                             const y = chartHeight - (d.price / maxPrice) * chartHeight;
                             return (
                                 <g key={i}>
@@ -179,7 +192,8 @@ export default function BlueBookProCharts({
                     {/* Tooltip */}
                     {hoveredPoint && (
                         <div className="mt-2 rounded-md bg-stone-800 px-3 py-2 text-xs text-white">
-                            {formatCurrency(hoveredPoint.price)} · {hoveredPoint.finishType} · {new Date(hoveredPoint.date).toLocaleDateString()}
+                            {formatCurrency(hoveredPoint.price)} · {hoveredPoint.finishType} ·{" "}
+                            {new Date(hoveredPoint.date).toLocaleDateString()}
                         </div>
                     )}
 

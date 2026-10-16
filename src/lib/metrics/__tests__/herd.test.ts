@@ -4,16 +4,46 @@ import { OTHER, tallyHerd, topBuckets, UNKNOWN, windowCounts, type Bucket } from
 describe("tallyHerd", () => {
     it("counts makers, finishes, sex and colour, owner-set before registry", () => {
         const t = tallyHerd([
-            { finish_type: "OF", assigned_gender: "Mare", catalog_id: "c1", catalog_items: { maker: "Breyer", scale: "Traditional (1:9)", attributes: { gender: "Stallion", color_description: "Bay" } } },
-            { finish_type: "OF", catalog_id: "c2", catalog_items: { maker: "breyer", scale: "Traditional (1:9)", attributes: { gender: "Gelding", color_description: "Bay" } } },
+            {
+                finish_type: "OF",
+                assigned_gender: "Mare",
+                catalog_id: "c1",
+                catalog_items: {
+                    maker: "Breyer",
+                    scale: "Traditional (1:9)",
+                    attributes: { gender: "Stallion", color_description: "Bay" },
+                },
+            },
+            {
+                finish_type: "OF",
+                catalog_id: "c2",
+                catalog_items: {
+                    maker: "breyer",
+                    scale: "Traditional (1:9)",
+                    attributes: { gender: "Gelding", color_description: "Bay" },
+                },
+            },
             { finish_type: "CM", color: "Grey", catalog_items: null },
         ]);
         expect(t.total).toBe(3);
         expect(t.linked).toBe(2);
-        expect(t.byMaker).toEqual([{ label: "Breyer", count: 2 }, { label: UNKNOWN, count: 1 }]);
-        expect(t.byFinish).toEqual([{ label: "OF", count: 2 }, { label: "CM", count: 1 }]);
-        expect(t.byGender).toEqual([{ label: "Gelding", count: 1 }, { label: "Mare", count: 1 }, { label: UNKNOWN, count: 1 }]);
-        expect(t.byColor).toEqual([{ label: "Bay", count: 2 }, { label: "Grey", count: 1 }]);
+        expect(t.byMaker).toEqual([
+            { label: "Breyer", count: 2 },
+            { label: UNKNOWN, count: 1 },
+        ]);
+        expect(t.byFinish).toEqual([
+            { label: "OF", count: 2 },
+            { label: "CM", count: 1 },
+        ]);
+        expect(t.byGender).toEqual([
+            { label: "Gelding", count: 1 },
+            { label: "Mare", count: 1 },
+            { label: UNKNOWN, count: 1 },
+        ]);
+        expect(t.byColor).toEqual([
+            { label: "Bay", count: 2 },
+            { label: "Grey", count: 1 },
+        ]);
     });
 
     it("folds the long tail into Other and keeps Unknown last", () => {

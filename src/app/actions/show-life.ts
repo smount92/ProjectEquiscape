@@ -60,13 +60,9 @@ export async function getMyShowLife(): Promise<MyShowLife> {
         //    PUBLISHED (completed/archived). Provisional placings in
         //    results_review stay with the host.
         const resultShowIds = new Set(
-            shows
-                .filter((s) => RESULT_LIFE_STATUSES.includes(s.status as ShowStatus))
-                .map((s) => s.id),
+            shows.filter((s) => RESULT_LIFE_STATUSES.includes(s.status as ShowStatus)).map((s) => s.id),
         );
-        const resultEntryIds = entries
-            .filter((e) => resultShowIds.has(e.show_id))
-            .map((e) => e.id);
+        const resultEntryIds = entries.filter((e) => resultShowIds.has(e.show_id)).map((e) => e.id);
         let placings: ShowLifePlacingRow[] = [];
         if (resultEntryIds.length > 0) {
             const { data: rawPlacings, error: placingsError } = await supabase
@@ -81,15 +77,10 @@ export async function getMyShowLife(): Promise<MyShowLife> {
         // 4. Names for display: classes (active listing + placings) and
         //    my horses (placing lines). Both tolerate missing rows —
         //    e.g. a horse transferred away after the show.
-        const classIds = [
-            ...new Set([...entries.map((e) => e.class_id), ...placings.map((p) => p.class_id)]),
-        ];
+        const classIds = [...new Set([...entries.map((e) => e.class_id), ...placings.map((p) => p.class_id)])];
         const classNamesById = new Map<string, string>();
         if (classIds.length > 0) {
-            const { data: classRows } = await supabase
-                .from("show_classes")
-                .select("id, name")
-                .in("id", classIds);
+            const { data: classRows } = await supabase.from("show_classes").select("id, name").in("id", classIds);
             for (const row of classRows ?? []) {
                 classNamesById.set(row.id as string, (row.name as string | null) ?? "Class");
             }
@@ -98,15 +89,9 @@ export async function getMyShowLife(): Promise<MyShowLife> {
         const horseIds = [...new Set(entries.map((e) => e.horse_id))];
         const horseNamesById = new Map<string, string>();
         if (horseIds.length > 0) {
-            const { data: horseRows } = await supabase
-                .from("user_horses")
-                .select("id, custom_name")
-                .in("id", horseIds);
+            const { data: horseRows } = await supabase.from("user_horses").select("id, custom_name").in("id", horseIds);
             for (const row of horseRows ?? []) {
-                horseNamesById.set(
-                    row.id as string,
-                    (row.custom_name as string | null) ?? "Unnamed horse",
-                );
+                horseNamesById.set(row.id as string, (row.custom_name as string | null) ?? "Unnamed horse");
             }
         }
 

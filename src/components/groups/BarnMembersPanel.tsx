@@ -58,7 +58,7 @@ export default function BarnMembersPanel({
         return (
             <aside className="ledger-card">
                 <span className="ledger-tab">Members</span>
-                <p className="text-muted-foreground m-0 text-sm italic">
+                <p className="m-0 text-sm text-muted-foreground italic">
                     This barn is private. Join to see who&apos;s inside.
                 </p>
             </aside>
@@ -75,10 +75,7 @@ export default function BarnMembersPanel({
             }
             setRequests((prev) => prev.filter((r) => r.userId !== userId));
             if (decision === "approved") {
-                setMembers((prev) => [
-                    ...prev,
-                    { userId, alias, role: "member", joinedAt: new Date().toISOString() },
-                ]);
+                setMembers((prev) => [...prev, { userId, alias, role: "member", joinedAt: new Date().toISOString() }]);
             }
         });
     };
@@ -119,12 +116,12 @@ export default function BarnMembersPanel({
                             <li key={r.userId} className="flex flex-col gap-1.5">
                                 <Link
                                     href={`/profile/${encodeURIComponent(r.alias)}`}
-                                    className="text-saddle text-sm font-bold hover:underline"
+                                    className="text-sm font-bold text-saddle hover:underline"
                                 >
                                     @{r.alias}
                                 </Link>
                                 {r.message && (
-                                    <p className="text-secondary-foreground m-0 text-xs italic">
+                                    <p className="m-0 text-xs text-secondary-foreground italic">
                                         &ldquo;{r.message}&rdquo;
                                     </p>
                                 )}
@@ -155,12 +152,10 @@ export default function BarnMembersPanel({
 
             {/* Roster */}
             <div className="ledger-card">
-                <span className="ledger-tab">
-                    Members ({members.length})
-                </span>
-                {error && <p className="text-destructive mb-2 text-xs">{error}</p>}
+                <span className="ledger-tab">Members ({members.length})</span>
+                {error && <p className="mb-2 text-xs text-destructive">{error}</p>}
                 {members.length === 0 ? (
-                    <p className="text-muted-foreground m-0 text-sm italic">No one has moved in yet.</p>
+                    <p className="m-0 text-sm text-muted-foreground italic">No one has moved in yet.</p>
                 ) : (
                     <ul className="m-0 flex list-none flex-col gap-0.5 p-0">
                         {members.map((m) => (
@@ -171,11 +166,11 @@ export default function BarnMembersPanel({
                                 <span className="flex min-w-0 flex-wrap items-center gap-2">
                                     <Link
                                         href={`/profile/${encodeURIComponent(m.alias)}`}
-                                        className="text-saddle truncate text-sm font-bold hover:underline"
+                                        className="truncate text-sm font-bold text-saddle hover:underline"
                                     >
                                         @{m.alias}
                                     </Link>
-                                    <span className="text-muted-foreground text-[0.68rem] tracking-[0.1em] uppercase">
+                                    <span className="text-[0.68rem] tracking-[0.1em] text-muted-foreground uppercase">
                                         {ROLE_LABEL[m.role] || m.role}
                                     </span>
                                 </span>
@@ -183,7 +178,7 @@ export default function BarnMembersPanel({
                                     <span className="flex shrink-0 items-center gap-1">
                                         {isOwner && (
                                             <select
-                                                className="border-input bg-card text-foreground rounded-md border py-0.5 pr-6 pl-1.5 text-[0.68rem]"
+                                                className="rounded-md border border-input bg-card py-0.5 pr-6 pl-1.5 text-[0.68rem] text-foreground"
                                                 value={m.role}
                                                 disabled={isPending}
                                                 title={`Role for ${m.alias}`}

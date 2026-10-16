@@ -69,9 +69,7 @@ export async function getAppToken(now: number = Date.now()): Promise<string> {
 }
 
 async function mintToken(now: number): Promise<string> {
-    const basic = Buffer.from(
-        `${process.env.EBAY_CLIENT_ID}:${process.env.EBAY_CLIENT_SECRET}`
-    ).toString("base64");
+    const basic = Buffer.from(`${process.env.EBAY_CLIENT_ID}:${process.env.EBAY_CLIENT_SECRET}`).toString("base64");
 
     const res = await fetch(`${ebayApiBase()}/identity/v1/oauth2/token`, {
         method: "POST",
@@ -119,7 +117,7 @@ const CATEGORY_MODEL_HORSES = "156265";
  */
 export async function searchActiveListings(
     query: string,
-    opts: { limit?: number; now?: number } = {}
+    opts: { limit?: number; now?: number } = {},
 ): Promise<EbayListing[]> {
     const token = await getAppToken(opts.now);
     const params = new URLSearchParams({
@@ -141,9 +139,7 @@ export async function searchActiveListings(
             Authorization: `Bearer ${token}`,
             "X-EBAY-C-MARKETPLACE-ID": ebayMarketplace(),
             Accept: "application/json",
-            ...(campaignId
-                ? { "X-EBAY-C-ENDUSERCTX": `affiliateCampaignId=${campaignId}` }
-                : {}),
+            ...(campaignId ? { "X-EBAY-C-ENDUSERCTX": `affiliateCampaignId=${campaignId}` } : {}),
         },
     });
 
@@ -155,7 +151,9 @@ export async function searchActiveListings(
 
     return items.flatMap((raw) => {
         const it = raw as {
-            itemId?: string; title?: string; itemWebUrl?: string;
+            itemId?: string;
+            title?: string;
+            itemWebUrl?: string;
             itemAffiliateWebUrl?: string;
             condition?: string;
             price?: { value?: string; currency?: string };
@@ -164,15 +162,17 @@ export async function searchActiveListings(
         // A listing with no usable price is not a price signal; dropping it
         // is better than storing a 0 that would drag every average down.
         if (!it.itemId || !it.title || !Number.isFinite(value) || value <= 0) return [];
-        return [{
-            itemId: String(it.itemId),
-            title: String(it.title),
-            price: value,
-            currency: String(it.price?.currency ?? "USD"),
-            condition: it.condition ? String(it.condition) : null,
-            itemWebUrl: it.itemWebUrl ? String(it.itemWebUrl) : null,
-            itemAffiliateWebUrl: it.itemAffiliateWebUrl ? String(it.itemAffiliateWebUrl) : null,
-        }];
+        return [
+            {
+                itemId: String(it.itemId),
+                title: String(it.title),
+                price: value,
+                currency: String(it.price?.currency ?? "USD"),
+                condition: it.condition ? String(it.condition) : null,
+                itemWebUrl: it.itemWebUrl ? String(it.itemWebUrl) : null,
+                itemAffiliateWebUrl: it.itemAffiliateWebUrl ? String(it.itemAffiliateWebUrl) : null,
+            },
+        ];
     });
 }
 

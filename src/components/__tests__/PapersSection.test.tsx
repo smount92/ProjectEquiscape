@@ -105,15 +105,22 @@ describe("PapersSection", () => {
 
     it("opens the lightbox on the scan, with only image papers in the reel", () => {
         render(<PapersSection horseId={HORSE} horseName="Winter Wonderland" papers={PAPERS} />);
-        fireEvent.click(screen.getByRole("button", { name: /View Breeding certificate — Winter Wonderland full size/ }));
+        fireEvent.click(
+            screen.getByRole("button", { name: /View Breeding certificate — Winter Wonderland full size/ }),
+        );
         expect(screen.getByTestId("lightbox")).toHaveTextContent("Breeding certificate — Winter Wonderland");
         expect(lightbox).toHaveBeenCalledWith(
-            expect.objectContaining({ images: [{ url: "https://signed.example/p1.webp", label: "Breeding certificate — Winter Wonderland" }], initialIndex: 0 }),
+            expect.objectContaining({
+                images: [{ url: "https://signed.example/p1.webp", label: "Breeding certificate — Winter Wonderland" }],
+                initialIndex: 0,
+            }),
         );
     });
 
     it("the owner gets the invitation on an empty folder, and controls on a full one", async () => {
-        const { rerender } = render(<PapersSection horseId={HORSE} horseName="Winter Wonderland" papers={[]} isOwner />);
+        const { rerender } = render(
+            <PapersSection horseId={HORSE} horseName="Winter Wonderland" papers={[]} isOwner />,
+        );
         expect(screen.getByText(/No papers filed yet/)).toBeInTheDocument();
         expect(screen.getByRole("button", { name: /File a paper/ })).toBeInTheDocument();
 

@@ -13,13 +13,7 @@ import { resolveAvatarUrls } from "@/lib/utils/avatars.server";
 import { sanitizeText } from "@/lib/utils/validation";
 import { getPostColumnSupport } from "@/lib/feed/columnSupport";
 import type { TablesInsert } from "@/lib/types/database.generated";
-import {
-    mergeByCreatedAtDesc,
-    takePage,
-    isAuditNote,
-    isGloballyVisible,
-    type ContextualRow,
-} from "@/lib/feed/stream";
+import { mergeByCreatedAtDesc, takePage, isAuditNote, isGloballyVisible, type ContextualRow } from "@/lib/feed/stream";
 
 // ============================================================
 // UNIVERSAL POSTS — Server Actions
@@ -94,13 +88,17 @@ export async function createPost(data: {
         if (support.visibility) insertRow.visibility = "followers";
     }
 
-    const { data: post, error } = await supabase.from("posts").insert(insertRow as TablesInsert<"posts">).select("id").single();
+    const { data: post, error } = await supabase
+        .from("posts")
+        .insert(insertRow as TablesInsert<"posts">)
+        .select("id")
+        .single();
 
     if (error) return { success: false, error: error.message };
 
     // Link media attachments
     if (data.imagePaths && data.imagePaths.length > 0 && post) {
-        const mediaRows = data.imagePaths.map(path => ({
+        const mediaRows = data.imagePaths.map((path) => ({
             storage_path: path,
             uploader_id: user.id,
             post_id: post.id,
@@ -133,7 +131,11 @@ export async function createPost(data: {
 
             // Notify event creator
             if (eventId) {
-                const { data: event } = await supabaseDeferred.from("events").select("created_by, name").eq("id", eventId).single();
+                const { data: event } = await supabaseDeferred
+                    .from("events")
+                    .select("created_by, name")
+                    .eq("id", eventId)
+                    .single();
                 if (event && (event as { created_by: string }).created_by !== userId) {
                     await createNotification({
                         userId: (event as { created_by: string }).created_by,
@@ -167,7 +169,11 @@ export async function createPost(data: {
 
             // Notify studio owner
             if (studioId) {
-                const { data: studio } = await supabaseDeferred.from("artist_profiles").select("user_id, studio_name").eq("user_id", studioId).single();
+                const { data: studio } = await supabaseDeferred
+                    .from("artist_profiles")
+                    .select("user_id, studio_name")
+                    .eq("user_id", studioId)
+                    .single();
                 if (studio && (studio as { user_id: string }).user_id !== userId) {
                     await createNotification({
                         userId: (studio as { user_id: string }).user_id,
@@ -185,7 +191,9 @@ export async function createPost(data: {
             // Evaluate post achievements
             const { evaluateUserAchievements } = await import("@/lib/utils/achievements");
             await evaluateUserAchievements(userId, "post_created");
-        } catch (err) { logger.error("Posts", "Background task failed", err); }
+        } catch (err) {
+            logger.error("Posts", "Background task failed", err);
+        }
     });
 
     return { success: true, postId: post!.id };
@@ -198,10 +206,7 @@ export async function createPost(data: {
  * @param postId - UUID of the parent post
  * @param content - Reply text content
  */
-export async function replyToPost(
-    parentId: string,
-    content: string
-): Promise<{ success: boolean; error?: string }> {
+export async function replyToPost(parentId: string, content: string): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
     if (!content.trim()) return { success: false, error: "Reply cannot be empty." };
     if (content.trim().length > 500) return { success: false, error: "Reply is too long (500 char max)." };
@@ -221,7 +226,11 @@ export async function replyToPost(
     after(async () => {
         try {
             const supabaseDeferred = await (await import("@/lib/supabase/server")).createClient();
-            const { data: parentPost } = await supabaseDeferred.from("posts").select("author_id").eq("id", parentId).single();
+            const { data: parentPost } = await supabaseDeferred
+                .from("posts")
+                .select("author_id")
+                .eq("id", parentId)
+                .single();
             const { data: actor } = await supabaseDeferred.from("users").select("alias_name").eq("id", userId).single();
             const alias = (actor as { alias_name: string } | null)?.alias_name || "Someone";
 
@@ -239,15 +248,15 @@ export async function replyToPost(
             // @mentions in reply
             const { parseAndNotifyMentions } = await import("@/app/actions/mentions");
             await parseAndNotifyMentions(trimmedContent, userId, alias, `/feed/${parentId}`);
-        } catch (err) { logger.error("Posts", "Background task failed", err); }
+        } catch (err) {
+            logger.error("Posts", "Background task failed", err);
+        }
     });
 
     return { success: true };
 }
 
-export async function deletePost(
-    postId: string
-): Promise<{ success: boolean; error?: string }> {
+export async function deletePost(postId: string): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
     const isAdmin = user.email?.toLowerCase() === process.env.ADMIN_EMAIL?.toLowerCase();
 
@@ -259,7 +268,13 @@ export async function deletePost(
         .maybeSingle();
 
     if (!postRow) return { success: false, error: "Post not found." };
-    const pr = postRow as { id: string; author_id: string; horse_id: string | null; group_id: string | null; event_id: string | null };
+    const pr = postRow as {
+        id: string;
+        author_id: string;
+        horse_id: string | null;
+        group_id: string | null;
+        event_id: string | null;
+    };
 
     if (pr.author_id !== user.id && !isAdmin) {
         return { success: false, error: "You can only delete your own posts." };
@@ -270,21 +285,18 @@ export async function deletePost(
     // old select for one errored silently and leaked every file since
     // migration 042).
     try {
-        const { data: media } = await supabase
-            .from("media_attachments")
-            .select("storage_path")
-            .eq("post_id", postId);
+        const { data: media } = await supabase.from("media_attachments").select("storage_path").eq("post_id", postId);
 
         if (media && media.length > 0) {
-            const paths = (media as { storage_path: string }[])
-                .map(m => m.storage_path)
-                .filter(Boolean);
+            const paths = (media as { storage_path: string }[]).map((m) => m.storage_path).filter(Boolean);
 
             if (paths.length > 0) {
                 await supabase.storage.from("horse-images").remove(paths);
             }
         }
-    } catch (err) { logger.error("Posts", "Media cleanup failed during post deletion", err); }
+    } catch (err) {
+        logger.error("Posts", "Media cleanup failed during post deletion", err);
+    }
 
     const { error } = await supabase.from("posts").delete().eq("id", postId);
     if (error) return { success: false, error: error.message };
@@ -306,10 +318,7 @@ export async function deletePost(
  * @param postId - UUID of the post to update
  * @param content - New post content
  */
-export async function updatePost(
-    postId: string,
-    newContent: string
-): Promise<{ success: boolean; error?: string }> {
+export async function updatePost(postId: string, newContent: string): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
     if (!newContent.trim()) return { success: false, error: "Content cannot be empty." };
@@ -350,9 +359,7 @@ export async function updatePost(
  * Creates a notification for the post author on like.
  * @param postId - UUID of the post to like/unlike
  */
-export async function togglePostLike(
-    postId: string
-): Promise<{ success: boolean; action?: string; error?: string }> {
+export async function togglePostLike(postId: string): Promise<{ success: boolean; action?: string; error?: string }> {
     const { supabase, user } = await requireAuth();
 
     const { data, error } = await supabase.rpc("toggle_post_like", {
@@ -370,9 +377,17 @@ export async function togglePostLike(
         after(async () => {
             try {
                 const supabaseDeferred = await (await import("@/lib/supabase/server")).createClient();
-                const { data: post } = await supabaseDeferred.from("posts").select("author_id").eq("id", postId).single();
+                const { data: post } = await supabaseDeferred
+                    .from("posts")
+                    .select("author_id")
+                    .eq("id", postId)
+                    .single();
                 if (post && (post as { author_id: string }).author_id !== userId) {
-                    const { data: actor } = await supabaseDeferred.from("users").select("alias_name").eq("id", userId).single();
+                    const { data: actor } = await supabaseDeferred
+                        .from("users")
+                        .select("alias_name")
+                        .eq("id", userId)
+                        .single();
                     const alias = (actor as { alias_name: string } | null)?.alias_name || "Someone";
                     const { createNotification } = await import("@/lib/notifications/createNotification");
                     await createNotification({
@@ -383,7 +398,9 @@ export async function togglePostLike(
                         linkUrl: `/feed`,
                     });
                 }
-            } catch (err) { logger.error("Posts", "Background task failed", err); }
+            } catch (err) {
+                logger.error("Posts", "Background task failed", err);
+            }
         });
     }
 
@@ -397,21 +414,26 @@ export async function togglePostLike(
  * @param context - Query context: type, targetId, cursor, limit
  * @returns Array of posts with author and engagement data
  */
-export async function getPosts(context: {
-    horseId?: string;
-    groupId?: string;
-    eventId?: string;
-    globalFeed?: boolean;
-}, options?: {
-    limit?: number;
-    cursor?: string;
-    includeReplies?: boolean;
-}): Promise<Post[]> {
+export async function getPosts(
+    context: {
+        horseId?: string;
+        groupId?: string;
+        eventId?: string;
+        globalFeed?: boolean;
+    },
+    options?: {
+        limit?: number;
+        cursor?: string;
+        includeReplies?: boolean;
+    },
+): Promise<Post[]> {
     const { supabase, user } = await requireAuth();
 
     let query = supabase
         .from("posts")
-        .select("id, author_id, content, parent_id, horse_id, group_id, event_id, likes_count, replies_count, is_pinned, created_at, updated_at, users!posts_author_id_fkey(alias_name, avatar_url)")
+        .select(
+            "id, author_id, content, parent_id, horse_id, group_id, event_id, likes_count, replies_count, is_pinned, created_at, updated_at, users!posts_author_id_fkey(alias_name, avatar_url)",
+        )
         .is("parent_id", null)
         .order("created_at", { ascending: false })
         .limit(options?.limit || 25);
@@ -443,17 +465,12 @@ export async function getPosts(context: {
     // content from me — same one-directional filter the Show Ring
     // applies). Filtered before the id list so their replies and
     // media never load either.
-    const { data: myBlocks } = await supabase
-        .from("user_blocks")
-        .select("blocked_id")
-        .eq("blocker_id", user.id);
+    const { data: myBlocks } = await supabase.from("user_blocks").select("blocked_id").eq("blocker_id", user.id);
     const blockedIds = new Set((myBlocks ?? []).map((b: { blocked_id: string }) => b.blocked_id));
-    const posts = (rawPosts as Record<string, unknown>[]).filter(
-        (p) => !blockedIds.has(p.author_id as string),
-    );
+    const posts = (rawPosts as Record<string, unknown>[]).filter((p) => !blockedIds.has(p.author_id as string));
     if (posts.length === 0) return [];
 
-    const postIds = posts.map(p => p.id as string);
+    const postIds = posts.map((p) => p.id as string);
 
     // Fetch media for all posts in one query
     const { data: media } = await supabase
@@ -478,7 +495,9 @@ export async function getPosts(context: {
     if (options?.includeReplies) {
         const { data: replies } = await supabase
             .from("posts")
-            .select("id, author_id, content, parent_id, likes_count, created_at, users!posts_author_id_fkey(alias_name, avatar_url)")
+            .select(
+                "id, author_id, content, parent_id, likes_count, created_at, users!posts_author_id_fkey(alias_name, avatar_url)",
+            )
             .in("parent_id", postIds)
             .order("created_at", { ascending: true })
             .limit(100); // Global cap: ~5 replies × 20 posts = 100 max
@@ -495,7 +514,11 @@ export async function getPosts(context: {
                 authorAvatarUrl: replyUser?.avatar_url ?? null,
                 content: r.content as string,
                 parentId: r.parent_id as string,
-                horseId: null, groupId: null, eventId: null, studioId: null, helpRequestId: null,
+                horseId: null,
+                groupId: null,
+                eventId: null,
+                studioId: null,
+                helpRequestId: null,
                 likesCount: (r.likes_count as number) || 0,
                 repliesCount: 0,
                 isPinned: false,
@@ -508,7 +531,7 @@ export async function getPosts(context: {
         }
     }
 
-    const mapped = posts.map(p => {
+    const mapped = posts.map((p) => {
         const postUser = p.users as { alias_name: string; avatar_url: string | null } | null;
         return {
             id: p.id as string,
@@ -572,17 +595,19 @@ export async function getEventMedia(eventId: string) {
     const supabase = await createClient();
     const { data } = await supabase
         .from("media_attachments")
-        .select("id, storage_path, event_id, caption, created_at, uploader_id, users!media_attachments_uploader_id_fkey(alias_name)")
+        .select(
+            "id, storage_path, event_id, caption, created_at, uploader_id, users!media_attachments_uploader_id_fkey(alias_name)",
+        )
         .eq("event_id", eventId)
         .order("created_at", { ascending: false });
 
     const items = data ?? [];
 
     if (items.length === 0) return [];
-    const paths = items.map(i => i.storage_path);
+    const paths = items.map((i) => i.storage_path);
     const urlMap = getPublicImageUrls(paths);
 
-    return items.map(i => ({
+    return items.map((i) => ({
         id: i.id,
         imageUrl: urlMap.get(i.storage_path) || "",
         caption: i.caption,
@@ -601,7 +626,7 @@ export async function getEventMedia(eventId: string) {
 export async function addEventMedia(
     eventId: string,
     imagePath: string,
-    caption?: string
+    caption?: string,
 ): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
@@ -622,9 +647,7 @@ export async function addEventMedia(
  * Delete a media item from an event's gallery (uploader or admin only).
  * @param mediaId - UUID of the media record to delete
  */
-export async function deleteEventMedia(
-    mediaId: string
-): Promise<{ success: boolean; error?: string }> {
+export async function deleteEventMedia(mediaId: string): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
     // Fetch the storage path before deleting the row (bucket-relative;
@@ -640,7 +663,9 @@ export async function deleteEventMedia(
         if (path) {
             await supabase.storage.from("horse-images").remove([path]);
         }
-    } catch (err) { logger.error("Posts", "Background task failed", err); }
+    } catch (err) {
+        logger.error("Posts", "Background task failed", err);
+    }
 
     const { error } = await supabase.from("media_attachments").delete().eq("id", mediaId);
     if (error) return { success: false, error: error.message };
@@ -805,9 +830,7 @@ export async function getFeedStream(options?: {
         // Who is hidden from me
         supabase.from("user_blocks").select("blocked_id").eq("blocker_id", user.id),
         // Who I follow (Following scope only)
-        scope === "following"
-            ? supabase.from("user_follows").select("following_id").eq("follower_id", user.id)
-            : null,
+        scope === "following" ? supabase.from("user_follows").select("following_id").eq("follower_id", user.id) : null,
         getPostColumnSupport(supabase),
     ]);
     const blockedIds = new Set((myBlocks ?? []).map((b: { blocked_id: string }) => b.blocked_id));
@@ -910,8 +933,7 @@ export async function getFeedStream(options?: {
     const { data: legacyRows } = await legacyQuery;
     const legacy = ((legacyRows ?? []) as unknown as Record<string, unknown>[]).filter(
         (e) =>
-            !blockedIds.has(e.actor_id as string) &&
-            (useInFilter || !authorSet || authorSet.has(e.actor_id as string)),
+            !blockedIds.has(e.actor_id as string) && (useInFilter || !authorSet || authorSet.has(e.actor_id as string)),
     );
     const legacyExhausted = (legacyRows ?? []).length <= limit;
 
@@ -954,13 +976,8 @@ export async function getFeedStream(options?: {
     const byId = new Map<string, FeedStreamItem>();
     for (const item of [...postItems, ...legacyItems]) byId.set(item.id, item);
 
-    const pinnedItems = pinnedRows
-        .map((r) => byId.get(r.id as string))
-        .filter((i): i is FeedStreamItem => !!i);
-    const items = [
-        ...pinnedItems,
-        ...page.items.map((s) => byId.get(s.id)).filter((i): i is FeedStreamItem => !!i),
-    ];
+    const pinnedItems = pinnedRows.map((r) => byId.get(r.id as string)).filter((i): i is FeedStreamItem => !!i);
+    const items = [...pinnedItems, ...page.items.map((s) => byId.get(s.id)).filter((i): i is FeedStreamItem => !!i)];
 
     // Batch-resolve avatar storage paths → signed URLs (posts + replies).
     const avatarPaths: (string | null)[] = [];
@@ -1009,10 +1026,7 @@ async function filterToGloballyVisible(
         // `visibility` is the authoritative column (migration 150):
         // 'public' only — 'unlisted' is link-viewable but listed nowhere,
         // and a feed is the definition of "listed".
-        const { data } = await supabase
-            .from("user_horses")
-            .select("id, visibility, deleted_at")
-            .in("id", horseIds);
+        const { data } = await supabase.from("user_horses").select("id, visibility, deleted_at").in("id", horseIds);
         for (const h of (data ?? []) as { id: string; visibility: string; deleted_at: string | null }[]) {
             if (h.visibility === "public" && !h.deleted_at) publicHorseIds.add(h.id);
         }
@@ -1023,10 +1037,7 @@ async function filterToGloballyVisible(
         // Only 'public' reaches the global feed; RLS lets a member read
         // their own private group's posts, so this filter is the only
         // thing standing between a private group and the world.
-        const { data } = await supabase
-            .from("groups")
-            .select("id, visibility")
-            .in("id", groupIds);
+        const { data } = await supabase.from("groups").select("id, visibility").in("id", groupIds);
         for (const g of (data ?? []) as { id: string; visibility: string }[]) {
             if (g.visibility === "public") publicGroupIds.add(g.id);
         }
@@ -1065,13 +1076,20 @@ async function hydratePostItems(
         supabase.from("likes").select("post_id").eq("user_id", userId).in("post_id", postIds),
         supabase
             .from("posts")
-            .select("id, author_id, content, parent_id, likes_count, created_at, users!posts_author_id_fkey(alias_name, avatar_url)")
+            .select(
+                "id, author_id, content, parent_id, likes_count, created_at, users!posts_author_id_fkey(alias_name, avatar_url)",
+            )
             .in("parent_id", postIds)
             .order("created_at", { ascending: true })
             .limit(150),
     ]);
 
-    const media = (mediaRes.data ?? []) as { id: string; storage_path: string; post_id: string; caption: string | null }[];
+    const media = (mediaRes.data ?? []) as {
+        id: string;
+        storage_path: string;
+        post_id: string;
+        caption: string | null;
+    }[];
     const urlMap = getPublicImageUrls(media.map((m) => m.storage_path));
     const likedSet = new Set(((likedRes.data ?? []) as { post_id: string }[]).map((l) => l.post_id));
 
@@ -1090,7 +1108,11 @@ async function hydratePostItems(
             authorAvatarUrl: replyUser?.avatar_url ?? null,
             content: r.content as string,
             parentId: parentKey,
-            horseId: null, groupId: null, eventId: null, studioId: null, helpRequestId: null,
+            horseId: null,
+            groupId: null,
+            eventId: null,
+            studioId: null,
+            helpRequestId: null,
             likesCount: (r.likes_count as number) || 0,
             repliesCount: 0,
             isPinned: false,
@@ -1153,19 +1175,34 @@ async function buildContextLabels(
 
         await Promise.all([
             horseIds.length
-                ? supabase.from("user_horses").select("id, custom_name").in("id", horseIds).then(({ data }) => {
-                    for (const h of (data ?? []) as { id: string; custom_name: string }[]) horseNames.set(h.id, h.custom_name);
-                })
+                ? supabase
+                      .from("user_horses")
+                      .select("id, custom_name")
+                      .in("id", horseIds)
+                      .then(({ data }) => {
+                          for (const h of (data ?? []) as { id: string; custom_name: string }[])
+                              horseNames.set(h.id, h.custom_name);
+                      })
                 : Promise.resolve(),
             groupIds.length
-                ? supabase.from("groups").select("id, name, slug").in("id", groupIds).then(({ data }) => {
-                    for (const g of (data ?? []) as { id: string; name: string; slug: string }[]) groupNames.set(g.id, { name: g.name, slug: g.slug });
-                })
+                ? supabase
+                      .from("groups")
+                      .select("id, name, slug")
+                      .in("id", groupIds)
+                      .then(({ data }) => {
+                          for (const g of (data ?? []) as { id: string; name: string; slug: string }[])
+                              groupNames.set(g.id, { name: g.name, slug: g.slug });
+                      })
                 : Promise.resolve(),
             showIds.length
-                ? supabase.from("shows").select("id, title").in("id", showIds).then(({ data }) => {
-                    for (const s of (data ?? []) as { id: string; title: string }[]) showTitles.set(s.id, s.title);
-                })
+                ? supabase
+                      .from("shows")
+                      .select("id, title")
+                      .in("id", showIds)
+                      .then(({ data }) => {
+                          for (const s of (data ?? []) as { id: string; title: string }[])
+                              showTitles.set(s.id, s.title);
+                      })
                 : Promise.resolve(),
         ]);
 
@@ -1209,7 +1246,7 @@ async function hydrateLegacyItems(
         .in("activity_id", ids);
     const likedSet = new Set(((myLikes ?? []) as { activity_id: string }[]).map((l) => l.activity_id));
 
-    const allImages = rows.flatMap((r) => ((r.image_urls as string[] | null) ?? []));
+    const allImages = rows.flatMap((r) => (r.image_urls as string[] | null) ?? []);
     const imageUrlMap = getPublicImageUrls(allImages);
 
     return rows.map((e) => {
@@ -1284,9 +1321,7 @@ export async function getFeedCapabilities(): Promise<{ visibility: boolean; kind
  * (every profile page is addressed by one), so this exposes nothing
  * new — but it still requires auth so it can't be scraped anonymously.
  */
-export async function searchAliases(
-    prefix: string,
-): Promise<{ alias: string; avatarUrl: string | null }[]> {
+export async function searchAliases(prefix: string): Promise<{ alias: string; avatarUrl: string | null }[]> {
     try {
         const { supabase } = await requireAuth();
         const cleaned = prefix.trim().replace(/[%_,.()]/g, "");
@@ -1321,9 +1356,7 @@ export async function searchAliases(
  * for replies, blocked authors, and rows RLS hides; the permalink
  * page falls back to its legacy/notFound handling.
  */
-export async function getFeedPost(
-    postId: string,
-): Promise<{ item: FeedStreamItem; knownAliases: string[] } | null> {
+export async function getFeedPost(postId: string): Promise<{ item: FeedStreamItem; knownAliases: string[] } | null> {
     const { supabase, user } = await requireAuth();
 
     const support = await getPostColumnSupport(supabase);
@@ -1331,19 +1364,12 @@ export async function getFeedPost(
     if (support.kind) selectColumns += ", kind";
     if (support.visibility) selectColumns += ", visibility";
 
-    const { data: row } = await supabase
-        .from("posts")
-        .select(selectColumns)
-        .eq("id", postId)
-        .maybeSingle();
+    const { data: row } = await supabase.from("posts").select(selectColumns).eq("id", postId).maybeSingle();
     if (!row) return null;
     const post = row as unknown as Record<string, unknown>;
     if (post.parent_id) return null;
 
-    const { data: myBlocks } = await supabase
-        .from("user_blocks")
-        .select("blocked_id")
-        .eq("blocker_id", user.id);
+    const { data: myBlocks } = await supabase.from("user_blocks").select("blocked_id").eq("blocker_id", user.id);
     const blockedIds = new Set((myBlocks ?? []).map((b: { blocked_id: string }) => b.blocked_id));
     if (blockedIds.has(post.author_id as string)) return null;
 

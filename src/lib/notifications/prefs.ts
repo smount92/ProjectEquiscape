@@ -61,10 +61,7 @@ export const NOTIFICATION_TYPE_PREF_KEYS: Record<string, string> = {
  * Unknown types and missing keys default ON; only an explicit
  * `false` on the mapped key mutes the type.
  */
-export function isNotificationTypeEnabled(
-    type: string,
-    prefs: NotificationPrefs,
-): boolean {
+export function isNotificationTypeEnabled(type: string, prefs: NotificationPrefs): boolean {
     const key = NOTIFICATION_TYPE_PREF_KEYS[type];
     if (!key) return true;
     if (!prefs || typeof prefs !== "object") return true;

@@ -9,12 +9,7 @@ interface FeedComposerProps {
     /** Show the Public/Followers picker (migration 166 applied). */
     visibilityEnabled: boolean;
     /** Called with the new post's id once the write succeeds. */
-    onPosted: (draft: {
-        postId: string;
-        content: string;
-        imagePreviews: string[];
-        visibility: PostVisibility;
-    }) => void;
+    onPosted: (draft: { postId: string; content: string; imagePreviews: string[]; visibility: PostVisibility }) => void;
     placeholder?: string;
 }
 
@@ -139,23 +134,19 @@ export default function FeedComposer({
                 maxLength={2000}
                 rows={2}
                 /* A lit-paper slip laid on the ledger, not a hole in it. */
-                className="lit-paper border-input bg-(--paper-lit) text-(--paper-lit-ink) focus:border-forest min-h-[76px] w-full resize-y rounded-md border px-4 py-3 text-sm no-underline transition-all focus:outline-none"
+                className="lit-paper min-h-[76px] w-full resize-y rounded-md border border-input bg-(--paper-lit) px-4 py-3 text-sm text-(--paper-lit-ink) no-underline transition-all focus:border-forest focus:outline-none"
                 aria-label="Write a post"
             />
 
             {imagePreviews.length > 0 && (
-                <div
-                    className={`mt-3 grid gap-1.5 ${
-                        imagePreviews.length === 1 ? "grid-cols-1" : "grid-cols-2"
-                    }`}
-                >
+                <div className={`mt-3 grid gap-1.5 ${imagePreviews.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
                     {imagePreviews.map((preview, i) => (
                         <div key={i} className="relative">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                                 src={preview}
                                 alt={`Preview ${i + 1}`}
-                                className="border-input bg-muted h-[150px] w-full rounded-lg border object-cover"
+                                className="h-[150px] w-full rounded-lg border border-input bg-muted object-cover"
                             />
                             <button
                                 onClick={() => removeImage(i)}
@@ -169,7 +160,7 @@ export default function FeedComposer({
                 </div>
             )}
 
-            <div className="border-forest/15 mt-3 flex flex-wrap items-center justify-between gap-2 border-t pt-3">
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-forest/15 pt-3">
                 <div className="flex flex-wrap items-center gap-2">
                     <button
                         type="button"
@@ -195,19 +186,13 @@ export default function FeedComposer({
                         exactly two answers and the current one should be
                         readable without opening anything. */}
                     {visibilityEnabled && (
-                        <div
-                            role="group"
-                            aria-label="Who can see this post"
-                            className="flex items-center gap-1"
-                        >
+                        <div role="group" aria-label="Who can see this post" className="flex items-center gap-1">
                             {VISIBILITY_CHOICES.map((choice) => (
                                 <button
                                     key={choice.value}
                                     type="button"
                                     aria-pressed={visibility === choice.value}
-                                    className={`studio-chip ${
-                                        visibility === choice.value ? "active" : ""
-                                    }`}
+                                    className={`studio-chip ${visibility === choice.value ? "active" : ""}`}
                                     onClick={() => setVisibility(choice.value)}
                                 >
                                     {choice.label}
@@ -216,9 +201,7 @@ export default function FeedComposer({
                         </div>
                     )}
 
-                    <span className="text-muted-foreground text-xs font-medium tabular-nums">
-                        {text.length}/2000
-                    </span>
+                    <span className="text-xs font-medium text-muted-foreground tabular-nums">{text.length}/2000</span>
                 </div>
 
                 <button
@@ -232,7 +215,7 @@ export default function FeedComposer({
             </div>
 
             {error && (
-                <p className="text-destructive mt-2 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm">
+                <p className="mt-2 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm text-destructive">
                     {error}
                 </p>
             )}

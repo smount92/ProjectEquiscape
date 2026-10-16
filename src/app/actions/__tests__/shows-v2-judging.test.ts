@@ -10,10 +10,7 @@
  */
 
 import { vi, describe, it, expect, beforeEach } from "vitest";
-import {
-    createMockAdminClient,
-    createMockSupabaseClient,
-} from "@/__tests__/mocks/supabase";
+import { createMockAdminClient, createMockSupabaseClient } from "@/__tests__/mocks/supabase";
 import { AuthError } from "@/lib/auth";
 
 const mockClient = createMockSupabaseClient();
@@ -65,9 +62,8 @@ const PHOTO_ID = "923e4567-e89b-42d3-a456-426614174000";
 
 /** Queue ONE list-read result (implicit await) in call order. */
 function queueList(data: unknown, error: unknown = null) {
-    mockClient._mockQuery.then.mockImplementationOnce(((
-        resolve: (value: unknown) => unknown,
-    ) => Promise.resolve({ data, error }).then(resolve)) as never);
+    mockClient._mockQuery.then.mockImplementationOnce(((resolve: (value: unknown) => unknown) =>
+        Promise.resolve({ data, error }).then(resolve)) as never);
 }
 
 beforeEach(() => {
@@ -92,10 +88,7 @@ beforeEach(() => {
 // ══════════════════════════════════════════════════════════════
 
 /** entry → show maybeSingle pair for the vote context. */
-function mockVoteContext(
-    entry: Record<string, unknown> | null,
-    show: Record<string, unknown> | null,
-) {
+function mockVoteContext(entry: Record<string, unknown> | null, show: Record<string, unknown> | null) {
     mockClient._mockQuery.maybeSingle
         .mockResolvedValueOnce({ data: entry, error: null })
         .mockResolvedValueOnce({ data: show, error: null });
@@ -136,10 +129,7 @@ describe("shows-v2 — castVote", () => {
     });
 
     it("refuses voting for your own entry", async () => {
-        mockVoteContext(
-            { ...liveEntry, owner_id: "user-1" },
-            { status: "judging", judging: "community_vote" },
-        );
+        mockVoteContext({ ...liveEntry, owner_id: "user-1" }, { status: "judging", judging: "community_vote" });
         const result = await castVote({ entryId: ENTRY_ID });
         expect(result.success).toBe(false);
         if (!result.success) expect(result.error).toMatch(/own entry/i);
@@ -147,10 +137,7 @@ describe("shows-v2 — castVote", () => {
     });
 
     it("refuses voting on a scratched entry", async () => {
-        mockVoteContext(
-            { ...liveEntry, status: "scratched" },
-            { status: "judging", judging: "community_vote" },
-        );
+        mockVoteContext({ ...liveEntry, status: "scratched" }, { status: "judging", judging: "community_vote" });
         const result = await castVote({ entryId: ENTRY_ID });
         expect(result.success).toBe(false);
         if (!result.success) expect(result.error).toMatch(/scratched/i);
@@ -362,10 +349,7 @@ describe("shows-v2 — recordPlacings", () => {
 // ══════════════════════════════════════════════════════════════
 
 /** getShowRole pair (show + optional staff row). */
-function mockShowRole(
-    show: Record<string, unknown>,
-    staffRole: string | null | undefined = undefined,
-) {
+function mockShowRole(show: Record<string, unknown>, staffRole: string | null | undefined = undefined) {
     mockClient._mockQuery.maybeSingle.mockResolvedValueOnce({
         data: {
             id: SHOW_ID,
@@ -412,9 +396,7 @@ describe("shows-v2 — finalizeCommunityVotes", () => {
         mockShowRole({});
         // loadClassContexts: divisions → sections → classes.
         queueList([{ id: DIVISION_ID, name: "Halter", sort_order: 0 }]);
-        queueList([
-            { id: SECTION_ID, name: "Stock", division_id: DIVISION_ID, sort_order: 0 },
-        ]);
+        queueList([{ id: SECTION_ID, name: "Stock", division_id: DIVISION_ID, sort_order: 0 }]);
         queueList([
             {
                 id: CLASS_ID,
@@ -478,9 +460,7 @@ function mockGalleryShow(overrides: Record<string, unknown> = {}) {
 /** Queue the gallery's standard list sequence up through votes. */
 function queueGalleryLists() {
     queueList([{ id: DIVISION_ID, name: "Halter", sort_order: 0 }]);
-    queueList([
-        { id: SECTION_ID, name: "Stock", division_id: DIVISION_ID, sort_order: 0 },
-    ]);
+    queueList([{ id: SECTION_ID, name: "Stock", division_id: DIVISION_ID, sort_order: 0 }]);
     queueList([
         {
             id: CLASS_ID,
@@ -613,9 +593,7 @@ describe("shows-v2 — results publish on completed", () => {
                 status: "entered",
             },
         ]);
-        queueList([
-            { entry_id: ENTRY_ID, class_id: CLASS_ID, place: 1, note: "Lovely." },
-        ]);
+        queueList([{ entry_id: ENTRY_ID, class_id: CLASS_ID, place: 1, note: "Lovely." }]);
         queueList([]); // callbacks — no championship ladder recorded
     }
 

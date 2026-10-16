@@ -70,9 +70,7 @@ export default function ProfileCustomizer({
 
     const toggleSection = (section: ProfileSection) => {
         setHidden((current) =>
-            current.includes(section)
-                ? current.filter((s) => s !== section)
-                : [...current, section],
+            current.includes(section) ? current.filter((s) => s !== section) : [...current, section],
         );
     };
 
@@ -128,19 +126,19 @@ export default function ProfileCustomizer({
     return (
         <div className="flex flex-col gap-8">
             {!available && (
-                <div className="border-input bg-card/60 rounded-lg border p-4 text-sm backdrop-blur-sm">
-                    <strong>Not switched on yet.</strong> Profile customization needs migration 171.
-                    You can look around, but saving will not stick until it is applied.
+                <div className="rounded-lg border border-input bg-card/60 p-4 text-sm backdrop-blur-sm">
+                    <strong>Not switched on yet.</strong> Profile customization needs migration 171. You can look
+                    around, but saving will not stick until it is applied.
                 </div>
             )}
 
             {/* ── Theme ── */}
             <section>
                 <h2 className="mb-1 font-serif text-lg font-bold">Trim</h2>
-                <p className="text-secondary-foreground mb-4 text-sm">
-                    Six leather-and-hardware pairings. They restyle the trim only — the lettering
-                    stays on the same cream ramp, so every choice reads the same in Lamplight, and
-                    Simple Mode flattens all of them to the standard panel.
+                <p className="mb-4 text-sm text-secondary-foreground">
+                    Six leather-and-hardware pairings. They restyle the trim only — the lettering stays on the same
+                    cream ramp, so every choice reads the same in Lamplight, and Simple Mode flattens all of them to the
+                    standard panel.
                 </p>
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {PROFILE_THEMES.map((option) => {
@@ -159,9 +157,7 @@ export default function ProfileCustomizer({
                                 <span className="text-engraved-light block font-serif text-sm font-bold tracking-[0.14em] uppercase">
                                     {option.label}
                                 </span>
-                                <span className="mt-1 block text-xs text-(--leather-text-soft)">
-                                    {option.blurb}
-                                </span>
+                                <span className="mt-1 block text-xs text-(--leather-text-soft)">{option.blurb}</span>
                                 {active && (
                                     <span className="mt-2 inline-block text-[0.6rem] font-bold tracking-[0.18em] text-(--brass-hi) uppercase">
                                         ✓ Selected
@@ -176,9 +172,9 @@ export default function ProfileCustomizer({
             {/* ── Nameplate ── */}
             <section>
                 <h2 className="mb-1 font-serif text-lg font-bold">Nameplate</h2>
-                <p className="text-secondary-foreground mb-4 text-sm">
-                    A short line under your alias, and how you like to be referred to. Your bio stays
-                    where it is — this is the one-liner above it.
+                <p className="mb-4 text-sm text-secondary-foreground">
+                    A short line under your alias, and how you like to be referred to. Your bio stays where it is — this
+                    is the one-liner above it.
                 </p>
                 <div className="flex flex-col gap-4">
                     <label className="flex flex-col gap-1">
@@ -208,13 +204,12 @@ export default function ProfileCustomizer({
             {/* ── Banner ── */}
             <section>
                 <h2 className="mb-1 font-serif text-lg font-bold">Banner</h2>
-                <p className="text-secondary-foreground mb-4 text-sm">
-                    An optional photo behind your nameplate. It sits under a scrim so your name stays
-                    readable whatever the picture — a bright shot will look moody, and that is on
-                    purpose. Max 3MB.
+                <p className="mb-4 text-sm text-secondary-foreground">
+                    An optional photo behind your nameplate. It sits under a scrim so your name stays readable whatever
+                    the picture — a bright shot will look moody, and that is on purpose. Max 3MB.
                 </p>
                 {bannerUrl && (
-                    <div className="border-input mb-3 overflow-hidden rounded-lg border">
+                    <div className="mb-3 overflow-hidden rounded-lg border border-input">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={bannerUrl} alt="Your banner" className="h-32 w-full object-cover" />
                     </div>
@@ -258,23 +253,23 @@ export default function ProfileCustomizer({
             {/* ── Featured horses ── */}
             <section>
                 <h2 className="mb-1 font-serif text-lg font-bold">Featured horses</h2>
-                <p className="text-secondary-foreground mb-4 text-sm">
-                    Pick up to {MAX_FEATURED} to lead your stable, in the order you choose them.
-                    Leave it empty and the shelf auto-picks by show record.
+                <p className="mb-4 text-sm text-secondary-foreground">
+                    Pick up to {MAX_FEATURED} to lead your stable, in the order you choose them. Leave it empty and the
+                    shelf auto-picks by show record.
                 </p>
                 {horses.length === 0 ? (
                     <p className="text-sm text-muted-foreground">
                         You have no public horses yet — make one public and it will show up here.
                     </p>
                 ) : (
-                    <div className="border-input max-h-64 overflow-y-auto rounded-lg border">
+                    <div className="max-h-64 overflow-y-auto rounded-lg border border-input">
                         {horses.map((horse) => {
                             const index = featured.indexOf(horse.id);
                             const picked = index >= 0;
                             return (
                                 <label
                                     key={horse.id}
-                                    className="border-input flex cursor-pointer items-center gap-3 border-b px-3 py-2 text-sm last:border-b-0"
+                                    className="flex cursor-pointer items-center gap-3 border-b border-input px-3 py-2 text-sm last:border-b-0"
                                 >
                                     <input
                                         type="checkbox"
@@ -294,9 +289,8 @@ export default function ProfileCustomizer({
             {/* ── Sections ── */}
             <section>
                 <h2 className="mb-1 font-serif text-lg font-bold">Sections</h2>
-                <p className="text-secondary-foreground mb-4 text-sm">
-                    Switch off anything you would rather not show. Your stable and your nameplate
-                    always stay.
+                <p className="mb-4 text-sm text-secondary-foreground">
+                    Switch off anything you would rather not show. Your stable and your nameplate always stay.
                 </p>
                 <div>
                     {PROFILE_SECTIONS.map((section) => {
@@ -304,7 +298,7 @@ export default function ProfileCustomizer({
                         return (
                             <div
                                 key={section}
-                                className="border-input flex items-center justify-between gap-4 border-b py-3 first:pt-0 last:border-b-0 last:pb-0 max-sm:gap-2"
+                                className="flex items-center justify-between gap-4 border-b border-input py-3 first:pt-0 last:border-b-0 last:pb-0 max-sm:gap-2"
                             >
                                 <span className="text-sm">{SECTION_LABELS[section]}</span>
                                 <button
@@ -321,7 +315,7 @@ export default function ProfileCustomizer({
                 </div>
             </section>
 
-            <div className="border-input flex flex-wrap items-center gap-4 border-t pt-6">
+            <div className="flex flex-wrap items-center gap-4 border-t border-input pt-6">
                 <Button type="button" size="wide" disabled={busy} onClick={handleSave}>
                     {pending ? "Saving…" : "Save profile"}
                 </Button>
@@ -329,10 +323,7 @@ export default function ProfileCustomizer({
                     <Link href={`/profile/${encodeURIComponent(alias)}`}>View my profile →</Link>
                 </Button>
                 {message && (
-                    <span
-                        className={`text-sm ${message.ok ? "text-forest" : "text-destructive"}`}
-                        role="status"
-                    >
+                    <span className={`text-sm ${message.ok ? "text-forest" : "text-destructive"}`} role="status">
                         {message.text}
                     </span>
                 )}

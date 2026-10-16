@@ -22,7 +22,19 @@ import {
 } from "@/lib/linker/model";
 
 function rel(over: Partial<LinkerRelease> & { id: string }): LinkerRelease {
-    return { title: over.id, model: null, look: null, from: null, to: null, run: null, setName: null, isSetPiece: false, photo: null, scale: null, ...over };
+    return {
+        title: over.id,
+        model: null,
+        look: null,
+        from: null,
+        to: null,
+        run: null,
+        setName: null,
+        isSetPiece: false,
+        photo: null,
+        scale: null,
+        ...over,
+    };
 }
 
 describe("linker model", () => {
@@ -46,9 +58,18 @@ describe("linker model", () => {
     });
 
     it("prints one identity line and marks molds that share it", () => {
-        const sm = { title: "Silky Sullivan", maker: "Breyer", scale: "Stablemate (1:32)", generation: null, sculptor: null, year: 1976 };
+        const sm = {
+            title: "Silky Sullivan",
+            maker: "Breyer",
+            scale: "Stablemate (1:32)",
+            generation: null,
+            sculptor: null,
+            year: 1976,
+        };
         expect(identityLine(sm)).toBe("Breyer · Stablemate · 1976");
-        expect(identityLine({ ...sm, generation: "G1", sculptor: "Maureen Love" })).toBe("Breyer · Stablemate G1 · Maureen Love · 1976");
+        expect(identityLine({ ...sm, generation: "G1", sculptor: "Maureen Love" })).toBe(
+            "Breyer · Stablemate G1 · Maureen Love · 1976",
+        );
         const marked = markAmbiguous([sm, { ...sm }, { ...sm, scale: "Classic (1:12)", year: 1975 }]);
         expect(marked.map((m) => m.ambiguous)).toEqual([true, true, false]);
     });
@@ -57,7 +78,9 @@ describe("linker model", () => {
         const t = "12-Piece Stablemates Set With Arabian Mare, Arabian Stallion, Citation, Silky Sullivan, Swaps.";
         expect(setLabel(t)).toBe("12-Piece Stablemates Set");
         expect(setLabel("Andrew")).toBeNull();
-        expect(setLabel("Classic Racehorse 3-Piece Set With Man O' War, Terrang")).toBe("Classic Racehorse 3-Piece Set");
+        expect(setLabel("Classic Racehorse 3-Piece Set With Man O' War, Terrang")).toBe(
+            "Classic Racehorse 3-Piece Set",
+        );
         expect(mentionsMold(t, "Arabian Mare")).toBe(true);
         expect(mentionsMold(t, "Silky Sullivan")).toBe(true);
         expect(mentionsMold(t, "Proud Arabian Mare")).toBe(false);
@@ -84,9 +107,17 @@ describe("linker model", () => {
         ]);
         expect(ordered.map((r) => r.id)).toEqual(["regular", "early", "later", "nonumber", "nocolour", "set"]);
         // A release whose own name was typed leads its group, even a set piece.
-        const withHit = orderReleases([rel({ id: "regular", look: "chestnut", run: "Regular Run" }), rel({ id: "named", look: "bay", hit: true, setName: "Gift set" })]);
+        const withHit = orderReleases([
+            rel({ id: "regular", look: "chestnut", run: "Regular Run" }),
+            rel({ id: "named", look: "bay", hit: true, setName: "Gift set" }),
+        ]);
         expect(withHit.map((r) => r.id)).toEqual(["named", "regular"]);
-        expect(commonOne([rel({ id: "hit", look: "bay", model: "9", hit: true }), rel({ id: "first", look: "grey", model: "1", from: 1980 })])).toBe("first");
+        expect(
+            commonOne([
+                rel({ id: "hit", look: "bay", model: "9", hit: true }),
+                rel({ id: "first", look: "grey", model: "1", from: 1980 }),
+            ]),
+        ).toBe("first");
         expect(commonOne(ordered)).toBe("regular");
         expect(commonOne([rel({ id: "a", look: "bay", model: "1" }), rel({ id: "b" })])).toBe("a");
         expect(commonOne([rel({ id: "b" })])).toBeNull();
@@ -106,8 +137,12 @@ describe("linker model", () => {
     });
 
     it("files a fact as a from/to correction with strings on both sides", () => {
-        expect(factCorrection("color_description", undefined, " dark bay ")).toEqual({ color_description: { from: "", to: "dark bay" } });
-        expect(factCorrection("release_year_start", 1976, "1988")).toEqual({ release_year_start: { from: "1976", to: "1988" } });
+        expect(factCorrection("color_description", undefined, " dark bay ")).toEqual({
+            color_description: { from: "", to: "dark bay" },
+        });
+        expect(factCorrection("release_year_start", 1976, "1988")).toEqual({
+            release_year_start: { from: "1976", to: "1988" },
+        });
         expect(factCorrection("model_number", null, "#5022")).toEqual({ model_number: { from: "", to: "5022" } });
     });
 
@@ -121,11 +156,17 @@ describe("linker model", () => {
     it("words the linked banner and splits a number out of a typed title", () => {
         const mold = { title: "Silky Sullivan", scale: "Stablemate (1:32)", generation: "G1" };
         expect(linkedLabel(mold, null)).toBe("Silky Sullivan (Stablemate G1), mold only");
-        expect(linkedLabel(mold, rel({ id: "r", title: "Silky Sullivan", model: "5022", look: "dark chestnut" }))).toBe("Silky Sullivan (Stablemate G1) · #5022 · dark chestnut");
-        expect(linkedLabel(mold, rel({ id: "r", title: "Montana Harvest", model: "1142", look: "dapple buckskin" }))).toBe("Silky Sullivan (Stablemate G1) · #1142 · Montana Harvest · dapple buckskin");
+        expect(linkedLabel(mold, rel({ id: "r", title: "Silky Sullivan", model: "5022", look: "dark chestnut" }))).toBe(
+            "Silky Sullivan (Stablemate G1) · #5022 · dark chestnut",
+        );
+        expect(
+            linkedLabel(mold, rel({ id: "r", title: "Montana Harvest", model: "1142", look: "dapple buckskin" })),
+        ).toBe("Silky Sullivan (Stablemate G1) · #1142 · Montana Harvest · dapple buckskin");
         expect(releaseName(rel({ id: "r", title: "#5022 Silky Sullivan" }), "Silky Sullivan")).toBeNull();
         expect(releaseName(rel({ id: "r", title: "T-Bone" }), "Silky Sullivan")).toBe("T-Bone");
-        expect(releaseName(rel({ id: "r", title: "Gift set With Kelso", setName: "Gift set" }), "Silky Sullivan")).toBeNull();
+        expect(
+            releaseName(rel({ id: "r", title: "Gift set With Kelso", setName: "Gift set" }), "Silky Sullivan"),
+        ).toBeNull();
         expect(splitNumberFromTitle("#5022 Silky Sullivan")).toEqual({ title: "Silky Sullivan", model: "5022" });
         expect(splitNumberFromTitle("Andrew")).toEqual({ title: "Andrew", model: null });
     });

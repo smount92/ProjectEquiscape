@@ -53,7 +53,6 @@ function AvailableCard({
             <Link href={`/community/${entry.horseId}`} className="flex flex-col text-foreground no-underline">
                 <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-muted">
                     {entry.thumbnailUrl ? (
-                         
                         <ThumbImage
                             src={entry.thumbnailUrl}
                             onError={(e) => {
@@ -193,7 +192,7 @@ export default function FavoritesBrowser({
     /* ── Empty state ─────────────────────────────────────────── */
     if (entries.length === 0) {
         return (
-            <div className="bg-card border-input animate-fade-in-up rounded-lg border px-8 py-12 text-center shadow-md transition-all">
+            <div className="animate-fade-in-up rounded-lg border border-input bg-card px-8 py-12 text-center shadow-md transition-all">
                 <div className="mb-4 text-5xl">💗</div>
                 <h2>No Favorites Yet</h2>
                 <p>Horses you ♥ around the Show Ring land here.</p>

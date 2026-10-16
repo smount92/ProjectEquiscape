@@ -40,20 +40,35 @@ export default function StableMasthead({
                 >
                     {aliasName ? `${aliasName}’s Herd` : "Your Herd"}
                     {totalHorses !== null && (
-                        <> · {totalHorses} horse{totalHorses === 1 ? "" : "s"}</>
+                        <>
+                            {" "}
+                            · {totalHorses} horse{totalHorses === 1 ? "" : "s"}
+                        </>
                     )}
                 </span>
             </div>
             <div className="z-[1] ml-auto flex flex-wrap gap-2">
                 {/* !min-h-11 lifts both ghost buttons to a 44px touch target
                     (WCAG 2.5.5) — they sat at ~34px. */}
-                <Link href="/stable/import" id="batch-import-button" className="btn-ghostleather !min-h-11 !px-4 !py-2 !text-xs">
+                <Link
+                    href="/stable/import"
+                    id="batch-import-button"
+                    className="btn-ghostleather !min-h-11 !px-4 !py-2 !text-xs"
+                >
                     <FileText size={14} strokeWidth={1.5} /> Batch Import
                 </Link>
-                <Link href="/add-horse/quick" id="quick-add-button" className="btn-ghostleather !min-h-11 !px-4 !py-2 !text-xs">
+                <Link
+                    href="/add-horse/quick"
+                    id="quick-add-button"
+                    className="btn-ghostleather !min-h-11 !px-4 !py-2 !text-xs"
+                >
                     <Zap size={14} strokeWidth={1.5} /> Quick Add
                 </Link>
-                <Link href="/add-horse" id="add-horse-button" className="btn-brass inline-flex items-center gap-1.5 no-underline hover:no-underline">
+                <Link
+                    href="/add-horse"
+                    id="add-horse-button"
+                    className="btn-brass inline-flex items-center gap-1.5 no-underline hover:no-underline"
+                >
                     <Plus size={14} strokeWidth={2} /> Add to Stable
                 </Link>
             </div>

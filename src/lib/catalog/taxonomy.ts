@@ -85,9 +85,7 @@ const SCALE_ALIASES: Record<string, CanonicalScale> = {
 };
 
 /** Fast lookup: lowercased canonical forms are canonical too. */
-const CANONICAL_BY_LOWER = new Map<string, CanonicalScale>(
-    CANONICAL_SCALES.map((s) => [s.toLowerCase(), s]),
-);
+const CANONICAL_BY_LOWER = new Map<string, CanonicalScale>(CANONICAL_SCALES.map((s) => [s.toLowerCase(), s]));
 
 /**
  * Normalize a raw scale string to its canonical form. Unknown values
@@ -179,11 +177,7 @@ export function suggestionItemTypeToDb(raw: string | null | undefined): CatalogC
 // URLs — the split adds semantics, it never re-slugs.
 
 /** Categories whose primary attribution is a person, not a company. */
-export const ARTIST_ATTRIBUTED_CATEGORIES: ReadonlySet<string> = new Set([
-    "artist_resin",
-    "micro_mini",
-    "medallion",
-]);
+export const ARTIST_ATTRIBUTED_CATEGORIES: ReadonlySet<string> = new Set(["artist_resin", "micro_mini", "medallion"]);
 
 /** The user-facing label for the primary-attribution field. */
 export function attributionLabel(itemType: string | null | undefined): "Artist" | "Manufacturer" {
@@ -310,11 +304,7 @@ export function deriveAttribution(row: {
  * a member's stable put "" into their facet dropdown, and Radix
  * Select throws on empty item values — it crashed their /dashboard.
  */
-export function resolveNewEntryMaker(
-    itemType: string,
-    maker: unknown,
-    sculptor: unknown,
-): string {
+export function resolveNewEntryMaker(itemType: string, maker: unknown, sculptor: unknown): string {
     const m = typeof maker === "string" ? maker.trim() : "";
     const s = typeof sculptor === "string" ? sculptor.trim() : "";
     return m || (ARTIST_ATTRIBUTED_CATEGORIES.has(itemType) ? s : "") || "Unknown";

@@ -114,13 +114,8 @@ type Supabase = Awaited<ReturnType<typeof createClient>>;
 
 /** The people this viewer has blocked — they do not appear in the room. */
 async function fetchBlockedIds(supabase: Supabase, viewerId: string): Promise<string[]> {
-    const { data } = await supabase
-        .from("user_blocks")
-        .select("blocked_id")
-        .eq("blocker_id", viewerId);
-    return ((data ?? []) as { blocked_id: string }[])
-        .map((r) => r.blocked_id)
-        .filter((id) => UUID_RE.test(id));
+    const { data } = await supabase.from("user_blocks").select("blocked_id").eq("blocker_id", viewerId);
+    return ((data ?? []) as { blocked_id: string }[]).map((r) => r.blocked_id).filter((id) => UUID_RE.test(id));
 }
 
 /** PostgREST `not.in` list, or null when there is nothing to exclude. */
@@ -198,12 +193,9 @@ async function fetchOrderedPage(
     // Stable tiebreak so a member never appears on two pages at once.
     rowsQuery = rowsQuery.order("id", { ascending: true });
 
-    const [{ data }, { count }] = await Promise.all([
-        rowsQuery.range(from, from + MEMBERS_PAGE_SIZE - 1),
-        countQuery,
-    ]);
+    const [{ data }, { count }] = await Promise.all([rowsQuery.range(from, from + MEMBERS_PAGE_SIZE - 1), countQuery]);
 
-    return { rows: (data ?? []) as unknown as ViewRow[], total: count ?? (data?.length ?? 0) };
+    return { rows: (data ?? []) as unknown as ViewRow[], total: count ?? data?.length ?? 0 };
 }
 
 /**
@@ -246,13 +238,10 @@ async function fetchActivePage(
         return { rows: [], total: ordered.length, truncated, lastActive };
     }
 
-    const { data } = await supabase
-        .from("discover_users_view")
-        .select(VIEW_COLUMNS)
-        .in("id", pageIds);
+    const { data } = await supabase.from("discover_users_view").select(VIEW_COLUMNS).in("id", pageIds);
 
     // `.in()` does not preserve our ranking — restore it.
-    const byId = new Map((((data ?? []) as unknown) as ViewRow[]).map((r) => [r.id, r]));
+    const byId = new Map(((data ?? []) as unknown as ViewRow[]).map((r) => [r.id, r]));
     const rows = pageIds.map((id) => byId.get(id)).filter((r): r is ViewRow => Boolean(r));
 
     return { rows, total: ordered.length, truncated, lastActive };
@@ -270,14 +259,8 @@ async function enrichPage(
     const others = ids.filter((id) => id !== viewerId);
 
     const [prefsResult, badgeResult, followResult, avatarMap] = await Promise.all([
-        supabase
-            .from("users")
-            .select("id, show_badges, is_verified, is_trusted_curator, is_supporter")
-            .in("id", ids),
-        supabase
-            .from("user_badges")
-            .select("user_id, badges(id, name, icon, tier)")
-            .in("user_id", ids),
+        supabase.from("users").select("id, show_badges, is_verified, is_trusted_curator, is_supporter").in("id", ids),
+        supabase.from("user_badges").select("user_id, badges(id, name, icon, tier)").in("user_id", ids),
         others.length > 0
             ? supabase
                   .from("user_follows")
@@ -289,17 +272,19 @@ async function enrichPage(
     ]);
 
     const prefs = new Map(
-        (((prefsResult.data ?? []) as unknown) as {
-            id: string;
-            show_badges: boolean | null;
-            is_verified: boolean | null;
-            is_trusted_curator: boolean | null;
-            is_supporter: boolean | null;
-        }[]).map((p) => [p.id, p]),
+        (
+            (prefsResult.data ?? []) as unknown as {
+                id: string;
+                show_badges: boolean | null;
+                is_verified: boolean | null;
+                is_trusted_curator: boolean | null;
+                is_supporter: boolean | null;
+            }[]
+        ).map((p) => [p.id, p]),
     );
 
     const badgesByUser = new Map<string, MemberBadge[]>();
-    for (const row of ((badgeResult.data ?? []) as unknown) as {
+    for (const row of (badgeResult.data ?? []) as unknown as {
         user_id: string;
         badges: MemberBadge | MemberBadge[] | null;
     }[]) {
@@ -311,9 +296,7 @@ async function enrichPage(
     }
 
     const followed = new Set(
-        (((followResult.data ?? []) as unknown) as { following_id: string }[]).map(
-            (f) => f.following_id,
-        ),
+        ((followResult.data ?? []) as unknown as { following_id: string }[]).map((f) => f.following_id),
     );
 
     return rows.map((row) => {
@@ -343,10 +326,7 @@ async function enrichPage(
 }
 
 /** One page of the Members directory, ready to render. */
-export async function getMembersDirectoryPage(
-    filters: MemberFilters,
-    viewerId: string,
-): Promise<MembersDirectoryPage> {
+export async function getMembersDirectoryPage(filters: MemberFilters, viewerId: string): Promise<MembersDirectoryPage> {
     const supabase = await createClient();
     const blocked = await fetchBlockedIds(supabase, viewerId);
 

@@ -37,11 +37,7 @@ import { getExhibitorCardCount, getExhibitorStar } from "@/lib/shows/horseTitles
 import { showYearOf } from "@/lib/shows/showYear";
 import { HORSE_TITLE_LABELS, nextStarProgress, type HorseTitleCode } from "@/lib/shows/titles";
 import { getStandings } from "@/app/actions/standings";
-import {
-    defaultCustomization,
-    sanitizeCustomization,
-    type ProfileCustomization,
-} from "./customization";
+import { defaultCustomization, sanitizeCustomization, type ProfileCustomization } from "./customization";
 
 /** Untyped escape hatch for columns the generator has not seen yet. */
 type LooseClient = SupabaseClient<never, never, never>;
@@ -60,10 +56,7 @@ function loose(client: SupabaseClient): LooseClient {
  * this select is a PostgREST 42703. A missing column must mean "not
  * customized", never a broken profile.
  */
-export async function fetchProfileCustomization(
-    client: SupabaseClient,
-    userId: string,
-): Promise<ProfileCustomization> {
+export async function fetchProfileCustomization(client: SupabaseClient, userId: string): Promise<ProfileCustomization> {
     // DEFINER read first (199): users has no anon SELECT policy, so the
     // direct column read below returns nothing for logged-out visitors —
     // a member's banner and tagline existed only for logged-in viewers
@@ -135,20 +128,11 @@ export interface ProfileSeason {
  * placings. It is wrapped in its own try so a standings failure never
  * costs the rest of the line, which is cheap.
  */
-export async function fetchProfileSeason(
-    client: SupabaseClient,
-    userId: string,
-): Promise<ProfileSeason | null> {
+export async function fetchProfileSeason(client: SupabaseClient, userId: string): Promise<ProfileSeason | null> {
     const showYear = showYearOf(new Date());
 
     const [careerRes, distinctionRows, cards, star] = await Promise.all([
-        safeMaybeSingle<{ career_points: number }>(
-            client,
-            "exhibitor_career",
-            "career_points",
-            "user_id",
-            userId,
-        ),
+        safeMaybeSingle<{ career_points: number }>(client, "exhibitor_career", "career_points", "user_id", userId),
         safeSelect<{ distinction_code: string }>(
             client,
             "exhibitor_distinctions",
@@ -199,11 +183,7 @@ export async function fetchProfileSeason(
 
     // A member with no record at all gets no scoreboard — same bar
     // MySeasonCard uses, so a brand-new profile is not all zeroes.
-    const empty =
-        season.careerPoints === 0 &&
-        season.liveCards === 0 &&
-        season.star === null &&
-        !season.points;
+    const empty = season.careerPoints === 0 && season.liveCards === 0 && season.star === null && !season.points;
     return empty ? null : season;
 }
 
@@ -254,10 +234,7 @@ export async function fetchStableTitles(
             });
         }
         const order: Record<string, number> = { CH: 0, SUP: 1, ROM: 2 };
-        out.sort(
-            (a, b) =>
-                (order[a.code] ?? 9) - (order[b.code] ?? 9) || a.horseName.localeCompare(b.horseName),
-        );
+        out.sort((a, b) => (order[a.code] ?? 9) - (order[b.code] ?? 9) || a.horseName.localeCompare(b.horseName));
         return out;
     } catch {
         return [];
@@ -284,10 +261,7 @@ export interface ProfileBarn {
  * can be trusted to do it. `visibility = 'public'` is the same
  * exact-match bar `filterToGloballyVisible` applies in the feed.
  */
-export async function fetchProfileBarns(
-    client: SupabaseClient,
-    userId: string,
-): Promise<ProfileBarn[]> {
+export async function fetchProfileBarns(client: SupabaseClient, userId: string): Promise<ProfileBarn[]> {
     try {
         const { data: memberships, error } = await client
             .from("group_memberships")
@@ -343,10 +317,7 @@ const PROFILE_POST_LIMIT = 5;
  * Over-fetches before filtering: most of what a member writes is
  * barn talk and passport comments, which the filter removes.
  */
-export async function fetchProfilePosts(
-    client: SupabaseClient,
-    userId: string,
-): Promise<ProfilePost[]> {
+export async function fetchProfilePosts(client: SupabaseClient, userId: string): Promise<ProfilePost[]> {
     try {
         const support = await getPostColumnSupport(client);
         const columns = [
@@ -373,17 +344,11 @@ export async function fetchProfilePosts(
         if (error || !Array.isArray(data)) return [];
         const rows = data as unknown as Record<string, unknown>[];
 
-        const horseIds = [
-            ...new Set(rows.map((r) => r.horse_id).filter((v): v is string => typeof v === "string")),
-        ];
-        const groupIds = [
-            ...new Set(rows.map((r) => r.group_id).filter((v): v is string => typeof v === "string")),
-        ];
+        const horseIds = [...new Set(rows.map((r) => r.horse_id).filter((v): v is string => typeof v === "string"))];
+        const groupIds = [...new Set(rows.map((r) => r.group_id).filter((v): v is string => typeof v === "string"))];
 
         const [publicHorseIds, publicGroupIds] = await Promise.all([
-            idSet(client, "user_horses", horseIds, (q) =>
-                q.eq("visibility", "public").is("deleted_at", null),
-            ),
+            idSet(client, "user_horses", horseIds, (q) => q.eq("visibility", "public").is("deleted_at", null)),
             idSet(client, "groups", groupIds, (q) => q.eq("visibility", "public")),
         ]);
 
@@ -439,11 +404,7 @@ async function idSet(
             data: unknown;
         }>);
         if (!Array.isArray(data)) return new Set();
-        return new Set(
-            data
-                .map((r) => (r as { id?: unknown }).id)
-                .filter((v): v is string => typeof v === "string"),
-        );
+        return new Set(data.map((r) => (r as { id?: unknown }).id).filter((v): v is string => typeof v === "string"));
     } catch {
         return new Set();
     }
@@ -458,11 +419,7 @@ async function safeMaybeSingle<T>(
     value: string,
 ): Promise<T | null> {
     try {
-        const { data, error } = await loose(client)
-            .from(table)
-            .select(columns)
-            .eq(column, value)
-            .maybeSingle();
+        const { data, error } = await loose(client).from(table).select(columns).eq(column, value).maybeSingle();
         if (error || !data) return null;
         return data as T;
     } catch {
@@ -479,10 +436,7 @@ async function safeSelect<T>(
     value: string,
 ): Promise<T[]> {
     try {
-        const { data, error } = await loose(client)
-            .from(table)
-            .select(columns)
-            .eq(column, value);
+        const { data, error } = await loose(client).from(table).select(columns).eq(column, value);
         if (error || !Array.isArray(data)) return [];
         return data as T[];
     } catch {

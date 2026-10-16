@@ -45,11 +45,7 @@ function signInAs(userId: string) {
 }
 
 /** getShowRole reads: shows row, then (if not host) show_staff row. */
-function stubRole(input: {
-    hostId: string;
-    status?: string;
-    staffRole?: string | null;
-}) {
+function stubRole(input: { hostId: string; status?: string; staffRole?: string | null }) {
     q.maybeSingle.mockResolvedValueOnce({
         data: {
             id: SHOW_ID,
@@ -89,9 +85,7 @@ describe("barEntrant", () => {
         expect(q.insert).toHaveBeenCalledWith(
             expect.objectContaining({ show_id: SHOW_ID, user_id: USER_ID, barred_by: "host-1" }),
         );
-        expect(q.update).toHaveBeenCalledWith(
-            expect.objectContaining({ status: "scratched" }),
-        );
+        expect(q.update).toHaveBeenCalledWith(expect.objectContaining({ status: "scratched" }));
         expect(createNotification).toHaveBeenCalledWith(
             expect.objectContaining({ userId: USER_ID, type: "show_moderation" }),
         );
@@ -224,14 +218,10 @@ describe("strikeEntryFromResults", () => {
 
         const result = await strikeEntryFromResults({ entryId: ENTRY_ID, reason: "troll placing" });
         expect(result).toEqual({ success: true });
-        expect(aq.update).toHaveBeenCalledWith(
-            expect.objectContaining({ status: "void" }),
-        );
+        expect(aq.update).toHaveBeenCalledWith(expect.objectContaining({ status: "void" }));
         expect(aq.delete).toHaveBeenCalledTimes(2); // placing + struck-class records
         expect(aq.eq).toHaveBeenCalledWith("class_name", "OF Quarter Horse");
-        expect(aq.update).toHaveBeenCalledWith(
-            expect.objectContaining({ status: "scratched" }),
-        );
+        expect(aq.update).toHaveBeenCalledWith(expect.objectContaining({ status: "scratched" }));
     });
 
     it("refuses while the show is still judging (scratch instead)", async () => {
@@ -335,9 +325,7 @@ describe("publishClassResults", () => {
 
         const result = await publishClassResults({ classId: CLASS_ID });
         expect(result).toEqual({ success: true });
-        expect(q.update).toHaveBeenCalledWith(
-            expect.objectContaining({ results_published_at: expect.any(String) }),
-        );
+        expect(q.update).toHaveBeenCalledWith(expect.objectContaining({ results_published_at: expect.any(String) }));
     });
 
     it("refuses to publish an unplaced class", async () => {

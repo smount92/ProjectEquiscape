@@ -36,11 +36,7 @@ export default function ShowRingMasthead({ totalCount }: { totalCount: number })
                     </span>
                 </div>
                 <div className="z-[1] ml-auto">
-                    <Link
-                        href="/community/help-id"
-                        id="help-id-link"
-                        className="btn-ghostleather !px-4 !py-2 !text-xs"
-                    >
+                    <Link href="/community/help-id" id="help-id-link" className="btn-ghostleather !px-4 !py-2 !text-xs">
                         🔍 Help Me ID
                     </Link>
                 </div>
@@ -49,8 +45,7 @@ export default function ShowRingMasthead({ totalCount }: { totalCount: number })
                 className="relative z-[1] mt-3 mb-0 max-w-[62ch] text-sm leading-relaxed italic"
                 style={{ color: "var(--leather-text)" }}
             >
-                Browse the latest models shared by collectors from around the world. Every horse
-                has a story.
+                Browse the latest models shared by collectors from around the world. Every horse has a story.
             </p>
         </div>
     );

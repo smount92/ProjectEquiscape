@@ -43,8 +43,7 @@ export default function CompletionLeaf({
     /** Plate V (records) only makes sense for a model, not tack or a prop. */
     isModel?: boolean;
 }) {
-    const passportHref =
-        visibility === "public" ? `/community/${horseId}` : `/stable/${horseId}`;
+    const passportHref = visibility === "public" ? `/community/${horseId}` : `/stable/${horseId}`;
     // Plate V — the horse exists now, so its records can be written
     // here without a trip to the passport and back (a user adding ten
     // horses in a row asked for exactly this). Each save re-arms a
@@ -61,9 +60,7 @@ export default function CompletionLeaf({
                         Entered in the ledger
                     </p>
 
-                    <h2 className="m-0 font-serif text-3xl font-bold break-words text-forest">
-                        {horseName}
-                    </h2>
+                    <h2 className="m-0 font-serif text-3xl font-bold break-words text-forest">{horseName}</h2>
 
                     <div className="my-5 flex justify-center">
                         <span className="stamp fe-stamp-land text-base">Recorded</span>
@@ -98,8 +95,7 @@ export default function CompletionLeaf({
                                         className="rounded-md border border-warning/40 bg-warning/10 px-4 py-2 text-left text-xs text-warning"
                                         role="note"
                                     >
-                                        Heads up: this horse is private — set it public to
-                                        enter the show.
+                                        Heads up: this horse is private — set it public to enter the show.
                                     </p>
                                 )}
                                 {horseId && (
@@ -122,11 +118,7 @@ export default function CompletionLeaf({
                         )}
 
                         <div className="mt-1 flex flex-wrap gap-3">
-                            <Button
-                                variant="outline"
-                                className="flex-1"
-                                onClick={onAddAnother}
-                            >
+                            <Button variant="outline" className="flex-1" onClick={onAddAnother}>
                                 Add another
                             </Button>
                             {onAddAnotherLikeThis && (
@@ -152,12 +144,15 @@ export default function CompletionLeaf({
                             Plate V · While it&apos;s fresh
                         </p>
                         <p className="mb-4 text-sm text-secondary-foreground">
-                            Show results and lineage can go on the record now. Everything here
-                            is optional and can also be edited from the passport later.
+                            Show results and lineage can go on the record now. Everything here is optional and can also
+                            be edited from the passport later.
                         </p>
 
-                        <details className="group mb-3 rounded-md border border-input bg-card/60 p-3" open={recordOpen}
-                            onToggle={(e) => setRecordOpen((e.target as HTMLDetailsElement).open)}>
+                        <details
+                            className="group mb-3 rounded-md border border-input bg-card/60 p-3"
+                            open={recordOpen}
+                            onToggle={(e) => setRecordOpen((e.target as HTMLDetailsElement).open)}
+                        >
                             <summary className="cursor-pointer list-none font-serif text-sm font-bold tracking-wide">
                                 🏆 Show results
                                 {recordsSaved > 0 && (
@@ -193,8 +188,8 @@ export default function CompletionLeaf({
                         </details>
 
                         <p className="mt-3 mb-0 text-xs text-muted-foreground">
-                            Papers and documents attach from the passport, where the files can be
-                            filed against a specific placing.
+                            Papers and documents attach from the passport, where the files can be filed against a
+                            specific placing.
                         </p>
                     </div>
                 )}

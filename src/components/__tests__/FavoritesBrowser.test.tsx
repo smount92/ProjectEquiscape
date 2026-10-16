@@ -9,15 +9,7 @@ import type { AvailableFavorite, FavoriteEntry, UnavailableFavorite } from "@/li
 // The global setup mocks next/link to render NOTHING — the cards wrap
 // their face in a Link, so render a real anchor.
 vi.mock("next/link", () => ({
-    default: ({
-        children,
-        href,
-        ...props
-    }: {
-        children: React.ReactNode;
-        href: string;
-        [key: string]: unknown;
-    }) => (
+    default: ({ children, href, ...props }: { children: React.ReactNode; href: string; [key: string]: unknown }) => (
         <a href={href} {...props}>
             {children}
         </a>
@@ -84,10 +76,7 @@ describe("FavoritesBrowser", () => {
     it("shows the warm empty state with a Show Ring link", () => {
         renderBrowser([]);
         expect(screen.getByText("Horses you ♥ around the Show Ring land here.")).toBeInTheDocument();
-        expect(screen.getByRole("link", { name: /Browse the Show Ring/ })).toHaveAttribute(
-            "href",
-            "/community",
-        );
+        expect(screen.getByRole("link", { name: /Browse the Show Ring/ })).toHaveAttribute("href", "/community");
     });
 
     it("optimistically removes a card on unfavorite and offers Undo", async () => {

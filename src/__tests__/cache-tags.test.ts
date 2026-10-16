@@ -21,7 +21,10 @@ function sourceFiles(dir: string): string[] {
     });
 }
 
-const files = sourceFiles(SRC).map((f) => ({ rel: path.relative(process.cwd(), f).split(path.sep).join("/"), text: readFileSync(f, "utf8") }));
+const files = sourceFiles(SRC).map((f) => ({
+    rel: path.relative(process.cwd(), f).split(path.sep).join("/"),
+    text: readFileSync(f, "utf8"),
+}));
 const all = files.map((f) => f.text).join("\n");
 
 /** Tags refreshed only by time, on purpose. */
@@ -31,7 +34,9 @@ const TIME_ONLY: Record<string, string> = {
 
 /** Every way a file can name a tag: CACHE_TAGS.key, or a constant set to it. */
 function namesFor(key: string): string[] {
-    const aliases = [...all.matchAll(new RegExp(`(?:const|let)\\s+(\\w+)\\s*=\\s*CACHE_TAGS\\.${key}\\b`, "g"))].map((m) => m[1]);
+    const aliases = [...all.matchAll(new RegExp(`(?:const|let)\\s+(\\w+)\\s*=\\s*CACHE_TAGS\\.${key}\\b`, "g"))].map(
+        (m) => m[1],
+    );
     return [`CACHE_TAGS.${key}`, ...aliases];
 }
 
@@ -54,14 +59,17 @@ describe("cache tags", () => {
 
     it("every tag is carried by a cache", () => {
         const uncarried = Object.keys(CACHE_TAGS).filter(
-            (key) => !namesFor(key).some((n) => new RegExp(`tags:\\s*\\[[^\\]]*\\b${n.replace(".", "\\.")}\\b`).test(all)),
+            (key) =>
+                !namesFor(key).some((n) => new RegExp(`tags:\\s*\\[[^\\]]*\\b${n.replace(".", "\\.")}\\b`).test(all)),
         );
         expect(uncarried).toEqual([]);
     });
 
     it("every tag is cleared by something, unless it is refreshed by time on purpose", () => {
         const uncleared = Object.keys(CACHE_TAGS).filter(
-            (key) => !(key in TIME_ONLY) && !namesFor(key).some((n) => new RegExp(`revalidateTag\\(\\s*${n.replace(".", "\\.")}\\b`).test(all)),
+            (key) =>
+                !(key in TIME_ONLY) &&
+                !namesFor(key).some((n) => new RegExp(`revalidateTag\\(\\s*${n.replace(".", "\\.")}\\b`).test(all)),
         );
         expect(uncleared).toEqual([]);
     });

@@ -13,10 +13,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import {
-    Dialog,
-    DialogContent,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import StableFilterBar from "@/components/stable/StableFilterBar";
 import StableWelcome from "@/components/stable/StableWelcome";
@@ -343,7 +340,10 @@ export default function StableBrowser({
                     className="fixed bottom-6 left-1/2 z-[100] flex max-w-[92vw] -translate-x-1/2 flex-wrap items-center justify-center gap-3 rounded-full px-5 py-3 shadow-[0_6px_16px_rgba(0,0,0,0.3)]"
                     style={{ background: "linear-gradient(180deg, #37664F, var(--color-forest-dark, #1E3D31))" }}
                 >
-                    <span className="font-serif text-sm font-bold whitespace-nowrap" style={{ color: "var(--brass-hi)" }}>
+                    <span
+                        className="font-serif text-sm font-bold whitespace-nowrap"
+                        style={{ color: "var(--brass-hi)" }}
+                    >
                         {selectedIds.size} selected
                     </span>
 
@@ -440,7 +440,11 @@ export default function StableBrowser({
                     </button>
 
                     {bulkNotice && (
-                        <span className="basis-full text-center text-xs" style={{ color: "var(--brass-hi)" }} role="status">
+                        <span
+                            className="basis-full text-center text-xs"
+                            style={{ color: "var(--brass-hi)" }}
+                            role="status"
+                        >
                             {bulkNotice}
                         </span>
                     )}
@@ -454,8 +458,8 @@ export default function StableBrowser({
                         <h3 className="mb-4">🗑️ Confirm Delete</h3>
                         <p className="mb-6 text-secondary-foreground">
                             Delete <strong>{selectedIds.size}</strong> item
-                            {selectedIds.size !== 1 ? "s" : ""}? The photos are erased from storage for good.
-                            Everything else lands in Recently Deleted, where you can put them back.
+                            {selectedIds.size !== 1 ? "s" : ""}? The photos are erased from storage for good. Everything
+                            else lands in Recently Deleted, where you can put them back.
                         </p>
                         <div className="flex justify-end gap-4">
                             <Button variant="outline" size="wide" onClick={() => setShowDeleteConfirm(false)}>

@@ -27,13 +27,7 @@
 
 import { normalizeScale } from "@/lib/catalog/taxonomy";
 import { horseBlocks } from "./entrantLedger";
-import type {
-    ClassStatus,
-    DivisionAxis,
-    EntryStatus,
-    ShowMode,
-    ShowStatus,
-} from "./types";
+import type { ClassStatus, DivisionAxis, EntryStatus, ShowMode, ShowStatus } from "./types";
 
 export interface EntryCandidate {
     horseId: string;
@@ -115,9 +109,7 @@ export interface ValidateEntryInput {
     now?: Date;
 }
 
-export type ValidateEntryResult =
-    | { ok: true }
-    | { ok: false; errors: string[] };
+export type ValidateEntryResult = { ok: true } | { ok: false; errors: string[] };
 
 export function validateEntry(input: ValidateEntryInput): ValidateEntryResult {
     const { candidate, horse, show, targetClass, existingEntries } = input;
@@ -131,15 +123,9 @@ export function validateEntry(input: ValidateEntryInput): ValidateEntryResult {
 
     // ── Capacity: distinct-entrant cap (a "table" is a person) ──
     if (show.capacity && show.capacity > 0) {
-        const liveOwners = new Set(
-            existingEntries
-                .filter((e) => e.status !== "scratched")
-                .map((e) => e.ownerId),
-        );
+        const liveOwners = new Set(existingEntries.filter((e) => e.status !== "scratched").map((e) => e.ownerId));
         if (!liveOwners.has(candidate.ownerId) && liveOwners.size >= show.capacity) {
-            errors.push(
-                `This show is full — it caps at ${show.capacity} exhibitor${show.capacity === 1 ? "" : "s"}.`,
-            );
+            errors.push(`This show is full — it caps at ${show.capacity} exhibitor${show.capacity === 1 ? "" : "s"}.`);
         }
     }
 
@@ -147,13 +133,9 @@ export function validateEntry(input: ValidateEntryInput): ValidateEntryResult {
     if (input.judgeUserIds && input.judgeUserIds.length > 0) {
         const judges = new Set(input.judgeUserIds);
         if (judges.has(candidate.ownerId)) {
-            errors.push(
-                "You are judging this show — a judge's horses can't compete in their own ring.",
-            );
+            errors.push("You are judging this show — a judge's horses can't compete in their own ring.");
         } else if (candidate.handlerId && judges.has(candidate.handlerId)) {
-            errors.push(
-                "The chosen handler is judging this show and can't also show in it.",
-            );
+            errors.push("The chosen handler is judging this show and can't also show in it.");
         }
     }
 
@@ -170,14 +152,16 @@ export function validateEntry(input: ValidateEntryInput): ValidateEntryResult {
             targetClass.status === "combined"
                 ? "This class was combined into another class — enter the combined class instead."
                 : targetClass.status === "cancelled"
-                    ? "This class has been cancelled."
-                    : "This class is no longer accepting entries.",
+                  ? "This class has been cancelled."
+                  : "This class is no longer accepting entries.",
         );
     }
 
     // ── Ownership: you enter your own horses (proxy = handler differs) ──
     if (horse.id !== candidate.horseId || horse.ownerId !== candidate.ownerId) {
-        errors.push("You can only enter horses you own. To have someone else show your horse, name them as the handler.");
+        errors.push(
+            "You can only enter horses you own. To have someone else show your horse, name them as the handler.",
+        );
     }
 
     const active = existingEntries.filter((e) => e.status !== "scratched");
@@ -246,9 +230,7 @@ export function validateEntry(input: ValidateEntryInput): ValidateEntryResult {
     // ── Per-class entrant cap ──
     if (blocks.has("class_full_for_you")) {
         const cap = targetClass.maxPerEntrant ?? 0;
-        errors.push(
-            `This class allows at most ${cap} ${cap === 1 ? "entry" : "entries"} per entrant.`,
-        );
+        errors.push(`This class allows at most ${cap} ${cap === 1 ? "entry" : "entries"} per entrant.`);
     }
 
     // ── Scale / finish eligibility ──

@@ -42,5 +42,7 @@ export async function readDefaultVisibility(supabase: unknown, userId: string): 
 /** Is this error a missing default_horse_visibility column (234 not pasted)? */
 export function isMissingVisibilityColumn(error: { code?: string; message?: string } | null): boolean {
     if (!error) return false;
-    return (error.code === "42703" || error.code === "PGRST204") && /default_horse_visibility/.test(error.message ?? "");
+    return (
+        (error.code === "42703" || error.code === "PGRST204") && /default_horse_visibility/.test(error.message ?? "")
+    );
 }

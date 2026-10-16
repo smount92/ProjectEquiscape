@@ -79,12 +79,7 @@ export default function HelpIdRequestForm() {
 
     if (!isOpen) {
         return (
-            <button
-                type="button"
-                className="btn-brass mt-8"
-                onClick={() => setIsOpen(true)}
-                id="new-id-request-btn"
-            >
+            <button type="button" className="btn-brass mt-8" onClick={() => setIsOpen(true)} id="new-id-request-btn">
                 🔍 Submit a Mystery Model
             </button>
         );
@@ -100,7 +95,7 @@ export default function HelpIdRequestForm() {
                         ✅
                     </p>
                     <span className="stamp">Submitted</span>
-                    <p className="text-secondary-foreground mt-3 text-sm">
+                    <p className="mt-3 text-sm text-secondary-foreground">
                         The community will help identify your model.
                     </p>
                 </div>
@@ -108,28 +103,22 @@ export default function HelpIdRequestForm() {
                 <form onSubmit={handleSubmit}>
                     {/* Photo Upload */}
                     <div className="mb-6">
-                        <label className="text-foreground mb-1 block text-sm font-semibold">
-                            Photo of the model *
-                        </label>
+                        <label className="mb-1 block text-sm font-semibold text-foreground">Photo of the model *</label>
                         <div
-                            className="border-forest/35 flex cursor-pointer flex-col items-center justify-center rounded-md border-2 border-dashed bg-[rgba(255,252,245,0.6)] px-8 py-10 text-center transition-all"
+                            className="flex cursor-pointer flex-col items-center justify-center rounded-md border-2 border-dashed border-forest/35 bg-[rgba(255,252,245,0.6)] px-8 py-10 text-center transition-all"
                             onClick={() => fileInputRef.current?.click()}
                         >
                             {preview ? (
-                                <img
-                                    src={preview}
-                                    alt="Preview"
-                                    className="max-h-[200px] rounded-md object-contain"
-                                />
+                                <img src={preview} alt="Preview" className="max-h-[200px] rounded-md object-contain" />
                             ) : (
                                 <>
                                     <div className="mb-3 text-[2.5rem] opacity-70" aria-hidden="true">
                                         📷
                                     </div>
-                                    <span className="text-foreground text-sm font-semibold">
+                                    <span className="text-sm font-semibold text-foreground">
                                         Click to upload a photo
                                     </span>
-                                    <span className="text-muted-foreground mt-1 text-xs">
+                                    <span className="mt-1 text-xs text-muted-foreground">
                                         Clear, well-lit photos get the best results
                                     </span>
                                 </>
@@ -150,7 +139,7 @@ export default function HelpIdRequestForm() {
                     {/* Description */}
                     <div className="mb-6">
                         <label
-                            className="text-foreground mb-1 block text-sm font-semibold"
+                            className="mb-1 block text-sm font-semibold text-foreground"
                             htmlFor="help-id-description"
                         >
                             Description
@@ -166,10 +155,7 @@ export default function HelpIdRequestForm() {
 
                     {/* Identifying Marks */}
                     <div className="mb-6">
-                        <label
-                            className="text-foreground mb-1 block text-sm font-semibold"
-                            htmlFor="help-id-marks"
-                        >
+                        <label className="mb-1 block text-sm font-semibold text-foreground" htmlFor="help-id-marks">
                             Any identifying marks?
                         </label>
                         <Input

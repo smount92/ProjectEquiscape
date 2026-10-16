@@ -52,7 +52,7 @@ for (const { path, label } of CRITICAL_PAGES) {
 
         expect(
             overflow.scrollWidth,
-            `${label}: scrollWidth (${overflow.scrollWidth}) should be ≤ innerWidth (${overflow.innerWidth})`
+            `${label}: scrollWidth (${overflow.scrollWidth}) should be ≤ innerWidth (${overflow.innerWidth})`,
         ).toBeLessThanOrEqual(overflow.innerWidth);
     });
 }
@@ -85,7 +85,7 @@ test.describe("Authenticated pages", () => {
 
             expect(
                 overflow.scrollWidth,
-                `${label}: scrollWidth (${overflow.scrollWidth}) should be ≤ innerWidth (${overflow.innerWidth})`
+                `${label}: scrollWidth (${overflow.scrollWidth}) should be ≤ innerWidth (${overflow.innerWidth})`,
             ).toBeLessThanOrEqual(overflow.innerWidth);
         });
     }

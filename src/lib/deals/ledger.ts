@@ -232,11 +232,7 @@ export function buildPlan(input: {
 }
 
 /** yyyy-mm-dd plus n cadence steps, in UTC. Null start ⇒ null dates. */
-export function addCadence(
-    startDate: string | null,
-    cadence: PlanCadence,
-    steps: number,
-): string | null {
+export function addCadence(startDate: string | null, cadence: PlanCadence, steps: number): string | null {
     const start = parseDate(startDate);
     if (start === null) return null;
     const d = new Date(start);
@@ -248,19 +244,14 @@ export function addCadence(
         const day = d.getUTCDate();
         d.setUTCDate(1);
         d.setUTCMonth(d.getUTCMonth() + steps);
-        const lastDay = new Date(
-            Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0),
-        ).getUTCDate();
+        const lastDay = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0)).getUTCDate();
         d.setUTCDate(Math.min(day, lastDay));
     }
     return d.toISOString().slice(0, 10);
 }
 
 /** The plan's rows add up to the agreed price (within a cent). */
-export function planMatchesPrice(
-    rows: { amount: number }[],
-    price: number | null,
-): boolean {
+export function planMatchesPrice(rows: { amount: number }[], price: number | null): boolean {
     if (price == null || !Number.isFinite(price)) return true;
     const sum = rows.reduce((s, r) => s + (Number.isFinite(r.amount) ? r.amount : 0), 0);
     return Math.abs(Math.round(sum * 100) - Math.round(price * 100)) <= 1;
@@ -277,11 +268,7 @@ export type LedgerActionResult = { ok: true } | { ok: false; reason: string };
  * trade may be either side or neither — the caller resolves it from the
  * deal kind and the terms and passes the answer in.
  */
-export function canMarkSent(
-    row: Installment,
-    actor: "a" | "b",
-    payer: "a" | "b" | null,
-): LedgerActionResult {
+export function canMarkSent(row: Installment, actor: "a" | "b", payer: "a" | "b" | null): LedgerActionResult {
     if (payer === null) {
         return { ok: false, reason: "These terms don't say who is paying yet." };
     }
@@ -298,11 +285,7 @@ export function canMarkSent(
 }
 
 /** The payer un-marks a row they marked in error, before it is confirmed. */
-export function canUnmarkSent(
-    row: Installment,
-    actor: "a" | "b",
-    payer: "a" | "b" | null,
-): LedgerActionResult {
+export function canUnmarkSent(row: Installment, actor: "a" | "b", payer: "a" | "b" | null): LedgerActionResult {
     if (payer === null || actor !== payer) {
         return { ok: false, reason: "Only the paying side can change this." };
     }
@@ -322,11 +305,7 @@ export function canUnmarkSent(
  * in hand at a live show is a real way this hobby pays, and a payee who
  * has the money should be able to say so without waiting on a form.
  */
-export function canConfirmReceived(
-    row: Installment,
-    actor: "a" | "b",
-    payer: "a" | "b" | null,
-): LedgerActionResult {
+export function canConfirmReceived(row: Installment, actor: "a" | "b", payer: "a" | "b" | null): LedgerActionResult {
     if (payer === null) {
         return { ok: false, reason: "These terms don't say who is paying yet." };
     }
@@ -348,8 +327,7 @@ export function canConfirmReceived(
 export function canUnconfirm(): LedgerActionResult {
     return {
         ok: false,
-        reason:
-            "A confirmed payment can't be un-confirmed — it is part of the record. Raise a dispute instead.",
+        reason: "A confirmed payment can't be un-confirmed — it is part of the record. Raise a dispute instead.",
     };
 }
 
@@ -403,14 +381,10 @@ export function ledgerHeadline(
     if (summary.allConfirmed) return `Paid in full — ${formatMoney(summary.total)}`;
     const parts = [`${summary.confirmedCount} of ${summary.count} paid`];
     if (summary.awaitingConfirmation.length > 0) {
-        parts.push(
-            `${summary.awaitingConfirmation.length} awaiting confirmation`,
-        );
+        parts.push(`${summary.awaitingConfirmation.length} awaiting confirmation`);
     }
     if (summary.overdue.length > 0) {
-        parts.push(
-            `${summary.overdue.length} past due`,
-        );
+        parts.push(`${summary.overdue.length} past due`);
     } else if (summary.nextDue?.dueDate) {
         parts.push(`next due ${formatDate(summary.nextDue.dueDate)}`);
     }

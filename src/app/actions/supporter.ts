@@ -11,9 +11,7 @@
 import { revalidatePath } from "next/cache";
 import { requireAuth, AuthError } from "@/lib/auth";
 
-export async function setSupporterLedgerListing(
-    visible: boolean
-): Promise<{ success: boolean; error?: string }> {
+export async function setSupporterLedgerListing(visible: boolean): Promise<{ success: boolean; error?: string }> {
     try {
         const { supabase, user } = await requireAuth();
 

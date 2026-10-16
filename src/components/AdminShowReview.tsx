@@ -53,7 +53,11 @@ export function AdminSanctioningDecision({
     const sanctioned = isMhhQualifying || decided === "grant";
 
     return (
-        <section className="ledger-card" aria-labelledby="sanctioning-decision-heading" data-testid="sanctioning-decision">
+        <section
+            className="ledger-card"
+            aria-labelledby="sanctioning-decision-heading"
+            data-testid="sanctioning-decision"
+        >
             <span className="ledger-tab" id="sanctioning-decision-heading">
                 🏅 Sanctioning
             </span>
@@ -69,14 +73,11 @@ export function AdminSanctioningDecision({
                                 : "Not sanctioned — no request pending"}
                     </p>
                     {note && decided === null && (
-                        <p className="m-0 mt-1 text-sm text-secondary-foreground italic">
-                            &ldquo;{note}&rdquo;
-                        </p>
+                        <p className="m-0 mt-1 text-sm text-secondary-foreground italic">&ldquo;{note}&rdquo;</p>
                     )}
                     {decided === "grant" && (
                         <p className="m-0 mt-1 text-xs text-muted-foreground">
-                            The host has been notified. Placings at {title} now earn Series points and
-                            can mint cards.
+                            The host has been notified. Placings at {title} now earn Series points and can mint cards.
                         </p>
                     )}
                     {decided === "dismiss" && (

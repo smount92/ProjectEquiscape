@@ -7,15 +7,7 @@
  * components can import the same shapes.
  */
 
-import type {
-    ClassStatus,
-    DivisionAxis,
-    EntryStatus,
-    ShowJudging,
-    ShowMode,
-    ShowStatus,
-    StaffRole,
-} from "./types";
+import type { ClassStatus, DivisionAxis, EntryStatus, ShowJudging, ShowMode, ShowStatus, StaffRole } from "./types";
 
 // ── /shows/host — "My Shows" list ──
 

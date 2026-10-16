@@ -21,9 +21,7 @@ describe("deriveVotePlacings", () => {
     });
 
     it("caps at six places even with more voted entries", () => {
-        const tallies = Array.from({ length: 9 }, (_, i) =>
-            tally(`e${i}`, 100 - i, `2026-07-01T00:0${i}:00Z`),
-        );
+        const tallies = Array.from({ length: 9 }, (_, i) => tally(`e${i}`, 100 - i, `2026-07-01T00:0${i}:00Z`));
         const result = deriveVotePlacings(tallies);
         expect(result).toHaveLength(6);
         expect(result.map((r) => r.place)).toEqual([1, 2, 3, 4, 5, 6]);
@@ -53,18 +51,13 @@ describe("deriveVotePlacings", () => {
     });
 
     it("handles fewer than six entries", () => {
-        const result = deriveVotePlacings([
-            tally("only", 1, "2026-07-01T00:00:00Z"),
-        ]);
+        const result = deriveVotePlacings([tally("only", 1, "2026-07-01T00:00:00Z")]);
         expect(result).toEqual([{ entryId: "only", place: 1 }]);
     });
 
     it("never places zero-vote entries — an unvoted class yields no placings", () => {
         expect(
-            deriveVotePlacings([
-                tally("a", 0, "2026-07-01T00:00:00Z"),
-                tally("b", 0, "2026-07-01T01:00:00Z"),
-            ]),
+            deriveVotePlacings([tally("a", 0, "2026-07-01T00:00:00Z"), tally("b", 0, "2026-07-01T01:00:00Z")]),
         ).toEqual([]);
     });
 
@@ -81,10 +74,7 @@ describe("deriveVotePlacings", () => {
     });
 
     it("does not mutate its input", () => {
-        const input = [
-            tally("a", 1, "2026-07-01T00:00:00Z"),
-            tally("b", 2, "2026-07-01T01:00:00Z"),
-        ];
+        const input = [tally("a", 1, "2026-07-01T00:00:00Z"), tally("b", 2, "2026-07-01T01:00:00Z")];
         const snapshot = JSON.parse(JSON.stringify(input));
         deriveVotePlacings(input);
         expect(input).toEqual(snapshot);

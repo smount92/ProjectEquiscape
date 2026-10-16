@@ -43,13 +43,18 @@ export default function RevokeTransferButton({ transferId, horseName }: RevokeTr
             <Button variant="destructive-outline" size="sm" onClick={() => setOpen(true)}>
                 Revoke
             </Button>
-            <Dialog open={open} onOpenChange={(next) => { if (!revoking) setOpen(next); }}>
+            <Dialog
+                open={open}
+                onOpenChange={(next) => {
+                    if (!revoking) setOpen(next);
+                }}
+            >
                 <DialogContent className="sm:max-w-[380px]">
                     <DialogHeader>
                         <DialogTitle>Revoke transfer code?</DialogTitle>
                         <DialogDescription>
-                            This cancels the pending transfer code for &ldquo;{horseName}&rdquo;. Anyone holding the code
-                            will no longer be able to claim it.
+                            This cancels the pending transfer code for &ldquo;{horseName}&rdquo;. Anyone holding the
+                            code will no longer be able to claim it.
                         </DialogDescription>
                     </DialogHeader>
                     {error && <p className="text-sm text-[#ef4444]">{error}</p>}

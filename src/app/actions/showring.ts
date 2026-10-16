@@ -39,9 +39,7 @@ import { summarizeShowRecords, type RecordSummaryInputRow } from "@/lib/market/r
 import { firstZodError, getShowRingPageSchema } from "@/lib/showring/schemas";
 import type { ShowRingCard, ShowRingFacetOptions } from "@/lib/showring/types";
 
-type ActionResult<T = object> =
-    | ({ success: true } & T)
-    | { success: false; error: string };
+type ActionResult<T = object> = ({ success: true } & T) | { success: false; error: string };
 
 /** Max catalog rows matched for the q ilike-over-the-join expansion. */
 const CATALOG_MATCH_CAP = 100;
@@ -65,10 +63,7 @@ type ShowRingFilterInput = Omit<ShowRingPageInput, "offset" | "limit">;
  * and count/hasMore are exact (the legacy build filtered the fetched
  * page in JS instead).
  */
-async function fetchBlockedOwnerIds(
-    supabase: SupabaseClient,
-    userId: string,
-): Promise<string[]> {
+async function fetchBlockedOwnerIds(supabase: SupabaseClient, userId: string): Promise<string[]> {
     const { data } = await supabase
         .from("user_blocks")
         .select("blocked_id")
@@ -170,16 +165,8 @@ async function buildShowRingCards(
 
     const [allFavsResult, userFavsResult, hoofprintResult, recordsResult] = await Promise.all([
         supabase.from("horse_favorites").select("horse_id").in("horse_id", pageIds),
-        supabase
-            .from("horse_favorites")
-            .select("horse_id")
-            .eq("user_id", userId)
-            .in("horse_id", pageIds),
-        supabase
-            .from("v_horse_hoofprint")
-            .select("horse_id")
-            .in("horse_id", pageIds)
-            .eq("is_public", true),
+        supabase.from("horse_favorites").select("horse_id").eq("user_id", userId).in("horse_id", pageIds),
+        supabase.from("v_horse_hoofprint").select("horse_id").in("horse_id", pageIds).eq("is_public", true),
         // Wave 3 — record chips: ONE batched query for the whole page
         // (never per-card). RLS scopes rows to public horses' records.
         supabase
@@ -192,16 +179,12 @@ async function buildShowRingCards(
     for (const f of (allFavsResult.data ?? []) as { horse_id: string }[]) {
         favCountMap.set(f.horse_id, (favCountMap.get(f.horse_id) || 0) + 1);
     }
-    const userFavSet = new Set(
-        ((userFavsResult.data ?? []) as { horse_id: string }[]).map((f) => f.horse_id),
-    );
+    const userFavSet = new Set(((userFavsResult.data ?? []) as { horse_id: string }[]).map((f) => f.horse_id));
     const hoofprintCountMap = new Map<string, number>();
     for (const e of (hoofprintResult.data ?? []) as { horse_id: string | null }[]) {
         if (e.horse_id) hoofprintCountMap.set(e.horse_id, (hoofprintCountMap.get(e.horse_id) || 0) + 1);
     }
-    const recordSummaryMap = summarizeShowRecords(
-        (recordsResult.data ?? []) as RecordSummaryInputRow[],
-    );
+    const recordSummaryMap = summarizeShowRecords((recordsResult.data ?? []) as RecordSummaryInputRow[]);
 
     const thumbnailUrls: string[] = [];
     for (const row of rows) {
@@ -294,8 +277,7 @@ async function fetchShowRingFacets(supabase: SupabaseClient): Promise<ShowRingFa
  * RPC noted above remains the real fix.)
  */
 const getShowRingFacetsCached = unstable_cache(
-    async (): Promise<ShowRingFacetOptions> =>
-        fetchShowRingFacets(createAnonClient() as unknown as SupabaseClient),
+    async (): Promise<ShowRingFacetOptions> => fetchShowRingFacets(createAnonClient() as unknown as SupabaseClient),
     ["showring-facets"],
     { revalidate: 300, tags: [CACHE_TAGS.showRing] },
 );
@@ -308,9 +290,7 @@ const getShowRingFacetsCached = unstable_cache(
  * The filtered, sorted first page of public horses plus exact match
  * count and whole-dataset facet options.
  */
-export async function getShowRingPage(
-    input: z.input<typeof getShowRingPageSchema>,
-): Promise<
+export async function getShowRingPage(input: z.input<typeof getShowRingPageSchema>): Promise<
     ActionResult<{
         cards: ShowRingCard[];
         totalCount: number;

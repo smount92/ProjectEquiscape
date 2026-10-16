@@ -52,7 +52,6 @@ export default function StableHorseCard({
             {/* Image */}
             <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-muted">
                 {horse.thumbnailUrl ? (
-                     
                     <ThumbImage
                         src={horse.thumbnailUrl}
                         onError={(e) => {

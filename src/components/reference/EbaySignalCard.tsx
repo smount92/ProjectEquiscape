@@ -47,7 +47,15 @@ function AskingSparkline({ history }: { history: { observedOn: string; askingMed
             aria-label={`Asking-price trend across ${history.length} readings: $${min.toLocaleString("en-US")} to $${max.toLocaleString("en-US")}`}
             className="block"
         >
-            <path d={path} fill="none" stroke="currentColor" strokeWidth="1.5" className="text-forest" strokeLinejoin="round" strokeLinecap="round" />
+            <path
+                d={path}
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                className="text-forest"
+                strokeLinejoin="round"
+                strokeLinecap="round"
+            />
             <circle cx={x(values.length - 1)} cy={y(last)} r="2.5" className="fill-current text-forest" />
         </svg>
     );
@@ -67,13 +75,7 @@ function AskingSparkline({ history }: { history: { observedOn: string; askingMed
  * the signal immediately and stops the sweep refreshing this model until
  * an admin resolves it — the member is trusted first, checked second.
  */
-export default function EbaySignalCard({
-    catalogItemId,
-    signal,
-}: {
-    catalogItemId: string;
-    signal: EbaySignalView;
-}) {
+export default function EbaySignalCard({ catalogItemId, signal }: { catalogItemId: string; signal: EbaySignalView }) {
     const [reported, setReported] = useState(false);
     const [confirming, setConfirming] = useState(false);
     const [note, setNote] = useState("");
@@ -110,12 +112,12 @@ export default function EbaySignalCard({
                     <div className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
                         Median asking
                     </div>
-                    <div className="mt-1 text-4xl font-extrabold tabular-nums text-foreground">
+                    <div className="mt-1 text-4xl font-extrabold text-foreground tabular-nums">
                         {money(signal.askingMedian)}
                     </div>
                     <div className="mt-1 text-xs text-muted-foreground">
-                        {money(signal.askingLow)}–{money(signal.askingHigh)} across{" "}
-                        {signal.sampleSize} listing{signal.sampleSize !== 1 ? "s" : ""} · checked {observed}
+                        {money(signal.askingLow)}–{money(signal.askingHigh)} across {signal.sampleSize} listing
+                        {signal.sampleSize !== 1 ? "s" : ""} · checked {observed}
                     </div>
                     {(signal.history?.length ?? 0) >= SPARKLINE_MIN_POINTS ? (
                         <div className="mt-3">
@@ -150,16 +152,18 @@ export default function EbaySignalCard({
                     <ul className="m-0 flex list-none flex-col gap-1.5 p-0">
                         {signal.listings.map((l) => (
                             <li key={l.url} className="flex items-baseline gap-2 text-sm">
-                                <span className="font-semibold tabular-nums text-foreground">{money(l.price)}</span>
+                                <span className="font-semibold text-foreground tabular-nums">{money(l.price)}</span>
                                 <a
                                     href={l.url}
                                     target="_blank"
                                     rel={EBAY_AFFILIATE_REL}
-                                    className="text-forest min-w-0 truncate hover:underline"
+                                    className="min-w-0 truncate text-forest hover:underline"
                                 >
                                     {l.title}
                                 </a>
-                                <span aria-hidden="true" className="text-xs text-muted-foreground">↗</span>
+                                <span aria-hidden="true" className="text-xs text-muted-foreground">
+                                    ↗
+                                </span>
                             </li>
                         ))}
                     </ul>
@@ -170,7 +174,7 @@ export default function EbaySignalCard({
                         {!confirming ? (
                             <button
                                 type="button"
-                                className="text-muted-foreground hover:text-foreground text-xs underline"
+                                className="text-xs text-muted-foreground underline hover:text-foreground"
                                 onClick={() => setConfirming(true)}
                             >
                                 Is this the wrong model? Report it
@@ -178,10 +182,10 @@ export default function EbaySignalCard({
                         ) : null}
                     </div>
                     {confirming && (
-                        <div className="border-input mt-3 flex flex-col gap-2 border-t pt-3">
+                        <div className="mt-3 flex flex-col gap-2 border-t border-input pt-3">
                             <input
                                 type="text"
-                                className="border-input bg-card w-full rounded-md border px-3 py-1.5 text-sm"
+                                className="w-full rounded-md border border-input bg-card px-3 py-1.5 text-sm"
                                 placeholder="Optional: what did it match instead? (helps us fix it faster)"
                                 value={note}
                                 maxLength={500}
@@ -191,7 +195,7 @@ export default function EbaySignalCard({
                             <div className="flex gap-3 text-xs">
                                 <button
                                     type="button"
-                                    className="text-destructive font-semibold underline disabled:opacity-50"
+                                    className="font-semibold text-destructive underline disabled:opacity-50"
                                     disabled={pending}
                                     onClick={handleReport}
                                 >
@@ -199,7 +203,7 @@ export default function EbaySignalCard({
                                 </button>
                                 <button
                                     type="button"
-                                    className="text-muted-foreground hover:text-foreground underline"
+                                    className="text-muted-foreground underline hover:text-foreground"
                                     disabled={pending}
                                     onClick={() => setConfirming(false)}
                                 >

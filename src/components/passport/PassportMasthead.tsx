@@ -63,7 +63,7 @@ export default function PassportMasthead({
                 Public Passport · Model Horse Hub
             </p>
             <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-2">
-                <h1 className="text-engraved-light m-0 font-serif text-3xl font-bold break-words tracking-[0.02em] md:text-4xl">
+                <h1 className="text-engraved-light m-0 font-serif text-3xl font-bold tracking-[0.02em] break-words md:text-4xl">
                     {horseName}
                 </h1>
                 {likes !== null && (

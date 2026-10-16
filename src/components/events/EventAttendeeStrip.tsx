@@ -30,9 +30,7 @@ function FaceRow({ people }: { people: EventAttendee[] }) {
                     />
                 ))}
             </div>
-            {overflow > 0 && (
-                <span className="text-xs text-muted-foreground">+{overflow} more</span>
-            )}
+            {overflow > 0 && <span className="text-xs text-muted-foreground">+{overflow} more</span>}
         </div>
     );
 }
@@ -41,11 +39,7 @@ function NameChips({ people }: { people: EventAttendee[] }) {
     return (
         <div className="mt-2 flex flex-wrap gap-1">
             {people.map((p) => (
-                <Link
-                    key={p.userId}
-                    href={`/profile/${encodeURIComponent(p.alias)}`}
-                    className="ownership-link"
-                >
+                <Link key={p.userId} href={`/profile/${encodeURIComponent(p.alias)}`} className="ownership-link">
                     @{p.alias}
                 </Link>
             ))}
@@ -53,19 +47,13 @@ function NameChips({ people }: { people: EventAttendee[] }) {
     );
 }
 
-export default function EventAttendeeStrip({
-    attendees,
-}: {
-    attendees: EventAttendee[];
-}) {
+export default function EventAttendeeStrip({ attendees }: { attendees: EventAttendee[] }) {
     const going = attendees.filter((a) => a.status === "going");
     const interested = attendees.filter((a) => a.status === "interested");
 
     if (going.length === 0 && interested.length === 0) {
         return (
-            <p className="m-0 text-sm text-muted-foreground">
-                Nobody has said they&rsquo;re going yet — be the first.
-            </p>
+            <p className="m-0 text-sm text-muted-foreground">Nobody has said they&rsquo;re going yet — be the first.</p>
         );
     }
 
@@ -73,7 +61,7 @@ export default function EventAttendeeStrip({
         <div className="flex flex-col gap-4">
             {going.length > 0 && (
                 <div>
-                    <h3 className="mb-2 font-serif text-[0.8125rem] tracking-[0.14em] uppercase text-forest">
+                    <h3 className="mb-2 font-serif text-[0.8125rem] tracking-[0.14em] text-forest uppercase">
                         Going ({going.length})
                     </h3>
                     <FaceRow people={going} />
@@ -82,7 +70,7 @@ export default function EventAttendeeStrip({
             )}
             {interested.length > 0 && (
                 <div>
-                    <h3 className="mb-2 font-serif text-[0.8125rem] tracking-[0.14em] uppercase text-muted-foreground">
+                    <h3 className="mb-2 font-serif text-[0.8125rem] tracking-[0.14em] text-muted-foreground uppercase">
                         Interested ({interested.length})
                     </h3>
                     <FaceRow people={interested} />

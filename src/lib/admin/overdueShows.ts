@@ -143,9 +143,7 @@ export function classifyOverdueShow(show: OverdueShowInput, now: Date): OverdueC
         // Prefer the posted deadline; fall back to last-touched for shows
         // the host closed by hand with no entries_close_at on file.
         const since = show.entriesCloseAt ?? show.updatedAt;
-        return daysSince(since, now) >= ENTRIES_CLOSED_STALLED_DAYS
-            ? build("entries_closed_stalled", since)
-            : null;
+        return daysSince(since, now) >= ENTRIES_CLOSED_STALLED_DAYS ? build("entries_closed_stalled", since) : null;
     }
 
     if (show.status === "running") {
@@ -153,9 +151,7 @@ export function classifyOverdueShow(show: OverdueShowInput, now: Date): OverdueC
             const days = daysSince(`${show.showDate}T00:00:00Z`, now);
             return days >= RUNNING_PAST_DATE_DAYS ? build("running_stalled", show.showDate) : null;
         }
-        return daysSince(show.updatedAt, now) >= RUNNING_IDLE_DAYS
-            ? build("running_stalled", show.updatedAt)
-            : null;
+        return daysSince(show.updatedAt, now) >= RUNNING_IDLE_DAYS ? build("running_stalled", show.updatedAt) : null;
     }
 
     if (show.status === "results_review") {
@@ -175,8 +171,7 @@ export function classifyOverdueShow(show: OverdueShowInput, now: Date): OverdueC
  * they dedupe independently.
  */
 export function nudgeLinkFor(showId: string, reason: OverdueReason): string {
-    const anchor =
-        reason === "judging_overdue" || reason === "judging_no_deadline" ? "judging-overdue" : "stalled";
+    const anchor = reason === "judging_overdue" || reason === "judging_no_deadline" ? "judging-overdue" : "stalled";
     return `/shows/host/${showId}#${anchor}`;
 }
 

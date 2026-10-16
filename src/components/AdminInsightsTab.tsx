@@ -42,14 +42,10 @@ function fmt(n: number | null): string {
 
 function Stat({ value, label, sub }: { value: string; label: string; sub?: string }) {
     return (
-        <div className="border-input bg-card rounded-lg border px-4 py-3">
-            <div className="text-foreground font-serif text-2xl leading-none font-bold tabular-nums">
-                {value}
-            </div>
-            <div className="text-muted-foreground mt-1.5 text-xs font-semibold tracking-wide uppercase">
-                {label}
-            </div>
-            {sub && <div className="text-muted-foreground mt-0.5 text-xs">{sub}</div>}
+        <div className="rounded-lg border border-input bg-card px-4 py-3">
+            <div className="font-serif text-2xl leading-none font-bold text-foreground tabular-nums">{value}</div>
+            <div className="mt-1.5 text-xs font-semibold tracking-wide text-muted-foreground uppercase">{label}</div>
+            {sub && <div className="mt-0.5 text-xs text-muted-foreground">{sub}</div>}
         </div>
     );
 }
@@ -98,24 +94,20 @@ function RevenueBand() {
             <h3 className="mt-0 mb-2 flex flex-wrap items-baseline gap-2 text-base font-bold">
                 💰 Revenue &amp; reach
                 {!ready && (
-                    <span className="text-muted-foreground text-xs font-normal">
+                    <span className="text-xs font-normal text-muted-foreground">
                         {failed
                             ? "could not be read this load"
                             : "waiting on migration 176 — paste supabase/migrations/176_revenue_measurability.sql"}
                     </span>
                 )}
             </h3>
-            <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(150px,1fr))]">
+            <div className="grid [grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] gap-3">
                 <Stat
                     value={ready ? money(data!.revenue.mrr) : "—"}
                     label="Net MRR"
                     sub="After Stripe fees · list price, not cash"
                 />
-                <Stat
-                    value={ready ? fmt(pro?.paying ?? 0) : "—"}
-                    label="🐴 Pro subscribers"
-                    sub="$4.555 net each"
-                />
+                <Stat value={ready ? fmt(pro?.paying ?? 0) : "—"} label="🐴 Pro subscribers" sub="$4.555 net each" />
                 <Stat
                     value={ready ? fmt(studio?.paying ?? 0) : "—"}
                     label="🎨 Studio subscribers"
@@ -137,12 +129,11 @@ function RevenueBand() {
                     sub="Exact MAU, not an estimate"
                 />
             </div>
-            <p className="text-muted-foreground mt-2 mb-0 text-xs">
-                MRR is subscriber count × net price — what the subscriptions are worth, not what
-                cleared. Beta members redeeming the six-months-free promo code show as active and
-                contribute $0 until it expires. Supporters are not counted here at all: it is not a
-                tier and its price lives only in Stripe. Active members means &quot;viewed at least
-                one tracked page&quot; — a member who only read their dashboard is not in it.
+            <p className="mt-2 mb-0 text-xs text-muted-foreground">
+                MRR is subscriber count × net price — what the subscriptions are worth, not what cleared. Beta members
+                redeeming the six-months-free promo code show as active and contribute $0 until it expires. Supporters
+                are not counted here at all: it is not a tier and its price lives only in Stripe. Active members means
+                &quot;viewed at least one tracked page&quot; — a member who only read their dashboard is not in it.
             </p>
         </div>
     );
@@ -169,7 +160,7 @@ const GROWTH_TONE: Record<string, string> = {
 /** A small two-column count table for one herd dimension. */
 function BucketTable({ title, rows, total }: { title: string; rows: Bucket[]; total: number }) {
     return (
-        <div className="border-input bg-card rounded-lg border px-3 py-2">
+        <div className="rounded-lg border border-input bg-card px-3 py-2">
             <div className="mb-1 text-xs font-bold tracking-wide uppercase">{title}</div>
             <table className="w-full border-collapse text-sm">
                 <tbody>
@@ -177,14 +168,14 @@ function BucketTable({ title, rows, total }: { title: string; rows: Bucket[]; to
                         <tr key={b.label}>
                             <td className="truncate py-0.5 pr-2">{b.label}</td>
                             <td className="py-0.5 text-right tabular-nums">{b.count.toLocaleString()}</td>
-                            <td className="text-muted-foreground w-12 py-0.5 text-right text-xs tabular-nums">
+                            <td className="w-12 py-0.5 text-right text-xs text-muted-foreground tabular-nums">
                                 {total > 0 ? `${Math.round((b.count / total) * 100)}%` : ""}
                             </td>
                         </tr>
                     ))}
                     {rows.length === 0 && (
                         <tr>
-                            <td className="text-muted-foreground py-0.5">—</td>
+                            <td className="py-0.5 text-muted-foreground">—</td>
                         </tr>
                     )}
                 </tbody>
@@ -214,21 +205,21 @@ function RegistryBand() {
             <h3 className="mt-0 mb-2 flex flex-wrap items-baseline gap-2 text-base font-bold">
                 📗 The Registry
                 {!data && (
-                    <span className="text-muted-foreground text-xs font-normal">
+                    <span className="text-xs font-normal text-muted-foreground">
                         {failed ? "could not be read this load" : "reading…"}
                     </span>
                 )}
             </h3>
-            <div className="mb-3 grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(150px,1fr))]">
+            <div className="mb-3 grid [grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] gap-3">
                 <Stat value={fmt(data?.items ?? null)} label="Entries" sub="Molds, releases, resins" />
                 <Stat value={fmt(data?.approvedAllTime ?? null)} label="Member changes approved" sub="All time" />
                 <Stat value={fmt(data?.changesAllTime ?? null)} label="Changelog rows" sub="Every applied change" />
                 <Stat value={fmt(data?.pending ?? null)} label="Waiting for review" sub="Pending suggestions" />
             </div>
-            <div className="border-input bg-card overflow-x-auto rounded-lg border">
+            <div className="overflow-x-auto rounded-lg border border-input bg-card">
                 <table className="w-full border-collapse text-sm">
                     <thead>
-                        <tr className="text-muted-foreground text-left text-xs tracking-wide uppercase">
+                        <tr className="text-left text-xs tracking-wide text-muted-foreground uppercase">
                             <th className="px-3 py-2">Last</th>
                             <th className="px-3 py-2 text-right">Reference views</th>
                             <th className="px-3 py-2 text-right">Viewers</th>
@@ -239,7 +230,7 @@ function RegistryBand() {
                     </thead>
                     <tbody>
                         {(data?.windows ?? []).map((w) => (
-                            <tr key={w.days} className="border-input border-t">
+                            <tr key={w.days} className="border-t border-input">
                                 <td className="px-3 py-1.5 font-semibold">{w.days} days</td>
                                 <td className="px-3 py-1.5 text-right tabular-nums">{fmt(w.views)}</td>
                                 <td className="px-3 py-1.5 text-right tabular-nums">{fmt(w.viewers)}</td>
@@ -249,8 +240,8 @@ function RegistryBand() {
                             </tr>
                         ))}
                         {!data && (
-                            <tr className="border-input border-t">
-                                <td className="text-muted-foreground px-3 py-2" colSpan={6}>
+                            <tr className="border-t border-input">
+                                <td className="px-3 py-2 text-muted-foreground" colSpan={6}>
                                     {failed ? "—" : "Reading…"}
                                 </td>
                             </tr>
@@ -258,9 +249,9 @@ function RegistryBand() {
                     </tbody>
                 </table>
             </div>
-            <p className="text-muted-foreground mt-2 mb-0 text-xs">
-                Views are reference pages only (the 175 rollups; &quot;—&quot; until that migration is in).
-                Changes are changelog rows: member suggestions once approved, plus admin edits and merges.
+            <p className="mt-2 mb-0 text-xs text-muted-foreground">
+                Views are reference pages only (the 175 rollups; &quot;—&quot; until that migration is in). Changes are
+                changelog rows: member suggestions once approved, plus admin edits and merges.
             </p>
         </div>
     );
@@ -287,7 +278,7 @@ function HerdBand() {
         <div>
             <h3 className="mt-0 mb-2 flex flex-wrap items-baseline gap-2 text-base font-bold">
                 🐴 The public herd
-                <span className="text-muted-foreground text-xs font-normal">
+                <span className="text-xs font-normal text-muted-foreground">
                     {data
                         ? `${fmt(data.total)} public horses · ${fmt(data.linked)} linked to the Registry`
                         : failed
@@ -296,7 +287,7 @@ function HerdBand() {
                 </span>
             </h3>
             {data && (
-                <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(220px,1fr))]">
+                <div className="grid [grid-template-columns:repeat(auto-fit,minmax(220px,1fr))] gap-3">
                     <BucketTable title="Maker" rows={data.byMaker} total={total} />
                     <BucketTable title="Finish" rows={data.byFinish} total={total} />
                     <BucketTable title="Scale" rows={data.byScale} total={total} />
@@ -307,10 +298,10 @@ function HerdBand() {
                     <BucketTable title="Category" rows={data.byCategory} total={total} />
                 </div>
             )}
-            <p className="text-muted-foreground mt-2 mb-0 text-xs">
-                Public horses only, counted as aggregates. Maker and scale come from the Registry
-                entry a horse is linked to; sex, breed and colour prefer what the owner set, then the
-                Registry&apos;s. &quot;Unknown&quot; is a blank, not a guess.
+            <p className="mt-2 mb-0 text-xs text-muted-foreground">
+                Public horses only, counted as aggregates. Maker and scale come from the Registry entry a horse is
+                linked to; sex, breed and colour prefer what the owner set, then the Registry&apos;s.
+                &quot;Unknown&quot; is a blank, not a guess.
             </p>
         </div>
     );
@@ -320,7 +311,12 @@ function GrowthBand() {
     const [range, setRange] = useState<GrowthRange>(30);
     const [growth, setGrowth] = useState<GrowthInsights | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [visible, setVisible] = useState<Record<string, boolean>>({ members: true, horses: true, records: false, listings: false });
+    const [visible, setVisible] = useState<Record<string, boolean>>({
+        members: true,
+        horses: true,
+        records: false,
+        listings: false,
+    });
 
     useEffect(() => {
         let cancelled = false;
@@ -352,9 +348,11 @@ function GrowthBand() {
     const ticks = growth ? [0, Math.floor((n - 1) / 2), n - 1].filter((i, k, a) => a.indexOf(i) === k) : [];
 
     return (
-        <div className="border-input bg-card rounded-lg border px-4 py-3" data-testid="growth-band">
+        <div className="rounded-lg border border-input bg-card px-4 py-3" data-testid="growth-band">
             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                <div className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">Growth · added per day</div>
+                <div className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                    Growth · added per day
+                </div>
                 <div className="flex items-center gap-1" role="group" aria-label="Range">
                     {GROWTH_RANGES.map((r) => (
                         <button
@@ -363,7 +361,9 @@ function GrowthBand() {
                             onClick={() => setRange(r)}
                             aria-pressed={range === r}
                             className={`cursor-pointer rounded-md border px-2.5 py-1 text-xs font-semibold transition-colors ${
-                                range === r ? "border-forest bg-forest/10 text-forest" : "border-input bg-card text-secondary-foreground hover:text-foreground"
+                                range === r
+                                    ? "border-forest bg-forest/10 text-forest"
+                                    : "border-input bg-card text-secondary-foreground hover:text-foreground"
                             }`}
                             id={`growth-range-${r}`}
                         >
@@ -373,12 +373,12 @@ function GrowthBand() {
                 </div>
             </div>
 
-            {error && <p className="text-destructive m-0 text-sm">{error}</p>}
-            {!growth && !error && <p className="text-muted-foreground m-0 py-6 text-center text-sm">Counting…</p>}
+            {error && <p className="m-0 text-sm text-destructive">{error}</p>}
+            {!growth && !error && <p className="m-0 py-6 text-center text-sm text-muted-foreground">Counting…</p>}
 
             {growth && (
                 <>
-                    <div className="mb-3 grid gap-2 [grid-template-columns:repeat(auto-fit,minmax(160px,1fr))]">
+                    <div className="mb-3 grid [grid-template-columns:repeat(auto-fit,minmax(160px,1fr))] gap-2">
                         {growth.series.map((x) => (
                             <button
                                 key={x.key}
@@ -386,17 +386,23 @@ function GrowthBand() {
                                 onClick={() => setVisible((v) => ({ ...v, [x.key]: !v[x.key] }))}
                                 aria-pressed={visible[x.key]}
                                 className={`cursor-pointer rounded-lg border px-3 py-2 text-left transition-colors ${
-                                    visible[x.key] ? "border-input bg-muted/50" : "border-input/60 bg-transparent opacity-60"
+                                    visible[x.key]
+                                        ? "border-input bg-muted/50"
+                                        : "border-input/60 bg-transparent opacity-60"
                                 }`}
                                 title={visible[x.key] ? "Hide this line" : "Show this line"}
                                 data-testid={`growth-${x.key}`}
                             >
-                                <div className={`flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase ${GROWTH_TONE[x.key] ?? "text-forest"}`}>
+                                <div
+                                    className={`flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase ${GROWTH_TONE[x.key] ?? "text-forest"}`}
+                                >
                                     <span className="inline-block h-0.5 w-4 bg-current" aria-hidden="true" />
                                     {x.label}
                                 </div>
-                                <div className="text-foreground font-serif text-2xl font-bold tabular-nums">{fmt(x.total)}</div>
-                                <div className="text-muted-foreground text-xs">
+                                <div className="font-serif text-2xl font-bold text-foreground tabular-nums">
+                                    {fmt(x.total)}
+                                </div>
+                                <div className="text-xs text-muted-foreground">
                                     {deltaLabel(x.total, x.prior, growth.range)}
                                     {x.allTime !== null && <> · {fmt(x.allTime)} all time</>}
                                 </div>
@@ -404,7 +410,7 @@ function GrowthBand() {
                         ))}
                     </div>
                     {n < 2 || shown.length === 0 ? (
-                        <p className="text-muted-foreground m-0 py-4 text-center text-sm">
+                        <p className="m-0 py-4 text-center text-sm text-muted-foreground">
                             {shown.length === 0 ? "Pick a line above." : "Not enough days for a line."}
                         </p>
                     ) : (
@@ -428,12 +434,14 @@ function GrowthBand() {
                                     />
                                 ))}
                             </svg>
-                            <div className="text-muted-foreground mt-1 flex justify-between text-xs tabular-nums">
+                            <div className="mt-1 flex justify-between text-xs text-muted-foreground tabular-nums">
                                 {ticks.map((i) => (
                                     <span key={i}>{shortDay(growth.days[i])}</span>
                                 ))}
                             </div>
-                            <p className="text-muted-foreground m-0 mt-1 text-xs">Peak day {fmt(peak)}. UTC days; deleted members and horses are not counted.</p>
+                            <p className="m-0 mt-1 text-xs text-muted-foreground">
+                                Peak day {fmt(peak)}. UTC days; deleted members and horses are not counted.
+                            </p>
                         </>
                     )}
                 </>
@@ -450,7 +458,7 @@ function GrowthBand() {
 function ActivityChart({ days }: { days: ActivityDay[] }) {
     if (days.length < 2) {
         return (
-            <div className="border-input bg-card text-muted-foreground rounded-lg border px-4 py-8 text-center text-sm">
+            <div className="rounded-lg border border-input bg-card px-4 py-8 text-center text-sm text-muted-foreground">
                 Not enough days recorded yet — the line appears once there are two.
             </div>
         );
@@ -471,21 +479,18 @@ function ActivityChart({ days }: { days: ActivityDay[] }) {
     const last = days[days.length - 1]?.day ?? "";
 
     return (
-        <div className="border-input bg-card rounded-lg border px-4 py-3">
+        <div className="rounded-lg border border-input bg-card px-4 py-3">
             <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
-                <div className="text-muted-foreground text-xs font-semibold tracking-wide uppercase">
+                <div className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
                     Daily active viewers
                 </div>
                 <div className="flex items-center gap-3 text-xs">
-                    <span className="text-forest flex items-center gap-1">
-                        <span className="bg-forest inline-block h-0.5 w-4" aria-hidden="true" />
+                    <span className="flex items-center gap-1 text-forest">
+                        <span className="inline-block h-0.5 w-4 bg-forest" aria-hidden="true" />
                         Members
                     </span>
-                    <span className="text-muted-foreground flex items-center gap-1">
-                        <span
-                            className="bg-muted-foreground inline-block h-0.5 w-4 opacity-60"
-                            aria-hidden="true"
-                        />
+                    <span className="flex items-center gap-1 text-muted-foreground">
+                        <span className="inline-block h-0.5 w-4 bg-muted-foreground opacity-60" aria-hidden="true" />
                         Signed out
                     </span>
                 </div>
@@ -517,7 +522,7 @@ function ActivityChart({ days }: { days: ActivityDay[] }) {
                 />
             </svg>
 
-            <div className="text-muted-foreground mt-1 flex justify-between text-xs tabular-nums">
+            <div className="mt-1 flex justify-between text-xs text-muted-foreground tabular-nums">
                 <span>{first}</span>
                 <span>peak {fmt(peak)}</span>
                 <span>{last}</span>
@@ -537,7 +542,7 @@ function TopList({ type, rows }: { type: EntityType; rows: TopObject[] }) {
                 {rows.map((r) => (
                     <li
                         key={`${r.entityType}:${r.entityId}`}
-                        className="border-input bg-card flex flex-wrap items-center justify-between gap-3 rounded-lg border px-4 py-2.5"
+                        className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-input bg-card px-4 py-2.5"
                     >
                         <span className="min-w-0 truncate text-sm">
                             {r.href ? (
@@ -548,9 +553,8 @@ function TopList({ type, rows }: { type: EntityType; rows: TopObject[] }) {
                                 r.name
                             )}
                         </span>
-                        <span className="text-muted-foreground shrink-0 text-xs tabular-nums">
-                            <strong className="text-foreground">{fmt(r.views)}</strong> views ·{" "}
-                            {fmt(r.uniques)} viewers
+                        <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
+                            <strong className="text-foreground">{fmt(r.views)}</strong> views · {fmt(r.uniques)} viewers
                         </span>
                     </li>
                 ))}
@@ -591,7 +595,7 @@ export default function AdminInsightsTab() {
     }, []);
 
     const vercelLink = (
-        <p className="text-muted-foreground mt-2 mb-0 text-xs">
+        <p className="mt-2 mb-0 text-xs text-muted-foreground">
             Page-level traffic, referrers and countries live in{" "}
             <a
                 href="https://vercel.com/dashboard/analytics"
@@ -607,7 +611,7 @@ export default function AdminInsightsTab() {
 
     if (loading) {
         return (
-            <div className="border-input bg-card text-muted-foreground rounded-lg border px-4 py-3 text-sm">
+            <div className="rounded-lg border border-input bg-card px-4 py-3 text-sm text-muted-foreground">
                 Reading the rollups…
             </div>
         );
@@ -622,12 +626,12 @@ export default function AdminInsightsTab() {
                 <RevenueBand />
                 <RegistryBand />
                 <HerdBand />
-                <div className="border-input bg-card rounded-lg border px-8 py-12 text-center">
+                <div className="rounded-lg border border-input bg-card px-8 py-12 text-center">
                     <div className="mb-3 text-4xl">📈</div>
                     <h2 className="m-0 text-base font-bold">Insights unavailable</h2>
-                    <p className="text-muted-foreground m-0 mt-1 text-sm">
-                        {error ?? "The rollups could not be read this load."} Nothing is broken by
-                        this — it is a read-only view.
+                    <p className="m-0 mt-1 text-sm text-muted-foreground">
+                        {error ?? "The rollups could not be read this load."} Nothing is broken by this — it is a
+                        read-only view.
                     </p>
                     {vercelLink}
                 </div>
@@ -642,17 +646,16 @@ export default function AdminInsightsTab() {
                 <RevenueBand />
                 <RegistryBand />
                 <HerdBand />
-                <div className="border-input bg-card rounded-lg border px-8 py-12 text-center">
+                <div className="rounded-lg border border-input bg-card px-8 py-12 text-center">
                     <div className="mb-3 text-4xl">📈</div>
                     <h2 className="m-0 text-base font-bold">Waiting on migration 175</h2>
-                    <p className="text-muted-foreground m-0 mt-1 text-sm">
+                    <p className="m-0 mt-1 text-sm text-muted-foreground">
                         The view beacon is live in the app but has nowhere to write yet. Paste{" "}
-                        <code>supabase/migrations/175_object_metrics.sql</code> and numbers start
-                        accumulating from that moment — there is no backfill, because nothing was
-                        recorded before it.
+                        <code>supabase/migrations/175_object_metrics.sql</code> and numbers start accumulating from that
+                        moment — there is no backfill, because nothing was recorded before it.
                     </p>
                 </div>
-                <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(150px,1fr))]">
+                <div className="grid [grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] gap-3">
                     <Stat value="—" label="Members today" />
                     <Stat value="—" label="Signed out today" />
                     <Stat value="—" label="Views today" />
@@ -679,23 +682,15 @@ export default function AdminInsightsTab() {
             <GrowthBand />
             {/* Band 1 — what the place earns, and who is actually here */}
             <RevenueBand />
-                <RegistryBand />
-                <HerdBand />
+            <RegistryBand />
+            <HerdBand />
 
             {/* Band 2 — how busy is the place */}
-            <div className="grid gap-3 [grid-template-columns:repeat(auto-fit,minmax(150px,1fr))]">
+            <div className="grid [grid-template-columns:repeat(auto-fit,minmax(150px,1fr))] gap-3">
                 <Stat value={fmt(today?.memberDau ?? 0)} label="Members today" sub="UTC day" />
-                <Stat
-                    value={fmt(today?.anonDau ?? 0)}
-                    label="Signed out today"
-                    sub="IP + agent, best effort"
-                />
+                <Stat value={fmt(today?.anonDau ?? 0)} label="Signed out today" sub="IP + agent, best effort" />
                 <Stat value={fmt(today?.views ?? 0)} label="Views today" sub="Tracked page loads" />
-                <Stat
-                    value={fmt(memberDays)}
-                    label="7-day member-days"
-                    sub="Sum of daily actives, not unique people"
-                />
+                <Stat value={fmt(memberDays)} label="7-day member-days" sub="Sum of daily actives, not unique people" />
                 <Stat
                     value={fmt(weekViews)}
                     label={`${insights.windowDays}-day object views`}
@@ -707,10 +702,8 @@ export default function AdminInsightsTab() {
 
             {/* Band 3 — where the attention went */}
             <div>
-                <h3 className="mt-0 mb-2 text-base font-bold">
-                    Last {insights.windowDays} days by object type
-                </h3>
-                <div className="grid gap-2 [grid-template-columns:repeat(auto-fit,minmax(210px,1fr))]">
+                <h3 className="mt-0 mb-2 text-base font-bold">Last {insights.windowDays} days by object type</h3>
+                <div className="grid [grid-template-columns:repeat(auto-fit,minmax(210px,1fr))] gap-2">
                     {ENTITY_TYPES.map((type) => {
                         const row = insights.totals.find((t) => t.entityType === type);
                         return (
@@ -727,7 +720,7 @@ export default function AdminInsightsTab() {
 
             {/* Band 4 — the leaderboards */}
             {insights.top.length === 0 ? (
-                <div className="border-input bg-card text-muted-foreground rounded-lg border px-4 py-8 text-center text-sm">
+                <div className="rounded-lg border border-input bg-card px-4 py-8 text-center text-sm text-muted-foreground">
                     Nothing viewed in the last {insights.windowDays} days yet.
                 </div>
             ) : (
@@ -739,10 +732,9 @@ export default function AdminInsightsTab() {
             )}
 
             <div>
-                <p className="text-muted-foreground m-0 text-xs">
-                    Counted per object, never per person: the daily dedupe token is a salted hash
-                    that the nightly cleanup deletes, so there is no record of who viewed what to
-                    query — here or anywhere.
+                <p className="m-0 text-xs text-muted-foreground">
+                    Counted per object, never per person: the daily dedupe token is a salted hash that the nightly
+                    cleanup deletes, so there is no record of who viewed what to query — here or anywhere.
                 </p>
                 {vercelLink}
             </div>

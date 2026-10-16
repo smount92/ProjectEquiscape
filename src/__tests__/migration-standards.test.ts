@@ -13,7 +13,9 @@ import { describe, expect, it } from "vitest";
 const DIR = path.join(process.cwd(), "supabase", "migrations");
 const FIRST_CHECKED = 233;
 
-const files = readdirSync(DIR).filter((f) => f.endsWith(".sql")).sort();
+const files = readdirSync(DIR)
+    .filter((f) => f.endsWith(".sql"))
+    .sort();
 const numberOf = (f: string) => Number(f.slice(0, 3));
 const checked = files.filter((f) => numberOf(f) >= FIRST_CHECKED);
 const adminSource = readFileSync(path.join(process.cwd(), "src", "app", "actions", "admin.ts"), "utf8");
@@ -33,14 +35,19 @@ export function migrationProblems(name: string, sql: string): string[] {
         problems.push(`header must name the migration number ${n} in its first lines`);
     for (const m of code.matchAll(/\bCREATE\s+(?:UNLOGGED\s+)?TABLE\s+(?!IF\s+NOT\s+EXISTS)([\w."]+)/gi))
         problems.push(`CREATE TABLE ${m[1]} needs IF NOT EXISTS`);
-    for (const m of code.matchAll(/\bCREATE\s+(?:UNIQUE\s+)?INDEX\s+(?:CONCURRENTLY\s+)?(?!IF\s+NOT\s+EXISTS)([\w."]+)/gi))
+    for (const m of code.matchAll(
+        /\bCREATE\s+(?:UNIQUE\s+)?INDEX\s+(?:CONCURRENTLY\s+)?(?!IF\s+NOT\s+EXISTS)([\w."]+)/gi,
+    ))
         problems.push(`CREATE INDEX ${m[1]} needs IF NOT EXISTS`);
     for (const m of code.matchAll(/\bCREATE\s+(?!OR\s+REPLACE)FUNCTION\s+([\w."]+)/gi))
         problems.push(`CREATE FUNCTION ${m[1]} needs OR REPLACE`);
     for (const m of code.matchAll(/\bADD\s+COLUMN\s+(?!IF\s+NOT\s+EXISTS)([\w"]+)/gi))
         problems.push(`ADD COLUMN ${m[1]} needs IF NOT EXISTS`);
     for (const m of code.matchAll(/\bCREATE\s+POLICY\s+("[^"]+"|\w+)\s+ON\s+([\w."]+)/gi)) {
-        const drop = new RegExp(`DROP\\s+POLICY\\s+IF\\s+EXISTS\\s+${m[1].replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s+ON\\s+${m[2].replace(/\./g, "\\.")}`, "i");
+        const drop = new RegExp(
+            `DROP\\s+POLICY\\s+IF\\s+EXISTS\\s+${m[1].replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s+ON\\s+${m[2].replace(/\./g, "\\.")}`,
+            "i",
+        );
         if (!drop.test(code)) problems.push(`policy ${m[1]} needs a DROP POLICY IF EXISTS first`);
     }
     for (const m of code.matchAll(/\bCREATE\s+(?:OR\s+REPLACE\s+)?TRIGGER\s+(\w+)/gi)) {

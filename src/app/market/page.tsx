@@ -45,12 +45,11 @@ export const metadata: Metadata = {
 
 function SellerPointer() {
     return (
-        <div className="border-input bg-card/50 rounded-lg border p-6 backdrop-blur-sm">
+        <div className="rounded-lg border border-input bg-card/50 p-6 backdrop-blur-sm">
             <h3 className="mb-1 font-serif text-lg font-bold">Sell from your stable</h3>
-            <p className="text-secondary-foreground mb-4 text-sm">
-                Open a horse in your stable, choose <strong>Edit</strong>, and set its trade status to
-                “For Sale” or “Open to Offers”. Its passport becomes the listing — record, condition and
-                all — and it appears here.
+            <p className="mb-4 text-sm text-secondary-foreground">
+                Open a horse in your stable, choose <strong>Edit</strong>, and set its trade status to “For Sale” or
+                “Open to Offers”. Its passport becomes the listing — record, condition and all — and it appears here.
             </p>
             <Button asChild variant="outline" size="wide">
                 <Link href="/dashboard">Open your stable →</Link>
@@ -61,11 +60,11 @@ function SellerPointer() {
 
 function WantListPointer() {
     return (
-        <div className="border-input bg-card/50 rounded-lg border p-6 backdrop-blur-sm">
+        <div className="rounded-lg border border-input bg-card/50 p-6 backdrop-blur-sm">
             <h3 className="mb-1 font-serif text-lg font-bold">Hunting a specific model?</h3>
-            <p className="text-secondary-foreground mb-4 text-sm">
-                Add it to your Want List and the Matchmaker tells you the moment a collector lists one —
-                no refreshing this page every morning.
+            <p className="mb-4 text-sm text-secondary-foreground">
+                Add it to your Want List and the Matchmaker tells you the moment a collector lists one — no refreshing
+                this page every morning.
             </p>
             <Button asChild variant="outline" size="wide">
                 <Link href="/wishlist">Open your Want List →</Link>
@@ -76,13 +75,13 @@ function WantListPointer() {
 
 function BlueBookPointer() {
     return (
-        <div className="border-input bg-card/50 rounded-lg border p-6 backdrop-blur-sm">
+        <div className="rounded-lg border border-input bg-card/50 p-6 backdrop-blur-sm">
             <h3 className="mb-1 font-serif text-lg font-bold">📈 Blue Book price guide</h3>
-            <p className="text-secondary-foreground mb-4 text-sm">
-                What did this mold actually sell for? Average, median and range from completed sales
-                recorded on this site — the guide spans the whole catalog, and every model says how many
-                sales its figures rest on. Where there are none yet, current eBay asking prices are shown
-                and labelled as asks. Free, and never behind a paywall.
+            <p className="mb-4 text-sm text-secondary-foreground">
+                What did this mold actually sell for? Average, median and range from completed sales recorded on this
+                site — the guide spans the whole catalog, and every model says how many sales its figures rest on. Where
+                there are none yet, current eBay asking prices are shown and labelled as asks. Free, and never behind a
+                paywall.
             </p>
             <Button asChild variant="outline" size="wide">
                 <Link href="/market/guide">Open the Blue Book →</Link>
@@ -91,16 +90,14 @@ function BlueBookPointer() {
     );
 }
 
-export default async function MarketplacePage({
-    searchParams,
-}: {
-    searchParams: Promise<RawSearchParams>;
-}) {
+export default async function MarketplacePage({ searchParams }: { searchParams: Promise<RawSearchParams> }) {
     const params = await searchParams;
     const filters = parseListingFilters(params);
     const page = parseListingPage(params);
-    const { gated, listings, total, totalListings, viewerIsAuthenticated, countries } =
-        await getMarketListingsPage(filters, page);
+    const { gated, listings, total, totalListings, viewerIsAuthenticated, countries } = await getMarketListingsPage(
+        filters,
+        page,
+    );
 
     const activeCount = countActiveListingFilters(filters);
     const totalPages = Math.max(1, Math.ceil(total / LISTINGS_PAGE_SIZE));
@@ -117,10 +114,10 @@ export default async function MarketplacePage({
 
             <div className="mx-auto max-w-[1100px]">
                 {guideHandoff && (
-                    <div className="border-input bg-card/60 mb-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border p-4 text-sm backdrop-blur-sm">
+                    <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-input bg-card/60 p-4 text-sm backdrop-blur-sm">
                         <span className="text-secondary-foreground">
-                            📈 Looking for sale-price data? The Blue Book moved to its own page — your
-                            filters came with it.
+                            📈 Looking for sale-price data? The Blue Book moved to its own page — your filters came with
+                            it.
                         </span>
                         <Button asChild variant="outline" size="sm">
                             <Link href={guideHandoff}>Open the Blue Book →</Link>
@@ -133,15 +130,15 @@ export default async function MarketplacePage({
                        records without a session (see listings.ts) —
                        show the honest teaser rather than a grid of
                        anonymous, record-less photos. */
-                    <div className="border-input bg-card rounded-lg border p-10 text-center shadow-md">
+                    <div className="rounded-lg border border-input bg-card p-10 text-center shadow-md">
                         <div className="mb-4 text-[3rem]">🏷️</div>
                         <h2 className="mb-2 font-serif text-2xl font-bold">
                             Model horses for sale, priced by their record
                         </h2>
-                        <p className="text-secondary-foreground mx-auto mb-6 max-w-[520px]">
-                            Every listing on Model Horse Hub carries the horse&rsquo;s passport: verified
-                            show records, qualification cards, condition grade and ownership history.
-                            Create a free account to browse the listings.
+                        <p className="mx-auto mb-6 max-w-[520px] text-secondary-foreground">
+                            Every listing on Model Horse Hub carries the horse&rsquo;s passport: verified show records,
+                            qualification cards, condition grade and ownership history. Create a free account to browse
+                            the listings.
                         </p>
                         <div className="flex flex-wrap items-center justify-center gap-3">
                             <Button asChild size="wide">
@@ -159,12 +156,12 @@ export default async function MarketplacePage({
                         </Suspense>
 
                         {listings.length === 0 ? (
-                            <div className="border-input bg-card mt-6 rounded-lg border p-12 text-center shadow-md">
+                            <div className="mt-6 rounded-lg border border-input bg-card p-12 text-center shadow-md">
                                 <div className="mb-4 text-[3rem]">🐎</div>
                                 <h3 className="mb-2 font-serif text-xl font-bold">
                                     {activeCount > 0 ? "No listings match those filters" : "No horses listed right now"}
                                 </h3>
-                                <p className="text-secondary-foreground mx-auto max-w-[440px]">
+                                <p className="mx-auto max-w-[440px] text-secondary-foreground">
                                     {activeCount > 0
                                         ? "Try widening the price band or clearing a filter — the marketplace is young and moves fast."
                                         : "The marketplace fills up as collectors set horses For Sale from their stables. In the meantime, the Blue Book has the sale history."}
@@ -183,7 +180,7 @@ export default async function MarketplacePage({
                         ) : (
                             <>
                                 <div className="mt-6 mb-4">
-                                    <span className="text-muted-foreground text-sm">
+                                    <span className="text-sm text-muted-foreground">
                                         {total.toLocaleString()} listing{total === 1 ? "" : "s"}
                                         {activeCount > 0 ? " matching your filters" : ""}
                                     </span>
@@ -200,7 +197,7 @@ export default async function MarketplacePage({
                                 </div>
 
                                 {totalPages > 1 && (
-                                    <div className="border-input mt-8 flex flex-wrap items-center justify-between gap-2 border-t pt-6">
+                                    <div className="mt-8 flex flex-wrap items-center justify-between gap-2 border-t border-input pt-6">
                                         {page > 1 ? (
                                             <Button asChild variant="outline" size="wide">
                                                 <Link href={buildListingHref(filters, page - 1)}>← Previous</Link>
@@ -210,7 +207,7 @@ export default async function MarketplacePage({
                                                 ← Previous
                                             </Button>
                                         )}
-                                        <span className="text-muted-foreground text-sm">
+                                        <span className="text-sm text-muted-foreground">
                                             Page {page} of {totalPages}
                                         </span>
                                         {page < totalPages ? (
@@ -228,14 +225,14 @@ export default async function MarketplacePage({
                         )}
 
                         {!viewerIsAuthenticated && (
-                            <div className="border-input bg-card/60 mt-10 flex flex-wrap items-center justify-between gap-4 rounded-lg border p-6 backdrop-blur-sm">
+                            <div className="mt-10 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-input bg-card/60 p-6 backdrop-blur-sm">
                                 <div>
                                     <h3 className="font-serif text-lg font-bold">
                                         Message a seller, save a favourite, get matched
                                     </h3>
-                                    <p className="text-secondary-foreground text-sm">
-                                        Browsing is open to everyone. A free account adds the Want List
-                                        matchmaker and lets you contact collectors directly.
+                                    <p className="text-sm text-secondary-foreground">
+                                        Browsing is open to everyone. A free account adds the Want List matchmaker and
+                                        lets you contact collectors directly.
                                     </p>
                                 </div>
                                 <Button asChild size="wide">
@@ -254,12 +251,11 @@ export default async function MarketplacePage({
                     <BlueBookPointer />
                 </div>
 
-                <div className="border-input bg-card/50 mt-6 rounded-lg border p-6 text-xs backdrop-blur-sm">
+                <div className="mt-6 rounded-lg border border-input bg-card/50 p-6 text-xs backdrop-blur-sm">
                     <p>
-                        🤝 Model Horse Hub is a discovery marketplace: listings link to the horse&rsquo;s
-                        passport and buyers and sellers arrange the sale themselves. We never take a cut,
-                        and trust features — verified show records, condition, ownership history — are
-                        free for everyone, always.
+                        🤝 Model Horse Hub is a discovery marketplace: listings link to the horse&rsquo;s passport and
+                        buyers and sellers arrange the sale themselves. We never take a cut, and trust features —
+                        verified show records, condition, ownership history — are free for everyone, always.
                     </p>
                 </div>
             </div>

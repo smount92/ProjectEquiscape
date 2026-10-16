@@ -30,7 +30,7 @@ export async function GET() {
       catalog_items:catalog_id(title, maker, item_type, attributes),
       user_collections(name),
       financial_vault(purchase_price, estimated_current_value, insurance_notes${withSets ? ", purchase_group_id, purchase_group_label" : ""})
-    `
+    `,
             )
             .eq("owner_id", user.id)
             .is("deleted_at", null)
@@ -41,10 +41,7 @@ export async function GET() {
     const { data: rawHorses, error } = horsesResult;
 
     if (error) {
-        return NextResponse.json(
-            { error: "Failed to fetch data" },
-            { status: 500 }
-        );
+        return NextResponse.json({ error: "Failed to fetch data" }, { status: 500 });
     }
 
     const horses = rawHorses ?? [];
@@ -55,9 +52,7 @@ export async function GET() {
         const g = h.financial_vault?.purchase_group_id;
         if (g) setSizes.set(g, (setSizes.get(g) ?? 0) + 1);
     }
-    const horseNameById = new Map(
-        horses.map((h) => [h.id as string, h.custom_name as string])
-    );
+    const horseNameById = new Map(horses.map((h) => [h.id as string, h.custom_name as string]));
 
     // Fetch Hoofprint timeline for all of the user's horses (view already
     // UNIONs creation/transfer/condition/show/customization/note events —
@@ -67,7 +62,7 @@ export async function GET() {
         const { data } = await supabase
             .from("v_horse_hoofprint")
             .select(
-                "source_id, horse_id, event_type, title, description, event_date, metadata, created_at, source_table"
+                "source_id, horse_id, event_type, title, description, event_date, metadata, created_at, source_table",
             )
             .in("horse_id", horseIds)
             .order("horse_id", { ascending: true })
@@ -86,7 +81,7 @@ export async function GET() {
       shows:show_id(title),
       show_classes:class_id(name),
       user_horses:horse_id(custom_name)
-    `
+    `,
         )
         .or(`current_owner_id.eq.${user.id},earned_by_owner_id.eq.${user.id}`)
         .order("issued_at", { ascending: false });
@@ -133,8 +128,18 @@ export async function GET() {
             escapeCSV(horse.catalog_items?.title),
             escapeCSV(horse.catalog_items?.maker),
             escapeCSV(horse.catalog_items?.item_type === "plastic_release" ? horse.catalog_items.title : ""),
-            escapeCSV((horse.catalog_items?.attributes as Record<string, unknown> | null)?.model_number as string | null | undefined),
-            escapeCSV((horse.catalog_items?.attributes as Record<string, unknown> | null)?.color_description as string | null | undefined),
+            escapeCSV(
+                (horse.catalog_items?.attributes as Record<string, unknown> | null)?.model_number as
+                    | string
+                    | null
+                    | undefined,
+            ),
+            escapeCSV(
+                (horse.catalog_items?.attributes as Record<string, unknown> | null)?.color_description as
+                    | string
+                    | null
+                    | undefined,
+            ),
             escapeCSV(horse.condition_grade),
             escapeCSV(horse.finish_type),
             escapeCSV(horse.sculptor),
@@ -143,7 +148,9 @@ export async function GET() {
             horse.listing_price ? formatMoney(Number(horse.listing_price), currencySymbol, { decimals: 2 }) : "",
             vault?.purchase_price
                 ? formatMoney(
-                      vault.purchase_group_id ? shareOf(Number(vault.purchase_price), setSize) : Number(vault.purchase_price),
+                      vault.purchase_group_id
+                          ? shareOf(Number(vault.purchase_price), setSize)
+                          : Number(vault.purchase_price),
                       currencySymbol,
                       { decimals: 2 },
                   )
@@ -158,7 +165,7 @@ export async function GET() {
                 : "",
             escapeCSV(vault?.insurance_notes),
             new Date(horse.created_at).toLocaleDateString("en-US"),
-            escapeCSV((horse as Record<string, unknown>).asset_category as string || "model"),
+            escapeCSV(((horse as Record<string, unknown>).asset_category as string) || "model"),
         ].join(",");
     });
 
@@ -173,37 +180,32 @@ export async function GET() {
         "Source",
         "Recorded At",
     ];
-    const timelineRows = (rawTimeline as {
-        horse_id: string | null;
-        event_type: string | null;
-        title: string | null;
-        description: string | null;
-        event_date: string | null;
-        metadata: unknown;
-        created_at: string | null;
-        source_table: string | null;
-    }[]).map((e) => [
-        escapeCSV(horseNameById.get(e.horse_id || "")),
-        escapeCSV(e.event_type),
-        escapeCSV(e.title),
-        escapeCSV(e.description),
-        escapeCSV(e.event_date),
-        escapeCSV(e.metadata ? JSON.stringify(e.metadata) : ""),
-        escapeCSV(e.source_table),
-        e.created_at ? new Date(e.created_at).toLocaleDateString("en-US") : "",
-    ].join(","));
+    const timelineRows = (
+        rawTimeline as {
+            horse_id: string | null;
+            event_type: string | null;
+            title: string | null;
+            description: string | null;
+            event_date: string | null;
+            metadata: unknown;
+            created_at: string | null;
+            source_table: string | null;
+        }[]
+    ).map((e) =>
+        [
+            escapeCSV(horseNameById.get(e.horse_id || "")),
+            escapeCSV(e.event_type),
+            escapeCSV(e.title),
+            escapeCSV(e.description),
+            escapeCSV(e.event_date),
+            escapeCSV(e.metadata ? JSON.stringify(e.metadata) : ""),
+            escapeCSV(e.source_table),
+            e.created_at ? new Date(e.created_at).toLocaleDateString("en-US") : "",
+        ].join(","),
+    );
 
     // -- Qualification Cards section --
-    const cardHeaders = [
-        "Card Code",
-        "Horse",
-        "Show",
-        "Class",
-        "Placing",
-        "Show Year",
-        "Status",
-        "Issued Date",
-    ];
+    const cardHeaders = ["Card Code", "Horse", "Show", "Class", "Placing", "Show Year", "Status", "Issued Date"];
     const cardRows = cards.map((c) => {
         const placing = c.earned_place === 1 ? "1st" : c.earned_place === 2 ? "2nd" : "";
         return [
@@ -227,11 +229,17 @@ export async function GET() {
     const csv =
         bom +
         "# Horses\n" +
-        headers.join(",") + "\n" + rows.join("\n") +
+        headers.join(",") +
+        "\n" +
+        rows.join("\n") +
         "\n\n# Hoofprint Timeline\n" +
-        timelineHeaders.join(",") + "\n" + timelineRows.join("\n") +
+        timelineHeaders.join(",") +
+        "\n" +
+        timelineRows.join("\n") +
         "\n\n# Qualification Cards\n" +
-        cardHeaders.join(",") + "\n" + cardRows.join("\n");
+        cardHeaders.join(",") +
+        "\n" +
+        cardRows.join("\n");
 
     // Return as downloadable CSV
     return new NextResponse(csv, {

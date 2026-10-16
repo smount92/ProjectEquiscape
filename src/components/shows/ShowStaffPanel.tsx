@@ -16,13 +16,7 @@ import type { StaffRole } from "@/lib/shows/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const ROLE_LABELS: Record<StaffRole, string> = {
     host: "Host",
@@ -84,9 +78,7 @@ export default function ShowStaffPanel({ showId, staff, viewerRole }: ShowStaffP
             coiNote: coiFlag && coiNote.trim() ? coiNote.trim() : undefined,
         });
         if (result.success) {
-            setAddedNote(
-                `@${candidate.alias} added as ${ROLE_LABELS[role]} — they've been notified.`,
-            );
+            setAddedNote(`@${candidate.alias} added as ${ROLE_LABELS[role]} — they've been notified.`);
             setAlias("");
             setCandidate(null);
             setCoiFlag(false);
@@ -119,13 +111,8 @@ export default function ShowStaffPanel({ showId, staff, viewerRole }: ShowStaffP
                 </span>
                 <ul className="flex list-none flex-col p-0">
                     {staff.map((member) => (
-                        <li
-                            key={member.userId}
-                            className="flex flex-wrap items-center gap-3 py-2"
-                        >
-                            <span className="text-sm font-semibold text-foreground">
-                                @{member.alias}
-                            </span>
+                        <li key={member.userId} className="flex flex-wrap items-center gap-3 py-2">
+                            <span className="text-sm font-semibold text-foreground">@{member.alias}</span>
                             <Badge variant={member.role === "host" ? "default" : "secondary"}>
                                 {ROLE_LABELS[member.role]}
                             </Badge>
@@ -219,12 +206,7 @@ export default function ShowStaffPanel({ showId, staff, viewerRole }: ShowStaffP
                                 <Button size="sm" disabled={pending} onClick={handleAdd}>
                                     {pending ? "Adding…" : "Add to staff"}
                                 </Button>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    disabled={pending}
-                                    onClick={() => setCandidate(null)}
-                                >
+                                <Button variant="ghost" size="sm" disabled={pending} onClick={() => setCandidate(null)}>
                                     Cancel
                                 </Button>
                             </div>
@@ -241,9 +223,8 @@ export default function ShowStaffPanel({ showId, staff, viewerRole }: ShowStaffP
                         </p>
                     )}
                     <p className="mt-4 text-xs text-muted-foreground">
-                        Co-hosts can edit everything except staff. Stewards record day-of class
-                        statuses and can scratch entries. Judges work their classes in the judge
-                        queue once judging begins.
+                        Co-hosts can edit everything except staff. Stewards record day-of class statuses and can scratch
+                        entries. Judges work their classes in the judge queue once judging begins.
                     </p>
                 </section>
             ) : (

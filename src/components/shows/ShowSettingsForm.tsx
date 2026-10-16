@@ -43,13 +43,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // ── Pure helpers (exported for unit tests) ──
 
@@ -118,10 +112,7 @@ export function localInputToIso(local: string): string | null {
  *  an untouched field must never register as a change). */
 function sameMinute(aIso: string | null, bIso: string | null): boolean {
     if (!aIso || !bIso) return aIso === bIso;
-    return (
-        Math.floor(new Date(aIso).getTime() / 60000) ===
-        Math.floor(new Date(bIso).getTime() / 60000)
-    );
+    return Math.floor(new Date(aIso).getTime() / 60000) === Math.floor(new Date(bIso).getTime() / 60000);
 }
 
 export function initialValues(show: ConsoleShow): SettingsFormValues {
@@ -156,10 +147,7 @@ function textDelta(current: string, initial: string | null): string | null | und
  * Mode/judging only ever enter the patch while the show is a draft
  * (the UI also disables those controls past draft).
  */
-export function buildSettingsPatch(
-    show: ConsoleShow,
-    values: SettingsFormValues,
-): ShowSettingsPatch {
+export function buildSettingsPatch(show: ConsoleShow, values: SettingsFormValues): ShowSettingsPatch {
     const patch: ShowSettingsPatch = {};
 
     const title = values.title.trim();
@@ -210,12 +198,7 @@ export function buildSettingsPatch(
     return patch;
 }
 
-const DATE_KEYS: (keyof ShowSettingsPatch)[] = [
-    "showDate",
-    "entriesOpenAt",
-    "entriesCloseAt",
-    "judgingEndsAt",
-];
+const DATE_KEYS: (keyof ShowSettingsPatch)[] = ["showDate", "entriesOpenAt", "entriesCloseAt", "judgingEndsAt"];
 
 /** Does this patch touch the schedule? (Drives the post-open confirm.) */
 export function patchTouchesDates(patch: ShowSettingsPatch): boolean {
@@ -227,9 +210,7 @@ function viewerZoneLabel(): string | null {
     try {
         const dtf = new Intl.DateTimeFormat("en-US", { timeZoneName: "short" });
         const zone = dtf.resolvedOptions().timeZone;
-        const short = dtf
-            .formatToParts(new Date())
-            .find((p) => p.type === "timeZoneName")?.value;
+        const short = dtf.formatToParts(new Date()).find((p) => p.type === "timeZoneName")?.value;
         return short && zone ? `${short} — ${zone}` : (zone ?? null);
     } catch {
         return null;
@@ -238,15 +219,7 @@ function viewerZoneLabel(): string | null {
 
 // ── Presentational bits ──
 
-function Field({
-    label,
-    hint,
-    children,
-}: {
-    label: string;
-    hint?: string;
-    children: React.ReactNode;
-}) {
+function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
     return (
         <label className="flex flex-col gap-1.5">
             <span className="text-sm font-semibold text-foreground">{label}</span>
@@ -279,8 +252,7 @@ export default function ShowSettingsForm({ show }: { show: ConsoleShow }) {
         setValues((prev) => ({ ...prev, [key]: value }));
 
     const isDraft = show.status === "draft";
-    const entriesHaveOpened =
-        SHOW_STATUS_ORDER.indexOf(show.status) >= SHOW_STATUS_ORDER.indexOf("entries_open");
+    const entriesHaveOpened = SHOW_STATUS_ORDER.indexOf(show.status) >= SHOW_STATUS_ORDER.indexOf("entries_open");
 
     const showSavedToast = () => {
         setToast("Settings saved.");
@@ -313,10 +285,8 @@ export default function ShowSettingsForm({ show }: { show: ConsoleShow }) {
         }
 
         // Window sanity against the EFFECTIVE values (patched or stored).
-        const openIso =
-            patch.entriesOpenAt !== undefined ? patch.entriesOpenAt : show.entriesOpenAt;
-        const closeIso =
-            patch.entriesCloseAt !== undefined ? patch.entriesCloseAt : show.entriesCloseAt;
+        const openIso = patch.entriesOpenAt !== undefined ? patch.entriesOpenAt : show.entriesOpenAt;
+        const closeIso = patch.entriesCloseAt !== undefined ? patch.entriesCloseAt : show.entriesCloseAt;
         if (openIso && closeIso && new Date(openIso) >= new Date(closeIso)) {
             setError("Entries must open before they close.");
             return;
@@ -381,10 +351,7 @@ export default function ShowSettingsForm({ show }: { show: ConsoleShow }) {
                                 onValueChange={(v) => set("judging", v as ShowJudging)}
                                 disabled={!isDraft}
                             >
-                                <SelectTrigger
-                                    aria-label="Judging method"
-                                    data-testid="settings-judging"
-                                >
+                                <SelectTrigger aria-label="Judging method" data-testid="settings-judging">
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -437,10 +404,7 @@ export default function ShowSettingsForm({ show }: { show: ConsoleShow }) {
                 <div className="flex flex-col gap-5">
                     {show.mode === "live" && (
                         <div className="grid gap-5 sm:grid-cols-2">
-                            <Field
-                                label="Show date"
-                                hint="A calendar date — it reads the same in every timezone."
-                            >
+                            <Field label="Show date" hint="A calendar date — it reads the same in every timezone.">
                                 <Input
                                     type="date"
                                     value={values.showDate}
@@ -573,9 +537,7 @@ export default function ShowSettingsForm({ show }: { show: ConsoleShow }) {
                 <Button type="submit" disabled={saving} data-testid="settings-save">
                     {saving ? "Saving…" : "Save settings"}
                 </Button>
-                <p className="mt-2 text-xs text-muted-foreground">
-                    Only the fields you changed are saved.
-                </p>
+                <p className="mt-2 text-xs text-muted-foreground">Only the fields you changed are saved.</p>
             </div>
 
             {/* Post-open schedule confirm */}
@@ -589,8 +551,8 @@ export default function ShowSettingsForm({ show }: { show: ConsoleShow }) {
                     <DialogHeader>
                         <DialogTitle>Change the schedule?</DialogTitle>
                         <DialogDescription>
-                            Entries have already opened — entrants will see the change, and the
-                            hourly clock enforces the new time.
+                            Entries have already opened — entrants will see the change, and the hourly clock enforces
+                            the new time.
                         </DialogDescription>
                     </DialogHeader>
                     {error && (

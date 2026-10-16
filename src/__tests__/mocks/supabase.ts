@@ -59,7 +59,11 @@ export function createMockSupabaseClient(overrides: Record<string, unknown> = {}
             from: vi.fn(() => ({
                 upload: vi.fn().mockResolvedValue({ data: { path: "test/path.webp" }, error: null }),
                 remove: vi.fn().mockResolvedValue({ data: [], error: null }),
-                getPublicUrl: vi.fn().mockReturnValue({ data: { publicUrl: "https://test.supabase.co/storage/v1/object/public/horse-images/test/path.webp" } }),
+                getPublicUrl: vi.fn().mockReturnValue({
+                    data: {
+                        publicUrl: "https://test.supabase.co/storage/v1/object/public/horse-images/test/path.webp",
+                    },
+                }),
             })),
         },
         rpc: vi.fn().mockResolvedValue({ data: null, error: null }),

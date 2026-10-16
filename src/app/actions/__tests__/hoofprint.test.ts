@@ -55,7 +55,7 @@ describe("Hoofprint — Transfer & Provenance System", () => {
                 generateTransferCode({
                     horseId: "h1",
                     acquisitionType: "purchase",
-                })
+                }),
             ).rejects.toThrow(AuthError);
         });
 
@@ -205,8 +205,7 @@ describe("Hoofprint — Transfer & Provenance System", () => {
                 data: { user: { id: "owner-1", email: "o@test.com" } },
             });
             // Override the eq to return an error on the last call
-            const eqMock = vi.fn()
-                .mockReturnValueOnce({ data: null, error: { message: "Transfer not found" } });
+            const eqMock = vi.fn().mockReturnValueOnce({ data: null, error: { message: "Transfer not found" } });
             mockClient._mockQuery.update.mockReturnValue({ eq: eqMock });
 
             const result = await cancelTransfer("transfer-1");
@@ -261,7 +260,7 @@ describe("Hoofprint — Transfer & Provenance System", () => {
                     horseId: "h1",
                     eventType: "note",
                     title: "Test Event",
-                })
+                }),
             ).rejects.toThrow(AuthError);
         });
 
@@ -288,7 +287,7 @@ describe("Hoofprint — Transfer & Provenance System", () => {
                     content: "Show Prep\n\nDetailed grooming notes",
                     horse_id: "h1",
                     author_id: "owner-1",
-                })
+                }),
             );
         });
     });
@@ -360,7 +359,7 @@ describe("Hoofprint — Transfer & Provenance System", () => {
                     owner_alias: "HorseCollector42",
                     acquisition_type: "original",
                     notes: "Won at auction",
-                })
+                }),
             );
         });
 

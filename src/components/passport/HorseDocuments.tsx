@@ -16,11 +16,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import {
-    createHorseDocument,
-    deleteHorseDocument,
-    updateHorseDocument,
-} from "@/app/actions/shows-v4";
+import { createHorseDocument, deleteHorseDocument, updateHorseDocument } from "@/app/actions/shows-v4";
 import LinkifiedText from "@/components/LinkifiedText";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,11 +41,7 @@ function asKind(kind: string): DocKind {
     return DOC_KINDS.some((k) => k.value === kind) ? (kind as DocKind) : "other";
 }
 
-export default function HorseDocuments({
-    horseId,
-    documents,
-    isOwner = false,
-}: HorseDocumentsProps) {
+export default function HorseDocuments({ horseId, documents, isOwner = false }: HorseDocumentsProps) {
     const router = useRouter();
     /** null = reading; "new" = composing; otherwise the id being edited. */
     const [editing, setEditing] = useState<string | null>(null);
@@ -107,11 +99,7 @@ export default function HorseDocuments({
     const remove = async (d: HorseDocumentView) => {
         if (busy) return;
         // ON DELETE SET NULL (148): an entry that used it loses its card.
-        if (
-            !window.confirm(
-                `Delete "${d.title}"? Any show entry using it loses its documentation.`,
-            )
-        ) {
+        if (!window.confirm(`Delete "${d.title}"? Any show entry using it loses its documentation.`)) {
             return;
         }
         setBusy(true);
@@ -126,10 +114,7 @@ export default function HorseDocuments({
     };
 
     const form = (
-        <div
-            className="border-input mt-2 flex flex-col gap-2 rounded-md border px-3 py-3"
-            data-testid="document-form"
-        >
+        <div className="mt-2 flex flex-col gap-2 rounded-md border border-input px-3 py-3" data-testid="document-form">
             <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label="Documentation kind">
                 {DOC_KINDS.map((k) => (
                     <button
@@ -140,7 +125,7 @@ export default function HorseDocuments({
                         onClick={() => setKind(k.value)}
                         className={`cursor-pointer rounded-full border px-2.5 py-0.5 text-xs ${
                             kind === k.value
-                                ? "border-forest bg-forest/10 text-forest font-semibold"
+                                ? "border-forest bg-forest/10 font-semibold text-forest"
                                 : "border-input text-muted-foreground"
                         }`}
                     >
@@ -165,7 +150,7 @@ export default function HorseDocuments({
                 aria-label="Documentation body"
             />
             <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="text-muted-foreground text-xs">
+                <span className="text-xs text-muted-foreground">
                     {body.length}/{MAX_DOC_BODY}
                 </span>
                 <span className="flex gap-2">
@@ -187,7 +172,7 @@ export default function HorseDocuments({
 
     return (
         <section
-            className="border-input bg-card mt-6 rounded-2xl border px-5 py-4"
+            className="mt-6 rounded-2xl border border-input bg-card px-5 py-4"
             aria-labelledby="passport-documents-heading"
             id="passport-documents"
         >
@@ -201,16 +186,15 @@ export default function HorseDocuments({
                     </Button>
                 )}
             </div>
-            <p className="text-muted-foreground m-0 mt-1 text-xs">
+            <p className="m-0 mt-1 text-xs text-muted-foreground">
                 {isOwner
                     ? "Breed notes and reference links a judge can check. Attach one when you enter a class — it's offered right in the entry form."
                     : "Breed notes and reference links behind this horse."}
             </p>
 
             {documents.length === 0 && isOwner && editing === null && (
-                <p className="text-muted-foreground m-0 mt-3 text-sm">
-                    No documentation yet — breed standard notes, a registry page, photos of
-                    the real horse.
+                <p className="m-0 mt-3 text-sm text-muted-foreground">
+                    No documentation yet — breed standard notes, a registry page, photos of the real horse.
                 </p>
             )}
 
@@ -220,21 +204,16 @@ export default function HorseDocuments({
                         {editing === d.id ? (
                             form
                         ) : (
-                            <details className="border-input rounded-md border px-3 py-2">
+                            <details className="rounded-md border border-input px-3 py-2">
                                 <summary className="cursor-pointer text-sm font-medium">
                                     {DOC_KIND_LABELS[d.kind] ?? "Documentation"}: {d.title}
                                 </summary>
-                                <p className="text-muted-foreground mt-2 text-sm whitespace-pre-wrap">
+                                <p className="mt-2 text-sm whitespace-pre-wrap text-muted-foreground">
                                     <LinkifiedText text={d.bodyMd} />
                                 </p>
                                 {isOwner && editing === null && (
                                     <div className="mt-2 flex gap-2">
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => startEdit(d)}
-                                            disabled={busy}
-                                        >
+                                        <Button variant="ghost" size="sm" onClick={() => startEdit(d)} disabled={busy}>
                                             Edit
                                         </Button>
                                         <Button

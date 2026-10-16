@@ -42,7 +42,7 @@ export default function ThreadActions({
     return (
         <div className="relative">
             <button
-                className="border-input bg-card text-muted-foreground hover:text-foreground flex h-[32px] w-[32px] items-center justify-center rounded-full border transition-all"
+                className="flex h-[32px] w-[32px] items-center justify-center rounded-full border border-input bg-card text-muted-foreground transition-all hover:text-foreground"
                 onClick={() => setOpen((v) => !v)}
                 aria-expanded={open}
                 aria-label="Thread options"
@@ -52,17 +52,11 @@ export default function ThreadActions({
                 ⋯
             </button>
             {open && (
-                <div className="border-input bg-card absolute right-0 z-20 mt-1 w-52 rounded-lg border p-1 shadow-md">
-                    <MenuItem
-                        onClick={() => run(() => setThreadMuted(conversationId, !muted))}
-                        disabled={busy}
-                    >
+                <div className="absolute right-0 z-20 mt-1 w-52 rounded-lg border border-input bg-card p-1 shadow-md">
+                    <MenuItem onClick={() => run(() => setThreadMuted(conversationId, !muted))} disabled={busy}>
                         {muted ? "🔔 Unmute this thread" : "🔕 Mute this thread"}
                     </MenuItem>
-                    <MenuItem
-                        onClick={() => run(() => setThreadArchived(conversationId, !archived))}
-                        disabled={busy}
-                    >
+                    <MenuItem onClick={() => run(() => setThreadArchived(conversationId, !archived))} disabled={busy}>
                         {archived ? "📥 Move back to inbox" : "🗄️ Archive"}
                     </MenuItem>
                 </div>
@@ -82,7 +76,7 @@ function MenuItem({
 }) {
     return (
         <button
-            className="hover:bg-muted text-foreground block w-full rounded-md px-3 py-2 text-left text-sm transition-colors disabled:opacity-50"
+            className="block w-full rounded-md px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-muted disabled:opacity-50"
             onClick={onClick}
             disabled={disabled}
         >

@@ -40,7 +40,14 @@ export default function CopyClasslistPicker({
     return (
         <div className="mt-2 flex w-full max-w-2xl flex-col items-center gap-2 border-t border-dashed border-input pt-4">
             {sources === null ? (
-                <Button type="button" variant="outline" size="sm" onClick={openPicker} disabled={loading || pending} id="copy-classlist-open">
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={openPicker}
+                    disabled={loading || pending}
+                    id="copy-classlist-open"
+                >
                     {loading ? "Looking up your shows…" : "Copy the classlist from one of my shows"}
                 </Button>
             ) : sources.length === 0 ? (

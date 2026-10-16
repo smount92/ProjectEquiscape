@@ -32,8 +32,7 @@ export default function WorkbenchLedger({
     commission: Commission;
     updates: CommissionUpdate[];
 }) {
-    const statusDate = (s: string): string | null =>
-        updates.find((u) => u.newStatus === s)?.createdAt ?? null;
+    const statusDate = (s: string): string | null => updates.find((u) => u.newStatus === s)?.createdAt ?? null;
 
     const ticks: Tick[] = [];
     ticks.push({
@@ -71,30 +70,27 @@ export default function WorkbenchLedger({
     if (!commission.acceptedAt && ticks.every((t) => !t.done)) return null;
 
     return (
-        <div className="bg-card border-input rounded-lg border p-5 shadow-md">
+        <div className="rounded-lg border border-input bg-card p-5 shadow-md">
             <h2 className="m-0 mb-3 font-serif text-lg font-bold">🤝 The handshake</h2>
             <ol className="m-0 grid list-none gap-1.5 p-0">
                 {ticks.map((t, i) => (
                     <li key={i} className="flex flex-wrap items-baseline gap-x-2 text-sm">
-                        <span
-                            aria-hidden="true"
-                            className={t.done ? "text-forest font-bold" : "text-muted-foreground"}
-                        >
+                        <span aria-hidden="true" className={t.done ? "font-bold text-forest" : "text-muted-foreground"}>
                             {t.done ? "✓" : "○"}
                         </span>
-                        <span className={t.done ? "text-foreground font-medium" : "text-muted-foreground"}>
+                        <span className={t.done ? "font-medium text-foreground" : "text-muted-foreground"}>
                             {t.label}
                         </span>
-                        <span className="text-muted-foreground text-xs">
+                        <span className="text-xs text-muted-foreground">
                             {t.done ? `${t.by} · ${fmt(t.at)}` : `awaiting ${t.by}`}
                         </span>
                     </li>
                 ))}
             </ol>
             {commission.termsSnapshot && (
-                <p className="text-muted-foreground mt-3 mb-0 text-xs">
-                    The full terms were frozen when both sides agreed — nothing above can be
-                    quietly edited, including by us.
+                <p className="mt-3 mb-0 text-xs text-muted-foreground">
+                    The full terms were frozen when both sides agreed — nothing above can be quietly edited, including
+                    by us.
                 </p>
             )}
         </div>

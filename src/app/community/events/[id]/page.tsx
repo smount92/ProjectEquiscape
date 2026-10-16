@@ -28,11 +28,7 @@ import { Button } from "@/components/ui/button";
  * and placings have always been served from (LegacyShowPage).
  */
 
-function formatWhen(event: {
-    startsAt: string;
-    endsAt: string | null;
-    isAllDay: boolean;
-}): string {
+function formatWhen(event: { startsAt: string; endsAt: string | null; isAllDay: boolean }): string {
     const start = new Date(event.startsAt);
     if (Number.isNaN(start.getTime())) return "Date TBD";
 
@@ -110,9 +106,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
         : start.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
     const dayLabel = Number.isNaN(start.getTime()) ? "?" : String(start.getDate());
 
-    const where = event.isVirtual
-        ? "Online"
-        : event.locationName || event.region || "Location to be announced";
+    const where = event.isVirtual ? "Online" : event.locationName || event.region || "Location to be announced";
 
     return (
         // frameless: every section below is its own ledger card, so the
@@ -148,22 +142,17 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                             <span className="font-serif text-[0.7rem] font-bold tracking-[0.14em] text-forest uppercase">
                                 {monthLabel}
                             </span>
-                            <span className="font-serif text-2xl leading-none font-bold tabular-nums text-foreground">
+                            <span className="font-serif text-2xl leading-none font-bold text-foreground tabular-nums">
                                 {dayLabel}
                             </span>
                         </div>
 
                         <div className="min-w-0 flex-1">
-                            <p className="m-0 font-serif text-[1.05rem] font-bold">
-                                {formatWhen(event)}
-                            </p>
-                            <p className="text-secondary-foreground m-0 mt-1 text-sm">
+                            <p className="m-0 font-serif text-[1.05rem] font-bold">{formatWhen(event)}</p>
+                            <p className="m-0 mt-1 text-sm text-secondary-foreground">
                                 {where}
                                 {event.locationAddress && !event.isVirtual && (
-                                    <span className="text-muted-foreground">
-                                        {" "}
-                                        — {event.locationAddress}
-                                    </span>
+                                    <span className="text-muted-foreground"> — {event.locationAddress}</span>
                                 )}
                             </p>
                             <p className="m-0 mt-1 text-xs text-muted-foreground">
@@ -182,13 +171,10 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
 
                     {linkUrl && (
                         <div className="mt-5">
-                            <EventLinkOut
-                                url={linkUrl}
-                                label={event.isVirtual ? "Join online" : "Event page"}
-                            />
+                            <EventLinkOut url={linkUrl} label={event.isVirtual ? "Join online" : "Event page"} />
                             <p className="m-0 mt-2 text-xs text-muted-foreground">
-                                This event happens off Model Horse Hub — entering, paying and
-                                results all live at that link.
+                                This event happens off Model Horse Hub — entering, paying and results all live at that
+                                link.
                             </p>
                         </div>
                     )}
@@ -209,9 +195,8 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                     <aside className="ledger-card mb-6">
                         <span className="ledger-tab">Legacy show</span>
                         <p className="m-0 text-sm leading-relaxed">
-                            This listing was created back when events doubled as shows. Its
-                            entries, classlist and results still live on the show page.
-                            New shows are opened in the Show Office.
+                            This listing was created back when events doubled as shows. Its entries, classlist and
+                            results still live on the show page. New shows are opened in the Show Office.
                         </p>
                         <div className="mt-3 flex flex-wrap gap-2">
                             <Button asChild variant="outline">
@@ -228,9 +213,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                 {event.description && (
                     <section className="ledger-card mb-6">
                         <span className="ledger-tab">About</span>
-                        <p className="m-0 leading-[1.7] whitespace-pre-line">
-                            {event.description}
-                        </p>
+                        <p className="m-0 leading-[1.7] whitespace-pre-line">{event.description}</p>
                     </section>
                 )}
 
@@ -244,20 +227,14 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                 {isHost && (
                     <div className="mb-6 flex flex-wrap justify-end gap-2">
                         <Button asChild variant="outline" size="wide">
-                            <Link href={`/community/events/${event.id}/manage`}>
-                                ⚙️ Edit event
-                            </Link>
+                            <Link href={`/community/events/${event.id}/manage`}>⚙️ Edit event</Link>
                         </Button>
                         <EventDeleteButton eventId={event.id} />
                     </div>
                 )}
 
                 {/* ── Photos ── */}
-                <EventPhotoGallery
-                    eventId={event.id}
-                    currentUserId={user.id}
-                    initialPhotos={photos}
-                />
+                <EventPhotoGallery eventId={event.id} currentUserId={user.id} initialPhotos={photos} />
 
                 {/* ── Discussion ── */}
                 <UniversalFeed
@@ -265,9 +242,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
                     context={{ eventId: event.id }}
                     currentUserId={user.id}
                     showComposer={true}
-                    composerPlaceholder={
-                        isPast ? "How was it?" : "Ask a question, or say you're bringing someone…"
-                    }
+                    composerPlaceholder={isPast ? "How was it?" : "Ask a question, or say you're bringing someone…"}
                     label="Discussion"
                 />
             </div>

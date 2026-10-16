@@ -29,21 +29,30 @@ const TRIGGER_RULES: Record<AchievementTrigger, BadgeCheck[]> = {
         {
             badgeId: "herd_builder_1",
             check: async (admin, userId) => {
-                const { count } = await admin.from("user_horses").select("id", { count: "exact", head: true }).eq("owner_id", userId);
+                const { count } = await admin
+                    .from("user_horses")
+                    .select("id", { count: "exact", head: true })
+                    .eq("owner_id", userId);
                 return (count ?? 0) >= 10;
             },
         },
         {
             badgeId: "herd_builder_2",
             check: async (admin, userId) => {
-                const { count } = await admin.from("user_horses").select("id", { count: "exact", head: true }).eq("owner_id", userId);
+                const { count } = await admin
+                    .from("user_horses")
+                    .select("id", { count: "exact", head: true })
+                    .eq("owner_id", userId);
                 return (count ?? 0) >= 50;
             },
         },
         {
             badgeId: "herd_builder_3",
             check: async (admin, userId) => {
-                const { count } = await admin.from("user_horses").select("id", { count: "exact", head: true }).eq("owner_id", userId);
+                const { count } = await admin
+                    .from("user_horses")
+                    .select("id", { count: "exact", head: true })
+                    .eq("owner_id", userId);
                 return (count ?? 0) >= 100;
             },
         },
@@ -140,14 +149,20 @@ const TRIGGER_RULES: Record<AchievementTrigger, BadgeCheck[]> = {
         {
             badgeId: "social_butterfly_1",
             check: async (admin, userId) => {
-                const { count } = await admin.from("posts").select("id", { count: "exact", head: true }).eq("author_id", userId);
+                const { count } = await admin
+                    .from("posts")
+                    .select("id", { count: "exact", head: true })
+                    .eq("author_id", userId);
                 return (count ?? 0) >= 10;
             },
         },
         {
             badgeId: "social_butterfly_2",
             check: async (admin, userId) => {
-                const { count } = await admin.from("posts").select("id", { count: "exact", head: true }).eq("author_id", userId);
+                const { count } = await admin
+                    .from("posts")
+                    .select("id", { count: "exact", head: true })
+                    .eq("author_id", userId);
                 return (count ?? 0) >= 50;
             },
         },
@@ -156,7 +171,10 @@ const TRIGGER_RULES: Record<AchievementTrigger, BadgeCheck[]> = {
         {
             badgeId: "first_follower",
             check: async (admin, userId) => {
-                const { count } = await admin.from("user_follows").select("id", { count: "exact", head: true }).eq("following_id", userId);
+                const { count } = await admin
+                    .from("user_follows")
+                    .select("id", { count: "exact", head: true })
+                    .eq("following_id", userId);
                 return (count ?? 0) >= 1;
             },
         },
@@ -167,10 +185,7 @@ const TRIGGER_RULES: Record<AchievementTrigger, BadgeCheck[]> = {
  * Evaluate and award badges for a user based on a trigger event.
  * MUST be called inside after() — never on the main thread.
  */
-export async function evaluateUserAchievements(
-    userId: string,
-    trigger: AchievementTrigger
-): Promise<void> {
+export async function evaluateUserAchievements(userId: string, trigger: AchievementTrigger): Promise<void> {
     try {
         const admin = getAdminClient();
         const rules = TRIGGER_RULES[trigger];

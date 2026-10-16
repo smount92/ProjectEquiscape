@@ -18,7 +18,9 @@ vi.mock("next/cache", () => ({
     unstable_cache: <T>(fn: T) => fn,
 }));
 vi.mock("next/server", () => ({
-    after: vi.fn((fn: () => void) => { fn(); /* execute immediately in tests */ }),
+    after: vi.fn((fn: () => void) => {
+        fn(); /* execute immediately in tests */
+    }),
 }));
 vi.mock("@/lib/notifications/createNotification", () => ({
     createNotification: vi.fn().mockResolvedValue(undefined),
@@ -62,8 +64,12 @@ describe("shows.ts — Show Actions", () => {
             // getShowEntries() → show query
             mockClient._mockQuery.single.mockResolvedValueOnce({
                 data: {
-                    id: "show-1", name: "Test Show", show_status: "closed",
-                    event_type: "photo_show", ends_at: null, created_by: "other",
+                    id: "show-1",
+                    name: "Test Show",
+                    show_status: "closed",
+                    event_type: "photo_show",
+                    ends_at: null,
+                    created_by: "other",
                     judging_method: "community_vote",
                 },
                 error: null,
@@ -77,8 +83,12 @@ describe("shows.ts — Show Actions", () => {
             const pastDate = new Date(Date.now() - 86400000).toISOString();
             mockClient._mockQuery.single.mockResolvedValueOnce({
                 data: {
-                    id: "show-1", name: "Test Show", show_status: "open",
-                    event_type: "photo_show", ends_at: pastDate, created_by: "other",
+                    id: "show-1",
+                    name: "Test Show",
+                    show_status: "open",
+                    event_type: "photo_show",
+                    ends_at: pastDate,
+                    created_by: "other",
                     judging_method: "community_vote",
                 },
                 error: null,
@@ -93,15 +103,20 @@ describe("shows.ts — Show Actions", () => {
             // Show query
             mockClient._mockQuery.single.mockResolvedValueOnce({
                 data: {
-                    id: "show-1", name: "Test Show", show_status: "open",
-                    event_type: "photo_show", ends_at: futureDate, created_by: "other",
+                    id: "show-1",
+                    name: "Test Show",
+                    show_status: "open",
+                    event_type: "photo_show",
+                    ends_at: futureDate,
+                    created_by: "other",
                     judging_method: "community_vote",
                 },
                 error: null,
             });
             // Horse ownership check
             mockClient._mockQuery.single.mockResolvedValueOnce({
-                data: null, error: { message: "not found" },
+                data: null,
+                error: { message: "not found" },
             });
             const result = await enterShow("show-1", "horse-1");
             expect(result.success).toBe(false);
@@ -121,8 +136,11 @@ describe("shows.ts — Show Actions", () => {
         it("rejects non-creator trying to close", async () => {
             mockClient._mockQuery.single.mockResolvedValueOnce({
                 data: {
-                    id: "show-1", name: "Test Show", show_status: "open",
-                    created_by: "other-user", event_type: "photo_show",
+                    id: "show-1",
+                    name: "Test Show",
+                    show_status: "open",
+                    created_by: "other-user",
+                    event_type: "photo_show",
                 },
                 error: null,
             });
@@ -143,8 +161,10 @@ describe("shows.ts — Show Actions", () => {
             // Event query — caller is the creator, expert judging
             mockClient._mockQuery.single.mockResolvedValueOnce({
                 data: {
-                    created_by: "user-1", judging_method: "expert_judge",
-                    name: "Test Show", starts_at: "2026-01-01T00:00:00Z",
+                    created_by: "user-1",
+                    judging_method: "expert_judge",
+                    name: "Test Show",
+                    starts_at: "2026-01-01T00:00:00Z",
                 },
                 error: null,
             });
@@ -182,7 +202,7 @@ describe("shows.ts — Show Actions", () => {
             expect(result.success).toBe(true);
             expect(result.error).toBeUndefined();
             expect(mockAdmin._mockQuery.insert).toHaveBeenCalledWith(
-                expect.objectContaining({ verification_tier: "platform_generated" })
+                expect.objectContaining({ verification_tier: "platform_generated" }),
             );
         });
     });
@@ -191,16 +211,18 @@ describe("shows.ts — Show Actions", () => {
     describe("overrideFinalPlacings", () => {
         it("rejects unauthenticated users", async () => {
             mockClient.auth.getUser.mockResolvedValueOnce({ data: { user: null } });
-            await expect(
-                overrideFinalPlacings("show-1", [{ entryId: "e1", placing: "1st" }])
-            ).rejects.toThrow(AuthError);
+            await expect(overrideFinalPlacings("show-1", [{ entryId: "e1", placing: "1st" }])).rejects.toThrow(
+                AuthError,
+            );
         });
 
         it("rejects non-creator", async () => {
             mockClient._mockQuery.single.mockResolvedValueOnce({
                 data: {
-                    id: "show-1", name: "Test Show",
-                    created_by: "other-user", show_status: "closed",
+                    id: "show-1",
+                    name: "Test Show",
+                    created_by: "other-user",
+                    show_status: "closed",
                     starts_at: "2026-01-01T00:00:00Z",
                 },
                 error: null,
@@ -213,8 +235,10 @@ describe("shows.ts — Show Actions", () => {
         it("rejects overrides on open shows", async () => {
             mockClient._mockQuery.single.mockResolvedValueOnce({
                 data: {
-                    id: "show-1", name: "Test Show",
-                    created_by: "user-1", show_status: "open",
+                    id: "show-1",
+                    name: "Test Show",
+                    created_by: "user-1",
+                    show_status: "open",
                     starts_at: "2026-01-01T00:00:00Z",
                 },
                 error: null,
@@ -229,8 +253,10 @@ describe("shows.ts — Show Actions", () => {
             // Event query
             mockClient._mockQuery.single.mockResolvedValueOnce({
                 data: {
-                    id: "show-1", name: "Test Show",
-                    created_by: "user-1", show_status: "closed",
+                    id: "show-1",
+                    name: "Test Show",
+                    created_by: "user-1",
+                    show_status: "closed",
                     starts_at: "2026-01-01T00:00:00Z",
                 },
                 error: null,
@@ -250,9 +276,7 @@ describe("shows.ts — Show Actions", () => {
                 error: null,
             });
 
-            const result = await overrideFinalPlacings("show-1", [
-                { entryId: "e1", placing: "1st" },
-            ]);
+            const result = await overrideFinalPlacings("show-1", [{ entryId: "e1", placing: "1st" }]);
             // The mock chain can succeed or fail depending on chain state;
             // we verify the function doesn't crash and returns a result
             expect(result).toHaveProperty("success");

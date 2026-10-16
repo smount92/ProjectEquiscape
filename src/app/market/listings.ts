@@ -68,15 +68,8 @@ import { readSellerTerms } from "@/lib/sellers/sellerTerms";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { getPublicImageUrls } from "@/lib/utils/storage";
 import { sanitizeForOr } from "@/lib/utils/search";
-import {
-    summarizeShowRecords,
-    type HorseRecordSummary,
-    type RecordSummaryInputRow,
-} from "@/lib/market/recordSummary";
-import {
-    buildMarketListingRpcArgs,
-    mapMarketListingRpcRows,
-} from "@/lib/market/rpcListings";
+import { summarizeShowRecords, type HorseRecordSummary, type RecordSummaryInputRow } from "@/lib/market/recordSummary";
+import { buildMarketListingRpcArgs, mapMarketListingRpcRows } from "@/lib/market/rpcListings";
 import {
     findPriceBand,
     LISTINGS_PAGE_SIZE,
@@ -194,16 +187,10 @@ async function fetchRecordSummaries(
  * docs/archive/ADVERSARIAL_AUDIT_2026-08-14_PART2.md), so this correctly
  * returns nothing today and lights up the moment the view is fixed.
  */
-async function fetchTrustedSellers(
-    supabase: SupabaseClient,
-    ownerIds: string[],
-): Promise<Set<string>> {
+async function fetchTrustedSellers(supabase: SupabaseClient, ownerIds: string[]): Promise<Set<string>> {
     if (ownerIds.length === 0) return new Set();
     try {
-        const { data } = await supabase
-            .from("mv_trusted_sellers")
-            .select("user_id")
-            .in("user_id", ownerIds);
+        const { data } = await supabase.from("mv_trusted_sellers").select("user_id").in("user_id", ownerIds);
         return new Set(((data ?? []) as { user_id: string }[]).map((t) => t.user_id));
     } catch {
         return new Set();
@@ -267,10 +254,7 @@ function parseCount(value: unknown): number {
  * Cookie-less anon client: no session to read, and the function is
  * visibility-guarded server-side.
  */
-async function fetchListingsViaRpc(
-    filters: ListingFilters,
-    page: number,
-): Promise<MarketListingsPage | null> {
+async function fetchListingsViaRpc(filters: ListingFilters, page: number): Promise<MarketListingsPage | null> {
     try {
         const supabase = createAnonClient();
         // get_market_listings ships in migration 169 (not yet in the
@@ -283,10 +267,7 @@ async function fetchListingsViaRpc(
         ) => Promise<{ data: unknown; error: unknown }>;
 
         const [pageResult, totalResult] = await Promise.all([
-            rpc(
-                "get_market_listings",
-                buildMarketListingRpcArgs(filters, page) as unknown as Record<string, unknown>,
-            ),
+            rpc("get_market_listings", buildMarketListingRpcArgs(filters, page) as unknown as Record<string, unknown>),
             rpc("get_market_listings_total", {}),
         ]);
 
@@ -347,10 +328,7 @@ async function fetchListingsViaRpc(
  * service-role client under the public predicate documented above.
  * The SQL predicate is identical either way.
  */
-export async function getMarketListingsPage(
-    filters: ListingFilters,
-    page: number,
-): Promise<MarketListingsPage> {
+export async function getMarketListingsPage(filters: ListingFilters, page: number): Promise<MarketListingsPage> {
     const authed = await createClient();
     const {
         data: { user },
@@ -385,9 +363,7 @@ export async function getMarketListingsPage(
         }
     }
 
-    const blockedOwnerIds = user
-        ? await fetchBlockedOwnerIds(authed as unknown as SupabaseClient, user.id)
-        : [];
+    const blockedOwnerIds = user ? await fetchBlockedOwnerIds(authed as unknown as SupabaseClient, user.id) : [];
 
     // "Has show record": EXISTS semantics via an inner-join embed, so
     // the filter runs IN the page query and count/paging stay exact.
@@ -473,9 +449,7 @@ export async function getMarketListingsPage(
         liveSellerCountries(supabase),
     ]);
 
-    const urlMap = getPublicImageUrls(
-        rows.flatMap((r) => (r.horse_images ?? []).map((i) => i.image_url)),
-    );
+    const urlMap = getPublicImageUrls(rows.flatMap((r) => (r.horse_images ?? []).map((i) => i.image_url)));
 
     const listings: MarketListing[] = rows.map((row) => {
         const rawThumb = pickThumbnail(row.horse_images);

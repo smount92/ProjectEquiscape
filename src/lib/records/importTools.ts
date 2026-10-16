@@ -55,7 +55,11 @@ export interface RecordFingerprintInput {
     placing: string | null | undefined;
 }
 
-const fold = (v: string | null | undefined) => (v ?? "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+const fold = (v: string | null | undefined) =>
+    (v ?? "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, " ")
+        .trim();
 
 export function recordFingerprint(r: RecordFingerprintInput): string {
     return [fold(r.showName), (r.showDate ?? "").slice(0, 10), fold(r.className), fold(r.placing)].join("|");
@@ -78,5 +82,8 @@ export function findDuplicates(
 
 /** localStorage key for a remembered mapping, keyed by the file's header set. */
 export function headerMapStorageKey(headers: readonly string[]): string {
-    return `mhh.results-import.map:${[...headers].map((h) => h.trim().toLowerCase()).sort().join("|")}`;
+    return `mhh.results-import.map:${[...headers]
+        .map((h) => h.trim().toLowerCase())
+        .sort()
+        .join("|")}`;
 }

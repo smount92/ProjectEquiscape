@@ -29,10 +29,7 @@ const NO_BADGE: SupporterBadge = { isSupporter: false, since: null, showInLedger
  * Errors — including "column does not exist" before migration 142 — resolve to
  * the no-badge state.
  */
-export async function fetchSupporterBadge(
-    client: SupabaseClient<Database>,
-    userId: string,
-): Promise<SupporterBadge> {
+export async function fetchSupporterBadge(client: SupabaseClient<Database>, userId: string): Promise<SupporterBadge> {
     try {
         const { data, error } = await client
             .from("users")
@@ -87,17 +84,16 @@ export function formatSupporterSince(since: string | null): string | null {
  * Returns true only when the DEFINER function says this member both opted
  * in AND holds an unexpired pro/studio tier; every error is "no chip".
  */
-export async function fetchMembershipDisplay(
-    client: SupabaseClient<Database>,
-    userId: string,
-): Promise<boolean> {
+export async function fetchMembershipDisplay(client: SupabaseClient<Database>, userId: string): Promise<boolean> {
     try {
         // The RPC name is cast because the generated types predate
         // migration 193; regen after the paste and this cast can go.
-        const { data, error } = await (client.rpc as unknown as (
-            fn: string,
-            args: Record<string, unknown>,
-        ) => Promise<{ data: unknown; error: unknown }>)("public_membership_label", {
+        const { data, error } = await (
+            client.rpc as unknown as (
+                fn: string,
+                args: Record<string, unknown>,
+            ) => Promise<{ data: unknown; error: unknown }>
+        )("public_membership_label", {
             p_user_id: userId,
         });
         if (error) return false;

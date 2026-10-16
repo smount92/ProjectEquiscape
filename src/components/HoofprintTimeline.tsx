@@ -1,14 +1,14 @@
 "use client";
 
-import { useState } from"react";
-import { useRouter } from"next/navigation";
-import Link from"next/link";
-import { motion } from"framer-motion";
-import { addTimelineEvent, deleteTimelineEvent, updateLifeStage } from"@/app/actions/hoofprint";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { addTimelineEvent, deleteTimelineEvent, updateLifeStage } from "@/app/actions/hoofprint";
 import { formatEventDate } from "@/lib/utils/eventDate";
-import type { TimelineEvent, OwnershipRecord } from"@/app/actions/hoofprint";
-import HorseshoeIcon from"@/components/icons/HorseshoeIcon";
-import GlossaryLink from"@/components/GlossaryLink";
+import type { TimelineEvent, OwnershipRecord } from "@/app/actions/hoofprint";
+import HorseshoeIcon from "@/components/icons/HorseshoeIcon";
+import GlossaryLink from "@/components/GlossaryLink";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -17,331 +17,354 @@ import { workEventIcon } from "@/lib/hoofprint/workIcon";
 import { rollupShowResults, TIMELINE_PREVIEW } from "@/lib/hoofprint/rollup";
 
 interface HoofprintTimelineProps {
- horseId: string;
- timeline: TimelineEvent[];
- ownershipChain: OwnershipRecord[];
- lifeStage: string;
- isOwner: boolean;
- currentUserId?: string;
- /**
-  * True when the page also renders the show-record trophy case. A show
-  * result then appears twice on one passport, so the timeline keeps the
-  * event (the chronology is the point) and drops the detail line the
-  * trophy case already carries in full.
-  */
- showRecordsListedElsewhere?: boolean;
+    horseId: string;
+    timeline: TimelineEvent[];
+    ownershipChain: OwnershipRecord[];
+    lifeStage: string;
+    isOwner: boolean;
+    currentUserId?: string;
+    /**
+     * True when the page also renders the show-record trophy case. A show
+     * result then appears twice on one passport, so the timeline keeps the
+     * event (the chronology is the point) and drops the detail line the
+     * trophy case already carries in full.
+     */
+    showRecordsListedElsewhere?: boolean;
 }
 
 const EVENT_ICONS: Record<string, string> = {
- acquired:"🏠",
- stage_update:"🎨",
- customization:"✂️",
- photo_update:"📸",
- show_result:"🏆",
- listed:"💲",
- sold:"🤝",
- transferred:"📦",
- note:"📝",
- status_change:"🔒",
- condition_change:"📊",
- title_granted:"🎖️",
+    acquired: "🏠",
+    stage_update: "🎨",
+    customization: "✂️",
+    photo_update: "📸",
+    show_result: "🏆",
+    listed: "💲",
+    sold: "🤝",
+    transferred: "📦",
+    note: "📝",
+    status_change: "🔒",
+    condition_change: "📊",
+    title_granted: "🎖️",
 };
 
 const STAGE_LABELS: Record<string, string> = {
- blank:"Blank / Unpainted",
- stripped:"Stripped / Body",
- in_progress:"Work in Progress",
- completed:"Completed",
- for_sale:"Listed for Sale",
- parked:"Parked — Off-Platform Sale",
+    blank: "Blank / Unpainted",
+    stripped: "Stripped / Body",
+    in_progress: "Work in Progress",
+    completed: "Completed",
+    for_sale: "Listed for Sale",
+    parked: "Parked — Off-Platform Sale",
 };
 
 const STAGE_ICONS: Record<string, string> = {
- blank:"🎨",
- stripped:"🛁",
- in_progress:"🔧",
- completed:"✅",
- for_sale:"💲",
- parked:"🔒",
+    blank: "🎨",
+    stripped: "🛁",
+    in_progress: "🔧",
+    completed: "✅",
+    for_sale: "💲",
+    parked: "🔒",
 };
 
 export default function HoofprintTimeline({
- horseId,
- timeline,
- ownershipChain,
- lifeStage,
- isOwner,
- currentUserId,
- showRecordsListedElsewhere = false,
+    horseId,
+    timeline,
+    ownershipChain,
+    lifeStage,
+    isOwner,
+    currentUserId,
+    showRecordsListedElsewhere = false,
 }: HoofprintTimelineProps) {
- // One line per show instead of one per placing (the record lives in
- // Show Records), and the latest few first — 112 placings arrived by
- // import on 2026-09-21 and drowned the story.
- const [showAllEvents, setShowAllEvents] = useState(false);
- const rolled = rollupShowResults(timeline);
- const visibleEvents = showAllEvents ? rolled : rolled.slice(0, TIMELINE_PREVIEW);
- const router = useRouter();
- const [showForm, setShowForm] = useState(false);
- const [formState, setFormState] = useState({
- title:"",
- description:"",
- });
- const [saving, setSaving] = useState(false);
- const [stageUpdating, setStageUpdating] = useState(false);
+    // One line per show instead of one per placing (the record lives in
+    // Show Records), and the latest few first — 112 placings arrived by
+    // import on 2026-09-21 and drowned the story.
+    const [showAllEvents, setShowAllEvents] = useState(false);
+    const rolled = rollupShowResults(timeline);
+    const visibleEvents = showAllEvents ? rolled : rolled.slice(0, TIMELINE_PREVIEW);
+    const router = useRouter();
+    const [showForm, setShowForm] = useState(false);
+    const [formState, setFormState] = useState({
+        title: "",
+        description: "",
+    });
+    const [saving, setSaving] = useState(false);
+    const [stageUpdating, setStageUpdating] = useState(false);
 
- const handleAddEvent = async (e: React.FormEvent) => {
- e.preventDefault();
- if (!formState.title.trim()) return;
- setSaving(true);
- const result = await addTimelineEvent({
- horseId,
- eventType:"note",
- title: formState.title.trim(),
- description: formState.description.trim() || undefined,
- });
- if (result.success) {
- setFormState({ title:"", description:"" });
- setShowForm(false);
- router.refresh();
- }
- setSaving(false);
- };
+    const handleAddEvent = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!formState.title.trim()) return;
+        setSaving(true);
+        const result = await addTimelineEvent({
+            horseId,
+            eventType: "note",
+            title: formState.title.trim(),
+            description: formState.description.trim() || undefined,
+        });
+        if (result.success) {
+            setFormState({ title: "", description: "" });
+            setShowForm(false);
+            router.refresh();
+        }
+        setSaving(false);
+    };
 
- const handleDelete = async (eventId: string) => {
- if (!confirm("Delete this timeline event?")) return;
- await deleteTimelineEvent(eventId, horseId);
- router.refresh();
- };
+    const handleDelete = async (eventId: string) => {
+        if (!confirm("Delete this timeline event?")) return;
+        await deleteTimelineEvent(eventId, horseId);
+        router.refresh();
+    };
 
- const handleStageChange = async (newStage: string) => {
- setStageUpdating(true);
- await updateLifeStage(horseId, newStage as"blank" |"stripped" |"in_progress" |"completed" |"for_sale");
- router.refresh();
- setStageUpdating(false);
- };
+    const handleStageChange = async (newStage: string) => {
+        setStageUpdating(true);
+        await updateLifeStage(horseId, newStage as "blank" | "stripped" | "in_progress" | "completed" | "for_sale");
+        router.refresh();
+        setStageUpdating(false);
+    };
 
- return (
- <div className="mt-8">
- {/* Header */}
- <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
- <div className="flex flex-wrap items-center gap-4">
- <div className="brass-heading">
- <span className="brass-heading-bar" aria-hidden="true" />
- <h2 className="m-0 flex items-center gap-2 text-xl font-bold">
- <HorseshoeIcon className="text-forest" /> <span className="whitespace-nowrap text-forest">Hoofprint</span>
- <GlossaryLink anchor="hoofprint" term="Hoofprint" />
- </h2>
- </div>
- <span className={`hoofprint-stage-badge stage-${lifeStage}`}>
- {STAGE_ICONS[lifeStage] ||"📋"} {STAGE_LABELS[lifeStage] || lifeStage}
- </span>
- </div>
- <div className="flex flex-wrap items-center gap-2">
- {isOwner && (
- <>
- <select
- className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm text-foreground ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 w-auto min-w-[140px] text-sm"
- value={lifeStage}
- onChange={(e) => handleStageChange(e.target.value)}
- disabled={stageUpdating}
- title="Life stage"
- >
- <option value="blank">🎨 Blank</option>
- <option value="stripped">🛁 Stripped / Body</option>
- <option value="in_progress">🔧 In Progress</option>
- <option value="completed">✅ Completed</option>
- <option value="for_sale">💲 For Sale</option>
- </select>
- <Button variant="outline" size="wide"
- onClick={() => setShowForm(!showForm)}
- >
- {showForm ?"Cancel" :"📝 Add Note"}
- </Button>
- {/* A repair, a prep job, a repaint: who, when, what was done —
+    return (
+        <div className="mt-8">
+            {/* Header */}
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+                <div className="flex flex-wrap items-center gap-4">
+                    <div className="brass-heading">
+                        <span className="brass-heading-bar" aria-hidden="true" />
+                        <h2 className="m-0 flex items-center gap-2 text-xl font-bold">
+                            <HorseshoeIcon className="text-forest" />{" "}
+                            <span className="whitespace-nowrap text-forest">Hoofprint</span>
+                            <GlossaryLink anchor="hoofprint" term="Hoofprint" />
+                        </h2>
+                    </div>
+                    <span className={`hoofprint-stage-badge stage-${lifeStage}`}>
+                        {STAGE_ICONS[lifeStage] || "📋"} {STAGE_LABELS[lifeStage] || lifeStage}
+                    </span>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                    {isOwner && (
+                        <>
+                            <select
+                                className="flex h-10 w-auto w-full min-w-[140px] rounded-md border border-input bg-card px-3 py-2 text-sm text-foreground ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
+                                value={lifeStage}
+                                onChange={(e) => handleStageChange(e.target.value)}
+                                disabled={stageUpdating}
+                                title="Life stage"
+                            >
+                                <option value="blank">🎨 Blank</option>
+                                <option value="stripped">🛁 Stripped / Body</option>
+                                <option value="in_progress">🔧 In Progress</option>
+                                <option value="completed">✅ Completed</option>
+                                <option value="for_sale">💲 For Sale</option>
+                            </select>
+                            <Button variant="outline" size="wide" onClick={() => setShowForm(!showForm)}>
+                                {showForm ? "Cancel" : "📝 Add Note"}
+                            </Button>
+                            {/* A repair, a prep job, a repaint: who, when, what was done —
      one work record, and it lands on this rail (artist request,
      2026-09-20). Opens on Repair & restoration. */}
- <OwnerCreditDialog
- horseId={horseId}
- defaultWorkType="Repair & restoration"
- label="🔧 Log work done"
- variant="button"
- />
- </>
- )}
- </div>
- </div>
+                            <OwnerCreditDialog
+                                horseId={horseId}
+                                defaultWorkType="Repair & restoration"
+                                label="🔧 Log work done"
+                                variant="button"
+                            />
+                        </>
+                    )}
+                </div>
+            </div>
 
- {/* Ownership Chain */}
- {ownershipChain.length > 0 && (
- <div className="bg-muted border-input mb-6 flex flex-wrap items-center gap-2 rounded-lg border p-4">
- <span className="text-muted-foreground mr-1 text-xs font-semibold tracking-wide uppercase">Chain of Custody:</span>
- {ownershipChain.map((owner, i) => (
- <span key={owner.id} className="inline-flex items-center gap-1">
- {i > 0 && <span className="text-muted-foreground text-[0.8rem]" aria-hidden="true">→</span>}
- {owner.ownerId ? (
- <Link
- href={`/profile/${encodeURIComponent(owner.ownerAlias)}`}
- className={`ownership-link ${!owner.releasedAt ?"current" :""}`}
- >
- @{owner.ownerAlias}
- {owner.acquisitionType !=="original" && (
- <span className="ownership-acq">({owner.acquisitionType})</span>
- )}
- {!owner.releasedAt && (
- <span className="ownership-acq font-semibold text-forest">· Current owner</span>
- )}
- </Link>
- ) : (
- <span className="ownership-offplatform">
- {owner.ownerAlias}
- <span className="ownership-acq">(off-platform)</span>
- </span>
- )}
- </span>
- ))}
- </div>
- )}
+            {/* Ownership Chain */}
+            {ownershipChain.length > 0 && (
+                <div className="mb-6 flex flex-wrap items-center gap-2 rounded-lg border border-input bg-muted p-4">
+                    <span className="mr-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                        Chain of Custody:
+                    </span>
+                    {ownershipChain.map((owner, i) => (
+                        <span key={owner.id} className="inline-flex items-center gap-1">
+                            {i > 0 && (
+                                <span className="text-[0.8rem] text-muted-foreground" aria-hidden="true">
+                                    →
+                                </span>
+                            )}
+                            {owner.ownerId ? (
+                                <Link
+                                    href={`/profile/${encodeURIComponent(owner.ownerAlias)}`}
+                                    className={`ownership-link ${!owner.releasedAt ? "current" : ""}`}
+                                >
+                                    @{owner.ownerAlias}
+                                    {owner.acquisitionType !== "original" && (
+                                        <span className="ownership-acq">({owner.acquisitionType})</span>
+                                    )}
+                                    {!owner.releasedAt && (
+                                        <span className="ownership-acq font-semibold text-forest">· Current owner</span>
+                                    )}
+                                </Link>
+                            ) : (
+                                <span className="ownership-offplatform">
+                                    {owner.ownerAlias}
+                                    <span className="ownership-acq">(off-platform)</span>
+                                </span>
+                            )}
+                        </span>
+                    ))}
+                </div>
+            )}
 
- {/* Add Event Form */}
- {showForm && (
- <form
- onSubmit={handleAddEvent}
- className="bg-muted border-input mb-6 rounded-lg border p-4"
- >
- <div className="mb-6">
- <label className="text-foreground mb-1 block text-sm font-semibold">Title</label>
- <Input
- type="text"
- 
- value={formState.title}
- onChange={(e) => setFormState({ ...formState, title: e.target.value })}
- placeholder="e.g. Won 1st at Breyerfest 2025"
- required
- />
- </div>
- <div className="mb-6">
- <label className="text-foreground mb-1 block text-sm font-semibold">Description (optional)</label>
- <Textarea
- 
- value={formState.description}
- onChange={(e) => setFormState({ ...formState, description: e.target.value })}
- placeholder="Add details..."
- rows={2}
- />
- </div>
- <div className="mt-2 flex items-center gap-4">
- <span className="text-muted-foreground text-xs">📝 Notes appear on the Hoofprint timeline</span>
- <Button
- type="submit" className="ml-auto"
- disabled={saving}
- >
- {saving ?"Saving…" :"Add Note"}
- </Button>
- </div>
- </form>
- )}
+            {/* Add Event Form */}
+            {showForm && (
+                <form onSubmit={handleAddEvent} className="mb-6 rounded-lg border border-input bg-muted p-4">
+                    <div className="mb-6">
+                        <label className="mb-1 block text-sm font-semibold text-foreground">Title</label>
+                        <Input
+                            type="text"
+                            value={formState.title}
+                            onChange={(e) => setFormState({ ...formState, title: e.target.value })}
+                            placeholder="e.g. Won 1st at Breyerfest 2025"
+                            required
+                        />
+                    </div>
+                    <div className="mb-6">
+                        <label className="mb-1 block text-sm font-semibold text-foreground">
+                            Description (optional)
+                        </label>
+                        <Textarea
+                            value={formState.description}
+                            onChange={(e) => setFormState({ ...formState, description: e.target.value })}
+                            placeholder="Add details..."
+                            rows={2}
+                        />
+                    </div>
+                    <div className="mt-2 flex items-center gap-4">
+                        <span className="text-xs text-muted-foreground">📝 Notes appear on the Hoofprint timeline</span>
+                        <Button type="submit" className="ml-auto" disabled={saving}>
+                            {saving ? "Saving…" : "Add Note"}
+                        </Button>
+                    </div>
+                </form>
+            )}
 
- {/* Timeline */}
- {timeline.length === 0 ? (
- <div className="text-muted-foreground p-8 text-center">
- <p><HorseshoeIcon /> No timeline events yet.</p>
- {isOwner && (
- <p className="text-sm">
- Add events to build this horse&apos;s Hoofprint!
- </p>
- )}
- </div>
- ) : (
- <motion.div
-  className="relative pl-11 before:absolute before:top-2 before:bottom-2 before:left-[15px] before:w-[2px] before:rounded-full before:bg-[color-mix(in_srgb,var(--brass,#B08D3E)_45%,transparent)] before:content-['']"
-  initial="hidden"
-  animate="visible"
-  variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.08 } } }}
- >
- {visibleEvents.map((event) => (
- <motion.div key={event.id} className="relative pb-6 last:pb-0" variants={{ hidden: { opacity: 0, x: -20 }, visible: { opacity: 1, x: 0, transition: { type: "spring" as const, stiffness: 200, damping: 25 } } }}>
- {/* Brass event dot on the rail */}
- <div
- className="absolute top-0 -left-11 z-[1] flex h-8 w-8 items-center justify-center rounded-full border-2 border-[var(--brass,#B08D3E)] bg-card text-[0.85rem] shadow-sm"
- aria-hidden="true"
- >
- {event.eventType === "customization"
- ? workEventIcon(typeof event.metadata?.work_type === "string" ? event.metadata.work_type : null)
- : EVENT_ICONS[event.eventType] ||"📋"}
- </div>
- <div className="flex items-start justify-between gap-2">
- <div className="min-w-0">
- <div className="text-[0.95rem] leading-snug font-semibold text-foreground">
- {event.title}
- {!event.isPublic && (
- <span className="text-muted-foreground ml-1.5 text-xs font-normal whitespace-nowrap">🔒 Private</span>
- )}
- </div>
- <div className="text-muted-foreground mt-0.5 text-xs">
- {event.eventDate && (
- <>
- {formatEventDate(event.eventDate)}
- {" · "}
- </>
- )}
- by @{event.userAlias}
- </div>
- {event.description && !(showRecordsListedElsewhere && event.eventType === "show_result") && (
- <div className="text-secondary-foreground mt-1 text-sm leading-relaxed">{event.description}</div>
- )}
- {/* Customization events carry their WIP photos in metadata —
+            {/* Timeline */}
+            {timeline.length === 0 ? (
+                <div className="p-8 text-center text-muted-foreground">
+                    <p>
+                        <HorseshoeIcon /> No timeline events yet.
+                    </p>
+                    {isOwner && <p className="text-sm">Add events to build this horse&apos;s Hoofprint!</p>}
+                </div>
+            ) : (
+                <motion.div
+                    className="relative pl-11 before:absolute before:top-2 before:bottom-2 before:left-[15px] before:w-[2px] before:rounded-full before:bg-[color-mix(in_srgb,var(--brass,#B08D3E)_45%,transparent)] before:content-['']"
+                    initial="hidden"
+                    animate="visible"
+                    variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.08 } } }}
+                >
+                    {visibleEvents.map((event) => (
+                        <motion.div
+                            key={event.id}
+                            className="relative pb-6 last:pb-0"
+                            variants={{
+                                hidden: { opacity: 0, x: -20 },
+                                visible: {
+                                    opacity: 1,
+                                    x: 0,
+                                    transition: { type: "spring" as const, stiffness: 200, damping: 25 },
+                                },
+                            }}
+                        >
+                            {/* Brass event dot on the rail */}
+                            <div
+                                className="absolute top-0 -left-11 z-[1] flex h-8 w-8 items-center justify-center rounded-full border-2 border-[var(--brass,#B08D3E)] bg-card text-[0.85rem] shadow-sm"
+                                aria-hidden="true"
+                            >
+                                {event.eventType === "customization"
+                                    ? workEventIcon(
+                                          typeof event.metadata?.work_type === "string"
+                                              ? event.metadata.work_type
+                                              : null,
+                                      )
+                                    : EVENT_ICONS[event.eventType] || "📋"}
+                            </div>
+                            <div className="flex items-start justify-between gap-2">
+                                <div className="min-w-0">
+                                    <div className="text-[0.95rem] leading-snug font-semibold text-foreground">
+                                        {event.title}
+                                        {!event.isPublic && (
+                                            <span className="ml-1.5 text-xs font-normal whitespace-nowrap text-muted-foreground">
+                                                🔒 Private
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="mt-0.5 text-xs text-muted-foreground">
+                                        {event.eventDate && (
+                                            <>
+                                                {formatEventDate(event.eventDate)}
+                                                {" · "}
+                                            </>
+                                        )}
+                                        by @{event.userAlias}
+                                    </div>
+                                    {event.description &&
+                                        !(showRecordsListedElsewhere && event.eventType === "show_result") && (
+                                            <div className="mt-1 text-sm leading-relaxed text-secondary-foreground">
+                                                {event.description}
+                                            </div>
+                                        )}
+                                    {/* Customization events carry their WIP photos in metadata —
      the view delivered them for months while nothing rendered
      them (audit: "carried to the passport, silently never
      shown"). A small strip; The Making chapter is the full reel. */}
- {event.eventType === "customization" &&
- Array.isArray(event.metadata?.image_urls) &&
- (event.metadata.image_urls as string[]).length > 0 && (
- <div className="mt-2 flex gap-1.5 overflow-x-auto">
- {(event.metadata.image_urls as string[]).slice(0, 6).map((url, i) => (
- <a key={i} href={url} target="_blank" rel="noopener" className="shrink-0">
- {/* eslint-disable-next-line @next/next/no-img-element */}
- <img
- src={url}
- alt=""
- loading="lazy"
- className="h-14 w-14 rounded-md border border-input object-cover"
- />
- </a>
- ))}
- </div>
- )}
- </div>
- {/* Only user-authored notes (from posts) can be deleted */}
- {isOwner &&
- currentUserId &&
- event.userId === currentUserId &&
- event.sourceTable ==="posts" && (
- <button
- className="shrink-0 cursor-pointer rounded-md border border-transparent p-1.5 text-sm opacity-60 transition-opacity hover:border-destructive/30 hover:bg-destructive/10 hover:opacity-100"
- onClick={() => handleDelete(event.id)}
- title="Delete note"
- aria-label={`Delete note: ${event.title}`}
- >
- 🗑
- </button>
- )}
- </div>
- </motion.div>
- ))}
- </motion.div>
- )}
- {rolled.length > TIMELINE_PREVIEW && (
- <div className="mt-2 text-center">
- <button
- type="button"
- onClick={() => setShowAllEvents((v) => !v)}
- className="text-forest cursor-pointer rounded-sm border-none bg-transparent p-0 text-sm font-semibold hover:underline"
- id="hoofprint-show-earlier"
- >
- {showAllEvents ? "Show fewer ↑" : `Show ${rolled.length - TIMELINE_PREVIEW} earlier ↓`}
- </button>
- </div>
- )}
- </div>
- );
+                                    {event.eventType === "customization" &&
+                                        Array.isArray(event.metadata?.image_urls) &&
+                                        (event.metadata.image_urls as string[]).length > 0 && (
+                                            <div className="mt-2 flex gap-1.5 overflow-x-auto">
+                                                {(event.metadata.image_urls as string[]).slice(0, 6).map((url, i) => (
+                                                    <a
+                                                        key={i}
+                                                        href={url}
+                                                        target="_blank"
+                                                        rel="noopener"
+                                                        className="shrink-0"
+                                                    >
+                                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                        <img
+                                                            src={url}
+                                                            alt=""
+                                                            loading="lazy"
+                                                            className="h-14 w-14 rounded-md border border-input object-cover"
+                                                        />
+                                                    </a>
+                                                ))}
+                                            </div>
+                                        )}
+                                </div>
+                                {/* Only user-authored notes (from posts) can be deleted */}
+                                {isOwner &&
+                                    currentUserId &&
+                                    event.userId === currentUserId &&
+                                    event.sourceTable === "posts" && (
+                                        <button
+                                            className="shrink-0 cursor-pointer rounded-md border border-transparent p-1.5 text-sm opacity-60 transition-opacity hover:border-destructive/30 hover:bg-destructive/10 hover:opacity-100"
+                                            onClick={() => handleDelete(event.id)}
+                                            title="Delete note"
+                                            aria-label={`Delete note: ${event.title}`}
+                                        >
+                                            🗑
+                                        </button>
+                                    )}
+                            </div>
+                        </motion.div>
+                    ))}
+                </motion.div>
+            )}
+            {rolled.length > TIMELINE_PREVIEW && (
+                <div className="mt-2 text-center">
+                    <button
+                        type="button"
+                        onClick={() => setShowAllEvents((v) => !v)}
+                        className="cursor-pointer rounded-sm border-none bg-transparent p-0 text-sm font-semibold text-forest hover:underline"
+                        id="hoofprint-show-earlier"
+                    >
+                        {showAllEvents ? "Show fewer ↑" : `Show ${rolled.length - TIMELINE_PREVIEW} earlier ↓`}
+                    </button>
+                </div>
+            )}
+        </div>
+    );
 }

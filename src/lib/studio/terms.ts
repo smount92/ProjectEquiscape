@@ -44,7 +44,10 @@ export interface StudioTerms {
  * turnaround (the shortest if only that is set). Null when no turnaround
  * has been written — the quote form then says so.
  */
-export function suggestedCompletion(terms: Pick<StudioTerms, "turnaroundMinDays" | "turnaroundMaxDays">, from: Date = new Date()): string | null {
+export function suggestedCompletion(
+    terms: Pick<StudioTerms, "turnaroundMinDays" | "turnaroundMaxDays">,
+    from: Date = new Date(),
+): string | null {
     const days = terms.turnaroundMaxDays ?? terms.turnaroundMinDays;
     if (days == null) return null;
     return new Date(from.getTime() + days * 24 * 3600 * 1000).toISOString().slice(0, 10);
@@ -98,15 +101,10 @@ export function coerceTerms(raw: unknown): StudioTerms {
     };
 
     return {
-        depositPercent: clampPercent(
-            pick("depositPercent", "deposit_percent"),
-            DEFAULT_TERMS.depositPercent,
-        ),
+        depositPercent: clampPercent(pick("depositPercent", "deposit_percent"), DEFAULT_TERMS.depositPercent),
         depositRefundableBeforeStart:
-            pick<boolean>(
-                "depositRefundableBeforeStart",
-                "deposit_refundable_before_start",
-            ) ?? DEFAULT_TERMS.depositRefundableBeforeStart,
+            pick<boolean>("depositRefundableBeforeStart", "deposit_refundable_before_start") ??
+            DEFAULT_TERMS.depositRefundableBeforeStart,
         // `?? default` rather than `|| default`: a studio that deliberately
         // includes ZERO revisions must not silently inherit the default 2.
         revisionsIncluded: (() => {
@@ -118,23 +116,13 @@ export function coerceTerms(raw: unknown): StudioTerms {
             return Math.round(v);
         })(),
         extraRevisionFee: moneyOrNull(pick("extraRevisionFee", "extra_revision_fee")),
-        killFeePercent: clampPercent(
-            pick("killFeePercent", "kill_fee_percent"),
-            DEFAULT_TERMS.killFeePercent,
-        ),
-        turnaroundMinDays: positiveIntOrNull(
-            pick("turnaroundMinDays", "turnaround_min_days"),
-        ),
-        turnaroundMaxDays: positiveIntOrNull(
-            pick("turnaroundMaxDays", "turnaround_max_days"),
-        ),
+        killFeePercent: clampPercent(pick("killFeePercent", "kill_fee_percent"), DEFAULT_TERMS.killFeePercent),
+        turnaroundMinDays: positiveIntOrNull(pick("turnaroundMinDays", "turnaround_min_days")),
+        turnaroundMaxDays: positiveIntOrNull(pick("turnaroundMaxDays", "turnaround_max_days")),
         acceptsRush: pick<boolean>("acceptsRush", "accepts_rush") ?? DEFAULT_TERMS.acceptsRush,
-        clientShipsModel:
-            pick<boolean>("clientShipsModel", "client_ships_model") ??
-            DEFAULT_TERMS.clientShipsModel,
+        clientShipsModel: pick<boolean>("clientShipsModel", "client_ships_model") ?? DEFAULT_TERMS.clientShipsModel,
         shippingNote: (pick<string>("shippingNote", "shipping_note") || null) ?? null,
-        extraNote:
-            (pick<string>("extraNote", "extra_note", "terms_text") || null) ?? null,
+        extraNote: (pick<string>("extraNote", "extra_note", "terms_text") || null) ?? null,
     };
 }
 
@@ -148,11 +136,7 @@ export interface TermsSnapshot extends StudioTerms {
     snapshotAt: string;
 }
 
-export function snapshotTerms(
-    terms: StudioTerms,
-    agreedPrice: number | null,
-    now: Date = new Date(),
-): TermsSnapshot {
+export function snapshotTerms(terms: StudioTerms, agreedPrice: number | null, now: Date = new Date()): TermsSnapshot {
     return {
         ...terms,
         agreedPrice: agreedPrice ?? null,
@@ -162,20 +146,14 @@ export function snapshotTerms(
 }
 
 /** The deposit implied by a price and a percentage. Rounded to cents. */
-export function depositFor(
-    price: number | null | undefined,
-    percent: number,
-): number | null {
+export function depositFor(price: number | null | undefined, percent: number): number | null {
     if (price == null || !Number.isFinite(price) || price <= 0) return null;
     if (!Number.isFinite(percent) || percent <= 0) return null;
     return Math.round(price * (percent / 100) * 100) / 100;
 }
 
 /** The kill fee implied by an agreement, for the cancellation confirm step. */
-export function killFeeFor(
-    price: number | null | undefined,
-    percent: number,
-): number | null {
+export function killFeeFor(price: number | null | undefined, percent: number): number | null {
     return depositFor(price, percent);
 }
 
@@ -192,9 +170,7 @@ export function termsLines(terms: StudioTerms): { label: string; value: string }
         value:
             terms.depositPercent > 0
                 ? `${terms.depositPercent}% up front, ${
-                      terms.depositRefundableBeforeStart
-                          ? "refundable until work begins"
-                          : "non-refundable"
+                      terms.depositRefundableBeforeStart ? "refundable until work begins" : "non-refundable"
                   }`
                 : "No deposit required",
     });
@@ -231,9 +207,7 @@ export function termsLines(terms: StudioTerms): { label: string; value: string }
         label: "Shipping",
         value:
             terms.shippingNote ||
-            (terms.clientShipsModel
-                ? "Commissioner ships the model to the artist"
-                : "Artist supplies the model"),
+            (terms.clientShipsModel ? "Commissioner ships the model to the artist" : "Artist supplies the model"),
     });
 
     return lines;
@@ -243,10 +217,7 @@ export function termsLines(terms: StudioTerms): { label: string; value: string }
  * Turnarounds read better in months once they pass a couple of weeks — the
  * hobby quotes "1-4 months", not "30-120 days".
  */
-export function turnaroundLabel(terms: {
-    turnaroundMinDays: number | null;
-    turnaroundMaxDays: number | null;
-}): string {
+export function turnaroundLabel(terms: { turnaroundMinDays: number | null; turnaroundMaxDays: number | null }): string {
     const { turnaroundMinDays: lo, turnaroundMaxDays: hi } = terms;
     if (!lo && !hi) return "Not stated";
     const fmt = (d: number) => {

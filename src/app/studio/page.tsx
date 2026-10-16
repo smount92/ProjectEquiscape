@@ -68,15 +68,12 @@ export default async function StudioDirectoryPage({ searchParams }: { searchPara
             <StudioDirectory studios={studios} initialQuery={typeof q === "string" ? q.slice(0, 80) : ""} />
 
             <div className="mt-10 grid gap-4 md:grid-cols-2">
-                <div className="border-input bg-card/50 rounded-lg border p-6 backdrop-blur-sm">
-                    <h3 className="mb-1 font-serif text-lg font-bold">
-                        🎨 Take commissions? Open a studio
-                    </h3>
-                    <p className="text-secondary-foreground mb-4 text-sm leading-relaxed">
-                        Publish your rates by scale, set your terms once, and control intake with
-                        slots that flip you to a waitlist when the bench fills. Your finished
-                        horses appear on your page automatically — with every ribbon they go on to
-                        win.
+                <div className="rounded-lg border border-input bg-card/50 p-6 backdrop-blur-sm">
+                    <h3 className="mb-1 font-serif text-lg font-bold">🎨 Take commissions? Open a studio</h3>
+                    <p className="mb-4 text-sm leading-relaxed text-secondary-foreground">
+                        Publish your rates by scale, set your terms once, and control intake with slots that flip you to
+                        a waitlist when the bench fills. Your finished horses appear on your page automatically — with
+                        every ribbon they go on to win.
                     </p>
                     <Button asChild variant="outline" size="wide">
                         <Link href={user ? "/studio/setup" : "/signup?redirectTo=%2Fstudio%2Fsetup"}>
@@ -85,15 +82,12 @@ export default async function StudioDirectoryPage({ searchParams }: { searchPara
                     </Button>
                 </div>
 
-                <div className="border-input bg-card/50 rounded-lg border p-6 backdrop-blur-sm">
-                    <h3 className="mb-1 font-serif text-lg font-bold">
-                        📋 Commissioning someone?
-                    </h3>
-                    <p className="text-secondary-foreground mb-4 text-sm leading-relaxed">
-                        Send a request with your references and budget, get a written quote with
-                        the terms attached, and follow the work in progress. Everything you agree
-                        is on the record — and when it&rsquo;s finished you can file the cost
-                        straight into your horse&rsquo;s vault.
+                <div className="rounded-lg border border-input bg-card/50 p-6 backdrop-blur-sm">
+                    <h3 className="mb-1 font-serif text-lg font-bold">📋 Commissioning someone?</h3>
+                    <p className="mb-4 text-sm leading-relaxed text-secondary-foreground">
+                        Send a request with your references and budget, get a written quote with the terms attached, and
+                        follow the work in progress. Everything you agree is on the record — and when it&rsquo;s
+                        finished you can file the cost straight into your horse&rsquo;s vault.
                     </p>
                     <Button asChild variant="outline" size="wide">
                         <Link href={user ? "/studio/my-commissions" : "/signup?redirectTo=%2Fstudio"}>
@@ -103,12 +97,11 @@ export default async function StudioDirectoryPage({ searchParams }: { searchPara
                 </div>
             </div>
 
-            <div className="border-input bg-card/50 mt-6 rounded-lg border p-6 text-xs leading-relaxed backdrop-blur-sm">
+            <div className="mt-6 rounded-lg border border-input bg-card/50 p-6 text-xs leading-relaxed backdrop-blur-sm">
                 <p className="m-0">
-                    🤝 Model Horse Hub never handles commission money and never takes a cut.
-                    Deposits and payments are arranged directly between the commissioner and the
-                    artist; what we keep is the record of what you agreed, when — and the show
-                    results that prove an artist&rsquo;s work.
+                    🤝 Model Horse Hub never handles commission money and never takes a cut. Deposits and payments are
+                    arranged directly between the commissioner and the artist; what we keep is the record of what you
+                    agreed, when — and the show results that prove an artist&rsquo;s work.
                 </p>
             </div>
         </ExplorerLayout>

@@ -8,10 +8,7 @@ import { createClient } from "@/lib/supabase/server";
  * Add a catalog item to the current user's wishlist.
  * @param catalogItemId - UUID of the catalog item
  */
-export async function addToWishlist(
-    catalogId: string | null,
-    notes?: string
-) {
+export async function addToWishlist(catalogId: string | null, notes?: string) {
     const supabase = await createClient();
     const {
         data: { user },
@@ -71,11 +68,7 @@ export async function removeFromWishlist(wishlistId: string) {
         return { error: "You must be logged in.", success: false };
     }
 
-    const { error } = await supabase
-        .from("user_wishlists")
-        .delete()
-        .eq("id", wishlistId)
-        .eq("user_id", user.id);
+    const { error } = await supabase.from("user_wishlists").delete().eq("id", wishlistId).eq("user_id", user.id);
 
     if (error) {
         logger.error("Wishlist", "Delete error", error);
@@ -90,9 +83,7 @@ export async function removeFromWishlist(wishlistId: string) {
  * and whether they already want it. Called client-side by the reference page's
  * WantButton so the page itself stays cookie-free and cacheable.
  */
-export async function getWishlistState(
-    catalogId: string,
-): Promise<{ loggedIn: boolean; wanted: boolean }> {
+export async function getWishlistState(catalogId: string): Promise<{ loggedIn: boolean; wanted: boolean }> {
     const supabase = await createClient();
     const {
         data: { user },

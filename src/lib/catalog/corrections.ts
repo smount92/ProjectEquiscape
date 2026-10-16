@@ -180,7 +180,7 @@ export function vocabularyProblem(fieldChanges: Record<string, unknown>): string
  */
 export function buildCorrectionUpdate(
     fieldChanges: Record<string, unknown>,
-    existingAttributes: Record<string, unknown> | null | undefined
+    existingAttributes: Record<string, unknown> | null | undefined,
 ): {
     columnUpdates: Record<string, unknown>;
     attributes: Record<string, unknown> | null;
@@ -200,17 +200,13 @@ export function buildCorrectionUpdate(
     }
 
     const attributes =
-        Object.keys(attributeUpdates).length > 0
-            ? { ...(existingAttributes ?? {}), ...attributeUpdates }
-            : null;
+        Object.keys(attributeUpdates).length > 0 ? { ...(existingAttributes ?? {}), ...attributeUpdates } : null;
 
     return { columnUpdates, attributes };
 }
 
 /** Does this correction touch any attribute key (i.e. needs the JSONB merge)? */
-export function correctionTouchesAttributes(
-    fieldChanges: Record<string, unknown>
-): boolean {
+export function correctionTouchesAttributes(fieldChanges: Record<string, unknown>): boolean {
     return Object.keys(fieldChanges).some((k) => !CATALOG_REAL_COLUMNS.has(k));
 }
 
@@ -246,9 +242,7 @@ const SILVER_VALUE_CHECKS: Record<string, (to: string) => boolean> = {
  * is not a rejection — the caller files the suggestion for human review,
  * exactly as it would for an untrusted member.
  */
-export function silverAutoApprovable(
-    fieldChanges: Record<string, unknown>
-): boolean {
+export function silverAutoApprovable(fieldChanges: Record<string, unknown>): boolean {
     const entries = Object.entries(fieldChanges);
     if (entries.length === 0) return false;
     return entries.every(([key, value]) => {

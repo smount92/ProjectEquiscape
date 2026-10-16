@@ -27,13 +27,7 @@ vi.mock("@/lib/utils/avatars.server", () => ({
     resolveAvatarUrls: vi.fn(async () => new Map<string, string>()),
 }));
 
-import {
-    createThread,
-    getGroupBoard,
-    getThread,
-    markGroupRead,
-    replyToThread,
-} from "@/app/actions/groups-forum";
+import { createThread, getGroupBoard, getThread, markGroupRead, replyToThread } from "@/app/actions/groups-forum";
 import { togglePinPost } from "@/app/actions/groups";
 
 const GROUP_ID = "123e4567-e89b-42d3-a456-426614174000";
@@ -275,10 +269,13 @@ describe("groups-forum — replyToThread", () => {
 
         const result = await replyToThread({ postId: THREAD_ID, content: "Count me in!" });
         expect(result).toEqual({ success: true, replyId: "reply-99" });
-        expect(mockClient.rpc).toHaveBeenCalledWith("add_post_reply", expect.objectContaining({
-            p_parent_id: THREAD_ID,
-            p_author_id: "test-user-id",
-        }));
+        expect(mockClient.rpc).toHaveBeenCalledWith(
+            "add_post_reply",
+            expect.objectContaining({
+                p_parent_id: THREAD_ID,
+                p_author_id: "test-user-id",
+            }),
+        );
 
         // Deferred notifications: actor alias, group slug, prior repliers
         mockClient._mockQuery.single
@@ -296,18 +293,22 @@ describe("groups-forum — replyToThread", () => {
         await runAfterCallbacks();
 
         expect(createNotification).toHaveBeenCalledTimes(3);
-        expect(createNotification).toHaveBeenCalledWith(expect.objectContaining({
-            userId: "op-user",
-            type: "reply",
-            content: expect.stringContaining("replied to your thread"),
-            linkUrl: `/community/groups/pnw-breyer/thread/${THREAD_ID}`,
-        }));
-        for (const participant of ["participant-1", "participant-2"]) {
-            expect(createNotification).toHaveBeenCalledWith(expect.objectContaining({
-                userId: participant,
+        expect(createNotification).toHaveBeenCalledWith(
+            expect.objectContaining({
+                userId: "op-user",
                 type: "reply",
-                content: expect.stringContaining('replied in "Carpool from Tacoma?"'),
-            }));
+                content: expect.stringContaining("replied to your thread"),
+                linkUrl: `/community/groups/pnw-breyer/thread/${THREAD_ID}`,
+            }),
+        );
+        for (const participant of ["participant-1", "participant-2"]) {
+            expect(createNotification).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    userId: participant,
+                    type: "reply",
+                    content: expect.stringContaining('replied in "Carpool from Tacoma?"'),
+                }),
+            );
         }
         expect(parseAndNotifyMentions).toHaveBeenCalledWith(
             "Count me in!",

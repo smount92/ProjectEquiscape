@@ -117,8 +117,12 @@ type DbError = { code?: string; message: string } | null;
  * them errors. Same escape hatch the artists table used pre-200:
  * loosen the client, validate shapes at runtime.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const loose = (c: unknown) => c as { from: (t: string) => any; rpc: (fn: string, args?: Record<string, unknown>) => PromiseLike<{ data: unknown; error: DbError }> };
+const loose = (c: unknown) =>
+    c as {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        from: (t: string) => any;
+        rpc: (fn: string, args?: Record<string, unknown>) => PromiseLike<{ data: unknown; error: DbError }>;
+    };
 
 /** Postgres "column/table missing" — the pre-202 signature. */
 function isMissingSchema(err: DbError): boolean {
@@ -135,8 +139,16 @@ const createSchema = z.object({
     summary: z.string().max(2000).optional(),
     materialsUsed: z.string().max(500).optional(),
     // A year, year-month or full date; normalised below (parseLooseDate).
-    claimedStart: z.string().regex(/^\d{4}(?:-\d{1,2})?(?:-\d{1,2})?$/).nullable().optional(),
-    dateCompleted: z.string().regex(/^\d{4}(?:-\d{1,2})?(?:-\d{1,2})?$/).nullable().optional(),
+    claimedStart: z
+        .string()
+        .regex(/^\d{4}(?:-\d{1,2})?(?:-\d{1,2})?$/)
+        .nullable()
+        .optional(),
+    dateCompleted: z
+        .string()
+        .regex(/^\d{4}(?:-\d{1,2})?(?:-\d{1,2})?$/)
+        .nullable()
+        .optional(),
 });
 
 /**
@@ -240,9 +252,9 @@ export async function createWorkRecord(input: z.input<typeof createSchema>): Pro
  * another stable and the picker only listed her own). RLS does the
  * visibility gating: a stranger's private horse never comes back.
  */
-export async function searchWorkTargets(query: string): Promise<
-    { id: string; name: string; ownerAlias: string | null; thumbUrl: string | null }[]
-> {
+export async function searchWorkTargets(
+    query: string,
+): Promise<{ id: string; name: string; ownerAlias: string | null; thumbUrl: string | null }[]> {
     const { supabase } = await requireAuth();
     const q = query.trim();
     if (q.length < 2) return [];
@@ -259,7 +271,10 @@ export async function searchWorkTargets(query: string): Promise<
     const { data: thumbs } = await supabase
         .from("horse_images")
         .select("horse_id, image_url")
-        .in("horse_id", rows.map((r) => r.id))
+        .in(
+            "horse_id",
+            rows.map((r) => r.id),
+        )
         .eq("angle_profile", "Primary_Thumbnail");
     const thumbByHorse = new Map<string, string>();
     for (const t of thumbs ?? []) {
@@ -283,7 +298,11 @@ const ownerCreditSchema = z.object({
     workType: z.string().min(2).max(60),
     artistName: z.string().min(2).max(80),
     summary: z.string().max(2000).optional(),
-    dateCompleted: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+    dateCompleted: z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/)
+        .nullable()
+        .optional(),
 });
 
 /**
@@ -377,7 +396,11 @@ const momentImageSchema = z.object({
     path: z.string().min(1).max(400),
     stage: z.string().trim().min(1).max(MAX_STAGE_LABEL),
     caption: z.string().max(MAX_MOMENT_NOTES).optional(),
-    claimedDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+    claimedDate: z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/)
+        .nullable()
+        .optional(),
     isPublic: z.boolean().optional(),
 });
 
@@ -490,11 +513,7 @@ export async function getMakingForHorse(horseId: string): Promise<WorkRecordView
         return [];
     }
 
-    const { data: horse } = await supabase
-        .from("user_horses")
-        .select("owner_id")
-        .eq("id", horseId)
-        .single();
+    const { data: horse } = await supabase.from("user_horses").select("owner_id").eq("id", horseId).single();
     const ownerId = horse?.owner_id ?? null;
 
     const ids = logsData.map((l) => l.id);
@@ -531,14 +550,7 @@ export async function getMakingForHorse(horseId: string): Promise<WorkRecordView
         // the OWNER recorded it (creating the credit IS their consent —
         // the stamp protects owners from artist claims, not from their
         // own entries). Parties always see their own records.
-        if (
-            !confirmed &&
-            !artistIsOwner &&
-            l.recorded_by !== "owner" &&
-            !viewerIsArtist &&
-            !viewerIsOwner
-        )
-            continue;
+        if (!confirmed && !artistIsOwner && l.recorded_by !== "owner" && !viewerIsArtist && !viewerIsOwner) continue;
         // 202's promise: hiding the reel hides the PHOTOS; the credit and
         // dates are provenance and stay. Parties still see their own reel.
         const reelHidden = !(l.reel_public ?? true) && !viewerIsArtist && !viewerIsOwner;
@@ -575,10 +587,23 @@ export async function getPublicMaking(horseId: string): Promise<WorkRecordView[]
     const { data, error } = await loose(supabase).rpc("get_public_making", { p_horse: horseId });
     if (error || !data) return [];
     const rows = data as Array<{
-        id: string; work_type: string; artist_alias: string | null; artist_user_id: string | null;
-        summary: string | null; claimed_start: string | null; date_completed: string | null;
-        recorded_by: string; verified: boolean;
-        moments: Array<{ id: string; stage: string; caption: string | null; image_urls: string[]; claimed_date: string | null; created_at: string }>;
+        id: string;
+        work_type: string;
+        artist_alias: string | null;
+        artist_user_id: string | null;
+        summary: string | null;
+        claimed_start: string | null;
+        date_completed: string | null;
+        recorded_by: string;
+        verified: boolean;
+        moments: Array<{
+            id: string;
+            stage: string;
+            caption: string | null;
+            image_urls: string[];
+            claimed_date: string | null;
+            created_at: string;
+        }>;
     }>;
     if (!Array.isArray(rows)) return [];
     return rows.map((r) => ({

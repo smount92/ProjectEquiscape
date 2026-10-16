@@ -47,10 +47,7 @@ describe("summarizeIncome", () => {
     it("counts legacy v1 statuses correctly after normalisation", () => {
         // `shipping` normalises to completed, `review` to awaiting_approval.
         const s = summarizeIncome(
-            [
-                row({ status: "shipping", agreedPrice: 400 }),
-                row({ status: "review", agreedPrice: 600 }),
-            ],
+            [row({ status: "shipping", agreedPrice: 400 }), row({ status: "review", agreedPrice: 600 })],
             NOW,
         );
         expect(s.earnedAllTime).toBe(400);
@@ -143,18 +140,12 @@ describe("summarizeIncome", () => {
     });
 
     it("falls back to the creation date when a completion date is missing", () => {
-        const s = summarizeIncome(
-            [row({ completedAt: null, createdAt: "2026-05-09", agreedPrice: 250 })],
-            NOW,
-        );
+        const s = summarizeIncome([row({ completedAt: null, createdAt: "2026-05-09", agreedPrice: 250 })], NOW);
         expect(s.byMonth[0].key).toBe("2026-05");
     });
 
     it("treats an unpriced completion as zero rather than breaking the total", () => {
-        const s = summarizeIncome(
-            [row({ agreedPrice: null }), row({ agreedPrice: 400 })],
-            NOW,
-        );
+        const s = summarizeIncome([row({ agreedPrice: null }), row({ agreedPrice: 400 })], NOW);
         expect(s.earnedAllTime).toBe(400);
         expect(s.earnedCount).toBe(2);
         expect(s.averageCommission).toBe(200);

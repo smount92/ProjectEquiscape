@@ -41,7 +41,13 @@ interface PapersSectionProps {
 const KIND_GLYPH: Record<string, string> = Object.fromEntries(PAPER_KINDS.map((k) => [k.value, k.glyph]));
 const KIND_LABEL: Record<string, string> = Object.fromEntries(PAPER_KINDS.map((k) => [k.value, k.label]));
 
-export default function PapersSection({ horseId, horseName, papers, isOwner = false, attachedLabels = {} }: PapersSectionProps) {
+export default function PapersSection({
+    horseId,
+    horseName,
+    papers,
+    isOwner = false,
+    attachedLabels = {},
+}: PapersSectionProps) {
     const router = useRouter();
     const [lightbox, setLightbox] = useState<number | null>(null);
     const [editing, setEditing] = useState<PaperView | "new" | null>(null);
@@ -95,9 +101,7 @@ export default function PapersSection({ horseId, horseName, papers, isOwner = fa
                 <h3 id="passport-papers-heading" className="m-0 flex items-center gap-2 text-lg">
                     <span aria-hidden="true">📜</span> Papers
                     {papers.length > 0 && (
-                        <span className="text-secondary-foreground text-sm font-normal">
-                            {papers.length} on file
-                        </span>
+                        <span className="text-sm font-normal text-secondary-foreground">{papers.length} on file</span>
                     )}
                 </h3>
                 {isOwner && papers.length < MAX_PAPERS_PER_HORSE && (
@@ -106,7 +110,7 @@ export default function PapersSection({ horseId, horseName, papers, isOwner = fa
                     </Button>
                 )}
             </div>
-            <p className="text-secondary-foreground m-0 mb-4 text-xs leading-relaxed">
+            <p className="m-0 mb-4 text-xs leading-relaxed text-secondary-foreground">
                 {isOwner
                     ? "Breeding certificates, registration papers, pedigree charts — filed by you, shown as they were issued. A scan of the old paper ones is the copy that survives a move."
                     : "Breeding certificates, registration papers and pedigree charts, filed by the owner and shown as they were issued."}
@@ -120,10 +124,9 @@ export default function PapersSection({ horseId, horseName, papers, isOwner = fa
                     style={{ ...PARCHMENT_INK, aspectRatio: "auto" }}
                 >
                     <p className="m-0 text-sm font-medium">No papers filed yet.</p>
-                    <p className="text-secondary-foreground m-0 mt-1 text-xs">
-                        The breeding certificate that came with {horseName}, registry papers, the
-                        pedigree chart — photograph or scan them, or drop in the PDF, and they
-                        hang here framed.
+                    <p className="m-0 mt-1 text-xs text-secondary-foreground">
+                        The breeding certificate that came with {horseName}, registry papers, the pedigree chart —
+                        photograph or scan them, or drop in the PDF, and they hang here framed.
                     </p>
                 </div>
             ) : (
@@ -148,9 +151,13 @@ export default function PapersSection({ horseId, horseName, papers, isOwner = fa
                                     >
                                         <div className="paper-plate">
                                             <div className="text-center">
-                                                <div className="text-4xl" aria-hidden="true">📄</div>
-                                                <div className="paper-kind text-xs font-semibold">PDF · {formatBytes(p.byteSize)}</div>
-                                                <div className="text-forest mt-1 text-xs font-semibold">Open ↗</div>
+                                                <div className="text-4xl" aria-hidden="true">
+                                                    📄
+                                                </div>
+                                                <div className="paper-kind text-xs font-semibold">
+                                                    PDF · {formatBytes(p.byteSize)}
+                                                </div>
+                                                <div className="mt-1 text-xs font-semibold text-forest">Open ↗</div>
                                             </div>
                                         </div>
                                     </a>
@@ -164,35 +171,58 @@ export default function PapersSection({ horseId, horseName, papers, isOwner = fa
                                     >
                                         <div className="paper-frame-inner">
                                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                                            <img src={p.url} alt={`${p.title} — ${KIND_LABEL[p.kind] ?? "papers"} for ${horseName}`} loading="lazy" decoding="async" />
+                                            <img
+                                                src={p.url}
+                                                alt={`${p.title} — ${KIND_LABEL[p.kind] ?? "papers"} for ${horseName}`}
+                                                loading="lazy"
+                                                decoding="async"
+                                            />
                                         </div>
                                     </button>
                                 )}
 
                                 <div className="px-1">
-                                    <div className="paper-kind text-secondary-foreground text-[0.7rem] font-semibold">
-                                        <span aria-hidden="true">{KIND_GLYPH[p.kind] ?? "🗂️"}</span> {KIND_LABEL[p.kind] ?? "Papers"}
+                                    <div className="paper-kind text-[0.7rem] font-semibold text-secondary-foreground">
+                                        <span aria-hidden="true">{KIND_GLYPH[p.kind] ?? "🗂️"}</span>{" "}
+                                        {KIND_LABEL[p.kind] ?? "Papers"}
                                         {tag && <span className="ml-2">· 📎 {tag}</span>}
                                         {isOwner && !p.isPublic && <span className="ml-2">· 🔒 only you</span>}
                                     </div>
-                                    <div className="font-serif text-base font-bold leading-tight">{p.title}</div>
+                                    <div className="font-serif text-base leading-tight font-bold">{p.title}</div>
                                     {issuedLine(p.issuedBy, p.issuedOn) && (
-                                        <div className="text-secondary-foreground text-xs">{issuedLine(p.issuedBy, p.issuedOn)}</div>
+                                        <div className="text-xs text-secondary-foreground">
+                                            {issuedLine(p.issuedBy, p.issuedOn)}
+                                        </div>
                                     )}
                                     {p.notes && (
-                                        <p className="text-secondary-foreground m-0 mt-1 text-xs leading-relaxed whitespace-pre-wrap">
+                                        <p className="m-0 mt-1 text-xs leading-relaxed whitespace-pre-wrap text-secondary-foreground">
                                             <LinkifiedText text={p.notes} />
                                         </p>
                                     )}
                                     {isOwner && (
                                         <div className="mt-2 flex flex-wrap gap-1">
-                                            <Button variant="ghost" size="sm" disabled={busyId === p.id} onClick={() => setEditing(p)}>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                disabled={busyId === p.id}
+                                                onClick={() => setEditing(p)}
+                                            >
                                                 Edit
                                             </Button>
-                                            <Button variant="ghost" size="sm" disabled={busyId === p.id} onClick={() => togglePublic(p)}>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                disabled={busyId === p.id}
+                                                onClick={() => togglePublic(p)}
+                                            >
                                                 {p.isPublic ? "Hide from passport" : "Show on passport"}
                                             </Button>
-                                            <Button variant="ghost" size="sm" disabled={busyId === p.id} onClick={() => remove(p)}>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                disabled={busyId === p.id}
+                                                onClick={() => remove(p)}
+                                            >
                                                 Remove
                                             </Button>
                                         </div>
@@ -205,7 +235,7 @@ export default function PapersSection({ horseId, horseName, papers, isOwner = fa
             )}
 
             {error && (
-                <p role="alert" className="text-destructive mt-3 text-sm font-semibold">
+                <p role="alert" className="mt-3 text-sm font-semibold text-destructive">
                     {error}
                 </p>
             )}

@@ -9,6 +9,8 @@
     "lint": "eslint",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.typecheck.json",
+    "format": "prettier --write src e2e",
+    "format:check": "prettier --check src e2e",
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",
     "test:unit:coverage": "vitest run --coverage",

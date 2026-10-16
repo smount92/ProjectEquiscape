@@ -52,9 +52,7 @@ export default function PhotoPicker({
     const [note, setNote] = useState<string | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     /** Watermark pref, fetched once per picker on first upload. */
-    const profileRef = useRef<{ watermarkPhotos: boolean; aliasName: string; watermarkText: string } | null>(
-        null,
-    );
+    const profileRef = useRef<{ watermarkPhotos: boolean; aliasName: string; watermarkText: string } | null>(null);
 
     const upload = async (file: File) => {
         if (uploading) return;
@@ -125,8 +123,8 @@ export default function PhotoPicker({
                 </Button>
             </div>
             <p className="m-0 text-xs text-muted-foreground">
-                Sharp side profile, plain background, whole horse in frame. A watermark shows your name —
-                in a blind-judged show the judge sees it too.
+                Sharp side profile, plain background, whole horse in frame. A watermark shows your name — in a
+                blind-judged show the judge sees it too.
             </p>
             {loading && !photos ? (
                 <p className="m-0 text-sm text-muted-foreground">Loading photos…</p>
@@ -183,8 +181,8 @@ export default function PhotoPicker({
                 </p>
             )}
             <p className="m-0 text-xs text-muted-foreground">
-                Uploads are free on every tier (up to 5 show photos per horse) and join this horse&rsquo;s
-                stable photos.
+                Uploads are free on every tier (up to 5 show photos per horse) and join this horse&rsquo;s stable
+                photos.
             </p>
         </div>
     );

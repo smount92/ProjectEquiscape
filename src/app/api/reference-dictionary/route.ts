@@ -26,19 +26,19 @@ export async function GET() {
 
     // Compress: short keys to reduce payload size
     // Split into releases and resins for backward compat with CsvImport matching
-    const releases = allItems.filter(r => r.item_type === "plastic_release");
-    const resins = allItems.filter(r => r.item_type === "artist_resin");
+    const releases = allItems.filter((r) => r.item_type === "plastic_release");
+    const resins = allItems.filter((r) => r.item_type === "artist_resin");
     // Molds and the other kinds were never candidates, so a spreadsheet row
     // naming a mold (or a china, micro mini, medallion, factory resin)
     // could only ever import unlinked.
-    const molds = allItems.filter(r => r.item_type === "plastic_mold");
-    const others = allItems.filter(r => !["plastic_release", "artist_resin", "plastic_mold"].includes(r.item_type));
+    const molds = allItems.filter((r) => r.item_type === "plastic_mold");
+    const others = allItems.filter((r) => !["plastic_release", "artist_resin", "plastic_mold"].includes(r.item_type));
 
     // Find parent mold names for releases
     const moldMap = new Map<string, { title: string; maker: string }>();
     allItems
-        .filter(r => r.item_type === "plastic_mold")
-        .forEach(m => moldMap.set(m.id, { title: m.title, maker: m.maker }));
+        .filter((r) => r.item_type === "plastic_mold")
+        .forEach((m) => moldMap.set(m.id, { title: m.title, maker: m.maker }));
 
     const dictionary = {
         releases: releases.map((r: Record<string, unknown>) => {

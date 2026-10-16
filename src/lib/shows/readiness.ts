@@ -65,9 +65,7 @@ export function deriveReadinessState(r: ShowReadiness, mode: ShowMode): Readines
     }
     // Belt-and-braces: gaps should never render blank.
     if (messages.length === 0) {
-        messages.push(
-            "Your horses aren't enterable yet — check visibility and photos in your stable.",
-        );
+        messages.push("Your horses aren't enterable yet — check visibility and photos in your stable.");
     }
 
     return { kind: "gaps", privateCount, publicNoPhotoCount, messages };

@@ -1,25 +1,13 @@
 import Link from "next/link";
 
 import { getStandings, type GetStandingsResult } from "@/app/actions/standings";
-import {
-    BEST_RESULTS_CAP,
-    FALLBACK_HORSE_NAME,
-    MIN_EXHIBITORS_FOR_POINTS,
-    POINTS_CAP,
-} from "@/lib/shows/points";
+import { BEST_RESULTS_CAP, FALLBACK_HORSE_NAME, MIN_EXHIBITORS_FOR_POINTS, POINTS_CAP } from "@/lib/shows/points";
 import { titlePrefix } from "@/lib/shows/titles";
 import { showYearLabel, showYearOf } from "@/lib/shows/showYear";
 import { createClient } from "@/lib/supabase/server";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
 import PageMasthead from "@/components/layouts/PageMasthead";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export const dynamic = "force-dynamic";
 
@@ -46,15 +34,7 @@ function standingsHref(year: number, scope: ScopeParam, shows: ShowsParam): stri
 }
 
 /** Ledger control pill — active gets the rubber stamp, idle stays quiet. */
-function ControlLink({
-    href,
-    active,
-    children,
-}: {
-    href: string;
-    active: boolean;
-    children: React.ReactNode;
-}) {
+function ControlLink({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) {
     if (active) {
         return (
             <span className="stamp" aria-current="true">
@@ -78,10 +58,7 @@ function ControlLink({
 function RankCell({ rank }: { rank: number }) {
     if (rank <= 3) {
         return (
-            <span
-                className="brass-medallion"
-                style={{ width: 30, height: 30, borderWidth: 2, fontSize: "0.8rem" }}
-            >
+            <span className="brass-medallion" style={{ width: 30, height: 30, borderWidth: 2, fontSize: "0.8rem" }}>
                 {rank}
             </span>
         );
@@ -124,10 +101,7 @@ function StandingsTable({
             <TableBody>
                 {result.scope === "horses"
                     ? result.rows.map((row) => (
-                          <TableRow
-                              key={row.horseId}
-                              className={row.ownerId === viewerId ? mine : undefined}
-                          >
+                          <TableRow key={row.horseId} className={row.ownerId === viewerId ? mine : undefined}>
                               <TableCell>
                                   <RankCell rank={row.rank} />
                               </TableCell>
@@ -142,7 +116,11 @@ function StandingsTable({
                                           // else; the public passport is what a rival's row
                                           // should open (2026-09-19). Your own rows keep the
                                           // owner view.
-                                          href={row.ownerId === viewerId ? `/stable/${row.horseId}` : `/community/${row.horseId}`}
+                                          href={
+                                              row.ownerId === viewerId
+                                                  ? `/stable/${row.horseId}`
+                                                  : `/community/${row.horseId}`
+                                          }
                                           className="text-foreground no-underline hover:underline"
                                       >
                                           {titlePrefixByHorse.get(row.horseId) && (
@@ -162,9 +140,7 @@ function StandingsTable({
                                       @{row.ownerAlias.replace(/^@+/, "")}
                                   </Link>
                               </TableCell>
-                              <TableCell className="text-right font-bold tabular-nums">
-                                  {row.points}
-                              </TableCell>
+                              <TableCell className="text-right font-bold tabular-nums">{row.points}</TableCell>
                               <TableCell className="hidden text-right tabular-nums sm:table-cell">
                                   {row.placings}
                               </TableCell>
@@ -177,10 +153,7 @@ function StandingsTable({
                           </TableRow>
                       ))
                     : result.rows.map((row) => (
-                          <TableRow
-                              key={row.ownerId}
-                              className={row.ownerId === viewerId ? mine : undefined}
-                          >
+                          <TableRow key={row.ownerId} className={row.ownerId === viewerId ? mine : undefined}>
                               <TableCell>
                                   <RankCell rank={row.rank} />
                               </TableCell>
@@ -192,9 +165,7 @@ function StandingsTable({
                                       @{row.ownerAlias.replace(/^@+/, "")}
                                   </Link>
                               </TableCell>
-                              <TableCell className="text-right font-bold tabular-nums">
-                                  {row.points}
-                              </TableCell>
+                              <TableCell className="text-right font-bold tabular-nums">{row.points}</TableCell>
                               <TableCell className="hidden text-right tabular-nums sm:table-cell">
                                   {row.placings}
                               </TableCell>
@@ -216,7 +187,6 @@ export default async function StandingsPage({
 }: {
     searchParams: Promise<{ year?: string; scope?: string; shows?: string }>;
 }) {
-
     const supabase = await createClient();
     const {
         data: { user },
@@ -267,9 +237,7 @@ export default async function StandingsPage({
 
     // The viewer's own rank, said plainly above the table.
     const myStableRow =
-        result.success && result.scope === "stables"
-            ? result.rows.find((r) => r.ownerId === user?.id)
-            : undefined;
+        result.success && result.scope === "stables" ? result.rows.find((r) => r.ownerId === user?.id) : undefined;
 
     return (
         <ExplorerLayout noHeader>
@@ -281,52 +249,33 @@ export default async function StandingsPage({
 
             {myStableRow && (
                 <p className="mb-4 text-sm text-secondary-foreground">
-                    Your stable stands <b className="text-foreground">#{myStableRow.rank}</b>{" "}
-                    with <b className="text-foreground">{myStableRow.points}</b> point
+                    Your stable stands <b className="text-foreground">#{myStableRow.rank}</b> with{" "}
+                    <b className="text-foreground">{myStableRow.points}</b> point
                     {myStableRow.points === 1 ? "" : "s"} this season.
                 </p>
             )}
 
-            <div
-                className="mb-6 flex flex-wrap items-center gap-x-6 gap-y-3"
-                aria-label="Standings filters"
-            >
+            <div className="mb-6 flex flex-wrap items-center gap-x-6 gap-y-3" aria-label="Standings filters">
                 <div className="flex flex-wrap items-center gap-3" aria-label="Show year">
                     {years.map((y) => (
-                        <ControlLink
-                            key={y}
-                            href={standingsHref(y, scope, shows)}
-                            active={y === year}
-                        >
+                        <ControlLink key={y} href={standingsHref(y, scope, shows)} active={y === year}>
                             {showYearLabel(y)}
                         </ControlLink>
                     ))}
                 </div>
                 <div className="flex flex-wrap items-center gap-3" aria-label="Standings scope">
-                    <ControlLink
-                        href={standingsHref(year, "horses", shows)}
-                        active={scope === "horses"}
-                    >
+                    <ControlLink href={standingsHref(year, "horses", shows)} active={scope === "horses"}>
                         Horses
                     </ControlLink>
-                    <ControlLink
-                        href={standingsHref(year, "stables", shows)}
-                        active={scope === "stables"}
-                    >
+                    <ControlLink href={standingsHref(year, "stables", shows)} active={scope === "stables"}>
                         Stables
                     </ControlLink>
                 </div>
                 <div className="flex flex-wrap items-center gap-3" aria-label="Which shows count">
-                    <ControlLink
-                        href={standingsHref(year, scope, "qualifying")}
-                        active={shows === "qualifying"}
-                    >
+                    <ControlLink href={standingsHref(year, scope, "qualifying")} active={shows === "qualifying"}>
                         Qualifying shows
                     </ControlLink>
-                    <ControlLink
-                        href={standingsHref(year, scope, "all")}
-                        active={shows === "all"}
-                    >
+                    <ControlLink href={standingsHref(year, scope, "all")} active={shows === "all"}>
                         All shows
                     </ControlLink>
                 </div>
@@ -352,8 +301,7 @@ export default async function StandingsPage({
                             {result.countedShows.length > 0 ? (
                                 <>
                                     Scored from {result.countedShows.length} show
-                                    {result.countedShows.length === 1 ? "" : "s"} with published
-                                    results:{" "}
+                                    {result.countedShows.length === 1 ? "" : "s"} with published results:{" "}
                                     {result.countedShows.map((s, i) => (
                                         <span key={s.id}>
                                             {i > 0 && ", "}
@@ -368,17 +316,13 @@ export default async function StandingsPage({
                                     .{" "}
                                 </>
                             ) : null}
-                            Points: first place is worth the class — 1st earns the number of
-                            entries in the class (capped at {POINTS_CAP}), one point less per
-                            place, never below 1 · Classes need {MIN_EXHIBITORS_FOR_POINTS}+
-                            exhibitors to pay points · A horse-and-owner pair&apos;s best{" "}
-                            {BEST_RESULTS_CAP} results count · Championship bonuses: section +3,
-                            division +5, show +10 · Only shows with published results count
+                            Points: first place is worth the class — 1st earns the number of entries in the class
+                            (capped at {POINTS_CAP}), one point less per place, never below 1 · Classes need{" "}
+                            {MIN_EXHIBITORS_FOR_POINTS}+ exhibitors to pay points · A horse-and-owner pair&apos;s best{" "}
+                            {BEST_RESULTS_CAP} results count · Championship bonuses: section +3, division +5, show +10 ·
+                            Only shows with published results count
                             {shows === "qualifying" ? " · MHH-qualifying shows only" : ""} ·{" "}
-                            <Link
-                                href="/shows/rules"
-                                className="text-muted-foreground underline hover:text-foreground"
-                            >
+                            <Link href="/shows/rules" className="text-muted-foreground underline hover:text-foreground">
                                 Full rules
                             </Link>
                             .

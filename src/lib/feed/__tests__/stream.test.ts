@@ -1,10 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-    mergeByCreatedAtDesc,
-    takePage,
-    isGloballyVisible,
-    type ContextualRow,
-} from "@/lib/feed/stream";
+import { mergeByCreatedAtDesc, takePage, isGloballyVisible, type ContextualRow } from "@/lib/feed/stream";
 
 const row = (id: string, createdAt: string) => ({ id, createdAt });
 
@@ -28,11 +23,7 @@ describe("mergeByCreatedAtDesc", () => {
 });
 
 describe("takePage", () => {
-    const rows = [
-        row("1", "2026-08-10T10:00:00Z"),
-        row("2", "2026-08-09T10:00:00Z"),
-        row("3", "2026-08-08T10:00:00Z"),
-    ];
+    const rows = [row("1", "2026-08-10T10:00:00Z"), row("2", "2026-08-09T10:00:00Z"), row("3", "2026-08-08T10:00:00Z")];
 
     it("returns a cursor when more rows were fetched than fit", () => {
         const page = takePage(rows, 2, true);
@@ -72,36 +63,24 @@ describe("isGloballyVisible", () => {
     });
 
     it("admits a post on a public horse", () => {
-        expect(
-            isGloballyVisible({ ...base, horseId: "horse-public" }, publicHorses, publicGroups),
-        ).toBe(true);
+        expect(isGloballyVisible({ ...base, horseId: "horse-public" }, publicHorses, publicGroups)).toBe(true);
     });
 
     it("REFUSES a post on a private or unlisted horse", () => {
-        expect(
-            isGloballyVisible({ ...base, horseId: "horse-private" }, publicHorses, publicGroups),
-        ).toBe(false);
+        expect(isGloballyVisible({ ...base, horseId: "horse-private" }, publicHorses, publicGroups)).toBe(false);
     });
 
     it("admits a post in a public group", () => {
-        expect(
-            isGloballyVisible({ ...base, groupId: "group-public" }, publicHorses, publicGroups),
-        ).toBe(true);
+        expect(isGloballyVisible({ ...base, groupId: "group-public" }, publicHorses, publicGroups)).toBe(true);
     });
 
     it("REFUSES a post in a private or restricted group", () => {
-        expect(
-            isGloballyVisible({ ...base, groupId: "group-private" }, publicHorses, publicGroups),
-        ).toBe(false);
+        expect(isGloballyVisible({ ...base, groupId: "group-private" }, publicHorses, publicGroups)).toBe(false);
     });
 
     it("REFUSES a group forum channel post even in a public group", () => {
         expect(
-            isGloballyVisible(
-                { ...base, groupId: "group-public", channelId: "chan-1" },
-                publicHorses,
-                publicGroups,
-            ),
+            isGloballyVisible({ ...base, groupId: "group-public", channelId: "chan-1" }, publicHorses, publicGroups),
         ).toBe(false);
     });
 

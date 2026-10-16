@@ -69,7 +69,10 @@ export default function MarketListingFilters({
     shipsFrom?: string[];
 }) {
     const shipsFromSet = new Set([...shipsFrom, ...(filters.from ? [filters.from] : [])]);
-    const shipsFromOptions = COUNTRIES.filter((c) => shipsFromSet.has(c.code)).map((c) => ({ value: c.code, label: c.name }));
+    const shipsFromOptions = COUNTRIES.filter((c) => shipsFromSet.has(c.code)).map((c) => ({
+        value: c.code,
+        label: c.name,
+    }));
     const router = useRouter();
     const [searchInput, setSearchInput] = useState(filters.q ?? "");
 

@@ -91,21 +91,13 @@ describe("recordChipLabel", () => {
         expect(recordChipLabel({ total: 4, placings: 3, championships: 1, verified: 0 })).toBe(
             "3 placings · 1 championship",
         );
-        expect(recordChipLabel({ total: 1, placings: 1, championships: 0, verified: 0 })).toBe(
-            "1 placing",
-        );
-        expect(recordChipLabel({ total: 2, placings: 0, championships: 2, verified: 0 })).toBe(
-            "2 championships",
-        );
+        expect(recordChipLabel({ total: 1, placings: 1, championships: 0, verified: 0 })).toBe("1 placing");
+        expect(recordChipLabel({ total: 2, placings: 0, championships: 2, verified: 0 })).toBe("2 championships");
     });
 
     it("falls back to an honest record count when nothing placed", () => {
-        expect(recordChipLabel({ total: 2, placings: 0, championships: 0, verified: 0 })).toBe(
-            "2 show records",
-        );
-        expect(recordChipLabel({ total: 1, placings: 0, championships: 0, verified: 0 })).toBe(
-            "1 show record",
-        );
+        expect(recordChipLabel({ total: 2, placings: 0, championships: 0, verified: 0 })).toBe("2 show records");
+        expect(recordChipLabel({ total: 1, placings: 0, championships: 0, verified: 0 })).toBe("1 show record");
     });
 
     it("returns null when there is nothing to say — never '0 placings'", () => {
@@ -117,15 +109,11 @@ describe("recordChipLabel", () => {
 
 describe("verifiedChipLabel", () => {
     it("says 'verified' only when every record is verified", () => {
-        expect(verifiedChipLabel({ total: 3, placings: 3, championships: 0, verified: 3 })).toBe(
-            "verified",
-        );
+        expect(verifiedChipLabel({ total: 3, placings: 3, championships: 0, verified: 3 })).toBe("verified");
     });
 
     it("counts a partial mix explicitly", () => {
-        expect(verifiedChipLabel({ total: 3, placings: 3, championships: 0, verified: 2 })).toBe(
-            "2 verified",
-        );
+        expect(verifiedChipLabel({ total: 3, placings: 3, championships: 0, verified: 2 })).toBe("2 verified");
     });
 
     it("claims nothing when no record is verified", () => {

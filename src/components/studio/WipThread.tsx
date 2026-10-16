@@ -49,7 +49,7 @@ export default function WipThread({
     const [open, setOpen] = useState(false);
 
     return (
-        <div className="bg-card border-input rounded-lg border p-6 shadow-md">
+        <div className="rounded-lg border border-input bg-card p-6 shadow-md">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
                 <h2 className="m-0 font-serif text-lg font-bold">📋 Progress</h2>
                 {canPost && !open && (
@@ -72,19 +72,14 @@ export default function WipThread({
             )}
 
             {updates.length === 0 ? (
-                <p className="text-muted-foreground text-sm">
-                    Nothing posted yet. Work-in-progress photos land here — the artist posts them
-                    as the piece comes together.
+                <p className="text-sm text-muted-foreground">
+                    Nothing posted yet. Work-in-progress photos land here — the artist posts them as the piece comes
+                    together.
                 </p>
             ) : (
                 <ol className="m-0 grid list-none gap-0 p-0">
                     {updates.map((update, i) => (
-                        <Entry
-                            key={update.id}
-                            update={update}
-                            party={party}
-                            last={i === updates.length - 1}
-                        />
+                        <Entry key={update.id} update={update} party={party} last={i === updates.length - 1} />
                     ))}
                 </ol>
             )}
@@ -92,15 +87,7 @@ export default function WipThread({
     );
 }
 
-function Entry({
-    update,
-    party,
-    last,
-}: {
-    update: CommissionUpdate;
-    party: Party | null;
-    last: boolean;
-}) {
+function Entry({ update, party, last }: { update: CommissionUpdate; party: Party | null; last: boolean }) {
     const isArtist = party === "artist";
     const router = useRouter();
     const [acking, setAcking] = useState(false);
@@ -111,15 +98,10 @@ function Entry({
                 (`commission-relative`, `gap-4-dot`) that exist nowhere in
                 globals.css, so this never rendered at all. */}
             <div className="relative flex justify-center">
-                <span className="border-input bg-card relative z-[1] grid h-8 w-8 place-items-center rounded-full border text-sm">
+                <span className="relative z-[1] grid h-8 w-8 place-items-center rounded-full border border-input bg-card text-sm">
                     {ICONS[update.updateType] ?? "📋"}
                 </span>
-                {!last && (
-                    <span
-                        aria-hidden="true"
-                        className="bg-input absolute top-8 bottom-[-1.25rem] w-px"
-                    />
-                )}
+                {!last && <span aria-hidden="true" className="absolute top-8 bottom-[-1.25rem] w-px bg-input" />}
             </div>
 
             <div className="min-w-0">
@@ -131,12 +113,8 @@ function Entry({
                         href={`/profile/${encodeURIComponent(update.authorAlias)}`}
                     />
                     <div className="min-w-0 flex-1">
-                        {update.title && (
-                            <div className="text-foreground text-sm font-bold">
-                                {update.title}
-                            </div>
-                        )}
-                        <div className="text-muted-foreground text-xs">
+                        {update.title && <div className="text-sm font-bold text-foreground">{update.title}</div>}
+                        <div className="text-xs text-muted-foreground">
                             @{update.authorAlias} ·{" "}
                             {new Date(update.createdAt).toLocaleDateString("en-US", {
                                 month: "short",
@@ -144,13 +122,16 @@ function Entry({
                                 hour: "2-digit",
                                 minute: "2-digit",
                             })}
-                            {!update.isVisibleToClient && isArtist && (
-                                <span className="ml-2">🔒 private note</span>
-                            )}
+                            {!update.isVisibleToClient && isArtist && <span className="ml-2">🔒 private note</span>}
                             {update.updateType === "wip_photo" && isArtist && (
-                                <span className="ml-2" title={update.isPublic
-                                    ? "Publishes to the horse's Making reel at delivery"
-                                    : "Workbench only — stays between you two"}>
+                                <span
+                                    className="ml-2"
+                                    title={
+                                        update.isPublic
+                                            ? "Publishes to the horse's Making reel at delivery"
+                                            : "Workbench only — stays between you two"
+                                    }
+                                >
                                     {update.isPublic ? "🌍 reel" : "🔏 workbench"}
                                 </span>
                             )}
@@ -162,9 +143,9 @@ function Entry({
                     both stamps stay. This is the "we've both checked
                     off" the thread exists for. */}
                 {update.checkpoint && (
-                    <div className="border-input bg-card mt-2 flex flex-wrap items-center gap-2 rounded-md border px-3 py-2 text-sm">
+                    <div className="mt-2 flex flex-wrap items-center gap-2 rounded-md border border-input bg-card px-3 py-2 text-sm">
                         {update.checkpoint.ackedAt ? (
-                            <span className="text-forest font-semibold">
+                            <span className="font-semibold text-forest">
                                 ✓ Signed off by the commissioner ·{" "}
                                 {new Date(update.checkpoint.ackedAt).toLocaleDateString("en-US", {
                                     month: "short",
@@ -188,7 +169,7 @@ function Entry({
                                 >
                                     {acking ? "Signing…" : "Sign off ✓"}
                                 </Button>
-                                {ackError && <span className="text-destructive text-xs">{ackError}</span>}
+                                {ackError && <span className="text-xs text-destructive">{ackError}</span>}
                             </>
                         ) : (
                             <span className="text-muted-foreground">Awaiting the commissioner&rsquo;s sign-off…</span>
@@ -197,7 +178,7 @@ function Entry({
                 )}
 
                 {update.body && (
-                    <p className="text-secondary-foreground mt-1.5 text-sm leading-relaxed whitespace-pre-wrap">
+                    <p className="mt-1.5 text-sm leading-relaxed whitespace-pre-wrap text-secondary-foreground">
                         {update.body}
                     </p>
                 )}
@@ -210,7 +191,7 @@ function Entry({
                                 href={url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="border-input block max-w-[280px] overflow-hidden rounded-md border"
+                                className="block max-w-[280px] overflow-hidden rounded-md border border-input"
                             >
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
@@ -225,7 +206,7 @@ function Entry({
                 )}
 
                 {update.oldStatus && update.newStatus && (
-                    <div className="text-muted-foreground mt-1.5 text-xs">
+                    <div className="mt-1.5 text-xs text-muted-foreground">
                         {STATUS_LABELS[normalizeStatus(update.oldStatus)]} →{" "}
                         <strong>{STATUS_LABELS[normalizeStatus(update.newStatus)]}</strong>
                     </div>
@@ -343,12 +324,12 @@ function PostForm({
     };
 
     return (
-        <form onSubmit={submit} className="border-input bg-muted/40 mb-6 rounded-lg border p-4">
+        <form onSubmit={submit} className="mb-6 rounded-lg border border-input bg-muted/40 p-4">
             {party === "artist" && (
                 <label className="mb-4 block">
                     <span className="mb-1 block text-sm font-semibold">Kind of update</span>
                     <select
-                        className="border-input bg-card ring-offset-background focus:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-offset-2 focus:outline-none"
+                        className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
                         value={type}
                         onChange={(e) => setType(e.target.value as typeof type)}
                     >
@@ -390,13 +371,9 @@ function PostForm({
                 <span className="mb-1 block text-sm font-semibold">
                     Photo <span className="text-muted-foreground">(optional)</span>
                 </span>
-                <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                />
+                <Input type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
                 {file && (
-                    <span className="text-muted-foreground mt-1 block text-xs">
+                    <span className="mt-1 block text-xs text-muted-foreground">
                         📎 {file.name} ({(file.size / 1024).toFixed(0)} KB)
                     </span>
                 )}
@@ -411,9 +388,7 @@ function PostForm({
                         className="h-4 w-4"
                     />
                     Visible to the commissioner
-                    <span className="text-muted-foreground text-xs">
-                        (uncheck for a private note to yourself)
-                    </span>
+                    <span className="text-xs text-muted-foreground">(uncheck for a private note to yourself)</span>
                 </label>
             )}
 
@@ -426,14 +401,14 @@ function PostForm({
                         className="h-4 w-4"
                     />
                     🌍 Publish to the horse&rsquo;s Making reel at delivery
-                    <span className="text-muted-foreground text-xs">
+                    <span className="text-xs text-muted-foreground">
                         (otherwise it stays on the workbench, between you two)
                     </span>
                 </label>
             )}
 
             {error && (
-                <p className="text-destructive border-destructive/30 bg-destructive/10 mb-4 rounded-md border px-4 py-2 text-sm">
+                <p className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm text-destructive">
                     {error}
                 </p>
             )}

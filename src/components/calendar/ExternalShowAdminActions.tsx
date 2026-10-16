@@ -33,9 +33,7 @@ export default function ExternalShowAdminActions({ showId }: { showId: string })
             });
             if (result.success) {
                 toast(
-                    decision === "approved"
-                        ? "✅ Listing approved — it's on the calendar."
-                        : "❌ Listing rejected.",
+                    decision === "approved" ? "✅ Listing approved — it's on the calendar." : "❌ Listing rejected.",
                     "success",
                 );
                 router.refresh();
@@ -53,11 +51,7 @@ export default function ExternalShowAdminActions({ showId }: { showId: string })
                         <Button onClick={() => review("approved")} disabled={isPending}>
                             {isPending ? "Working…" : "✅ Approve"}
                         </Button>
-                        <Button
-                            variant="outline"
-                            onClick={() => setShowRejectForm(true)}
-                            disabled={isPending}
-                        >
+                        <Button variant="outline" onClick={() => setShowRejectForm(true)} disabled={isPending}>
                             ❌ Reject
                         </Button>
                     </div>

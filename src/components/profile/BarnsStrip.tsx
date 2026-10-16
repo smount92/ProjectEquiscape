@@ -30,10 +30,7 @@ export default function BarnsStrip({
 }) {
     return (
         <section className="animate-fade-in-up mt-10" id="barns">
-            <SectionHeading
-                title="Barns"
-                note={barns.length > 0 ? `${barns.length} public` : undefined}
-            />
+            <SectionHeading title="Barns" note={barns.length > 0 ? `${barns.length} public` : undefined} />
             {barns.length === 0 ? (
                 <EmptyNote
                     icon="🚪"
@@ -51,7 +48,7 @@ export default function BarnsStrip({
                             <Link
                                 key={barn.id}
                                 href={`/community/groups/${barn.slug}`}
-                                className="border-input bg-card/50 flex items-center gap-2 rounded-lg border px-3 py-2 no-underline backdrop-blur-sm transition-all hover:translate-y-[-1px]"
+                                className="flex items-center gap-2 rounded-lg border border-input bg-card/50 px-3 py-2 no-underline backdrop-blur-sm transition-all hover:translate-y-[-1px]"
                             >
                                 <span aria-hidden="true">🐎</span>
                                 <span className="min-w-0">

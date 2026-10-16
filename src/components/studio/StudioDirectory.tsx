@@ -28,7 +28,13 @@ const SORTS: { key: SortKey; label: string }[] = [
     { key: "name", label: "A to Z" },
 ];
 
-export default function StudioDirectory({ studios, initialQuery = "" }: { studios: DirectoryEntry[]; initialQuery?: string }) {
+export default function StudioDirectory({
+    studios,
+    initialQuery = "",
+}: {
+    studios: DirectoryEntry[];
+    initialQuery?: string;
+}) {
     const [search, setSearch] = useState(initialQuery);
     const [status, setStatus] = useState<Status>("all");
     const [service, setService] = useState("all");
@@ -108,10 +114,10 @@ export default function StudioDirectory({ studios, initialQuery = "" }: { studio
         onChange: (v: string) => void,
         options: readonly (readonly [string, string])[],
     ) => (
-        <label className="text-secondary-foreground flex min-w-0 flex-col gap-1 text-[0.65rem] font-semibold tracking-wider uppercase">
+        <label className="flex min-w-0 flex-col gap-1 text-[0.65rem] font-semibold tracking-wider text-secondary-foreground uppercase">
             {label}
             <select
-                className="border-input bg-card text-foreground h-9 w-full rounded-md border px-2 text-sm font-normal tracking-normal normal-case"
+                className="h-9 w-full rounded-md border border-input bg-card px-2 text-sm font-normal tracking-normal text-foreground normal-case"
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 aria-label={label}
@@ -127,7 +133,7 @@ export default function StudioDirectory({ studios, initialQuery = "" }: { studio
 
     return (
         <div>
-            <div className="bg-card border-input z-10 mb-6 rounded-xl border p-3 shadow-md backdrop-blur-sm md:sticky md:top-[calc(var(--header-height)+0.75rem)] md:p-4">
+            <div className="z-10 mb-6 rounded-xl border border-input bg-card p-3 shadow-md backdrop-blur-sm md:sticky md:top-[calc(var(--header-height)+0.75rem)] md:p-4">
                 <Input
                     type="search"
                     placeholder="Search by studio, artist, service, medium, scale or place…"
@@ -144,19 +150,34 @@ export default function StudioDirectory({ studios, initialQuery = "" }: { studio
                         ["closed", "Closed"],
                     ])}
                     {allServices.length > 0 &&
-                        pick("Need", service, setService, [["all", "Anything"], ...allServices.map((x) => [x, x] as const)])}
+                        pick("Need", service, setService, [
+                            ["all", "Anything"],
+                            ...allServices.map((x) => [x, x] as const),
+                        ])}
                     {allScales.length > 1 &&
-                        pick("Scale", scale, setScale, [["all", "Any scale"], ...allScales.map((x) => [x, x] as const)])}
-                    {pick("Sort", sort, (v) => setSort(v as SortKey), SORTS.map((o) => [o.key, o.label] as const))}
+                        pick("Scale", scale, setScale, [
+                            ["all", "Any scale"],
+                            ...allScales.map((x) => [x, x] as const),
+                        ])}
+                    {pick(
+                        "Sort",
+                        sort,
+                        (v) => setSort(v as SortKey),
+                        SORTS.map((o) => [o.key, o.label] as const),
+                    )}
                 </div>
 
-                <p className="text-secondary-foreground m-0 mt-2 text-xs md:mt-3" aria-live="polite">
+                <p className="m-0 mt-2 text-xs text-secondary-foreground md:mt-3" aria-live="polite">
                     {filtered.length} of {studios.length} studio{studios.length === 1 ? "" : "s"}
                     {openCount > 0 && ` · ${openCount} open for commissions`}
                     {filtering && (
                         <>
                             {" · "}
-                            <button type="button" onClick={clear} className="text-forest cursor-pointer border-0 bg-transparent p-0 text-xs font-semibold hover:underline">
+                            <button
+                                type="button"
+                                onClick={clear}
+                                className="cursor-pointer border-0 bg-transparent p-0 text-xs font-semibold text-forest hover:underline"
+                            >
                                 Clear filters
                             </button>
                         </>
@@ -165,14 +186,12 @@ export default function StudioDirectory({ studios, initialQuery = "" }: { studio
             </div>
 
             {filtered.length === 0 ? (
-                <div className="border-input bg-card rounded-lg border p-12 text-center shadow-md">
+                <div className="rounded-lg border border-input bg-card p-12 text-center shadow-md">
                     <div className="mb-4 text-[3rem]">🎨</div>
                     <h3 className="mb-2 font-serif text-xl font-bold">
-                        {studios.length === 0
-                            ? "No studios yet"
-                            : "No studios match those filters"}
+                        {studios.length === 0 ? "No studios yet" : "No studios match those filters"}
                     </h3>
-                    <p className="text-secondary-foreground mx-auto max-w-[440px] text-sm">
+                    <p className="mx-auto max-w-[440px] text-sm text-secondary-foreground">
                         {studios.length === 0
                             ? "The directory fills up as customizers and finishwork artists open studios. If you take commissions, yours can be the first."
                             : "Try clearing a filter — plenty of artists keep a waitlist even when their bench is full."}
@@ -201,7 +220,7 @@ function StudioCard({ studio }: { studio: DirectoryEntry }) {
     return (
         <Link
             href={`/studio/${studio.studioSlug}`}
-            className="border-input bg-card block rounded-lg border p-5 no-underline shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+            className="block rounded-lg border border-input bg-card p-5 no-underline shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
         >
             <div className="mb-2 flex items-start justify-between gap-2">
                 <span className="font-serif text-base font-bold">{studio.studioName}</span>
@@ -212,7 +231,7 @@ function StudioCard({ studio }: { studio: DirectoryEntry }) {
                         alt=""
                         width={36}
                         height={36}
-                        className="border-input h-9 w-9 shrink-0 rounded-full border object-cover"
+                        className="h-9 w-9 shrink-0 rounded-full border border-input object-cover"
                         loading="lazy"
                     />
                 )}
@@ -220,7 +239,7 @@ function StudioCard({ studio }: { studio: DirectoryEntry }) {
 
             <StudioStatusPill status={studio.effectiveStatus} className="mb-3" />
 
-            <div className="text-muted-foreground mb-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+            <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                 <span>@{studio.ownerAlias}</span>
                 {studio.region && <span>📍 {studio.region}</span>}
                 {studio.priceLabel !== "Ask" && <span>{studio.priceLabel}</span>}
@@ -229,7 +248,7 @@ function StudioCard({ studio }: { studio: DirectoryEntry }) {
 
             {/* Proof of work is the thing worth showing on a browse card. */}
             {studio.finishedCount > 0 && (
-                <div className="border-success/30 bg-success/10 text-success mb-3 inline-block rounded-full border px-2.5 py-0.5 text-xs font-semibold">
+                <div className="mb-3 inline-block rounded-full border border-success/30 bg-success/10 px-2.5 py-0.5 text-xs font-semibold text-success">
                     {studio.finishedCount} finished horse
                     {studio.finishedCount === 1 ? "" : "s"} on Model Horse Hub
                 </div>

@@ -22,10 +22,7 @@ export default async function EventsPage() {
     if (!user) redirect("/login");
 
     // Upcoming is the page; the archive is a footnote, so it's capped.
-    const [upcoming, past] = await Promise.all([
-        getEvents({ upcoming: true }),
-        getEvents({ past: true, limit: 20 }),
-    ]);
+    const [upcoming, past] = await Promise.all([getEvents({ upcoming: true }), getEvents({ past: true, limit: 20 })]);
 
     return (
         // frameless: the board files itself onto ledger month shelves,

@@ -25,10 +25,7 @@ import type { EntrantHorse, MyShowEntry } from "@/lib/shows/public";
 import type { ShowMode, ShowStatus } from "@/lib/shows/types";
 import ProgramAccordion from "@/components/shows/ProgramAccordion";
 import ShowReadinessPanel from "@/components/shows/ShowReadinessPanel";
-import {
-    classLabel,
-    MyEntriesCard,
-} from "@/components/shows/ShowEntrySectionParts";
+import { classLabel, MyEntriesCard } from "@/components/shows/ShowEntrySectionParts";
 import { useShowToast } from "@/components/shows/useShowToast";
 import { Button } from "@/components/ui/button";
 import {
@@ -114,9 +111,7 @@ export default function AlbumEntrySection({
     };
 
     const hasLiveEntry = (classId: string, horseId: string) =>
-        myEntries.some(
-            (e) => e.classId === classId && e.horseId === horseId && e.status !== "scratched",
-        );
+        myEntries.some((e) => e.classId === classId && e.horseId === horseId && e.status !== "scratched");
 
     return (
         <>
@@ -168,11 +163,7 @@ export default function AlbumEntrySection({
             )}
 
             {/* ── The program (accordion) ── */}
-            <section
-                id="program"
-                className="ledger-card scroll-mt-32"
-                aria-labelledby="album-program-heading"
-            >
+            <section id="program" className="ledger-card scroll-mt-32" aria-labelledby="album-program-heading">
                 <span className="ledger-tab" id="album-program-heading">
                     Program
                 </span>
@@ -195,9 +186,7 @@ export default function AlbumEntrySection({
             >
                 <DialogContent className="sm:max-w-[440px]">
                     <DialogHeader>
-                        <DialogTitle>
-                            {scratchTarget && `Scratch ${scratchTarget.horseName}?`}
-                        </DialogTitle>
+                        <DialogTitle>{scratchTarget && `Scratch ${scratchTarget.horseName}?`}</DialogTitle>
                         <DialogDescription>
                             {scratchTarget &&
                                 `This withdraws ${scratchTarget.horseName} from ${

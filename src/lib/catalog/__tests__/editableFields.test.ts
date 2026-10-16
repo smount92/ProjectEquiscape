@@ -142,7 +142,6 @@ describe("missingFieldLabels", () => {
     });
 
     it("shrinks as the row fills in", () => {
-        expect(missingFieldLabels(fullRow).length)
-            .toBeLessThan(missingFieldLabels(bareRow).length);
+        expect(missingFieldLabels(fullRow).length).toBeLessThan(missingFieldLabels(bareRow).length);
     });
 });

@@ -133,9 +133,7 @@ describe("StableFilterBar", () => {
 
     it("deletes a saved view", async () => {
         const user = userEvent.setup();
-        renderBar({}, [
-            { id: VIEW_ID, name: "OF Breyers", params: { finish: "OF" }, createdAt: "2026-07-10" },
-        ]);
+        renderBar({}, [{ id: VIEW_ID, name: "OF Breyers", params: { finish: "OF" }, createdAt: "2026-07-10" }]);
         await user.click(screen.getByRole("button", { name: /views/i }));
         await user.click(await screen.findByRole("button", { name: "Delete view OF Breyers" }));
         await waitFor(() => {

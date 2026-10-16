@@ -30,9 +30,7 @@ export const COMMISSION_STATUSES = [
 /** Ways a commission can end early. Not part of the progress ladder. */
 export const CLOSED_STATUSES = ["declined", "cancelled"] as const;
 
-export type CommissionStatus =
-    | (typeof COMMISSION_STATUSES)[number]
-    | (typeof CLOSED_STATUSES)[number];
+export type CommissionStatus = (typeof COMMISSION_STATUSES)[number] | (typeof CLOSED_STATUSES)[number];
 
 /**
  * v1 statuses that rows in the database may still carry. We never WRITE
@@ -57,20 +55,11 @@ export function normalizeStatus(raw: string | null | undefined): CommissionStatu
 }
 
 export function isTerminal(status: CommissionStatus): boolean {
-    return (
-        status === "delivered" ||
-        status === "received" ||
-        status === "declined" ||
-        status === "cancelled"
-    );
+    return status === "delivered" || status === "received" || status === "declined" || status === "cancelled";
 }
 
 /** Work that counts against an artist's slots — i.e. actually on the bench. */
-export const ACTIVE_STATUSES: CommissionStatus[] = [
-    "accepted",
-    "in_progress",
-    "awaiting_approval",
-];
+export const ACTIVE_STATUSES: CommissionStatus[] = ["accepted", "in_progress", "awaiting_approval"];
 
 /** Work that counts as earned. Income rollups use exactly this set. */
 export const EARNED_STATUSES: CommissionStatus[] = ["completed", "delivered", "received"];
@@ -205,26 +194,19 @@ export const TRANSITIONS: Record<CommissionStatus, Transition[]> = {
             afterAgreement: true,
         },
     ],
-    completed: [
-        { to: "delivered", by: ["artist"], label: "Mark delivered", emoji: "📦" },
-    ],
+    completed: [{ to: "delivered", by: ["artist"], label: "Mark delivered", emoji: "📦" }],
     // The loop-closer that didn't exist before 203: "delivered" was the
     // artist's word alone. The client confirming arrival is the last
     // checkpoint, and the one that makes the workbench thread a full
     // handshake — every stage above it was checked by somebody too.
-    delivered: [
-        { to: "received", by: ["client"], label: "Confirm received", emoji: "🏠" },
-    ],
+    delivered: [{ to: "received", by: ["client"], label: "Confirm received", emoji: "🏠" }],
     received: [],
     declined: [],
     cancelled: [],
 };
 
 /** Every move `party` may make from `status`, in display order. */
-export function availableTransitions(
-    status: CommissionStatus,
-    party: Party,
-): Transition[] {
+export function availableTransitions(status: CommissionStatus, party: Party): Transition[] {
     return (TRANSITIONS[status] ?? []).filter((t) => t.by.includes(party));
 }
 
@@ -240,11 +222,7 @@ export interface TransitionCheck {
  * The authoritative guard. The server action calls exactly this before it
  * writes; nothing else decides whether a move is legal.
  */
-export function canTransition(
-    from: CommissionStatus,
-    to: CommissionStatus,
-    party: Party,
-): TransitionCheck {
+export function canTransition(from: CommissionStatus, to: CommissionStatus, party: Party): TransitionCheck {
     const rules = TRANSITIONS[from] ?? [];
     if (rules.length === 0) {
         return {
@@ -303,13 +281,9 @@ export function statusBlurb(status: CommissionStatus, viewer: Party): string {
                 ? "Review the price, timeline and terms, then accept or decline."
                 : "Quote sent. Waiting on the commissioner.";
         case "accepted":
-            return yours
-                ? "Terms agreed. Start work when you're ready."
-                : "Terms agreed. The artist will start work.";
+            return yours ? "Terms agreed. Start work when you're ready." : "Terms agreed. The artist will start work.";
         case "in_progress":
-            return yours
-                ? "On the bench. Post WIP updates as you go."
-                : "On the bench — watch for WIP updates here.";
+            return yours ? "On the bench. Post WIP updates as you go." : "On the bench — watch for WIP updates here.";
         case "awaiting_approval":
             return yours
                 ? "Approve the work, or spend a revision asking for changes."
@@ -385,16 +359,11 @@ export interface SlotState {
     label: string;
 }
 
-export function slotState(
-    used: number,
-    max: number,
-    declared: StudioStatus,
-): SlotState {
+export function slotState(used: number, max: number, declared: StudioStatus): SlotState {
     const u = Math.max(0, Math.floor(used || 0));
     const m = Math.max(0, Math.floor(max || 0));
     const full = m > 0 && u >= m;
-    const effectiveStatus: StudioStatus =
-        declared === "closed" ? "closed" : full ? "waitlist" : declared;
+    const effectiveStatus: StudioStatus = declared === "closed" ? "closed" : full ? "waitlist" : declared;
     return {
         used: u,
         max: m,

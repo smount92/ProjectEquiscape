@@ -35,9 +35,14 @@ export default function PaperThumbs({ papers, horseName }: { papers: PaperView[]
                             title={`${p.title} (PDF)`}
                             aria-label={`Open ${p.title} (PDF)`}
                         >
-                            <div className="paper-plate h-full w-full text-center text-[0.6rem] font-semibold" style={{ aspectRatio: "auto" }}>
+                            <div
+                                className="paper-plate h-full w-full text-center text-[0.6rem] font-semibold"
+                                style={{ aspectRatio: "auto" }}
+                            >
                                 <span>
-                                    <span className="block text-xl" aria-hidden="true">📄</span>
+                                    <span className="block text-xl" aria-hidden="true">
+                                        📄
+                                    </span>
                                     PDF
                                 </span>
                             </div>

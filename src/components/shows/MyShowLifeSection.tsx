@@ -12,11 +12,7 @@
 import Link from "next/link";
 
 import { friendlyShowStatus } from "@/lib/shows/plainWords";
-import {
-    formatCloseAt,
-    placeLabel,
-    type MyShowLife,
-} from "@/lib/shows/showLife";
+import { formatCloseAt, placeLabel, type MyShowLife } from "@/lib/shows/showLife";
 
 export default function MyShowLifeSection({ life }: { life: MyShowLife }) {
     const { activeEntries, recentResults } = life;
@@ -78,10 +74,7 @@ export default function MyShowLifeSection({ life }: { life: MyShowLife }) {
                                 </Link>
                                 <ul className="m-0 mt-1 flex list-none flex-col gap-0.5 p-0">
                                     {result.placings.map((placing, i) => (
-                                        <li
-                                            key={`${result.showId}-${i}`}
-                                            className="text-sm text-secondary-foreground"
-                                        >
+                                        <li key={`${result.showId}-${i}`} className="text-sm text-secondary-foreground">
                                             <span className="font-bold text-foreground">
                                                 {placeLabel(placing.place)}
                                             </span>{" "}

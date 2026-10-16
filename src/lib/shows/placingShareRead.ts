@@ -150,9 +150,7 @@ export async function loadPublicPlacing(
         .from("show_class_entries")
         .select("id, status")
         .eq("class_id", entry.class_id as string);
-    const totalEntries = (classEntries ?? []).filter(
-        (e: { status: string }) => e.status !== "scratched",
-    ).length;
+    const totalEntries = (classEntries ?? []).filter((e: { status: string }) => e.status !== "scratched").length;
 
     // ── Names + photo (anon-safe helper reads) ──
     const horseNames = await getHorseNames(supabase, [entry.horse_id as string]);
@@ -184,15 +182,9 @@ export async function loadPublicPlacing(
         },
         place,
         horseName:
-            horseNames instanceof Map
-                ? (horseNames.get(entry.horse_id as string) ?? "Unnamed horse")
-                : "Unnamed horse",
-        ownerAlias:
-            aliases instanceof Map ? (aliases.get(entry.owner_id as string) ?? "unknown") : "unknown",
-        photoUrl:
-            entry.photo_id && photoUrls instanceof Map
-                ? (photoUrls.get(entry.photo_id as string) ?? null)
-                : null,
+            horseNames instanceof Map ? (horseNames.get(entry.horse_id as string) ?? "Unnamed horse") : "Unnamed horse",
+        ownerAlias: aliases instanceof Map ? (aliases.get(entry.owner_id as string) ?? "unknown") : "unknown",
+        photoUrl: entry.photo_id && photoUrls instanceof Map ? (photoUrls.get(entry.photo_id as string) ?? null) : null,
         className: cls.name as string,
         classNumber: (cls.class_number as string | null) ?? null,
         sectionName,

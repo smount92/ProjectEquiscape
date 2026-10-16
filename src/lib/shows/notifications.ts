@@ -56,8 +56,7 @@ export interface EntrantResults {
     placements: PlacementLine[];
 }
 
-const formatRole = (role: StaffRole): string =>
-    role === "co_host" ? "co-host" : role;
+const formatRole = (role: StaffRole): string => (role === "co_host" ? "co-host" : role);
 
 /**
  * Fold entries + placings into per-owner results. EVERY distinct
@@ -100,9 +99,7 @@ export function buildEntrantResults(input: {
 
     return owners.map((ownerId) => ({
         ownerId,
-        placements: (placementsByOwner.get(ownerId) ?? []).sort(
-            (a, b) => a.place - b.place,
-        ),
+        placements: (placementsByOwner.get(ownerId) ?? []).sort((a, b) => a.place - b.place),
     }));
 }
 
@@ -173,9 +170,7 @@ export function buildCardNotificationPlans(input: {
     };
 
     return [...byOwner.entries()].map(([ownerId, cards]) => {
-        const names = [
-            ...new Set(cards.map((c) => input.horseNamesById.get(c.horseId) ?? "Your horse")),
-        ];
+        const names = [...new Set(cards.map((c) => input.horseNamesById.get(c.horseId) ?? "Your horse"))];
         const listed = names.slice(0, MAX_LISTED_PLACEMENTS).join(", ");
         const extra = names.length - MAX_LISTED_PLACEMENTS;
         const single = cards.length === 1 ? cards[0] : null;
@@ -189,8 +184,7 @@ export function buildCardNotificationPlans(input: {
             actorId: null,
             content,
             horseId: cards[0].horseId,
-            linkUrl:
-                single?.code ? `/cards/${single.code}` : `/stable/${cards[0].horseId}`,
+            linkUrl: single?.code ? `/cards/${single.code}` : `/stable/${cards[0].horseId}`,
         };
     });
 }
@@ -213,10 +207,7 @@ export function buildStaffAddedPlan(input: {
         type: "show_staff",
         actorId: input.addedByUserId,
         content: `🤝 @${input.addedByAlias} added you as ${roleName} for ${input.showTitle}`,
-        linkUrl:
-            input.role === "judge"
-                ? `/shows/host/${input.showId}/judge`
-                : `/shows/host/${input.showId}`,
+        linkUrl: input.role === "judge" ? `/shows/host/${input.showId}/judge` : `/shows/host/${input.showId}`,
     };
 }
 
@@ -232,13 +223,7 @@ export function buildClassChangePlans(input: {
     newClassName: string;
     movedEntries: { ownerId: string; status: string }[];
 }): NotificationInput[] {
-    const owners = [
-        ...new Set(
-            input.movedEntries
-                .filter((e) => e.status !== "scratched")
-                .map((e) => e.ownerId),
-        ),
-    ];
+    const owners = [...new Set(input.movedEntries.filter((e) => e.status !== "scratched").map((e) => e.ownerId))];
     const oldNames = input.oldClassNames.map((n) => `"${n}"`).join(" and ");
     const content =
         input.kind === "split"
@@ -260,11 +245,7 @@ export function buildVotingOpenPlans(input: {
     showTitle: string;
     entries: { ownerId: string; status: string }[];
 }): NotificationInput[] {
-    const owners = [
-        ...new Set(
-            input.entries.filter((e) => e.status !== "scratched").map((e) => e.ownerId),
-        ),
-    ];
+    const owners = [...new Set(input.entries.filter((e) => e.status !== "scratched").map((e) => e.ownerId))];
     return owners.map((ownerId) => ({
         userId: ownerId,
         type: "show_voting_open",
@@ -321,9 +302,7 @@ export function buildEntryScratchedPlan(input: {
  * entries, first-entry order. The bulk helper's self-guard drops the
  * announcing host's own row via actorId.
  */
-export function deriveAnnouncementRecipients(
-    entries: { ownerId: string; status: string }[],
-): string[] {
+export function deriveAnnouncementRecipients(entries: { ownerId: string; status: string }[]): string[] {
     const owners: string[] = [];
     const seen = new Set<string>();
     for (const e of entries) {
@@ -440,10 +419,7 @@ export function buildResultsFollowerPlans(input: {
 }
 
 /** Is `entriesCloseAt` inside the (now, now+24h] reminder window? */
-export function isClosingWithin24h(
-    entriesCloseAt: string | null,
-    now: Date,
-): boolean {
+export function isClosingWithin24h(entriesCloseAt: string | null, now: Date): boolean {
     if (!entriesCloseAt) return false;
     const closes = new Date(entriesCloseAt).getTime();
     if (Number.isNaN(closes)) return false;
@@ -520,9 +496,7 @@ export async function runResultsPublishedFanout(
         }
         const classNamesById = new Map(tree.contexts.map((c) => [c.classId, c.className]));
 
-        const liveEntryIds = context.entries
-            .filter((e) => e.status !== "scratched")
-            .map((e) => e.id);
+        const liveEntryIds = context.entries.filter((e) => e.status !== "scratched").map((e) => e.id);
         let placings: { entryId: string; place: number | null }[] = [];
         if (liveEntryIds.length > 0) {
             const { data: placingRows, error: placingsError } = await client
@@ -530,10 +504,7 @@ export async function runResultsPublishedFanout(
                 .select("entry_id, place")
                 .in("entry_id", liveEntryIds);
             if (placingsError) {
-                logger.error(
-                    "ShowNotifications",
-                    `Results fan-out placings failed: ${placingsError.message}`,
-                );
+                logger.error("ShowNotifications", `Results fan-out placings failed: ${placingsError.message}`);
                 return;
             }
             placings = (placingRows ?? []).map((p) => ({
@@ -558,14 +529,10 @@ export async function runResultsPublishedFanout(
             horseNamesById,
         });
 
-        await createNotificationsBulk(
-            buildResultsNotificationPlans({ showId, showTitle: context.title, results }),
-        );
+        await createNotificationsBulk(buildResultsNotificationPlans({ showId, showTitle: context.title, results }));
 
         if (issuedCards.length > 0) {
-            await createNotificationsBulk(
-                buildCardNotificationPlans({ cards: issuedCards, horseNamesById }),
-            );
+            await createNotificationsBulk(buildCardNotificationPlans({ cards: issuedCards, horseNamesById }));
         }
 
         await sendShowResultsEmails({ showId, showTitle: context.title, results });
@@ -578,10 +545,7 @@ export async function runResultsPublishedFanout(
  * Community-vote show entered judging → "voting is open" fan-out.
  * Admin client for the same after()-lifecycle reason as above.
  */
-export async function runVotingOpenedFanout(
-    client: SupabaseClient,
-    showId: string,
-): Promise<void> {
+export async function runVotingOpenedFanout(client: SupabaseClient, showId: string): Promise<void> {
     try {
         const context = await loadShowEntriesContext(client, showId);
         if ("error" in context) {
@@ -605,10 +569,7 @@ export async function runVotingOpenedFanout(
  * ready. Admin client for the same after()-lifecycle reason as the
  * voting fan-out; the transition itself was already host-gated.
  */
-export async function runJudgingOpenedFanout(
-    client: SupabaseClient,
-    showId: string,
-): Promise<void> {
+export async function runJudgingOpenedFanout(client: SupabaseClient, showId: string): Promise<void> {
     try {
         const { data: show, error: showError } = await client
             .from("shows")
@@ -629,10 +590,7 @@ export async function runJudgingOpenedFanout(
             .eq("show_id", showId)
             .eq("role", "judge");
         if (staffError) {
-            logger.error(
-                "ShowNotifications",
-                `Judging-open fan-out staff load failed: ${staffError.message}`,
-            );
+            logger.error("ShowNotifications", `Judging-open fan-out staff load failed: ${staffError.message}`);
             return;
         }
 
@@ -677,19 +635,14 @@ export async function runClassChangeFanout(
             return;
         }
 
-        let query = client
-            .from("show_class_entries")
-            .select("id, owner_id, status");
+        let query = client.from("show_class_entries").select("id, owner_id, status");
         query =
             "entryIds" in input.moved
                 ? query.in("id", input.moved.entryIds)
                 : query.eq("class_id", input.moved.newClassId);
         const { data: entryRows, error: entriesError } = await query;
         if (entriesError) {
-            logger.error(
-                "ShowNotifications",
-                `Class-change fan-out entries failed: ${entriesError.message}`,
-            );
+            logger.error("ShowNotifications", `Class-change fan-out entries failed: ${entriesError.message}`);
             return;
         }
 
@@ -722,17 +675,10 @@ export async function runStaffAddedNotification(
     },
 ): Promise<void> {
     try {
-        const { data: show } = await client
-            .from("shows")
-            .select("id, title")
-            .eq("id", input.showId)
-            .maybeSingle();
+        const { data: show } = await client.from("shows").select("id, title").eq("id", input.showId).maybeSingle();
         if (!show) return;
         const aliases = await getAliases(client, [input.addedByUserId]);
-        const addedByAlias =
-            aliases instanceof Map
-                ? (aliases.get(input.addedByUserId) ?? "unknown")
-                : "unknown";
+        const addedByAlias = aliases instanceof Map ? (aliases.get(input.addedByUserId) ?? "unknown") : "unknown";
         await createNotification(
             buildStaffAddedPlan({
                 showId: input.showId,
@@ -752,15 +698,8 @@ export async function runStaffAddedNotification(
  * Show title, or null. The lifecycle fan-outs below need nothing else
  * from the row, and every one of them is fire-and-forget.
  */
-async function loadShowTitle(
-    client: SupabaseClient,
-    showId: string,
-): Promise<string | null> {
-    const { data: show, error } = await client
-        .from("shows")
-        .select("id, title")
-        .eq("id", showId)
-        .maybeSingle();
+async function loadShowTitle(client: SupabaseClient, showId: string): Promise<string | null> {
+    const { data: show, error } = await client.from("shows").select("id, title").eq("id", showId).maybeSingle();
     if (error || !show) return null;
     return (show.title as string) ?? null;
 }
@@ -785,11 +724,7 @@ async function runLifecycleFanout(
     client: SupabaseClient,
     showId: string,
     label: string,
-    plan: (input: {
-        showId: string;
-        showTitle: string;
-        recipientIds: string[];
-    }) => NotificationInput[],
+    plan: (input: { showId: string; showTitle: string; recipientIds: string[] }) => NotificationInput[],
     pickRecipients: (audience: Awaited<ReturnType<typeof loadShowAudience>>) => string[],
 ): Promise<void> {
     try {
@@ -810,10 +745,7 @@ async function runLifecycleFanout(
 }
 
 /** Entries closed → the whole audience, deduped. */
-export async function runEntriesClosedFanout(
-    client: SupabaseClient,
-    showId: string,
-): Promise<void> {
+export async function runEntriesClosedFanout(client: SupabaseClient, showId: string): Promise<void> {
     await runLifecycleFanout(
         client,
         showId,
@@ -837,13 +769,8 @@ export async function runJudgingStartedFanout(
     showId: string,
     options: { excludeEntrants?: boolean } = {},
 ): Promise<void> {
-    await runLifecycleFanout(
-        client,
-        showId,
-        "Judging-started",
-        buildJudgingStartedPlans,
-        (audience) =>
-            options.excludeEntrants ? audience.followerOnlyIds : audience.audienceIds,
+    await runLifecycleFanout(client, showId, "Judging-started", buildJudgingStartedPlans, (audience) =>
+        options.excludeEntrants ? audience.followerOnlyIds : audience.audienceIds,
     );
 }
 
@@ -855,10 +782,7 @@ export async function runJudgingStartedFanout(
  * notices on top). This is the half of the room that was never told
  * anything — someone who followed a show to see how it turned out.
  */
-export async function runResultsFollowersFanout(
-    client: SupabaseClient,
-    showId: string,
-): Promise<void> {
+export async function runResultsFollowersFanout(client: SupabaseClient, showId: string): Promise<void> {
     await runLifecycleFanout(
         client,
         showId,
@@ -892,10 +816,7 @@ export async function runEntryScratchedNotification(
                 showId: input.showId,
                 showTitle: show.title as string,
                 ownerId: input.ownerId,
-                horseName:
-                    horseNames instanceof Map
-                        ? (horseNames.get(input.horseId) ?? "Your horse")
-                        : "Your horse",
+                horseName: horseNames instanceof Map ? (horseNames.get(input.horseId) ?? "Your horse") : "Your horse",
                 className: (cls?.name as string | undefined) ?? "a class",
                 scratchedByUserId: input.scratchedByUserId,
                 reason: input.reason ?? null,

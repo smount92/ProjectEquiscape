@@ -99,7 +99,14 @@ export async function importShowRecords(
         .select("show_name, show_date, class_name, placing")
         .eq("horse_id", horseId)
         .limit(2000);
-    const existing = ((existingRows ?? []) as { show_name: string; show_date: string | null; class_name: string | null; placing: string | null }[]).map((r) => ({
+    const existing = (
+        (existingRows ?? []) as {
+            show_name: string;
+            show_date: string | null;
+            class_name: string | null;
+            placing: string | null;
+        }[]
+    ).map((r) => ({
         showName: r.show_name,
         showDate: r.show_date,
         className: r.class_name,
@@ -171,7 +178,9 @@ export async function importShowRecords(
     let payload = anyCard ? withCards : base;
     let { error } = await supabase.from("show_records").insert(payload as never);
     if (error && anyCard && isMissingColumn(error, "qualifier")) {
-        warnings.push("Card tracking isn't switched on yet, so the cards weren't kept. Edit those records to add them once it is.");
+        warnings.push(
+            "Card tracking isn't switched on yet, so the cards weren't kept. Edit those records to add them once it is.",
+        );
         payload = base;
         ({ error } = await supabase.from("show_records").insert(payload as never));
     }
@@ -202,7 +211,10 @@ export async function importShowRecords(
 }
 
 /** Remove every record a single import created, for seven days after it ran. Owner only. */
-export async function undoShowRecordsImport(horseId: string, batchId: string): Promise<{ success: boolean; error?: string; removed?: number }> {
+export async function undoShowRecordsImport(
+    horseId: string,
+    batchId: string,
+): Promise<{ success: boolean; error?: string; removed?: number }> {
     const { supabase, user } = await requireAuth();
     if (!UUID.test(horseId) || !UUID.test(batchId)) return { success: false, error: "Nothing to undo." };
     const since = new Date(Date.now() - UNDO_WINDOW_MS).toISOString();

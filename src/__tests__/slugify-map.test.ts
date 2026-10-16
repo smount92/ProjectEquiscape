@@ -12,7 +12,10 @@ import { describe, expect, it } from "vitest";
 const DIR = path.join(process.cwd(), "supabase", "migrations");
 
 function latestMap(): { from: string; to: string } {
-    const files = readdirSync(DIR).filter((f) => f.endsWith(".sql")).sort().reverse();
+    const files = readdirSync(DIR)
+        .filter((f) => f.endsWith(".sql"))
+        .sort()
+        .reverse();
     for (const f of files) {
         const sql = readFileSync(path.join(DIR, f), "utf8");
         const at = sql.indexOf("CREATE OR REPLACE FUNCTION public.catalog_slugify(");
@@ -33,7 +36,10 @@ function slugify(text: string, map: { from: string; to: string }): string {
         const i = from.indexOf(c);
         return i < 0 ? c : to[i];
     });
-    return mapped.join("").replace(/[^a-z0-9]+/g, "-").replace(/(^-+|-+$)/g, "");
+    return mapped
+        .join("")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-+|-+$)/g, "");
 }
 
 describe("catalog_slugify letter map", () => {

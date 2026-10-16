@@ -48,16 +48,11 @@ export default function LearnPage() {
     return (
         <ExplorerLayout noHeader>
             <div className="animate-fade-in-up mx-auto max-w-[860px]">
-                <PageMasthead
-                    icon="🎓"
-                    title="Learn"
-                    subtitle="Guides to the hobby, for newcomers and old hands"
-                />
+                <PageMasthead icon="🎓" title="Learn" subtitle="Guides to the hobby, for newcomers and old hands" />
 
                 <p className="mb-8 text-base leading-relaxed text-secondary-foreground">
-                    The model horse hobby is deep — decades of terms, formats, and unwritten
-                    rules. These guides are the written version: plain-spoken, honest about the
-                    quirks, and free to read with or without an account.
+                    The model horse hobby is deep — decades of terms, formats, and unwritten rules. These guides are the
+                    written version: plain-spoken, honest about the quirks, and free to read with or without an account.
                 </p>
 
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -71,9 +66,7 @@ export default function LearnPage() {
                                 {guide.icon}
                             </div>
                             <h2 className="mb-2 text-lg font-bold text-foreground">{guide.title}</h2>
-                            <p className="m-0 text-sm leading-relaxed text-secondary-foreground">
-                                {guide.blurb}
-                            </p>
+                            <p className="m-0 text-sm leading-relaxed text-secondary-foreground">{guide.blurb}</p>
                             <span className="mt-3 inline-block text-sm font-semibold text-forest">
                                 Read the guide →
                             </span>
@@ -83,7 +76,10 @@ export default function LearnPage() {
 
                 <p className="mt-10 mb-12 text-sm text-secondary-foreground">
                     Looking for how the site itself works? See{" "}
-                    <Link href="/getting-started" className="font-semibold text-forest underline decoration-2 underline-offset-2">
+                    <Link
+                        href="/getting-started"
+                        className="font-semibold text-forest underline decoration-2 underline-offset-2"
+                    >
                         Getting Started
                     </Link>{" "}
                     and the{" "}
@@ -91,11 +87,13 @@ export default function LearnPage() {
                         FAQ
                     </Link>
                     . For how points, qualification cards and titles are scored, the{" "}
-                    <Link href="/shows/rules" className="font-semibold text-forest underline decoration-2 underline-offset-2">
+                    <Link
+                        href="/shows/rules"
+                        className="font-semibold text-forest underline decoration-2 underline-offset-2"
+                    >
                         showing rules
                     </Link>{" "}
-                    are the published source — their numbers are read out of the same code that
-                    scores the shows.
+                    are the published source — their numbers are read out of the same code that scores the shows.
                 </p>
             </div>
         </ExplorerLayout>

@@ -65,7 +65,13 @@ function parse(raw: string, palette: Palette, depth = 0): RGB | null {
     }
     const hex = v.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
     if (hex) {
-        const h = hex[1].length === 3 ? hex[1].split("").map((c) => c + c).join("") : hex[1];
+        const h =
+            hex[1].length === 3
+                ? hex[1]
+                      .split("")
+                      .map((c) => c + c)
+                      .join("")
+                : hex[1];
         return { r: parseInt(h.slice(0, 2), 16), g: parseInt(h.slice(2, 4), 16), b: parseInt(h.slice(4, 6), 16), a: 1 };
     }
     const rgb = v.match(/^rgba?\(\s*([\d.]+)[\s,]+([\d.]+)[\s,]+([\d.]+)(?:[\s,/]+([\d.]+))?\s*\)$/i);
@@ -82,7 +88,15 @@ function luminance(c: RGB): number {
 }
 
 export function contrast(fg: RGB, bg: RGB): number {
-    const over = fg.a < 1 ? { r: fg.r * fg.a + bg.r * (1 - fg.a), g: fg.g * fg.a + bg.g * (1 - fg.a), b: fg.b * fg.a + bg.b * (1 - fg.a), a: 1 } : fg;
+    const over =
+        fg.a < 1
+            ? {
+                  r: fg.r * fg.a + bg.r * (1 - fg.a),
+                  g: fg.g * fg.a + bg.g * (1 - fg.a),
+                  b: fg.b * fg.a + bg.b * (1 - fg.a),
+                  a: 1,
+              }
+            : fg;
     const l1 = luminance(over);
     const l2 = luminance(bg);
     return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
@@ -100,7 +114,18 @@ const PAIRS: [ink: string, grounds: string[]][] = [
     ["--muted-foreground", ["--background", "--card", "--muted"]],
     ["--accent-foreground", ["--accent"]],
     // Surfaces are white-safe: `bg-X text-white` must read on every one of them.
-    ["--primary-foreground", ["--primary", "--color-forest", "--color-success", "--color-warning", "--color-info", "--color-studio", "--destructive"]],
+    [
+        "--primary-foreground",
+        [
+            "--primary",
+            "--color-forest",
+            "--color-success",
+            "--color-warning",
+            "--color-info",
+            "--color-studio",
+            "--destructive",
+        ],
+    ],
     ["--ink-forest", ["--background", "--card", "--muted"]],
     ["--ink-success", ["--background", "--card", "--muted"]],
     ["--ink-warning", ["--background", "--card", "--muted"]],
@@ -139,11 +164,15 @@ describe("theme token contrast (globals.css)", () => {
                     if (!bg || bg.a < 1) continue;
                     const r = contrast(fg, bg);
                     table.push(`${r.toFixed(2).padStart(5)}  ${ink} on ${ground}`);
-                    if (r < AA) failures.push(`${ink} on ${ground}: ${r.toFixed(2)}:1 (${palette[ink]} on ${palette[ground]})`);
+                    if (r < AA)
+                        failures.push(`${ink} on ${ground}: ${r.toFixed(2)}:1 (${palette[ink]} on ${palette[ground]})`);
                 }
             }
             expect(table.length, "no pairs measured — did the token names move?").toBeGreaterThan(10);
-            expect(failures, `Below AA in ${theme}:\n  ${failures.join("\n  ")}\n\nAll pairs:\n  ${table.join("\n  ")}`).toEqual([]);
+            expect(
+                failures,
+                `Below AA in ${theme}:\n  ${failures.join("\n  ")}\n\nAll pairs:\n  ${table.join("\n  ")}`,
+            ).toEqual([]);
         });
     }
 });

@@ -41,10 +41,12 @@ describe("validateQualifier", () => {
     });
 
     it("trims the card ID and caps its length", () => {
-        expect(validateQualifier({ program: "omeq", card: "purple", year: 2026, cardId: "  OMEQ-0042 " }, NOW)).toEqual({
-            ok: true,
-            value: { program: "omeq", card: "purple", year: 2026, cardId: "OMEQ-0042" },
-        });
+        expect(validateQualifier({ program: "omeq", card: "purple", year: 2026, cardId: "  OMEQ-0042 " }, NOW)).toEqual(
+            {
+                ok: true,
+                value: { program: "omeq", card: "purple", year: 2026, cardId: "OMEQ-0042" },
+            },
+        );
         expect(validateQualifier({ program: "omeq", card: "purple", year: 2026, cardId: "x".repeat(41) }, NOW).ok).toBe(
             false,
         );

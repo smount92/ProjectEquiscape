@@ -15,7 +15,13 @@ describe("ledger", () => {
             rec({ id: "a", placing: "1st" }),
             rec({ id: "b", placing: "2nd", className: "Other" }),
             rec({ id: "c", placing: "Champion", ribbonColor: null, isNan: true }),
-            rec({ id: "d", showName: "Autumn Live", showDate: "2019-10-01", placing: "Blue", qualifierProgram: "omeq" }),
+            rec({
+                id: "d",
+                showName: "Autumn Live",
+                showDate: "2019-10-01",
+                placing: "Blue",
+                qualifierProgram: "omeq",
+            }),
             rec({ id: "e", showName: "Sometime", showDate: null, showDateText: "2021", placing: "HM" }),
         ]);
         expect(s).toEqual({ total: 5, firsts: 2, championships: 1, cards: 2, shows: 3, span: "2019–2024" });

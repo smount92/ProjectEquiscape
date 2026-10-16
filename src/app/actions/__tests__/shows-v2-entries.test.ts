@@ -115,14 +115,16 @@ function existingEntry(overrides: Record<string, unknown> = {}, axis = "performa
  * Queue the standard context walk:
  * class → section → division → show → bar check (v4) → horse.
  */
-function queueEntryContext(opts: {
-    cls?: Record<string, unknown>;
-    division?: Record<string, unknown>;
-    show?: Record<string, unknown>;
-    horse?: Record<string, unknown>;
-    /** Row in show_barred_entrants — null (default) = not barred. */
-    barred?: Record<string, unknown> | null;
-} = {}) {
+function queueEntryContext(
+    opts: {
+        cls?: Record<string, unknown>;
+        division?: Record<string, unknown>;
+        show?: Record<string, unknown>;
+        horse?: Record<string, unknown>;
+        /** Row in show_barred_entrants — null (default) = not barred. */
+        barred?: Record<string, unknown> | null;
+    } = {},
+) {
     mockClient._mockQuery.maybeSingle
         .mockResolvedValueOnce({ data: classRow(opts.cls), error: null })
         .mockResolvedValueOnce({ data: sectionRow, error: null })
@@ -157,9 +159,7 @@ describe("shows-v2 — enterClass", () => {
 
     it("rejects unauthenticated users", async () => {
         mockClient.auth.getUser.mockResolvedValueOnce({ data: { user: null } });
-        await expect(enterClass({ classId: CLASS_ID, horseId: HORSE_ID })).rejects.toThrow(
-            AuthError,
-        );
+        await expect(enterClass({ classId: CLASS_ID, horseId: HORSE_ID })).rejects.toThrow(AuthError);
     });
 
     it("surfaces ALL validateEntry violations verbatim, and does not insert", async () => {
@@ -201,9 +201,7 @@ describe("shows-v2 — enterClass", () => {
         const result = await enterClass({ classId: CLASS_ID, horseId: HORSE_ID });
         expect(result.success).toBe(false);
         if (!result.success) {
-            expect(result.violations).toEqual([
-                expect.stringMatching(/online shows judge a photo/i),
-            ]);
+            expect(result.violations).toEqual([expect.stringMatching(/online shows judge a photo/i)]);
         }
         expect(mockClient._mockQuery.insert).not.toHaveBeenCalled();
     });
@@ -222,9 +220,7 @@ describe("shows-v2 — enterClass", () => {
         });
         expect(result.success).toBe(false);
         if (!result.success) {
-            expect(result.violations).toEqual([
-                expect.stringMatching(/does not belong to the selected horse/i),
-            ]);
+            expect(result.violations).toEqual([expect.stringMatching(/does not belong to the selected horse/i)]);
         }
         expect(mockClient._mockQuery.insert).not.toHaveBeenCalled();
     });
@@ -267,29 +263,20 @@ describe("shows-v2 — enterClass", () => {
 
         const result = await enterClass({ classId: CLASS_ID, horseId: HORSE_ID });
         expect(result).toEqual({ success: true, entryId: ENTRY_ID, entryNumber: 2 });
-        expect(mockClient._mockQuery.insert).toHaveBeenCalledWith(
-            expect.objectContaining({ entry_number: 2 }),
-        );
+        expect(mockClient._mockQuery.insert).toHaveBeenCalledWith(expect.objectContaining({ entry_number: 2 }));
     });
 
     it("enforces the one-breed-halter-class declaration", async () => {
         queueEntryContext(); // target division axis = halter
         mockClient._setImplicitResolve({
-            data: [
-                existingEntry(
-                    { horse_id: HORSE_ID, owner_id: "user-1", entry_number: 2 },
-                    "halter",
-                ),
-            ],
+            data: [existingEntry({ horse_id: HORSE_ID, owner_id: "user-1", entry_number: 2 }, "halter")],
             error: null,
         });
 
         const result = await enterClass({ classId: CLASS_ID, horseId: HORSE_ID });
         expect(result.success).toBe(false);
         if (!result.success) {
-            expect(result.violations).toEqual([
-                expect.stringMatching(/already entered in a breed halter class/i),
-            ]);
+            expect(result.violations).toEqual([expect.stringMatching(/already entered in a breed halter class/i)]);
         }
         expect(mockClient._mockQuery.insert).not.toHaveBeenCalled();
     });
@@ -425,9 +412,7 @@ describe("shows-v2 — enterClassBatch", () => {
             );
             expect(result.results[1].success).toBe(false);
             expect(result.results[1].error).toMatch(/only enter horses you own/i);
-            expect(result.results[1].violations).toEqual([
-                expect.stringMatching(/only enter horses you own/i),
-            ]);
+            expect(result.results[1].violations).toEqual([expect.stringMatching(/only enter horses you own/i)]);
         }
         expect(mockClient._mockQuery.insert).toHaveBeenCalledTimes(1);
     });
@@ -469,9 +454,7 @@ describe("shows-v2 — enterClassBatch", () => {
         });
         expect(result.success).toBe(true);
         if (result.success) {
-            expect(result.results[0]).toEqual(
-                expect.objectContaining({ success: true, documentationNote: null }),
-            );
+            expect(result.results[0]).toEqual(expect.objectContaining({ success: true, documentationNote: null }));
         }
         expect(v4.createHorseDocument).toHaveBeenCalledWith({
             horseId: HORSE_ID,
@@ -592,9 +575,7 @@ describe("shows-v2 — scratchEntry", () => {
 
         const result = await scratchEntry({ entryId: ENTRY_ID });
         expect(result).toEqual({ success: true });
-        expect(mockClient._mockQuery.update).toHaveBeenCalledWith(
-            expect.objectContaining({ status: "scratched" }),
-        );
+        expect(mockClient._mockQuery.update).toHaveBeenCalledWith(expect.objectContaining({ status: "scratched" }));
         expect(mockClient._mockQuery.eq).toHaveBeenCalledWith("id", ENTRY_ID);
     });
 });

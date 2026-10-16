@@ -1,11 +1,7 @@
 import Link from "next/link";
 import { referenceHref } from "@/lib/catalog/referenceUrl";
 import { CATEGORY_LABELS } from "@/lib/catalog/taxonomy";
-import {
-    disambiguationLine,
-    displayTitle,
-    type CardAttributes,
-} from "@/lib/catalog/cardDisplay";
+import { disambiguationLine, displayTitle, type CardAttributes } from "@/lib/catalog/cardDisplay";
 
 /**
  * Identification-card browse for the Reference Catalog (CATALOG_V2, the
@@ -72,9 +68,7 @@ export default function CatalogCardsList({
                 const typeChip = {
                     // Taxonomy v2 labels; raw value only for data drift.
                     label: CATEGORY_LABELS[item.item_type] ?? item.item_type,
-                    forest:
-                        item.item_type === "plastic_release" ||
-                        item.item_type === "artist_resin",
+                    forest: item.item_type === "plastic_release" || item.item_type === "artist_resin",
                 };
 
                 return (
@@ -144,7 +138,7 @@ export default function CatalogCardsList({
                                 stats fetch (migration 134/145: public owners only) */}
                             {owner > 0 && (
                                 <span
-                                    className="shrink-0 text-xs tabular-nums whitespace-nowrap text-secondary-foreground"
+                                    className="shrink-0 text-xs whitespace-nowrap text-secondary-foreground tabular-nums"
                                     title="collectors have this"
                                 >
                                     👥 {owner.toLocaleString()}

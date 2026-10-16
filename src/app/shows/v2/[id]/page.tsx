@@ -8,11 +8,7 @@
 
 import { permanentRedirect } from "next/navigation";
 
-export default async function LegacyV2ShowPath({
-    params,
-}: {
-    params: Promise<{ id: string }>;
-}) {
+export default async function LegacyV2ShowPath({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     permanentRedirect(`/shows/${id}`);
 }

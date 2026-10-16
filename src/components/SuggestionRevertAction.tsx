@@ -28,9 +28,7 @@ export default function SuggestionRevertAction({ suggestionId }: { suggestionId:
         startTransition(async () => {
             const result = await revertSuggestion({ suggestionId, reason: reason.trim() });
             if (result.success) {
-                const kept = result.drifted?.length
-                    ? ` (${result.drifted.join(", ")} changed again since — kept)`
-                    : "";
+                const kept = result.drifted?.length ? ` (${result.drifted.join(", ")} changed again since — kept)` : "";
                 toast(`↩️ Reverted ${result.reverted?.join(", ")}${kept}. Author notified.`, "success");
                 setConfirming(false);
                 router.refresh();
@@ -51,9 +49,8 @@ export default function SuggestionRevertAction({ suggestionId }: { suggestionId:
     return (
         <div className="flex flex-col gap-2">
             <p className="text-sm text-secondary-foreground">
-                Puts the previous values back and returns the approval credit.
-                The author sees your reason. Fields corrected again since are
-                left alone.
+                Puts the previous values back and returns the approval credit. The author sees your reason. Fields
+                corrected again since are left alone.
             </p>
             <textarea
                 className="input"
@@ -63,11 +60,7 @@ export default function SuggestionRevertAction({ suggestionId }: { suggestionId:
                 rows={2}
             />
             <div className="flex gap-2">
-                <Button
-                    variant="outline"
-                    onClick={handleRevert}
-                    disabled={isPending || reason.trim().length < 5}
-                >
+                <Button variant="outline" onClick={handleRevert} disabled={isPending || reason.trim().length < 5}>
                     {isPending ? "Reverting…" : "Confirm revert"}
                 </Button>
                 <Button variant="outline" onClick={() => setConfirming(false)} disabled={isPending}>

@@ -34,11 +34,7 @@ const LEVEL_CLASS: Record<CheckLevel, string> = {
     info: "text-muted-foreground",
 };
 
-export default async function AdminShowReviewPage({
-    params,
-}: {
-    params: Promise<{ id: string }>;
-}) {
+export default async function AdminShowReviewPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
 
     // Same gate as /admin: only ADMIN_EMAIL, case-insensitive. The
@@ -65,8 +61,7 @@ export default async function AdminShowReviewPage({
             }
             description={
                 <>
-                    <strong>{r.show.title}</strong> as entrants will read it — hosted by @
-                    {r.host.alias}
+                    <strong>{r.show.title}</strong> as entrants will read it — hosted by @{r.host.alias}
                     {isDraft && " · still a draft, not public yet"}
                 </>
             }
@@ -109,19 +104,16 @@ export default async function AdminShowReviewPage({
                                 <li key={c.key} className="flex gap-2 text-sm">
                                     <span aria-hidden="true">{LEVEL_GLYPH[c.level]}</span>
                                     <span>
-                                        <span className={`font-semibold ${LEVEL_CLASS[c.level]}`}>
-                                            {c.label}
-                                        </span>{" "}
+                                        <span className={`font-semibold ${LEVEL_CLASS[c.level]}`}>{c.label}</span>{" "}
                                         <span className="text-muted-foreground">{c.detail}</span>
                                     </span>
                                 </li>
                             ))}
                         </ul>
                         <p className="m-0 mt-3 text-xs text-muted-foreground">
-                            {r.entryCount} live {r.entryCount === 1 ? "entry" : "entries"} from{" "}
-                            {r.exhibitorCount} {r.exhibitorCount === 1 ? "exhibitor" : "exhibitors"} ·
-                            blind browsing {r.blindBrowsing ? "on" : "off"} · created{" "}
-                            {new Date(r.createdAt).toLocaleDateString()}
+                            {r.entryCount} live {r.entryCount === 1 ? "entry" : "entries"} from {r.exhibitorCount}{" "}
+                            {r.exhibitorCount === 1 ? "exhibitor" : "exhibitors"} · blind browsing{" "}
+                            {r.blindBrowsing ? "on" : "off"} · created {new Date(r.createdAt).toLocaleDateString()}
                         </p>
                     </section>
 
@@ -143,9 +135,7 @@ export default async function AdminShowReviewPage({
                                     {r.show.aboutMd ? (
                                         <RichText content={r.show.aboutMd} />
                                     ) : (
-                                        <p className="m-0 text-sm text-muted-foreground italic">
-                                            Nothing written.
-                                        </p>
+                                        <p className="m-0 text-sm text-muted-foreground italic">Nothing written.</p>
                                     )}
                                 </div>
                             </section>
@@ -157,9 +147,7 @@ export default async function AdminShowReviewPage({
                                     {r.show.rulesMd ? (
                                         <RichText content={r.show.rulesMd} />
                                     ) : (
-                                        <p className="m-0 text-sm text-muted-foreground italic">
-                                            Nothing written.
-                                        </p>
+                                        <p className="m-0 text-sm text-muted-foreground italic">Nothing written.</p>
                                     )}
                                 </div>
                             </section>

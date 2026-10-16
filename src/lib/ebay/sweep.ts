@@ -16,13 +16,7 @@
  */
 
 import { searchActiveListings, buildQuery, type EbayListing } from "@/lib/ebay/client";
-import {
-    buildNumberIndex,
-    isMatch,
-    matchListing,
-    type MatchCandidate,
-    type RejectReason,
-} from "@/lib/ebay/matching";
+import { buildNumberIndex, isMatch, matchListing, type MatchCandidate, type RejectReason } from "@/lib/ebay/matching";
 import type { SweepResult } from "@/lib/ebay/schedule";
 
 export type SweepTarget = MatchCandidate;
@@ -80,11 +74,7 @@ export const MIN_SAMPLE = 3;
  * marketplace, so a stray non-matching currency is dropped rather than
  * silently converted at a rate we do not have.
  */
-export function summarise(
-    catalogItemId: string,
-    listings: EbayListing[],
-    matchBasis: string
-): PriceSignal | null {
+export function summarise(catalogItemId: string, listings: EbayListing[], matchBasis: string): PriceSignal | null {
     if (!listings.length) return null;
     const currency = listings[0].currency;
     const sameCurrency = listings.filter((l) => l.currency === currency);
@@ -125,10 +115,7 @@ export interface SweepDeps {
  * (never-attempted first, stalest attempt after, matchable only) is the
  * caller's job — lib/ebay/schedule.
  */
-export async function sweep(
-    targets: SweepTarget[],
-    deps: SweepDeps = {}
-): Promise<SweepOutcome> {
+export async function sweep(targets: SweepTarget[], deps: SweepDeps = {}): Promise<SweepOutcome> {
     const search = deps.search ?? searchActiveListings;
     const index = buildNumberIndex(targets);
     const signals: PriceSignal[] = [];
@@ -149,7 +136,11 @@ export async function sweep(
     let stopped = false;
 
     const processOne = async (target: SweepTarget): Promise<void> => {
-        if (!target.modelNumber) { note("no-model-number-in-listing"); perTarget[target.id] = "skipped"; return; }
+        if (!target.modelNumber) {
+            note("no-model-number-in-listing");
+            perTarget[target.id] = "skipped";
+            return;
+        }
         let listings: EbayListing[];
         try {
             listings = await search(buildQuery(target.maker, target.title, target.modelNumber));
@@ -157,7 +148,10 @@ export async function sweep(
         } catch (err) {
             const message = err instanceof Error ? err.message : String(err);
             errors.push(`${target.id}: ${message}`);
-            if (/rate limit/i.test(message)) { stopped = true; return; }
+            if (/rate limit/i.test(message)) {
+                stopped = true;
+                return;
+            }
             perTarget[target.id] = "error";
             return;
         }
@@ -165,11 +159,17 @@ export async function sweep(
         const accepted: EbayListing[] = [];
         for (const listing of listings) {
             const outcome = matchListing(listing, index);
-            if (!isMatch(outcome)) { note(outcome.reason); continue; }
+            if (!isMatch(outcome)) {
+                note(outcome.reason);
+                continue;
+            }
             // A listing that matches a DIFFERENT model than the one we
             // searched for is not this model's comp, however good the
             // match is. Search results are fuzzy; matching is not.
-            if (outcome.catalogId !== target.id) { note("no-catalog-row-for-number"); continue; }
+            if (outcome.catalogId !== target.id) {
+                note("no-catalog-row-for-number");
+                continue;
+            }
             accepted.push(listing);
         }
 

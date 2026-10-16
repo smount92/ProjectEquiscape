@@ -55,11 +55,21 @@ export const RUBRIC_TEMPLATES: readonly Rubric[] = [
         key: "halter",
         name: "Halter (breed)",
         criteria: [
-            { key: "breed_type", label: "Breed type & character", weight: 25, help: "does the model read as the breed" },
+            {
+                key: "breed_type",
+                label: "Breed type & character",
+                weight: 25,
+                help: "does the model read as the breed",
+            },
             { key: "conformation", label: "Conformation & anatomy", weight: 20 },
             { key: "color", label: "Color & markings realism", weight: 20 },
             { key: "condition", label: "Condition & finish", weight: 15 },
-            { key: "presentation", label: "Presentation (photo)", weight: 20, help: "focus, lighting, footing, the horse shown to advantage" },
+            {
+                key: "presentation",
+                label: "Presentation (photo)",
+                weight: 20,
+                help: "focus, lighting, footing, the horse shown to advantage",
+            },
         ],
     },
     {
@@ -197,10 +207,7 @@ export function orderByScore(
 }
 
 /** Per-criterion class averages, for the scorecard's dashed polygon. */
-export function classAverages(
-    rubric: Rubric,
-    sheets: readonly ScoreSheet[],
-): Record<string, number> {
+export function classAverages(rubric: Rubric, sheets: readonly ScoreSheet[]): Record<string, number> {
     const out: Record<string, number> = {};
     for (const c of rubric.criteria) {
         const vals = sheets.map((s) => s[c.key]).filter((v): v is number => typeof v === "number");

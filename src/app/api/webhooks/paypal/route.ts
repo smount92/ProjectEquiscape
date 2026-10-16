@@ -6,12 +6,7 @@ import { metricsDb } from "@/lib/metrics/db";
 import { isMissingRevenueSchema } from "@/lib/metrics/revenue";
 import { paypalPathLive } from "@/lib/paypal/flag";
 import { readSignatureHeaders, verifyWebhookSignature } from "@/lib/paypal/webhook";
-import {
-    fixedTermPaidThrough,
-    getSubscription,
-    isEntitlingStatus,
-    resolvePlan,
-} from "@/lib/paypal/subscriptions";
+import { fixedTermPaidThrough, getSubscription, isEntitlingStatus, resolvePlan } from "@/lib/paypal/subscriptions";
 import { grantPaypalTier, revokePaypalTier, grantPrepaidTerm, endPrepaidTerm } from "@/lib/paypal/entitlement";
 import {
     captureMatchesPrice,
@@ -110,8 +105,7 @@ async function resolveSubscription(
     resource: PaypalWebhookEvent["resource"],
     subscriptionId: string | null,
 ): Promise<PaypalSubscription | null> {
-    const hasEverything =
-        !!resource?.custom_id && !!resource?.plan_id && !!resource?.status && !!resource?.id;
+    const hasEverything = !!resource?.custom_id && !!resource?.plan_id && !!resource?.status && !!resource?.id;
     if (hasEverything) return resource as PaypalSubscription;
     if (!subscriptionId) return null;
     return getSubscription(subscriptionId);
@@ -392,7 +386,10 @@ async function applyStatusFromPaypal(admin: AdminClient, event: PaypalWebhookEve
     if (isEntitlingStatus(subscription.status)) {
         const plan = resolvePlan(subscription.plan_id);
         if (!plan) {
-            logger.error("PayPalWebhook", `Subscription ${subscriptionId} has an unrecognised plan id — granting nothing`);
+            logger.error(
+                "PayPalWebhook",
+                `Subscription ${subscriptionId} has an unrecognised plan id — granting nothing`,
+            );
             return { ok: true };
         }
         const outcome = await grantPaypalTier(admin, {

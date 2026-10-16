@@ -15,11 +15,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 
-import {
-    listSanctioningRequests,
-    resolveSanctioningRequest,
-    type SanctioningRequestRow,
-} from "@/app/actions/admin";
+import { listSanctioningRequests, resolveSanctioningRequest, type SanctioningRequestRow } from "@/app/actions/admin";
 import { Button } from "@/components/ui/button";
 
 export default function AdminSanctioningCard({
@@ -65,8 +61,8 @@ export default function AdminSanctioningCard({
                 <div className="mb-4 text-5xl">🏅</div>
                 <h2>No Sanctioning Requests</h2>
                 <p>
-                    Hosts asking for MHH sanctioning on their show will appear here. Granting makes
-                    placings there earn Championship Series points.
+                    Hosts asking for MHH sanctioning on their show will appear here. Granting makes placings there earn
+                    Championship Series points.
                 </p>
             </div>
         );
@@ -74,12 +70,10 @@ export default function AdminSanctioningCard({
 
     return (
         <section className="rounded-lg border border-input bg-card p-5">
-            <h2 className="mt-0 mb-1 text-base font-bold text-foreground">
-                🏅 Sanctioning requests
-            </h2>
+            <h2 className="mt-0 mb-1 text-base font-bold text-foreground">🏅 Sanctioning requests</h2>
             <p className="mt-0 mb-4 text-xs text-muted-foreground">
-                Hosts asking for MHH sanctioning on their show. Granting makes placings
-                there earn Championship Series points and mint qualification cards.
+                Hosts asking for MHH sanctioning on their show. Granting makes placings there earn Championship Series
+                points and mint qualification cards.
             </p>
 
             {error && (
@@ -127,11 +121,7 @@ export default function AdminSanctioningCard({
                             )}
                         </div>
                         <div className="flex gap-2">
-                            <Button
-                                size="sm"
-                                disabled={pending}
-                                onClick={() => resolve(r.showId, "grant")}
-                            >
+                            <Button size="sm" disabled={pending} onClick={() => resolve(r.showId, "grant")}>
                                 Grant
                             </Button>
                             <Button

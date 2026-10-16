@@ -6,7 +6,13 @@ import { applyHeaderMap, findDuplicates, guessHeaderMap, mapHasRequired, recordF
 describe("header mapping", () => {
     it("guesses from the file's headers and leaves strangers unmapped", () => {
         const map = guessHeaderMap(["Event", "When", "Placement", "Horse", "Judge Name"]);
-        expect(map).toEqual({ Event: "showName", When: "showDate", Placement: "placing", Horse: "", "Judge Name": "judgeName" });
+        expect(map).toEqual({
+            Event: "showName",
+            When: "showDate",
+            Placement: "placing",
+            Horse: "",
+            "Judge Name": "judgeName",
+        });
         expect(mapHasRequired(map)).toBe(true);
         expect(mapHasRequired(guessHeaderMap(["Event", "Judge"]))).toBe(false);
     });
@@ -32,8 +38,20 @@ describe("header mapping", () => {
 
 describe("duplicate detection", () => {
     it("matches on show, date, class and placing, loosely", () => {
-        expect(recordFingerprint({ showName: "Spring  Fling", showDate: "2024-03-23", className: "Stock Horse Mare", placing: "1st" })).toBe(
-            recordFingerprint({ showName: "spring fling", showDate: "2024-03-23T00:00:00", className: "stock horse mare", placing: "1ST" }),
+        expect(
+            recordFingerprint({
+                showName: "Spring  Fling",
+                showDate: "2024-03-23",
+                className: "Stock Horse Mare",
+                placing: "1st",
+            }),
+        ).toBe(
+            recordFingerprint({
+                showName: "spring fling",
+                showDate: "2024-03-23T00:00:00",
+                className: "stock horse mare",
+                placing: "1ST",
+            }),
         );
     });
 
@@ -44,7 +62,9 @@ describe("duplicate detection", () => {
             { "Show name": "Spring Fling", "Show date": "23/03/2024", Class: "Stock Horse Mare", Placing: "2" },
             { "Show name": "Autumn Live", "Show date": "2023-10-01", Class: "Halter", Placing: "1" },
         ]);
-        const dupes = findDuplicates(records, [{ showName: "Autumn Live", showDate: "2023-10-01", className: "Halter", placing: "1st" }]);
+        const dupes = findDuplicates(records, [
+            { showName: "Autumn Live", showDate: "2023-10-01", className: "Halter", placing: "1st" },
+        ]);
         expect([...dupes].sort()).toEqual([3, 5]);
     });
 });

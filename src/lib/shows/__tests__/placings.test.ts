@@ -20,7 +20,12 @@ describe("placings — the single vocabulary", () => {
 
     describe("placeLabel", () => {
         const expected: [Place, string][] = [
-            [1, "1st"], [2, "2nd"], [3, "3rd"], [4, "4th"], [5, "5th"], [6, "6th"],
+            [1, "1st"],
+            [2, "2nd"],
+            [3, "3rd"],
+            [4, "4th"],
+            [5, "5th"],
+            [6, "6th"],
         ];
         it.each(expected)("place %d → %s", (place, label) => {
             expect(placeLabel(place)).toBe(label);
@@ -36,7 +41,12 @@ describe("placings — the single vocabulary", () => {
 
     describe("ribbonColor — US convention", () => {
         const expected: [Place, string][] = [
-            [1, "blue"], [2, "red"], [3, "yellow"], [4, "white"], [5, "pink"], [6, "green"],
+            [1, "blue"],
+            [2, "red"],
+            [3, "yellow"],
+            [4, "white"],
+            [5, "pink"],
+            [6, "green"],
         ];
         it.each(expected)("place %d → %s ribbon", (place, color) => {
             expect(ribbonColor(place)).toBe(color);

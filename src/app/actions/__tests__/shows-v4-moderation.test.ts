@@ -92,10 +92,7 @@ function queueAdminList(data: unknown, error: unknown = null) {
  * order: entries read → bar upsert → placings delete → entries
  * delete. (The bar-row existence check is a maybeSingle, not a list.)
  */
-function queueRemovalSequence(
-    queue: typeof queueList,
-    entries: { id: string; class_id: string }[],
-) {
+function queueRemovalSequence(queue: typeof queueList, entries: { id: string; class_id: string }[]) {
     queue(entries);
     queue(null);
     queue(null);
@@ -168,10 +165,7 @@ describe("removeEntrantFromShow — authorization", () => {
             removedClasses: 1,
             newlyBarred: true,
         });
-        expect(q.upsert).toHaveBeenCalledWith(
-            expect.objectContaining({ barred_by: COHOST_ID }),
-            expect.anything(),
-        );
+        expect(q.upsert).toHaveBeenCalledWith(expect.objectContaining({ barred_by: COHOST_ID }), expect.anything());
     });
 
     it("allows the platform admin, whose writes go through the service-role client", async () => {
@@ -290,10 +284,7 @@ describe("removeEntrantFromShow — the sweep", () => {
             newlyBarred: false,
         });
         // ignoreDuplicates keeps the ORIGINAL reason/barred_by.
-        expect(q.upsert).toHaveBeenCalledWith(
-            expect.anything(),
-            expect.objectContaining({ ignoreDuplicates: true }),
-        );
+        expect(q.upsert).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ ignoreDuplicates: true }));
     });
 
     it("bars a member who has no entries yet", async () => {
@@ -349,8 +340,7 @@ describe("removeEntrantFromShow — the sweep", () => {
 
         const result = await removeEntrantFromShow({ showId: SHOW_ID, userId: TROLL_ID });
         expect(result.success).toBe(false);
-        if (!result.success)
-            expect(result.error).toBe("permission denied for table show_class_entries");
+        if (!result.success) expect(result.error).toBe("permission denied for table show_class_entries");
     });
 });
 

@@ -32,10 +32,7 @@ export default function AdminModerationCard() {
         }
         setPending(mode);
         setNotice(null);
-        const result =
-            mode === "suspend"
-                ? await suspendUserByAlias(alias, reason)
-                : await unsuspendUserByAlias(alias);
+        const result = mode === "suspend" ? await suspendUserByAlias(alias, reason) : await unsuspendUserByAlias(alias);
         setNotice(
             result.success
                 ? {
@@ -55,8 +52,8 @@ export default function AdminModerationCard() {
         <div className="rounded-lg border border-input bg-card p-4">
             <h3 className="m-0 mb-1 text-base font-bold">Suspend a user</h3>
             <p className="m-0 mb-3 text-sm text-muted-foreground">
-                Site-wide and reversible: a suspended account can still sign in and read, but every
-                action (entering shows, posting, messaging, trading) is refused.
+                Site-wide and reversible: a suspended account can still sign in and read, but every action (entering
+                shows, posting, messaging, trading) is refused.
             </p>
             <div className="flex flex-col gap-2 sm:flex-row">
                 <Input
@@ -83,12 +80,7 @@ export default function AdminModerationCard() {
                 >
                     {pending === "suspend" ? "Suspending…" : "Suspend"}
                 </Button>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={pending !== null}
-                    onClick={() => void run("unsuspend")}
-                >
+                <Button variant="outline" size="sm" disabled={pending !== null} onClick={() => void run("unsuspend")}>
                     {pending === "unsuspend" ? "Working…" : "Unsuspend"}
                 </Button>
             </div>

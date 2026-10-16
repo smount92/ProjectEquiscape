@@ -21,7 +21,10 @@ import { getMakingForHorse, getPublicMaking, type WorkRecordView } from "@/app/a
 
 export const dynamic = "force-dynamic";
 
-async function loadHorseHeader(horseId: string, isMember: boolean): Promise<{
+async function loadHorseHeader(
+    horseId: string,
+    isMember: boolean,
+): Promise<{
     name: string;
     ownerId: string | null;
     ownerAlias: string | null;
@@ -59,10 +62,7 @@ async function loadHorseHeader(horseId: string, isMember: boolean): Promise<{
     const row = data?.[0];
     if (!row?.horse) return null;
     const imgs = row.images ?? [];
-    const primary =
-        imgs.find((i) => i.angle_profile === "Primary_Thumbnail")?.image_url ??
-        imgs[0]?.image_url ??
-        null;
+    const primary = imgs.find((i) => i.angle_profile === "Primary_Thumbnail")?.image_url ?? imgs[0]?.image_url ?? null;
     return {
         name: row.horse.custom_name,
         ownerId: null,
@@ -83,10 +83,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     if (!header) return { title: "The Making — Model Horse Hub" };
 
     const title = `The Making of ${header.name}`;
-    const momentCount = records.reduce(
-        (n, r) => n + r.moments.reduce((k, m) => k + m.imageUrls.length, 0),
-        0,
-    );
+    const momentCount = records.reduce((n, r) => n + r.moments.reduce((k, m) => k + m.imageUrls.length, 0), 0);
     const artists = [...new Set(records.map((r) => r.artistAlias).filter(Boolean))] as string[];
     const description =
         records.length > 0
@@ -141,25 +138,24 @@ export default async function MakingPage({ params }: { params: Promise<{ id: str
 
     return (
         <main className="mx-auto max-w-3xl px-4 py-8">
-            <nav className="text-muted-foreground mb-4 text-sm">
+            <nav className="mb-4 text-sm text-muted-foreground">
                 <Link href={`/community/${horseId}`} className="text-forest hover:underline">
                     ← {header.name}&rsquo;s passport
                 </Link>
             </nav>
-            <h1 className="text-foreground mb-1 font-serif text-3xl font-bold">
-                The Making of {header.name}
-            </h1>
+            <h1 className="mb-1 font-serif text-3xl font-bold text-foreground">The Making of {header.name}</h1>
             {header.ownerAlias && (
-                <p className="text-muted-foreground mt-0 mb-6 text-sm">
-                    In the stable of @{header.ownerAlias}
-                </p>
+                <p className="mt-0 mb-6 text-sm text-muted-foreground">In the stable of @{header.ownerAlias}</p>
             )}
             {records.length > 0 ? (
                 <MakingReel records={records} ownerId={header.ownerId} showControls={isMember} />
             ) : (
-                <div className="border-input bg-card text-muted-foreground rounded-xl border border-dashed px-5 py-8 text-center text-sm">
-                    No making-of story here yet. If you finished this horse, log the work
-                    from your <Link href="/studio" className="text-forest hover:underline">studio</Link>.
+                <div className="rounded-xl border border-dashed border-input bg-card px-5 py-8 text-center text-sm text-muted-foreground">
+                    No making-of story here yet. If you finished this horse, log the work from your{" "}
+                    <Link href="/studio" className="text-forest hover:underline">
+                        studio
+                    </Link>
+                    .
                 </div>
             )}
         </main>

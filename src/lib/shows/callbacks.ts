@@ -94,9 +94,7 @@ function findCallback(
     scope: CallbackScope,
     scopeId: string | null,
 ): CallbackRecord | undefined {
-    return callbacks.find(
-        (c) => c.scope === scope && (scope === "show" || c.scopeId === scopeId),
-    );
+    return callbacks.find((c) => c.scope === scope && (scope === "show" || c.scopeId === scopeId));
 }
 
 /**
@@ -118,15 +116,11 @@ export function buildCallbackLadder(input: {
     // ── Section rounds ──
     const sectionRounds: LadderRound[] = [];
     for (const section of sections) {
-        const judgeable = classes.filter(
-            (c) => c.sectionId === section.id && isJudgeableClassStatus(c.status),
-        );
+        const judgeable = classes.filter((c) => c.sectionId === section.id && isJudgeableClassStatus(c.status));
         if (judgeable.length === 0) continue;
 
         const allPlaced = judgeable.every((c) => c.status === "placed");
-        const candidates = judgeable.flatMap((c) =>
-            c.entries.filter((e) => e.place === 1).map((e) => e.id),
-        );
+        const candidates = judgeable.flatMap((c) => c.entries.filter((e) => e.place === 1).map((e) => e.id));
         const recorded = findCallback(callbacks, "section", section.id);
 
         sectionRounds.push({
@@ -134,11 +128,7 @@ export function buildCallbackLadder(input: {
             scopeId: section.id,
             label: section.name,
             divisionName: divisionById.get(section.divisionId)?.name ?? null,
-            state: recorded?.championEntryId
-                ? "decided"
-                : allPlaced && candidates.length > 0
-                  ? "open"
-                  : "waiting",
+            state: recorded?.championEntryId ? "decided" : allPlaced && candidates.length > 0 ? "open" : "waiting",
             candidateEntryIds: candidates,
             championEntryId: recorded?.championEntryId ?? null,
             reserveEntryId: recorded?.reserveEntryId ?? null,
@@ -154,9 +144,7 @@ export function buildCallbackLadder(input: {
         if (rounds.length === 0) continue;
 
         const allDecided = rounds.every((r) => r.state === "decided");
-        const candidates = rounds.flatMap((r) =>
-            r.championEntryId ? [r.championEntryId] : [],
-        );
+        const candidates = rounds.flatMap((r) => (r.championEntryId ? [r.championEntryId] : []));
         const recorded = findCallback(callbacks, "division", division.id);
 
         divisionRounds.push({
@@ -164,11 +152,7 @@ export function buildCallbackLadder(input: {
             scopeId: division.id,
             label: division.name,
             divisionName: null,
-            state: recorded?.championEntryId
-                ? "decided"
-                : allDecided && candidates.length > 0
-                  ? "open"
-                  : "waiting",
+            state: recorded?.championEntryId ? "decided" : allDecided && candidates.length > 0 ? "open" : "waiting",
             candidateEntryIds: candidates,
             championEntryId: recorded?.championEntryId ?? null,
             reserveEntryId: recorded?.reserveEntryId ?? null,
@@ -179,20 +163,14 @@ export function buildCallbackLadder(input: {
     let showRound: LadderRound | null = null;
     if (divisionRounds.length > 0) {
         const allDecided = divisionRounds.every((r) => r.state === "decided");
-        const candidates = divisionRounds.flatMap((r) =>
-            r.championEntryId ? [r.championEntryId] : [],
-        );
+        const candidates = divisionRounds.flatMap((r) => (r.championEntryId ? [r.championEntryId] : []));
         const recorded = findCallback(callbacks, "show", null);
         showRound = {
             scope: "show",
             scopeId: null,
             label: input.showLabel ?? "Grand Championship",
             divisionName: null,
-            state: recorded?.championEntryId
-                ? "decided"
-                : allDecided && candidates.length > 0
-                  ? "open"
-                  : "waiting",
+            state: recorded?.championEntryId ? "decided" : allDecided && candidates.length > 0 ? "open" : "waiting",
             candidateEntryIds: candidates,
             championEntryId: recorded?.championEntryId ?? null,
             reserveEntryId: recorded?.reserveEntryId ?? null,

@@ -19,10 +19,7 @@ const STAFF_PHRASES: Record<StaffRole, string> = {
  */
 export function StaffBanner({ show, role }: { show: PublicShow; role: StaffRole }) {
     const judgeQueueLive =
-        role === "judge" &&
-        show.mode === "online" &&
-        show.judging === "judged" &&
-        show.status === "judging";
+        role === "judge" && show.mode === "online" && show.judging === "judged" && show.status === "judging";
     const href = judgeQueueLive ? `/shows/host/${show.id}/judge` : `/shows/host/${show.id}`;
     const label = judgeQueueLive ? "Open the judge queue →" : "Open the show console →";
     return (
@@ -32,9 +29,7 @@ export function StaffBanner({ show, role }: { show: PublicShow; role: StaffRole 
             data-testid="staff-banner"
         >
             <span className="stamp">Show Staff</span>
-            <p className="text-sm text-foreground">
-                You are {STAFF_PHRASES[role]} for this show.
-            </p>
+            <p className="text-sm text-foreground">You are {STAFF_PHRASES[role]} for this show.</p>
             <Link
                 href={href}
                 className="ml-auto text-sm font-semibold text-forest hover:underline"

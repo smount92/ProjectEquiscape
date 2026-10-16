@@ -64,9 +64,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
         attachments: attachmentMap[e.id] || undefined,
     }));
 
-    const labels = room.kind
-        ? { a: roleLabel(room.kind, "a"), b: roleLabel(room.kind, "b") }
-        : { a: "Them", b: "You" };
+    const labels = room.kind ? { a: roleLabel(room.kind, "a"), b: roleLabel(room.kind, "b") } : { a: "Them", b: "You" };
 
     const isDeal = !!room.transaction || !!room.subject || room.terms.boxes.length > 0;
     const frozen = !!room.disputed;
@@ -81,9 +79,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
           })
         : null;
 
-    const composerDisabledReason = room.isBlocked
-        ? "You can no longer message this person."
-        : null;
+    const composerDisabledReason = room.isBlocked ? "You can no longer message this person." : null;
 
     const vaultMeta = room.transaction?.metadata ?? null;
 
@@ -95,10 +91,10 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
     return (
         <div className="mx-auto flex min-h-[calc(100dvh-var(--header-height))] max-w-6xl flex-col px-4 md:px-8">
             {/* ── 1. The pinned header ── */}
-            <div className="bg-card border-input animate-fade-in-up mb-2 flex shrink-0 flex-wrap items-center gap-3 rounded-lg border px-4 py-3 sm:mb-4 sm:gap-4 sm:px-6 sm:py-4">
+            <div className="animate-fade-in-up mb-2 flex shrink-0 flex-wrap items-center gap-3 rounded-lg border border-input bg-card px-4 py-3 sm:mb-4 sm:gap-4 sm:px-6 sm:py-4">
                 <Link
                     href="/inbox"
-                    className="text-muted-foreground flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-full bg-black/5 no-underline transition-all"
+                    className="flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-full bg-black/5 text-muted-foreground no-underline transition-all"
                     aria-label="Back to inbox"
                 >
                     <svg
@@ -118,23 +114,19 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
 
                 <div className="flex min-w-[13rem] flex-1 basis-52 flex-col">
                     <div className="flex items-center gap-2">
-                        <Link href={`/profile/${encodeURIComponent(room.otherAlias)}`}>
-                            @{room.otherAlias}
-                        </Link>
+                        <Link href={`/profile/${encodeURIComponent(room.otherAlias)}`}>@{room.otherAlias}</Link>
                         {/* The role label reads off the TRANSACTION, so a seller
                             who opened the thread is no longer called the buyer. */}
                         {room.kind && (
-                            <span className="bg-success/10 text-forest rounded-full px-[8px] py-[2px] text-xs font-medium">
+                            <span className="rounded-full bg-success/10 px-[8px] py-[2px] text-xs font-medium text-forest">
                                 {room.otherLabel}
                             </span>
                         )}
                     </div>
                     {room.subject ? (
-                        <span className="text-muted-foreground mt-0.5 text-xs">
-                            🐴 Re: {room.subject.title}
-                        </span>
+                        <span className="mt-0.5 text-xs text-muted-foreground">🐴 Re: {room.subject.title}</span>
                     ) : (
-                        <span className="text-muted-foreground mt-0.5 flex items-center gap-1 text-xs opacity-70">
+                        <span className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground opacity-70">
                             <MessageCircle className="h-3 w-3" /> Direct message
                         </span>
                     )}
@@ -152,8 +144,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
                     </TrustChip>
                     {room.otherAvgRating !== null && (
                         <TrustChip title="Average review score">
-                            <Star className="h-3 w-3 fill-current" /> {room.otherAvgRating} (
-                            {room.otherRatingCount})
+                            <Star className="h-3 w-3 fill-current" /> {room.otherAvgRating} ({room.otherRatingCount})
                         </TrustChip>
                     )}
                 </div>
@@ -164,11 +155,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
                     archived={room.archived}
                     enabled={room.support.participants}
                 />
-                <BlockButton
-                    targetId={room.otherId}
-                    targetAlias={room.otherAlias}
-                    initialBlocked={room.isBlocked}
-                />
+                <BlockButton targetId={room.otherId} targetAlias={room.otherAlias} initialBlocked={room.isBlocked} />
             </div>
 
             <div className="flex min-h-0 flex-1 flex-col">
@@ -176,7 +163,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
                 {room.subject && room.subject.horseId && (
                     <Link
                         href={`/community/${room.subject.horseId}`}
-                        className="group border-input bg-card text-foreground animate-fade-in-up mb-2 flex shrink-0 items-center gap-4 rounded-xl border p-3 no-underline shadow-sm transition-all hover:-translate-y-px hover:shadow-md sm:mb-4 sm:p-4"
+                        className="group animate-fade-in-up mb-2 flex shrink-0 items-center gap-4 rounded-xl border border-input bg-card p-3 text-foreground no-underline shadow-sm transition-all hover:-translate-y-px hover:shadow-md sm:mb-4 sm:p-4"
                         id="chat-horse-link"
                     >
                         {room.subject.thumbUrl ? (
@@ -187,7 +174,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
                                 className="h-10 w-10 shrink-0 rounded-md object-cover sm:h-14 sm:w-14"
                             />
                         ) : (
-                            <div className="bg-card flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-xl sm:h-14 sm:w-14 sm:text-2xl">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-card text-xl sm:h-14 sm:w-14 sm:text-2xl">
                                 🐴
                             </div>
                         )}
@@ -196,28 +183,28 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
                                 {room.subject.title}
                             </span>
                             {room.subject.reference && (
-                                <span className="text-muted-foreground overflow-hidden text-xs text-ellipsis whitespace-nowrap">
+                                <span className="overflow-hidden text-xs text-ellipsis whitespace-nowrap text-muted-foreground">
                                     {room.subject.reference}
                                 </span>
                             )}
                             <div className="flex flex-wrap items-center gap-1.5">
                                 {agreed !== null ? (
-                                    <span className="border-forest/25 bg-forest/5 text-forest inline-flex w-fit items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold">
+                                    <span className="inline-flex w-fit items-center rounded-full border border-forest/25 bg-forest/5 px-2.5 py-0.5 text-xs font-semibold text-forest">
                                         Agreed {formatMoney(agreed)}
                                     </span>
                                 ) : room.subject.listingPrice ? (
-                                    <span className="bg-success/10 text-success inline-flex w-fit items-center rounded-full px-2 py-0.5 text-xs font-bold">
+                                    <span className="inline-flex w-fit items-center rounded-full bg-success/10 px-2 py-0.5 text-xs font-bold text-success">
                                         {formatMoney(room.subject.listingPrice)}
                                     </span>
                                 ) : null}
                                 {room.subject.tradeStatus === "Pending Sale" && (
-                                    <span className="bg-info/10 text-info inline-flex w-fit items-center rounded-full px-2 py-0.5 text-xs font-bold">
+                                    <span className="inline-flex w-fit items-center rounded-full bg-info/10 px-2 py-0.5 text-xs font-bold text-info">
                                         Pending sale
                                     </span>
                                 )}
                             </div>
                         </div>
-                        <span className="text-muted-foreground group-hover:text-forest shrink-0 text-[1.1rem] transition-transform group-hover:translate-x-[3px]">
+                        <span className="shrink-0 text-[1.1rem] text-muted-foreground transition-transform group-hover:translate-x-[3px] group-hover:text-forest">
                             →
                         </span>
                     </Link>
@@ -267,9 +254,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
                                     labels={labels}
                                     readOnly={frozen}
                                     readOnlyReason={
-                                        frozen
-                                            ? "This deal is disputed — the terms are frozen as they stood."
-                                            : null
+                                        frozen ? "This deal is disputed — the terms are frozen as they stood." : null
                                     }
                                 />
                                 {room.support.installments && (
@@ -282,9 +267,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
                                         agreedPrice={agreed ?? room.transaction?.offerAmount ?? null}
                                         readOnly={frozen}
                                         readOnlyReason={
-                                            frozen
-                                                ? "This deal is disputed — the ledger is frozen as it stood."
-                                                : null
+                                            frozen ? "This deal is disputed — the ledger is frozen as it stood." : null
                                         }
                                     />
                                 )}
@@ -311,10 +294,9 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
                                 />
                             </>
                         ) : (
-                            <div className="border-input bg-muted/40 text-muted-foreground rounded-lg border p-4 text-sm leading-relaxed">
-                                Agreed terms, payment plans and the exportable deal record arrive
-                                with the next database update. Offers and Safe-Trade work exactly as
-                                they do today until then.
+                            <div className="rounded-lg border border-input bg-muted/40 p-4 text-sm leading-relaxed text-muted-foreground">
+                                Agreed terms, payment plans and the exportable deal record arrive with the next database
+                                update. Offers and Safe-Trade work exactly as they do today until then.
                             </div>
                         )}
                     </div>
@@ -343,7 +325,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
                     </div>
                 )}
 
-                <div className="text-muted-foreground mt-6 mb-8 text-center text-[0.65rem]">
+                <div className="mt-6 mb-8 text-center text-[0.65rem] text-muted-foreground">
                     Private between you and @{room.otherAlias}
                     {room.kind ? ` · you are the ${roleLabel(room.kind, room.party)}` : ""} ·{" "}
                     {room.kind
@@ -358,7 +340,7 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
 function TrustChip({ children, title }: { children: React.ReactNode; title: string }) {
     return (
         <span
-            className="border-input text-muted-foreground bg-card inline-flex items-center gap-[3px] rounded-sm border px-2 py-0.5 text-xs whitespace-nowrap"
+            className="inline-flex items-center gap-[3px] rounded-sm border border-input bg-card px-2 py-0.5 text-xs whitespace-nowrap text-muted-foreground"
             title={title}
         >
             {children}

@@ -1,74 +1,76 @@
 "use client";
 
-import { useState } from"react";
-import { useRouter } from"next/navigation";
-import { updateShowStatus, deleteShow } from"@/app/actions/shows";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { updateShowStatus, deleteShow } from "@/app/actions/shows";
 import { Button } from "@/components/ui/button";
 
 interface AdminShow {
- id: string;
- title: string;
- status: string;
- endAt: string | null;
- entryCount: number;
+    id: string;
+    title: string;
+    status: string;
+    endAt: string | null;
+    entryCount: number;
 }
 
 export default function AdminShowManager({ shows }: { shows: AdminShow[] }) {
- const router = useRouter();
- const [busy, setBusy] = useState<string | null>(null);
+    const router = useRouter();
+    const [busy, setBusy] = useState<string | null>(null);
 
- const handleStatusChange = async (showId: string, newStatus: string) => {
- setBusy(showId);
- await updateShowStatus(showId, newStatus as"open" |"judging" |"closed");
- router.refresh();
- setBusy(null);
- };
+    const handleStatusChange = async (showId: string, newStatus: string) => {
+        setBusy(showId);
+        await updateShowStatus(showId, newStatus as "open" | "judging" | "closed");
+        router.refresh();
+        setBusy(null);
+    };
 
- const handleDelete = async (showId: string, title: string) => {
- if (!confirm(`Delete"${title}" and all its entries? This cannot be undone.`)) return;
- setBusy(showId);
- await deleteShow(showId);
- router.refresh();
- setBusy(null);
- };
+    const handleDelete = async (showId: string, title: string) => {
+        if (!confirm(`Delete"${title}" and all its entries? This cannot be undone.`)) return;
+        setBusy(showId);
+        await deleteShow(showId);
+        router.refresh();
+        setBusy(null);
+    };
 
- if (shows.length === 0) {
- return <p className="text-muted-foreground">No shows yet. Create one above.</p>;
- }
+    if (shows.length === 0) {
+        return <p className="text-muted-foreground">No shows yet. Create one above.</p>;
+    }
 
- return (
- <div className="flex flex-col gap-2">
- {shows.map((show) => (
- <div
- key={show.id}
- className="flex flex-wrap items-center gap-2 border-b border-input py-4 last:border-b-0"
- >
- <div className="min-w-[200px] flex-1">
- <div className="font-semibold">{show.title}</div>
- <div className="text-muted-foreground text-xs">
- 🐴 {show.entryCount} entries
- {show.endAt && <> · ⏰ {new Date(show.endAt).toLocaleDateString()}</>}
- </div>
- </div>
- <select
- value={show.status}
- onChange={(e) => handleStatusChange(show.id, e.target.value)}
- className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 w-auto min-w-[120px]"
- disabled={busy === show.id}
- title={`Status for ${show.title}`}
- >
- <option value="open">🟢 Open</option>
- <option value="judging">🟡 Judging</option>
- <option value="closed">🔴 Closed</option>
- </select>
- <Button variant="destructive-outline" size="wide"
- onClick={() => handleDelete(show.id, show.title)}
- disabled={busy === show.id}
- >
- 🗑 Delete
- </Button>
- </div>
- ))}
- </div>
- );
+    return (
+        <div className="flex flex-col gap-2">
+            {shows.map((show) => (
+                <div
+                    key={show.id}
+                    className="flex flex-wrap items-center gap-2 border-b border-input py-4 last:border-b-0"
+                >
+                    <div className="min-w-[200px] flex-1">
+                        <div className="font-semibold">{show.title}</div>
+                        <div className="text-xs text-muted-foreground">
+                            🐴 {show.entryCount} entries
+                            {show.endAt && <> · ⏰ {new Date(show.endAt).toLocaleDateString()}</>}
+                        </div>
+                    </div>
+                    <select
+                        value={show.status}
+                        onChange={(e) => handleStatusChange(show.id, e.target.value)}
+                        className="flex h-10 w-auto w-full min-w-[120px] rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
+                        disabled={busy === show.id}
+                        title={`Status for ${show.title}`}
+                    >
+                        <option value="open">🟢 Open</option>
+                        <option value="judging">🟡 Judging</option>
+                        <option value="closed">🔴 Closed</option>
+                    </select>
+                    <Button
+                        variant="destructive-outline"
+                        size="wide"
+                        onClick={() => handleDelete(show.id, show.title)}
+                        disabled={busy === show.id}
+                    >
+                        🗑 Delete
+                    </Button>
+                </div>
+            ))}
+        </div>
+    );
 }

@@ -88,13 +88,7 @@ export interface PaypalPurchaseUnit {
  * create returns when payment_source.paypal is present, in place of the
  * CREATED you get without it.
  */
-export type PaypalOrderStatus =
-    | "CREATED"
-    | "SAVED"
-    | "APPROVED"
-    | "PAYER_ACTION_REQUIRED"
-    | "VOIDED"
-    | "COMPLETED";
+export type PaypalOrderStatus = "CREATED" | "SAVED" | "APPROVED" | "PAYER_ACTION_REQUIRED" | "VOIDED" | "COMPLETED";
 
 export interface PaypalOrder {
     id?: string;

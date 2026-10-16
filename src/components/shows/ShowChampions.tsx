@@ -14,13 +14,7 @@ import Link from "next/link";
 import { championHex, championLabel } from "@/lib/shows/placings";
 import type { ChampionAward, ShowChampionsData } from "@/lib/shows/ring";
 
-function AwardLine({
-    award,
-    kind,
-}: {
-    award: ChampionAward;
-    kind: "champion" | "reserve";
-}) {
+function AwardLine({ award, kind }: { award: ChampionAward; kind: "champion" | "reserve" }) {
     const entry = kind === "champion" ? award.champion : award.reserve;
     if (!entry) return null;
     return (
@@ -34,9 +28,7 @@ function AwardLine({
                 {championLabel(kind, award.scope)}
             </span>
             {entry.entryNumber !== null && (
-                <span className="font-mono text-sm font-bold text-foreground">
-                    #{entry.entryNumber}
-                </span>
+                <span className="font-mono text-sm font-bold text-foreground">#{entry.entryNumber}</span>
             )}
             {entry.horseName === "Unnamed horse" ? (
                 /* Hidden horse: on the record, never a 404 link. */
@@ -68,8 +60,7 @@ function Rosette({ grand }: { grand: boolean }) {
             aria-hidden="true"
             className={`inline-block shrink-0 rounded-full border ${grand ? "h-10 w-10" : "h-7 w-7"}`}
             style={{
-                background:
-                    "radial-gradient(circle at 35% 30%, var(--brass-hi), var(--brass-dark))",
+                background: "radial-gradient(circle at 35% 30%, var(--brass-hi), var(--brass-dark))",
                 borderColor: "var(--ink-brass, #7A5C22)",
             }}
         />
@@ -80,9 +71,7 @@ function AwardCard({ award }: { award: ChampionAward }) {
     const grand = award.scope === "show";
     return (
         <div
-            className={`flex items-start gap-3 rounded-lg border p-3 ${
-                grand ? "border-2" : "border-input"
-            }`}
+            className={`flex items-start gap-3 rounded-lg border p-3 ${grand ? "border-2" : "border-input"}`}
             style={grand ? { borderColor: "var(--brass)" } : undefined}
             data-testid="champion-award"
             data-scope={award.scope}
@@ -106,10 +95,7 @@ function AwardCard({ award }: { award: ChampionAward }) {
 }
 
 export default function ShowChampions({ champions }: { champions: ShowChampionsData }) {
-    const hasAny =
-        champions.show !== null ||
-        champions.divisions.length > 0 ||
-        champions.sections.length > 0;
+    const hasAny = champions.show !== null || champions.divisions.length > 0 || champions.sections.length > 0;
     if (!hasAny) return null;
 
     return (
@@ -129,10 +115,7 @@ export default function ShowChampions({ champions }: { champions: ShowChampionsD
                 {champions.sections.length > 0 && (
                     <div className="grid gap-3 sm:grid-cols-2">
                         {champions.sections.map((award) => (
-                            <AwardCard
-                                key={`section-${award.divisionName}-${award.scopeLabel}`}
-                                award={award}
-                            />
+                            <AwardCard key={`section-${award.divisionName}-${award.scopeLabel}`} award={award} />
                         ))}
                     </div>
                 )}

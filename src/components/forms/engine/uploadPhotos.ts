@@ -62,18 +62,10 @@ export async function uploadStudioPhotos({
             : compressImage(file, tier);
 
     // ── Angle slots (+ a 400px thumbnail each) ──
-    for (const [angle, slot] of Object.entries(photos.slots) as [
-        AngleProfile,
-        { file: File },
-    ][]) {
+    for (const [angle, slot] of Object.entries(photos.slots) as [AngleProfile, { file: File }][]) {
         if (!slot) continue;
         const path = `horses/${horseId}/${angle}_${Date.now()}.webp`;
-        const { error } = await uploadImageWithRetry(
-            supabase,
-            "horse-images",
-            path,
-            await compress(slot.file),
-        );
+        const { error } = await uploadImageWithRetry(supabase, "horse-images", path, await compress(slot.file));
         if (error) {
             failed.push(gallerySlots.find((s) => s.angle === angle)?.label ?? angle);
             continue;
@@ -81,11 +73,9 @@ export async function uploadStudioPhotos({
         uploaded.push({ path, angle });
         try {
             const thumb = await generateThumbnail(slot.file);
-            await supabase.storage
-                .from("horse-images")
-                .upload(path.replace(/\.webp$/, "_thumb.webp"), thumb, {
-                    contentType: "image/webp",
-                });
+            await supabase.storage.from("horse-images").upload(path.replace(/\.webp$/, "_thumb.webp"), thumb, {
+                contentType: "image/webp",
+            });
         } catch {
             // Non-fatal — the grid falls back to full-res.
         }
@@ -100,12 +90,7 @@ export async function uploadStudioPhotos({
         for (let i = 0; i < items.length; i++) {
             const prefix = angle === "extra_detail" ? "extra_detail" : "flaw_rub_damage";
             const path = `horses/${horseId}/${prefix}_${Date.now()}_${i}.webp`;
-            const { error } = await uploadImageWithRetry(
-                supabase,
-                "horse-images",
-                path,
-                await compress(items[i].file),
-            );
+            const { error } = await uploadImageWithRetry(supabase, "horse-images", path, await compress(items[i].file));
             if (error) failed.push(`${label} ${i + 1}`);
             else uploaded.push({ path, angle });
         }
@@ -124,9 +109,7 @@ export async function uploadStudioPhotos({
     if (uploaded.length > 0) {
         const result = await finalizeHorseImages(horseId, uploaded);
         if (!result.success) {
-            problems.push(
-                `The uploaded photos could not be attached: ${result.error ?? "unknown error"}`,
-            );
+            problems.push(`The uploaded photos could not be attached: ${result.error ?? "unknown error"}`);
         } else if (result.skippedReason) {
             problems.push(result.skippedReason);
         }

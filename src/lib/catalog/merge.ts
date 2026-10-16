@@ -14,17 +14,26 @@ type Done = { error: { message: string } | null };
 export interface MergeClient {
     from: (table: string) => {
         select: (cols: string) => {
-            eq: (col: string, val: string) => PromiseLike<{ data: unknown; error?: unknown }> & {
+            eq: (
+                col: string,
+                val: string,
+            ) => PromiseLike<{ data: unknown; error?: unknown }> & {
                 maybeSingle: () => Promise<{ data: unknown; error?: unknown }>;
             };
         };
         update: (row: Record<string, unknown>) => {
-            eq: (col: string, val: string) => { select: (cols: string) => Promise<{ data: unknown; error: { message: string } | null }> };
+            eq: (
+                col: string,
+                val: string,
+            ) => { select: (cols: string) => Promise<{ data: unknown; error: { message: string } | null }> };
         };
         insert: (row: Record<string, unknown>) => Promise<Done>;
         upsert: (row: Record<string, unknown>, options: { onConflict: string }) => PromiseLike<Done>;
         delete: () => {
-            eq: (col: string, val: string) => PromiseLike<Done> & { in: (col: string, vals: string[]) => PromiseLike<Done> };
+            eq: (
+                col: string,
+                val: string,
+            ) => PromiseLike<Done> & { in: (col: string, vals: string[]) => PromiseLike<Done> };
         };
     };
 }
@@ -116,7 +125,10 @@ export async function mergeCatalogItemsCore(
     if (dup.maker_slug && dup.slug) {
         await admin
             .from("catalog_slug_history")
-            .upsert({ old_maker_slug: dup.maker_slug, old_slug: dup.slug, item_id: canonical.id }, { onConflict: "old_maker_slug,old_slug" });
+            .upsert(
+                { old_maker_slug: dup.maker_slug, old_slug: dup.slug, item_id: canonical.id },
+                { onConflict: "old_maker_slug,old_slug" },
+            );
     }
 
     const { error: deleteError } = await admin.from("catalog_items").delete().eq("id", dup.id);

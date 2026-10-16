@@ -54,7 +54,7 @@ describe("checkRateLimit", () => {
         const mockRpc = vi.fn().mockResolvedValue({ data: null, error: { message: "DB error" } });
         mockGetAdminClient.mockReturnValue({ rpc: mockRpc } as unknown as ReturnType<typeof getAdminClient>);
 
-        const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => { });
+        const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
         const result = await checkRateLimit("test_endpoint", 5, 15);
         expect(result).toBe(true);
         consoleSpy.mockRestore();
@@ -65,7 +65,7 @@ describe("checkRateLimit", () => {
             throw new Error("Connection failed");
         });
 
-        const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => { });
+        const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
         const result = await checkRateLimit("test_endpoint", 5, 15);
         expect(result).toBe(true);
         consoleSpy.mockRestore();
@@ -97,9 +97,12 @@ describe("checkRateLimit", () => {
 
         await checkRateLimit("test_endpoint", 5, 15);
         // Should use first IP from x-forwarded-for
-        expect(mockRpc).toHaveBeenCalledWith("check_rate_limit", expect.objectContaining({
-            p_identifier: "10.0.0.1",
-        }));
+        expect(mockRpc).toHaveBeenCalledWith(
+            "check_rate_limit",
+            expect.objectContaining({
+                p_identifier: "10.0.0.1",
+            }),
+        );
     });
 
     it("falls back to x-real-ip when x-forwarded-for is missing", async () => {
@@ -114,8 +117,11 @@ describe("checkRateLimit", () => {
         mockGetAdminClient.mockReturnValue({ rpc: mockRpc } as unknown as ReturnType<typeof getAdminClient>);
 
         await checkRateLimit("test_endpoint", 5, 15);
-        expect(mockRpc).toHaveBeenCalledWith("check_rate_limit", expect.objectContaining({
-            p_identifier: "192.168.0.1",
-        }));
+        expect(mockRpc).toHaveBeenCalledWith(
+            "check_rate_limit",
+            expect.objectContaining({
+                p_identifier: "192.168.0.1",
+            }),
+        );
     });
 });

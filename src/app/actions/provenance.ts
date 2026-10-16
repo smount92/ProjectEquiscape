@@ -168,7 +168,7 @@ export async function updateShowRecord(
         qualifierCard?: string | null;
         qualifierYear?: number | string | null;
         qualifierCardId?: string | null;
-    }
+    },
 ): Promise<{ success: boolean; error?: string; warning?: string }> {
     const supabase = await createClient();
     const {
@@ -219,10 +219,7 @@ export async function updateShowRecord(
         }
     }
 
-    let { error } = await supabase
-        .from("show_records")
-        .update(updateData)
-        .eq("id", recordId);
+    let { error } = await supabase.from("show_records").update(updateData).eq("id", recordId);
     let warning: string | undefined;
     // Pre-210: drop the card columns, keep the rest of the edit.
     if (error && isMissingColumn(error) && qualifierTouched) {
@@ -240,9 +237,7 @@ export async function updateShowRecord(
 /**
  * Delete a show record. RLS enforces owner-only.
  */
-export async function deleteShowRecord(
-    recordId: string
-): Promise<{ success: boolean; error?: string }> {
+export async function deleteShowRecord(recordId: string): Promise<{ success: boolean; error?: string }> {
     const supabase = await createClient();
     const {
         data: { user },
@@ -272,16 +267,11 @@ export async function deleteShowRecord(
     if (record.verification_tier === "platform_generated" || record.show_id) {
         return {
             success: false,
-            error:
-                "This placing was awarded in a show on Model Horse Hub, so it stays on the record. Ask the show's host if you think it's wrong.",
+            error: "This placing was awarded in a show on Model Horse Hub, so it stays on the record. Ask the show's host if you think it's wrong.",
         };
     }
 
-    const { error } = await supabase
-        .from("show_records")
-        .delete()
-        .eq("id", recordId)
-        .eq("user_id", user.id);
+    const { error } = await supabase.from("show_records").delete().eq("id", recordId).eq("user_id", user.id);
 
     if (error) return { success: false, error: error.message };
     return { success: true };
@@ -431,9 +421,7 @@ const LINKS_NOT_KEPT =
 /**
  * Delete a pedigree card.
  */
-export async function deletePedigree(
-    horseId: string
-): Promise<{ success: boolean; error?: string }> {
+export async function deletePedigree(horseId: string): Promise<{ success: boolean; error?: string }> {
     const supabase = await createClient();
     const {
         data: { user },
@@ -441,10 +429,7 @@ export async function deletePedigree(
 
     if (!user) return { success: false, error: "You must be logged in." };
 
-    const { error } = await supabase
-        .from("horse_pedigrees")
-        .delete()
-        .eq("horse_id", horseId);
+    const { error } = await supabase.from("horse_pedigrees").delete().eq("horse_id", horseId);
 
     if (error) return { success: false, error: error.message };
     return { success: true };

@@ -39,7 +39,9 @@ export function NotificationProvider({
     const supabase = createClient();
 
     const fetchNotificationCount = useCallback(async () => {
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+            data: { user },
+        } = await supabase.auth.getUser();
         if (!user) return;
         const { count } = await supabase
             .from("notifications")
@@ -50,7 +52,9 @@ export function NotificationProvider({
     }, [supabase]);
 
     const fetchMessageCount = useCallback(async () => {
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+            data: { user },
+        } = await supabase.auth.getUser();
         if (!user) return;
 
         // One embedded-filter count. This runs on mount for EVERY signed-in
@@ -63,7 +67,9 @@ export function NotificationProvider({
         let cleanup: (() => void) | null = null;
 
         const setup = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
+            const {
+                data: { user },
+            } = await supabase.auth.getUser();
             if (!user) return;
 
             // Initial fetch
@@ -76,7 +82,7 @@ export function NotificationProvider({
                 .on(
                     "postgres_changes",
                     { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` },
-                    () => setUnreadNotifications(prev => prev + 1)
+                    () => setUnreadNotifications((prev) => prev + 1),
                 )
                 .on(
                     "postgres_changes",
@@ -85,23 +91,19 @@ export function NotificationProvider({
                         if (payload.new && (payload.new as { is_read: boolean }).is_read) {
                             fetchNotificationCount(); // Re-fetch exact count after mark-read
                         }
-                    }
+                    },
                 )
                 .subscribe();
 
             // Single channel for incoming messages
             const msgChannel = supabase
                 .channel(`global-inbox-${user.id}`)
-                .on(
-                    "postgres_changes",
-                    { event: "INSERT", schema: "public", table: "messages" },
-                    (payload) => {
-                        const msg = payload.new as { sender_id: string };
-                        if (msg.sender_id !== user.id) {
-                            setUnreadMessages(prev => prev + 1);
-                        }
+                .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
+                    const msg = payload.new as { sender_id: string };
+                    if (msg.sender_id !== user.id) {
+                        setUnreadMessages((prev) => prev + 1);
                     }
-                )
+                })
                 .subscribe();
 
             // Visibility-based refresh with 30s cooldown

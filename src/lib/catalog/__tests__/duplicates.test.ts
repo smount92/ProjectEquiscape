@@ -15,14 +15,21 @@ describe("duplicate reports", () => {
     });
 
     it("must be filed from an entry, name another entry, and not itself", () => {
-        expect(duplicateReportRefusal({ catalogItemId: null, fieldChanges: { duplicate_of: B } })).toMatch(/from the entry/);
+        expect(duplicateReportRefusal({ catalogItemId: null, fieldChanges: { duplicate_of: B } })).toMatch(
+            /from the entry/,
+        );
         expect(duplicateReportRefusal({ catalogItemId: A, fieldChanges: {} })).toMatch(/Pick the entry/);
         expect(duplicateReportRefusal({ catalogItemId: A, fieldChanges: { duplicate_of: A } })).toMatch(/same entry/);
         expect(duplicateReportRefusal({ catalogItemId: A, fieldChanges: { duplicate_of: B } })).toBeNull();
     });
 
     it("recognises the pre-migration CHECK refusal", () => {
-        expect(isMissingDuplicateType({ code: "23514", message: 'violates check constraint "catalog_suggestions_suggestion_type_check"' })).toBe(true);
+        expect(
+            isMissingDuplicateType({
+                code: "23514",
+                message: 'violates check constraint "catalog_suggestions_suggestion_type_check"',
+            }),
+        ).toBe(true);
         expect(isMissingDuplicateType({ code: "42501", message: "permission denied" })).toBe(false);
         expect(isMissingDuplicateType(null)).toBe(false);
     });

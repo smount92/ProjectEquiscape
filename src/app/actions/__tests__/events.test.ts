@@ -112,9 +112,7 @@ describe("createEvent — events are for OUTSIDE-MHH happenings", () => {
             error: null,
         });
         await createEvent(VALID);
-        const tables = (mockClient.from as unknown as Mock).mock.calls.map(
-            (c: string[]) => c[0],
-        );
+        const tables = (mockClient.from as unknown as Mock).mock.calls.map((c: string[]) => c[0]);
         expect(tables).not.toContain("event_divisions");
         expect(tables).not.toContain("event_classes");
     });

@@ -27,12 +27,7 @@ export const MAX_STABLE_PAGE = 10_000;
 
 export const FINISH_OPTIONS = ["OF", "Custom", "Artist Resin"] as const;
 
-export const TRADE_OPTIONS = [
-    "For Sale",
-    "Open to Offers",
-    "Not for Sale",
-    "Stolen/Missing",
-] as const;
+export const TRADE_OPTIONS = ["For Sale", "Open to Offers", "Not for Sale", "Stolen/Missing"] as const;
 
 export const CATEGORY_OPTIONS = ["model", "tack", "prop", "diorama", "other_model"] as const;
 
@@ -111,9 +106,7 @@ function nonEmpty(v: string | string[] | undefined, max: number): string | undef
  * dropped (never trusted): finish/trade/category/sort must be in their
  * vocabularies, collection must be a UUID.
  */
-export function parseStableSearchParams(
-    params: Record<string, string | string[] | undefined>,
-): StableFilters {
+export function parseStableSearchParams(params: Record<string, string | string[] | undefined>): StableFilters {
     const filters: StableFilters = { sort: "newest" };
 
     const q = nonEmpty(params.q, 100);

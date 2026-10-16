@@ -15,12 +15,7 @@ import { getAdminClient } from "@/lib/supabase/admin";
 import { sanitizeText } from "@/lib/utils/validation";
 import { decodeHtmlEntities } from "@/lib/utils/decodeEntities";
 import { cleanAttributeBag } from "@/lib/forms/attributes";
-import {
-    DELETED_NAME_PLACEHOLDER,
-    clearStashedName,
-    readStashedName,
-    stashDeletedName,
-} from "@/lib/stable/softDelete";
+import { DELETED_NAME_PLACEHOLDER, clearStashedName, readStashedName, stashDeletedName } from "@/lib/stable/softDelete";
 import {
     firstProblemMessage,
     splitProblems,
@@ -48,11 +43,7 @@ import type { Json, TablesInsert } from "@/lib/types/database.generated";
  * fields are logged, not refused, until the flag has soaked — a create
  * path older than the engine (Help-ID, for one) may simply not send them.
  */
-function enforceValidation(
-    where: string,
-    horseId: string | null,
-    problems: FieldProblem[],
-): string | null {
+function enforceValidation(where: string, horseId: string | null, problems: FieldProblem[]): string | null {
     const { invalid, missing } = splitProblems(problems);
     if (missing.length > 0) {
         logger.warn(where, "Form-engine required-field gap (log-only during soak)", {
@@ -75,8 +66,15 @@ const ACTIVE_TRANSACTION_STATUSES = ["offer_made", "pending_payment", "funds_ver
 
 /** Commission statuses under which the horse is somebody else's work in progress. */
 const ACTIVE_COMMISSION_STATUSES = [
-    "requested", "quoted", "accepted", "in_progress", "awaiting_approval", "completed",
-    "review", "revision", "shipping",
+    "requested",
+    "quoted",
+    "accepted",
+    "in_progress",
+    "awaiting_approval",
+    "completed",
+    "review",
+    "revision",
+    "shipping",
 ];
 
 /** Check if a horse has an active transaction or commission that blocks mutations */
@@ -141,10 +139,7 @@ export async function deleteHorse(horseId: string): Promise<{ success: boolean; 
     if (txnError) return { success: false, error: txnError };
 
     // Get images to clean up storage
-    const { data: images } = await supabase
-        .from("horse_images")
-        .select("image_url")
-        .eq("horse_id", horseId);
+    const { data: images } = await supabase.from("horse_images").select("image_url").eq("horse_id", horseId);
 
     // Delete storage files
     if (images && images.length > 0) {
@@ -330,10 +325,15 @@ export async function restoreHorse(
  * @param storagePath - Storage path to clean up (nullable)
  * @param horseId - UUID of the horse to delete (must be owned by caller)
  */
-export async function deleteHorseImageAction(recordId: string, storagePath: string | null): Promise<{ success: boolean; error?: string }> {
+export async function deleteHorseImageAction(
+    recordId: string,
+    storagePath: string | null,
+): Promise<{ success: boolean; error?: string }> {
     try {
         const supabase = await createClient();
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+            data: { user },
+        } = await supabase.auth.getUser();
         if (!user) return { success: false, error: "Not logged in" };
 
         // ENTRY LOCK (owner ask, 2026-09-03): this photo may be the
@@ -383,25 +383,30 @@ export async function deleteHorseImageAction(recordId: string, storagePath: stri
  * @param horseId - UUID of the horse to update
  * @param data - Update payload with whitelisted horse fields, vault data, and condition change
  */
-export async function updateHorseAction(horseId: string, data: {
-    horseUpdate: Record<string, unknown> | null;
-    vaultData: Record<string, unknown> | null;
-    hasExistingVault: boolean;
-    deleteVault: boolean;
-    conditionChange: { newCondition: string; note: string | null } | null;
-    /**
-     * The horse's asset category, so the form engine can apply that
-     * category's rules. Optional: the legacy edit form doesn't know it
-     * (asset_category is immutable after create and never rendered), and
-     * fetching it would cost a query on every save. Absent means "any" —
-     * every value still gets a type, enum and length check; only the
-     * per-category required rules are skipped. See `UpdateCategory`.
-     */
-    assetCategory?: AssetCategory;
-}): Promise<{ success: boolean; error?: string }> {
+export async function updateHorseAction(
+    horseId: string,
+    data: {
+        horseUpdate: Record<string, unknown> | null;
+        vaultData: Record<string, unknown> | null;
+        hasExistingVault: boolean;
+        deleteVault: boolean;
+        conditionChange: { newCondition: string; note: string | null } | null;
+        /**
+         * The horse's asset category, so the form engine can apply that
+         * category's rules. Optional: the legacy edit form doesn't know it
+         * (asset_category is immutable after create and never rendered), and
+         * fetching it would cost a query on every save. Absent means "any" —
+         * every value still gets a type, enum and length check; only the
+         * per-category required rules are skipped. See `UpdateCategory`.
+         */
+        assetCategory?: AssetCategory;
+    },
+): Promise<{ success: boolean; error?: string }> {
     try {
         const supabase = await createClient();
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+            data: { user },
+        } = await supabase.auth.getUser();
         if (!user) return { success: false, error: "Not logged in" };
 
         // Guard: check for active transactions (rug-pull prevention)
@@ -409,7 +414,10 @@ export async function updateHorseAction(horseId: string, data: {
         if (txnError) {
             // If the only change is trade_status, give a specific error
             if (data.horseUpdate && Object.keys(data.horseUpdate).length === 1 && data.horseUpdate.trade_status) {
-                return { success: false, error: "This horse is locked in an active transaction. Cancel the transaction before changing its marketplace status." };
+                return {
+                    success: false,
+                    error: "This horse is locked in an active transaction. Cancel the transaction before changing its marketplace status.",
+                };
             }
             return { success: false, error: txnError };
         }
@@ -426,15 +434,20 @@ export async function updateHorseAction(horseId: string, data: {
                 .maybeSingle();
 
             if (expiredTransfer) {
-                await admin.from("horse_transfers")
+                await admin
+                    .from("horse_transfers")
                     .update({ status: "expired" })
                     .eq("id", (expiredTransfer as { id: string }).id);
-                await admin.from("user_horses")
+                await admin
+                    .from("user_horses")
                     .update({ life_stage: "completed" })
                     .eq("id", horseId)
                     .eq("life_stage", "parked");
             }
-        } catch (err) { Sentry.captureException(err, { tags: { domain: "horse" } }); logger.error("Horse", "Auto-unpark expired transfer failed", err); }
+        } catch (err) {
+            Sentry.captureException(err, { tags: { domain: "horse" } });
+            logger.error("Horse", "Auto-unpark expired transfer failed", err);
+        }
 
         // ── Security: whitelist allowed fields to prevent column injection ──
         // finishing_artist_verified is DELIBERATELY not here: it's a trust
@@ -443,20 +456,45 @@ export async function updateHorseAction(horseId: string, data: {
         // "Verified Artist"). It stays writable only by a future gated
         // verification path, never by updateHorse.
         const HORSE_ALLOWED = [
-            'custom_name', 'sculptor', 'finishing_artist', 'finish_type',
-            'condition_grade', 'is_public', 'visibility', 'trade_status', 'listing_price',
-            'marketplace_notes', 'collection_id', 'catalog_id', 'life_stage',
-            'edition_number', 'edition_size', 'asset_category',
-            'finish_details', 'public_notes', 'assigned_breed', 'assigned_gender',
-            'assigned_age', 'regional_id', 'attributes',
+            "custom_name",
+            "sculptor",
+            "finishing_artist",
+            "finish_type",
+            "condition_grade",
+            "is_public",
+            "visibility",
+            "trade_status",
+            "listing_price",
+            "marketplace_notes",
+            "collection_id",
+            "catalog_id",
+            "life_stage",
+            "edition_number",
+            "edition_size",
+            "asset_category",
+            "finish_details",
+            "public_notes",
+            "assigned_breed",
+            "assigned_gender",
+            "assigned_age",
+            "regional_id",
+            "attributes",
             // Artist resin identity (217)
-            'resin_material', 'resin_body', 'cast_by', 'prep_artist',
+            "resin_material",
+            "resin_body",
+            "cast_by",
+            "prep_artist",
             // Show identity: color / pattern (219)
-            'color',
+            "color",
         ];
         const VAULT_ALLOWED = [
-            'purchase_price', 'purchase_date', 'estimated_current_value',
-            'insurance_notes', 'horse_id', 'purchase_date_text', 'is_trade',
+            "purchase_price",
+            "purchase_date",
+            "estimated_current_value",
+            "insurance_notes",
+            "horse_id",
+            "purchase_date_text",
+            "is_trade",
         ];
 
         const horseUpdate = data.horseUpdate
@@ -481,8 +519,7 @@ export async function updateHorseAction(horseId: string, data: {
                 horseUpdate.assigned_breed = canonicalShowbio("breed", horseUpdate.assigned_breed);
             if (typeof horseUpdate.assigned_age === "string")
                 horseUpdate.assigned_age = canonicalShowbio("age", horseUpdate.assigned_age);
-            if (typeof horseUpdate.color === "string")
-                horseUpdate.color = canonicalShowbio("color", horseUpdate.color);
+            if (typeof horseUpdate.color === "string") horseUpdate.color = canonicalShowbio("color", horseUpdate.color);
         }
 
         const vaultData = data.vaultData
@@ -508,11 +545,7 @@ export async function updateHorseAction(horseId: string, data: {
         // Same JSONB hardening as the create path — but ONLY when the
         // caller told us the category. Guessing "model" here would clean a
         // tack horse's bag against an empty key set and wipe it.
-        if (
-            data.assetCategory &&
-            horseUpdate?.attributes &&
-            typeof horseUpdate.attributes === "object"
-        ) {
+        if (data.assetCategory && horseUpdate?.attributes && typeof horseUpdate.attributes === "object") {
             const { cleaned } = cleanAttributeBag(
                 data.assetCategory,
                 horseUpdate.attributes as Record<string, unknown>,
@@ -544,7 +577,11 @@ export async function updateHorseAction(horseId: string, data: {
                                 .select("title, maker")
                                 .eq("id", oldCatalogId)
                                 .maybeSingle();
-                            if (oldItem) oldName = catalogDisplayName((oldItem as { maker: string }).maker, (oldItem as { title: string }).title);
+                            if (oldItem)
+                                oldName = catalogDisplayName(
+                                    (oldItem as { maker: string }).maker,
+                                    (oldItem as { title: string }).title,
+                                );
                         }
                         if (newCatalogId) {
                             const { data: newItem } = await supabase
@@ -552,7 +589,11 @@ export async function updateHorseAction(horseId: string, data: {
                                 .select("title, maker")
                                 .eq("id", newCatalogId)
                                 .maybeSingle();
-                            if (newItem) newName = catalogDisplayName((newItem as { maker: string }).maker, (newItem as { title: string }).title);
+                            if (newItem)
+                                newName = catalogDisplayName(
+                                    (newItem as { maker: string }).maker,
+                                    (newItem as { title: string }).title,
+                                );
                         }
 
                         // kind='audit' keeps this provenance note off the
@@ -567,10 +608,17 @@ export async function updateHorseAction(horseId: string, data: {
                             ...(support.kind ? { kind: "audit" } : {}),
                         });
                     }
-                } catch (err) { Sentry.captureException(err, { tags: { domain: "horse" } }); logger.error("Horse", "Catalog identity audit log failed", err); }
+                } catch (err) {
+                    Sentry.captureException(err, { tags: { domain: "horse" } });
+                    logger.error("Horse", "Catalog identity audit log failed", err);
+                }
             }
 
-            let { error: updErr } = await supabase.from("user_horses").update(horseUpdate).eq("id", horseId).eq("owner_id", user.id);
+            let { error: updErr } = await supabase
+                .from("user_horses")
+                .update(horseUpdate)
+                .eq("id", horseId)
+                .eq("owner_id", user.id);
             if (updErr && isMissingPendingColumn(updErr)) {
                 // Migration 217/219 not pasted yet: save everything else.
                 ({ error: updErr } = await supabase
@@ -620,9 +668,7 @@ export async function updateHorseAction(horseId: string, data: {
                     .limit(1)
                     .maybeSingle();
 
-                const logged = justLogged as
-                    | { id: string; new_condition: string; created_at: string | null }
-                    | null;
+                const logged = justLogged as { id: string; new_condition: string; created_at: string | null } | null;
                 // Only the row THIS save produced: right grade, and recent
                 // enough that a concurrent edit can't have interleaved.
                 const isOurs =
@@ -709,8 +755,8 @@ export async function createHorseRecord(data: {
     }
 
     // Non-model categories don't require finishType
-    const category = data.assetCategory || 'model';
-    if (category === 'model' && !data.finishType) {
+    const category = data.assetCategory || "model";
+    if (category === "model" && !data.finishType) {
         return { success: false, error: "Finish type is required for model horses." };
     }
 
@@ -721,7 +767,7 @@ export async function createHorseRecord(data: {
         if (refusal) return { success: false, error: refusal };
     }
 
-    const isModel = category === 'model';
+    const isModel = category === "model";
     const horseInsert: UserHorseInsert = {
         owner_id: user.id,
         custom_name: sanitizeText(decodeHtmlEntities(data.customName)),
@@ -794,7 +840,13 @@ export async function createHorseRecord(data: {
     if (error || !horse) return { success: false, error: error?.message || "Failed to save horse." };
 
     // Insert financial vault if any data provided
-    const hasVault = data.purchasePrice || data.purchaseDate || data.estimatedValue || data.insuranceNotes || data.purchaseDateText || data.isTrade;
+    const hasVault =
+        data.purchasePrice ||
+        data.purchaseDate ||
+        data.estimatedValue ||
+        data.insuranceNotes ||
+        data.purchaseDateText ||
+        data.isTrade;
     if (hasVault) {
         const vaultInsert: FinancialVaultInsert = { horse_id: horse.id };
         vaultInsert.is_trade = !!data.isTrade;
@@ -820,7 +872,10 @@ export async function createHorseRecord(data: {
         try {
             const { evaluateUserAchievements } = await import("@/lib/utils/achievements");
             await evaluateUserAchievements(finalUserId, "horse_added");
-        } catch (err) { Sentry.captureException(err, { tags: { domain: "horse" } }); logger.error("Horse", "Achievement evaluation failed after horse add", err); }
+        } catch (err) {
+            Sentry.captureException(err, { tags: { domain: "horse" } });
+            logger.error("Horse", "Achievement evaluation failed after horse add", err);
+        }
     });
 
     return { success: true, horseId: horse.id };
@@ -832,7 +887,7 @@ export async function createHorseRecord(data: {
  */
 export async function finalizeHorseImages(
     horseId: string,
-    images: { path: string; angle: string }[]
+    images: { path: string; angle: string }[],
 ): Promise<{ success: boolean; error?: string; skippedExtraDetail?: number; skippedReason?: string }> {
     const { supabase, user } = await requireAuth();
 
@@ -881,7 +936,7 @@ export async function finalizeHorseImages(
         }
     }
 
-    const extraDetailImages = images.filter(img => img.angle === "extra_detail");
+    const extraDetailImages = images.filter((img) => img.angle === "extra_detail");
     if (extraDetailImages.length > 0) {
         const { getUserTier } = await import("@/lib/auth");
         const tier = await getUserTier();
@@ -922,7 +977,9 @@ export async function finalizeHorseImages(
 
     // Build public URLs and insert image records
     const inserts = images.map((img) => {
-        const { data: { publicUrl } } = supabase.storage.from("horse-images").getPublicUrl(img.path);
+        const {
+            data: { publicUrl },
+        } = supabase.storage.from("horse-images").getPublicUrl(img.path);
         return {
             horse_id: horseId,
             image_url: publicUrl,
@@ -942,12 +999,13 @@ export async function finalizeHorseImages(
         try {
             const { evaluateUserAchievements } = await import("@/lib/utils/achievements");
             await evaluateUserAchievements(finalUserId, "photo_uploaded");
-        } catch (err) { Sentry.captureException(err, { tags: { domain: "horse" } }); logger.error("Horse", "Achievement evaluation failed after photo upload", err); }
+        } catch (err) {
+            Sentry.captureException(err, { tags: { domain: "horse" } });
+            logger.error("Horse", "Achievement evaluation failed after photo upload", err);
+        }
     });
 
-    return skippedExtraDetail > 0
-        ? { success: true, skippedExtraDetail, skippedReason }
-        : { success: true };
+    return skippedExtraDetail > 0 ? { success: true, skippedExtraDetail, skippedReason } : { success: true };
 }
 
 /**
@@ -978,18 +1036,14 @@ export async function bulkUpdateHorses(
         collectionId?: string | null;
         tradeStatus?: string;
         visibility?: "public" | "unlisted" | "private";
-    }
+    },
 ): Promise<{ success: boolean; count?: number; error?: string }> {
     const { supabase, user } = await requireAuth();
     if (horseIds.length === 0) return { success: false, error: "No horses selected." };
     if (horseIds.length > 500) return { success: false, error: "Too many items (max 500)." };
 
     // Verify ownership of ALL horses
-    const { data: owned } = await supabase
-        .from("user_horses")
-        .select("id")
-        .eq("owner_id", user.id)
-        .in("id", horseIds);
+    const { data: owned } = await supabase.from("user_horses").select("id").eq("owner_id", user.id).in("id", horseIds);
 
     const ownedIds = (owned ?? []).map((h: { id: string }) => h.id);
     if (ownedIds.length !== horseIds.length) {
@@ -1064,7 +1118,7 @@ export async function bulkUpdateHorses(
  * @param horseIds - Array of horse UUIDs to delete (max 100)
  */
 export async function bulkDeleteHorses(
-    horseIds: string[]
+    horseIds: string[],
 ): Promise<{ success: boolean; count?: number; error?: string }> {
     const { supabase, user } = await requireAuth();
     if (horseIds.length === 0) return { success: false, error: "No horses selected." };
@@ -1101,10 +1155,7 @@ export async function bulkDeleteHorses(
     }
 
     // Clean up storage for all images
-    const { data: images } = await supabase
-        .from("horse_images")
-        .select("image_url")
-        .in("horse_id", horseIds);
+    const { data: images } = await supabase.from("horse_images").select("image_url").in("horse_id", horseIds);
 
     if (images && images.length > 0) {
         const paths = images
@@ -1255,7 +1306,7 @@ export async function quickAddHorse(data: {
  */
 export async function reorderHorseImages(
     horseId: string,
-    imageIds: string[]
+    imageIds: string[],
 ): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
     if (imageIds.length === 0) return { success: false, error: "No images." };
@@ -1271,14 +1322,11 @@ export async function reorderHorseImages(
 
     // Update sort_order for each image
     const updates = imageIds.map((id, index) =>
-        supabase.from("horse_images")
-            .update({ sort_order: index })
-            .eq("id", id)
-            .eq("horse_id", horseId)
+        supabase.from("horse_images").update({ sort_order: index }).eq("id", id).eq("horse_id", horseId),
     );
 
     const results = await Promise.all(updates);
-    const failed = results.find(r => r.error);
+    const failed = results.find((r) => r.error);
     if (failed?.error) return { success: false, error: failed.error.message };
 
     revalidatePath(`/stable/${horseId}/edit`);
@@ -1289,7 +1337,9 @@ export async function reorderHorseImages(
 /**
  * Search public horses by name — used for relational pedigree lookups.
  */
-export async function searchPublicHorses(query: string): Promise<{ id: string; custom_name: string; finish_type: string }[]> {
+export async function searchPublicHorses(
+    query: string,
+): Promise<{ id: string; custom_name: string; finish_type: string }[]> {
     if (!query || query.length < 2) return [];
     const supabase = await createClient();
     const { data } = await supabase

@@ -32,22 +32,70 @@ vi.mock("@/components/SuggestNewEntryForm", () => ({
     default: (p: { initialTitle?: string; onSubmitted?: (t: string) => void }) => (
         <div data-testid="suggest-form">
             {p.initialTitle}
-            <button type="button" onClick={() => p.onSubmitted?.("Pinto Pony")}>file</button>
+            <button type="button" onClick={() => p.onSubmitted?.("Pinto Pony")}>
+                file
+            </button>
         </div>
     ),
 }));
 
 const SM = {
-    id: "sm", title: "Silky Sullivan", maker: "Breyer", scale: "Stablemate (1:32)", generation: null, sculptor: null, year: 1976, owners: 4, ambiguous: false, href: "/reference/breyer/silky-sullivan-2",
+    id: "sm",
+    title: "Silky Sullivan",
+    maker: "Breyer",
+    scale: "Stablemate (1:32)",
+    generation: null,
+    sculptor: null,
+    year: 1976,
+    owners: 4,
+    ambiguous: false,
+    href: "/reference/breyer/silky-sullivan-2",
     releases: [
-        { id: "r5022", title: "#5022 Silky Sullivan", model: "5022", look: "Dark chestnut, various socks", from: null, to: null, run: "Regular Run", setName: null, isSetPiece: false, photo: null, scale: "Stablemate (1:32)" },
-        { id: "rset", title: "12-Piece Stablemates Set With Arabian Mare, Silky Sullivan", model: "711096", look: null, from: 1996, to: null, run: null, setName: "12-Piece Stablemates Set", isSetPiece: true, photo: null, scale: "Stablemate (1:32)" },
+        {
+            id: "r5022",
+            title: "#5022 Silky Sullivan",
+            model: "5022",
+            look: "Dark chestnut, various socks",
+            from: null,
+            to: null,
+            run: "Regular Run",
+            setName: null,
+            isSetPiece: false,
+            photo: null,
+            scale: "Stablemate (1:32)",
+        },
+        {
+            id: "rset",
+            title: "12-Piece Stablemates Set With Arabian Mare, Silky Sullivan",
+            model: "711096",
+            look: null,
+            from: 1996,
+            to: null,
+            run: null,
+            setName: "12-Piece Stablemates Set",
+            isSetPiece: true,
+            photo: null,
+            scale: "Stablemate (1:32)",
+        },
     ],
 };
 const RESULT: LinkerResult = {
-    term: "Silky Sullivan", kind: "text", scale: "Stablemate (1:32)",
+    term: "Silky Sullivan",
+    kind: "text",
+    scale: "Stablemate (1:32)",
     molds: [SM],
-    otherScales: [{ id: "cl", title: "Silky Sullivan", maker: "Breyer", scale: "Classic (1:12)", generation: null, year: 1975, releaseCount: 14, href: "/reference/breyer/silky-sullivan-4" }],
+    otherScales: [
+        {
+            id: "cl",
+            title: "Silky Sullivan",
+            maker: "Breyer",
+            scale: "Classic (1:12)",
+            generation: null,
+            year: 1975,
+            releaseCount: 14,
+            href: "/reference/breyer/silky-sullivan-4",
+        },
+    ],
     others: [],
     numberHits: [],
 };
@@ -56,7 +104,15 @@ beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
     linker.searchLinker.mockResolvedValue(RESULT);
-    reference.getCatalogItem.mockImplementation(async (id: string) => ({ id, itemType: id === "sm" ? "plastic_mold" : "plastic_release", parentId: null, title: "x", maker: "Breyer", scale: null, attributes: {} }));
+    reference.getCatalogItem.mockImplementation(async (id: string) => ({
+        id,
+        itemType: id === "sm" ? "plastic_mold" : "plastic_release",
+        parentId: null,
+        title: "x",
+        maker: "Breyer",
+        scale: null,
+        attributes: {},
+    }));
 });
 
 describe("ReferenceLinker", () => {
@@ -70,9 +126,27 @@ describe("ReferenceLinker", () => {
         expect(rows[0].textContent).toContain("#5022 · Dark chestnut, various socks");
         expect(rows[0].textContent).toContain("year not recorded");
         // A named release leads with its number and name in bold; the colour drops below.
-        linker.searchLinker.mockResolvedValue({ ...RESULT, molds: [{ ...SM, releases: [{ ...SM.releases[0], id: "rmh", title: "Montana Harvest", model: "1142", look: "dapple shaded buckskin" }] }] });
+        linker.searchLinker.mockResolvedValue({
+            ...RESULT,
+            molds: [
+                {
+                    ...SM,
+                    releases: [
+                        {
+                            ...SM.releases[0],
+                            id: "rmh",
+                            title: "Montana Harvest",
+                            model: "1142",
+                            look: "dapple shaded buckskin",
+                        },
+                    ],
+                },
+            ],
+        });
         fireEvent.change(screen.getByLabelText("Find the model"), { target: { value: "Montana Harvest" } });
-        await waitFor(() => expect(screen.getByTestId("linker-row-lead").textContent).toBe("#1142 · Montana Harvest"), { timeout: 3000 });
+        await waitFor(() => expect(screen.getByTestId("linker-row-lead").textContent).toBe("#1142 · Montana Harvest"), {
+            timeout: 3000,
+        });
         expect(screen.getByTestId("linker-row-lead").className).toContain("font-bold");
         expect(rows[1].textContent).toContain("colour not recorded");
         // A set piece never offers to fill its colour: that row's colour belongs to another mold's piece.
@@ -89,7 +163,9 @@ describe("ReferenceLinker", () => {
         const mold = await screen.findByTestId("linker-mold", {}, { timeout: 3000 });
         fireEvent.click(within(mold).getAllByTestId("linker-pick")[0]);
         await waitFor(() => expect(onSelect).toHaveBeenCalledWith("r5022", expect.objectContaining({ id: "r5022" })));
-        expect(screen.getByTestId("linker-banner").textContent).toContain("Silky Sullivan (Stablemate) · #5022 · Dark chestnut");
+        expect(screen.getByTestId("linker-banner").textContent).toContain(
+            "Silky Sullivan (Stablemate) · #5022 · Dark chestnut",
+        );
     });
 
     it("links the mold only, and files an added release under the mold", async () => {
@@ -101,15 +177,43 @@ describe("ReferenceLinker", () => {
         fireEvent.click(within(mold).getByTestId("linker-add-open"));
         const form = within(mold).getByTestId("linker-add");
         fireEvent.change(within(form).getByPlaceholderText("5022"), { target: { value: "5177" } });
-        fireEvent.change(within(form).getByPlaceholderText("dark chestnut, various socks"), { target: { value: "Black, no white" } });
+        fireEvent.change(within(form).getByPlaceholderText("dark chestnut, various socks"), {
+            target: { value: "Black, no white" },
+        });
         fireEvent.click(within(form).getByText("Add it under this mold"));
-        await waitFor(() => expect(linker.fileReleaseUnderMold).toHaveBeenCalledWith(expect.objectContaining({ moldId: "sm", modelNumber: "5177", look: "Black, no white" })));
+        await waitFor(() =>
+            expect(linker.fileReleaseUnderMold).toHaveBeenCalledWith(
+                expect.objectContaining({ moldId: "sm", modelNumber: "5177", look: "Black, no white" }),
+            ),
+        );
         await waitFor(() => expect(onSelect).toHaveBeenCalledWith("sm", expect.objectContaining({ id: "sm" })));
         expect(screen.getByTestId("linker-banner").textContent).toContain("mold only");
     });
 
     it("searches a model number and lands on the release", async () => {
-        linker.searchLinker.mockResolvedValue({ term: "5022", kind: "number", scale: null, molds: [], otherScales: [], others: [], numberHits: [{ mold: { id: "sm", title: "Silky Sullivan", maker: "Breyer", scale: "Stablemate (1:32)", generation: null, year: 1976, releaseCount: 2, href: "/x" }, release: SM.releases[0] }] });
+        linker.searchLinker.mockResolvedValue({
+            term: "5022",
+            kind: "number",
+            scale: null,
+            molds: [],
+            otherScales: [],
+            others: [],
+            numberHits: [
+                {
+                    mold: {
+                        id: "sm",
+                        title: "Silky Sullivan",
+                        maker: "Breyer",
+                        scale: "Stablemate (1:32)",
+                        generation: null,
+                        year: 1976,
+                        releaseCount: 2,
+                        href: "/x",
+                    },
+                    release: SM.releases[0],
+                },
+            ],
+        });
         render(<ReferenceLinker selectedCatalogId={null} onCatalogSelect={vi.fn()} />);
         fireEvent.change(screen.getByLabelText("Find the model"), { target: { value: "5022" } });
         const block = await screen.findByTestId("linker-number", {}, { timeout: 3000 });

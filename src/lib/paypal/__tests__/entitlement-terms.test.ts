@@ -31,12 +31,7 @@ vi.mock("@/lib/notifications/createNotification", () => ({
     createNotification: mockCreateNotification,
 }));
 
-import {
-    grantPaypalTier,
-    revokePaypalTier,
-    grantPrepaidTerm,
-    endPrepaidTerm,
-} from "@/lib/paypal/entitlement";
+import { grantPaypalTier, revokePaypalTier, grantPrepaidTerm, endPrepaidTerm } from "@/lib/paypal/entitlement";
 
 type AdminArg = Parameters<typeof grantPaypalTier>[0];
 
@@ -93,26 +88,23 @@ describe("revokePaypalTier — GUARD 0, the safety property", () => {
         expect(mockUpdateUserById).not.toHaveBeenCalled();
     });
 
-    it.each(["EXPIRED", "CANCELLED", "SUSPENDED"])(
-        "%s cannot end a term that is still paid for",
-        async (status) => {
-            userWith({
-                tier: "studio",
-                paid_through: FUTURE,
-                paypal_subscription_id: "I-SUB-1",
-                paypal_tier: "studio",
-            });
+    it.each(["EXPIRED", "CANCELLED", "SUSPENDED"])("%s cannot end a term that is still paid for", async (status) => {
+        userWith({
+            tier: "studio",
+            paid_through: FUTURE,
+            paypal_subscription_id: "I-SUB-1",
+            paypal_tier: "studio",
+        });
 
-            const outcome = await revokePaypalTier(admin as unknown as AdminArg, {
-                userId: "user-1",
-                subscriptionId: "I-SUB-1",
-                paypalStatus: status,
-            });
+        const outcome = await revokePaypalTier(admin as unknown as AdminArg, {
+            userId: "user-1",
+            subscriptionId: "I-SUB-1",
+            paypalStatus: status,
+        });
 
-            expect(outcome.action).toBe("ignored");
-            expect(mockUpdateUserById).not.toHaveBeenCalled();
-        },
-    );
+        expect(outcome.action).toBe("ignored");
+        expect(mockUpdateUserById).not.toHaveBeenCalled();
+    });
 
     it("guard 0 outranks the others — it fires even for the granting subscription", async () => {
         // Everything else about this revoke is legitimate. It is refused
@@ -443,21 +435,33 @@ describe("grantPrepaidTerm — STACKING", () => {
     it("three stacked terms accumulate", async () => {
         userWith({});
         await grantPrepaidTerm(admin as unknown as AdminArg, {
-            userId: "user-1", tier: "pro", months: 3, captureId: "C1", now: NOW,
+            userId: "user-1",
+            tier: "pro",
+            months: 3,
+            captureId: "C1",
+            now: NOW,
         });
         const afterFirst = written().paid_through as string;
 
         mockUpdateUserById.mockClear();
         userWith({ tier: "pro", paid_through: afterFirst, paypal_prepaid_captures: ["C1"] });
         await grantPrepaidTerm(admin as unknown as AdminArg, {
-            userId: "user-1", tier: "pro", months: 3, captureId: "C2", now: NOW,
+            userId: "user-1",
+            tier: "pro",
+            months: 3,
+            captureId: "C2",
+            now: NOW,
         });
         const afterSecond = written().paid_through as string;
 
         mockUpdateUserById.mockClear();
         userWith({ tier: "pro", paid_through: afterSecond, paypal_prepaid_captures: ["C1", "C2"] });
         await grantPrepaidTerm(admin as unknown as AdminArg, {
-            userId: "user-1", tier: "pro", months: 3, captureId: "C3", now: NOW,
+            userId: "user-1",
+            tier: "pro",
+            months: 3,
+            captureId: "C3",
+            now: NOW,
         });
 
         expect(written().paid_through).toBe("2026-10-15T12:00:00.000Z");
@@ -546,7 +550,9 @@ describe("endPrepaidTerm — a refund ends the membership", () => {
             paypal_prepaid_tier: "pro",
         });
         await endPrepaidTerm(admin as unknown as AdminArg, {
-            userId: "user-1", captureId: "CAP-1", reason: "REFUNDED",
+            userId: "user-1",
+            captureId: "CAP-1",
+            reason: "REFUNDED",
         });
         expect(mockUpdateUserById).toHaveBeenCalledTimes(1);
 
@@ -554,7 +560,9 @@ describe("endPrepaidTerm — a refund ends the membership", () => {
         mockUpdateUserById.mockClear();
         userWith({ tier: "free", paypal_prepaid_captures: ["CAP-1"] });
         const outcome = await endPrepaidTerm(admin as unknown as AdminArg, {
-            userId: "user-1", captureId: "CAP-1", reason: "REFUNDED",
+            userId: "user-1",
+            captureId: "CAP-1",
+            reason: "REFUNDED",
         });
         // The tier is already free and the markers are gone, so the
         // write is harmless — but it must not throw or fail.
@@ -570,7 +578,9 @@ describe("endPrepaidTerm — a refund ends the membership", () => {
         });
         mockUpdateUserById.mockResolvedValue({ data: null, error: { message: "auth unavailable" } });
         const outcome = await endPrepaidTerm(admin as unknown as AdminArg, {
-            userId: "user-1", captureId: "CAP-1", reason: "REVERSED",
+            userId: "user-1",
+            captureId: "CAP-1",
+            reason: "REVERSED",
         });
         expect(outcome).toEqual({ action: "failed", error: "term-write-failed" });
     });

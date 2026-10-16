@@ -13,11 +13,7 @@ import { setMembershipDisplay } from "@/app/actions/membership-display";
  * deliberately a brass plaque, not a medal, so it never reads as the
  * earned curator ranks.
  */
-export default function MembershipDisplayToggle({
-    initialVisible,
-}: {
-    initialVisible: boolean;
-}) {
+export default function MembershipDisplayToggle({ initialVisible }: { initialVisible: boolean }) {
     const [visible, setVisible] = useState(initialVisible);
     const [error, setError] = useState<string | null>(null);
     const [pending, startTransition] = useTransition();
@@ -50,9 +46,8 @@ export default function MembershipDisplayToggle({
                         Show a &ldquo;Supporting Member&rdquo; chip on my profile
                     </span>
                     <span className="block text-xs text-secondary-foreground">
-                        Off by default. It says you support the site — never which plan,
-                        and it&rsquo;s separate from the curator medals you earn by
-                        contributing.
+                        Off by default. It says you support the site — never which plan, and it&rsquo;s separate from
+                        the curator medals you earn by contributing.
                     </span>
                 </span>
             </label>

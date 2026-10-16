@@ -55,11 +55,7 @@ export default function ShowAnnounceDialog({ showId, recipientCount }: ShowAnnou
         if (result.success) {
             setOpen(false);
             setMessage("");
-            setToast(
-                `Announcement sent to ${result.recipientCount} entrant${
-                    result.recipientCount === 1 ? "" : "s"
-                }.`,
-            );
+            setToast(`Announcement sent to ${result.recipientCount} entrant${result.recipientCount === 1 ? "" : "s"}.`);
             if (toastTimer.current) clearTimeout(toastTimer.current);
             toastTimer.current = setTimeout(() => setToast(null), 3000);
         } else {
@@ -118,7 +114,7 @@ export default function ShowAnnounceDialog({ showId, recipientCount }: ShowAnnou
                             aria-label="Announcement message"
                             disabled={sending}
                         />
-                        <span className="self-end text-xs tabular-nums text-muted-foreground">
+                        <span className="self-end text-xs text-muted-foreground tabular-nums">
                             {message.length}/{MAX_LENGTH}
                         </span>
                     </div>

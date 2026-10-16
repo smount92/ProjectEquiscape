@@ -278,9 +278,5 @@ export function getClasslistTemplate(key: string): ShowClasslistTemplate | null 
 }
 
 export function countTemplateClasses(template: ShowClasslistTemplate): number {
-    return template.divisions.reduce(
-        (dSum, d) =>
-            dSum + d.sections.reduce((sSum, s) => sSum + s.classes.length, 0),
-        0,
-    );
+    return template.divisions.reduce((dSum, d) => dSum + d.sections.reduce((sSum, s) => sSum + s.classes.length, 0), 0);
 }

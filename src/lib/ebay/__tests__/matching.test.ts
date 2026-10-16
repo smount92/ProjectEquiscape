@@ -20,16 +20,46 @@ import {
 
 const CATALOG: MatchCandidate[] = [
     { id: "alborozo", title: "Alborozo", maker: "Breyer", modelNumber: "712053", scale: "Traditional (1:9)" },
-    { id: "notorious", title: "Notoriously Framed", maker: "Breyer", modelNumber: "712393", scale: "Traditional (1:9)" },
+    {
+        id: "notorious",
+        title: "Notoriously Framed",
+        maker: "Breyer",
+        modelNumber: "712393",
+        scale: "Traditional (1:9)",
+    },
     { id: "fam-arab-85", title: "Family Arabian Mare", maker: "Breyer", modelNumber: "85", scale: "Traditional (1:9)" },
     { id: "nl-shire", title: "Large Shire", maker: "North Light", modelNumber: "NL220", scale: null },
     // One release, two finish variants — same model for pricing purposes.
-    { id: "sr-matte", title: "Seize The Day Surprise", maker: "Breyer", modelNumber: "710469", scale: "Traditional (1:9)" },
-    { id: "sr-glossy", title: "Seize The Day Surprise", maker: "Breyer", modelNumber: "710469", scale: "Traditional (1:9)" },
+    {
+        id: "sr-matte",
+        title: "Seize The Day Surprise",
+        maker: "Breyer",
+        modelNumber: "710469",
+        scale: "Traditional (1:9)",
+    },
+    {
+        id: "sr-glossy",
+        title: "Seize The Day Surprise",
+        maker: "Breyer",
+        modelNumber: "710469",
+        scale: "Traditional (1:9)",
+    },
     // The import placeholder — 3 unrelated models under one number.
     { id: "ph-misty", title: "Bay Pinto Misty", maker: "Breyer", modelNumber: "430040", scale: "Traditional (1:9)" },
-    { id: "ph-clyde", title: "Bay Roan Clydesdale Foal Test Piece", maker: "Breyer", modelNumber: "430040", scale: "Traditional (1:9)" },
-    { id: "ph-spider", title: "Chestnut Stud Spider Test Piece", maker: "Breyer", modelNumber: "430040", scale: "Traditional (1:9)" },
+    {
+        id: "ph-clyde",
+        title: "Bay Roan Clydesdale Foal Test Piece",
+        maker: "Breyer",
+        modelNumber: "430040",
+        scale: "Traditional (1:9)",
+    },
+    {
+        id: "ph-spider",
+        title: "Chestnut Stud Spider Test Piece",
+        maker: "Breyer",
+        modelNumber: "430040",
+        scale: "Traditional (1:9)",
+    },
 ];
 
 const index = buildNumberIndex(CATALOG);
@@ -177,10 +207,7 @@ describe("listings that are not the original model", () => {
     // phrase (the paper as the product) disqualifies.
     it("keeps a model listed with its COA while refusing the COA alone", () => {
         const withPapers = matchListing({ title: "Breyer Alborozo 712053 NIB w/ COA" }, index);
-        const paperAlone = matchListing(
-            { title: "Breyer Certificate of Authenticity #712053 Alborozo" },
-            index,
-        );
+        const paperAlone = matchListing({ title: "Breyer Certificate of Authenticity #712053 Alborozo" }, index);
         expect(isMatch(withPapers)).toBe(true);
         expect(isMatch(paperAlone)).toBe(false);
     });

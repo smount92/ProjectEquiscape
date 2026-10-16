@@ -72,13 +72,7 @@ function Track({
 /** Two rows only at real volume — under this, one tall row. */
 const TWO_ROW_THRESHOLD = 50;
 
-export default function EntryRibbon({
-    showId,
-    gallery,
-}: {
-    showId: string;
-    gallery: ShowGalleryData;
-}) {
+export default function EntryRibbon({ showId, gallery }: { showId: string; gallery: ShowGalleryData }) {
     const entries: RibbonEntry[] = gallery.classes.flatMap((cls) =>
         cls.entries
             .filter((e) => e.photoUrl)

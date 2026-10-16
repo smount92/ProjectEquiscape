@@ -18,11 +18,7 @@ export const metadata: Metadata = {
  * fetched its own user id from /api/auth/me before it could do anything,
  * which meant an empty form on every load.
  */
-export default async function StudioSetupPage({
-    searchParams,
-}: {
-    searchParams: Promise<{ tab?: string }>;
-}) {
+export default async function StudioSetupPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
     const { tab } = await searchParams;
     const supabase = await createClient();
     const {
@@ -55,11 +51,7 @@ export default async function StudioSetupPage({
                 compact
                 icon="🎨"
                 title={profile ? "Studio settings" : "Open your studio"}
-                subtitle={
-                    profile
-                        ? profile.studioName
-                        : "Rates, terms and everything commissioners see"
-                }
+                subtitle={profile ? profile.studioName : "Rates, terms and everything commissioners see"}
                 backHref={profile ? "/studio/dashboard" : "/studio"}
                 backLabel={profile ? "Dashboard" : "The Art Studio"}
             />

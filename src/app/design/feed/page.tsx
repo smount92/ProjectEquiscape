@@ -14,14 +14,14 @@ import { getPosts, type Post } from "@/app/actions/posts";
 export const dynamic = "force-dynamic";
 
 const NOISE =
-  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E\")";
+    "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E\")";
 
 function timeAgo(iso: string): string {
-  const s = Math.max(1, Math.floor((Date.now() - new Date(iso).getTime()) / 1000));
-  if (s < 3600) return `${Math.max(1, Math.floor(s / 60))}m ago`;
-  if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
-  if (s < 604800) return `${Math.floor(s / 86400)}d ago`;
-  return new Date(iso).toLocaleDateString();
+    const s = Math.max(1, Math.floor((Date.now() - new Date(iso).getTime()) / 1000));
+    if (s < 3600) return `${Math.max(1, Math.floor(s / 60))}m ago`;
+    if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+    if (s < 604800) return `${Math.floor(s / 86400)}d ago`;
+    return new Date(iso).toLocaleDateString();
 }
 
 const CSS = `
@@ -73,76 +73,70 @@ const CSS = `
 `;
 
 export default async function LeatherFeedPrototype() {
-  if (process.env.NODE_ENV === "production") {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (
-      !user ||
-      user.email?.toLowerCase() !== process.env.ADMIN_EMAIL?.toLowerCase()
-    ) {
-      notFound();
+    if (process.env.NODE_ENV === "production") {
+        const supabase = await createClient();
+        const {
+            data: { user },
+        } = await supabase.auth.getUser();
+        if (!user || user.email?.toLowerCase() !== process.env.ADMIN_EMAIL?.toLowerCase()) {
+            notFound();
+        }
     }
-  }
 
-  let posts: Post[] = [];
-  let loadError: string | null = null;
-  try {
-    posts = await getPosts({ globalFeed: true }, { limit: 10 });
-  } catch {
-    loadError = "Log in first — the feed loads through the same auth as /feed.";
-  }
+    let posts: Post[] = [];
+    let loadError: string | null = null;
+    try {
+        posts = await getPosts({ globalFeed: true }, { limit: 10 });
+    } catch {
+        loadError = "Log in first — the feed loads through the same auth as /feed.";
+    }
 
-  return (
-    <div className="proto-feed mx-auto max-w-md px-4 py-8">
-      <style dangerouslySetInnerHTML={{ __html: CSS }} />
-      <p className="mb-4 text-center text-xs tracking-wide text-muted-foreground">
-        Design prototype — real posts from the live feed, leather treatment.
-        Compare with <Link className="underline" href="/feed">/feed</Link>.
-      </p>
-      <div className="panel">
-        <h1>Stable Activity Feed</h1>
-        <div className="spine" aria-hidden="true" />
-        {loadError && <div className="empty">{loadError}</div>}
-        {!loadError && posts.length === 0 && (
-          <div className="empty">No posts yet — the feed is empty.</div>
-        )}
-        {posts.map((post) => (
-          <div className="entry" key={post.id}>
-            <span className="dot" aria-hidden="true" />
-            <time>{timeAgo(post.createdAt)}</time>
-            <div className="frame">
-              {post.media[0] && (
-                <img
-                  className="photo"
-                  src={post.media[0].imageUrl}
-                  alt={post.media[0].caption ?? "Post photo"}
-                />
-              )}
-              <div className="byline">
-                {post.authorAvatarUrl ? (
-                  <img
-                    className="avatar"
-                    src={post.authorAvatarUrl}
-                    alt=""
-                  />
-                ) : (
-                  <span className="avatar-fallback" aria-hidden="true">
-                    {post.authorAlias.replace(/^@/, "").charAt(0).toUpperCase()}
-                  </span>
-                )}
-                <span className="who">@{post.authorAlias.replace(/^@/, "")}</span>
-              </div>
-              {post.content && <p>{post.content}</p>}
-              <div className="meta">
-                <span>♥ {post.likesCount}</span>
-                <span>✉ {post.repliesCount} replies</span>
-              </div>
+    return (
+        <div className="proto-feed mx-auto max-w-md px-4 py-8">
+            <style dangerouslySetInnerHTML={{ __html: CSS }} />
+            <p className="mb-4 text-center text-xs tracking-wide text-muted-foreground">
+                Design prototype — real posts from the live feed, leather treatment. Compare with{" "}
+                <Link className="underline" href="/feed">
+                    /feed
+                </Link>
+                .
+            </p>
+            <div className="panel">
+                <h1>Stable Activity Feed</h1>
+                <div className="spine" aria-hidden="true" />
+                {loadError && <div className="empty">{loadError}</div>}
+                {!loadError && posts.length === 0 && <div className="empty">No posts yet — the feed is empty.</div>}
+                {posts.map((post) => (
+                    <div className="entry" key={post.id}>
+                        <span className="dot" aria-hidden="true" />
+                        <time>{timeAgo(post.createdAt)}</time>
+                        <div className="frame">
+                            {post.media[0] && (
+                                <img
+                                    className="photo"
+                                    src={post.media[0].imageUrl}
+                                    alt={post.media[0].caption ?? "Post photo"}
+                                />
+                            )}
+                            <div className="byline">
+                                {post.authorAvatarUrl ? (
+                                    <img className="avatar" src={post.authorAvatarUrl} alt="" />
+                                ) : (
+                                    <span className="avatar-fallback" aria-hidden="true">
+                                        {post.authorAlias.replace(/^@/, "").charAt(0).toUpperCase()}
+                                    </span>
+                                )}
+                                <span className="who">@{post.authorAlias.replace(/^@/, "")}</span>
+                            </div>
+                            {post.content && <p>{post.content}</p>}
+                            <div className="meta">
+                                <span>♥ {post.likesCount}</span>
+                                <span>✉ {post.repliesCount} replies</span>
+                            </div>
+                        </div>
+                    </div>
+                ))}
             </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+        </div>
+    );
 }

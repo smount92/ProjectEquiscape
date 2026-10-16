@@ -46,15 +46,7 @@ function rosetteInk(place: Place): string {
 }
 
 /** Concentric-circle rosette with ribbon tails, ~290px tall. */
-function Rosette({
-    color,
-    text,
-    ink,
-}: {
-    color: string;
-    text: string;
-    ink: string;
-}) {
+function Rosette({ color, text, ink }: { color: string; text: string; ink: string }) {
     const SIZE = 210;
     return (
         <div

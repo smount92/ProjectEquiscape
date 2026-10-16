@@ -46,11 +46,7 @@ const CHECKLIST: { title: string; detail: string }[] = [
     },
 ];
 
-export default function ShowReadinessPanel({
-    showId,
-    mode,
-    onHorsesReady,
-}: ShowReadinessPanelProps) {
+export default function ShowReadinessPanel({ showId, mode, onHorsesReady }: ShowReadinessPanelProps) {
     const [state, setState] = useState<ReadinessState | null>(null);
     const [failed, setFailed] = useState(false);
     const [checking, setChecking] = useState(false);
@@ -106,8 +102,7 @@ export default function ShowReadinessPanel({
                     Get Show-Ready
                 </span>
                 <p className="text-sm text-muted-foreground">
-                    Entries are open, and you&rsquo;re about two minutes from your first one.
-                    The show will wait.
+                    Entries are open, and you&rsquo;re about two minutes from your first one. The show will wait.
                 </p>
                 <ol className="mt-3 flex list-none flex-col gap-2.5 p-0">
                     {CHECKLIST.map((step, i) => (
@@ -130,8 +125,7 @@ export default function ShowReadinessPanel({
                         <Link href={addHref}>Add your first horse →</Link>
                     </Button>
                     <span className="text-xs text-muted-foreground">
-                        You&rsquo;ll get a &ldquo;Back to the show&rdquo; button when it&rsquo;s
-                        saved.
+                        You&rsquo;ll get a &ldquo;Back to the show&rdquo; button when it&rsquo;s saved.
                     </span>
                 </div>
             </section>
@@ -144,9 +138,7 @@ export default function ShowReadinessPanel({
                 <span className="ledger-tab" id="almost-ready-heading">
                     Almost Show-Ready
                 </span>
-                <p className="text-sm text-muted-foreground">
-                    Entries are open — your stable just needs a touch-up:
-                </p>
+                <p className="text-sm text-muted-foreground">Entries are open — your stable just needs a touch-up:</p>
                 <ul className="mt-2 flex list-disc flex-col gap-1 pl-5 text-sm text-foreground">
                     {state.messages.map((message) => (
                         <li key={message}>{message}</li>
@@ -164,8 +156,7 @@ export default function ShowReadinessPanel({
                     </Button>
                 </div>
                 <p className="mt-2 text-xs text-muted-foreground">
-                    Visibility and photos live on each horse&rsquo;s edit page — fix one and
-                    re-check.
+                    Visibility and photos live on each horse&rsquo;s edit page — fix one and re-check.
                 </p>
             </section>
         );

@@ -18,9 +18,7 @@ import { candidateFirstTokens, resolveMentions } from "@/lib/feed/mentionMatch";
  * Server-only, and safe to call with untrusted content: it reads
  * aliases and returns them, nothing more.
  */
-export async function resolveMentionedAliases(
-    content: string,
-): Promise<{ alias: string; userId: string }[]> {
+export async function resolveMentionedAliases(content: string): Promise<{ alias: string; userId: string }[]> {
     const candidates = extractMentions(content);
     if (candidates.length === 0) return [];
 
@@ -34,11 +32,7 @@ export async function resolveMentionedAliases(
     // never contain the comma or dot that would break PostgREST's `or`
     // grammar.
     const orFilter = tokens.map((t) => `alias_name.ilike.${t}%`).join(",");
-    const { data: users } = await admin
-        .from("users")
-        .select("id, alias_name")
-        .or(orFilter)
-        .limit(200);
+    const { data: users } = await admin.from("users").select("id, alias_name").or(orFilter).limit(200);
 
     const rows = (users ?? []) as { id: string; alias_name: string }[];
     if (rows.length === 0) return [];
@@ -50,9 +44,7 @@ export async function resolveMentionedAliases(
 
     const matched = resolveMentions(candidates, rows.map((r) => r.alias_name).filter(Boolean));
 
-    return matched
-        .map((alias) => ({ alias, userId: byAlias.get(alias.toLowerCase())! }))
-        .filter((m) => !!m.userId);
+    return matched.map((alias) => ({ alias, userId: byAlias.get(alias.toLowerCase())! })).filter((m) => !!m.userId);
 }
 
 /**
@@ -70,7 +62,7 @@ export async function parseAndNotifyMentions(
     content: string,
     actorId: string,
     actorAlias: string,
-    sourceUrl: string
+    sourceUrl: string,
 ): Promise<void> {
     try {
         const mentioned = await resolveMentionedAliases(content);

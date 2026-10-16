@@ -12,11 +12,11 @@ import { createClient as createAuthClient } from "@/lib/supabase/server";
 import { Resend } from "resend";
 
 import {
-  EMAIL_FROM,
-  escapeEmailHtml,
-  renderBrandedEmail,
-  renderBrandedEmailText,
-  renderEmailQuote,
+    EMAIL_FROM,
+    escapeEmailHtml,
+    renderBrandedEmail,
+    renderBrandedEmailText,
+    renderEmailQuote,
 } from "@/lib/email/layout";
 import { loadShowProgram } from "@/lib/shows/queries";
 import { hasSanctioningRequest, stripSanctioningMarker } from "@/lib/shows/sanctioning";
@@ -26,86 +26,75 @@ import type { PublicShow } from "@/lib/shows/public";
 import type { ShowJudging, ShowMode, ShowStatus } from "@/lib/shows/types";
 import { paypalBillingEnabled } from "@/lib/paypal/flag";
 import {
-  attachLoad,
-  groupDuplicates,
-  MAX_DUPLICATE_GROUPS,
-  type DuplicateCandidate,
-  type DuplicateGroup,
-  type ItemLoad,
+    attachLoad,
+    groupDuplicates,
+    MAX_DUPLICATE_GROUPS,
+    type DuplicateCandidate,
+    type DuplicateGroup,
+    type ItemLoad,
 } from "@/lib/admin/catalogDuplicates";
 import {
-  buildNudgeContent,
-  canNudgeAgain,
-  classifyOverdueShow,
-  cutoffDate,
-  cutoffIso,
-  nudgeLinkFor,
-  sortOverdue,
-  ENTRIES_CLOSED_STALLED_DAYS,
-  JUDGING_NO_DEADLINE_DAYS,
-  NUDGE_COOLDOWN_DAYS,
-  RESULTS_REVIEW_STALLED_DAYS,
-  RUNNING_IDLE_DAYS,
-  RUNNING_PAST_DATE_DAYS,
-  type OverdueReason,
-  type OverdueShowInput,
+    buildNudgeContent,
+    canNudgeAgain,
+    classifyOverdueShow,
+    cutoffDate,
+    cutoffIso,
+    nudgeLinkFor,
+    sortOverdue,
+    ENTRIES_CLOSED_STALLED_DAYS,
+    JUDGING_NO_DEADLINE_DAYS,
+    NUDGE_COOLDOWN_DAYS,
+    RESULTS_REVIEW_STALLED_DAYS,
+    RUNNING_IDLE_DAYS,
+    RUNNING_PAST_DATE_DAYS,
+    type OverdueReason,
+    type OverdueShowInput,
 } from "@/lib/admin/overdueShows";
 
 async function verifyAdmin() {
-  const authClient = await createAuthClient();
-  const {
-    data: { user },
-  } = await authClient.auth.getUser();
-  const adminEmail = process.env.ADMIN_EMAIL;
+    const authClient = await createAuthClient();
+    const {
+        data: { user },
+    } = await authClient.auth.getUser();
+    const adminEmail = process.env.ADMIN_EMAIL;
 
-  if (!user || !user.email || !adminEmail) return null;
-  if (user.email.toLowerCase() !== adminEmail.toLowerCase()) return null;
+    if (!user || !user.email || !adminEmail) return null;
+    if (user.email.toLowerCase() !== adminEmail.toLowerCase()) return null;
 
-  return user;
+    return user;
 }
 
 function getAdminSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+    return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 }
 
 /**
  * Toggle a contact message's is_read status.
  */
 export async function toggleMessageRead(
-  messageId: string,
-  isRead: boolean
+    messageId: string,
+    isRead: boolean,
 ): Promise<{ success: boolean; error?: string }> {
-  const user = await verifyAdmin();
-  if (!user) return { success: false, error: "Unauthorized" };
+    const user = await verifyAdmin();
+    if (!user) return { success: false, error: "Unauthorized" };
 
-  const { error } = await getAdminSupabase()
-    .from("contact_messages")
-    .update({ is_read: isRead })
-    .eq("id", messageId);
+    const { error } = await getAdminSupabase().from("contact_messages").update({ is_read: isRead }).eq("id", messageId);
 
-  if (error) return { success: false, error: error.message };
-  return { success: true };
+    if (error) return { success: false, error: error.message };
+    return { success: true };
 }
 
 /**
  * Delete a contact message permanently.
  */
-export async function deleteContactMessage(
-  messageId: string
-): Promise<{ success: boolean; error?: string }> {
-  const user = await verifyAdmin();
-  if (!user) return { success: false, error: "Unauthorized" };
+export async function deleteContactMessage(messageId: string): Promise<{ success: boolean; error?: string }> {
+    const user = await verifyAdmin();
+    if (!user) return { success: false, error: "Unauthorized" };
 
-  const { error } = await getAdminSupabase()
-    .from("contact_messages")
-    .delete()
-    .eq("id", messageId);
+    const { error } = await getAdminSupabase().from("contact_messages").delete().eq("id", messageId);
 
-  if (error) return { success: false, error: error.message };
-  return { success: true };
+    if (error) return { success: false, error: error.message };
+    return { success: true };
 }
 
 /**
@@ -113,65 +102,62 @@ export async function deleteContactMessage(
  * Auto-marks the original message as read after sending.
  */
 export async function replyToContactMessage(
-  messageId: string,
-  recipientEmail: string,
-  recipientName: string,
-  originalSubject: string | null,
-  originalMessage: string,
-  replyBody: string
+    messageId: string,
+    recipientEmail: string,
+    recipientName: string,
+    originalSubject: string | null,
+    originalMessage: string,
+    replyBody: string,
 ): Promise<{ success: boolean; error?: string }> {
-  const user = await verifyAdmin();
-  if (!user) return { success: false, error: "Unauthorized" };
+    const user = await verifyAdmin();
+    if (!user) return { success: false, error: "Unauthorized" };
 
-  if (!replyBody.trim()) return { success: false, error: "Reply cannot be empty." };
+    if (!replyBody.trim()) return { success: false, error: "Reply cannot be empty." };
 
-  const resend = new Resend(process.env.RESEND_API_KEY);
-  const replyToEmail = user.email || process.env.ADMIN_EMAIL || "";
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    const replyToEmail = user.email || process.env.ADMIN_EMAIL || "";
 
-  const subject = `Re: ${originalSubject || "Your message to Model Horse Hub"}`;
+    const subject = `Re: ${originalSubject || "Your message to Model Horse Hub"}`;
 
-  // Shared branded shell. This template predated lib/email/layout.ts and
-  // carried the retired indigo palette plus its own escapeHtml. No CTA —
-  // the member replies to this mail, they don't click through — and no
-  // "Notification settings" link, because an answer to a message you sent
-  // us is not something you can switch off.
-  const card = {
-    title: subject,
-    heading: "A reply from Model Horse Hub",
-    bodyHtml: `
+    // Shared branded shell. This template predated lib/email/layout.ts and
+    // carried the retired indigo palette plus its own escapeHtml. No CTA —
+    // the member replies to this mail, they don't click through — and no
+    // "Notification settings" link, because an answer to a message you sent
+    // us is not something you can switch off.
+    const card = {
+        title: subject,
+        heading: "A reply from Model Horse Hub",
+        bodyHtml: `
       <p style="margin:0 0 14px 0;">Hi ${escapeEmailHtml(recipientName)},</p>
       <div style="white-space:pre-wrap;margin:0 0 22px 0;">${escapeEmailHtml(replyBody.trim())}</div>
       ${renderEmailQuote(originalMessage, "Your original message")}`,
-    footerNote: "You're getting this because you wrote to Model Horse Hub. Just reply to answer.",
-    hideSettingsLink: true,
-  };
+        footerNote: "You're getting this because you wrote to Model Horse Hub. Just reply to answer.",
+        hideSettingsLink: true,
+    };
 
-  try {
-    const { error } = await resend.emails.send({
-      from: EMAIL_FROM,
-      to: recipientEmail,
-      replyTo: replyToEmail,
-      subject,
-      html: renderBrandedEmail(card),
-      text: renderBrandedEmailText(card),
-    });
+    try {
+        const { error } = await resend.emails.send({
+            from: EMAIL_FROM,
+            to: recipientEmail,
+            replyTo: replyToEmail,
+            subject,
+            html: renderBrandedEmail(card),
+            text: renderBrandedEmailText(card),
+        });
 
-    if (error) {
-      logger.error("Admin Reply", "Resend error", error);
-      return { success: false, error: `Email failed: ${error.message}` };
+        if (error) {
+            logger.error("Admin Reply", "Resend error", error);
+            return { success: false, error: `Email failed: ${error.message}` };
+        }
+    } catch (err) {
+        logger.error("Admin Reply", "Unexpected error", err);
+        return { success: false, error: "Failed to send email. Check Resend configuration." };
     }
-  } catch (err) {
-    logger.error("Admin Reply", "Unexpected error", err);
-    return { success: false, error: "Failed to send email. Check Resend configuration." };
-  }
 
-  // Auto-mark as read after replying
-  await getAdminSupabase()
-    .from("contact_messages")
-    .update({ is_read: true })
-    .eq("id", messageId);
+    // Auto-mark as read after replying
+    await getAdminSupabase().from("contact_messages").update({ is_read: true }).eq("id", messageId);
 
-  return { success: true };
+    return { success: true };
 }
 
 /**
@@ -179,43 +165,41 @@ export async function replyToContactMessage(
  * Admin-only — uses Service Role to insert into featured_horses.
  */
 export async function featureHorse(data: {
-  horseId: string;
-  title: string;
-  description?: string;
-  expiresAt?: string;
+    horseId: string;
+    title: string;
+    description?: string;
+    expiresAt?: string;
 }): Promise<{ success: boolean; error?: string }> {
-  const user = await verifyAdmin();
-  if (!user) return { success: false, error: "Unauthorized" };
+    const user = await verifyAdmin();
+    if (!user) return { success: false, error: "Unauthorized" };
 
-  if (!data.horseId.trim() || !data.title.trim()) {
-    return { success: false, error: "Horse ID and title are required." };
-  }
+    if (!data.horseId.trim() || !data.title.trim()) {
+        return { success: false, error: "Horse ID and title are required." };
+    }
 
-  // Verify horse exists and is public
-  const supabaseAdmin = getAdminSupabase();
-  const { data: horse } = await supabaseAdmin
-    .from("user_horses")
-    .select("id, is_public")
-    .eq("id", data.horseId)
-    .single();
+    // Verify horse exists and is public
+    const supabaseAdmin = getAdminSupabase();
+    const { data: horse } = await supabaseAdmin
+        .from("user_horses")
+        .select("id, is_public")
+        .eq("id", data.horseId)
+        .single();
 
-  if (!horse) return { success: false, error: "Horse not found." };
-  if (!(horse as { is_public: boolean }).is_public) {
-    return { success: false, error: "Horse must be public to be featured." };
-  }
+    if (!horse) return { success: false, error: "Horse not found." };
+    if (!(horse as { is_public: boolean }).is_public) {
+        return { success: false, error: "Horse must be public to be featured." };
+    }
 
-  const { error } = await supabaseAdmin
-    .from("featured_horses")
-    .insert({
-      horse_id: data.horseId,
-      title: data.title.trim(),
-      description: data.description?.trim() || null,
-      expires_at: data.expiresAt || null,
-      created_by: user.id,
+    const { error } = await supabaseAdmin.from("featured_horses").insert({
+        horse_id: data.horseId,
+        title: data.title.trim(),
+        description: data.description?.trim() || null,
+        expires_at: data.expiresAt || null,
+        created_by: user.id,
     });
 
-  if (error) return { success: false, error: error.message };
-  return { success: true };
+    if (error) return { success: false, error: error.message };
+    return { success: true };
 }
 
 /**
@@ -229,197 +213,187 @@ export async function featureHorse(data: {
 // ── Announcements (banner phase 1 — owner-authored) ──
 
 export interface AdminAnnouncement {
-  id: string;
-  message: string;
-  linkUrl: string | null;
-  placement: string;
-  startsAt: string;
-  endsAt: string | null;
+    id: string;
+    message: string;
+    linkUrl: string | null;
+    placement: string;
+    startsAt: string;
+    endsAt: string | null;
 }
 
 /** Untyped access until 165 is in generated types. */
 type AnnouncementsTable = (table: "announcements") => {
-  select: (cols: string) => {
-    order: (
-      col: string,
-      opts: { ascending: boolean },
-    ) => PromiseLike<{ data: unknown; error: { message: string } | null }>;
-  };
-  insert: (row: Record<string, unknown>) => PromiseLike<{ error: { message: string } | null }>;
-  delete: () => {
-    eq: (col: string, val: string) => PromiseLike<{ error: { message: string } | null }>;
-  };
+    select: (cols: string) => {
+        order: (
+            col: string,
+            opts: { ascending: boolean },
+        ) => PromiseLike<{ data: unknown; error: { message: string } | null }>;
+    };
+    insert: (row: Record<string, unknown>) => PromiseLike<{ error: { message: string } | null }>;
+    delete: () => {
+        eq: (col: string, val: string) => PromiseLike<{ error: { message: string } | null }>;
+    };
 };
 
 export async function listAnnouncements(): Promise<
-  { success: true; announcements: AdminAnnouncement[] } | { success: false; error: string }
+    { success: true; announcements: AdminAnnouncement[] } | { success: false; error: string }
 > {
-  const user = await verifyAdmin();
-  if (!user) return { success: false, error: "Unauthorized" };
-  const from = getAdminSupabase().from.bind(getAdminSupabase()) as unknown as AnnouncementsTable;
-  const { data, error } = await from("announcements")
-    .select("id, message, link_url, placement, starts_at, ends_at")
-    .order("created_at", { ascending: false });
-  if (error) return { success: false, error: error.message };
-  const rows = (Array.isArray(data) ? data : []) as {
-    id: string;
-    message: string;
-    link_url: string | null;
-    placement: string;
-    starts_at: string;
-    ends_at: string | null;
-  }[];
-  return {
-    success: true,
-    announcements: rows.map((r) => ({
-      id: r.id,
-      message: r.message,
-      linkUrl: r.link_url,
-      placement: r.placement,
-      startsAt: r.starts_at,
-      endsAt: r.ends_at,
-    })),
-  };
+    const user = await verifyAdmin();
+    if (!user) return { success: false, error: "Unauthorized" };
+    const from = getAdminSupabase().from.bind(getAdminSupabase()) as unknown as AnnouncementsTable;
+    const { data, error } = await from("announcements")
+        .select("id, message, link_url, placement, starts_at, ends_at")
+        .order("created_at", { ascending: false });
+    if (error) return { success: false, error: error.message };
+    const rows = (Array.isArray(data) ? data : []) as {
+        id: string;
+        message: string;
+        link_url: string | null;
+        placement: string;
+        starts_at: string;
+        ends_at: string | null;
+    }[];
+    return {
+        success: true,
+        announcements: rows.map((r) => ({
+            id: r.id,
+            message: r.message,
+            linkUrl: r.link_url,
+            placement: r.placement,
+            startsAt: r.starts_at,
+            endsAt: r.ends_at,
+        })),
+    };
 }
 
 export async function createAnnouncement(input: {
-  message: string;
-  linkUrl?: string;
-  endsAt?: string;
-  placement?: "site" | "stable" | "shows";
+    message: string;
+    linkUrl?: string;
+    endsAt?: string;
+    placement?: "site" | "stable" | "shows";
 }): Promise<{ success: boolean; error?: string }> {
-  const user = await verifyAdmin();
-  if (!user) return { success: false, error: "Unauthorized" };
-  const message = input.message.trim();
-  if (!message || message.length > 300) {
-    return { success: false, error: "Announcement text must be 1–300 characters." };
-  }
-  const from = getAdminSupabase().from.bind(getAdminSupabase()) as unknown as AnnouncementsTable;
-  const { error } = await from("announcements").insert({
-    message,
-    link_url: input.linkUrl?.trim() || null,
-    ends_at: input.endsAt || null,
-    placement: input.placement ?? "site",
-    created_by: user.id,
-  });
-  if (error) return { success: false, error: error.message };
-  // The banner's cache is cleared here, not by a short time window —
-  // a short window would be inherited by every static page on the site.
-  revalidateTag(ANNOUNCEMENTS_CACHE_TAG, "max");
-  return { success: true };
+    const user = await verifyAdmin();
+    if (!user) return { success: false, error: "Unauthorized" };
+    const message = input.message.trim();
+    if (!message || message.length > 300) {
+        return { success: false, error: "Announcement text must be 1–300 characters." };
+    }
+    const from = getAdminSupabase().from.bind(getAdminSupabase()) as unknown as AnnouncementsTable;
+    const { error } = await from("announcements").insert({
+        message,
+        link_url: input.linkUrl?.trim() || null,
+        ends_at: input.endsAt || null,
+        placement: input.placement ?? "site",
+        created_by: user.id,
+    });
+    if (error) return { success: false, error: error.message };
+    // The banner's cache is cleared here, not by a short time window —
+    // a short window would be inherited by every static page on the site.
+    revalidateTag(ANNOUNCEMENTS_CACHE_TAG, "max");
+    return { success: true };
 }
 
 export async function deleteAnnouncement(id: string): Promise<{ success: boolean; error?: string }> {
-  const user = await verifyAdmin();
-  if (!user) return { success: false, error: "Unauthorized" };
-  const from = getAdminSupabase().from.bind(getAdminSupabase()) as unknown as AnnouncementsTable;
-  const { error } = await from("announcements").delete().eq("id", id);
-  if (error) return { success: false, error: error.message };
-  revalidateTag(ANNOUNCEMENTS_CACHE_TAG, "max");
-  return { success: true };
+    const user = await verifyAdmin();
+    if (!user) return { success: false, error: "Unauthorized" };
+    const from = getAdminSupabase().from.bind(getAdminSupabase()) as unknown as AnnouncementsTable;
+    const { error } = await from("announcements").delete().eq("id", id);
+    if (error) return { success: false, error: error.message };
+    revalidateTag(ANNOUNCEMENTS_CACHE_TAG, "max");
+    return { success: true };
 }
 
-export async function suspendUser(
-  userId: string,
-  reason: string
-): Promise<{ success: boolean; error?: string }> {
-  const user = await verifyAdmin();
-  if (!user) return { success: false, error: "Unauthorized" };
-  if (userId === user.id) return { success: false, error: "You cannot suspend yourself." };
-  const trimmedReason = reason.trim();
-  if (!trimmedReason) return { success: false, error: "Give a reason — it lands on the audit trail." };
+export async function suspendUser(userId: string, reason: string): Promise<{ success: boolean; error?: string }> {
+    const user = await verifyAdmin();
+    if (!user) return { success: false, error: "Unauthorized" };
+    if (userId === user.id) return { success: false, error: "You cannot suspend yourself." };
+    const trimmedReason = reason.trim();
+    if (!trimmedReason) return { success: false, error: "Give a reason — it lands on the audit trail." };
 
-  const admin = getAdminSupabase();
+    const admin = getAdminSupabase();
 
-  const { data: target, error: fetchError } = await admin.auth.admin.getUserById(userId);
-  if (fetchError || !target?.user) return { success: false, error: "User not found." };
+    const { data: target, error: fetchError } = await admin.auth.admin.getUserById(userId);
+    if (fetchError || !target?.user) return { success: false, error: "User not found." };
 
-  const { error: authError } = await admin.auth.admin.updateUserById(userId, {
-    app_metadata: { ...target.user.app_metadata, is_suspended: true },
-  });
-  if (authError) return { success: false, error: authError.message };
+    const { error: authError } = await admin.auth.admin.updateUserById(userId, {
+        app_metadata: { ...target.user.app_metadata, is_suspended: true },
+    });
+    if (authError) return { success: false, error: authError.message };
 
-  const { error: dbError } = await admin
-    .from("users")
-    .update({
-      is_suspended: true,
-      suspended_at: new Date().toISOString(),
-      suspended_reason: trimmedReason,
-    })
-    .eq("id", userId);
-  if (dbError) {
-    logger.error("Admin", `users.is_suspended write failed for ${userId} (app_metadata IS set)`, dbError);
-    return { success: false, error: "Suspension partially applied — retry to sync the database flag." };
-  }
+    const { error: dbError } = await admin
+        .from("users")
+        .update({
+            is_suspended: true,
+            suspended_at: new Date().toISOString(),
+            suspended_reason: trimmedReason,
+        })
+        .eq("id", userId);
+    if (dbError) {
+        logger.error("Admin", `users.is_suspended write failed for ${userId} (app_metadata IS set)`, dbError);
+        return { success: false, error: "Suspension partially applied — retry to sync the database flag." };
+    }
 
-  // Kill live sessions (audit S5): app_metadata only lands in NEW
-  // tokens — an open tab keeps a valid JWT until expiry, which let a
-  // just-suspended user keep voting/judging via direct PostgREST.
-  // signOut revokes their refresh tokens; access tokens then die at
-  // their (short) natural expiry. Best-effort — the suspension stands.
-  try {
-    await admin.auth.admin.signOut(userId, "global");
-  } catch (err) {
-    logger.error("Admin", `session revocation failed for suspended user ${userId}`, err);
-  }
+    // Kill live sessions (audit S5): app_metadata only lands in NEW
+    // tokens — an open tab keeps a valid JWT until expiry, which let a
+    // just-suspended user keep voting/judging via direct PostgREST.
+    // signOut revokes their refresh tokens; access tokens then die at
+    // their (short) natural expiry. Best-effort — the suspension stands.
+    try {
+        await admin.auth.admin.signOut(userId, "global");
+    } catch (err) {
+        logger.error("Admin", `session revocation failed for suspended user ${userId}`, err);
+    }
 
-  return { success: true };
+    return { success: true };
 }
 
 /** Reverse suspendUser — clears both stamps. */
-export async function unsuspendUser(
-  userId: string
-): Promise<{ success: boolean; error?: string }> {
-  const user = await verifyAdmin();
-  if (!user) return { success: false, error: "Unauthorized" };
+export async function unsuspendUser(userId: string): Promise<{ success: boolean; error?: string }> {
+    const user = await verifyAdmin();
+    if (!user) return { success: false, error: "Unauthorized" };
 
-  const admin = getAdminSupabase();
+    const admin = getAdminSupabase();
 
-  const { data: target, error: fetchError } = await admin.auth.admin.getUserById(userId);
-  if (fetchError || !target?.user) return { success: false, error: "User not found." };
+    const { data: target, error: fetchError } = await admin.auth.admin.getUserById(userId);
+    if (fetchError || !target?.user) return { success: false, error: "User not found." };
 
-  const { error: authError } = await admin.auth.admin.updateUserById(userId, {
-    app_metadata: { ...target.user.app_metadata, is_suspended: false },
-  });
-  if (authError) return { success: false, error: authError.message };
+    const { error: authError } = await admin.auth.admin.updateUserById(userId, {
+        app_metadata: { ...target.user.app_metadata, is_suspended: false },
+    });
+    if (authError) return { success: false, error: authError.message };
 
-  const { error: dbError } = await admin
-    .from("users")
-    .update({ is_suspended: false, suspended_at: null, suspended_reason: null })
-    .eq("id", userId);
-  if (dbError) return { success: false, error: dbError.message };
+    const { error: dbError } = await admin
+        .from("users")
+        .update({ is_suspended: false, suspended_at: null, suspended_reason: null })
+        .eq("id", userId);
+    if (dbError) return { success: false, error: dbError.message };
 
-  return { success: true };
+    return { success: true };
 }
 
 /** Alias-based wrappers so the admin console doesn't need a user-id lookup UI. */
-export async function suspendUserByAlias(
-  alias: string,
-  reason: string
-): Promise<{ success: boolean; error?: string }> {
-  const user = await verifyAdmin();
-  if (!user) return { success: false, error: "Unauthorized" };
-  const { data: target } = await getAdminSupabase()
-    .from("users")
-    .select("id, alias_name")
-    .ilike("alias_name", alias.trim())
-    .maybeSingle();
-  if (!target) return { success: false, error: `No user with alias "${alias.trim()}".` };
-  return suspendUser((target as { id: string }).id, reason);
+export async function suspendUserByAlias(alias: string, reason: string): Promise<{ success: boolean; error?: string }> {
+    const user = await verifyAdmin();
+    if (!user) return { success: false, error: "Unauthorized" };
+    const { data: target } = await getAdminSupabase()
+        .from("users")
+        .select("id, alias_name")
+        .ilike("alias_name", alias.trim())
+        .maybeSingle();
+    if (!target) return { success: false, error: `No user with alias "${alias.trim()}".` };
+    return suspendUser((target as { id: string }).id, reason);
 }
 
-export async function unsuspendUserByAlias(
-  alias: string
-): Promise<{ success: boolean; error?: string }> {
-  const user = await verifyAdmin();
-  if (!user) return { success: false, error: "Unauthorized" };
-  const { data: target } = await getAdminSupabase()
-    .from("users")
-    .select("id")
-    .ilike("alias_name", alias.trim())
-    .maybeSingle();
-  if (!target) return { success: false, error: `No user with alias "${alias.trim()}".` };
-  return unsuspendUser((target as { id: string }).id);
+export async function unsuspendUserByAlias(alias: string): Promise<{ success: boolean; error?: string }> {
+    const user = await verifyAdmin();
+    if (!user) return { success: false, error: "Unauthorized" };
+    const { data: target } = await getAdminSupabase()
+        .from("users")
+        .select("id")
+        .ilike("alias_name", alias.trim())
+        .maybeSingle();
+    if (!target) return { success: false, error: `No user with alias "${alias.trim()}".` };
+    return unsuspendUser((target as { id: string }).id);
 }
 
 /**
@@ -431,27 +405,27 @@ export async function unsuspendUserByAlias(
  * duplicate. Accepts UUIDs or slugs.
  */
 export async function mergeCatalogItems(
-  duplicateRef: string,
-  canonicalRef: string
+    duplicateRef: string,
+    canonicalRef: string,
 ): Promise<{ success: boolean; error?: string; summary?: string }> {
-  const user = await verifyAdmin();
-  if (!user) return { success: false, error: "Unauthorized" };
+    const user = await verifyAdmin();
+    if (!user) return { success: false, error: "Unauthorized" };
 
-  // The procedure itself lives in lib/catalog/merge — an approved
-  // duplicate report runs the very same one.
-  const admin = getAdminSupabase() as unknown as MergeClient;
-  const dup = await resolveCatalogRef(admin, duplicateRef);
-  if (!dup) return { success: false, error: `Duplicate "${duplicateRef}" not found (id or slug).` };
-  const canonical = await resolveCatalogRef(admin, canonicalRef);
-  if (!canonical) return { success: false, error: `Canonical "${canonicalRef}" not found (id or slug).` };
+    // The procedure itself lives in lib/catalog/merge — an approved
+    // duplicate report runs the very same one.
+    const admin = getAdminSupabase() as unknown as MergeClient;
+    const dup = await resolveCatalogRef(admin, duplicateRef);
+    if (!dup) return { success: false, error: `Duplicate "${duplicateRef}" not found (id or slug).` };
+    const canonical = await resolveCatalogRef(admin, canonicalRef);
+    if (!canonical) return { success: false, error: `Canonical "${canonicalRef}" not found (id or slug).` };
 
-  const result = await mergeCatalogItemsCore(admin, dup, canonical, { userId: user.id, alias: "Admin" }, (logError) =>
-    logger.error("Admin", "Merge changelog write failed (continuing)", logError),
-  );
-  if (!result.success) return { success: false, error: result.error };
-  // The removed page and its old address must stop serving from the cache.
-  revalidateTag(CACHE_TAGS.referencePages, "max");
-  return { success: true, summary: result.summary };
+    const result = await mergeCatalogItemsCore(admin, dup, canonical, { userId: user.id, alias: "Admin" }, (logError) =>
+        logger.error("Admin", "Merge changelog write failed (continuing)", logError),
+    );
+    if (!result.success) return { success: false, error: result.error };
+    // The removed page and its old address must stop serving from the cache.
+    revalidateTag(CACHE_TAGS.referencePages, "max");
+    return { success: true, summary: result.summary };
 }
 
 // ── MHH sanctioning requests (Season 1 manual approval) ──
@@ -463,56 +437,53 @@ export async function mergeCatalogItems(
 const SANCTIONING_REQUEST_MARKER = "[Host requested MHH sanctioning]";
 
 export interface SanctioningRequestRow {
-  showId: string;
-  title: string;
-  status: string;
-  showYear: number | null;
-  hostAlias: string;
-  createdAt: string;
-  /** The host's own note text, marker stripped. */
-  note: string | null;
+    showId: string;
+    title: string;
+    status: string;
+    showYear: number | null;
+    hostAlias: string;
+    createdAt: string;
+    /** The host's own note text, marker stripped. */
+    note: string | null;
 }
 
 export async function listSanctioningRequests(): Promise<
-  { success: true; requests: SanctioningRequestRow[] } | { success: false; error: string }
+    { success: true; requests: SanctioningRequestRow[] } | { success: false; error: string }
 > {
-  const user = await verifyAdmin();
-  if (!user) return { success: false, error: "Unauthorized" };
+    const user = await verifyAdmin();
+    if (!user) return { success: false, error: "Unauthorized" };
 
-  const admin = getAdminSupabase();
-  const { data, error } = await admin
-    .from("shows")
-    .select("id, title, status, show_year, host_id, sanctioning_note, created_at")
-    .eq("is_mhh_qualifying", false)
-    .ilike("sanctioning_note", `%${SANCTIONING_REQUEST_MARKER}%`)
-    .order("created_at", { ascending: true });
-  if (error) return { success: false, error: error.message };
+    const admin = getAdminSupabase();
+    const { data, error } = await admin
+        .from("shows")
+        .select("id, title, status, show_year, host_id, sanctioning_note, created_at")
+        .eq("is_mhh_qualifying", false)
+        .ilike("sanctioning_note", `%${SANCTIONING_REQUEST_MARKER}%`)
+        .order("created_at", { ascending: true });
+    if (error) return { success: false, error: error.message };
 
-  const rows = data ?? [];
-  const hostIds = [...new Set(rows.map((s) => s.host_id as string))];
-  const aliasById = new Map<string, string>();
-  if (hostIds.length > 0) {
-    const { data: hosts } = await admin.from("users").select("id, alias_name").in("id", hostIds);
-    for (const h of hosts ?? []) {
-      if (h.alias_name) aliasById.set(h.id as string, h.alias_name as string);
+    const rows = data ?? [];
+    const hostIds = [...new Set(rows.map((s) => s.host_id as string))];
+    const aliasById = new Map<string, string>();
+    if (hostIds.length > 0) {
+        const { data: hosts } = await admin.from("users").select("id, alias_name").in("id", hostIds);
+        for (const h of hosts ?? []) {
+            if (h.alias_name) aliasById.set(h.id as string, h.alias_name as string);
+        }
     }
-  }
 
-  return {
-    success: true,
-    requests: rows.map((s) => ({
-      showId: s.id as string,
-      title: (s.title as string) ?? "Untitled show",
-      status: (s.status as string) ?? "draft",
-      showYear: (s.show_year as number | null) ?? null,
-      hostAlias: aliasById.get(s.host_id as string) ?? "Unknown host",
-      createdAt: s.created_at as string,
-      note:
-        ((s.sanctioning_note as string | null) ?? "")
-          .replace(SANCTIONING_REQUEST_MARKER, "")
-          .trim() || null,
-    })),
-  };
+    return {
+        success: true,
+        requests: rows.map((s) => ({
+            showId: s.id as string,
+            title: (s.title as string) ?? "Untitled show",
+            status: (s.status as string) ?? "draft",
+            showYear: (s.show_year as number | null) ?? null,
+            hostAlias: aliasById.get(s.host_id as string) ?? "Unknown host",
+            createdAt: s.created_at as string,
+            note: ((s.sanctioning_note as string | null) ?? "").replace(SANCTIONING_REQUEST_MARKER, "").trim() || null,
+        })),
+    };
 }
 
 // ── Sanctioning review: the show behind a request, drafts included ──
@@ -523,131 +494,128 @@ export async function listSanctioningRequests(): Promise<
 // what the admin reviews is what entrants will see.
 
 export interface SanctioningReview {
-  show: PublicShow;
-  divisions: ConsoleDivision[];
-  entryCount: number;
-  exhibitorCount: number;
-  blindBrowsing: boolean;
-  createdAt: string;
-  /** The queue marker is in the note. */
-  requested: boolean;
-  /** Staff beyond the host. */
-  staff: { alias: string; role: string }[];
-  host: { alias: string; completedShows: number; totalShows: number };
-  /** Observations for the admin to weigh — never gates. */
-  checks: SanctioningCheck[];
+    show: PublicShow;
+    divisions: ConsoleDivision[];
+    entryCount: number;
+    exhibitorCount: number;
+    blindBrowsing: boolean;
+    createdAt: string;
+    /** The queue marker is in the note. */
+    requested: boolean;
+    /** Staff beyond the host. */
+    staff: { alias: string; role: string }[];
+    host: { alias: string; completedShows: number; totalShows: number };
+    /** Observations for the admin to weigh — never gates. */
+    checks: SanctioningCheck[];
 }
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function getShowForSanctioningReview(
-  showId: string
+    showId: string,
 ): Promise<{ success: true; review: SanctioningReview } | { success: false; error: string }> {
-  const user = await verifyAdmin();
-  if (!user) return { success: false, error: "Unauthorized" };
-  if (!UUID_RE.test(showId)) return { success: false, error: "Show not found." };
+    const user = await verifyAdmin();
+    if (!user) return { success: false, error: "Unauthorized" };
+    if (!UUID_RE.test(showId)) return { success: false, error: "Show not found." };
 
-  const admin = getAdminSupabase();
-  const { data: show, error: showError } = await admin
-    .from("shows")
-    .select(
-      "id, host_id, title, mode, judging, status, venue_name, venue_address, show_date, entries_open_at, entries_close_at, judging_ends_at, about_md, rules_md, fee_info, capacity, is_mhh_qualifying, sanctioning_note, show_year, blind_browsing, created_at"
-    )
-    .eq("id", showId)
-    .maybeSingle();
-  if (showError) return { success: false, error: showError.message };
-  if (!show) return { success: false, error: "Show not found." };
+    const admin = getAdminSupabase();
+    const { data: show, error: showError } = await admin
+        .from("shows")
+        .select(
+            "id, host_id, title, mode, judging, status, venue_name, venue_address, show_date, entries_open_at, entries_close_at, judging_ends_at, about_md, rules_md, fee_info, capacity, is_mhh_qualifying, sanctioning_note, show_year, blind_browsing, created_at",
+        )
+        .eq("id", showId)
+        .maybeSingle();
+    if (showError) return { success: false, error: showError.message };
+    if (!show) return { success: false, error: "Show not found." };
 
-  const program = await loadShowProgram(admin, showId);
-  if ("error" in program) return { success: false, error: program.error };
+    const program = await loadShowProgram(admin, showId);
+    if ("error" in program) return { success: false, error: program.error };
 
-  const hostId = show.host_id as string;
-  const [hostRes, hostShowsRes, staffRes] = await Promise.all([
-    admin.from("users").select("alias_name").eq("id", hostId).maybeSingle(),
-    admin.from("shows").select("id, status").eq("host_id", hostId),
-    admin.from("show_staff").select("user_id, role").eq("show_id", showId),
-  ]);
-  const hostAlias =
-    (hostRes.data as { alias_name: string | null } | null)?.alias_name ?? "unknown";
-  const hostShows = (hostShowsRes.data ?? []) as { id: string; status: string }[];
-  const staffRows = ((staffRes.data ?? []) as { user_id: string; role: string }[]).filter(
-    (m) => m.role !== "host"
-  );
-  const staffAliasById = new Map<string, string>();
-  if (staffRows.length > 0) {
-    const { data: staffUsers } = await admin
-      .from("users")
-      .select("id, alias_name")
-      .in("id", [...new Set(staffRows.map((m) => m.user_id))]);
-    for (const u of (staffUsers ?? []) as { id: string; alias_name: string | null }[]) {
-      if (u.alias_name) staffAliasById.set(u.id, u.alias_name);
+    const hostId = show.host_id as string;
+    const [hostRes, hostShowsRes, staffRes] = await Promise.all([
+        admin.from("users").select("alias_name").eq("id", hostId).maybeSingle(),
+        admin.from("shows").select("id, status").eq("host_id", hostId),
+        admin.from("show_staff").select("user_id, role").eq("show_id", showId),
+    ]);
+    const hostAlias = (hostRes.data as { alias_name: string | null } | null)?.alias_name ?? "unknown";
+    const hostShows = (hostShowsRes.data ?? []) as { id: string; status: string }[];
+    const staffRows = ((staffRes.data ?? []) as { user_id: string; role: string }[]).filter((m) => m.role !== "host");
+    const staffAliasById = new Map<string, string>();
+    if (staffRows.length > 0) {
+        const { data: staffUsers } = await admin
+            .from("users")
+            .select("id, alias_name")
+            .in("id", [...new Set(staffRows.map((m) => m.user_id))]);
+        for (const u of (staffUsers ?? []) as { id: string; alias_name: string | null }[]) {
+            if (u.alias_name) staffAliasById.set(u.id, u.alias_name);
+        }
     }
-  }
-  const staff = staffRows.map((m) => ({
-    alias: staffAliasById.get(m.user_id) ?? "unknown",
-    role: m.role,
-  }));
+    const staff = staffRows.map((m) => ({
+        alias: staffAliasById.get(m.user_id) ?? "unknown",
+        role: m.role,
+    }));
 
-  const publicShow: PublicShow = {
-    id: show.id as string,
-    title: show.title as string,
-    mode: show.mode as ShowMode,
-    judging: show.judging as ShowJudging,
-    status: show.status as ShowStatus,
-    hostAlias,
-    venueName: (show.venue_name as string | null) ?? null,
-    venueAddress: (show.venue_address as string | null) ?? null,
-    showDate: (show.show_date as string | null) ?? null,
-    entriesOpenAt: (show.entries_open_at as string | null) ?? null,
-    entriesCloseAt: (show.entries_close_at as string | null) ?? null,
-    judgingEndsAt: (show.judging_ends_at as string | null) ?? null,
-    aboutMd: (show.about_md as string | null) ?? null,
-    rulesMd: (show.rules_md as string | null) ?? null,
-    feeInfo: (show.fee_info as string | null) ?? null,
-    capacity: (show.capacity as number | null) ?? null,
-    isMhhQualifying: !!show.is_mhh_qualifying,
-    sanctioningNote: stripSanctioningMarker(show.sanctioning_note as string | null),
-    showYear: (show.show_year as number | null) ?? null,
-  };
+    const publicShow: PublicShow = {
+        id: show.id as string,
+        title: show.title as string,
+        mode: show.mode as ShowMode,
+        judging: show.judging as ShowJudging,
+        status: show.status as ShowStatus,
+        hostAlias,
+        venueName: (show.venue_name as string | null) ?? null,
+        venueAddress: (show.venue_address as string | null) ?? null,
+        showDate: (show.show_date as string | null) ?? null,
+        entriesOpenAt: (show.entries_open_at as string | null) ?? null,
+        entriesCloseAt: (show.entries_close_at as string | null) ?? null,
+        judgingEndsAt: (show.judging_ends_at as string | null) ?? null,
+        aboutMd: (show.about_md as string | null) ?? null,
+        rulesMd: (show.rules_md as string | null) ?? null,
+        feeInfo: (show.fee_info as string | null) ?? null,
+        capacity: (show.capacity as number | null) ?? null,
+        isMhhQualifying: !!show.is_mhh_qualifying,
+        sanctioningNote: stripSanctioningMarker(show.sanctioning_note as string | null),
+        showYear: (show.show_year as number | null) ?? null,
+    };
 
-  const classes = program.divisions.flatMap((d) => d.sections.flatMap((sec) => sec.classes));
-  const checks = buildSanctioningChecks({
-    mode: publicShow.mode,
-    judging: publicShow.judging,
-    status: publicShow.status,
-    showDate: publicShow.showDate,
-    entriesOpenAt: publicShow.entriesOpenAt,
-    entriesCloseAt: publicShow.entriesCloseAt,
-    judgingEndsAt: publicShow.judgingEndsAt,
-    aboutMd: publicShow.aboutMd,
-    rulesMd: publicShow.rulesMd,
-    divisionCount: program.divisions.length,
-    classCount: classes.length,
-    qualifyingClassCount: classes.filter((c) => c.isQualifying).length,
-    judgeCount: staff.filter((m) => m.role === "judge").length,
-    hostCompletedShows: hostShows.filter((h) => h.status === "completed").length,
-    hostTotalShows: hostShows.length,
-  });
+    const classes = program.divisions.flatMap((d) => d.sections.flatMap((sec) => sec.classes));
+    const checks = buildSanctioningChecks({
+        mode: publicShow.mode,
+        judging: publicShow.judging,
+        status: publicShow.status,
+        showDate: publicShow.showDate,
+        entriesOpenAt: publicShow.entriesOpenAt,
+        entriesCloseAt: publicShow.entriesCloseAt,
+        judgingEndsAt: publicShow.judgingEndsAt,
+        aboutMd: publicShow.aboutMd,
+        rulesMd: publicShow.rulesMd,
+        divisionCount: program.divisions.length,
+        classCount: classes.length,
+        qualifyingClassCount: classes.filter((c) => c.isQualifying).length,
+        judgeCount: staff.filter((m) => m.role === "judge").length,
+        hostCompletedShows: hostShows.filter((h) => h.status === "completed").length,
+        hostTotalShows: hostShows.length,
+    });
 
-  return {
-    success: true,
-    review: {
-      show: publicShow,
-      divisions: program.divisions,
-      entryCount: program.entryCount,
-      exhibitorCount: program.exhibitorCount,
-      blindBrowsing: !!show.blind_browsing,
-      createdAt: show.created_at as string,
-      requested: hasSanctioningRequest(show.sanctioning_note as string | null),
-      staff,
-      host: {
-        alias: hostAlias,
-        completedShows: hostShows.filter((h) => h.status === "completed").length,
-        totalShows: hostShows.length,
-      },
-      checks,
-    },
-  };
+    return {
+        success: true,
+        review: {
+            show: publicShow,
+            divisions: program.divisions,
+            entryCount: program.entryCount,
+            exhibitorCount: program.exhibitorCount,
+            blindBrowsing: !!show.blind_browsing,
+            createdAt: show.created_at as string,
+            requested: hasSanctioningRequest(show.sanctioning_note as string | null),
+            staff,
+            host: {
+                alias: hostAlias,
+                completedShows: hostShows.filter((h) => h.status === "completed").length,
+                totalShows: hostShows.length,
+            },
+            checks,
+        },
+    };
 }
 
 /**
@@ -657,55 +625,53 @@ export async function getShowForSanctioningReview(
  * leaves the queue either way.
  */
 export async function resolveSanctioningRequest(
-  showId: string,
-  decision: "grant" | "dismiss"
+    showId: string,
+    decision: "grant" | "dismiss",
 ): Promise<{ success: boolean; error?: string }> {
-  const user = await verifyAdmin();
-  if (!user) return { success: false, error: "Unauthorized" };
-  if (decision !== "grant" && decision !== "dismiss") {
-    return { success: false, error: "Unknown decision." };
-  }
-
-  const admin = getAdminSupabase();
-  const { data: show, error: readError } = await admin
-    .from("shows")
-    .select("id, title, host_id, sanctioning_note, is_mhh_qualifying")
-    .eq("id", showId)
-    .maybeSingle();
-  if (readError) return { success: false, error: readError.message };
-  if (!show) return { success: false, error: "Show not found." };
-
-  const strippedNote =
-    ((show.sanctioning_note as string | null) ?? "")
-      .replace(SANCTIONING_REQUEST_MARKER, "")
-      .trim() || null;
-
-  const { error: updateError } = await admin
-    .from("shows")
-    .update({
-      sanctioning_note: strippedNote,
-      ...(decision === "grant" ? { is_mhh_qualifying: true } : {}),
-    })
-    .eq("id", showId);
-  if (updateError) return { success: false, error: updateError.message };
-
-  if (decision === "grant") {
-    // House pattern: dynamic import + try/catch — createNotification is
-    // server-only and must never take the action down with it.
-    try {
-      const { createNotification } = await import("@/lib/notifications/createNotification");
-      await createNotification({
-        userId: show.host_id as string,
-        type: "show_moderation",
-        content: `🏅 "${show.title}" is now MHH Sanctioned — placings there earn Championship Series points and can mint qualification cards.`,
-        linkUrl: `/shows/host/${showId}`,
-      });
-    } catch (err) {
-      logger.error("Admin", "Sanctioning grant notification failed (continuing)", err);
+    const user = await verifyAdmin();
+    if (!user) return { success: false, error: "Unauthorized" };
+    if (decision !== "grant" && decision !== "dismiss") {
+        return { success: false, error: "Unknown decision." };
     }
-  }
 
-  return { success: true };
+    const admin = getAdminSupabase();
+    const { data: show, error: readError } = await admin
+        .from("shows")
+        .select("id, title, host_id, sanctioning_note, is_mhh_qualifying")
+        .eq("id", showId)
+        .maybeSingle();
+    if (readError) return { success: false, error: readError.message };
+    if (!show) return { success: false, error: "Show not found." };
+
+    const strippedNote =
+        ((show.sanctioning_note as string | null) ?? "").replace(SANCTIONING_REQUEST_MARKER, "").trim() || null;
+
+    const { error: updateError } = await admin
+        .from("shows")
+        .update({
+            sanctioning_note: strippedNote,
+            ...(decision === "grant" ? { is_mhh_qualifying: true } : {}),
+        })
+        .eq("id", showId);
+    if (updateError) return { success: false, error: updateError.message };
+
+    if (decision === "grant") {
+        // House pattern: dynamic import + try/catch — createNotification is
+        // server-only and must never take the action down with it.
+        try {
+            const { createNotification } = await import("@/lib/notifications/createNotification");
+            await createNotification({
+                userId: show.host_id as string,
+                type: "show_moderation",
+                content: `🏅 "${show.title}" is now MHH Sanctioned — placings there earn Championship Series points and can mint qualification cards.`,
+                linkUrl: `/shows/host/${showId}`,
+            });
+        } catch (err) {
+            logger.error("Admin", "Sanctioning grant notification failed (continuing)", err);
+        }
+    }
+
+    return { success: true };
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -738,12 +704,12 @@ export async function resolveSanctioningRequest(
 const CHECK_VIOLATION = "23514";
 
 export interface LegacySuggestionRow {
-  id: string;
-  suggestionType: string;
-  name: string;
-  details: string | null;
-  createdAt: string;
-  submitterAlias: string;
+    id: string;
+    suggestionType: string;
+    name: string;
+    details: string | null;
+    createdAt: string;
+    submitterAlias: string;
 }
 
 /**
@@ -755,63 +721,60 @@ export interface LegacySuggestionRow {
  * a queue that looks drained while other members' rows sit in it.
  */
 export async function listLegacySuggestions(): Promise<
-  { success: true; suggestions: LegacySuggestionRow[] } | { success: false; error: string }
+    { success: true; suggestions: LegacySuggestionRow[] } | { success: false; error: string }
 > {
-  const user = await verifyAdmin();
-  if (!user) return { success: false, error: "Unauthorized" };
+    const user = await verifyAdmin();
+    if (!user) return { success: false, error: "Unauthorized" };
 
-  const admin = getAdminSupabase();
-  const { data, error } = await admin
-    .from("database_suggestions")
-    .select("id, suggestion_type, name, details, created_at, submitted_by")
-    .eq("status", "pending")
-    .order("created_at", { ascending: true })
-    .limit(200);
+    const admin = getAdminSupabase();
+    const { data, error } = await admin
+        .from("database_suggestions")
+        .select("id, suggestion_type, name, details, created_at, submitted_by")
+        .eq("status", "pending")
+        .order("created_at", { ascending: true })
+        .limit(200);
 
-  // Feature-detect: if the table was ever dropped the console must not
-  // 500 — the section is meant to retire, after all.
-  if (error) {
-    logger.error("Admin", "Legacy suggestion queue read failed", error);
-    return { success: true, suggestions: [] };
-  }
+    // Feature-detect: if the table was ever dropped the console must not
+    // 500 — the section is meant to retire, after all.
+    if (error) {
+        logger.error("Admin", "Legacy suggestion queue read failed", error);
+        return { success: true, suggestions: [] };
+    }
 
-  const rows = (data ?? []) as {
-    id: string;
-    suggestion_type: string;
-    name: string;
-    details: string | null;
-    created_at: string;
-    submitted_by: string;
-  }[];
-  if (rows.length === 0) return { success: true, suggestions: [] };
+    const rows = (data ?? []) as {
+        id: string;
+        suggestion_type: string;
+        name: string;
+        details: string | null;
+        created_at: string;
+        submitted_by: string;
+    }[];
+    if (rows.length === 0) return { success: true, suggestions: [] };
 
-  const aliasById = new Map<string, string>();
-  const submitterIds = [...new Set(rows.map((r) => r.submitted_by))];
-  const { data: submitters } = await admin
-    .from("users")
-    .select("id, alias_name")
-    .in("id", submitterIds);
-  for (const s of (submitters ?? []) as { id: string; alias_name: string | null }[]) {
-    if (s.alias_name) aliasById.set(s.id, s.alias_name);
-  }
+    const aliasById = new Map<string, string>();
+    const submitterIds = [...new Set(rows.map((r) => r.submitted_by))];
+    const { data: submitters } = await admin.from("users").select("id, alias_name").in("id", submitterIds);
+    for (const s of (submitters ?? []) as { id: string; alias_name: string | null }[]) {
+        if (s.alias_name) aliasById.set(s.id, s.alias_name);
+    }
 
-  return {
-    success: true,
-    suggestions: rows.map((r) => ({
-      id: r.id,
-      suggestionType: r.suggestion_type,
-      name: r.name,
-      details: r.details,
-      createdAt: r.created_at,
-      submitterAlias: aliasById.get(r.submitted_by) ?? "Unknown member",
-    })),
-  };
+    return {
+        success: true,
+        suggestions: rows.map((r) => ({
+            id: r.id,
+            suggestionType: r.suggestion_type,
+            name: r.name,
+            details: r.details,
+            createdAt: r.created_at,
+            submitterAlias: aliasById.get(r.submitted_by) ?? "Unknown member",
+        })),
+    };
 }
 
 const LEGACY_ITEM_TYPES: Record<string, string> = {
-  mold: "plastic_mold",
-  release: "plastic_release",
-  resin: "artist_resin",
+    mold: "plastic_mold",
+    release: "plastic_release",
+    resin: "artist_resin",
 };
 
 /**
@@ -829,104 +792,102 @@ const LEGACY_ITEM_TYPES: Record<string, string> = {
  *            always be cleared without a migration.
  */
 export async function resolveLegacySuggestion(
-  id: string,
-  decision: "approve" | "reject" | "dismiss",
-  adminNotes?: string
+    id: string,
+    decision: "approve" | "reject" | "dismiss",
+    adminNotes?: string,
 ): Promise<{ success: boolean; error?: string }> {
-  const user = await verifyAdmin();
-  if (!user) return { success: false, error: "Unauthorized" };
-  if (decision !== "approve" && decision !== "reject" && decision !== "dismiss") {
-    return { success: false, error: "Unknown decision." };
-  }
-
-  const admin = getAdminSupabase();
-  const { data: row, error: readError } = await admin
-    .from("database_suggestions")
-    .select("id, suggestion_type, name, details, status")
-    .eq("id", id)
-    .maybeSingle();
-  if (readError) return { success: false, error: readError.message };
-  if (!row) return { success: false, error: "Suggestion not found — it may already be cleared." };
-
-  const suggestion = row as {
-    suggestion_type: string;
-    name: string;
-    details: string | null;
-    status: string;
-  };
-
-  if (decision === "approve") {
-    const itemType = LEGACY_ITEM_TYPES[suggestion.suggestion_type];
-    if (!itemType) {
-      return {
-        success: false,
-        error: `Unknown suggestion type "${suggestion.suggestion_type}" — use Dismiss to clear it.`,
-      };
+    const user = await verifyAdmin();
+    if (!user) return { success: false, error: "Unauthorized" };
+    if (decision !== "approve" && decision !== "reject" && decision !== "dismiss") {
+        return { success: false, error: "Unknown decision." };
     }
 
-    const title = suggestion.name.trim();
-    // The maker guess is the legacy behaviour, preserved: first line or
-    // first comma-segment of the free-text details.
-    const makerGuess = (suggestion.details ?? "").split(/[,\n]/)[0]?.trim() || "Unknown";
+    const admin = getAdminSupabase();
+    const { data: row, error: readError } = await admin
+        .from("database_suggestions")
+        .select("id, suggestion_type, name, details, status")
+        .eq("id", id)
+        .maybeSingle();
+    if (readError) return { success: false, error: readError.message };
+    if (!row) return { success: false, error: "Suggestion not found — it may already be cleared." };
 
-    const { data: existing } = await admin
-      .from("catalog_items")
-      .select("id")
-      .eq("item_type", itemType)
-      .ilike("title", title)
-      .limit(1);
+    const suggestion = row as {
+        suggestion_type: string;
+        name: string;
+        details: string | null;
+        status: string;
+    };
 
-    if (!existing || existing.length === 0) {
-      const { data: inserted, error: insertError } = await admin
-        .from("catalog_items")
-        .insert({ item_type: itemType, title, maker: makerGuess })
-        .select("id")
-        .single();
-      if (insertError) {
-        return { success: false, error: `Catalog insert failed: ${insertError.message}` };
-      }
-      // Leave a changelog trail (the old path never did — approvals were
-      // invisible in the Registry's history and weekly counts). Best
-      // effort: a missing id or failed log never blocks the approve.
-      const newId = (inserted as { id: string } | null)?.id ?? null;
-      if (newId) {
-        const { error: logError } = await admin.from("catalog_changelog").insert({
-          catalog_item_id: newId,
-          change_type: "addition",
-          change_summary: `Added "${title}" (${itemType}) from the legacy suggestion queue.`,
-          contributed_by: user.id,
-          contributor_alias: "Admin",
-          approved_by: user.id,
-        });
-        if (logError) {
-          logger.error("Admin", "Legacy-approve changelog write failed (continuing)", logError);
+    if (decision === "approve") {
+        const itemType = LEGACY_ITEM_TYPES[suggestion.suggestion_type];
+        if (!itemType) {
+            return {
+                success: false,
+                error: `Unknown suggestion type "${suggestion.suggestion_type}" — use Dismiss to clear it.`,
+            };
         }
-      }
+
+        const title = suggestion.name.trim();
+        // The maker guess is the legacy behaviour, preserved: first line or
+        // first comma-segment of the free-text details.
+        const makerGuess = (suggestion.details ?? "").split(/[,\n]/)[0]?.trim() || "Unknown";
+
+        const { data: existing } = await admin
+            .from("catalog_items")
+            .select("id")
+            .eq("item_type", itemType)
+            .ilike("title", title)
+            .limit(1);
+
+        if (!existing || existing.length === 0) {
+            const { data: inserted, error: insertError } = await admin
+                .from("catalog_items")
+                .insert({ item_type: itemType, title, maker: makerGuess })
+                .select("id")
+                .single();
+            if (insertError) {
+                return { success: false, error: `Catalog insert failed: ${insertError.message}` };
+            }
+            // Leave a changelog trail (the old path never did — approvals were
+            // invisible in the Registry's history and weekly counts). Best
+            // effort: a missing id or failed log never blocks the approve.
+            const newId = (inserted as { id: string } | null)?.id ?? null;
+            if (newId) {
+                const { error: logError } = await admin.from("catalog_changelog").insert({
+                    catalog_item_id: newId,
+                    change_type: "addition",
+                    change_summary: `Added "${title}" (${itemType}) from the legacy suggestion queue.`,
+                    contributed_by: user.id,
+                    contributor_alias: "Admin",
+                    approved_by: user.id,
+                });
+                if (logError) {
+                    logger.error("Admin", "Legacy-approve changelog write failed (continuing)", logError);
+                }
+            }
+        }
     }
-  }
 
-  const note =
-    adminNotes?.trim() ||
-    (decision === "dismiss" ? "Dismissed from the legacy queue — no catalog change." : null);
+    const note =
+        adminNotes?.trim() || (decision === "dismiss" ? "Dismissed from the legacy queue — no catalog change." : null);
 
-  // ROOT-CAUSE FIX: no `reviewed_at`. The column does not exist on this
-  // table and writing it is what jammed the queue.
-  const stamp = async (status: string, notes: string | null) =>
-    admin.from("database_suggestions").update({ status, admin_notes: notes }).eq("id", id);
+    // ROOT-CAUSE FIX: no `reviewed_at`. The column does not exist on this
+    // table and writing it is what jammed the queue.
+    const stamp = async (status: string, notes: string | null) =>
+        admin.from("database_suggestions").update({ status, admin_notes: notes }).eq("id", id);
 
-  const targetStatus =
-    decision === "approve" ? "approved" : decision === "reject" ? "rejected" : "dismissed";
+    const targetStatus = decision === "approve" ? "approved" : decision === "reject" ? "rejected" : "dismissed";
 
-  let { error } = await stamp(targetStatus, note);
+    let { error } = await stamp(targetStatus, note);
 
-  if (error && decision === "dismiss" && (error as { code?: string }).code === CHECK_VIOLATION) {
-    // 020's CHECK predates 'dismissed'. Land the row as 'rejected' with
-    // a marker — same outcome for the queue, no migration required.
-    ({ error } = await stamp("rejected", `[dismissed] ${note ?? ""}`.trim()));
-  }
+    if (error && decision === "dismiss" && (error as { code?: string }).code === CHECK_VIOLATION) {
+        // 020's CHECK predates 'dismissed'. Land the row as 'rejected' with
+        // a marker — same outcome for the queue, no migration required.
+        ({ error } = await stamp("rejected", `[dismissed] ${note ?? ""}`.trim()));
+    }
 
-  if (error) return { success: false, error: error.message };
-  return { success: true };
+    if (error) return { success: false, error: error.message };
+    return { success: true };
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -938,15 +899,15 @@ export async function resolveLegacySuggestion(
 // ══════════════════════════════════════════════════════════════
 
 export interface AdminMemberRow {
-  id: string;
-  alias: string;
-  email: string | null;
-  createdAt: string | null;
-  isSuspended: boolean;
-  suspendedAt: string | null;
-  suspendedReason: string | null;
-  isSupporter: boolean;
-  horseCount: number;
+    id: string;
+    alias: string;
+    email: string | null;
+    createdAt: string | null;
+    isSuspended: boolean;
+    suspendedAt: string | null;
+    suspendedReason: string | null;
+    isSupporter: boolean;
+    horseCount: number;
 }
 
 /**
@@ -954,63 +915,61 @@ export interface AdminMemberRow {
  * returns the newest members, so the tab is useful before you type.
  */
 export async function searchMembers(
-  query: string
+    query: string,
 ): Promise<{ success: true; members: AdminMemberRow[] } | { success: false; error: string }> {
-  const user = await verifyAdmin();
-  if (!user) return { success: false, error: "Unauthorized" };
+    const user = await verifyAdmin();
+    if (!user) return { success: false, error: "Unauthorized" };
 
-  const admin = getAdminSupabase();
-  const trimmed = query.trim();
+    const admin = getAdminSupabase();
+    const trimmed = query.trim();
 
-  let request = admin
-    .from("users")
-    .select(
-      "id, alias_name, email, created_at, is_suspended, suspended_at, suspended_reason, is_supporter"
-    );
-  if (trimmed) request = request.ilike("alias_name", `%${trimmed}%`);
+    let request = admin
+        .from("users")
+        .select("id, alias_name, email, created_at, is_suspended, suspended_at, suspended_reason, is_supporter");
+    if (trimmed) request = request.ilike("alias_name", `%${trimmed}%`);
 
-  const { data, error } = await request.order("created_at", { ascending: false }).limit(25);
-  if (error) return { success: false, error: error.message };
+    const { data, error } = await request.order("created_at", { ascending: false }).limit(25);
+    if (error) return { success: false, error: error.message };
 
-  const rows = (data ?? []) as {
-    id: string;
-    alias_name: string | null;
-    email: string | null;
-    created_at: string | null;
-    is_suspended: boolean | null;
-    suspended_at: string | null;
-    suspended_reason: string | null;
-    is_supporter: boolean | null;
-  }[];
-  if (rows.length === 0) return { success: true, members: [] };
+    const rows = (data ?? []) as {
+        id: string;
+        alias_name: string | null;
+        email: string | null;
+        created_at: string | null;
+        is_suspended: boolean | null;
+        suspended_at: string | null;
+        suspended_reason: string | null;
+        is_supporter: boolean | null;
+    }[];
+    if (rows.length === 0) return { success: true, members: [] };
 
-  // One grouped count instead of N head-counts.
-  const horseCounts = new Map<string, number>();
-  const { data: horses } = await admin
-    .from("user_horses")
-    .select("owner_id")
-    .in(
-      "owner_id",
-      rows.map((r) => r.id)
-    );
-  for (const h of (horses ?? []) as { owner_id: string }[]) {
-    horseCounts.set(h.owner_id, (horseCounts.get(h.owner_id) ?? 0) + 1);
-  }
+    // One grouped count instead of N head-counts.
+    const horseCounts = new Map<string, number>();
+    const { data: horses } = await admin
+        .from("user_horses")
+        .select("owner_id")
+        .in(
+            "owner_id",
+            rows.map((r) => r.id),
+        );
+    for (const h of (horses ?? []) as { owner_id: string }[]) {
+        horseCounts.set(h.owner_id, (horseCounts.get(h.owner_id) ?? 0) + 1);
+    }
 
-  return {
-    success: true,
-    members: rows.map((r) => ({
-      id: r.id,
-      alias: r.alias_name ?? "(no alias)",
-      email: r.email,
-      createdAt: r.created_at,
-      isSuspended: r.is_suspended === true,
-      suspendedAt: r.suspended_at,
-      suspendedReason: r.suspended_reason,
-      isSupporter: r.is_supporter === true,
-      horseCount: horseCounts.get(r.id) ?? 0,
-    })),
-  };
+    return {
+        success: true,
+        members: rows.map((r) => ({
+            id: r.id,
+            alias: r.alias_name ?? "(no alias)",
+            email: r.email,
+            createdAt: r.created_at,
+            isSuspended: r.is_suspended === true,
+            suspendedAt: r.suspended_at,
+            suspendedReason: r.suspended_reason,
+            isSupporter: r.is_supporter === true,
+            horseCount: horseCounts.get(r.id) ?? 0,
+        })),
+    };
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -1024,159 +983,148 @@ export async function searchMembers(
 // ══════════════════════════════════════════════════════════════
 
 /** Statuses that mean "this show is live business right now". */
-const OPEN_SHOW_STATUSES = [
-  "published",
-  "entries_open",
-  "entries_closed",
-  "running",
-  "judging",
-  "results_review",
-];
+const OPEN_SHOW_STATUSES = ["published", "entries_open", "entries_closed", "running", "judging", "results_review"];
 
 export interface AdminPulse {
-  totalMembers: number;
-  newMembers7d: number | null;
-  totalHorses: number;
-  posts7d: number | null;
-  liveListings: number | null;
-  openShows: number | null;
-  openShowEntries: number | null;
-  pending: {
-    reports: number | null;
-    sanctioning: number | null;
-    barnJoinRequests: number | null;
-    catalogSuggestions: number | null;
-    contactMessages: number | null;
-    legacySuggestions: number | null;
-    externalShows: number | null;
-  };
+    totalMembers: number;
+    newMembers7d: number | null;
+    totalHorses: number;
+    posts7d: number | null;
+    liveListings: number | null;
+    openShows: number | null;
+    openShowEntries: number | null;
+    pending: {
+        reports: number | null;
+        sanctioning: number | null;
+        barnJoinRequests: number | null;
+        catalogSuggestions: number | null;
+        contactMessages: number | null;
+        legacySuggestions: number | null;
+        externalShows: number | null;
+    };
 }
 
 type CountResult = { count: number | null; error: unknown };
 
 /** A head-count that answers null instead of throwing when the shape isn't there. */
 function countOf(result: PromiseSettledResult<CountResult>): number | null {
-  if (result.status !== "fulfilled") return null;
-  if (result.value.error) return null;
-  return result.value.count ?? 0;
+    if (result.status !== "fulfilled") return null;
+    if (result.value.error) return null;
+    return result.value.count ?? 0;
 }
 
 export async function getAdminPulse(): Promise<
-  { success: true; pulse: AdminPulse } | { success: false; error: string }
+    { success: true; pulse: AdminPulse } | { success: false; error: string }
 > {
-  const user = await verifyAdmin();
-  if (!user) return { success: false, error: "Unauthorized" };
+    const user = await verifyAdmin();
+    if (!user) return { success: false, error: "Unauthorized" };
 
-  const admin = getAdminSupabase();
-  const since7d = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-  const head = (table: string) => admin.from(table).select("id", { count: "exact", head: true });
+    const admin = getAdminSupabase();
+    const since7d = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const head = (table: string) => admin.from(table).select("id", { count: "exact", head: true });
 
-  // Barn join requests waiting on the admin specifically: pending rows
-  // in barns where the admin is staff. Two steps — the barns first,
-  // then the requests — because PostgREST cannot join for a head count.
-  const adminStaffBarns = (async (): Promise<CountResult> => {
-    const { data: memberships, error: mErr } = await admin
-      .from("group_memberships")
-      .select("group_id, role")
-      .eq("user_id", user.id)
-      .in("role", ["owner", "admin", "moderator"]);
-    if (mErr) return { count: null, error: mErr };
-    const groupIds = (memberships ?? []).map((m) => (m as { group_id: string }).group_id);
-    if (groupIds.length === 0) return { count: 0, error: null };
-    const { count, error } = await admin
-      .from("barn_join_requests")
-      .select("user_id", { count: "exact", head: true })
-      .eq("status", "pending")
-      .in("group_id", groupIds);
-    return { count, error };
-  })();
+    // Barn join requests waiting on the admin specifically: pending rows
+    // in barns where the admin is staff. Two steps — the barns first,
+    // then the requests — because PostgREST cannot join for a head count.
+    const adminStaffBarns = (async (): Promise<CountResult> => {
+        const { data: memberships, error: mErr } = await admin
+            .from("group_memberships")
+            .select("group_id, role")
+            .eq("user_id", user.id)
+            .in("role", ["owner", "admin", "moderator"]);
+        if (mErr) return { count: null, error: mErr };
+        const groupIds = (memberships ?? []).map((m) => (m as { group_id: string }).group_id);
+        if (groupIds.length === 0) return { count: 0, error: null };
+        const { count, error } = await admin
+            .from("barn_join_requests")
+            .select("user_id", { count: "exact", head: true })
+            .eq("status", "pending")
+            .in("group_id", groupIds);
+        return { count, error };
+    })();
 
-  // Open shows, and the entries sitting in them.
-  const openShowsAndEntries = (async (): Promise<{
-    shows: number | null;
-    entries: number | null;
-  }> => {
-    const { data, error } = await admin
-      .from("shows")
-      .select("id")
-      .in("status", OPEN_SHOW_STATUSES)
-      .limit(500);
-    if (error) return { shows: null, entries: null };
-    const ids = (data ?? []).map((s) => (s as { id: string }).id);
-    if (ids.length === 0) return { shows: 0, entries: 0 };
-    const { count, error: entryError } = await admin
-      .from("show_class_entries")
-      .select("id", { count: "exact", head: true })
-      .in("show_id", ids);
-    return { shows: ids.length, entries: entryError ? null : (count ?? 0) };
-  })();
+    // Open shows, and the entries sitting in them.
+    const openShowsAndEntries = (async (): Promise<{
+        shows: number | null;
+        entries: number | null;
+    }> => {
+        const { data, error } = await admin.from("shows").select("id").in("status", OPEN_SHOW_STATUSES).limit(500);
+        if (error) return { shows: null, entries: null };
+        const ids = (data ?? []).map((s) => (s as { id: string }).id);
+        if (ids.length === 0) return { shows: 0, entries: 0 };
+        const { count, error: entryError } = await admin
+            .from("show_class_entries")
+            .select("id", { count: "exact", head: true })
+            .in("show_id", ids);
+        return { shows: ids.length, entries: entryError ? null : (count ?? 0) };
+    })();
 
-  const [
-    authUsers,
-    newMembers,
-    horses,
-    posts,
-    listings,
-    reports,
-    catalogSuggestions,
-    contactMessages,
-    legacySuggestions,
-    externalShows,
-    barnRequests,
-    shows,
-    sanctioning,
-  ] = await Promise.allSettled([
-    admin.auth.admin.listUsers({ perPage: 1000, page: 1 }),
-    head("users").gte("created_at", since7d) as unknown as Promise<CountResult>,
-    head("user_horses") as unknown as Promise<CountResult>,
-    head("posts").gte("created_at", since7d) as unknown as Promise<CountResult>,
-    head("user_horses").eq("trade_status", "For Sale") as unknown as Promise<CountResult>,
-    head("user_reports").eq("status", "open") as unknown as Promise<CountResult>,
-    head("catalog_suggestions").eq("status", "pending") as unknown as Promise<CountResult>,
-    head("contact_messages").eq("is_read", false) as unknown as Promise<CountResult>,
-    head("database_suggestions").eq("status", "pending") as unknown as Promise<CountResult>,
-    head("external_shows").eq("status", "pending") as unknown as Promise<CountResult>,
-    adminStaffBarns,
-    openShowsAndEntries,
-    (async (): Promise<CountResult> => {
-      const { count, error } = await admin
-        .from("shows")
-        .select("id", { count: "exact", head: true })
-        .eq("is_mhh_qualifying", false)
-        .ilike("sanctioning_note", `%${SANCTIONING_REQUEST_MARKER}%`);
-      return { count, error };
-    })(),
-  ]);
+    const [
+        authUsers,
+        newMembers,
+        horses,
+        posts,
+        listings,
+        reports,
+        catalogSuggestions,
+        contactMessages,
+        legacySuggestions,
+        externalShows,
+        barnRequests,
+        shows,
+        sanctioning,
+    ] = await Promise.allSettled([
+        admin.auth.admin.listUsers({ perPage: 1000, page: 1 }),
+        head("users").gte("created_at", since7d) as unknown as Promise<CountResult>,
+        head("user_horses") as unknown as Promise<CountResult>,
+        head("posts").gte("created_at", since7d) as unknown as Promise<CountResult>,
+        head("user_horses").eq("trade_status", "For Sale") as unknown as Promise<CountResult>,
+        head("user_reports").eq("status", "open") as unknown as Promise<CountResult>,
+        head("catalog_suggestions").eq("status", "pending") as unknown as Promise<CountResult>,
+        head("contact_messages").eq("is_read", false) as unknown as Promise<CountResult>,
+        head("database_suggestions").eq("status", "pending") as unknown as Promise<CountResult>,
+        head("external_shows").eq("status", "pending") as unknown as Promise<CountResult>,
+        adminStaffBarns,
+        openShowsAndEntries,
+        (async (): Promise<CountResult> => {
+            const { count, error } = await admin
+                .from("shows")
+                .select("id", { count: "exact", head: true })
+                .eq("is_mhh_qualifying", false)
+                .ilike("sanctioning_note", `%${SANCTIONING_REQUEST_MARKER}%`);
+            return { count, error };
+        })(),
+    ]);
 
-  const showsValue =
-    shows.status === "fulfilled"
-      ? (shows.value as { shows: number | null; entries: number | null })
-      : { shows: null, entries: null };
+    const showsValue =
+        shows.status === "fulfilled"
+            ? (shows.value as { shows: number | null; entries: number | null })
+            : { shows: null, entries: null };
 
-  return {
-    success: true,
-    pulse: {
-      totalMembers:
-        authUsers.status === "fulfilled"
-          ? ((authUsers.value as { data?: { users?: unknown[] } }).data?.users?.length ?? 0)
-          : 0,
-      newMembers7d: countOf(newMembers as PromiseSettledResult<CountResult>),
-      totalHorses: countOf(horses as PromiseSettledResult<CountResult>) ?? 0,
-      posts7d: countOf(posts as PromiseSettledResult<CountResult>),
-      liveListings: countOf(listings as PromiseSettledResult<CountResult>),
-      openShows: showsValue.shows,
-      openShowEntries: showsValue.entries,
-      pending: {
-        reports: countOf(reports as PromiseSettledResult<CountResult>),
-        sanctioning: countOf(sanctioning as PromiseSettledResult<CountResult>),
-        barnJoinRequests: countOf(barnRequests as PromiseSettledResult<CountResult>),
-        catalogSuggestions: countOf(catalogSuggestions as PromiseSettledResult<CountResult>),
-        contactMessages: countOf(contactMessages as PromiseSettledResult<CountResult>),
-        legacySuggestions: countOf(legacySuggestions as PromiseSettledResult<CountResult>),
-        externalShows: countOf(externalShows as PromiseSettledResult<CountResult>),
-      },
-    },
-  };
+    return {
+        success: true,
+        pulse: {
+            totalMembers:
+                authUsers.status === "fulfilled"
+                    ? ((authUsers.value as { data?: { users?: unknown[] } }).data?.users?.length ?? 0)
+                    : 0,
+            newMembers7d: countOf(newMembers as PromiseSettledResult<CountResult>),
+            totalHorses: countOf(horses as PromiseSettledResult<CountResult>) ?? 0,
+            posts7d: countOf(posts as PromiseSettledResult<CountResult>),
+            liveListings: countOf(listings as PromiseSettledResult<CountResult>),
+            openShows: showsValue.shows,
+            openShowEntries: showsValue.entries,
+            pending: {
+                reports: countOf(reports as PromiseSettledResult<CountResult>),
+                sanctioning: countOf(sanctioning as PromiseSettledResult<CountResult>),
+                barnJoinRequests: countOf(barnRequests as PromiseSettledResult<CountResult>),
+                catalogSuggestions: countOf(catalogSuggestions as PromiseSettledResult<CountResult>),
+                contactMessages: countOf(contactMessages as PromiseSettledResult<CountResult>),
+                legacySuggestions: countOf(legacySuggestions as PromiseSettledResult<CountResult>),
+                externalShows: countOf(externalShows as PromiseSettledResult<CountResult>),
+            },
+        },
+    };
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -1193,305 +1141,318 @@ export async function getAdminPulse(): Promise<
 // ══════════════════════════════════════════════════════════════
 
 type MigrationProbe =
-  | { kind: "column"; table: string; column: string }
-  | { kind: "rpc"; fn: string }
-  | { kind: "none"; why: string };
+    | { kind: "column"; table: string; column: string }
+    | { kind: "rpc"; fn: string }
+    | { kind: "none"; why: string };
 
 interface MigrationSpec {
-  id: string;
-  title: string;
-  summary: string;
-  probe: MigrationProbe;
+    id: string;
+    title: string;
+    summary: string;
+    probe: MigrationProbe;
 }
 
 const PENDING_MIGRATIONS: MigrationSpec[] = [
-  {
-    id: "166",
-    title: "Social spine",
-    summary: "posts.kind + posts.visibility — one feed, per-post audience.",
-    probe: { kind: "column", table: "posts", column: "kind" },
-  },
-  {
-    id: "167",
-    title: "Barns",
-    summary: "groups.is_private + barn_join_requests + private-barn RLS.",
-    probe: { kind: "column", table: "groups", column: "is_private" },
-  },
-  {
-    id: "168",
-    title: "Events rework",
-    summary: "Widens the event_type CHECK for external_show + club.",
-    probe: {
-      kind: "none",
-      why: "CHECK-constraint widening — nothing to select. createEvent already degrades to 'other'/'meetup' until it's in.",
+    {
+        id: "166",
+        title: "Social spine",
+        summary: "posts.kind + posts.visibility — one feed, per-post audience.",
+        probe: { kind: "column", table: "posts", column: "kind" },
     },
-  },
-  {
-    id: "169",
-    title: "Market completion",
-    summary: "get_market_listings RPC, mv_trusted_sellers, anon favourite counts.",
-    probe: { kind: "rpc", fn: "get_market_listings_total" },
-  },
-  {
-    id: "170",
-    title: "Art studio",
-    summary: "artist_profiles terms/services/waitlist + three RLS gap fixes.",
-    probe: { kind: "column", table: "artist_profiles", column: "services" },
-  },
-  {
-    id: "171",
-    title: "Profile customization",
-    summary: "users.profile_customization jsonb (theme, tagline, featured).",
-    probe: { kind: "column", table: "users", column: "profile_customization" },
-  },
-  {
-    id: "172",
-    title: "Commerce bugfixes",
-    summary: "Widens chk_trade_status; rewrites respond_to_offer_atomic.",
-    probe: {
-      kind: "none",
-      why: "A CHECK widening and a function body — neither is visible to a select. Verify by flagging a horse 'Stolen/Missing' or declining an offer.",
+    {
+        id: "167",
+        title: "Barns",
+        summary: "groups.is_private + barn_join_requests + private-barn RLS.",
+        probe: { kind: "column", table: "groups", column: "is_private" },
     },
-  },
-  {
-    id: "173",
-    title: "Deal room",
-    summary: "messages.kind/payload, conversation_participants, deal terms.",
-    probe: { kind: "column", table: "messages", column: "kind" },
-  },
-  // ── September 2026 ──
-  {
-    id: "209",
-    title: "Documents on public passports",
-    summary: "horse_documents readable on public/unlisted passports.",
-    probe: {
-      kind: "none",
-      why: "Policy only — a SELECT policy on horse_documents for public and unlisted horses; nothing new to select. Verify by opening a public passport signed out and looking for its Documentation.",
+    {
+        id: "168",
+        title: "Events rework",
+        summary: "Widens the event_type CHECK for external_show + club.",
+        probe: {
+            kind: "none",
+            why: "CHECK-constraint widening — nothing to select. createEvent already degrades to 'other'/'meetup' until it's in.",
+        },
     },
-  },
-  {
-    id: "210",
-    title: "Qualifier cards",
-    summary: "show_records.qualifier_program / card / year / card id (NAN + OMEQ).",
-    probe: { kind: "column", table: "show_records", column: "qualifier_program" },
-  },
-  {
-    id: "211",
-    title: "Price sweep ledger",
-    summary: "catalog_price_sweeps — which catalog rows the eBay sweep has tried, and when.",
-    probe: { kind: "column", table: "catalog_price_sweeps", column: "catalog_item_id" },
-  },
-  {
-    id: "212",
-    title: "Studio pass",
-    summary: "artist_profiles.links, making_ uploads on client horses, checkpoint updates, participants-only commissions.",
-    probe: { kind: "column", table: "artist_profiles", column: "links" },
-  },
-  {
-    id: "213",
-    title: "Papers",
-    summary: "horse_papers + the private horse-papers bucket; pedigree sire/dam links and bred-by.",
-    probe: { kind: "column", table: "horse_papers", column: "id" },
-  },
-  {
-    id: "214",
-    title: "Papers on records + accomplishments",
-    summary: "horse_accomplishments; horse_papers.show_record_id / accomplishment_id.",
-    probe: { kind: "column", table: "horse_accomplishments", column: "id" },
-  },
-  {
-    id: "215",
-    title: "Artist region",
-    summary: "artist_profiles.region — where the artist works; searchable in the directory.",
-    probe: { kind: "column", table: "artist_profiles", column: "region" },
-  },
-  {
-    id: "216",
-    title: "Credit names on the wall",
-    summary: "artist_profiles.also_known_as; v_artist_finished_horses gains the older text-credit branch.",
-    probe: { kind: "column", table: "artist_profiles", column: "also_known_as" },
-  },
-  {
-    id: "217",
-    title: "Artist resin identity",
-    summary: "user_horses.resin_material / resin_body / cast_by / prep_artist; passport RPC carries them; the wall credits prep work by name.",
-    probe: { kind: "column", table: "user_horses", column: "resin_material" },
-  },
-  {
-    id: "218",
-    title: "Seller terms",
-    summary: "users.country / ships_to / ships_not_to / open_to_trades / looking_for + get_public_seller_terms RPC.",
-    probe: { kind: "rpc", fn: "get_public_seller_terms" },
-  },
-  {
-    id: "219",
-    title: "Color / pattern",
-    summary: "user_horses.color for the show identity; get_public_passport carries it.",
-    probe: { kind: "column", table: "user_horses", column: "color" },
-  },
-  {
-    id: "220",
-    title: "Import undo",
-    summary: "show_records.import_batch — one undo removes a whole spreadsheet import.",
-    probe: { kind: "column", table: "show_records", column: "import_batch" },
-  },
-  {
-    id: "221",
-    title: "Thread marks",
-    summary: "posts.thread_status — In progress / Implemented / Not planned on barn threads (the suggestion box).",
-    probe: { kind: "column", table: "posts", column: "thread_status" },
-  },
-  {
-    id: "222",
-    title: "Seller currency",
-    summary: "get_public_seller_terms returns currency_symbol; listings and the buyer panel price in the seller's own symbol.",
-    probe: {
-      kind: "none",
-      why: "Replaces an existing function's return shape — a probe can't tell 218 from 222. Verify: a listing by a seller with a non-dollar symbol shows it on its card.",
+    {
+        id: "169",
+        title: "Market completion",
+        summary: "get_market_listings RPC, mv_trusted_sellers, anon favourite counts.",
+        probe: { kind: "rpc", fn: "get_market_listings_total" },
     },
-  },
-  {
-    id: "223",
-    title: "Search ranking",
-    summary: "search_catalog_fuzzy orders exact, prefix, word-prefix and containing titles above trigram similarity.",
-    probe: {
-      kind: "none",
-      why: "Same function, same columns, new ORDER BY — nothing to select. Verify: type sherm in the reference picker; Sherman Morgan should lead.",
+    {
+        id: "170",
+        title: "Art studio",
+        summary: "artist_profiles terms/services/waitlist + three RLS gap fixes.",
+        probe: { kind: "column", table: "artist_profiles", column: "services" },
     },
-  },
-  {
-    id: "224",
-    title: "Set purchases",
-    summary: "financial_vault.purchase_group_id + label; get_stable_summary counts a set's price once (equal shares).",
-    probe: { kind: "column", table: "financial_vault", column: "purchase_group_id" },
-  },
-  {
-    id: "225",
-    title: "Field size on public records",
-    summary: "get_public_horse_records returns total_entries, so a logged-out passport reads '3rd of 12'.",
-    probe: {
-      kind: "none",
-      why: "Re-creates a function's return shape — nothing to select. Verify: a public horse's record on a logged-out passport shows the field size.",
+    {
+        id: "171",
+        title: "Profile customization",
+        summary: "users.profile_customization jsonb (theme, tagline, featured).",
+        probe: { kind: "column", table: "users", column: "profile_customization" },
     },
-  },
-  {
-    id: "226",
-    title: "Folders: one source",
-    summary: "Backfills horse_collections from the legacy column and lets visitors read links for public horses in public folders.",
-    probe: {
-      kind: "none",
-      why: "A data backfill and a row policy — nothing to select. Verify: every horse you moved in bulk shows in its folder on your public profile.",
+    {
+        id: "172",
+        title: "Commerce bugfixes",
+        summary: "Widens chk_trade_status; rewrites respond_to_offer_atomic.",
+        probe: {
+            kind: "none",
+            why: "A CHECK widening and a function body — neither is visible to a select. Verify by flagging a horse 'Stolen/Missing' or declining an offer.",
+        },
     },
-  },
-  {
-    id: "234",
-    title: "Where new horses start",
-    summary: "users.default_horse_visibility (Public / Unlisted / Private, carried over from the old on/off setting) and batch_import_horses_v3, so Add Horse, Quick Add and CSV import start where the member chose.",
-    probe: { kind: "column", table: "users", column: "default_horse_visibility" },
-  },
-  {
-    id: "233",
-    title: "Registry guards",
-    summary: "Old Registry addresses forward to the current page; scale, run type and material are checked by the database; a want list can't hold one model twice; catalog rows that horses link to, and a horse's history, can't be deleted out from under them.",
-    probe: { kind: "column", table: "catalog_slug_history", column: "item_id" },
-  },
-  {
-    id: "232",
-    title: "Page address follows the maker",
-    summary: "A catalog row's maker_slug (and, on a clash, its slug) now follows a change of maker, so a corrected maker moves the page instead of leaving it under the old one.",
-    probe: {
-      kind: "none",
-      why: "A trigger — nothing to select. Verify: correct a test entry's maker and its page moves to /reference/<new-maker>/….",
+    {
+        id: "173",
+        title: "Deal room",
+        summary: "messages.kind/payload, conversation_participants, deal terms.",
+        probe: { kind: "column", table: "messages", column: "kind" },
     },
-  },
-  {
-    id: "231",
-    title: "Roadmap history",
-    summary: "Creates roadmap_events. The Roadmap tab was retired 2026-10-15 (the Backlog board replaced it); the table stays until a cleanup migration.",
-    probe: { kind: "column", table: "roadmap_events", column: "id" },
-  },
-  {
-    id: "230",
-    title: "Roadmap",
-    summary: "Creates roadmap_items. The Roadmap tab was retired 2026-10-15 (the Backlog board replaced it); the table stays until a cleanup migration.",
-    probe: { kind: "column", table: "roadmap_items", column: "id" },
-  },
-  {
-    id: "229",
-    title: "Profile links",
-    summary: "Adds users.links (outbound links a member shows on their profile) and grants the column to readers.",
-    probe: { kind: "column", table: "users", column: "links" },
-  },
-  {
-    id: "228",
-    title: "Duplicate reports",
-    summary: "Lets catalog_suggestions and catalog_changelog carry the 'duplicate' type, so a member can report two registry entries as one and an admin can approve the merge.",
-    probe: {
-      kind: "none",
-      why: "Widens two CHECK constraints — nothing to select. Verify: 'Report a duplicate' on a reference page files without the migration notice.",
+    // ── September 2026 ──
+    {
+        id: "209",
+        title: "Documents on public passports",
+        summary: "horse_documents readable on public/unlisted passports.",
+        probe: {
+            kind: "none",
+            why: "Policy only — a SELECT policy on horse_documents for public and unlisted horses; nothing new to select. Verify by opening a public passport signed out and looking for its Documentation.",
+        },
     },
-  },
+    {
+        id: "210",
+        title: "Qualifier cards",
+        summary: "show_records.qualifier_program / card / year / card id (NAN + OMEQ).",
+        probe: { kind: "column", table: "show_records", column: "qualifier_program" },
+    },
+    {
+        id: "211",
+        title: "Price sweep ledger",
+        summary: "catalog_price_sweeps — which catalog rows the eBay sweep has tried, and when.",
+        probe: { kind: "column", table: "catalog_price_sweeps", column: "catalog_item_id" },
+    },
+    {
+        id: "212",
+        title: "Studio pass",
+        summary:
+            "artist_profiles.links, making_ uploads on client horses, checkpoint updates, participants-only commissions.",
+        probe: { kind: "column", table: "artist_profiles", column: "links" },
+    },
+    {
+        id: "213",
+        title: "Papers",
+        summary: "horse_papers + the private horse-papers bucket; pedigree sire/dam links and bred-by.",
+        probe: { kind: "column", table: "horse_papers", column: "id" },
+    },
+    {
+        id: "214",
+        title: "Papers on records + accomplishments",
+        summary: "horse_accomplishments; horse_papers.show_record_id / accomplishment_id.",
+        probe: { kind: "column", table: "horse_accomplishments", column: "id" },
+    },
+    {
+        id: "215",
+        title: "Artist region",
+        summary: "artist_profiles.region — where the artist works; searchable in the directory.",
+        probe: { kind: "column", table: "artist_profiles", column: "region" },
+    },
+    {
+        id: "216",
+        title: "Credit names on the wall",
+        summary: "artist_profiles.also_known_as; v_artist_finished_horses gains the older text-credit branch.",
+        probe: { kind: "column", table: "artist_profiles", column: "also_known_as" },
+    },
+    {
+        id: "217",
+        title: "Artist resin identity",
+        summary:
+            "user_horses.resin_material / resin_body / cast_by / prep_artist; passport RPC carries them; the wall credits prep work by name.",
+        probe: { kind: "column", table: "user_horses", column: "resin_material" },
+    },
+    {
+        id: "218",
+        title: "Seller terms",
+        summary:
+            "users.country / ships_to / ships_not_to / open_to_trades / looking_for + get_public_seller_terms RPC.",
+        probe: { kind: "rpc", fn: "get_public_seller_terms" },
+    },
+    {
+        id: "219",
+        title: "Color / pattern",
+        summary: "user_horses.color for the show identity; get_public_passport carries it.",
+        probe: { kind: "column", table: "user_horses", column: "color" },
+    },
+    {
+        id: "220",
+        title: "Import undo",
+        summary: "show_records.import_batch — one undo removes a whole spreadsheet import.",
+        probe: { kind: "column", table: "show_records", column: "import_batch" },
+    },
+    {
+        id: "221",
+        title: "Thread marks",
+        summary: "posts.thread_status — In progress / Implemented / Not planned on barn threads (the suggestion box).",
+        probe: { kind: "column", table: "posts", column: "thread_status" },
+    },
+    {
+        id: "222",
+        title: "Seller currency",
+        summary:
+            "get_public_seller_terms returns currency_symbol; listings and the buyer panel price in the seller's own symbol.",
+        probe: {
+            kind: "none",
+            why: "Replaces an existing function's return shape — a probe can't tell 218 from 222. Verify: a listing by a seller with a non-dollar symbol shows it on its card.",
+        },
+    },
+    {
+        id: "223",
+        title: "Search ranking",
+        summary:
+            "search_catalog_fuzzy orders exact, prefix, word-prefix and containing titles above trigram similarity.",
+        probe: {
+            kind: "none",
+            why: "Same function, same columns, new ORDER BY — nothing to select. Verify: type sherm in the reference picker; Sherman Morgan should lead.",
+        },
+    },
+    {
+        id: "224",
+        title: "Set purchases",
+        summary:
+            "financial_vault.purchase_group_id + label; get_stable_summary counts a set's price once (equal shares).",
+        probe: { kind: "column", table: "financial_vault", column: "purchase_group_id" },
+    },
+    {
+        id: "225",
+        title: "Field size on public records",
+        summary: "get_public_horse_records returns total_entries, so a logged-out passport reads '3rd of 12'.",
+        probe: {
+            kind: "none",
+            why: "Re-creates a function's return shape — nothing to select. Verify: a public horse's record on a logged-out passport shows the field size.",
+        },
+    },
+    {
+        id: "226",
+        title: "Folders: one source",
+        summary:
+            "Backfills horse_collections from the legacy column and lets visitors read links for public horses in public folders.",
+        probe: {
+            kind: "none",
+            why: "A data backfill and a row policy — nothing to select. Verify: every horse you moved in bulk shows in its folder on your public profile.",
+        },
+    },
+    {
+        id: "234",
+        title: "Where new horses start",
+        summary:
+            "users.default_horse_visibility (Public / Unlisted / Private, carried over from the old on/off setting) and batch_import_horses_v3, so Add Horse, Quick Add and CSV import start where the member chose.",
+        probe: { kind: "column", table: "users", column: "default_horse_visibility" },
+    },
+    {
+        id: "233",
+        title: "Registry guards",
+        summary:
+            "Old Registry addresses forward to the current page; scale, run type and material are checked by the database; a want list can't hold one model twice; catalog rows that horses link to, and a horse's history, can't be deleted out from under them.",
+        probe: { kind: "column", table: "catalog_slug_history", column: "item_id" },
+    },
+    {
+        id: "232",
+        title: "Page address follows the maker",
+        summary:
+            "A catalog row's maker_slug (and, on a clash, its slug) now follows a change of maker, so a corrected maker moves the page instead of leaving it under the old one.",
+        probe: {
+            kind: "none",
+            why: "A trigger — nothing to select. Verify: correct a test entry's maker and its page moves to /reference/<new-maker>/….",
+        },
+    },
+    {
+        id: "231",
+        title: "Roadmap history",
+        summary:
+            "Creates roadmap_events. The Roadmap tab was retired 2026-10-15 (the Backlog board replaced it); the table stays until a cleanup migration.",
+        probe: { kind: "column", table: "roadmap_events", column: "id" },
+    },
+    {
+        id: "230",
+        title: "Roadmap",
+        summary:
+            "Creates roadmap_items. The Roadmap tab was retired 2026-10-15 (the Backlog board replaced it); the table stays until a cleanup migration.",
+        probe: { kind: "column", table: "roadmap_items", column: "id" },
+    },
+    {
+        id: "229",
+        title: "Profile links",
+        summary: "Adds users.links (outbound links a member shows on their profile) and grants the column to readers.",
+        probe: { kind: "column", table: "users", column: "links" },
+    },
+    {
+        id: "228",
+        title: "Duplicate reports",
+        summary:
+            "Lets catalog_suggestions and catalog_changelog carry the 'duplicate' type, so a member can report two registry entries as one and an admin can approve the merge.",
+        probe: {
+            kind: "none",
+            why: "Widens two CHECK constraints — nothing to select. Verify: 'Report a duplicate' on a reference page files without the migration notice.",
+        },
+    },
 ];
 
 export interface MigrationStatusRow {
-  id: string;
-  title: string;
-  summary: string;
-  /** true = probe found it, false = probe says it's missing, null = not probe-able. */
-  applied: boolean | null;
-  /** Present when applied is null — why the probe can't answer. */
-  note?: string;
+    id: string;
+    title: string;
+    summary: string;
+    /** true = probe found it, false = probe says it's missing, null = not probe-able. */
+    applied: boolean | null;
+    /** Present when applied is null — why the probe can't answer. */
+    note?: string;
 }
 
 export async function getMigrationStatus(): Promise<
-  { success: true; migrations: MigrationStatusRow[] } | { success: false; error: string }
+    { success: true; migrations: MigrationStatusRow[] } | { success: false; error: string }
 > {
-  const user = await verifyAdmin();
-  if (!user) return { success: false, error: "Unauthorized" };
+    const user = await verifyAdmin();
+    if (!user) return { success: false, error: "Unauthorized" };
 
-  const admin = getAdminSupabase();
+    const admin = getAdminSupabase();
 
-  const probes = await Promise.allSettled(
-    PENDING_MIGRATIONS.map(async (m): Promise<boolean | null> => {
-      if (m.probe.kind === "none") return null;
-      if (m.probe.kind === "rpc") {
-        const { error } = await admin.rpc(m.probe.fn);
-        // PGRST202 = "function not found in schema cache". Any other
-        // error means the function EXISTS and simply objected.
-        if (!error) return true;
-        const code = (error as { code?: string }).code;
-        return code === "PGRST202" || code === "42883" ? false : true;
-      }
-      const { error } = await admin.from(m.probe.table).select(m.probe.column).limit(1);
-      if (!error) return true;
-      const code = (error as { code?: string }).code;
-      // 42703 undefined_column, 42P01 undefined_table, PGRST204 column
-      // and PGRST205 table missing from the schema cache (a never-created
-      // table answers PGRST205, not 42P01).
-      if (code === "42703" || code === "42P01" || code === "PGRST204" || code === "PGRST205") return false;
-      return null;
-    })
-  );
+    const probes = await Promise.allSettled(
+        PENDING_MIGRATIONS.map(async (m): Promise<boolean | null> => {
+            if (m.probe.kind === "none") return null;
+            if (m.probe.kind === "rpc") {
+                const { error } = await admin.rpc(m.probe.fn);
+                // PGRST202 = "function not found in schema cache". Any other
+                // error means the function EXISTS and simply objected.
+                if (!error) return true;
+                const code = (error as { code?: string }).code;
+                return code === "PGRST202" || code === "42883" ? false : true;
+            }
+            const { error } = await admin.from(m.probe.table).select(m.probe.column).limit(1);
+            if (!error) return true;
+            const code = (error as { code?: string }).code;
+            // 42703 undefined_column, 42P01 undefined_table, PGRST204 column
+            // and PGRST205 table missing from the schema cache (a never-created
+            // table answers PGRST205, not 42P01).
+            if (code === "42703" || code === "42P01" || code === "PGRST204" || code === "PGRST205") return false;
+            return null;
+        }),
+    );
 
-  return {
-    success: true,
-    migrations: PENDING_MIGRATIONS.map((m, i) => {
-      const probe = probes[i];
-      const applied = probe.status === "fulfilled" ? probe.value : null;
-      return {
-        id: m.id,
-        title: m.title,
-        summary: m.summary,
-        applied,
-        note:
-          applied === null
-            ? m.probe.kind === "none"
-              ? m.probe.why
-              : "The probe itself errored — check the schema by hand."
-            : undefined,
-      };
-    }),
-  };
+    return {
+        success: true,
+        migrations: PENDING_MIGRATIONS.map((m, i) => {
+            const probe = probes[i];
+            const applied = probe.status === "fulfilled" ? probe.value : null;
+            return {
+                id: m.id,
+                title: m.title,
+                summary: m.summary,
+                applied,
+                note:
+                    applied === null
+                        ? m.probe.kind === "none"
+                            ? m.probe.why
+                            : "The probe itself errored — check the schema by hand."
+                        : undefined,
+            };
+        }),
+    };
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -1514,127 +1475,124 @@ export async function getMigrationStatus(): Promise<
 // ══════════════════════════════════════════════════════════════
 
 export interface EnvFlagRow {
-  key: string;
-  /** Public switch value, never a secret. Truncated defensively. */
-  value: string | null;
-  /** What the app's own gate resolves to right now. */
-  on: boolean;
-  label: string;
-  /** What being off actually costs a visitor. */
-  effect: string;
+    key: string;
+    /** Public switch value, never a secret. Truncated defensively. */
+    value: string | null;
+    /** What the app's own gate resolves to right now. */
+    on: boolean;
+    label: string;
+    /** What being off actually costs a visitor. */
+    effect: string;
 }
 
 export interface EnvSecretRow {
-  key: string;
-  /** Presence ONLY. The value never leaves the server. */
-  present: boolean;
-  label: string;
-  /** What breaks when it is missing. */
-  impact: string;
+    key: string;
+    /** Presence ONLY. The value never leaves the server. */
+    present: boolean;
+    label: string;
+    /** What breaks when it is missing. */
+    impact: string;
 }
 
 export interface EnvFlagStatus {
-  flags: EnvFlagRow[];
-  secrets: EnvSecretRow[];
-  nodeEnv: string;
-  /** Vercel's environment name (production / preview / development), when deployed. */
-  vercelEnv: string | null;
-  /** Short SHA of the running build, when Vercel provides it. */
-  commitSha: string | null;
+    flags: EnvFlagRow[];
+    secrets: EnvSecretRow[];
+    nodeEnv: string;
+    /** Vercel's environment name (production / preview / development), when deployed. */
+    vercelEnv: string | null;
+    /** Short SHA of the running build, when Vercel provides it. */
+    commitSha: string | null;
 }
 
 /** Set AND non-blank. An empty string is not configuration. */
 function isSet(value: string | undefined): boolean {
-  return typeof value === "string" && value.trim().length > 0;
+    return typeof value === "string" && value.trim().length > 0;
 }
 
 /** Public values only. Caps length so a mis-pasted blob can't spill into the page. */
 function publicValue(value: string | undefined): string | null {
-  if (!isSet(value)) return null;
-  const clean = value!.trim();
-  return clean.length > 24 ? `${clean.slice(0, 24)}…` : clean;
+    if (!isSet(value)) return null;
+    const clean = value!.trim();
+    return clean.length > 24 ? `${clean.slice(0, 24)}…` : clean;
 }
 
 export async function getEnvFlagStatus(): Promise<
-  { success: true; status: EnvFlagStatus } | { success: false; error: string }
+    { success: true; status: EnvFlagStatus } | { success: false; error: string }
 > {
-  const user = await verifyAdmin();
-  if (!user) return { success: false, error: "Unauthorized" };
+    const user = await verifyAdmin();
+    if (!user) return { success: false, error: "Unauthorized" };
 
-  // Static property access, deliberately: Next.js inlines
-  // `process.env.NEXT_PUBLIC_X` at build time and a computed lookup
-  // (`process.env[key]`) would read undefined in the bundle.
-  const flags: EnvFlagRow[] = [
-    {
-      key: "NEXT_PUBLIC_WANTED_NUDGE",
-      // No shared helper for this one — actions/wishlist.ts compares the
-      // literal "1" inline. Mirrored exactly rather than loosened.
-      value: publicValue(process.env.NEXT_PUBLIC_WANTED_NUDGE),
-      on: process.env.NEXT_PUBLIC_WANTED_NUDGE === "1",
-      label: "Wanted nudge",
-      effect: "Off = wishlist adds stay passive counts and notify nobody.",
-    },
-    {
-      key: "NEXT_PUBLIC_PAYPAL_BILLING",
-      value: publicValue(process.env.NEXT_PUBLIC_PAYPAL_BILLING),
-      on: paypalBillingEnabled(),
-      label: "PayPal billing",
-      effect:
-        "Off = card checkout only; the PayPal buttons, routes and webhook all behave as if absent.",
-    },
-  ];
+    // Static property access, deliberately: Next.js inlines
+    // `process.env.NEXT_PUBLIC_X` at build time and a computed lookup
+    // (`process.env[key]`) would read undefined in the bundle.
+    const flags: EnvFlagRow[] = [
+        {
+            key: "NEXT_PUBLIC_WANTED_NUDGE",
+            // No shared helper for this one — actions/wishlist.ts compares the
+            // literal "1" inline. Mirrored exactly rather than loosened.
+            value: publicValue(process.env.NEXT_PUBLIC_WANTED_NUDGE),
+            on: process.env.NEXT_PUBLIC_WANTED_NUDGE === "1",
+            label: "Wanted nudge",
+            effect: "Off = wishlist adds stay passive counts and notify nobody.",
+        },
+        {
+            key: "NEXT_PUBLIC_PAYPAL_BILLING",
+            value: publicValue(process.env.NEXT_PUBLIC_PAYPAL_BILLING),
+            on: paypalBillingEnabled(),
+            label: "PayPal billing",
+            effect: "Off = card checkout only; the PayPal buttons, routes and webhook all behave as if absent.",
+        },
+    ];
 
-  const secrets: EnvSecretRow[] = [
-    {
-      key: "SUPABASE_SERVICE_ROLE_KEY",
-      present: isSet(process.env.SUPABASE_SERVICE_ROLE_KEY),
-      label: "Supabase service role",
-      impact: "Missing = this whole console, every cron, and all admin reads fail.",
-    },
-    {
-      key: "STRIPE_SECRET_KEY",
-      present: isSet(process.env.STRIPE_SECRET_KEY),
-      label: "Stripe",
-      impact: "Missing = supporter checkout and every billing call fail.",
-    },
-    {
-      key: "PAYPAL_CLIENT_SECRET",
-      present: isSet(process.env.PAYPAL_CLIENT_SECRET),
-      label: "PayPal REST app",
-      impact:
-        "Missing = the PayPal path stays dark even with the flag on: checkout 404s and the webhook refuses every delivery.",
-    },
-    {
-      key: "PAYPAL_WEBHOOK_ID",
-      present: isSet(process.env.PAYPAL_WEBHOOK_ID),
-      label: "PayPal webhook id",
-      impact:
-        "Missing = no PayPal delivery can be verified, so no PayPal subscription ever grants or loses a tier.",
-    },
-    {
-      key: "RESEND_API_KEY",
-      present: isSet(process.env.RESEND_API_KEY),
-      label: "Resend",
-      impact: "Missing = no transactional mail: replies, deadline emails, results.",
-    },
-    {
-      key: "ADMIN_EMAIL",
-      present: isSet(process.env.ADMIN_EMAIL),
-      label: "Admin identity",
-      impact: "Missing = verifyAdmin refuses everyone, including you.",
-    },
-  ];
+    const secrets: EnvSecretRow[] = [
+        {
+            key: "SUPABASE_SERVICE_ROLE_KEY",
+            present: isSet(process.env.SUPABASE_SERVICE_ROLE_KEY),
+            label: "Supabase service role",
+            impact: "Missing = this whole console, every cron, and all admin reads fail.",
+        },
+        {
+            key: "STRIPE_SECRET_KEY",
+            present: isSet(process.env.STRIPE_SECRET_KEY),
+            label: "Stripe",
+            impact: "Missing = supporter checkout and every billing call fail.",
+        },
+        {
+            key: "PAYPAL_CLIENT_SECRET",
+            present: isSet(process.env.PAYPAL_CLIENT_SECRET),
+            label: "PayPal REST app",
+            impact: "Missing = the PayPal path stays dark even with the flag on: checkout 404s and the webhook refuses every delivery.",
+        },
+        {
+            key: "PAYPAL_WEBHOOK_ID",
+            present: isSet(process.env.PAYPAL_WEBHOOK_ID),
+            label: "PayPal webhook id",
+            impact: "Missing = no PayPal delivery can be verified, so no PayPal subscription ever grants or loses a tier.",
+        },
+        {
+            key: "RESEND_API_KEY",
+            present: isSet(process.env.RESEND_API_KEY),
+            label: "Resend",
+            impact: "Missing = no transactional mail: replies, deadline emails, results.",
+        },
+        {
+            key: "ADMIN_EMAIL",
+            present: isSet(process.env.ADMIN_EMAIL),
+            label: "Admin identity",
+            impact: "Missing = verifyAdmin refuses everyone, including you.",
+        },
+    ];
 
-  return {
-    success: true,
-    status: {
-      flags,
-      secrets,
-      nodeEnv: process.env.NODE_ENV ?? "unknown",
-      vercelEnv: process.env.VERCEL_ENV ?? null,
-      commitSha: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? null,
-    },
-  };
+    return {
+        success: true,
+        status: {
+            flags,
+            secrets,
+            nodeEnv: process.env.NODE_ENV ?? "unknown",
+            vercelEnv: process.env.VERCEL_ENV ?? null,
+            commitSha: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? null,
+        },
+    };
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -1661,130 +1619,130 @@ const CATALOG_SWEEP_ROW_LIMIT = 2000;
 const REFERENCE_ROW_LIMIT = 5000;
 
 const REFERENCE_TABLES: { table: string; column: string; bucket: keyof ItemLoad }[] = [
-  { table: "user_horses", column: "catalog_id", bucket: "horses" },
-  { table: "user_wishlists", column: "catalog_id", bucket: "wishlists" },
-  { table: "id_suggestions", column: "catalog_id", bucket: "otherRefs" },
-  { table: "catalog_suggestions", column: "catalog_item_id", bucket: "otherRefs" },
-  { table: "catalog_changelog", column: "catalog_item_id", bucket: "otherRefs" },
-  { table: "catalog_items", column: "parent_id", bucket: "otherRefs" },
+    { table: "user_horses", column: "catalog_id", bucket: "horses" },
+    { table: "user_wishlists", column: "catalog_id", bucket: "wishlists" },
+    { table: "id_suggestions", column: "catalog_id", bucket: "otherRefs" },
+    { table: "catalog_suggestions", column: "catalog_item_id", bucket: "otherRefs" },
+    { table: "catalog_changelog", column: "catalog_item_id", bucket: "otherRefs" },
+    { table: "catalog_items", column: "parent_id", bucket: "otherRefs" },
 ];
 
 export interface CatalogDuplicateReport {
-  groups: DuplicateGroup[];
-  /** Catalog rows actually examined. */
-  scanned: number;
-  /** true = the scan hit its row cap; older entries were NOT looked at. */
-  scanCapped: boolean;
-  /** Groups found in total — `groups` may be a capped slice of this. */
-  totalGroups: number;
-  /** Set when the reference counts are incomplete. Null = every count is exact. */
-  loadNote: string | null;
+    groups: DuplicateGroup[];
+    /** Catalog rows actually examined. */
+    scanned: number;
+    /** true = the scan hit its row cap; older entries were NOT looked at. */
+    scanCapped: boolean;
+    /** Groups found in total — `groups` may be a capped slice of this. */
+    totalGroups: number;
+    /** Set when the reference counts are incomplete. Null = every count is exact. */
+    loadNote: string | null;
 }
 
 export async function findCatalogDuplicates(): Promise<
-  { success: true; report: CatalogDuplicateReport } | { success: false; error: string }
+    { success: true; report: CatalogDuplicateReport } | { success: false; error: string }
 > {
-  const user = await verifyAdmin();
-  if (!user) return { success: false, error: "Unauthorized" };
+    const user = await verifyAdmin();
+    if (!user) return { success: false, error: "Unauthorized" };
 
-  const admin = getAdminSupabase();
-  const { data, error } = await admin
-    .from("catalog_items")
-    .select("id, title, maker, item_type, slug, created_at")
-    .order("created_at", { ascending: false })
-    .limit(CATALOG_SWEEP_ROW_LIMIT);
-  if (error) return { success: false, error: error.message };
+    const admin = getAdminSupabase();
+    const { data, error } = await admin
+        .from("catalog_items")
+        .select("id, title, maker, item_type, slug, created_at")
+        .order("created_at", { ascending: false })
+        .limit(CATALOG_SWEEP_ROW_LIMIT);
+    if (error) return { success: false, error: error.message };
 
-  const rows = (data ?? []) as {
-    id: string;
-    title: string | null;
-    maker: string | null;
-    item_type: string | null;
-    slug: string | null;
-    created_at: string;
-  }[];
+    const rows = (data ?? []) as {
+        id: string;
+        title: string | null;
+        maker: string | null;
+        item_type: string | null;
+        slug: string | null;
+        created_at: string;
+    }[];
 
-  const candidates: DuplicateCandidate[] = rows.map((r) => ({
-    id: r.id,
-    title: r.title ?? "",
-    maker: r.maker,
-    itemType: r.item_type ?? "",
-    slug: r.slug,
-    createdAt: r.created_at,
-  }));
+    const candidates: DuplicateCandidate[] = rows.map((r) => ({
+        id: r.id,
+        title: r.title ?? "",
+        maker: r.maker,
+        itemType: r.item_type ?? "",
+        slug: r.slug,
+        createdAt: r.created_at,
+    }));
 
-  const { groups, totalGroups } = groupDuplicates(candidates, MAX_DUPLICATE_GROUPS);
-  const scanned = rows.length;
-  const scanCapped = scanned >= CATALOG_SWEEP_ROW_LIMIT;
+    const { groups, totalGroups } = groupDuplicates(candidates, MAX_DUPLICATE_GROUPS);
+    const scanned = rows.length;
+    const scanCapped = scanned >= CATALOG_SWEEP_ROW_LIMIT;
 
-  const ids = groups.flatMap((g) => g.members.map((m) => m.id));
-  if (ids.length === 0) {
+    const ids = groups.flatMap((g) => g.members.map((m) => m.id));
+    if (ids.length === 0) {
+        return {
+            success: true,
+            report: { groups: [], scanned, scanCapped, totalGroups, loadNote: null },
+        };
+    }
+
+    const tallies = await Promise.all(
+        REFERENCE_TABLES.map(async (ref) => {
+            const { data: refRows, error: refError } = await admin
+                .from(ref.table)
+                .select(ref.column)
+                .in(ref.column, ids)
+                .limit(REFERENCE_ROW_LIMIT);
+            if (refError) {
+                logger.error("Admin", `Duplicate sweep could not read ${ref.table}.${ref.column}`, refError);
+                return { ref, counts: null, capped: false };
+            }
+            // The column name is dynamic, so PostgREST's generated types
+            // can't narrow the row shape — read it as the string map it is.
+            const list = (refRows ?? []) as unknown as Record<string, string | null>[];
+            const counts = new Map<string, number>();
+            for (const row of list) {
+                const key = row[ref.column];
+                if (key) counts.set(key, (counts.get(key) ?? 0) + 1);
+            }
+            return { ref, counts, capped: list.length >= REFERENCE_ROW_LIMIT };
+        }),
+    );
+
+    const load = new Map<string, ItemLoad>();
+    for (const id of ids) load.set(id, { horses: 0, wishlists: 0, otherRefs: 0 });
+
+    const unreadable: string[] = [];
+    let tallyCapped = false;
+    for (const tally of tallies) {
+        if (!tally.counts) {
+            unreadable.push(tally.ref.table);
+            continue;
+        }
+        if (tally.capped) tallyCapped = true;
+        for (const [id, n] of tally.counts) {
+            const entry = load.get(id);
+            if (entry) entry[tally.ref.bucket] = entry[tally.ref.bucket] + n;
+        }
+    }
+
+    // Counts drive the suggested merge direction, so a partial count has
+    // to say so rather than let a "0 references" row look safe to delete.
+    const notes: string[] = [];
+    if (unreadable.length > 0) {
+        notes.push(`counts exclude ${unreadable.join(", ")} (unreadable this load)`);
+    }
+    if (tallyCapped) {
+        notes.push(`a tally hit its ${REFERENCE_ROW_LIMIT}-row cap, so some counts are a floor`);
+    }
+
     return {
-      success: true,
-      report: { groups: [], scanned, scanCapped, totalGroups, loadNote: null },
+        success: true,
+        report: {
+            groups: attachLoad(groups, load),
+            scanned,
+            scanCapped,
+            totalGroups,
+            loadNote: notes.length > 0 ? `Reference ${notes.join("; ")}.` : null,
+        },
     };
-  }
-
-  const tallies = await Promise.all(
-    REFERENCE_TABLES.map(async (ref) => {
-      const { data: refRows, error: refError } = await admin
-        .from(ref.table)
-        .select(ref.column)
-        .in(ref.column, ids)
-        .limit(REFERENCE_ROW_LIMIT);
-      if (refError) {
-        logger.error("Admin", `Duplicate sweep could not read ${ref.table}.${ref.column}`, refError);
-        return { ref, counts: null, capped: false };
-      }
-      // The column name is dynamic, so PostgREST's generated types
-      // can't narrow the row shape — read it as the string map it is.
-      const list = (refRows ?? []) as unknown as Record<string, string | null>[];
-      const counts = new Map<string, number>();
-      for (const row of list) {
-        const key = row[ref.column];
-        if (key) counts.set(key, (counts.get(key) ?? 0) + 1);
-      }
-      return { ref, counts, capped: list.length >= REFERENCE_ROW_LIMIT };
-    })
-  );
-
-  const load = new Map<string, ItemLoad>();
-  for (const id of ids) load.set(id, { horses: 0, wishlists: 0, otherRefs: 0 });
-
-  const unreadable: string[] = [];
-  let tallyCapped = false;
-  for (const tally of tallies) {
-    if (!tally.counts) {
-      unreadable.push(tally.ref.table);
-      continue;
-    }
-    if (tally.capped) tallyCapped = true;
-    for (const [id, n] of tally.counts) {
-      const entry = load.get(id);
-      if (entry) entry[tally.ref.bucket] = entry[tally.ref.bucket] + n;
-    }
-  }
-
-  // Counts drive the suggested merge direction, so a partial count has
-  // to say so rather than let a "0 references" row look safe to delete.
-  const notes: string[] = [];
-  if (unreadable.length > 0) {
-    notes.push(`counts exclude ${unreadable.join(", ")} (unreadable this load)`);
-  }
-  if (tallyCapped) {
-    notes.push(`a tally hit its ${REFERENCE_ROW_LIMIT}-row cap, so some counts are a floor`);
-  }
-
-  return {
-    success: true,
-    report: {
-      groups: attachLoad(groups, load),
-      scanned,
-      scanCapped,
-      totalGroups,
-      loadNote: notes.length > 0 ? `Reference ${notes.join("; ")}.` : null,
-    },
-  };
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -1809,213 +1767,218 @@ export async function findCatalogDuplicates(): Promise<
 /** Rows per predicate. Hitting it marks the queue capped. */
 const OVERDUE_PER_PREDICATE_LIMIT = 50;
 
-const OVERDUE_SHOW_COLUMNS =
-  "id, title, host_id, status, judging_ends_at, entries_close_at, show_date, updated_at";
+const OVERDUE_SHOW_COLUMNS = "id, title, host_id, status, judging_ends_at, entries_close_at, show_date, updated_at";
 
 export interface OverdueShowRow {
-  showId: string;
-  title: string;
-  hostAlias: string;
-  status: string;
-  reason: OverdueReason;
-  /** The deadline (or last-touched stamp) the overdue count is measured from. */
-  since: string;
-  overdueDays: number;
-  /** Live entries — scratched ones are history and are not counted. */
-  entryCount: number;
-  /** When the host was last nudged about THIS reason, cron or console. */
-  nudgedAt: string | null;
-  /** True while the cooldown is still running. */
-  nudgeOnCooldown: boolean;
-  hostConsoleUrl: string;
+    showId: string;
+    title: string;
+    hostAlias: string;
+    status: string;
+    reason: OverdueReason;
+    /** The deadline (or last-touched stamp) the overdue count is measured from. */
+    since: string;
+    overdueDays: number;
+    /** Live entries — scratched ones are history and are not counted. */
+    entryCount: number;
+    /** When the host was last nudged about THIS reason, cron or console. */
+    nudgedAt: string | null;
+    /** True while the cooldown is still running. */
+    nudgeOnCooldown: boolean;
+    hostConsoleUrl: string;
 }
 
 export interface OverdueShowsReport {
-  rows: OverdueShowRow[];
-  /** true = at least one predicate filled its slot; there may be more. */
-  capped: boolean;
+    rows: OverdueShowRow[];
+    /** true = at least one predicate filled its slot; there may be more. */
+    capped: boolean;
 }
 
 type OverdueShowRecord = {
-  id: string;
-  title: string | null;
-  host_id: string;
-  status: string;
-  judging_ends_at: string | null;
-  entries_close_at: string | null;
-  show_date: string | null;
-  updated_at: string;
+    id: string;
+    title: string | null;
+    host_id: string;
+    status: string;
+    judging_ends_at: string | null;
+    entries_close_at: string | null;
+    show_date: string | null;
+    updated_at: string;
 };
 
 export async function listOverdueShows(): Promise<
-  { success: true; report: OverdueShowsReport } | { success: false; error: string }
+    { success: true; report: OverdueShowsReport } | { success: false; error: string }
 > {
-  const user = await verifyAdmin();
-  if (!user) return { success: false, error: "Unauthorized" };
+    const user = await verifyAdmin();
+    if (!user) return { success: false, error: "Unauthorized" };
 
-  const admin = getAdminSupabase();
-  const now = new Date();
-  const nowIso = now.toISOString();
-  const base = () => admin.from("shows").select(OVERDUE_SHOW_COLUMNS);
+    const admin = getAdminSupabase();
+    const now = new Date();
+    const nowIso = now.toISOString();
+    const base = () => admin.from("shows").select(OVERDUE_SHOW_COLUMNS);
 
-  const settled = await Promise.allSettled([
-    // 1. Past its judging deadline — the cron's own predicate, verbatim.
-    base()
-      .eq("status", "judging")
-      .not("judging_ends_at", "is", null)
-      .lte("judging_ends_at", nowIso)
-      .order("judging_ends_at", { ascending: true })
-      .limit(OVERDUE_PER_PREDICATE_LIMIT),
-    // 2. Judging with NO deadline — the cron's `.not(... is null)` filter
-    //    means these can never be nudged by the clock.
-    base()
-      .eq("status", "judging")
-      .is("judging_ends_at", null)
-      .lte("updated_at", cutoffIso(now, JUDGING_NO_DEADLINE_DAYS))
-      .order("updated_at", { ascending: true })
-      .limit(OVERDUE_PER_PREDICATE_LIMIT),
-    // 3. Entries closed and never advanced. `or` because a hand-closed
-    //    show can have no entries_close_at on file at all.
-    base()
-      .eq("status", "entries_closed")
-      .or(
-        `entries_close_at.lte.${cutoffIso(now, ENTRIES_CLOSED_STALLED_DAYS)},updated_at.lte.${cutoffIso(now, ENTRIES_CLOSED_STALLED_DAYS)}`
-      )
-      .order("updated_at", { ascending: true })
-      .limit(OVERDUE_PER_PREDICATE_LIMIT),
-    // 4. Live show still running. show_date is a DATE, updated_at a
-    //    timestamp — two cutoffs, two shapes.
-    base()
-      .eq("status", "running")
-      .or(
-        `show_date.lte.${cutoffDate(now, RUNNING_PAST_DATE_DAYS)},updated_at.lte.${cutoffIso(now, RUNNING_IDLE_DAYS)}`
-      )
-      .order("updated_at", { ascending: true })
-      .limit(OVERDUE_PER_PREDICATE_LIMIT),
-    // 5. Results sitting in review, unpublished.
-    base()
-      .eq("status", "results_review")
-      .lte("updated_at", cutoffIso(now, RESULTS_REVIEW_STALLED_DAYS))
-      .order("updated_at", { ascending: true })
-      .limit(OVERDUE_PER_PREDICATE_LIMIT),
-  ]);
+    const settled = await Promise.allSettled([
+        // 1. Past its judging deadline — the cron's own predicate, verbatim.
+        base()
+            .eq("status", "judging")
+            .not("judging_ends_at", "is", null)
+            .lte("judging_ends_at", nowIso)
+            .order("judging_ends_at", { ascending: true })
+            .limit(OVERDUE_PER_PREDICATE_LIMIT),
+        // 2. Judging with NO deadline — the cron's `.not(... is null)` filter
+        //    means these can never be nudged by the clock.
+        base()
+            .eq("status", "judging")
+            .is("judging_ends_at", null)
+            .lte("updated_at", cutoffIso(now, JUDGING_NO_DEADLINE_DAYS))
+            .order("updated_at", { ascending: true })
+            .limit(OVERDUE_PER_PREDICATE_LIMIT),
+        // 3. Entries closed and never advanced. `or` because a hand-closed
+        //    show can have no entries_close_at on file at all.
+        base()
+            .eq("status", "entries_closed")
+            .or(
+                `entries_close_at.lte.${cutoffIso(now, ENTRIES_CLOSED_STALLED_DAYS)},updated_at.lte.${cutoffIso(now, ENTRIES_CLOSED_STALLED_DAYS)}`,
+            )
+            .order("updated_at", { ascending: true })
+            .limit(OVERDUE_PER_PREDICATE_LIMIT),
+        // 4. Live show still running. show_date is a DATE, updated_at a
+        //    timestamp — two cutoffs, two shapes.
+        base()
+            .eq("status", "running")
+            .or(
+                `show_date.lte.${cutoffDate(now, RUNNING_PAST_DATE_DAYS)},updated_at.lte.${cutoffIso(now, RUNNING_IDLE_DAYS)}`,
+            )
+            .order("updated_at", { ascending: true })
+            .limit(OVERDUE_PER_PREDICATE_LIMIT),
+        // 5. Results sitting in review, unpublished.
+        base()
+            .eq("status", "results_review")
+            .lte("updated_at", cutoffIso(now, RESULTS_REVIEW_STALLED_DAYS))
+            .order("updated_at", { ascending: true })
+            .limit(OVERDUE_PER_PREDICATE_LIMIT),
+    ]);
 
-  let capped = false;
-  const byId = new Map<string, OverdueShowRecord>();
-  for (const result of settled) {
-    if (result.status !== "fulfilled") continue;
-    const { data, error } = result.value as { data: unknown; error: unknown };
-    if (error) continue; // a predicate that can't run must not blank the queue
-    const rows = (Array.isArray(data) ? data : []) as OverdueShowRecord[];
-    if (rows.length >= OVERDUE_PER_PREDICATE_LIMIT) capped = true;
-    for (const row of rows) byId.set(row.id, row);
-  }
-
-  // Re-check every row through the shared classifier: `or` filters are
-  // broader than the real predicate (a running show edited yesterday
-  // with a stale show_date matches the query but may not be stalled).
-  const classified: { record: OverdueShowRecord; input: OverdueShowInput; reason: OverdueReason; since: string; overdueDays: number }[] = [];
-  for (const record of byId.values()) {
-    const input: OverdueShowInput = {
-      id: record.id,
-      title: record.title ?? "Untitled show",
-      hostId: record.host_id,
-      status: record.status,
-      judgingEndsAt: record.judging_ends_at,
-      entriesCloseAt: record.entries_close_at,
-      showDate: record.show_date,
-      updatedAt: record.updated_at,
-    };
-    const verdict = classifyOverdueShow(input, now);
-    if (!verdict) continue;
-    classified.push({ record, input, ...verdict });
-  }
-
-  if (classified.length === 0) {
-    return { success: true, report: { rows: [], capped } };
-  }
-
-  const showIds = classified.map((c) => c.record.id);
-  const hostIds = [...new Set(classified.map((c) => c.record.host_id))];
-  const links = classified.map((c) => nudgeLinkFor(c.record.id, c.reason));
-
-  const [hosts, entries, nudges] = await Promise.allSettled([
-    admin.from("users").select("id, alias_name").in("id", hostIds),
-    admin.from("show_class_entries").select("show_id, status").in("show_id", showIds),
-    admin
-      .from("notifications")
-      .select("user_id, link_url, created_at")
-      .eq("type", "show_deadline")
-      .in("link_url", links)
-      .order("created_at", { ascending: false }),
-  ]);
-
-  const aliasById = new Map<string, string>();
-  if (hosts.status === "fulfilled") {
-    const rows = ((hosts.value as { data: unknown }).data ?? []) as {
-      id: string;
-      alias_name: string | null;
-    }[];
-    for (const h of rows) {
-      if (h.alias_name) aliasById.set(h.id, h.alias_name);
+    let capped = false;
+    const byId = new Map<string, OverdueShowRecord>();
+    for (const result of settled) {
+        if (result.status !== "fulfilled") continue;
+        const { data, error } = result.value as { data: unknown; error: unknown };
+        if (error) continue; // a predicate that can't run must not blank the queue
+        const rows = (Array.isArray(data) ? data : []) as OverdueShowRecord[];
+        if (rows.length >= OVERDUE_PER_PREDICATE_LIMIT) capped = true;
+        for (const row of rows) byId.set(row.id, row);
     }
-  }
 
-  const entryCounts = new Map<string, number>();
-  if (entries.status === "fulfilled") {
-    const rows = ((entries.value as { data: unknown }).data ?? []) as {
-      show_id: string;
-      status: string;
-    }[];
-    for (const e of rows) {
-      if (e.status === "scratched") continue;
-      entryCounts.set(e.show_id, (entryCounts.get(e.show_id) ?? 0) + 1);
+    // Re-check every row through the shared classifier: `or` filters are
+    // broader than the real predicate (a running show edited yesterday
+    // with a stale show_date matches the query but may not be stalled).
+    const classified: {
+        record: OverdueShowRecord;
+        input: OverdueShowInput;
+        reason: OverdueReason;
+        since: string;
+        overdueDays: number;
+    }[] = [];
+    for (const record of byId.values()) {
+        const input: OverdueShowInput = {
+            id: record.id,
+            title: record.title ?? "Untitled show",
+            hostId: record.host_id,
+            status: record.status,
+            judgingEndsAt: record.judging_ends_at,
+            entriesCloseAt: record.entries_close_at,
+            showDate: record.show_date,
+            updatedAt: record.updated_at,
+        };
+        const verdict = classifyOverdueShow(input, now);
+        if (!verdict) continue;
+        classified.push({ record, input, ...verdict });
     }
-  }
 
-  // Newest-first from the query, so the first hit per key is the latest.
-  const nudgedAtByKey = new Map<string, string>();
-  if (nudges.status === "fulfilled") {
-    const rows = ((nudges.value as { data: unknown }).data ?? []) as {
-      user_id: string;
-      link_url: string | null;
-      created_at: string;
-    }[];
-    for (const n of rows) {
-      if (!n.link_url) continue;
-      const key = `${n.user_id}|${n.link_url}`;
-      if (!nudgedAtByKey.has(key)) nudgedAtByKey.set(key, n.created_at);
+    if (classified.length === 0) {
+        return { success: true, report: { rows: [], capped } };
     }
-  }
 
-  const rows: OverdueShowRow[] = classified.map((c) => {
-    const link = nudgeLinkFor(c.record.id, c.reason);
-    const nudgedAt = nudgedAtByKey.get(`${c.record.host_id}|${link}`) ?? null;
-    return {
-      showId: c.record.id,
-      title: c.input.title,
-      hostAlias: aliasById.get(c.record.host_id) ?? "Unknown host",
-      status: c.record.status,
-      reason: c.reason,
-      since: c.since,
-      overdueDays: c.overdueDays,
-      entryCount: entryCounts.get(c.record.id) ?? 0,
-      nudgedAt,
-      nudgeOnCooldown: !canNudgeAgain(nudgedAt, now),
-      hostConsoleUrl: `/shows/host/${c.record.id}`,
-    };
-  });
+    const showIds = classified.map((c) => c.record.id);
+    const hostIds = [...new Set(classified.map((c) => c.record.host_id))];
+    const links = classified.map((c) => nudgeLinkFor(c.record.id, c.reason));
 
-  return { success: true, report: { rows: sortOverdue(rows), capped } };
+    const [hosts, entries, nudges] = await Promise.allSettled([
+        admin.from("users").select("id, alias_name").in("id", hostIds),
+        admin.from("show_class_entries").select("show_id, status").in("show_id", showIds),
+        admin
+            .from("notifications")
+            .select("user_id, link_url, created_at")
+            .eq("type", "show_deadline")
+            .in("link_url", links)
+            .order("created_at", { ascending: false }),
+    ]);
+
+    const aliasById = new Map<string, string>();
+    if (hosts.status === "fulfilled") {
+        const rows = ((hosts.value as { data: unknown }).data ?? []) as {
+            id: string;
+            alias_name: string | null;
+        }[];
+        for (const h of rows) {
+            if (h.alias_name) aliasById.set(h.id, h.alias_name);
+        }
+    }
+
+    const entryCounts = new Map<string, number>();
+    if (entries.status === "fulfilled") {
+        const rows = ((entries.value as { data: unknown }).data ?? []) as {
+            show_id: string;
+            status: string;
+        }[];
+        for (const e of rows) {
+            if (e.status === "scratched") continue;
+            entryCounts.set(e.show_id, (entryCounts.get(e.show_id) ?? 0) + 1);
+        }
+    }
+
+    // Newest-first from the query, so the first hit per key is the latest.
+    const nudgedAtByKey = new Map<string, string>();
+    if (nudges.status === "fulfilled") {
+        const rows = ((nudges.value as { data: unknown }).data ?? []) as {
+            user_id: string;
+            link_url: string | null;
+            created_at: string;
+        }[];
+        for (const n of rows) {
+            if (!n.link_url) continue;
+            const key = `${n.user_id}|${n.link_url}`;
+            if (!nudgedAtByKey.has(key)) nudgedAtByKey.set(key, n.created_at);
+        }
+    }
+
+    const rows: OverdueShowRow[] = classified.map((c) => {
+        const link = nudgeLinkFor(c.record.id, c.reason);
+        const nudgedAt = nudgedAtByKey.get(`${c.record.host_id}|${link}`) ?? null;
+        return {
+            showId: c.record.id,
+            title: c.input.title,
+            hostAlias: aliasById.get(c.record.host_id) ?? "Unknown host",
+            status: c.record.status,
+            reason: c.reason,
+            since: c.since,
+            overdueDays: c.overdueDays,
+            entryCount: entryCounts.get(c.record.id) ?? 0,
+            nudgedAt,
+            nudgeOnCooldown: !canNudgeAgain(nudgedAt, now),
+            hostConsoleUrl: `/shows/host/${c.record.id}`,
+        };
+    });
+
+    return { success: true, report: { rows: sortOverdue(rows), capped } };
 }
 
 export interface NudgeHostResult {
-  success: boolean;
-  error?: string;
-  /** true = a notification row was written. */
-  sent?: boolean;
-  /** Human-readable outcome when nothing was sent but nothing failed either. */
-  note?: string;
+    success: boolean;
+    error?: string;
+    /** true = a notification row was written. */
+    sent?: boolean;
+    /** Human-readable outcome when nothing was sent but nothing failed either. */
+    note?: string;
 }
 
 /**
@@ -2035,89 +1998,85 @@ export interface NudgeHostResult {
  * machine and to the host, not to this console.
  */
 export async function nudgeOverdueShowHost(showId: string): Promise<NudgeHostResult> {
-  const user = await verifyAdmin();
-  if (!user) return { success: false, error: "Unauthorized" };
+    const user = await verifyAdmin();
+    if (!user) return { success: false, error: "Unauthorized" };
 
-  const admin = getAdminSupabase();
-  const { data, error } = await admin
-    .from("shows")
-    .select(OVERDUE_SHOW_COLUMNS)
-    .eq("id", showId)
-    .maybeSingle();
-  if (error) return { success: false, error: error.message };
-  if (!data) return { success: false, error: "Show not found." };
+    const admin = getAdminSupabase();
+    const { data, error } = await admin.from("shows").select(OVERDUE_SHOW_COLUMNS).eq("id", showId).maybeSingle();
+    if (error) return { success: false, error: error.message };
+    if (!data) return { success: false, error: "Show not found." };
 
-  const record = data as OverdueShowRecord;
-  const now = new Date();
-  const input: OverdueShowInput = {
-    id: record.id,
-    title: record.title ?? "Untitled show",
-    hostId: record.host_id,
-    status: record.status,
-    judgingEndsAt: record.judging_ends_at,
-    entriesCloseAt: record.entries_close_at,
-    showDate: record.show_date,
-    updatedAt: record.updated_at,
-  };
-
-  const verdict = classifyOverdueShow(input, now);
-  if (!verdict) {
-    return {
-      success: true,
-      sent: false,
-      note: "That show is no longer overdue — the host has moved it on. Nothing sent.",
+    const record = data as OverdueShowRecord;
+    const now = new Date();
+    const input: OverdueShowInput = {
+        id: record.id,
+        title: record.title ?? "Untitled show",
+        hostId: record.host_id,
+        status: record.status,
+        judgingEndsAt: record.judging_ends_at,
+        entriesCloseAt: record.entries_close_at,
+        showDate: record.show_date,
+        updatedAt: record.updated_at,
     };
-  }
 
-  const link = nudgeLinkFor(record.id, verdict.reason);
-  const { data: priorRows } = await admin
-    .from("notifications")
-    .select("created_at")
-    .eq("type", "show_deadline")
-    .eq("user_id", record.host_id)
-    .eq("link_url", link)
-    .order("created_at", { ascending: false })
-    .limit(1);
-  const lastNudgedAt = ((priorRows ?? [])[0] as { created_at: string } | undefined)?.created_at ?? null;
+    const verdict = classifyOverdueShow(input, now);
+    if (!verdict) {
+        return {
+            success: true,
+            sent: false,
+            note: "That show is no longer overdue — the host has moved it on. Nothing sent.",
+        };
+    }
 
-  if (!canNudgeAgain(lastNudgedAt, now)) {
-    return {
-      success: true,
-      sent: false,
-      note: `Already nudged ${new Date(lastNudgedAt!).toLocaleDateString()} — the cooldown is ${NUDGE_COOLDOWN_DAYS} days.`,
-    };
-  }
+    const link = nudgeLinkFor(record.id, verdict.reason);
+    const { data: priorRows } = await admin
+        .from("notifications")
+        .select("created_at")
+        .eq("type", "show_deadline")
+        .eq("user_id", record.host_id)
+        .eq("link_url", link)
+        .order("created_at", { ascending: false })
+        .limit(1);
+    const lastNudgedAt = ((priorRows ?? [])[0] as { created_at: string } | undefined)?.created_at ?? null;
 
-  // House pattern: dynamic import + try/catch. A notification sink must
-  // never take an admin action down with it.
-  let delivered = 0;
-  try {
-    const { createNotificationsBulk } = await import("@/lib/notifications/createNotification");
-    delivered = await createNotificationsBulk([
-      {
-        userId: record.host_id,
-        type: "show_deadline",
-        // System event, not the admin poking a member: the self-guard
-        // must not fire if the admin happens to host the show.
-        actorId: null,
-        content: buildNudgeContent(input.title, verdict),
-        linkUrl: link,
-      },
-    ]);
-  } catch (err) {
-    logger.error("Admin", "Overdue-show nudge failed", err);
-    return { success: false, error: "Could not send the nudge — check the logs." };
-  }
+    if (!canNudgeAgain(lastNudgedAt, now)) {
+        return {
+            success: true,
+            sent: false,
+            note: `Already nudged ${new Date(lastNudgedAt!).toLocaleDateString()} — the cooldown is ${NUDGE_COOLDOWN_DAYS} days.`,
+        };
+    }
 
-  if (delivered === 0) {
-    return {
-      success: true,
-      sent: false,
-      note: "Nothing sent — the host has show-deadline notifications muted.",
-    };
-  }
+    // House pattern: dynamic import + try/catch. A notification sink must
+    // never take an admin action down with it.
+    let delivered = 0;
+    try {
+        const { createNotificationsBulk } = await import("@/lib/notifications/createNotification");
+        delivered = await createNotificationsBulk([
+            {
+                userId: record.host_id,
+                type: "show_deadline",
+                // System event, not the admin poking a member: the self-guard
+                // must not fire if the admin happens to host the show.
+                actorId: null,
+                content: buildNudgeContent(input.title, verdict),
+                linkUrl: link,
+            },
+        ]);
+    } catch (err) {
+        logger.error("Admin", "Overdue-show nudge failed", err);
+        return { success: false, error: "Could not send the nudge — check the logs." };
+    }
 
-  return { success: true, sent: true };
+    if (delivered === 0) {
+        return {
+            success: true,
+            sent: false,
+            note: "Nothing sent — the host has show-deadline notifications muted.",
+        };
+    }
+
+    return { success: true, sent: true };
 }
 
 // ── Feed pinning — admin announcements held above the Paddock stream ──
@@ -2129,28 +2088,25 @@ export async function nudgeOverdueShowHost(showId: string): Promise<NudgeHostRes
  * which is also why an author can't pin themselves to the top.
  */
 export async function setFeedPostPinned(
-  postId: string,
-  pinned: boolean
+    postId: string,
+    pinned: boolean,
 ): Promise<{ success: boolean; error?: string }> {
-  const user = await verifyAdmin();
-  if (!user) return { success: false, error: "Unauthorized" };
+    const user = await verifyAdmin();
+    if (!user) return { success: false, error: "Unauthorized" };
 
-  const admin = getAdminSupabase();
-  const { data: post, error: readError } = await admin
-    .from("posts")
-    .select("id, parent_id, group_id")
-    .eq("id", postId)
-    .maybeSingle();
-  if (readError) return { success: false, error: readError.message };
-  if (!post) return { success: false, error: "Post not found." };
-  // Barn pins share the column but belong to the barn (lib/feed/paddockPin).
-  const refusal = paddockPinRefusal(post as { parent_id: string | null; group_id: string | null });
-  if (refusal) return { success: false, error: refusal };
+    const admin = getAdminSupabase();
+    const { data: post, error: readError } = await admin
+        .from("posts")
+        .select("id, parent_id, group_id")
+        .eq("id", postId)
+        .maybeSingle();
+    if (readError) return { success: false, error: readError.message };
+    if (!post) return { success: false, error: "Post not found." };
+    // Barn pins share the column but belong to the barn (lib/feed/paddockPin).
+    const refusal = paddockPinRefusal(post as { parent_id: string | null; group_id: string | null });
+    if (refusal) return { success: false, error: refusal };
 
-  const { error } = await admin
-    .from("posts")
-    .update({ is_pinned: pinned })
-    .eq("id", postId);
-  if (error) return { success: false, error: error.message };
-  return { success: true };
+    const { error } = await admin.from("posts").update({ is_pinned: pinned }).eq("id", postId);
+    if (error) return { success: false, error: error.message };
+    return { success: true };
 }

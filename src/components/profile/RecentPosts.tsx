@@ -45,10 +45,7 @@ export default function RecentPosts({
                     Their posts are hidden while the block is on. Unblock above to see them again.
                 </EmptyNote>
             ) : posts.length === 0 ? (
-                <EmptyNote
-                    icon="📣"
-                    title={isOwnProfile ? "You haven't posted publicly yet" : "Quiet in the aisle"}
-                >
+                <EmptyNote icon="📣" title={isOwnProfile ? "You haven't posted publicly yet" : "Quiet in the aisle"}>
                     {isOwnProfile
                         ? "Posts you make to the public feed land here. Barn talk and passport comments stay where you wrote them."
                         : `@${alias} hasn't posted to the public feed lately.`}
@@ -67,8 +64,7 @@ export default function RecentPosts({
                                 {post.likesCount > 0 && <span>♥ {post.likesCount}</span>}
                                 {post.repliesCount > 0 && (
                                     <span>
-                                        💬 {post.repliesCount}{" "}
-                                        {post.repliesCount === 1 ? "reply" : "replies"}
+                                        💬 {post.repliesCount} {post.repliesCount === 1 ? "reply" : "replies"}
                                     </span>
                                 )}
                             </div>

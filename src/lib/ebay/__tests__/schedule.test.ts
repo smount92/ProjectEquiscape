@@ -69,7 +69,10 @@ describe("planSweep with the attempt ledger (211)", () => {
 
 describe("planSweep before the ledger exists (day rotation)", () => {
     const candidates = ids(40);
-    const lastSignal = new Map([["m010", "2026-08-25T00:00:00Z"], ["m011", "2026-09-07T00:00:00Z"]]);
+    const lastSignal = new Map([
+        ["m010", "2026-08-25T00:00:00Z"],
+        ["m011", "2026-09-07T00:00:00Z"],
+    ]);
 
     it("rotates the never-read pool so consecutive days take different slices", () => {
         const a = planSweep({ candidates, lastSignal, lastAttempt: null, now: new Date("2026-09-18T07:00:00Z") });
@@ -101,11 +104,7 @@ describe("planSweep before the ledger exists (day rotation)", () => {
 describe("attemptRows / tallyOutcomes", () => {
     it("records one row per model asked about, with the sample behind a signal", () => {
         const now = new Date("2026-09-21T07:00:30Z");
-        const rows = attemptRows(
-            { a: "signal", b: "no-match", c: "error" },
-            new Map([["a", 7]]),
-            now,
-        );
+        const rows = attemptRows({ a: "signal", b: "no-match", c: "error" }, new Map([["a", 7]]), now);
         expect(rows).toEqual([
             { catalog_item_id: "a", swept_at: now.toISOString(), outcome: "signal", sample_size: 7 },
             { catalog_item_id: "b", swept_at: now.toISOString(), outcome: "no-match", sample_size: 0 },

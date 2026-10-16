@@ -15,112 +15,108 @@ interface CompressionConfig {
 }
 
 const TIER_CONFIG: Record<UserTier, CompressionConfig> = {
-    free:   { maxDimension: 1000, quality: 0.70 },
-    pro:    { maxDimension: 2500, quality: 0.92 },
+    free: { maxDimension: 1000, quality: 0.7 },
+    pro: { maxDimension: 2500, quality: 0.92 },
     studio: { maxDimension: 2500, quality: 0.95 },
 };
 
 const THUMB_DIMENSION = 400;
-const THUMB_QUALITY = 0.60;
+const THUMB_QUALITY = 0.6;
 // Pre-compression cap. Modern phone cameras produce 15-25MB originals;
 // they are downscaled/transcoded to WebP client-side before upload, so
 // the STORAGE cap (10MB, migration 149) still holds for what we send.
 const MAX_FILE_SIZE_MB = 30;
 
 export async function compressImage(file: File, tier: UserTier = "free"): Promise<File> {
-  // Skip only when small AND already WebP — the old skip returned the
-  // original bytes (JPEG/PNG/GIF) which were then uploaded under a
-  // .webp name with an image/webp content type (audit collection D3).
-  if (file.size < 200 * 1024 && file.type === "image/webp") {
-    return file;
-  }
+    // Skip only when small AND already WebP — the old skip returned the
+    // original bytes (JPEG/PNG/GIF) which were then uploaded under a
+    // .webp name with an image/webp content type (audit collection D3).
+    if (file.size < 200 * 1024 && file.type === "image/webp") {
+        return file;
+    }
 
-  const config = TIER_CONFIG[tier];
+    const config = TIER_CONFIG[tier];
 
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = (event) => {
-      const img = new Image();
-      img.src = event.target?.result as string;
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        let { width, height } = img;
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target?.result as string;
+            img.onload = () => {
+                const canvas = document.createElement("canvas");
+                let { width, height } = img;
 
-        // Scale down if larger than tier max dimension
-        if (width > config.maxDimension || height > config.maxDimension) {
-          if (width > height) {
-            height = Math.round((height * config.maxDimension) / width);
-            width = config.maxDimension;
-          } else {
-            width = Math.round((width * config.maxDimension) / height);
-            height = config.maxDimension;
-          }
-        }
+                // Scale down if larger than tier max dimension
+                if (width > config.maxDimension || height > config.maxDimension) {
+                    if (width > height) {
+                        height = Math.round((height * config.maxDimension) / width);
+                        width = config.maxDimension;
+                    } else {
+                        width = Math.round((width * config.maxDimension) / height);
+                        height = config.maxDimension;
+                    }
+                }
 
-        canvas.width = width;
-        canvas.height = height;
+                canvas.width = width;
+                canvas.height = height;
 
-        const ctx = canvas.getContext("2d");
-        if (!ctx) {
-          resolve(file); // Fallback to original
-          return;
-        }
+                const ctx = canvas.getContext("2d");
+                if (!ctx) {
+                    resolve(file); // Fallback to original
+                    return;
+                }
 
-        ctx.drawImage(img, 0, 0, width, height);
+                ctx.drawImage(img, 0, 0, width, height);
 
-        canvas.toBlob(
-          (blob) => {
-            if (!blob) {
-              resolve(file);
-              return;
-            }
-            const compressedFile = new File(
-              [blob],
-              file.name.replace(/\.[^.]+$/, ".webp"),
-              {
-                type: "image/webp",
-                lastModified: Date.now(),
-              }
-            );
-            resolve(compressedFile);
-          },
-          "image/webp",
-          config.quality
-        );
-      };
-      img.onerror = () =>
-        reject(
-          new Error(
-            file.type === "image/heic" || file.type === "image/heif"
-              ? "This browser can't read HEIC photos — try Safari, or set your iPhone camera to 'Most Compatible' (JPEG)."
-              : "Failed to load image",
-          ),
-        );
-    };
-    reader.onerror = () => reject(new Error("Failed to read file"));
-  });
+                canvas.toBlob(
+                    (blob) => {
+                        if (!blob) {
+                            resolve(file);
+                            return;
+                        }
+                        const compressedFile = new File([blob], file.name.replace(/\.[^.]+$/, ".webp"), {
+                            type: "image/webp",
+                            lastModified: Date.now(),
+                        });
+                        resolve(compressedFile);
+                    },
+                    "image/webp",
+                    config.quality,
+                );
+            };
+            img.onerror = () =>
+                reject(
+                    new Error(
+                        file.type === "image/heic" || file.type === "image/heif"
+                            ? "This browser can't read HEIC photos — try Safari, or set your iPhone camera to 'Most Compatible' (JPEG)."
+                            : "Failed to load image",
+                    ),
+                );
+        };
+        reader.onerror = () => reject(new Error("Failed to read file"));
+    });
 }
 
 export function validateImageFile(file: File): string | null {
-  // HEIC/HEIF accepted: iPhones either hand us a JPEG (most browsers)
-  // or a real HEIC that Safari can decode into the canvas transcoder.
-  const validTypes = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/heic", "image/heif"];
-  if (!validTypes.includes(file.type)) {
-    return "Please upload a JPEG, PNG, WebP, GIF, or HEIC photo.";
-  }
-  if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
-    return `Image must be under ${MAX_FILE_SIZE_MB}MB.`;
-  }
-  return null;
+    // HEIC/HEIF accepted: iPhones either hand us a JPEG (most browsers)
+    // or a real HEIC that Safari can decode into the canvas transcoder.
+    const validTypes = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/heic", "image/heif"];
+    if (!validTypes.includes(file.type)) {
+        return "Please upload a JPEG, PNG, WebP, GIF, or HEIC photo.";
+    }
+    if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+        return `Image must be under ${MAX_FILE_SIZE_MB}MB.`;
+    }
+    return null;
 }
 
 export function createImagePreviewUrl(file: File): string {
-  return URL.createObjectURL(file);
+    return URL.createObjectURL(file);
 }
 
 export function revokeImagePreviewUrl(url: string): void {
-  URL.revokeObjectURL(url);
+    URL.revokeObjectURL(url);
 }
 
 /**
@@ -150,22 +146,30 @@ export async function generateThumbnail(file: File): Promise<File> {
                 canvas.width = width;
                 canvas.height = height;
                 const ctx = canvas.getContext("2d");
-                if (!ctx) { resolve(file); return; }
+                if (!ctx) {
+                    resolve(file);
+                    return;
+                }
 
                 ctx.drawImage(img, 0, 0, width, height);
 
                 canvas.toBlob(
                     (blob) => {
-                        if (!blob) { resolve(file); return; }
+                        if (!blob) {
+                            resolve(file);
+                            return;
+                        }
                         // Append _thumb suffix before extension
                         const thumbName = file.name.replace(/\.[^.]+$/, "_thumb.webp");
-                        resolve(new File([blob], thumbName, {
-                            type: "image/webp",
-                            lastModified: Date.now(),
-                        }));
+                        resolve(
+                            new File([blob], thumbName, {
+                                type: "image/webp",
+                                lastModified: Date.now(),
+                            }),
+                        );
                     },
                     "image/webp",
-                    THUMB_QUALITY
+                    THUMB_QUALITY,
                 );
             };
             img.onerror = () => reject(new Error("Failed to load image for thumbnail"));
@@ -179,82 +183,90 @@ export async function generateThumbnail(file: File): Promise<File> {
  * Uses the same tier-aware config as compressImage.
  */
 export async function compressImageWithWatermark(
-  file: File,
-  aliasName: string,
-  tier: UserTier = "free",
-  customText?: string
+    file: File,
+    aliasName: string,
+    tier: UserTier = "free",
+    customText?: string,
 ): Promise<File> {
-  const config = TIER_CONFIG[tier];
+    const config = TIER_CONFIG[tier];
 
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = (event) => {
-      const img = new Image();
-      img.src = event.target?.result as string;
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        let { width, height } = img;
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target?.result as string;
+            img.onload = () => {
+                const canvas = document.createElement("canvas");
+                let { width, height } = img;
 
-        // Scale down if larger than tier max dimension
-        if (width > config.maxDimension || height > config.maxDimension) {
-          if (width > height) {
-            height = Math.round((height * config.maxDimension) / width);
-            width = config.maxDimension;
-          } else {
-            width = Math.round((width * config.maxDimension) / height);
-            height = config.maxDimension;
-          }
-        }
+                // Scale down if larger than tier max dimension
+                if (width > config.maxDimension || height > config.maxDimension) {
+                    if (width > height) {
+                        height = Math.round((height * config.maxDimension) / width);
+                        width = config.maxDimension;
+                    } else {
+                        width = Math.round((width * config.maxDimension) / height);
+                        height = config.maxDimension;
+                    }
+                }
 
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext("2d");
-        if (!ctx) { resolve(file); return; }
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext("2d");
+                if (!ctx) {
+                    resolve(file);
+                    return;
+                }
 
-        ctx.drawImage(img, 0, 0, width, height);
+                ctx.drawImage(img, 0, 0, width, height);
 
-        // ── WATERMARK ──
-        const cleanAlias = aliasName.replace(/^@+/, "");
-        const text = customText?.trim() || `© @${cleanAlias} — ModelHorseHub`;
-        const fontSize = Math.max(12, Math.floor(width * 0.02));
-        ctx.font = `${fontSize}px Inter, sans-serif`;
-        ctx.textAlign = "right";
-        ctx.textBaseline = "bottom";
+                // ── WATERMARK ──
+                const cleanAlias = aliasName.replace(/^@+/, "");
+                const text = customText?.trim() || `© @${cleanAlias} — ModelHorseHub`;
+                const fontSize = Math.max(12, Math.floor(width * 0.02));
+                ctx.font = `${fontSize}px Inter, sans-serif`;
+                ctx.textAlign = "right";
+                ctx.textBaseline = "bottom";
 
-        // Semi-transparent background pill
-        const textMetrics = ctx.measureText(text);
-        const padding = 6;
-        const bgX = width - textMetrics.width - padding * 3;
-        const bgY = height - fontSize - padding * 3;
-        ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
-        ctx.fillRect(bgX, bgY, textMetrics.width + padding * 2, fontSize + padding * 2);
+                // Semi-transparent background pill
+                const textMetrics = ctx.measureText(text);
+                const padding = 6;
+                const bgX = width - textMetrics.width - padding * 3;
+                const bgY = height - fontSize - padding * 3;
+                ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+                ctx.fillRect(bgX, bgY, textMetrics.width + padding * 2, fontSize + padding * 2);
 
-        // White text at 70% opacity
-        ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
-        ctx.fillText(text, width - padding * 2, height - padding * 2);
+                // White text at 70% opacity
+                ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+                ctx.fillText(text, width - padding * 2, height - padding * 2);
 
-        canvas.toBlob(
-          (blob) => {
-            if (!blob) { resolve(file); return; }
-            resolve(new File([blob], file.name.replace(/\.[^.]+$/, ".webp"), {
-              type: "image/webp",
-              lastModified: Date.now(),
-            }));
-          },
-          "image/webp",
-          config.quality
-        );
-      };
-      img.onerror = () =>
-        reject(
-          new Error(
-            file.type === "image/heic" || file.type === "image/heif"
-              ? "This browser can't read HEIC photos — try Safari, or set your iPhone camera to 'Most Compatible' (JPEG)."
-              : "Failed to load image",
-          ),
-        );
-    };
-    reader.onerror = () => reject(new Error("Failed to read file"));
-  });
+                canvas.toBlob(
+                    (blob) => {
+                        if (!blob) {
+                            resolve(file);
+                            return;
+                        }
+                        resolve(
+                            new File([blob], file.name.replace(/\.[^.]+$/, ".webp"), {
+                                type: "image/webp",
+                                lastModified: Date.now(),
+                            }),
+                        );
+                    },
+                    "image/webp",
+                    config.quality,
+                );
+            };
+            img.onerror = () =>
+                reject(
+                    new Error(
+                        file.type === "image/heic" || file.type === "image/heif"
+                            ? "This browser can't read HEIC photos — try Safari, or set your iPhone camera to 'Most Compatible' (JPEG)."
+                            : "Failed to load image",
+                    ),
+                );
+        };
+        reader.onerror = () => reject(new Error("Failed to read file"));
+    });
 }

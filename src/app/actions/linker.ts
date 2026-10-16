@@ -137,7 +137,12 @@ async function ownersOf(supabase: Client, moldId: string): Promise<number | null
 /** A mold's own releases plus the set rows on other molds whose title names it. */
 async function expandMold(supabase: Client, mold: Row, hitIds: Set<string> = new Set()): Promise<LinkerMold> {
     const [{ data: own }, { data: sets }, owners] = await Promise.all([
-        supabase.from("catalog_items").select(COLS).eq("parent_id", mold.id).eq("item_type", "plastic_release").limit(400),
+        supabase
+            .from("catalog_items")
+            .select(COLS)
+            .eq("parent_id", mold.id)
+            .eq("item_type", "plastic_release")
+            .limit(400),
         supabase
             .from("catalog_items")
             .select(COLS)
@@ -149,9 +154,13 @@ async function expandMold(supabase: Client, mold: Row, hitIds: Set<string> = new
     ]);
     const ownRows = (own ?? []) as Row[];
     const setRows = ((sets ?? []) as Row[]).filter(
-        (r) => mentionsMold(r.title, stripGeneration(mold.title)) && (!mold.scale || !r.scale || r.scale === mold.scale),
+        (r) =>
+            mentionsMold(r.title, stripGeneration(mold.title)) && (!mold.scale || !r.scale || r.scale === mold.scale),
     );
-    const photos = await photosFor(supabase, [...ownRows, ...setRows].map((r) => r.id));
+    const photos = await photosFor(
+        supabase,
+        [...ownRows, ...setRows].map((r) => r.id),
+    );
     const releases = collapseSetPieces(
         orderReleases([
             ...ownRows.map((r) => ({ ...toRelease(r, false, photos), hit: hitIds.has(r.id) })),
@@ -170,14 +179,25 @@ async function expandMold(supabase: Client, mold: Row, hitIds: Set<string> = new
         owners,
         releases,
         ambiguous: false,
-        href: referenceHref({ id: mold.id, maker: mold.maker, title: mold.title, maker_slug: mold.maker_slug, slug: mold.slug }),
+        href: referenceHref({
+            id: mold.id,
+            maker: mold.maker,
+            title: mold.title,
+            maker_slug: mold.maker_slug,
+            slug: mold.slug,
+        }),
     };
 }
 
 async function releaseCounts(supabase: Client, moldIds: string[]): Promise<Map<string, number>> {
     const out = new Map<string, number>();
     if (moldIds.length === 0) return out;
-    const { data } = await supabase.from("catalog_items").select("parent_id").in("parent_id", moldIds).eq("item_type", "plastic_release").limit(5000);
+    const { data } = await supabase
+        .from("catalog_items")
+        .select("parent_id")
+        .in("parent_id", moldIds)
+        .eq("item_type", "plastic_release")
+        .limit(5000);
     for (const r of (data ?? []) as { parent_id: string }[]) out.set(r.parent_id, (out.get(r.parent_id) ?? 0) + 1);
     return out;
 }
@@ -189,7 +209,15 @@ export async function searchLinker(rawTerm: string, scale: string | null): Promi
     const supabase = await createClient();
     const chosen = scale && scale !== "any" ? scale : null;
     const parsed = parseTerm(rawTerm);
-    const empty: LinkerResult = { term: rawTerm, kind: parsed.kind, scale: chosen, molds: [], otherScales: [], others: [], numberHits: [] };
+    const empty: LinkerResult = {
+        term: rawTerm,
+        kind: parsed.kind,
+        scale: chosen,
+        molds: [],
+        otherScales: [],
+        others: [],
+        numberHits: [],
+    };
     if (parsed.kind === "empty") return empty;
 
     if (parsed.kind === "number") {
@@ -200,7 +228,9 @@ export async function searchLinker(rawTerm: string, scale: string | null): Promi
             .eq("item_type", "plastic_release")
             // PostgREST or(): `*` is the wildcard and a space inside a clause breaks it,
             // so the title prefix is matched loosely here and tightened below.
-            .or(`attributes->>model_number.ilike.${n},attributes->>model_number.ilike.#${n},title.ilike.#${n}*,title.ilike.${n}*`)
+            .or(
+                `attributes->>model_number.ilike.${n},attributes->>model_number.ilike.#${n},title.ilike.#${n}*,title.ilike.${n}*`,
+            )
             .limit(40);
         const exact = new RegExp("^#?" + n.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(\\s|$)", "i");
         const rows = ((data ?? []) as Row[]).filter((r) => {
@@ -213,14 +243,19 @@ export async function searchLinker(rawTerm: string, scale: string | null): Promi
             : { data: [] as Row[] };
         const counts = await releaseCounts(supabase, parentIds);
         const parentMap = new Map(((parents ?? []) as Row[]).map((p) => [p.id, p]));
-        const photos = await photosFor(supabase, rows.map((r) => r.id));
+        const photos = await photosFor(
+            supabase,
+            rows.map((r) => r.id),
+        );
         // Every scale is shown for a number: a member who typed it knows what they hold.
         const hits: NumberHit[] = rows.map((r) => {
-                const p = r.parent_id ? parentMap.get(r.parent_id) : undefined;
-                return { mold: p ? toSummary(p, counts.get(p.id) ?? 0) : null, release: toRelease(r, false, photos) };
-            });
+            const p = r.parent_id ? parentMap.get(r.parent_id) : undefined;
+            return { mold: p ? toSummary(p, counts.get(p.id) ?? 0) : null, release: toRelease(r, false, photos) };
+        });
         // In-scale rows first, then the rest, so a Stablemate member sees the Stablemate #5022 before a Classic #5022.
-        hits.sort((a, b) => Number(!scaleMatches(a.release.scale, chosen)) - Number(!scaleMatches(b.release.scale, chosen)));
+        hits.sort(
+            (a, b) => Number(!scaleMatches(a.release.scale, chosen)) - Number(!scaleMatches(b.release.scale, chosen)),
+        );
         return { ...empty, numberHits: hits };
     }
 
@@ -232,9 +267,18 @@ export async function searchLinker(rawTerm: string, scale: string | null): Promi
 
     // Releases whose mold did not surface by itself still point at it.
     const moldIds = new Set(rows.filter((r) => r.item_type === "plastic_mold").map((r) => r.id));
-    const missingParents = [...new Set(rows.filter((r) => r.item_type === "plastic_release" && r.parent_id && !moldIds.has(r.parent_id)).map((r) => r.parent_id as string))];
+    const missingParents = [
+        ...new Set(
+            rows
+                .filter((r) => r.item_type === "plastic_release" && r.parent_id && !moldIds.has(r.parent_id))
+                .map((r) => r.parent_id as string),
+        ),
+    ];
     if (missingParents.length) {
-        const { data: parents } = await supabase.from("catalog_items").select(COLS).in("id", missingParents.slice(0, 20));
+        const { data: parents } = await supabase
+            .from("catalog_items")
+            .select(COLS)
+            .in("id", missingParents.slice(0, 20));
         rows = rows.concat((parents ?? []) as Row[]);
     }
 
@@ -244,21 +288,24 @@ export async function searchLinker(rawTerm: string, scale: string | null): Promi
     // Only the release's own name counts, not the roster after "With": a set
     // that lists Silky Sullivan among its pieces must not drag Man O' War in.
     const hitReleases = rows.filter(
-        (r) => r.item_type === "plastic_release" && r.parent_id && titleMatches(r.title.replace(/\s+with\s+.*$/i, ""), termLower),
+        (r) =>
+            r.item_type === "plastic_release" &&
+            r.parent_id &&
+            titleMatches(r.title.replace(/\s+with\s+.*$/i, ""), termLower),
     );
     const hitIds = new Set(hitReleases.map((r) => r.id));
     const viaRelease = new Map<string, string>();
-    for (const r of hitReleases) if (!viaRelease.has(r.parent_id as string)) viaRelease.set(r.parent_id as string, r.title);
+    for (const r of hitReleases)
+        if (!viaRelease.has(r.parent_id as string)) viaRelease.set(r.parent_id as string, r.title);
     const named = (r: Row) => titleMatches(r.title, termLower) || viaRelease.has(r.id);
     const allMolds = rows.filter((r) => r.item_type === "plastic_mold");
     // Named matches first; when nothing is named, the three closest names so the member is not stranded.
     const moldPool = allMolds.some(named) ? allMolds.filter(named) : allMolds.slice(0, 3);
-    const molds = moldPool
-        .sort((a, b) => {
-            const ea = stripGeneration(a.title).toLowerCase() === termLower ? 0 : 1;
-            const eb = stripGeneration(b.title).toLowerCase() === termLower ? 0 : 1;
-            return ea - eb;
-        });
+    const molds = moldPool.sort((a, b) => {
+        const ea = stripGeneration(a.title).toLowerCase() === termLower ? 0 : 1;
+        const eb = stripGeneration(b.title).toLowerCase() === termLower ? 0 : 1;
+        return ea - eb;
+    });
     const inScale = molds.filter((m) => scaleMatches(m.scale, chosen)).slice(0, MAX_MOLDS);
     const outScale = chosen ? molds.filter((m) => !scaleMatches(m.scale, chosen)).slice(0, 12) : [];
 
@@ -266,24 +313,36 @@ export async function searchLinker(rawTerm: string, scale: string | null): Promi
         // A mold found by its own name gets no "matches your search" rows: its
         // regular run and its set rows carry that name too, and tagging them
         // would mean nothing. Only a mold reached through a release gets them.
-        Promise.all(inScale.map((m) => expandMold(supabase, m, titleMatches(m.title, termLower) ? new Set<string>() : hitIds))),
-        releaseCounts(supabase, outScale.map((m) => m.id)),
+        Promise.all(
+            inScale.map((m) => expandMold(supabase, m, titleMatches(m.title, termLower) ? new Set<string>() : hitIds)),
+        ),
+        releaseCounts(
+            supabase,
+            outScale.map((m) => m.id),
+        ),
     ]);
     const marked = markAmbiguous(expanded);
     for (const m of marked) {
         const common = commonOne(m.releases);
-        if (common) m.releases = m.releases.map((r) => (r.id === common ? { ...r, run: r.run ?? "the common one" } : r));
+        if (common)
+            m.releases = m.releases.map((r) => (r.id === common ? { ...r, run: r.run ?? "the common one" } : r));
     }
 
     const others = rows
-        .filter((r) => r.item_type !== "plastic_mold" && r.item_type !== "plastic_release" && titleMatches(r.title, termLower))
+        .filter(
+            (r) =>
+                r.item_type !== "plastic_mold" && r.item_type !== "plastic_release" && titleMatches(r.title, termLower),
+        )
         .slice(0, 12)
         .map(toOther);
 
     return {
         ...empty,
         molds: marked,
-        otherScales: outScale.map((m) => ({ ...toSummary(m, counts.get(m.id) ?? 0), ...(viaRelease.has(m.id) ? { hitTitle: viaRelease.get(m.id) } : {}) })),
+        otherScales: outScale.map((m) => ({
+            ...toSummary(m, counts.get(m.id) ?? 0),
+            ...(viaRelease.has(m.id) ? { hitTitle: viaRelease.get(m.id) } : {}),
+        })),
         others,
     };
 }
@@ -299,7 +358,12 @@ export async function fileReleaseUnderMold(input: {
     note?: string;
 }): Promise<{ success: true; suggestionId?: string; autoApproved?: boolean } | { success: false; error: string }> {
     const supabase = await createClient();
-    const { data: mold } = await supabase.from("catalog_items").select(COLS).eq("id", input.moldId).eq("item_type", "plastic_mold").maybeSingle();
+    const { data: mold } = await supabase
+        .from("catalog_items")
+        .select(COLS)
+        .eq("id", input.moldId)
+        .eq("item_type", "plastic_mold")
+        .maybeSingle();
     if (!mold) return { success: false, error: "That mold is not in the Registry any more." };
     const m = mold as Row;
     const model = (input.modelNumber ?? "").trim().replace(/^#/, "");
@@ -329,7 +393,11 @@ export async function fileReleaseUnderMold(input: {
         reason: `Added from the reference linker while linking a horse${input.note?.trim() ? ": " + input.note.trim() : "."}`,
     });
     if (!result.success) return { success: false, error: ("error" in result && result.error) || "Could not file it." };
-    return { success: true, suggestionId: (result as { id?: string }).id, autoApproved: (result as { autoApproved?: boolean }).autoApproved };
+    return {
+        success: true,
+        suggestionId: (result as { id?: string }).id,
+        autoApproved: (result as { autoApproved?: boolean }).autoApproved,
+    };
 }
 
 /** "Fill in what you know": one fact on one release. */
@@ -345,14 +413,23 @@ export async function fileReleaseFact(input: {
     // A set row's colour describes the piece on the mold it is filed under.
     // A colour for a different piece of the set would overwrite it.
     if (input.isSetPiece && input.fact === "colour") {
-        return { success: false, error: "This row is the set, filed under another mold. Use \"Add my release\" to record your piece's colour." };
+        return {
+            success: false,
+            error: 'This row is the set, filed under another mold. Use "Add my release" to record your piece\'s colour.',
+        };
     }
-    const field = input.fact === "colour" ? "color_description" : input.fact === "year" ? "release_year_start" : "model_number";
-    if (field === "release_year_start" && !/^\d{4}$/.test(value)) return { success: false, error: "Use a four-digit year." };
+    const field =
+        input.fact === "colour" ? "color_description" : input.fact === "year" ? "release_year_start" : "model_number";
+    if (field === "release_year_start" && !/^\d{4}$/.test(value))
+        return { success: false, error: "Use a four-digit year." };
     // The correction carries what the Registry holds today as `from`, so the
     // queue shows a real diff and a revert knows what to put back.
     const supabase = await createClient();
-    const { data: row } = await supabase.from("catalog_items").select("attributes").eq("id", input.catalogId).maybeSingle();
+    const { data: row } = await supabase
+        .from("catalog_items")
+        .select("attributes")
+        .eq("id", input.catalogId)
+        .maybeSingle();
     const current = ((row as { attributes?: Record<string, unknown> | null } | null)?.attributes ?? {})[field];
     const result = await createSuggestion({
         catalogItemId: input.catalogId,
@@ -380,7 +457,12 @@ export type MoldChoice = { id: string; title: string; maker: string; scale: stri
  * instead of matching typed text later.
  */
 export async function pickMold(rawTerm: string, maker: string | null, scale: string | null): Promise<MoldChoice[]> {
-    const term = stripGeneration(rawTerm.replace(/[%*,()]/g, " ").replace(/\s+/g, " ").trim()).trim();
+    const term = stripGeneration(
+        rawTerm
+            .replace(/[%*,()]/g, " ")
+            .replace(/\s+/g, " ")
+            .trim(),
+    ).trim();
     if (term.length < 2) return [];
     const supabase = await createClient();
     const search = (makerOnly: string | null) => {
@@ -396,7 +478,7 @@ export async function pickMold(rawTerm: string, maker: string | null, scale: str
     };
     // The member's own maker first: common words ("Mare", "Stallion") match
     // hundreds of molds, and theirs must not fall outside the first 40.
-    const own = maker ? ((await search(maker)).data ?? []) as MoldChoice[] : [];
+    const own = maker ? (((await search(maker)).data ?? []) as MoldChoice[]) : [];
     const rest = own.length >= 8 ? [] : (((await search(null)).data ?? []) as MoldChoice[]);
     const seen = new Set<string>();
     const rows = [...own, ...rest].filter((m) => (seen.has(m.id) ? false : (seen.add(m.id), true)));

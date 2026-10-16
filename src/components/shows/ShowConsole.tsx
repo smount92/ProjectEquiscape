@@ -43,18 +43,14 @@ const TABS: { key: TabKey; label: string }[] = [
 
 const TAB_KEYS = TABS.map((t) => t.key);
 
-export default function ShowConsole({ data, viewerTier = null }: { data: ShowConsoleData; viewerTier?: UserTier | null }) {
-    const {
-        show,
-        viewerId,
-        viewerRole,
-        divisions,
-        staff,
-        entries,
-        feePaidUserIds,
-        barred,
-        followerCount,
-    } = data;
+export default function ShowConsole({
+    data,
+    viewerTier = null,
+}: {
+    data: ShowConsoleData;
+    viewerTier?: UserTier | null;
+}) {
+    const { show, viewerId, viewerRole, divisions, staff, entries, feePaidUserIds, barred, followerCount } = data;
     const searchParams = useSearchParams();
     const { showToast, toastNode } = useShowToast();
 
@@ -65,8 +61,7 @@ export default function ShowConsole({ data, viewerTier = null }: { data: ShowCon
     // clicks update state and mirror to the URL shallowly below.
     const [activeTab, setActiveTab] = useState<TabKey>(() => {
         const raw = searchParams.get("tab");
-        const valid =
-            raw !== null && (TAB_KEYS as string[]).includes(raw) ? (raw as TabKey) : "overview";
+        const valid = raw !== null && (TAB_KEYS as string[]).includes(raw) ? (raw as TabKey) : "overview";
         return valid === "settings" && !canManage ? "overview" : valid;
     });
 
@@ -92,18 +87,13 @@ export default function ShowConsole({ data, viewerTier = null }: { data: ShowCon
         window.history.replaceState(null, "", url.toString());
     }, [searchParams, showToast]);
 
-    const classCount = divisions.reduce(
-        (sum, d) => sum + d.sections.reduce((s, sec) => s + sec.classes.length, 0),
-        0,
-    );
+    const classCount = divisions.reduce((sum, d) => sum + d.sections.reduce((s, sec) => s + sec.classes.length, 0), 0);
 
     // The announce composer's reach preview: distinct owners of live
     // entries, minus the sender (announceToEntrants applies the same
     // rule server-side and returns the real count).
     const announceRecipientCount = new Set(
-        entries
-            .filter((e) => e.status !== "scratched" && e.ownerId !== viewerId)
-            .map((e) => e.ownerId),
+        entries.filter((e) => e.status !== "scratched" && e.ownerId !== viewerId).map((e) => e.ownerId),
     ).size;
 
     const badgeFor = (key: TabKey): number | null => {
@@ -136,7 +126,7 @@ export default function ShowConsole({ data, viewerTier = null }: { data: ShowCon
             <div
                 role="tablist"
                 aria-label="Show console sections"
-                className="mb-6 flex gap-1 overflow-x-auto border-b border-border [-webkit-overflow-scrolling:touch] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                className="mb-6 flex gap-1 overflow-x-auto border-b border-border [-ms-overflow-style:none] [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             >
                 {visibleTabs.map((tab) => {
                     const badge = badgeFor(tab.key);
@@ -181,12 +171,7 @@ export default function ShowConsole({ data, viewerTier = null }: { data: ShowCon
                             canManage={canManage}
                             followerCount={followerCount}
                         />
-                        {canManage && (
-                            <ShowAnnounceDialog
-                                showId={show.id}
-                                recipientCount={announceRecipientCount}
-                            />
-                        )}
+                        {canManage && <ShowAnnounceDialog showId={show.id} recipientCount={announceRecipientCount} />}
                     </div>
                 )}
                 {activeTab === "classlist" && (
@@ -198,24 +183,22 @@ export default function ShowConsole({ data, viewerTier = null }: { data: ShowCon
                         entriesExist={entries.length > 0}
                     />
                 )}
-                {activeTab === "staff" && (
-                    <ShowStaffPanel showId={show.id} staff={staff} viewerRole={viewerRole} />
-                )}
+                {activeTab === "staff" && <ShowStaffPanel showId={show.id} staff={staff} viewerRole={viewerRole} />}
                 {activeTab === "entries" && (
                     <>
-                    {canManage && <PrintTagsLink showId={show.id} all tier={viewerTier} className="mb-3" />}
-                    <ShowEntriesPanel
-                        showId={show.id}
-                        divisions={divisions}
-                        entries={entries}
-                        showStatus={show.status}
-                        feePaidUserIds={feePaidUserIds}
-                        barred={barred ?? []}
-                        feeInfo={show.feeInfo}
-                        canManage={canManage}
-                        viewerRole={viewerRole}
-                        viewerId={viewerId}
-                    />
+                        {canManage && <PrintTagsLink showId={show.id} all tier={viewerTier} className="mb-3" />}
+                        <ShowEntriesPanel
+                            showId={show.id}
+                            divisions={divisions}
+                            entries={entries}
+                            showStatus={show.status}
+                            feePaidUserIds={feePaidUserIds}
+                            barred={barred ?? []}
+                            feeInfo={show.feeInfo}
+                            canManage={canManage}
+                            viewerRole={viewerRole}
+                            viewerId={viewerId}
+                        />
                     </>
                 )}
                 {activeTab === "settings" && canManage && <ShowSettingsForm show={show} />}

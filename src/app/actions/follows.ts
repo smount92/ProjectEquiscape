@@ -10,9 +10,7 @@ import { after } from "next/server";
 /**
  * Toggle follow on a user. Returns new state + counts.
  */
-export async function toggleFollow(
-    targetUserId: string
-): Promise<{
+export async function toggleFollow(targetUserId: string): Promise<{
     success: boolean;
     isFollowing?: boolean;
     followerCount?: number;
@@ -50,11 +48,7 @@ export async function toggleFollow(
         }
 
         // Notify the followed user (fire-and-forget)
-        const { data: actor } = await supabase
-            .from("users")
-            .select("alias_name")
-            .eq("id", user.id)
-            .single();
+        const { data: actor } = await supabase.from("users").select("alias_name").eq("id", user.id).single();
         const alias = (actor as { alias_name: string } | null)?.alias_name || "Someone";
         await createNotification({
             userId: targetUserId,
@@ -76,7 +70,9 @@ export async function toggleFollow(
             try {
                 const { evaluateUserAchievements } = await import("@/lib/utils/achievements");
                 await evaluateUserAchievements(targetId, "follower_gained");
-            } catch (err) { logger.error("Follows", "Background task failed", err); }
+            } catch (err) {
+                logger.error("Follows", "Background task failed", err);
+            }
         });
     }
 
@@ -107,14 +103,8 @@ export async function getFollowStats(userId: string): Promise<{
     } = await supabase.auth.getUser();
 
     const [{ count: followerCount }, { count: followingCount }] = await Promise.all([
-        supabase
-            .from("user_follows")
-            .select("id", { count: "exact", head: true })
-            .eq("following_id", userId),
-        supabase
-            .from("user_follows")
-            .select("id", { count: "exact", head: true })
-            .eq("follower_id", userId),
+        supabase.from("user_follows").select("id", { count: "exact", head: true }).eq("following_id", userId),
+        supabase.from("user_follows").select("id", { count: "exact", head: true }).eq("follower_id", userId),
     ]);
 
     let isFollowing = false;

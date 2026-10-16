@@ -84,7 +84,6 @@ function ShowRingHorseCard({ horse }: { horse: ShowRingCard }) {
                 {/* Image container — locked aspect ratio */}
                 <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-muted">
                     {horse.thumbnailUrl ? (
-                         
                         <ThumbImage
                             src={horse.thumbnailUrl}
                             onError={(e) => {
@@ -171,11 +170,7 @@ function ShowRingHorseCard({ horse }: { horse: ShowRingCard }) {
                 navigating; renders nothing when there is no record. */}
             {horse.recordSummary && (
                 <div className="mt-2 px-1">
-                    <HorseRecordChip
-                        horseId={horse.id}
-                        horseName={horse.customName}
-                        summary={horse.recordSummary}
-                    />
+                    <HorseRecordChip horseId={horse.id} horseName={horse.customName} summary={horse.recordSummary} />
                 </div>
             )}
 
@@ -269,11 +264,7 @@ export default function ShowRingBrowser({
 
     return (
         <>
-            <ShowRingFilterBar
-                filters={filters}
-                facetOptions={facetOptions}
-                onFiltersChange={pushFilters}
-            />
+            <ShowRingFilterBar filters={filters} facetOptions={facetOptions} onFiltersChange={pushFilters} />
 
             {/* Result line */}
             <div className="mt-3 mb-4 pl-1 text-sm text-muted-foreground italic" id="showring-result-line">
@@ -294,9 +285,7 @@ export default function ShowRingBrowser({
                 /* True-empty ring: nothing public yet */
                 <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-input bg-muted/50 p-16">
                     <span className="mb-4 text-6xl">🏟️</span>
-                    <h2 className="mb-2 font-serif text-xl font-semibold text-foreground">
-                        The Show Ring is Empty
-                    </h2>
+                    <h2 className="mb-2 font-serif text-xl font-semibold text-foreground">The Show Ring is Empty</h2>
                     <p className="mb-6 max-w-sm text-center text-muted-foreground">
                         No models have been shared yet. Be the first to showcase your collection!
                     </p>

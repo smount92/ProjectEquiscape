@@ -31,13 +31,7 @@ export function linkHost(url: string): string {
     }
 }
 
-export default function EventLinkOut({
-    url,
-    label = "Event page",
-}: {
-    url: string;
-    label?: string;
-}) {
+export default function EventLinkOut({ url, label = "Event page" }: { url: string; label?: string }) {
     const host = linkHost(url);
 
     return (
@@ -45,13 +39,11 @@ export default function EventLinkOut({
             href={url}
             target="_blank"
             rel="noopener nofollow"
-            className="inline-flex items-center gap-2 rounded-md border-2 border-forest bg-forest/5 px-4 py-2 font-serif text-sm font-bold tracking-[0.08em] uppercase text-forest no-underline transition-colors hover:bg-forest hover:text-white"
+            className="inline-flex items-center gap-2 rounded-md border-2 border-forest bg-forest/5 px-4 py-2 font-serif text-sm font-bold tracking-[0.08em] text-forest uppercase no-underline transition-colors hover:bg-forest hover:text-white"
         >
             {label}
             <span aria-hidden="true">↗</span>
-            <span className="font-sans text-[0.7rem] font-normal tracking-normal normal-case opacity-70">
-                {host}
-            </span>
+            <span className="font-sans text-[0.7rem] font-normal tracking-normal normal-case opacity-70">{host}</span>
         </a>
     );
 }

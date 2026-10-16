@@ -2,112 +2,118 @@ import { registryClaimLive } from "@/lib/stats/registryClaimLive";
 
 export default async function AiDataPolicySection() {
     const registry = await registryClaimLive();
- return (
- <section className="mb-12" id="ai-data-policy">
- <h2>🤖 AI, Data Collection, and Copyright Policy</h2>
- <p className="mb-6 text-base leading-relaxed text-secondary-foreground">
-  We believe your data and your art belong to you. Because there is a lot of confusion
-  regarding how modern websites are built, we want to be fully transparent about our
-  technology and data practices:
- </p>
+    return (
+        <section className="mb-12" id="ai-data-policy">
+            <h2>🤖 AI, Data Collection, and Copyright Policy</h2>
+            <p className="mb-6 text-base leading-relaxed text-secondary-foreground">
+                We believe your data and your art belong to you. Because there is a lot of confusion regarding how
+                modern websites are built, we want to be fully transparent about our technology and data practices:
+            </p>
 
- <div className="flex flex-col gap-6">
-  {/* Q1 */}
-  <div className="rounded-lg border border-input bg-card p-6 shadow-sm">
-  <h3 className="mb-2 text-base font-bold text-foreground">
-   1. Are my photos used to train AI?
-  </h3>
-  <p className="text-base leading-relaxed text-secondary-foreground">
-   <strong>Absolutely not.</strong> Model Horse Hub does not use user-uploaded images,
-   descriptions, or custom artwork to train any Generative Artificial Intelligence models.
-   We do not sell or share our database with third-party AI companies. Your photos and art
-   remain your exclusive intellectual property.
-  </p>
-  </div>
+            <div className="flex flex-col gap-6">
+                {/* Q1 */}
+                <div className="rounded-lg border border-input bg-card p-6 shadow-sm">
+                    <h3 className="mb-2 text-base font-bold text-foreground">1. Are my photos used to train AI?</h3>
+                    <p className="text-base leading-relaxed text-secondary-foreground">
+                        <strong>Absolutely not.</strong> Model Horse Hub does not use user-uploaded images,
+                        descriptions, or custom artwork to train any Generative Artificial Intelligence models. We do
+                        not sell or share our database with third-party AI companies. Your photos and art remain your
+                        exclusive intellectual property.
+                    </p>
+                </div>
 
-  {/* Q2 */}
-  <div className="rounded-lg border border-input bg-card p-6 shadow-sm">
-  <h3 className="mb-2 text-base font-bold text-foreground">
-   2. Did you use AI to scrape other hobby websites?
-  </h3>
-  <p className="text-base leading-relaxed text-secondary-foreground">
-   <strong>No.</strong> Our reference catalog of {registry} models was built using
-   traditional, standard data-gathering scripts, not AI scrapers.
-  </p>
-  </div>
+                {/* Q2 */}
+                <div className="rounded-lg border border-input bg-card p-6 shadow-sm">
+                    <h3 className="mb-2 text-base font-bold text-foreground">
+                        2. Did you use AI to scrape other hobby websites?
+                    </h3>
+                    <p className="text-base leading-relaxed text-secondary-foreground">
+                        <strong>No.</strong> Our reference catalog of {registry} models was built using traditional,
+                        standard data-gathering scripts, not AI scrapers.
+                    </p>
+                </div>
 
-  {/* Q3 */}
-  <div className="rounded-lg border border-input bg-card p-6 shadow-sm">
-  <h3 className="mb-2 text-base font-bold text-foreground">
-   3. How did you gather the reference data ethically?
-  </h3>
-  <p className="mb-4 text-base leading-relaxed text-secondary-foreground">
-   We took strict measures to ensure our data collection was ethical, legal, and respectful
-   of the hobby ecosystem:
-  </p>
-  <ul className="flex flex-col gap-3 p-0">
-   <li className="flex items-start gap-3 text-base leading-relaxed text-secondary-foreground">
-   <span className="mt-0.5 shrink-0 text-lg" aria-hidden="true">📋</span>
-   <span>
-    <strong>Non-Copyrightable Facts Only:</strong> We only indexed publicly available,
-    factual data (e.g., manufacturer names, release years, scales, and mold names).
-    Facts cannot be copyrighted. We did not scrape original articles, artist
-    biographies, or opinion pieces.
-   </span>
-   </li>
-   <li className="flex items-start gap-3 text-base leading-relaxed text-secondary-foreground">
-   <span className="mt-0.5 shrink-0 text-lg" aria-hidden="true">🚫</span>
-   <span>
-    <strong>Zero Photos Scraped:</strong> We explicitly excluded all images from our
-    data gathering to protect the copyright of hobby photographers and artists. Every
-    reference photo on MHH has been uploaded by a community member who owns that
-    specific model.
-   </span>
-   </li>
-   <li className="flex items-start gap-3 text-base leading-relaxed text-secondary-foreground">
-   <span className="mt-0.5 shrink-0 text-lg" aria-hidden="true">🐢</span>
-   <span>
-    <strong>Server Respect (Rate-Limiting):</strong> We know that legacy hobby
-    reference websites are often run by volunteers on tight budgets. We heavily
-    rate-limited our scripts to run slowly, ensuring we never consumed excess
-    bandwidth, wore down, or burdened their servers.
-   </span>
-   </li>
-  </ul>
-  </div>
+                {/* Q3 */}
+                <div className="rounded-lg border border-input bg-card p-6 shadow-sm">
+                    <h3 className="mb-2 text-base font-bold text-foreground">
+                        3. How did you gather the reference data ethically?
+                    </h3>
+                    <p className="mb-4 text-base leading-relaxed text-secondary-foreground">
+                        We took strict measures to ensure our data collection was ethical, legal, and respectful of the
+                        hobby ecosystem:
+                    </p>
+                    <ul className="flex flex-col gap-3 p-0">
+                        <li className="flex items-start gap-3 text-base leading-relaxed text-secondary-foreground">
+                            <span className="mt-0.5 shrink-0 text-lg" aria-hidden="true">
+                                📋
+                            </span>
+                            <span>
+                                <strong>Non-Copyrightable Facts Only:</strong> We only indexed publicly available,
+                                factual data (e.g., manufacturer names, release years, scales, and mold names). Facts
+                                cannot be copyrighted. We did not scrape original articles, artist biographies, or
+                                opinion pieces.
+                            </span>
+                        </li>
+                        <li className="flex items-start gap-3 text-base leading-relaxed text-secondary-foreground">
+                            <span className="mt-0.5 shrink-0 text-lg" aria-hidden="true">
+                                🚫
+                            </span>
+                            <span>
+                                <strong>Zero Photos Scraped:</strong> We explicitly excluded all images from our data
+                                gathering to protect the copyright of hobby photographers and artists. Every reference
+                                photo on MHH has been uploaded by a community member who owns that specific model.
+                            </span>
+                        </li>
+                        <li className="flex items-start gap-3 text-base leading-relaxed text-secondary-foreground">
+                            <span className="mt-0.5 shrink-0 text-lg" aria-hidden="true">
+                                🐢
+                            </span>
+                            <span>
+                                <strong>Server Respect (Rate-Limiting):</strong> We know that legacy hobby reference
+                                websites are often run by volunteers on tight budgets. We heavily rate-limited our
+                                scripts to run slowly, ensuring we never consumed excess bandwidth, wore down, or
+                                burdened their servers.
+                            </span>
+                        </li>
+                    </ul>
+                </div>
 
-  {/* Q4 */}
-  <div className="rounded-lg border border-input bg-card p-6 shadow-sm">
-  <h3 className="mb-2 text-base font-bold text-foreground">
-   4. Where is AI actually used on the platform?
-  </h3>
-  <p className="mb-4 text-base leading-relaxed text-secondary-foreground">
-   <strong>Nowhere that touches your data.</strong> We listened to the community on this
-   one: as of August 2026, no feature on Model Horse Hub sends your photos, collection
-   data, or vault information to any AI service. (An earlier optional mold-identification
-   tool has been removed.) The only remaining AI involvement is behind the scenes:
-  </p>
-  <ul className="flex flex-col gap-3 p-0">
-   <li className="flex items-start gap-3 text-base leading-relaxed text-secondary-foreground">
-   <span className="mt-0.5 shrink-0 text-lg" aria-hidden="true">💻</span>
-   <span>
-    <strong>Writing Code:</strong> We utilized AI coding assistants to help our human
-    developers architect the database and write portions of the platform&apos;s code
-    securely and efficiently.
-   </span>
-   </li>
-   <li className="flex items-start gap-3 text-base leading-relaxed text-secondary-foreground">
-   <span className="mt-0.5 shrink-0 text-lg" aria-hidden="true">📊</span>
-   <span>
-    <strong>Monthly Collection Report (Pro Feature):</strong> Premium users receive an
-    automated monthly email summarizing their collection&apos;s market value changes.
-    This report is computed entirely on our own servers with plain arithmetic &mdash;{" "}
-    <strong>no AI is involved and your data never leaves the platform</strong>.
-   </span>
-   </li>
-  </ul>
-  </div>
- </div>
- </section>
- );
+                {/* Q4 */}
+                <div className="rounded-lg border border-input bg-card p-6 shadow-sm">
+                    <h3 className="mb-2 text-base font-bold text-foreground">
+                        4. Where is AI actually used on the platform?
+                    </h3>
+                    <p className="mb-4 text-base leading-relaxed text-secondary-foreground">
+                        <strong>Nowhere that touches your data.</strong> We listened to the community on this one: as of
+                        August 2026, no feature on Model Horse Hub sends your photos, collection data, or vault
+                        information to any AI service. (An earlier optional mold-identification tool has been removed.)
+                        The only remaining AI involvement is behind the scenes:
+                    </p>
+                    <ul className="flex flex-col gap-3 p-0">
+                        <li className="flex items-start gap-3 text-base leading-relaxed text-secondary-foreground">
+                            <span className="mt-0.5 shrink-0 text-lg" aria-hidden="true">
+                                💻
+                            </span>
+                            <span>
+                                <strong>Writing Code:</strong> We utilized AI coding assistants to help our human
+                                developers architect the database and write portions of the platform&apos;s code
+                                securely and efficiently.
+                            </span>
+                        </li>
+                        <li className="flex items-start gap-3 text-base leading-relaxed text-secondary-foreground">
+                            <span className="mt-0.5 shrink-0 text-lg" aria-hidden="true">
+                                📊
+                            </span>
+                            <span>
+                                <strong>Monthly Collection Report (Pro Feature):</strong> Premium users receive an
+                                automated monthly email summarizing their collection&apos;s market value changes. This
+                                report is computed entirely on our own servers with plain arithmetic &mdash;{" "}
+                                <strong>no AI is involved and your data never leaves the platform</strong>.
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    );
 }

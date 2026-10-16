@@ -15,9 +15,7 @@
 
 import type { ClassStatus, ShowMode, ShowStatus } from "./types";
 
-export type TransitionResult =
-    | { ok: true }
-    | { ok: false; reason: string };
+export type TransitionResult = { ok: true } | { ok: false; reason: string };
 
 // ── Show lifecycle ──
 
@@ -56,11 +54,7 @@ export const SHOW_STATUS_ORDER: ShowStatus[] = [
  * Can a show move from `from` to `to` given its mode?
  * Returns an explicit reason on refusal — surfaced verbatim to hosts.
  */
-export function canTransition(
-    from: ShowStatus,
-    to: ShowStatus,
-    mode: ShowMode,
-): TransitionResult {
+export function canTransition(from: ShowStatus, to: ShowStatus, mode: ShowMode): TransitionResult {
     if (from === to) {
         return { ok: false, reason: `Show is already ${formatStatus(to)}.` };
     }
@@ -83,12 +77,12 @@ export function canTransition(
             reason: `A show cannot go from ${formatStatus(from)} to ${formatStatus(to)}. Next step${allowed.length === 1 ? "" : "s"}: ${
                 allowed.length > 0
                     ? allowed
-                        .filter((s) => {
-                            const m = MODE_ONLY[s];
-                            return !m || m === mode;
-                        })
-                        .map(formatStatus)
-                        .join(", ")
+                          .filter((s) => {
+                              const m = MODE_ONLY[s];
+                              return !m || m === mode;
+                          })
+                          .map(formatStatus)
+                          .join(", ")
                     : "none — the show is archived"
             }.`,
         };
@@ -124,10 +118,7 @@ const CLASS_TRANSITIONS: Record<ClassStatus, ClassStatus[]> = {
     cancelled: ["scheduled"], // un-cancel before anything was judged
 };
 
-export function canTransitionClass(
-    from: ClassStatus,
-    to: ClassStatus,
-): TransitionResult {
+export function canTransitionClass(from: ClassStatus, to: ClassStatus): TransitionResult {
     if (from === to) {
         return { ok: false, reason: `Class is already ${formatStatus(to)}.` };
     }
@@ -169,12 +160,5 @@ export function canCombineClass(status: ClassStatus): TransitionResult {
 
 /** Day-of mutations (split/combine/cancel/record) are only legal while the show runs. */
 export function isShowMutableForClasslist(status: ShowStatus): boolean {
-    return [
-        "draft",
-        "published",
-        "entries_open",
-        "entries_closed",
-        "running",
-        "judging",
-    ].includes(status);
+    return ["draft", "published", "entries_open", "entries_closed", "running", "judging"].includes(status);
 }

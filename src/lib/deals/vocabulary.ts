@@ -225,10 +225,7 @@ export function payeeParty(kind: DealKind): DealParty | null {
  * "did you click first?" and answered "you are the buyer" — the reason
  * the thread header has been labelling sellers as buyers since 2024.
  */
-export function partyForUser(
-    userId: string,
-    parties: { aId: string | null; bId: string | null },
-): DealParty | null {
+export function partyForUser(userId: string, parties: { aId: string | null; bId: string | null }): DealParty | null {
     if (parties.aId && userId === parties.aId) return "a";
     if (parties.bId && userId === parties.bId) return "b";
     return null;

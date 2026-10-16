@@ -85,10 +85,7 @@ export default function PhotoStudio({
         return good;
     };
 
-    const startQueue = (
-        files: File[],
-        target: { kind: "extra" | "flaw"; replaceIndex: number | null },
-    ) => {
+    const startQueue = (files: File[], target: { kind: "extra" | "flaw"; replaceIndex: number | null }) => {
         const good = accept(files);
         if (good.length === 0) return;
         setCropTarget(target);
@@ -139,9 +136,7 @@ export default function PhotoStudio({
             revokeImagePreviewUrl(list[idx]?.previewUrl);
             onChange({
                 ...value,
-                [listKey]: list.map((item, i) =>
-                    i === idx ? { file: cropped, previewUrl } : item,
-                ),
+                [listKey]: list.map((item, i) => (i === idx ? { file: cropped, previewUrl } : item)),
             });
             setCropFile(null);
             setCropTarget(null);
@@ -172,9 +167,8 @@ export default function PhotoStudio({
     return (
         <>
             <p className="mb-5 text-sm text-secondary-foreground">
-                Click a mount to seat a photo in it. Everything is cropped and compressed
-                here in your browser before it is saved. The{" "}
-                <strong>primary shot</strong> is the one your Digital Shelf will show.
+                Click a mount to seat a photo in it. Everything is cropped and compressed here in your browser before it
+                is saved. The <strong>primary shot</strong> is the one your Digital Shelf will show.
             </p>
 
             {notice && (
@@ -276,8 +270,7 @@ export default function PhotoStudio({
                 />
             ) : (
                 <div className="rounded-lg border border-input bg-muted px-4 py-3 text-sm text-muted-foreground">
-                    Extra detail shots are a Pro feature. Condition photos above are free
-                    for everyone, always.
+                    Extra detail shots are a Pro feature. Condition photos above are free for everyone, always.
                 </div>
             )}
 
@@ -365,12 +358,7 @@ function ThumbStrip({
                     if (files.length > 0) onPick(files.slice(0, cap - items.length));
                 }}
             />
-            <Button
-                type="button"
-                variant="outline"
-                disabled={full}
-                onClick={() => inputRef.current?.click()}
-            >
+            <Button type="button" variant="outline" disabled={full} onClick={() => inputRef.current?.click()}>
                 {full ? `${cap} is the limit` : `+ Add ${title.toLowerCase()}`}
             </Button>
             <span className="ml-3 text-xs text-muted-foreground">

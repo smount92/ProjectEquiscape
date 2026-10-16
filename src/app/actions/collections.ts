@@ -50,7 +50,7 @@ export async function createCollectionAction(name: string, description: string |
  */
 export async function updateCollectionAction(
     collectionId: string,
-    data: { name?: string; description?: string; isPublic?: boolean }
+    data: { name?: string; description?: string; isPublic?: boolean },
 ): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
@@ -77,16 +77,11 @@ export async function updateCollectionAction(
  * Delete a collection. Horses in it become uncollected (not deleted).
  * @param collectionId - UUID of the collection to delete
  */
-export async function deleteCollectionAction(
-    collectionId: string
-): Promise<{ success: boolean; error?: string }> {
+export async function deleteCollectionAction(collectionId: string): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
     // Clean up junction table (cascade should handle this, but be explicit)
-    await supabase
-        .from("horse_collections")
-        .delete()
-        .eq("collection_id", collectionId);
+    await supabase.from("horse_collections").delete().eq("collection_id", collectionId);
 
     // Also unassign from legacy FK column
     await supabase
@@ -95,11 +90,7 @@ export async function deleteCollectionAction(
         .eq("collection_id", collectionId)
         .eq("owner_id", user.id);
 
-    const { error } = await supabase
-        .from("user_collections")
-        .delete()
-        .eq("id", collectionId)
-        .eq("user_id", user.id);
+    const { error } = await supabase.from("user_collections").delete().eq("id", collectionId).eq("user_id", user.id);
 
     if (error) return { success: false, error: error.message };
     revalidatePath("/dashboard");
@@ -121,7 +112,7 @@ export async function getHorseCollections(horseId: string): Promise<string[]> {
  */
 export async function setHorseCollections(
     horseId: string,
-    collectionIds: string[]
+    collectionIds: string[],
 ): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 

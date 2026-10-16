@@ -33,9 +33,7 @@ export async function uploadImageWithRetry(
     let { error } = await client.storage.from(bucket).upload(path, body, { contentType });
     if (error) {
         await new Promise((resolve) => setTimeout(resolve, 800));
-        ({ error } = await client.storage
-            .from(bucket)
-            .upload(path, body, { contentType, upsert: true }));
+        ({ error } = await client.storage.from(bucket).upload(path, body, { contentType, upsert: true }));
     }
     if (error) {
         Sentry.captureException(new Error(`Image upload failed after retry: ${error.message}`), {

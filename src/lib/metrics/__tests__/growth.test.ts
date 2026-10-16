@@ -10,7 +10,13 @@ describe("growth series", () => {
     });
 
     it("buckets stamps by day and fills the gaps with zero", () => {
-        const stamps = ["2026-09-21T01:00:00Z", "2026-09-21T23:59:00Z", "2026-09-19T12:00:00Z", "2026-08-01T00:00:00Z", null];
+        const stamps = [
+            "2026-09-21T01:00:00Z",
+            "2026-09-21T23:59:00Z",
+            "2026-09-19T12:00:00Z",
+            "2026-08-01T00:00:00Z",
+            null,
+        ];
         expect(bucketByDay(stamps, 3, NOW)).toEqual([1, 0, 2]);
     });
 

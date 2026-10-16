@@ -85,11 +85,7 @@ export async function generateMetadata({
     };
 }
 
-export default async function PlacingSharePage({
-    params,
-}: {
-    params: Promise<{ id: string; entryId: string }>;
-}) {
+export default async function PlacingSharePage({ params }: { params: Promise<{ id: string; entryId: string }> }) {
     const { id, entryId } = await params;
 
     const supabase = await createClient();
@@ -115,15 +111,8 @@ export default async function PlacingSharePage({
 
     return (
         <ExplorerLayout frameless noHeader>
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-            />
-            <PlacingCelebration
-                data={data}
-                authed={!!user}
-                shareUrl={`${APP_URL}/shows/${id}/placing/${entryId}`}
-            />
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+            <PlacingCelebration data={data} authed={!!user} shareUrl={`${APP_URL}/shows/${id}/placing/${entryId}`} />
         </ExplorerLayout>
     );
 }

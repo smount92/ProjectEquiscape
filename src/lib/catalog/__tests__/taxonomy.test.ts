@@ -149,9 +149,10 @@ describe("attribution split — artist vs manufacturer", () => {
     });
 
     it("artist pieces: maker is the artist, manufacturer only if explicit", () => {
-        expect(
-            deriveAttribution({ item_type: "artist_resin", maker: "Sarah Rose" }),
-        ).toEqual({ artist: "Sarah Rose", manufacturer: null });
+        expect(deriveAttribution({ item_type: "artist_resin", maker: "Sarah Rose" })).toEqual({
+            artist: "Sarah Rose",
+            manufacturer: null,
+        });
         expect(
             deriveAttribution({
                 item_type: "artist_resin",
@@ -187,9 +188,10 @@ describe("attribution split — artist vs manufacturer", () => {
     });
 
     it("blank strings degrade to null, never to empty credit lines", () => {
-        expect(
-            deriveAttribution({ item_type: "artist_resin", maker: "  ", sculptor: " " }),
-        ).toEqual({ artist: null, manufacturer: null });
+        expect(deriveAttribution({ item_type: "artist_resin", maker: "  ", sculptor: " " })).toEqual({
+            artist: null,
+            manufacturer: null,
+        });
     });
 });
 

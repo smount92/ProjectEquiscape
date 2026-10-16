@@ -76,10 +76,7 @@ export async function notifyHorsePublic(data: {
     }
 
     // Check for wishlist matches if horse is listed for sale
-    if (
-        (horse.trade_status === "For Sale" || horse.trade_status === "Open to Offers") &&
-        horse.catalog_id
-    ) {
+    if ((horse.trade_status === "For Sale" || horse.trade_status === "Open to Offers") && horse.catalog_id) {
         try {
             await checkWishlistMatches({
                 userId: user.id,
@@ -145,7 +142,7 @@ async function checkWishlistMatches(data: {
                 actor_id: data.userId,
                 content: `A ${data.horseName} matching your Want List is now ${data.tradeStatus}!`,
                 horse_id: data.horseId,
-            }))
+            })),
         );
     } catch {
         logger.error("WishlistMatch", "Failed to check matches");

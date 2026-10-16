@@ -36,7 +36,15 @@ describe("moldSearch", () => {
             ["pp", []],
             ["sm", ["r5010", "sultan", "emperor"]],
         ]);
-        expect(placeReleasesUnderMolds(candidates, kids)).toEqual(["schleich", "pp", "sm", "r5010", "sultan", "emperor", "proud"]);
+        expect(placeReleasesUnderMolds(candidates, kids)).toEqual([
+            "schleich",
+            "pp",
+            "sm",
+            "r5010",
+            "sultan",
+            "emperor",
+            "proud",
+        ]);
         expect(placeReleasesUnderMolds(candidates, kids, { preferStablemate: true })).toEqual([
             "sm",
             "r5010",

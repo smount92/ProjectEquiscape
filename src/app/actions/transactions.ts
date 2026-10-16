@@ -12,11 +12,7 @@ import { createActivityEvent } from "@/app/actions/activity";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 
-import {
-    canPerform,
-    requirePaidAt,
-    type TransactionStatus,
-} from "@/lib/commerce/stateMachine";
+import { canPerform, requirePaidAt, type TransactionStatus } from "@/lib/commerce/stateMachine";
 import { assertHorseAvailable, cancelSiblingOffers } from "@/lib/commerce/horseLock";
 import { stampPaidAtFromLedger } from "@/lib/commerce/planRelease";
 import { isMissingSchema } from "@/lib/deals/columnSupport";
@@ -153,9 +149,7 @@ export async function createTransaction(data: {
                 // another writable flag.
                 const { data: conv, error: convError } = await admin
                     .from("conversations")
-                    .select(
-                        "id, completion_confirmed_by_buyer_at, completion_confirmed_by_seller_at",
-                    )
+                    .select("id, completion_confirmed_by_buyer_at, completion_confirmed_by_seller_at")
                     .eq("id", input.conversationId)
                     .eq("seller_id", input.partyAId)
                     .eq("buyer_id", input.partyBId)
@@ -169,8 +163,7 @@ export async function createTransaction(data: {
                     // migration is pasted rather than staying exploitable.
                     return {
                         success: false,
-                        error:
-                            "Completing a conversation needs a database update that hasn't been applied yet.",
+                        error: "Completing a conversation needs a database update that hasn't been applied yet.",
                     };
                 }
 
@@ -179,9 +172,7 @@ export async function createTransaction(data: {
                     completion_confirmed_by_seller_at: string | null;
                 } | null;
                 eventVerified =
-                    !!row &&
-                    !!row.completion_confirmed_by_buyer_at &&
-                    !!row.completion_confirmed_by_seller_at;
+                    !!row && !!row.completion_confirmed_by_buyer_at && !!row.completion_confirmed_by_seller_at;
             }
         }
         if (!eventVerified) {
@@ -204,11 +195,7 @@ export async function createTransaction(data: {
     if (input.metadata) insertData.metadata = input.metadata as TransactionInsert["metadata"];
     if (input.status === "completed") insertData.completed_at = new Date().toISOString();
 
-    const { data: row, error } = await admin
-        .from("transactions")
-        .insert(insertData)
-        .select("id")
-        .single();
+    const { data: row, error } = await admin.from("transactions").insert(insertData).select("id").single();
 
     if (error) return { success: false, error: error.message };
     return { success: true, transactionId: (row as { id: string }).id };
@@ -222,9 +209,7 @@ export async function createTransaction(data: {
  * flow) or 'funds_verified' (Safe-Trade claim flow).
  * @param transactionId - UUID of the transaction to complete
  */
-export async function completeTransaction(
-    transactionId: string
-): Promise<{ success: boolean; error?: string }> {
+export async function completeTransaction(transactionId: string): Promise<{ success: boolean; error?: string }> {
     const parsedId = transactionIdSchema.safeParse(transactionId);
     if (!parsedId.success) return { success: false, error: firstZodError(parsedId.error) };
 
@@ -293,7 +278,10 @@ export async function completeTransaction(
         try {
             const { evaluateUserAchievements } = await import("@/lib/utils/achievements");
             await evaluateUserAchievements(completingUserId, "transaction_completed");
-        } catch (err) { Sentry.captureException(err, { tags: { domain: "commerce" } }); logger.error("Commerce", "Background task failed", err); }
+        } catch (err) {
+            Sentry.captureException(err, { tags: { domain: "commerce" } });
+            logger.error("Commerce", "Background task failed", err);
+        }
     });
 
     return { success: true };
@@ -305,24 +293,26 @@ export async function completeTransaction(
  * Includes attached reviews for each transaction.
  * @returns Transactions with camelCase field names and nested reviews
  */
-export async function getTransactionsForUser(): Promise<{
-    id: string;
-    type: string;
-    status: string;
-    partyAId: string;
-    partyBId: string | null;
-    horseId: string | null;
-    completedAt: string | null;
-    createdAt: string;
-    reviews: {
+export async function getTransactionsForUser(): Promise<
+    {
         id: string;
-        reviewerId: string;
-        targetId: string;
-        stars: number;
-        content: string | null;
+        type: string;
+        status: string;
+        partyAId: string;
+        partyBId: string | null;
+        horseId: string | null;
+        completedAt: string | null;
         createdAt: string;
-    }[];
-}[]> {
+        reviews: {
+            id: string;
+            reviewerId: string;
+            targetId: string;
+            stars: number;
+            content: string | null;
+            createdAt: string;
+        }[];
+    }[]
+> {
     const { supabase, user } = await requireAuth();
 
     const { data: rows } = await supabase
@@ -333,7 +323,7 @@ export async function getTransactionsForUser(): Promise<{
 
     if (!rows || rows.length === 0) return [];
 
-    const txnIds = (rows as { id: string }[]).map(r => r.id);
+    const txnIds = (rows as { id: string }[]).map((r) => r.id);
 
     const { data: reviewRows } = await supabase
         .from("reviews")
@@ -341,17 +331,32 @@ export async function getTransactionsForUser(): Promise<{
         .in("transaction_id", txnIds);
 
     const reviewsByTxn = new Map<string, typeof reviewRows>();
-    for (const r of (reviewRows ?? []) as { id: string; transaction_id: string; reviewer_id: string; target_id: string; stars: number; content: string | null; created_at: string }[]) {
+    for (const r of (reviewRows ?? []) as {
+        id: string;
+        transaction_id: string;
+        reviewer_id: string;
+        target_id: string;
+        stars: number;
+        content: string | null;
+        created_at: string;
+    }[]) {
         const list = reviewsByTxn.get(r.transaction_id) ?? [];
         list.push(r);
         reviewsByTxn.set(r.transaction_id, list);
     }
 
-    return (rows as {
-        id: string; type: string; status: string;
-        party_a_id: string; party_b_id: string | null;
-        horse_id: string | null; completed_at: string | null; created_at: string;
-    }[]).map(r => ({
+    return (
+        rows as {
+            id: string;
+            type: string;
+            status: string;
+            party_a_id: string;
+            party_b_id: string | null;
+            horse_id: string | null;
+            completed_at: string | null;
+            created_at: string;
+        }[]
+    ).map((r) => ({
         id: r.id,
         type: r.type,
         status: r.status,
@@ -360,10 +365,16 @@ export async function getTransactionsForUser(): Promise<{
         horseId: r.horse_id,
         completedAt: r.completed_at,
         createdAt: r.created_at,
-        reviews: ((reviewsByTxn.get(r.id) ?? []) as {
-            id: string; reviewer_id: string; target_id: string;
-            stars: number; content: string | null; created_at: string;
-        }[]).map(rv => ({
+        reviews: (
+            (reviewsByTxn.get(r.id) ?? []) as {
+                id: string;
+                reviewer_id: string;
+                target_id: string;
+                stars: number;
+                content: string | null;
+                created_at: string;
+            }[]
+        ).map((rv) => ({
             id: rv.id,
             reviewerId: rv.reviewer_id,
             targetId: rv.target_id,
@@ -437,20 +448,14 @@ export async function leaveReview(data: {
     // Deep-link where the review actually renders — the REVIEWED
     // user's profile (without this the bell fell back to the
     // reviewer's profile, which is not where the review lives).
-    const { data: target } = await supabase
-        .from("users")
-        .select("alias_name")
-        .eq("id", input.targetId)
-        .maybeSingle();
+    const { data: target } = await supabase.from("users").select("alias_name").eq("id", input.targetId).maybeSingle();
     const targetAlias = (target as { alias_name: string } | null)?.alias_name;
     await createNotification({
         userId: input.targetId,
         type: "rating",
         actorId: user.id,
         content: `@${alias} left you a ★${input.stars} review`,
-        ...(targetAlias
-            ? { linkUrl: `/profile/${encodeURIComponent(targetAlias)}` }
-            : {}),
+        ...(targetAlias ? { linkUrl: `/profile/${encodeURIComponent(targetAlias)}` } : {}),
     });
     await createActivityEvent({
         actorId: user.id,
@@ -468,9 +473,7 @@ export async function leaveReview(data: {
  * reviews (a non-matching id is a silent no-op, preserved behavior).
  * @param reviewId - UUID of the review to delete
  */
-export async function deleteReview(
-    reviewId: string
-): Promise<{ success: boolean; error?: string }> {
+export async function deleteReview(reviewId: string): Promise<{ success: boolean; error?: string }> {
     const parsedId = reviewIdSchema.safeParse(reviewId);
     if (!parsedId.success) return { success: false, error: firstZodError(parsedId.error) };
 
@@ -490,9 +493,7 @@ export async function deleteReview(
  * @param userId - UUID of the user to get reviews for
  * @returns Average rating, total count, and list of reviews with reviewer aliases
  */
-export async function getUserReviewSummary(
-    userId: string
-): Promise<{
+export async function getUserReviewSummary(userId: string): Promise<{
     average: number;
     count: number;
     ratings: {
@@ -545,14 +546,16 @@ export async function getUserReviewSummary(
  * Batch-fetches target user aliases and horse names for display.
  * @returns Unreviewed transactions with target alias and horse name
  */
-export async function getReviewableTransactions(): Promise<{
-    transactionId: string;
-    type: string;
-    targetId: string;
-    targetAlias: string;
-    horseName: string | null;
-    completedAt: string;
-}[]> {
+export async function getReviewableTransactions(): Promise<
+    {
+        transactionId: string;
+        type: string;
+        targetId: string;
+        targetAlias: string;
+        horseName: string | null;
+        completedAt: string;
+    }[]
+> {
     const { supabase, user } = await requireAuth();
 
     // Get completed transactions where user is a party
@@ -565,7 +568,7 @@ export async function getReviewableTransactions(): Promise<{
 
     if (!txns || txns.length === 0) return [];
 
-    const txnIds = (txns as { id: string }[]).map(t => t.id);
+    const txnIds = (txns as { id: string }[]).map((t) => t.id);
 
     // Get reviews the current user has already left
     const { data: myReviews } = await supabase
@@ -577,22 +580,27 @@ export async function getReviewableTransactions(): Promise<{
     const reviewedTxnIds = new Set((myReviews ?? []).map((r: { transaction_id: string }) => r.transaction_id));
 
     // Filter to unreviewed transactions
-    const unreviewed = (txns as {
-        id: string; type: string; party_a_id: string; party_b_id: string | null;
-        horse_id: string | null; completed_at: string;
-    }[]).filter(t => !reviewedTxnIds.has(t.id));
+    const unreviewed = (
+        txns as {
+            id: string;
+            type: string;
+            party_a_id: string;
+            party_b_id: string | null;
+            horse_id: string | null;
+            completed_at: string;
+        }[]
+    ).filter((t) => !reviewedTxnIds.has(t.id));
 
     if (unreviewed.length === 0) return [];
 
     // Batch-fetch target user aliases
-    const targetIds = [...new Set(unreviewed.map(t =>
-        t.party_a_id === user.id ? t.party_b_id : t.party_a_id
-    ).filter(Boolean) as string[])];
+    const targetIds = [
+        ...new Set(
+            unreviewed.map((t) => (t.party_a_id === user.id ? t.party_b_id : t.party_a_id)).filter(Boolean) as string[],
+        ),
+    ];
 
-    const { data: users } = await supabase
-        .from("users")
-        .select("id, alias_name")
-        .in("id", targetIds);
+    const { data: users } = await supabase.from("users").select("id, alias_name").in("id", targetIds);
 
     const aliasMap = new Map<string, string>();
     for (const u of (users ?? []) as { id: string; alias_name: string }[]) {
@@ -600,26 +608,23 @@ export async function getReviewableTransactions(): Promise<{
     }
 
     // Batch-fetch horse names
-    const horseIds = [...new Set(unreviewed.map(t => t.horse_id).filter(Boolean) as string[])];
+    const horseIds = [...new Set(unreviewed.map((t) => t.horse_id).filter(Boolean) as string[])];
     const horseMap = new Map<string, string>();
     if (horseIds.length > 0) {
-        const { data: horses } = await supabase
-            .from("user_horses")
-            .select("id, custom_name")
-            .in("id", horseIds);
+        const { data: horses } = await supabase.from("user_horses").select("id, custom_name").in("id", horseIds);
         for (const h of (horses ?? []) as { id: string; custom_name: string }[]) {
             horseMap.set(h.id, h.custom_name);
         }
     }
 
-    return unreviewed.map(t => {
+    return unreviewed.map((t) => {
         const targetId = t.party_a_id === user.id ? t.party_b_id! : t.party_a_id;
         return {
             transactionId: t.id,
             type: t.type,
             targetId,
             targetAlias: aliasMap.get(targetId) || "Unknown",
-            horseName: t.horse_id ? (horseMap.get(t.horse_id) || null) : null,
+            horseName: t.horse_id ? horseMap.get(t.horse_id) || null : null,
             completedAt: t.completed_at,
         };
     });
@@ -636,9 +641,7 @@ export async function getReviewableTransactions(): Promise<{
  * @param conversationId - UUID of the DM conversation
  * @returns Full transaction state for OfferCard rendering, or null if none
  */
-export async function getTransactionByConversation(
-    conversationId: string
-): Promise<{
+export async function getTransactionByConversation(conversationId: string): Promise<{
     transactionId: string;
     status: string;
     type: string;
@@ -660,7 +663,9 @@ export async function getTransactionByConversation(
 
     const { data } = await supabase
         .from("transactions")
-        .select("id, status, type, offer_amount, offer_message, party_a_id, party_b_id, horse_id, paid_at, verified_at, metadata")
+        .select(
+            "id, status, type, offer_amount, offer_message, party_a_id, party_b_id, horse_id, paid_at, verified_at, metadata",
+        )
         .eq("conversation_id", parsedId.data)
         .eq("type", "marketplace_sale")
         .order("created_at", { ascending: false })
@@ -714,11 +719,7 @@ export async function makeOffer(data: {
     if (user.id === input.sellerId) return { success: false, error: "You cannot make an offer on your own horse." };
 
     // Pre-fetch horse name for notifications (non-blocking if RPC fails)
-    const { data: horse } = await supabase
-        .from("user_horses")
-        .select("custom_name")
-        .eq("id", input.horseId)
-        .single();
+    const { data: horse } = await supabase.from("user_horses").select("custom_name").eq("id", input.horseId).single();
     const horseName = (horse as { custom_name: string } | null)?.custom_name || "the horse";
 
     // Create or find conversation (needed before the atomic RPC)
@@ -778,7 +779,7 @@ export async function makeOffer(data: {
  */
 export async function respondToOffer(
     transactionId: string,
-    action: "accept" | "decline"
+    action: "accept" | "decline",
 ): Promise<{ success: boolean; error?: string }> {
     const parsed = respondToOfferSchema.safeParse({ transactionId, action });
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
@@ -799,11 +800,11 @@ export async function respondToOffer(
 
     // State machine pre-check (defense in depth — the RPC re-validates
     // under a row lock).
-    const gate = canPerform(
-        parsed.data.action === "accept" ? "accept_offer" : "decline_offer",
-        user.id,
-        { status: t.status as TransactionStatus, partyAId: t.party_a_id, partyBId: t.party_b_id },
-    );
+    const gate = canPerform(parsed.data.action === "accept" ? "accept_offer" : "decline_offer", user.id, {
+        status: t.status as TransactionStatus,
+        partyAId: t.party_a_id,
+        partyBId: t.party_b_id,
+    });
     if (!gate.ok) return { success: false, error: gate.reason };
 
     // One horse, one sale (audit C3). Neither accept RPC looked at the
@@ -900,9 +901,7 @@ export async function respondToOffer(
  * Notifies the seller.
  * @param transactionId - UUID of the pending_payment transaction
  */
-export async function markPaymentSent(
-    transactionId: string
-): Promise<{ success: boolean; error?: string }> {
+export async function markPaymentSent(transactionId: string): Promise<{ success: boolean; error?: string }> {
     const parsedId = transactionIdSchema.safeParse(transactionId);
     if (!parsedId.success) return { success: false, error: firstZodError(parsedId.error) };
 
@@ -930,9 +929,12 @@ export async function markPaymentSent(
     // permits stamping paid_at on their own transaction. Surface write
     // failures — a silent RLS no-op here would notify the seller of a
     // payment the row never recorded (adversarial-review S1).
-    const { error: paidError } = await supabase.from("transactions").update({
-        paid_at: new Date().toISOString(),
-    }).eq("id", parsedId.data);
+    const { error: paidError } = await supabase
+        .from("transactions")
+        .update({
+            paid_at: new Date().toISOString(),
+        })
+        .eq("id", parsedId.data);
     if (paidError) return { success: false, error: paidError.message };
 
     // Notify seller
@@ -961,7 +963,7 @@ export async function markPaymentSent(
  * @param transactionId - UUID of the pending_payment transaction
  */
 export async function verifyFundsAndRelease(
-    transactionId: string
+    transactionId: string,
 ): Promise<{ success: boolean; pin?: string; error?: string }> {
     const parsedId = transactionIdSchema.safeParse(transactionId);
     if (!parsedId.success) return { success: false, error: firstZodError(parsedId.error) };
@@ -1020,11 +1022,14 @@ export async function verifyFundsAndRelease(
     // the transaction stays pending_payment (adversarial-review S1; the
     // park-then-update ordering itself is the documented atomicity
     // follow-up requiring a cancel/verify RPC).
-    const { error: verifyError } = await supabase.from("transactions").update({
-        status: "funds_verified",
-        verified_at: new Date().toISOString(),
-        metadata: { pin: parkResult.pin },
-    }).eq("id", parsedId.data);
+    const { error: verifyError } = await supabase
+        .from("transactions")
+        .update({
+            status: "funds_verified",
+            verified_at: new Date().toISOString(),
+            metadata: { pin: parkResult.pin },
+        })
+        .eq("id", parsedId.data);
     if (verifyError) {
         return {
             success: false,
@@ -1057,9 +1062,7 @@ export async function verifyFundsAndRelease(
  * unparks it and cancels pending claim PINs.
  * @param transactionId - UUID of the transaction to cancel
  */
-export async function cancelTransaction(
-    transactionId: string
-): Promise<{ success: boolean; error?: string }> {
+export async function cancelTransaction(transactionId: string): Promise<{ success: boolean; error?: string }> {
     const parsedId = transactionIdSchema.safeParse(transactionId);
     if (!parsedId.success) return { success: false, error: firstZodError(parsedId.error) };
 
@@ -1088,7 +1091,10 @@ export async function cancelTransaction(
 
     // 1. Cancel the transaction.
     // USER client (downgraded): the seller is a party → txn_update RLS.
-    const { error: cancelErr } = await supabase.from("transactions").update({ status: "cancelled" }).eq("id", parsedId.data);
+    const { error: cancelErr } = await supabase
+        .from("transactions")
+        .update({ status: "cancelled" })
+        .eq("id", parsedId.data);
     if (cancelErr) return { success: false, error: `Database error: ${cancelErr.message}` };
 
     // 2. Revert horse trade_status to "Open to Offers".
@@ -1097,7 +1103,8 @@ export async function cancelTransaction(
 
     // 3. If horse was parked (funds_verified state), unpark it
     if (t.status === "funds_verified") {
-        await supabase.from("user_horses")
+        await supabase
+            .from("user_horses")
             .update({ life_stage: "completed" })
             .eq("id", t.horse_id)
             .eq("life_stage", "parked");
@@ -1105,7 +1112,8 @@ export async function cancelTransaction(
         // Cancel any pending transfer PINs for this horse.
         // USER client (downgraded): the seller is the transfer sender →
         // "Sender cancels transfer" RLS policy (migration 022).
-        await supabase.from("horse_transfers")
+        await supabase
+            .from("horse_transfers")
             .update({ status: "cancelled" })
             .eq("horse_id", t.horse_id)
             .eq("status", "pending");
@@ -1127,9 +1135,7 @@ export async function cancelTransaction(
 }
 
 /** Buyer retracts their offer while still in offer_made state */
-export async function retractOffer(
-    transactionId: string
-): Promise<{ success: boolean; error?: string }> {
+export async function retractOffer(transactionId: string): Promise<{ success: boolean; error?: string }> {
     const parsedId = transactionIdSchema.safeParse(transactionId);
     if (!parsedId.success) return { success: false, error: firstZodError(parsedId.error) };
 

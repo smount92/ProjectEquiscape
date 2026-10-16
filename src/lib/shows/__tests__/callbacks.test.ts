@@ -26,12 +26,7 @@ const DIVISIONS = [
     { id: "div-cm", name: "CM Halter" },
 ];
 
-function cls(
-    id: string,
-    sectionId: string,
-    status: LadderClass["status"],
-    firsts: string[] = [],
-): LadderClass {
+function cls(id: string, sectionId: string, status: LadderClass["status"], firsts: string[] = []): LadderClass {
     return {
         classId: id,
         sectionId,
@@ -52,10 +47,7 @@ function ladderOf(classes: LadderClass[], callbacks: CallbackRecord[] = []) {
 
 describe("callbacks — buildCallbackLadder", () => {
     it("section round waits until every judgeable class is placed", () => {
-        const ladder = ladderOf([
-            cls("c1", "sec-stock", "placed", ["e1"]),
-            cls("c2", "sec-stock", "judging"),
-        ]);
+        const ladder = ladderOf([cls("c1", "sec-stock", "placed", ["e1"]), cls("c2", "sec-stock", "judging")]);
         expect(ladder.sections[0].state).toBe("waiting");
     });
 
@@ -85,20 +77,14 @@ describe("callbacks — buildCallbackLadder", () => {
     });
 
     it("sections without judgeable classes produce no round", () => {
-        const ladder = ladderOf([
-            cls("c1", "sec-stock", "placed", ["e1"]),
-            cls("c2", "sec-light", "cancelled"),
-        ]);
+        const ladder = ladderOf([cls("c1", "sec-stock", "placed", ["e1"]), cls("c2", "sec-light", "cancelled")]);
         expect(ladder.sections.map((r) => r.scopeId)).toEqual(["sec-stock"]);
         // div-cm has no classes at all — no division round either.
         expect(ladder.divisions.map((r) => r.scopeId)).toEqual(["div-of"]);
     });
 
     it("division round waits until every section round is decided", () => {
-        const classes = [
-            cls("c1", "sec-stock", "placed", ["e1"]),
-            cls("c2", "sec-light", "placed", ["e2"]),
-        ];
+        const classes = [cls("c1", "sec-stock", "placed", ["e1"]), cls("c2", "sec-light", "placed", ["e2"])];
         const open = ladderOf(classes, [
             {
                 scope: "section",
@@ -119,10 +105,7 @@ describe("callbacks — buildCallbackLadder", () => {
     });
 
     it("show round candidates are the division champions", () => {
-        const classes = [
-            cls("c1", "sec-stock", "placed", ["e1"]),
-            cls("c2", "sec-cm-stock", "placed", ["e9"]),
-        ];
+        const classes = [cls("c1", "sec-stock", "placed", ["e1"]), cls("c2", "sec-cm-stock", "placed", ["e9"])];
         const ladder = ladderOf(classes, [
             { scope: "section", scopeId: "sec-stock", championEntryId: "e1", reserveEntryId: null },
             { scope: "section", scopeId: "sec-cm-stock", championEntryId: "e9", reserveEntryId: null },
@@ -155,9 +138,7 @@ describe("callbacks — buildCallbackLadder", () => {
         const ladder = ladderOf([cls("c1", "sec-stock", "placed", ["e1"])]);
         expect(findLadderRound(ladder, "section", "sec-stock")?.label).toBe("Stock");
         expect(findLadderRound(ladder, "section", "sec-unknown")).toBeNull();
-        expect(findLadderRound(ladder, "division", "div-of")?.label).toBe(
-            "OF Plastic Halter",
-        );
+        expect(findLadderRound(ladder, "division", "div-of")?.label).toBe("OF Plastic Halter");
         expect(findLadderRound(ladder, "show", null)).toBe(ladder.show);
     });
 });
@@ -180,11 +161,7 @@ describe("callbacks — validateCallbackSelection", () => {
     });
 
     it("refuses a waiting round", () => {
-        const result = validateCallbackSelection(
-            { ...openRound, state: "waiting" },
-            "e1",
-            null,
-        );
+        const result = validateCallbackSelection({ ...openRound, state: "waiting" }, "e1", null);
         expect(result.ok).toBe(false);
         if (!result.ok) expect(result.reason).toMatch(/opens when every class/i);
     });

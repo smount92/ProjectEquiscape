@@ -52,15 +52,11 @@ describe("Auto-approve rules (pure logic)", () => {
         year: "1998",
         title: "Alborozo",
     };
-    function shouldAutoApprove(
-        approvedCount: number,
-        suggestionType: string,
-        changedFields: string[]
-    ): boolean {
+    function shouldAutoApprove(approvedCount: number, suggestionType: string, changedFields: string[]): boolean {
         if (suggestionType !== "correction") return false;
         return curatorAutoApprovable(
             approvedCount,
-            Object.fromEntries(changedFields.map((f) => [f, { from: "", to: SAMPLE[f] ?? "X" }]))
+            Object.fromEntries(changedFields.map((f) => [f, { from: "", to: SAMPLE[f] ?? "X" }])),
         );
     }
 
@@ -78,12 +74,9 @@ describe("Auto-approve rules (pure logic)", () => {
     });
 
     it("Silver auto-approves color + year combined", () => {
-        expect(
-            shouldAutoApprove(SILVER_THRESHOLD, "correction", [
-                "color_description",
-                "release_year_start",
-            ])
-        ).toBe(true);
+        expect(shouldAutoApprove(SILVER_THRESHOLD, "correction", ["color_description", "release_year_start"])).toBe(
+            true,
+        );
     });
 
     it("Silver auto-approves the fields that actually exist on rows", () => {
@@ -119,9 +112,7 @@ describe("Auto-approve rules (pure logic)", () => {
     });
 
     it("Silver does NOT auto-approve mix of allowed + disallowed fields", () => {
-        expect(
-            shouldAutoApprove(SILVER_THRESHOLD, "correction", ["color_description", "maker"])
-        ).toBe(false);
+        expect(shouldAutoApprove(SILVER_THRESHOLD, "correction", ["color_description", "maker"])).toBe(false);
     });
 
     it("Silver does NOT auto-approve human-label keys (must be attribute keys)", () => {
@@ -209,7 +200,7 @@ describe("the Silver value gate", () => {
             silverAutoApprovable({
                 color_description: { from: "", to: "Bay pinto" },
                 run_type: { from: "", to: "not-a-run-type" },
-            })
+            }),
         ).toBe(false);
     });
 });

@@ -250,23 +250,14 @@ describe("attribute fields per category", () => {
         model: [],
         tack: ["tack_type", "discipline", "materials", "fits_molds", "working_parts"],
         prop: ["prop_category", "dimensions", "terrain_setting", "materials"],
-        diorama: [
-            "scene_theme",
-            "discipline",
-            "components",
-            "base_dimensions",
-            "documentation_notes",
-        ],
+        diorama: ["scene_theme", "discipline", "components", "base_dimensions", "documentation_notes"],
         other_model: ["species", "breed", "manufacturer", "model_number"],
     };
 
-    it.each(Object.entries(EXPECTED))(
-        "%s owns exactly the keys the old CATEGORY_KEYS set did",
-        (category, keys) => {
-            const actual = getAttributeKeys(category as AssetCategory);
-            expect([...actual].sort()).toEqual([...keys].sort());
-        },
-    );
+    it.each(Object.entries(EXPECTED))("%s owns exactly the keys the old CATEGORY_KEYS set did", (category, keys) => {
+        const actual = getAttributeKeys(category as AssetCategory);
+        expect([...actual].sort()).toEqual([...keys].sort());
+    });
 
     it("gives models no attributes bag at all", () => {
         expect(getAttributeFields("model")).toHaveLength(0);

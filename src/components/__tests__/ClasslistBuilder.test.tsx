@@ -4,22 +4,20 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 
 import ClasslistBuilder from "@/components/shows/ClasslistBuilder";
 import type { ConsoleDivision } from "@/lib/shows/console";
-import {
-    countTemplateClasses,
-    NAMHSA_CORE_TEMPLATE,
-} from "@/lib/shows/namhsaTemplate";
+import { countTemplateClasses, NAMHSA_CORE_TEMPLATE } from "@/lib/shows/namhsaTemplate";
 
 const actions = vi.hoisted(() => ({
     addClass: vi.fn().mockResolvedValue({ success: true, classId: "new-class" }),
     addDivision: vi.fn().mockResolvedValue({ success: true, divisionId: "new-div" }),
     addSection: vi.fn().mockResolvedValue({ success: true, sectionId: "new-sec" }),
-    loadNamhsaTemplate: vi
-        .fn()
-        .mockResolvedValue({ success: true, divisions: 3, sections: 10, classes: 41 }),
+    loadNamhsaTemplate: vi.fn().mockResolvedValue({ success: true, divisions: 3, sections: 10, classes: 41 }),
     reorderClasslist: vi.fn().mockResolvedValue({ success: true, updated: 2 }),
     updateClass: vi.fn().mockResolvedValue({ success: true }),
     applyClassDefaults: vi.fn().mockResolvedValue({ success: true, classes: 41 }),
-    listClasslistSources: vi.fn().mockResolvedValue({ success: true, shows: [{ id: "223e4567-e89b-42d3-a456-426614174000", title: "Last Spring Live", status: "completed" }] }),
+    listClasslistSources: vi.fn().mockResolvedValue({
+        success: true,
+        shows: [{ id: "223e4567-e89b-42d3-a456-426614174000", title: "Last Spring Live", status: "completed" }],
+    }),
     copyClasslistFromShow: vi.fn().mockResolvedValue({ success: true, divisions: 3, sections: 10, classes: 41 }),
 }));
 
@@ -93,15 +91,7 @@ beforeEach(() => {
 
 describe("ClasslistBuilder — empty state", () => {
     it("offers the template picker and loads the chosen template", async () => {
-        render(
-            <ClasslistBuilder
-                showId={SHOW_ID}
-                showStatus="draft"
-                divisions={[]}
-                canManage
-                entriesExist={false}
-            />,
-        );
+        render(<ClasslistBuilder showId={SHOW_ID} showStatus="draft" divisions={[]} canManage entriesExist={false} />);
 
         // All five templates render as picker cards.
         expect(screen.getByRole("button", { name: /namhsa core classlist/i })).toBeInTheDocument();
@@ -189,9 +179,7 @@ describe("ClasslistBuilder — adding a class", () => {
         });
         fireEvent.click(screen.getByRole("button", { name: /add class/i }));
 
-        expect(
-            await screen.findByText(/can no longer be edited/i),
-        ).toBeInTheDocument();
+        expect(await screen.findByText(/can no longer be edited/i)).toBeInTheDocument();
     });
 });
 
@@ -261,15 +249,7 @@ describe("ClasslistBuilder — show-wide rules and copy-from-show (2026-09-29)",
     }, 20000);
 
     it("lets an empty show copy the classlist of one of the host's shows", async () => {
-        render(
-            <ClasslistBuilder
-                showId={SHOW_ID}
-                showStatus="draft"
-                divisions={[]}
-                canManage
-                entriesExist={false}
-            />,
-        );
+        render(<ClasslistBuilder showId={SHOW_ID} showStatus="draft" divisions={[]} canManage entriesExist={false} />);
         fireEvent.click(screen.getByRole("button", { name: /copy the classlist from one of my shows/i }));
         const select = await screen.findByLabelText(/show to copy the classlist from/i);
         fireEvent.change(select, { target: { value: "223e4567-e89b-42d3-a456-426614174000" } });

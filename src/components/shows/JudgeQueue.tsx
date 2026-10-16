@@ -26,12 +26,7 @@ import { useRouter } from "next/navigation";
 
 import { recordPlacings } from "@/app/actions/shows-v2";
 
-import {
-    publishClassResults,
-    setClassRubric,
-    unpublishClassResults,
-    writeCritique,
-} from "@/app/actions/shows-v4";
+import { publishClassResults, setClassRubric, unpublishClassResults, writeCritique } from "@/app/actions/shows-v4";
 import EntryScorePad from "@/components/shows/EntryScorePad";
 import { RUBRIC_TEMPLATES, orderByScore } from "@/lib/shows/rubrics";
 import type { JudgeQueueClass, JudgeQueueData, JudgeQueueEntry } from "@/lib/shows/gallery";
@@ -168,9 +163,7 @@ export default function JudgeQueue({ queue }: { queue: JudgeQueueData }) {
         return (
             <div className="ledger-card">
                 <span className="ledger-tab">Judge Queue</span>
-                <p className="text-sm text-muted-foreground">
-                    This show has no classes to judge yet.
-                </p>
+                <p className="text-sm text-muted-foreground">This show has no classes to judge yet.</p>
             </div>
         );
     }
@@ -200,8 +193,8 @@ export default function JudgeQueue({ queue }: { queue: JudgeQueueData }) {
 
             {showHint && canRecord && (
                 <p data-testid="tray-hint" className="text-sm text-muted-foreground">
-                    Tap a horse to pin the next ribbon on it. Tap a ribbon in the tray to
-                    take it back. Everything saves as you go.
+                    Tap a horse to pin the next ribbon on it. Tap a ribbon in the tray to take it back. Everything saves
+                    as you go.
                 </p>
             )}
 
@@ -222,8 +215,7 @@ export default function JudgeQueue({ queue }: { queue: JudgeQueueData }) {
             {celebrating && (
                 <div className="ledger-card" role="status" data-testid="judging-complete">
                     <p className="text-base font-semibold text-forest">
-                        All {classes.length} classes judged 🎉 — championship callbacks are
-                        ready.
+                        All {classes.length} classes judged 🎉 — championship callbacks are ready.
                     </p>
                 </div>
             )}
@@ -267,7 +259,7 @@ export default function JudgeQueue({ queue }: { queue: JudgeQueueData }) {
                 {toast && (
                     <span
                         data-testid="judge-toast"
-                        className="stamp bg-(--paper-lit) block max-w-[calc(100vw-2rem)] text-center shadow-lg"
+                        className="stamp block max-w-[calc(100vw-2rem)] bg-(--paper-lit) text-center shadow-lg"
                     >
                         {toast}
                     </span>
@@ -372,21 +364,22 @@ function ClassRecorder({
         let result: Awaited<ReturnType<typeof recordPlacings>>;
         try {
             result = await recordPlacings({
-            classId: cls.classId,
-            placings: toServerPlacings(currentSlots, currentNotes),
-            // EVERY note she touched rides along, placed or not —
-            // unplaced ones persist server-side as participation rows.
-            // An empty string is an explicit clear.
-            notes: Object.fromEntries(
-                Object.entries(currentNotes).map(([id, text]) => [id, text.trim()]),
-            ),
-            markDone,
+                classId: cls.classId,
+                placings: toServerPlacings(currentSlots, currentNotes),
+                // EVERY note she touched rides along, placed or not —
+                // unplaced ones persist server-side as participation rows.
+                // An empty string is an explicit clear.
+                notes: Object.fromEntries(Object.entries(currentNotes).map(([id, text]) => [id, text.trim()])),
+                markDone,
             });
         } catch {
             // Thrown (not returned) failure — network drop or a deploy
             // mid-session. WITHOUT this catch, inFlightRef stayed true
             // forever and every later autosave silently no-opped.
-            result = { success: false, error: "Save failed — check your connection and tap retry. If it keeps failing, copy any unsaved notes, then reload." };
+            result = {
+                success: false,
+                error: "Save failed — check your connection and tap retry. If it keeps failing, copy any unsaved notes, then reload.",
+            };
         }
         inFlightRef.current = false;
         if (markDone) setDoneSaving(false);
@@ -442,10 +435,7 @@ function ClassRecorder({
         return () => clearTimeout(timer);
     }, [autosave.status, autosave.savedAtMs]);
 
-    const whisper = whisperText(
-        autosave,
-        autosave.savedAtMs !== null && autosave.savedAtMs !== relaxedAtMs,
-    );
+    const whisper = whisperText(autosave, autosave.savedAtMs !== null && autosave.savedAtMs !== relaxedAtMs);
 
     const handleTapEntry = (entryId: string) => {
         if (!canRecord) return;
@@ -535,7 +525,7 @@ function ClassRecorder({
                             href={`/shows/${showId}/class/${cls.classId}`}
                             target="_blank"
                             rel="noopener"
-                            className="border-input hover:border-forest rounded-full border px-2.5 py-0.5 text-[0.7rem] font-semibold no-underline"
+                            className="rounded-full border border-input px-2.5 py-0.5 text-[0.7rem] font-semibold no-underline hover:border-forest"
                             title="The class room exactly as entrants will see it — dashed banner until you publish"
                         >
                             👁 Preview
@@ -543,7 +533,7 @@ function ClassRecorder({
                         <button
                             type="button"
                             onClick={onToggleMask}
-                            className="border-input hover:border-forest cursor-pointer rounded-full border px-2.5 py-0.5 text-[0.7rem] font-semibold"
+                            className="cursor-pointer rounded-full border border-input px-2.5 py-0.5 text-[0.7rem] font-semibold hover:border-forest"
                             title="Covers the watermark corner in YOUR view only — the photo itself is untouched"
                         >
                             {maskWatermarks ? "🕶 watermarks hidden" : "🕶 hide watermarks"}
@@ -553,19 +543,21 @@ function ClassRecorder({
             </div>
 
             {canRecord && !cls.resultsPublishedAt && (
-                <div className="border-input bg-card flex flex-wrap items-center gap-x-3 gap-y-2 rounded-md border px-3 py-2 text-sm">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-md border border-input bg-card px-3 py-2 text-sm">
                     <label className="flex items-center gap-2">
                         <span className="font-semibold">🎯 Rubric</span>
                         <select
                             value={cls.rubric?.key ?? ""}
                             disabled={rubricBusy}
                             onChange={(e) => void handleRubricPick(e.target.value)}
-                            className="border-input bg-background rounded-md border px-2 py-1 text-sm"
+                            className="rounded-md border border-input bg-background px-2 py-1 text-sm"
                             aria-label="Scoring rubric for this class"
                         >
                             <option value="">None — ribbon tray only</option>
                             {RUBRIC_TEMPLATES.map((t) => (
-                                <option key={t.key} value={t.key}>{t.name}</option>
+                                <option key={t.key} value={t.key}>
+                                    {t.name}
+                                </option>
                             ))}
                         </select>
                     </label>
@@ -575,12 +567,12 @@ function ClassRecorder({
                                 type="button"
                                 onClick={applyScoreOrder}
                                 disabled={scoredOrder.length === 0}
-                                className="text-forest cursor-pointer text-sm font-semibold hover:underline disabled:cursor-default disabled:opacity-45"
+                                className="cursor-pointer text-sm font-semibold text-forest hover:underline disabled:cursor-default disabled:opacity-45"
                             >
                                 Sort tray by scores ({scoredOrder.length} of {cls.entries.length} scored)
                             </button>
                             {scoredTies > 0 && (
-                                <span className="text-(--brass) text-xs font-semibold">
+                                <span className="text-xs font-semibold text-(--brass)">
                                     {scoredTies} tie{scoredTies === 1 ? "" : "s"} — your call stands
                                 </span>
                             )}
@@ -602,9 +594,7 @@ function ClassRecorder({
                             <li key={entry.id} className="flex flex-col gap-1.5">
                                 <div
                                     className={`relative overflow-hidden rounded-lg border-2 bg-card transition-all ${
-                                        place !== null
-                                            ? "border-forest ring-2 ring-forest"
-                                            : "border-input"
+                                        place !== null ? "border-forest ring-2 ring-forest" : "border-input"
                                     }`}
                                 >
                                     <button
@@ -617,10 +607,7 @@ function ClassRecorder({
                                         onClick={() => handleTapEntry(entry.id)}
                                     >
                                         {entry.photoUrl ? (
-                                            <MaskedEntryPhoto
-                                                photoUrl={entry.photoUrl}
-                                                mask={maskWatermarks}
-                                            />
+                                            <MaskedEntryPhoto photoUrl={entry.photoUrl} mask={maskWatermarks} />
                                         ) : (
                                             <div
                                                 className="flex aspect-square w-full items-center justify-center bg-muted text-4xl"
@@ -646,8 +633,7 @@ function ClassRecorder({
                                                     aria-hidden="true"
                                                     className="inline-block h-2.5 w-2.5 rounded-full border border-border"
                                                     style={{
-                                                        backgroundColor:
-                                                            ribbonHex(place) ?? undefined,
+                                                        backgroundColor: ribbonHex(place) ?? undefined,
                                                     }}
                                                 />
                                                 {placeLabel(place)}
@@ -698,9 +684,7 @@ function ClassRecorder({
                                                 aria-label={`${hasNote ? "Edit" : "Add"} critique for ${entry.horseName}`}
                                                 className="flex min-h-10 min-w-10 cursor-pointer items-center justify-center rounded-md bg-black/60 text-sm text-white transition-all hover:bg-black/75 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring"
                                                 onClick={() =>
-                                                    setNoteOpenFor((cur) =>
-                                                        cur === entry.id ? null : entry.id,
-                                                    )
+                                                    setNoteOpenFor((cur) => (cur === entry.id ? null : entry.id))
                                                 }
                                             >
                                                 <span aria-hidden="true">✎{hasNote ? " ✓" : ""}</span>
@@ -714,9 +698,7 @@ function ClassRecorder({
                                                 className="flex min-h-10 min-w-10 cursor-pointer items-center justify-center rounded-md bg-black/60 text-sm text-white transition-all hover:bg-black/75 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-ring"
                                                 onClick={() =>
                                                     setLightboxIndex(
-                                                        lightboxImages.findIndex(
-                                                            (img) => img.url === entry.photoUrl,
-                                                        ),
+                                                        lightboxImages.findIndex((img) => img.url === entry.photoUrl),
                                                     )
                                                 }
                                             >
@@ -739,11 +721,7 @@ function ClassRecorder({
                                             />
                                         )}
                                         <Textarea
-                                            value={
-                                                entry.id in notes
-                                                    ? notes[entry.id]
-                                                    : (entry.note ?? "")
-                                            }
+                                            value={entry.id in notes ? notes[entry.id] : (entry.note ?? "")}
                                             onChange={(e) => handleNoteChange(entry.id, e.target.value)}
                                             placeholder="Placing note (rides with the trophy-case record)…"
                                             maxLength={2000}
@@ -773,21 +751,21 @@ function ClassRecorder({
                 who just scored 14 entries is at the bottom.) More
                 class-level buttons land here as they're invented. */}
             {canRecord && cls.rubric && (
-                <div className="border-input bg-card flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border px-3 py-2 text-sm">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-input bg-card px-3 py-2 text-sm">
                     <button
                         type="button"
                         onClick={applyScoreOrder}
                         disabled={scoredOrder.length === 0}
-                        className="text-forest cursor-pointer font-semibold hover:underline disabled:cursor-default disabled:opacity-45"
+                        className="cursor-pointer font-semibold text-forest hover:underline disabled:cursor-default disabled:opacity-45"
                     >
                         🎯 Place by scores ({scoredOrder.length} of {cls.entries.length} scored)
                     </button>
                     {scoredTies > 0 && (
-                        <span className="text-(--brass) text-xs font-semibold">
+                        <span className="text-xs font-semibold text-(--brass)">
                             {scoredTies} tie{scoredTies === 1 ? "" : "s"} — your call stands
                         </span>
                     )}
-                    <span className="text-muted-foreground text-xs">
+                    <span className="text-xs text-muted-foreground">
                         fills the tray from totals; adjust any ribbon after
                     </span>
                 </div>
@@ -815,9 +793,7 @@ function ClassRecorder({
                 />
             )}
 
-            {canPublish && cls.status === "placed" && (
-                <PublishClassControl cls={cls} />
-            )}
+            {canPublish && cls.status === "placed" && <PublishClassControl cls={cls} />}
 
             {lightboxIndex !== null && lightboxIndex >= 0 && (
                 <PhotoLightbox
@@ -879,7 +855,10 @@ function EntryCritiqueEditor({
             </p>
             <Textarea
                 value={model}
-                onChange={(e) => { setModel(e.target.value); setState("idle"); }}
+                onChange={(e) => {
+                    setModel(e.target.value);
+                    setState("idle");
+                }}
                 placeholder="The model — conformation, breed fit, condition…"
                 maxLength={2000}
                 rows={2}
@@ -887,7 +866,10 @@ function EntryCritiqueEditor({
             />
             <Textarea
                 value={photo}
-                onChange={(e) => { setPhoto(e.target.value); setState("idle"); }}
+                onChange={(e) => {
+                    setPhoto(e.target.value);
+                    setState("idle");
+                }}
                 placeholder="The photo — angle, light, footing… (kept separate so photo skill never reads as a model fault)"
                 maxLength={2000}
                 rows={2}
@@ -902,11 +884,11 @@ function EntryCritiqueEditor({
                 >
                     {state === "saving" ? "Saving…" : "Save critique"}
                 </button>
-                {state === "saved" && (
-                    <span className="text-xs text-muted-foreground">Saved ✓</span>
-                )}
+                {state === "saved" && <span className="text-xs text-muted-foreground">Saved ✓</span>}
                 {state === "error" && error && (
-                    <span role="alert" className="text-xs text-destructive">{error}</span>
+                    <span role="alert" className="text-xs text-destructive">
+                        {error}
+                    </span>
                 )}
             </div>
         </div>
@@ -957,7 +939,9 @@ function PublishClassControl({ cls }: { cls: JudgeQueueClass }) {
                 {pending ? "Working…" : published ? "Unpublish" : "Publish class results"}
             </button>
             {error && (
-                <p role="alert" className="w-full text-xs text-destructive">{error}</p>
+                <p role="alert" className="w-full text-xs text-destructive">
+                    {error}
+                </p>
             )}
         </div>
     );

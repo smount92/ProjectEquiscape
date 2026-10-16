@@ -36,7 +36,15 @@ export interface SellerTerms {
 }
 
 export function emptySellerTerms(userId: string): SellerTerms {
-    return { userId, country: null, shipsTo: null, shipsNotTo: null, openToTrades: false, lookingFor: null, currency: null };
+    return {
+        userId,
+        country: null,
+        shipsTo: null,
+        shipsNotTo: null,
+        openToTrades: false,
+        lookingFor: null,
+        currency: null,
+    };
 }
 
 function text(v: unknown, max: number): string | null {
@@ -45,7 +53,8 @@ function text(v: unknown, max: number): string | null {
 
 /** Map a raw row (RPC or table) to the terms. */
 export function sellerTermsFrom(row: Record<string, unknown> | null | undefined, userId?: string): SellerTerms {
-    const id = (typeof row?.user_id === "string" && row.user_id) || (typeof row?.id === "string" && row.id) || userId || "";
+    const id =
+        (typeof row?.user_id === "string" && row.user_id) || (typeof row?.id === "string" && row.id) || userId || "";
     if (!row) return emptySellerTerms(id);
     const rawCountry = typeof row.country === "string" ? row.country.toUpperCase() : null;
     return {
@@ -65,7 +74,9 @@ export function hasSellerTerms(t: SellerTerms | null | undefined): boolean {
 }
 
 /** True when a save failed only because migration 218 is not in the database yet. */
-export function isMissingSellerColumn(err: { code?: string | null; message?: string | null } | null | undefined): boolean {
+export function isMissingSellerColumn(
+    err: { code?: string | null; message?: string | null } | null | undefined,
+): boolean {
     if (!err) return false;
     const code = err.code ?? "";
     const message = err.message ?? "";
@@ -87,7 +98,10 @@ const RPC_BATCH = 100;
  * and members alike (DEFINER RPC, public-safe columns only). Empty map
  * when the RPC is not there yet, never an error.
  */
-export async function readSellerTerms(client: SupabaseClient, userIds: readonly string[]): Promise<Map<string, SellerTerms>> {
+export async function readSellerTerms(
+    client: SupabaseClient,
+    userIds: readonly string[],
+): Promise<Map<string, SellerTerms>> {
     const out = new Map<string, SellerTerms>();
     const ids = [...new Set(userIds.filter(Boolean))];
     if (ids.length === 0) return out;

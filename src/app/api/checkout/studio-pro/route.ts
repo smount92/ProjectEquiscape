@@ -7,7 +7,9 @@ import Stripe from "stripe";
 // POST /api/checkout/studio-pro — Studio Pro artist subscription ($10/mo)
 export async function POST() {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+        data: { user },
+    } = await supabase.auth.getUser();
     if (!user) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -15,10 +17,7 @@ export async function POST() {
     // Prevent double-subscription
     const tier = await getUserTier();
     if ((tier as string) === "studio") {
-        return NextResponse.json(
-            { error: "You're already on Studio Pro!" },
-            { status: 400 }
-        );
+        return NextResponse.json({ error: "You're already on Studio Pro!" }, { status: 400 });
     }
 
     // A tier bought through PayPal is billed by PayPal. Starting a Stripe
@@ -31,16 +30,13 @@ export async function POST() {
             {
                 error: "Your subscription is currently billed through PayPal. Cancel that one first, then you can subscribe here — otherwise you'd be charged twice.",
             },
-            { status: 400 }
+            { status: 400 },
         );
     }
 
     const priceId = process.env.STRIPE_STUDIO_PRO_PRICE_ID;
     if (!priceId || !process.env.STRIPE_SECRET_KEY) {
-        return NextResponse.json(
-            { error: "Studio Pro is not yet configured. Contact support." },
-            { status: 500 }
-        );
+        return NextResponse.json({ error: "Studio Pro is not yet configured. Contact support." }, { status: 500 });
     }
 
     try {
@@ -77,9 +73,6 @@ export async function POST() {
         return NextResponse.json({ url: session.url });
     } catch (err) {
         Sentry.captureException(err, { tags: { domain: "commerce" } });
-        return NextResponse.json(
-            { error: "Failed to create checkout session." },
-            { status: 500 }
-        );
+        return NextResponse.json({ error: "Failed to create checkout session." }, { status: 500 });
     }
 }

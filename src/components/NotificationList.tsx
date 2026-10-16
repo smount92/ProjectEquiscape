@@ -17,11 +17,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import {
-    markNotificationRead,
-    markAllNotificationsRead,
-    clearNotifications,
-} from "@/app/actions/notifications";
+import { markNotificationRead, markAllNotificationsRead, clearNotifications } from "@/app/actions/notifications";
 import { Button } from "@/components/ui/button";
 import { useNotifications } from "@/lib/context/NotificationProvider";
 import {
@@ -75,7 +71,7 @@ function FilterTab({
             className={
                 active
                     ? "ledger-tab mb-0 cursor-pointer border-0"
-                    : "border-input bg-card text-secondary-foreground hover:border-forest hover:text-forest mb-0 cursor-pointer rounded-[3px_10px_3px_3px] border px-4 py-[5px] font-serif text-[0.8125rem] tracking-[0.18em] uppercase transition-colors"
+                    : "mb-0 cursor-pointer rounded-[3px_10px_3px_3px] border border-input bg-card px-4 py-[5px] font-serif text-[0.8125rem] tracking-[0.18em] text-secondary-foreground uppercase transition-colors hover:border-forest hover:text-forest"
             }
         >
             {label}
@@ -96,10 +92,7 @@ export default function NotificationList({ initialNotifications }: NotificationL
 
     // Kind is derived once per row and reused by the rail, the badges and
     // the filter — one pass, one source of truth.
-    const decorated = useMemo(
-        () => notifs.map((n) => ({ ...n, kind: notificationKind(n.type) })),
-        [notifs],
-    );
+    const decorated = useMemo(() => notifs.map((n) => ({ ...n, kind: notificationKind(n.type) })), [notifs]);
 
     const counts = useMemo(() => {
         const totals = new Map<NotificationKindId, { count: number; unread: number }>();
@@ -160,9 +153,9 @@ export default function NotificationList({ initialNotifications }: NotificationL
                     🔔
                 </div>
                 <h2 className="mb-2 font-serif text-xl font-bold">Nothing has come in</h2>
-                <p className="text-secondary-foreground mx-auto max-w-[460px] text-sm leading-relaxed">
-                    Show results, offers on your horses, comments and transfers all land here. When
-                    something happens, this is where you will hear about it.
+                <p className="mx-auto max-w-[460px] text-sm leading-relaxed text-secondary-foreground">
+                    Show results, offers on your horses, comments and transfers all land here. When something happens,
+                    this is where you will hear about it.
                 </p>
                 <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
                     <Button asChild variant="outline" size="wide">
@@ -209,12 +202,7 @@ export default function NotificationList({ initialNotifications }: NotificationL
                     )}
                     {confirmClear ? (
                         <>
-                            <Button
-                                variant="destructive"
-                                size="sm"
-                                onClick={handleClear}
-                                disabled={clearing}
-                            >
+                            <Button variant="destructive" size="sm" onClick={handleClear} disabled={clearing}>
                                 {clearing ? "Clearing…" : `Delete all ${notifs.length}`}
                             </Button>
                             <Button
@@ -241,10 +229,9 @@ export default function NotificationList({ initialNotifications }: NotificationL
 
             {/* Clearing is a delete, not a dismiss — say so before it happens. */}
             {confirmClear && (
-                <p className="text-destructive border-destructive/30 bg-destructive/10 rounded-md border px-4 py-2 text-xs leading-relaxed">
-                    This permanently deletes all {notifs.length} notifications, read and unread.
-                    They cannot be brought back — the underlying shows, offers and messages are
-                    unaffected.
+                <p className="rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-xs leading-relaxed text-destructive">
+                    This permanently deletes all {notifs.length} notifications, read and unread. They cannot be brought
+                    back — the underlying shows, offers and messages are unaffected.
                 </p>
             )}
 
@@ -255,13 +242,11 @@ export default function NotificationList({ initialNotifications }: NotificationL
                 </span>
 
                 {visible.length === 0 ? (
-                    <p className="text-secondary-foreground py-8 text-center text-sm">
-                        Nothing under{" "}
-                        <strong>{notificationKindMeta(filter as NotificationKindId).heading}</strong>
-                        .{" "}
+                    <p className="py-8 text-center text-sm text-secondary-foreground">
+                        Nothing under <strong>{notificationKindMeta(filter as NotificationKindId).heading}</strong>.{" "}
                         <button
                             type="button"
-                            className="text-forest cursor-pointer font-semibold underline"
+                            className="cursor-pointer font-semibold text-forest underline"
                             onClick={() => setFilter("all")}
                         >
                             Show everything
@@ -270,7 +255,7 @@ export default function NotificationList({ initialNotifications }: NotificationL
                 ) : (
                     buckets.map((bucket) => (
                         <div key={bucket.label}>
-                            <h2 className="text-muted-foreground border-input mt-5 mb-1 border-b pb-1 font-serif text-[0.7rem] tracking-[0.18em] uppercase first:mt-0">
+                            <h2 className="mt-5 mb-1 border-b border-input pb-1 font-serif text-[0.7rem] tracking-[0.18em] text-muted-foreground uppercase first:mt-0">
                                 {bucket.label}
                             </h2>
                             {bucket.rows.map((n) => {
@@ -280,33 +265,29 @@ export default function NotificationList({ initialNotifications }: NotificationL
                                         key={n.id}
                                         href={resolveNotificationHref(n)}
                                         onClick={() => handleClick(n.id)}
-                                        className={`border-input flex items-start gap-3 border-b py-3 pr-2 text-inherit no-underline transition-colors last:border-b-0 hover:bg-black/[0.04] ${
-                                            n.isRead
-                                                ? "pl-2"
-                                                : "border-l-forest bg-forest/[0.06] border-l-[3px] pl-2"
+                                        className={`flex items-start gap-3 border-b border-input py-3 pr-2 text-inherit no-underline transition-colors last:border-b-0 hover:bg-black/[0.04] ${
+                                            n.isRead ? "pl-2" : "border-l-[3px] border-l-forest bg-forest/[0.06] pl-2"
                                         }`}
                                     >
                                         <span className="mt-0.5 shrink-0 text-xl" aria-hidden="true">
                                             {notificationIcon(n.type)}
                                         </span>
                                         <div className="flex min-w-0 flex-1 flex-col gap-1">
-                                            <span
-                                                className={`text-sm leading-snug ${n.isRead ? "" : "font-semibold"}`}
-                                            >
+                                            <span className={`text-sm leading-snug ${n.isRead ? "" : "font-semibold"}`}>
                                                 {n.content || "Something happened — open to see."}
                                             </span>
                                             <span className="flex flex-wrap items-center gap-2">
                                                 {/* .stamp keeps its own a11y size floor — do
                                                     not shrink it to fit more per row. */}
                                                 <span className="stamp">{kind.label}</span>
-                                                <span className="text-muted-foreground text-xs">
+                                                <span className="text-xs text-muted-foreground">
                                                     {timeAgo(n.createdAt)}
                                                 </span>
                                             </span>
                                         </div>
                                         {!n.isRead && (
                                             <span
-                                                className="bg-forest mt-2 h-2 w-2 shrink-0 rounded-full"
+                                                className="mt-2 h-2 w-2 shrink-0 rounded-full bg-forest"
                                                 aria-label="Unread"
                                             />
                                         )}
@@ -318,12 +299,9 @@ export default function NotificationList({ initialNotifications }: NotificationL
                 )}
             </section>
 
-            <p className="text-muted-foreground text-xs">
+            <p className="text-xs text-muted-foreground">
                 Showing the {notifs.length} most recent.{" "}
-                <Link
-                    href="/settings#notifications"
-                    className="text-forest font-semibold no-underline hover:underline"
-                >
+                <Link href="/settings#notifications" className="font-semibold text-forest no-underline hover:underline">
                     Choose what lands here →
                 </Link>
             </p>

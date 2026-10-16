@@ -60,7 +60,8 @@ interface Flash {
 }
 
 const isTyping = (el: EventTarget | null) =>
-    el instanceof HTMLElement && (/^(INPUT|TEXTAREA|SELECT|BUTTON|A|SUMMARY)$/.test(el.tagName) || el.isContentEditable);
+    el instanceof HTMLElement &&
+    (/^(INPUT|TEXTAREA|SELECT|BUTTON|A|SUMMARY)$/.test(el.tagName) || el.isContentEditable);
 
 export default function EnterShowWorkbench({
     show,
@@ -250,22 +251,20 @@ export default function EnterShowWorkbench({
         for (let i = 0; i < ok.length; i++) track("show_entry", { show_id: show.id });
 
         // The server's re-read is the truth; if it failed, add what we know.
-        const nextEntries =
-            res.myEntries ??
-            [
-                ...myEntries,
-                ...ok.map((r) => ({
-                    id: r.entryId ?? `${current.classId}-${r.horseId}`,
-                    classId: current.classId,
-                    horseId: r.horseId,
-                    horseName: nameOf(r.horseId),
-                    entryNumber: r.entryNumber ?? null,
-                    status: "entered" as const,
-                    handlerAlias: null,
-                    photoId: selection.get(r.horseId)?.photoId ?? null,
-                    place: null,
-                })),
-            ];
+        const nextEntries = res.myEntries ?? [
+            ...myEntries,
+            ...ok.map((r) => ({
+                id: r.entryId ?? `${current.classId}-${r.horseId}`,
+                classId: current.classId,
+                horseId: r.horseId,
+                horseName: nameOf(r.horseId),
+                entryNumber: r.entryNumber ?? null,
+                status: "entered" as const,
+                handlerAlias: null,
+                photoId: selection.get(r.horseId)?.photoId ?? null,
+                place: null,
+            })),
+        ];
         setMyEntries(nextEntries);
 
         const refused = res.results.filter((r) => !r.success);
@@ -327,16 +326,27 @@ export default function EnterShowWorkbench({
 
             <div aria-live="polite" role="status">
                 {flash && (
-                    <div className="rounded-md border border-input bg-card px-3 py-2 text-sm" data-testid="batch-verdicts">
+                    <div
+                        className="rounded-md border border-input bg-card px-3 py-2 text-sm"
+                        data-testid="batch-verdicts"
+                    >
                         <div className="flex items-start gap-2">
                             <span className="flex-1 font-semibold text-foreground">{flash.label}</span>
-                            <button type="button" className="cursor-pointer text-muted-foreground" aria-label="Dismiss" onClick={() => setFlash(null)}>
+                            <button
+                                type="button"
+                                className="cursor-pointer text-muted-foreground"
+                                aria-label="Dismiss"
+                                onClick={() => setFlash(null)}
+                            >
                                 ✕
                             </button>
                         </div>
                         <ul className="m-0 list-none p-0">
                             {flash.items.map((it) => (
-                                <li key={it.horseId} className={it.ok ? "text-forest" : "font-semibold text-destructive"}>
+                                <li
+                                    key={it.horseId}
+                                    className={it.ok ? "text-forest" : "font-semibold text-destructive"}
+                                >
                                     {it.ok ? "✓" : "✗"} {it.name} — {it.text}
                                 </li>
                             ))}

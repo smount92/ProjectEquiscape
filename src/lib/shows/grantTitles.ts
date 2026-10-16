@@ -17,24 +17,13 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import {
-    buildCareerTotals,
-    type StandingsCallbackRow,
-    type StandingsEntryRow,
-    type StandingsShowRow,
-} from "./points";
-import {
-    evaluateExhibitorDistinctions,
-    evaluateHorseTitles,
-    type TitleCardInput,
-} from "./titles";
+import { buildCareerTotals, type StandingsCallbackRow, type StandingsEntryRow, type StandingsShowRow } from "./points";
+import { evaluateExhibitorDistinctions, evaluateHorseTitles, type TitleCardInput } from "./titles";
 
 /** horse_titles/exhibitor_distinctions enter generated types after
  *  migration 159 — minimal untyped write access until then (same
  *  idiom as publicCards/135). */
-type UntypedUpsert = (
-    table: string,
-) => {
+type UntypedUpsert = (table: string) => {
     upsert: (
         rows: Record<string, unknown>[],
         opts: { onConflict: string; ignoreDuplicates: boolean },
@@ -60,7 +49,7 @@ async function selectInChunks<T>(
     for (let i = 0; i < values.length; i += IN_CHUNK) {
         const { data, error } = await run(values.slice(i, i + IN_CHUNK));
         if (error) return { error: error.message };
-        out.push(...(((data as T[]) ?? [])));
+        out.push(...((data as T[]) ?? []));
     }
     return out;
 }
@@ -218,10 +207,7 @@ export async function grantTitlesForShow(
     // upsert stays ignoreDuplicates — a racing publish is still free.
     const [existingTitles, existingDistinctions] = await Promise.all([
         supabase.from("horse_titles").select("horse_id, title_code").in("horse_id", horseIds),
-        supabase
-            .from("exhibitor_distinctions")
-            .select("user_id, distinction_code")
-            .in("user_id", ownerIds),
+        supabase.from("exhibitor_distinctions").select("user_id, distinction_code").in("user_id", ownerIds),
     ]);
     const hadTitle = new Set(
         ((existingTitles.data ?? []) as { horse_id: string; title_code: string }[]).map(
@@ -277,30 +263,23 @@ export async function grantTitlesForShow(
 
     // Notify the payoffs (best-effort; grants stand regardless).
     try {
-        const newTitleRows = titleRows.filter(
-            (r) => !hadTitle.has(`${r.horse_id}::${r.title_code}`),
-        );
+        const newTitleRows = titleRows.filter((r) => !hadTitle.has(`${r.horse_id}::${r.title_code}`));
         if (newTitleRows.length > 0) {
             const { HORSE_TITLE_LABELS } = await import("./titles");
-            const { createNotification } = await import(
-                "@/lib/notifications/createNotification"
-            );
+            const { createNotification } = await import("@/lib/notifications/createNotification");
             const grantedHorseIds = [...new Set(newTitleRows.map((r) => r.horse_id as string))];
             const { data: horses } = await supabase
                 .from("user_horses")
                 .select("id, owner_id, custom_name")
                 .in("id", grantedHorseIds);
             const horseById = new Map(
-                ((horses ?? []) as { id: string; owner_id: string; custom_name: string }[]).map(
-                    (h) => [h.id, h],
-                ),
+                ((horses ?? []) as { id: string; owner_id: string; custom_name: string }[]).map((h) => [h.id, h]),
             );
             for (const row of newTitleRows) {
                 const horse = horseById.get(row.horse_id as string);
                 if (!horse) continue;
                 const label =
-                    HORSE_TITLE_LABELS[row.title_code as keyof typeof HORSE_TITLE_LABELS] ??
-                    (row.title_code as string);
+                    HORSE_TITLE_LABELS[row.title_code as keyof typeof HORSE_TITLE_LABELS] ?? (row.title_code as string);
                 await createNotification({
                     userId: horse.owner_id,
                     type: "show_title",
@@ -315,14 +294,11 @@ export async function grantTitlesForShow(
         );
         if (newDistinctionRows.length > 0) {
             const { EXHIBITOR_DISTINCTION_LABELS } = await import("./titles");
-            const { createNotification } = await import(
-                "@/lib/notifications/createNotification"
-            );
+            const { createNotification } = await import("@/lib/notifications/createNotification");
             for (const row of newDistinctionRows) {
                 const label =
-                    EXHIBITOR_DISTINCTION_LABELS[
-                        row.distinction_code as keyof typeof EXHIBITOR_DISTINCTION_LABELS
-                    ] ?? (row.distinction_code as string);
+                    EXHIBITOR_DISTINCTION_LABELS[row.distinction_code as keyof typeof EXHIBITOR_DISTINCTION_LABELS] ??
+                    (row.distinction_code as string);
                 await createNotification({
                     userId: row.user_id as string,
                     type: "show_title",

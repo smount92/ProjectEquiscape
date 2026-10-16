@@ -31,10 +31,10 @@ const ROOMS: Room[] = [
         Icon: Home,
         body: (
             <>
-                One entry per horse: the reference it came from, photos from every angle, condition,
-                and what you paid — that last part visible to you and nobody else. Filter the herd by
-                mold, maker, finish or status and keep the views you use. When your insurer asks what
-                the shelves are worth, print the report. Already keeping a spreadsheet? Import it.
+                One entry per horse: the reference it came from, photos from every angle, condition, and what you paid —
+                that last part visible to you and nobody else. Filter the herd by mold, maker, finish or status and keep
+                the views you use. When your insurer asks what the shelves are worth, print the report. Already keeping
+                a spreadsheet? Import it.
             </>
         ),
         links: [
@@ -48,12 +48,11 @@ const ROOMS: Room[] = [
         Icon: Camera,
         body: (
             <>
-                Photo shows and live shows, run to one published rulebook. First place pays the size
-                of the class, so winning a deep one counts for more than winning a walkover. A 1st or
-                2nd in a class with real competition mints a qualification card stamped with the field
-                it beat — <em>1st of 12, 8 exhibitors</em> — and cards plus career points earn CH, ROM
-                and SUP, which the horse keeps for the rest of its life. Hosting is free, and the ring
-                console runs off a phone at the table.
+                Photo shows and live shows, run to one published rulebook. First place pays the size of the class, so
+                winning a deep one counts for more than winning a walkover. A 1st or 2nd in a class with real
+                competition mints a qualification card stamped with the field it beat — <em>1st of 12, 8 exhibitors</em>{" "}
+                — and cards plus career points earn CH, ROM and SUP, which the horse keeps for the rest of its life.
+                Hosting is free, and the ring console runs off a phone at the table.
             </>
         ),
         links: [
@@ -67,11 +66,10 @@ const ROOMS: Room[] = [
         Icon: TrendingUp,
         body: (
             <>
-                A listing here is the horse&rsquo;s passport, not a photo and a paragraph: what it
-                has won, what condition it&rsquo;s in, who has owned it. The Blue Book sits alongside
-                — average, median and range from completed sales, free for everyone and never behind
-                the paid tier. We take no cut and hold no money; buyer and seller settle it between
-                themselves, the way the hobby already does.
+                A listing here is the horse&rsquo;s passport, not a photo and a paragraph: what it has won, what
+                condition it&rsquo;s in, who has owned it. The Blue Book sits alongside — average, median and range from
+                completed sales, free for everyone and never behind the paid tier. We take no cut and hold no money;
+                buyer and seller settle it between themselves, the way the hobby already does.
             </>
         ),
         links: [
@@ -85,10 +83,10 @@ const ROOMS: Room[] = [
         Icon: BookOpen,
         body: (
             <>
-                OF releases, the molds under them, and artist resins — with maker, sculptor, scale,
-                finish and year. Look a model up instead of trying to recall whether that palomino was
-                a 1994 or a 1995. Collectors correct and extend it, and a correction lands for
-                everybody at once, which is the only way a catalog this size stays honest.
+                OF releases, the molds under them, and artist resins — with maker, sculptor, scale, finish and year.
+                Look a model up instead of trying to recall whether that palomino was a 1994 or a 1995. Collectors
+                correct and extend it, and a correction lands for everybody at once, which is the only way a catalog
+                this size stays honest.
             </>
         ),
         links: [
@@ -102,9 +100,9 @@ const ROOMS: Room[] = [
         Icon: Newspaper,
         body: (
             <>
-                The feed, plus barns for breed circles, regional clubs and trading groups; an events
-                calendar; and Help ID for when you have a body in hand and no idea what it is.
-                Members only — it&rsquo;s a room, not a shop window.
+                The feed, plus barns for breed circles, regional clubs and trading groups; an events calendar; and Help
+                ID for when you have a body in hand and no idea what it is. Members only — it&rsquo;s a room, not a shop
+                window.
             </>
         ),
         links: [{ href: "/signup?redirectTo=%2Ffeed", label: "Join and walk in →", id: "room-paddock-cta" }],
@@ -125,9 +123,8 @@ export default function FiveRooms() {
                             Five <span className="text-forest">rooms</span>
                         </h2>
                     </div>
-                    <p className="text-secondary-foreground mx-auto mb-10 max-w-[560px] text-base">
-                        The site is laid out the way the hobby is. You&rsquo;ll know which door you
-                        want.
+                    <p className="mx-auto mb-10 max-w-[560px] text-base text-secondary-foreground">
+                        The site is laid out the way the hobby is. You&rsquo;ll know which door you want.
                     </p>
                 </div>
 
@@ -135,23 +132,21 @@ export default function FiveRooms() {
                     {ROOMS.map(({ name, standfirst, Icon, body, links }) => (
                         <li key={name} className="flex">
                             <div className="ledger-paper flex flex-1 flex-col py-6 pr-6 transition-all hover:-translate-y-1 hover:shadow-md">
-                                <div className="bg-forest/10 text-forest mb-4 flex h-12 w-12 items-center justify-center rounded-xl">
+                                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-forest/10 text-forest">
                                     <Icon size={24} strokeWidth={1.5} aria-hidden="true" />
                                 </div>
-                                <h3 className="text-foreground font-serif text-xl font-bold">{name}</h3>
-                                <p className="text-forest m-0 mb-3 font-serif text-[0.72rem] tracking-[0.16em] uppercase">
+                                <h3 className="font-serif text-xl font-bold text-foreground">{name}</h3>
+                                <p className="m-0 mb-3 font-serif text-[0.72rem] tracking-[0.16em] text-forest uppercase">
                                     {standfirst}
                                 </p>
-                                <p className="text-secondary-foreground m-0 text-sm leading-relaxed">
-                                    {body}
-                                </p>
+                                <p className="m-0 text-sm leading-relaxed text-secondary-foreground">{body}</p>
                                 <div className="mt-auto flex flex-wrap gap-x-5 gap-y-1 pt-5">
                                     {links.map((link) => (
                                         <Link
                                             key={link.href}
                                             href={link.href}
                                             id={link.id}
-                                            className="text-forest text-xs font-semibold tracking-[0.08em] uppercase no-underline hover:underline"
+                                            className="text-xs font-semibold tracking-[0.08em] text-forest uppercase no-underline hover:underline"
                                         >
                                             {link.label}
                                         </Link>

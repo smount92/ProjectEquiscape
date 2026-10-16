@@ -8,7 +8,9 @@ import type { EntrantHorse, MyShowEntry } from "@/lib/shows/public";
 function horse(o: Partial<EntrantHorse> & { id: string; name: string }): EntrantHorse {
     return { thumbnailUrl: null, scale: null, finish: null, breed: null, gender: null, ...o };
 }
-function division(classes: { id: string; name: string; number: string; allowedScales?: string[] | null }[]): ConsoleDivision[] {
+function division(
+    classes: { id: string; name: string; number: string; allowedScales?: string[] | null }[],
+): ConsoleDivision[] {
     return [
         {
             id: "d1",
@@ -57,7 +59,11 @@ describe("entrant ledger — the three tiers", () => {
     const classic = horse({ id: "classic", name: "Little", breed: "Arabian", scale: "Classic" });
 
     it("a class that names a breed: match fits, other breed and no breed are maybes with a hint", () => {
-        const l = buildEntrantLedger({ divisions: division([{ id: "c1", name: "Arabian", number: "101" }]), myEntries: [], horses: [arab, morgan, noBreed] });
+        const l = buildEntrantLedger({
+            divisions: division([{ id: "c1", name: "Arabian", number: "101" }]),
+            myEntries: [],
+            horses: [arab, morgan, noBreed],
+        });
         const c = l.byClass.c1;
         expect(c.breedNamed).toBe(true);
         expect(c.fits).toEqual(["arab"]);
@@ -70,7 +76,11 @@ describe("entrant ledger — the three tiers", () => {
     });
 
     it("a class that names no breed: every clean horse fits", () => {
-        const l = buildEntrantLedger({ divisions: division([{ id: "c1", name: "Fall & Creative Scenes", number: "109" }]), myEntries: [], horses: [arab, morgan, noBreed] });
+        const l = buildEntrantLedger({
+            divisions: division([{ id: "c1", name: "Fall & Creative Scenes", number: "109" }]),
+            myEntries: [],
+            horses: [arab, morgan, noBreed],
+        });
         expect(l.byClass.c1.breedNamed).toBe(false);
         expect(l.byClass.c1.fits).toEqual(["arab", "morgan", "nb"]);
         expect(l.byClass.c1.maybe).toEqual([]);

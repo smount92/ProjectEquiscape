@@ -3,10 +3,10 @@ import { Document, Page, View, Text, StyleSheet, Svg, Rect } from "@react-pdf/re
 // Standard model horse show tag: 1¾" × 1³⁄₃₂" folded
 // Unfolded (printed): 3½" × 1³⁄₃₂"
 // In PDF points: 1 inch = 72 pts
-const TAG_WIDTH = 252;  // 3.5 inches unfolded
-const TAG_HEIGHT = 79;  // 1 3/32 inches (~1.09375")
-const HALF_WIDTH = 126;  // 1.75 inches (each side when folded)
-const QR_SIZE = 55;     // ~0.76 inches — fits in height with padding
+const TAG_WIDTH = 252; // 3.5 inches unfolded
+const TAG_HEIGHT = 79; // 1 3/32 inches (~1.09375")
+const HALF_WIDTH = 126; // 1.75 inches (each side when folded)
+const QR_SIZE = 55; // ~0.76 inches — fits in height with padding
 
 const styles = StyleSheet.create({
     page: {
@@ -161,8 +161,8 @@ function RealQRCode({ matrix }: { matrix: boolean[][] }) {
                             height={cellSize}
                             fill="#2C2017"
                         />
-                    ) : null
-                )
+                    ) : null,
+                ),
             )}
         </Svg>
     );
@@ -170,10 +170,14 @@ function RealQRCode({ matrix }: { matrix: boolean[][] }) {
 
 function makeLabel(finishType: string): string {
     const map: Record<string, string> = {
-        of: "OF", original_finish: "OF",
-        custom: "C", cm: "CM",
-        artist_resin: "AR", ar: "AR",
-        repaint: "R", remodel: "RM",
+        of: "OF",
+        original_finish: "OF",
+        custom: "C",
+        cm: "CM",
+        artist_resin: "AR",
+        ar: "AR",
+        repaint: "R",
+        remodel: "RM",
     };
     return map[finishType?.toLowerCase()] || finishType?.toUpperCase() || "—";
 }

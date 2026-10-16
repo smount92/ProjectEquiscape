@@ -17,7 +17,10 @@ import { Input } from "@/components/ui/input";
 const FINISH_OPTIONS = ["OF", "Custom", "Artist Resin"] as const;
 
 function parseCommaList(value: string): string[] | null {
-    const items = value.split(",").map((s) => s.trim()).filter(Boolean);
+    const items = value
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
     return items.length > 0 ? items : null;
 }
 
@@ -68,8 +71,8 @@ export default function ShowDefaultsCard({
             </span>
             <div className="flex flex-wrap items-center justify-between gap-3">
                 <p className="m-0 text-sm text-muted-foreground">
-                    Set entry limits, finishes and scales once for all {classCount} classes. Any
-                    single class can still be changed on its own afterwards.
+                    Set entry limits, finishes and scales once for all {classCount} classes. Any single class can still
+                    be changed on its own afterwards.
                 </p>
                 <Button type="button" variant="outline" size="sm" onClick={() => setOpen((o) => !o)}>
                     {open ? "Hide" : "Set rules for all classes"}
@@ -120,7 +123,9 @@ export default function ShowDefaultsCard({
                                             checked={finishes.includes(finish)}
                                             onChange={(e) =>
                                                 setFinishes((prev) =>
-                                                    e.target.checked ? [...prev, finish] : prev.filter((f) => f !== finish),
+                                                    e.target.checked
+                                                        ? [...prev, finish]
+                                                        : prev.filter((f) => f !== finish),
                                                 )
                                             }
                                             className="size-5 min-h-6 min-w-6 accent-forest"

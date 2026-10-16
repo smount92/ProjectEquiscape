@@ -21,12 +21,7 @@ export const metadata = {
     description: "Now judging, on deck, and the latest results.",
 };
 
-export default async function RingBoardPage({
-    params,
-}: {
-    params: Promise<{ id: string }>;
-}) {
-
+export default async function RingBoardPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const result = await getRingBoard({ showId: id });
     // Missing/draft shows and online shows have no board.

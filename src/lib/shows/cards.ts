@@ -39,8 +39,7 @@ export function shouldIssueCard(ctx: CardIssuanceContext): boolean {
 // CHECK constraint on qualification_cards.id (migration 117).
 
 export const CARD_CODE_LENGTH = 8;
-export const CARD_CODE_ALPHABET =
-    "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+export const CARD_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
 
 const CARD_CODE_PATTERN = /^[A-HJ-NP-Za-km-z2-9]{8}$/;
 
@@ -49,15 +48,10 @@ const CARD_CODE_PATTERN = /^[A-HJ-NP-Za-km-z2-9]{8}$/;
  * the call site must collision-check against qualification_cards
  * and call again on conflict.
  */
-export function generateCardCode(
-    random: () => number = Math.random,
-): string {
+export function generateCardCode(random: () => number = Math.random): string {
     let code = "";
     for (let i = 0; i < CARD_CODE_LENGTH; i++) {
-        const idx = Math.min(
-            Math.floor(random() * CARD_CODE_ALPHABET.length),
-            CARD_CODE_ALPHABET.length - 1,
-        );
+        const idx = Math.min(Math.floor(random() * CARD_CODE_ALPHABET.length), CARD_CODE_ALPHABET.length - 1);
         code += CARD_CODE_ALPHABET[idx];
     }
     return code;
@@ -81,10 +75,7 @@ const CARD_ACTIONS: Record<CardAction, { from: CardStatus[]; to: CardStatus }> =
     void: { from: ["issued", "transferred"], to: "void" },
 };
 
-export function canApplyCardAction(
-    status: CardStatus,
-    action: CardAction,
-): TransitionResult {
+export function canApplyCardAction(status: CardStatus, action: CardAction): TransitionResult {
     const rule = CARD_ACTIONS[action];
     if (!rule) return { ok: false, reason: `Unknown card action: ${action}.` };
     if (!rule.from.includes(status)) {
@@ -94,8 +85,8 @@ export function canApplyCardAction(
                 status === "redeemed"
                     ? "This card has already been redeemed."
                     : status === "void"
-                        ? "This card has been voided."
-                        : `A ${status} card cannot be ${action === "void" ? "voided" : `${action}ed`}.`,
+                      ? "This card has been voided."
+                      : `A ${status} card cannot be ${action === "void" ? "voided" : `${action}ed`}.`,
         };
     }
     return { ok: true };

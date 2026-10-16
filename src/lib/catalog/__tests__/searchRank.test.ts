@@ -20,19 +20,13 @@ describe("rankSearchResults", () => {
     });
 
     it("ranks prefix matches above similarity-only matches", () => {
-        const results = [
-            item("Hope Rising", "plastic_release"),
-            item("Rising Hopes and Dreams", "artist_resin"),
-        ];
+        const results = [item("Hope Rising", "plastic_release"), item("Rising Hopes and Dreams", "artist_resin")];
         const ranked = rankSearchResults(results, "rising hopes");
         expect(ranked[0].title).toBe("Rising Hopes and Dreams");
     });
 
     it("floats finish-matching types within a tier without hiding anything", () => {
-        const results = [
-            item("Dream Weaver", "plastic_release"),
-            item("Dream Weaver", "artist_resin"),
-        ];
+        const results = [item("Dream Weaver", "plastic_release"), item("Dream Weaver", "artist_resin")];
         const forResin = rankSearchResults(results, "dream", "Artist Resin");
         expect(forResin[0].itemType).toBe("artist_resin");
         expect(forResin).toHaveLength(2);
@@ -83,7 +77,13 @@ describe("typing, not typos (223)", () => {
             ],
             "sherm",
         );
-        expect(out.map((x) => x.title)).toEqual(["Sherman Morgan", "Justin Sherman", "The Shermanator", "Sheba", "Sherlock"]);
+        expect(out.map((x) => x.title)).toEqual([
+            "Sherman Morgan",
+            "Justin Sherman",
+            "The Shermanator",
+            "Sheba",
+            "Sherlock",
+        ]);
     });
 
     it("formats a release's years", () => {

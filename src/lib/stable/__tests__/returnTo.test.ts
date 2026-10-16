@@ -43,7 +43,9 @@ describe("returnToCardId", () => {
 
     it("a known source that is not a passport wins over an older passport in the trail", () => {
         expect(returnToCardId({ trail: [`/stable/${A}`, "/dashboard"], from: "/market", ids })).toBeNull();
-        expect(returnToCardId({ trail: [`/stable/${A}`, "/dashboard?page=2"], from: "/dashboard?page=1", ids })).toBeNull();
+        expect(
+            returnToCardId({ trail: [`/stable/${A}`, "/dashboard?page=2"], from: "/dashboard?page=1", ids }),
+        ).toBeNull();
     });
 
     it("never scrolls to a horse that is not on this page", () => {

@@ -45,8 +45,7 @@ export function placingShareTitle(f: PlacingShareFacts): string {
  *  "won 1st of 9 entries in Stock Breeds at ..., a Model Horse Hub
  *  photo show." */
 export function placingShareDescription(f: PlacingShareFacts): string {
-    const field =
-        f.totalEntries !== null && f.totalEntries > 1 ? ` of ${f.totalEntries} entries` : "";
+    const field = f.totalEntries !== null && f.totalEntries > 1 ? ` of ${f.totalEntries} entries` : "";
     const showKind = f.mode === "live" ? "live show" : "photo show";
     return `${f.horseName} won ${placeLabel(f.place)}${field} in ${f.className} at ${f.showTitle}, a Model Horse Hub ${showKind}.`;
 }
@@ -84,10 +83,7 @@ export interface HorseEntryClassRow {
  * name) keys resolve to nothing. The caller pre-filters `entries`
  * to results-published shows and non-scratched rows.
  */
-export function resolvePlacingHrefs(
-    records: ShareableRecord[],
-    entries: HorseEntryClassRow[],
-): Record<string, string> {
+export function resolvePlacingHrefs(records: ShareableRecord[], entries: HorseEntryClassRow[]): Record<string, string> {
     // (show_id :: class_name) → entryId; duplicates poison the key.
     const entryByKey = new Map<string, string | null>();
     for (const e of entries) {

@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 /**
  * Database-backed rate limiter for serverless.
  * Uses Supabase RPC to check rate limits in Postgres.
- * 
+ *
  * @param endpoint - The endpoint identifier (e.g. 'claim_pin', 'contact_form')
  * @param maxAttempts - Maximum attempts allowed in the window
  * @param windowMinutes - Window duration in minutes
@@ -18,7 +18,7 @@ export async function checkRateLimit(
     identifierOverride?: string,
 ): Promise<boolean> {
     try {
-        const identifier = identifierOverride || await getClientIp();
+        const identifier = identifierOverride || (await getClientIp());
         const supabaseAdmin = getAdminClient();
 
         const { data, error } = await supabaseAdmin.rpc("check_rate_limit", {

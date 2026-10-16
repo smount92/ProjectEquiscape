@@ -23,12 +23,7 @@ import { focusChips, focusFromConsole } from "@/lib/shows/focus";
 import HandlerBanner from "@/components/shows/HandlerBanner";
 import { notFound } from "next/navigation";
 
-import {
-    getMyEntrantHorses,
-    getMyShowEntries,
-    getPublicShow,
-    getShowGallery,
-} from "@/app/actions/shows-v2";
+import { getMyEntrantHorses, getMyShowEntries, getPublicShow, getShowGallery } from "@/app/actions/shows-v2";
 import { getShowChampions } from "@/app/actions/shows-v2-ring";
 import { getShowFollowState } from "@/app/actions/show-follow";
 import { GALLERY_STATUSES, RESULTS_STATUSES, type ShowGalleryData } from "@/lib/shows/gallery";
@@ -52,10 +47,12 @@ export default async function AlbumShowPage({ showId }: { showId: string }) {
     // viewers additionally get their entries + the entry flow.
     // WAVE 1: the show tree and "who is asking" are independent.
     const supabase = await createClient();
-    const [result, { data: { user } }] = await Promise.all([
-        getPublicShow({ showId }),
-        supabase.auth.getUser(),
-    ]);
+    const [
+        result,
+        {
+            data: { user },
+        },
+    ] = await Promise.all([getPublicShow({ showId }), supabase.auth.getUser()]);
 
     // Bad id, missing show, and drafts all land here.
     if (!result.success) notFound();
@@ -72,20 +69,11 @@ export default async function AlbumShowPage({ showId }: { showId: string }) {
     // lives in getShowGallery: a blind payload carries no owner
     // identities, and the wall never re-derives them.
     // Champions — published results only, both modes.
-    const [
-        entriesResult,
-        horsesResult,
-        roleResult,
-        galleryResult,
-        championsResult,
-        followState,
-    ] = await Promise.all([
+    const [entriesResult, horsesResult, roleResult, galleryResult, championsResult, followState] = await Promise.all([
         user ? getMyShowEntries({ showId }) : null,
         user && show.status === "entries_open" ? getMyEntrantHorses() : null,
         user ? getShowRole(supabase, showId, user.id) : null,
-        show.mode === "online" && GALLERY_STATUSES.includes(show.status)
-            ? getShowGallery({ showId })
-            : null,
+        show.mode === "online" && GALLERY_STATUSES.includes(show.status) ? getShowGallery({ showId }) : null,
         RESULTS_STATUSES.includes(show.status) ? getShowChampions({ showId }) : null,
         // Runs for anon too: the answer decides whether the Follow
         // control renders at all (migration 184 feature detection), and
@@ -109,10 +97,7 @@ export default async function AlbumShowPage({ showId }: { showId: string }) {
 
     return (
         <ExplorerLayout frameless noHeader>
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(showJsonLd) }}
-            />
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(showJsonLd) }} />
             <div className="flex flex-col gap-5">
                 <AlbumMasthead
                     show={show}
@@ -141,11 +126,7 @@ export default async function AlbumShowPage({ showId }: { showId: string }) {
                 {(show.aboutMd || show.rulesMd) && (
                     <div className="grid gap-3 md:grid-cols-2">
                         {show.aboutMd && (
-                            <details
-                                id="about"
-                                className="ledger-card group scroll-mt-32"
-                                open={liveEntryCount === 0}
-                            >
+                            <details id="about" className="ledger-card group scroll-mt-32" open={liveEntryCount === 0}>
                                 <summary className="ledger-tab cursor-pointer list-none" id="show-about-heading">
                                     About this show
                                     <span className="ml-2 text-xs opacity-70 group-open:hidden">▾</span>
@@ -154,11 +135,7 @@ export default async function AlbumShowPage({ showId }: { showId: string }) {
                             </details>
                         )}
                         {show.rulesMd && (
-                            <details
-                                id="rules"
-                                className="ledger-card group scroll-mt-32"
-                                open={liveEntryCount === 0}
-                            >
+                            <details id="rules" className="ledger-card group scroll-mt-32" open={liveEntryCount === 0}>
                                 <summary className="ledger-tab cursor-pointer list-none" id="show-rules-heading">
                                     Rules
                                     <span className="ml-2 text-xs opacity-70 group-open:hidden">▾</span>
@@ -188,8 +165,7 @@ export default async function AlbumShowPage({ showId }: { showId: string }) {
                             <div className="ledger-card">
                                 <span className="ledger-tab">Entry Album</span>
                                 <p className="text-sm text-muted-foreground">
-                                    The album fills up once entries open — every entry photo
-                                    lands here.
+                                    The album fills up once entries open — every entry photo lands here.
                                 </p>
                             </div>
                         )}
@@ -200,9 +176,8 @@ export default async function AlbumShowPage({ showId }: { showId: string }) {
                 {show.isMhhQualifying && (
                     <p className="text-sm text-muted-foreground">
                         🏅 This show is <b>MHH Sanctioned</b> — placings here earn{" "}
-                        <b>Championship Series season points</b>, and 1st &amp; 2nd in
-                        qualifying classes with enough competition mint{" "}
-                        <b>qualification cards</b> that travel with the horse and count toward
+                        <b>Championship Series season points</b>, and 1st &amp; 2nd in qualifying classes with enough
+                        competition mint <b>qualification cards</b> that travel with the horse and count toward
                         permanent titles.{" "}
                         <Link
                             href="/shows/rules"
@@ -228,10 +203,9 @@ export default async function AlbumShowPage({ showId }: { showId: string }) {
                         authed={!!user}
                         viewerTier={viewerTier}
                         showYear={show.showYear}
-                    showIsQualifying={show.isMhhQualifying}
+                        showIsQualifying={show.isMhhQualifying}
                     />
                 </div>
-
             </div>
         </ExplorerLayout>
     );

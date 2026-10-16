@@ -78,11 +78,7 @@ export default function ShowFollowButton({
             onClick={onClick}
             disabled={isPending}
             aria-pressed={isFollowing}
-            aria-label={
-                isFollowing
-                    ? `Stop following ${showTitle}`
-                    : `Follow ${showTitle} for updates`
-            }
+            aria-label={isFollowing ? `Stop following ${showTitle}` : `Follow ${showTitle} for updates`}
             title={
                 failed
                     ? "That didn't go through — try again"
@@ -90,9 +86,7 @@ export default function ShowFollowButton({
                       ? "You'll hear when entries close, judging starts and results are up"
                       : "Get told when entries close, judging starts and results are up"
             }
-            className={`studio-chip shrink-0 ${isFollowing ? "active" : ""} ${
-                isPending ? "opacity-60" : ""
-            }`}
+            className={`studio-chip shrink-0 ${isFollowing ? "active" : ""} ${isPending ? "opacity-60" : ""}`}
             data-testid="show-follow-cta"
         >
             {isFollowing ? "★ Following" : "☆ Follow this show"}

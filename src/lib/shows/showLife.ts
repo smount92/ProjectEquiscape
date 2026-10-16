@@ -114,21 +114,17 @@ export function buildShowLife(input: {
         activeByShow.set(entry.show_id, list);
     }
 
-    const activeEntries: ShowLifeActiveEntry[] = [...activeByShow.entries()].map(
-        ([showId, showEntries]) => {
-            const show = showsById.get(showId)!;
-            return {
-                showId,
-                showTitle: show.title ?? "Untitled show",
-                showStatus: show.status as ShowStatus,
-                entriesCloseAt: show.entries_close_at,
-                myEntryCount: showEntries.length,
-                myClasses: showEntries
-                    .slice(0, MAX_LISTED_CLASSES)
-                    .map((e) => classNamesById.get(e.class_id) ?? "Class"),
-            };
-        },
-    );
+    const activeEntries: ShowLifeActiveEntry[] = [...activeByShow.entries()].map(([showId, showEntries]) => {
+        const show = showsById.get(showId)!;
+        return {
+            showId,
+            showTitle: show.title ?? "Untitled show",
+            showStatus: show.status as ShowStatus,
+            entriesCloseAt: show.entries_close_at,
+            myEntryCount: showEntries.length,
+            myClasses: showEntries.slice(0, MAX_LISTED_CLASSES).map((e) => classNamesById.get(e.class_id) ?? "Class"),
+        };
+    });
     activeEntries.sort((a, b) => {
         if (a.entriesCloseAt === null && b.entriesCloseAt === null) return 0;
         if (a.entriesCloseAt === null) return 1;

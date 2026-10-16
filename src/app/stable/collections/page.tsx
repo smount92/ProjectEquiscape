@@ -27,23 +27,25 @@ export default async function FoldersPage() {
         getStableSummary(),
         supabase.from("users").select("currency_symbol").eq("id", user.id).maybeSingle(),
     ]);
-    const stats = new Map(
-        (summaryResult.success ? summaryResult.summary.collections : []).map((c) => [c.id, c]),
+    const stats = new Map((summaryResult.success ? summaryResult.summary.collections : []).map((c) => [c.id, c]));
+    const folders: FolderRow[] = ((rows ?? []) as { id: string; name: string; is_public: boolean | null }[]).map(
+        (r) => ({
+            id: r.id,
+            name: r.name,
+            isPublic: r.is_public === true,
+            count: stats.get(r.id)?.count ?? 0,
+            value: stats.get(r.id)?.value ?? 0,
+        }),
     );
-    const folders: FolderRow[] = ((rows ?? []) as { id: string; name: string; is_public: boolean | null }[]).map((r) => ({
-        id: r.id,
-        name: r.name,
-        isPublic: r.is_public === true,
-        count: stats.get(r.id)?.count ?? 0,
-        value: stats.get(r.id)?.value ?? 0,
-    }));
 
     return (
         <ExplorerLayout frameless noHeader>
             <PageMasthead
                 icon="📁"
                 title="Folders"
-                subtitle={folders.length === 0 ? "None yet" : `${folders.length} folder${folders.length === 1 ? "" : "s"}`}
+                subtitle={
+                    folders.length === 0 ? "None yet" : `${folders.length} folder${folders.length === 1 ? "" : "s"}`
+                }
                 backHref="/dashboard"
                 backLabel="Digital Stable"
             />

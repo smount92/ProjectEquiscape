@@ -28,15 +28,7 @@ vi.mock("@/lib/context/NotificationProvider", () => ({
 // The global setup renders next/link as nothing, which would hide every
 // href on the page. Real anchors here so destinations can be asserted.
 vi.mock("next/link", () => ({
-    default: ({
-        children,
-        href,
-        ...props
-    }: {
-        children: React.ReactNode;
-        href: string;
-        [key: string]: unknown;
-    }) => (
+    default: ({ children, href, ...props }: { children: React.ReactNode; href: string; [key: string]: unknown }) => (
         <a href={href} {...props}>
             {children}
         </a>
@@ -105,22 +97,12 @@ describe("NotificationList — reading the stream", () => {
 
     it("falls back sensibly when a row has no link_url", () => {
         render(<NotificationList initialNotifications={rows()} />);
-        expect(screen.getByText("Bea commented on Sable").closest("a")).toHaveAttribute(
-            "href",
-            "/community/h3",
-        );
-        expect(screen.getByText("Cass followed you").closest("a")).toHaveAttribute(
-            "href",
-            "/profile/Cass",
-        );
+        expect(screen.getByText("Bea commented on Sable").closest("a")).toHaveAttribute("href", "/community/h3");
+        expect(screen.getByText("Cass followed you").closest("a")).toHaveAttribute("href", "/profile/Cass");
     });
 
     it("never leaves a row with nothing to say", () => {
-        render(
-            <NotificationList
-                initialNotifications={[{ ...base, id: "x", content: null, type: "mystery" }]}
-            />,
-        );
+        render(<NotificationList initialNotifications={[{ ...base, id: "x", content: null, type: "mystery" }]} />);
         expect(screen.getByText(/Something happened/)).toBeInTheDocument();
     });
 });
@@ -164,9 +146,7 @@ describe("NotificationList — actions", () => {
         render(<NotificationList initialNotifications={rows()} />);
         fireEvent.click(screen.getByRole("button", { name: /Mark all read/ }));
         await waitFor(() => expect(actions.markAllNotificationsRead).toHaveBeenCalled());
-        await waitFor(() =>
-            expect(screen.queryByRole("button", { name: /Mark all read/ })).not.toBeInTheDocument(),
-        );
+        await waitFor(() => expect(screen.queryByRole("button", { name: /Mark all read/ })).not.toBeInTheDocument());
     });
 
     it("makes clearing a two-step action and says what it destroys", async () => {
@@ -178,9 +158,7 @@ describe("NotificationList — actions", () => {
 
         fireEvent.click(screen.getByRole("button", { name: /Delete all 4/ }));
         await waitFor(() => expect(actions.clearNotifications).toHaveBeenCalled());
-        await waitFor(() =>
-            expect(screen.getByText(/Nothing has come in/)).toBeInTheDocument(),
-        );
+        await waitFor(() => expect(screen.getByText(/Nothing has come in/)).toBeInTheDocument());
     });
 
     it("lets the confirmation be backed out of", () => {

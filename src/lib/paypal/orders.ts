@@ -55,8 +55,7 @@ import type { PaypalCapture, PaypalLink, PaypalOrder } from "./types";
  */
 export function approvalLinkOf(links: PaypalLink[] | undefined | null): string | null {
     const list = links ?? [];
-    const byRel = (rel: string) =>
-        list.find((link) => link?.rel?.toLowerCase() === rel)?.href ?? null;
+    const byRel = (rel: string) => list.find((link) => link?.rel?.toLowerCase() === rel)?.href ?? null;
     return byRel("payer-action") ?? byRel("approve") ?? null;
 }
 
@@ -86,9 +85,7 @@ export function encodePrepaidCustomId(userId: string, termKey: string): string {
 }
 
 /** Split a custom_id back up. `termKey` is null for the bare-id shape. */
-export function decodePrepaidCustomId(
-    value: unknown,
-): { userId: string; termKey: string | null } | null {
+export function decodePrepaidCustomId(value: unknown): { userId: string; termKey: string | null } | null {
     if (typeof value !== "string") return null;
     const trimmed = value.trim();
     if (!trimmed) return null;
@@ -162,9 +159,7 @@ export interface CreatePrepaidOrderArgs {
  * can map a capture back to a member without a round trip. It is the only
  * mapping there is; without it we grant nothing.
  */
-export async function createPrepaidOrder(
-    args: CreatePrepaidOrderArgs,
-): Promise<{ id: string; approveUrl: string }> {
+export async function createPrepaidOrder(args: CreatePrepaidOrderArgs): Promise<{ id: string; approveUrl: string }> {
     const { term, userId } = args;
 
     const body = {
@@ -232,10 +227,7 @@ export async function getCapture(captureId: string): Promise<PaypalCapture> {
 }
 
 /** Issues that mean "this order is already captured", not "this failed". */
-const ALREADY_CAPTURED_ISSUES = new Set([
-    "ORDER_ALREADY_CAPTURED",
-    "ORDER_ALREADY_COMPLETED",
-]);
+const ALREADY_CAPTURED_ISSUES = new Set(["ORDER_ALREADY_CAPTURED", "ORDER_ALREADY_COMPLETED"]);
 
 /**
  * Take the money.
@@ -260,19 +252,16 @@ const ALREADY_CAPTURED_ISSUES = new Set([
  */
 export async function captureOrder(orderId: string): Promise<PaypalCapture | null> {
     try {
-        const captured = await paypalFetch<PaypalOrder>(
-            `/v2/checkout/orders/${encodeURIComponent(orderId)}/capture`,
-            {
-                method: "POST",
-                // An empty JSON body, not an absent one: PayPal rejects a
-                // capture with Content-Type json and no body on some paths.
-                body: "{}",
-                headers: {
-                    "PayPal-Request-Id": `mhh-capture-${orderId}`,
-                    Prefer: "return=representation",
-                },
+        const captured = await paypalFetch<PaypalOrder>(`/v2/checkout/orders/${encodeURIComponent(orderId)}/capture`, {
+            method: "POST",
+            // An empty JSON body, not an absent one: PayPal rejects a
+            // capture with Content-Type json and no body on some paths.
+            body: "{}",
+            headers: {
+                "PayPal-Request-Id": `mhh-capture-${orderId}`,
+                Prefer: "return=representation",
             },
-        );
+        });
         const capture = completedCaptureOf(captured);
         if (capture?.id) return capture;
 

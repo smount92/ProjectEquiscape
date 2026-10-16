@@ -144,9 +144,9 @@ describe("cleanAttributeBag — the untrusted-input path", () => {
     });
 
     it("filters non-strings out of a chip array", () => {
-        expect(
-            cleanAttributeBag("tack", { working_parts: ["Working Buckles", 7, null] }).cleaned,
-        ).toEqual({ working_parts: ["Working Buckles"] });
+        expect(cleanAttributeBag("tack", { working_parts: ["Working Buckles", 7, null] }).cleaned).toEqual({
+            working_parts: ["Working Buckles"],
+        });
     });
 
     it("returns an empty bag for models, whatever it is handed", () => {

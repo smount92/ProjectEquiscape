@@ -28,13 +28,7 @@
  * reach the trophy case — only placed entries do.
  */
 
-import {
-    championColor,
-    championLabel,
-    placeLabel,
-    ribbonColor,
-    type ChampionKind,
-} from "./placings";
+import { championColor, championLabel, placeLabel, ribbonColor, type ChampionKind } from "./placings";
 import type { CallbackScope, Place, ShowMode } from "./types";
 
 /** Insert shape for the legacy show_records table. */
@@ -119,10 +113,7 @@ function capitalize(s: string): string {
 
 /** DATE column value: live shows use their show date; online
  *  shows anchor on the end of judging, else entry close. */
-export function resolveShowRecordDate(
-    show: PublishShowInput["show"],
-    fallbackDate?: string,
-): string | null {
+export function resolveShowRecordDate(show: PublishShowInput["show"], fallbackDate?: string): string | null {
     if (show.mode === "live") return show.showDate ?? fallbackDate ?? null;
     const anchor = show.judgingEndsAt ?? show.entriesCloseAt;
     if (anchor) return anchor.slice(0, 10);
@@ -143,9 +134,7 @@ export function buildShowRecords(input: PublishShowInput): {
         liveCountByClass.set(e.classId, (liveCountByClass.get(e.classId) ?? 0) + 1);
     }
 
-    const alreadyWritten = new Set(
-        input.existing.map((r) => `${r.horseId}::${r.className ?? ""}`),
-    );
+    const alreadyWritten = new Set(input.existing.map((r) => `${r.horseId}::${r.className ?? ""}`));
 
     const showDate = resolveShowRecordDate(input.show, input.fallbackDate);
 

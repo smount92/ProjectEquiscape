@@ -13,7 +13,11 @@ import { getThumbUrl } from "@/lib/utils/imageUrl";
  * and the full photo one click away was fine (market, 2026-09-19). When
  * the variant is missing this falls back to the original once.
  */
-export default function ThumbImage({ src, alt, ...rest }: ImgHTMLAttributes<HTMLImageElement> & { src: string; alt: string }) {
+export default function ThumbImage({
+    src,
+    alt,
+    ...rest
+}: ImgHTMLAttributes<HTMLImageElement> & { src: string; alt: string }) {
     const thumb = getThumbUrl(src);
     const onError = (e: SyntheticEvent<HTMLImageElement>) => {
         const img = e.currentTarget;

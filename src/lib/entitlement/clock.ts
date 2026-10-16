@@ -132,9 +132,7 @@ export function addMonthsUtc(fromMs: number, months: number): number {
     target.setUTCMonth(target.getUTCMonth() + months);
 
     // Day 0 of the following month is the last day of this one.
-    const lastDayOfTargetMonth = new Date(
-        Date.UTC(target.getUTCFullYear(), target.getUTCMonth() + 1, 0),
-    ).getUTCDate();
+    const lastDayOfTargetMonth = new Date(Date.UTC(target.getUTCFullYear(), target.getUTCMonth() + 1, 0)).getUTCDate();
 
     target.setUTCDate(Math.min(day, lastDayOfTargetMonth));
     return target.getTime();
@@ -152,11 +150,7 @@ export function addMonthsUtc(fromMs: number, months: number): number {
  * Returns an ISO string because that is what goes into app_metadata; the
  * caller never does date arithmetic of its own.
  */
-export function extendedPaidThrough(
-    currentMetadata: TierMetadata,
-    months: number,
-    now: number = Date.now(),
-): string {
+export function extendedPaidThrough(currentMetadata: TierMetadata, months: number, now: number = Date.now()): string {
     const existing = paidThroughMs(currentMetadata);
     const base = existing !== null && existing > now ? existing : now;
     return new Date(addMonthsUtc(base, months)).toISOString();

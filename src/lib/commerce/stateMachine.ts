@@ -44,9 +44,7 @@ export function isTerminal(status: TransactionStatus): boolean {
 /** Who may trigger a given action. */
 export type TransactionActor = "buyer" | "seller" | "either" | "system";
 
-export type TransitionResult =
-    | { ok: true }
-    | { ok: false; reason: string };
+export type TransitionResult = { ok: true } | { ok: false; reason: string };
 
 /**
  * Every state-changing operation on a Safe-Trade transaction.
@@ -188,11 +186,7 @@ export function actorForCaller(
  * Party is checked before status — matching the order (and therefore
  * the error precedence) of the original inline checks.
  */
-export function canPerform(
-    action: CommerceAction,
-    callerId: string,
-    txn: TransactionContext,
-): TransitionResult {
+export function canPerform(action: CommerceAction, callerId: string, txn: TransactionContext): TransitionResult {
     const spec = COMMERCE_ACTIONS[action];
 
     if (spec.actor === "system") {
@@ -200,8 +194,7 @@ export function canPerform(
     }
 
     const role = actorForCaller(callerId, txn);
-    const partyOk =
-        spec.actor === "either" ? role !== null : role === spec.actor;
+    const partyOk = spec.actor === "either" ? role !== null : role === spec.actor;
     if (!partyOk) {
         return { ok: false, reason: spec.wrongPartyReason };
     }
@@ -227,7 +220,5 @@ export function requirePaidAt(paidAt: string | null): TransitionResult {
 
 /** All actions legal from `status` (ignoring party) — for tests/UI parity. */
 export function legalActions(status: TransactionStatus): CommerceAction[] {
-    return (Object.keys(COMMERCE_ACTIONS) as CommerceAction[]).filter((a) =>
-        COMMERCE_ACTIONS[a].from.includes(status),
-    );
+    return (Object.keys(COMMERCE_ACTIONS) as CommerceAction[]).filter((a) => COMMERCE_ACTIONS[a].from.includes(status));
 }

@@ -35,14 +35,9 @@ export async function sendNewMessageNotification({
     messageSnippet: string;
     conversationId: string;
 }): Promise<void> {
-    const truncatedSnippet =
-        messageSnippet.length > 100
-            ? messageSnippet.slice(0, 100) + "…"
-            : messageSnippet;
+    const truncatedSnippet = messageSnippet.length > 100 ? messageSnippet.slice(0, 100) + "…" : messageSnippet;
 
-    const horseContext = horseName
-        ? ` regarding <strong>${escapeEmailHtml(horseName)}</strong>`
-        : "";
+    const horseContext = horseName ? ` regarding <strong>${escapeEmailHtml(horseName)}</strong>` : "";
 
     const subject = horseName
         ? `New message from @${senderName} about ${horseName}`

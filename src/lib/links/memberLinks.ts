@@ -82,7 +82,10 @@ function normalizeOne(key: LinkKey, raw: unknown): string | null {
 }
 
 /** Normalise whatever was stored or typed into clean https URLs, for the given slots. */
-export function normalizeMemberLinks(input: unknown, keys: readonly LinkKey[] = LINK_META.map((m) => m.key)): MemberLinks {
+export function normalizeMemberLinks(
+    input: unknown,
+    keys: readonly LinkKey[] = LINK_META.map((m) => m.key),
+): MemberLinks {
     if (!input || typeof input !== "object") return {};
     const out: MemberLinks = {};
     for (const key of keys) {

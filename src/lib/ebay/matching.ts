@@ -125,7 +125,8 @@ const MULTI_ITEM = [
  *   - explicitly marked as a model number by a preceding token (#, No.,
  *     model, item), which is a human saying "this is the number".
  */
-const MARKED_NUMBER = /(?:#|\bno\.?\s*|\bmodel\s*(?:no\.?|number)?\s*|\bitem\s*(?:no\.?|number)?\s*)([0-9]{1,6}[A-Za-z]?)\b/gi;
+const MARKED_NUMBER =
+    /(?:#|\bno\.?\s*|\bmodel\s*(?:no\.?|number)?\s*|\bitem\s*(?:no\.?|number)?\s*)([0-9]{1,6}[A-Za-z]?)\b/gi;
 const BARE_LONG_NUMBER = /\b([0-9]{4,6}[A-Za-z]?)\b/g;
 
 /** A year in a listing title is almost never the model number. */
@@ -166,7 +167,7 @@ const MAKER_ALIASES: Record<string, RegExp> = {
     Hartland: /\bhartland\b/i,
     Hagen: /\bhagen[\s-]?renaker\b/i,
     Schleich: /\bschleich\b/i,
-    "Copperfox": /\bcopper\s?fox\b/i,
+    Copperfox: /\bcopper\s?fox\b/i,
 };
 
 export function makerAppearsInTitle(maker: string | null, title: string): boolean {
@@ -210,10 +211,7 @@ export function isAmbiguousNumber(rows: MatchCandidate[]): boolean {
     return titles.size > 1;
 }
 
-export function matchListing(
-    listing: ListingInput,
-    index: Map<string, MatchCandidate[]>
-): MatchOutcome {
+export function matchListing(listing: ListingInput, index: Map<string, MatchCandidate[]>): MatchOutcome {
     const title = String(listing.title ?? "").trim();
     if (!title) return { catalogId: null, reason: "empty-listing-title" };
 

@@ -15,12 +15,18 @@ const DIR = path.join(process.cwd(), "supabase", "migrations");
 
 /** The value list of the latest migration that defines this constraint. */
 function checkList(constraint: string): string[] {
-    const files = readdirSync(DIR).filter((f) => f.endsWith(".sql")).sort().reverse();
+    const files = readdirSync(DIR)
+        .filter((f) => f.endsWith(".sql"))
+        .sort()
+        .reverse();
     for (const f of files) {
         const sql = readFileSync(path.join(DIR, f), "utf8");
         const at = sql.indexOf(`ADD CONSTRAINT ${constraint} CHECK`);
         if (at < 0) continue;
-        const body = sql.slice(at, sql.indexOf(") NOT VALID", at) > 0 ? sql.indexOf(") NOT VALID", at) : sql.indexOf(";", at));
+        const body = sql.slice(
+            at,
+            sql.indexOf(") NOT VALID", at) > 0 ? sql.indexOf(") NOT VALID", at) : sql.indexOf(";", at),
+        );
         const inList = body.slice(body.lastIndexOf(" IN ("));
         return [...inList.matchAll(/'((?:[^']|'')*)'/g)].map((m) => m[1].replace(/''/g, "'"));
     }

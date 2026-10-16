@@ -160,11 +160,13 @@ describe("markTransactionComplete — completion takes both sides", () => {
     });
 
     it("is idempotent once the deal is already complete", async () => {
-        queueConvo(convoRow({
-            transaction_status: "completed",
-            completion_confirmed_by_buyer_at: "2026-08-01T00:00:00Z",
-            completion_confirmed_by_seller_at: "2026-08-02T00:00:00Z",
-        }));
+        queueConvo(
+            convoRow({
+                transaction_status: "completed",
+                completion_confirmed_by_buyer_at: "2026-08-01T00:00:00Z",
+                completion_confirmed_by_seller_at: "2026-08-02T00:00:00Z",
+            }),
+        );
 
         const result = await markTransactionComplete(CONVO);
 

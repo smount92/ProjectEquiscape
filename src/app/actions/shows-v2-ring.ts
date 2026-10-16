@@ -23,13 +23,7 @@ import {
     firstZodError,
     recordCallbackSchema,
 } from "@/lib/shows/schemas";
-import {
-    getAliases,
-    getHorseNames,
-    getShowRole,
-    loadClassContexts,
-    type ClassContextTree,
-} from "@/lib/shows/queries";
+import { getAliases, getHorseNames, getShowRole, loadClassContexts, type ClassContextTree } from "@/lib/shows/queries";
 import {
     buildCallbackLadder,
     findLadderRound,
@@ -48,18 +42,9 @@ import {
     type RingConsoleData,
     type ShowChampionsData,
 } from "@/lib/shows/ring";
-import type {
-    CallbackScope,
-    EntryStatus,
-    Place,
-    ShowMode,
-    ShowStatus,
-    StaffRole,
-} from "@/lib/shows/types";
+import type { CallbackScope, EntryStatus, Place, ShowMode, ShowStatus, StaffRole } from "@/lib/shows/types";
 
-type ActionResult<T = object> =
-    | ({ success: true } & T)
-    | { success: false; error: string };
+type ActionResult<T = object> = ({ success: true } & T) | { success: false; error: string };
 
 /** Everyone who works the table may open the ring console and
  *  record callbacks — matches the RLS policy on show_callbacks (118). */
@@ -77,29 +62,21 @@ interface LiveEntryRow {
 }
 
 /** Live (non-scratched) entries of the show, arrival-ordered. */
-async function loadLiveEntries(
-    supabase: SupabaseClient,
-    showId: string,
-): Promise<LiveEntryRow[] | { error: string }> {
+async function loadLiveEntries(supabase: SupabaseClient, showId: string): Promise<LiveEntryRow[] | { error: string }> {
     const { data, error } = await supabase
         .from("show_class_entries")
         .select("id, class_id, horse_id, owner_id, entry_number, status, created_at")
         .eq("show_id", showId)
         .order("created_at", { ascending: true });
     if (error) return { error: error.message };
-    return ((data ?? []) as (LiveEntryRow & { created_at: string })[]).filter(
-        (e) => e.status !== "scratched",
-    );
+    return ((data ?? []) as (LiveEntryRow & { created_at: string })[]).filter((e) => e.status !== "scratched");
 }
 
 /** place + recency per entry across the given classes. */
 async function loadPlacings(
     supabase: SupabaseClient,
     classIds: string[],
-): Promise<
-    | { byEntry: Map<string, Place>; latestByClass: Map<string, string> }
-    | { error: string }
-> {
+): Promise<{ byEntry: Map<string, Place>; latestByClass: Map<string, string> } | { error: string }> {
     const byEntry = new Map<string, Place>();
     const latestByClass = new Map<string, string>();
     if (classIds.length === 0) return { byEntry, latestByClass };
@@ -118,10 +95,7 @@ async function loadPlacings(
     return { byEntry, latestByClass };
 }
 
-async function loadCallbacks(
-    supabase: SupabaseClient,
-    showId: string,
-): Promise<CallbackRecord[] | { error: string }> {
+async function loadCallbacks(supabase: SupabaseClient, showId: string): Promise<CallbackRecord[] | { error: string }> {
     const { data, error } = await supabase
         .from("show_callbacks")
         .select("scope, scope_id, champion_entry_id, reserve_entry_id")
@@ -200,7 +174,10 @@ export async function getRingConsole(
     const entries = await loadLiveEntries(supabase, showId);
     if ("error" in entries) return { success: false, error: entries.error };
 
-    const horseNames = await getHorseNames(supabase, entries.map((e) => e.horse_id));
+    const horseNames = await getHorseNames(
+        supabase,
+        entries.map((e) => e.horse_id),
+    );
     if (!(horseNames instanceof Map)) return { success: false, error: horseNames.error };
 
     const placings = await loadPlacings(
@@ -271,9 +248,7 @@ export async function getRingConsole(
  * pick — corrections at the table stay legal. The 117 trigger
  * (same-show integrity) and 118 RLS are the backstops.
  */
-export async function recordCallback(
-    input: z.input<typeof recordCallbackSchema>,
-): Promise<ActionResult> {
+export async function recordCallback(input: z.input<typeof recordCallbackSchema>): Promise<ActionResult> {
     const parsed = recordCallbackSchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { supabase, user } = await requireAuth();
@@ -334,11 +309,7 @@ export async function recordCallback(
         };
     }
 
-    const legal = validateCallbackSelection(
-        round,
-        v.championEntryId,
-        v.reserveEntryId ?? null,
-    );
+    const legal = validateCallbackSelection(round, v.championEntryId, v.reserveEntryId ?? null);
     if (!legal.ok) return { success: false, error: legal.reason };
 
     // One row per round: update in place when it exists (corrections),
@@ -346,13 +317,8 @@ export async function recordCallback(
     // index, so we look the row up first — staff volumes make a race
     // here vanishingly rare, and a duplicate would only mean the
     // newest row wins at read time (loadCallbacks takes them in order).
-    let existing = supabase
-        .from("show_callbacks")
-        .select("id")
-        .eq("show_id", v.showId)
-        .eq("scope", v.scope);
-    existing =
-        scopeId === null ? existing.is("scope_id", null) : existing.eq("scope_id", scopeId);
+    let existing = supabase.from("show_callbacks").select("id").eq("show_id", v.showId).eq("scope", v.scope);
+    existing = scopeId === null ? existing.is("scope_id", null) : existing.eq("scope_id", scopeId);
     const { data: existingRow, error: exErr } = await existing.maybeSingle();
     if (exErr) return { success: false, error: exErr.message };
 
@@ -452,11 +418,8 @@ export async function getRingBoard(
     // Latest placed classes, newest placing first, capped for the wall.
     const placedContexts = contexts
         .filter((c) => c.status === "placed")
-        .sort(
-            (a, b) =>
-                (placings.latestByClass.get(b.classId) ?? "").localeCompare(
-                    placings.latestByClass.get(a.classId) ?? "",
-                ),
+        .sort((a, b) =>
+            (placings.latestByClass.get(b.classId) ?? "").localeCompare(placings.latestByClass.get(a.classId) ?? ""),
         )
         .slice(0, 4);
 
@@ -480,9 +443,7 @@ export async function getRingBoard(
                     {
                         place,
                         entryNumber: e.entry_number,
-                        horseName:
-                            horseNames.get((entryById.get(e.id) as LiveEntryRow).horse_id) ??
-                            "Unnamed horse",
+                        horseName: horseNames.get((entryById.get(e.id) as LiveEntryRow).horse_id) ?? "Unnamed horse",
                     },
                 ];
             })
@@ -544,11 +505,7 @@ export async function getShowChampions(
 
     // Entry facts for every referenced champion/reserve.
     const entryIds = [
-        ...new Set(
-            callbacks.flatMap((c) =>
-                [c.championEntryId, c.reserveEntryId].filter((id): id is string => !!id),
-            ),
-        ),
+        ...new Set(callbacks.flatMap((c) => [c.championEntryId, c.reserveEntryId].filter((id): id is string => !!id))),
     ];
     const { data: entryRows, error: eErr } = await supabase
         .from("show_class_entries")
@@ -556,13 +513,15 @@ export async function getShowChampions(
         .in("id", entryIds);
     if (eErr) return { success: false, error: eErr.message };
     const entryById = new Map(
-        ((entryRows ?? []) as {
-            id: string;
-            horse_id: string;
-            owner_id: string;
-            entry_number: number | null;
-            status: EntryStatus;
-        }[]).map((e) => [e.id, e]),
+        (
+            (entryRows ?? []) as {
+                id: string;
+                horse_id: string;
+                owner_id: string;
+                entry_number: number | null;
+                status: EntryStatus;
+            }[]
+        ).map((e) => [e.id, e]),
     );
 
     const horseNames = await getHorseNames(

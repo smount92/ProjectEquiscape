@@ -103,10 +103,7 @@ describe("HorseDocuments", () => {
         render(<HorseDocuments horseId={HORSE_ID} documents={DOCS} isOwner />);
         fireEvent.click(screen.getByRole("button", { name: "Edit" }));
         expect(screen.getByLabelText("Documentation title")).toHaveValue("AQHA standard");
-        expect(screen.getByRole("radio", { name: "Breed" })).toHaveAttribute(
-            "aria-checked",
-            "true",
-        );
+        expect(screen.getByRole("radio", { name: "Breed" })).toHaveAttribute("aria-checked", "true");
         fireEvent.change(screen.getByLabelText("Documentation title"), {
             target: { value: "AQHA breed standard" },
         });

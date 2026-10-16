@@ -43,13 +43,7 @@ function EntryChip({ entry }: { entry: CalendarEntry }) {
         "block truncate rounded-[3px] border-l-2 border-forest/70 bg-forest/10 px-1 py-[1px] text-[0.68rem] leading-snug font-medium text-foreground no-underline hover:bg-forest/20 hover:underline";
 
     return entry.outbound ? (
-        <a
-            href={entry.href}
-            target="_blank"
-            rel="noopener nofollow"
-            className={className}
-            title={label}
-        >
+        <a href={entry.href} target="_blank" rel="noopener nofollow" className={className} title={label}>
             <span aria-hidden="true">{entry.icon}</span> {entry.title}
             <span aria-hidden="true"> ↗</span>
         </a>
@@ -67,22 +61,16 @@ function DaySquare({ day }: { day: CalendarDay }) {
 
     // Out-of-month squares are scaffolding: present so the weeks line
     // up, quiet so they never compete with the month you asked for.
-    const tone = !day.inMonth
-        ? "opacity-45"
-        : day.isPast
-          ? "opacity-70"
-          : "";
+    const tone = !day.inMonth ? "opacity-45" : day.isPast ? "opacity-70" : "";
 
     return (
-        <td
-            className={`border-forest/20 bg-card/55 h-[70px] w-[14.28%] border p-1 align-top sm:h-[104px] ${tone}`}
-        >
+        <td className={`h-[70px] w-[14.28%] border border-forest/20 bg-card/55 p-1 align-top sm:h-[104px] ${tone}`}>
             <div className="flex items-baseline justify-between gap-1">
                 {day.isToday && <span className="sr-only">Today, </span>}
                 <span
                     className={`font-serif text-[0.7rem] font-bold tabular-nums sm:text-xs ${
                         day.isToday
-                            ? "bg-forest grid h-[18px] min-w-[18px] place-items-center rounded-full px-1 text-[color:var(--primary-foreground)]"
+                            ? "grid h-[18px] min-w-[18px] place-items-center rounded-full bg-forest px-1 text-[color:var(--primary-foreground)]"
                             : "text-forest"
                     }`}
                 >
@@ -94,7 +82,7 @@ function DaySquare({ day }: { day: CalendarDay }) {
                 {day.entries.length > 0 && (
                     <span
                         aria-hidden="true"
-                        className="border-forest/40 text-forest inline-flex h-[16px] min-w-[16px] items-center justify-center rounded-full border px-1 text-[0.6rem] font-bold tabular-nums sm:hidden"
+                        className="inline-flex h-[16px] min-w-[16px] items-center justify-center rounded-full border border-forest/40 px-1 text-[0.6rem] font-bold text-forest tabular-nums sm:hidden"
                     >
                         {day.entries.length}
                     </span>
@@ -108,7 +96,7 @@ function DaySquare({ day }: { day: CalendarDay }) {
                             <EntryChip key={`${entry.kind}-${entry.id}`} entry={entry} />
                         ))}
                         {overflow > 0 && (
-                            <span className="text-muted-foreground px-1 text-[0.62rem] font-semibold">
+                            <span className="px-1 text-[0.62rem] font-semibold text-muted-foreground">
                                 +{overflow} more
                             </span>
                         )}
@@ -154,12 +142,7 @@ export default function CalendarMonthGrid({
                     <Link href={todayHref} className={NAV_LINK}>
                         This month
                     </Link>
-                    <Link
-                        href={nextHref}
-                        className={NAV_LINK}
-                        aria-label={`Next month — ${grid.nextKey}`}
-                        rel="next"
-                    >
+                    <Link href={nextHref} className={NAV_LINK} aria-label={`Next month — ${grid.nextKey}`} rel="next">
                         Next →
                     </Link>
                 </nav>
@@ -167,17 +150,12 @@ export default function CalendarMonthGrid({
 
             <table className="w-full table-fixed border-collapse">
                 <caption className="sr-only">
-                    {grid.label} — {grid.count}{" "}
-                    {grid.count === 1 ? "entry" : "entries"} on the calendar
+                    {grid.label} — {grid.count} {grid.count === 1 ? "entry" : "entries"} on the calendar
                 </caption>
                 <thead>
                     <tr>
                         {WEEKDAY_LABELS.map((weekday) => (
-                            <th
-                                key={weekday}
-                                scope="col"
-                                className="pb-1 text-center text-[0.62rem] sm:text-[0.7rem]"
-                            >
+                            <th key={weekday} scope="col" className="pb-1 text-center text-[0.62rem] sm:text-[0.7rem]">
                                 <span className="sm:hidden" aria-hidden="true">
                                     {weekday.slice(0, 1)}
                                 </span>
@@ -198,9 +176,9 @@ export default function CalendarMonthGrid({
             </table>
 
             {grid.count === 0 && (
-                <p className="text-secondary-foreground mt-3 mb-0 text-sm">
-                    Nothing on the calendar in {grid.label} yet — try the months either
-                    side, or switch to the list to see everything that is coming.
+                <p className="mt-3 mb-0 text-sm text-secondary-foreground">
+                    Nothing on the calendar in {grid.label} yet — try the months either side, or switch to the list to
+                    see everything that is coming.
                 </p>
             )}
         </section>

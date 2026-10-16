@@ -3,13 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { paypalPathLive } from "@/lib/paypal/flag";
 import { termByKey, TERM_CURRENCY } from "@/lib/billing/terms";
-import {
-    captureMatchesPrice,
-    captureOrder,
-    completedCaptureOf,
-    getOrder,
-    orderCustomId,
-} from "@/lib/paypal/orders";
+import { captureMatchesPrice, captureOrder, completedCaptureOf, getOrder, orderCustomId } from "@/lib/paypal/orders";
 import { grantPrepaidTerm } from "@/lib/paypal/entitlement";
 import { logger } from "@/lib/logger";
 
@@ -73,10 +67,7 @@ export async function GET(request: Request) {
         // this, anyone could paste someone else's order id.
         const custom = orderCustomId(order);
         if (custom?.userId !== user.id) {
-            logger.error(
-                "PayPalPrepaidReturn",
-                `Order ${orderId} does not belong to ${user.id} — capturing nothing`,
-            );
+            logger.error("PayPalPrepaidReturn", `Order ${orderId} does not belong to ${user.id} — capturing nothing`);
             return redirectTo("/upgrade?status=paypal-pending");
         }
 
@@ -99,8 +90,7 @@ export async function GET(request: Request) {
         // the webhook, moments ago. Read that capture rather than making
         // another; captureOrder would handle it too, but there is no
         // reason to send PayPal a request we know the answer to.
-        const capture =
-            status === "COMPLETED" ? completedCaptureOf(order) : await captureOrder(orderId);
+        const capture = status === "COMPLETED" ? completedCaptureOf(order) : await captureOrder(orderId);
 
         if (!capture?.id) {
             logger.error("PayPalPrepaidReturn", `Order ${orderId} produced no readable capture`);
@@ -136,9 +126,7 @@ export async function GET(request: Request) {
         }
 
         return redirectTo(
-            term.tier === "studio"
-                ? "/studio/dashboard?upgraded=success"
-                : "/upgrade?status=term-success",
+            term.tier === "studio" ? "/studio/dashboard?upgraded=success" : "/upgrade?status=term-success",
         );
     } catch (err) {
         const Sentry = await import("@sentry/nextjs");

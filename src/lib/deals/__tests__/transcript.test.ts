@@ -74,11 +74,7 @@ describe("mixed transcript", () => {
     });
 
     it("carries the dates payment entries exist to record", () => {
-        const sent = describeEvent(
-            "payment_sent",
-            { seq: 2, amount: 75, onDate: "2026-09-01" },
-            ctx,
-        );
+        const sent = describeEvent("payment_sent", { seq: 2, amount: 75, onDate: "2026-09-01" }, ctx);
         expect(sent.headline).toBe("@amanda marked payment 2 sent — $75");
         expect(sent.lines).toContainEqual({ label: "Sent on", value: "Sep 1, 2026" });
 
@@ -105,16 +101,12 @@ describe("mixed transcript", () => {
 
     it("reserves the warning tone for closures and disputes, never for money moving", () => {
         expect(describeEvent("payment_sent", { seq: 1, amount: 10 }, ctx).tone).toBe("money");
-        expect(describeEvent("plan_created", { installmentCount: 6, total: 400 }, ctx).tone).toBe(
-            "money",
-        );
+        expect(describeEvent("plan_created", { installmentCount: 6, total: 400 }, ctx).tone).toBe("money");
         expect(describeEvent("terms_agreed", { agreedPrice: 300 }, ctx).tone).toBe("good");
     });
 
     it("falls back to the row's own content for a system entry", () => {
-        expect(describeEvent("system", {}, ctx, "The offer expired").headline).toBe(
-            "The offer expired",
-        );
+        expect(describeEvent("system", {}, ctx, "The offer expired").headline).toBe("The offer expired");
         expect(describeEvent("system", {}, ctx, null).headline).toBe("Recorded");
     });
 

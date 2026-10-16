@@ -62,7 +62,9 @@ function bump(map: Map<string, Bucket>, raw: unknown): void {
 /** Busiest first; everything past `n` folds into one "Other" row, Unknown always last. */
 export function topBuckets(map: Map<string, Bucket>, n: number): Bucket[] {
     const unknown = map.get(UNKNOWN.toLowerCase());
-    const named = [...map.values()].filter((b) => b.label !== UNKNOWN).sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
+    const named = [...map.values()]
+        .filter((b) => b.label !== UNKNOWN)
+        .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
     const head = named.slice(0, n);
     const rest = named.slice(n).reduce((s, b) => s + b.count, 0);
     if (rest > 0) head.push({ label: OTHER, count: rest });

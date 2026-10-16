@@ -19,7 +19,11 @@ const files = readdirSync(DIR)
 function count(re: RegExp): { total: number; top: string } {
     const per = files.map(({ f, text }) => [f, (text.match(re) ?? []).length] as const).filter(([, n]) => n > 0);
     const total = per.reduce((s, [, n]) => s + n, 0);
-    const top = [...per].sort((a, b) => b[1] - a[1]).slice(0, 8).map(([f, n]) => `${String(n).padStart(4)}  ${f}`).join("\n  ");
+    const top = [...per]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 8)
+        .map(([f, n]) => `${String(n).padStart(4)}  ${f}`)
+        .join("\n  ");
     return { total, top };
 }
 
@@ -33,7 +37,9 @@ const BASELINES = {
 describe("server action standards ratchet", () => {
     it("database error text is not returned to members (use safeError)", () => {
         const { total, top } = count(/error:\s*[A-Za-z_][\w.]*\.message\b/g);
-        expect(total, `Raw error.message returns rose to ${total}.\n  ${top}`).toBeLessThanOrEqual(BASELINES.rawErrorMessages);
+        expect(total, `Raw error.message returns rose to ${total}.\n  ${top}`).toBeLessThanOrEqual(
+            BASELINES.rawErrorMessages,
+        );
     });
 
     it("actions use requireAuth(), not raw auth.getUser()", () => {
@@ -43,13 +49,19 @@ describe("server action standards ratchet", () => {
 
     it("ActionResult comes from src/lib/actions/result.ts", () => {
         const { total, top } = count(/^(?:export )?(?:type|interface) ActionResult\b/gm);
-        expect(total, `Local ActionResult declarations rose to ${total}.\n  ${top}`).toBeLessThanOrEqual(BASELINES.localActionResultTypes);
+        expect(total, `Local ActionResult declarations rose to ${total}.\n  ${top}`).toBeLessThanOrEqual(
+            BASELINES.localActionResultTypes,
+        );
     });
 });
 
 describe("safeError", () => {
     it("returns plain words, never the database message", () => {
-        const result = safeError("Test", { message: "duplicate key value violates unique constraint" }, "Could not save it.");
+        const result = safeError(
+            "Test",
+            { message: "duplicate key value violates unique constraint" },
+            "Could not save it.",
+        );
         expect(result).toEqual({ success: false, error: "Could not save it." });
         expect(safeError("Test", new Error("boom"))).toEqual({ success: false, error: GENERIC_FAILURE });
         expect(NOT_LOGGED_IN).toMatch(/log in/i);

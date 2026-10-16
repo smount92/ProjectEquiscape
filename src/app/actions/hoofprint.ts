@@ -58,69 +58,85 @@ export async function getHoofprint(horseId: string): Promise<{
     // Single query → the view does all the UNION ALL work
     const { data: rawTimeline } = await supabase
         .from("v_horse_hoofprint")
-        .select("source_id, horse_id, user_id, event_type, title, description, event_date, metadata, is_public, created_at, source_table")
+        .select(
+            "source_id, horse_id, user_id, event_type, title, description, event_date, metadata, is_public, created_at, source_table",
+        )
         .eq("horse_id", horseId)
         .order("event_date", { ascending: false, nullsFirst: false })
         .order("created_at", { ascending: false });
 
     // Fetch user aliases for all unique user IDs in the results
-    const userIds = [...new Set((rawTimeline ?? []).map((e: { user_id: string | null }) => e.user_id).filter(Boolean))] as string[];
+    const userIds = [
+        ...new Set((rawTimeline ?? []).map((e: { user_id: string | null }) => e.user_id).filter(Boolean)),
+    ] as string[];
     const aliasMap = new Map<string, string>();
     if (userIds.length > 0) {
-        const { data: users } = await supabase
-            .from("users")
-            .select("id, alias_name")
-            .in("id", userIds);
+        const { data: users } = await supabase.from("users").select("id, alias_name").in("id", userIds);
         (users ?? []).forEach((u: { id: string; alias_name: string }) => aliasMap.set(u.id, u.alias_name));
     }
 
-    const timeline: TimelineEvent[] = (rawTimeline ?? []).map((e: {
-        source_id: string | null; event_type: string | null; title: string | null; description: string | null;
-        event_date: string | null; metadata: unknown; is_public: boolean | null;
-        created_at: string | null; user_id: string | null; source_table: string | null;
-    }) => ({
-        id: e.source_id || "",
-        eventType: e.event_type || "",
-        title: e.title || "",
-        description: e.description,
-        eventDate: e.event_date,
-        metadata: (e.metadata as Record<string, unknown>) || {},
-        isPublic: e.is_public ?? true,
-        createdAt: e.created_at || "",
-        userAlias: e.user_id ? (aliasMap.get(e.user_id) || "Unknown") : "Unknown",
-        userId: e.user_id || "",
-        sourceTable: e.source_table || undefined,
-    }));
+    const timeline: TimelineEvent[] = (rawTimeline ?? []).map(
+        (e: {
+            source_id: string | null;
+            event_type: string | null;
+            title: string | null;
+            description: string | null;
+            event_date: string | null;
+            metadata: unknown;
+            is_public: boolean | null;
+            created_at: string | null;
+            user_id: string | null;
+            source_table: string | null;
+        }) => ({
+            id: e.source_id || "",
+            eventType: e.event_type || "",
+            title: e.title || "",
+            description: e.description,
+            eventDate: e.event_date,
+            metadata: (e.metadata as Record<string, unknown>) || {},
+            isPublic: e.is_public ?? true,
+            createdAt: e.created_at || "",
+            userAlias: e.user_id ? aliasMap.get(e.user_id) || "Unknown" : "Unknown",
+            userId: e.user_id || "",
+            sourceTable: e.source_table || undefined,
+        }),
+    );
 
     // Fetch ownership chain (direct table query — unchanged)
     const { data: rawOwnership } = await supabase
         .from("horse_ownership_history")
-        .select("id, owner_alias, owner_id, acquired_at, released_at, acquisition_type, sale_price, is_price_public, notes")
+        .select(
+            "id, owner_alias, owner_id, acquired_at, released_at, acquisition_type, sale_price, is_price_public, notes",
+        )
         .eq("horse_id", horseId)
         .order("acquired_at", { ascending: true });
 
-    const ownershipChain: OwnershipRecord[] = (rawOwnership ?? []).map((o: {
-        id: string; owner_alias: string; owner_id: string | null; acquired_at: string;
-        released_at: string | null; acquisition_type: string; sale_price: number | null;
-        is_price_public: boolean | null; notes: string | null;
-    }) => ({
-        id: o.id,
-        ownerAlias: o.owner_alias,
-        ownerId: o.owner_id,
-        acquiredAt: o.acquired_at,
-        releasedAt: o.released_at,
-        acquisitionType: o.acquisition_type,
-        salePrice: o.is_price_public ? o.sale_price : null,
-        isPricePublic: o.is_price_public ?? false,
-        notes: o.notes,
-    }));
+    const ownershipChain: OwnershipRecord[] = (rawOwnership ?? []).map(
+        (o: {
+            id: string;
+            owner_alias: string;
+            owner_id: string | null;
+            acquired_at: string;
+            released_at: string | null;
+            acquisition_type: string;
+            sale_price: number | null;
+            is_price_public: boolean | null;
+            notes: string | null;
+        }) => ({
+            id: o.id,
+            ownerAlias: o.owner_alias,
+            ownerId: o.owner_id,
+            acquiredAt: o.acquired_at,
+            releasedAt: o.released_at,
+            acquisitionType: o.acquisition_type,
+            salePrice: o.is_price_public ? o.sale_price : null,
+            isPricePublic: o.is_price_public ?? false,
+            notes: o.notes,
+        }),
+    );
 
     // Fetch life stage
-    const { data: horse } = await supabase
-        .from("user_horses")
-        .select("life_stage")
-        .eq("id", horseId)
-        .single();
+    const { data: horse } = await supabase.from("user_horses").select("life_stage").eq("id", horseId).single();
 
     return {
         timeline,
@@ -150,9 +166,7 @@ export async function addTimelineEvent(data: {
     const { supabase, user } = await requireAuth();
 
     // Build post content from title + description
-    const content = data.description
-        ? data.title + "\n\n" + data.description
-        : data.title;
+    const content = data.description ? data.title + "\n\n" + data.description : data.title;
 
     const { error } = await supabase.from("posts").insert({
         author_id: user.id,
@@ -174,15 +188,14 @@ export async function addTimelineEvent(data: {
  * Delete a custom timeline event from a horse's Hoofprint.
  * @param eventId - UUID of the timeline event to delete
  */
-export async function deleteTimelineEvent(eventId: string, horseId: string): Promise<{ success: boolean; error?: string }> {
+export async function deleteTimelineEvent(
+    eventId: string,
+    horseId: string,
+): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
     // Delete the post (RLS ensures only author or horse owner can delete)
-    const { error } = await supabase
-        .from("posts")
-        .delete()
-        .eq("id", eventId)
-        .eq("author_id", user.id);
+    const { error } = await supabase.from("posts").delete().eq("id", eventId).eq("author_id", user.id);
 
     if (error) return { success: false, error: error.message };
     revalidatePath(`/stable/${horseId}`);
@@ -202,7 +215,7 @@ export async function deleteTimelineEvent(eventId: string, horseId: string): Pro
  */
 export async function updateLifeStage(
     horseId: string,
-    newStage: "blank" | "stripped" | "in_progress" | "completed" | "for_sale"
+    newStage: "blank" | "stripped" | "in_progress" | "completed" | "for_sale",
 ): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
 
@@ -266,18 +279,13 @@ export async function initializeHoofprint(data: {
     // Fall back to the legacy insert so behaviour is unchanged (it will
     // still be refused by RLS, exactly as before — no worse, no better),
     // and say so in the log rather than failing the add.
-    const missingFunction =
-        error.code === "PGRST202" || /function .* does not exist/i.test(error.message ?? "");
+    const missingFunction = error.code === "PGRST202" || /function .* does not exist/i.test(error.message ?? "");
     if (!missingFunction) {
         logger.error("Hoofprint", "Genesis ownership row failed", error);
         return;
     }
 
-    const { data: profile } = await supabase
-        .from("users")
-        .select("alias_name")
-        .eq("id", user.id)
-        .single();
+    const { data: profile } = await supabase.from("users").select("alias_name").eq("id", user.id).single();
     const alias = (profile as { alias_name: string } | null)?.alias_name || "Unknown";
 
     const { error: legacyError } = await supabase.from("horse_ownership_history").insert({
@@ -288,11 +296,7 @@ export async function initializeHoofprint(data: {
         notes: data.acquisitionNotes || null,
     });
     if (legacyError) {
-        logger.error(
-            "Hoofprint",
-            "Genesis ownership row rejected (migration 182 not yet applied)",
-            legacyError
-        );
+        logger.error("Hoofprint", "Genesis ownership row rejected (migration 182 not yet applied)", legacyError);
     }
 
     // ⚡ REMOVED: horse_timeline INSERT — now derived from v_horse_hoofprint view
@@ -418,7 +422,9 @@ export async function claimTransfer(transferCode: string): Promise<{
                 sale_price: result.sale_price || null,
             },
         });
-    } catch (err) { logger.error("Hoofprint", "Background task failed", err); }
+    } catch (err) {
+        logger.error("Hoofprint", "Background task failed", err);
+    }
 
     // Background: Send notifications (non-critical — OK to fail)
     try {
@@ -431,7 +437,9 @@ export async function claimTransfer(transferCode: string): Promise<{
                 horse_id: result.horse_id,
             });
         }
-    } catch (err) { logger.error("Hoofprint", "Background task failed", err); }
+    } catch (err) {
+        logger.error("Hoofprint", "Background task failed", err);
+    }
 
     revalidatePath("/dashboard");
     revalidatePath(`/stable/${result.horse_id}`);
@@ -447,25 +455,24 @@ export async function claimTransfer(transferCode: string): Promise<{
 /** Cancel a pending transfer. */
 export async function cancelTransfer(transferId: string): Promise<{ success: boolean; error?: string }> {
     const supabase = await createClient();
-    const { error } = await supabase
-        .from("horse_transfers")
-        .update({ status: "cancelled" })
-        .eq("id", transferId);
+    const { error } = await supabase.from("horse_transfers").update({ status: "cancelled" }).eq("id", transferId);
 
     if (error) return { success: false, error: error.message };
     return { success: true };
 }
 
 /** Get pending outgoing transfers for the current user. */
-export async function getMyPendingTransfers(): Promise<{
-    id: string;
-    horseId: string;
-    horseName: string;
-    transferCode: string;
-    createdAt: string;
-    expiresAt: string;
-    acquisitionType: string;
-}[]> {
+export async function getMyPendingTransfers(): Promise<
+    {
+        id: string;
+        horseId: string;
+        horseName: string;
+        transferCode: string;
+        createdAt: string;
+        expiresAt: string;
+        acquisitionType: string;
+    }[]
+> {
     const { supabase, user } = await requireAuth();
 
     const { data } = await supabase
@@ -479,36 +486,44 @@ export async function getMyPendingTransfers(): Promise<{
 
     // Get horse names
     const horseIds = data.map((t: { horse_id: string }) => t.horse_id);
-    const { data: horses } = await supabase
-        .from("user_horses")
-        .select("id, custom_name")
-        .in("id", horseIds);
+    const { data: horses } = await supabase.from("user_horses").select("id, custom_name").in("id", horseIds);
 
     const nameMap = new Map<string, string>();
     (horses ?? []).forEach((h: { id: string; custom_name: string }) => nameMap.set(h.id, h.custom_name));
 
-    return data.map((t: { id: string; horse_id: string; transfer_code: string; created_at: string; expires_at: string; acquisition_type: string }) => ({
-        id: t.id,
-        horseId: t.horse_id,
-        horseName: nameMap.get(t.horse_id) || "Unknown Horse",
-        transferCode: t.transfer_code,
-        createdAt: t.created_at,
-        expiresAt: t.expires_at,
-        acquisitionType: t.acquisition_type,
-    }));
+    return data.map(
+        (t: {
+            id: string;
+            horse_id: string;
+            transfer_code: string;
+            created_at: string;
+            expires_at: string;
+            acquisition_type: string;
+        }) => ({
+            id: t.id,
+            horseId: t.horse_id,
+            horseName: nameMap.get(t.horse_id) || "Unknown Horse",
+            transferCode: t.transfer_code,
+            createdAt: t.created_at,
+            expiresAt: t.expires_at,
+            acquisitionType: t.acquisition_type,
+        }),
+    );
 }
 
 /** Get horses the current user has transferred away (ghost remnants) */
-export async function getTransferHistory(): Promise<{
-    id: string;
-    horseId: string;
-    horseName: string | null;
-    horseThumbnail: string | null;
-    salePrice: number | null;
-    isPricePublic: boolean;
-    acquisitionType: string;
-    releasedAt: string;
-}[]> {
+export async function getTransferHistory(): Promise<
+    {
+        id: string;
+        horseId: string;
+        horseName: string | null;
+        horseThumbnail: string | null;
+        salePrice: number | null;
+        isPricePublic: boolean;
+        acquisitionType: string;
+        releasedAt: string;
+    }[]
+> {
     const { supabase, user } = await requireAuth();
 
     const { data: records } = await supabase
@@ -520,7 +535,18 @@ export async function getTransferHistory(): Promise<{
 
     if (!records) return [];
 
-    return (records as { id: string; horse_id: string; horse_name: string | null; horse_thumbnail: string | null; sale_price: number | null; is_price_public: boolean; acquisition_type: string; released_at: string }[]).map(r => ({
+    return (
+        records as {
+            id: string;
+            horse_id: string;
+            horse_name: string | null;
+            horse_thumbnail: string | null;
+            sale_price: number | null;
+            is_price_public: boolean;
+            acquisition_type: string;
+            released_at: string;
+        }[]
+    ).map((r) => ({
         id: r.id,
         horseId: r.horse_id,
         horseName: r.horse_name,

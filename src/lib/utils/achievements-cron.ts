@@ -14,7 +14,9 @@ export async function evaluateComplexBadges(admin: SupabaseClient): Promise<numb
     try {
         // Fallback: raw query if RPC doesn't exist yet
         // Will implement via RPC in future migration
-    } catch { /* future */ }
+    } catch {
+        /* future */
+    }
 
     // ── Conga Line: 5+ horses on the same mold ──
     try {
@@ -63,14 +65,13 @@ export async function evaluateComplexBadges(admin: SupabaseClient): Promise<numb
     // ── Five Star Seller: 5.0 avg with 5+ reviews ──
     try {
         // Fallback: will add RPC in future
-    } catch { /* future */ }
+    } catch {
+        /* future */
+    }
 
     // ── Popular Kid: 25+ total likes ──
     try {
-        const { data: popularUsers } = await admin
-            .from("posts")
-            .select("author_id, likes_count")
-            .gt("likes_count", 0);
+        const { data: popularUsers } = await admin.from("posts").select("author_id, likes_count").gt("likes_count", 0);
 
         if (popularUsers) {
             const likeTotals = new Map<string, number>();

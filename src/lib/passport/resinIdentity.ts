@@ -75,7 +75,9 @@ export function resinMakeupLine(r: ResinIdentity): string | null {
  * True when a save or read failed only because migration 217 is not in
  * the database yet (undefined column, or PostgREST's schema-cache miss).
  */
-export function isMissingResinColumn(err: { code?: string | null; message?: string | null } | null | undefined): boolean {
+export function isMissingResinColumn(
+    err: { code?: string | null; message?: string | null } | null | undefined,
+): boolean {
     if (!err) return false;
     const code = err.code ?? "";
     const message = err.message ?? "";

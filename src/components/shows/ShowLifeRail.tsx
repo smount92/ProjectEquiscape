@@ -43,22 +43,22 @@ export default async function ShowLifeRail() {
     const latestPlacing = latestResult?.placings[0];
 
     return (
-        <div className="bg-card rounded-lg border border-input p-6 shadow-md transition-all">
+        <div className="rounded-lg border border-input bg-card p-6 shadow-md transition-all">
             <h3 className="mb-4 flex items-center gap-2 text-xs font-semibold tracking-widest text-secondary-foreground uppercase">
                 <Trophy size={14} strokeWidth={1.5} /> Shows
             </h3>
             <div className="flex flex-col gap-2 text-sm">
                 {openCount !== null && openCount > 0 && (
                     <p className="m-0 text-secondary-foreground">
-                        <span className="text-forest font-bold">{openCount}</span> show
+                        <span className="font-bold text-forest">{openCount}</span> show
                         {openCount === 1 ? "" : "s"} open for entries right now
                     </p>
                 )}
                 {life.activeEntries.length > 0 && (
                     <p className="m-0 text-secondary-foreground">
                         You&apos;re entered in{" "}
-                        <span className="font-bold text-foreground">{life.activeEntries.length}</span>{" "}
-                        show{life.activeEntries.length === 1 ? "" : "s"}
+                        <span className="font-bold text-foreground">{life.activeEntries.length}</span> show
+                        {life.activeEntries.length === 1 ? "" : "s"}
                     </p>
                 )}
                 {nextDeadline && (
@@ -75,10 +75,8 @@ export default async function ShowLifeRail() {
                 {latestResult && latestPlacing && (
                     <p className="m-0 text-secondary-foreground">
                         Latest result:{" "}
-                        <span className="font-bold text-foreground">
-                            {placeLabel(latestPlacing.place)}
-                        </span>{" "}
-                        — {latestPlacing.className},{" "}
+                        <span className="font-bold text-foreground">{placeLabel(latestPlacing.place)}</span> —{" "}
+                        {latestPlacing.className},{" "}
                         <Link
                             href={`/shows/${latestResult.showId}`}
                             className="font-semibold text-foreground no-underline hover:underline"
@@ -89,7 +87,7 @@ export default async function ShowLifeRail() {
                 )}
             </div>
             <div className="mt-4 border-t border-input pt-3">
-                <Link href="/shows" className="text-forest text-sm font-semibold no-underline hover:underline">
+                <Link href="/shows" className="text-sm font-semibold text-forest no-underline hover:underline">
                     Find a show →
                 </Link>
             </div>

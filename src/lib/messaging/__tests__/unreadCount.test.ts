@@ -88,12 +88,7 @@ describe("countUnreadMessages", () => {
         expect(rec.eq).toEqual([["is_read", false]]);
         expect(rec.neq).toEqual([["sender_id", "user-42"]]);
         // buyer OR seller, applied to the EMBEDDED table.
-        expect(rec.or).toEqual([
-            [
-                "buyer_id.eq.user-42,seller_id.eq.user-42",
-                { referencedTable: "conversations" },
-            ],
-        ]);
+        expect(rec.or).toEqual([["buyer_id.eq.user-42,seller_id.eq.user-42", { referencedTable: "conversations" }]]);
     });
 
     it("reports zero rather than NaN when the member has no threads", async () => {

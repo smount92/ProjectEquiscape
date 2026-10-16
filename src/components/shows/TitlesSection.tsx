@@ -28,11 +28,7 @@ function LadderRow({ p }: { p: TitleProgress }) {
                         </span>
                         {p.code} — {p.label}
                     </span>
-                    {p.remaining && (
-                        <span className="text-right text-xs text-muted-foreground">
-                            {p.remaining}
-                        </span>
-                    )}
+                    {p.remaining && <span className="text-right text-xs text-muted-foreground">{p.remaining}</span>}
                 </div>
                 <div
                     className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted"
@@ -69,13 +65,11 @@ export default function TitlesSection({
                 <span aria-hidden="true">🏆</span> MHH Titles
             </h3>
             <p className="mb-4 text-xs text-secondary-foreground">
-                Permanent titles earned in MHH-sanctioned showing. Titles stay with the
-                horse for life, whoever owns it.
+                Permanent titles earned in MHH-sanctioned showing. Titles stay with the horse for life, whoever owns it.
                 {ladder && (
                     <>
                         {" "}
-                        Career points:{" "}
-                        <b className="text-secondary-foreground">{ladder.careerPoints}</b>.
+                        Career points: <b className="text-secondary-foreground">{ladder.careerPoints}</b>.
                     </>
                 )}
             </p>

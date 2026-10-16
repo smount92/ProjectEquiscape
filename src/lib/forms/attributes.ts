@@ -15,10 +15,7 @@ import type { FormValues } from "./types";
  * Build the JSONB bag from form values. Empty values are omitted entirely
  * rather than stored as `""` — the passport renders on presence.
  */
-export function packAttributes(
-    category: AssetCategory,
-    values: FormValues,
-): Record<string, unknown> {
+export function packAttributes(category: AssetCategory, values: FormValues): Record<string, unknown> {
     const out: Record<string, unknown> = {};
     for (const spec of getAttributeFields(category)) {
         const key = spec.attributeKey as string;

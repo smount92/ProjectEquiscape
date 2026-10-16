@@ -35,9 +35,7 @@ export function resetShowFollowSupport(): void {
 }
 
 /** Is `show_followers` present? False = pre-184, degrade silently. */
-export async function getShowFollowSupport(
-    supabase: SupabaseClient,
-): Promise<boolean> {
+export async function getShowFollowSupport(supabase: SupabaseClient): Promise<boolean> {
     if (cached !== null && Date.now() - cachedAt < TTL_MS) return cached;
     if (inflight) return inflight;
 
@@ -73,9 +71,7 @@ export const UNDEFINED_TABLE = "42P01";
  * true here as "no followers exist" rather than as a failure.
  * Mirrors isMissingSchema in src/lib/deals/columnSupport.ts.
  */
-export function isMissingSchema(
-    error: { code?: string; message?: string } | null | undefined,
-): boolean {
+export function isMissingSchema(error: { code?: string; message?: string } | null | undefined): boolean {
     if (!error) return false;
     return (
         error.code === UNDEFINED_TABLE ||

@@ -18,16 +18,8 @@ import { createHash } from "node:crypto";
  * IN THAT ORDER, no separators. The endpoint URL must match what was
  * typed into the developer portal byte for byte, https and all.
  */
-export function challengeResponseFor(
-    challengeCode: string,
-    verificationToken: string,
-    endpointUrl: string,
-): string {
-    return createHash("sha256")
-        .update(challengeCode)
-        .update(verificationToken)
-        .update(endpointUrl)
-        .digest("hex");
+export function challengeResponseFor(challengeCode: string, verificationToken: string, endpointUrl: string): string {
+    return createHash("sha256").update(challengeCode).update(verificationToken).update(endpointUrl).digest("hex");
 }
 
 /** 32–80 chars, alphanumeric plus underscore and hyphen — eBay's rule. */

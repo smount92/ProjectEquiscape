@@ -24,13 +24,7 @@ interface Props {
     closed?: boolean;
 }
 
-export default function EventRsvpBar({
-    eventId,
-    currentStatus,
-    goingCount,
-    interestedCount,
-    closed = false,
-}: Props) {
+export default function EventRsvpBar({ eventId, currentStatus, goingCount, interestedCount, closed = false }: Props) {
     const router = useRouter();
     const [saving, setSaving] = useState(false);
 
@@ -44,7 +38,7 @@ export default function EventRsvpBar({
 
     if (closed) {
         return (
-            <p className="text-muted-foreground m-0 text-sm italic">
+            <p className="m-0 text-sm text-muted-foreground italic">
                 This event has passed — {goingCount} went, {interestedCount} were interested.
             </p>
         );
@@ -60,7 +54,7 @@ export default function EventRsvpBar({
                 className={`${RSVP_BTN} ${
                     going
                         ? "border-forest bg-forest text-white"
-                        : "border-forest/35 text-forest hover:bg-forest/10 bg-transparent"
+                        : "border-forest/35 bg-transparent text-forest hover:bg-forest/10"
                 }`}
                 aria-pressed={going}
                 disabled={saving}
@@ -74,7 +68,7 @@ export default function EventRsvpBar({
                 className={`${RSVP_BTN} ${
                     interested
                         ? "border-warning bg-warning/15 text-warning"
-                        : "border-input text-secondary-foreground hover:bg-warning/10 bg-transparent"
+                        : "border-input bg-transparent text-secondary-foreground hover:bg-warning/10"
                 }`}
                 aria-pressed={interested}
                 disabled={saving}
@@ -84,9 +78,7 @@ export default function EventRsvpBar({
                 <span className="tabular-nums opacity-75">{interestedCount}</span>
             </button>
             {currentStatus && currentStatus !== "not_going" && (
-                <span className="text-muted-foreground text-xs italic">
-                    Tap again to change your mind.
-                </span>
+                <span className="text-xs text-muted-foreground italic">Tap again to change your mind.</span>
             )}
         </div>
     );

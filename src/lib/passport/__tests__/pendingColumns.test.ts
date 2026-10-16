@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { colorText, isMissingPendingColumn, PENDING_HORSE_COLUMNS, selectWithPending, withoutPendingColumns } from "../pendingColumns";
+import {
+    colorText,
+    isMissingPendingColumn,
+    PENDING_HORSE_COLUMNS,
+    selectWithPending,
+    withoutPendingColumns,
+} from "../pendingColumns";
 
 describe("pending horse columns", () => {
     it("covers the resin identity and color", () => {
@@ -8,10 +14,14 @@ describe("pending horse columns", () => {
     });
 
     it("recognises only the pre-paste failure for these columns", () => {
-        expect(isMissingPendingColumn({ code: "42703", message: "column user_horses.color does not exist" })).toBe(true);
+        expect(isMissingPendingColumn({ code: "42703", message: "column user_horses.color does not exist" })).toBe(
+            true,
+        );
         expect(isMissingPendingColumn({ code: "42703", message: "column user_horses.bio does not exist" })).toBe(false);
         expect(isMissingPendingColumn({ code: "23505", message: "color" })).toBe(false);
-        expect(withoutPendingColumns({ custom_name: "Smoky", color: "bay", cast_by: "MVS" })).toEqual({ custom_name: "Smoky" });
+        expect(withoutPendingColumns({ custom_name: "Smoky", color: "bay", cast_by: "MVS" })).toEqual({
+            custom_name: "Smoky",
+        });
     });
 
     it("retries a select without the pending columns when they are missing", async () => {

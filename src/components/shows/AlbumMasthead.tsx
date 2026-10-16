@@ -47,9 +47,7 @@ function DetailsFact({ label, value }: { label: string; value: React.ReactNode }
     if (value === null || value === undefined || value === "") return null;
     return (
         <div className="flex flex-col gap-0.5">
-            <dt className="text-xs font-semibold tracking-wide uppercase text-(--paper-lit-ink) opacity-75">
-                {label}
-            </dt>
+            <dt className="text-xs font-semibold tracking-wide text-(--paper-lit-ink) uppercase opacity-75">{label}</dt>
             <dd className="m-0 text-sm text-(--paper-lit-ink)">{value}</dd>
         </div>
     );
@@ -165,14 +163,10 @@ export default function AlbumMasthead({
                             {dateBit}
                         </span>
                     )}
-                    {show.status === "published" && show.entriesOpenAt && (
-                        <ShowCountdown target={show.entriesOpenAt} />
-                    )}
+                    {show.status === "published" && show.entriesOpenAt && <ShowCountdown target={show.entriesOpenAt} />}
                     <span>
                         <span aria-hidden="true">· </span>
-                        {entryCount > 0
-                            ? `${entryCount} entr${entryCount === 1 ? "y" : "ies"}`
-                            : "no entries yet"}
+                        {entryCount > 0 ? `${entryCount} entr${entryCount === 1 ? "y" : "ies"}` : "no entries yet"}
                     </span>
                     <span>
                         <span aria-hidden="true">· </span>
@@ -180,10 +174,7 @@ export default function AlbumMasthead({
                     </span>
                     <span className="ml-auto inline-flex shrink-0 items-center gap-1 text-xs font-semibold tracking-wide uppercase">
                         Details
-                        <span
-                            aria-hidden="true"
-                            className="inline-block transition-transform group-open:rotate-180"
-                        >
+                        <span aria-hidden="true" className="inline-block transition-transform group-open:rotate-180">
                             ▾
                         </span>
                     </span>
@@ -199,44 +190,32 @@ export default function AlbumMasthead({
                             <DetailsFact label="Address" value={show.venueAddress} />
                             <DetailsFact
                                 label="Entries close"
-                                value={
-                                    show.entriesCloseAt ? (
-                                        <LocalTime iso={show.entriesCloseAt} withTime />
-                                    ) : null
-                                }
+                                value={show.entriesCloseAt ? <LocalTime iso={show.entriesCloseAt} withTime /> : null}
                             />
                         </>
                     ) : (
                         <>
                             <DetailsFact
                                 label="Entries open"
-                                value={
-                                    show.entriesOpenAt ? (
-                                        <LocalTime iso={show.entriesOpenAt} withTime />
-                                    ) : null
-                                }
+                                value={show.entriesOpenAt ? <LocalTime iso={show.entriesOpenAt} withTime /> : null}
                             />
                             <DetailsFact
                                 label="Entries close"
-                                value={
-                                    show.entriesCloseAt ? (
-                                        <LocalTime iso={show.entriesCloseAt} withTime />
-                                    ) : null
-                                }
+                                value={show.entriesCloseAt ? <LocalTime iso={show.entriesCloseAt} withTime /> : null}
                             />
                             <DetailsFact
                                 label="Judging ends"
-                                value={
-                                    show.judgingEndsAt ? (
-                                        <LocalTime iso={show.judgingEndsAt} withTime />
-                                    ) : null
-                                }
+                                value={show.judgingEndsAt ? <LocalTime iso={show.judgingEndsAt} withTime /> : null}
                             />
                         </>
                     )}
                     <DetailsFact
                         label="Fees"
-                        value={<span className="whitespace-pre-wrap"><LinkifiedText text={fee} /></span>}
+                        value={
+                            <span className="whitespace-pre-wrap">
+                                <LinkifiedText text={fee} />
+                            </span>
+                        }
                     />
                     <DetailsFact label="Sanctioning" value={show.sanctioningNote} />
                 </dl>

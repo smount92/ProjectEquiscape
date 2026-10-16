@@ -118,10 +118,7 @@ describe("groupDuplicates", () => {
     });
 
     it("ignores untitled rows — they would group with each other and mean nothing", () => {
-        const { groups } = groupDuplicates([
-            candidate({ id: "a", title: "" }),
-            candidate({ id: "b", title: "   " }),
-        ]);
+        const { groups } = groupDuplicates([candidate({ id: "a", title: "" }), candidate({ id: "b", title: "   " })]);
         expect(groups).toHaveLength(0);
     });
 

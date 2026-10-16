@@ -23,7 +23,9 @@ export default function RegistryLink({
     return (
         <Link
             href={referenceHref(item)}
-            className={className ?? "text-forest decoration-forest/40 hover:decoration-forest underline underline-offset-2"}
+            className={
+                className ?? "text-forest underline decoration-forest/40 underline-offset-2 hover:decoration-forest"
+            }
         >
             {children ?? item.title}
         </Link>

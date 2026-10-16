@@ -50,8 +50,6 @@ describe("formatEventDate", () => {
     });
 
     it("accepts custom format options", () => {
-        expect(formatEventDate("2026-08-24", { month: "long", year: "numeric" })).toContain(
-            "August",
-        );
+        expect(formatEventDate("2026-08-24", { month: "long", year: "numeric" })).toContain("August");
     });
 });

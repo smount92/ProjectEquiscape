@@ -163,41 +163,63 @@ describe("schemas — classlist structure", () => {
 
     it("reorder requires at least one item and valid kinds", () => {
         expect(reorderClasslistSchema.safeParse({ showId: UUID, kind: "class", items: [] }).success).toBe(false);
-        expect(reorderClasslistSchema.safeParse({
-            showId: UUID,
-            kind: "row",
-            items: [{ id: UUID, sortOrder: 0 }],
-        }).success).toBe(false);
-        expect(reorderClasslistSchema.safeParse({
-            showId: UUID,
-            kind: "section",
-            items: [{ id: UUID, sortOrder: 2 }, { id: UUID2, sortOrder: 1 }],
-        }).success).toBe(true);
+        expect(
+            reorderClasslistSchema.safeParse({
+                showId: UUID,
+                kind: "row",
+                items: [{ id: UUID, sortOrder: 0 }],
+            }).success,
+        ).toBe(false);
+        expect(
+            reorderClasslistSchema.safeParse({
+                showId: UUID,
+                kind: "section",
+                items: [
+                    { id: UUID, sortOrder: 2 },
+                    { id: UUID2, sortOrder: 1 },
+                ],
+            }).success,
+        ).toBe(true);
     });
 });
 
 describe("schemas — split/combine", () => {
     it("split requires at least one entry to move", () => {
-        expect(splitClassSchema.safeParse({
-            classId: UUID, newClassName: "QH Split B", entryIdsToMove: [],
-        }).success).toBe(false);
-        expect(splitClassSchema.safeParse({
-            classId: UUID, newClassName: "QH Split B", entryIdsToMove: [UUID2],
-        }).success).toBe(true);
+        expect(
+            splitClassSchema.safeParse({
+                classId: UUID,
+                newClassName: "QH Split B",
+                entryIdsToMove: [],
+            }).success,
+        ).toBe(false);
+        expect(
+            splitClassSchema.safeParse({
+                classId: UUID,
+                newClassName: "QH Split B",
+                entryIdsToMove: [UUID2],
+            }).success,
+        ).toBe(true);
     });
 
     it("combine requires two+ distinct classes", () => {
-        expect(combineClassesSchema.safeParse({
-            classIds: [UUID], newClassName: "Combined",
-        }).success).toBe(false);
+        expect(
+            combineClassesSchema.safeParse({
+                classIds: [UUID],
+                newClassName: "Combined",
+            }).success,
+        ).toBe(false);
         const dup = combineClassesSchema.safeParse({
-            classIds: [UUID, UUID], newClassName: "Combined",
+            classIds: [UUID, UUID],
+            newClassName: "Combined",
         });
         expect(dup.success).toBe(false);
         if (!dup.success) expect(firstZodError(dup.error)).toMatch(/duplicate/i);
-        expect(combineClassesSchema.safeParse({
-            classIds: [UUID, UUID2], newClassName: "Combined",
-        }).success).toBe(true);
+        expect(
+            combineClassesSchema.safeParse({
+                classIds: [UUID, UUID2],
+                newClassName: "Combined",
+            }).success,
+        ).toBe(true);
     });
 });
 
@@ -230,7 +252,10 @@ describe("show-wide class defaults + copy (2026-09-29)", () => {
     const showId = "123e4567-e89b-42d3-a456-426614174000";
     it("accepts a partial patch and refuses an empty one", () => {
         expect(applyClassDefaultsSchema.safeParse({ showId, patch: { maxPerEntrant: 3 } }).success).toBe(true);
-        expect(applyClassDefaultsSchema.safeParse({ showId, patch: { allowedFinishes: ["OF"], allowedScales: null } }).success).toBe(true);
+        expect(
+            applyClassDefaultsSchema.safeParse({ showId, patch: { allowedFinishes: ["OF"], allowedScales: null } })
+                .success,
+        ).toBe(true);
         expect(applyClassDefaultsSchema.safeParse({ showId, patch: {} }).success).toBe(false);
         expect(applyClassDefaultsSchema.safeParse({ showId, patch: { maxPerEntrant: 0 } }).success).toBe(false);
     });

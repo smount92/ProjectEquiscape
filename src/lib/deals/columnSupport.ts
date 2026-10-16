@@ -58,9 +58,7 @@ export function resetDealColumnSupport(): void {
     inflight = null;
 }
 
-export async function getDealColumnSupport(
-    supabase: SupabaseClient,
-): Promise<DealColumnSupport> {
+export async function getDealColumnSupport(supabase: SupabaseClient): Promise<DealColumnSupport> {
     if (cached && Date.now() - cachedAt < TTL_MS) return cached;
     if (inflight) return inflight;
 
@@ -100,9 +98,7 @@ export const UNDEFINED_COLUMN = "42703";
 /** Postgres "relation does not exist" — the new tables are missing. */
 export const UNDEFINED_TABLE = "42P01";
 
-export function isMissingSchema(
-    error: { code?: string; message?: string } | null | undefined,
-): boolean {
+export function isMissingSchema(error: { code?: string; message?: string } | null | undefined): boolean {
     if (!error) return false;
     return (
         error.code === UNDEFINED_COLUMN ||

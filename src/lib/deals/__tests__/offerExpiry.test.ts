@@ -55,9 +55,7 @@ describe("offerCountdown", () => {
     });
 
     it("hands back the deadline for a tooltip", () => {
-        expect(offerCountdown(MADE, at("2026-08-02T12:00:00Z"))?.expiresAt).toBe(
-            "2026-08-08T12:00:00.000Z",
-        );
+        expect(offerCountdown(MADE, at("2026-08-02T12:00:00Z"))?.expiresAt).toBe("2026-08-08T12:00:00.000Z");
     });
 
     it("returns null rather than guessing when there is no timestamp", () => {

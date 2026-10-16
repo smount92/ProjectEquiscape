@@ -179,13 +179,6 @@ describe("formatCloseAt", () => {
 
 describe("placeLabel", () => {
     it("renders the one placing vocabulary", () => {
-        expect([1, 2, 3, 4, 5, 6].map(placeLabel)).toEqual([
-            "1st",
-            "2nd",
-            "3rd",
-            "4th",
-            "5th",
-            "6th",
-        ]);
+        expect([1, 2, 3, 4, 5, 6].map(placeLabel)).toEqual(["1st", "2nd", "3rd", "4th", "5th", "6th"]);
     });
 });

@@ -33,9 +33,7 @@ interface Props {
 
 export default function GroupDetailClient({ group, initialPosts, channels, currentUserId, board = null }: Props) {
     const boardOk = board !== null;
-    const [activeTab, setActiveTab] = useState<"board" | "feed" | "files" | "registry">(
-        boardOk ? "board" : "feed",
-    );
+    const [activeTab, setActiveTab] = useState<"board" | "feed" | "files" | "registry">(boardOk ? "board" : "feed");
 
     const isAdmin = group.memberRole === "owner" || group.memberRole === "admin";
     const isMod = isAdmin || group.memberRole === "moderator";
@@ -50,17 +48,37 @@ export default function GroupDetailClient({ group, initialPosts, channels, curre
             {/* Room tabs */}
             <div className="mb-4 flex flex-wrap gap-1.5" role="tablist" aria-label="Barn sections">
                 {boardOk && (
-                    <button role="tab" aria-selected={activeTab === "board"} className={tabClass("board")} onClick={() => setActiveTab("board")}>
+                    <button
+                        role="tab"
+                        aria-selected={activeTab === "board"}
+                        className={tabClass("board")}
+                        onClick={() => setActiveTab("board")}
+                    >
                         📌 Notice Board
                     </button>
                 )}
-                <button role="tab" aria-selected={activeTab === "feed"} className={tabClass("feed")} onClick={() => setActiveTab("feed")}>
+                <button
+                    role="tab"
+                    aria-selected={activeTab === "feed"}
+                    className={tabClass("feed")}
+                    onClick={() => setActiveTab("feed")}
+                >
                     {boardOk ? "💬 Latest" : "💬 Feed"}
                 </button>
-                <button role="tab" aria-selected={activeTab === "files"} className={tabClass("files")} onClick={() => setActiveTab("files")}>
+                <button
+                    role="tab"
+                    aria-selected={activeTab === "files"}
+                    className={tabClass("files")}
+                    onClick={() => setActiveTab("files")}
+                >
                     📁 Files
                 </button>
-                <button role="tab" aria-selected={activeTab === "registry"} className={tabClass("registry")} onClick={() => setActiveTab("registry")}>
+                <button
+                    role="tab"
+                    aria-selected={activeTab === "registry"}
+                    className={tabClass("registry")}
+                    onClick={() => setActiveTab("registry")}
+                >
                     📋 Registry
                 </button>
             </div>
@@ -68,7 +86,7 @@ export default function GroupDetailClient({ group, initialPosts, channels, curre
             {/* Board-fetch failure is not silent — members should know why
                 the notice board is missing rather than assume it's empty. */}
             {!boardOk && (
-                <p className="text-muted-foreground mb-4 text-xs italic">
+                <p className="mb-4 text-xs text-muted-foreground italic">
                     The notice board is unavailable right now — showing the barn&apos;s latest posts instead.
                 </p>
             )}

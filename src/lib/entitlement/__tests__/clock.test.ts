@@ -81,9 +81,7 @@ describe("entitledTier — READ-TIME EXPIRY", () => {
     // ── The whole point of the feature ──
     it("a tier whose term has passed reads as free IMMEDIATELY, with no cron", () => {
         expect(entitledTier({ tier: "pro", paid_through: "2026-01-01T00:00:00Z" }, JAN_15)).toBe("free");
-        expect(entitledTier({ tier: "studio", paid_through: "2026-01-14T23:59:59Z" }, JAN_15)).toBe(
-            "free",
-        );
+        expect(entitledTier({ tier: "studio", paid_through: "2026-01-14T23:59:59Z" }, JAN_15)).toBe("free");
     });
 
     it("expires exactly ON the boundary, not a moment after", () => {
@@ -97,9 +95,7 @@ describe("entitledTier — READ-TIME EXPIRY", () => {
     });
 
     it("never promotes: a free tier with a future clock is still free", () => {
-        expect(entitledTier({ tier: "free", paid_through: "2099-01-01T00:00:00Z" }, JAN_15)).toBe(
-            "free",
-        );
+        expect(entitledTier({ tier: "free", paid_through: "2099-01-01T00:00:00Z" }, JAN_15)).toBe("free");
     });
 
     it("is free for an anonymous or metadata-less reader", () => {
@@ -179,9 +175,7 @@ describe("extendedPaidThrough — STACKING", () => {
     });
 
     it("starts from now when the existing date is garbage", () => {
-        expect(extendedPaidThrough({ paid_through: "soon" }, 3, JAN_15)).toBe(
-            "2026-04-15T12:00:00.000Z",
-        );
+        expect(extendedPaidThrough({ paid_through: "soon" }, 3, JAN_15)).toBe("2026-04-15T12:00:00.000Z");
     });
 });
 

@@ -21,12 +21,7 @@ import { isNotificationTypeEnabled, type NotificationPrefs } from "@/lib/notific
 import type { EntrantResults } from "@/lib/shows/notifications";
 import { placeLabel } from "@/lib/shows/placings";
 import type { Place } from "@/lib/shows/types";
-import {
-    EMAIL_FROM,
-    escapeEmailHtml,
-    renderBrandedEmail,
-    renderBrandedEmailText,
-} from "./layout";
+import { EMAIL_FROM, escapeEmailHtml, renderBrandedEmail, renderBrandedEmailText } from "./layout";
 
 /** Resend batch API limit per call. */
 export const EMAIL_BATCH_SIZE = 100;
@@ -60,10 +55,7 @@ export function buildResultsEmailBody(input: {
 }
 
 /** The entries-closing reminder body. All inputs escaped here. */
-export function buildDeadlineEmailBody(input: {
-    showTitle: string;
-    entriesCloseAt: string | null;
-}): string {
+export function buildDeadlineEmailBody(input: { showTitle: string; entriesCloseAt: string | null }): string {
     const when = input.entriesCloseAt
         ? new Date(input.entriesCloseAt).toLocaleString("en-US", {
               month: "short",
@@ -94,10 +86,7 @@ interface EmailRecipient {
  * (2) addresses only exist in auth.users, reachable solely via
  * auth.admin.getUserById. Addresses never leave the server.
  */
-async function resolveRecipients(
-    userIds: string[],
-    prefType: string,
-): Promise<EmailRecipient[]> {
+async function resolveRecipients(userIds: string[], prefType: string): Promise<EmailRecipient[]> {
     const unique = [...new Set(userIds)];
     if (unique.length === 0) return [];
     const admin = getAdminClient();
@@ -192,8 +181,7 @@ export async function sendShowResultsEmails(input: {
                 }),
                 ctaLabel: "See the full results",
                 ctaUrl: `/shows/${input.showId}`,
-                footerNote:
-                    "You entered this show on Model Horse Hub, so we let you know when its results published.",
+                footerNote: "You entered this show on Model Horse Hub, so we let you know when its results published.",
             };
             return {
                 from: EMAIL_FROM,
@@ -241,8 +229,7 @@ export async function sendEntriesClosingEmails(input: {
                 bodyHtml,
                 ctaLabel: "Review your entries",
                 ctaUrl: `/shows/${input.showId}`,
-                footerNote:
-                    "You have entries at this show on Model Horse Hub, so we reminded you before its deadline.",
+                footerNote: "You have entries at this show on Model Horse Hub, so we reminded you before its deadline.",
             };
             return {
                 from: EMAIL_FROM,

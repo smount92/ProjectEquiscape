@@ -75,9 +75,7 @@ describe("viewerHash", () => {
     it("is a different value for the same viewer tomorrow", () => {
         // This is what makes a two-day trail impossible even if a purge
         // were missed: yesterday's row cannot be matched to today's.
-        expect(viewerHash(SECRET, day, "u:abc")).not.toBe(
-            viewerHash(SECRET, "2026-08-04", "u:abc"),
-        );
+        expect(viewerHash(SECRET, day, "u:abc")).not.toBe(viewerHash(SECRET, "2026-08-04", "u:abc"));
     });
 
     it("separates two viewers on the same day", () => {
@@ -102,9 +100,7 @@ describe("viewerHash", () => {
 describe("hashViewer", () => {
     it("composes key and hash so the route handler makes one call", () => {
         const day = "2026-08-03";
-        expect(hashViewer({ userId: "abc" }, day, SECRET)).toBe(
-            viewerHash(SECRET, day, viewerKey({ userId: "abc" })),
-        );
+        expect(hashViewer({ userId: "abc" }, day, SECRET)).toBe(viewerHash(SECRET, day, viewerKey({ userId: "abc" })));
     });
 
     it("gives a signed-in and signed-out view of the same person different tokens", () => {

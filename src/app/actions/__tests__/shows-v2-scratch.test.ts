@@ -86,9 +86,7 @@ describe("scratchEntry — owner door (unchanged rule: entries_open only)", () =
 
         const result = await scratchEntry({ entryId: ENTRY_ID });
         expect(result).toEqual({ success: true });
-        expect(q.update).toHaveBeenCalledWith(
-            expect.objectContaining({ status: "scratched" }),
-        );
+        expect(q.update).toHaveBeenCalledWith(expect.objectContaining({ status: "scratched" }));
         expect(runEntryScratchedNotification).not.toHaveBeenCalled();
     });
 

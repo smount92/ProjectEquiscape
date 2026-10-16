@@ -44,13 +44,7 @@ const MAX_SHOWN = 10_000;
  * horse is reachable without client JS — same URL-as-state pattern as
  * the catalog pagination.
  */
-export default async function AnonProfile({
-    alias,
-    shownParam,
-}: {
-    alias: string;
-    shownParam?: string | string[];
-}) {
+export default async function AnonProfile({ alias, shownParam }: { alias: string; shownParam?: string | string[] }) {
     const admin = getAdminClient();
 
     const parsedShown = Number.parseInt(Array.isArray(shownParam) ? (shownParam[0] ?? "") : (shownParam ?? ""), 10);
@@ -74,12 +68,16 @@ export default async function AnonProfile({
 
     if (!profileUser || profileUser.account_status === "deleted") notFound();
     // The member's country (218), if they chose to show one.
-    const anonSeller = (await readSellerTerms(admin as unknown as SupabaseClient, [profileUser.id])).get(profileUser.id) ?? null;
+    const anonSeller =
+        (await readSellerTerms(admin as unknown as SupabaseClient, [profileUser.id])).get(profileUser.id) ?? null;
 
     // Supporter plaque (public recognition) — separate tolerant read so anon
     // profiles keep rendering even before migration 142 is applied.
     const supporterBadge = await fetchSupporterBadge(admin, profileUser.id);
-    const anonLinks = await readProfileLinks(admin as unknown as Parameters<typeof readProfileLinks>[0], profileUser.id);
+    const anonLinks = await readProfileLinks(
+        admin as unknown as Parameters<typeof readProfileLinks>[0],
+        profileUser.id,
+    );
 
     // Avatar → signed URL (service role can read the avatars bucket).
     let avatarUrl = profileUser.avatar_url;
@@ -115,7 +113,11 @@ export default async function AnonProfile({
         .eq("following_id", profileUser.id);
 
     const thumbPaths = horses
-        .map((h) => h.horse_images?.find((i) => i.angle_profile === "Primary_Thumbnail")?.image_url || h.horse_images?.[0]?.image_url)
+        .map(
+            (h) =>
+                h.horse_images?.find((i) => i.angle_profile === "Primary_Thumbnail")?.image_url ||
+                h.horse_images?.[0]?.image_url,
+        )
         .filter((p): p is string => Boolean(p));
     const urlMap = getPublicImageUrls(thumbPaths);
 
@@ -154,10 +156,10 @@ export default async function AnonProfile({
                         <span aria-hidden="true">{profileUser.alias_name.charAt(0).toUpperCase()}</span>
                     )}
                 </div>
-                <h1 className="text-engraved-light mb-1 font-serif text-[clamp(1.5rem,4vw,2.3rem)] font-bold tracking-[0.13em] uppercase text-balance">
+                <h1 className="text-engraved-light mb-1 font-serif text-[clamp(1.5rem,4vw,2.3rem)] font-bold tracking-[0.13em] text-balance uppercase">
                     {profileUser.alias_name}
                 </h1>
-                <div className="font-serif text-[0.78rem] tracking-[0.2em] uppercase text-(--leather-text-soft)">
+                <div className="font-serif text-[0.78rem] tracking-[0.2em] text-(--leather-text-soft) uppercase">
                     @{profileUser.alias_name} · Member since {memberSince}
                 </div>
                 {anonSeller?.country && (
@@ -167,7 +169,7 @@ export default async function AnonProfile({
                 )}
                 {supporterBadge.isSupporter && <SupporterPlaque since={supporterBadge.since} />}
                 {profileUser.bio && (
-                    <p className="mx-auto mt-3 mb-0 max-w-[52ch] text-[0.92rem] italic text-(--leather-text)">
+                    <p className="mx-auto mt-3 mb-0 max-w-[52ch] text-[0.92rem] text-(--leather-text) italic">
                         <LinkifiedText text={profileUser.bio} />
                     </p>
                 )}
@@ -183,7 +185,7 @@ export default async function AnonProfile({
                 </div>
             </header>
 
-            <div className="stats-strap relative -mt-4 mx-6 sm:mx-10" role="group" aria-label="Stable statistics">
+            <div className="stats-strap relative mx-6 -mt-4 sm:mx-10" role="group" aria-label="Stable statistics">
                 {strapStats.map((s) => (
                     <div key={s.label}>
                         <div className="stat-num">{s.num}</div>
@@ -196,7 +198,7 @@ export default async function AnonProfile({
                 <div className="brass-heading mb-3">
                     <span className="brass-heading-bar" aria-hidden="true" />
                     <h2 className="font-serif text-base font-bold text-foreground">The Stable</h2>
-                    <span className="ml-auto text-xs italic text-muted-foreground">
+                    <span className="ml-auto text-xs text-muted-foreground italic">
                         {publicHorseCount ?? 0} public model{(publicHorseCount ?? 0) !== 1 ? "s" : ""}
                     </span>
                 </div>
@@ -229,14 +231,18 @@ export default async function AnonProfile({
                                         </div>
                                         <div className="polaroid-name">{h.custom_name}</div>
                                         <div className="polaroid-breed">
-                                            {h.catalog_items ? `${h.catalog_items.maker} ${h.catalog_items.title}` : "Unlisted Mold"}
+                                            {h.catalog_items
+                                                ? `${h.catalog_items.maker} ${h.catalog_items.title}`
+                                                : "Unlisted Mold"}
                                             {h.finish_type ? ` · ${h.finish_type}` : ""}
                                         </div>
                                         {forSale && (
                                             <div className="mt-1 text-center">
                                                 <span className="stamp stamp-red">
                                                     {h.trade_status === "For Sale" ? "For Sale" : "Open to Offers"}
-                                                    {h.listing_price ? ` $${h.listing_price.toLocaleString("en-US")}` : ""}
+                                                    {h.listing_price
+                                                        ? ` $${h.listing_price.toLocaleString("en-US")}`
+                                                        : ""}
                                                 </span>
                                             </div>
                                         )}

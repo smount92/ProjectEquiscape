@@ -56,9 +56,7 @@ export default function SelectionRow({
     const [docs, setDocs] = useState<ExistingDoc[] | null>(null);
 
     const thumb = photoUrl ?? horse.thumbnailUrl;
-    const missing = [horse.gender ? null : "sex", horse.breed ? null : "breed"].filter(
-        (x): x is string => x !== null,
-    );
+    const missing = [horse.gender ? null : "sex", horse.breed ? null : "breed"].filter((x): x is string => x !== null);
 
     const lookup = async () => {
         setLookingUp(true);
@@ -82,7 +80,11 @@ export default function SelectionRow({
             .order("created_at")
             .then(({ data }) => {
                 const rows = (data ?? []) as { id: string; title: unknown }[];
-                setDocs(rows.filter((r) => typeof r.title === "string").map((r) => ({ id: r.id, title: r.title as string })));
+                setDocs(
+                    rows
+                        .filter((r) => typeof r.title === "string")
+                        .map((r) => ({ id: r.id, title: r.title as string })),
+                );
             });
     };
 
@@ -91,13 +93,19 @@ export default function SelectionRow({
     const docBody = sel.doc.mode === "new" ? sel.doc.body : "";
 
     return (
-        <li className="flex flex-col gap-1.5 border-b border-input py-2 last:border-b-0" data-testid={`selected-${horse.id}`}>
+        <li
+            className="flex flex-col gap-1.5 border-b border-input py-2 last:border-b-0"
+            data-testid={`selected-${horse.id}`}
+        >
             <div className="flex items-center gap-2">
                 {thumb ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={thumb} alt="" className="h-10 w-10 shrink-0 rounded-md object-cover" />
                 ) : (
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-muted" aria-hidden="true">
+                    <span
+                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-muted"
+                        aria-hidden="true"
+                    >
                         🐴
                     </span>
                 )}
@@ -148,7 +156,12 @@ export default function SelectionRow({
                                 maxLength={60}
                                 aria-label={`Handler alias for ${horse.name}`}
                             />
-                            <Button variant="outline" size="sm" disabled={lookingUp || !handlerQuery.trim()} onClick={lookup}>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={lookingUp || !handlerQuery.trim()}
+                                onClick={lookup}
+                            >
                                 {lookingUp ? "Looking up…" : "Look up"}
                             </Button>
                         </>
@@ -161,7 +174,11 @@ export default function SelectionRow({
                 <summary className="cursor-pointer text-muted-foreground">
                     {sel.doc.mode === "none" ? "Add documentation for the judge" : "Documentation ✓"}
                 </summary>
-                <div className="mt-1 flex flex-wrap gap-1.5" role="group" aria-label={`Documentation for ${horse.name}`}>
+                <div
+                    className="mt-1 flex flex-wrap gap-1.5"
+                    role="group"
+                    aria-label={`Documentation for ${horse.name}`}
+                >
                     <Button
                         variant={sel.doc.mode === "none" ? "default" : "outline"}
                         size="sm"
@@ -219,7 +236,8 @@ export default function SelectionRow({
                             aria-label={`Documentation for ${horse.name}`}
                         />
                         <p className="m-0 text-muted-foreground">
-                            {docBody.length}/{MAX_DOC_BODY} · Saved to this horse&rsquo;s passport for the next class too.
+                            {docBody.length}/{MAX_DOC_BODY} · Saved to this horse&rsquo;s passport for the next class
+                            too.
                         </p>
                     </div>
                 )}

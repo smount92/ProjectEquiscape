@@ -17,12 +17,7 @@
 
 import { useCallback, useEffect, useState, useTransition } from "react";
 
-import {
-    searchMembers,
-    suspendUser,
-    unsuspendUser,
-    type AdminMemberRow,
-} from "@/app/actions/admin";
+import { searchMembers, suspendUser, unsuspendUser, type AdminMemberRow } from "@/app/actions/admin";
 import AdminModerationCard from "@/components/AdminModerationCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,13 +31,7 @@ function formatDay(iso: string | null): string {
     });
 }
 
-function MemberRow({
-    member,
-    onChanged,
-}: {
-    member: AdminMemberRow;
-    onChanged: () => void;
-}) {
+function MemberRow({ member, onChanged }: { member: AdminMemberRow; onChanged: () => void }) {
     const [reason, setReason] = useState("");
     const [showReason, setShowReason] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -55,10 +44,7 @@ function MemberRow({
         }
         startTransition(async () => {
             setError(null);
-            const result =
-                mode === "suspend"
-                    ? await suspendUser(member.id, reason)
-                    : await unsuspendUser(member.id);
+            const result = mode === "suspend" ? await suspendUser(member.id, reason) : await unsuspendUser(member.id);
             if (!result.success) {
                 setError(result.error ?? "Something went wrong.");
                 return;
@@ -96,8 +82,8 @@ function MemberRow({
                         )}
                     </div>
                     <div className="mt-0.5 text-xs text-muted-foreground">
-                        {member.email ?? "no email on file"} · joined {formatDay(member.createdAt)}{" "}
-                        · {member.horseCount.toLocaleString()} horse
+                        {member.email ?? "no email on file"} · joined {formatDay(member.createdAt)} ·{" "}
+                        {member.horseCount.toLocaleString()} horse
                         {member.horseCount === 1 ? "" : "s"}
                     </div>
                     {member.isSuspended && (
@@ -110,12 +96,7 @@ function MemberRow({
 
                 <div className="flex shrink-0 gap-2">
                     {member.isSuspended ? (
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            disabled={pending}
-                            onClick={() => act("unsuspend")}
-                        >
+                        <Button variant="outline" size="sm" disabled={pending} onClick={() => act("unsuspend")}>
                             {pending ? "Working…" : "Unsuspend"}
                         </Button>
                     ) : showReason ? (
@@ -201,13 +182,10 @@ export default function AdminMembersTab() {
     return (
         <div className="flex flex-col gap-6">
             <div>
-                <h3 className="mt-0 mb-1 flex items-center gap-2 text-base font-bold">
-                    👤 Members
-                </h3>
+                <h3 className="mt-0 mb-1 flex items-center gap-2 text-base font-bold">👤 Members</h3>
                 <p className="mt-0 mb-3 text-xs text-muted-foreground">
-                    Search by alias. Suspension is site-wide and reversible: the account can still
-                    sign in and read, every mutation is refused, and live sessions are revoked so it
-                    bites on an already-open tab.
+                    Search by alias. Suspension is site-wide and reversible: the account can still sign in and read,
+                    every mutation is refused, and live sessions are revoked so it bites on an already-open tab.
                 </p>
                 <Input
                     value={query}
@@ -242,9 +220,7 @@ export default function AdminMembersTab() {
             )}
 
             <div>
-                <h3 className="mt-0 mb-2 text-sm font-bold text-muted-foreground">
-                    Direct handle (no search needed)
-                </h3>
+                <h3 className="mt-0 mb-2 text-sm font-bold text-muted-foreground">Direct handle (no search needed)</h3>
                 <AdminModerationCard />
             </div>
         </div>

@@ -104,9 +104,7 @@ export function buildMoldTimeline(rows: TimelineSource[]): MoldTimeline {
     const dated = clustered
         .filter((r) => r.year !== null)
         .sort((a, b) => a.year! - b.year! || a.title.localeCompare(b.title));
-    const undated = clustered
-        .filter((r) => r.year === null)
-        .sort((a, b) => a.title.localeCompare(b.title));
+    const undated = clustered.filter((r) => r.year === null).sort((a, b) => a.title.localeCompare(b.title));
 
     const decadeMap = new Map<number, TimelineRelease[]>();
     for (const r of dated) {
@@ -292,7 +290,7 @@ export function buildSurvey(t: MoldTimeline, maxLanes = 8): Survey | null {
 
     const runs = all
         .filter((r) => r.year !== null && r.yearEnd !== null && r.yearEnd > r.year)
-        .sort((a, b) => (b.yearEnd! - b.year!) - (a.yearEnd! - a.year!));
+        .sort((a, b) => b.yearEnd! - b.year! - (a.yearEnd! - a.year!));
     const lanes = runs
         .slice(0, maxLanes)
         .sort((a, b) => a.year! - b.year!)

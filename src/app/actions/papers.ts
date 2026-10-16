@@ -70,14 +70,32 @@ function loose(client: unknown) {
     return client as {
         from: (t: string) => {
             select: (c: string) => {
-                eq: (k: string, v: string) => {
-                    order: (k: string, o: { ascending: boolean }) => PromiseLike<{ data: Row[] | null; error: DbError }>;
+                eq: (
+                    k: string,
+                    v: string,
+                ) => {
+                    order: (
+                        k: string,
+                        o: { ascending: boolean },
+                    ) => PromiseLike<{ data: Row[] | null; error: DbError }>;
                     maybeSingle: () => PromiseLike<{ data: Row | null; error: DbError }>;
                 };
             };
-            insert: (row: Row) => { select: (c: string) => { single: () => PromiseLike<{ data: Row | null; error: DbError }> } };
-            update: (row: Row) => { eq: (k: string, v: string) => { select: (c: string) => PromiseLike<{ data: Row[] | null; error: DbError }> } };
-            delete: () => { eq: (k: string, v: string) => { select: (c: string) => PromiseLike<{ data: Row[] | null; error: DbError }> } };
+            insert: (row: Row) => {
+                select: (c: string) => { single: () => PromiseLike<{ data: Row | null; error: DbError }> };
+            };
+            update: (row: Row) => {
+                eq: (
+                    k: string,
+                    v: string,
+                ) => { select: (c: string) => PromiseLike<{ data: Row[] | null; error: DbError }> };
+            };
+            delete: () => {
+                eq: (
+                    k: string,
+                    v: string,
+                ) => { select: (c: string) => PromiseLike<{ data: Row[] | null; error: DbError }> };
+            };
         };
     };
 }
@@ -149,7 +167,11 @@ const createSchema = z.object({
     kind: z.string(),
     title: z.string().min(1).max(MAX_PAPER_TITLE),
     issuedBy: z.string().max(MAX_PAPER_ISSUER).nullable().optional(),
-    issuedOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+    issuedOn: z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/)
+        .nullable()
+        .optional(),
     notes: z.string().max(MAX_PAPER_NOTES).nullable().optional(),
     isPublic: z.boolean().optional(),
     /** 214: attach to one of the horse's own records. */
@@ -194,9 +216,18 @@ export async function createPaper(
         if (!rec) return { success: false, error: "That show record isn't on this horse." };
     }
     if (v.accomplishmentId) {
-        const { data: acc } = await (supabase as unknown as {
-            from: (t: string) => { select: (c: string) => { eq: (k: string, v: string) => { eq: (k: string, v: string) => { maybeSingle: () => PromiseLike<{ data: Row | null }> } } } };
-        })
+        const { data: acc } = await (
+            supabase as unknown as {
+                from: (t: string) => {
+                    select: (c: string) => {
+                        eq: (
+                            k: string,
+                            v: string,
+                        ) => { eq: (k: string, v: string) => { maybeSingle: () => PromiseLike<{ data: Row | null }> } };
+                    };
+                };
+            }
+        )
             .from("horse_accomplishments")
             .select("id")
             .eq("id", v.accomplishmentId)
@@ -273,14 +304,16 @@ const updateSchema = z.object({
     kind: z.string().optional(),
     title: z.string().min(1).max(MAX_PAPER_TITLE).optional(),
     issuedBy: z.string().max(MAX_PAPER_ISSUER).nullable().optional(),
-    issuedOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+    issuedOn: z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/)
+        .nullable()
+        .optional(),
     notes: z.string().max(MAX_PAPER_NOTES).nullable().optional(),
     isPublic: z.boolean().optional(),
 });
 
-export async function updatePaper(
-    input: z.input<typeof updateSchema>,
-): Promise<{ success: boolean; error?: string }> {
+export async function updatePaper(input: z.input<typeof updateSchema>): Promise<{ success: boolean; error?: string }> {
     const parsed = updateSchema.safeParse(input);
     if (!parsed.success) return { success: false, error: "Check the paper's details and try again." };
     const v = parsed.data;

@@ -176,8 +176,7 @@ const num = (v: unknown): number | null => {
     const n = typeof v === "number" ? v : Number(v);
     return Number.isFinite(n) ? n : null;
 };
-const text = (v: unknown): string | null =>
-    typeof v === "string" && v.trim() ? v.trim() : null;
+const text = (v: unknown): string | null => (typeof v === "string" && v.trim() ? v.trim() : null);
 
 /**
  * Turn a stored event row into the sentence the thread, the inbox
@@ -315,9 +314,7 @@ export function describeEvent(
                 headline: `${who} confirmed payment ${seq ?? "?"} received — ${formatMoney(amount)}`,
                 lines: [
                     ...(onDate ? [{ label: "Received on", value: formatDate(onDate) }] : []),
-                    ...(remaining !== null
-                        ? [{ label: "Still outstanding", value: formatMoney(remaining) }]
-                        : []),
+                    ...(remaining !== null ? [{ label: "Still outstanding", value: formatMoney(remaining) }] : []),
                 ],
             };
         }
@@ -419,8 +416,6 @@ export function evidenceLine(
     content?: string | null,
 ): string {
     const d = describeEvent(kind, payload, ctx, content);
-    const detail = d.lines
-        .map((l) => (l.label ? `${l.label}: ${l.value}` : l.value))
-        .join("; ");
+    const detail = d.lines.map((l) => (l.label ? `${l.label}: ${l.value}` : l.value)).join("; ");
     return `${formatStamp(createdAt)} — ${d.headline}${detail ? ` (${detail})` : ""}`;
 }

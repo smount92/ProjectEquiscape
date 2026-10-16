@@ -140,10 +140,7 @@ export function parseListingPage(params: RawSearchParams): number {
  * Filters (+ optional page) → query string. Defaults are omitted so
  * the canonical unfiltered URL is a bare `/market`.
  */
-export function buildListingSearchParams(
-    filters: ListingFilters,
-    page = 1,
-): URLSearchParams {
+export function buildListingSearchParams(filters: ListingFilters, page = 1): URLSearchParams {
     const params = new URLSearchParams();
     if (filters.q) params.set("q", filters.q);
     if (filters.finish) params.set("finish", filters.finish);

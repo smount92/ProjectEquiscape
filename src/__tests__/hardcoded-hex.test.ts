@@ -51,7 +51,9 @@ describe("hex colour literals", () => {
             `Hex colours in components rose from ${BASELINE} to ${total}. Use a theme token, or raise BASELINE in this file on purpose.\n  ${top}`,
         ).toBeLessThanOrEqual(BASELINE);
         if (total < BASELINE) {
-            console.info(`[hardcoded-hex] ${total} < baseline ${BASELINE}; lower BASELINE in src/__tests__/hardcoded-hex.test.ts to lock the gain in.`);
+            console.info(
+                `[hardcoded-hex] ${total} < baseline ${BASELINE}; lower BASELINE in src/__tests__/hardcoded-hex.test.ts to lock the gain in.`,
+            );
         }
     });
 });

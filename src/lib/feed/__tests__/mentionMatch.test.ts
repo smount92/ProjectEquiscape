@@ -65,10 +65,7 @@ describe("resolveMentions", () => {
     });
 
     it("de-duplicates case-insensitively and preserves order", () => {
-        expect(resolveMentions(["amanda hi", "Amanda again", "black"], ALIASES)).toEqual([
-            "Amanda",
-            "black",
-        ]);
+        expect(resolveMentions(["amanda hi", "Amanda again", "black"], ALIASES)).toEqual(["Amanda", "black"]);
     });
 
     it("drops unmatched candidates", () => {
@@ -78,10 +75,7 @@ describe("resolveMentions", () => {
 
 describe("candidateFirstTokens", () => {
     it("lowercases and de-duplicates first tokens", () => {
-        expect(candidateFirstTokens(["Black Fox Farm", "black cat", "Amanda"]).sort()).toEqual([
-            "amanda",
-            "black",
-        ]);
+        expect(candidateFirstTokens(["Black Fox Farm", "black cat", "Amanda"]).sort()).toEqual(["amanda", "black"]);
     });
 
     it("ignores blank candidates", () => {
@@ -112,9 +106,7 @@ describe("splitMentionSegments", () => {
 
     it("keeps legacy bare handles working with no alias list", () => {
         const segments = splitMentionSegments("ping @Alice please", []);
-        expect(segments.filter((s) => s.type === "mention")).toEqual([
-            { type: "mention", value: "Alice" },
-        ]);
+        expect(segments.filter((s) => s.type === "mention")).toEqual([{ type: "mention", value: "Alice" }]);
     });
 
     it("does not treat an email address as a mention", () => {
@@ -124,10 +116,7 @@ describe("splitMentionSegments", () => {
 
     it("handles multiple mentions in one line", () => {
         const segments = splitMentionSegments("@Amanda and @black fox farm", ALIASES);
-        expect(segments.filter((s) => s.type === "mention").map((s) => s.value)).toEqual([
-            "Amanda",
-            "black fox farm",
-        ]);
+        expect(segments.filter((s) => s.type === "mention").map((s) => s.value)).toEqual(["Amanda", "black fox farm"]);
     });
 
     it("returns the whole string as text when there are no mentions", () => {
@@ -150,7 +139,7 @@ describe("splitMentionSegments", () => {
             .map((s) => (s.type === "mention" ? `@${s.value}` : s.value))
             .join("");
         // Quoted mentions lose their quotes; everything else is byte-identical.
-        expect(rebuilt).toBe('hey @black fox farm and @Amanda - see @John Smith too');
+        expect(rebuilt).toBe("hey @black fox farm and @Amanda - see @John Smith too");
     });
 });
 

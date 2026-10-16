@@ -58,7 +58,11 @@ async function qrMatrix(url: string): Promise<boolean[][]> {
 }
 
 /** Region-style "XXX-YYY" when the owner holds an exhibitor number, else the show's leg-tag number. */
-function horseNumberFor(exhibitorNumber: string | null | undefined, regionalId: string | null | undefined, entryNumber: number): string {
+function horseNumberFor(
+    exhibitorNumber: string | null | undefined,
+    regionalId: string | null | undefined,
+    entryNumber: number,
+): string {
     const seq = regionalId || String(entryNumber).padStart(3, "0");
     return exhibitorNumber ? `${exhibitorNumber}-${seq}` : `#${entryNumber}`;
 }
@@ -118,7 +122,13 @@ export async function GET(request: Request) {
             .neq("status", "scratched");
         if (!all) entryQuery = entryQuery.eq("owner_id", user.id);
         const { data: rows } = await entryQuery;
-        const entries = (rows ?? []) as { id: string; horse_id: string; owner_id: string; class_id: string; entry_number: number | null }[];
+        const entries = (rows ?? []) as {
+            id: string;
+            horse_id: string;
+            owner_id: string;
+            class_id: string;
+            entry_number: number | null;
+        }[];
         if (entries.length === 0) return NextResponse.json({ error: "No entries found" }, { status: 404 });
 
         const classIds = [...new Set(entries.map((e) => e.class_id))];
@@ -137,7 +147,10 @@ export async function GET(request: Request) {
         );
         const horseMap = new Map(((horseRows ?? []) as unknown as HorseRow[]).map((h) => [h.id, h]));
         const ownerMap = new Map(
-            ((ownerRows ?? []) as { id: string; alias_name: string; exhibitor_number: string | null }[]).map((o) => [o.id, o]),
+            ((ownerRows ?? []) as { id: string; alias_name: string; exhibitor_number: string | null }[]).map((o) => [
+                o.id,
+                o,
+            ]),
         );
 
         // Program order: class number, then leg-tag number.
@@ -197,7 +210,8 @@ export async function GET(request: Request) {
         .eq("entry_type", "entered");
     if (!printAll || !isHost) entryQuery = entryQuery.eq("user_id", user.id);
     const { data: rawEntries } = await entryQuery;
-    if (!rawEntries || rawEntries.length === 0) return NextResponse.json({ error: "No entries found" }, { status: 404 });
+    if (!rawEntries || rawEntries.length === 0)
+        return NextResponse.json({ error: "No entries found" }, { status: 404 });
 
     const horseIds = [...new Set(rawEntries.map((e) => e.horse_id))];
     const { data: horses } = await supabase.from("user_horses").select(HORSE_COLUMNS).in("id", horseIds);

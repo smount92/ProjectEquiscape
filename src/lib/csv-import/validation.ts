@@ -182,13 +182,8 @@ export function matchScoreLabel(score: number): "Strong match" | "Possible match
  * order, plus how many CSV rows collide — powers the "N rows match horses
  * already in your stable" warning.
  */
-export function findDuplicateNames(
-    csvNames: string[],
-    existingNames: string[],
-): { names: string[]; rowCount: number } {
-    const existing = new Set(
-        existingNames.map((n) => n.trim().toLowerCase()).filter(Boolean),
-    );
+export function findDuplicateNames(csvNames: string[], existingNames: string[]): { names: string[]; rowCount: number } {
+    const existing = new Set(existingNames.map((n) => n.trim().toLowerCase()).filter(Boolean));
     const seen = new Set<string>();
     const names: string[] = [];
     let rowCount = 0;

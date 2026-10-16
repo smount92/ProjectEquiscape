@@ -3,7 +3,11 @@ import { expandInitials, makerMatches, parseCatalogQuery } from "@/lib/catalog/q
 
 describe("parseCatalogQuery", () => {
     it("splits a leading maker off the query, any case, longest alias first", () => {
-        expect(parseCatalogQuery("Peter stone Ideal sto")).toEqual({ maker: "Peter Stone", term: "Ideal sto", raw: "Peter stone Ideal sto" });
+        expect(parseCatalogQuery("Peter stone Ideal sto")).toEqual({
+            maker: "Peter Stone",
+            term: "Ideal sto",
+            raw: "Peter stone Ideal sto",
+        });
         expect(parseCatalogQuery("stone horses arabian").maker).toBe("Peter Stone");
         expect(parseCatalogQuery("Breyer Adios")).toMatchObject({ maker: "Breyer", term: "Adios" });
         expect(parseCatalogQuery("BHR clydesdale")).toMatchObject({ maker: "Black Horse Ranch", term: "clydesdale" });

@@ -15,9 +15,7 @@ import { requireAuth } from "@/lib/auth";
 import type { EntrantHorse } from "@/lib/shows/public";
 import type { ShowReadiness } from "@/lib/shows/readiness";
 
-type ActionResult<T = object> =
-    | ({ success: true } & T)
-    | { success: false; error: string };
+type ActionResult<T = object> = ({ success: true } & T) | { success: false; error: string };
 
 /**
  * Cheap counts for the readiness panel: how many horses the viewer
@@ -122,14 +120,8 @@ export async function listMyEntrantHorses(): Promise<ActionResult<{ horses: Entr
                 finish: (h.finish_type as string | null) ?? null,
                 // Owner-set, else the registry's — the same precedence
                 // the judge's identity line uses (getHorseShowIdentities).
-                breed:
-                    (h.assigned_breed as string | null) ||
-                    ((attrs.breed as string | undefined) ?? null) ||
-                    null,
-                gender:
-                    (h.assigned_gender as string | null) ||
-                    ((attrs.gender as string | undefined) ?? null) ||
-                    null,
+                breed: (h.assigned_breed as string | null) || ((attrs.breed as string | undefined) ?? null) || null,
+                gender: (h.assigned_gender as string | null) || ((attrs.gender as string | undefined) ?? null) || null,
             };
         }),
     };

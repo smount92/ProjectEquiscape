@@ -30,7 +30,9 @@ export default function ShowRingDoor({ horses }: { horses: ShowRingPreviewHorse[
     return (
         <div className="leather-band stitched mb-8 rounded-xl px-6 py-5" id="paddock-show-ring-door">
             <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-                <span aria-hidden="true" className="text-[2.2rem] leading-none">🏆</span>
+                <span aria-hidden="true" className="text-[2.2rem] leading-none">
+                    🏆
+                </span>
                 <span className="min-w-[13rem] flex-1 basis-52">
                     <Link
                         href="/community"
@@ -39,11 +41,13 @@ export default function ShowRingDoor({ horses }: { horses: ShowRingPreviewHorse[
                         The Show Ring
                     </Link>
                     <span className="block text-sm" style={{ color: "var(--leather-text-soft)" }}>
-                        The community&rsquo;s horses on show — browse, favorite, and find your
-                        next obsession.
+                        The community&rsquo;s horses on show — browse, favorite, and find your next obsession.
                     </span>
                 </span>
-                <Link href="/community" className="btn-brass inline-flex w-full shrink-0 items-center justify-center gap-1.5 no-underline sm:w-auto">
+                <Link
+                    href="/community"
+                    className="btn-brass inline-flex w-full shrink-0 items-center justify-center gap-1.5 no-underline sm:w-auto"
+                >
                     Step into the ring →
                 </Link>
             </div>
@@ -55,7 +59,7 @@ export default function ShowRingDoor({ horses }: { horses: ShowRingPreviewHorse[
                             key={horse.id}
                             href={`/community/${horse.id}`}
                             title={horse.name}
-                            className={`group relative aspect-square overflow-hidden rounded-lg border border-black/40 shadow-md no-underline ${
+                            className={`group relative aspect-square overflow-hidden rounded-lg border border-black/40 no-underline shadow-md ${
                                 i >= 4 ? "hidden lg:block" : i >= 3 ? "hidden sm:block" : ""
                             }`}
                         >

@@ -79,9 +79,9 @@ export default async function LogWorkPage() {
                 backHref="/studio/dashboard"
                 backLabel="Dashboard"
             />
-            <p className="text-secondary-foreground mt-0 mb-6 max-w-[60ch] text-sm">
-                Records on your own horses verify when their new owner claims them; records on a
-                client&rsquo;s horse ask that owner to confirm.
+            <p className="mt-0 mb-6 max-w-[60ch] text-sm text-secondary-foreground">
+                Records on your own horses verify when their new owner claims them; records on a client&rsquo;s horse
+                ask that owner to confirm.
             </p>
             <LogWorkForm horses={list} tier={tier} studioName={profile.studio_name} studioSlug={profile.studio_slug} />
         </FocusLayout>

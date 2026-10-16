@@ -51,8 +51,7 @@ export default function AdminEnvFlagsCard({ status }: { status: EnvFlagStatus | 
             <div className="rounded-lg border border-input bg-card px-6 py-8 text-center">
                 <h3 className="m-0 text-base font-bold">Environment unavailable</h3>
                 <p className="m-0 mt-1 text-sm text-muted-foreground">
-                    The env read did not return this load. Nothing is broken by this — it is a
-                    read-only view.
+                    The env read did not return this load. Nothing is broken by this — it is a read-only view.
                 </p>
             </div>
         );
@@ -63,13 +62,11 @@ export default function AdminEnvFlagsCard({ status }: { status: EnvFlagStatus | 
     return (
         <div className="flex flex-col gap-4">
             <div>
-                <h3 className="mt-0 mb-1 flex items-center gap-2 text-base font-bold">
-                    🔌 Environment &amp; flags
-                </h3>
+                <h3 className="mt-0 mb-1 flex items-center gap-2 text-base font-bold">🔌 Environment &amp; flags</h3>
                 <p className="mt-0 mb-0 text-xs text-muted-foreground">
-                    What the <strong>server</strong> is seeing right now, on this build. Flag values
-                    are public switches; the keys below them are reported as set-or-not and nothing
-                    else — no value ever leaves the server.
+                    What the <strong>server</strong> is seeing right now, on this build. Flag values are public
+                    switches; the keys below them are reported as set-or-not and nothing else — no value ever leaves the
+                    server.
                 </p>
             </div>
 
@@ -79,8 +76,7 @@ export default function AdminEnvFlagsCard({ status }: { status: EnvFlagStatus | 
                 </span>
                 {status.vercelEnv && (
                     <span>
-                        VERCEL_ENV{" "}
-                        <span className="font-mono text-foreground">{status.vercelEnv}</span>
+                        VERCEL_ENV <span className="font-mono text-foreground">{status.vercelEnv}</span>
                     </span>
                 )}
                 {status.commitSha && (
@@ -108,23 +104,16 @@ export default function AdminEnvFlagsCard({ status }: { status: EnvFlagStatus | 
                             <div className="min-w-0 flex-1">
                                 <div className="text-sm font-semibold text-foreground">
                                     {flag.label}{" "}
-                                    <span className="font-mono text-xs text-muted-foreground">
-                                        {flag.key}
-                                    </span>
+                                    <span className="font-mono text-xs text-muted-foreground">{flag.key}</span>
                                 </div>
-                                <div className="mt-0.5 text-xs text-muted-foreground">
-                                    {flag.effect}
-                                </div>
+                                <div className="mt-0.5 text-xs text-muted-foreground">{flag.effect}</div>
                                 <div className="mt-0.5 text-xs text-secondary-foreground">
                                     Value:{" "}
-                                    <span className="font-mono">
-                                        {flag.value === null ? "unset" : flag.value}
-                                    </span>
+                                    <span className="font-mono">{flag.value === null ? "unset" : flag.value}</span>
                                     {flag.value !== null && !flag.on && (
                                         <span className="text-destructive">
                                             {" "}
-                                            — set, but not the literal &ldquo;1&rdquo; the gate
-                                            requires
+                                            — set, but not the literal &ldquo;1&rdquo; the gate requires
                                         </span>
                                     )}
                                 </div>
@@ -136,9 +125,7 @@ export default function AdminEnvFlagsCard({ status }: { status: EnvFlagStatus | 
             </div>
 
             <div>
-                <h4 className="mt-0 mb-2 text-sm font-bold text-foreground">
-                    Keys the server needs
-                </h4>
+                <h4 className="mt-0 mb-2 text-sm font-bold text-foreground">Keys the server needs</h4>
                 <ul className="m-0 flex list-none flex-col gap-2 p-0">
                     {status.secrets.map((secret) => (
                         <li
@@ -148,13 +135,9 @@ export default function AdminEnvFlagsCard({ status }: { status: EnvFlagStatus | 
                             <div className="min-w-0 flex-1">
                                 <div className="text-sm font-semibold text-foreground">
                                     {secret.label}{" "}
-                                    <span className="font-mono text-xs text-muted-foreground">
-                                        {secret.key}
-                                    </span>
+                                    <span className="font-mono text-xs text-muted-foreground">{secret.key}</span>
                                 </div>
-                                <div className="mt-0.5 text-xs text-muted-foreground">
-                                    {secret.impact}
-                                </div>
+                                <div className="mt-0.5 text-xs text-muted-foreground">{secret.impact}</div>
                             </div>
                             <SetPill present={secret.present} />
                         </li>
@@ -163,10 +146,9 @@ export default function AdminEnvFlagsCard({ status }: { status: EnvFlagStatus | 
             </div>
 
             <p className="m-0 text-xs text-muted-foreground">
-                <strong>NEXT_PUBLIC_* values are baked at build time.</strong> Changing one in the
-                Vercel dashboard does nothing until the next deploy — until then this card keeps
-                reporting the value that was compiled in, which is exactly what the site is
-                actually running on. The keys underneath are read live per request.
+                <strong>NEXT_PUBLIC_* values are baked at build time.</strong> Changing one in the Vercel dashboard does
+                nothing until the next deploy — until then this card keeps reporting the value that was compiled in,
+                which is exactly what the site is actually running on. The keys underneath are read live per request.
             </p>
         </div>
     );

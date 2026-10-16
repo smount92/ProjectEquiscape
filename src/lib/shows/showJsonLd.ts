@@ -18,6 +18,9 @@ export function buildShowJsonLd(show: PublicShow) {
         location:
             show.mode === "live"
                 ? { "@type": "Place", name: show.venueName ?? undefined, address: show.venueAddress ?? undefined }
-                : { "@type": "VirtualLocation", url: `${process.env.NEXT_PUBLIC_APP_URL || "https://modelhorsehub.com"}/shows/${show.id}` },
+                : {
+                      "@type": "VirtualLocation",
+                      url: `${process.env.NEXT_PUBLIC_APP_URL || "https://modelhorsehub.com"}/shows/${show.id}`,
+                  },
     };
 }

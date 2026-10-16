@@ -47,9 +47,7 @@ import type {
     StableSummaryRow,
 } from "@/lib/stable/types";
 
-type ActionResult<T = object> =
-    | ({ success: true } & T)
-    | { success: false; error: string };
+type ActionResult<T = object> = ({ success: true } & T) | { success: false; error: string };
 
 /** Max catalog rows matched for the q ilike-over-the-join expansion. */
 const CATALOG_MATCH_CAP = 100;
@@ -84,9 +82,7 @@ async function resolveIdConstraint(
             .eq("user_id", userId)
             .limit(5000);
         const recordIds = new Set(((records ?? []) as { horse_id: string }[]).map((r) => r.horse_id));
-        constraint = constraint
-            ? new Set([...constraint].filter((id) => recordIds.has(id)))
-            : recordIds;
+        constraint = constraint ? new Set([...constraint].filter((id) => recordIds.has(id))) : recordIds;
     }
 
     if (constraint === null) return null;
@@ -291,9 +287,12 @@ async function buildCards(
         const images = (row.horse_images ?? []) as { image_url: string; angle_profile: string }[];
         const thumb = images.find((img) => img.angle_profile === "Primary_Thumbnail");
         const imageUrl = thumb?.image_url || images[0]?.image_url;
-        const catalog = row.catalog_items as
-            | { title: string; maker: string; item_type?: string | null; parent_id?: string | null }
-            | null;
+        const catalog = row.catalog_items as {
+            title: string;
+            maker: string;
+            item_type?: string | null;
+            parent_id?: string | null;
+        } | null;
         const moldName = catalog
             ? catalog.parent_id
                 ? (parentTitle.get(catalog.parent_id) ?? null)
@@ -335,7 +334,13 @@ async function buildCards(
 /** Rows of catalog_id scanned for the mold facet; a stable past this is still filterable, just unfaceted. */
 const MOLD_FACET_SCAN = 2000;
 
-type CatalogFamilyRow = { id: string; title: string; maker: string; item_type: string | null; parent_id: string | null };
+type CatalogFamilyRow = {
+    id: string;
+    title: string;
+    maker: string;
+    item_type: string | null;
+    parent_id: string | null;
+};
 
 async function fetchCatalogRows(supabase: SupabaseClient, ids: string[]): Promise<CatalogFamilyRow[]> {
     const out: CatalogFamilyRow[] = [];
@@ -396,10 +401,7 @@ async function fetchMoldFacet(supabase: SupabaseClient, userId: string): Promise
     }
 }
 
-async function fetchFacetOptions(
-    supabase: SupabaseClient,
-    userId: string,
-): Promise<StableFacetOptions> {
+async function fetchFacetOptions(supabase: SupabaseClient, userId: string): Promise<StableFacetOptions> {
     const [{ data, error }, molds] = await Promise.all([
         supabase.rpc("get_stable_facets", { p_owner: userId }),
         fetchMoldFacet(supabase, userId),
@@ -411,8 +413,7 @@ async function fetchFacetOptions(
         // NULL-only guard) crashed /dashboard for the member who owned
         // a horse linked to it. Facet values are dropdown options; ""
         // is never one.
-        const clean = (a?: string[]) =>
-            (a ?? []).filter((s) => typeof s === "string" && s.trim() !== "");
+        const clean = (a?: string[]) => (a ?? []).filter((s) => typeof s === "string" && s.trim() !== "");
         return {
             makers: clean(f.makers),
             scales: clean(f.scales),
@@ -440,9 +441,7 @@ async function fetchFacetOptions(
  * bookmark, a hand-edited ?page=) is clamped to the last page rather
  * than rendering an empty list; the returned `page` is the one served.
  */
-export async function getStablePage(
-    input: z.input<typeof getStablePageSchema>,
-): Promise<
+export async function getStablePage(input: z.input<typeof getStablePageSchema>): Promise<
     ActionResult<{
         cards: StableCard[];
         totalCount: number;
@@ -509,14 +508,7 @@ export async function getMatchingHorseIds(
     const { supabase, user } = await requireAuth();
 
     try {
-        const { rows, count } = await queryStableHorses(
-            supabase,
-            user.id,
-            parsed.data,
-            0,
-            SELECT_ALL_CAP,
-            true,
-        );
+        const { rows, count } = await queryStableHorses(supabase, user.id, parsed.data, 0, SELECT_ALL_CAP, true);
         const total = count ?? 0;
         return {
             success: true,
@@ -591,10 +583,7 @@ export async function saveStableView(
 
     const { data, error } = await supabase
         .from("stable_saved_views")
-        .upsert(
-            { user_id: user.id, name, params },
-            { onConflict: "user_id,name" },
-        )
+        .upsert({ user_id: user.id, name, params }, { onConflict: "user_id,name" })
         .select("id, user_id, name, params, created_at")
         .single();
     if (error || !data) return { success: false, error: error?.message ?? "Failed to save view." };
@@ -603,9 +592,7 @@ export async function saveStableView(
     return { success: true, view: toSavedView(data as StableSavedViewRow) };
 }
 
-export async function deleteStableView(
-    input: z.input<typeof deleteStableViewSchema>,
-): Promise<ActionResult> {
+export async function deleteStableView(input: z.input<typeof deleteStableViewSchema>): Promise<ActionResult> {
     const parsed = deleteStableViewSchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { supabase, user } = await requireAuth();

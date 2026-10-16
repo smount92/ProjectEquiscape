@@ -1,159 +1,149 @@
 "use client";
 
-import { useState, useMemo } from"react";
-import { useRouter } from"next/navigation";
-import { makeOffer } from"@/app/actions/transactions";
-import { RISKY_PAYMENT_REGEX, RISKY_PAYMENT_WARNING } from"@/lib/safety";
+import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { makeOffer } from "@/app/actions/transactions";
+import { RISKY_PAYMENT_REGEX, RISKY_PAYMENT_WARNING } from "@/lib/safety";
 import { Input } from "@/components/ui/input";
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
 interface MakeOfferModalProps {
- horseId: string;
- horseName: string;
- sellerId: string;
- askingPrice?: number | null;
- onClose: () => void;
+    horseId: string;
+    horseName: string;
+    sellerId: string;
+    askingPrice?: number | null;
+    onClose: () => void;
 }
 
 export default function MakeOfferModal({ horseId, horseName, sellerId, askingPrice, onClose }: MakeOfferModalProps) {
- const [amount, setAmount] = useState(askingPrice ? String(askingPrice) :"");
- const [message, setMessage] = useState("");
- const [isBundle, setIsBundle] = useState(false);
- const [saving, setSaving] = useState(false);
- const [error, setError] = useState("");
- const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
- const router = useRouter();
+    const [amount, setAmount] = useState(askingPrice ? String(askingPrice) : "");
+    const [message, setMessage] = useState("");
+    const [isBundle, setIsBundle] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [error, setError] = useState("");
+    const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
+    const router = useRouter();
 
- const showPaymentWarning = useMemo(() => RISKY_PAYMENT_REGEX.test(message), [message]);
+    const showPaymentWarning = useMemo(() => RISKY_PAYMENT_REGEX.test(message), [message]);
 
- const handleSubmit = async (e: React.FormEvent) => {
- e.preventDefault();
- const numAmount = parseFloat(amount);
- if (!numAmount || numAmount <= 0) {
- setError("Please enter a valid amount.");
- return;
- }
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        const numAmount = parseFloat(amount);
+        if (!numAmount || numAmount <= 0) {
+            setError("Please enter a valid amount.");
+            return;
+        }
 
- setSaving(true);
- setError("");
- const result = await makeOffer({
- horseId,
- sellerId,
- amount: numAmount,
- message: message.trim() || undefined,
- isBundle,
- });
+        setSaving(true);
+        setError("");
+        const result = await makeOffer({
+            horseId,
+            sellerId,
+            amount: numAmount,
+            message: message.trim() || undefined,
+            isBundle,
+        });
 
- if (result.success && result.conversationId) {
- router.push(`/inbox/${result.conversationId}`);
- } else {
- setError(result.error ||"Failed to submit offer.");
- setSaving(false);
- }
- };
+        if (result.success && result.conversationId) {
+            router.push(`/inbox/${result.conversationId}`);
+        } else {
+            setError(result.error || "Failed to submit offer.");
+            setSaving(false);
+        }
+    };
 
- return (
- <Dialog open={true} onOpenChange={(open) => { if (!open) onClose(); }}>
- <DialogContent className="sm:max-w-[420px]">
- <DialogHeader>
- <DialogTitle>💰 Make an Offer</DialogTitle>
- <DialogDescription>
- 🐴 <strong>{horseName}</strong>
- </DialogDescription>
- </DialogHeader>
+    return (
+        <Dialog
+            open={true}
+            onOpenChange={(open) => {
+                if (!open) onClose();
+            }}
+        >
+            <DialogContent className="sm:max-w-[420px]">
+                <DialogHeader>
+                    <DialogTitle>💰 Make an Offer</DialogTitle>
+                    <DialogDescription>
+                        🐴 <strong>{horseName}</strong>
+                    </DialogDescription>
+                </DialogHeader>
 
- <form onSubmit={handleSubmit}>
- <div className="mb-6">
- <label className="text-foreground mb-1 block text-sm font-semibold">Your Offer</label>
- <div className="flex items-center gap-1">
- <span className="text-muted-foreground text-lg font-bold">$</span>
- <Input
- type="number"
- step="0.01"
- min="0.01"
- value={amount}
- onChange={(e) => setAmount(e.target.value)}
- placeholder="0.00"
- required
- autoFocus
- />
- </div>
- {askingPrice && (
- <span className="text-muted-foreground mt-1 block text-xs">
- Asking price: ${askingPrice.toLocaleString("en-US")}
- </span>
- )}
- </div>
+                <form onSubmit={handleSubmit}>
+                    <div className="mb-6">
+                        <label className="mb-1 block text-sm font-semibold text-foreground">Your Offer</label>
+                        <div className="flex items-center gap-1">
+                            <span className="text-lg font-bold text-muted-foreground">$</span>
+                            <Input
+                                type="number"
+                                step="0.01"
+                                min="0.01"
+                                value={amount}
+                                onChange={(e) => setAmount(e.target.value)}
+                                placeholder="0.00"
+                                required
+                                autoFocus
+                            />
+                        </div>
+                        {askingPrice && (
+                            <span className="mt-1 block text-xs text-muted-foreground">
+                                Asking price: ${askingPrice.toLocaleString("en-US")}
+                            </span>
+                        )}
+                    </div>
 
- <div className="mb-6">
- <label className="text-foreground mb-1 block text-sm font-semibold">Message (optional)</label>
- <textarea
- value={message}
- onChange={(e) => setMessage(e.target.value)}
- placeholder="Tell the seller about your interest…"
- className="inline-flex min-h-[36px] w-full resize-y rounded-md border border-input bg-transparent px-4 py-2 text-sm transition-all"
- rows={3}
- maxLength={500}
- />
- {showPaymentWarning && (
- <div
- className="mt-2 text-sm text-[var(--color-warning,#eab308)] py-1 px-2 rounded-sm border border-yellow-300 bg-yellow-50"
- >
- {RISKY_PAYMENT_WARNING}
- </div>
- )}
- </div>
+                    <div className="mb-6">
+                        <label className="mb-1 block text-sm font-semibold text-foreground">Message (optional)</label>
+                        <textarea
+                            value={message}
+                            onChange={(e) => setMessage(e.target.value)}
+                            placeholder="Tell the seller about your interest…"
+                            className="inline-flex min-h-[36px] w-full resize-y rounded-md border border-input bg-transparent px-4 py-2 text-sm transition-all"
+                            rows={3}
+                            maxLength={500}
+                        />
+                        {showPaymentWarning && (
+                            <div className="mt-2 rounded-sm border border-yellow-300 bg-yellow-50 px-2 py-1 text-sm text-[var(--color-warning,#eab308)]">
+                                {RISKY_PAYMENT_WARNING}
+                            </div>
+                        )}
+                    </div>
 
- <label className="mb-2 flex cursor-pointer items-center gap-2 text-sm">
- <input
- type="checkbox"
- checked={isBundle}
- onChange={(e) => setIsBundle(e.target.checked)}
- className="size-5 min-h-6 min-w-6 accent-forest"
- />
- This is a bundle/lot sale (excluded from market price index)
- </label>
+                    <label className="mb-2 flex cursor-pointer items-center gap-2 text-sm">
+                        <input
+                            type="checkbox"
+                            checked={isBundle}
+                            onChange={(e) => setIsBundle(e.target.checked)}
+                            className="size-5 min-h-6 min-w-6 accent-forest"
+                        />
+                        This is a bundle/lot sale (excluded from market price index)
+                    </label>
 
- <label className="mb-2 flex cursor-pointer items-start gap-2 text-xs text-muted-foreground mt-4">
-  <input
-  type="checkbox"
-  checked={disclaimerAccepted}
-  onChange={(e) => setDisclaimerAccepted(e.target.checked)}
-  className="mt-0.5 size-5 min-h-6 min-w-6 shrink-0 accent-forest"
-  required
-  />
-  <span>
-   I understand that Model Horse Hub does not process payments and cannot
-   mediate financial disputes. All transactions are between buyer and seller.
-  </span>
- </label>
+                    <label className="mt-4 mb-2 flex cursor-pointer items-start gap-2 text-xs text-muted-foreground">
+                        <input
+                            type="checkbox"
+                            checked={disclaimerAccepted}
+                            onChange={(e) => setDisclaimerAccepted(e.target.checked)}
+                            className="mt-0.5 size-5 min-h-6 min-w-6 shrink-0 accent-forest"
+                            required
+                        />
+                        <span>
+                            I understand that Model Horse Hub does not process payments and cannot mediate financial
+                            disputes. All transactions are between buyer and seller.
+                        </span>
+                    </label>
 
- {error && <div className="mt-2 text-sm text-red-700">{error}</div>}
+                    {error && <div className="mt-2 text-sm text-red-700">{error}</div>}
 
- <div className="mt-6 flex gap-3 max-sm:flex-col">
- <Button
- type="button" variant="outline" size="wide"
- onClick={onClose}
- disabled={saving}
- >
- Cancel
- </Button>
- <Button
- type="submit"
- disabled={saving || !disclaimerAccepted}
- >
- {saving ?"Submitting…" :"Submit Offer"}
- </Button>
- </div>
- </form>
- </DialogContent>
- </Dialog>
- );
+                    <div className="mt-6 flex gap-3 max-sm:flex-col">
+                        <Button type="button" variant="outline" size="wide" onClick={onClose} disabled={saving}>
+                            Cancel
+                        </Button>
+                        <Button type="submit" disabled={saving || !disclaimerAccepted}>
+                            {saving ? "Submitting…" : "Submit Offer"}
+                        </Button>
+                    </div>
+                </form>
+            </DialogContent>
+        </Dialog>
+    );
 }

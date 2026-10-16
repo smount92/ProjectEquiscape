@@ -17,15 +17,7 @@ import { render, screen } from "@testing-library/react";
 import BuyerPanel, { formatAskingPrice } from "@/components/passport/BuyerPanel";
 
 vi.mock("next/link", () => ({
-    default: ({
-        children,
-        href,
-        ...props
-    }: {
-        children: React.ReactNode;
-        href: string;
-        [key: string]: unknown;
-    }) => (
+    default: ({ children, href, ...props }: { children: React.ReactNode; href: string; [key: string]: unknown }) => (
         <a href={href} {...props}>
             {children}
         </a>
@@ -79,9 +71,7 @@ describe("BuyerPanel — price + stamp", () => {
     });
 
     it("Open to Offers: no price → 'Open to offers', un-red stamp", () => {
-        render(
-            <BuyerPanel {...baseProps} tradeStatus="Open to Offers" listingPrice={null} />,
-        );
+        render(<BuyerPanel {...baseProps} tradeStatus="Open to Offers" listingPrice={null} />);
         expect(screen.getByTestId("buyer-panel-price")).toHaveTextContent("Open to offers");
         const stamp = screen.getByText("Open to Offers");
         expect(stamp.className).toContain("stamp");
@@ -155,14 +145,7 @@ describe("BuyerPanel — contact actions", () => {
 
     it("anon variant renders login-CTA equivalents with redirectTo", () => {
         const loginHref = `/login?redirectTo=${encodeURIComponent("/community/horse-1")}`;
-        render(
-            <BuyerPanel
-                {...baseProps}
-                variant="anon"
-                sellerId={null}
-                loginHref={loginHref}
-            />,
-        );
+        render(<BuyerPanel {...baseProps} variant="anon" sellerId={null} loginHref={loginHref} />);
         expect(screen.queryByTestId("message-seller-button")).not.toBeInTheDocument();
         const ask = screen.getByRole("link", { name: /Ask a question/ });
         const offer = screen.getByRole("link", { name: /Make Offer/ });

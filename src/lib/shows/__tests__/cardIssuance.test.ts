@@ -49,8 +49,24 @@ describe("buildCardIssuePlan — issuance rules", () => {
             }),
         );
         expect(cards).toEqual([
-            { classId: "class-1", horseId: "h1", earnedPlace: 1, ownerId: "o1", classEntryCount: 3, classExhibitorCount: 3, isStakes: false },
-            { classId: "class-1", horseId: "h2", earnedPlace: 2, ownerId: "o2", classEntryCount: 3, classExhibitorCount: 3, isStakes: false },
+            {
+                classId: "class-1",
+                horseId: "h1",
+                earnedPlace: 1,
+                ownerId: "o1",
+                classEntryCount: 3,
+                classExhibitorCount: 3,
+                isStakes: false,
+            },
+            {
+                classId: "class-1",
+                horseId: "h2",
+                earnedPlace: 2,
+                ownerId: "o2",
+                classEntryCount: 3,
+                classExhibitorCount: 3,
+                isStakes: false,
+            },
         ]);
     });
 
@@ -62,9 +78,7 @@ describe("buildCardIssuePlan — issuance rules", () => {
     });
 
     it("non-qualifying classes never mint, even for 1st", () => {
-        const { cards } = buildCardIssuePlan(
-            baseInput({ classes: [{ id: "class-1", isQualifying: false }] }),
-        );
+        const { cards } = buildCardIssuePlan(baseInput({ classes: [{ id: "class-1", isQualifying: false }] }));
         expect(cards).toEqual([]);
     });
 
@@ -79,9 +93,7 @@ describe("buildCardIssuePlan — issuance rules", () => {
     it("scratched entries never mint", () => {
         const { cards } = buildCardIssuePlan(
             baseInput({
-                entries: [
-                    { id: "e1", classId: "class-1", horseId: "h1", ownerId: "o1", status: "scratched" },
-                ],
+                entries: [{ id: "e1", classId: "class-1", horseId: "h1", ownerId: "o1", status: "scratched" }],
                 placings: [{ entryId: "e1", classId: "class-1", place: 1 }],
             }),
         );
@@ -93,7 +105,15 @@ describe("buildCardIssuePlan — issuance rules", () => {
             baseInput({ existingCards: [{ classId: "class-1", horseId: "h1" }] }),
         );
         expect(cards).toEqual([
-            { classId: "class-1", horseId: "h2", earnedPlace: 2, ownerId: "o2", classEntryCount: 3, classExhibitorCount: 3, isStakes: false },
+            {
+                classId: "class-1",
+                horseId: "h2",
+                earnedPlace: 2,
+                ownerId: "o2",
+                classEntryCount: 3,
+                classExhibitorCount: 3,
+                isStakes: false,
+            },
         ]);
         expect(skippedExisting).toBe(1);
     });
@@ -130,11 +150,7 @@ describe("buildCardIssuePlan — issuance rules", () => {
 // ══════════════════════════════════════════════════════════════
 
 /** N placed entries in class-1 from distinct owners; 1st place goes to e1. */
-function gatedInput(
-    entryCount: number,
-    ownerCount: number,
-    showYear: number | null,
-): CardIssueInput {
+function gatedInput(entryCount: number, ownerCount: number, showYear: number | null): CardIssueInput {
     const entries = Array.from({ length: entryCount }, (_, i) => ({
         id: `e${i + 1}`,
         classId: "class-1",
@@ -248,8 +264,8 @@ const supabase = mockClient as unknown as SupabaseClient;
 /** Queue the implicit-await query results in call order. */
 function queueImplicit(...results: { data: unknown; error: unknown }[]) {
     for (const r of results) {
-        mockClient._mockQuery.then.mockImplementationOnce(
-            (resolve: (value: unknown) => void) => Promise.resolve(r).then(resolve),
+        mockClient._mockQuery.then.mockImplementationOnce((resolve: (value: unknown) => void) =>
+            Promise.resolve(r).then(resolve),
         );
     }
 }
@@ -304,18 +320,33 @@ describe("issueQualificationCardsForShow", () => {
             skipped: 0,
             skippedGated: 0,
             cards: [
-                { classId: "class-1", horseId: "h1", earnedPlace: 1, ownerId: "o1", classEntryCount: 3, classExhibitorCount: 3, isStakes: false, code: expect.any(String) },
-                { classId: "class-1", horseId: "h2", earnedPlace: 2, ownerId: "o2", classEntryCount: 3, classExhibitorCount: 3, isStakes: false, code: expect.any(String) },
+                {
+                    classId: "class-1",
+                    horseId: "h1",
+                    earnedPlace: 1,
+                    ownerId: "o1",
+                    classEntryCount: 3,
+                    classExhibitorCount: 3,
+                    isStakes: false,
+                    code: expect.any(String),
+                },
+                {
+                    classId: "class-1",
+                    horseId: "h2",
+                    earnedPlace: 2,
+                    ownerId: "o2",
+                    classEntryCount: 3,
+                    classExhibitorCount: 3,
+                    isStakes: false,
+                    code: expect.any(String),
+                },
             ],
         });
         // The plan's codes ARE the inserted card ids (verify links work).
         const planned = (result as { cards: { code: string }[] }).cards;
         for (const c of planned) expect(isValidCardCode(c.code)).toBe(true);
 
-        const rows = mockClient._mockQuery.insert.mock.calls[0][0] as Record<
-            string,
-            unknown
-        >[];
+        const rows = mockClient._mockQuery.insert.mock.calls[0][0] as Record<string, unknown>[];
         expect(rows).toHaveLength(2);
         expect(rows[0]).toEqual(
             expect.objectContaining({

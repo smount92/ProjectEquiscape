@@ -1,22 +1,13 @@
 import { describe, it, expect } from "vitest";
-import {
-    disambiguationLine,
-    displayTitle,
-    pickQuickChips,
-    yearRangeLabel,
-} from "@/lib/catalog/cardDisplay";
+import { disambiguationLine, displayTitle, pickQuickChips, yearRangeLabel } from "@/lib/catalog/cardDisplay";
 
 describe("yearRangeLabel", () => {
     it("renders a start–end range", () => {
-        expect(yearRangeLabel({ release_year_start: 1988, release_year_end: 1995 })).toBe(
-            "1988–1995",
-        );
+        expect(yearRangeLabel({ release_year_start: 1988, release_year_end: 1995 })).toBe("1988–1995");
     });
 
     it("collapses equal start/end to one year", () => {
-        expect(yearRangeLabel({ release_year_start: "1988", release_year_end: "1988" })).toBe(
-            "1988",
-        );
+        expect(yearRangeLabel({ release_year_start: "1988", release_year_end: "1988" })).toBe("1988");
     });
 
     it("tolerates start-only and end-only", () => {
@@ -66,9 +57,7 @@ describe("disambiguationLine", () => {
     });
 
     it("trims whitespace-padded values", () => {
-        expect(disambiguationLine(" Peter Stone ", { color_description: " Chestnut " })).toBe(
-            "Peter Stone · Chestnut",
-        );
+        expect(disambiguationLine(" Peter Stone ", { color_description: " Chestnut " })).toBe("Peter Stone · Chestnut");
     });
 });
 

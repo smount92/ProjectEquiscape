@@ -74,10 +74,10 @@ export default async function MyReportsPage() {
                             📄
                         </div>
                         <h2 className="mb-2 font-serif text-xl font-bold">Nothing purchased yet</h2>
-                        <p className="text-secondary-foreground mx-auto max-w-[460px] text-sm leading-relaxed">
-                            Paid one-off reports show up here with the date you bought them. In the
-                            meantime, the whole-stable insurance PDF and the Blue Book price guide are
-                            free — no purchase, no Pro subscription.
+                        <p className="mx-auto max-w-[460px] text-sm leading-relaxed text-secondary-foreground">
+                            Paid one-off reports show up here with the date you bought them. In the meantime, the
+                            whole-stable insurance PDF and the Blue Book price guide are free — no purchase, no Pro
+                            subscription.
                         </p>
                         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
                             <Button asChild variant="outline" size="wide">
@@ -113,7 +113,7 @@ export default async function MyReportsPage() {
                                             <td className="py-3 pr-3 align-top">
                                                 <span className="inline-flex items-center gap-1.5 font-semibold">
                                                     <FileText
-                                                        className="text-forest h-3.5 w-3.5 shrink-0"
+                                                        className="h-3.5 w-3.5 shrink-0 text-forest"
                                                         aria-hidden="true"
                                                     />
                                                     {REPORT_LABEL[report.reportType] ?? report.reportType}
@@ -124,25 +124,23 @@ export default async function MyReportsPage() {
                                                     {report.horseName ?? "Model removed"}
                                                 </span>
                                                 {report.horseReference && (
-                                                    <span className="text-muted-foreground block text-xs">
+                                                    <span className="block text-xs text-muted-foreground">
                                                         {report.horseReference}
                                                     </span>
                                                 )}
                                                 {report.horseMissing && (
-                                                    <span className="stamp stamp-red mt-1 inline-block">
-                                                        Retired
-                                                    </span>
+                                                    <span className="stamp stamp-red mt-1 inline-block">Retired</span>
                                                 )}
                                             </td>
                                             <td className="py-3 text-right align-top">
                                                 {report.horseMissing ? (
-                                                    <span className="text-muted-foreground text-xs">
+                                                    <span className="text-xs text-muted-foreground">
                                                         No longer in your stable
                                                     </span>
                                                 ) : (
                                                     <Link
                                                         href={`/stable/${report.horseId}`}
-                                                        className="text-forest text-xs font-semibold no-underline hover:underline"
+                                                        className="text-xs font-semibold text-forest no-underline hover:underline"
                                                     >
                                                         Open passport →
                                                     </Link>
@@ -161,18 +159,16 @@ export default async function MyReportsPage() {
                     hands back a different document than the one bought. */}
                 <div className="ledger-card mt-6">
                     <span className="ledger-tab">How reports work</span>
-                    <p className="text-secondary-foreground text-sm leading-relaxed">
-                        Model Horse Hub doesn&rsquo;t file a copy of your report when you buy it. Every
-                        insurance PDF is rendered fresh at the moment you ask for it, from your current
-                        vault figures, condition grades and photos — so a report you generate today
-                        reflects today&rsquo;s collection rather than the day you paid. That&rsquo;s
-                        better for an insurer and worse for a filing cabinet, and it&rsquo;s why the
-                        list above is a record of purchases rather than a shelf of documents.
+                    <p className="text-sm leading-relaxed text-secondary-foreground">
+                        Model Horse Hub doesn&rsquo;t file a copy of your report when you buy it. Every insurance PDF is
+                        rendered fresh at the moment you ask for it, from your current vault figures, condition grades
+                        and photos — so a report you generate today reflects today&rsquo;s collection rather than the
+                        day you paid. That&rsquo;s better for an insurer and worse for a filing cabinet, and it&rsquo;s
+                        why the list above is a record of purchases rather than a shelf of documents.
                     </p>
-                    <p className="text-secondary-foreground mt-3 text-sm leading-relaxed">
-                        To produce the current PDF for your whole stable, use the insurance report
-                        button in Settings. It covers every horse you own, including the ones listed
-                        above.
+                    <p className="mt-3 text-sm leading-relaxed text-secondary-foreground">
+                        To produce the current PDF for your whole stable, use the insurance report button in Settings.
+                        It covers every horse you own, including the ones listed above.
                     </p>
                     <div className="mt-4">
                         <Button asChild variant="outline" size="wide">
@@ -181,11 +177,11 @@ export default async function MyReportsPage() {
                     </div>
                 </div>
 
-                <div className="border-input bg-card/50 mt-6 rounded-lg border p-6 text-xs backdrop-blur-sm">
+                <div className="mt-6 rounded-lg border border-input bg-card/50 p-6 text-xs backdrop-blur-sm">
                     <p>
-                        🤝 Paid reports are a convenience, never a gate. The trust record — verified
-                        show results, condition grades, Hoofprint provenance and the Blue Book&rsquo;s
-                        sale history — is free for every collector, always.
+                        🤝 Paid reports are a convenience, never a gate. The trust record — verified show results,
+                        condition grades, Hoofprint provenance and the Blue Book&rsquo;s sale history — is free for
+                        every collector, always.
                     </p>
                 </div>
             </div>

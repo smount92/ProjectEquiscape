@@ -40,9 +40,7 @@ import {
 } from "@/lib/external-shows/schemas";
 import type { ApprovedExternalShow } from "@/lib/external-shows/calendar";
 
-type ActionResult<T = object> =
-    | ({ success: true } & T)
-    | { success: false; error: string };
+type ActionResult<T = object> = ({ success: true } & T) | { success: false; error: string };
 
 /** A pending row as the admin queue shows it (moderation surface —
  *  includes the submitter, unlike the public read). */
@@ -79,9 +77,7 @@ const EXTERNAL_SHOWS_CACHE_TAG = CACHE_TAGS.externalShows;
 
 // ── Submit (any member; always lands pending) ──
 
-export async function submitExternalShow(
-    input: SubmitExternalShowInput,
-): Promise<ActionResult> {
+export async function submitExternalShow(input: SubmitExternalShowInput): Promise<ActionResult> {
     const { supabase, user } = await requireAuth();
 
     const parsed = submitExternalShowSchema.safeParse(input);
@@ -153,9 +149,7 @@ const loadApprovedExternalShows = unstable_cache(
     { revalidate: 60, tags: [EXTERNAL_SHOWS_CACHE_TAG] },
 );
 
-export async function listApprovedExternalShows(): Promise<
-    ActionResult<{ shows: ApprovedExternalShow[] }>
-> {
+export async function listApprovedExternalShows(): Promise<ActionResult<{ shows: ApprovedExternalShow[] }>> {
     try {
         return { success: true, shows: await loadApprovedExternalShows() };
     } catch (err) {
@@ -170,9 +164,7 @@ export async function listApprovedExternalShows(): Promise<
 
 // ── Admin: moderation queue ──
 
-export async function listPendingExternalShows(): Promise<
-    ActionResult<{ shows: PendingExternalShow[] }>
-> {
+export async function listPendingExternalShows(): Promise<ActionResult<{ shows: PendingExternalShow[] }>> {
     try {
         await requireAdmin();
     } catch {
@@ -198,10 +190,7 @@ export async function listPendingExternalShows(): Promise<
     const aliasById = new Map<string, string>();
     const submitterIds = [...new Set(rows.map((r) => r.submitted_by))];
     if (submitterIds.length > 0) {
-        const { data: users } = await admin
-            .from("users")
-            .select("id, alias_name")
-            .in("id", submitterIds);
+        const { data: users } = await admin.from("users").select("id, alias_name").in("id", submitterIds);
         for (const u of (users ?? []) as { id: string; alias_name: string }[]) {
             aliasById.set(u.id, u.alias_name);
         }
@@ -218,9 +207,7 @@ export async function listPendingExternalShows(): Promise<
 
 // ── Admin: approve / reject ──
 
-export async function reviewExternalShow(
-    input: ReviewExternalShowInput,
-): Promise<ActionResult> {
+export async function reviewExternalShow(input: ReviewExternalShowInput): Promise<ActionResult> {
     let adminUserId: string;
     try {
         const { user } = await requireAdmin();

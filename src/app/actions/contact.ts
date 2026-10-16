@@ -15,10 +15,7 @@ export interface ContactFormState {
  * Stores in the database for admin review.
  * @param data - Contact form data: name, email, subject, message
  */
-export async function submitContactForm(
-    _prevState: ContactFormState,
-    formData: FormData
-): Promise<ContactFormState> {
+export async function submitContactForm(_prevState: ContactFormState, formData: FormData): Promise<ContactFormState> {
     const name = (formData.get("name") as string)?.trim();
     const email = (formData.get("email") as string)?.trim();
     const subject = (formData.get("subject") as string)?.trim() || null;

@@ -146,15 +146,18 @@ export async function getMarketPrice(catalogId: string, finishType?: string): Pr
  * Search market prices with optional filters.
  * Powers the /market page.
  */
-export async function searchMarketPrices(query?: string, options?: {
-    itemType?: string;
-    finishType?: string;
-    lifeStage?: string;
-    sortBy?: "average_price" | "transaction_volume" | "last_sold_at" | "title";
-    sortDirection?: "asc" | "desc";
-    limit?: number;
-    offset?: number;
-}): Promise<{ items: MarketPrice[]; total: number }> {
+export async function searchMarketPrices(
+    query?: string,
+    options?: {
+        itemType?: string;
+        finishType?: string;
+        lifeStage?: string;
+        sortBy?: "average_price" | "transaction_volume" | "last_sold_at" | "title";
+        sortDirection?: "asc" | "desc";
+        limit?: number;
+        offset?: number;
+    },
+): Promise<{ items: MarketPrice[]; total: number }> {
     const limit = options?.limit || 20;
     const offset = options?.offset || 0;
 
@@ -179,10 +182,7 @@ export async function searchMarketPrices(query?: string, options?: {
     // Map<`id::finish::stage`> did (last row wins on a collision).
     const priceMap = new Map<string, Record<string, unknown>>();
     for (const row of priceRows) {
-        priceMap.set(
-            `${row.catalog_id}::${row.finish_type || "OF"}::${row.life_stage || "completed"}`,
-            row,
-        );
+        priceMap.set(`${row.catalog_id}::${row.finish_type || "OF"}::${row.life_stage || "completed"}`, row);
     }
     const pricesByCatalog = new Map<string, Record<string, unknown>[]>();
     for (const row of priceMap.values()) {
@@ -198,8 +198,7 @@ export async function searchMarketPrices(query?: string, options?: {
     // /market cards can link to the STORED reference URL — client-side
     // re-slugifying ignores migration 129's collision suffixes and 404s.
     const q = sanitizeForOr(query ?? "").toLowerCase();
-    const itemType =
-        options?.itemType && options.itemType !== "all" ? options.itemType : null;
+    const itemType = options?.itemType && options.itemType !== "all" ? options.itemType : null;
 
     const catalogRows = allCatalog.filter((cat) => {
         if (!pricesByCatalog.has(cat.id)) return false;
@@ -246,11 +245,16 @@ export async function searchMarketPrices(query?: string, options?: {
     const dir = options?.sortDirection === "asc" ? 1 : -1;
     merged.sort((a, b) => {
         switch (sortBy) {
-            case "average_price": return (a.averagePrice - b.averagePrice) * dir;
-            case "transaction_volume": return (a.transactionVolume - b.transactionVolume) * dir;
-            case "last_sold_at": return ((a.lastSoldAt || "").localeCompare(b.lastSoldAt || "")) * dir;
-            case "title": return a.title.localeCompare(b.title) * dir;
-            default: return 0;
+            case "average_price":
+                return (a.averagePrice - b.averagePrice) * dir;
+            case "transaction_volume":
+                return (a.transactionVolume - b.transactionVolume) * dir;
+            case "last_sold_at":
+                return (a.lastSoldAt || "").localeCompare(b.lastSoldAt || "") * dir;
+            case "title":
+                return a.title.localeCompare(b.title) * dir;
+            default:
+                return 0;
         }
     });
 
@@ -280,11 +284,7 @@ export async function refreshMarketPrices(): Promise<{ success: boolean; error?:
     const { supabase, user } = await requireAuth();
 
     // Check admin role
-    const { data: profile } = await supabase
-        .from("users")
-        .select("role")
-        .eq("id", user.id)
-        .single();
+    const { data: profile } = await supabase.from("users").select("role").eq("id", user.id).single();
 
     const role = (profile as { role: string } | null)?.role;
     if (role !== "admin") {
@@ -320,4 +320,3 @@ export interface MarketHorseRecord {
     /** Live MHH qualification cards (issued/transferred) on the horse. */
     cardCount: number;
 }
-

@@ -15,15 +15,7 @@
  */
 
 /** The allow-list. Anything not in here is rejected by the beacon route. */
-export const ENTITY_TYPES = [
-    "horse",
-    "listing",
-    "show",
-    "barn",
-    "studio",
-    "reference",
-    "profile",
-] as const;
+export const ENTITY_TYPES = ["horse", "listing", "show", "barn", "studio", "reference", "profile"] as const;
 
 export type EntityType = (typeof ENTITY_TYPES)[number];
 

@@ -40,14 +40,11 @@ export function buildCommissionEmailCard(input: CommissionEmailInput): BrandedEm
       <p style="margin:0;color:#6b6b6b;font-size:13px;">Everything you two agree stays on the record in the commission room. Model Horse Hub never handles the money.</p>`,
         ctaLabel: input.ctaLabel ?? "Open the commission",
         ctaUrl: input.ctaUrl,
-        footerNote:
-            "You're getting this because you're a party to a commission on Model Horse Hub.",
+        footerNote: "You're getting this because you're a party to a commission on Model Horse Hub.",
     };
 }
 
-export async function sendCommissionEmail(
-    input: CommissionEmailInput & { toEmail: string },
-): Promise<void> {
+export async function sendCommissionEmail(input: CommissionEmailInput & { toEmail: string }): Promise<void> {
     const card = buildCommissionEmailCard(input);
     try {
         const resend = new Resend(process.env.RESEND_API_KEY);

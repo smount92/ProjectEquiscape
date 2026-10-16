@@ -45,15 +45,13 @@ export default function VaultHandoff({
 
     if (alreadyRecorded || done) {
         return (
-            <div className="border-success/30 bg-success/10 rounded-lg border p-4 text-sm leading-relaxed">
+            <div className="rounded-lg border border-success/30 bg-success/10 p-4 text-sm leading-relaxed">
                 <p className="m-0">
-                    ✅ Filed into {horseName ? <strong>{horseName}</strong> : "the horse"}&rsquo;s
-                    vault
+                    ✅ Filed into {horseName ? <strong>{horseName}</strong> : "the horse"}&rsquo;s vault
                     {total != null && (
                         <>
                             {" "}
-                            — <strong>{formatMoney(total)}</strong> invested in commissioned work
-                            so far
+                            — <strong>{formatMoney(total)}</strong> invested in commissioned work so far
                         </>
                     )}
                     .{" "}
@@ -69,30 +67,28 @@ export default function VaultHandoff({
 
     if (!horseId) {
         return (
-            <div className="border-input bg-muted/40 rounded-lg border p-4">
+            <div className="rounded-lg border border-input bg-muted/40 p-4">
                 <h3 className="mb-1 font-serif text-base font-bold">💰 Record what this cost</h3>
-                <p className="text-muted-foreground m-0 text-sm leading-relaxed">
-                    This commission isn&rsquo;t linked to a horse in your stable, so there&rsquo;s
-                    no vault to file it into. Ask the artist to link it, or add the cost by hand
-                    from the horse&rsquo;s own page.
+                <p className="m-0 text-sm leading-relaxed text-muted-foreground">
+                    This commission isn&rsquo;t linked to a horse in your stable, so there&rsquo;s no vault to file it
+                    into. Ask the artist to link it, or add the cost by hand from the horse&rsquo;s own page.
                 </p>
             </div>
         );
     }
 
     return (
-        <div className="border-input bg-muted/40 rounded-lg border p-4">
+        <div className="rounded-lg border border-input bg-muted/40 p-4">
             <h3 className="mb-1 font-serif text-base font-bold">💰 Record what this cost</h3>
-            <p className="text-secondary-foreground mb-4 text-sm leading-relaxed">
-                File <strong>{formatMoney(price)}</strong> into{" "}
-                <strong>{horseName ?? "this horse"}</strong>&rsquo;s vault as commissioned work.
-                It sits alongside the purchase price rather than replacing it, so what you paid
-                for the horse and what you&rsquo;ve invested in it stay separate figures. Only you
-                can see the vault.
+            <p className="mb-4 text-sm leading-relaxed text-secondary-foreground">
+                File <strong>{formatMoney(price)}</strong> into <strong>{horseName ?? "this horse"}</strong>&rsquo;s
+                vault as commissioned work. It sits alongside the purchase price rather than replacing it, so what you
+                paid for the horse and what you&rsquo;ve invested in it stay separate figures. Only you can see the
+                vault.
             </p>
 
             {error && (
-                <p className="text-destructive border-destructive/30 bg-destructive/10 mb-4 rounded-md border px-4 py-2 text-sm">
+                <p className="mb-4 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm text-destructive">
                     {error}
                 </p>
             )}

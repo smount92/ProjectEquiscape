@@ -119,9 +119,7 @@ export const MEMBERSHIP_TERMS: readonly MembershipTerm[] = Array.isArray(CONFIG.
 
 /** ISO currency for every term. USD unless the config says otherwise. */
 export const TERM_CURRENCY: string =
-    typeof CONFIG.currency === "string" && /^[A-Z]{3}$/.test(CONFIG.currency)
-        ? CONFIG.currency
-        : "USD";
+    typeof CONFIG.currency === "string" && /^[A-Z]{3}$/.test(CONFIG.currency) ? CONFIG.currency : "USD";
 
 /** One term by key, or null. The only way a term key becomes a purchase. */
 export function termByKey(key: string | null | undefined): MembershipTerm | null {

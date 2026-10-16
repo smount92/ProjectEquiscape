@@ -3,11 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import {
-    sendQuote,
-    transitionCommission,
-    type Commission,
-} from "@/app/actions/art-studio";
+import { sendQuote, transitionCommission, type Commission } from "@/app/actions/art-studio";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -81,11 +77,9 @@ export default function CommissionActions({
     };
 
     return (
-        <div className="bg-card border-input rounded-lg border p-6 shadow-md">
+        <div className="rounded-lg border border-input bg-card p-6 shadow-md">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-                <h2 className="m-0 font-serif text-lg font-bold">
-                    {yourTurn ? "Your move" : "Where this stands"}
-                </h2>
+                <h2 className="m-0 font-serif text-lg font-bold">{yourTurn ? "Your move" : "Where this stands"}</h2>
                 {commission.revisionsIncluded > 0 && (
                     <span
                         className={`text-xs font-semibold ${
@@ -97,9 +91,7 @@ export default function CommissionActions({
                 )}
             </div>
 
-            <p className="text-secondary-foreground mb-4 text-sm leading-relaxed">
-                {statusBlurb(status, party)}
-            </p>
+            <p className="mb-4 text-sm leading-relaxed text-secondary-foreground">{statusBlurb(status, party)}</p>
 
             {quoting && (
                 <QuoteForm
@@ -131,10 +123,8 @@ export default function CommissionActions({
             {!quoting && !confirming && (
                 <>
                     {moves.length === 0 ? (
-                        <p className="text-muted-foreground text-sm">
-                            {ballIsWith(status)
-                                ? "Nothing for you to do right now."
-                                : "This commission is closed."}
+                        <p className="text-sm text-muted-foreground">
+                            {ballIsWith(status) ? "Nothing for you to do right now." : "This commission is closed."}
                         </p>
                     ) : (
                         <div className="flex flex-wrap gap-2">
@@ -145,11 +135,7 @@ export default function CommissionActions({
                                     size="wide"
                                     disabled={busy}
                                     onClick={() => onMove(move)}
-                                    className={
-                                        move.destructive
-                                            ? "text-muted-foreground"
-                                            : undefined
-                                    }
+                                    className={move.destructive ? "text-muted-foreground" : undefined}
                                 >
                                     {move.emoji} {move.label}
                                 </Button>
@@ -160,7 +146,7 @@ export default function CommissionActions({
             )}
 
             {error && (
-                <p className="text-destructive border-destructive/30 bg-destructive/10 mt-4 rounded-md border px-4 py-3 text-sm">
+                <p className="mt-4 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
                     {error}
                 </p>
             )}
@@ -183,9 +169,7 @@ function QuoteForm({
     onClose: () => void;
     onDone: () => void;
 }) {
-    const [price, setPrice] = useState(
-        commission.agreedPrice != null ? String(commission.agreedPrice) : "",
-    );
+    const [price, setPrice] = useState(commission.agreedPrice != null ? String(commission.agreedPrice) : "");
     const [note, setNote] = useState(commission.quoteNote ?? "");
     const [completion, setCompletion] = useState(commission.estimatedCompletion ?? defaultCompletion ?? "");
     const [revisions, setRevisions] = useState(
@@ -224,20 +208,17 @@ function QuoteForm({
     };
 
     return (
-        <form onSubmit={submit} className="border-input bg-muted/40 rounded-lg border p-4">
-            <h3 className="mb-1 font-serif text-base font-bold">
-                {isRevising ? "Revise your quote" : "Send a quote"}
-            </h3>
-            <p className="text-muted-foreground mb-4 text-xs leading-relaxed">
+        <form onSubmit={submit} className="rounded-lg border border-input bg-muted/40 p-4">
+            <h3 className="mb-1 font-serif text-base font-bold">{isRevising ? "Revise your quote" : "Send a quote"}</h3>
+            <p className="mb-4 text-xs leading-relaxed text-muted-foreground">
                 {commission.budgetAmount != null && (
                     <>
-                        They said their budget is{" "}
-                        <strong>{formatMoney(commission.budgetAmount)}</strong>. That&rsquo;s a
-                        guide, not a ceiling —{" "}
+                        They said their budget is <strong>{formatMoney(commission.budgetAmount)}</strong>. That&rsquo;s
+                        a guide, not a ceiling —{" "}
                     </>
                 )}
-                quote what the work is worth. Nothing is committed until they accept, and your
-                terms are attached automatically.
+                quote what the work is worth. Nothing is committed until they accept, and your terms are attached
+                automatically.
             </p>
 
             <div className="grid gap-4 sm:grid-cols-2">
@@ -257,13 +238,8 @@ function QuoteForm({
                     <span className="mb-1 block text-sm font-semibold">
                         Estimated completion <span className="text-destructive">*</span>
                     </span>
-                    <Input
-                        type="date"
-                        value={completion}
-                        required
-                        onChange={(e) => setCompletion(e.target.value)}
-                    />
-                    <span className="text-muted-foreground mt-1 block text-xs">
+                    <Input type="date" value={completion} required onChange={(e) => setCompletion(e.target.value)} />
+                    <span className="mt-1 block text-xs text-muted-foreground">
                         {defaultCompletion
                             ? "Starts at your longest turnaround. Change it for this piece if you need to."
                             : "Set a turnaround under Settings → Terms and this fills itself in."}
@@ -273,8 +249,7 @@ function QuoteForm({
 
             <label className="mt-4 block">
                 <span className="mb-1 block text-sm font-semibold">
-                    Revisions included{" "}
-                    <span className="text-muted-foreground">(optional override)</span>
+                    Revisions included <span className="text-muted-foreground">(optional override)</span>
                 </span>
                 <Input
                     type="number"
@@ -299,7 +274,7 @@ function QuoteForm({
             </label>
 
             {error && (
-                <p className="text-destructive border-destructive/30 bg-destructive/10 mt-4 rounded-md border px-4 py-2 text-sm">
+                <p className="mt-4 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm text-destructive">
                     {error}
                 </p>
             )}
@@ -341,62 +316,53 @@ function ConfirmPanel({
 }) {
     const snapshot = commission.termsSnapshot;
     const killFee =
-        move.afterAgreement && snapshot
-            ? killFeeFor(commission.agreedPrice, snapshot.killFeePercent)
-            : null;
+        move.afterAgreement && snapshot ? killFeeFor(commission.agreedPrice, snapshot.killFeePercent) : null;
     const revisions = revisionState(commission.revisionsUsed, commission.revisionsIncluded);
 
     return (
-        <div className="border-input bg-muted/40 rounded-lg border p-4">
+        <div className="rounded-lg border border-input bg-muted/40 p-4">
             <h3 className="mb-2 font-serif text-base font-bold">
                 {move.emoji} {move.label}?
             </h3>
 
             {move.afterAgreement && (
-                <div className="border-warning/40 bg-warning/10 mb-4 rounded-md border p-3 text-sm leading-relaxed">
+                <div className="mb-4 rounded-md border border-warning/40 bg-warning/10 p-3 text-sm leading-relaxed">
                     <p className="m-0">
                         Terms were already agreed on this commission.
                         {killFee != null ? (
                             <>
                                 {" "}
-                                Under them, <strong>{formatMoney(killFee)}</strong> (
-                                {snapshot?.killFeePercent}% of{" "}
-                                {formatMoney(commission.agreedPrice)}) is owed for work already
-                                done.
+                                Under them, <strong>{formatMoney(killFee)}</strong> ({snapshot?.killFeePercent}% of{" "}
+                                {formatMoney(commission.agreedPrice)}) is owed for work already done.
                             </>
                         ) : (
                             " Check the agreed terms below before you go ahead."
                         )}{" "}
-                        Model Horse Hub doesn&rsquo;t collect or refund anything — settle it
-                        between yourselves.
+                        Model Horse Hub doesn&rsquo;t collect or refund anything — settle it between yourselves.
                     </p>
                 </div>
             )}
 
             {move.consumesRevision && (
-                <div className="border-input bg-card mb-4 rounded-md border p-3 text-sm leading-relaxed">
+                <div className="mb-4 rounded-md border border-input bg-card p-3 text-sm leading-relaxed">
                     <p className="m-0">
                         {revisions.overAllowance ? (
                             <>
-                                You&rsquo;ve used all{" "}
-                                <strong>{revisions.included}</strong> included revision
-                                {revisions.included === 1 ? "" : "s"}. The artist may charge for
-                                this one
+                                You&rsquo;ve used all <strong>{revisions.included}</strong> included revision
+                                {revisions.included === 1 ? "" : "s"}. The artist may charge for this one
                                 {snapshot?.extraRevisionFee != null && (
                                     <>
                                         {" "}
-                                        (their rate is{" "}
-                                        <strong>{formatMoney(snapshot.extraRevisionFee)}</strong>)
+                                        (their rate is <strong>{formatMoney(snapshot.extraRevisionFee)}</strong>)
                                     </>
                                 )}
                                 .
                             </>
                         ) : (
                             <>
-                                This uses revision{" "}
-                                <strong>{revisions.used + 1}</strong> of{" "}
-                                <strong>{revisions.included}</strong>. Be specific — one clear
-                                list of changes is worth five messages.
+                                This uses revision <strong>{revisions.used + 1}</strong> of{" "}
+                                <strong>{revisions.included}</strong>. Be specific — one clear list of changes is worth
+                                five messages.
                             </>
                         )}
                     </p>
@@ -406,9 +372,7 @@ function ConfirmPanel({
             <label className="block">
                 <span className="mb-1 block text-sm font-semibold">
                     {move.consumesRevision ? "What needs changing" : "Add a note"}
-                    {!move.consumesRevision && (
-                        <span className="text-muted-foreground"> (optional)</span>
-                    )}
+                    {!move.consumesRevision && <span className="text-muted-foreground"> (optional)</span>}
                 </span>
                 <Textarea
                     rows={3}

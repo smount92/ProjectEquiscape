@@ -48,8 +48,7 @@ export default function AdminOpsTab({ migrations }: { migrations: MigrationStatu
                 <div className="mb-3 text-4xl">🛠️</div>
                 <h2 className="m-0 text-base font-bold">Migration status unavailable</h2>
                 <p className="m-0 mt-1 text-sm text-muted-foreground">
-                    The probes could not run this load. Nothing is broken by this — it is a
-                    read-only view.
+                    The probes could not run this load. Nothing is broken by this — it is a read-only view.
                 </p>
             </div>
         );
@@ -60,20 +59,18 @@ export default function AdminOpsTab({ migrations }: { migrations: MigrationStatu
     return (
         <div className="flex flex-col gap-4">
             <div>
-                <h3 className="mt-0 mb-1 flex items-center gap-2 text-base font-bold">
-                    🛠️ Migrations awaiting paste
-                </h3>
+                <h3 className="mt-0 mb-1 flex items-center gap-2 text-base font-bold">🛠️ Migrations awaiting paste</h3>
                 <p className="mt-0 mb-0 text-xs text-muted-foreground">
-                    Every feature behind these files degrades quietly until the SQL is pasted, so
-                    the site never complains. This is the only place that says so out loud. Paste
-                    order matters: run them lowest number first.
+                    Every feature behind these files degrades quietly until the SQL is pasted, so the site never
+                    complains. This is the only place that says so out loud. Paste order matters: run them lowest number
+                    first.
                 </p>
             </div>
 
             {missing.length > 0 && (
                 <p className="m-0 rounded-lg border border-destructive/40 bg-destructive/5 px-4 py-2.5 text-sm font-semibold text-destructive">
-                    {missing.length} migration{missing.length === 1 ? "" : "s"} not yet in the
-                    database: {missing.map((m) => m.id).join(", ")}
+                    {missing.length} migration{missing.length === 1 ? "" : "s"} not yet in the database:{" "}
+                    {missing.map((m) => m.id).join(", ")}
                 </p>
             )}
 
@@ -85,15 +82,10 @@ export default function AdminOpsTab({ migrations }: { migrations: MigrationStatu
                     >
                         <div className="min-w-0 flex-1">
                             <div className="text-sm font-semibold text-foreground">
-                                <span className="font-mono text-muted-foreground">{m.id}</span>{" "}
-                                {m.title}
+                                <span className="font-mono text-muted-foreground">{m.id}</span> {m.title}
                             </div>
                             <div className="mt-0.5 text-xs text-muted-foreground">{m.summary}</div>
-                            {m.note && (
-                                <div className="mt-1 text-xs text-secondary-foreground italic">
-                                    {m.note}
-                                </div>
-                            )}
+                            {m.note && <div className="mt-1 text-xs text-secondary-foreground italic">{m.note}</div>}
                         </div>
                         <StatusPill applied={m.applied} />
                     </li>
@@ -101,8 +93,8 @@ export default function AdminOpsTab({ migrations }: { migrations: MigrationStatu
             </ul>
 
             <p className="m-0 text-xs text-muted-foreground">
-                Files live in <span className="font-mono">supabase/migrations/</span>. A probe reads
-                one column (or calls one function) per migration; it never writes.
+                Files live in <span className="font-mono">supabase/migrations/</span>. A probe reads one column (or
+                calls one function) per migration; it never writes.
             </p>
         </div>
     );

@@ -28,7 +28,10 @@ export async function leaveRating(data: {
         .maybeSingle();
 
     if (!txn) {
-        return { success: false, error: "No completed transaction found for this conversation. Mark the transaction as complete first." };
+        return {
+            success: false,
+            error: "No completed transaction found for this conversation. Mark the transaction as complete first.",
+        };
     }
 
     return leaveReview({

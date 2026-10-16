@@ -76,9 +76,7 @@ describe("submitExternalShow — validation", () => {
     });
 
     it("rejects javascript: URLs", async () => {
-        const result = await submitExternalShow(
-            validInput({ url: "javascript:alert(1)" }),
-        );
+        const result = await submitExternalShow(validInput({ url: "javascript:alert(1)" }));
         expect(result.success).toBe(false);
         expect(q.insert).not.toHaveBeenCalled();
     });
@@ -104,9 +102,7 @@ describe("submitExternalShow — validation", () => {
     });
 
     it("rejects a show dated before yesterday", async () => {
-        const result = await submitExternalShow(
-            validInput({ startsOn: isoDaysFromNow(-2) }),
-        );
+        const result = await submitExternalShow(validInput({ startsOn: isoDaysFromNow(-2) }));
         expect(result.success).toBe(false);
         expect(q.insert).not.toHaveBeenCalled();
     });
@@ -139,9 +135,7 @@ describe("submitExternalShow — validation", () => {
     });
 
     it("rejects descriptions over 500 characters", async () => {
-        const result = await submitExternalShow(
-            validInput({ description: "x".repeat(501) }),
-        );
+        const result = await submitExternalShow(validInput({ description: "x".repeat(501) }));
         expect(result.success).toBe(false);
     });
 });
@@ -151,9 +145,7 @@ describe("submitExternalShow — the status guard", () => {
         const result = await submitExternalShow(validInput());
         expect(result.success).toBe(true);
         expect(q.insert).toHaveBeenCalledTimes(1);
-        expect(q.insert).toHaveBeenCalledWith(
-            expect.objectContaining({ status: "pending", submitted_by: "user-1" }),
-        );
+        expect(q.insert).toHaveBeenCalledWith(expect.objectContaining({ status: "pending", submitted_by: "user-1" }));
     });
 
     it("a submitter cannot smuggle an approved status or a foreign owner", async () => {
@@ -176,9 +168,7 @@ describe("submitExternalShow — the status guard", () => {
     });
 
     it("strips markup from free-text fields before storage", async () => {
-        await submitExternalShow(
-            validInput({ title: "Big <script>alert(1)</script> Show" }),
-        );
+        await submitExternalShow(validInput({ title: "Big <script>alert(1)</script> Show" }));
         const payload = q.insert.mock.calls[0][0] as Record<string, unknown>;
         expect(payload.title).not.toContain("<script>");
     });

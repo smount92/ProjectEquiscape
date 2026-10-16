@@ -67,7 +67,9 @@ export function rollupShowResults<T extends RollupEvent>(events: readonly T[]): 
             out.push(e);
             continue;
         }
-        const placings = group.map((g) => (typeof g.metadata?.placing === "string" ? g.metadata.placing : null)).filter((p): p is string => !!p);
+        const placings = group
+            .map((g) => (typeof g.metadata?.placing === "string" ? g.metadata.placing : null))
+            .filter((p): p is string => !!p);
         const best = placings.slice().sort((a, b) => placingRank(a) - placingRank(b))[0] ?? null;
         const name = typeof e.metadata?.show_name === "string" ? e.metadata.show_name : e.title.replace(/^.*? at /, "");
         const cards = group.filter((g) => g.metadata?.is_nan_qualifying === true).length;
@@ -75,8 +77,16 @@ export function rollupShowResults<T extends RollupEvent>(events: readonly T[]): 
             ...e,
             id: `rollup:${e.id}`,
             title: `${group.length} placings at ${name}`,
-            description: [best ? `Best: ${best}` : null, cards ? `${cards} card${cards === 1 ? "" : "s"}` : null].filter(Boolean).join(" · ") || null,
-            metadata: { ...e.metadata, rolled_up: true, rolled_count: group.length, rolled_ids: group.map((g) => g.id) },
+            description:
+                [best ? `Best: ${best}` : null, cards ? `${cards} card${cards === 1 ? "" : "s"}` : null]
+                    .filter(Boolean)
+                    .join(" · ") || null,
+            metadata: {
+                ...e.metadata,
+                rolled_up: true,
+                rolled_count: group.length,
+                rolled_ids: group.map((g) => g.id),
+            },
         });
     }
     return out;

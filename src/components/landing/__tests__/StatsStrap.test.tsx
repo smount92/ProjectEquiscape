@@ -3,11 +3,7 @@ import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 
 import StatsStrap from "../StatsStrap";
-import {
-    NO_PUBLIC_STATS,
-    statIsPresentable,
-    type PublicStats,
-} from "@/lib/stats/publicStatsShape";
+import { NO_PUBLIC_STATS, statIsPresentable, type PublicStats } from "@/lib/stats/publicStatsShape";
 
 /**
  * The landing page's contract with the owner: every number on the front

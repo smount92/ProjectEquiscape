@@ -28,17 +28,15 @@ function shortDate(iso: string): string {
     return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
 }
 
-const RAIL_LINK =
-    "text-forest text-xs font-semibold tracking-[0.08em] uppercase no-underline hover:underline";
+const RAIL_LINK = "text-forest text-xs font-semibold tracking-[0.08em] uppercase no-underline hover:underline";
 
 function MyBarns({ barns }: { barns: Group[] }) {
     return (
         <aside className="ledger-card">
             <span className="ledger-tab">My Barns</span>
             {barns.length === 0 ? (
-                <p className="text-muted-foreground m-0 text-sm italic">
-                    You haven&rsquo;t joined a barn yet — they&rsquo;re where the smaller
-                    conversations happen.
+                <p className="m-0 text-sm text-muted-foreground italic">
+                    You haven&rsquo;t joined a barn yet — they&rsquo;re where the smaller conversations happen.
                 </p>
             ) : (
                 <ul className="m-0 list-none divide-y divide-forest/10 p-0">
@@ -46,10 +44,10 @@ function MyBarns({ barns }: { barns: Group[] }) {
                         <li key={barn.id} className="py-1.5 first:pt-0 last:pb-0">
                             <Link
                                 href={`/community/groups/${barn.slug}`}
-                                className="text-foreground flex items-baseline justify-between gap-2 text-sm font-semibold no-underline hover:underline"
+                                className="flex items-baseline justify-between gap-2 text-sm font-semibold text-foreground no-underline hover:underline"
                             >
                                 <span className="truncate">🏠 {barn.name}</span>
-                                <span className="text-muted-foreground shrink-0 text-xs font-normal tabular-nums">
+                                <span className="shrink-0 text-xs font-normal text-muted-foreground tabular-nums">
                                     {barn.memberCount}
                                 </span>
                             </Link>
@@ -78,14 +76,12 @@ function UpcomingEvents({ events }: { events: MHHEvent[] }) {
                     <li key={event.id} className="py-2 first:pt-0 last:pb-0">
                         <Link
                             href={`/community/events/${event.id}`}
-                            className="text-foreground block text-sm font-semibold no-underline hover:underline"
+                            className="block text-sm font-semibold text-foreground no-underline hover:underline"
                         >
                             {eventTypeIcon(event.eventType)} {event.name}
                         </Link>
-                        <div className="text-muted-foreground mt-0.5 flex flex-wrap items-center gap-x-2 text-xs">
-                            <span className="font-serif tracking-[0.08em] uppercase">
-                                {shortDate(event.startsAt)}
-                            </span>
+                        <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-muted-foreground">
+                            <span className="font-serif tracking-[0.08em] uppercase">{shortDate(event.startsAt)}</span>
                             <span aria-hidden="true">·</span>
                             <span className="tabular-nums">
                                 {event.rsvpCount} {event.rsvpCount === 1 ? "person" : "people"} in
@@ -123,13 +119,11 @@ function Rooms() {
                     <li key={room.href} className="py-2 first:pt-0 last:pb-0">
                         <Link
                             href={room.href}
-                            className="text-foreground flex items-baseline gap-2 text-sm no-underline hover:underline"
+                            className="flex items-baseline gap-2 text-sm text-foreground no-underline hover:underline"
                         >
                             <span aria-hidden="true">{room.icon}</span>
                             <span className="font-semibold">{room.label}</span>
-                            <span className="text-muted-foreground truncate text-xs">
-                                {room.blurb}
-                            </span>
+                            <span className="truncate text-xs text-muted-foreground">{room.blurb}</span>
                         </Link>
                     </li>
                 ))}
@@ -138,13 +132,7 @@ function Rooms() {
     );
 }
 
-export default function PaddockRail({
-    barns,
-    events,
-}: {
-    barns: Group[];
-    events: MHHEvent[];
-}) {
+export default function PaddockRail({ barns, events }: { barns: Group[]; events: MHHEvent[] }) {
     return (
         <aside className="flex flex-col gap-5 lg:sticky lg:top-[calc(var(--header-height)+1.5rem)]">
             <MyBarns barns={barns} />

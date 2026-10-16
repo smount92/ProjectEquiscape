@@ -112,7 +112,10 @@ test.describe("Show System — E2E", () => {
         }
 
         // Click the parent link
-        const openShowCard = page.locator("a[id^='show-']").filter({ has: page.locator(".show-status-open") }).first();
+        const openShowCard = page
+            .locator("a[id^='show-']")
+            .filter({ has: page.locator(".show-status-open") })
+            .first();
         await openShowCard.click();
         await page.waitForURL("**/shows/**", { timeout: 10000 });
 
@@ -133,7 +136,10 @@ test.describe("Show System — E2E", () => {
         await page.waitForLoadState("networkidle");
 
         // Find a closed show
-        const closedShowCard = page.locator("a[id^='show-']").filter({ has: page.locator(".show-status-closed") }).first();
+        const closedShowCard = page
+            .locator("a[id^='show-']")
+            .filter({ has: page.locator(".show-status-closed") })
+            .first();
         if ((await closedShowCard.count()) === 0) {
             test.skip(true, "No closed shows available");
             return;
@@ -198,7 +204,10 @@ test.describe("Show System — E2E", () => {
         await page.waitForLoadState("networkidle");
 
         // Look for a show in judging status
-        const judgingCard = page.locator("a[id^='show-']").filter({ has: page.locator(".show-status-judging") }).first();
+        const judgingCard = page
+            .locator("a[id^='show-']")
+            .filter({ has: page.locator(".show-status-judging") })
+            .first();
         if ((await judgingCard.count()) === 0) {
             test.skip(true, "No shows in judging status");
             return;
@@ -221,7 +230,10 @@ test.describe("Show System — E2E", () => {
         await page.goto("/shows");
         await page.waitForLoadState("networkidle");
 
-        const closedCard = page.locator("a[id^='show-']").filter({ has: page.locator(".show-status-closed") }).first();
+        const closedCard = page
+            .locator("a[id^='show-']")
+            .filter({ has: page.locator(".show-status-closed") })
+            .first();
         if ((await closedCard.count()) === 0) {
             test.skip(true, "No closed shows available");
             return;
@@ -246,7 +258,10 @@ test.describe("Show System — E2E", () => {
         await page.goto("/shows");
         await page.waitForLoadState("networkidle");
 
-        const openShowCard = page.locator("a[id^='show-']").filter({ has: page.locator(".show-status-open") }).first();
+        const openShowCard = page
+            .locator("a[id^='show-']")
+            .filter({ has: page.locator(".show-status-open") })
+            .first();
         if ((await openShowCard.count()) === 0) {
             test.skip(true, "No open shows available");
             return;
@@ -338,9 +353,7 @@ test.describe("Show System — E2E", () => {
         await freshPage.waitForLoadState("networkidle");
 
         await expect(freshPage).not.toHaveURL(/\/login/);
-        await expect(
-            freshPage.getByRole("heading", { level: 1, name: "Shows" }),
-        ).toBeVisible({ timeout: 10000 });
+        await expect(freshPage.getByRole("heading", { level: 1, name: "Shows" })).toBeVisible({ timeout: 10000 });
 
         await context.close();
     });

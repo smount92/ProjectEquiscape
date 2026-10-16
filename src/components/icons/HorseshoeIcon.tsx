@@ -4,13 +4,7 @@
  * (1em) so it drops into text like an emoji did. Decorative by default.
  */
 
-export default function HorseshoeIcon({
-    className = "",
-    title,
-}: {
-    className?: string;
-    title?: string;
-}) {
+export default function HorseshoeIcon({ className = "", title }: { className?: string; title?: string }) {
     return (
         <svg
             viewBox="0 0 24 24"

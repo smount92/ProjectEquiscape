@@ -15,15 +15,7 @@ vi.mock("next/navigation", () => ({
 // The global setup mocks next/link to render NOTHING — but the Show
 // Ring card wraps its whole face in a Link, so render a real anchor.
 vi.mock("next/link", () => ({
-    default: ({
-        children,
-        href,
-        ...props
-    }: {
-        children: React.ReactNode;
-        href: string;
-        [key: string]: unknown;
-    }) => (
+    default: ({ children, href, ...props }: { children: React.ReactNode; href: string; [key: string]: unknown }) => (
         <a href={href} {...props}>
             {children}
         </a>
@@ -132,16 +124,12 @@ beforeEach(() => {
 describe("ShowRingBrowser", () => {
     it("shows the 'N models match' result line when filters are active", () => {
         renderBrowser();
-        expect(document.getElementById("showring-result-line")?.textContent).toContain(
-            "30 models match",
-        );
+        expect(document.getElementById("showring-result-line")?.textContent).toContain("30 models match");
     });
 
     it("shows the plain public-model count when no filters are active", () => {
         renderBrowser({ filters: { sort: "newest" }, totalCount: 214, initialHasMore: false });
-        expect(document.getElementById("showring-result-line")?.textContent).toContain(
-            "214 public models",
-        );
+        expect(document.getElementById("showring-result-line")?.textContent).toContain("214 public models");
     });
 
     it("renders the true-empty state when the ring has no public horses at all", () => {
@@ -233,9 +221,7 @@ describe("ShowRingBrowser", () => {
 
     it("marks fully verified records on the chip", () => {
         renderBrowser({
-            initialCards: [
-                card({ recordSummary: { total: 2, placings: 2, championships: 0, verified: 2 } }),
-            ],
+            initialCards: [card({ recordSummary: { total: 2, placings: 2, championships: 0, verified: 2 } })],
         });
         expect(screen.getByText(/✅ verified/)).toBeInTheDocument();
     });
@@ -243,9 +229,7 @@ describe("ShowRingBrowser", () => {
     it("opens the quick-look dialog and fetches that horse's record on demand", async () => {
         const user = userEvent.setup();
         renderBrowser({
-            initialCards: [
-                card({ recordSummary: { total: 3, placings: 2, championships: 1, verified: 2 } }),
-            ],
+            initialCards: [card({ recordSummary: { total: 3, placings: 2, championships: 1, verified: 2 } })],
         });
         await user.click(document.getElementById("record-chip-h-1")!);
         await waitFor(() => {
@@ -254,9 +238,6 @@ describe("ShowRingBrowser", () => {
         expect(await screen.findByText(/Grand Champion/)).toBeInTheDocument();
         expect(screen.getByText(/2 MHH qualification cards/)).toBeInTheDocument();
         // The road to the full trophy case: the public passport.
-        expect(screen.getByRole("link", { name: /full trophy case/i })).toHaveAttribute(
-            "href",
-            "/community/h-1",
-        );
+        expect(screen.getByRole("link", { name: /full trophy case/i })).toHaveAttribute("href", "/community/h-1");
     });
 });

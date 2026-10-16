@@ -88,7 +88,11 @@ export default function FeedPostCard({
                     authorAvatarUrl: currentUserAvatar,
                     content,
                     parentId: item.id,
-                    horseId: null, groupId: null, eventId: null, studioId: null, helpRequestId: null,
+                    horseId: null,
+                    groupId: null,
+                    eventId: null,
+                    studioId: null,
+                    helpRequestId: null,
                     likesCount: 0,
                     repliesCount: 0,
                     isPinned: false,
@@ -135,9 +139,7 @@ export default function FeedPostCard({
     const gridMedia = item.media.slice(0, 4);
 
     return (
-        <article
-            className={`ledger-card paddock-post ${isSystem ? "paddock-post-system" : ""}`}
-        >
+        <article className={`ledger-card paddock-post ${isSystem ? "paddock-post-system" : ""}`}>
             <PostHeader
                 avatarUrl={item.authorAvatarUrl}
                 alias={item.authorAlias}
@@ -153,9 +155,7 @@ export default function FeedPostCard({
                                     className="inline-flex min-h-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-1.5 py-0.5 text-xs font-semibold text-muted-foreground no-underline transition-all hover:bg-card"
                                     onClick={() =>
                                         startTransition(async () => {
-                                            const { setFeedPostPinned } = await import(
-                                                "@/app/actions/admin"
-                                            );
+                                            const { setFeedPostPinned } = await import("@/app/actions/admin");
                                             await setFeedPostPinned(item.id, !item.isPinned);
                                             router.refresh();
                                         })
@@ -208,7 +208,7 @@ export default function FeedPostCard({
                     )}
                     {item.visibility === "followers" && (
                         <span
-                            className="border-input bg-muted text-secondary-foreground inline-flex items-center rounded-full border px-2.5 py-[3px] text-xs font-semibold"
+                            className="inline-flex items-center rounded-full border border-input bg-muted px-2.5 py-[3px] text-xs font-semibold text-secondary-foreground"
                             title="Only your followers can see this post"
                         >
                             👥 Followers
@@ -221,7 +221,7 @@ export default function FeedPostCard({
                 {isEditing ? (
                     <div className="flex flex-col gap-1">
                         <textarea
-                            className="min-h-[36px] w-full resize-y rounded-md border border-input bg-(--paper-lit)/70 text-(--paper-lit-ink) px-4 py-2 text-sm no-underline transition-all focus:border-forest focus:outline-none"
+                            className="min-h-[36px] w-full resize-y rounded-md border border-input bg-(--paper-lit)/70 px-4 py-2 text-sm text-(--paper-lit-ink) no-underline transition-all focus:border-forest focus:outline-none"
                             value={editText}
                             onChange={(e) => setEditText(e.target.value)}
                             rows={3}
@@ -253,11 +253,7 @@ export default function FeedPostCard({
                 big or a tidy pair-grid — the PassportGallery treatment,
                 not four full-bleed images stacked down the card. */}
             {gridMedia.length > 0 && (
-                <div
-                    className={`mt-3 grid gap-1.5 pl-10 ${
-                        gridMedia.length === 1 ? "grid-cols-1" : "grid-cols-2"
-                    }`}
-                >
+                <div className={`mt-3 grid gap-1.5 pl-10 ${gridMedia.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
                     {gridMedia.map((m, i) => (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
@@ -273,15 +269,15 @@ export default function FeedPostCard({
                             // expected grammar.
                             className={
                                 gridMedia.length === 1
-                                    ? "border-input bg-muted h-auto max-h-[480px] w-auto max-w-full rounded-lg border object-contain"
-                                    : "border-input bg-muted aspect-square h-auto w-full rounded-lg border object-cover"
+                                    ? "h-auto max-h-[480px] w-auto max-w-full rounded-lg border border-input bg-muted object-contain"
+                                    : "aspect-square h-auto w-full rounded-lg border border-input bg-muted object-cover"
                             }
                         />
                     ))}
                 </div>
             )}
 
-            <div className="border-forest/15 mt-2 border-t pt-1 pl-10">
+            <div className="mt-2 border-t border-forest/15 pt-1 pl-10">
                 <ReactionBar
                     isLiked={item.isLikedByMe}
                     likeCount={item.likesCount}
@@ -296,7 +292,7 @@ export default function FeedPostCard({
             </div>
 
             {showReplies && !isLegacy && (
-                <div className="border-forest/25 mt-3 ml-10 border-l-2 pl-4">
+                <div className="mt-3 ml-10 border-l-2 border-forest/25 pl-4">
                     {visibleReplies.map((r) => (
                         <div key={r.id} className="mb-3">
                             <PostHeader

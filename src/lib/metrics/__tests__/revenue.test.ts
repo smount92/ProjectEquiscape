@@ -1,10 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-    computeRevenue,
-    isMissingRevenueSchema,
-    normalizeSubscriptionStatus,
-    NET_MONTHLY_PRICE,
-} from "../revenue";
+import { computeRevenue, isMissingRevenueSchema, normalizeSubscriptionStatus, NET_MONTHLY_PRICE } from "../revenue";
 
 describe("NET_MONTHLY_PRICE", () => {
     it("is list price less Stripe's 2.9% + $0.30", () => {
@@ -128,20 +123,14 @@ describe("isMissingRevenueSchema", () => {
         for (const code of ["42P01", "42703", "42883", "PGRST202", "PGRST204", "PGRST205"]) {
             expect(isMissingRevenueSchema({ code })).toBe(true);
         }
-        expect(
-            isMissingRevenueSchema({ message: 'column users.last_seen_on does not exist' }),
-        ).toBe(true);
-        expect(
-            isMissingRevenueSchema({ message: "Could not find the function in the schema cache" }),
-        ).toBe(true);
+        expect(isMissingRevenueSchema({ message: "column users.last_seen_on does not exist" })).toBe(true);
+        expect(isMissingRevenueSchema({ message: "Could not find the function in the schema cache" })).toBe(true);
     });
 
     it("does not swallow a real failure", () => {
         expect(isMissingRevenueSchema(null)).toBe(false);
         expect(isMissingRevenueSchema(undefined)).toBe(false);
         expect(isMissingRevenueSchema({ code: "42501", message: "permission denied" })).toBe(false);
-        expect(isMissingRevenueSchema({ code: "23503", message: "foreign key violation" })).toBe(
-            false,
-        );
+        expect(isMissingRevenueSchema({ code: "23503", message: "foreign key violation" })).toBe(false);
     });
 });

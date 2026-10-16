@@ -5,10 +5,14 @@ import PageMasthead from "@/components/layouts/PageMasthead";
 import type { Metadata } from "next";
 
 const MEDAL_MAP: Record<string, string> = {
-    "1st": "🥇", "2nd": "🥈", "3rd": "🥉",
+    "1st": "🥇",
+    "2nd": "🥈",
+    "3rd": "🥉",
     HM: "🎗️",
-    Champion: "🏆", "Reserve Champion": "🥈",
-    "Grand Champion": "🏆", "Reserve Grand Champion": "🥈",
+    Champion: "🏆",
+    "Reserve Champion": "🥈",
+    "Grand Champion": "🏆",
+    "Reserve Grand Champion": "🥈",
 };
 
 // US show-ribbon convention. These are fixed real-world ribbon colors — a
@@ -63,10 +67,17 @@ export default async function PublicShowResultsPage({ params }: { params: Promis
 
     return (
         <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
-            <PageMasthead compact icon="🏆" title="Show Results" subtitle="Public results" backHref={`/shows/${event.id}`} backLabel="Show" />
+            <PageMasthead
+                compact
+                icon="🏆"
+                title="Show Results"
+                subtitle="Public results"
+                backHref={`/shows/${event.id}`}
+                backLabel="Show"
+            />
 
             {/* Header */}
-            <div className="mb-8 text-center animate-fade-in-up">
+            <div className="animate-fade-in-up mb-8 text-center">
                 <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-input bg-card px-4 py-1.5 text-sm font-medium text-secondary-foreground shadow-sm">
                     📸 Show Results
                     {event.isSanctioned && (
@@ -75,9 +86,7 @@ export default async function PublicShowResultsPage({ params }: { params: Promis
                         </span>
                     )}
                 </div>
-                <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                    {event.name}
-                </h1>
+                <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{event.name}</h1>
                 <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
                     {event.date && <span>📅 {event.date}</span>}
                     <span>🎤 Hosted by @{event.host}</span>
@@ -101,24 +110,25 @@ export default async function PublicShowResultsPage({ params }: { params: Promis
             </div>
 
             {/* Download CSV */}
-            <div className="mb-8 flex justify-center animate-fade-in-up">
+            <div className="animate-fade-in-up mb-8 flex justify-center">
                 <a
                     href={`/api/export/show-results/${event.id}`}
-                    className="inline-flex items-center gap-2 rounded-lg border border-input bg-card px-5 py-2.5 text-sm font-medium text-foreground shadow-sm transition-all hover:bg-muted hover:shadow-md no-underline"
+                    className="inline-flex items-center gap-2 rounded-lg border border-input bg-card px-5 py-2.5 text-sm font-medium text-foreground no-underline shadow-sm transition-all hover:bg-muted hover:shadow-md"
                 >
                     📥 Download Results CSV
                 </a>
             </div>
 
             {/* Results by Division → Class */}
-            <div className="space-y-8 animate-fade-in-up">
+            <div className="animate-fade-in-up space-y-8">
                 {divisions.map((division) => (
-                    <div key={division.name} className="overflow-hidden rounded-xl border border-input bg-card shadow-sm">
+                    <div
+                        key={division.name}
+                        className="overflow-hidden rounded-xl border border-input bg-card shadow-sm"
+                    >
                         {/* Division Header */}
                         <div className="border-b border-input bg-muted px-6 py-3">
-                            <h2 className="text-lg font-semibold text-foreground">
-                                📂 {division.name}
-                            </h2>
+                            <h2 className="text-lg font-semibold text-foreground">📂 {division.name}</h2>
                         </div>
 
                         {/* Classes */}
@@ -135,7 +145,9 @@ export default async function PublicShowResultsPage({ params }: { params: Promis
                                     </h3>
 
                                     {cls.results.length === 0 ? (
-                                        <p className="text-sm italic text-muted-foreground">No placements in this class</p>
+                                        <p className="text-sm text-muted-foreground italic">
+                                            No placements in this class
+                                        </p>
                                     ) : (
                                         <div className="space-y-1.5">
                                             {cls.results.map((result, idx) => (
@@ -162,7 +174,7 @@ export default async function PublicShowResultsPage({ params }: { params: Promis
                                                     )}
 
                                                     {/* Name + Owner */}
-                                                    <div className="flex-1 min-w-0">
+                                                    <div className="min-w-0 flex-1">
                                                         <span className="font-semibold text-foreground">
                                                             {result.horseName}
                                                         </span>
@@ -191,7 +203,9 @@ export default async function PublicShowResultsPage({ params }: { params: Promis
                 <div className="rounded-xl border border-input bg-card px-8 py-16 text-center shadow-sm">
                     <div className="mb-4 text-5xl">📋</div>
                     <h2 className="text-xl font-semibold text-foreground">No Results Available</h2>
-                    <p className="mt-2 text-muted-foreground">This show hasn&apos;t announced results yet, or no entries were placed.</p>
+                    <p className="mt-2 text-muted-foreground">
+                        This show hasn&apos;t announced results yet, or no entries were placed.
+                    </p>
                 </div>
             )}
 

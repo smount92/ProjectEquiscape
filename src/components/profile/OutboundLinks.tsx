@@ -18,7 +18,11 @@ export default function OutboundLinks({
     const entries = linkEntries(links ?? {}, keys);
     if (entries.length === 0) return null;
     return (
-        <ul className={`m-0 flex list-none flex-wrap items-center justify-center gap-2 p-0 ${className}`} aria-label="Links" data-testid="outbound-links">
+        <ul
+            className={`m-0 flex list-none flex-wrap items-center justify-center gap-2 p-0 ${className}`}
+            aria-label="Links"
+            data-testid="outbound-links"
+        >
             {entries.map((e) => (
                 <li key={e.key}>
                     <a

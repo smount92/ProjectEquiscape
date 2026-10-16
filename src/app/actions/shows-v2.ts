@@ -64,11 +64,7 @@ import {
     deleteSectionSchema,
     updateShowSettingsSchema,
 } from "@/lib/shows/schemas";
-import {
-    hasSanctioningRequest,
-    stripSanctioningMarker,
-    withSanctioningMarker,
-} from "@/lib/shows/sanctioning";
+import { hasSanctioningRequest, stripSanctioningMarker, withSanctioningMarker } from "@/lib/shows/sanctioning";
 import {
     loadShowProgram,
     getAliases,
@@ -150,15 +146,12 @@ import type {
 // file can share them — "use server" files may only export async
 // server actions.
 
-type ActionResult<T = object> =
-    | ({ success: true } & T)
-    | { success: false; error: string };
+type ActionResult<T = object> = ({ success: true } & T) | { success: false; error: string };
 
 const MANAGER_ROLES: StaffRole[] = ["host", "co_host"];
 
 /** Uniform refusal for structural classlist edits on a frozen show. */
-const CLASSLIST_FROZEN_ERROR =
-    "The classlist can no longer be edited — this show has moved past its running phase.";
+const CLASSLIST_FROZEN_ERROR = "The classlist can no longer be edited — this show has moved past its running phase.";
 
 /** showId lookup for a class via its section → division chain. */
 async function getShowIdOfClass(
@@ -196,9 +189,7 @@ function callerIsPlatformAdmin(email: string | undefined): boolean {
     return !!adminEmail && !!email && email.toLowerCase() === adminEmail;
 }
 
-export async function createShow(
-    input: z.input<typeof createShowSchema>,
-): Promise<ActionResult<{ showId: string }>> {
+export async function createShow(input: z.input<typeof createShowSchema>): Promise<ActionResult<{ showId: string }>> {
     const parsed = createShowSchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { supabase, user } = await requireAuth();
@@ -250,9 +241,7 @@ export async function createShow(
     return { success: true, showId: show.id as string };
 }
 
-export async function updateShowSettings(
-    input: z.input<typeof updateShowSettingsSchema>,
-): Promise<ActionResult> {
+export async function updateShowSettings(input: z.input<typeof updateShowSettingsSchema>): Promise<ActionResult> {
     const parsed = updateShowSettingsSchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { supabase, user } = await requireAuth();
@@ -288,10 +277,8 @@ export async function updateShowSettings(
             const storedNote = (current?.sanctioning_note as string | null) ?? null;
             const asked = patch.isMhhQualifying === true;
             if (asked) delete patch.isMhhQualifying; // never self-granted
-            const nextNote =
-                patch.sanctioningNote !== undefined ? patch.sanctioningNote : storedNote;
-            const wantsRequest =
-                asked || hasSanctioningRequest(storedNote) || !!nextNote?.trim();
+            const nextNote = patch.sanctioningNote !== undefined ? patch.sanctioningNote : storedNote;
+            const wantsRequest = asked || hasSanctioningRequest(storedNote) || !!nextNote?.trim();
             if (!sanctioned && wantsRequest) {
                 patch.sanctioningNote = withSanctioningMarker(nextNote);
             }
@@ -314,8 +301,7 @@ export async function updateShowSettings(
         ) {
             return {
                 success: false,
-                error:
-                    "Results are published — dates and qualifying status are frozen. Contact the site admin if a date is genuinely wrong.",
+                error: "Results are published — dates and qualifying status are frozen. Contact the site admin if a date is genuinely wrong.",
             };
         }
     }
@@ -329,15 +315,9 @@ export async function updateShowSettings(
             .select("entries_open_at, entries_close_at")
             .eq("id", showId)
             .single<{ entries_open_at: string | null; entries_close_at: string | null }>();
-        const effectiveOpen =
-            patch.entriesOpenAt !== undefined ? patch.entriesOpenAt : stored?.entries_open_at;
-        const effectiveClose =
-            patch.entriesCloseAt !== undefined ? patch.entriesCloseAt : stored?.entries_close_at;
-        if (
-            effectiveOpen &&
-            effectiveClose &&
-            new Date(effectiveOpen) >= new Date(effectiveClose)
-        ) {
+        const effectiveOpen = patch.entriesOpenAt !== undefined ? patch.entriesOpenAt : stored?.entries_open_at;
+        const effectiveClose = patch.entriesCloseAt !== undefined ? patch.entriesCloseAt : stored?.entries_close_at;
+        if (effectiveOpen && effectiveClose && new Date(effectiveOpen) >= new Date(effectiveClose)) {
             return { success: false, error: "Entries must open before they close." };
         }
     }
@@ -373,9 +353,7 @@ export async function updateShowSettings(
  * draft has public history (entries, staff invites, published
  * pages) and must go through archived status instead of deletion.
  */
-export async function deleteShow(
-    input: z.input<typeof deleteShowSchema>,
-): Promise<ActionResult> {
+export async function deleteShow(input: z.input<typeof deleteShowSchema>): Promise<ActionResult> {
     const parsed = deleteShowSchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { supabase, user } = await requireAuth();
@@ -394,11 +372,7 @@ export async function deleteShow(
     // else) silently filters the row, report failure instead of a
     // false success — a delete that "succeeds" without deleting is
     // the bug class that quietly eats user trust.
-    const { data: deleted, error } = await supabase
-        .from("shows")
-        .delete()
-        .eq("id", showId)
-        .select("id");
+    const { data: deleted, error } = await supabase.from("shows").delete().eq("id", showId).select("id");
     if (error) return { success: false, error: error.message };
     if (!deleted || deleted.length === 0) {
         return { success: false, error: "The show could not be deleted — please refresh and try again." };
@@ -406,9 +380,7 @@ export async function deleteShow(
     return { success: true };
 }
 
-export async function transitionShowStatus(
-    input: z.input<typeof transitionShowStatusSchema>,
-): Promise<ActionResult> {
+export async function transitionShowStatus(input: z.input<typeof transitionShowStatusSchema>): Promise<ActionResult> {
     const parsed = transitionShowStatusSchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { supabase, user } = await requireAuth();
@@ -499,9 +471,7 @@ export async function transitionShowStatus(
             const hostId = user.id;
             after(async () => {
                 try {
-                    const { createNotification } = await import(
-                        "@/lib/notifications/createNotification"
-                    );
+                    const { createNotification } = await import("@/lib/notifications/createNotification");
                     const bits = [
                         `Your show minted ${summary.issued} qualification card${summary.issued === 1 ? "" : "s"}`,
                     ];
@@ -646,7 +616,10 @@ async function writeShowRecordsForShow(
         const { data: sectionRows, error: sErr } = await supabase
             .from("show_sections")
             .select("id, name, division_id")
-            .in("division_id", divisions.map((d) => d.id));
+            .in(
+                "division_id",
+                divisions.map((d) => d.id),
+            );
         if (sErr) return { error: sErr.message };
         sections = sectionRows ?? [];
         if (sections.length > 0) {
@@ -659,23 +632,35 @@ async function writeShowRecordsForShow(
                         in: (
                             k: string,
                             v: string[],
-                        ) => PromiseLike<{ data: Record<string, unknown>[] | null; error: { code?: string; message: string } | null }>;
+                        ) => PromiseLike<{
+                            data: Record<string, unknown>[] | null;
+                            error: { code?: string; message: string } | null;
+                        }>;
                         eq: (
                             k: string,
                             v: string,
-                        ) => PromiseLike<{ data: Record<string, unknown>[] | null; error: { code?: string; message: string } | null }>;
+                        ) => PromiseLike<{
+                            data: Record<string, unknown>[] | null;
+                            error: { code?: string; message: string } | null;
+                        }>;
                     };
                 };
             };
             let { data: classRows, error: cErr } = await sb
                 .from("show_classes")
                 .select("id, name, section_id, rubric")
-                .in("section_id", sections.map((s) => s.id));
+                .in(
+                    "section_id",
+                    sections.map((s) => s.id),
+                );
             if (cErr && (cErr.code === "42703" || cErr.code === "PGRST204")) {
                 ({ data: classRows, error: cErr } = await sb
                     .from("show_classes")
                     .select("id, name, section_id")
-                    .in("section_id", sections.map((s) => s.id)));
+                    .in(
+                        "section_id",
+                        sections.map((s) => s.id),
+                    ));
             }
             if (cErr) return { error: cErr.message };
             classes = (classRows ?? []) as typeof classes;
@@ -690,7 +675,10 @@ async function writeShowRecordsForShow(
                 eq: (
                     k: string,
                     v: string,
-                ) => PromiseLike<{ data: Record<string, unknown>[] | null; error: { code?: string; message: string } | null }>;
+                ) => PromiseLike<{
+                    data: Record<string, unknown>[] | null;
+                    error: { code?: string; message: string } | null;
+                }>;
             };
         };
     };
@@ -705,9 +693,7 @@ async function writeShowRecordsForShow(
             .eq("show_id", showId));
     }
     if (eErr) return { error: eErr.message };
-    const liveEntries = (entryRows ?? []).filter(
-        (e) => (e.status as string) !== "scratched",
-    );
+    const liveEntries = (entryRows ?? []).filter((e) => (e.status as string) !== "scratched");
 
     // The judged photo, frozen onto the record (207) — galleries
     // change; records don't.
@@ -719,7 +705,10 @@ async function writeShowRecordsForShow(
     const { data: placingRows, error: pErr } = await supabase
         .from("show_placings")
         .select("entry_id, class_id, place, note")
-        .in("class_id", classes.map((c) => c.id));
+        .in(
+            "class_id",
+            classes.map((c) => c.id),
+        );
     if (pErr) return { error: pErr.message };
     const placings = placingRows ?? [];
     if (placings.length === 0) return { written: 0, skipped: 0 };
@@ -789,12 +778,10 @@ async function writeShowRecordsForShow(
             championEntryId: (r.champion_entry_id as string | null) ?? null,
             reserveEntryId: (r.reserve_entry_id as string | null) ?? null,
         })),
-        existing: (existingRows ?? []).map(
-            (r: { horse_id: string; class_name: string | null }) => ({
-                horseId: r.horse_id,
-                className: r.class_name,
-            }),
-        ),
+        existing: (existingRows ?? []).map((r: { horse_id: string; class_name: string | null }) => ({
+            horseId: r.horse_id,
+            className: r.class_name,
+        })),
         fallbackDate: new Date().toISOString().slice(0, 10),
     });
 
@@ -803,9 +790,7 @@ async function writeShowRecordsForShow(
         if (insertError && (insertError.code === "42703" || insertError.code === "PGRST204")) {
             // Pre-206 database: the record still lands, just without
             // its scorecard — placings must never wait on a paste.
-            const stripped = rows.map(
-                ({ score_total: _st, scorecard: _sc, entry_photo_url: _ep, ...rest }) => rest,
-            );
+            const stripped = rows.map(({ score_total: _st, scorecard: _sc, entry_photo_url: _ep, ...rest }) => rest);
             ({ error: insertError } = await admin.from("show_records").insert(stripped as never));
         }
         if (insertError) return { error: insertError.message };
@@ -886,9 +871,7 @@ export async function addSection(
     return { success: true, sectionId: data.id as string };
 }
 
-export async function updateDivision(
-    input: z.input<typeof updateDivisionSchema>,
-): Promise<ActionResult> {
+export async function updateDivision(input: z.input<typeof updateDivisionSchema>): Promise<ActionResult> {
     const parsed = updateDivisionSchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { supabase, user } = await requireAuth();
@@ -911,17 +894,12 @@ export async function updateDivision(
         return { success: false, error: CLASSLIST_FROZEN_ERROR };
     }
 
-    const { error } = await supabase
-        .from("show_divisions")
-        .update({ name: v.name })
-        .eq("id", v.divisionId);
+    const { error } = await supabase.from("show_divisions").update({ name: v.name }).eq("id", v.divisionId);
     if (error) return { success: false, error: error.message };
     return { success: true };
 }
 
-export async function updateSection(
-    input: z.input<typeof updateSectionSchema>,
-): Promise<ActionResult> {
+export async function updateSection(input: z.input<typeof updateSectionSchema>): Promise<ActionResult> {
     const parsed = updateSectionSchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { supabase, user } = await requireAuth();
@@ -939,17 +917,12 @@ export async function updateSection(
         return { success: false, error: CLASSLIST_FROZEN_ERROR };
     }
 
-    const { error } = await supabase
-        .from("show_sections")
-        .update({ name: v.name })
-        .eq("id", v.sectionId);
+    const { error } = await supabase.from("show_sections").update({ name: v.name }).eq("id", v.sectionId);
     if (error) return { success: false, error: error.message };
     return { success: true };
 }
 
-export async function addClass(
-    input: z.input<typeof addClassSchema>,
-): Promise<ActionResult<{ classId: string }>> {
+export async function addClass(input: z.input<typeof addClassSchema>): Promise<ActionResult<{ classId: string }>> {
     const parsed = addClassSchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { supabase, user } = await requireAuth();
@@ -986,9 +959,7 @@ export async function addClass(
     return { success: true, classId: data.id as string };
 }
 
-export async function updateClass(
-    input: z.input<typeof updateClassSchema>,
-): Promise<ActionResult> {
+export async function updateClass(input: z.input<typeof updateClassSchema>): Promise<ActionResult> {
     const parsed = updateClassSchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { supabase, user } = await requireAuth();
@@ -1054,10 +1025,7 @@ export async function updateClass(
 // host who added a division by accident could only leave it standing
 // empty on the public show page (Starshore, 2026-10-07).
 
-async function entriesUnderClasses(
-    supabase: SupabaseClient,
-    classIds: string[],
-): Promise<number | { error: string }> {
+async function entriesUnderClasses(supabase: SupabaseClient, classIds: string[]): Promise<number | { error: string }> {
     if (classIds.length === 0) return 0;
     const { count, error } = await supabase
         .from("show_class_entries")
@@ -1085,9 +1053,7 @@ function hasEntriesRefusal(name: string, entries: number): string {
     return `“${name}” has ${entries} ${entries === 1 ? "entry" : "entries"} — cancel it instead of deleting it, so the entries stay on record.`;
 }
 
-export async function deleteClass(
-    input: z.input<typeof deleteClassSchema>,
-): Promise<ActionResult> {
+export async function deleteClass(input: z.input<typeof deleteClassSchema>): Promise<ActionResult> {
     const parsed = deleteClassSchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { supabase, user } = await requireAuth();
@@ -1109,14 +1075,15 @@ export async function deleteClass(
     if (typeof entries !== "number") return { success: false, error: entries.error };
     if (entries > 0) return { success: false, error: hasEntriesRefusal(cls.name as string, entries) };
 
-    const { error } = await supabase.from("show_classes").delete().eq("id", cls.id as string);
+    const { error } = await supabase
+        .from("show_classes")
+        .delete()
+        .eq("id", cls.id as string);
     if (error) return { success: false, error: error.message };
     return { success: true };
 }
 
-export async function deleteSection(
-    input: z.input<typeof deleteSectionSchema>,
-): Promise<ActionResult> {
+export async function deleteSection(input: z.input<typeof deleteSectionSchema>): Promise<ActionResult> {
     const parsed = deleteSectionSchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { supabase, user } = await requireAuth();
@@ -1147,14 +1114,15 @@ export async function deleteSection(
     if (entries > 0) return { success: false, error: hasEntriesRefusal(section.name as string, entries) };
 
     // Classes under the section go with it (ON DELETE CASCADE, 117).
-    const { error } = await supabase.from("show_sections").delete().eq("id", section.id as string);
+    const { error } = await supabase
+        .from("show_sections")
+        .delete()
+        .eq("id", section.id as string);
     if (error) return { success: false, error: error.message };
     return { success: true };
 }
 
-export async function deleteDivision(
-    input: z.input<typeof deleteDivisionSchema>,
-): Promise<ActionResult> {
+export async function deleteDivision(input: z.input<typeof deleteDivisionSchema>): Promise<ActionResult> {
     const parsed = deleteDivisionSchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { supabase, user } = await requireAuth();
@@ -1190,7 +1158,10 @@ export async function deleteDivision(
     if (entries > 0) return { success: false, error: hasEntriesRefusal(division.name as string, entries) };
 
     // Sections and classes under the division go with it (ON DELETE CASCADE, 117).
-    const { error } = await supabase.from("show_divisions").delete().eq("id", division.id as string);
+    const { error } = await supabase
+        .from("show_divisions")
+        .delete()
+        .eq("id", division.id as string);
     if (error) return { success: false, error: error.message };
     return { success: true };
 }
@@ -1567,10 +1538,7 @@ async function insertClasslist(
     if (sErr || !sectionRows) return { success: false, error: sErr?.message ?? "Failed to create sections." };
 
     const sectionIdByKey = new Map<string, string>(
-        sectionRows.map((r: { id: string; name: string; division_id: string }) => [
-            `${r.division_id}:${r.name}`,
-            r.id,
-        ]),
+        sectionRows.map((r: { id: string; name: string; division_id: string }) => [`${r.division_id}:${r.name}`, r.id]),
     );
 
     const classInserts: Record<string, unknown>[] = [];
@@ -1642,8 +1610,7 @@ export async function addShowStaff(
         if (liveEntries && liveEntries.length > 0) {
             return {
                 success: false,
-                error:
-                    "That user has live entries in this show — a judge can't compete in their own ring. Scratch their entries first, or pick a different judge.",
+                error: "That user has live entries in this show — a judge can't compete in their own ring. Scratch their entries first, or pick a different judge.",
             };
         }
     }
@@ -1662,9 +1629,10 @@ export async function addShowStaff(
     if (error || !data) {
         return {
             success: false,
-            error: error?.code === "23505"
-                ? "That user already has a role on this show."
-                : error?.message ?? "Failed to add staff member.",
+            error:
+                error?.code === "23505"
+                    ? "That user already has a role on this show."
+                    : (error?.message ?? "Failed to add staff member."),
         };
     }
 
@@ -1683,9 +1651,7 @@ export async function addShowStaff(
     return { success: true, staffId: data.id as string };
 }
 
-export async function removeShowStaff(
-    input: z.input<typeof removeShowStaffSchema>,
-): Promise<ActionResult> {
+export async function removeShowStaff(input: z.input<typeof removeShowStaffSchema>): Promise<ActionResult> {
     const parsed = removeShowStaffSchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { supabase, user } = await requireAuth();
@@ -1700,11 +1666,7 @@ export async function removeShowStaff(
         return { success: false, error: "The host cannot be removed from their own show." };
     }
 
-    const { error } = await supabase
-        .from("show_staff")
-        .delete()
-        .eq("show_id", v.showId)
-        .eq("user_id", v.userId);
+    const { error } = await supabase.from("show_staff").delete().eq("show_id", v.showId).eq("user_id", v.userId);
     if (error) return { success: false, error: error.message };
     return { success: true };
 }
@@ -1892,9 +1854,7 @@ export async function getShowConsole(
     // ── Assemble the tree (per-class counts = LIVE entries only;
     // scratched rows still show in the entrant table as history) ──
     const entryCountByClass = countBy(
-        entries
-            .filter((e) => e.status !== "scratched")
-            .map((e) => ({ key: e.class_id as string })),
+        entries.filter((e) => e.status !== "scratched").map((e) => ({ key: e.class_id as string })),
     );
     // Distinct exhibitors per class — the card-gate context every
     // entry surface renders ("1 more exhibitor mints cards").
@@ -1960,9 +1920,7 @@ export async function getShowConsole(
         ownerId: e.owner_id as string,
         ownerAlias: aliases.get(e.owner_id as string) ?? "unknown",
         handlerAlias:
-            e.handler_id && e.handler_id !== e.owner_id
-                ? (aliases.get(e.handler_id as string) ?? "unknown")
-                : null,
+            e.handler_id && e.handler_id !== e.owner_id ? (aliases.get(e.handler_id as string) ?? "unknown") : null,
         entryNumber: (e.entry_number as number | null) ?? null,
         status: e.status as EntryStatus,
     }));
@@ -2015,10 +1973,9 @@ export async function getShowConsole(
     // pasted yet) degrades to 0, which renders as no follower line.
     let followerCount = 0;
     try {
-        const { data: followerData, error: followerError } = await supabase.rpc(
-            "show_follower_count",
-            { p_show_id: parsed.data.showId },
-        );
+        const { data: followerData, error: followerError } = await supabase.rpc("show_follower_count", {
+            p_show_id: parsed.data.showId,
+        });
         if (!followerError && typeof followerData === "number") {
             followerCount = followerData;
         }
@@ -2067,9 +2024,7 @@ export async function getShowConsole(
  * Toggle an entrant's fee-paid mark on the host's manual checklist
  * (migration 139). Managers only — RLS backs this up.
  */
-export async function setFeePaid(
-    input: z.input<typeof setFeePaidSchema>,
-): Promise<ActionResult> {
+export async function setFeePaid(input: z.input<typeof setFeePaidSchema>): Promise<ActionResult> {
     const parsed = setFeePaidSchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { supabase, user } = await requireAuth();
@@ -2189,9 +2144,7 @@ export async function getPublicShows(): Promise<ActionResult<{ shows: PublicShow
 
 /** The read itself, unchanged — takes its client so the cache can hand
  *  it the anon one. */
-async function readPublicShows(
-    supabase: SupabaseClient,
-): Promise<ActionResult<{ shows: PublicShowSummary[] }>> {
+async function readPublicShows(supabase: SupabaseClient): Promise<ActionResult<{ shows: PublicShowSummary[] }>> {
     const { data: showRows, error: showsError } = await supabase
         .from("shows")
         .select(
@@ -2212,9 +2165,7 @@ async function readPublicShows(
         .select("id, show_id, axis")
         .in("show_id", showIds);
     if (dErr) return { success: false, error: dErr.message };
-    const showByDivision = new Map(
-        (divisionRows ?? []).map((d: { id: string; show_id: string }) => [d.id, d.show_id]),
-    );
+    const showByDivision = new Map((divisionRows ?? []).map((d: { id: string; show_id: string }) => [d.id, d.show_id]));
     // The focus chips (OF / CM / Halter / …) are read off the same
     // rows the class count walks, so the list costs no extra query.
     const focusByShow = new Map<string, FocusInput[]>();
@@ -2279,7 +2230,10 @@ async function readPublicShows(
             .map((r: { show_id: string }) => ({ key: r.show_id })),
     );
 
-    const aliases = await getAliases(supabase, shows.map((s) => s.host_id as string));
+    const aliases = await getAliases(
+        supabase,
+        shows.map((s) => s.host_id as string),
+    );
     if (!(aliases instanceof Map)) return { success: false, error: aliases.error };
 
     return {
@@ -2315,9 +2269,7 @@ async function readPublicShows(
  */
 export async function getPublicShow(
     input: z.input<typeof getPublicShowSchema>,
-): Promise<
-    ActionResult<{ show: PublicShow; divisions: ConsoleDivision[]; entryCount: number }>
-> {
+): Promise<ActionResult<{ show: PublicShow; divisions: ConsoleDivision[]; entryCount: number }>> {
     const parsed = getPublicShowSchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const supabase = await createClient();
@@ -2429,16 +2381,15 @@ async function readMyShowEntries(
     // (results_review) stay with the host until the show completes.
     const placeByEntry = new Map<string, Place>();
     if (entries.length > 0) {
-        const { data: show } = await supabase
-            .from("shows")
-            .select("status")
-            .eq("id", showId)
-            .maybeSingle();
+        const { data: show } = await supabase.from("shows").select("status").eq("id", showId).maybeSingle();
         if (show && RESULTS_STATUSES.includes(show.status as ShowStatus)) {
             const { data: placingRows, error: pErr } = await supabase
                 .from("show_placings")
                 .select("entry_id, place")
-                .in("entry_id", entries.map((e) => e.id as string));
+                .in(
+                    "entry_id",
+                    entries.map((e) => e.id as string),
+                );
             if (pErr) return { success: false, error: pErr.message };
             for (const p of placingRows ?? []) {
                 if (p.place !== null) {
@@ -2458,9 +2409,7 @@ async function readMyShowEntries(
             entryNumber: (e.entry_number as number | null) ?? null,
             status: e.status as EntryStatus,
             handlerAlias:
-                e.handler_id && e.handler_id !== user.id
-                    ? (aliases.get(e.handler_id as string) ?? "unknown")
-                    : null,
+                e.handler_id && e.handler_id !== user.id ? (aliases.get(e.handler_id as string) ?? "unknown") : null,
             photoId: (e.photo_id as string | null) ?? null,
             place: placeByEntry.get(e.id as string) ?? null,
         })),
@@ -2518,14 +2467,8 @@ export async function getMyEntrantHorses(): Promise<ActionResult<{ horses: Entra
                 // Same precedence as getHorseShowIdentities: owner-set,
                 // else the registry's — so the dialog previews exactly
                 // what the judge will read.
-                breed:
-                    (h.assigned_breed as string | null) ||
-                    ((attrs.breed as string | undefined) ?? null) ||
-                    null,
-                gender:
-                    (h.assigned_gender as string | null) ||
-                    ((attrs.gender as string | undefined) ?? null) ||
-                    null,
+                breed: (h.assigned_breed as string | null) || ((attrs.breed as string | undefined) ?? null) || null,
+                gender: (h.assigned_gender as string | null) || ((attrs.gender as string | undefined) ?? null) || null,
             };
         }),
     };
@@ -2556,9 +2499,7 @@ interface ShowEntryWithAxis {
  * live in src/lib/shows/entryRules.validateEntry; this action only
  * loads its context and persists on success.
  */
-export async function enterClass(
-    input: z.input<typeof enterClassSchema>,
-): Promise<EnterClassResult> {
+export async function enterClass(input: z.input<typeof enterClassSchema>): Promise<EnterClassResult> {
     const parsed = enterClassSchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { supabase, user } = await requireAuth();
@@ -2685,9 +2626,7 @@ async function enterOne(
             id: horse.id as string,
             ownerId: horse.owner_id as string,
             scale:
-                ((horse.catalog_items as unknown as { scale: string | null } | null)?.scale as
-                    | string
-                    | null) ?? null,
+                ((horse.catalog_items as unknown as { scale: string | null } | null)?.scale as string | null) ?? null,
             finish: (horse.finish_type as string | null) ?? null,
         },
         show: {
@@ -2710,8 +2649,7 @@ async function enterOne(
             horseId: e.horse_id,
             ownerId: e.owner_id,
             status: e.status as EntryStatus,
-            divisionAxis: e.show_classes.show_sections.show_divisions
-                .axis as DivisionAxis,
+            divisionAxis: e.show_classes.show_sections.show_divisions.axis as DivisionAxis,
             photoId: e.photo_id ?? null,
         })),
         isBarred: !!barRow,
@@ -2725,9 +2663,7 @@ async function enterOne(
     let photoId: string | null = null;
     if (show.mode === "online") {
         if (!v.photoId) {
-            violations.push(
-                "Online shows judge a photo — pick one of this horse's photos for the entry.",
-            );
+            violations.push("Online shows judge a photo — pick one of this horse's photos for the entry.");
         } else {
             const { data: photo, error: pErr } = await supabase
                 .from("horse_images")
@@ -2753,12 +2689,8 @@ async function enterOne(
     // max+1 across the show. Two entrants submitting in the same
     // instant can race to the same number — acceptable at beta
     // scale: numbers are labels, not keys, and hosts can renumber. ──
-    const existingNumber = allEntries.find(
-        (e) => e.horse_id === v.horseId && e.entry_number !== null,
-    )?.entry_number;
-    const entryNumber =
-        existingNumber ??
-        Math.max(0, ...allEntries.map((e) => e.entry_number ?? 0)) + 1;
+    const existingNumber = allEntries.find((e) => e.horse_id === v.horseId && e.entry_number !== null)?.entry_number;
+    const entryNumber = existingNumber ?? Math.max(0, ...allEntries.map((e) => e.entry_number ?? 0)) + 1;
 
     const { data: inserted, error: insertError } = await supabase
         .from("show_class_entries")
@@ -2784,8 +2716,7 @@ async function enterOne(
                 ? "This horse is already entered in this class."
                 : insertError?.code === "23503"
                   ? "The chosen handler's account could not be found — check the alias and try again."
-                  : insertError?.code === "42501" ||
-                      insertError?.message?.includes("row-level security")
+                  : insertError?.code === "42501" || insertError?.message?.includes("row-level security")
                     ? "Entries closed just as you submitted — refresh the show page to see its current status."
                     : (insertError?.message ?? "Failed to enter the class.");
         return { success: false, error: friendly };
@@ -2810,14 +2741,9 @@ async function enterOne(
             const { followDb, isMissingSchema } = await import("@/lib/shows/followSupport");
             const { error: followError } = await followDb(supabase)
                 .from("show_followers")
-                .upsert(
-                    { show_id: showId, user_id: followerId },
-                    { onConflict: "show_id,user_id" },
-                );
+                .upsert({ show_id: showId, user_id: followerId }, { onConflict: "show_id,user_id" });
             if (followError && !isMissingSchema(followError)) {
-                console.error(
-                    `Implicit follow on entry for show ${showId} failed: ${followError.message}`,
-                );
+                console.error(`Implicit follow on entry for show ${showId} failed: ${followError.message}`);
             }
         } catch {
             // Best-effort — an entry must never fail over a follow row.
@@ -2836,9 +2762,7 @@ async function enterOne(
             // notices): 'server-only' can't resolve under vitest, and
             // a notification must never fail the entry.
             try {
-                const { createNotification } = await import(
-                    "@/lib/notifications/createNotification"
-                );
+                const { createNotification } = await import("@/lib/notifications/createNotification");
                 await createNotification({
                     userId: namedHandler,
                     type: "show_handler",
@@ -2886,9 +2810,7 @@ export type EnterClassBatchResult =
  * failing never stops the others. Documentation rides behind each
  * successful entry, exactly as the old dialog did.
  */
-export async function enterClassBatch(
-    input: z.input<typeof enterClassBatchSchema>,
-): Promise<EnterClassBatchResult> {
+export async function enterClassBatch(input: z.input<typeof enterClassBatchSchema>): Promise<EnterClassBatchResult> {
     const parsed = enterClassBatchSchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { supabase, user } = await requireAuth();
@@ -2974,9 +2896,7 @@ async function attachBatchDocumentation(
  * entries UPDATE policy has no handler branch (owners and staff
  * only), and adding one would let handlers touch other columns.
  */
-export async function removeSelfAsHandler(input: {
-    entryId: string;
-}): Promise<ActionResult> {
+export async function removeSelfAsHandler(input: { entryId: string }): Promise<ActionResult> {
     const entryId = z.uuid().safeParse(input.entryId);
     if (!entryId.success) return { success: false, error: "Invalid entry." };
     const { user } = await requireAuth();
@@ -3019,7 +2939,10 @@ export async function getMyHandlerEntries(input: {
         const entries = (rows ?? []) as { id: string; class_id: string; horse_id: string }[];
         if (entries.length === 0) return { success: true, entries: [] };
         const [horseNames, classRes] = await Promise.all([
-            getHorseNames(supabase, entries.map((e) => e.horse_id)),
+            getHorseNames(
+                supabase,
+                entries.map((e) => e.horse_id),
+            ),
             supabase
                 .from("show_classes")
                 .select("id, name")
@@ -3032,9 +2955,7 @@ export async function getMyHandlerEntries(input: {
             success: true,
             entries: entries.map((e) => ({
                 id: e.id,
-                horseName:
-                    (horseNames instanceof Map ? horseNames.get(e.horse_id) : null) ??
-                    "Unnamed horse",
+                horseName: (horseNames instanceof Map ? horseNames.get(e.horse_id) : null) ?? "Unnamed horse",
                 className: classNames.get(e.class_id) ?? "a class",
             })),
         };
@@ -3059,9 +2980,7 @@ const SCRATCH_STAFF_ROLES: StaffRole[] = ["host", "co_host", "steward"];
  * creates a NEW row (partial unique index, 117), which is why the
  * UI says "Scratch" / "Re-enter" rather than "undo".
  */
-export async function scratchEntry(
-    input: z.input<typeof scratchEntrySchema>,
-): Promise<ActionResult> {
+export async function scratchEntry(input: z.input<typeof scratchEntrySchema>): Promise<ActionResult> {
     const parsed = scratchEntrySchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { supabase, user } = await requireAuth();
@@ -3117,9 +3036,7 @@ export async function scratchEntry(
         .from("show_class_entries")
         .update({
             status: "scratched",
-            ...(reason
-                ? { note: `Scratched by ${isOwner ? "owner" : "show staff"}: ${reason}` }
-                : {}),
+            ...(reason ? { note: `Scratched by ${isOwner ? "owner" : "show staff"}: ${reason}` } : {}),
         })
         .eq("id", parsed.data.entryId)
         .select("id");
@@ -3160,9 +3077,7 @@ export async function scratchEntry(
  * legitimately re-entered live in this class meanwhile, the restore
  * refuses instead of duplicating.
  */
-export async function restoreEntry(
-    input: z.input<typeof restoreEntrySchema>,
-): Promise<ActionResult> {
+export async function restoreEntry(input: z.input<typeof restoreEntrySchema>): Promise<ActionResult> {
     const parsed = restoreEntrySchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { supabase, user } = await requireAuth();
@@ -3280,9 +3195,7 @@ export async function getShowGallery(
         .eq("show_id", showId)
         .order("created_at", { ascending: true });
     if (eErr) return { success: false, error: eErr.message };
-    const entries = (entryRows ?? []).filter(
-        (e: { status: string }) => e.status !== "scratched",
-    );
+    const entries = (entryRows ?? []).filter((e: { status: string }) => e.status !== "scratched");
 
     const photoUrls = await getEntryPhotoUrls(
         supabase,
@@ -3311,7 +3224,10 @@ export async function getShowGallery(
         const { data: voteRows, error: vErr } = await supabase
             .from("show_entry_votes")
             .select("entry_id, voter_id")
-            .in("entry_id", entries.map((e) => e.id as string));
+            .in(
+                "entry_id",
+                entries.map((e) => e.id as string),
+            );
         if (vErr) return { success: false, error: vErr.message };
         for (const v of voteRows ?? []) {
             const entryId = v.entry_id as string;
@@ -3327,7 +3243,10 @@ export async function getShowGallery(
         const { data: placingRows, error: pErr } = await supabase
             .from("show_placings")
             .select("entry_id, place")
-            .in("entry_id", entries.map((e) => e.id as string));
+            .in(
+                "entry_id",
+                entries.map((e) => e.id as string),
+            );
         if (pErr) return { success: false, error: pErr.message };
         for (const p of placingRows ?? []) {
             if (p.place !== null) placeByEntry.set(p.entry_id as string, p.place as Place);
@@ -3338,7 +3257,10 @@ export async function getShowGallery(
     const revealed = isOwnerRevealed(status, show.blind_browsing as boolean);
     let aliases = new Map<string, string>();
     if (revealed) {
-        const loaded = await getAliases(supabase, entries.map((e) => e.owner_id as string));
+        const loaded = await getAliases(
+            supabase,
+            entries.map((e) => e.owner_id as string),
+        );
         if (!(loaded instanceof Map)) return { success: false, error: loaded.error };
         aliases = loaded;
     }
@@ -3438,9 +3360,7 @@ async function getVoteContext(
  * The RLS policies from migration 119 are the backstop for every
  * check made here.
  */
-export async function castVote(
-    input: z.input<typeof castVoteSchema>,
-): Promise<ActionResult> {
+export async function castVote(input: z.input<typeof castVoteSchema>): Promise<ActionResult> {
     const parsed = castVoteSchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { supabase, user } = await requireAuth();
@@ -3469,19 +3389,14 @@ export async function castVote(
     if (error) {
         return {
             success: false,
-            error:
-                error.code === "23505"
-                    ? "You already voted for this entry."
-                    : error.message,
+            error: error.code === "23505" ? "You already voted for this entry." : error.message,
         };
     }
     return { success: true };
 }
 
 /** Remove your own vote while voting is still open. */
-export async function removeVote(
-    input: z.input<typeof removeVoteSchema>,
-): Promise<ActionResult> {
+export async function removeVote(input: z.input<typeof removeVoteSchema>): Promise<ActionResult> {
     const parsed = removeVoteSchema.safeParse(input);
     if (!parsed.success) return { success: false, error: firstZodError(parsed.error) };
     const { supabase, user } = await requireAuth();
@@ -3564,32 +3479,48 @@ export async function getJudgeQueue(
     const loose = supabase as unknown as {
         from: (t: string) => {
             select: (c: string) => {
-                eq: (k: string, v: string) => {
+                eq: (
+                    k: string,
+                    v: string,
+                ) => {
                     order: (
                         k: string,
                         o: { ascending: boolean },
-                    ) => PromiseLike<{ data: Record<string, unknown>[] | null; error: { code?: string; message: string } | null }>;
+                    ) => PromiseLike<{
+                        data: Record<string, unknown>[] | null;
+                        error: { code?: string; message: string } | null;
+                    }>;
                     in: (
                         k: string,
                         v: string[],
-                    ) => PromiseLike<{ data: Record<string, unknown>[] | null; error: { code?: string; message: string } | null }>;
+                    ) => PromiseLike<{
+                        data: Record<string, unknown>[] | null;
+                        error: { code?: string; message: string } | null;
+                    }>;
                 };
                 in: (
                     k: string,
                     v: string[],
-                ) => PromiseLike<{ data: Record<string, unknown>[] | null; error: { code?: string; message: string } | null }>;
+                ) => PromiseLike<{
+                    data: Record<string, unknown>[] | null;
+                    error: { code?: string; message: string } | null;
+                }>;
             };
         };
     };
     let { data: entryRows, error: eErr } = await loose
         .from("show_class_entries")
-        .select("id, class_id, horse_id, owner_id, entry_number, photo_id, status, created_at, critique_text, critique_photo_text, score_data, score_total")
+        .select(
+            "id, class_id, horse_id, owner_id, entry_number, photo_id, status, created_at, critique_text, critique_photo_text, score_data, score_total",
+        )
         .eq("show_id", showId)
         .order("created_at", { ascending: true });
     if (eErr && (eErr.code === "42703" || eErr.code === "PGRST204")) {
         ({ data: entryRows, error: eErr } = await loose
             .from("show_class_entries")
-            .select("id, class_id, horse_id, owner_id, entry_number, photo_id, status, created_at, critique_text, critique_photo_text")
+            .select(
+                "id, class_id, horse_id, owner_id, entry_number, photo_id, status, created_at, critique_text, critique_photo_text",
+            )
             .eq("show_id", showId)
             .order("created_at", { ascending: true }));
     }
@@ -3605,12 +3536,18 @@ export async function getJudgeQueue(
         let { data: pubRows, error: pubErr } = await loose
             .from("show_classes")
             .select("id, results_published_at, rubric")
-            .in("id", contexts.map((c) => c.classId));
+            .in(
+                "id",
+                contexts.map((c) => c.classId),
+            );
         if (pubErr && (pubErr.code === "42703" || pubErr.code === "PGRST204")) {
             ({ data: pubRows, error: pubErr } = await loose
                 .from("show_classes")
                 .select("id, results_published_at")
-                .in("id", contexts.map((c) => c.classId)));
+                .in(
+                    "id",
+                    contexts.map((c) => c.classId),
+                ));
         }
         if (pubErr) return { success: false, error: pubErr.message };
         for (const raw of pubRows ?? []) {
@@ -3648,7 +3585,10 @@ export async function getJudgeQueue(
         const { data: placingRows, error: pErr } = await supabase
             .from("show_placings")
             .select("entry_id, place, note")
-            .in("entry_id", entries.map((e) => e.id as string));
+            .in(
+                "entry_id",
+                entries.map((e) => e.id as string),
+            );
         if (pErr) return { success: false, error: pErr.message };
         for (const p of placingRows ?? []) {
             placingByEntry.set(p.entry_id as string, {
@@ -3659,13 +3599,13 @@ export async function getJudgeQueue(
     }
 
     // Blind judging: same server-side rule as the public gallery.
-    const revealed = isOwnerRevealed(
-        show.status as ShowStatus,
-        show.blind_browsing as boolean,
-    );
+    const revealed = isOwnerRevealed(show.status as ShowStatus, show.blind_browsing as boolean);
     let aliases = new Map<string, string>();
     if (revealed) {
-        const loaded = await getAliases(supabase, entries.map((e) => e.owner_id as string));
+        const loaded = await getAliases(
+            supabase,
+            entries.map((e) => e.owner_id as string),
+        );
         if (!(loaded instanceof Map)) return { success: false, error: loaded.error };
         aliases = loaded;
     }
@@ -3852,12 +3792,11 @@ export async function recordPlacings(
     // but didn't pin evaporated on every save — "notes gone on half
     // the horses."
     const slotted = new Set(v.placings.map((p) => p.entryId));
-    const slate: { entry_id: string; place: number | null; note: string | null }[] =
-        v.placings.map((p) => ({
-            entry_id: p.entryId,
-            place: p.place,
-            note: p.note?.length ? p.note : (noteByEntry.get(p.entryId) ?? null),
-        }));
+    const slate: { entry_id: string; place: number | null; note: string | null }[] = v.placings.map((p) => ({
+        entry_id: p.entryId,
+        place: p.place,
+        note: p.note?.length ? p.note : (noteByEntry.get(p.entryId) ?? null),
+    }));
     for (const [entryId, note] of noteByEntry) {
         if (!slotted.has(entryId)) slate.push({ entry_id: entryId, place: null, note });
     }
@@ -3935,15 +3874,16 @@ export async function finalizeCommunityVotes(
         .select("id, class_id, status, created_at")
         .eq("show_id", showId);
     if (eErr) return { success: false, error: eErr.message };
-    const entries = (entryRows ?? []).filter(
-        (e: { status: string }) => e.status !== "scratched",
-    );
+    const entries = (entryRows ?? []).filter((e: { status: string }) => e.status !== "scratched");
     if (entries.length === 0) return { success: true, classesPlaced: 0, placingsWritten: 0 };
 
     const { data: voteRows, error: vErr } = await supabase
         .from("show_entry_votes")
         .select("entry_id")
-        .in("entry_id", entries.map((e) => e.id as string));
+        .in(
+            "entry_id",
+            entries.map((e) => e.id as string),
+        );
     if (vErr) return { success: false, error: vErr.message };
     const voteCounts = new Map<string, number>();
     for (const row of voteRows ?? []) {

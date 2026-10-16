@@ -122,7 +122,9 @@ export default function ClassRail({ classes: allClasses, selectedClassId, onSele
                                                     } ${cls.state === "closed" ? "opacity-50" : ""}`}
                                                 >
                                                     <span className="truncate">{classLabel(cls)}</span>
-                                                    {mark && <span className="text-xs text-muted-foreground">{mark}</span>}
+                                                    {mark && (
+                                                        <span className="text-xs text-muted-foreground">{mark}</span>
+                                                    )}
                                                 </button>
                                             </li>
                                         );

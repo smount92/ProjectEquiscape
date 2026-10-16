@@ -46,31 +46,29 @@ let captureResponses: Array<{ body: unknown; status: number }> = [];
 let orderFixture: unknown = null;
 let requests: Array<{ url: string; body: unknown; headers: Record<string, string> }> = [];
 
-const mockFetch = vi.fn(
-    async (input: unknown, init?: { body?: string; headers?: Record<string, string> }) => {
-        const url = String(input);
-        if (url.includes("/v1/oauth2/token")) {
-            return jsonResponse({ access_token: "test-access-token", expires_in: 32000 });
-        }
-        requests.push({
-            url,
-            body: init?.body ? JSON.parse(init.body) : null,
-            headers: init?.headers ?? {},
-        });
+const mockFetch = vi.fn(async (input: unknown, init?: { body?: string; headers?: Record<string, string> }) => {
+    const url = String(input);
+    if (url.includes("/v1/oauth2/token")) {
+        return jsonResponse({ access_token: "test-access-token", expires_in: 32000 });
+    }
+    requests.push({
+        url,
+        body: init?.body ? JSON.parse(init.body) : null,
+        headers: init?.headers ?? {},
+    });
 
-        if (url.endsWith("/v2/checkout/orders")) {
-            return jsonResponse(createResponse);
-        }
-        if (url.includes("/capture")) {
-            const next = captureResponses.shift();
-            return jsonResponse(next?.body ?? {}, next?.status ?? 200);
-        }
-        if (url.includes("/v2/checkout/orders/")) {
-            return jsonResponse(orderFixture);
-        }
-        return jsonResponse({ name: "UNEXPECTED_CALL" }, 500);
-    },
-);
+    if (url.endsWith("/v2/checkout/orders")) {
+        return jsonResponse(createResponse);
+    }
+    if (url.includes("/capture")) {
+        const next = captureResponses.shift();
+        return jsonResponse(next?.body ?? {}, next?.status ?? 200);
+    }
+    if (url.includes("/v2/checkout/orders/")) {
+        return jsonResponse(orderFixture);
+    }
+    return jsonResponse({ name: "UNEXPECTED_CALL" }, 500);
+});
 
 vi.stubGlobal("fetch", mockFetch);
 
@@ -101,9 +99,9 @@ describe("approvalLinkOf — the payer-action trap", () => {
     });
 
     it("still finds `approve`, the shape without payment_source", () => {
-        expect(
-            approvalLinkOf([{ rel: "approve", href: "https://paypal.com/approve/ORDER-1" }]),
-        ).toBe("https://paypal.com/approve/ORDER-1");
+        expect(approvalLinkOf([{ rel: "approve", href: "https://paypal.com/approve/ORDER-1" }])).toBe(
+            "https://paypal.com/approve/ORDER-1",
+        );
     });
 
     it("prefers payer-action when PayPal sends both", () => {
@@ -183,9 +181,7 @@ describe("createPrepaidOrder", () => {
         expect(body.purchase_units[0].reference_id).toBe("pro-6");
 
         // experience_context, NOT the deprecated application_context.
-        expect(body.payment_source.paypal.experience_context.return_url).toBe(
-            "https://modelhorsehub.com/return",
-        );
+        expect(body.payment_source.paypal.experience_context.return_url).toBe("https://modelhorsehub.com/return");
         expect(body.payment_source.paypal.experience_context.user_action).toBe("PAY_NOW");
         expect(body).not.toHaveProperty("application_context");
 
@@ -218,9 +214,7 @@ describe("captureOrder — taking the money, exactly once", () => {
                     purchase_units: [
                         {
                             payments: {
-                                captures: [
-                                    { id: "CAP-1", status: "COMPLETED", amount: { value: "27.00" } },
-                                ],
+                                captures: [{ id: "CAP-1", status: "COMPLETED", amount: { value: "27.00" } }],
                             },
                         },
                     ],
@@ -237,9 +231,7 @@ describe("captureOrder — taking the money, exactly once", () => {
             {
                 status: 201,
                 body: {
-                    purchase_units: [
-                        { payments: { captures: [{ id: "CAP-1", status: "COMPLETED" }] } },
-                    ],
+                    purchase_units: [{ payments: { captures: [{ id: "CAP-1", status: "COMPLETED" }] } }],
                 },
             },
         ];
@@ -262,9 +254,7 @@ describe("captureOrder — taking the money, exactly once", () => {
         orderFixture = {
             id: "ORDER-1",
             status: "COMPLETED",
-            purchase_units: [
-                { payments: { captures: [{ id: "CAP-EXISTING", status: "COMPLETED" }] } },
-            ],
+            purchase_units: [{ payments: { captures: [{ id: "CAP-EXISTING", status: "COMPLETED" }] } }],
         };
 
         const capture = await captureOrder("ORDER-1");
@@ -331,35 +321,25 @@ describe("custom_id — who bought what", () => {
 // ══════════════════════════════════════════════════════════════
 describe("captureMatchesPrice — the last gate before a grant", () => {
     it("accepts the exact price", () => {
-        expect(
-            captureMatchesPrice({ amount: { value: "27.00", currency_code: "USD" } }, "27.00", "USD"),
-        ).toBe(true);
+        expect(captureMatchesPrice({ amount: { value: "27.00", currency_code: "USD" } }, "27.00", "USD")).toBe(true);
     });
 
     it("accepts a differently formatted but equal amount", () => {
-        expect(
-            captureMatchesPrice({ amount: { value: "27.0", currency_code: "usd" } }, "27.00", "USD"),
-        ).toBe(true);
+        expect(captureMatchesPrice({ amount: { value: "27.0", currency_code: "usd" } }, "27.00", "USD")).toBe(true);
     });
 
     it("REFUSES a short payment", () => {
-        expect(
-            captureMatchesPrice({ amount: { value: "1.00", currency_code: "USD" } }, "27.00", "USD"),
-        ).toBe(false);
+        expect(captureMatchesPrice({ amount: { value: "1.00", currency_code: "USD" } }, "27.00", "USD")).toBe(false);
     });
 
     it("REFUSES a different currency", () => {
-        expect(
-            captureMatchesPrice({ amount: { value: "27.00", currency_code: "CAD" } }, "27.00", "USD"),
-        ).toBe(false);
+        expect(captureMatchesPrice({ amount: { value: "27.00", currency_code: "CAD" } }, "27.00", "USD")).toBe(false);
     });
 
     it("REFUSES an amount it cannot read", () => {
         expect(captureMatchesPrice({}, "27.00", "USD")).toBe(false);
         expect(captureMatchesPrice(null, "27.00", "USD")).toBe(false);
-        expect(
-            captureMatchesPrice({ amount: { value: "lots", currency_code: "USD" } }, "27.00", "USD"),
-        ).toBe(false);
+        expect(captureMatchesPrice({ amount: { value: "lots", currency_code: "USD" } }, "27.00", "USD")).toBe(false);
     });
 });
 

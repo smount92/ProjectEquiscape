@@ -14,7 +14,12 @@ export type AccomplishmentKind = "racing" | "performance" | "breeding" | "award"
 
 export const ACCOMPLISHMENT_KINDS: { value: AccomplishmentKind; label: string; glyph: string; hint: string }[] = [
     { value: "racing", label: "Racing", glyph: "🏇", hint: "A race record — the Express, the FTRA, a track day." },
-    { value: "performance", label: "Performance", glyph: "🎠", hint: "Trail, dressage, a clinic — anything ridden or driven outside a show ring." },
+    {
+        value: "performance",
+        label: "Performance",
+        glyph: "🎠",
+        hint: "Trail, dressage, a clinic — anything ridden or driven outside a show ring.",
+    },
     { value: "breeding", label: "Breeding", glyph: "🐎", hint: "A breeding granted, a foal produced." },
     { value: "award", label: "Award", glyph: "🎖️", hint: "A year-end award, a hall of fame, a special recognition." },
     { value: "other", label: "Other", glyph: "📌", hint: "Anything else worth keeping with the horse." },

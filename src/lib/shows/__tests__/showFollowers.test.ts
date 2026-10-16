@@ -89,10 +89,7 @@ function audienceClient(input: {
     title?: string | null;
 }) {
     return fakeClient({
-        shows:
-            input.title === null
-                ? { data: null }
-                : { data: { id: SHOW_ID, title: input.title ?? "Summerween" } },
+        shows: input.title === null ? { data: null } : { data: { id: SHOW_ID, title: input.title ?? "Summerween" } },
         show_class_entries: input.entriesError
             ? { error: input.entriesError }
             : {
@@ -101,9 +98,7 @@ function audienceClient(input: {
                       status: e.status ?? "entered",
                   })),
               },
-        show_followers: input.followersError
-            ? { error: input.followersError }
-            : { data: input.followers ?? [] },
+        show_followers: input.followersError ? { error: input.followersError } : { data: input.followers ?? [] },
     });
 }
 
@@ -182,10 +177,7 @@ describe("loadShowAudience", () => {
 
     it("excludes SCRATCHED entries from the entrant half", async () => {
         const { client } = audienceClient({
-            entries: [
-                { owner_id: "alice", status: "scratched" },
-                { owner_id: "bob" },
-            ],
+            entries: [{ owner_id: "alice", status: "scratched" }, { owner_id: "bob" }],
             followers: [],
         });
         const audience = await loadShowAudience(client, SHOW_ID);

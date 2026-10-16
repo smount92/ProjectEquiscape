@@ -32,7 +32,7 @@ export default function StudioListingToggle({ listed }: { listed: boolean }) {
     };
 
     return (
-        <div className="bg-card border-input rounded-lg border p-6 shadow-md" data-testid="studio-listing">
+        <div className="rounded-lg border border-input bg-card p-6 shadow-md" data-testid="studio-listing">
             <label className="flex items-start gap-3">
                 <input
                     id="studio-listed"
@@ -44,14 +44,14 @@ export default function StudioListingToggle({ listed }: { listed: boolean }) {
                 />
                 <span>
                     <span className="block text-base font-bold">Listed in the Art Studios directory</span>
-                    <span className="text-secondary-foreground block text-sm">
+                    <span className="block text-sm text-secondary-foreground">
                         {on
                             ? "Your studio is public: on the directory, reachable by its page, linked from the horses you have worked on."
                             : "Your studio is hidden: not on the directory, and only you can open its page. Your work records and commissions are untouched."}
                     </span>
                 </span>
             </label>
-            {error && <p className="text-destructive m-0 mt-2 text-sm">{error}</p>}
+            {error && <p className="m-0 mt-2 text-sm text-destructive">{error}</p>}
         </div>
     );
 }

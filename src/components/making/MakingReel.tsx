@@ -56,9 +56,7 @@ export default function MakingReel({
                         byKey.set(`${m.id}:${i}`, flatImages.length);
                         flatImages.push({
                             url,
-                            label: [stageLabel(stage), m.caption ?? undefined]
-                                .filter(Boolean)
-                                .join(" — "),
+                            label: [stageLabel(stage), m.caption ?? undefined].filter(Boolean).join(" — "),
                         });
                     });
                 }
@@ -82,46 +80,44 @@ export default function MakingReel({
                 const ordered = groupByStage(rec.moments);
 
                 return (
-                    <section key={rec.id} className="border-input bg-card rounded-xl border p-4 md:p-5">
+                    <section key={rec.id} className="rounded-xl border border-input bg-card p-4 md:p-5">
                         {/* Record header — the credit card */}
                         <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-                            <h3 className="text-foreground m-0 font-serif text-lg font-bold">
+                            <h3 className="m-0 font-serif text-lg font-bold text-foreground">
                                 {rec.workType}
                                 {rec.artistAlias && (
-                                    <span className="text-secondary-foreground font-sans text-base font-normal">
-                                        {" "}by {rec.artistAlias}
+                                    <span className="font-sans text-base font-normal text-secondary-foreground">
+                                        {" "}
+                                        by {rec.artistAlias}
                                     </span>
                                 )}
                             </h3>
-                            {span && (
-                                <span className="text-muted-foreground text-sm tabular-nums">{span}</span>
-                            )}
+                            {span && <span className="text-sm text-muted-foreground tabular-nums">{span}</span>}
                         </div>
                         <div className="mt-1 flex flex-wrap items-center gap-2">
                             <span
                                 className={
                                     credit.verified
-                                        ? "text-forest border-forest rounded-full border px-2 py-0.5 text-xs font-semibold"
-                                        : "text-muted-foreground border-input rounded-full border px-2 py-0.5 text-xs font-semibold"
+                                        ? "rounded-full border border-forest px-2 py-0.5 text-xs font-semibold text-forest"
+                                        : "rounded-full border border-input px-2 py-0.5 text-xs font-semibold text-muted-foreground"
                                 }
                             >
-                                {credit.verified ? "✓ " : ""}{credit.label}
+                                {credit.verified ? "✓ " : ""}
+                                {credit.label}
                             </span>
                             {rec.disavowedAt && (
-                                <span className="text-destructive text-xs font-semibold">
+                                <span className="text-xs font-semibold text-destructive">
                                     Disavowed — hidden from credit surfaces
                                 </span>
                             )}
                         </div>
                         {rec.summary && (
-                            <p className="text-secondary-foreground mt-2 mb-0 text-sm whitespace-pre-line">
+                            <p className="mt-2 mb-0 text-sm whitespace-pre-line text-secondary-foreground">
                                 {rec.summary}
                             </p>
                         )}
                         {rec.materialsUsed && (
-                            <p className="text-muted-foreground mt-1 mb-0 text-xs">
-                                Materials: {rec.materialsUsed}
-                            </p>
+                            <p className="mt-1 mb-0 text-xs text-muted-foreground">Materials: {rec.materialsUsed}</p>
                         )}
 
                         {showControls && (rec.viewerIsOwner || rec.viewerIsArtist) && (
@@ -130,16 +126,19 @@ export default function MakingReel({
 
                         {/* The reel */}
                         {ordered.length > 0 && (
-                            <div className="border-border-tan/40 mt-4 border-l-2 pl-4">
+                            <div className="mt-4 border-l-2 border-border-tan/40 pl-4">
                                 {ordered.map(([stage, moments]) => (
                                     <div key={stage} className="mb-4 last:mb-0">
                                         <div className="mb-1.5 flex items-baseline gap-2">
-                                            <span className="bg-card text-forest -ml-[1.45rem] inline-block h-2.5 w-2.5 rounded-full border-2 border-(--brass)" aria-hidden="true" />
-                                            <h4 className="text-foreground m-0 font-serif text-sm font-bold">
+                                            <span
+                                                className="-ml-[1.45rem] inline-block h-2.5 w-2.5 rounded-full border-2 border-(--brass) bg-card text-forest"
+                                                aria-hidden="true"
+                                            />
+                                            <h4 className="m-0 font-serif text-sm font-bold text-foreground">
                                                 {stageLabel(stage)}
                                             </h4>
                                             {moments[0]?.claimedDate && (
-                                                <span className="text-muted-foreground text-xs tabular-nums">
+                                                <span className="text-xs text-muted-foreground tabular-nums">
                                                     {fmtDate(moments[0].claimedDate)}
                                                 </span>
                                             )}
@@ -147,7 +146,10 @@ export default function MakingReel({
                                         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
                                             {moments.map((m) =>
                                                 m.imageUrls.map((url, i) => (
-                                                    <figure key={m.id + i} className="border-input bg-background m-0 overflow-hidden rounded-lg border">
+                                                    <figure
+                                                        key={m.id + i}
+                                                        className="m-0 overflow-hidden rounded-lg border border-input bg-background"
+                                                    >
                                                         <button
                                                             type="button"
                                                             className="block w-full cursor-zoom-in p-0"
@@ -165,7 +167,7 @@ export default function MakingReel({
                                                             />
                                                         </button>
                                                         {i === 0 && m.caption && (
-                                                            <figcaption className="text-muted-foreground px-2 py-1 text-xs leading-snug whitespace-pre-line">
+                                                            <figcaption className="px-2 py-1 text-xs leading-snug whitespace-pre-line text-muted-foreground">
                                                                 {m.caption}
                                                                 {!m.isPublic && " 🔒"}
                                                             </figcaption>

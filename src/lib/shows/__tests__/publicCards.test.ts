@@ -57,9 +57,7 @@ describe("mapPublicCardRows", () => {
     });
 
     it("degrades missing display fields to placeholders, not crashes", () => {
-        const cards = mapPublicCardRows([
-            { code: "AbCd2345", earned_place: 1, status: "issued" },
-        ]);
+        const cards = mapPublicCardRows([{ code: "AbCd2345", earned_place: 1, status: "issued" }]);
         expect(cards).toHaveLength(1);
         expect(cards[0].showYear).toBeNull();
         expect(cards[0].showTitle).toBe("Unknown show");

@@ -11,15 +11,7 @@ import { render, screen } from "@testing-library/react";
 import AlbumCtaRow from "@/components/shows/AlbumCtaRow";
 
 vi.mock("next/link", () => ({
-    default: ({
-        children,
-        href,
-        ...props
-    }: {
-        children: React.ReactNode;
-        href: string;
-        [key: string]: unknown;
-    }) => (
+    default: ({ children, href, ...props }: { children: React.ReactNode; href: string; [key: string]: unknown }) => (
         <a href={href} {...props}>
             {children}
         </a>
@@ -55,10 +47,7 @@ describe("AlbumCtaRow — the entry path", () => {
         renderRow({ authed: false });
         const cta = screen.getByTestId("album-enter-cta");
         expect(cta).toHaveTextContent("Sign in to enter");
-        expect(cta).toHaveAttribute(
-            "href",
-            `/login?redirectTo=${encodeURIComponent("/shows/show-1/enter")}`,
-        );
+        expect(cta).toHaveAttribute("href", `/login?redirectTo=${encodeURIComponent("/shows/show-1/enter")}`);
     });
 
     it("hides the enter CTA once entries close; the pill still jumps to #entries", () => {

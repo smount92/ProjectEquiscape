@@ -72,18 +72,15 @@ export async function getOpenReports() {
     if (!data || data.length === 0) return [];
 
     // Fetch reporter aliases separately
-    const reporterIds = [...new Set((data as { reporter_id: string }[]).map(r => r.reporter_id))];
-    const { data: users } = await admin
-        .from("users")
-        .select("id, alias_name")
-        .in("id", reporterIds);
+    const reporterIds = [...new Set((data as { reporter_id: string }[]).map((r) => r.reporter_id))];
+    const { data: users } = await admin.from("users").select("id, alias_name").in("id", reporterIds);
 
     const aliasMap = new Map<string, string>();
     for (const u of (users || []) as { id: string; alias_name: string }[]) {
         aliasMap.set(u.id, u.alias_name);
     }
 
-    return (data as Record<string, unknown>[]).map(r => ({
+    return (data as Record<string, unknown>[]).map((r) => ({
         id: r.id as string,
         reporterId: r.reporter_id as string,
         reporterAlias: aliasMap.get(r.reporter_id as string) || "Unknown",
@@ -98,10 +95,7 @@ export async function getOpenReports() {
 }
 
 /** Admin: dismiss a report */
-export async function dismissReport(
-    reportId: string,
-    notes?: string
-): Promise<{ success: boolean; error?: string }> {
+export async function dismissReport(reportId: string, notes?: string): Promise<{ success: boolean; error?: string }> {
     const { user } = await requireAdmin(); // was requireAuth — any user could resolve reports
 
     const admin = getAdminClient();
@@ -121,10 +115,7 @@ export async function dismissReport(
 }
 
 /** Admin: action a report (mark as handled) */
-export async function actionReport(
-    reportId: string,
-    notes: string
-): Promise<{ success: boolean; error?: string }> {
+export async function actionReport(reportId: string, notes: string): Promise<{ success: boolean; error?: string }> {
     const { user } = await requireAdmin(); // was requireAuth — any user could action reports
 
     const admin = getAdminClient();

@@ -18,11 +18,7 @@ vi.mock("@/lib/supabase/server", () => ({
     createClient: vi.fn(() => Promise.resolve(mockClient)),
 }));
 
-import {
-    getRingBoard,
-    getRingConsole,
-    recordCallback,
-} from "@/app/actions/shows-v2-ring";
+import { getRingBoard, getRingConsole, recordCallback } from "@/app/actions/shows-v2-ring";
 
 const SHOW_ID = "123e4567-e89b-42d3-a456-426614174000";
 const DIVISION_ID = "523e4567-e89b-42d3-a456-426614174000";
@@ -35,9 +31,8 @@ const ENTRY_3 = "623e4567-e89b-42d3-a456-426614174003"; // 2nd in class 1
 
 /** Queue ONE list-read result (implicit await) in call order. */
 function queueList(data: unknown, error: unknown = null) {
-    mockClient._mockQuery.then.mockImplementationOnce(((
-        resolve: (value: unknown) => unknown,
-    ) => Promise.resolve({ data, error }).then(resolve)) as never);
+    mockClient._mockQuery.then.mockImplementationOnce(((resolve: (value: unknown) => unknown) =>
+        Promise.resolve({ data, error }).then(resolve)) as never);
 }
 
 beforeEach(() => {
@@ -72,9 +67,7 @@ function mockLadderLoads({
     existingCallbackRow = null as Record<string, unknown> | null,
 } = {}) {
     queueList([{ id: DIVISION_ID, name: "OF Plastic Halter", sort_order: 0 }]);
-    queueList([
-        { id: SECTION_ID, name: "Stock", division_id: DIVISION_ID, sort_order: 0 },
-    ]);
+    queueList([{ id: SECTION_ID, name: "Stock", division_id: DIVISION_ID, sort_order: 0 }]);
     queueList([
         {
             id: CLASS_1,

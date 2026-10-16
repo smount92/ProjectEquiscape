@@ -14,15 +14,7 @@ import type { ConsoleClass, ConsoleDivision } from "@/lib/shows/console";
 import type { EntrantHorse, MyShowEntry } from "@/lib/shows/public";
 
 vi.mock("next/link", () => ({
-    default: ({
-        children,
-        href,
-        ...props
-    }: {
-        children: React.ReactNode;
-        href: string;
-        [key: string]: unknown;
-    }) => (
+    default: ({ children, href, ...props }: { children: React.ReactNode; href: string; [key: string]: unknown }) => (
         <a href={href} {...props}>
             {children}
         </a>
@@ -48,8 +40,7 @@ vi.mock("@/lib/supabase/client", () => ({
         from: (table: string) => ({
             select: () => ({
                 eq: () => ({
-                    order: () =>
-                        Promise.resolve({ data: table === "horse_images" ? photoRows : [], error: null }),
+                    order: () => Promise.resolve({ data: table === "horse_images" ? photoRows : [], error: null }),
                 }),
             }),
         }),
@@ -161,8 +152,7 @@ function renderBench(overrides: Partial<React.ComponentProps<typeof EnterShowWor
     );
 }
 
-const cardButton = (horseId: string) =>
-    within(screen.getByTestId(`horse-card-${horseId}`)).getAllByRole("button")[0];
+const cardButton = (horseId: string) => within(screen.getByTestId(`horse-card-${horseId}`)).getAllByRole("button")[0];
 
 beforeEach(() => {
     vi.clearAllMocks();
@@ -181,9 +171,7 @@ describe("EnterShowWorkbench", () => {
         expect(labels.some((l) => /111 · Paint/.test(l ?? ""))).toBe(false);
         expect(within(rail).getAllByRole("button")[0]).toHaveAttribute("aria-current", "true");
         expect(screen.getByRole("heading", { level: 2, name: "110 · Quarter Horse" })).toBeInTheDocument();
-        expect(screen.getByTestId("class-limits")).toHaveTextContent(
-            "Up to 3 of your horses · Traditional (1:9) only",
-        );
+        expect(screen.getByTestId("class-limits")).toHaveTextContent("Up to 3 of your horses · Traditional (1:9) only");
         // Your entry already in the class is a chip, and the rail marks the cap.
         expect(screen.getByText("✓ Already In")).toBeInTheDocument();
         expect(within(rail).getByText("✓ You: 1 of 3")).toBeInTheDocument();
@@ -193,7 +181,11 @@ describe("EnterShowWorkbench", () => {
         renderBench();
         // 110 · Quarter Horse names a breed, so only the Quarter Horse is a clean fit.
         const fits = screen.getByTestId("fits-horses");
-        expect(within(fits).getAllByRole("button", { pressed: false }).map((b) => b.textContent ?? "")[0]).toMatch(/Duns Blazing/);
+        expect(
+            within(fits)
+                .getAllByRole("button", { pressed: false })
+                .map((b) => b.textContent ?? "")[0],
+        ).toMatch(/Duns Blazing/);
         expect(within(fits).getByText("Breed match")).toBeInTheDocument();
 
         const maybe = screen.getByTestId("maybe-horses");

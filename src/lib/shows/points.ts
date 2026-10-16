@@ -81,11 +81,7 @@ export const STANDINGS_SHOW_STATUSES: ShowStatus[] = ["completed", "archived"];
  * place, floor 1 — but a class with < 2 distinct exhibitors pays 0,
  * and participation (place null) pays 0.
  */
-export function placementPoints(
-    place: number | null,
-    classSize: number,
-    distinctExhibitors: number,
-): number {
+export function placementPoints(place: number | null, classSize: number, distinctExhibitors: number): number {
     if (place === null || place < 1) return 0;
     if (distinctExhibitors < MIN_EXHIBITORS_FOR_POINTS) return 0;
     if (classSize < 1) return 0;
@@ -237,9 +233,7 @@ interface PairTally {
 
 /** Sum of a pair's points under the best-N cap (+ bonuses, uncapped). */
 function pairPoints(pair: PairTally): number {
-    const best = [...pair.placementResults]
-        .sort((a, b) => b - a)
-        .slice(0, BEST_RESULTS_CAP);
+    const best = [...pair.placementResults].sort((a, b) => b - a).slice(0, BEST_RESULTS_CAP);
     return best.reduce((sum, p) => sum + p, 0) + pair.championshipBonus;
 }
 

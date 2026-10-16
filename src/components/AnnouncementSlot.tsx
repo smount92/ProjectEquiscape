@@ -21,11 +21,10 @@ import { unstable_cache } from "next/cache";
 import { ANNOUNCEMENTS_CACHE_SECONDS, ANNOUNCEMENTS_CACHE_TAG, getLiveAnnouncements } from "@/lib/announcements";
 import AnnouncementBar from "./AnnouncementBar";
 
-const cachedSiteAnnouncements = unstable_cache(
-    () => getLiveAnnouncements(["site"]),
-    ["announcements-site"],
-    { revalidate: ANNOUNCEMENTS_CACHE_SECONDS, tags: [ANNOUNCEMENTS_CACHE_TAG] },
-);
+const cachedSiteAnnouncements = unstable_cache(() => getLiveAnnouncements(["site"]), ["announcements-site"], {
+    revalidate: ANNOUNCEMENTS_CACHE_SECONDS,
+    tags: [ANNOUNCEMENTS_CACHE_TAG],
+});
 
 export default async function AnnouncementSlot() {
     const announcements = await cachedSiteAnnouncements();
