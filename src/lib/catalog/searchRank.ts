@@ -22,6 +22,8 @@
  * plastic, so nothing is ever hidden by context.
  */
 import { makerMatches } from "./queryParse";
+import { searchKey } from "./searchKey";
+import { yearRangeLabel, type CardAttributes } from "./cardDisplay";
 
 export interface RankableItem {
     title: string;
@@ -45,15 +47,9 @@ function tierOf(queryLower: string, titleLower: string): number {
     return 4;
 }
 
-/** "2018–", "1977–1990" or "2006" from a release's year attributes; null when undated. */
+/** "1977–1990" or "2018" from a release's year attributes; null when undated. The Registry's one label (MHH-077). */
 export function releaseYears(attributes: Record<string, unknown> | null | undefined): string | null {
-    const year = (v: unknown): number | null =>
-        typeof v === "number" ? v : typeof v === "string" && /^\d{4}$/.test(v) ? Number(v) : null;
-    const a = year(attributes?.release_year_start);
-    const b = year(attributes?.release_year_end);
-    if (a == null && b == null) return null;
-    if (a != null && b != null) return a === b ? String(a) : `${a}–${b}`;
-    return a != null ? `${a}–` : `–${b}`;
+    return yearRangeLabel(attributes as CardAttributes | null | undefined);
 }
 
 export function rankSearchResults<T extends RankableItem>(
@@ -63,7 +59,9 @@ export function rankSearchResults<T extends RankableItem>(
     /** The maker the query named ("Peter Stone ISH"); its rows float first, nothing is hidden. */
     makerHint?: string | null,
 ): T[] {
-    const q = query.trim().toLowerCase();
+    // Punctuation never decides a tier: typing Horspital Play Set is an
+    // exact match for the title “Horspital” Play Set (MHH-080).
+    const q = searchKey(query);
     const affinity = finishType ? FINISH_AFFINITY[finishType] : undefined;
     // Decorate with the original index so the sort stays stable on the
     // RPC's similarity order wherever the tiers tie.
@@ -71,7 +69,7 @@ export function rankSearchResults<T extends RankableItem>(
         .map((item, i) => ({
             item,
             maker: makerHint && makerMatches(item.maker, makerHint) ? 0 : 1,
-            tier: tierOf(q, item.title.trim().toLowerCase()),
+            tier: tierOf(q, searchKey(item.title)),
             fits: affinity?.has(item.itemType) ? 0 : 1,
             i,
         }))

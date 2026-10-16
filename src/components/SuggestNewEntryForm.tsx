@@ -4,7 +4,8 @@ import { useEffect, useRef, useState, useTransition, type KeyboardEvent } from "
 import { useRouter } from "next/navigation";
 import { createSuggestion } from "@/app/actions/catalog-suggestions";
 import { pickMold, type MoldChoice } from "@/app/actions/linker";
-import { splitNumberFromTitle } from "@/lib/linker/model";
+import { releaseYearFields } from "@/lib/linker/model";
+import { reconcileTitleNumber, titleNumberProblem } from "@/lib/catalog/titleNumber";
 import { ARTIST_ATTRIBUTED_CATEGORIES, CANONICAL_SCALES, KNOWN_MANUFACTURERS, RUN_TYPES } from "@/lib/catalog/taxonomy";
 import { MATERIAL_OPTIONS } from "@/lib/catalog/editableFields";
 import { GENDER_GROUPS } from "@/lib/config/genders";
@@ -78,6 +79,8 @@ export default function SuggestNewEntryForm({
     const [color, setColor] = useState("");
     const [material, setMaterial] = useState("");
     const [year, setYear] = useState("");
+    // The last year a release was made, when it ended (MHH-077).
+    const [yearEnd, setYearEnd] = useState("");
     const [retailPrice, setRetailPrice] = useState("");
     // Tier 1 (2026-08-23). Run type/count describe a FACTORY release, so
     // they are only collected for factory categories (see the payload).
@@ -157,13 +160,32 @@ export default function SuggestNewEntryForm({
         { id: string; title: string; maker: string | null; item_type: string }[] | null
     >(null);
 
-    const handleSubmit = (confirmDuplicates = false) => {
-        if (!title.trim()) {
+    // A title that starts with a different number from the Model number box:
+    // the member says which is right before anything is sent (MHH-079).
+    const [numberConflict, setNumberConflict] = useState<{ inTitle: string; inBox: string; title: string } | null>(
+        null,
+    );
+
+    const handleSubmit = (confirmDuplicates = false, chosen?: { title: string; model: string }) => {
+        const titleNow = chosen?.title ?? title;
+        const modelNow = chosen?.model ?? modelNumber;
+        if (!titleNow.trim()) {
             setError("Title is required.");
             return;
         }
         if (!reason.trim() || reason.trim().length < 10) {
             setError("Please provide a reason (at least 10 characters).");
+            return;
+        }
+
+        // First and last year as one range, checked the way every year box is (MHH-077).
+        if (yearEnd.trim() && !year.trim()) {
+            setError("Add the first year too, or leave the last year empty.");
+            return;
+        }
+        const years = releaseYearFields(yearEnd.trim() ? `${year.trim()}-${yearEnd.trim()}` : year);
+        if (!years.ok) {
+            setError(years.error);
             return;
         }
 
@@ -173,10 +195,20 @@ export default function SuggestNewEntryForm({
         const isMold = itemType === "plastic_mold";
         const effectiveMaker = isArtistPiece ? artistName.trim() : maker === "Other" ? customMaker.trim() : maker;
 
-        // A number typed at the front of the title moves to its own field.
-        const typed = splitNumberFromTitle(title);
-        const finalTitle = typed.model && !modelNumber.trim() ? typed.title : title.trim();
-        const finalModel = (modelNumber.trim() || typed.model || "").replace(/^#/, "");
+        // A number typed at the front of the title: off the title when the box
+        // holds it, into the box when it is empty, a question when they differ.
+        // Molds and artist pieces have no number field, so their titles stay as typed.
+        const hasNumberField = !isArtistPiece && !isMold;
+        const numbered = hasNumberField
+            ? reconcileTitleNumber(titleNow, modelNow)
+            : ({ ok: true, title: titleNow.trim(), model: "" } as const);
+        if (!numbered.ok) {
+            setNumberConflict({ inTitle: numbered.inTitle, inBox: numbered.inBox, title: numbered.title });
+            return;
+        }
+        setNumberConflict(null);
+        const finalTitle = numbered.title;
+        const finalModel = numbered.model;
 
         startTransition(async () => {
             setError(null);
@@ -193,7 +225,8 @@ export default function SuggestNewEntryForm({
                     scale: scale || undefined,
                     color: color || undefined,
                     material: material || undefined,
-                    year: year ? parseInt(year, 10) : undefined,
+                    year: years.fields.year,
+                    year_end: years.fields.year_end,
                     retail_price: /^\d{1,5}([.]\d{1,2})?$/.test(retailPrice.trim()) ? retailPrice.trim() : undefined,
                     // Run fields are factory-only — an artist piece has no "run".
                     run_type: isArtistPiece ? undefined : runType || undefined,
@@ -279,9 +312,7 @@ export default function SuggestNewEntryForm({
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder={
-                        itemType === "plastic_mold"
-                            ? "e.g. Family Arabian Stallion"
-                            : "e.g. Breyer #712 — Misty of Chincoteague"
+                        itemType === "plastic_mold" ? "e.g. Family Arabian Stallion" : "e.g. Misty of Chincoteague"
                     }
                     maxLength={200}
                 />
@@ -580,7 +611,7 @@ export default function SuggestNewEntryForm({
                 )}
                 <div className="mb-6">
                     <label className="mb-1 block text-sm font-semibold text-foreground" htmlFor="new-entry-year">
-                        Year
+                        First year
                     </label>
                     <Input
                         id="new-entry-year"
@@ -588,9 +619,26 @@ export default function SuggestNewEntryForm({
                         value={year}
                         onChange={(e) => setYear(e.target.value)}
                         placeholder="e.g. 1995"
-                        min={1950}
-                        max={2030}
+                        min={1900}
+                        max={2100}
                     />
+                </div>
+                <div className="mb-6">
+                    <label className="mb-1 block text-sm font-semibold text-foreground" htmlFor="new-entry-year-end">
+                        Last year <span className="font-normal text-muted-foreground">(if it ended)</span>
+                    </label>
+                    <Input
+                        id="new-entry-year-end"
+                        type="number"
+                        value={yearEnd}
+                        onChange={(e) => setYearEnd(e.target.value)}
+                        placeholder="e.g. 1997"
+                        min={1900}
+                        max={2100}
+                    />
+                    <p className="m-0 mt-1 text-xs text-muted-foreground">
+                        Leave it empty for a release still made, or made for one year only.
+                    </p>
                 </div>
                 <div className="mb-6">
                     <label className="mb-1 block text-sm font-semibold text-foreground" htmlFor="new-entry-retail">
@@ -697,6 +745,39 @@ export default function SuggestNewEntryForm({
                 <p className="mt-2 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm text-destructive">
                     {error}
                 </p>
+            )}
+
+            {numberConflict && (
+                <div
+                    className="mb-4 rounded-lg border border-input bg-muted/50 p-4"
+                    role="alert"
+                    data-testid="new-entry-number-conflict"
+                >
+                    <p className="m-0 mb-1 text-sm font-semibold">
+                        {titleNumberProblem(numberConflict.inTitle, numberConflict.inBox)}
+                    </p>
+                    <p className="m-0 mb-3 text-xs text-muted-foreground">
+                        The number goes in its own box; the name keeps just “{numberConflict.title}”.
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                        {[numberConflict.inTitle, numberConflict.inBox].map((n) => (
+                            <Button
+                                key={n}
+                                variant="outline"
+                                size="sm"
+                                disabled={isPending}
+                                onClick={() => {
+                                    const chosen = { title: numberConflict.title, model: n };
+                                    setTitle(chosen.title);
+                                    setModelNumber(chosen.model);
+                                    handleSubmit(duplicates !== null, chosen);
+                                }}
+                            >
+                                It&apos;s #{n}
+                            </Button>
+                        ))}
+                    </div>
+                </div>
             )}
 
             {/* Actions */}

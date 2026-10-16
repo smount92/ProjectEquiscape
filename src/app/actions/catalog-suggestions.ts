@@ -3,14 +3,8 @@
 import { requireAuth } from "@/lib/auth";
 import { stripGeneration } from "@/lib/linker/model";
 import { fieldLabel } from "@/lib/catalog/editableFields";
-import {
-    namedMolds,
-    placeReleasesUnderMolds,
-    searchName,
-    termImpliesStablemate,
-    type CandidateRow,
-} from "@/lib/catalog/moldSearch";
-import { parseCatalogQuery } from "@/lib/catalog/queryParse";
+import { readRegistryTerm, searchRegistry } from "@/lib/catalog/registrySearch";
+import { applyTitleNumberRule } from "@/lib/catalog/titleNumber";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/logger";
 import { createClient } from "@/lib/supabase/server";
@@ -20,6 +14,7 @@ import { sanitizeText } from "@/lib/utils/validation";
 import { sanitizeForOr } from "@/lib/utils/search";
 import {
     BRONZE_THRESHOLD,
+    additionYears,
     CATALOG_REAL_COLUMNS,
     CONTRIBUTOR_THRESHOLD,
     GOLD_THRESHOLD,
@@ -40,6 +35,7 @@ import {
     normalizeScale,
     resolveNewEntryMaker,
     suggestionItemTypeToDb,
+    ARTIST_ATTRIBUTED_CATEGORIES,
 } from "@/lib/catalog/taxonomy";
 import { REFERENCE_PAGES_CACHE_TAG } from "@/app/actions/reference-pages";
 import {
@@ -191,57 +187,27 @@ export async function getCatalogItems(filters: CatalogFilters) {
     // "Breyer Adios" / "Stone ISH": a leading maker becomes the maker
     // facet (unless one is already chosen) and the initials are spelled
     // out, so the text search runs on the name alone.
-    const parsedSearch = filters.search ? parseCatalogQuery(filters.search) : null;
-    const parsedTerm = parsedSearch && parsedSearch.term.length >= 2 ? parsedSearch.term : filters.search;
     // "G1 Arabian Stallion" / "SM Arabian Stallion" search for the mold's
-    // own name, so the exact-name tier of the RPC can find it (lib/catalog/moldSearch).
-    const searchTerm = parsedTerm ? searchName(parsedTerm) || parsedTerm : parsedTerm;
-    const makerFacet = filters.maker ?? parsedSearch?.maker ?? undefined;
+    // own name; a named mold brings its releases; sets that only list the
+    // name come last. All of that is the shared Registry search
+    // (lib/catalog/registrySearch), which the duplicate picker, the old
+    // picker and the wishlist search use too (MHH-076).
+    const read = filters.search?.trim() ? readRegistryTerm(filters.search) : null;
+    const searchTerm = read?.term || undefined;
+    const makerFacet = filters.maker ?? read?.maker ?? undefined;
 
     let searchIds: string[] | null = null;
-    if (searchTerm) {
-        const { data: fuzzyRows, error: fuzzyError } = await supabase.rpc("search_catalog_fuzzy", {
-            search_term: searchTerm,
-            max_results: FUZZY_CANDIDATE_LIMIT,
+    let rosterIds = new Set<string>();
+    if (searchTerm && filters.search) {
+        const found = await searchRegistry(supabase, filters.search, {
+            scale: filters.scale,
+            candidates: FUZZY_CANDIDATE_LIMIT,
         });
-        if (!fuzzyError && Array.isArray(fuzzyRows)) {
-            const rows = fuzzyRows as CandidateRow[];
-            searchIds = rows.map((r) => r.id);
+        if (found) {
+            searchIds = found.rows.map((r) => r.id);
+            rosterIds = found.rosterIds;
             if (searchIds.length === 0) {
                 return { success: true as const, items: [], total: 0, page, pageSize };
-            }
-            // A search that names a mold shows the releases filed under it,
-            // whatever those releases are called (2026-10-14: a member's 16
-            // Stablemate Arabian Stallion releases were filed under the mold
-            // and 11 never surfaced, because search reads titles).
-            const named = namedMolds(rows, searchTerm);
-            if (named.length > 0) {
-                const { data: kids } = await supabase
-                    .from("catalog_items")
-                    .select("id, parent_id, title, attributes")
-                    .in(
-                        "parent_id",
-                        named.map((m) => m.id),
-                    )
-                    .eq("item_type", "plastic_release")
-                    .limit(1000);
-                const byMold = new Map<string, string[]>(named.map((m) => [m.id, []]));
-                const sorted = (
-                    (kids ?? []) as {
-                        id: string;
-                        parent_id: string;
-                        title: string;
-                        attributes: Record<string, unknown> | null;
-                    }[]
-                ).sort(
-                    (a, b) =>
-                        Number(a.attributes?.release_year_start ?? 9999) -
-                            Number(b.attributes?.release_year_start ?? 9999) || a.title.localeCompare(b.title),
-                );
-                for (const k of sorted) byMold.get(k.parent_id)?.push(k.id);
-                searchIds = placeReleasesUnderMolds(rows, byMold, {
-                    preferStablemate: !!parsedTerm && termImpliesStablemate(parsedTerm) && !filters.scale,
-                });
             }
         }
         // RPC unavailable (fresh env, migration pending)? searchIds stays
@@ -398,12 +364,16 @@ export async function getCatalogItems(filters: CatalogFilters) {
         const ordered = [...((data ?? []) as unknown as { id: string }[])].sort(
             (a, b) => (rank.get(a.id) ?? Number.MAX_SAFE_INTEGER) - (rank.get(b.id) ?? Number.MAX_SAFE_INTEGER),
         );
+        // Where the sets that only list the name begin, as an index into the
+        // whole ordered result; the page draws a "Sets that include it" heading there.
+        const rosterFrom = rosterIds.size ? ordered.findIndex((r) => rosterIds.has(r.id)) : -1;
         return {
             success: true as const,
             items: ordered.slice(from, from + pageSize) as unknown as typeof data,
             total: ordered.length,
             page,
             pageSize,
+            ...(rosterFrom >= 0 ? { rosterFrom } : {}),
         };
     }
     return {
@@ -438,6 +408,38 @@ export async function createSuggestion(input: SuggestionInput) {
 
     // Check for trusted curator auto-approve
     const admin = getAdminClient();
+
+    // A model number typed in front of a title moves to its own field, or must
+    // agree with it (STANDARDS: titles hold the name only). The forms ask the
+    // member first; this is the guard for every path that sets a title (MHH-079).
+    if (
+        (input.suggestionType === "addition" || input.suggestionType === "correction") &&
+        input.fieldChanges &&
+        "title" in input.fieldChanges
+    ) {
+        let entry: { hasModelNumber: boolean; currentModel?: string | null };
+        if (input.suggestionType === "addition") {
+            const type = suggestionItemTypeToDb(input.fieldChanges.item_type as string | undefined);
+            entry = { hasModelNumber: !!type && type !== "plastic_mold" && !ARTIST_ATTRIBUTED_CATEGORIES.has(type) };
+        } else {
+            const { data: row } = input.catalogItemId
+                ? await admin
+                      .from("catalog_items")
+                      .select("item_type, attributes")
+                      .eq("id", input.catalogItemId)
+                      .maybeSingle()
+                : { data: null };
+            const r = row as { item_type: string; attributes: Record<string, unknown> | null } | null;
+            const current = r?.attributes?.model_number;
+            entry = {
+                hasModelNumber: !!r && r.item_type !== "plastic_mold" && !ARTIST_ATTRIBUTED_CATEGORIES.has(r.item_type),
+                currentModel: typeof current === "string" ? current : current == null ? null : String(current),
+            };
+        }
+        const numbered = applyTitleNumberRule(input.fieldChanges, entry);
+        if (!numbered.ok) return { success: false, error: numbered.error };
+        input.fieldChanges = numbered.fieldChanges;
+    }
 
     // ── Duplicate guard (additions only): before creating a new-entry
     // suggestion, look for existing catalog items with a matching
@@ -1219,7 +1221,8 @@ async function applyApprovedSuggestion(
             ...(parentId ? { parent_id: parentId.id } : {}),
             attributes: JSON.parse(
                 JSON.stringify({
-                    ...(fc.year ? { release_year_start: normalizeFactValue("release_year_start", fc.year) } : {}),
+                    // First and last year; "Last year (if it ended)" was never stored (MHH-077).
+                    ...(fc.year ? additionYears(fc.year, fc.year_end) : {}),
                     ...(fc.color ? { color_description: normalizeFactValue("color_description", fc.color) } : {}),
                     ...(fc.model_number ? { model_number: fc.model_number } : {}),
                     ...(canonicalVocabulary("material", fc.material)

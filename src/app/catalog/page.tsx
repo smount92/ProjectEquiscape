@@ -9,6 +9,7 @@ import CatalogFilterBar from "@/components/catalog/CatalogFilterBar";
 import CatalogResultsTable from "@/components/catalog/CatalogResultsTable";
 import CatalogCardsList from "@/components/catalog/CatalogCardsList";
 import CatalogViewToggle from "@/components/catalog/CatalogViewToggle";
+import SetsHeadingSplit from "@/components/catalog/SetsHeadingSplit";
 
 import {
     pickQuickChips,
@@ -103,6 +104,13 @@ export default async function ReferencePage({
 
     const items = (result.success ? result.items : []) as unknown as CatalogItemRow[];
     const total = result.success ? result.total : 0;
+    // Sets that only list the searched name come last, under their own
+    // heading (MHH-075). The index is into the whole result; on this page
+    // the heading sits at `setsAt` (0 when the page is all sets), or nowhere.
+    const rosterFrom = result.success && "rosterFrom" in result ? (result.rosterFrom ?? -1) : -1;
+    const pageStart = (filters.page - 1) * PAGE_SIZE;
+    const setsAt = rosterFrom < 0 ? -1 : Math.max(0, rosterFrom - pageStart);
+    const splitAt = setsAt < items.length ? setsAt : -1;
     const facets = (facetRes.data ?? {}) as {
         makers?: string[];
         scales?: string[];
@@ -322,16 +330,30 @@ export default async function ReferencePage({
                            renderer, unforked. */
                         <CatalogViewToggle
                             cards={
-                                <CatalogCardsList
+                                <SetsHeadingSplit
                                     items={items}
-                                    statsMap={statsMap}
-                                    thumbs={thumbsMap}
-                                    releaseCounts={releaseCounts}
-                                    ebayMedians={ebayMap}
-                                    parentTitles={parentTitles}
+                                    splitAt={splitAt}
+                                    term={filters.q}
+                                    render={(list) => (
+                                        <CatalogCardsList
+                                            items={list}
+                                            statsMap={statsMap}
+                                            thumbs={thumbsMap}
+                                            releaseCounts={releaseCounts}
+                                            ebayMedians={ebayMap}
+                                            parentTitles={parentTitles}
+                                        />
+                                    )}
                                 />
                             }
-                            table={<CatalogResultsTable items={items} statsMap={statsMap} />}
+                            table={
+                                <SetsHeadingSplit
+                                    items={items}
+                                    splitAt={splitAt}
+                                    term={filters.q}
+                                    render={(list) => <CatalogResultsTable items={list} statsMap={statsMap} />}
+                                />
+                            }
                         />
                     )}
 

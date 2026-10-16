@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import WantButton from "@/components/reference/WantButton";
 import ReferencePhotoGallery from "@/components/reference/ReferencePhotoGallery";
 import { referenceHref } from "@/lib/catalog/referenceUrl";
+import { yearRangeLabel } from "@/lib/catalog/cardDisplay";
 import { missingFieldLabels } from "@/lib/catalog/editableFields";
 import { createAnonClient } from "@/lib/supabase/anon";
 import {
@@ -134,7 +135,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     if (!item) return forwardOrNotFound(maker, slug);
 
     const attrs = item.attributes ?? {};
-    const year = attrs.release_year_start ? ` (${attrs.release_year_start})` : "";
+    const yearsText = yearRangeLabel(attrs);
+    const year = yearsText ? ` (${yearsText})` : "";
     const title = `${catalogDisplayName(item.maker, item.title)} — value & collector info`;
     const description = `${item.title}${year} by ${item.maker}${item.scale ? `, ${item.scale}` : ""}. See specs, photos, current listings, and Blue Book value on Model Horse Hub — the community model-horse catalog.`;
     const canonical = `${APP_URL}/reference/${item.maker_slug}/${item.slug}`;
@@ -327,6 +329,8 @@ export default async function ReferencePage({ params }: Props) {
     };
 
     const attrs = item.attributes ?? {};
+    // "1995–1997", or "1998" for a release with only a first year (MHH-077).
+    const yearsText = yearRangeLabel(attrs);
     const missingLabels = missingFieldLabels(item);
     const chip = (label: string, value: unknown, glossary?: { anchor: string; term: string }) =>
         value != null && value !== "" ? (
@@ -497,7 +501,7 @@ export default async function ReferencePage({ params }: Props) {
                             </p>
                         )}
                         <div className="flex flex-wrap gap-2">
-                            {chip("Year", attrs.release_year_start)}
+                            {chip(yearsText?.includes("–") ? "Years" : "Year", yearsText)}
                             {chip("Finish", attrs.finish, finishGlossary(attrs.finish))}
                             {chip("Material", attrs.material)}
                             {chip("Run", attrs.run_count)}

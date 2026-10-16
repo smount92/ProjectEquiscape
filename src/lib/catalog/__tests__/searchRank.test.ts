@@ -4,6 +4,14 @@ import { applyTypeFilter, rankSearchResults, releaseYears } from "@/lib/catalog/
 const item = (title: string, itemType: string) => ({ title, itemType });
 
 describe("rankSearchResults", () => {
+    it("ranks an exact title exact however it is punctuated (MHH-080)", () => {
+        const results = [
+            { title: "Horspital Play Set With Lying Foal", itemType: "plastic_release" },
+            { title: '"Horspital" Play Set', itemType: "plastic_release" },
+        ];
+        expect(rankSearchResults(results, "Horspital Play Set")[0].title).toBe('"Horspital" Play Set');
+    });
+
     // Amanda's actual report, 2026-08-27: searching "Rising Hopes"
     // put the exact-match resin second to last, below every fuzzy
     // Breyer release, because the old UI sectioned resins last.
@@ -87,7 +95,7 @@ describe("typing, not typos (223)", () => {
     });
 
     it("formats a release's years", () => {
-        expect(releaseYears({ release_year_start: 2018 })).toBe("2018–");
+        expect(releaseYears({ release_year_start: 2018 })).toBe("2018");
         expect(releaseYears({ release_year_start: 1977, release_year_end: 1990 })).toBe("1977–1990");
         expect(releaseYears({ release_year_start: "2006", release_year_end: 2006 })).toBe("2006");
         expect(releaseYears({})).toBeNull();

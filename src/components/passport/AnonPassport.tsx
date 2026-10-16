@@ -37,6 +37,7 @@ import type { AssetCategory } from "@/lib/types/database";
 import { getPublicFavoriteCount } from "@/lib/favorites/publicCount";
 import HoofprintTimeline from "@/components/HoofprintTimeline";
 import { getPublicHoofprint } from "@/lib/hoofprint/publicHoofprint";
+import { yearRangeLabel } from "@/lib/catalog/cardDisplay";
 
 // Read-only public passport for logged-OUT visitors (FUNNEL-4). The full
 // interactive passport (favorite/comment/message/hoofprint) stays in
@@ -441,10 +442,10 @@ export default async function AnonPassport({
                                 {releaseInfo.color && <DetailRow label="Color">{releaseInfo.color}</DetailRow>}
                                 {releaseInfo.yearStart && (
                                     <DetailRow label="Release Years">
-                                        {releaseInfo.yearStart}
-                                        {releaseInfo.yearEnd && releaseInfo.yearEnd !== releaseInfo.yearStart
-                                            ? `–${releaseInfo.yearEnd}`
-                                            : ""}
+                                        {yearRangeLabel({
+                                            release_year_start: releaseInfo.yearStart,
+                                            release_year_end: releaseInfo.yearEnd,
+                                        })}
                                     </DetailRow>
                                 )}
                             </>

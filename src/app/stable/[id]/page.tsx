@@ -47,6 +47,7 @@ import { resinIdentityFrom, resinMakeupLine } from "@/lib/passport/resinIdentity
 import { colorText, readPendingColumns } from "@/lib/passport/pendingColumns";
 import { getSetPurchase } from "@/app/actions/set-purchase";
 import { selectWithPurchaseNotes } from "@/lib/vault/purchaseNotes";
+import { yearRangeLabel } from "@/lib/catalog/cardDisplay";
 
 // Types
 interface VaultData {
@@ -647,10 +648,10 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
                                             Release Years
                                         </span>
                                         <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
-                                            {releaseInfo.yearStart}
-                                            {releaseInfo.yearEnd && releaseInfo.yearEnd !== releaseInfo.yearStart
-                                                ? `–${releaseInfo.yearEnd}`
-                                                : ""}
+                                            {yearRangeLabel({
+                                                release_year_start: releaseInfo.yearStart,
+                                                release_year_end: releaseInfo.yearEnd,
+                                            })}
                                         </span>
                                     </div>
                                 )}

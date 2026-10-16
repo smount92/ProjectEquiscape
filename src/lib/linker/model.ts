@@ -14,6 +14,10 @@
  * molds apart the model says so (`ambiguous`) instead of pretending.
  */
 
+import { sameWords } from "@/lib/catalog/searchKey";
+import { yearRangeLabel } from "@/lib/catalog/cardDisplay";
+import { parseYearRange } from "@/lib/catalog/corrections";
+
 export const LINKER_PREF_KEY = "mhh:linker";
 export type LinkerPref = "new" | "old";
 
@@ -172,28 +176,57 @@ export function setLabel(title: string): string | null {
     return null;
 }
 
-/** Does this release's title say it came with a piece on `moldTitle`? */
-export function mentionsMold(title: string, moldTitle: string): boolean {
+/**
+ * The pieces a set title lists after "With": "12-Piece Set With Arabian
+ * Mare, American Saddlebred (2) & Swaps." → ["Arabian Mare", "American
+ * Saddlebred", "Swaps"]. Split on commas, "&", "and" and a further "with";
+ * a count or note in brackets and trailing punctuation are dropped. Only a
+ * capitalised piece is a horse: a lowercase one is an accessory ("foal
+ * blanket", "unicorn halter") or a note ("replaced by …"), MHH-068.
+ */
+export function rosterPieces(title: string): string[] {
     const i = title.search(/\bwith\b/i);
-    if (i < 0) return false;
-    const tail = title.slice(i);
-    const esc = moldTitle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    // eslint-disable-next-line security/detect-non-literal-regexp -- the title is escaped above
-    const re = new RegExp("(^|[\\s,])(" + esc + ")(?=$|[\\s,.;])", "gi");
-    // A roster names a mold the way a title does, capitalised ("With Rojo");
-    // a lowercase word is an accessory, not a mold ("foal blanket" is not
-    // the Foal mold, "unicorn halter" not the Unicorn), MHH-068.
-    for (const m of tail.matchAll(re)) {
-        if (/^[\p{Lu}\d]/u.test(m[2])) return true;
-    }
-    return false;
+    if (i < 0) return [];
+    return title
+        .slice(i)
+        .replace(/^with\b/i, "")
+        .split(/,|&|\band\b|\bwith\b|;/i)
+        .map((p) =>
+            p
+                .replace(/\([^)]*\)/g, " ")
+                .replace(/^[\s"'“”‘’]+|[\s.,;:!"'“”‘’]+$/g, "")
+                .replace(/\s+/g, " "),
+        )
+        .filter((p) => /^[\p{Lu}\d]/u.test(p));
 }
 
+/**
+ * Does this release's title say it came with a piece on `moldTitle`? A
+ * piece counts only when it IS the mold's name, whole (same words, any
+ * order, punctuation aside): "American Saddlebred" is not the Saddlebred
+ * mold. Matching the name as a word inside a piece put 37 false set lines
+ * on the Stablemate Saddlebred mold (MHH-074).
+ */
+export function mentionsMold(title: string, moldTitle: string): boolean {
+    const mold = stripGeneration(moldTitle);
+    return rosterPieces(title).some((piece) => sameWords(stripGeneration(piece), mold));
+}
+
+/**
+ * Words a title must contain to be worth testing with `mentionsMold`, for
+ * the database read that fetches candidate set rows ("with" is added by
+ * the caller). Order-free, so "Morgan - Prancing" is fetched for Prancing
+ * Morgan. One-letter words ("O" in Man O' War) are left out.
+ */
+export function rosterPrefilterWords(moldTitle: string): string[] {
+    return stripGeneration(moldTitle)
+        .split(/[^\p{L}\p{N}]+/u)
+        .filter((w) => w.length >= 2);
+}
+
+/** The Registry's one year label (cardDisplay.yearRangeLabel): "1995–1997", or "1998" for a start alone. */
 export function yearsLabel(r: Pick<LinkerRelease, "from" | "to">): string | null {
-    if (r.from && r.to) return r.from === r.to ? String(r.from) : `${r.from}–${r.to}`;
-    if (r.from) return `${r.from}–`;
-    if (r.to) return `–${r.to}`;
-    return null;
+    return yearRangeLabel({ release_year_start: r.from, release_year_end: r.to });
 }
 
 export type MissingFact = "colour" | "year" | "model number";
@@ -317,13 +350,44 @@ export function linkedLabel(
  * strings and read "undefined → undefined" on the admin queue.
  */
 export function factCorrection(
-    field: "color_description" | "release_year_start" | "model_number",
+    field: "color_description" | "release_year_start" | "release_year_end" | "model_number",
     current: unknown,
     value: string,
 ): Record<string, { from: string; to: string }> {
     const to = field === "model_number" ? value.trim().replace(/^#/, "") : value.trim();
     const from = current === null || current === undefined ? "" : String(current);
     return { [field]: { from, to } };
+}
+
+/**
+ * "Fill in what you know" for the year (MHH-077): "1976" files the first
+ * year; "1995-1997" (or 1995–97, 1995 to 1997) files the first and the last.
+ */
+export function yearFactChanges(
+    raw: string,
+    current: { release_year_start?: unknown; release_year_end?: unknown },
+): { ok: true; changes: Record<string, { from: string; to: string }> } | { ok: false; error: string } {
+    const range = parseYearRange(raw);
+    if (!range.ok) return range;
+    return {
+        ok: true,
+        changes: {
+            ...factCorrection("release_year_start", current.release_year_start, String(range.start)),
+            ...(range.end !== null
+                ? factCorrection("release_year_end", current.release_year_end, String(range.end))
+                : {}),
+        },
+    };
+}
+
+/** "Add my release": the typed years as the suggestion's `year` and `year_end`; empty is fine. */
+export function releaseYearFields(
+    raw: string | null | undefined,
+): { ok: true; fields: { year?: number; year_end?: number } } | { ok: false; error: string } {
+    if (!raw?.trim()) return { ok: true, fields: {} };
+    const range = parseYearRange(raw);
+    if (!range.ok) return range;
+    return { ok: true, fields: { year: range.start, ...(range.end !== null ? { year_end: range.end } : {}) } };
 }
 
 /** Strip a leading "#5022 " from a typed title so the number goes in its own field. */

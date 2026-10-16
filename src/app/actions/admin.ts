@@ -1443,6 +1443,13 @@ const PENDING_MIGRATIONS: MigrationSpec[] = [
         probe: { kind: "column", table: "financial_vault", column: "purchase_notes" },
     },
     {
+        id: "240",
+        title: "Search reads past punctuation",
+        summary:
+            "catalog_items.search_key (generated, trigram-indexed); search_catalog_fuzzy also matches every typed word in it, so quotes, hyphens, curly apostrophes and word order stop hiding titles.",
+        probe: { kind: "column", table: "catalog_items", column: "search_key" },
+    },
+    {
         id: "239",
         title: "Hotfix: horses and posts load their member again",
         summary:

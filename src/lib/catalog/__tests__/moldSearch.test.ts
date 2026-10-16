@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { namedMolds, placeReleasesUnderMolds, searchName, termImpliesStablemate } from "@/lib/catalog/moldSearch";
+import {
+    matchKind,
+    namedMolds,
+    placeReleasesUnderMolds,
+    rosterLast,
+    searchName,
+    termImpliesStablemate,
+} from "@/lib/catalog/moldSearch";
 
 describe("moldSearch", () => {
     it("reads the mold name out of what a collector types", () => {
@@ -22,6 +29,10 @@ describe("moldSearch", () => {
         ];
         expect(namedMolds(rows, "Arabian Stallion").map((r) => r.id)).toEqual(["pp", "sm"]);
         expect(namedMolds(rows, "")).toEqual([]);
+        // However it is punctuated or ordered (MHH-080).
+        const morgan = [{ id: "pm", item_type: "plastic_mold", title: "Prancing Morgan", scale: "Stablemate (1:32)" }];
+        expect(namedMolds(morgan, "Morgan - Prancing").map((r) => r.id)).toEqual(["pm"]);
+        expect(namedMolds(rows, "arabian-stallion").map((r) => r.id)).toEqual(["pp", "sm"]);
     });
 
     it("places each named mold's releases right under it, moves loose ones up, and keeps the rest in order", () => {
@@ -55,5 +66,54 @@ describe("moldSearch", () => {
             "proud",
         ]);
         expect(placeReleasesUnderMolds(candidates, kids, { limit: 3 })).toEqual(["schleich", "pp", "sm"]);
+    });
+
+    it("tells a row's own match from a match only inside a set's roster (MHH-075)", () => {
+        // Live rows for "Arabian Stallion", 2026-10-16.
+        expect(matchKind({ title: "Arabian Stallion", parent_title: null }, "Arabian Stallion")).toBe("own");
+        expect(matchKind({ title: "Sultan", parent_title: "Arabian Stallion" }, "Arabian Stallion")).toBe("own");
+        expect(
+            matchKind(
+                {
+                    title: "12-Piece Stablemates Set With Arabian Stallion, Citation, Draft Horse",
+                    parent_title: "Arabian Stallion",
+                },
+                "Arabian Stallion",
+            ),
+        ).toBe("own");
+        expect(
+            matchKind(
+                {
+                    title: "Stablemates Assortment With Arabian Mare, Arabian Stallion, Citation",
+                    parent_title: "Citation",
+                },
+                "Arabian Stallion",
+            ),
+        ).toBe("roster");
+        expect(matchKind({ title: "Proud Arabian Mare", parent_title: null }, "Arabian Stallion")).toBe("other");
+        expect(matchKind({ title: "Stallion", parent_title: "Morgan Stallion (G1)" }, "Morgan Stallion")).toBe("own");
+    });
+
+    it("moves roster-only rows after everything else and keeps each band's order", () => {
+        const rows = [
+            {
+                id: "set1",
+                title: "Stablemates Assortment With Arabian Mare, Arabian Stallion",
+                parent_title: "Arabian Mare",
+            },
+            { id: "mold", title: "Arabian Stallion", parent_title: null },
+            { id: "set2", title: "Gift Set With Arabian Stallion, Swaps", parent_title: "Swaps" },
+            { id: "near", title: "Arabian Mare", parent_title: null },
+            { id: "kid", title: "Sultan", parent_title: "Arabian Stallion" },
+        ];
+        expect(rosterLast(["set1", "mold", "kid", "set2", "near"], rows, "Arabian Stallion")).toEqual([
+            "mold",
+            "kid",
+            "near",
+            "set1",
+            "set2",
+        ]);
+        // An id the candidate rows do not describe (a release placed under a named mold) keeps its place.
+        expect(rosterLast(["set1", "mold", "x"], rows, "Arabian Stallion")).toEqual(["mold", "x", "set1"]);
     });
 });
