@@ -5,6 +5,7 @@ import {
     factCorrection,
     generationOf,
     identityLine,
+    labelForItem,
     linkedLabel,
     markAmbiguous,
     mentionsMold,
@@ -174,5 +175,41 @@ describe("linker model", () => {
         ).toBeNull();
         expect(splitNumberFromTitle("#5022 Silky Sullivan")).toEqual({ title: "Silky Sullivan", model: "5022" });
         expect(splitNumberFromTitle("Andrew")).toEqual({ title: "Andrew", model: null });
+    });
+
+    it("names a link it did not make from the catalog row alone, the way linkedLabel does", () => {
+        const base = { maker: "Breyer", scale: "Stablemate (1:32)", attributes: {} };
+        expect(labelForItem({ ...base, itemType: "plastic_mold", title: "Silky Sullivan (G1)" })).toBe(
+            "Silky Sullivan (Stablemate G1), mold only",
+        );
+        expect(
+            labelForItem({
+                ...base,
+                itemType: "plastic_release",
+                title: "#5022 Silky Sullivan",
+                parentTitle: "Silky Sullivan (G1)",
+                attributes: { model_number: "#5022", color_description: "dark chestnut" },
+            }),
+        ).toBe("Silky Sullivan (Stablemate G1) · #5022 · dark chestnut");
+        // A release with no mold yet still reads by its own number and name; a number stored as a number counts.
+        expect(
+            labelForItem({
+                ...base,
+                itemType: "plastic_release",
+                title: "Montana Harvest",
+                attributes: { model_number: 1142 },
+            }),
+        ).toBe("#1142 · Montana Harvest");
+        expect(
+            labelForItem({
+                ...base,
+                itemType: "plastic_release",
+                title: "Montana Harvest",
+                attributes: { model_number: "1142" },
+            }),
+        ).toBe("#1142 · Montana Harvest");
+        expect(
+            labelForItem({ itemType: "artist_resin", title: "Ideal Stock Horse", maker: "Peter Stone", scale: null }),
+        ).toBe("Ideal Stock Horse · Peter Stone");
     });
 });

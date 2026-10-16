@@ -107,22 +107,6 @@ export async function getCatalogItem(id: string): Promise<CatalogItem | null> {
     return item;
 }
 
-/**
- * Get all releases for a mold.
- * Replaces getReleasesForMoldAction().
- */
-export async function getReleasesForMold(moldId: string): Promise<CatalogItem[]> {
-    const supabase = await createClient();
-    const { data } = await supabase
-        .from("catalog_items")
-        .select("id, item_type, parent_id, title, maker, scale, attributes")
-        .eq("parent_id", moldId)
-        .eq("item_type", "plastic_release")
-        .order("title");
-
-    return (data ?? []).map(mapCatalogRow);
-}
-
 // ── Helpers ──
 
 function mapCatalogRow(row: Record<string, unknown>): CatalogItem {

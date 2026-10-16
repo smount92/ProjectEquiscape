@@ -221,7 +221,7 @@ Key entry points for understanding the code:
 | Commerce Flow | `src/app/actions/transactions.ts` |
 | Chat + OfferCard | `src/app/inbox/[id]/page.tsx` + `src/components/OfferCard.tsx` |
 | Horse CRUD | `src/app/actions/horse.ts` |
-| Reference Search | `src/components/UnifiedReferenceSearch.tsx` |
+| Reference Search | `src/components/linker/ReferenceLinker.tsx` |
 | Feed | `src/app/feed/page.tsx` + `src/app/actions/activity.ts` |
 | Header Nav | `src/components/Header.tsx` |
 | Stripe Checkout | `src/app/api/checkout/route.ts` + `src/app/upgrade/page.tsx` |

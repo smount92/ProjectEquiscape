@@ -576,11 +576,6 @@
         }
     }
 
-    .ref-selected-parent {
-        border-color: rgba(44, 85, 69, 0.3);
-        box-shadow: 0 0 0 1px rgba(44, 85, 69, 0.2);
-    }
-
     .community-card:hover {
         transform: translateY(-4px);
         box-shadow:

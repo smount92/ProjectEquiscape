@@ -3,8 +3,8 @@
 /**
  * The reference linker's reads and the two ways it writes.
  *
- * Reads run on the member's own client (catalog_items is public), the
- * same fuzzy RPC the old picker uses, plus two things the old picker
+ * Reads run on the member's own client (catalog_items is public), on the
+ * same fuzzy RPC the retired flat-list picker used, plus two things it
  * never did: a model-number path, and the set rows that name a mold in
  * their title so a Stablemate Arabian Mare stops looking empty.
  *
@@ -216,6 +216,7 @@ export async function searchLinker(rawTerm: string, scale: string | null): Promi
         molds: [],
         otherScales: [],
         others: [],
+        loose: [],
         numberHits: [],
     };
     if (parsed.kind === "empty") return empty;
@@ -259,7 +260,7 @@ export async function searchLinker(rawTerm: string, scale: string | null): Promi
         return { ...empty, numberHits: hits };
     }
 
-    // Text: the same fuzzy RPC as the old picker, on a term with alias words stripped.
+    // Text: the same fuzzy RPC the flat-list picker used, on a term with alias words stripped.
     const q = parseCatalogQuery(normalizeTerm(parsed.value));
     const term = q.term.length >= 2 ? q.term : normalizeTerm(parsed.value);
     const { data } = await supabase.rpc("search_catalog_fuzzy", { search_term: term, max_results: 80 });
@@ -336,9 +337,22 @@ export async function searchLinker(rawTerm: string, scale: string | null): Promi
         .slice(0, 12)
         .map(toOther);
 
+    // A release with no mold yet (an orphan the repairs have not reached) is
+    // still a row a member may own. The old picker listed it; so does this.
+    // Every scale: its scale is often unrecorded, and a hidden row is a lost link.
+    const looseRows = rows
+        .filter((r) => r.item_type === "plastic_release" && !r.parent_id && titleMatches(r.title, termLower))
+        .slice(0, 8);
+    const loosePhotos = await photosFor(
+        supabase,
+        looseRows.map((r) => r.id),
+    );
+    const loose = looseRows.map((r) => toRelease(r, false, loosePhotos));
+
     return {
         ...empty,
         molds: marked,
+        loose,
         otherScales: outScale.map((m) => ({
             ...toSummary(m, counts.get(m.id) ?? 0),
             ...(viaRelease.has(m.id) ? { hitTitle: viaRelease.get(m.id) } : {}),

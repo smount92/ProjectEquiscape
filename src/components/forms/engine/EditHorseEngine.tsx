@@ -25,12 +25,11 @@ import { useParams, useRouter } from "next/navigation";
 import FocusLayout from "@/components/layouts/FocusLayout";
 import PageMasthead from "@/components/layouts/PageMasthead";
 import CollectionPicker from "@/components/CollectionPicker";
-import ReferenceLinkerSwitch from "@/components/linker/ReferenceLinkerSwitch";
+import ReferenceLinker from "@/components/linker/ReferenceLinker";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { createClient } from "@/lib/supabase/client";
 import { entitledTier } from "@/lib/entitlement/clock";
-import { getCatalogItem, type CatalogItem } from "@/app/actions/reference";
 import { deleteHorseImageAction, getMyTier, updateHorseAction } from "@/app/actions/horse";
 import { getHorseCollections, setHorseCollections } from "@/app/actions/collections";
 import { getProfile } from "@/app/actions/settings";
@@ -109,7 +108,6 @@ export default function EditHorseEngine() {
     const [setPurchase, setSetPurchase] = useState<SetPurchase | null>(null);
     const form = useHorseForm({ mode: "edit", category, initialValues: initial, currencySymbol });
 
-    const [reference, setReference] = useState<CatalogItem | null>(null);
     const [collectionIds, setCollectionIds] = useState<string[]>([]);
     const [existingImages, setExistingImages] = useState<ExistingImage[]>([]);
     const [newPhotos, setNewPhotos] = useState<PhotoStudioValue>(EMPTY_STUDIO);
@@ -229,11 +227,6 @@ export default function EditHorseEngine() {
                 if (ids.length > 0) setCollectionIds(ids);
                 else if (horse.collection_id) setCollectionIds([horse.collection_id as string]);
             });
-            if (horse.catalog_id) {
-                getCatalogItem(horse.catalog_id as string).then((item) => {
-                    if (item) setReference(item);
-                });
-            }
         })();
 
         getMyTier()
@@ -462,20 +455,11 @@ export default function EditHorseEngine() {
                         <LeafHeading note="Changing an identity is recorded on this horse's Hoofprint — provenance is not quietly rewritable.">
                             Reference Link
                         </LeafHeading>
-                        <ReferenceLinkerSwitch
+                        <ReferenceLinker
                             finishType={String(form.values.finish_type ?? "") || null}
                             selectedCatalogId={(form.values.catalog_id as string) ?? null}
-                            onCatalogSelect={(id, item) => {
-                                form.setValue("catalog_id", id ?? "");
-                                setReference(item);
-                            }}
+                            onCatalogSelect={(id) => form.setValue("catalog_id", id ?? "")}
                         />
-                        {reference && (
-                            <p className="mt-3 text-sm text-muted-foreground">
-                                Linked to <strong>{reference.title}</strong>
-                                {reference.maker ? ` · ${reference.maker}` : ""}
-                            </p>
-                        )}
                     </LedgerLeaf>
                 )}
 

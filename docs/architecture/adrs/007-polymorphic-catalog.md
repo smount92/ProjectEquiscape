@@ -67,5 +67,5 @@ catalog_items:
 
 - All catalog queries must filter by `item_type` when type-specific results are needed
 - The `attributes` JSONB column is schema-less — validation is application-side
-- Reference search (UnifiedReferenceSearch) must handle multiple item types in results
+- Reference search (UnifiedReferenceSearch; since MHH-032 the ReferenceLinker) must handle multiple item types in results
 - Price guide aggregation groups by `catalog_id` + `finish_type` across the materialized view

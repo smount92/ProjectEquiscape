@@ -21,7 +21,7 @@ import { Camera, Link2, Tag, Lock, ScrollText } from "lucide-react";
 
 import FocusLayout from "@/components/layouts/FocusLayout";
 import PageMasthead from "@/components/layouts/PageMasthead";
-import ReferenceLinkerSwitch from "@/components/linker/ReferenceLinkerSwitch";
+import ReferenceLinker from "@/components/linker/ReferenceLinker";
 import CollectionPicker from "@/components/CollectionPicker";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
@@ -480,14 +480,14 @@ export default function AddHorseEngine() {
             {/* ══ REFERENCE ══ */}
             {leaf.key === "reference" && (
                 <LedgerLeaf tab="Plate II · Reference">
-                    <LeafHeading note="Search by mold name, release name (paint job), or artist resin. Linking is optional — a one-of-a-kind is still a horse.">
+                    <LeafHeading note="Pick the scale, then search by mold name, release name, model number or artist resin.">
                         <Link2 className="mr-2 inline h-4 w-4" aria-hidden="true" />
                         Reference Link
                     </LeafHeading>
 
                     {reference && <ReferenceCard item={reference} />}
 
-                    <ReferenceLinkerSwitch
+                    <ReferenceLinker
                         finishType={String(form.values.finish_type ?? "") || null}
                         selectedCatalogId={(form.values.catalog_id as string) ?? null}
                         onCatalogSelect={(id, item) => {

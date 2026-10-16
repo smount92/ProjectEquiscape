@@ -38,7 +38,7 @@ changes meaning, change it here first.
 | **Reference page** | The public page for a catalog item, `/reference/[maker]/[slug]`. `/catalog/[id]` is the edit surface. |
 | **Suggestion** | A member's proposed change to the Registry (`catalog_suggestions`): correction, new entry, photo, removal, duplicate. Reviewed in Admin › Catalog. |
 | **Curator** | A member whose rank lets their corrections apply without review. |
-| **Linker** | The Reference step of adding or editing a horse, where the member links their horse to a catalog row. There is the old picker and the new linker. |
+| **Linker** | The Reference step of adding, quick-adding or editing a horse, where the member links their horse to a catalog row: scale first, then the mold, then the release (`src/components/linker/ReferenceLinker.tsx`). It replaced the old flat-list picker for everyone under ruling Q7 (MHH-032). |
 | **Blue Book** | The price guide (`/market/guide`). eBay prices are *asking* prices and are never called sold. |
 
 ## Stable and the horse's record

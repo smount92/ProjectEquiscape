@@ -142,7 +142,8 @@ Four generations coexist. Know which you are in before you edit.
 
 | File | Functions |
 |------|-----------|
-| [`reference.ts`](../../src/app/actions/reference.ts) | `searchCatalogAction`, `searchCatalogFuzzy`, `getCatalogItem`, `getReleasesForMold`, `matchCsvRowsBatch` |
+| [`reference.ts`](../../src/app/actions/reference.ts) | `searchCatalogAction`, `searchCatalogFuzzy`, `getCatalogItem`, `matchCsvRowsBatch` |
+| [`linker.ts`](../../src/app/actions/linker.ts) | The Reference step's reads and writes: `searchLinker`, `fileReleaseUnderMold`, `fileReleaseFact`, `pickMold` |
 | [`reference-pages.ts`](../../src/app/actions/reference-pages.ts) | `unstable_cache` readers for the public `/reference` pages: `resolveReferenceItem`, `getActiveListingsForCatalog`, `getCatalogPhotos`, `getChildReleases`, `getCatalogCounts`, `getReferenceMarket`, `getReferenceMarketHistory` (+ `REFERENCE_PAGES_CACHE_TAG`) |
 | [`maker-hubs.ts`](../../src/app/actions/maker-hubs.ts) | `getMakerIndex`, `getMakerMolds`, `getMakerRecent` |
 | [`catalog-suggestions.ts`](../../src/app/actions/catalog-suggestions.ts) | `getCatalogItems`, `getCatalogItem`, `createSuggestion`, `getSuggestions`, `getSuggestion`, `voteSuggestion`, `removeVote`, `getUserVote`, `addSuggestionComment`, `deleteSuggestionComment`, `reviewSuggestion`, `getChangelog`, `getTopCurators` |

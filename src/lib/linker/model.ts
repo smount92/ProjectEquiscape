@@ -1,21 +1,19 @@
 /**
- * The reference linker — the one model behind the "Try the new linker"
- * step of the add-horse form.
+ * The reference linker — the one model behind the Reference step of the
+ * add, quick-add and edit horse forms.
  *
- * The old picker hands back a flat list of titles. This module decides
- * the shapes the new one shows: a mold with an identity line, releases
- * ordered by how likely they are to be the member's horse, what a row
- * says when a fact is missing, and how a typed term is read. It is pure
- * so the server action and the component agree and the tests can pin
- * the rules. Spec: the "Reference linker spec" doc (2026-10-12).
+ * This module decides the shapes the linker shows: a mold with an
+ * identity line, releases ordered by how likely they are to be the
+ * member's horse, what a row says when a fact is missing, and how a
+ * typed term is read. It is pure so the server action and the component
+ * agree and the tests can pin the rules. Spec: the "Reference linker
+ * spec" doc (2026-10-12). It replaced the old flat-list picker for
+ * everyone under ruling Q7 (MHH-032).
  *
  * It runs on the Registry as it is today: no generation column, no
  * alias table, sets hung on one mold. Where the data cannot tell two
  * molds apart the model says so (`ambiguous`) instead of pretending.
  */
-
-export const LINKER_PREF_KEY = "mhh:linker";
-export type LinkerPref = "new" | "old";
 
 export interface LinkerRelease {
     id: string;
@@ -94,6 +92,8 @@ export interface LinkerResult {
     otherScales: LinkerMoldSummary[];
     /** Resins, chinas, micros and the rest. */
     others: LinkerOther[];
+    /** Releases by that name that are not filed under any mold yet. Still real rows a member may own. */
+    loose: LinkerRelease[];
     numberHits: NumberHit[];
 }
 
@@ -296,7 +296,7 @@ export function releaseName(
 /** What the linked banner says. */
 export function linkedLabel(
     mold: Pick<LinkerMold, "title" | "scale" | "generation"> | null,
-    release: LinkerRelease | null,
+    release: Pick<LinkerRelease, "title" | "model" | "look" | "setName" | "isSetPiece"> | null,
 ): string {
     if (!mold && !release) return "";
     const moldBit = mold
@@ -308,6 +308,43 @@ export function linkedLabel(
         .filter(Boolean)
         .join(" · ");
     return [moldBit, rel || release.title].filter(Boolean).join(" · ");
+}
+
+/**
+ * The banner for a link the linker did not make itself: a horse being
+ * edited, an add-horse link that arrived with `?catalog=`, or a member
+ * coming back to the Reference step. Reads like `linkedLabel` from the
+ * catalog row alone (the release's mold arrives as `parentTitle`).
+ */
+export function labelForItem(item: {
+    itemType: string;
+    title: string;
+    maker: string | null;
+    scale: string | null;
+    parentTitle?: string | null;
+    attributes?: Record<string, unknown> | null;
+}): string {
+    const a = item.attributes ?? {};
+    const text = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : null);
+    const moldOf = (title: string) => ({
+        title: stripGeneration(title),
+        scale: item.scale,
+        generation: generationOf(title),
+    });
+    if (item.itemType === "plastic_mold") return linkedLabel(moldOf(item.title), null);
+    if (item.itemType === "plastic_release") {
+        return linkedLabel(item.parentTitle ? moldOf(item.parentTitle) : null, {
+            title: item.title,
+            model:
+                typeof a.model_number === "number"
+                    ? String(a.model_number)
+                    : (text(a.model_number)?.replace(/^#/, "") ?? null),
+            look: text(a.color_description),
+            setName: setLabel(item.title),
+            isSetPiece: false,
+        });
+    }
+    return [item.title, item.maker].filter(Boolean).join(" · ");
 }
 
 /**

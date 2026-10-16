@@ -3,8 +3,8 @@
 /**
  * A per-browser preference read through useSyncExternalStore, so the
  * server render and the first client render agree (the fallback) and the
- * stored value arrives without a setState-in-effect. Used for which
- * linker a member chose and which scale chip they pressed last.
+ * stored value arrives without a setState-in-effect. Used for the scale
+ * chip a member pressed last on the Reference step.
  */
 
 import { useCallback, useSyncExternalStore } from "react";
@@ -28,7 +28,7 @@ function subscribe(cb: () => void): () => void {
     };
 }
 
-export function writePref(key: string, value: string): void {
+function writePref(key: string, value: string): void {
     try {
         localStorage.setItem(key, value);
     } catch {

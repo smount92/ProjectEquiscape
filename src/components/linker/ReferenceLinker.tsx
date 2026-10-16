@@ -1,11 +1,11 @@
 "use client";
 
 /**
- * The new reference linker — the Reference step of the add-horse form
- * redrawn as a funnel: scale first, then the mold with one identity
- * line, then the release by what it looks like, with every missing fact
- * named in the row and fillable on the spot. Opt-in beside the old
- * picker (ReferenceLinkerSwitch) so members can try it and go back.
+ * The reference linker — the Reference step of the add, quick-add and
+ * edit horse forms, drawn as a funnel: scale first, then the mold with
+ * one identity line, then the release by what it looks like, with every
+ * missing fact named in the row and fillable on the spot. It replaced
+ * the old flat-list picker for everyone under ruling Q7 (MHH-032).
  *
  * Shapes and rules live in src/lib/linker/model.ts; reads and writes in
  * src/app/actions/linker.ts. This file only lays them out.
@@ -17,6 +17,7 @@ import { getCatalogItem, type CatalogItem } from "@/app/actions/reference";
 import { fileReleaseFact, fileReleaseUnderMold, searchLinker } from "@/app/actions/linker";
 import {
     identityLine,
+    labelForItem,
     LINKER_SCALES,
     linkedLabel,
     missingFacts,
@@ -32,6 +33,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import SuggestNewEntryForm from "@/components/SuggestNewEntryForm";
+import MarketValueBadge from "@/components/MarketValueBadge";
 import { useLocalPref } from "@/lib/linker/prefs";
 
 const SCALE_KEY = "mhh:linker-scale";
@@ -40,9 +42,9 @@ const SHOW_FIRST = 4;
 export interface ReferenceLinkerProps {
     selectedCatalogId: string | null;
     onCatalogSelect: (catalogId: string | null, item: CatalogItem | null) => void;
-    /** The finish declared on the horse form; changes the help line, never the list. */
+    /** The finish on the horse form: sets the help line; a resin puts resins first. Never hides a row. */
     finishType?: string | null;
-    /** After "Suggest an entry" is filed: the host names the horse after it, as the old picker does. */
+    /** After "Suggest an entry" is filed: the host names the horse after it. */
     onCustomEntry?: (searchTerm: string) => void;
 }
 
@@ -461,10 +463,42 @@ export default function ReferenceLinker({
     const [suggesting, setSuggesting] = useState(false);
     const [result, setResult] = useState<LinkerResult | null>(null);
     const [searching, setSearching] = useState(false);
-    const [banner, setBanner] = useState<string | null>(null);
+    // The link this linker is showing. Once the host has it, it is shown only
+    // while the host still holds the same id, so a host that unlinks (a
+    // suggested entry, a reset) never leaves a stale "Linked:" banner behind.
+    const [linked, setLinked] = useState<{ id: string; label: string; why: string | null; pending: boolean } | null>(
+        null,
+    );
     const [notice, setNotice] = useState<string | null>(null);
     const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
     const seq = useRef(0);
+    const shown = linked && (linked.pending || linked.id === selectedCatalogId) ? linked : null;
+
+    // A link made before this step opened (a horse being edited, a
+    // `?catalog=` add, a member coming back to the step) is named, with
+    // its Unlink, instead of a bare "already linked".
+    const linkedId = linked?.id ?? null;
+    const linkPending = linked?.pending ?? false;
+    useEffect(() => {
+        if (!selectedCatalogId || linkPending || linkedId === selectedCatalogId) return;
+        let live = true;
+        getCatalogItem(selectedCatalogId)
+            .then((item) => {
+                if (live && item)
+                    setLinked({
+                        id: item.id,
+                        label: labelForItem(item),
+                        why: "Pick another below to change it, or carry on.",
+                        pending: false,
+                    });
+            })
+            .catch(() => {
+                /* the plain "already linked" line stays */
+            });
+        return () => {
+            live = false;
+        };
+    }, [selectedCatalogId, linkedId, linkPending]);
 
     const run = useCallback((term: string, sc: string) => {
         const n = ++seq.current;
@@ -489,9 +523,9 @@ export default function ReferenceLinker({
     }, [q, scale, run]);
 
     const link = async (id: string, label: string, why: string) => {
-        setBanner(label);
-        setNotice(why);
-        const item = await getCatalogItem(id);
+        setLinked({ id, label, why, pending: true });
+        const item = await getCatalogItem(id).catch(() => null);
+        setLinked((prev) => (prev && prev.id === id ? { ...prev, pending: false } : prev));
         onCatalogSelect(id, item);
     };
 
@@ -507,17 +541,57 @@ export default function ReferenceLinker({
         link(m.id, linkedLabel(m, null), "Linked to the sculpture. Pick the exact release any time from the passport.");
 
     const clear = () => {
-        setBanner(null);
+        setLinked(null);
         setNotice(null);
         onCatalogSelect(null, null);
     };
 
+    // A resin horse most likely links a resin: its matches lead, the way the
+    // old picker floated them. Customs and OF keep molds first.
+    const resinFirst = !!finishType && /resin/i.test(finishType);
     const finishNote =
         finishType === "custom" || finishType === "Custom"
             ? "A custom is its own horse. Linking is optional; if you know the base mold, link the mold so the passport can say what it was painted on."
-            : finishType && /resin/i.test(finishType)
+            : resinFirst
               ? "Artist resins link to the sculpture, not a release. Search the resin’s name or the artist."
               : null;
+
+    const othersBlock =
+        result && result.kind === "text" && result.others.length > 0 ? (
+            <div data-testid="linker-others">
+                <p className="m-0 mb-1 text-xs text-muted-foreground">Resins and other pieces</p>
+                <div className="flex flex-col gap-2">
+                    {result.others.map((o) => (
+                        <div
+                            key={o.id}
+                            className="flex items-center justify-between gap-3 rounded-lg border border-input bg-card px-4 py-2"
+                        >
+                            <div className="min-w-0">
+                                <div className="font-semibold text-foreground">{o.title}</div>
+                                <div className="text-xs text-secondary-foreground">
+                                    {[
+                                        o.itemType.replace(/_/g, " "),
+                                        o.maker,
+                                        o.scale ? shortScale(o.scale) : null,
+                                        o.look,
+                                    ]
+                                        .filter(Boolean)
+                                        .join(" · ")}
+                                </div>
+                            </div>
+                            <Button
+                                type="button"
+                                size="sm"
+                                variant={selectedCatalogId === o.id ? "default" : "outline"}
+                                onClick={() => link(o.id, `${o.title} · ${o.maker}`, "Linked.")}
+                            >
+                                {selectedCatalogId === o.id ? "Linked" : "This one"}
+                            </Button>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        ) : null;
 
     return (
         <div className="flex flex-col gap-3" data-testid="reference-linker">
@@ -565,26 +639,32 @@ export default function ReferenceLinker({
                 )}
             </div>
 
-            {banner && (
+            {shown && (
                 <div
                     className="flex flex-wrap items-start justify-between gap-2 rounded-lg border border-forest bg-forest/10 px-4 py-3"
                     data-testid="linker-banner"
                 >
                     <div className="min-w-0">
-                        <div className="font-serif font-bold text-foreground">Linked: {banner}</div>
-                        {notice && <div className="text-sm text-secondary-foreground">{notice}</div>}
+                        <div className="font-serif font-bold text-foreground">Linked: {shown.label}</div>
+                        {shown.why && <div className="text-sm text-secondary-foreground">{shown.why}</div>}
+                        {/* The market estimate for what was linked, as the old picker showed it. */}
+                        {!shown.pending && (
+                            <div className="mt-1 empty:hidden">
+                                <MarketValueBadge catalogId={shown.id} compact />
+                            </div>
+                        )}
                     </div>
                     <Button type="button" size="sm" variant="outline" onClick={clear}>
                         Unlink
                     </Button>
                 </div>
             )}
-            {!banner && notice && (
+            {notice && (
                 <p className="m-0 rounded-md bg-forest/10 px-3 py-2 text-sm text-foreground" role="status">
                     {notice}
                 </p>
             )}
-            {!banner && selectedCatalogId && (
+            {!shown && selectedCatalogId && (
                 <p className="m-0 text-xs text-muted-foreground">
                     Already linked. Pick another below to change it, or carry on.
                 </p>
@@ -634,6 +714,7 @@ export default function ReferenceLinker({
 
             {result && result.kind === "text" && (
                 <div className="flex flex-col gap-3">
+                    {resinFirst && othersBlock}
                     {result.molds.length > 0 ? (
                         <>
                             <p className="m-0 text-xs text-muted-foreground" data-testid="linker-count">
@@ -658,7 +739,9 @@ export default function ReferenceLinker({
                         >
                             {scale !== "any" && result.otherScales.length > 0
                                 ? `No ${shortScale(scale)} mold by that name. The matches below are other scales; pick one or change the scale above.`
-                                : "Nothing in the Registry by that name. Check the spelling, try the maker's name for it, or suggest it below."}
+                                : result.others.length > 0 || result.loose.length > 0
+                                  ? "No mold by that name; the other matches are listed here."
+                                  : "Nothing in the Registry by that name. Check the spelling, try the maker's name for it, or suggest it below."}
                         </p>
                     )}
 
@@ -693,41 +776,30 @@ export default function ReferenceLinker({
                         </div>
                     )}
 
-                    {result.others.length > 0 && (
-                        <div data-testid="linker-others">
-                            <p className="m-0 mb-1 text-xs text-muted-foreground">Resins and other pieces</p>
-                            <div className="flex flex-col gap-2">
-                                {result.others.map((o) => (
-                                    <div
-                                        key={o.id}
-                                        className="flex items-center justify-between gap-3 rounded-lg border border-input bg-card px-4 py-2"
-                                    >
-                                        <div className="min-w-0">
-                                            <div className="font-semibold text-foreground">{o.title}</div>
-                                            <div className="text-xs text-secondary-foreground">
-                                                {[
-                                                    o.itemType.replace(/_/g, " "),
-                                                    o.maker,
-                                                    o.scale ? shortScale(o.scale) : null,
-                                                    o.look,
-                                                ]
-                                                    .filter(Boolean)
-                                                    .join(" · ")}
-                                            </div>
-                                        </div>
-                                        <Button
-                                            type="button"
-                                            size="sm"
-                                            variant={selectedCatalogId === o.id ? "default" : "outline"}
-                                            onClick={() => link(o.id, `${o.title} · ${o.maker}`, "Linked.")}
-                                        >
-                                            {selectedCatalogId === o.id ? "Linked" : "This one"}
-                                        </Button>
-                                    </div>
-                                ))}
+                    {result.loose.length > 0 && (
+                        <section className="rounded-lg border border-input bg-card" data-testid="linker-loose">
+                            <div className="px-4 py-2">
+                                <div className="font-serif font-bold text-foreground">Releases without a mold yet</div>
+                                <div className="text-xs text-secondary-foreground">
+                                    Real Registry entries a steward has not filed under their mold. Link one as it is.
+                                </div>
                             </div>
-                        </div>
+                            <ul className="m-0 list-none p-0">
+                                {result.loose.map((r) => (
+                                    <ReleaseRow
+                                        key={r.id}
+                                        mold={null}
+                                        release={r}
+                                        selected={selectedCatalogId === r.id}
+                                        onPick={() => pickRelease(r, null)}
+                                        onNotice={setNotice}
+                                    />
+                                ))}
+                            </ul>
+                        </section>
                     )}
+
+                    {!resinFirst && othersBlock}
                 </div>
             )}
 

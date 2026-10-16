@@ -2,7 +2,7 @@
  * Timeline shaping for mold and artist reference pages.
  *
  * Pure functions, no network — the rules live here so they can be
- * argued with in tests (the searchRank precedent). The Ledger design:
+ * argued with in tests (as the linker's rules are in lib/linker/model.ts). The Ledger design:
  * releases grouped into decade shelves, variations of one release
  * clustered behind their parent row, honest "undated" shelf for rows
  * whose year the catalog does not know yet.

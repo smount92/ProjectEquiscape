@@ -11,7 +11,7 @@ member's exact case passes.
 ## 1. Reproduce
 
 - Use the member's own links and words. Read the rows they point at (anon REST reads; `.env.local` has the public key).
-- Reproduce on **every surface that shows the same thing**. Registry example: old picker, new linker, `/catalog` search, the reference page, the passport. A bug on one surface and not another tells you where the cause is.
+- Reproduce on **every surface that shows the same thing**. Registry example: the linker (the horse forms' Reference step), `/catalog` search, the reference page, the passport. A bug on one surface and not another tells you where the cause is.
 - Logged-out problems: check production directly. Logged-in problems: a look-see (below) as the test bot on the dev server.
 - Error digest from the error page: find it in Admin › Ops › Errors (Sentry). Vercel logs hold `console` output.
 - If you cannot reproduce, say so and ask the member for one more detail. Do not guess-fix.

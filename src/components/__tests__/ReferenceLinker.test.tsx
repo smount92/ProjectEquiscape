@@ -1,15 +1,17 @@
 // @vitest-environment jsdom
 /**
- * The new reference linker: molds grouped with an identity line, release
- * rows led by what the horse looks like, missing facts named in the row,
- * "mine isn't here" filing under the mold, and the switch that lets a
- * member try it and go back.
+ * The reference linker, the Reference step of every horse form: molds
+ * grouped with an identity line, release rows led by what the horse looks
+ * like, missing facts named in the row, "mine isn't here" filing under the
+ * mold, and what it carried over from the retired flat-list picker (an
+ * existing link named with its Unlink, releases with no mold yet, resins
+ * first for a resin horse).
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
+import { useState } from "react";
 
 import ReferenceLinker from "@/components/linker/ReferenceLinker";
-import ReferenceLinkerSwitch from "@/components/linker/ReferenceLinkerSwitch";
 import type { LinkerResult } from "@/lib/linker/model";
 
 const linker = vi.hoisted(() => ({
@@ -21,11 +23,11 @@ vi.mock("@/app/actions/linker", () => linker);
 
 const reference = vi.hoisted(() => ({
     getCatalogItem: vi.fn(),
-    searchCatalogAction: vi.fn(),
-    getReleasesForMold: vi.fn(),
 }));
 vi.mock("@/app/actions/reference", () => reference);
-vi.mock("@/lib/analytics", () => ({ track: vi.fn() }));
+vi.mock("@/components/MarketValueBadge", () => ({
+    default: (p: { catalogId: string | null }) => <span data-testid="market-value">{p.catalogId}</span>,
+}));
 vi.mock("@/app/actions/catalog-suggestions", () => ({ createSuggestion: vi.fn() }));
 vi.mock("@/lib/context/ToastContext", () => ({ useToast: () => ({ toast: vi.fn() }) }));
 vi.mock("@/components/SuggestNewEntryForm", () => ({
@@ -97,6 +99,7 @@ const RESULT: LinkerResult = {
         },
     ],
     others: [],
+    loose: [],
     numberHits: [],
 };
 
@@ -158,7 +161,7 @@ describe("ReferenceLinker", () => {
 
     it("links a release through the real catalog item and shows the banner", async () => {
         const onSelect = vi.fn();
-        render(<ReferenceLinker selectedCatalogId={null} onCatalogSelect={onSelect} />);
+        render(<Host onSelect={onSelect} />);
         fireEvent.change(screen.getByLabelText("Find the model"), { target: { value: "Silky Sullivan" } });
         const mold = await screen.findByTestId("linker-mold", {}, { timeout: 3000 });
         fireEvent.click(within(mold).getAllByTestId("linker-pick")[0]);
@@ -171,7 +174,7 @@ describe("ReferenceLinker", () => {
     it("links the mold only, and files an added release under the mold", async () => {
         const onSelect = vi.fn();
         linker.fileReleaseUnderMold.mockResolvedValue({ success: true, autoApproved: false });
-        render(<ReferenceLinker selectedCatalogId={null} onCatalogSelect={onSelect} />);
+        render(<Host onSelect={onSelect} />);
         fireEvent.change(screen.getByLabelText("Find the model"), { target: { value: "Silky Sullivan" } });
         const mold = await screen.findByTestId("linker-mold", {}, { timeout: 3000 });
         fireEvent.click(within(mold).getByTestId("linker-add-open"));
@@ -198,6 +201,7 @@ describe("ReferenceLinker", () => {
             molds: [],
             otherScales: [],
             others: [],
+            loose: [],
             numberHits: [
                 {
                     mold: {
@@ -244,16 +248,102 @@ describe("ReferenceLinker", () => {
         expect(screen.getByRole("status").textContent).toMatch(/Suggested for the Registry/);
     });
 
-    it("the switch starts on the old picker, remembers 'new', and goes back", async () => {
-        reference.searchCatalogAction.mockResolvedValue([]);
-        const { container } = render(<ReferenceLinkerSwitch selectedCatalogId={null} onCatalogSelect={vi.fn()} />);
-        await waitFor(() => expect(container.querySelector("[data-linker]")?.getAttribute("data-linker")).toBe("old"));
-        fireEvent.click(screen.getByTestId("linker-try-new"));
-        expect(container.querySelector("[data-linker]")?.getAttribute("data-linker")).toBe("new");
-        expect(localStorage.getItem("mhh:linker")).toBe("new");
-        expect(screen.getByTestId("reference-linker")).toBeTruthy();
-        fireEvent.click(screen.getByTestId("linker-return-old"));
-        expect(localStorage.getItem("mhh:linker")).toBe("old");
-        expect(screen.queryByTestId("reference-linker")).toBeNull();
+    it("names a link made before it opened, with its market value, and Unlink clears it", async () => {
+        reference.getCatalogItem.mockResolvedValue({
+            id: "r5022",
+            itemType: "plastic_release",
+            parentId: "sm",
+            parentTitle: "Silky Sullivan",
+            title: "#5022 Silky Sullivan",
+            maker: "Breyer",
+            scale: "Stablemate (1:32)",
+            attributes: { model_number: "5022", color_description: "Dark chestnut" },
+        });
+        const onSelect = vi.fn();
+        render(<Host initial="r5022" onSelect={onSelect} />);
+        const banner = await screen.findByTestId("linker-banner");
+        expect(banner.textContent).toContain("Linked: Silky Sullivan (Stablemate) · #5022 · Dark chestnut");
+        expect(within(banner).getByTestId("market-value").textContent).toBe("r5022");
+        expect(screen.queryByText(/Already linked/)).toBeNull();
+        fireEvent.click(within(banner).getByText("Unlink"));
+        expect(onSelect).toHaveBeenCalledWith(null, null);
+        expect(screen.queryByTestId("linker-banner")).toBeNull();
+    });
+
+    it("drops its banner when the host unlinks", async () => {
+        const { rerender } = render(<ReferenceLinker selectedCatalogId="sm" onCatalogSelect={vi.fn()} />);
+        await screen.findByTestId("linker-banner");
+        rerender(<ReferenceLinker selectedCatalogId={null} onCatalogSelect={vi.fn()} />);
+        expect(screen.queryByTestId("linker-banner")).toBeNull();
+    });
+
+    it("lists releases that have no mold yet and links one", async () => {
+        linker.searchLinker.mockResolvedValue({
+            ...RESULT,
+            molds: [],
+            otherScales: [],
+            loose: [{ ...SM.releases[0], id: "orphan", title: "Montana Harvest", model: "1142" }],
+        });
+        const onSelect = vi.fn();
+        render(<Host onSelect={onSelect} />);
+        fireEvent.change(screen.getByLabelText("Find the model"), { target: { value: "Montana Harvest" } });
+        const loose = await screen.findByTestId("linker-loose", {}, { timeout: 3000 });
+        expect(screen.getByTestId("linker-none").textContent).toMatch(/No mold by that name/);
+        fireEvent.click(within(loose).getByTestId("linker-pick"));
+        await waitFor(() => expect(onSelect).toHaveBeenCalledWith("orphan", expect.objectContaining({ id: "orphan" })));
+        expect(screen.getByTestId("linker-banner").textContent).toContain("#1142 · Montana Harvest");
+    });
+
+    it("puts resins first for a resin horse, and molds first otherwise", async () => {
+        linker.searchLinker.mockResolvedValue({
+            ...RESULT,
+            others: [
+                {
+                    id: "res",
+                    title: "Silky",
+                    itemType: "artist_resin",
+                    maker: "Sarah Rose",
+                    scale: null,
+                    look: null,
+                    href: "/x",
+                },
+            ],
+        });
+        const order = () =>
+            [...document.querySelectorAll("[data-testid='linker-mold'], [data-testid='linker-others']")].map((el) =>
+                el.getAttribute("data-testid"),
+            );
+        const { unmount } = render(<Host finishType="Artist Resin" />);
+        fireEvent.change(screen.getByLabelText("Find the model"), { target: { value: "Silky" } });
+        await screen.findByTestId("linker-others", {}, { timeout: 3000 });
+        expect(order()).toEqual(["linker-others", "linker-mold"]);
+        unmount();
+        render(<Host finishType="OF" />);
+        fireEvent.change(screen.getByLabelText("Find the model"), { target: { value: "Silky" } });
+        await screen.findByTestId("linker-others", {}, { timeout: 3000 });
+        expect(order()).toEqual(["linker-mold", "linker-others"]);
     });
 });
+
+/** A host that holds the link the way the horse forms do. */
+function Host({
+    initial = null,
+    finishType,
+    onSelect,
+}: {
+    initial?: string | null;
+    finishType?: string;
+    onSelect?: (id: string | null, item: unknown) => void;
+}) {
+    const [id, setId] = useState<string | null>(initial);
+    return (
+        <ReferenceLinker
+            selectedCatalogId={id}
+            finishType={finishType}
+            onCatalogSelect={(next, item) => {
+                setId(next);
+                onSelect?.(next, item);
+            }}
+        />
+    );
+}

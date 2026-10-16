@@ -14,7 +14,7 @@ All 121+ client components live in `src/components/`. Every component is a `"use
 | `CollectionPicker` | `CollectionPicker.tsx` | Add a horse to a collection |
 | `CsvImport` | `CsvImport.tsx` | CSV file upload and preview |
 | `DeleteHorseModal` | `DeleteHorseModal.tsx` | Confirmation modal for horse deletion |
-| `UnifiedReferenceSearch` | `UnifiedReferenceSearch.tsx` | Fuzzy reference catalog search |
+| `ReferenceLinker` | `linker/ReferenceLinker.tsx` | The Reference step of the horse forms: link a horse to a mold, release or resin |
 | `SuggestReferenceModal` | `SuggestReferenceModal.tsx` | Suggest a missing catalog entry |
 | `MarketFilters` | `MarketFilters.tsx` | Blue Book market price filtering |
 | `MarketValueBadge` | `MarketValueBadge.tsx` | Inline price estimate badge |
