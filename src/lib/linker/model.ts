@@ -14,6 +14,8 @@
  * molds apart the model says so (`ambiguous`) instead of pretending.
  */
 
+import { sameWords } from "@/lib/catalog/searchKey";
+
 export const LINKER_PREF_KEY = "mhh:linker";
 export type LinkerPref = "new" | "old";
 
@@ -172,21 +174,52 @@ export function setLabel(title: string): string | null {
     return null;
 }
 
-/** Does this release's title say it came with a piece on `moldTitle`? */
-export function mentionsMold(title: string, moldTitle: string): boolean {
+/**
+ * The pieces a set title lists after "With": "12-Piece Set With Arabian
+ * Mare, American Saddlebred (2) & Swaps." → ["Arabian Mare", "American
+ * Saddlebred", "Swaps"]. Split on commas, "&", "and" and a further "with";
+ * a count or note in brackets and trailing punctuation are dropped. Only a
+ * capitalised piece is a horse: a lowercase one is an accessory ("foal
+ * blanket", "unicorn halter") or a note ("replaced by …"), MHH-068.
+ */
+export function rosterPieces(title: string): string[] {
     const i = title.search(/\bwith\b/i);
-    if (i < 0) return false;
-    const tail = title.slice(i);
-    const esc = moldTitle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    // eslint-disable-next-line security/detect-non-literal-regexp -- the title is escaped above
-    const re = new RegExp("(^|[\\s,])(" + esc + ")(?=$|[\\s,.;])", "gi");
-    // A roster names a mold the way a title does, capitalised ("With Rojo");
-    // a lowercase word is an accessory, not a mold ("foal blanket" is not
-    // the Foal mold, "unicorn halter" not the Unicorn), MHH-068.
-    for (const m of tail.matchAll(re)) {
-        if (/^[\p{Lu}\d]/u.test(m[2])) return true;
-    }
-    return false;
+    if (i < 0) return [];
+    return title
+        .slice(i)
+        .replace(/^with\b/i, "")
+        .split(/,|&|\band\b|\bwith\b|;/i)
+        .map((p) =>
+            p
+                .replace(/\([^)]*\)/g, " ")
+                .replace(/^[\s"'“”‘’]+|[\s.,;:!"'“”‘’]+$/g, "")
+                .replace(/\s+/g, " "),
+        )
+        .filter((p) => /^[\p{Lu}\d]/u.test(p));
+}
+
+/**
+ * Does this release's title say it came with a piece on `moldTitle`? A
+ * piece counts only when it IS the mold's name, whole (same words, any
+ * order, punctuation aside): "American Saddlebred" is not the Saddlebred
+ * mold. Matching the name as a word inside a piece put 37 false set lines
+ * on the Stablemate Saddlebred mold (MHH-074).
+ */
+export function mentionsMold(title: string, moldTitle: string): boolean {
+    const mold = stripGeneration(moldTitle);
+    return rosterPieces(title).some((piece) => sameWords(stripGeneration(piece), mold));
+}
+
+/**
+ * Words a title must contain to be worth testing with `mentionsMold`, for
+ * the database read that fetches candidate set rows ("with" is added by
+ * the caller). Order-free, so "Morgan - Prancing" is fetched for Prancing
+ * Morgan. One-letter words ("O" in Man O' War) are left out.
+ */
+export function rosterPrefilterWords(moldTitle: string): string[] {
+    return stripGeneration(moldTitle)
+        .split(/[^\p{L}\p{N}]+/u)
+        .filter((w) => w.length >= 2);
 }
 
 export function yearsLabel(r: Pick<LinkerRelease, "from" | "to">): string | null {

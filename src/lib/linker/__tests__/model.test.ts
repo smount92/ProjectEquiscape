@@ -13,6 +13,7 @@ import {
     orderReleases,
     parseTerm,
     releaseName,
+    rosterPrefilterWords,
     scaleMatches,
     setLabel,
     splitNumberFromTitle,
@@ -90,6 +91,68 @@ describe("linker model", () => {
         expect(mentionsMold("Clydesdale Gift Set With Clydesdale Mare, green foal blanket", "Foal")).toBe(false);
         expect(mentionsMold("Unicorn Set With unicorn halter and Unicorn", "Unicorn")).toBe(true);
         expect(mentionsMold("Dress-Up Set With unicorn halter", "Unicorn")).toBe(false);
+    });
+
+    it("matches a whole piece name, never a mold name inside a longer one (MHH-074)", () => {
+        // Live titles from the Stablemate Saddlebred mold, 2026-10-16.
+        const twelve =
+            "12-Piece Stablemates Set With Arabian Mare, Arabian Stallion, Citation, Draft Horse, American Saddlebred, Swaps.";
+        expect(mentionsMold(twelve, "Saddlebred")).toBe(false);
+        expect(mentionsMold(twelve, "American Saddlebred")).toBe(true);
+        expect(mentionsMold(twelve, "Swaps")).toBe(true);
+        expect(mentionsMold(twelve, "Arabian")).toBe(false);
+        expect(
+            mentionsMold(
+                "The Mod Squad On keychain. With Appaloosa, Rearing Arabian, Draft Horse, Saddlebred.",
+                "Saddlebred",
+            ),
+        ).toBe(true);
+        expect(
+            mentionsMold(
+                "Wooden Carry Stable with Horses With American Saddlebred (2), Andalusian (2), Standing Stock Horse (2)",
+                "Andalusian",
+            ),
+        ).toBe(true);
+        expect(
+            mentionsMold(
+                "Wooden Carry Stable with Horses With American Saddlebred (2), Andalusian (2), Standing Stock Horse (2)",
+                "Saddlebred",
+            ),
+        ).toBe(false);
+        expect(
+            mentionsMold("Four Piece Gift Pack With American Saddlebred, Clydesdale, Thoroughbred", "Saddlebred"),
+        ).toBe(false);
+        expect(
+            mentionsMold(
+                '"Horspital" Play Set With American Saddlebred, blankets, corral fencing',
+                "American Saddlebred",
+            ),
+        ).toBe(true);
+        // Pieces split on commas, "&" and "and"; the same words in another order are the same piece.
+        expect(
+            mentionsMold("Polka Dot Parade With American Saddlebred, Morgan - Prancing, Warmblood", "Prancing Morgan"),
+        ).toBe(true);
+        expect(mentionsMold("Stablemate Keychain With Arabian-Rearing, American Saddlebred", "Rearing Arabian")).toBe(
+            true,
+        );
+        expect(mentionsMold("Pony Pals With Shetland Pony & Welsh Pony", "Welsh Pony")).toBe(true);
+        expect(mentionsMold("Pony Pals With Shetland Pony and Welsh Pony", "Shetland Pony")).toBe(true);
+        expect(mentionsMold("Pony Pals With Shetland Pony and Welsh Pony", "Pony")).toBe(false);
+        // The title before "With" is the set's own name, not a piece.
+        expect(mentionsMold("Panuhu and Honego, Foal With Rojo", "Foal")).toBe(false);
+        // A note after the roster is not a piece.
+        expect(
+            mentionsMold(
+                "Horspital Play Set With American Saddlebred, replaced by Scrambling Foal in 2006",
+                "Scrambling Foal",
+            ),
+        ).toBe(false);
+    });
+
+    it("lists the words a roster search must contain, for the database prefilter", () => {
+        expect(rosterPrefilterWords("Man O' War")).toEqual(["Man", "War"]);
+        expect(rosterPrefilterWords("Morgan Stallion (G1)")).toEqual(["Morgan", "Stallion"]);
+        expect(rosterPrefilterWords("Saddlebred")).toEqual(["Saddlebred"]);
     });
 
     it("labels years and names the missing facts", () => {

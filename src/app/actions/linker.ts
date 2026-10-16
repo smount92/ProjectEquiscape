@@ -29,6 +29,7 @@ import {
     normalizeTerm,
     orderReleases,
     parseTerm,
+    rosterPrefilterWords,
     scaleMatches,
     setLabel,
     stripGeneration,
@@ -135,6 +136,23 @@ async function ownersOf(supabase: Client, moldId: string): Promise<number | null
     }
 }
 
+/**
+ * Candidate set rows for a mold: a title with "with" and every word of the
+ * mold's name, in any order. `mentionsMold` then keeps only rows that list
+ * the mold as a whole piece; this read is the coarse sieve, sized so a
+ * common name (Thoroughbred, 120+ sets) is never cut short (MHH-074).
+ */
+function setCandidates(supabase: Client, mold: Row, limit: number) {
+    let q = supabase
+        .from("catalog_items")
+        .select(COLS)
+        .eq("item_type", "plastic_release")
+        .neq("parent_id", mold.id)
+        .ilike("title", "%with%");
+    for (const w of rosterPrefilterWords(mold.title)) q = q.ilike("title", `%${w.replace(/[%_]/g, "")}%`);
+    return q.limit(limit);
+}
+
 /** A mold's own releases plus the set rows on other molds whose title names it. */
 async function expandMold(supabase: Client, mold: Row, hitIds: Set<string> = new Set()): Promise<LinkerMold> {
     const [{ data: own }, { data: sets }, owners] = await Promise.all([
@@ -144,13 +162,7 @@ async function expandMold(supabase: Client, mold: Row, hitIds: Set<string> = new
             .eq("parent_id", mold.id)
             .eq("item_type", "plastic_release")
             .limit(400),
-        supabase
-            .from("catalog_items")
-            .select(COLS)
-            .eq("item_type", "plastic_release")
-            .neq("parent_id", mold.id)
-            .ilike("title", `%with%${stripGeneration(mold.title).replace(/[%_]/g, "")}%`)
-            .limit(80),
+        setCandidates(supabase, mold, 400),
         ownersOf(supabase, mold.id),
     ]);
     const ownRows = (own ?? []) as Row[];
