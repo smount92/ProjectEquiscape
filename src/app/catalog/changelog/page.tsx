@@ -14,6 +14,8 @@ type ChangelogEntry = {
     contributor_alias: string;
     created_at: string;
     catalog_item_id: string | null;
+    /** Who made the change, in what role (migration 242); null on older rows. */
+    actor_role?: string | null;
     catalog_items: {
         maker_slug: string | null;
         slug: string | null;
@@ -22,10 +24,15 @@ type ChangelogEntry = {
     } | null;
 };
 
-/** Reference page for a changelog entry's catalog item, else the curation page. */
-function entryHref(entry: ChangelogEntry): string {
+/**
+ * Reference page for a changelog entry's catalog item, else the curation
+ * page, else no link at all: a removed entry's lines keep no item
+ * (registry_remove clears it), and "/catalog/null" is not a page.
+ */
+function entryHref(entry: Pick<ChangelogEntry, "catalog_item_id" | "catalog_items">): string | null {
+    if (!entry.catalog_item_id) return null;
     const cat = entry.catalog_items;
-    if (cat && entry.catalog_item_id) {
+    if (cat) {
         return referenceHref({
             id: entry.catalog_item_id,
             maker: cat.maker,
@@ -36,6 +43,17 @@ function entryHref(entry: ChangelogEntry): string {
     }
     return `/catalog/${entry.catalog_item_id}`;
 }
+
+const CHANGE_ICONS: Record<string, string> = {
+    correction: "🔧",
+    addition: "📗",
+    photo: "📸",
+    duplicate: "🔁",
+    merge: "🔁",
+    revert: "↩️",
+    restore: "↩️",
+    removal: "🗑",
+};
 
 export const metadata: Metadata = {
     title: "Catalog Changelog",
@@ -64,17 +82,12 @@ export default async function ChangelogPage() {
             <div className="flex flex-col gap-0">
                 {entries.map((entry) => {
                     const timeAgo = getTimeAgo(entry.created_at);
+                    const href = entryHref(entry);
 
                     return (
                         <div key={entry.id} className="flex gap-4 border-b border-input px-0 py-4">
                             <span className="min-w-[28px] text-[1.3rem]">
-                                {entry.change_type === "correction"
-                                    ? "🔧"
-                                    : entry.change_type === "addition"
-                                      ? "📗"
-                                      : entry.change_type === "photo"
-                                        ? "📸"
-                                        : "🗑"}
+                                {CHANGE_ICONS[entry.change_type] ?? "🗑"}
                             </span>
                             <div className="space-y-4">
                                 <p className="mb-[4px] text-sm font-medium text-foreground">
@@ -88,13 +101,14 @@ export default async function ChangelogPage() {
                                     >
                                         @{entry.contributor_alias}
                                     </Link>
+                                    {entry.actor_role === "moderator" && " · by a Registry moderator"}
                                     {" · "}
                                     {timeAgo}
-                                    {entry.catalog_item_id && (
+                                    {href && (
                                         <>
                                             {" · "}
                                             <Link
-                                                href={entryHref(entry)}
+                                                href={href}
                                                 className="font-semibold text-secondary-foreground hover:text-foreground"
                                             >
                                                 View entry →
