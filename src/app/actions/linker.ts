@@ -433,7 +433,7 @@ export async function fileReleaseFact(input: {
     value: string;
     /** The row is a set piece filed under another mold (see ReleaseRow). */
     isSetPiece?: boolean;
-}): Promise<{ success: true } | { success: false; error: string }> {
+}): Promise<{ success: true; autoApproved?: boolean } | { success: false; error: string }> {
     const value = input.value.trim();
     if (!value) return { success: false, error: "Type the value first." };
     // A set row's colour describes the piece on the mold it is filed under.
@@ -474,7 +474,8 @@ export async function fileReleaseFact(input: {
         reason: "Filled in from the reference linker by a member holding the horse.",
     });
     if (!result.success) return { success: false, error: ("error" in result && result.error) || "Could not file it." };
-    return { success: true };
+    // A curator's fact applies at once; the row then says "saved" rather than "sent for review".
+    return { success: true, autoApproved: !!(result as { autoApproved?: boolean }).autoApproved };
 }
 
 /**

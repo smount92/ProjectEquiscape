@@ -26,7 +26,7 @@ describe("fileReleaseFact: the year", () => {
     it("files a range as the first and the last year, with what the Registry holds as `from`", async () => {
         db.row = { attributes: { release_year_start: 1994 } };
         const r = await fileReleaseFact({ catalogId: "c1", fact: "year", value: "1995–97" });
-        expect(r).toEqual({ success: true });
+        expect(r).toEqual({ success: true, autoApproved: false });
         expect(suggestions.createSuggestion).toHaveBeenCalledWith(
             expect.objectContaining({
                 catalogItemId: "c1",

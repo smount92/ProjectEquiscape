@@ -190,6 +190,52 @@ describe("ReferenceLinker", () => {
         expect(screen.getByTestId("linker-banner").textContent).toContain("mold only");
     });
 
+    it("offers one link per missing fact and keeps the rest reachable after filing one (MHH-078)", async () => {
+        linker.fileReleaseFact.mockResolvedValue({ success: true });
+        linker.searchLinker.mockResolvedValue({
+            ...RESULT,
+            molds: [{ ...SM, releases: [{ ...SM.releases[0], look: null, model: null, from: null }] }],
+        });
+        render(<ReferenceLinker selectedCatalogId={null} onCatalogSelect={vi.fn()} />);
+        fireEvent.change(screen.getByLabelText("Find the model"), { target: { value: "Silky Sullivan" } });
+        const row = (await screen.findAllByTestId("linker-release", {}, { timeout: 3000 }))[0];
+        expect(within(row).getByTestId("linker-fill-colour")).toBeTruthy();
+        expect(within(row).getByTestId("linker-fill-year")).toBeTruthy();
+        expect(within(row).getByTestId("linker-fill-model-number")).toBeTruthy();
+        // File the year as a range.
+        fireEvent.click(within(row).getByTestId("linker-fill-year"));
+        const box = within(row).getByPlaceholderText("e.g. 1976 or 1995-1997");
+        fireEvent.change(box, { target: { value: "1995-1997" } });
+        fireEvent.click(within(row).getByText("File it"));
+        await waitFor(() =>
+            expect(linker.fileReleaseFact).toHaveBeenCalledWith(
+                expect.objectContaining({ catalogId: "r5022", fact: "year", value: "1995-1997" }),
+            ),
+        );
+        await waitFor(() =>
+            expect(within(row).getByTestId("linker-sent").textContent).toMatch(/year.*sent for review/i),
+        );
+        // The year link is gone; the colour and the model number are still there.
+        expect(within(row).queryByTestId("linker-fill-year")).toBeNull();
+        fireEvent.click(within(row).getByTestId("linker-fill-model-number"));
+        expect(within(row).getByPlaceholderText("e.g. 5022")).toBeTruthy();
+    });
+
+    it("sends a set piece's colour to its own row, with Add my release filled in (MHH-078)", async () => {
+        render(<ReferenceLinker selectedCatalogId={null} onCatalogSelect={vi.fn()} />);
+        fireEvent.change(screen.getByLabelText("Find the model"), { target: { value: "Silky Sullivan" } });
+        const mold = await screen.findByTestId("linker-mold", {}, { timeout: 3000 });
+        const setRow = within(mold).getAllByTestId("linker-release")[1];
+        expect(within(setRow).queryByTestId("linker-fill-colour")).toBeNull();
+        fireEvent.click(within(setRow).getByTestId("linker-add-piece"));
+        const form = within(mold).getByTestId("linker-add");
+        expect((within(form).getByPlaceholderText("5022") as HTMLInputElement).value).toBe("711096");
+        expect((within(form).getByPlaceholderText("leave blank if sold alone") as HTMLInputElement).value).toBe(
+            "12-Piece Stablemates Set",
+        );
+        expect((within(form).getByPlaceholderText("e.g. 1976 or 1995-1997") as HTMLInputElement).value).toBe("1996");
+    });
+
     it("searches a model number and lands on the release", async () => {
         linker.searchLinker.mockResolvedValue({
             term: "5022",
