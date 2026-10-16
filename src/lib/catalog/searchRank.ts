@@ -23,6 +23,7 @@
  */
 import { makerMatches } from "./queryParse";
 import { searchKey } from "./searchKey";
+import { yearRangeLabel, type CardAttributes } from "./cardDisplay";
 
 export interface RankableItem {
     title: string;
@@ -46,15 +47,9 @@ function tierOf(queryLower: string, titleLower: string): number {
     return 4;
 }
 
-/** "2018–", "1977–1990" or "2006" from a release's year attributes; null when undated. */
+/** "1977–1990" or "2018" from a release's year attributes; null when undated. The Registry's one label (MHH-077). */
 export function releaseYears(attributes: Record<string, unknown> | null | undefined): string | null {
-    const year = (v: unknown): number | null =>
-        typeof v === "number" ? v : typeof v === "string" && /^\d{4}$/.test(v) ? Number(v) : null;
-    const a = year(attributes?.release_year_start);
-    const b = year(attributes?.release_year_end);
-    if (a == null && b == null) return null;
-    if (a != null && b != null) return a === b ? String(a) : `${a}–${b}`;
-    return a != null ? `${a}–` : `–${b}`;
+    return yearRangeLabel(attributes as CardAttributes | null | undefined);
 }
 
 export function rankSearchResults<T extends RankableItem>(

@@ -129,6 +129,69 @@ export function normalizeFactValue(key: string, value: unknown): unknown {
     }
 }
 
+// ── Release years ──
+
+/** The earliest year a Registry release can carry (Hagen-Renaker, Beswick and Hartland predate Breyer). */
+export const MIN_RELEASE_YEAR = 1900;
+/** The latest: next year's announced releases, and one more. */
+export function maxReleaseYear(): number {
+    return new Date().getFullYear() + 2;
+}
+
+export type YearRange = { ok: true; start: number; end: number | null } | { ok: false; error: string };
+
+/**
+ * A release's years as a member types them (MHH-077): "1995", "1995-1997",
+ * "1995–97", "1995 - 1997", "1995 to 1997". A two-digit end takes the
+ * start's century ("1998-02" is 2002). The same year twice is one year.
+ * Storage is attributes.release_year_start and release_year_end; before
+ * this the end year was dropped (parseInt("1995-1997") is 1995).
+ */
+export function parseYearRange(raw: string): YearRange {
+    const v = raw.trim();
+    const max = maxReleaseYear();
+    const shape = "Use a year like 1976, or a range like 1995-1997.";
+    const parts = v
+        .toLowerCase()
+        .replace(/\s+to\s+/g, "-")
+        .split(/[-‐‑‒–—―]/)
+        .map((p) => p.trim());
+    if (parts.length > 2 || !/^\d{4}$/.test(parts[0]) || (parts.length === 2 && !/^(\d{2}|\d{4})$/.test(parts[1])))
+        return { ok: false, error: shape };
+    const start = Number(parts[0]);
+    let end: number | null = null;
+    if (parts.length === 2) {
+        if (parts[1].length === 2) {
+            end = Math.floor(start / 100) * 100 + Number(parts[1]);
+            if (end < start && end + 100 <= max) end += 100;
+        } else end = Number(parts[1]);
+    }
+    if (end !== null && end < start)
+        return { ok: false, error: `The last year (${end}) is before the first (${start}).` };
+    if (start < MIN_RELEASE_YEAR || start > max || (end !== null && end > max))
+        return { ok: false, error: `Years run from ${MIN_RELEASE_YEAR} to ${max}.` };
+    return { ok: true, start, end: end === start ? null : end };
+}
+
+/**
+ * The years an approved new entry stores, from its suggestion's `year` and
+ * `year_end`. The end is kept only when it makes a valid range with the
+ * start; the start is kept as before either way, so an older pending
+ * suggestion approves exactly as it would have.
+ */
+export function additionYears(
+    year: unknown,
+    yearEnd: unknown,
+): { release_year_start?: unknown; release_year_end?: number } {
+    const blank = (v: unknown) => v === undefined || v === null || (typeof v === "string" && !v.trim());
+    if (blank(year)) return {};
+    const start = normalizeFactValue("release_year_start", typeof year === "number" ? year : String(year).trim());
+    if (blank(yearEnd)) return { release_year_start: start };
+    const range = parseYearRange(`${String(year).trim()}-${String(yearEnd).trim()}`);
+    if (!range.ok) return { release_year_start: start };
+    return { release_year_start: range.start, ...(range.end !== null ? { release_year_end: range.end } : {}) };
+}
+
 // ── Registry vocabularies (the database refuses anything else, 233) ──
 
 const VOCAB_LABEL = { scale: "scale", run_type: "run type", material: "material" } as const;

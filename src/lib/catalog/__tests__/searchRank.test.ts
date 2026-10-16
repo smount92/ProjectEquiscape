@@ -95,7 +95,7 @@ describe("typing, not typos (223)", () => {
     });
 
     it("formats a release's years", () => {
-        expect(releaseYears({ release_year_start: 2018 })).toBe("2018–");
+        expect(releaseYears({ release_year_start: 2018 })).toBe("2018");
         expect(releaseYears({ release_year_start: 1977, release_year_end: 1990 })).toBe("1977–1990");
         expect(releaseYears({ release_year_start: "2006", release_year_end: 2006 })).toBe("2006");
         expect(releaseYears({})).toBeNull();

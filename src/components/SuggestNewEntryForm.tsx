@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useTransition, type KeyboardEvent } from "
 import { useRouter } from "next/navigation";
 import { createSuggestion } from "@/app/actions/catalog-suggestions";
 import { pickMold, type MoldChoice } from "@/app/actions/linker";
-import { splitNumberFromTitle } from "@/lib/linker/model";
+import { releaseYearFields, splitNumberFromTitle } from "@/lib/linker/model";
 import { ARTIST_ATTRIBUTED_CATEGORIES, CANONICAL_SCALES, KNOWN_MANUFACTURERS, RUN_TYPES } from "@/lib/catalog/taxonomy";
 import { MATERIAL_OPTIONS } from "@/lib/catalog/editableFields";
 import { GENDER_GROUPS } from "@/lib/config/genders";
@@ -78,6 +78,8 @@ export default function SuggestNewEntryForm({
     const [color, setColor] = useState("");
     const [material, setMaterial] = useState("");
     const [year, setYear] = useState("");
+    // The last year a release was made, when it ended (MHH-077).
+    const [yearEnd, setYearEnd] = useState("");
     const [retailPrice, setRetailPrice] = useState("");
     // Tier 1 (2026-08-23). Run type/count describe a FACTORY release, so
     // they are only collected for factory categories (see the payload).
@@ -167,6 +169,17 @@ export default function SuggestNewEntryForm({
             return;
         }
 
+        // First and last year as one range, checked the way every year box is (MHH-077).
+        if (yearEnd.trim() && !year.trim()) {
+            setError("Add the first year too, or leave the last year empty.");
+            return;
+        }
+        const years = releaseYearFields(yearEnd.trim() ? `${year.trim()}-${yearEnd.trim()}` : year);
+        if (!years.ok) {
+            setError(years.error);
+            return;
+        }
+
         // Attribution split: for artist pieces the person IS the primary
         // attribution (maker); for factory pieces the company is.
         const isArtistPiece = ARTIST_ATTRIBUTED_CATEGORIES.has(itemType);
@@ -193,7 +206,8 @@ export default function SuggestNewEntryForm({
                     scale: scale || undefined,
                     color: color || undefined,
                     material: material || undefined,
-                    year: year ? parseInt(year, 10) : undefined,
+                    year: years.fields.year,
+                    year_end: years.fields.year_end,
                     retail_price: /^\d{1,5}([.]\d{1,2})?$/.test(retailPrice.trim()) ? retailPrice.trim() : undefined,
                     // Run fields are factory-only — an artist piece has no "run".
                     run_type: isArtistPiece ? undefined : runType || undefined,
@@ -580,7 +594,7 @@ export default function SuggestNewEntryForm({
                 )}
                 <div className="mb-6">
                     <label className="mb-1 block text-sm font-semibold text-foreground" htmlFor="new-entry-year">
-                        Year
+                        First year
                     </label>
                     <Input
                         id="new-entry-year"
@@ -588,9 +602,26 @@ export default function SuggestNewEntryForm({
                         value={year}
                         onChange={(e) => setYear(e.target.value)}
                         placeholder="e.g. 1995"
-                        min={1950}
-                        max={2030}
+                        min={1900}
+                        max={2100}
                     />
+                </div>
+                <div className="mb-6">
+                    <label className="mb-1 block text-sm font-semibold text-foreground" htmlFor="new-entry-year-end">
+                        Last year <span className="font-normal text-muted-foreground">(if it ended)</span>
+                    </label>
+                    <Input
+                        id="new-entry-year-end"
+                        type="number"
+                        value={yearEnd}
+                        onChange={(e) => setYearEnd(e.target.value)}
+                        placeholder="e.g. 1997"
+                        min={1900}
+                        max={2100}
+                    />
+                    <p className="m-0 mt-1 text-xs text-muted-foreground">
+                        Leave it empty for a release still made, or made for one year only.
+                    </p>
                 </div>
                 <div className="mb-6">
                     <label className="mb-1 block text-sm font-semibold text-foreground" htmlFor="new-entry-retail">

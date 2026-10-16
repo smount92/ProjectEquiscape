@@ -13,11 +13,13 @@ import {
     orderReleases,
     parseTerm,
     releaseName,
+    releaseYearFields,
     rosterPrefilterWords,
     scaleMatches,
     setLabel,
     splitNumberFromTitle,
     stripGeneration,
+    yearFactChanges,
     yearsLabel,
     type LinkerRelease,
 } from "@/lib/linker/model";
@@ -157,8 +159,8 @@ describe("linker model", () => {
 
     it("labels years and names the missing facts", () => {
         expect(yearsLabel({ from: 1976, to: 1988 })).toBe("1976–1988");
-        expect(yearsLabel({ from: 2001, to: null })).toBe("2001–");
-        expect(yearsLabel({ from: null, to: 1997 })).toBe("–1997");
+        expect(yearsLabel({ from: 2001, to: null })).toBe("2001");
+        expect(yearsLabel({ from: null, to: 1997 })).toBe("1997");
         expect(yearsLabel({ from: null, to: null })).toBeNull();
         expect(missingFacts({ look: null, from: null, to: null, model: "5022" })).toEqual(["colour", "year"]);
         expect(missingFacts({ look: "bay", from: 1990, to: null, model: null })).toEqual(["model number"]);
@@ -212,6 +214,33 @@ describe("linker model", () => {
             release_year_start: { from: "1976", to: "1988" },
         });
         expect(factCorrection("model_number", null, "#5022")).toEqual({ model_number: { from: "", to: "5022" } });
+    });
+
+    it("files a typed year range as both year fields, and says why a bad one is refused (MHH-077)", () => {
+        expect(yearFactChanges("1995-1997", {})).toEqual({
+            ok: true,
+            changes: {
+                release_year_start: { from: "", to: "1995" },
+                release_year_end: { from: "", to: "1997" },
+            },
+        });
+        expect(yearFactChanges("1995–97", { release_year_start: 1994 })).toEqual({
+            ok: true,
+            changes: {
+                release_year_start: { from: "1994", to: "1995" },
+                release_year_end: { from: "", to: "1997" },
+            },
+        });
+        expect(yearFactChanges("1998", {})).toEqual({
+            ok: true,
+            changes: { release_year_start: { from: "", to: "1998" } },
+        });
+        expect(yearFactChanges("1997-1995", {})).toMatchObject({ ok: false, error: expect.stringMatching(/before/) });
+        // "Add my release": the end year is no longer dropped.
+        expect(releaseYearFields("1995 to 1997")).toEqual({ ok: true, fields: { year: 1995, year_end: 1997 } });
+        expect(releaseYearFields("1976")).toEqual({ ok: true, fields: { year: 1976 } });
+        expect(releaseYearFields("  ")).toEqual({ ok: true, fields: {} });
+        expect(releaseYearFields("70s")).toMatchObject({ ok: false });
     });
 
     it("matches scale chips", () => {

@@ -15,6 +15,8 @@
  */
 
 import { sameWords } from "@/lib/catalog/searchKey";
+import { yearRangeLabel } from "@/lib/catalog/cardDisplay";
+import { parseYearRange } from "@/lib/catalog/corrections";
 
 export const LINKER_PREF_KEY = "mhh:linker";
 export type LinkerPref = "new" | "old";
@@ -222,11 +224,9 @@ export function rosterPrefilterWords(moldTitle: string): string[] {
         .filter((w) => w.length >= 2);
 }
 
+/** The Registry's one year label (cardDisplay.yearRangeLabel): "1995–1997", or "1998" for a start alone. */
 export function yearsLabel(r: Pick<LinkerRelease, "from" | "to">): string | null {
-    if (r.from && r.to) return r.from === r.to ? String(r.from) : `${r.from}–${r.to}`;
-    if (r.from) return `${r.from}–`;
-    if (r.to) return `–${r.to}`;
-    return null;
+    return yearRangeLabel({ release_year_start: r.from, release_year_end: r.to });
 }
 
 export type MissingFact = "colour" | "year" | "model number";
@@ -350,13 +350,44 @@ export function linkedLabel(
  * strings and read "undefined → undefined" on the admin queue.
  */
 export function factCorrection(
-    field: "color_description" | "release_year_start" | "model_number",
+    field: "color_description" | "release_year_start" | "release_year_end" | "model_number",
     current: unknown,
     value: string,
 ): Record<string, { from: string; to: string }> {
     const to = field === "model_number" ? value.trim().replace(/^#/, "") : value.trim();
     const from = current === null || current === undefined ? "" : String(current);
     return { [field]: { from, to } };
+}
+
+/**
+ * "Fill in what you know" for the year (MHH-077): "1976" files the first
+ * year; "1995-1997" (or 1995–97, 1995 to 1997) files the first and the last.
+ */
+export function yearFactChanges(
+    raw: string,
+    current: { release_year_start?: unknown; release_year_end?: unknown },
+): { ok: true; changes: Record<string, { from: string; to: string }> } | { ok: false; error: string } {
+    const range = parseYearRange(raw);
+    if (!range.ok) return range;
+    return {
+        ok: true,
+        changes: {
+            ...factCorrection("release_year_start", current.release_year_start, String(range.start)),
+            ...(range.end !== null
+                ? factCorrection("release_year_end", current.release_year_end, String(range.end))
+                : {}),
+        },
+    };
+}
+
+/** "Add my release": the typed years as the suggestion's `year` and `year_end`; empty is fine. */
+export function releaseYearFields(
+    raw: string | null | undefined,
+): { ok: true; fields: { year?: number; year_end?: number } } | { ok: false; error: string } {
+    if (!raw?.trim()) return { ok: true, fields: {} };
+    const range = parseYearRange(raw);
+    if (!range.ok) return range;
+    return { ok: true, fields: { year: range.start, ...(range.end !== null ? { year_end: range.end } : {}) } };
 }
 
 /** Strip a leading "#5022 " from a typed title so the number goes in its own field. */

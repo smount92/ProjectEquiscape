@@ -117,7 +117,7 @@ function FactForm({
             <input
                 className="h-8 min-w-0 flex-1 rounded-md border border-input bg-card px-2 text-sm"
                 placeholder={
-                    fact === "colour" ? "what it looks like" : fact === "year" ? "first year, e.g. 1976" : "e.g. 5022"
+                    fact === "colour" ? "what it looks like" : fact === "year" ? "e.g. 1976 or 1995-1997" : "e.g. 5022"
                 }
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
@@ -290,7 +290,7 @@ function AddForm({
             </div>
             {field("modelNumber", "Model number", "5022")}
             {field("look", "What it looks like", "dark chestnut, various socks")}
-            {field("yearFrom", "First year", "1976")}
+            {field("yearFrom", "Years", "e.g. 1976 or 1995-1997")}
             {field("name", "Name, if it had one", "Andrew")}
             {field("setName", "Came in a set?", "leave blank if sold alone")}
             <div className="col-span-full flex flex-wrap items-center gap-2">

@@ -20,6 +20,7 @@ import { referenceHref } from "@/lib/catalog/referenceUrl";
 import { createSuggestion } from "@/app/actions/catalog-suggestions";
 import { containsEveryWord, sameWords, searchKey } from "@/lib/catalog/searchKey";
 import { rosterLast } from "@/lib/catalog/moldSearch";
+import { parseYearRange } from "@/lib/catalog/corrections";
 import {
     collapseSetPieces,
     commonOne,
@@ -30,10 +31,12 @@ import {
     normalizeTerm,
     orderReleases,
     parseTerm,
+    releaseYearFields,
     rosterPrefilterWords,
     scaleMatches,
     setLabel,
     stripGeneration,
+    yearFactChanges,
     type LinkerMold,
     type LinkerMoldSummary,
     type LinkerOther,
@@ -393,7 +396,9 @@ export async function fileReleaseUnderMold(input: {
     const set = (input.setName ?? "").trim();
     if (!model && !look) return { success: false, error: "Give at least a model number or what it looks like." };
     const title = name || set || stripGeneration(m.title);
-    const year = parseInt((input.yearFrom ?? "").trim(), 10);
+    // "1995-1997" files both years; parseInt kept only the first (MHH-077).
+    const years = releaseYearFields(input.yearFrom);
+    if (!years.ok) return { success: false, error: years.error };
     const result = await createSuggestion({
         catalogItemId: null,
         suggestionType: "addition",
@@ -408,7 +413,7 @@ export async function fileReleaseUnderMold(input: {
             parent_catalog_id: m.id,
             ...(model ? { model_number: model } : {}),
             ...(look ? { color: look } : {}),
-            ...(Number.isFinite(year) ? { year } : {}),
+            ...years.fields,
             ...(set ? { set_name: set } : {}),
         },
         reason: `Added from the reference linker while linking a horse${input.note?.trim() ? ": " + input.note.trim() : "."}`,
@@ -439,10 +444,11 @@ export async function fileReleaseFact(input: {
             error: 'This row is the set, filed under another mold. Use "Add my release" to record your piece\'s colour.',
         };
     }
-    const field =
-        input.fact === "colour" ? "color_description" : input.fact === "year" ? "release_year_start" : "model_number";
-    if (field === "release_year_start" && !/^\d{4}$/.test(value))
-        return { success: false, error: "Use a four-digit year." };
+    // A year may be a range: "1995-1997" files the first and the last year (MHH-077).
+    if (input.fact === "year") {
+        const check = parseYearRange(value);
+        if (!check.ok) return { success: false, error: check.error };
+    }
     // The correction carries what the Registry holds today as `from`, so the
     // queue shows a real diff and a revert knows what to put back.
     const supabase = await createClient();
@@ -451,11 +457,20 @@ export async function fileReleaseFact(input: {
         .select("attributes")
         .eq("id", input.catalogId)
         .maybeSingle();
-    const current = ((row as { attributes?: Record<string, unknown> | null } | null)?.attributes ?? {})[field];
+    const attrs = (row as { attributes?: Record<string, unknown> | null } | null)?.attributes ?? {};
+    let fieldChanges: Record<string, { from: string; to: string }>;
+    if (input.fact === "year") {
+        const years = yearFactChanges(value, attrs);
+        if (!years.ok) return { success: false, error: years.error };
+        fieldChanges = years.changes;
+    } else {
+        const field = input.fact === "colour" ? "color_description" : "model_number";
+        fieldChanges = factCorrection(field, attrs[field], value);
+    }
     const result = await createSuggestion({
         catalogItemId: input.catalogId,
         suggestionType: "correction",
-        fieldChanges: factCorrection(field, current, value),
+        fieldChanges,
         reason: "Filled in from the reference linker by a member holding the horse.",
     });
     if (!result.success) return { success: false, error: ("error" in result && result.error) || "Could not file it." };

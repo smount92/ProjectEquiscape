@@ -13,6 +13,7 @@ import { sanitizeText } from "@/lib/utils/validation";
 import { sanitizeForOr } from "@/lib/utils/search";
 import {
     BRONZE_THRESHOLD,
+    additionYears,
     CATALOG_REAL_COLUMNS,
     CONTRIBUTOR_THRESHOLD,
     GOLD_THRESHOLD,
@@ -1186,7 +1187,8 @@ async function applyApprovedSuggestion(
             ...(parentId ? { parent_id: parentId.id } : {}),
             attributes: JSON.parse(
                 JSON.stringify({
-                    ...(fc.year ? { release_year_start: normalizeFactValue("release_year_start", fc.year) } : {}),
+                    // First and last year; "Last year (if it ended)" was never stored (MHH-077).
+                    ...(fc.year ? additionYears(fc.year, fc.year_end) : {}),
                     ...(fc.color ? { color_description: normalizeFactValue("color_description", fc.color) } : {}),
                     ...(fc.model_number ? { model_number: fc.model_number } : {}),
                     ...(canonicalVocabulary("material", fc.material)

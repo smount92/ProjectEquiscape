@@ -116,3 +116,33 @@ describe("SuggestNewEntryForm — the mold picker behaves like a proper list", (
         expect(screen.queryByText(/linked to this mold/i)).not.toBeInTheDocument();
     });
 });
+
+describe("SuggestNewEntryForm — a release's last year (MHH-077)", () => {
+    beforeEach(() => {
+        createSuggestion.mockReset();
+        createSuggestion.mockResolvedValue({ success: true });
+    });
+
+    const fill = (first: string, last: string) => {
+        render(<SuggestNewEntryForm />);
+        fireEvent.change(screen.getByLabelText(/title \/ name/i), { target: { value: "Pinto Saddlebred" } });
+        fireEvent.change(screen.getByLabelText(/first year/i), { target: { value: first } });
+        fireEvent.change(screen.getByLabelText(/last year/i), { target: { value: last } });
+        fireEvent.change(screen.getByLabelText(/reason|why/i), { target: { value: "Missing release on this mold." } });
+        fireEvent.click(screen.getByRole("button", { name: /submit/i }));
+    };
+
+    it("sends the first and the last year", async () => {
+        fill("1995", "1997");
+        await waitFor(() => expect(createSuggestion).toHaveBeenCalled());
+        const input = createSuggestion.mock.calls[0][0] as { fieldChanges: Record<string, unknown> };
+        expect(input.fieldChanges.year).toBe(1995);
+        expect(input.fieldChanges.year_end).toBe(1997);
+    });
+
+    it("says so when the last year is before the first, and sends nothing", async () => {
+        fill("1997", "1995");
+        expect(await screen.findByText(/before the first/i)).toBeInTheDocument();
+        expect(createSuggestion).not.toHaveBeenCalled();
+    });
+});

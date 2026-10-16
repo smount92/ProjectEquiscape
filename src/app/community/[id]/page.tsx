@@ -48,6 +48,7 @@ import HorseDocuments from "@/components/passport/HorseDocuments";
 import { getHorseDocuments } from "@/lib/shows/queries";
 import { qualifierDisplayFields } from "@/lib/records/qualifiers";
 import { getMakingForHorse } from "@/app/actions/work-records";
+import { yearRangeLabel } from "@/lib/catalog/cardDisplay";
 
 // Force fresh data on every request — prevents stale comments/favorites
 
@@ -650,10 +651,10 @@ export default async function PublicPassportPage({
                                             Release Years
                                         </span>
                                         <span className="max-w-[60%] text-right text-sm font-semibold text-foreground">
-                                            {releaseInfo.yearStart}
-                                            {releaseInfo.yearEnd && releaseInfo.yearEnd !== releaseInfo.yearStart
-                                                ? `–${releaseInfo.yearEnd}`
-                                                : ""}
+                                            {yearRangeLabel({
+                                                release_year_start: releaseInfo.yearStart,
+                                                release_year_end: releaseInfo.yearEnd,
+                                            })}
                                         </span>
                                     </div>
                                 )}
