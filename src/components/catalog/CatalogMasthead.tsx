@@ -9,7 +9,9 @@
  */
 
 import Link from "next/link";
+import { Suspense } from "react";
 import { BookOpen, FileText, Lightbulb } from "lucide-react";
+import DeskLink from "@/components/desk/DeskLink";
 
 export default function CatalogMasthead({
     totalCount,
@@ -47,6 +49,10 @@ export default function CatalogMasthead({
                     </span>
                 </div>
                 <div className="z-[1] ml-auto flex flex-wrap gap-2">
+                    {/* Moderators and the owner only; streams in so the masthead never waits on it. */}
+                    <Suspense fallback={null}>
+                        <DeskLink />
+                    </Suspense>
                     <Link href="/catalog/changelog" className="btn-ghostleather !px-4 !py-2 !text-xs">
                         <FileText size={14} strokeWidth={1.5} /> Changelog
                     </Link>
