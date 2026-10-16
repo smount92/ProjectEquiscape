@@ -1396,8 +1396,8 @@ const PENDING_MIGRATIONS: MigrationSpec[] = [
         id: "235",
         title: "Report everything; hide, never delete",
         summary:
-            "The reports table accepts show entries and Help ID requests and suggestions too; posts and Help ID rows get hidden_at, and a row policy hides them from members, so a report card can take them down without deleting anything.",
-        probe: { kind: "column", table: "posts", column: "hidden_at" },
+            "The reports table accepts show entries and Help ID requests and suggestions too; posts and Help ID rows get hidden_at, and a row policy hides them from members, so a report card can take them down without deleting anything. Take-downs stick: a removed message can't be restored by either side, a horse made private and an entry scratched by a moderator are stamped so their owner can't undo it, hidden notes leave the logged-out passport, and hidden posts take no replies or likes.",
+        probe: { kind: "column", table: "show_class_entries", column: "moderation_scratched_at" },
     },
     {
         id: "234",
