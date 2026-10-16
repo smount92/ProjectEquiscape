@@ -97,7 +97,8 @@ describe("external show reviews tell the member who sent the show", () => {
 });
 
 describe("a dismissed sanctioning request tells the host", () => {
-    it("dismissal of a real request notifies; a grant still sends its own notice", async () => {
+    const NOTE = `Please ${SANCTIONING_REQUEST_MARKER}`;
+    function pendingRequest(updated: unknown[] = [{ id: SHOW }]) {
         db.on("shows", (q) =>
             q.op === "select"
                 ? {
@@ -105,13 +106,17 @@ describe("a dismissed sanctioning request tells the host", () => {
                           id: SHOW,
                           title: "Region 4 Live",
                           host_id: "host-1",
-                          sanctioning_note: `Please ${SANCTIONING_REQUEST_MARKER}`,
+                          sanctioning_note: NOTE,
                           is_mhh_qualifying: false,
                       },
                       error: null,
                   }
-                : OK,
+                : { data: updated, error: null },
         );
+    }
+
+    it("dismissal of a real request notifies; a grant still sends its own notice", async () => {
+        pendingRequest();
         expect(await resolveSanctioningRequest(SHOW, "dismiss")).toEqual({ success: true });
         expect(createNotification).toHaveBeenCalledWith({
             userId: "host-1",
@@ -119,6 +124,44 @@ describe("a dismissed sanctioning request tells the host", () => {
             content: expect.stringMatching(/request to make "Region 4 Live" MHH Sanctioned and haven't granted it/),
             linkUrl: `/shows/host/${SHOW}`,
         });
+    });
+
+    it("only changes the show while the request it read is still pending", async () => {
+        pendingRequest();
+        await resolveSanctioningRequest(SHOW, "dismiss");
+        const [dismissal] = db.writes("shows");
+        expect(db.filter(dismissal, "eq", "sanctioning_note")).toBe(NOTE);
+
+        db.reset();
+        pendingRequest();
+        await resolveSanctioningRequest(SHOW, "grant");
+        const [grant] = db.writes("shows");
+        expect(db.filter(grant, "eq", "sanctioning_note")).toBe(NOTE);
+        expect(db.filter(grant, "eq", "is_mhh_qualifying")).toBe(false);
+    });
+
+    it("tells the host once: a second click, or a second admin, changes and sends nothing", async () => {
+        pendingRequest([]);
+        expect(await resolveSanctioningRequest(SHOW, "dismiss")).toEqual({
+            success: false,
+            error: "This request has already been dealt with.",
+        });
+        expect(await resolveSanctioningRequest(SHOW, "grant")).toEqual({
+            success: false,
+            error: "This request has already been dealt with.",
+        });
+        expect(createNotification).not.toHaveBeenCalled();
+    });
+
+    it("won't grant a show that is already sanctioned", async () => {
+        db.on("shows", () => ({
+            data: { id: SHOW, title: "X", host_id: "host-1", sanctioning_note: null, is_mhh_qualifying: true },
+            error: null,
+        }));
+        const result = await resolveSanctioningRequest(SHOW, "grant");
+        expect(result.success).toBe(false);
+        expect(db.writes("shows")).toEqual([]);
+        expect(createNotification).not.toHaveBeenCalled();
     });
 
     it("says nothing when there was no request to dismiss", async () => {
@@ -152,6 +195,30 @@ describe("suspension tells the member, with the reason and the contact page", ()
         );
     });
 
+    it("amending the reason of a suspended member says the reason changed, not that they were suspended again", async () => {
+        db.on("users", (q) =>
+            q.op === "select" ? { data: { is_suspended: true, suspended_reason: "Spam" }, error: null } : OK,
+        );
+        expect(await suspendUser("u-9", "Spam and scam links in messages")).toEqual({ success: true });
+        expect(createNotification).toHaveBeenCalledTimes(1);
+        const [{ content }] = createNotification.mock.calls[0] as [{ content: string }];
+        expect(content).not.toMatch(/has been suspended/);
+        expect(content).toMatch(
+            /^We've updated the reason your account is suspended\. The reason: Spam and scam links/,
+        );
+        // The suspension keeps the day it began.
+        const [write] = db.writes("users");
+        expect(write.payload).toEqual({ suspended_reason: "Spam and scam links in messages" });
+    });
+
+    it("says nothing when an already-suspended member is suspended again for the same reason", async () => {
+        db.on("users", (q) =>
+            q.op === "select" ? { data: { is_suspended: true, suspended_reason: "Spam" }, error: null } : OK,
+        );
+        expect(await suspendUser("u-9", "Spam")).toEqual({ success: true });
+        expect(createNotification).not.toHaveBeenCalled();
+    });
+
     it("says nothing when the suspension didn't happen", async () => {
         authAdmin.updateUserById.mockResolvedValueOnce({ error: { message: "auth down" } });
         const result = await suspendUser("u-9", "Spam");
@@ -165,27 +232,40 @@ describe("a barn thread's new mark tells its author", () => {
 
     beforeEach(() => {
         getUser.mockResolvedValue({ data: { user: { id: "barn-admin", email: "m@test.com" } } });
+        threadMarked([{ id: POST }]);
+        db.on("group_memberships", () => ({ data: { role: "admin" }, error: null }));
+        db.on("groups", () => ({ data: { name: "Site Suggestions", slug: "suggestions" }, error: null }));
+    });
+
+    /** The thread; the mark's update returns `changed` (empty: it already had that mark). */
+    function threadMarked(changed: unknown[]) {
         db.on("posts", (q) =>
             q.op === "select"
                 ? {
                       data: { group_id: "g-1", author_id: "author-1", title: "Add a dark mode", content: "Please" },
                       error: null,
                   }
-                : OK,
+                : { data: changed, error: null },
         );
-        db.on("group_memberships", () => ({ data: { role: "admin" }, error: null }));
-        db.on("groups", () => ({ data: { name: "Site Suggestions", slug: "suggestions" }, error: null }));
-    });
+    }
 
     it("marked: the author hears which mark, with a link to the thread", async () => {
-        expect(await setThreadStatus(POST, "implemented")).toEqual({ success: true });
+        expect(await setThreadStatus(POST, "not_planned")).toEqual({ success: true });
         expect(createNotification).toHaveBeenCalledWith({
             userId: "author-1",
             type: "group_post",
             actorId: "barn-admin",
-            content: 'Your thread "Add a dark mode" in Site Suggestions was marked implemented.',
+            content: 'Your thread "Add a dark mode" in Site Suggestions is now marked "Not planned".',
             linkUrl: `/community/groups/suggestions/thread/${POST}`,
         });
+    });
+
+    it("the same mark again changes nothing and sends nothing", async () => {
+        threadMarked([]);
+        expect(await setThreadStatus(POST, "implemented")).toEqual({ success: true });
+        const [write] = db.writes("posts");
+        expect(write.filters).toContainEqual(["or", "thread_status.is.null,thread_status.neq.implemented"]);
+        expect(createNotification).not.toHaveBeenCalled();
     });
 
     it("cleared: no notice", async () => {

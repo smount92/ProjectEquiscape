@@ -1199,10 +1199,15 @@ export async function setThreadStatus(
     if (!role || !["owner", "admin", "moderator"].includes(role)) {
         return { success: false, error: "Only barn admins can mark threads." };
     }
-    const { error } = await supabase
+    // A new mark is written only where it differs from the old one, and
+    // the rows that come back say whether it did: the same mark clicked
+    // twice, or by two staff, changes nothing and tells nobody again.
+    let mark = supabase
         .from("posts")
         .update({ thread_status: status } as never)
         .eq("id", postId);
+    if (status !== null) mark = mark.or(`thread_status.is.null,thread_status.neq.${status}`);
+    const { data: changed, error } = await mark.select("id");
     if (error) {
         if (error.code === "42703" || error.code === "PGRST204") {
             return { success: false, error: "Thread marks aren't switched on yet (migration 221)." };
@@ -1211,8 +1216,9 @@ export async function setThreadStatus(
     }
 
     // The member who started the thread hears the new mark (MHH-024); a
-    // cleared mark isn't news. Their own mark never pings them (self-guard).
-    if (status !== null) {
+    // cleared or unchanged mark isn't news. Their own mark never pings them
+    // (self-guard).
+    if (status !== null && (changed ?? []).length > 0) {
         try {
             const { data: g } = await supabase.from("groups").select("name, slug").eq("id", p.group_id).maybeSingle();
             const group = g as { name: string; slug: string } | null;
@@ -1223,7 +1229,7 @@ export async function setThreadStatus(
                 userId: p.author_id,
                 type: "group_post",
                 actorId: user.id,
-                content: `Your thread "${named}"${group ? ` in ${group.name}` : ""} was marked ${THREAD_STATUS_LABEL[status].label.toLowerCase()}.`,
+                content: `Your thread "${named}"${group ? ` in ${group.name}` : ""} is now marked "${THREAD_STATUS_LABEL[status].label}".`,
                 ...(group ? { linkUrl: `/community/groups/${group.slug}/thread/${postId}` } : {}),
             });
         } catch (err) {

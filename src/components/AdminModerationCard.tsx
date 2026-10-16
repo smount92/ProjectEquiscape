@@ -27,7 +27,10 @@ export default function AdminModerationCard() {
             return;
         }
         if (mode === "suspend" && reason.trim().length < 3) {
-            setNotice({ ok: false, text: "A reason is required — it lands on the audit trail." });
+            setNotice({
+                ok: false,
+                text: "A reason is required — the member is told it, and it lands on the audit trail.",
+            });
             return;
         }
         setPending(mode);
@@ -53,7 +56,7 @@ export default function AdminModerationCard() {
             <h3 className="m-0 mb-1 text-base font-bold">Suspend a user</h3>
             <p className="m-0 mb-3 text-sm text-muted-foreground">
                 Site-wide and reversible: a suspended account can still sign in and read, but every action (entering
-                shows, posting, messaging, trading) is refused.
+                shows, posting, messaging, trading) is refused. The member is told, with your reason.
             </p>
             <div className="flex flex-col gap-2 sm:flex-row">
                 <Input
@@ -66,7 +69,7 @@ export default function AdminModerationCard() {
                 <Input
                     value={reason}
                     onChange={(e) => setReason(e.target.value)}
-                    placeholder="Reason (required to suspend)"
+                    placeholder="Reason (required — the member is told it, and it lands on the audit trail)"
                     aria-label="Suspension reason"
                     disabled={pending !== null}
                 />
