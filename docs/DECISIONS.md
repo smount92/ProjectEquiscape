@@ -50,6 +50,7 @@ Owner rulings, newest first. Each one is also folded into the sections below.
 - **Registry style rules** (set titles, auction rows, generation tags, title format) are written by moderators: one proposes, the others agree, and it takes effect unless the owner vetoes.
 - **Defaults taken** for the other design questions (owner may override): public badge and name in the Registry history; "Registry moderator" and "Registry Desk"; 12-month term renewed in one click; Silver and Gold auto-approve stay; the admin Catalog tab stays until the Desk replaces it; daily digest plus alerts for merges, big batches and removals; artists can't approve suggestions about their own pieces.
 - **Financial Vault**: a private "Purchase notes" field, and links in vault notes are clickable (member request).
+- **Registry Desk mock approved** (https://claude.ai/artifact/BQuj11HRaMuYDfEy8succo), with one requirement: **every field is editable**, not only the few in the mock. The Mold view works as: pick a mold, click through its releases one by one, the release's full record opens below, edit, save.
 
 **2026-10-15**
 - **Artist names**: D'Arry Jones Frank, Sandra Winters and Pamela du Boulay are the right spellings; Maggie Jenner-Bennett is Maggie Bennett. The format repair merges the other spellings into these.
