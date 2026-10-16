@@ -34,7 +34,9 @@ All seven tickets come from one volunteer cataloguing Breyer Stablemates
   release" take 1976, 1995-1997, 1995–97, 1995 - 1997 or 1995 to 1997 and
   file the first and the last year; a backwards range is refused in words.
   "Suggest a new entry" has a "Last year (if it ended)" box. Everywhere a
-  release's years show, a first year alone reads "1998", not "1998–".
+  release's years show, a first year alone reads "1998", not "1998–", and
+  a last year alone reads "–1997". An older year stored in words ("1990s")
+  shows as written.
 - **Every missing fact can be filled in, one after another (MHH-078).** A
   release row offers "add the colour · add the year · add the model
   number"; a filed fact reads "sent for review" (or "saved to the
@@ -44,8 +46,11 @@ All seven tickets come from one volunteer cataloguing Breyer Stablemates
 - **A model number typed into a name moves to the number box (MHH-079).**
   "#5038 Silky Sullivan" with 5038 in the box files as "Silky Sullivan";
   with the box empty the number moves there; when the two differ, the
-  form asks which is right. Same in "Add my release", and the server
-  applies the rule to every new entry and title correction.
+  form asks which is right. A number without "#" may be part of the name
+  ("101 Dalmatians"), so with the box empty the form asks "Is that the
+  model number?" instead of moving it. Same in "Add my release", and the
+  server applies the rule to every new entry and title correction, moving
+  a number silently only when it has a "#" or equals the box.
 - **Search reads past punctuation (MHH-080, after migration 240 is
   pasted).** "Horspital Play Set" finds “Horspital” Play Set, "12 Piece"
   finds 12-Piece, "Lover's" finds Lover’s, and "Prancing Morgan" finds

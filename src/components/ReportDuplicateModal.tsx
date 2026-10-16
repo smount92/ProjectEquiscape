@@ -57,6 +57,7 @@ export default function ReportDuplicateModal({
     const [more, setMore] = useState(false);
     const [searching, setSearching] = useState(false);
     const [searchedFor, setSearchedFor] = useState<string | null>(null);
+    const [searchFailed, setSearchFailed] = useState(false);
     const [keep, setKeep] = useState<RegistryPick | null>(null);
     const [reason, setReason] = useState("");
     const [error, setError] = useState("");
@@ -73,10 +74,17 @@ export default function ReportDuplicateModal({
         const t = setTimeout(
             async () => {
                 setSearching(true);
-                const found = await findRegistryEntries(term, catalogItem.id);
+                // A thrown search (network, server error) must not leave the list on "Searching…".
+                let found: Awaited<ReturnType<typeof findRegistryEntries>> | null = null;
+                try {
+                    found = await findRegistryEntries(term, catalogItem.id);
+                } catch {
+                    found = null;
+                }
                 if (cancelled) return;
-                setResults(found.picks);
-                setMore(found.more);
+                setResults(found?.picks ?? []);
+                setMore(found?.more ?? false);
+                setSearchFailed(!found);
                 setSearchedFor(term);
                 setSearching(false);
             },
@@ -195,9 +203,11 @@ export default function ReportDuplicateModal({
                                         <li className="px-3 py-2 text-sm text-muted-foreground">
                                             {searching || searchedFor !== term
                                                 ? "Searching…"
-                                                : term
-                                                  ? "Nothing else matches. Try the model number, or the mold's name."
-                                                  : "Type the name or model number of the entry to keep."}
+                                                : searchFailed
+                                                  ? "We couldn't search the Registry just now. Check your connection and try again."
+                                                  : term
+                                                    ? "Nothing else matches. Try the model number, or the mold's name."
+                                                    : "Type the name or model number of the entry to keep."}
                                         </li>
                                     )}
                                 </ul>

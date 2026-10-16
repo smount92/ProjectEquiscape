@@ -21,6 +21,7 @@ import {
     linkedLabel,
     missingFacts,
     shortScale,
+    yearsInput,
     yearsLabel,
     releaseName,
     type LinkerMold,
@@ -337,12 +338,16 @@ function AddForm({
             />
         </label>
     );
-    // A number in front of the name that differs from the Model number box:
-    // asked before anything is filed (MHH-079).
+    // A number in front of the name that differs from the Model number box,
+    // or a bare one while the box is empty ("101 Dalmatians"): asked before
+    // anything is filed (MHH-079).
     const [conflict, setConflict] = useState<{ inTitle: string; inBox: string; title: string } | null>(null);
-    const send = (values: typeof v) => {
+    // The name the member said keeps its leading number.
+    const [numberIsName, setNumberIsName] = useState<string | null>(null);
+    const send = (values: typeof v, keepNumber = false) => {
         const typedName = values.name.trim() ? "name" : "setName";
-        const numbered = reconcileTitleNumber(values[typedName], values.modelNumber);
+        const keep = keepNumber || numberIsName === values[typedName].trim();
+        const numbered = reconcileTitleNumber(values[typedName], values.modelNumber, { bare: keep ? "keep" : "ask" });
         if (!numbered.ok) {
             setConflict({ inTitle: numbered.inTitle, inBox: numbered.inBox, title: numbered.title });
             return;
@@ -389,7 +394,7 @@ function AddForm({
                         {titleNumberProblem(conflict.inTitle, conflict.inBox)}
                     </p>
                     <div className="flex flex-wrap gap-2" data-testid="linker-number-conflict">
-                        {[conflict.inTitle, conflict.inBox].map((n) => (
+                        {[conflict.inTitle, conflict.inBox].filter(Boolean).map((n) => (
                             <Button
                                 key={n}
                                 type="button"
@@ -406,6 +411,21 @@ function AddForm({
                                 It&apos;s #{n}
                             </Button>
                         ))}
+                        {!conflict.inBox && (
+                            <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                disabled={pending}
+                                onClick={() => {
+                                    const key = v.name.trim() ? "name" : "setName";
+                                    setNumberIsName(v[key].trim());
+                                    send(v, true);
+                                }}
+                            >
+                                No, it&apos;s part of the name
+                            </Button>
+                        )}
                     </div>
                 </div>
             )}
@@ -450,7 +470,7 @@ function MoldGroup({
         openAdd({
             modelNumber: r.model ?? "",
             setName: r.setName ?? "",
-            yearFrom: yearsLabel(r) ?? "",
+            yearFrom: yearsInput(r),
         });
     const shown = open ? mold.releases : mold.releases.slice(0, SHOW_FIRST);
     const hidden = mold.releases.length - shown.length;

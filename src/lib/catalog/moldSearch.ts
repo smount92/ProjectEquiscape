@@ -11,7 +11,7 @@
  * order. Pure, so the action and the tests agree.
  */
 
-import { stripGeneration } from "@/lib/linker/model";
+import { rosterPieces, rosterRuns, stripGeneration } from "@/lib/linker/model";
 import { containsEveryWord, sameWords, searchKey } from "@/lib/catalog/searchKey";
 
 /** Most ids one search carries into the facet query (a URL-length budget). */
@@ -61,8 +61,10 @@ export interface MatchRow {
 /**
  * How a row matches what was typed (MHH-075):
  *  - "own": its own name (the title before " With ") or its mold's name holds every typed word;
- *  - "roster": every word is in the title, but only because a set's roster lists it;
- *  - "other": neither (a near spelling, a maker match).
+ *  - "roster": one piece of a set's roster holds every typed word;
+ *  - "other": neither (a near spelling, a maker match, or the words spread
+ *    over several pieces: "Set With Morgan Mare, Arabian Stallion" does not
+ *    include a Morgan Stallion).
  * Searching "Arabian Stallion" returned 49 Stablemate rows and only 8 were
  * on that mold: every set listing an Arabian Stallion among its pieces came
  * along, mixed in with the mold's own releases.
@@ -73,7 +75,12 @@ export function matchKind(row: MatchRow, term: string): "own" | "roster" | "othe
     const head = row.title.replace(/\s+with\b.*$/i, "");
     if (containsEveryWord(searchKey(stripGeneration(head)), t)) return "own";
     if (row.parent_title && containsEveryWord(searchKey(stripGeneration(row.parent_title)), t)) return "own";
-    if (containsEveryWord(searchKey(row.title), t)) return "roster";
+    const holds = (piece: string) => containsEveryWord(searchKey(stripGeneration(piece)), t);
+    if (rosterPieces(row.title).some(holds)) return "roster";
+    // A piece named with "and" ("Mare and Foal") is split by the roster reader;
+    // read the joined pieces only when the member typed "and" too, so words
+    // from two separate pieces never add up to one.
+    if (t.split(" ").includes("and") && rosterRuns(row.title).some(holds)) return "roster";
     return "other";
 }
 

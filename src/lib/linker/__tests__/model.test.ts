@@ -14,6 +14,7 @@ import {
     parseTerm,
     releaseName,
     releaseYearFields,
+    rosterPrefilterPatterns,
     rosterPrefilterWords,
     scaleMatches,
     setLabel,
@@ -157,10 +158,37 @@ describe("linker model", () => {
         expect(rosterPrefilterWords("Saddlebred")).toEqual(["Saddlebred"]);
     });
 
+    it("anchors each prefilter word after 'with', where the roster is (review of MHH-074)", () => {
+        expect(rosterPrefilterPatterns("Saddlebred")).toEqual(["%with%Saddlebred%"]);
+        expect(rosterPrefilterPatterns("Morgan Stallion (G1)")).toEqual(["%with%Morgan%", "%with%Stallion%"]);
+        // LIKE wildcards in a name never reach the pattern.
+        expect(rosterPrefilterPatterns("Pinto_100%")).toEqual(["%with%Pinto%", "%with%100%"]);
+        expect(rosterPrefilterPatterns("Man O' War")).toEqual(["%with%Man%", "%with%War%"]);
+    });
+
+    it("reads a mold whose own name holds 'and' or '&' as one piece (review of MHH-074)", () => {
+        const t = "Set With Mare and Foal, Stallion";
+        expect(mentionsMold(t, "Mare and Foal")).toBe(true);
+        expect(mentionsMold(t, "Mare & Foal")).toBe(true);
+        expect(mentionsMold(t, "Stallion")).toBe(true);
+        expect(mentionsMold("Set With Mare & Foal, Stallion", "Mare and Foal")).toBe(true);
+        // Only pieces joined by "and" or "&" are read together, never across a comma.
+        expect(mentionsMold("Set With Mare, Foal, Stallion", "Mare and Foal")).toBe(false);
+        expect(mentionsMold(t, "Foal Stallion")).toBe(false);
+        // The earlier cases still hold.
+        const twelve =
+            "12-Piece Stablemates Set With Arabian Mare, Arabian Stallion, Citation, Draft Horse, American Saddlebred & Swaps.";
+        expect(mentionsMold(twelve, "American Saddlebred")).toBe(true);
+        expect(mentionsMold(twelve, "Saddlebred")).toBe(false);
+        expect(mentionsMold(twelve, "Swaps")).toBe(true);
+        expect(mentionsMold("Pony Pals With Shetland Pony and Welsh Pony", "Shetland Pony")).toBe(true);
+        expect(mentionsMold("Pony Pals With Shetland Pony and Welsh Pony", "Pony")).toBe(false);
+    });
+
     it("labels years and names the missing facts", () => {
         expect(yearsLabel({ from: 1976, to: 1988 })).toBe("1976–1988");
         expect(yearsLabel({ from: 2001, to: null })).toBe("2001");
-        expect(yearsLabel({ from: null, to: 1997 })).toBe("1997");
+        expect(yearsLabel({ from: null, to: 1997 })).toBe("–1997");
         expect(yearsLabel({ from: null, to: null })).toBeNull();
         expect(missingFacts({ look: null, from: null, to: null, model: "5022" })).toEqual(["colour", "year"]);
         expect(missingFacts({ look: "bay", from: 1990, to: null, model: null })).toEqual(["model number"]);

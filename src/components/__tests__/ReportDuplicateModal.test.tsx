@@ -94,6 +94,27 @@ describe("ReportDuplicateModal", () => {
         );
     });
 
+    it("says so in plain words when the search fails, instead of staying on 'Searching…'", async () => {
+        reference.findRegistryEntries.mockRejectedValue(new Error("fetch failed"));
+        render(<ReportDuplicateModal catalogItem={{ id: "x", title: "Saddlebred", maker: "Breyer" }} openOnMount />);
+        fireEvent.change(screen.getByPlaceholderText("Search by name or model number…"), {
+            target: { value: "Pinto Saddlebred" },
+        });
+        const list = await screen.findByTestId("report-duplicate-results");
+        await waitFor(() => expect(list.textContent).toMatch(/couldn.t search/i), { timeout: 2000 });
+        expect(list.textContent).not.toMatch(/Searching/);
+        expect(list.textContent).not.toMatch(/fetch failed/);
+        // A later search that works clears the message.
+        reference.findRegistryEntries.mockResolvedValue({ picks: [PINTO], more: false });
+        fireEvent.change(screen.getByPlaceholderText("Search by name or model number…"), {
+            target: { value: "Pinto Saddlebred 5002" },
+        });
+        await waitFor(() => expect(within(list).getAllByTestId("report-duplicate-pick")).toHaveLength(1), {
+            timeout: 2000,
+        });
+        expect(list.textContent).not.toMatch(/couldn.t search/i);
+    });
+
     it("offers the other entries on the same mold before anything is typed", async () => {
         reference.findRegistryEntries.mockResolvedValue({
             picks: [pick({ id: "m", title: "Saddlebred", itemType: "plastic_mold", sameMold: true }), PINTO],
