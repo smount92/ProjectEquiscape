@@ -225,6 +225,70 @@ describe("shows-v2 — enterClass", () => {
         expect(mockClient._mockQuery.insert).not.toHaveBeenCalled();
     });
 
+    describe("a horse the site team scratched from this class (235)", () => {
+        const scratchedByUs = () =>
+            existingEntry(
+                {
+                    class_id: CLASS_ID,
+                    horse_id: HORSE_ID,
+                    owner_id: "user-1",
+                    status: "scratched",
+                    moderation_scratched_at: "2026-10-15T00:00:00Z",
+                },
+                "halter",
+            );
+
+        it("can't simply be entered again: the server refuses, in plain words, before inserting", async () => {
+            queueEntryContext();
+            mockClient._setImplicitResolve({ data: [scratchedByUs()], error: null });
+            const result = await enterClass({ classId: CLASS_ID, horseId: HORSE_ID });
+            expect(result.success).toBe(false);
+            if (!result.success) expect(result.error).toMatch(/scratched by the site team after a report/);
+            expect(mockClient._mockQuery.insert).not.toHaveBeenCalled();
+            expect(mockClient._mockQuery.select).toHaveBeenCalledWith(
+                expect.stringContaining("moderation_scratched_at"),
+            );
+        });
+
+        it("comes back as before when its owner scratched it", async () => {
+            queueEntryContext();
+            mockClient._setImplicitResolve({
+                data: [{ ...scratchedByUs(), moderation_scratched_at: null }],
+                error: null,
+            });
+            mockClient._mockQuery.single.mockResolvedValueOnce({ data: { id: ENTRY_ID }, error: null });
+            const result = await enterClass({ classId: CLASS_ID, horseId: HORSE_ID });
+            expect(result.success).toBe(true);
+        });
+
+        it("still enters before 235 is pasted (no stamp column to read)", async () => {
+            queueEntryContext();
+            mockClient._mockQuery.then.mockImplementationOnce((resolve: (v: unknown) => void) =>
+                Promise.resolve({ data: null, error: { code: "42703", message: "column does not exist" } }).then(
+                    resolve,
+                ),
+            );
+            mockClient._mockQuery.single.mockResolvedValueOnce({ data: { id: ENTRY_ID }, error: null });
+            const result = await enterClass({ classId: CLASS_ID, horseId: HORSE_ID });
+            expect(result.success).toBe(true);
+        });
+
+        it("reads the database guard's refusal as the same plain words", async () => {
+            queueEntryContext();
+            mockClient._mockQuery.single.mockResolvedValueOnce({
+                data: null,
+                error: {
+                    code: "P0001",
+                    message:
+                        "This horse's entry in this class was scratched by the site team after a report, so it can't be entered in this class again.",
+                },
+            });
+            const result = await enterClass({ classId: CLASS_ID, horseId: HORSE_ID });
+            expect(result.success).toBe(false);
+            if (!result.success) expect(result.error).toMatch(/Contact us to ask about it\.$/);
+        });
+    });
+
     it("enters a live show: max+1 entry number, no photo, no handler", async () => {
         queueEntryContext();
         mockClient._setImplicitResolve({ data: [existingEntry()], error: null });
