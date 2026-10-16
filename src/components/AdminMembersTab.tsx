@@ -183,6 +183,10 @@ export default function AdminMembersTab({ initialQuery = "" }: { initialQuery?: 
 
     return (
         <div className="flex flex-col gap-6">
+            {/* First, because it is the part of this tab that waits on you:
+                the dispute bell and the pulse tile both land here. */}
+            <AdminDisputesCard />
+
             <div>
                 <h3 className="mt-0 mb-1 flex items-center gap-2 text-base font-bold">👤 Members</h3>
                 <p className="mt-0 mb-3 text-xs text-muted-foreground">
@@ -225,8 +229,6 @@ export default function AdminMembersTab({ initialQuery = "" }: { initialQuery?: 
                 <h3 className="mt-0 mb-2 text-sm font-bold text-muted-foreground">Direct handle (no search needed)</h3>
                 <AdminModerationCard />
             </div>
-
-            <AdminDisputesCard />
         </div>
     );
 }

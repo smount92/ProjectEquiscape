@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { messageShowHost } from "@/app/actions/show-host-message";
 import { HOST_MESSAGE_MAX, hostMessageHeading } from "@/lib/shows/hostMessage";
+import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 
@@ -60,10 +61,10 @@ export default function MessageHostForm({
     };
 
     return (
-        <form onSubmit={send} className="mx-auto flex max-w-[560px] flex-col gap-5" aria-describedby="host-note">
+        <form onSubmit={send} className="mx-auto flex max-w-[560px] flex-col gap-5">
             <p id="host-note" className="m-0 text-sm text-secondary-foreground">
-                Your message goes to {hostAlias ? `@${hostAlias}` : "the host"}&apos;s inbox, in your conversation with
-                them. Their reply comes back to yours.
+                This goes to {hostAlias ? `@${hostAlias}` : "the host"} as a private message. Their reply will appear in
+                your Inbox.
             </p>
 
             {entries.length > 0 && (
@@ -71,19 +72,14 @@ export default function MessageHostForm({
                     <label htmlFor="host-entry" className="mb-1 block text-sm font-semibold text-foreground">
                         Which entry is this about?
                     </label>
-                    <select
-                        id="host-entry"
-                        value={entryId}
-                        onChange={(e) => setEntryId(e.target.value)}
-                        className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
-                    >
+                    <NativeSelect id="host-entry" value={entryId} onChange={(e) => setEntryId(e.target.value)}>
                         <option value="">The show in general</option>
                         {entries.map((e) => (
                             <option key={e.id} value={e.id}>
                                 {optionLabel(e)}
                             </option>
                         ))}
-                    </select>
+                    </NativeSelect>
                 </div>
             )}
 
@@ -91,9 +87,11 @@ export default function MessageHostForm({
                 <label htmlFor="host-message" className="mb-1 block text-sm font-semibold text-foreground">
                     Message
                 </label>
-                <p className="mt-0 mb-2 text-xs text-muted-foreground">
+                <p id="host-message-heading" className="mt-0 mb-2 text-xs text-muted-foreground">
                     It starts with <span className="font-medium text-secondary-foreground">{heading}</span>
                 </p>
+                {/* No autoFocus: it would skip the page's context for a screen
+                    reader and throw the phone keyboard up before they've read it. */}
                 <Textarea
                     id="host-message"
                     value={message}
@@ -102,10 +100,15 @@ export default function MessageHostForm({
                     rows={6}
                     maxLength={HOST_MESSAGE_MAX}
                     required
-                    autoFocus
+                    aria-describedby="host-note host-message-heading host-message-count"
                 />
-                <p className="mt-1 mb-0 text-right text-xs text-muted-foreground tabular-nums">
-                    {message.length}/{HOST_MESSAGE_MAX}
+                <p id="host-message-count" className="mt-1 mb-0 text-right text-xs text-muted-foreground tabular-nums">
+                    <span aria-hidden="true">
+                        {message.length}/{HOST_MESSAGE_MAX}
+                    </span>
+                    <span className="sr-only">
+                        {message.length} of {HOST_MESSAGE_MAX} characters
+                    </span>
                 </p>
             </div>
 

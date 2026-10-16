@@ -74,7 +74,8 @@ describe("submitContactForm", () => {
         await submitContactForm({ error: null, success: false }, form({ ...base, category: "billing" }));
         for (const run of deferred) await run();
         expect(notified[0]).toMatchObject({ userId: "owner-1", linkUrl: "/admin#mailbox" });
-        expect(notified[0].content).toMatch(/New message from Pat \(payments or my membership\): Broken page/);
+        // The owner's word for it, not the member-facing "Payments or my membership".
+        expect(notified[0].content).toBe("✉️ New message from Pat (Billing): Broken page");
     });
 
     it("still delivers the message before migration 236", async () => {

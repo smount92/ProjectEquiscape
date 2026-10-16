@@ -223,6 +223,22 @@ export default function SettingsClient() {
             setShipsNotTo(profile.shipsNotTo);
             setOpenToTrades(profile.openToTrades);
             setLookingFor(profile.lookingFor);
+
+            // Who is billed through Stripe decides the Subscription leaf's
+            // first button, so it is known before the page shows: the
+            // buttons must not swap places under the member's finger.
+            const supabase = createClient();
+            let user: Awaited<ReturnType<typeof supabase.auth.getUser>>["data"]["user"] = null;
+            try {
+                ({
+                    data: { user },
+                } = await supabase.auth.getUser());
+                setHasStripeBilling(
+                    !!(user?.app_metadata as { stripe_customer_id?: string } | null)?.stripe_customer_id,
+                );
+            } catch {
+                // No billing button; "Compare plans" still leads to /upgrade.
+            }
             setIsLoading(false);
 
             // Supporter state, read client-side from the viewer's own users row
@@ -230,10 +246,6 @@ export default function SettingsClient() {
             // Runs after the page is interactive; any error — including the
             // columns not existing yet — just leaves the toggle hidden.
             try {
-                const supabase = createClient();
-                const {
-                    data: { user },
-                } = await supabase.auth.getUser();
                 if (user) {
                     const { data: srow } = await supabase
                         .from("users")
@@ -248,9 +260,6 @@ export default function SettingsClient() {
                     // and tolerant: before the migration the column is
                     // missing and the toggle simply stays hidden.
                     const tier = (user.app_metadata as { tier?: string } | null)?.tier;
-                    setHasStripeBilling(
-                        !!(user.app_metadata as { stripe_customer_id?: string } | null)?.stripe_customer_id,
-                    );
                     if (tier === "pro" || tier === "studio") {
                         const { data: mrow, error: mErr } = await supabase
                             .from("users")
@@ -269,6 +278,16 @@ export default function SettingsClient() {
         }
         load();
     }, [router]);
+
+    // A link to /settings#subscription (or any leaf) arrives while the
+    // page is still loading, so the browser finds no anchor and stays at
+    // the top. Once the leaves exist, go to the one the link named.
+    useEffect(() => {
+        if (isLoading) return;
+        const id = decodeURIComponent(window.location.hash.slice(1));
+        if (!id) return;
+        document.getElementById(id)?.scrollIntoView({ block: "start" });
+    }, [isLoading]);
 
     // ── Profile save (shared by Profile / Privacy / Showing) ──
     const handleSaveProfile = async (origin: string) => {
@@ -818,12 +837,22 @@ export default function SettingsClient() {
                         reports. The trust record — verified show results, condition grades, Hoofprint provenance and
                         the Blue Book — is free for everyone, always.
                     </p>
-                    <div className="flex flex-wrap items-start gap-4">
-                        <Link href="/upgrade" className="btn-brass">
-                            View plans &amp; upgrade
-                        </Link>
-                        {hasStripeBilling && <ManageBillingButton />}
-                    </div>
+                    {hasStripeBilling ? (
+                        // A paying member came here to manage what they pay
+                        // for: that is the main button; plans are a quiet aside.
+                        <div className="flex flex-wrap items-start gap-4">
+                            <ManageBillingButton variant="default" />
+                            <Button asChild variant="outline">
+                                <Link href="/upgrade">Compare plans</Link>
+                            </Button>
+                        </div>
+                    ) : (
+                        <div className="flex flex-wrap items-start gap-4">
+                            <Link href="/upgrade" className="btn-brass">
+                                View plans &amp; upgrade
+                            </Link>
+                        </div>
+                    )}
 
                     {/* Active supporters only. */}
                     {supporterLedger && (

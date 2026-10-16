@@ -22,6 +22,8 @@ export interface ShowCore {
     status: ShowStatus;
     mode: ShowMode;
     judging: ShowJudging;
+    /** For notices that have to say which show they mean. */
+    title: string | null;
 }
 
 /**
@@ -35,7 +37,7 @@ export async function getShowRole(
 ): Promise<{ show: ShowCore; role: StaffRole | null } | { error: string }> {
     const { data: show, error } = await supabase
         .from("shows")
-        .select("id, host_id, status, mode, judging")
+        .select("id, host_id, status, mode, judging, title")
         .eq("id", showId)
         .maybeSingle();
     if (error) return { error: error.message };

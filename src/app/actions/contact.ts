@@ -88,13 +88,13 @@ export async function submitContactForm(_prevState: ContactFormState, formData: 
             const { adminNotificationTargets } = await import("@/lib/notifications/adminTargets");
             const { createNotification } = await import("@/lib/notifications/createNotification");
             const { getAdminClient } = await import("@/lib/supabase/admin");
-            const { contactCategoryLabel } = await import("@/lib/contact/categories");
+            const { contactCategoryOwnerLabel } = await import("@/lib/contact/categories");
             for (const ownerId of await adminNotificationTargets(getAdminClient())) {
                 await createNotification({
                     userId: ownerId,
                     type: "system",
                     actorId: user?.id ?? null,
-                    content: `✉️ New message from ${name} (${contactCategoryLabel(category).toLowerCase()})${subject ? `: ${subject.slice(0, 100)}` : ""}`,
+                    content: `✉️ New message from ${name} (${contactCategoryOwnerLabel(category)})${subject ? `: ${subject.slice(0, 100)}` : ""}`,
                     linkUrl: "/admin#mailbox",
                 });
             }

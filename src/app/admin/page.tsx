@@ -12,6 +12,7 @@ import {
     listSanctioningRequests,
 } from "@/app/actions/admin";
 import AdminTabs from "@/components/AdminTabs";
+import { countOpenContactMessages } from "@/lib/contact/openCount";
 import { getSentryIssues } from "@/lib/sentry/issues";
 import CommandCenterLayout from "@/components/layouts/CommandCenterLayout";
 import { Zap, Shield } from "lucide-react";
@@ -39,7 +40,7 @@ export default async function AdminPage() {
     // a server action that re-gates on ADMIN_EMAIL — nothing admin-shaped
     // is ever fetched with the client key.
     const [
-        unreadResult,
+        openMessagesCount,
         allShows,
         legacyResult,
         reports,
@@ -51,8 +52,9 @@ export default async function AdminPage() {
         sanctioningResult,
         catalogSuggestionsResult,
     ] = await Promise.all([
-        supabaseAdmin.from("contact_messages").select("id", { count: "exact", head: true }).eq("is_read", false),
-        // The mailbox itself loads in AdminMailbox (filters, paging).
+        // Open messages: what the Mailbox's Open filter lists and the pulse
+        // counts. The mailbox itself loads in AdminMailbox (filters, paging).
+        countOpenContactMessages(supabaseAdmin),
         getPhotoShows(),
         // Legacy database_suggestions queue. Read through the service role
         // now: migration 020's only SELECT policy is "your own rows", so the
@@ -83,7 +85,7 @@ export default async function AdminPage() {
             .limit(50),
     ]);
 
-    const unreadMessages = unreadResult.count ?? 0;
+    const openMessages = openMessagesCount ?? 0;
     const pendingSuggestions = legacyResult.success ? legacyResult.suggestions : [];
     const pendingExternalShows = externalShowsResult.success ? externalShowsResult.shows : [];
     const pulse = pulseResult.success ? pulseResult.pulse : null;
@@ -142,7 +144,7 @@ export default async function AdminPage() {
                  * own tab, catalog merge under Catalog, announcements under Content.
                  */
                 <AdminTabs
-                    unreadCount={unreadMessages}
+                    openMessages={openMessages}
                     shows={allShows.map((s) => ({
                         id: s.id,
                         title: s.title,
