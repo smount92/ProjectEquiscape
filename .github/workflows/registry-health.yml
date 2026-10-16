@@ -59,14 +59,14 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Keep this week's counts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: registry-health-json
           path: health.json
           retention-days: 90
 
       - name: Keep the full report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: registry-health
           path: report.txt
