@@ -1,8 +1,17 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { parseCatalogQuery, makerMatches } from "@/lib/catalog/queryParse";
-import { rosterLast } from "@/lib/catalog/moldSearch";
+import { makerMatches } from "@/lib/catalog/queryParse";
+import {
+    orderForAnchor,
+    readRegistryTerm,
+    searchRegistry,
+    type PickerAnchor,
+    type RegistryRow,
+} from "@/lib/catalog/registrySearch";
+import { yearRangeLabel, type CardAttributes } from "@/lib/catalog/cardDisplay";
+import { parseTerm, splitNumberFromTitle } from "@/lib/linker/model";
+import { sanitizeForOr } from "@/lib/utils/search";
 
 // ============================================================
 // UNIVERSAL CATALOG — Server Actions
@@ -21,74 +30,171 @@ export interface CatalogItem {
     parentTitle?: string;
 }
 
-/**
- * Sanitize a search query for safe use in PostgREST .or() filters.
- */
-function sanitizeSearchQuery(raw: string): string {
-    return raw.replace(/[,().%\\]/g, "").trim();
-}
+const ROW_COLUMNS = "id, item_type, parent_id, title, maker, scale, attributes";
 
 /**
- * Search all catalog items (molds, releases, resins) in one query.
- * Multi-word: "Breyer Adios" splits into ["Breyer", "Adios"] and
- * chains .or() so ALL words must appear across title/maker/model_number.
+ * The shared Registry search (lib/catalog/registrySearch), plus the named
+ * maker's own rows when fifty better-titled rows from other makers fill the
+ * window ("Arabian" is mostly Breyer). `null` when the search RPC is down.
  */
-export async function searchCatalogAction(query: string): Promise<CatalogItem[]> {
-    const supabase = await createClient();
-    const q = sanitizeSearchQuery(query);
-    if (!q || q.length < 2) return [];
-
-    // "Peter stone Ideal sto": the maker comes off the front and the
-    // initials are spelled out before the title search runs.
-    const parsed = parseCatalogQuery(q);
-    const term = parsed.term.length >= 2 ? parsed.term : q;
-
-    // Use pg_trgm trigram search — leverages GIN index from Migration 100
-    const { data, error } = await supabase.rpc("search_catalog_fuzzy", {
-        search_term: term,
-        max_results: 50,
-    });
-
-    if (error || !data) return [];
-
-    type Row = {
-        id: string;
-        item_type: string;
-        parent_id: string | null;
-        title: string;
-        maker: string;
-        scale: string | null;
-        attributes: Record<string, unknown>;
-        parent_title?: string | null;
-    };
-    // Cast through unknown — generated types may lag behind migration 110
-    let rows = data as unknown as Row[];
-
-    // A named maker's own rows must be present even when fifty better
-    // titled rows from other makers fill the fuzzy window ("Arabian" is
-    // mostly Breyer). Top up straight from the table, then let the
-    // client rank the named maker first.
-    if (parsed.maker && !rows.some((r) => makerMatches(r.maker, parsed.maker))) {
+async function registryRows(
+    supabase: Awaited<ReturnType<typeof createClient>>,
+    query: string,
+    candidates: number,
+): Promise<RegistryRow[] | null> {
+    const found = await searchRegistry(supabase, query, { candidates });
+    if (!found) return null;
+    let rows = found.rows;
+    if (found.maker && !rows.some((r) => makerMatches(r.maker, found.maker))) {
         const { data: makerRows } = await supabase
             .from("catalog_items")
-            .select("id, item_type, parent_id, title, maker, scale, attributes")
-            .ilike("maker", parsed.maker)
-            .ilike("title", `%${term.replace(/[%_]/g, "")}%`)
+            .select(ROW_COLUMNS)
+            .ilike("maker", found.maker)
+            .ilike("title", `%${sanitizeForOr(found.term).replace(/[%_]/g, "")}%`)
             .limit(25);
         if (Array.isArray(makerRows) && makerRows.length > 0) {
             const seen = new Set(rows.map((r) => r.id));
-            rows = [...(makerRows as unknown as Row[]).filter((r) => !seen.has(r.id)), ...rows];
+            rows = [...(makerRows as unknown as RegistryRow[]).filter((r) => !seen.has(r.id)), ...rows];
         }
     }
+    return rows;
+}
 
-    // A set that only lists the name among its pieces comes after the rows
-    // that are, or sit on, what was typed (MHH-075).
-    const byId = new Map(rows.map((r) => [r.id, r]));
-    return rosterLast(
-        rows.map((r) => r.id),
-        rows,
-        term,
-    ).map((id) => mapCatalogRow(byId.get(id) as Row));
+/**
+ * Search all catalog items (molds, releases, resins) by name, the way the
+ * Registry page does (MHH-076): a leading maker is a preference, "SM"/"G1"
+ * come off, a named mold brings its releases, roster-only sets go last.
+ * Used by the old picker and the wishlist search.
+ */
+export async function searchCatalogAction(query: string): Promise<CatalogItem[]> {
+    const q = query.trim();
+    if (q.length < 2) return [];
+    const supabase = await createClient();
+    const rows = await registryRows(supabase, q, 50);
+    return (rows ?? []).slice(0, 50).map((r) => mapCatalogRow(r as unknown as Record<string, unknown>));
+}
+
+/** One entry in the duplicate picker, with what tells it apart from its neighbours. */
+export interface RegistryPick {
+    id: string;
+    title: string;
+    maker: string;
+    scale: string | null;
+    itemType: string;
+    modelNumber: string | null;
+    years: string | null;
+    colour: string | null;
+    /** The mold a release is filed under; null for a mold or an unfiled release. */
+    moldTitle: string | null;
+    /** On the same mold as the entry being reported. */
+    sameMold: boolean;
+}
+
+/** Most entries the duplicate picker lists at once. */
+const PICKER_LIMIT = 25;
+
+/**
+ * The duplicate picker's search (MHH-076). It showed 8 rows from a thinner
+ * search, so "Black and White Saddlebred" never reached Pinto Saddlebred
+ * #5002. Now: the shared Registry search over 200 candidates, a model
+ * number read as a number, the reported entry itself left out, entries on
+ * its mold first and then its scale, up to 25. With nothing typed yet, the
+ * other entries on the same mold, since that is where a duplicate usually is.
+ */
+export async function findRegistryEntries(
+    query: string,
+    reportedId?: string | null,
+): Promise<{ picks: RegistryPick[]; more: boolean }> {
+    const supabase = await createClient();
+    const q = query.trim();
+    let anchor: PickerAnchor | null = null;
+    if (reportedId) {
+        const { data } = await supabase
+            .from("catalog_items")
+            .select("id, item_type, parent_id, scale")
+            .eq("id", reportedId)
+            .maybeSingle();
+        const r = data as { id: string; item_type: string; parent_id: string | null; scale: string | null } | null;
+        if (r) anchor = { id: r.id, moldId: r.item_type === "plastic_mold" ? r.id : r.parent_id, scale: r.scale };
+    }
+
+    let rows: RegistryRow[] = [];
+    const parsed = parseTerm(q);
+    if (q.length < 2) {
+        if (!anchor?.moldId) return { picks: [], more: false };
+        const { data } = await supabase
+            .from("catalog_items")
+            .select(ROW_COLUMNS)
+            .or(`id.eq.${anchor.moldId},parent_id.eq.${anchor.moldId}`)
+            .limit(200);
+        rows = ((data ?? []) as unknown as RegistryRow[]).sort(
+            (a, b) =>
+                Number(a.item_type !== "plastic_mold") - Number(b.item_type !== "plastic_mold") ||
+                Number(a.attributes?.release_year_start ?? 9999) - Number(b.attributes?.release_year_start ?? 9999) ||
+                a.title.localeCompare(b.title),
+        );
+    } else if (parsed.kind === "number") {
+        rows = await rowsByModelNumber(supabase, parsed.value);
+    } else {
+        rows =
+            (await registryRows(supabase, q, 200)) ??
+            (((
+                await supabase
+                    .from("catalog_items")
+                    .select(ROW_COLUMNS)
+                    .ilike("title", `%${sanitizeForOr(q).replace(/[%_]/g, "")}%`)
+                    .limit(100)
+            ).data ?? []) as unknown as RegistryRow[]);
+    }
+
+    const ordered = orderForAnchor(rows, anchor, q.length >= 2 ? readRegistryTerm(q).term : null);
+    const shown = ordered.slice(0, PICKER_LIMIT);
+    // Each row says which mold it is on; rows read straight from the table lack the joined title.
+    const missing = [...new Set(shown.filter((r) => r.parent_id && !r.parent_title).map((r) => r.parent_id as string))];
+    const moldTitles = new Map<string, string>();
+    if (missing.length) {
+        const { data } = await supabase.from("catalog_items").select("id, title").in("id", missing);
+        for (const m of (data ?? []) as { id: string; title: string }[]) moldTitles.set(m.id, m.title);
+    }
+    const text = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : null);
+    return {
+        picks: shown.map((r) => ({
+            id: r.id,
+            title: r.title,
+            maker: r.maker ?? "",
+            scale: r.scale,
+            itemType: r.item_type,
+            modelNumber: text(r.attributes?.model_number)?.replace(/^#/, "") ?? null,
+            years: yearRangeLabel(r.attributes as CardAttributes | null),
+            colour: text(r.attributes?.color_description),
+            moldTitle: r.parent_id ? (r.parent_title ?? moldTitles.get(r.parent_id) ?? null) : null,
+            sameMold: r.sameMold,
+        })),
+        more: ordered.length > PICKER_LIMIT,
+    };
+}
+
+/** Rows carrying a model number, with or without a "#", in the number field or leading the title. */
+async function rowsByModelNumber(
+    supabase: Awaited<ReturnType<typeof createClient>>,
+    n: string,
+): Promise<RegistryRow[]> {
+    const safe = n.replace(/[^0-9a-z-]/gi, "");
+    if (!safe) return [];
+    const { data } = await supabase
+        .from("catalog_items")
+        .select(ROW_COLUMNS)
+        // PostgREST or(): `*` is the wildcard; the title prefix is tightened below.
+        .or(
+            `attributes->>model_number.ilike.${safe},attributes->>model_number.ilike.#${safe},title.ilike.#${safe}*,title.ilike.${safe}*`,
+        )
+        .limit(60);
+    return ((data ?? []) as unknown as RegistryRow[]).filter((r) => {
+        const m = String(r.attributes?.model_number ?? "")
+            .replace(/^#/, "")
+            .toLowerCase();
+        return m === safe.toLowerCase() || splitNumberFromTitle(r.title).model?.toLowerCase() === safe.toLowerCase();
+    });
 }
 
 /**
