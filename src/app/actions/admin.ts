@@ -1436,6 +1436,16 @@ const PENDING_MIGRATIONS: MigrationSpec[] = [
         },
     },
     {
+        id: "239",
+        title: "Hotfix: horses and posts load their member again",
+        summary:
+            "Drops the four foreign keys 235 added on hidden_by / moderation_hidden_by, which made every horse-with-owner and post-with-author query ambiguous (PGRST201).",
+        probe: {
+            kind: "none",
+            why: "It removes constraints, so there is nothing to select. Verify: a stable page and the Paddock feed load.",
+        },
+    },
+    {
         id: "238",
         title: "Stripe notices go out once",
         summary:

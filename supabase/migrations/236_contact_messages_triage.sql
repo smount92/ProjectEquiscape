@@ -35,7 +35,7 @@ BEGIN
     WHERE is_read = true;
   END IF;
 END $$;
-ALTER TABLE public.contact_messages ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES public.users(id) ON DELETE SET NULL;
+ALTER TABLE public.contact_messages ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES public.users(id) ON DELETE SET NULL; -- embed-checked: contact_messages had no other link to users
 ALTER TABLE public.contact_messages ADD COLUMN IF NOT EXISTS error_ref TEXT;
 
 ALTER TABLE public.contact_messages DROP CONSTRAINT IF EXISTS contact_messages_category_check;

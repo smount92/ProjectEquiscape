@@ -57,11 +57,11 @@ ALTER TABLE public.user_reports ADD CONSTRAINT user_reports_target_type_check
 
 -- ── 2. Hiding, never deleting ─────────────────────────────────
 ALTER TABLE public.posts ADD COLUMN IF NOT EXISTS hidden_at TIMESTAMPTZ;
-ALTER TABLE public.posts ADD COLUMN IF NOT EXISTS hidden_by UUID REFERENCES public.users(id) ON DELETE SET NULL;
+ALTER TABLE public.posts ADD COLUMN IF NOT EXISTS hidden_by UUID; -- no FK: see 239
 ALTER TABLE public.id_requests ADD COLUMN IF NOT EXISTS hidden_at TIMESTAMPTZ;
-ALTER TABLE public.id_requests ADD COLUMN IF NOT EXISTS hidden_by UUID REFERENCES public.users(id) ON DELETE SET NULL;
+ALTER TABLE public.id_requests ADD COLUMN IF NOT EXISTS hidden_by UUID; -- no FK: see 239
 ALTER TABLE public.id_suggestions ADD COLUMN IF NOT EXISTS hidden_at TIMESTAMPTZ;
-ALTER TABLE public.id_suggestions ADD COLUMN IF NOT EXISTS hidden_by UUID REFERENCES public.users(id) ON DELETE SET NULL;
+ALTER TABLE public.id_suggestions ADD COLUMN IF NOT EXISTS hidden_by UUID; -- no FK: see 239
 
 COMMENT ON COLUMN public.posts.hidden_at IS
   'Set when the site team takes a reported post down. Hidden rows are invisible to members (posts_not_hidden policy); clear it to restore.';
@@ -177,7 +177,7 @@ $$;
 -- copies is_public into visibility: setting is_public = true is refused
 -- the same as setting visibility = 'public'.
 ALTER TABLE public.user_horses ADD COLUMN IF NOT EXISTS moderation_hidden_at TIMESTAMPTZ;
-ALTER TABLE public.user_horses ADD COLUMN IF NOT EXISTS moderation_hidden_by UUID REFERENCES public.users(id) ON DELETE SET NULL;
+ALTER TABLE public.user_horses ADD COLUMN IF NOT EXISTS moderation_hidden_by UUID; -- no FK: see 239
 
 COMMENT ON COLUMN public.user_horses.moderation_hidden_at IS
   'Set when the site team makes a reported horse private. While set, the owner cannot make it public or list it (trg_user_horses_moderation_guard). Clear it, from the SQL editor, to lift the hold.';

@@ -55,6 +55,16 @@ export function migrationProblems(name: string, sql: string): string[] {
         if (!new RegExp(`DROP\\s+TRIGGER\\s+IF\\s+EXISTS\\s+${m[1]}\\b`, "i").test(code))
             problems.push(`trigger ${m[1]} needs a DROP TRIGGER IF EXISTS first`);
     }
+    // A second foreign key to users on a table that already has one makes
+    // every `users(...)` embed from that table ambiguous, and the API
+    // refuses it (PGRST201). 235 did this to user_horses and posts and broke
+    // stables and the feed until 239. Leave such a column without a foreign
+    // key, or, after checking no code embeds users from that table, mark the
+    // line `-- embed-checked`.
+    for (const line of sql.split("\n")) {
+        if (/\bREFERENCES\s+(?:public\.)?users\b/i.test(line.replace(/--.*$/, "")) && !/--\s*embed-checked/i.test(line))
+            problems.push(`a new foreign key to users needs an embed check: ${line.trim().slice(0, 80)}`);
+    }
     for (const m of code.matchAll(/\bADD\s+CONSTRAINT\s+(\w+)/gi)) {
         if (!new RegExp(`DROP\\s+CONSTRAINT\\s+IF\\s+EXISTS\\s+${m[1]}\\b`, "i").test(code))
             problems.push(`constraint ${m[1]} needs a DROP CONSTRAINT IF EXISTS first`);
@@ -96,6 +106,15 @@ describe("migrations", () => {
         expect(found).toMatch(/policy "p" needs a DROP POLICY IF EXISTS first/);
         expect(found).toMatch(/ADD COLUMN c needs IF NOT EXISTS/);
         expect(found).toMatch(/PENDING_MIGRATIONS/);
+    });
+
+    it("catches a second foreign key to users (the 235 embed break)", () => {
+        const fk = `-- 999: example\nALTER TABLE public.posts ADD COLUMN IF NOT EXISTS hidden_by UUID REFERENCES public.users(id);`;
+        expect(migrationProblems("999_example.sql", fk).join("\n")).toMatch(
+            /foreign key to users needs an embed check/,
+        );
+        const checked = `${fk} -- embed-checked`;
+        expect(migrationProblems("999_example.sql", checked).join("\n")).not.toMatch(/embed check/);
     });
 
     it("passes a well-formed migration", () => {
