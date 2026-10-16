@@ -5,6 +5,8 @@ import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { entitledTier } from "@/lib/entitlement/clock";
 import type { SupabaseClient } from "@supabase/supabase-js";
+// (getAdminClient is imported lazily inside resolveRegistryRole: it is
+// "server-only", and client components import types from this file.)
 import type { Database } from "@/lib/types/database.generated";
 
 /** The AuthError message requireAuth() throws for a suspended account. */
@@ -90,6 +92,93 @@ export async function requireAdmin(): Promise<{
         throw new AuthError("Admin access required.");
     }
     return { supabase, user };
+}
+
+// ══════════════════════════════════════════════════════════════
+// Registry moderators (migration 242, Registry Desk Phase 1)
+// ══════════════════════════════════════════════════════════════
+
+/** Who may use the Registry Desk. The owner always; a moderator while their seat is active. */
+export type RegistryRole = "owner" | "moderator";
+
+/** The words a member who is not a Registry moderator sees from any Desk action. */
+export const REGISTRY_DESK_REFUSAL = "The Registry Desk is for Registry moderators.";
+
+function isOwnerEmail(email: string | undefined): boolean {
+    const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase();
+    return !!adminEmail && email?.toLowerCase() === adminEmail;
+}
+
+/**
+ * The viewer's Registry role, read once per request. The seat is read
+ * with the service role (registry_moderators has no policies), so a
+ * removed moderator is refused on their very next request. Before 242
+ * the table is missing and only the owner has a role.
+ */
+const resolveRegistryRole = cache(async function resolveRegistryRole(): Promise<{
+    userId: string;
+    alias: string;
+    role: RegistryRole;
+} | null> {
+    const { user } = await resolveViewer();
+    if (!user) return null;
+    // A suspended account has no Desk, whatever its seat says.
+    if (user.app_metadata?.is_suspended) return null;
+    const { getAdminClient } = await import("@/lib/supabase/admin");
+    const admin = getAdminClient();
+    const owner = isOwnerEmail(user.email);
+    let alias = owner ? "Owner" : "";
+    try {
+        const { data } = await admin.from("users").select("alias_name").eq("id", user.id).maybeSingle();
+        const name = (data as { alias_name: string | null } | null)?.alias_name;
+        if (name) alias = name;
+    } catch {
+        /* the alias is cosmetic; the role check below decides */
+    }
+    if (owner) return { userId: user.id, alias, role: "owner" };
+    try {
+        const { data, error } = await (admin as unknown as SupabaseClient)
+            .from("registry_moderators")
+            .select("status")
+            .eq("user_id", user.id)
+            .maybeSingle();
+        // 42P01 / PGRST205: no 242 yet, so nobody but the owner has a seat.
+        if (error || !data) return null;
+        if ((data as { status: string }).status !== "active") return null;
+    } catch {
+        return null;
+    }
+    return { userId: user.id, alias: alias || "member", role: "moderator" };
+});
+
+/**
+ * The viewer's Registry role, or null. Never throws: use it to decide
+ * whether to show a link to the Desk. Actions use requireRegistryModerator.
+ */
+export async function registryRoleOf(): Promise<{ userId: string; alias: string; role: RegistryRole } | null> {
+    try {
+        return await resolveRegistryRole();
+    } catch {
+        return null;
+    }
+}
+
+/**
+ * Require the owner or an active Registry moderator. Calls requireAuth()
+ * first, so a suspended account is refused before any role check. Throws
+ * AuthError: "Please log in" style for no session, the suspension words,
+ * or REGISTRY_DESK_REFUSAL. Callers catch and return their error format.
+ */
+export async function requireRegistryModerator(): Promise<{
+    supabase: SupabaseClient<Database>;
+    user: { id: string; email?: string };
+    role: RegistryRole;
+    alias: string;
+}> {
+    const { supabase, user } = await requireAuth();
+    const seat = await resolveRegistryRole();
+    if (!seat || seat.userId !== user.id) throw new AuthError(REGISTRY_DESK_REFUSAL);
+    return { supabase, user, role: seat.role, alias: seat.alias };
 }
 
 export type UserTier = "studio" | "pro" | "free";
