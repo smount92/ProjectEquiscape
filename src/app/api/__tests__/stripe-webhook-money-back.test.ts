@@ -4,8 +4,10 @@ import { NextRequest } from "next/server";
 // ── Money going back, and failed payments (MHH-023) ──
 // Before: a refund, a chargeback or a failed renewal reached nobody. Pinned:
 //   1. a failed renewal tells the member, pointing at Settings › Subscription
-//   2. a refund tells the member and the owner, and re-reads the customer's
-//      subscriptions so the plan follows Stripe (never cancelled here)
+//   2. a refund tells the member and the owner what THIS refund gave back,
+//      and never touches anyone's plan (they may have moved to PayPal or a
+//      prepaid term; cancelling in Stripe sends its own event)
+//   4. a repeated delivery of the same event sends no second notice
 //   3. a chargeback alerts the owner with the amount and reason
 
 vi.stubEnv("STRIPE_SECRET_KEY", "sk_test_123");
@@ -92,23 +94,47 @@ describe("POST /api/webhooks/stripe — money going back", () => {
         expect(notice?.linkUrl).toBe("/settings#subscription");
     });
 
-    it("tells the member and the owner about a refund, and re-reads the plan from Stripe", async () => {
+    it("tells the member and the owner about a refund, and leaves every plan alone", async () => {
         mockConstructEvent.mockReturnValue({
+            id: "evt_1",
             type: "charge.refunded",
             data: { object: { id: "ch_1", customer: "cus_1", refunded: true, amount_refunded: 500, currency: "usd" } },
         });
         const res = await POST(request());
         expect(res.status).toBe(200);
-        expect(notifications.find((n) => n.userId === "member-1")?.content).toMatch(/refund of \$5\.00/);
+        expect(notifications.find((n) => n.userId === "member-1")?.content).toContain("refund of $5.00");
         const owner = notifications.find((n) => n.userId === "owner-1");
-        expect(owner?.content).toMatch(/full refund of \$5\.00 for @Cheapie/);
+        expect(owner?.content).toContain("full refund of $5.00 for @Cheapie");
         expect(owner?.linkUrl).toBe("https://dashboard.stripe.com/customers/cus_1");
-        expect(mockSubsList).toHaveBeenCalledWith(expect.objectContaining({ customer: "cus_1" }));
-        // Still active in Stripe → still Pro: a refund never cancels anyone here.
-        expect(mockUpdateUserById).toHaveBeenCalledWith(
-            "member-1",
-            expect.objectContaining({ app_metadata: expect.objectContaining({ tier: "pro" }) }),
+        expect(mockSubsList).not.toHaveBeenCalled();
+        expect(mockUpdateUserById).not.toHaveBeenCalled();
+    });
+
+    it("reports only what this refund gave back, not the running total", async () => {
+        mockConstructEvent.mockReturnValue({
+            id: "evt_2",
+            type: "charge.refunded",
+            data: {
+                object: { id: "ch_1", customer: "cus_1", refunded: false, amount_refunded: 500, currency: "usd" },
+                previous_attributes: { amount_refunded: 200 },
+            },
+        });
+        await POST(request());
+        expect(notifications.find((n) => n.userId === "owner-1")?.content).toContain("partial refund of $3.00");
+    });
+
+    it("sends nothing the second time Stripe delivers the same event", async () => {
+        mockConstructEvent.mockReturnValue({
+            id: "evt_1",
+            type: "charge.refunded",
+            data: { object: { id: "ch_1", customer: "cus_1", refunded: true, amount_refunded: 500, currency: "usd" } },
+        });
+        builder.then.mockImplementationOnce((resolve: (v: unknown) => void) =>
+            Promise.resolve({ data: null, error: { code: "23505" } }).then(resolve),
         );
+        const res = await POST(request());
+        expect(res.status).toBe(200);
+        expect(notifications).toEqual([]);
     });
 
     it("alerts the owner to a chargeback", async () => {

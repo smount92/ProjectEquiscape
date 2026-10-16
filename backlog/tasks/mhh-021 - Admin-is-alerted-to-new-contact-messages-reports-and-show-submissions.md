@@ -1,10 +1,10 @@
 ---
 id: MHH-021
 title: 'Admin is alerted to new contact messages, reports and show submissions'
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-10-15 22:19'
-updated_date: '2026-10-16 01:03'
+updated_date: '2026-10-16 01:34'
 labels:
   - admin
 milestone: m-2
@@ -26,12 +26,12 @@ Gap G3.
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Bell on contact message, content report and external-show submission
+- [x] #1 Bell on contact message, content report and external-show submission
 <!-- AC:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 Tests pass (pre-commit)
+- [x] #1 Tests pass (pre-commit)
 - [ ] #2 Decision recorded in docs/DECISIONS.md if one was made
 - [ ] #3 Member who reported it has a drafted reply, if any
 <!-- DOD:END -->

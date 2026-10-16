@@ -1372,6 +1372,13 @@ const PENDING_MIGRATIONS: MigrationSpec[] = [
         },
     },
     {
+        id: "238",
+        title: "Stripe notices go out once",
+        summary:
+            "stripe_notice_events: the Stripe webhook records an event before sending its notices (payment failed, refund, chargeback), so a repeated delivery never rings the bell twice.",
+        probe: { kind: "column", table: "stripe_notice_events", column: "event_id" },
+    },
+    {
         id: "237",
         title: "Scheduled-job heartbeats",
         summary:
@@ -2194,6 +2201,10 @@ export async function getCronHealth(): Promise<
     const { data, error } = await db
         .from("cron_heartbeats")
         .select("job, last_run_at, last_ok_at, last_failed_at, last_error");
+    // Only a missing table means 237 is not pasted; any other error is a real failure.
+    if (error && error.code !== "42P01" && error.code !== "PGRST205") {
+        return { success: false, error: "The scheduled jobs couldn't load just now." };
+    }
     const installed = !error;
     const rows = new Map((data ?? []).map((r) => [r.job, r]));
     return {

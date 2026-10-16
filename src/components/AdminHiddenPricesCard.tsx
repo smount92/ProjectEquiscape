@@ -17,20 +17,27 @@ export default function AdminHiddenPricesCard() {
 
     useEffect(() => {
         let live = true;
-        listHiddenPrices().then((r) => {
-            if (!live) return;
-            if (r.success) setPrices(r.prices);
-            else setError(r.error);
-        });
+        listHiddenPrices()
+            .then((r) => {
+                if (!live) return;
+                if (r.success) setPrices(r.prices);
+                else setError(r.error);
+            })
+            .catch(() => {
+                if (live) setError("The hidden prices couldn't load just now.");
+            });
         return () => {
             live = false;
         };
     }, []);
 
     const restore = async (p: HiddenPrice) => {
-        setBusy(p.flagId);
-        const r = await restoreHiddenPrice(p.flagId);
-        if (r.success) setPrices((prev) => (prev ?? []).filter((x) => x.flagId !== p.flagId));
+        setBusy(p.catalogItemId);
+        const r = await restoreHiddenPrice(p.catalogItemId).catch(() => ({
+            success: false,
+            error: "That price couldn't be restored just now.",
+        }));
+        if (r.success) setPrices((prev) => (prev ?? []).filter((x) => x.catalogItemId !== p.catalogItemId));
         else setError(r.error ?? "That price couldn't be restored just now.");
         setBusy(null);
     };
@@ -49,7 +56,7 @@ export default function AdminHiddenPricesCard() {
                 <ul className="m-0 flex list-none flex-col gap-2 p-0">
                     {prices.map((p) => (
                         <li
-                            key={p.flagId}
+                            key={p.catalogItemId}
                             className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-input p-3 text-sm"
                         >
                             <div>
@@ -59,22 +66,25 @@ export default function AdminHiddenPricesCard() {
                                 >
                                     {p.title}
                                 </Link>
-                                <div className="text-xs text-muted-foreground">
-                                    Reported by {p.reporter} on{" "}
-                                    {new Date(p.reportedAt).toLocaleDateString("en-US", {
-                                        month: "short",
-                                        day: "numeric",
-                                    })}
-                                    {p.note ? ` · "${p.note}"` : ""}
-                                </div>
+                                {p.reports.map((r, i) => (
+                                    <div key={i} className="text-xs text-muted-foreground">
+                                        Reported by {r.reporter} on{" "}
+                                        {new Date(r.reportedAt).toLocaleDateString("en-US", {
+                                            month: "short",
+                                            day: "numeric",
+                                        })}
+                                        {r.note ? ` · "${r.note}"` : ""}
+                                    </div>
+                                ))}
                             </div>
                             <Button
                                 type="button"
                                 variant="outline"
                                 onClick={() => restore(p)}
-                                disabled={busy === p.flagId}
+                                disabled={busy === p.catalogItemId}
+                                aria-label={`Show the price for ${p.title} again`}
                             >
-                                {busy === p.flagId ? "Restoring…" : "Show it again"}
+                                {busy === p.catalogItemId ? "Restoring…" : "Show it again"}
                             </Button>
                         </li>
                     ))}

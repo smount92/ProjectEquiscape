@@ -55,6 +55,8 @@ to `main`, one rebuild. How releases work: `docs/guides/releasing.md`.
      everything else works.
    - `236_contact_messages_triage.sql`
    - `237_cron_heartbeats.sql`
+   - `238_stripe_notice_ledger.sql`: Stripe notices (payment failed, refund,
+     chargeback) go out once, even when Stripe delivers an event twice.
 4. Merge to main and push. The live smoke test runs by itself.
 
 ## Reports, start to finish (MHH-019, MHH-021 report half, MHH-024, MHH-025)

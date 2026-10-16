@@ -19,10 +19,24 @@
 -- ============================================================
 
 ALTER TABLE public.contact_messages ADD COLUMN IF NOT EXISTS category TEXT NOT NULL DEFAULT 'question';
-ALTER TABLE public.contact_messages ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'open';
+ALTER TABLE public.contact_messages ADD COLUMN IF NOT EXISTS resolved_at TIMESTAMPTZ;
+-- status, and the one-time backfill: messages already read before this
+-- release count as handled. It runs only on the paste that adds the column,
+-- so pasting again never re-closes a message the owner has reopened.
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public' AND table_name = 'contact_messages' AND column_name = 'status'
+  ) THEN
+    ALTER TABLE public.contact_messages ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'open';
+    UPDATE public.contact_messages
+    SET status = 'resolved', resolved_at = coalesce(resolved_at, created_at)
+    WHERE is_read = true;
+  END IF;
+END $$;
 ALTER TABLE public.contact_messages ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES public.users(id) ON DELETE SET NULL;
 ALTER TABLE public.contact_messages ADD COLUMN IF NOT EXISTS error_ref TEXT;
-ALTER TABLE public.contact_messages ADD COLUMN IF NOT EXISTS resolved_at TIMESTAMPTZ;
 
 ALTER TABLE public.contact_messages DROP CONSTRAINT IF EXISTS contact_messages_category_check;
 ALTER TABLE public.contact_messages ADD CONSTRAINT contact_messages_category_check
@@ -32,10 +46,6 @@ ALTER TABLE public.contact_messages DROP CONSTRAINT IF EXISTS contact_messages_s
 ALTER TABLE public.contact_messages ADD CONSTRAINT contact_messages_status_check
   CHECK (status IN ('open', 'resolved'));
 
--- Messages already read before this release count as handled.
-UPDATE public.contact_messages
-SET status = 'resolved', resolved_at = coalesce(resolved_at, created_at)
-WHERE is_read = true AND status = 'open';
 
 CREATE INDEX IF NOT EXISTS idx_contact_messages_status_created ON public.contact_messages (status, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_contact_messages_user ON public.contact_messages (user_id);
