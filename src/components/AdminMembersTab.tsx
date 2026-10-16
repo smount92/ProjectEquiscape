@@ -154,8 +154,9 @@ function MemberRow({ member, onChanged }: { member: AdminMemberRow; onChanged: (
     );
 }
 
-export default function AdminMembersTab() {
-    const [query, setQuery] = useState("");
+/** `initialQuery`: open already searching for a member (a report card's "Suspend …" link). */
+export default function AdminMembersTab({ initialQuery = "" }: { initialQuery?: string }) {
+    const [query, setQuery] = useState(initialQuery);
     const [members, setMembers] = useState<AdminMemberRow[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);

@@ -79,6 +79,54 @@ export const REPORT_TARGET_LABEL: Record<ReportTargetType, string> = {
     id_suggestion: "Help ID suggestion",
 };
 
+/**
+ * The take-down button on an admin report card, per kind. Every one is
+ * reversible and keeps the member's data: posts, replies and Help ID rows
+ * are hidden (migration 235), a message is marked removed, a horse is made
+ * private (which ends its listing), a show entry is scratched. A member has
+ * no take-down here: suspension lives in Admin › Members.
+ */
+export const REPORT_TAKE_DOWN_LABEL: Record<ReportTargetType, string | null> = {
+    post: "Hide the post",
+    comment: "Hide the reply",
+    horse: "Make the horse private",
+    user: null,
+    message: "Remove the message",
+    show_entry: "Scratch the entry",
+    id_request: "Hide the request",
+    id_suggestion: "Hide the suggestion",
+};
+
+/** What the member who made it is told when it comes down. */
+export const REPORT_TAKE_DOWN_NOTICE: Record<ReportTargetType, string> = {
+    post: "We hid one of your posts because it breaks the community rules.",
+    comment: "We hid one of your replies because it breaks the community rules.",
+    horse: "We made one of your horses private, which also takes it off the Market, because its page breaks the community rules.",
+    user: "",
+    message: "We removed a message you sent because it breaks the community rules.",
+    show_entry: "We scratched one of your show entries because it breaks the community rules.",
+    id_request: "We hid your Help ID request because it breaks the community rules.",
+    id_suggestion: "We hid one of your Help ID suggestions because it breaks the community rules.",
+};
+
+/** Said after every take-down notice: the way to reach us. */
+export const TAKE_DOWN_APPEAL = "If you think we got it wrong, write to us through the contact page.";
+
+/** A reported thing as the admin card shows it (built in reportTargets.ts). */
+export interface ReportTargetView {
+    /** What the admin reads on the card: a name, a title, or a short excerpt. */
+    summary: string;
+    /** The page it lives on, or null when there is none to open (a private message). */
+    href: string | null;
+    /** The member who made it (for a member report, the member). */
+    ownerId: string | null;
+    ownerAlias: string | null;
+    /** Where it stands now, in a word or two: "Hidden", "Private", "Scratched" … */
+    state: string | null;
+    /** The take-down button's words, or null when there is nothing to take down here. */
+    takeDownLabel: string | null;
+}
+
 /** "a post", "an entry": the article for a noun in a sentence. */
 export function withArticle(noun: string): string {
     return /^[aeiou]/i.test(noun) ? `an ${noun}` : `a ${noun}`;

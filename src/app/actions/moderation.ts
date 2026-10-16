@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireAuth, requireAdmin, AuthError } from "@/lib/auth";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
@@ -11,12 +12,17 @@ import {
     ADMIN_REPORTS_URL,
     REPORT_DETAILS_MAX,
     REPORT_REASONS,
+    REPORT_TAKE_DOWN_LABEL,
+    REPORT_TAKE_DOWN_NOTICE,
     REPORT_TARGET_NOUN,
     REPORT_TARGET_TYPES,
     REPORT_TARGET_TYPES_BEFORE_235,
+    TAKE_DOWN_APPEAL,
+    isReportTargetType,
     withArticle,
     type ReportTargetType,
 } from "@/lib/moderation/reports";
+import { describeReportTargets, takeDownReportedContent, targetKey } from "@/lib/moderation/reportTargets";
 
 // ============================================================
 // COMMUNITY MODERATION — Server Actions
@@ -140,12 +146,22 @@ export async function getOpenReports() {
         aliasMap.set(u.id, u.alias_name);
     }
 
-    return (data as Record<string, unknown>[]).map((r) => ({
+    const rows = data as Record<string, unknown>[];
+
+    // What each report is about: a summary, a link, who made it, and what
+    // can be done about it — so the card can act without hunting.
+    const views = await describeReportTargets(
+        moderationDb(),
+        rows.map((r) => ({ targetType: r.target_type as string, targetId: r.target_id as string })),
+    );
+
+    return rows.map((r) => ({
         id: r.id as string,
         reporterId: r.reporter_id as string,
         reporterAlias: aliasMap.get(r.reporter_id as string) || "Unknown",
         targetType: r.target_type as string,
         targetId: r.target_id as string,
+        target: views.get(targetKey(r.target_type as string, r.target_id as string)) ?? null,
         reason: r.reason as string,
         details: r.details as string | null,
         status: r.status as string,
@@ -154,42 +170,109 @@ export async function getOpenReports() {
     }));
 }
 
-/** Admin: dismiss a report */
-export async function dismissReport(reportId: string, notes?: string): Promise<{ success: boolean; error?: string }> {
-    const { user } = await requireAdmin(); // was requireAuth — any user could resolve reports
+export type OpenReport = Awaited<ReturnType<typeof getOpenReports>>[number];
 
-    const admin = getAdminClient();
-    const { error } = await admin
+/**
+ * The service-role client, untyped for the moderation helpers (they touch
+ * hidden_at, which postdates the generated types). Every caller in this
+ * file is behind requireAdmin().
+ */
+function moderationDb(): SupabaseClient {
+    return getAdminClient() as unknown as SupabaseClient;
+}
+
+const resolveReportSchema = z.object({
+    reportId: z.uuid(),
+    /**
+     * dismiss: it doesn't break the rules.
+     * take_down: hide / remove / make private / scratch the content.
+     * handled: dealt with another way (a word with the member, a suspension).
+     */
+    decision: z.enum(["dismiss", "take_down", "handled"]),
+    note: z.string().trim().max(1000).optional(),
+});
+
+/**
+ * Admin: close a report, and act on it when asked. The one way a report
+ * leaves the queue, so every outcome records a note and a status
+ * ('dismissed' or 'actioned').
+ *
+ * A take-down closes every open report on the same content, since they
+ * were all about the thing that is now gone.
+ */
+export async function resolveReport(input: z.input<typeof resolveReportSchema>): Promise<ActionResult> {
+    let adminId: string;
+    try {
+        adminId = (await requireAdmin()).user.id;
+    } catch (err) {
+        if (err instanceof AuthError) return fail("Admin access required.");
+        throw err;
+    }
+    const parsed = resolveReportSchema.safeParse(input);
+    if (!parsed.success) return fail("That report action isn't recognised.");
+    const { reportId, decision } = parsed.data;
+    const note = parsed.data.note || undefined;
+    if (decision === "handled" && !note) return fail("Write a note saying what you did.");
+
+    const db = moderationDb();
+    const { data: report, error: readError } = await db
         .from("user_reports")
-        .update({
-            status: "dismissed",
-            admin_notes: notes || "Dismissed — no action needed.",
-            resolved_by: user.id,
-            resolved_at: new Date().toISOString(),
-        })
-        .eq("id", reportId);
+        .select("id, target_type, target_id, status")
+        .eq("id", reportId)
+        .maybeSingle();
+    if (readError) return safeError("Moderation", readError, "Could not load the report.");
+    const r = report as { target_type: string; target_id: string; status: string } | null;
+    if (!r) return fail("That report no longer exists.");
+    if (r.status !== "open") return fail("This report has already been dealt with.");
 
-    if (error) return safeError("Moderation", error, "Could not dismiss the report.");
+    const targetType = isReportTargetType(r.target_type) ? r.target_type : null;
+    let ownerId: string | null = null;
+    if (decision === "take_down") {
+        if (!targetType) return fail("This kind of report can't be taken down from here.");
+        const done = await takeDownReportedContent(db, targetType, r.target_id, adminId);
+        if (!done.success) return done;
+        ownerId = done.ownerId;
+    }
+
+    const status = decision === "dismiss" ? "dismissed" : "actioned";
+    const recorded =
+        note ??
+        (decision === "dismiss"
+            ? "Dismissed: it doesn't break the rules."
+            : `Taken down: ${targetType ? REPORT_TAKE_DOWN_LABEL[targetType] : "content"}.`);
+
+    let close = db
+        .from("user_reports")
+        .update({ status, admin_notes: recorded, resolved_by: adminId, resolved_at: new Date().toISOString() })
+        .eq("status", "open");
+    close =
+        decision === "take_down"
+            ? close.eq("target_type", r.target_type).eq("target_id", r.target_id)
+            : close.eq("id", reportId);
+    const { error: closeError } = await close.select("id, reporter_id");
+    if (closeError) return safeError("Moderation", closeError, "Could not close the report.");
+
+    if (decision === "take_down" && ownerId && targetType) {
+        await tellTheOwner(ownerId, targetType);
+    }
+
     revalidatePath("/admin");
     return { success: true };
 }
 
-/** Admin: action a report (mark as handled) */
-export async function actionReport(reportId: string, notes: string): Promise<{ success: boolean; error?: string }> {
-    const { user } = await requireAdmin(); // was requireAuth — any user could action reports
-
-    const admin = getAdminClient();
-    const { error } = await admin
-        .from("user_reports")
-        .update({
-            status: "actioned",
-            admin_notes: notes,
-            resolved_by: user.id,
-            resolved_at: new Date().toISOString(),
-        })
-        .eq("id", reportId);
-
-    if (error) return safeError("Moderation", error, "Could not save the report.");
-    revalidatePath("/admin");
-    return { success: true };
+/** The member whose content came down hears it from us, with a way to reply. */
+async function tellTheOwner(ownerId: string, targetType: ReportTargetType): Promise<void> {
+    const notice = REPORT_TAKE_DOWN_NOTICE[targetType];
+    if (!notice) return;
+    try {
+        const { createNotification } = await import("@/lib/notifications/createNotification");
+        await createNotification({
+            userId: ownerId,
+            type: "moderation",
+            content: `${notice} ${TAKE_DOWN_APPEAL}`,
+            linkUrl: "/contact",
+        });
+    } catch (err) {
+        logger.error("Moderation", "Take-down notice failed (the take-down stands)", err);
+    }
 }

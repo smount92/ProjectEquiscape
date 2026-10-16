@@ -1340,13 +1340,10 @@ const PENDING_MIGRATIONS: MigrationSpec[] = [
     },
     {
         id: "235",
-        title: "Report everything",
+        title: "Report everything; hide, never delete",
         summary:
-            "The reports table accepts show entries, Help ID requests and Help ID suggestions as well as posts, replies, horses, members and messages.",
-        probe: {
-            kind: "none",
-            why: "Widens a CHECK constraint — nothing to select. Verify: report a show entry; it files without the 'not switched on yet' notice.",
-        },
+            "The reports table accepts show entries and Help ID requests and suggestions too; posts and Help ID rows get hidden_at, and a row policy hides them from members, so a report card can take them down without deleting anything.",
+        probe: { kind: "column", table: "posts", column: "hidden_at" },
     },
     {
         id: "234",

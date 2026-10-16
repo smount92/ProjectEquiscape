@@ -440,7 +440,12 @@ export interface ThreadEntry {
     editedAt: string | null;
     isMine: boolean;
     attachments?: { url: string; caption: string | null }[];
+    /** Removed by the site team after a report: shown as a placeholder. */
+    removed?: boolean;
 }
+
+/** What a removed message says in its place. */
+export const REMOVED_MESSAGE_TEXT = "This message was removed by a moderator.";
 
 export interface DealRoom {
     conversationId: string;
@@ -810,7 +815,7 @@ async function loadEntries(
     support: DealColumnSupport,
 ): Promise<ThreadEntry[]> {
     const columns = support.messageKinds
-        ? "id, sender_id, content, created_at, kind, payload, edited_at"
+        ? "id, sender_id, content, created_at, kind, payload, edited_at, deleted_at"
         : "id, sender_id, content, created_at";
 
     const { data, error } = await dealDb(supabase)
@@ -821,16 +826,22 @@ async function loadEntries(
         .limit(1000);
     if (error) return [];
 
-    return ((data ?? []) as unknown as Record<string, unknown>[]).map((m) => ({
-        id: m.id as string,
-        senderId: (m.sender_id as string | null) ?? null,
-        kind: coerceKind(m.kind ?? "chat"),
-        payload: coercePayload(m.payload),
-        content: (m.content as string) ?? "",
-        createdAt: m.created_at as string,
-        editedAt: (m.edited_at as string | null) ?? null,
-        isMine: false, // filled by the caller, which knows the viewer
-    }));
+    return ((data ?? []) as unknown as Record<string, unknown>[]).map((m) => {
+        // A message the site team removed after a report (deleted_at, 173)
+        // keeps its place in the thread but not its words or photos.
+        const removed = !!m.deleted_at;
+        return {
+            id: m.id as string,
+            senderId: (m.sender_id as string | null) ?? null,
+            kind: coerceKind(m.kind ?? "chat"),
+            payload: coercePayload(m.payload),
+            content: removed ? REMOVED_MESSAGE_TEXT : ((m.content as string) ?? ""),
+            createdAt: m.created_at as string,
+            editedAt: (m.edited_at as string | null) ?? null,
+            isMine: false, // filled by the caller, which knows the viewer
+            ...(removed ? { removed: true } : {}),
+        };
+    });
 }
 
 async function loadLedger(supabase: SupabaseClient, conversationId: string): Promise<Installment[]> {

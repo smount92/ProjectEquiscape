@@ -27,7 +27,7 @@ import AdminPulseStrip from "@/components/AdminPulseStrip";
 import type { PendingExternalShow } from "@/app/actions/external-shows";
 import type { AdminPulse, EnvFlagStatus, LegacySuggestionRow, MigrationStatusRow } from "@/app/actions/admin";
 import { Button } from "@/components/ui/button";
-import { REPORT_TARGET_LABEL, isReportTargetType } from "@/lib/moderation/reports";
+import { REPORT_TARGET_LABEL, isReportTargetType, type ReportTargetView } from "@/lib/moderation/reports";
 
 interface ContactMessage {
     id: string;
@@ -51,6 +51,8 @@ interface Report {
     id: string;
     targetType: string;
     targetId: string;
+    /** What was reported, where it lives, and what can be done (getOpenReports). */
+    target?: ReportTargetView | null;
     reason: string;
     details: string | null;
     reporterAlias: string;
@@ -201,6 +203,8 @@ export default function AdminTabs({
     sanctioningCount = 0,
 }: AdminTabsProps) {
     const [activeTab, setActiveTab] = useState<TabKey>("mailbox");
+    // A report card's "Suspend @alias" opens Members already searching for them.
+    const [memberQuery, setMemberQuery] = useState("");
 
     // Open the tab a link asked for (the admin bell links to /admin?tab=reports),
     // else the one last used.
@@ -291,11 +295,19 @@ export default function AdminTabs({
                 {activeTab === "mailbox" && <MailboxTab messages={messages} />}
                 {activeTab === "shows" && <ShowsTab shows={shows} />}
                 {activeTab === "content" && <ContentTab suggestions={suggestions} />}
-                {activeTab === "reports" && <ReportsTab reports={reports} />}
+                {activeTab === "reports" && (
+                    <ReportsTab
+                        reports={reports}
+                        onOpenMember={(alias) => {
+                            setMemberQuery(alias);
+                            handleTabChange("members");
+                        }}
+                    />
+                )}
                 {activeTab === "catalog" && <CatalogTab suggestions={catalogSuggestions} />}
                 {activeTab === "calendar" && <CalendarQueueTab shows={externalShows} />}
                 {activeTab === "sanctioning" && <AdminSanctioningCard showEmptyState />}
-                {activeTab === "members" && <AdminMembersTab />}
+                {activeTab === "members" && <AdminMembersTab key={memberQuery} initialQuery={memberQuery} />}
                 {activeTab === "insights" && <AdminInsightsTab />}
                 {activeTab === "ops" && (
                     <div className="flex flex-col gap-8">
@@ -424,7 +436,7 @@ function ContentTab({ suggestions }: { suggestions: LegacySuggestionRow[] }) {
 /* ═══════════════════════════════════════════
  Reports Tab
  ═══════════════════════════════════════════ */
-function ReportsTab({ reports }: { reports: Report[] }) {
+export function ReportsTab({ reports, onOpenMember }: { reports: Report[]; onOpenMember?: (alias: string) => void }) {
     if (reports.length === 0) {
         return (
             <div className="rounded-lg border border-input bg-card px-8 py-12 text-center shadow-md transition-all">
@@ -437,24 +449,73 @@ function ReportsTab({ reports }: { reports: Report[] }) {
 
     return (
         <div className="flex flex-col gap-2">
-            {reports.map((report) => (
-                <div key={report.id} className="rounded-lg border border-input bg-card px-6 py-4 transition-all">
-                    <div className="mb-1 flex justify-between">
-                        <strong>{report.reason}</strong>
-                        <span className="text-xs text-muted-foreground">
-                            {isReportTargetType(report.targetType)
-                                ? REPORT_TARGET_LABEL[report.targetType]
-                                : report.targetType}{" "}
-                            · {new Date(report.createdAt).toLocaleDateString()}
-                        </span>
-                    </div>
-                    <p className="mb-1 text-sm">
-                        Reported by: {report.reporterAlias} · Target: {report.targetId.slice(0, 8)}…
-                    </p>
-                    {report.details && <p className="text-sm text-muted-foreground">{report.details}</p>}
-                    <ReportActions reportId={report.id} />
-                </div>
-            ))}
+            {reports.map((report) => {
+                const target = report.target ?? null;
+                const kind = isReportTargetType(report.targetType)
+                    ? REPORT_TARGET_LABEL[report.targetType]
+                    : report.targetType;
+                return (
+                    <article
+                        key={report.id}
+                        className="rounded-lg border border-input bg-card px-6 py-4 transition-all"
+                        aria-label={`Report: ${kind}`}
+                    >
+                        <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
+                            <span className="flex items-center gap-2">
+                                <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold">{kind}</span>
+                                <strong>{report.reason}</strong>
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                                {new Date(report.createdAt).toLocaleDateString()} · reported by @{report.reporterAlias}
+                            </span>
+                        </div>
+
+                        {/* What was reported, in its own words, with the way to it. */}
+                        <blockquote className="m-0 rounded-md border-l-4 border-input bg-muted/40 px-3 py-2 text-sm">
+                            {target ? target.summary : "Couldn't load what was reported."}
+                            {target?.state && (
+                                <span className="ml-2 rounded-full border border-input px-2 py-0.5 text-xs text-muted-foreground">
+                                    {target.state}
+                                </span>
+                            )}
+                        </blockquote>
+                        <p className="mt-1 mb-0 flex flex-wrap gap-x-4 text-xs text-muted-foreground">
+                            {target?.ownerAlias && (
+                                <span>
+                                    {report.targetType === "user" ? "Member" : "By"} @{target.ownerAlias}
+                                </span>
+                            )}
+                            {target?.href ? (
+                                <a
+                                    href={target.href}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-forest underline-offset-2 hover:underline"
+                                >
+                                    Open it ↗
+                                </a>
+                            ) : (
+                                target &&
+                                report.targetType === "message" && (
+                                    <span>Private message: the words above are all of it.</span>
+                                )
+                            )}
+                        </p>
+
+                        {report.details && (
+                            <p className="mt-2 mb-0 text-sm text-secondary-foreground">
+                                <span className="font-semibold">Reporter says:</span> {report.details}
+                            </p>
+                        )}
+                        <ReportActions
+                            reportId={report.id}
+                            takeDownLabel={target?.takeDownLabel ?? null}
+                            ownerAlias={target?.ownerAlias ?? null}
+                            onOpenMember={onOpenMember}
+                        />
+                    </article>
+                );
+            })}
         </div>
     );
 }

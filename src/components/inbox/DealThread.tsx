@@ -37,6 +37,8 @@ export interface ThreadMessage {
     editedAt: string | null;
     isMine: boolean;
     attachments?: { url: string; caption: string | null }[];
+    /** Removed by the site team after a report; `content` is the placeholder. */
+    removed?: boolean;
 }
 
 interface DealThreadProps {
@@ -387,7 +389,7 @@ export default function DealThread({
                                         otherAvatarUrl={otherAvatarUrl}
                                         currentUserAvatar={currentUserAvatar}
                                         onEdit={
-                                            msg.isMine && msg.kind === "chat" && !composerDisabledReason
+                                            msg.isMine && msg.kind === "chat" && !msg.removed && !composerDisabledReason
                                                 ? () => {
                                                       setEditingId(msg.id);
                                                       setEditText(msg.content);
@@ -623,7 +625,9 @@ function ChatBubble({
                         : "rounded-bl-[4px] border border-input bg-card text-foreground"
                 }`}
             >
-                <div className="break-words whitespace-pre-wrap">{msg.content}</div>
+                <div className={`break-words whitespace-pre-wrap ${msg.removed ? "italic opacity-80" : ""}`}>
+                    {msg.content}
+                </div>
 
                 {msg.attachments && msg.attachments.length > 0 && (
                     <div
@@ -681,7 +685,7 @@ function ChatBubble({
             <ReportButton
                 targetType="message"
                 targetId={msg.id}
-                isOwn={msg.isMine}
+                isOwn={msg.isMine || !!msg.removed}
                 variant="icon"
                 className="self-center border-transparent opacity-60 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
             />
