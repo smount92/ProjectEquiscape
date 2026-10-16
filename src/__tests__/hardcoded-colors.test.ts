@@ -22,7 +22,7 @@ const PALETTE =
     /\b(bg|text|border)-(gray|amber|yellow|blue|red|green|white|black|slate|zinc|stone|neutral|emerald|indigo|purple|pink|orange|sky|rose|lime|teal|cyan|violet|fuchsia)(-[0-9]{2,3})?(\/[0-9]+)?\b/g;
 
 /** 2026-09-19 — the count on the day the ratchet went in. Lower it as usages are converted. */
-const BASELINE = 406;
+const BASELINE = 383;
 
 function walk(dir: string, out: string[] = []): string[] {
     for (const name of readdirSync(dir)) {

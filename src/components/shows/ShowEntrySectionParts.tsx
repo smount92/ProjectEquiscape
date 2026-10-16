@@ -84,7 +84,7 @@ export function MyEntriesCard({
                         <TableHead>Handler</TableHead>
                         <TableHead>Status</TableHead>
                         {hasResults && <TableHead>Result</TableHead>}
-                        {entriesOpen && <TableHead />}
+                        {(entriesOpen || showId) && <TableHead />}
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -142,9 +142,9 @@ export function MyEntriesCard({
                                         )}
                                     </TableCell>
                                 )}
-                                {entriesOpen && (
-                                    <TableCell className="text-right">
-                                        {!scratched && entry.status === "entered" && (
+                                {(entriesOpen || showId) && (
+                                    <TableCell className="text-right whitespace-nowrap">
+                                        {entriesOpen && !scratched && entry.status === "entered" && (
                                             <Button
                                                 variant="destructive-outline"
                                                 size="sm"
@@ -155,7 +155,8 @@ export function MyEntriesCard({
                                                 Scratch
                                             </Button>
                                         )}
-                                        {scratched &&
+                                        {entriesOpen &&
+                                            scratched &&
                                             cls &&
                                             cls.status === "scheduled" &&
                                             !hasLiveEntry(entry.classId, entry.horseId) &&
@@ -172,6 +173,17 @@ export function MyEntriesCard({
                                                     Re-enter
                                                 </Button>
                                             ))}
+                                        {/* MHH-026: a question about this entry goes
+                                            straight to the host, entry named. */}
+                                        {showId && (
+                                            <Link
+                                                href={`/shows/${showId}/message-host?entry=${entry.id}`}
+                                                className="ml-2 text-xs text-muted-foreground underline underline-offset-2"
+                                                aria-label={`Ask the host about ${entry.horseName}`}
+                                            >
+                                                Ask the host
+                                            </Link>
+                                        )}
                                     </TableCell>
                                 )}
                             </TableRow>

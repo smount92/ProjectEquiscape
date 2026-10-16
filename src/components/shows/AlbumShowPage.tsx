@@ -103,6 +103,7 @@ export default async function AlbumShowPage({ showId }: { showId: string }) {
                     show={show}
                     entryCount={entryCount}
                     focusChips={focusChips(focusFromConsole(divisions))}
+                    canMessageHost={staffRole !== "host"}
                 />
 
                 <AlbumCtaRow

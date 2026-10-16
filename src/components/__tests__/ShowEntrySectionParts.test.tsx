@@ -128,6 +128,24 @@ describe("MyEntriesCard", () => {
         );
     });
 
+    it("offers Ask the host on every entry, even after entries close (MHH-026)", () => {
+        render(
+            <MyEntriesCard
+                myEntries={[entry({ status: "scratched" })]}
+                classById={classById}
+                entriesOpen={false}
+                scratching={false}
+                hasLiveEntry={noLive}
+                onScratch={() => {}}
+                onReenter={() => {}}
+                showId="s1"
+            />,
+        );
+        const ask = screen.getByRole("link", { name: /^Ask the host about/ });
+        expect(ask.getAttribute("href")).toBe("/shows/s1/message-host?entry=e1");
+        expect(screen.queryByRole("link", { name: "Re-enter" })).not.toBeInTheDocument();
+    });
+
     it("keeps the Re-enter button when no showId is given", () => {
         const onReenter = vi.fn();
         render(

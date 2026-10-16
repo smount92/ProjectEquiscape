@@ -146,9 +146,9 @@ export async function barEntrant(input: z.input<typeof barEntrantSchema>): Promi
             actorId: null,
             content:
                 scratched > 0
-                    ? `Your ${scratched === 1 ? "entry was" : "entries were"} scratched and you may not re-enter this show. Contact the host with questions.`
-                    : "You may not enter this show. Contact the host with questions.",
-            linkUrl: `/shows/${v.showId}`,
+                    ? `Your ${scratched === 1 ? "entry was" : "entries were"} scratched and you may not re-enter this show. Open this to message the host.`
+                    : "You may not enter this show. Open this to message the host.",
+            linkUrl: `/shows/${v.showId}/message-host`,
         });
     } catch {
         // Notification is best-effort.
@@ -320,9 +320,9 @@ export async function removeEntrantFromShow(
             actorId: null,
             content:
                 removedEntries > 0
-                    ? `Your ${removedEntries === 1 ? "entry was" : "entries were"} removed from this show by the host, and you cannot re-enter it. Contact the host with questions.`
-                    : "The host has barred you from entering this show. Contact the host with questions.",
-            linkUrl: `/shows/${v.showId}`,
+                    ? `Your ${removedEntries === 1 ? "entry was" : "entries were"} removed from this show by the host, and you cannot re-enter it. Open this to message the host.`
+                    : "The host has barred you from entering this show. Open this to message the host.",
+            linkUrl: `/shows/${v.showId}/message-host`,
         });
     } catch {
         // Notification is best-effort — the removal stands either way.

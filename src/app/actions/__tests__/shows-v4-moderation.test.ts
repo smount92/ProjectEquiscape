@@ -397,7 +397,7 @@ describe("removeEntrantFromShow — telling the member", () => {
                 userId: TROLL_ID,
                 type: "show_moderation",
                 actorId: null,
-                linkUrl: `/shows/${SHOW_ID}`,
+                linkUrl: `/shows/${SHOW_ID}/message-host`,
             }),
         );
         const sent = vi.mocked(createNotification).mock.calls[0][0];

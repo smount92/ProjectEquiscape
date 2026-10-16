@@ -10,6 +10,10 @@ to `main`, one rebuild. How releases work: `docs/guides/releasing.md`.
 - Members are told when a membership payment fails, and when a refund is
   on its way. Settings › Subscription has **Manage billing** (Stripe's own
   page: update the card, see invoices, cancel).
+- Entrants can write to a show's host from the site: "message the host" on
+  the show page, "Ask the host" on each of their entries, and every bar,
+  scratch or removal notice opens it. The message names the show and the
+  entry, and lands in the ordinary inbox thread with the host.
 
 ## What the owner will notice
 
