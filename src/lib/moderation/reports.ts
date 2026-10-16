@@ -135,19 +135,19 @@ export function takeDownNotice(type: ReportTargetType, name: string | null): str
 }
 
 /**
- * What the member who reported it hears when the report is closed. It names
- * the thing they reported (`name`, as in takeDownNotice) and says what
- * happened to it, and nothing about anyone: never which member, never a
- * suspension. "Dealt with another way" is said neutrally for that reason.
+ * What the member who reported it hears when the report is closed: what
+ * happened to the thing, and nothing about anyone (never which member, never
+ * a suspension; "dealt with another way" is said neutrally for that reason).
+ * It quotes none of the reported words, names or titles: a member who
+ * reported abuse must not find it repeated in their own bell (owner,
+ * 2026-10-15). The owner of the content is the one told which item.
  */
 export function reportOutcomeNotice(
     decision: "dismiss" | "take_down" | "handled",
     targetType: ReportTargetType | null,
-    name: string | null = null,
 ): string {
     const noun = targetType ? REPORT_TARGET_NOUN[targetType] : "post";
-    const thing = name ? `the ${noun} ${targetType === "user" ? name : `"${name}"`}` : withArticle(noun);
-    const thanks = `Thank you for reporting ${thing}.`;
+    const thanks = `Thank you for reporting that ${noun}.`;
     if (decision === "take_down") return `${thanks} We looked into it and removed it.`;
     if (decision === "handled") return `${thanks} We've reviewed your report and closed it.`;
     return `${thanks} We looked, and it doesn't break ${COMMUNITY_RULES}, so we've left it up.`;

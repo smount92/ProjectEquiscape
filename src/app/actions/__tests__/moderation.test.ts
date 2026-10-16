@@ -304,7 +304,7 @@ describe("resolveReport (MHH-025)", () => {
             userId: MEMBER.id,
             type: "moderation",
             content:
-                "Thank you for reporting the horse \"Bramble\". We looked, and it doesn't break our Community Conduct rules (Terms, section 6), so we've left it up.",
+                "Thank you for reporting that horse. We looked, and it doesn't break our Community Conduct rules (Terms, section 6), so we've left it up.",
         });
     });
 
@@ -324,7 +324,7 @@ describe("resolveReport (MHH-025)", () => {
         const toReporters = notices().filter((n) => String(n.userId).startsWith("rep-"));
         expect(toReporters.map((n) => n.userId)).toEqual(["rep-1", "rep-2"]);
         for (const n of toReporters) {
-            expect(n.content).toBe('Thank you for reporting the message "pay me". We looked into it and removed it.');
+            expect(n.content).toBe("Thank you for reporting that message. We looked into it and removed it.");
             expect(n.content).not.toMatch(/Threats|sender|suspend/i);
         }
     });

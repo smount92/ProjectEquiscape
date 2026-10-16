@@ -38,15 +38,15 @@ describe("take-down notices name what came down", () => {
         }
     });
 
-    it("thanks the reporter naming the item, and never says what happened to anyone", () => {
-        expect(reportOutcomeNotice("take_down", "post", "Buy cheap models")).toBe(
-            'Thank you for reporting the post "Buy cheap models". We looked into it and removed it.',
+    it("thanks the reporter without repeating the reported words, and never says what happened to anyone", () => {
+        expect(reportOutcomeNotice("take_down", "post")).toBe(
+            "Thank you for reporting that post. We looked into it and removed it.",
         );
-        expect(reportOutcomeNotice("handled", "user", "@Trouble")).toBe(
-            "Thank you for reporting the member @Trouble. We've reviewed your report and closed it.",
+        expect(reportOutcomeNotice("handled", "user")).toBe(
+            "Thank you for reporting that member. We've reviewed your report and closed it.",
         );
-        expect(reportOutcomeNotice("dismiss", "message", null)).toBe(
-            "Thank you for reporting a message. We looked, and it doesn't break our Community Conduct rules (Terms, section 6), so we've left it up.",
+        expect(reportOutcomeNotice("dismiss", "message")).toBe(
+            "Thank you for reporting that message. We looked, and it doesn't break our Community Conduct rules (Terms, section 6), so we've left it up.",
         );
     });
 

@@ -310,7 +310,7 @@ export async function resolveReport(input: z.input<typeof resolveReportSchema>):
                 .filter(Boolean),
         ),
     ] as string[];
-    await tellTheReporters(reporters, reportOutcomeNotice(decision, targetType, name));
+    await tellTheReporters(reporters, reportOutcomeNotice(decision, targetType));
 
     revalidatePath("/admin");
     return { success: true };
