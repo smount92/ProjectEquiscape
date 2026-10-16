@@ -1,10 +1,11 @@
 "use server";
 
+import { z } from "zod";
 import { logger } from "@/lib/logger";
 import * as Sentry from "@sentry/nextjs";
 import type { Json } from "@/lib/types/database.generated";
 
-import { requireAuth } from "@/lib/auth";
+import { AuthError, requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { getPublicImageUrls } from "@/lib/utils/storage";
@@ -26,7 +27,29 @@ interface FeedItem {
 }
 
 /**
+ * The Paddock events the app writes, and the metadata each one carries.
+ * Nothing else is accepted: this is a directly-callable "use server"
+ * action, and it once took any event type with any metadata, so a member
+ * could post a `text_post` (or anything) straight into the Paddock, with
+ * no Report button and nothing to take down. Feed text goes through
+ * createPost into `posts`, where reports and take-downs work.
+ *
+ * Callers: follows.ts (follow), horse-events.ts (new_horse),
+ * provenance.ts (show_record), transactions.ts (rating).
+ */
+const ACTIVITY_EVENTS = {
+    follow: z.object({ targetAlias: z.string().max(100) }).strict(),
+    new_horse: z.object({ horseName: z.string().max(200), finishType: z.string().max(40) }).strict(),
+    show_record: z.object({ showName: z.string().max(300), placing: z.string().max(100).nullable() }).strict(),
+    rating: z.object({ stars: z.number().int().min(1).max(5), targetAlias: z.string().max(100) }).strict(),
+} as const;
+
+/**
  * Create an activity event (Service Role, fire-and-forget).
+ *
+ * Only for the signed-in member's own events, and only the kinds in
+ * ACTIVITY_EVENTS with their own metadata; anything else is refused
+ * (logged, never written).
  */
 export async function createActivityEvent(data: {
     actorId: string;
@@ -40,20 +63,36 @@ export async function createActivityEvent(data: {
         // authenticated caller — never a caller-supplied id — or a client could
         // forge feed events attributed to anyone. Every internal caller already
         // passes its own auth.uid(), so this only blocks direct-call forgery.
-        const supabase = await createClient();
-        const {
-            data: { user },
-        } = await supabase.auth.getUser();
-        if (!user || user.id !== data.actorId) return;
+        let userId: string;
+        try {
+            userId = (await requireAuth()).user.id;
+        } catch (err) {
+            if (err instanceof AuthError) return;
+            throw err;
+        }
+        if (userId !== data.actorId) return;
+
+        const schema = Object.hasOwn(ACTIVITY_EVENTS, data.eventType)
+            ? ACTIVITY_EVENTS[data.eventType as keyof typeof ACTIVITY_EVENTS]
+            : null;
+        const metadata = schema?.safeParse(data.metadata ?? {});
+        if (!schema || !metadata?.success) {
+            logger.warn("Activity", `Refused an activity event that the app doesn't write: ${data.eventType}`);
+            return;
+        }
+        const ids = z
+            .object({ horseId: z.guid().optional(), targetId: z.guid().optional() })
+            .safeParse({ horseId: data.horseId || undefined, targetId: data.targetId || undefined });
+        if (!ids.success) return;
 
         const supabaseAdmin = getAdminClient();
 
         await supabaseAdmin.from("activity_events").insert({
-            actor_id: data.actorId,
+            actor_id: userId,
             event_type: data.eventType,
-            horse_id: data.horseId || null,
-            target_id: data.targetId || null,
-            metadata: data.metadata || null,
+            horse_id: ids.data.horseId ?? null,
+            target_id: ids.data.targetId ?? null,
+            metadata: metadata.data as Json,
         });
     } catch (err) {
         Sentry.captureException(err, { tags: { domain: "activity" }, level: "warning" });
