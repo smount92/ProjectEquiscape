@@ -26,13 +26,10 @@ back. In priority order:
 
 | # | Gap | Effect | Suggested fix |
 |---|---|---|---|
-| G1 | The Report button exists only on horse pages. Posts, comments, profiles, DMs, market listings, show entries, barn threads and Help ID have none. | Members can't report most bad content except by contact form. | One Report button component mounted everywhere content appears (the reports table already accepts post, comment, user and message). |
 | G2 | Deal Room disputes never reach the admin. | A deal can go bad with no one at the site knowing. | Bell the admin on dispute, and count open disputes in the admin pulse. |
 | G3 | No admin alert for new contact messages, content reports or external-show submissions. | Messages wait until someone happens to open the tab. | Bell the admin on each, as Registry suggestions already do. |
 | G4 | Wrong-model price flags have no admin screen. | A false flag hides a model's price forever. | A small card in Admin › Catalog listing active flags with Resolve. |
 | G5 | Stripe refunds and chargebacks are not handled; failed payments don't tell the member. | A refunded member keeps their tier; a failing card goes unnoticed. | Handle `charge.refunded`, `charge.dispute.created`, and notify on `invoice.payment_failed`. |
-| G6 | Reporters never hear the outcome of content reports, external-show reviews, sanctioning dismissals, barn thread status, or suspensions. | Members stop reporting. | Notify the reporter on every resolution, as Registry suggestions do. |
-| G7 | Content report cards show no link to the content and have no takedown action. "Take action" only saves a note. | Moderation means hunting for the content by hand. | Link plus Hide/Remove on the card. |
 | G8 | Show entrants and judges have no way to dispute a result, bar or scratch. | Disputes happen in DMs or nowhere. | "Message the host" on the entry, with the show attached. |
 | G9 | The contact form has no category, no status, no account link and no error reference; Admin shows only the last 100. Account deletions are invisible to the admin. | Hard to tell what is open; the error reference must be typed. | Category + Open/Resolved status; prefill the error reference and the signed-in account. |
 | G10 | Nothing can be turned into a ticket in one click from a contact message, report, suggestion or barn thread. | Ideas live in two places. | "Add to Roadmap" on contact messages, reports, suggestions and barn threads. |

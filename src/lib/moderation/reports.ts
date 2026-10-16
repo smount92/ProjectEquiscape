@@ -109,6 +109,22 @@ export const REPORT_TAKE_DOWN_NOTICE: Record<ReportTargetType, string> = {
     id_suggestion: "We hid one of your Help ID suggestions because it breaks the community rules.",
 };
 
+/**
+ * What the member who reported it hears when the report is closed. It says
+ * what happened to the content and nothing about anyone: never which
+ * member, never a suspension.
+ */
+export function reportOutcomeNotice(
+    decision: "dismiss" | "take_down" | "handled",
+    targetType: ReportTargetType | null,
+): string {
+    const thing = withArticle(targetType ? REPORT_TARGET_NOUN[targetType] : "post");
+    const thanks = `Thank you for reporting ${thing}.`;
+    if (decision === "take_down") return `${thanks} We looked into it and removed it.`;
+    if (decision === "handled") return `${thanks} We looked into it and have dealt with it.`;
+    return `${thanks} We looked, and it doesn't break the community rules, so we've left it up.`;
+}
+
 /** Said after every take-down notice: the way to reach us. */
 export const TAKE_DOWN_APPEAL = "If you think we got it wrong, write to us through the contact page.";
 

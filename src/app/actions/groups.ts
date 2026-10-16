@@ -11,7 +11,7 @@ import { GROUP_FILE_MAX_SIZE, GROUP_FILE_ALLOWED_EXTENSIONS } from "@/lib/groupF
 import { revalidatePath } from "next/cache";
 import { sanitizeText } from "@/lib/utils/validation";
 import { sanitizeForOr } from "@/lib/utils/search";
-import { isThreadStatus, type ThreadStatus } from "@/lib/groups/threadStatus";
+import { THREAD_STATUS_LABEL, isThreadStatus, type ThreadStatus } from "@/lib/groups/threadStatus";
 
 // ============================================================
 // BARNS — Server Actions
@@ -1181,8 +1181,12 @@ export async function setThreadStatus(
 ): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
     if (status !== null && !isThreadStatus(status)) return { success: false, error: "That isn't a mark." };
-    const { data: post } = await supabase.from("posts").select("group_id").eq("id", postId).maybeSingle();
-    const p = post as { group_id: string | null } | null;
+    const { data: post } = await supabase
+        .from("posts")
+        .select("group_id, author_id, title, content")
+        .eq("id", postId)
+        .maybeSingle();
+    const p = post as { group_id: string | null; author_id: string; title: string | null; content: string } | null;
     if (!p) return { success: false, error: "Thread not found." };
     if (!p.group_id) return { success: false, error: "Not a barn thread." };
     const { data: membership } = await supabase
@@ -1205,6 +1209,28 @@ export async function setThreadStatus(
         }
         return { success: false, error: error.message };
     }
+
+    // The member who started the thread hears the new mark (MHH-024); a
+    // cleared mark isn't news. Their own mark never pings them (self-guard).
+    if (status !== null) {
+        try {
+            const { data: g } = await supabase.from("groups").select("name, slug").eq("id", p.group_id).maybeSingle();
+            const group = g as { name: string; slug: string } | null;
+            const words = (p.title || p.content || "").replace(/\s+/g, " ").trim();
+            const named = words.length > 60 ? `${words.slice(0, 59)}…` : words;
+            const { createNotification } = await import("@/lib/notifications/createNotification");
+            await createNotification({
+                userId: p.author_id,
+                type: "group_post",
+                actorId: user.id,
+                content: `Your thread "${named}"${group ? ` in ${group.name}` : ""} was marked ${THREAD_STATUS_LABEL[status].label.toLowerCase()}.`,
+                ...(group ? { linkUrl: `/community/groups/${group.slug}/thread/${postId}` } : {}),
+            });
+        } catch (err) {
+            logger.error("Barns", "Thread mark notice failed (the mark stands)", err);
+        }
+    }
+
     revalidatePath("/community/groups");
     return { success: true };
 }

@@ -19,6 +19,7 @@ import {
     REPORT_TARGET_TYPES_BEFORE_235,
     TAKE_DOWN_APPEAL,
     isReportTargetType,
+    reportOutcomeNotice,
     withArticle,
     type ReportTargetType,
 } from "@/lib/moderation/reports";
@@ -249,15 +250,35 @@ export async function resolveReport(input: z.input<typeof resolveReportSchema>):
         decision === "take_down"
             ? close.eq("target_type", r.target_type).eq("target_id", r.target_id)
             : close.eq("id", reportId);
-    const { error: closeError } = await close.select("id, reporter_id");
+    const { data: closed, error: closeError } = await close.select("id, reporter_id");
     if (closeError) return safeError("Moderation", closeError, "Could not close the report.");
 
     if (decision === "take_down" && ownerId && targetType) {
         await tellTheOwner(ownerId, targetType);
     }
+    const reporters = [
+        ...new Set(((closed ?? []) as { reporter_id: string | null }[]).map((c) => c.reporter_id).filter(Boolean)),
+    ] as string[];
+    await tellTheReporters(reporters, reportOutcomeNotice(decision, targetType));
 
     revalidatePath("/admin");
     return { success: true };
+}
+
+/**
+ * Everyone who reported it hears the outcome (MHH-024), in words that say
+ * what happened to the content and nothing about anyone.
+ */
+async function tellTheReporters(reporterIds: string[], content: string): Promise<void> {
+    if (reporterIds.length === 0) return;
+    try {
+        const { createNotification } = await import("@/lib/notifications/createNotification");
+        for (const userId of reporterIds) {
+            await createNotification({ userId, type: "moderation", content });
+        }
+    } catch (err) {
+        logger.error("Moderation", "Report outcome notice failed (the report is closed)", err);
+    }
 }
 
 /** The member whose content came down hears it from us, with a way to reply. */

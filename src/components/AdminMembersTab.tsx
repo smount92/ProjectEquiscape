@@ -39,7 +39,7 @@ function MemberRow({ member, onChanged }: { member: AdminMemberRow; onChanged: (
 
     const act = (mode: "suspend" | "unsuspend") => {
         if (mode === "suspend" && reason.trim().length < 3) {
-            setError("A reason is required — it lands on the audit trail.");
+            setError("A reason is required — the member is told it, and it lands on the audit trail.");
             return;
         }
         startTransition(async () => {
@@ -126,7 +126,7 @@ function MemberRow({ member, onChanged }: { member: AdminMemberRow; onChanged: (
                     <Input
                         value={reason}
                         onChange={(e) => setReason(e.target.value)}
-                        placeholder="Reason (required — lands on the audit trail)"
+                        placeholder="Reason (required — the member is told it, and it lands on the audit trail)"
                         aria-label={`Suspension reason for ${member.alias}`}
                         disabled={pending}
                     />

@@ -241,6 +241,45 @@ describe("resolveReport (MHH-025)", () => {
         });
     });
 
+    it("tells the reporter it doesn't break the rules (MHH-024)", async () => {
+        openReport("horse", "h1");
+        await resolveReport({ reportId: REPORT, decision: "dismiss" });
+        expect(createNotification).toHaveBeenCalledWith({
+            userId: MEMBER.id,
+            type: "moderation",
+            content:
+                "Thank you for reporting a horse. We looked, and it doesn't break the community rules, so we've left it up.",
+        });
+    });
+
+    it("tells every reporter 'we removed it', and nothing about the member (MHH-024)", async () => {
+        adminDb.on("user_reports", (q) =>
+            q.op === "select"
+                ? { data: { id: REPORT, target_type: "message", target_id: "m1", status: "open" }, error: null }
+                : {
+                      data: [
+                          { id: REPORT, reporter_id: "rep-1" },
+                          { id: "other", reporter_id: "rep-2" },
+                      ],
+                      error: null,
+                  },
+        );
+        adminDb.on("messages", (q) =>
+            q.op === "select"
+                ? { data: { id: "m1", kind: "chat", sender_id: "sender-1", conversation_id: null }, error: null }
+                : OK,
+        );
+        await resolveReport({ reportId: REPORT, decision: "take_down", note: "Threats" });
+        const toReporters = createNotification.mock.calls
+            .map(([n]) => n as { userId: string; content: string })
+            .filter((n) => n.userId.startsWith("rep-"));
+        expect(toReporters.map((n) => n.userId)).toEqual(["rep-1", "rep-2"]);
+        for (const n of toReporters) {
+            expect(n.content).toBe("Thank you for reporting a message. We looked into it and removed it.");
+            expect(n.content).not.toMatch(/Threats|sender|suspend/i);
+        }
+    });
+
     it("won't handle a report twice", async () => {
         adminDb.on("user_reports", () => ({
             data: { id: REPORT, target_type: "post", target_id: "p1", status: "dismissed" },
