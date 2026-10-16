@@ -375,7 +375,8 @@ export function ReportsTab({ reports, onOpenMember }: { reports: Report[]; onOpe
                                     rel="noopener noreferrer"
                                     className="text-forest underline-offset-2 hover:underline"
                                 >
-                                    Open it ↗
+                                    Open it <span aria-hidden="true">↗</span>
+                                    <span className="sr-only"> (opens in a new tab)</span>
                                 </a>
                             ) : (
                                 target &&

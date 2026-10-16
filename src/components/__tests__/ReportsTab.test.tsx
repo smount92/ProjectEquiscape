@@ -21,6 +21,7 @@ const report = {
     createdAt: "2026-10-15T12:00:00Z",
     target: {
         summary: "You should quit the hobby",
+        name: "You should quit the hobby",
         href: "/community/groups/qh-barn/thread/t-1",
         ownerId: "u-2",
         ownerAlias: "Grumpy",
@@ -57,12 +58,41 @@ describe("Admin › Reports card", () => {
         expect(resolveReport).toHaveBeenCalledWith({ reportId: "r-1", decision: "take_down", note: "Personal attack" });
     });
 
-    it("dismisses, and only allows 'another way' with a note", async () => {
+    it("dismisses after a confirm, and only allows 'another way' with a note", async () => {
         const user = userEvent.setup();
         render(<ReportsTab reports={[report]} />);
         expect(screen.getByRole("button", { name: "Dealt with another way" })).toBeDisabled();
         await user.click(screen.getByRole("button", { name: "Doesn't break the rules" }));
+        expect(resolveReport).not.toHaveBeenCalled();
+        await user.click(screen.getByRole("button", { name: "Cancel" }));
+        expect(screen.getByRole("button", { name: "Hide the reply" })).toBeInTheDocument();
+
+        await user.click(screen.getByRole("button", { name: "Doesn't break the rules" }));
+        await user.click(screen.getByRole("button", { name: "Yes, it doesn't break the rules" }));
         expect(resolveReport).toHaveBeenCalledWith({ reportId: "r-1", decision: "dismiss", note: undefined });
+    });
+
+    it("says the link opens in a new tab, and the note box is the shared Textarea", () => {
+        render(<ReportsTab reports={[report]} />);
+        expect(screen.getByRole("link", { name: "Open it (opens in a new tab)" })).toHaveAttribute("target", "_blank");
+        expect(screen.getByLabelText(/note for the record/i)).toHaveAttribute("data-slot", "textarea");
+    });
+
+    it("links the Deal Room conversation when a take-down waits for a sale", async () => {
+        resolveReport.mockResolvedValueOnce({
+            success: false,
+            error: "This horse is in a sale that's under way. Resolve it in the Deal Room first (/inbox/0a1b2c3d-0000-4000-8000-000000000000), then take the horse down.",
+        });
+        const user = userEvent.setup();
+        render(<ReportsTab reports={[report]} />);
+        await user.click(screen.getByRole("button", { name: "Hide the reply" }));
+        await user.click(screen.getByRole("button", { name: "Yes, hide the reply" }));
+        const alert = await screen.findByRole("alert");
+        expect(alert).toHaveTextContent("Resolve it in the Deal Room first (open it), then take the horse down.");
+        expect(screen.getByRole("link", { name: "open it" })).toHaveAttribute(
+            "href",
+            "/inbox/0a1b2c3d-0000-4000-8000-000000000000",
+        );
     });
 
     it("sends suspension to the Members tab rather than doing it here", async () => {
