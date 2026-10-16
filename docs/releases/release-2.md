@@ -5,11 +5,20 @@ to `main`, one rebuild. How releases work: `docs/guides/releasing.md`.
 
 ## What members will notice
 
+- The contact form asks what it's about, and an error page's reference is
+  attached for you.
 - Members are told when a membership payment fails, and when a refund is
   on its way. Settings › Subscription has **Manage billing** (Stripe's own
   page: update the card, see invoices, cancel).
 
 ## What the owner will notice
+
+- A bell for every new contact message and every outside-show listing
+  waiting for review.
+- Admin › Mailbox shows Open / Resolved / All, what each message is about,
+  the sender's account if they were signed in, and the error reference
+  when they came from an error page (no more typing it). Older messages
+  load on demand.
 
 - A bell when Stripe refunds a member or a member opens a chargeback, with
   a link to the customer in Stripe. Refunds never cancel anyone by
@@ -28,5 +37,6 @@ to `main`, one rebuild. How releases work: `docs/guides/releasing.md`.
      `charge.refunded` and `charge.dispute.created` (the endpoint already
      receives the subscription and invoice events).
 2. Push the branch, wait for CI to go green.
-3. Paste this release's migrations, if any (listed here as they are added).
+3. Paste this release's migrations in number order:
+   - `236_contact_messages_triage.sql`
 4. Merge to main and push. The live smoke test runs by itself.

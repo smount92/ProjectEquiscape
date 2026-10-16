@@ -1344,6 +1344,13 @@ const PENDING_MIGRATIONS: MigrationSpec[] = [
         },
     },
     {
+        id: "236",
+        title: "Contact messages: category, status, account",
+        summary:
+            "contact_messages gains category, open/resolved status, the signed-in sender's account and the error-page reference; the mailbox filters and pages by them.",
+        probe: { kind: "column", table: "contact_messages", column: "category" },
+    },
+    {
         id: "234",
         title: "Where new horses start",
         summary:

@@ -21,16 +21,6 @@ export const metadata = {
     description: "Founder's Command Center.",
 };
 
-interface ContactMessage {
-    id: string;
-    name: string;
-    email: string;
-    subject: string | null;
-    message: string;
-    is_read: boolean;
-    created_at: string;
-}
-
 export default async function AdminPage() {
     const supabase = await createClient();
     const {
@@ -50,7 +40,6 @@ export default async function AdminPage() {
     // is ever fetched with the client key.
     const [
         unreadResult,
-        messagesResult,
         allShows,
         legacyResult,
         reports,
@@ -63,11 +52,7 @@ export default async function AdminPage() {
         catalogSuggestionsResult,
     ] = await Promise.all([
         supabaseAdmin.from("contact_messages").select("id", { count: "exact", head: true }).eq("is_read", false),
-        supabaseAdmin
-            .from("contact_messages")
-            .select("id, name, email, subject, message, is_read, created_at")
-            .order("created_at", { ascending: false })
-            .limit(100),
+        // The mailbox itself loads in AdminMailbox (filters, paging).
         getPhotoShows(),
         // Legacy database_suggestions queue. Read through the service role
         // now: migration 020's only SELECT policy is "your own rows", so the
@@ -98,7 +83,6 @@ export default async function AdminPage() {
     ]);
 
     const unreadMessages = unreadResult.count ?? 0;
-    const messages = (messagesResult.data as ContactMessage[]) ?? [];
     const pendingSuggestions = legacyResult.success ? legacyResult.suggestions : [];
     const pendingExternalShows = externalShowsResult.success ? externalShowsResult.shows : [];
     const pulse = pulseResult.success ? pulseResult.pulse : null;
@@ -157,7 +141,6 @@ export default async function AdminPage() {
                  * own tab, catalog merge under Catalog, announcements under Content.
                  */
                 <AdminTabs
-                    messages={messages}
                     unreadCount={unreadMessages}
                     shows={allShows.map((s) => ({
                         id: s.id,

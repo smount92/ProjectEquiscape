@@ -1,8 +1,10 @@
 "use client";
 
-import { useActionState } from "react";
+import { Suspense, useActionState } from "react";
+import { useSearchParams } from "next/navigation";
 import { submitContactForm, type ContactFormState } from "@/app/actions/contact";
 import { useRef, useEffect } from "react";
+import { CONTACT_CATEGORIES } from "@/lib/contact/categories";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import FocusLayout from "@/components/layouts/FocusLayout";
@@ -14,7 +16,20 @@ const initialState: ContactFormState = {
     success: false,
 };
 
+// The reference an error page sends along (?ref=...), so the member never
+// has to type it. useSearchParams needs a Suspense boundary for the build.
 export default function ContactPage() {
+    return (
+        <Suspense fallback={null}>
+            <ContactForm />
+        </Suspense>
+    );
+}
+
+function ContactForm() {
+    const params = useSearchParams();
+    const rawRef = params.get("ref") ?? "";
+    const errorRef = /^[A-Za-z0-9_-]{1,100}$/.test(rawRef) ? rawRef : "";
     const [state, formAction, isPending] = useActionState(submitContactForm, initialState);
     const formRef = useRef<HTMLFormElement>(null);
 
@@ -101,6 +116,35 @@ export default function ContactPage() {
                                 autoComplete="email"
                             />
                         </div>
+
+                        <div className="mb-6">
+                            <label
+                                htmlFor="contact-category"
+                                className="mb-1 block text-sm font-semibold text-foreground"
+                            >
+                                What&apos;s this about?
+                            </label>
+                            <select
+                                id="contact-category"
+                                name="category"
+                                defaultValue={errorRef ? "problem" : "question"}
+                                className="flex h-10 w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none"
+                            >
+                                {CONTACT_CATEGORIES.map((c) => (
+                                    <option key={c.value} value={c.value}>
+                                        {c.label}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {errorRef && (
+                            <p className="mb-6 rounded-md border border-input bg-muted px-3 py-2 text-sm text-secondary-foreground">
+                                Error reference <strong className="font-mono">{errorRef}</strong> is attached, so we can
+                                find what went wrong.
+                                <input type="hidden" name="error_ref" value={errorRef} />
+                            </p>
+                        )}
 
                         <div className="mb-6">
                             <label

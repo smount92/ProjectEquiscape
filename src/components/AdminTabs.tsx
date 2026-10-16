@@ -1,11 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { BRONZE_THRESHOLD, CONTRIBUTOR_THRESHOLD, GOLD_THRESHOLD, SILVER_THRESHOLD } from "@/lib/catalog/corrections";
-import { deleteContactMessage } from "@/app/actions/admin";
-import MarkReadButton from "@/components/MarkReadButton";
-import AdminReplyForm from "@/components/AdminReplyForm";
 import FeatureHorseForm from "@/components/FeatureHorseForm";
 import AdminShowManager from "@/components/AdminShowManager";
 import AdminSuggestionsPanel from "@/components/AdminSuggestionsPanel";
@@ -26,17 +22,7 @@ import AdminInsightsTab from "@/components/AdminInsightsTab";
 import AdminPulseStrip from "@/components/AdminPulseStrip";
 import type { PendingExternalShow } from "@/app/actions/external-shows";
 import type { AdminPulse, EnvFlagStatus, LegacySuggestionRow, MigrationStatusRow } from "@/app/actions/admin";
-import { Button } from "@/components/ui/button";
-
-interface ContactMessage {
-    id: string;
-    name: string;
-    email: string;
-    subject: string | null;
-    message: string;
-    is_read: boolean;
-    created_at: string;
-}
+import AdminMailbox from "@/components/AdminMailbox";
 
 interface Show {
     id: string;
@@ -89,7 +75,6 @@ const SUGGESTION_STATUS_LABELS: Record<string, string> = {
 };
 
 interface AdminTabsProps {
-    messages: ContactMessage[];
     unreadCount: number;
     shows: Show[];
     suggestions: LegacySuggestionRow[];
@@ -140,53 +125,7 @@ const TABS: { key: TabKey; emoji: string; label: string }[] = [
     { key: "ops", emoji: "🛠️", label: "Ops" },
 ];
 
-function formatDate(dateStr: string): string {
-    return new Date(dateStr).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true,
-    });
-}
-
-function DeleteMessageButton({ messageId }: { messageId: string }) {
-    const [confirming, setConfirming] = useState(false);
-    const [deleting, setDeleting] = useState(false);
-    const router = useRouter();
-
-    const handleDelete = async () => {
-        setDeleting(true);
-        const result = await deleteContactMessage(messageId);
-        if (result.success) {
-            router.refresh();
-        }
-        setDeleting(false);
-        setConfirming(false);
-    };
-
-    if (confirming) {
-        return (
-            <span className="inline-flex items-center gap-1">
-                <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
-                    {deleting ? "…" : "Confirm"}
-                </Button>
-                <Button variant="outline" onClick={() => setConfirming(false)} disabled={deleting}>
-                    Cancel
-                </Button>
-            </span>
-        );
-    }
-
-    return (
-        <Button variant="destructive-outline" onClick={() => setConfirming(true)} title="Delete this message">
-            🗑️ Delete
-        </Button>
-    );
-}
-
 export default function AdminTabs({
-    messages,
     unreadCount,
     shows,
     suggestions,
@@ -287,7 +226,7 @@ export default function AdminTabs({
 
             {/* Tab content */}
             <div className="min-h-[300px]">
-                {activeTab === "mailbox" && <MailboxTab messages={messages} />}
+                {activeTab === "mailbox" && <AdminMailbox />}
                 {activeTab === "shows" && <ShowsTab shows={shows} />}
                 {activeTab === "content" && <ContentTab suggestions={suggestions} />}
                 {activeTab === "reports" && <ReportsTab reports={reports} />}
@@ -305,65 +244,6 @@ export default function AdminTabs({
                 )}
             </div>
         </>
-    );
-}
-
-/* ═══════════════════════════════════════════
- Mailbox Tab
- ═══════════════════════════════════════════ */
-function MailboxTab({ messages }: { messages: ContactMessage[] }) {
-    if (messages.length === 0) {
-        return (
-            <div className="rounded-lg border border-input bg-card px-8 py-12 text-center shadow-md transition-all">
-                <div className="mb-4 text-5xl">📬</div>
-                <h2>No Messages Yet</h2>
-                <p>Contact form submissions will appear here.</p>
-            </div>
-        );
-    }
-
-    return (
-        <div className="flex flex-col gap-3">
-            {messages.map((msg) => (
-                <div
-                    key={msg.id}
-                    className={`rounded-lg border border-input p-4 transition-all ${msg.is_read ? "bg-card opacity-75" : "bg-card shadow-md"}`}
-                >
-                    <div className="mb-2 flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <span className="text-sm font-semibold text-foreground">{msg.name}</span>
-                            <a
-                                href={`mailto:${msg.email}`}
-                                className="text-xs text-forest no-underline hover:underline"
-                            >
-                                {msg.email}
-                            </a>
-                        </div>
-                        <span className="text-xs text-muted-foreground">{formatDate(msg.created_at)}</span>
-                    </div>
-                    {msg.subject && (
-                        <div className="mb-2 flex items-center gap-2 text-sm font-medium">
-                            {!msg.is_read && <span className="h-2 w-2 shrink-0 rounded-full bg-forest" />}
-                            {msg.subject}
-                        </div>
-                    )}
-                    <div className="mb-3 text-sm leading-relaxed whitespace-pre-wrap text-secondary-foreground">
-                        {msg.message}
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2 border-t border-input pt-3">
-                        <AdminReplyForm
-                            messageId={msg.id}
-                            recipientEmail={msg.email}
-                            recipientName={msg.name}
-                            originalSubject={msg.subject}
-                            originalMessage={msg.message}
-                        />
-                        <MarkReadButton messageId={msg.id} isRead={msg.is_read} />
-                        <DeleteMessageButton messageId={msg.id} />
-                    </div>
-                </div>
-            ))}
-        </div>
     );
 }
 

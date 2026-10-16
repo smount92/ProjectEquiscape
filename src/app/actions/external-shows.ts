@@ -25,6 +25,7 @@
  */
 
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
+import { after } from "next/server";
 import { CACHE_TAGS } from "@/lib/cache/tags";
 
 import { requireAdmin, requireAuth } from "@/lib/auth";
@@ -113,6 +114,25 @@ export async function submitExternalShow(input: SubmitExternalShowInput): Promis
         return { success: false, error: error.message };
     }
 
+    // The owner hears of every listing waiting for review (MHH-021).
+    const title = sanitizeText(v.title).slice(0, 100);
+    after(async () => {
+        try {
+            const { adminNotificationTargets } = await import("@/lib/notifications/adminTargets");
+            const { createNotification } = await import("@/lib/notifications/createNotification");
+            for (const ownerId of await adminNotificationTargets(getAdminClient())) {
+                await createNotification({
+                    userId: ownerId,
+                    type: "system",
+                    actorId: user.id,
+                    content: `📅 New show listing to review: "${title}"`,
+                    linkUrl: "/admin#calendar",
+                });
+            }
+        } catch {
+            /* the listing is saved; the bell is best effort */
+        }
+    });
     revalidatePath("/admin");
     return { success: true };
 }
