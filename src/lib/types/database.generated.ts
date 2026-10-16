@@ -570,6 +570,7 @@ export type Database = {
           slug: string | null
           sort_key: string | null
           title: string
+          updated_at: string
         }
         Insert: {
           artist?: string | null
@@ -585,6 +586,7 @@ export type Database = {
           slug?: string | null
           sort_key?: string | null
           title: string
+          updated_at?: string
         }
         Update: {
           artist?: string | null
@@ -600,6 +602,7 @@ export type Database = {
           slug?: string | null
           sort_key?: string | null
           title?: string
+          updated_at?: string
         }
         Relationships: [
           {
@@ -819,6 +822,35 @@ export type Database = {
           {
             foreignKeyName: "catalog_sale_reports_catalog_item_id_fkey"
             columns: ["catalog_item_id"]
+            isOneToOne: false
+            referencedRelation: "catalog_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      catalog_slug_history: {
+        Row: {
+          created_at: string
+          item_id: string
+          old_maker_slug: string
+          old_slug: string
+        }
+        Insert: {
+          created_at?: string
+          item_id: string
+          old_maker_slug: string
+          old_slug: string
+        }
+        Update: {
+          created_at?: string
+          item_id?: string
+          old_maker_slug?: string
+          old_slug?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalog_slug_history_item_id_fkey"
+            columns: ["item_id"]
             isOneToOne: false
             referencedRelation: "catalog_items"
             referencedColumns: ["id"]
@@ -6097,6 +6129,7 @@ export type Database = {
           resin_material: string | null
           sculptor: string | null
           trade_status: string
+          updated_at: string
           visibility: string
         }
         Insert: {
@@ -6134,6 +6167,7 @@ export type Database = {
           resin_material?: string | null
           sculptor?: string | null
           trade_status?: string
+          updated_at?: string
           visibility?: string
         }
         Update: {
@@ -6171,6 +6205,7 @@ export type Database = {
           resin_material?: string | null
           sculptor?: string | null
           trade_status?: string
+          updated_at?: string
           visibility?: string
         }
         Relationships: [
@@ -6299,6 +6334,7 @@ export type Database = {
           created_at: string
           currency_symbol: string | null
           default_horse_public: boolean | null
+          default_horse_visibility: string
           deleted_at: string | null
           email: string
           exhibitor_number: string | null
@@ -6339,6 +6375,7 @@ export type Database = {
           created_at?: string
           currency_symbol?: string | null
           default_horse_public?: boolean | null
+          default_horse_visibility?: string
           deleted_at?: string | null
           email: string
           exhibitor_number?: string | null
@@ -6379,6 +6416,7 @@ export type Database = {
           created_at?: string
           currency_symbol?: string | null
           default_horse_public?: boolean | null
+          default_horse_visibility?: string
           deleted_at?: string | null
           email?: string
           exhibitor_number?: string | null
@@ -6629,6 +6667,10 @@ export type Database = {
       }
       batch_import_horses_v2: {
         Args: { p_is_public?: boolean; rows: Json }
+        Returns: Json
+      }
+      batch_import_horses_v3: {
+        Args: { p_visibility?: string; rows: Json }
         Returns: Json
       }
       can_report_sales: { Args: { p_user_id: string }; Returns: boolean }

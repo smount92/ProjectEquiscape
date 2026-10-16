@@ -37,6 +37,8 @@ kept by the AI assistant across sessions, then checked against the code.
 Owner rulings, newest first. Each one is also folded into the sections below.
 
 **2026-10-15**
+- **Artist names**: D'Arry Jones Frank, Sandra Winters and Pamela du Boulay are the right spellings; Maggie Jenner-Bennett is Maggie Bennett. The format repair merges the other spellings into these.
+- **Default visibility**: Settings offers Public / Unlisted / Private for new horses, used by Add Horse, Quick Add and spreadsheet import (migration 234).
 - **Tracker**: Backlog.md (task files in `backlog/`, kanban board) is the one tracker. The admin Roadmap tab's items move into it and the tab is retired. Ticket entry follows one written method so tickets stay consistent.
 - **Q14 Prepaid prices**: Pro $15/27/50 and Studio $30/54/100 for 3/6/12 months stand; revisit if uptake stays low.
 - **Q16 Show comments**: wanted eventually, and they must be premium: modern comment design, not a message board.

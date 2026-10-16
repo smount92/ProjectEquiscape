@@ -286,16 +286,17 @@ CREATE TEMP TABLE IF NOT EXISTS _names (old_name text, new_name text);
 TRUNCATE _names;
 INSERT INTO _names VALUES
   ('Brigette Eberl', 'Brigitte Eberl'),
-  ('D''Arry Jones Frank', 'D''Arry Jone Frank'),
+  ('Maggie Jenner-Bennett', 'Maggie Bennett'),
+  ('Maggie Jenner-Bennet', 'Maggie Bennett'),
   ('Tanya Banemann', 'Tanya Baneman'),
   ('Tanga Bannemann', 'Tanya Baneman'),
   ('Kristina Kantunina', 'Kristina Katunina'),
   ('Melody Pena', 'Melody Peña'),
   ('Elzbieta Zarzecka', 'Elżbieta Zarzecka'),
-  ('Sandra Winters', 'Sandra Winter'),
   ('Maria Hjerppe', 'Mariah Hjerppe'),
   ('Luis Agular', 'Luis M. Aguilar'),
-  ('Maggie Jenner-Bennet', 'Maggie Jenner-Bennett'),
+  ('D''Arry Jone Frank', 'D''Arry Jones Frank'),
+  ('Sandra Winter', 'Sandra Winters'),
   ('Pamela Du Boulay', 'Pamela du Boulay');
 
 -- 1. Colour descriptions start with a capital.

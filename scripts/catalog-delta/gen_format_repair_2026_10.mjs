@@ -37,14 +37,21 @@ for (let a = 0; a < names.length; a++) for (let b = a + 1; b < names.length; b++
   const close = x === y || (x.length > 6 && y.length > 6 && Math.abs(x.length - y.length) <= 2 && lev(x, y) <= 2);
   if (close) parent.set(find(names[a]), find(names[b]));
 }
+// Names the owner ruled are one person though they aren't close spellings
+// (2026-10-15).
+const SAME_PERSON = [["Maggie Jenner-Bennett", "Maggie Bennett"], ["Maggie Jenner-Bennet", "Maggie Bennett"]];
+for (const [a, b] of SAME_PERSON) if (parent.has(a) && parent.has(b)) parent.set(find(a), find(b));
 const groups = new Map();
 for (const n of names) { const r = find(n); if (!groups.has(r)) groups.set(r, []); groups.get(r).push(n); }
 // Known-correct spellings win their group whatever the counts say.
 const PREFERRED = new Set([
   "Pamela du Boulay", // the sculptor's own spelling: lowercase "du"
+  "D'Arry Jones Frank", // owner ruling 2026-10-15
+  "Sandra Winters", // owner ruling 2026-10-15
+  "Maggie Bennett", // owner ruling 2026-10-15: same artist as Maggie Jenner-Bennett
 ]);
 // Pairs the evidence can't settle: merged as the counts say, but flagged.
-const CONFIRM = new Set(["D'Arry Jones Frank", "Sandra Winters"]);
+const CONFIRM = new Set([]);
 const pairs = [];
 for (const g of groups.values()) {
   if (g.length < 2) continue;
@@ -137,7 +144,7 @@ for (const p of pairs) {
 }
 md.push("", "Rows: catalog rows naming that spelling as maker, artist, manufacturer or sculptor.", "");
 md.push("If the kept spelling is itself the typo for any pair, say which and it will be flipped.", "");
-md.push("Separate question, not merged: \"Maggie Jenner-Bennett\" may be the same artist as \"Maggie Bennett\". Say if they are one person.", "");
+md.push("Owner rulings 2026-10-15: D'Arry Jones Frank, Sandra Winters, and Maggie Bennett (the same artist as Maggie Jenner-Bennett) are the right names.", "");
 md.push("## 4. Titles", "");
 md.push("Many of these \"titles\" are a run description rather than a name (\"BreyerFest Special Run (1,113 made) Split run of …\"); the March import put the source's notes where the name should be. This repair only tidies them as listed. Giving those releases real names is a separate job; say if you want it ticketed.", "");
 md.push("Titles whose \"With …\" part names a mold are treated as sets and keep it: mold pages read it to list the sets a mold was sold in. A mold name counts when it appears with its own capitals as whole words (\"With Rojo\" counts; \"foal blanket\" is not the Foal mold).", "");

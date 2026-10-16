@@ -1,6 +1,6 @@
 # Registry format repair: review list (MHH-003)
 
-Built 2026-10-15 from the live Registry. Nothing changes until the owner runs
+Built 2026-10-16 from the live Registry. Nothing changes until the owner runs
 `registry_format_repair_2026_10.sql` (dry run first). Owner rulings Q23, Q24, Q25.
 
 > **Before you run**
@@ -13,8 +13,8 @@ Built 2026-10-15 from the live Registry. Nothing changes until the owner runs
 ## What the repair does (what the dry run will show)
 
 1. **Colour descriptions** that start lowercase get a capital first letter: 4015 rows ("red chestnut" → "Red chestnut").
-2. **Years stored as text** become numbers: 1729 values (start and end years counted separately) on 1662 rows. The dry run counts values. Nothing visible changes.
-3. **Names one or two letters apart** merge into one spelling: 12 pairs (below), touching 21 rows (a row counts once even if its maker and artist both change; 9 of them have the old spelling in the sculptor field, which the Registry also reads). Known-correct spellings win; otherwise the more common one does. The less common spelling's pages forward to the kept one.
+2. **Years stored as text** become numbers: 1730 values (start and end years counted separately) on 1663 rows. The dry run counts values. Nothing visible changes.
+3. **Names one or two letters apart** merge into one spelling: 13 pairs (below), touching 62 rows (a row counts once even if its maker and artist both change; 9 of them have the old spelling in the sculptor field, which the Registry also reads). Known-correct spellings win; otherwise the more common one does. The less common spelling's pages forward to the kept one.
 4. **Titles ending in punctuation**: 272 rows (below). Sets keep their roster and lose only the final period; other titles keep the name and move the description into the release's notes.
 
 After the run, the final check's "titles ending in punctuation" should read about 7, not 0: titles that end in an abbreviation ("Co.", "Jr.", "I.C.E.") keep their period on purpose.
@@ -24,23 +24,24 @@ After the run, the final check's "titles ending in punctuation" should read abou
 | Keep | Rows | Merge in | Rows | Check |
 |---|---|---|---|---|
 | Brigitte Eberl | 362 | Brigette Eberl | 3 |  |
-| D'Arry Jone Frank | 41 | D'Arry Jones Frank | 3 | **Please confirm**: the records don't settle which spelling is right |
+| Maggie Bennett | 195 | Maggie Jenner-Bennett | 2 | Known correct spelling |
+| Maggie Bennett | 195 | Maggie Jenner-Bennet | 2 | Known correct spelling |
 | Tanya Baneman | 16 | Tanya Banemann | 1 |  |
 | Tanya Baneman | 16 | Tanga Bannemann | 1 |  |
 | Kristina Katunina | 16 | Kristina Kantunina | 4 |  |
 | Melody Peña | 19 | Melody Pena | 1 |  |
 | Elżbieta Zarzecka | 4 | Elzbieta Zarzecka | 1 |  |
-| Sandra Winter | 2 | Sandra Winters | 1 | **Please confirm**: the records don't settle which spelling is right |
 | Mariah Hjerppe | 2 | Maria Hjerppe | 1 |  |
 | Luis M. Aguilar | 2 | Luis Agular | 1 |  |
-| Maggie Jenner-Bennett | 2 | Maggie Jenner-Bennet | 2 |  |
+| D'Arry Jones Frank | 3 | D'Arry Jone Frank | 41 | Known correct spelling |
+| Sandra Winters | 1 | Sandra Winter | 2 | Known correct spelling |
 | Pamela du Boulay | 1 | Pamela Du Boulay | 3 | Known correct spelling |
 
 Rows: catalog rows naming that spelling as maker, artist, manufacturer or sculptor.
 
 If the kept spelling is itself the typo for any pair, say which and it will be flipped.
 
-Separate question, not merged: "Maggie Jenner-Bennett" may be the same artist as "Maggie Bennett". Say if they are one person.
+Owner rulings 2026-10-15: D'Arry Jones Frank, Sandra Winters, and Maggie Bennett (the same artist as Maggie Jenner-Bennett) are the right names.
 
 ## 4. Titles
 
