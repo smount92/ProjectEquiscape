@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { parseCatalogQuery, makerMatches } from "@/lib/catalog/queryParse";
+import { rosterLast } from "@/lib/catalog/moldSearch";
 
 // ============================================================
 // UNIVERSAL CATALOG — Server Actions
@@ -80,7 +81,14 @@ export async function searchCatalogAction(query: string): Promise<CatalogItem[]>
         }
     }
 
-    return rows.map(mapCatalogRow);
+    // A set that only lists the name among its pieces comes after the rows
+    // that are, or sit on, what was typed (MHH-075).
+    const byId = new Map(rows.map((r) => [r.id, r]));
+    return rosterLast(
+        rows.map((r) => r.id),
+        rows,
+        term,
+    ).map((id) => mapCatalogRow(byId.get(id) as Row));
 }
 
 /**

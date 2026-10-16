@@ -6,6 +6,8 @@ import { fieldLabel } from "@/lib/catalog/editableFields";
 import {
     namedMolds,
     placeReleasesUnderMolds,
+    rosterLast,
+    rosterOnlyIds,
     searchName,
     termImpliesStablemate,
     type CandidateRow,
@@ -199,6 +201,7 @@ export async function getCatalogItems(filters: CatalogFilters) {
     const makerFacet = filters.maker ?? parsedSearch?.maker ?? undefined;
 
     let searchIds: string[] | null = null;
+    let rosterIds = new Set<string>();
     if (searchTerm) {
         const { data: fuzzyRows, error: fuzzyError } = await supabase.rpc("search_catalog_fuzzy", {
             search_term: searchTerm,
@@ -243,6 +246,11 @@ export async function getCatalogItems(filters: CatalogFilters) {
                     preferStablemate: !!parsedTerm && termImpliesStablemate(parsedTerm) && !filters.scale,
                 });
             }
+            // A set that only lists the searched name among its pieces comes
+            // after every row that is, or sits on, what was searched, under its
+            // own heading (MHH-075).
+            rosterIds = rosterOnlyIds(rows, searchTerm);
+            searchIds = rosterLast(searchIds, rows, searchTerm);
         }
         // RPC unavailable (fresh env, migration pending)? searchIds stays
         // null and the title/maker ILIKE fallback below keeps search alive.
@@ -398,12 +406,16 @@ export async function getCatalogItems(filters: CatalogFilters) {
         const ordered = [...((data ?? []) as unknown as { id: string }[])].sort(
             (a, b) => (rank.get(a.id) ?? Number.MAX_SAFE_INTEGER) - (rank.get(b.id) ?? Number.MAX_SAFE_INTEGER),
         );
+        // Where the sets that only list the name begin, as an index into the
+        // whole ordered result; the page draws a "Sets that include it" heading there.
+        const rosterFrom = rosterIds.size ? ordered.findIndex((r) => rosterIds.has(r.id)) : -1;
         return {
             success: true as const,
             items: ordered.slice(from, from + pageSize) as unknown as typeof data,
             total: ordered.length,
             page,
             pageSize,
+            ...(rosterFrom >= 0 ? { rosterFrom } : {}),
         };
     }
     return {

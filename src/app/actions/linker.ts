@@ -19,6 +19,7 @@ import { parseCatalogQuery, makerMatches } from "@/lib/catalog/queryParse";
 import { referenceHref } from "@/lib/catalog/referenceUrl";
 import { createSuggestion } from "@/app/actions/catalog-suggestions";
 import { containsEveryWord, sameWords, searchKey } from "@/lib/catalog/searchKey";
+import { rosterLast } from "@/lib/catalog/moldSearch";
 import {
     collapseSetPieces,
     commonOne,
@@ -341,12 +342,19 @@ export async function searchLinker(rawTerm: string, scale: string | null): Promi
             m.releases = m.releases.map((r) => (r.id === common ? { ...r, run: r.run ?? "the common one" } : r));
     }
 
-    const others = rows
-        .filter(
-            (r) =>
-                r.item_type !== "plastic_mold" && r.item_type !== "plastic_release" && titleMatches(r.title, termLower),
-        )
+    // A piece found only in a set's roster comes after pieces found by their own name (MHH-075).
+    const otherRows = rows.filter(
+        (r) => r.item_type !== "plastic_mold" && r.item_type !== "plastic_release" && titleMatches(r.title, termLower),
+    );
+    const otherOrder = rosterLast(
+        otherRows.map((r) => r.id),
+        otherRows,
+        term,
+    );
+    const otherById = new Map(otherRows.map((r) => [r.id, r]));
+    const others = otherOrder
         .slice(0, 12)
+        .map((id) => otherById.get(id) as Row)
         .map(toOther);
 
     return {

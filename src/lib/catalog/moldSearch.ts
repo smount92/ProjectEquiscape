@@ -12,7 +12,7 @@
  */
 
 import { stripGeneration } from "@/lib/linker/model";
-import { sameWords } from "@/lib/catalog/searchKey";
+import { containsEveryWord, sameWords, searchKey } from "@/lib/catalog/searchKey";
 
 /** Most ids one search carries into the facet query (a URL-length budget). */
 export const EXPANDED_CANDIDATE_LIMIT = 260;
@@ -37,6 +37,8 @@ export interface CandidateRow {
     item_type: string;
     title: string;
     scale?: string | null;
+    /** The mold's title, as the fuzzy RPC joins it. */
+    parent_title?: string | null;
 }
 
 /**
@@ -47,6 +49,47 @@ export interface CandidateRow {
 export function namedMolds<T extends CandidateRow>(rows: T[], name: string): T[] {
     if (!name.trim()) return [];
     return rows.filter((r) => r.item_type === "plastic_mold" && sameWords(stripGeneration(r.title), name));
+}
+
+/** A search candidate as the fuzzy RPC returns it: its own title and its mold's. */
+export interface MatchRow {
+    id?: string;
+    title: string;
+    parent_title?: string | null;
+}
+
+/**
+ * How a row matches what was typed (MHH-075):
+ *  - "own": its own name (the title before " With ") or its mold's name holds every typed word;
+ *  - "roster": every word is in the title, but only because a set's roster lists it;
+ *  - "other": neither (a near spelling, a maker match).
+ * Searching "Arabian Stallion" returned 49 Stablemate rows and only 8 were
+ * on that mold: every set listing an Arabian Stallion among its pieces came
+ * along, mixed in with the mold's own releases.
+ */
+export function matchKind(row: MatchRow, term: string): "own" | "roster" | "other" {
+    const t = searchKey(stripGeneration(term));
+    if (!t) return "other";
+    const head = row.title.replace(/\s+with\b.*$/i, "");
+    if (containsEveryWord(searchKey(stripGeneration(head)), t)) return "own";
+    if (row.parent_title && containsEveryWord(searchKey(stripGeneration(row.parent_title)), t)) return "own";
+    if (containsEveryWord(searchKey(row.title), t)) return "roster";
+    return "other";
+}
+
+/**
+ * The result order with roster-only rows moved to the end, each band in its
+ * own order. Ids the rows do not describe (releases placed under a named
+ * mold) keep their place: they are the mold's own.
+ */
+export function rosterLast(ids: string[], rows: (MatchRow & { id: string })[], term: string): string[] {
+    const roster = rosterOnlyIds(rows, term);
+    return [...ids.filter((id) => !roster.has(id)), ...ids.filter((id) => roster.has(id))];
+}
+
+/** The rows that match only inside a set's roster. */
+export function rosterOnlyIds(rows: (MatchRow & { id: string })[], term: string): Set<string> {
+    return new Set(rows.filter((r) => matchKind(r, term) === "roster").map((r) => r.id));
 }
 
 /**
