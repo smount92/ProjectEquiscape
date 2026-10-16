@@ -85,6 +85,11 @@ describe("linker model", () => {
         expect(mentionsMold(t, "Silky Sullivan")).toBe(true);
         expect(mentionsMold(t, "Proud Arabian Mare")).toBe(false);
         expect(mentionsMold("Arabian Mare and Foal Set With Proud Arabian Foal", "Arabian Mare")).toBe(false);
+        // A capitalised roster names a mold; a lowercase accessory does not (MHH-068).
+        expect(mentionsMold("Panuhu and Honego, Foal With Rojo", "Rojo")).toBe(true);
+        expect(mentionsMold("Clydesdale Gift Set With Clydesdale Mare, green foal blanket", "Foal")).toBe(false);
+        expect(mentionsMold("Unicorn Set With unicorn halter and Unicorn", "Unicorn")).toBe(true);
+        expect(mentionsMold("Dress-Up Set With unicorn halter", "Unicorn")).toBe(false);
     });
 
     it("labels years and names the missing facts", () => {

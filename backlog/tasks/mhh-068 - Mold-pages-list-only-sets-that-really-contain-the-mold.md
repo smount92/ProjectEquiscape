@@ -1,10 +1,10 @@
 ---
 id: MHH-068
 title: Mold pages list only sets that really contain the mold
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-10-15 23:56'
-updated_date: '2026-10-16 00:36'
+updated_date: '2026-10-16 00:59'
 labels:
   - registry
 milestone: m-2
@@ -29,8 +29,8 @@ mentionsMold in src/lib/linker/model.ts and getMoldSetMentions in src/app/action
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 'foal blanket' no longer lists a set under the Foal mold
-- [ ] #2 Real rosters ('With Rojo') still list
+- [x] #1 'foal blanket' no longer lists a set under the Foal mold
+- [x] #2 Real rosters ('With Rojo') still list
 <!-- AC:END -->
 
 ## Definition of Done
@@ -39,3 +39,9 @@ mentionsMold in src/lib/linker/model.ts and getMoldSetMentions in src/app/action
 - [ ] #2 Decision recorded in docs/DECISIONS.md if one was made
 - [ ] #3 Member who reported it has a drafted reply, if any
 <!-- DOD:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+mentionsMold (src/lib/linker/model.ts), used by mold pages and the linker, now needs the mold name capitalised after 'With' as a roster writes it: 'With Rojo' lists, 'green foal blanket' and 'unicorn halter' don't. Tests added.
+<!-- SECTION:FINAL_SUMMARY:END -->

@@ -179,7 +179,14 @@ export function mentionsMold(title: string, moldTitle: string): boolean {
     const tail = title.slice(i);
     const esc = moldTitle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     // eslint-disable-next-line security/detect-non-literal-regexp -- the title is escaped above
-    return new RegExp("(^|[\\s,])" + esc + "(?=$|[\\s,.;])", "i").test(tail);
+    const re = new RegExp("(^|[\\s,])(" + esc + ")(?=$|[\\s,.;])", "gi");
+    // A roster names a mold the way a title does, capitalised ("With Rojo");
+    // a lowercase word is an accessory, not a mold ("foal blanket" is not
+    // the Foal mold, "unicorn halter" not the Unicorn), MHH-068.
+    for (const m of tail.matchAll(re)) {
+        if (/^[\p{Lu}\d]/u.test(m[2])) return true;
+    }
+    return false;
 }
 
 export function yearsLabel(r: Pick<LinkerRelease, "from" | "to">): string | null {
