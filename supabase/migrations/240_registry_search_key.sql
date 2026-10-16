@@ -113,7 +113,7 @@ BEGIN
        OR (v_key <> '' AND extensions.similarity(coalesce(ci.search_key, ''), v_key) > 0.15)
     ORDER BY
         (lower(ci.title) = lower(btrim(search_term))) DESC,
-        (v_key <> '' AND ci.search_key = v_key) DESC,
+        coalesce(v_key <> '' AND ci.search_key = v_key, false) DESC,
         (ci.title ILIKE btrim(search_term) || '%') DESC,
         (ci.title ILIKE '% ' || btrim(search_term) || '%') DESC,
         (ci.title ILIKE '%' || btrim(search_term) || '%') DESC,
