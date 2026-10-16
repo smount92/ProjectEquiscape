@@ -12,6 +12,7 @@ import {
 import { useRouter } from "next/navigation";
 import { Textarea } from "@/components/ui/textarea";
 import { UserAvatar } from "@/components/social";
+import ReportButton from "@/components/ReportButton";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -45,6 +46,8 @@ interface Suggestion {
 interface HelpIdDetailClientProps {
     requestId: string;
     isOwner: boolean;
+    /** The viewer — nobody is offered a Report button on their own suggestion. */
+    currentUserId?: string;
     isResolved: boolean;
     acceptedSuggestionId: string | null;
     suggestions: Suggestion[];
@@ -53,6 +56,7 @@ interface HelpIdDetailClientProps {
 export default function HelpIdDetailClient({
     requestId,
     isOwner,
+    currentUserId,
     isResolved,
     acceptedSuggestionId,
     suggestions: initialSuggestions,
@@ -186,6 +190,13 @@ export default function HelpIdDetailClient({
                                         )}
                                     </button>
                                 )}
+
+                                <ReportButton
+                                    targetType="id_suggestion"
+                                    targetId={s.id}
+                                    isOwn={s.user_id === currentUserId}
+                                    className="ml-auto"
+                                />
                             </div>
                         </article>
                     ))}

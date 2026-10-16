@@ -3,6 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getPublicImageUrl } from "@/lib/utils/storage";
 import HelpIdDetailClient from "@/components/HelpIdDetailClient";
+import ReportButton from "@/components/ReportButton";
 import ScrapbookLayout from "@/components/layouts/ScrapbookLayout";
 import PageMasthead from "@/components/layouts/PageMasthead";
 
@@ -156,12 +157,14 @@ export default async function HelpIdDetailPage({ params }: PageProps) {
                     <p className="leading-[1.7] text-secondary-foreground">
                         {req.description || "No description provided."}
                     </p>
+                    <ReportButton targetType="id_request" targetId={req.id} isOwn={isOwner} className="mt-2" />
                 </div>
             }
             belowContent={
                 <HelpIdDetailClient
                     requestId={req.id}
                     isOwner={isOwner}
+                    currentUserId={user.id}
                     isResolved={isResolved}
                     acceptedSuggestionId={req.accepted_suggestion_id}
                     suggestions={suggestions}

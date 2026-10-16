@@ -4,7 +4,7 @@ title: 'Admin is alerted to new contact messages, reports and show submissions'
 status: In Progress
 assignee: []
 created_date: '2026-10-15 22:19'
-updated_date: '2026-10-16 00:52'
+updated_date: '2026-10-16 01:03'
 labels:
   - admin
 milestone: m-2
@@ -39,5 +39,5 @@ Gap G3.
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
-Contact messages and external-show listings now ring the owner's bell (main checkout). The content-report bell is built in the moderation worktree.
+Both halves built for Release 2. Contact messages and external-show listings ring the owner's bell (links /admin#mailbox, /admin#calendar). Content reports ring it too (submitReport, linking /admin?tab=reports). AdminTabs opens the tab named by ?tab= or #hash.
 <!-- SECTION:NOTES:END -->

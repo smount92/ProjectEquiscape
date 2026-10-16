@@ -445,6 +445,8 @@ export async function editMessage(
         .eq("id", messageId)
         .eq("conversation_id", conversationId)
         .eq("sender_id", user.id)
+        // A message the site team removed after a report stays removed.
+        .is("deleted_at", null)
         .select("edited_at")
         .maybeSingle();
 

@@ -105,13 +105,18 @@ describe("POST /api/webhooks/stripe — money going back", () => {
         expect(owner?.linkUrl).toBe("https://dashboard.stripe.com/customers/cus_1");
         expect(mockSubsList).toHaveBeenCalledWith(expect.objectContaining({ customer: "cus_1" }));
         // Still active in Stripe → still Pro: a refund never cancels anyone here.
-        expect(mockUpdateUserById).toHaveBeenCalledWith("member-1", expect.objectContaining({ app_metadata: expect.objectContaining({ tier: "pro" }) }));
+        expect(mockUpdateUserById).toHaveBeenCalledWith(
+            "member-1",
+            expect.objectContaining({ app_metadata: expect.objectContaining({ tier: "pro" }) }),
+        );
     });
 
     it("alerts the owner to a chargeback", async () => {
         mockConstructEvent.mockReturnValue({
             type: "charge.dispute.created",
-            data: { object: { id: "dp_1", charge: "ch_1", amount: 1000, currency: "usd", reason: "product_not_received" } },
+            data: {
+                object: { id: "dp_1", charge: "ch_1", amount: 1000, currency: "usd", reason: "product_not_received" },
+            },
         });
         mockChargesRetrieve.mockResolvedValue({ id: "ch_1", customer: "cus_1" });
         const res = await POST(request());

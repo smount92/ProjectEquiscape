@@ -344,7 +344,25 @@ export async function suspendUser(userId: string, reason: string): Promise<{ suc
         logger.error("Admin", `session revocation failed for suspended user ${userId}`, err);
     }
 
+    // The member hears it from us, with the reason and the way to reach us
+    // (MHH-024). A suspended account can still sign in and read its bell.
+    await notifyMember(
+        userId,
+        `Your account has been suspended. The reason: ${/[.!?]$/.test(trimmedReason) ? trimmedReason : `${trimmedReason}.`} While it is suspended you can sign in and look around, but you can't post, enter shows or trade. To talk to us about it, write to us through the contact page.`,
+        "/contact",
+    );
+
     return { success: true };
+}
+
+/** A moderation notice to one member. Best effort: the action it reports stands either way. */
+async function notifyMember(userId: string, content: string, linkUrl: string, type = "moderation"): Promise<void> {
+    try {
+        const { createNotification } = await import("@/lib/notifications/createNotification");
+        await createNotification({ userId, type, content, linkUrl });
+    } catch (err) {
+        logger.error("Admin", "Moderation notice failed (continuing)", err);
+    }
 }
 
 /** Reverse suspendUser — clears both stamps. */
@@ -367,6 +385,8 @@ export async function unsuspendUser(userId: string): Promise<{ success: boolean;
         .update({ is_suspended: false, suspended_at: null, suspended_reason: null })
         .eq("id", userId);
     if (dbError) return { success: false, error: dbError.message };
+
+    await notifyMember(userId, "Your account is active again: you can post, enter shows and trade. Welcome back.", "/");
 
     return { success: true };
 }
@@ -669,6 +689,14 @@ export async function resolveSanctioningRequest(
         } catch (err) {
             logger.error("Admin", "Sanctioning grant notification failed (continuing)", err);
         }
+    } else if (hasSanctioningRequest(show.sanctioning_note as string | null)) {
+        // A dismissal used to be silent; the host now hears it (MHH-024).
+        await notifyMember(
+            show.host_id as string,
+            `We looked at your request to make "${show.title}" MHH Sanctioned and haven't granted it this time. You can ask again from the show's settings, or write to us through the contact page.`,
+            `/shows/host/${showId}`,
+            "show_moderation",
+        );
     }
 
     return { success: true };
@@ -1356,6 +1384,13 @@ const PENDING_MIGRATIONS: MigrationSpec[] = [
         summary:
             "contact_messages gains category, open/resolved status, the signed-in sender's account and the error-page reference; the mailbox filters and pages by them.",
         probe: { kind: "column", table: "contact_messages", column: "category" },
+    },
+    {
+        id: "235",
+        title: "Report everything; hide, never delete",
+        summary:
+            "The reports table accepts show entries and Help ID requests and suggestions too; posts and Help ID rows get hidden_at, and a row policy hides them from members, so a report card can take them down without deleting anything.",
+        probe: { kind: "column", table: "posts", column: "hidden_at" },
     },
     {
         id: "234",

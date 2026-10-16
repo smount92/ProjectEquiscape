@@ -57,7 +57,7 @@ export default function ExternalShowAdminActions({ showId }: { showId: string })
                     </div>
                     <Input
                         type="text"
-                        placeholder="Optional note…"
+                        placeholder="Optional note (the member who sent it sees this)…"
                         value={note}
                         maxLength={500}
                         onChange={(e) => setNote(e.target.value)}
@@ -66,7 +66,7 @@ export default function ExternalShowAdminActions({ showId }: { showId: string })
             ) : (
                 <div className="flex flex-col gap-2">
                     <Textarea
-                        placeholder="Reason for rejection (required)…"
+                        placeholder="Reason for rejection (required; the member who sent it sees this)…"
                         value={note}
                         maxLength={500}
                         onChange={(e) => setNote(e.target.value)}

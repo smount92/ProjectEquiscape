@@ -39,12 +39,12 @@ A report can be two types. Sort by the **cause**, once you know it.
 | Channel | Member side | Owner sees it in | Member hears back? |
 |---|---|---|---|
 | Contact form | `/contact` (footer, error page, 404, FAQ) | Admin › Mailbox | Only if you reply (Reply button sends email) |
-| Content report | Report button - **horse pages only** today | Admin › Reports | No |
+| Content report | 🚩 Report on posts, replies, barn threads, profiles, messages, horses/listings, show entries, Help ID | Admin › Reports + bell | Yes, bell when the report is closed |
 | Registry suggestion / duplicate report / "Suggest an entry" / linker "Mine isn't here" | Registry pages, linker | Admin › Catalog queue + bell | Yes, bell on approve/reject |
 | Wrong-model price flag | eBay card on reference page | Bell only (no admin screen) | No |
-| Suggestion-box barn | Barn thread | Only as a barn member | No (status change is silent) |
-| External show listing | Shows › list a show | Admin › Calendar | No |
-| Sanctioning request | Host's show settings | Admin › Sanctioning | On grant only |
+| Suggestion-box barn | Barn thread | Only as a barn member | Yes, bell when staff mark the thread |
+| External show listing | Shows › list a show | Admin › Calendar | Yes, bell on approve/reject with the note |
+| Sanctioning request | Host's show settings | Admin › Sanctioning | Yes, bell on grant and on dismiss |
 | Deal dispute | Deal Room | **Nowhere** - other party only | n/a |
 | Error page | "Quote reference …" | Admin › Ops › Errors (Sentry) | Only via contact form |
 | Direct message, Facebook, in person | - | Owner pastes it into the conversation | Owner replies |

@@ -14,6 +14,7 @@ import { getFollowStats } from "@/app/actions/follows";
 import EditBioButton from "@/components/EditBioButton";
 import { readProfileLinks } from "@/lib/links/readProfileLinks";
 import BlockButton from "@/components/BlockButton";
+import ReportButton from "@/components/ReportButton";
 import MessageUserButton from "@/components/MessageUserButton";
 import RatingForm from "@/components/RatingForm";
 import { isBlocked as checkIsBlocked } from "@/app/actions/blocks";
@@ -741,6 +742,7 @@ export default async function ProfilePage({
                         initialBlocked={blocked}
                     />
                 )}
+                <ReportButton targetType="user" targetId={profileUser.id} isOwn={isOwnProfile} />
             </div>
 
             {/* Public Collections */}
