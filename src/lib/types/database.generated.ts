@@ -1330,33 +1330,70 @@ export type Database = {
       }
       contact_messages: {
         Row: {
+          category: string
           created_at: string
           email: string
+          error_ref: string | null
           id: string
           is_read: boolean
           message: string
           name: string
+          resolved_at: string | null
+          status: string
           subject: string | null
+          user_id: string | null
         }
         Insert: {
+          category?: string
           created_at?: string
           email: string
+          error_ref?: string | null
           id?: string
           is_read?: boolean
           message: string
           name: string
+          resolved_at?: string | null
+          status?: string
           subject?: string | null
+          user_id?: string | null
         }
         Update: {
+          category?: string
           created_at?: string
           email?: string
+          error_ref?: string | null
           id?: string
           is_read?: boolean
           message?: string
           name?: string
+          resolved_at?: string | null
+          status?: string
           subject?: string | null
+          user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "contact_messages_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "discover_users_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contact_messages_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "mv_trusted_sellers"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "contact_messages_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       conversation_participants: {
         Row: {
@@ -1479,6 +1516,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      cron_heartbeats: {
+        Row: {
+          job: string
+          last_error: string | null
+          last_failed_at: string | null
+          last_ok_at: string | null
+          last_run_at: string | null
+        }
+        Insert: {
+          job: string
+          last_error?: string | null
+          last_failed_at?: string | null
+          last_ok_at?: string | null
+          last_run_at?: string | null
+        }
+        Update: {
+          job?: string
+          last_error?: string | null
+          last_failed_at?: string | null
+          last_ok_at?: string | null
+          last_run_at?: string | null
+        }
+        Relationships: []
       }
       customization_logs: {
         Row: {
@@ -3507,6 +3568,8 @@ export type Database = {
           accepted_suggestion_id: string | null
           created_at: string | null
           description: string | null
+          hidden_at: string | null
+          hidden_by: string | null
           id: string
           image_url: string
           status: string
@@ -3516,6 +3579,8 @@ export type Database = {
           accepted_suggestion_id?: string | null
           created_at?: string | null
           description?: string | null
+          hidden_at?: string | null
+          hidden_by?: string | null
           id?: string
           image_url: string
           status?: string
@@ -3525,6 +3590,8 @@ export type Database = {
           accepted_suggestion_id?: string | null
           created_at?: string | null
           description?: string | null
+          hidden_at?: string | null
+          hidden_by?: string | null
           id?: string
           image_url?: string
           status?: string
@@ -3537,6 +3604,8 @@ export type Database = {
           catalog_id: string | null
           created_at: string | null
           free_text: string | null
+          hidden_at: string | null
+          hidden_by: string | null
           id: string
           request_id: string
           upvotes: number | null
@@ -3546,6 +3615,8 @@ export type Database = {
           catalog_id?: string | null
           created_at?: string | null
           free_text?: string | null
+          hidden_at?: string | null
+          hidden_by?: string | null
           id?: string
           request_id: string
           upvotes?: number | null
@@ -3555,6 +3626,8 @@ export type Database = {
           catalog_id?: string | null
           created_at?: string | null
           free_text?: string | null
+          hidden_at?: string | null
+          hidden_by?: string | null
           id?: string
           request_id?: string
           upvotes?: number | null
@@ -4008,6 +4081,8 @@ export type Database = {
           event_id: string | null
           group_id: string | null
           help_request_id: string | null
+          hidden_at: string | null
+          hidden_by: string | null
           horse_id: string | null
           id: string
           is_pinned: boolean
@@ -4031,6 +4106,8 @@ export type Database = {
           event_id?: string | null
           group_id?: string | null
           help_request_id?: string | null
+          hidden_at?: string | null
+          hidden_by?: string | null
           horse_id?: string | null
           id?: string
           is_pinned?: boolean
@@ -4054,6 +4131,8 @@ export type Database = {
           event_id?: string | null
           group_id?: string | null
           help_request_id?: string | null
+          hidden_at?: string | null
+          hidden_by?: string | null
           horse_id?: string | null
           id?: string
           is_pinned?: boolean
@@ -4668,6 +4747,7 @@ export type Database = {
           handler_id: string | null
           horse_id: string
           id: string
+          moderation_scratched_at: string | null
           note: string | null
           owner_id: string
           photo_id: string | null
@@ -4688,6 +4768,7 @@ export type Database = {
           handler_id?: string | null
           horse_id: string
           id?: string
+          moderation_scratched_at?: string | null
           note?: string | null
           owner_id: string
           photo_id?: string | null
@@ -4708,6 +4789,7 @@ export type Database = {
           handler_id?: string | null
           horse_id?: string
           id?: string
+          moderation_scratched_at?: string | null
           note?: string | null
           owner_id?: string
           photo_id?: string | null
@@ -5752,6 +5834,24 @@ export type Database = {
           },
         ]
       }
+      stripe_notice_events: {
+        Row: {
+          event_id: string
+          event_type: string | null
+          sent_at: string
+        }
+        Insert: {
+          event_id: string
+          event_type?: string | null
+          sent_at?: string
+        }
+        Update: {
+          event_id?: string
+          event_type?: string | null
+          sent_at?: string
+        }
+        Relationships: []
+      }
       subscription_state: {
         Row: {
           current_period_end: string | null
@@ -6121,6 +6221,8 @@ export type Database = {
           life_stage: string | null
           listing_price: number | null
           marketplace_notes: string | null
+          moderation_hidden_at: string | null
+          moderation_hidden_by: string | null
           owner_id: string
           prep_artist: string | null
           public_notes: string | null
@@ -6159,6 +6261,8 @@ export type Database = {
           life_stage?: string | null
           listing_price?: number | null
           marketplace_notes?: string | null
+          moderation_hidden_at?: string | null
+          moderation_hidden_by?: string | null
           owner_id: string
           prep_artist?: string | null
           public_notes?: string | null
@@ -6197,6 +6301,8 @@ export type Database = {
           life_stage?: string | null
           listing_price?: number | null
           marketplace_notes?: string | null
+          moderation_hidden_at?: string | null
+          moderation_hidden_by?: string | null
           owner_id?: string
           prep_artist?: string | null
           public_notes?: string | null
