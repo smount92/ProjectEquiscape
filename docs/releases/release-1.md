@@ -8,6 +8,8 @@ batch". One push to `main`, one rebuild. How releases work:
 
 - Old Registry links keep working after a maker correction or a merge;
   they forward to the page's new address (needs migration 233).
+- 88 Registry pages with accented names get correct addresses (Melody Peña
+  was at /melody-peia, Mesteño at /mesteio); the old addresses forward.
 - Resin pages with no scale say "Not recorded. Know it? Add it".
 - "Suggest a new entry" offers the molds in the Registry as you type, so a
   new release is filed under the right mold; "#1838 Montana Harvest" in the
