@@ -1,0 +1,28 @@
+# Release 2: Reports reach us
+
+Branch `release-2`. Board milestone "Release 2 - Reports reach us". One push
+to `main`, one rebuild. How releases work: `docs/guides/releasing.md`.
+
+## What members will notice
+
+- Members are told when a membership payment fails, and when a refund is
+  on its way. Settings › Subscription has **Manage billing** (Stripe's own
+  page: update the card, see invoices, cancel).
+
+## What the owner will notice
+
+- A bell when Stripe refunds a member or a member opens a chargeback, with
+  a link to the customer in Stripe. Refunds never cancel anyone by
+  themselves: to end a member's access, cancel the subscription in Stripe.
+
+## Go-live checklist (owner)
+
+1. **Stripe dashboard, once:**
+   - Settings › Billing › Customer portal: turn it on (allow updating the
+     payment method, viewing invoices and cancelling).
+   - Developers › Webhooks › the modelhorsehub.com endpoint: add the events
+     `charge.refunded` and `charge.dispute.created` (the endpoint already
+     receives the subscription and invoice events).
+2. Push the branch, wait for CI to go green.
+3. Paste this release's migrations, if any (listed here as they are added).
+4. Merge to main and push. The live smoke test runs by itself.

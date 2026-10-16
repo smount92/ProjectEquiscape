@@ -4,10 +4,11 @@ title: New linker becomes the default; old picker removed
 status: To Do
 assignee: []
 created_date: '2026-10-15 22:19'
+updated_date: '2026-10-16 00:36'
 due_date: '2026-10-29'
 labels:
   - registry
-milestone: m-1
+milestone: m-2
 dependencies: []
 priority: medium
 type: chore

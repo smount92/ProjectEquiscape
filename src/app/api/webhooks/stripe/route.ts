@@ -5,6 +5,15 @@ import { logger } from "@/lib/logger";
 import { metricsDb } from "@/lib/metrics/db";
 import { isMissingRevenueSchema, normalizeSubscriptionStatus } from "@/lib/metrics/revenue";
 import * as Sentry from "@sentry/nextjs";
+import { adminNotificationTargets } from "@/lib/notifications/adminTargets";
+import {
+    BILLING_PAGE,
+    findUserIdByCustomer,
+    formatStripeAmount,
+    memberNotice,
+    ownerNotice,
+    stripeCustomerUrl,
+} from "@/lib/billing/stripeNotices";
 
 // ============================================================
 // Stripe Webhook Handler
@@ -279,6 +288,67 @@ export async function POST(request: NextRequest) {
                 if (!result.ok) {
                     return NextResponse.json({ error: result.error }, { status: 500 });
                 }
+
+                // Tell the member, who otherwise learns only when their plan ends.
+                const failedFor = await findUserIdByCustomer(admin, subscription.customer as string);
+                if (failedFor) {
+                    await notifyOne(
+                        admin,
+                        failedFor,
+                        memberNotice.paymentFailed(invoice.attempt_count ?? 1),
+                        BILLING_PAGE,
+                    );
+                }
+                break;
+            }
+
+            // ── Money going back (MHH-023) ──
+            // A refund never cancels anyone by itself: the plan follows the
+            // subscription's real status in Stripe, re-read here. The owner
+            // and the member are both told.
+            case "charge.refunded": {
+                const charge = event.data.object as Stripe.Charge;
+                const customerId =
+                    typeof charge.customer === "string" ? charge.customer : (charge.customer?.id ?? null);
+                const memberId = await findUserIdByCustomer(admin, customerId);
+                const full = charge.refunded === true;
+                const amount = formatStripeAmount(charge.amount_refunded, charge.currency);
+                if (memberId) await notifyOne(admin, memberId, memberNotice.refunded(amount, full), BILLING_PAGE);
+                await notifyOwner(
+                    admin,
+                    ownerNotice.refunded(amount, full, await memberLabel(admin, memberId, customerId)),
+                    customerId ? stripeCustomerUrl(customerId) : null,
+                );
+                if (customerId) {
+                    const recheck = await recheckCustomer(stripe, admin, customerId);
+                    if (!recheck.ok) return NextResponse.json({ error: recheck.error }, { status: 500 });
+                }
+                break;
+            }
+
+            // ── Chargeback opened ──
+            case "charge.dispute.created": {
+                const dispute = event.data.object as Stripe.Dispute;
+                const chargeId = typeof dispute.charge === "string" ? dispute.charge : dispute.charge.id;
+                const charge = await stripe.charges.retrieve(chargeId);
+                const customerId =
+                    typeof charge.customer === "string" ? charge.customer : (charge.customer?.id ?? null);
+                const memberId = await findUserIdByCustomer(admin, customerId);
+                const amount = formatStripeAmount(dispute.amount, dispute.currency);
+                Sentry.captureMessage("Stripe chargeback opened", {
+                    level: "warning",
+                    tags: { domain: "stripe" },
+                    extra: { disputeId: dispute.id, amount, reason: dispute.reason },
+                });
+                await notifyOwner(
+                    admin,
+                    ownerNotice.disputed(
+                        amount,
+                        dispute.reason ?? "unknown",
+                        await memberLabel(admin, memberId, customerId),
+                    ),
+                    customerId ? stripeCustomerUrl(customerId) : null,
+                );
                 break;
             }
 
@@ -455,5 +525,40 @@ async function handleSubscriptionChange(
         subscriptionId: subscription.id,
         status: subscription.status,
     });
+    return { ok: true };
+}
+
+// ── Notices (MHH-023) ──
+
+async function notifyOne(admin: AdminClient, userId: string, content: string, linkUrl: string | null): Promise<void> {
+    const { createNotification } = await import("@/lib/notifications/createNotification");
+    await createNotification({ userId, type: "system", actorId: null, content, ...(linkUrl ? { linkUrl } : {}) });
+}
+
+async function notifyOwner(admin: AdminClient, content: string, linkUrl: string | null): Promise<void> {
+    const targets = await adminNotificationTargets(admin);
+    for (const userId of targets) await notifyOne(admin, userId, content, linkUrl);
+}
+
+/** "@alias" for the owner's notice, or the Stripe customer id when unknown. */
+async function memberLabel(admin: AdminClient, userId: string | null, customerId: string | null): Promise<string> {
+    if (userId) {
+        const { data } = await admin.from("users").select("alias_name").eq("id", userId).maybeSingle();
+        if (data?.alias_name) return `@${data.alias_name}`;
+    }
+    return customerId ? `Stripe customer ${customerId}` : "an unknown customer";
+}
+
+/** Re-read every subscription a customer has and apply its real status. */
+async function recheckCustomer(
+    stripe: Stripe,
+    admin: AdminClient,
+    customerId: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+    const subs = await stripe.subscriptions.list({ customer: customerId, status: "all", limit: 10 });
+    for (const sub of subs.data) {
+        const result = await handleSubscriptionChange(admin, sub);
+        if (!result.ok) return result;
+    }
     return { ok: true };
 }

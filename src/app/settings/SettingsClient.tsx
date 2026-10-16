@@ -41,6 +41,7 @@ import type { HorseVisibility } from "@/lib/stable/defaultVisibility";
 import { Button } from "@/components/ui/button";
 import SupporterLedgerToggle from "@/components/SupporterLedgerToggle";
 import MembershipDisplayToggle from "@/components/MembershipDisplayToggle";
+import ManageBillingButton from "@/components/ManageBillingButton";
 import InsuranceReportButton from "@/components/InsuranceReportButton";
 import ExportButton from "@/components/ExportButton";
 import ExplorerLayout from "@/components/layouts/ExplorerLayout";
@@ -195,6 +196,8 @@ export default function SettingsClient() {
     // Membership chip opt-in — null unless the viewer holds pro/studio,
     // so the toggle stays hidden for everyone else (same shape as above).
     const [membershipDisplay, setMembershipDisplay] = useState<{ visible: boolean } | null>(null);
+    // A Stripe customer can manage their card and plan (MHH-023).
+    const [hasStripeBilling, setHasStripeBilling] = useState(false);
 
     useEffect(() => {
         async function load() {
@@ -245,6 +248,9 @@ export default function SettingsClient() {
                     // and tolerant: before the migration the column is
                     // missing and the toggle simply stays hidden.
                     const tier = (user.app_metadata as { tier?: string } | null)?.tier;
+                    setHasStripeBilling(
+                        !!(user.app_metadata as { stripe_customer_id?: string } | null)?.stripe_customer_id,
+                    );
                     if (tier === "pro" || tier === "studio") {
                         const { data: mrow, error: mErr } = await supabase
                             .from("users")
@@ -812,9 +818,12 @@ export default function SettingsClient() {
                         reports. The trust record — verified show results, condition grades, Hoofprint provenance and
                         the Blue Book — is free for everyone, always.
                     </p>
-                    <Link href="/upgrade" className="btn-brass">
-                        View plans &amp; upgrade
-                    </Link>
+                    <div className="flex flex-wrap items-start gap-4">
+                        <Link href="/upgrade" className="btn-brass">
+                            View plans &amp; upgrade
+                        </Link>
+                        {hasStripeBilling && <ManageBillingButton />}
+                    </div>
 
                     {/* Active supporters only. */}
                     {supporterLedger && (

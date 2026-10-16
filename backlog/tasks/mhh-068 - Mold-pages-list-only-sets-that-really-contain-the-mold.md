@@ -4,9 +4,10 @@ title: Mold pages list only sets that really contain the mold
 status: To Do
 assignee: []
 created_date: '2026-10-15 23:56'
+updated_date: '2026-10-16 00:36'
 labels:
   - registry
-milestone: m-1
+milestone: m-2
 dependencies: []
 priority: medium
 type: bug

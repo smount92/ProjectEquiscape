@@ -4,9 +4,10 @@ title: Remove the dead /show-ring public path
 status: To Do
 assignee: []
 created_date: '2026-10-15 23:56'
+updated_date: '2026-10-16 00:36'
 labels:
   - platform
-milestone: m-1
+milestone: m-2
 dependencies: []
 priority: low
 type: chore

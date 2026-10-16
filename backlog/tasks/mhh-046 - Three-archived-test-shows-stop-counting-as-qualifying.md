@@ -4,9 +4,10 @@ title: Three archived test shows stop counting as qualifying
 status: Waiting on owner
 assignee: []
 created_date: '2026-10-15 22:19'
+updated_date: '2026-10-16 00:36'
 labels:
   - shows
-milestone: m-1
+milestone: m-2
 dependencies: []
 priority: high
 type: bug
