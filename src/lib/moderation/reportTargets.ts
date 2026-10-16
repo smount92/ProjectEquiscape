@@ -406,11 +406,26 @@ async function takeDownHorse(db: Db, id: string, adminId: string, now: string): 
         .select("id, party_b_id, conversation_id");
     if (offersError)
         return safeError("Moderation", offersError, "Could not withdraw the open offers. Please try again.");
-    const withdrawnOffers = ((withdrawn ?? []) as Row[])
+    const withdrawnRows = (withdrawn ?? []) as Row[];
+    const withdrawnOffers = withdrawnRows
         .filter((t) => !!str(t.party_b_id))
         .map((t) => ({ buyerId: str(t.party_b_id) as string, conversationId: str(t.conversation_id) }));
     const after = await saleUnderWay();
-    if (after) return after;
+    if (after) {
+        // A sale started in between: leave everything as it was, offers too.
+        if (withdrawnRows.length > 0) {
+            const { error: restoreError } = await db
+                .from("transactions")
+                .update({ status: OPEN_OFFER })
+                .in(
+                    "id",
+                    withdrawnRows.map((t) => t.id as string),
+                )
+                .eq("status", "cancelled");
+            if (restoreError) logger.error("Moderation", "Could not put withdrawn offers back", restoreError);
+        }
+        return after;
+    }
 
     // Private takes the passport, and with it the listing, off every
     // public surface; the trade status is reset too so the horse does

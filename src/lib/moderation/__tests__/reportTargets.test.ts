@@ -380,6 +380,23 @@ describe("takeDownReportedContent", () => {
             expect(db.writes("user_horses")).toEqual([]);
         });
 
+        it("puts the offers back and leaves the horse alone if a sale started in between", async () => {
+            db.on("user_horses", (q) => (q.op === "select" ? { data: LISTED_HORSE, error: null } : OK));
+            let checks = 0;
+            db.on("transactions", (q) =>
+                q.op === "update"
+                    ? { data: [{ id: "t1", party_b_id: "b1", conversation_id: "c1" }], error: null }
+                    : { data: checks++ === 0 ? [] : [{ id: "t2", status: "pending_payment" }], error: null },
+            );
+            const result = await takeDownReportedContent(client, "horse", "h1", ADMIN);
+            expect(result.success).toBe(false);
+            const [withdraw, restore] = db.writes("transactions");
+            expect(withdraw.payload).toEqual({ status: "cancelled" });
+            expect(restore.payload).toEqual({ status: "offer_made" });
+            expect(db.filter(restore, "in", "id")).toEqual(["t1"]);
+            expect(db.writes("user_horses")).toEqual([]);
+        });
+
         it("won't hold a horse twice", async () => {
             db.on("user_horses", () => ({
                 data: { ...LISTED_HORSE, moderation_hidden_at: "2026-10-15T00:00:00Z" },
