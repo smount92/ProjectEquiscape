@@ -1,7 +1,7 @@
 "use server";
 
 import { logger } from "@/lib/logger";
-import { revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { CACHE_TAGS } from "@/lib/cache/tags";
 import { ANNOUNCEMENTS_CACHE_TAG } from "@/lib/announcements";
 import { paddockPinRefusal } from "@/lib/feed/paddockPin";
@@ -25,6 +25,7 @@ import type { ConsoleDivision } from "@/lib/shows/console";
 import type { PublicShow } from "@/lib/shows/public";
 import type { ShowJudging, ShowMode, ShowStatus } from "@/lib/shows/types";
 import { paypalBillingEnabled } from "@/lib/paypal/flag";
+import { countOpenContactMessages } from "@/lib/contact/openCount";
 import {
     attachLoad,
     groupDuplicates,
@@ -94,6 +95,8 @@ export async function deleteContactMessage(messageId: string): Promise<{ success
     const { error } = await getAdminSupabase().from("contact_messages").delete().eq("id", messageId);
 
     if (error) return { success: false, error: error.message };
+    // The Mailbox tab badge and the pulse count open messages; refresh them.
+    revalidatePath("/admin");
     return { success: true };
 }
 
@@ -1026,6 +1029,7 @@ export interface AdminPulse {
         sanctioning: number | null;
         barnJoinRequests: number | null;
         catalogSuggestions: number | null;
+        /** Contact messages still open (countOpenContactMessages). */
         contactMessages: number | null;
         legacySuggestions: number | null;
         externalShows: number | null;
@@ -1112,7 +1116,8 @@ export async function getAdminPulse(): Promise<
         head("user_horses").eq("trade_status", "For Sale") as unknown as Promise<CountResult>,
         head("user_reports").eq("status", "open") as unknown as Promise<CountResult>,
         head("catalog_suggestions").in("status", ["pending", "under_review"]) as unknown as Promise<CountResult>,
-        head("contact_messages").eq("is_read", false) as unknown as Promise<CountResult>,
+        // Open, not unread: the same number the Mailbox tab badges and lists.
+        countOpenContactMessages(admin).then((count) => ({ count, error: count === null ? "unreadable" : null })),
         head("database_suggestions").eq("status", "pending") as unknown as Promise<CountResult>,
         head("external_shows").eq("status", "pending") as unknown as Promise<CountResult>,
         adminStaffBarns,

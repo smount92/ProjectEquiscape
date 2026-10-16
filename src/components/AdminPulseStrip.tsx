@@ -98,7 +98,7 @@ export default function AdminPulseStrip({ pulse, onJump }: PulseStripProps) {
     const queues: QueueSpec[] = [
         { key: "reports", label: "Reports", count: pulse.pending.reports, urgent: true },
         { key: "members", label: "Deal disputes", count: pulse.pending.disputes, urgent: true },
-        { key: "mailbox", label: "Unread mail", count: pulse.pending.contactMessages },
+        { key: "mailbox", label: "Open messages", count: pulse.pending.contactMessages },
         { key: "catalog", label: "Catalog suggestions", count: pulse.pending.catalogSuggestions },
         { key: "sanctioning", label: "Sanctioning requests", count: pulse.pending.sanctioning },
         { key: "calendar", label: "Calendar listings", count: pulse.pending.externalShows },

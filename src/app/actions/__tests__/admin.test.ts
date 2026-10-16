@@ -383,6 +383,28 @@ describe("getAdminPulse", () => {
         expect(statusFilter[1]).not.toContain("draft");
     });
 
+    it("counts OPEN contact messages: the Mailbox's Open filter, not unread", async () => {
+        queue("contact_messages", { count: 5, error: null });
+
+        const result = await getAdminPulse();
+
+        expect(result.success).toBe(true);
+        if (!result.success) return;
+        expect(result.pulse.pending.contactMessages).toBe(5);
+        expect(queriesFor("contact_messages")[0].eq).toHaveBeenCalledWith("status", "open");
+    });
+
+    it("before migration 236 (no status column) the count falls back to unread", async () => {
+        queue("contact_messages", { count: null, error: { message: "" } }, { count: 2, error: null });
+
+        const result = await getAdminPulse();
+
+        expect(result.success).toBe(true);
+        if (!result.success) return;
+        expect(result.pulse.pending.contactMessages).toBe(2);
+        expect(queriesFor("contact_messages")[1].eq).toHaveBeenCalledWith("is_read", false);
+    });
+
     it("refuses a non-admin", async () => {
         authGetUser.mockResolvedValue({ data: { user: { id: "u-9", email: "x@test.com" } } });
         const result = await getAdminPulse();

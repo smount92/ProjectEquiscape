@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { BRONZE_THRESHOLD, CONTRIBUTOR_THRESHOLD, GOLD_THRESHOLD, SILVER_THRESHOLD } from "@/lib/catalog/corrections";
 import FeatureHorseForm from "@/components/FeatureHorseForm";
 import AdminShowManager from "@/components/AdminShowManager";
@@ -80,7 +81,8 @@ const SUGGESTION_STATUS_LABELS: Record<string, string> = {
 };
 
 interface AdminTabsProps {
-    unreadCount: number;
+    /** Contact messages still open: what Mailbox › Open lists (countOpenContactMessages). */
+    openMessages: number;
     shows: Show[];
     suggestions: LegacySuggestionRow[];
     reports: Report[];
@@ -130,8 +132,30 @@ const TABS: { key: TabKey; emoji: string; label: string }[] = [
     { key: "ops", emoji: "🛠️", label: "Ops" },
 ];
 
+const isTabKey = (v: unknown): v is TabKey => typeof v === "string" && TABS.some((t) => t.key === v);
+
+/**
+ * The tab a URL asks for: `#members` / `#mailbox` / `#calendar` (notice
+ * links) or `?tab=reports` (the report bell). A hash is the more recent
+ * ask when both are there. Null when neither names a tab.
+ */
+export function askedAdminTab(tabParam: string | null, hash: string): TabKey | null {
+    const fromHash = hash.replace(/^#/, "");
+    if (isTabKey(fromHash)) return fromHash;
+    return isTabKey(tabParam) ? tabParam : null;
+}
+
+/** localStorage can throw (private windows, blocked site data); the tab is a convenience. */
+function safeStorage<T>(read: () => T): T | null {
+    try {
+        return read();
+    } catch {
+        return null;
+    }
+}
+
 export default function AdminTabs({
-    unreadCount,
+    openMessages,
     shows,
     suggestions,
     reports,
@@ -146,21 +170,49 @@ export default function AdminTabs({
     const [activeTab, setActiveTab] = useState<TabKey>("mailbox");
     // A report card's "Suspend @alias" opens Members already searching for them.
     const [memberQuery, setMemberQuery] = useState("");
+    const searchParams = useSearchParams();
+    const restored = useRef(false);
 
     // Open the tab a link asked for (?tab=reports from the report bell,
-    // #members / #mailbox from the other notices), else the one last used.
+    // #members / #mailbox / #calendar from the other notices), else, on
+    // first load only, the one last used. This runs again whenever the
+    // URL changes, so a notice clicked while the owner is already on
+    // /admin still switches tabs: Next re-renders useSearchParams readers
+    // on every navigation, a hash-only one included, and the history
+    // entry is written before effects run.
     useEffect(() => {
-        const asked = new URLSearchParams(window.location.search).get("tab") ?? window.location.hash.slice(1);
-        const saved = asked && TABS.some((t) => t.key === asked) ? asked : localStorage.getItem("admin-tab");
-        if (saved && TABS.some((t) => t.key === saved)) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect -- mount-gate: the saved tab lives in localStorage, unreadable during SSR
-            setActiveTab(saved as TabKey);
+        const asked = askedAdminTab(searchParams?.get("tab") ?? null, window.location.hash);
+        if (asked) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect -- the URL lives outside React; this syncs to it
+            setActiveTab(asked);
+        } else if (!restored.current) {
+            const saved = safeStorage(() => localStorage.getItem("admin-tab"));
+            if (isTabKey(saved)) setActiveTab(saved);
         }
+        restored.current = true;
+    }, [searchParams]);
+
+    // A plain #hash change (typed, or a raw <a href="#...">) that Next's
+    // router never sees.
+    useEffect(() => {
+        const onHashChange = () => {
+            const asked = askedAdminTab(new URLSearchParams(window.location.search).get("tab"), window.location.hash);
+            if (asked) setActiveTab(asked);
+        };
+        window.addEventListener("hashchange", onHashChange);
+        return () => window.removeEventListener("hashchange", onHashChange);
     }, []);
 
     const handleTabChange = (key: TabKey) => {
         setActiveTab(key);
-        localStorage.setItem("admin-tab", key);
+        safeStorage(() => localStorage.setItem("admin-tab", key));
+        // Keep the address in step with the tab, so the next notice link
+        // (even one to the tab that was open before) is a real change and
+        // a reload stays put. `null` state lets Next's router adopt the new
+        // URL (it copies its own history state across).
+        if (window.location.hash !== `#${key}` || window.location.search) {
+            window.history.replaceState(null, "", `${window.location.pathname}#${key}`);
+        }
     };
 
     // Every actionable queue carries its count on the tab. `ops` badges
@@ -171,11 +223,15 @@ export default function AdminTabs({
     const missingMigrations = migrations.filter((m) => m.applied === false).length;
     const missingKeys = (envFlags?.secrets ?? []).filter((s) => !s.present).length;
     const opsWarnings = missingMigrations + missingKeys;
+    // Open Deal Room disputes are listed at the top of Members.
+    const openDisputes = pulse?.pending.disputes ?? 0;
 
     const getBadge = (key: TabKey): number | null => {
         switch (key) {
             case "mailbox":
-                return unreadCount > 0 ? unreadCount : null;
+                return openMessages > 0 ? openMessages : null;
+            case "members":
+                return openDisputes > 0 ? openDisputes : null;
             case "shows":
                 return shows.length > 0 ? shows.length : null;
             case "content":
@@ -195,7 +251,10 @@ export default function AdminTabs({
         }
     };
 
-    const alarming = (key: TabKey) => (key === "reports" && reports.length > 0) || (key === "ops" && opsWarnings > 0);
+    const alarming = (key: TabKey) =>
+        (key === "reports" && reports.length > 0) ||
+        (key === "members" && openDisputes > 0) ||
+        (key === "ops" && opsWarnings > 0);
 
     return (
         <>
