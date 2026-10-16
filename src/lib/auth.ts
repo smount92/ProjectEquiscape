@@ -7,6 +7,9 @@ import { entitledTier } from "@/lib/entitlement/clock";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/types/database.generated";
 
+/** The AuthError message requireAuth() throws for a suspended account. */
+export const SUSPENDED_AUTH_ERROR = "This account is suspended.";
+
 export class AuthError extends Error {
     constructor(message = "Not authenticated.") {
         super(message);
@@ -52,7 +55,7 @@ export async function requireAuth(): Promise<{
     // is server-validated. Read surfaces (optionalAuth) stay open;
     // every mutation funnels through here.
     if (user.app_metadata?.is_suspended) {
-        throw new AuthError("This account is suspended.");
+        throw new AuthError(SUSPENDED_AUTH_ERROR);
     }
     return { supabase, user };
 }

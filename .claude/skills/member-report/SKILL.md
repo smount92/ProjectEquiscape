@@ -38,15 +38,17 @@ A report can be two types. Sort by the **cause**, once you know it.
 
 | Channel | Member side | Owner sees it in | Member hears back? |
 |---|---|---|---|
-| Contact form | `/contact` (footer, error page, 404, FAQ) | Admin › Mailbox | Only if you reply (Reply button sends email) |
-| Content report | Report button - **horse pages only** today | Admin › Reports | No |
+| Contact form | `/contact` (footer, error page with the reference attached, 404, FAQ) | Admin › Mailbox (Open / Resolved, category, account) + bell | Only if you reply (Reply button sends email) |
+| Content report | 🚩 Report on posts, replies, barn threads, profiles, messages, horses/listings, show entries, Help ID | Admin › Reports + bell | Yes, bell when the report is closed |
 | Registry suggestion / duplicate report / "Suggest an entry" / linker "Mine isn't here" | Registry pages, linker | Admin › Catalog queue + bell | Yes, bell on approve/reject |
-| Wrong-model price flag | eBay card on reference page | Bell only (no admin screen) | No |
-| Suggestion-box barn | Barn thread | Only as a barn member | No (status change is silent) |
-| External show listing | Shows › list a show | Admin › Calendar | No |
-| Sanctioning request | Host's show settings | Admin › Sanctioning | On grant only |
-| Deal dispute | Deal Room | **Nowhere** - other party only | n/a |
+| Wrong-model price flag | eBay card on reference page | Admin › Catalog › Hidden eBay prices + bell | Yes, bell when "Show it again" |
+| Suggestion-box barn | Barn thread | Only as a barn member | Yes, bell when staff mark the thread |
+| External show listing | Shows › list a show | Admin › Calendar + bell | Yes, bell on approve/reject with the note |
+| Sanctioning request | Host's show settings | Admin › Sanctioning | Yes, bell on grant and on dismiss |
+| Deal dispute | Deal Room | Admin › Members (top) + pulse + bell | Through the Deal Room |
 | Error page | "Quote reference …" | Admin › Ops › Errors (Sentry) | Only via contact form |
+| Show entry question, bar or scratch | "message the host" / "Ask the host", and every bar or scratch notice | The host's inbox (not the owner) | The host replies in the thread |
+| Account deletion | Settings | Bell | n/a |
 | Direct message, Facebook, in person | - | Owner pastes it into the conversation | Owner replies |
 
 Known gaps in this table are tracked in `docs/workflows/README.md`.
@@ -54,6 +56,6 @@ Known gaps in this table are tracked in `docs/workflows/README.md`.
 ## 4. Close the loop
 
 1. **Reply to the member** in plain words: what was wrong, what changed, what they need to do (often nothing). Draft it; the owner sends it. Never promise a date.
-2. **Record it**: if it led to a fix, the commit message names the symptom. If it needs a decision or more work, create a ticket (`ticket` skill) with the member's words as the source.
+2. **Record it**: if it led to a fix, the commit message names the symptom. If it needs a decision or more work, create a ticket (`ticket` skill) with the member's words as the source. In the admin console, "Copy as ticket" on a Mailbox message, report card, Registry suggestion or barn thread copies the ready `backlog task create` command (emails and phone numbers removed).
 3. **Look sideways**: one member's report usually stands for many silent ones. Check whether other rows, horses or members have the same problem, and say how many.
 4. **Ask once**: could the member have fixed this themselves? If not, should they be able to? That answer goes in the ticket.

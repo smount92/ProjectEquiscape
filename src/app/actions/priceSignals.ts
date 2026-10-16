@@ -35,13 +35,23 @@ export async function reportWrongModelMatch(input: {
         if (error) {
             const e = error as { code?: string; message?: string };
             if (e.code === "23505") {
-                // The unique constraint: they already reported this one.
-                return { success: true };
+                // One flag per member per model. Already active: nothing to do.
+                // Resolved earlier (the owner showed the price again) and now
+                // wrong again: reopen it, so the new report still counts.
+                const { data: reopened } = await getAdminClient()
+                    .from("catalog_price_signal_flags")
+                    .update({ status: "active", note, resolved_at: null, created_at: new Date().toISOString() })
+                    .eq("catalog_item_id", input.catalogItemId)
+                    .eq("reporter_id", user.id)
+                    .neq("status", "active")
+                    .select("id");
+                if (!reopened || reopened.length === 0) return { success: true };
+            } else {
+                if (e.code === "42P01" || /catalog_price_signal_flags/.test(e.message ?? "")) {
+                    return { success: false, error: "Reporting isn't available yet — try again soon." };
+                }
+                return { success: false, error: "Could not file the report." };
             }
-            if (e.code === "42P01" || /catalog_price_signal_flags/.test(e.message ?? "")) {
-                return { success: false, error: "Reporting isn't available yet — try again soon." };
-            }
-            return { success: false, error: e.message ?? "Could not file the report." };
         }
 
         // Tell the admins, off the response path.
@@ -82,4 +92,103 @@ export async function reportWrongModelMatch(input: {
         }
         return { success: false, error: "Could not file the report." };
     }
+}
+
+// ── The owner's side of a "wrong model" report (MHH-022, gap G4) ──
+// A report hid the price and took the model off the sweep, and nothing
+// could ever bring it back. The owner now sees every hidden price and can
+// show it again when the report turns out to be mistaken; a price that
+// really was the wrong model simply stays hidden.
+
+/** One model whose price is hidden, with every member's report on it. */
+export interface HiddenPrice {
+    catalogItemId: string;
+    title: string;
+    reports: { reporter: string; reportedAt: string; note: string | null }[];
+}
+
+export async function listHiddenPrices(): Promise<
+    { success: true; prices: HiddenPrice[] } | { success: false; error: string }
+> {
+    const { requireAdmin } = await import("@/lib/auth");
+    await requireAdmin();
+    const admin = getAdminClient();
+    const { data, error } = await admin
+        .from("catalog_price_signal_flags")
+        .select("id, catalog_item_id, note, reporter_id, created_at")
+        .eq("status", "active")
+        .order("created_at", { ascending: false })
+        .limit(500);
+    if (error) return { success: false, error: "The hidden prices couldn't load just now." };
+    const rows = data ?? [];
+    const itemIds = [...new Set(rows.map((r) => r.catalog_item_id))];
+    const userIds = [...new Set(rows.map((r) => r.reporter_id))];
+    const [{ data: items }, { data: users }] = await Promise.all([
+        itemIds.length
+            ? admin.from("catalog_items").select("id, title").in("id", itemIds)
+            : Promise.resolve({ data: [] }),
+        userIds.length ? admin.from("users").select("id, alias_name").in("id", userIds) : Promise.resolve({ data: [] }),
+    ]);
+    const title = new Map(((items ?? []) as { id: string; title: string }[]).map((i) => [i.id, i.title]));
+    const alias = new Map(((users ?? []) as { id: string; alias_name: string }[]).map((u) => [u.id, u.alias_name]));
+    // Newest report first, so the most recently hidden model leads.
+    const byItem = new Map<string, HiddenPrice>();
+    for (const r of rows) {
+        const entry = byItem.get(r.catalog_item_id) ?? {
+            catalogItemId: r.catalog_item_id,
+            title: title.get(r.catalog_item_id) ?? "a catalog entry",
+            reports: [],
+        };
+        entry.reports.push({
+            reporter: alias.get(r.reporter_id) ? `@${alias.get(r.reporter_id)}` : "a member",
+            reportedAt: r.created_at,
+            note: r.note,
+        });
+        byItem.set(r.catalog_item_id, entry);
+    }
+    return { success: true, prices: [...byItem.values()] };
+}
+
+/**
+ * The reports were mistaken: show the model's price again and put it back on
+ * the sweep. Every active report on the model is resolved (one left open
+ * would keep the price hidden), and each member who reported it is told.
+ */
+export async function restoreHiddenPrice(catalogItemId: string): Promise<{ success: boolean; error?: string }> {
+    const { requireAdmin } = await import("@/lib/auth");
+    await requireAdmin();
+    const admin = getAdminClient();
+    const { data: flags, error } = await admin
+        .from("catalog_price_signal_flags")
+        .update({ status: "resolved", resolved_at: new Date().toISOString() })
+        .eq("catalog_item_id", catalogItemId)
+        .eq("status", "active")
+        .select("reporter_id");
+    if (error) return { success: false, error: "That price couldn't be restored just now." };
+    if (!flags || flags.length === 0) return { success: false, error: "Those reports were already handled." };
+
+    const reporterIds = [...new Set(flags.map((f) => f.reporter_id as string))];
+    after(async () => {
+        try {
+            const { createNotification } = await import("@/lib/notifications/createNotification");
+            const { data: item } = await admin
+                .from("catalog_items")
+                .select("title")
+                .eq("id", catalogItemId)
+                .maybeSingle();
+            for (const userId of reporterIds) {
+                await createNotification({
+                    userId,
+                    type: "system",
+                    actorId: null,
+                    content: `Thanks for flagging the eBay price on "${item?.title ?? "a model"}". We checked it against the listings and it is the right model, so the price is showing again.`,
+                    linkUrl: `/catalog/${catalogItemId}`,
+                });
+            }
+        } catch {
+            /* non-blocking */
+        }
+    });
+    revalidateTag(REFERENCE_PAGES_CACHE_TAG, "max");
+    return { success: true };
 }

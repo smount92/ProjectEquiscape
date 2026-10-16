@@ -24,6 +24,7 @@ import { logger } from "@/lib/logger";
 import * as Sentry from "@sentry/nextjs";
 import { ebayCompsLive } from "@/lib/ebay/flag";
 import { attemptRows, planSweep, tallyOutcomes, type AttemptInfo, type SweepResult } from "@/lib/ebay/schedule";
+import { withHeartbeat } from "@/lib/ops/heartbeat";
 import { sweep, type SweepTarget } from "@/lib/ebay/sweep";
 
 /**
@@ -84,7 +85,7 @@ async function readAll(
     return rows;
 }
 
-export async function GET(request: NextRequest) {
+async function runJob(request: NextRequest) {
     const authHeader = request.headers.get("authorization");
     // Unset-secret guard: without it, an env missing CRON_SECRET
     // (e.g. preview deploys) accepts the literal "Bearer undefined".
@@ -340,4 +341,9 @@ export async function GET(request: NextRequest) {
         logger.error("CronEbay", "sweep failed", err);
         return NextResponse.json({ error: "sweep failed" }, { status: 500 });
     }
+}
+
+// Every authorised run records a heartbeat for Admin › Ops (MHH-029).
+export async function GET(request: NextRequest) {
+    return withHeartbeat("ebay-price-signals", request, runJob);
 }

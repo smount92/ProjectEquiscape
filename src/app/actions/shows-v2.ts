@@ -100,7 +100,7 @@ import {
     type ShowGalleryData,
 } from "@/lib/shows/gallery";
 import { parseRubric } from "@/lib/shows/rubrics";
-import { validateEntry } from "@/lib/shows/entryRules";
+import { MODERATION_SCRATCHED_MESSAGE, validateEntry } from "@/lib/shows/entryRules";
 import { DOC_KIND_LABELS } from "@/lib/shows/documents";
 import {
     PUBLIC_BROWSE_STATUSES,
@@ -2487,10 +2487,16 @@ interface ShowEntryWithAxis {
     status: string;
     entry_number: number | null;
     photo_id?: string | null;
+    /** Migration 235; absent before it is pasted. */
+    moderation_scratched_at?: string | null;
     show_classes: {
         show_sections: { show_divisions: { axis: string } };
     };
 }
+
+/** Everything enterOne's rules read from the show's existing entries. */
+const ENTRY_RULE_COLUMNS =
+    "class_id, horse_id, owner_id, status, entry_number, photo_id, show_classes!inner(show_sections!inner(show_divisions!inner(axis)))";
 
 /**
  * Enter one horse in one class — the core of Phase D.
@@ -2605,12 +2611,13 @@ async function enterOne(
     // ── Everything already entered at this show (rule context).
     // One nested select so each entry carries its class's division
     // axis — the halter-declaration rule needs it. ──
-    const { data: entryRows, error: eErr } = await supabase
-        .from("show_class_entries")
-        .select(
-            "class_id, horse_id, owner_id, status, entry_number, photo_id, show_classes!inner(show_sections!inner(show_divisions!inner(axis)))",
-        )
-        .eq("show_id", showId);
+    // moderation_scratched_at (235) keeps a horse the site team scratched
+    // out of that class; before 235 the column isn't there, so ask without it.
+    const readEntries = (columns: string) => supabase.from("show_class_entries").select(columns).eq("show_id", showId);
+    let { data: entryRows, error: eErr } = await readEntries(`${ENTRY_RULE_COLUMNS}, moderation_scratched_at`);
+    if (eErr && (eErr.code === "42703" || eErr.code === "PGRST204")) {
+        ({ data: entryRows, error: eErr } = await readEntries(ENTRY_RULE_COLUMNS));
+    }
     if (eErr) return { success: false, error: eErr.message };
     const allEntries = (entryRows ?? []) as unknown as ShowEntryWithAxis[];
 
@@ -2651,6 +2658,7 @@ async function enterOne(
             status: e.status as EntryStatus,
             divisionAxis: e.show_classes.show_sections.show_divisions.axis as DivisionAxis,
             photoId: e.photo_id ?? null,
+            moderationScratched: !!e.moderation_scratched_at,
         })),
         isBarred: !!barRow,
         judgeUserIds,
@@ -2718,7 +2726,9 @@ async function enterOne(
                   ? "The chosen handler's account could not be found — check the alias and try again."
                   : insertError?.code === "42501" || insertError?.message?.includes("row-level security")
                     ? "Entries closed just as you submitted — refresh the show page to see its current status."
-                    : (insertError?.message ?? "Failed to enter the class.");
+                    : insertError?.message?.includes("scratched by the site team")
+                      ? MODERATION_SCRATCHED_MESSAGE
+                      : (insertError?.message ?? "Failed to enter the class.");
         return { success: false, error: friendly };
     }
 

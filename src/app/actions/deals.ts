@@ -1001,6 +1001,26 @@ export async function raiseDispute(conversationId: string, reason: string): Prom
         conversationId,
         `@${alias} raised a dispute on your deal — the record has been frozen`,
     );
+    // The owner hears of every dispute (MHH-020): the site does not referee,
+    // but a pattern of non-delivery is a conduct matter.
+    after(async () => {
+        try {
+            const { adminNotificationTargets } = await import("@/lib/notifications/adminTargets");
+            const { createNotification } = await import("@/lib/notifications/createNotification");
+            const { getAdminClient } = await import("@/lib/supabase/admin");
+            for (const ownerId of await adminNotificationTargets(getAdminClient())) {
+                await createNotification({
+                    userId: ownerId,
+                    type: "system",
+                    actorId: user.id,
+                    content: `⚖️ @${alias} opened a deal dispute: "${sanitizeText(trimmed).slice(0, 140)}"`,
+                    linkUrl: "/admin#members",
+                });
+            }
+        } catch (err) {
+            logger.error("Deals", "Owner dispute notice failed", err);
+        }
+    });
     revalidateThread(conversationId);
     return { success: true };
 }

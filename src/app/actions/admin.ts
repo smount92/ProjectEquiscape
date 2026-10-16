@@ -1,7 +1,7 @@
 "use server";
 
 import { logger } from "@/lib/logger";
-import { revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { CACHE_TAGS } from "@/lib/cache/tags";
 import { ANNOUNCEMENTS_CACHE_TAG } from "@/lib/announcements";
 import { paddockPinRefusal } from "@/lib/feed/paddockPin";
@@ -25,6 +25,7 @@ import type { ConsoleDivision } from "@/lib/shows/console";
 import type { PublicShow } from "@/lib/shows/public";
 import type { ShowJudging, ShowMode, ShowStatus } from "@/lib/shows/types";
 import { paypalBillingEnabled } from "@/lib/paypal/flag";
+import { countOpenContactMessages } from "@/lib/contact/openCount";
 import {
     attachLoad,
     groupDuplicates,
@@ -94,6 +95,8 @@ export async function deleteContactMessage(messageId: string): Promise<{ success
     const { error } = await getAdminSupabase().from("contact_messages").delete().eq("id", messageId);
 
     if (error) return { success: false, error: error.message };
+    // The Mailbox tab badge and the pulse count open messages; refresh them.
+    revalidatePath("/admin");
     return { success: true };
 }
 
@@ -308,12 +311,50 @@ export async function suspendUser(userId: string, reason: string): Promise<{ suc
     if (!user) return { success: false, error: "Unauthorized" };
     if (userId === user.id) return { success: false, error: "You cannot suspend yourself." };
     const trimmedReason = reason.trim();
-    if (!trimmedReason) return { success: false, error: "Give a reason — it lands on the audit trail." };
+    if (!trimmedReason) {
+        return { success: false, error: "Give a reason — the member reads it, and it lands on the audit trail." };
+    }
 
     const admin = getAdminSupabase();
 
     const { data: target, error: fetchError } = await admin.auth.admin.getUserById(userId);
     if (fetchError || !target?.user) return { success: false, error: "User not found." };
+
+    // Suspending a member who is already suspended amends the reason: the
+    // suspension keeps the day it began, and the member hears that the
+    // reason changed (or nothing, if it didn't), not a second "suspended".
+    const { data: current } = await admin
+        .from("users")
+        .select("is_suspended, suspended_reason")
+        .eq("id", userId)
+        .maybeSingle();
+    const was = current as { is_suspended: boolean | null; suspended_reason: string | null } | null;
+    if (was?.is_suspended) {
+        // Keep the sign-in stamp in step if it was ever lost.
+        if (!target.user.app_metadata?.is_suspended) {
+            const { error: authError } = await admin.auth.admin.updateUserById(userId, {
+                app_metadata: { ...target.user.app_metadata, is_suspended: true },
+            });
+            if (authError) return { success: false, error: authError.message };
+            try {
+                await admin.auth.admin.signOut(userId, "global");
+            } catch (err) {
+                logger.error("Admin", `session revocation failed for suspended user ${userId}`, err);
+            }
+        }
+        if (was.suspended_reason === trimmedReason) return { success: true };
+        const { error: amendError } = await admin
+            .from("users")
+            .update({ suspended_reason: trimmedReason })
+            .eq("id", userId);
+        if (amendError) return { success: false, error: "Could not change the reason. Please try again." };
+        await notifyMember(
+            userId,
+            `We've updated the reason your account is suspended. The reason: ${withFullStop(trimmedReason)} To talk to us about it, write to us through the contact page.`,
+            "/contact",
+        );
+        return { success: true };
+    }
 
     const { error: authError } = await admin.auth.admin.updateUserById(userId, {
         app_metadata: { ...target.user.app_metadata, is_suspended: true },
@@ -344,7 +385,30 @@ export async function suspendUser(userId: string, reason: string): Promise<{ suc
         logger.error("Admin", `session revocation failed for suspended user ${userId}`, err);
     }
 
+    // The member hears it from us, with the reason and the way to reach us
+    // (MHH-024). A suspended account can still sign in and read its bell.
+    await notifyMember(
+        userId,
+        `Your account has been suspended. The reason: ${withFullStop(trimmedReason)} While it is suspended you can sign in and look around, but you can't post, enter shows or trade. To talk to us about it, write to us through the contact page.`,
+        "/contact",
+    );
+
     return { success: true };
+}
+
+/** A sentence that ends with a full stop (or its own ! or ?). */
+function withFullStop(text: string): string {
+    return /[.!?]$/.test(text) ? text : `${text}.`;
+}
+
+/** A moderation notice to one member. Best effort: the action it reports stands either way. */
+async function notifyMember(userId: string, content: string, linkUrl: string, type = "moderation"): Promise<void> {
+    try {
+        const { createNotification } = await import("@/lib/notifications/createNotification");
+        await createNotification({ userId, type, content, linkUrl });
+    } catch (err) {
+        logger.error("Admin", "Moderation notice failed (continuing)", err);
+    }
 }
 
 /** Reverse suspendUser — clears both stamps. */
@@ -367,6 +431,8 @@ export async function unsuspendUser(userId: string): Promise<{ success: boolean;
         .update({ is_suspended: false, suspended_at: null, suspended_reason: null })
         .eq("id", userId);
     if (dbError) return { success: false, error: dbError.message };
+
+    await notifyMember(userId, "Your account is active again: you can post, enter shows and trade. Welcome back.", "/");
 
     return { success: true };
 }
@@ -435,6 +501,7 @@ export async function mergeCatalogItems(
 // and grant (or dismiss) the request via the service role.
 
 const SANCTIONING_REQUEST_MARKER = "[Host requested MHH sanctioning]";
+const SANCTIONING_ALREADY_DECIDED = "This request has already been dealt with.";
 
 export interface SanctioningRequestRow {
     showId: string;
@@ -643,17 +710,32 @@ export async function resolveSanctioningRequest(
     if (readError) return { success: false, error: readError.message };
     if (!show) return { success: false, error: "Show not found." };
 
-    const strippedNote =
-        ((show.sanctioning_note as string | null) ?? "").replace(SANCTIONING_REQUEST_MARKER, "").trim() || null;
+    const note = (show.sanctioning_note as string | null) ?? null;
+    // Nothing to decide: a dismissal needs a pending request, and a grant a
+    // show that isn't sanctioned yet (the owner may grant without a request).
+    if (decision === "dismiss" && !hasSanctioningRequest(note)) {
+        return { success: false, error: SANCTIONING_ALREADY_DECIDED };
+    }
+    if (decision === "grant" && show.is_mhh_qualifying) {
+        return { success: false, error: "This show is already MHH Sanctioned." };
+    }
 
-    const { error: updateError } = await admin
+    const strippedNote = (note ?? "").replace(SANCTIONING_REQUEST_MARKER, "").trim() || null;
+
+    // Only while the show is as it was read: two admins, or a double click,
+    // can't both decide it and both tell the host.
+    let decide = admin
         .from("shows")
         .update({
             sanctioning_note: strippedNote,
             ...(decision === "grant" ? { is_mhh_qualifying: true } : {}),
         })
         .eq("id", showId);
+    if (decision === "grant") decide = decide.eq("is_mhh_qualifying", false);
+    decide = note === null ? decide.is("sanctioning_note", null) : decide.eq("sanctioning_note", note);
+    const { data: decided, error: updateError } = await decide.select("id");
     if (updateError) return { success: false, error: updateError.message };
+    if ((decided ?? []).length === 0) return { success: false, error: SANCTIONING_ALREADY_DECIDED };
 
     if (decision === "grant") {
         // House pattern: dynamic import + try/catch — createNotification is
@@ -669,6 +751,14 @@ export async function resolveSanctioningRequest(
         } catch (err) {
             logger.error("Admin", "Sanctioning grant notification failed (continuing)", err);
         }
+    } else {
+        // A dismissal used to be silent; the host now hears it (MHH-024).
+        await notifyMember(
+            show.host_id as string,
+            `We looked at your request to make "${show.title}" MHH Sanctioned and haven't granted it this time. You can ask again from the show's settings, or write to us through the contact page.`,
+            `/shows/host/${showId}`,
+            "show_moderation",
+        );
     }
 
     return { success: true };
@@ -998,9 +1088,12 @@ export interface AdminPulse {
         sanctioning: number | null;
         barnJoinRequests: number | null;
         catalogSuggestions: number | null;
+        /** Contact messages still open (countOpenContactMessages). */
         contactMessages: number | null;
         legacySuggestions: number | null;
         externalShows: number | null;
+        /** Deal Room disputes still open (MHH-020). */
+        disputes: number | null;
     };
 }
 
@@ -1073,6 +1166,7 @@ export async function getAdminPulse(): Promise<
         barnRequests,
         shows,
         sanctioning,
+        disputes,
     ] = await Promise.allSettled([
         admin.auth.admin.listUsers({ perPage: 1000, page: 1 }),
         head("users").gte("created_at", since7d) as unknown as Promise<CountResult>,
@@ -1080,8 +1174,9 @@ export async function getAdminPulse(): Promise<
         head("posts").gte("created_at", since7d) as unknown as Promise<CountResult>,
         head("user_horses").eq("trade_status", "For Sale") as unknown as Promise<CountResult>,
         head("user_reports").eq("status", "open") as unknown as Promise<CountResult>,
-        head("catalog_suggestions").eq("status", "pending") as unknown as Promise<CountResult>,
-        head("contact_messages").eq("is_read", false) as unknown as Promise<CountResult>,
+        head("catalog_suggestions").in("status", ["pending", "under_review"]) as unknown as Promise<CountResult>,
+        // Open, not unread: the same number the Mailbox tab badges and lists.
+        countOpenContactMessages(admin).then((count) => ({ count, error: count === null ? "unreadable" : null })),
         head("database_suggestions").eq("status", "pending") as unknown as Promise<CountResult>,
         head("external_shows").eq("status", "pending") as unknown as Promise<CountResult>,
         adminStaffBarns,
@@ -1094,6 +1189,7 @@ export async function getAdminPulse(): Promise<
                 .ilike("sanctioning_note", `%${SANCTIONING_REQUEST_MARKER}%`);
             return { count, error };
         })(),
+        head("conversations").not("disputed_at", "is", null) as unknown as Promise<CountResult>,
     ]);
 
     const showsValue =
@@ -1122,6 +1218,7 @@ export async function getAdminPulse(): Promise<
                 contactMessages: countOf(contactMessages as PromiseSettledResult<CountResult>),
                 legacySuggestions: countOf(legacySuggestions as PromiseSettledResult<CountResult>),
                 externalShows: countOf(externalShows as PromiseSettledResult<CountResult>),
+                disputes: countOf(disputes as PromiseSettledResult<CountResult>),
             },
         },
     };
@@ -1337,6 +1434,44 @@ const PENDING_MIGRATIONS: MigrationSpec[] = [
             kind: "none",
             why: "A data backfill and a row policy — nothing to select. Verify: every horse you moved in bulk shows in its folder on your public profile.",
         },
+    },
+    {
+        id: "239",
+        title: "Hotfix: horses and posts load their member again",
+        summary:
+            "Drops the four foreign keys 235 added on hidden_by / moderation_hidden_by, which made every horse-with-owner and post-with-author query ambiguous (PGRST201).",
+        probe: {
+            kind: "none",
+            why: "It removes constraints, so there is nothing to select. Verify: a stable page and the Paddock feed load.",
+        },
+    },
+    {
+        id: "238",
+        title: "Stripe notices go out once",
+        summary:
+            "stripe_notice_events: the Stripe webhook records an event before sending its notices (payment failed, refund, chargeback), so a repeated delivery never rings the bell twice.",
+        probe: { kind: "column", table: "stripe_notice_events", column: "event_id" },
+    },
+    {
+        id: "237",
+        title: "Scheduled-job heartbeats",
+        summary:
+            "cron_heartbeats: each scheduled job records when it ran and whether it worked; Admin › Ops shows late or failing jobs.",
+        probe: { kind: "column", table: "cron_heartbeats", column: "job" },
+    },
+    {
+        id: "236",
+        title: "Contact messages: category, status, account",
+        summary:
+            "contact_messages gains category, open/resolved status, the signed-in sender's account and the error-page reference; the mailbox filters and pages by them.",
+        probe: { kind: "column", table: "contact_messages", column: "category" },
+    },
+    {
+        id: "235",
+        title: "Report everything; hide, never delete",
+        summary:
+            "The reports table accepts show entries and Help ID requests and suggestions too; posts and Help ID rows get hidden_at, and a row policy hides them from members, so a report card can take them down without deleting anything. Take-downs stick: a removed message can't be restored by either side, a horse made private and an entry scratched by a moderator are stamped so their owner can't undo it, hidden notes leave the logged-out passport, and hidden posts take no replies or likes.",
+        probe: { kind: "column", table: "show_class_entries", column: "moderation_scratched_at" },
     },
     {
         id: "234",
@@ -2109,4 +2244,57 @@ export async function setFeedPostPinned(
     const { error } = await admin.from("posts").update({ is_pinned: pinned }).eq("id", postId);
     if (error) return { success: false, error: error.message };
     return { success: true };
+}
+
+// ── Scheduled jobs (MHH-029) ──
+
+/** Each scheduled job's last run, success and failure, for Admin › Ops. */
+export async function getCronHealth(): Promise<
+    | { success: true; jobs: import("@/lib/ops/heartbeat").CronHealth[]; installed: boolean }
+    | { success: false; error: string }
+> {
+    const user = await verifyAdmin();
+    if (!user) return { success: false, error: "Unauthorized" };
+    const { CRON_JOBS, cronState } = await import("@/lib/ops/heartbeat");
+    const db = getAdminSupabase() as unknown as {
+        from: (t: string) => {
+            select: (c: string) => PromiseLike<{
+                data:
+                    | {
+                          job: string;
+                          last_run_at: string | null;
+                          last_ok_at: string | null;
+                          last_failed_at: string | null;
+                          last_error: string | null;
+                      }[]
+                    | null;
+                error: { code?: string } | null;
+            }>;
+        };
+    };
+    const { data, error } = await db
+        .from("cron_heartbeats")
+        .select("job, last_run_at, last_ok_at, last_failed_at, last_error");
+    // Only a missing table means 237 is not pasted; any other error is a real failure.
+    if (error && error.code !== "42P01" && error.code !== "PGRST205") {
+        return { success: false, error: "The scheduled jobs couldn't load just now." };
+    }
+    const installed = !error;
+    const rows = new Map((data ?? []).map((r) => [r.job, r]));
+    return {
+        success: true,
+        installed,
+        jobs: CRON_JOBS.map((j) => {
+            const row = rows.get(j.job) ?? null;
+            return {
+                job: j.job,
+                schedule: j.schedule,
+                lastRunAt: row?.last_run_at ?? null,
+                lastOkAt: row?.last_ok_at ?? null,
+                lastFailedAt: row?.last_failed_at ?? null,
+                lastError: row?.last_error ?? null,
+                state: cronState(row, j.lateAfterHours),
+            };
+        }),
+    };
 }

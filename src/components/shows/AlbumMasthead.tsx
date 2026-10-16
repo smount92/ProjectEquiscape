@@ -98,11 +98,14 @@ export default function AlbumMasthead({
     show,
     entryCount,
     focusChips = [],
+    canMessageHost = false,
 }: {
     show: PublicShow;
     entryCount: number;
     /** "OF · CM · Halter · Performance", read off the class list. */
     focusChips?: string[];
+    /** Everyone but the host gets a "Message the host" link (MHH-026). */
+    canMessageHost?: boolean;
 }) {
     const fee = feeText(show.feeInfo);
     const isFree = fee === "Free";
@@ -132,7 +135,20 @@ export default function AlbumMasthead({
                         className="font-medium text-(--leather-text) hover:underline"
                     >
                         @{show.hostAlias}
-                    </Link>{" "}
+                    </Link>
+                    {canMessageHost && (
+                        <>
+                            {" ("}
+                            <Link
+                                href={`/shows/${encodeURIComponent(show.id)}/message-host`}
+                                className="text-(--leather-text) underline underline-offset-2"
+                                prefetch={false}
+                            >
+                                message the host
+                            </Link>
+                            )
+                        </>
+                    )}{" "}
                     · {show.mode === "live" ? "Live show" : "Online photo show"}
                     {show.judging === "community_vote" && " · Community vote"}
                     {show.isMhhQualifying &&

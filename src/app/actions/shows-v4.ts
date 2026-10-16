@@ -24,6 +24,7 @@ import { requireAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { canApplyCardAction } from "@/lib/shows/cards";
+import { barNoticeText } from "@/lib/shows/barNotice";
 import { championLabel } from "@/lib/shows/placings";
 import { MAX_ENTRIES_PER_OWNER_FOR_SIZE, placementPoints } from "@/lib/shows/points";
 import {
@@ -144,11 +145,8 @@ export async function barEntrant(input: z.input<typeof barEntrantSchema>): Promi
             userId: v.userId,
             type: "show_moderation",
             actorId: null,
-            content:
-                scratched > 0
-                    ? `Your ${scratched === 1 ? "entry was" : "entries were"} scratched and you may not re-enter this show. Contact the host with questions.`
-                    : "You may not enter this show. Contact the host with questions.",
-            linkUrl: `/shows/${v.showId}`,
+            content: barNoticeText(roleResult.show.title, scratched),
+            linkUrl: `/shows/${v.showId}/message-host`,
         });
     } catch {
         // Notification is best-effort.
@@ -318,11 +316,8 @@ export async function removeEntrantFromShow(
             userId: v.userId,
             type: "show_moderation",
             actorId: null,
-            content:
-                removedEntries > 0
-                    ? `Your ${removedEntries === 1 ? "entry was" : "entries were"} removed from this show by the host, and you cannot re-enter it. Contact the host with questions.`
-                    : "The host has barred you from entering this show. Contact the host with questions.",
-            linkUrl: `/shows/${v.showId}`,
+            content: barNoticeText(roleResult.show.title, removedEntries),
+            linkUrl: `/shows/${v.showId}/message-host`,
         });
     } catch {
         // Notification is best-effort — the removal stands either way.

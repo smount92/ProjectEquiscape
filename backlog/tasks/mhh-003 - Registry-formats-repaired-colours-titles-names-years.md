@@ -4,11 +4,11 @@ title: 'Registry formats repaired: colours, titles, names, years'
 status: Waiting on owner
 assignee: []
 created_date: '2026-10-15 22:19'
-updated_date: '2026-10-16 00:17'
+updated_date: '2026-10-16 00:26'
 labels:
   - registry
   - data
-milestone: m-0
+milestone: m-1
 dependencies: []
 priority: high
 type: chore

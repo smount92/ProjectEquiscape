@@ -8,9 +8,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/logger";
+import { withHeartbeat } from "@/lib/ops/heartbeat";
 import * as Sentry from "@sentry/nextjs";
 
-export async function GET(request: NextRequest) {
+async function runJob(request: NextRequest) {
     // Verify Vercel cron secret
     const authHeader = request.headers.get("authorization");
     // Unset-secret guard: without it, an env missing CRON_SECRET
@@ -21,12 +22,16 @@ export async function GET(request: NextRequest) {
 
     try {
         const admin = getAdminClient();
-        await admin.rpc("refresh_market_prices");
+        // Supabase returns errors rather than throwing; a failed main step
+        // must fail the run, or the heartbeat would call it on time.
+        const { error: marketError } = await admin.rpc("refresh_market_prices");
+        if (marketError) throw new Error(`refresh_market_prices: ${marketError.message}`);
 
         // Auto-unpark horses with expired transfer PINs (Trn-04 fix)
         let unparkResult = null;
         try {
-            const { data } = await admin.rpc("auto_unpark_expired_transfers");
+            const { data, error } = await admin.rpc("auto_unpark_expired_transfers");
+            if (error) throw error;
             unparkResult = data;
         } catch (err) {
             Sentry.captureException(err, { tags: { domain: "cron" } });
@@ -36,7 +41,8 @@ export async function GET(request: NextRequest) {
         // System garbage collection
         let gcResult = null;
         try {
-            const { data } = await admin.rpc("cleanup_system_garbage");
+            const { data, error } = await admin.rpc("cleanup_system_garbage");
+            if (error) throw error;
             gcResult = data;
         } catch (err) {
             Sentry.captureException(err, { tags: { domain: "cron" } });
@@ -56,7 +62,8 @@ export async function GET(request: NextRequest) {
         // Refresh trusted sellers materialized view (Community Trusted badge)
         let trustedRefreshed = false;
         try {
-            await admin.rpc("refresh_mv_trusted_sellers");
+            const { error } = await admin.rpc("refresh_mv_trusted_sellers");
+            if (error) throw error;
             trustedRefreshed = true;
         } catch (err) {
             Sentry.captureException(err, { tags: { domain: "cron" } });
@@ -74,4 +81,9 @@ export async function GET(request: NextRequest) {
         Sentry.captureException(error, { tags: { domain: "cron" }, level: "fatal" });
         return NextResponse.json({ success: false, error: String(error) }, { status: 500 });
     }
+}
+
+// Every authorised run records a heartbeat for Admin › Ops (MHH-029).
+export async function GET(request: NextRequest) {
+    return withHeartbeat("refresh-market", request, runJob);
 }

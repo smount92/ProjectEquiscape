@@ -27,6 +27,7 @@ import { placeLabel } from "@/lib/shows/placings";
 import type { Place } from "@/lib/shows/types";
 import LinkifiedText from "@/components/LinkifiedText";
 import PhotoLightbox from "@/components/PhotoLightbox";
+import ReportButton from "@/components/ReportButton";
 import VoteButton from "@/components/shows/VoteButton";
 import { useShowToast } from "@/components/shows/useShowToast";
 
@@ -157,6 +158,14 @@ export default function ClassRoomLineup({
                             <span className="text-xs text-muted-foreground">Leg tag {entry.entryNumber ?? "—"}</span>
                         )}
                         {entry.isOwn && !isPlaced && <span className="text-xs text-muted-foreground">Your entry</span>}
+                        <ReportButton
+                            targetType="show_entry"
+                            targetId={entry.id}
+                            isOwn={entry.isOwn}
+                            signedIn={authed}
+                            variant="icon"
+                            className="border-transparent"
+                        />
                     </span>
                 </div>
 

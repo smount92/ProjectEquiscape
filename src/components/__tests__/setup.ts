@@ -9,6 +9,13 @@ import "@testing-library/jest-dom/vitest";
 // revalidateTag/revalidatePath need Next's request store, which tests don't
 // have ("static generation store missing"). Everything else in next/cache
 // (unstable_cache) stays real. A test that asserts on them mocks them itself.
+// after() needs a request scope too; tests that want to run the deferred
+// work mock next/server themselves and collect the callbacks.
+vi.mock("next/server", async (importOriginal) => ({
+    ...(await importOriginal<typeof import("next/server")>()),
+    after: vi.fn(),
+}));
+
 vi.mock("next/cache", async (importOriginal) => ({
     ...(await importOriginal<typeof import("next/cache")>()),
     revalidateTag: vi.fn(),

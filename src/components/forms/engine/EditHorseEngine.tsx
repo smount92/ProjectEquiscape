@@ -53,6 +53,9 @@ import { PENDING_HORSE_COLUMNS, isMissingPendingColumn } from "@/lib/passport/pe
 import SetPurchasePanel from "@/components/SetPurchasePanel";
 import { getSetPurchase } from "@/app/actions/set-purchase";
 import type { SetPurchase } from "@/lib/vault/setPurchase";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import ModerationHoldNotice from "@/components/ModerationHoldNotice";
+import { heldHorseIds, isModerationHoldError } from "@/lib/moderation/horseHold";
 
 interface ExistingImage {
     recordId: string;
@@ -122,6 +125,8 @@ export default function EditHorseEngine() {
     const [saving, setSaving] = useState(false);
     const savingRef = useRef(false);
     const [saveError, setSaveError] = useState<string | null>(null);
+    /** Made private by a moderator (235): it can't be shown or listed. */
+    const [held, setHeld] = useState(false);
 
     const [tier, setTier] = useState<UserTier>("free");
     const [viewerTier, setViewerTier] = useState<string | null>(null);
@@ -224,6 +229,12 @@ export default function EditHorseEngine() {
             form.reset(values);
             setOriginalCondition((horse.condition_grade as string) ?? "");
             setLoading(false);
+
+            heldHorseIds(supabase as unknown as SupabaseClient, [horseId])
+                .then((ids) => {
+                    if (!cancelled) setHeld(ids.has(horseId));
+                })
+                .catch(() => {});
 
             getHorseCollections(horseId).then((ids) => {
                 if (ids.length > 0) setCollectionIds(ids);
@@ -407,14 +418,16 @@ export default function EditHorseEngine() {
                 backLabel="Passport"
             />
 
-            {saveError && (
+            {saveError && isModerationHoldError(saveError) ? (
+                <ModerationHoldNotice role="alert" />
+            ) : saveError ? (
                 <div
                     className="mb-5 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2.5 text-sm text-destructive"
                     role="alert"
                 >
                     {saveError}
                 </div>
-            )}
+            ) : null}
 
             <div className="flex flex-col gap-6">
                 {/* ── Photos ── */}
@@ -534,6 +547,7 @@ export default function EditHorseEngine() {
                 {/* ── Marketplace + visibility ── */}
                 <LedgerLeaf tab="Marketplace">
                     <LeafHeading>Marketplace & Visibility</LeafHeading>
+                    {held && <ModerationHoldNotice />}
                     <EditGroup form={form} group="market" />
                     <EditGroup form={form} group="visibility" />
                 </LedgerLeaf>

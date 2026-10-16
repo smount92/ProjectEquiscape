@@ -7,6 +7,7 @@ import { editMessage, sendMessage } from "@/app/actions/messaging";
 import { markThreadRead } from "@/app/actions/deals";
 import { createClient } from "@/lib/supabase/client";
 import { UserAvatar } from "@/components/social";
+import ReportButton from "@/components/ReportButton";
 import { useNotifications } from "@/lib/context/NotificationProvider";
 import { RISKY_PAYMENT_REGEX } from "@/lib/safety";
 import { coerceKind, describeEvent, isEventKind, type MessageKind } from "@/lib/deals/transcript";
@@ -36,6 +37,8 @@ export interface ThreadMessage {
     editedAt: string | null;
     isMine: boolean;
     attachments?: { url: string; caption: string | null }[];
+    /** Removed by the site team after a report; `content` is the placeholder. */
+    removed?: boolean;
 }
 
 interface DealThreadProps {
@@ -386,7 +389,7 @@ export default function DealThread({
                                         otherAvatarUrl={otherAvatarUrl}
                                         currentUserAvatar={currentUserAvatar}
                                         onEdit={
-                                            msg.isMine && msg.kind === "chat" && !composerDisabledReason
+                                            msg.isMine && msg.kind === "chat" && !msg.removed && !composerDisabledReason
                                                 ? () => {
                                                       setEditingId(msg.id);
                                                       setEditText(msg.content);
@@ -622,7 +625,9 @@ function ChatBubble({
                         : "rounded-bl-[4px] border border-input bg-card text-foreground"
                 }`}
             >
-                <div className="break-words whitespace-pre-wrap">{msg.content}</div>
+                <div className={`break-words whitespace-pre-wrap ${msg.removed ? "italic opacity-80" : ""}`}>
+                    {msg.content}
+                </div>
 
                 {msg.attachments && msg.attachments.length > 0 && (
                     <div
@@ -677,6 +682,13 @@ function ChatBubble({
                     ✎
                 </button>
             )}
+            <ReportButton
+                targetType="message"
+                targetId={msg.id}
+                isOwn={msg.isMine || !!msg.removed}
+                variant="icon"
+                className="self-center border-transparent opacity-60 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+            />
             {msg.isMine &&
                 (showAvatar ? (
                     <UserAvatar src={currentUserAvatar} alias="You" size="xs" />

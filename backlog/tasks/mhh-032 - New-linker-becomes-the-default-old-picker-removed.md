@@ -4,6 +4,7 @@ title: New linker becomes the default; old picker removed
 status: To Do
 assignee: []
 created_date: '2026-10-15 22:19'
+updated_date: '2026-10-16 02:54'
 due_date: '2026-10-29'
 labels:
   - registry
@@ -37,3 +38,9 @@ Ruling Q7.
 - [ ] #2 Decision recorded in docs/DECISIONS.md if one was made
 - [ ] #3 Member who reported it has a drafted reply, if any
 <!-- DOD:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Built on branch linker-default (5e8cba98). Ships with the first release after 2026-10-29 if no linker bug is filed (ruling Q7).
+<!-- SECTION:NOTES:END -->

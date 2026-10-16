@@ -29,7 +29,7 @@ function count(re: RegExp): { total: number; top: string } {
 
 /** 2026-10-15 baselines. Lower them as files are converted; never raise them. */
 const BASELINES = {
-    rawErrorMessages: 364,
+    rawErrorMessages: 360,
     rawGetUser: 63,
     localActionResultTypes: 13,
 };

@@ -13,7 +13,9 @@ vi.mock("@/lib/supabase/server", () => ({
 }));
 vi.mock("@/lib/supabase/admin", () => ({ getAdminClient: vi.fn(() => mockClient) }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn(), revalidateTag: vi.fn() }));
-vi.mock("next/server", () => ({ after: vi.fn() }));
+const deferred: (() => Promise<void>)[] = [];
+vi.mock("next/server", () => ({ after: vi.fn((fn: () => Promise<void>) => deferred.push(fn)) }));
+vi.mock("@/lib/notifications/adminTargets", () => ({ adminNotificationTargets: vi.fn(async () => ["owner-1"]) }));
 vi.mock("@/lib/utils/rateLimit", () => ({ checkRateLimit: vi.fn().mockResolvedValue(true) }));
 vi.mock("@/lib/notifications/createNotification", () => ({
     createNotification: vi.fn().mockResolvedValue(undefined),
@@ -520,6 +522,22 @@ describe("Deal room — deals.ts", () => {
 
         queueLoad(disputed);
         expect((await savePaymentPlan(CONVO, [{ amount: 1, dueDate: null }])).error).toMatch(/disputed/i);
+    });
+
+    it("tells the owner when a dispute is opened", async () => {
+        const { createNotification } = await import("@/lib/notifications/createNotification");
+        deferred.length = 0;
+        queueLoad(convoRow());
+        const result = await raiseDispute(CONVO, "He never shipped the horse.");
+        expect(result.success).toBe(true);
+        for (const run of deferred) await run();
+        expect(createNotification).toHaveBeenCalledWith(
+            expect.objectContaining({
+                userId: "owner-1",
+                linkUrl: "/admin#members",
+                content: expect.stringMatching(/opened a deal dispute/),
+            }),
+        );
     });
 
     it("refuses to dispute the same deal twice", async () => {

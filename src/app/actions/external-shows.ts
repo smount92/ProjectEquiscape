@@ -25,12 +25,15 @@
  */
 
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
+import { after } from "next/server";
 import { CACHE_TAGS } from "@/lib/cache/tags";
 
 import { requireAdmin, requireAuth } from "@/lib/auth";
 import { createAnonClient } from "@/lib/supabase/anon";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { sanitizeText } from "@/lib/utils/validation";
+import { logger } from "@/lib/logger";
+import { safeError } from "@/lib/actions/result";
 import {
     firstZodError,
     reviewExternalShowSchema,
@@ -113,6 +116,25 @@ export async function submitExternalShow(input: SubmitExternalShowInput): Promis
         return { success: false, error: error.message };
     }
 
+    // The owner hears of every listing waiting for review (MHH-021).
+    const title = sanitizeText(v.title).slice(0, 100);
+    after(async () => {
+        try {
+            const { adminNotificationTargets } = await import("@/lib/notifications/adminTargets");
+            const { createNotification } = await import("@/lib/notifications/createNotification");
+            for (const ownerId of await adminNotificationTargets(getAdminClient())) {
+                await createNotification({
+                    userId: ownerId,
+                    type: "system",
+                    actorId: user.id,
+                    content: `📅 New show listing to review: "${title}"`,
+                    linkUrl: "/admin#calendar",
+                });
+            }
+        } catch {
+            /* the listing is saved; the bell is best effort */
+        }
+    });
     revalidatePath("/admin");
     return { success: true };
 }
@@ -224,22 +246,60 @@ export async function reviewExternalShow(input: ReviewExternalShowInput): Promis
     // table at all (migration 143) — moderation state can ONLY
     // change through this admin-gated path.
     const admin = getAdminClient();
-    const { error } = await admin
+    const reviewNote = note ? sanitizeText(note) : null;
+    const { data: reviewed, error } = await admin
         .from("external_shows")
         .update({
             status: decision,
-            review_note: note ? sanitizeText(note) : null,
+            review_note: reviewNote,
             reviewed_by: adminUserId,
             reviewed_at: new Date().toISOString(),
         })
         .eq("id", id)
-        .eq("status", "pending");
+        .eq("status", "pending")
+        .select("title, submitted_by");
 
-    if (error) return { success: false, error: error.message };
+    if (error) return safeError("ExternalShows", error, "Could not save the review. Please try again.");
+
+    // The member who submitted it hears the outcome (MHH-024). Only when
+    // this call moved it out of pending, so a double click tells them once.
+    const row = ((reviewed ?? []) as { title: string; submitted_by: string }[])[0];
+    if (row) await tellTheSubmitter(row.submitted_by, row.title, decision, reviewNote);
 
     // An approval must not sit behind the 60 s data cache.
     revalidateTag(EXTERNAL_SHOWS_CACHE_TAG, "max");
     revalidatePath("/calendar");
     revalidatePath("/admin");
     return { success: true };
+}
+
+/** Tell the member who submitted a show what we decided, with our note. Best effort. */
+async function tellTheSubmitter(
+    userId: string,
+    title: string,
+    decision: "approved" | "rejected",
+    note: string | null,
+): Promise<void> {
+    // The note is the owner's own words; end it as a sentence so the next
+    // one doesn't run on ("...a shop Questions?").
+    const said = note?.trim() ? (/[.!?]["')\]]*$/.test(note.trim()) ? note.trim() : `${note.trim()}.`) : null;
+    const content =
+        decision === "approved"
+            ? `"${title}" is on the calendar now. Thank you for adding it.${said ? ` A note from us: ${said}` : ""}`
+            : `We didn't add "${title}" to the calendar.${
+                  said
+                      ? ` The reason: ${said} Questions? Write to us through the contact page.`
+                      : " Write to us through the contact page if you'd like to know why."
+              }`;
+    try {
+        const { createNotification } = await import("@/lib/notifications/createNotification");
+        await createNotification({
+            userId,
+            type: "moderation",
+            content,
+            linkUrl: decision === "approved" ? "/calendar" : "/contact",
+        });
+    } catch (err) {
+        logger.error("ExternalShows", "Review notice failed (the review stands)", err);
+    }
 }

@@ -61,7 +61,8 @@ export default async function ChatPage({ params }: { params: Promise<{ id: strin
     const entries = room.entries.map((e) => ({
         ...e,
         isMine: e.senderId === user.id,
-        attachments: attachmentMap[e.id] || undefined,
+        // A message removed after a report loses its photos with its words.
+        attachments: e.removed ? undefined : attachmentMap[e.id] || undefined,
     }));
 
     const labels = room.kind ? { a: roleLabel(room.kind, "a"), b: roleLabel(room.kind, "b") } : { a: "Them", b: "You" };

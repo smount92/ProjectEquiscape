@@ -19,6 +19,7 @@ import { useCallback, useEffect, useState, useTransition } from "react";
 
 import { searchMembers, suspendUser, unsuspendUser, type AdminMemberRow } from "@/app/actions/admin";
 import AdminModerationCard from "@/components/AdminModerationCard";
+import AdminDisputesCard from "@/components/AdminDisputesCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -39,7 +40,7 @@ function MemberRow({ member, onChanged }: { member: AdminMemberRow; onChanged: (
 
     const act = (mode: "suspend" | "unsuspend") => {
         if (mode === "suspend" && reason.trim().length < 3) {
-            setError("A reason is required — it lands on the audit trail.");
+            setError("A reason is required — the member is told it, and it lands on the audit trail.");
             return;
         }
         startTransition(async () => {
@@ -126,7 +127,7 @@ function MemberRow({ member, onChanged }: { member: AdminMemberRow; onChanged: (
                     <Input
                         value={reason}
                         onChange={(e) => setReason(e.target.value)}
-                        placeholder="Reason (required — lands on the audit trail)"
+                        placeholder="Reason (required — the member is told it, and it lands on the audit trail)"
                         aria-label={`Suspension reason for ${member.alias}`}
                         disabled={pending}
                     />
@@ -154,8 +155,9 @@ function MemberRow({ member, onChanged }: { member: AdminMemberRow; onChanged: (
     );
 }
 
-export default function AdminMembersTab() {
-    const [query, setQuery] = useState("");
+/** `initialQuery`: open already searching for a member (a report card's "Suspend …" link). */
+export default function AdminMembersTab({ initialQuery = "" }: { initialQuery?: string }) {
+    const [query, setQuery] = useState(initialQuery);
     const [members, setMembers] = useState<AdminMemberRow[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
@@ -181,6 +183,10 @@ export default function AdminMembersTab() {
 
     return (
         <div className="flex flex-col gap-6">
+            {/* First, because it is the part of this tab that waits on you:
+                the dispute bell and the pulse tile both land here. */}
+            <AdminDisputesCard />
+
             <div>
                 <h3 className="mt-0 mb-1 flex items-center gap-2 text-base font-bold">👤 Members</h3>
                 <p className="mt-0 mb-3 text-xs text-muted-foreground">

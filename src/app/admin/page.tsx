@@ -12,6 +12,7 @@ import {
     listSanctioningRequests,
 } from "@/app/actions/admin";
 import AdminTabs from "@/components/AdminTabs";
+import { countOpenContactMessages } from "@/lib/contact/openCount";
 import { getSentryIssues } from "@/lib/sentry/issues";
 import CommandCenterLayout from "@/components/layouts/CommandCenterLayout";
 import { Zap, Shield } from "lucide-react";
@@ -20,16 +21,6 @@ export const metadata = {
     title: "Admin Console",
     description: "Founder's Command Center.",
 };
-
-interface ContactMessage {
-    id: string;
-    name: string;
-    email: string;
-    subject: string | null;
-    message: string;
-    is_read: boolean;
-    created_at: string;
-}
 
 export default async function AdminPage() {
     const supabase = await createClient();
@@ -49,8 +40,7 @@ export default async function AdminPage() {
     // a server action that re-gates on ADMIN_EMAIL — nothing admin-shaped
     // is ever fetched with the client key.
     const [
-        unreadResult,
-        messagesResult,
+        openMessagesCount,
         allShows,
         legacyResult,
         reports,
@@ -62,12 +52,9 @@ export default async function AdminPage() {
         sanctioningResult,
         catalogSuggestionsResult,
     ] = await Promise.all([
-        supabaseAdmin.from("contact_messages").select("id", { count: "exact", head: true }).eq("is_read", false),
-        supabaseAdmin
-            .from("contact_messages")
-            .select("id, name, email, subject, message, is_read, created_at")
-            .order("created_at", { ascending: false })
-            .limit(100),
+        // Open messages: what the Mailbox's Open filter lists and the pulse
+        // counts. The mailbox itself loads in AdminMailbox (filters, paging).
+        countOpenContactMessages(supabaseAdmin),
         getPhotoShows(),
         // Legacy database_suggestions queue. Read through the service role
         // now: migration 020's only SELECT policy is "your own rows", so the
@@ -92,13 +79,13 @@ export default async function AdminPage() {
             .select(
                 "id, user_id, catalog_item_id, suggestion_type, field_changes, reason, status, upvotes, downvotes, created_at",
             )
-            .eq("status", "pending")
+            // A suggestion someone has started reviewing still waits (MHH-030).
+            .in("status", ["pending", "under_review"])
             .order("created_at", { ascending: true })
             .limit(50),
     ]);
 
-    const unreadMessages = unreadResult.count ?? 0;
-    const messages = (messagesResult.data as ContactMessage[]) ?? [];
+    const openMessages = openMessagesCount ?? 0;
     const pendingSuggestions = legacyResult.success ? legacyResult.suggestions : [];
     const pendingExternalShows = externalShowsResult.success ? externalShowsResult.shows : [];
     const pulse = pulseResult.success ? pulseResult.pulse : null;
@@ -157,8 +144,7 @@ export default async function AdminPage() {
                  * own tab, catalog merge under Catalog, announcements under Content.
                  */
                 <AdminTabs
-                    messages={messages}
-                    unreadCount={unreadMessages}
+                    openMessages={openMessages}
                     shows={allShows.map((s) => ({
                         id: s.id,
                         title: s.title,

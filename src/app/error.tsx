@@ -118,14 +118,17 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
 
                 <p className="m-0 mt-4 text-xs text-muted-foreground">
                     Still stuck?{" "}
-                    <Link href="/contact" className="font-semibold text-forest">
+                    <Link
+                        href={error.digest ? `/contact?ref=${encodeURIComponent(error.digest)}` : "/contact"}
+                        className="font-semibold text-forest"
+                    >
                         Tell us what broke
                     </Link>
                     {error.digest ? (
                         <>
                             {" "}
-                            and quote reference{" "}
-                            <span className="font-mono text-secondary-foreground">{error.digest}</span>
+                            (reference <span className="font-mono text-secondary-foreground">{error.digest}</span>,
+                            attached for you)
                         </>
                     ) : null}
                     .

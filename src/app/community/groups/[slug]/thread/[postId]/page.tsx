@@ -38,6 +38,9 @@ export default async function GroupThreadPage({ params }: { params: Promise<{ sl
     }
 
     const canPin = ["owner", "admin", "moderator"].includes(group.memberRole || "");
+    // The site owner can turn a thread into a ticket (MHH-028).
+    const adminEmail = process.env.ADMIN_EMAIL?.toLowerCase();
+    const isSiteAdmin = !!adminEmail && user.email?.toLowerCase() === adminEmail;
 
     return (
         // noHeader: ThreadView brings its own forest header (breadcrumb +
@@ -52,6 +55,7 @@ export default async function GroupThreadPage({ params }: { params: Promise<{ sl
                     currentUserAlias={viewer?.alias_name ?? "You"}
                     currentUserAvatar={viewerAvatar}
                     canPin={canPin}
+                    isSiteAdmin={isSiteAdmin}
                 />
             </div>
         </ExplorerLayout>

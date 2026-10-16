@@ -14,6 +14,7 @@ import {
 import { deleteTextPost } from "@/app/actions/activity";
 import { toggleActivityLike } from "@/app/actions/likes";
 import RichText from "@/components/RichText";
+import ReportButton from "@/components/ReportButton";
 import { safeUUID } from "@/lib/utils/uuid";
 import { PostHeader, HorseEmbedCard, ReactionBar, ReplyComposer } from "@/components/social";
 import { Button } from "@/components/ui/button";
@@ -65,6 +66,9 @@ export default function FeedPostCard({
     const isSystem = item.kind === "show_results";
     // Pinning is a posts-table feature; legacy activity rows can't carry it.
     const canPin = viewerIsAdmin && !isLegacy;
+    // Legacy activity rows aren't in `posts`, so a report could never be
+    // acted on; everything else can be reported by anyone but its author.
+    const canReport = !isLegacy && item.authorId !== currentUserId;
 
     const [showReplies, setShowReplies] = useState(false);
     const [showAllReplies, setShowAllReplies] = useState(false);
@@ -148,8 +152,9 @@ export default function FeedPostCard({
                 isEdited={wasEdited}
                 permalink={`/feed/${item.id}`}
                 actions={
-                    item.canEdit || item.canDelete || canPin ? (
+                    item.canEdit || item.canDelete || canPin || canReport ? (
                         <>
+                            {canReport && <ReportButton targetType="post" targetId={item.id} variant="icon" />}
                             {canPin && (
                                 <button
                                     className="inline-flex min-h-0 cursor-pointer items-center justify-center gap-2 rounded-md border border-input bg-transparent px-1.5 py-0.5 text-xs font-semibold text-muted-foreground no-underline transition-all hover:bg-card"
@@ -317,7 +322,9 @@ export default function FeedPostCard({
                                         >
                                             🗑️
                                         </button>
-                                    ) : undefined
+                                    ) : (
+                                        <ReportButton targetType="comment" targetId={r.id} variant="icon" />
+                                    )
                                 }
                             />
                             <div className="mt-0.5 pl-8">

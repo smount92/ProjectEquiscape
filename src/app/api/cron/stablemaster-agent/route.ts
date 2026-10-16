@@ -21,6 +21,7 @@ import { isPro } from "@/lib/auth";
 import { logger } from "@/lib/logger";
 import { Resend } from "resend";
 import * as Sentry from "@sentry/nextjs";
+import { withHeartbeat } from "@/lib/ops/heartbeat";
 import {
     EMAIL_FROM,
     escapeEmailHtml,
@@ -29,7 +30,7 @@ import {
     renderEmailStats,
 } from "@/lib/email/layout";
 
-export async function GET(request: NextRequest) {
+async function runJob(request: NextRequest) {
     // Verify Vercel cron secret
     const authHeader = request.headers.get("authorization");
     // Unset-secret guard: without it, an env missing CRON_SECRET
@@ -208,4 +209,9 @@ ${moversHtml}
         logger.error("Stablemaster", "Cron job failed", error);
         return NextResponse.json({ success: false, error: String(error) }, { status: 500 });
     }
+}
+
+// Every authorised run records a heartbeat for Admin › Ops (MHH-029).
+export async function GET(request: NextRequest) {
+    return withHeartbeat("stablemaster-agent", request, runJob);
 }

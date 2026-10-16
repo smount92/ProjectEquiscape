@@ -11,7 +11,7 @@ import { GROUP_FILE_MAX_SIZE, GROUP_FILE_ALLOWED_EXTENSIONS } from "@/lib/groupF
 import { revalidatePath } from "next/cache";
 import { sanitizeText } from "@/lib/utils/validation";
 import { sanitizeForOr } from "@/lib/utils/search";
-import { isThreadStatus, type ThreadStatus } from "@/lib/groups/threadStatus";
+import { THREAD_STATUS_LABEL, isThreadStatus, type ThreadStatus } from "@/lib/groups/threadStatus";
 
 // ============================================================
 // BARNS — Server Actions
@@ -1181,8 +1181,12 @@ export async function setThreadStatus(
 ): Promise<{ success: boolean; error?: string }> {
     const { supabase, user } = await requireAuth();
     if (status !== null && !isThreadStatus(status)) return { success: false, error: "That isn't a mark." };
-    const { data: post } = await supabase.from("posts").select("group_id").eq("id", postId).maybeSingle();
-    const p = post as { group_id: string | null } | null;
+    const { data: post } = await supabase
+        .from("posts")
+        .select("group_id, author_id, title, content")
+        .eq("id", postId)
+        .maybeSingle();
+    const p = post as { group_id: string | null; author_id: string; title: string | null; content: string } | null;
     if (!p) return { success: false, error: "Thread not found." };
     if (!p.group_id) return { success: false, error: "Not a barn thread." };
     const { data: membership } = await supabase
@@ -1195,16 +1199,44 @@ export async function setThreadStatus(
     if (!role || !["owner", "admin", "moderator"].includes(role)) {
         return { success: false, error: "Only barn admins can mark threads." };
     }
-    const { error } = await supabase
+    // A new mark is written only where it differs from the old one, and
+    // the rows that come back say whether it did: the same mark clicked
+    // twice, or by two staff, changes nothing and tells nobody again.
+    let mark = supabase
         .from("posts")
         .update({ thread_status: status } as never)
         .eq("id", postId);
+    if (status !== null) mark = mark.or(`thread_status.is.null,thread_status.neq.${status}`);
+    const { data: changed, error } = await mark.select("id");
     if (error) {
         if (error.code === "42703" || error.code === "PGRST204") {
             return { success: false, error: "Thread marks aren't switched on yet (migration 221)." };
         }
         return { success: false, error: error.message };
     }
+
+    // The member who started the thread hears the new mark (MHH-024); a
+    // cleared or unchanged mark isn't news. Their own mark never pings them
+    // (self-guard).
+    if (status !== null && (changed ?? []).length > 0) {
+        try {
+            const { data: g } = await supabase.from("groups").select("name, slug").eq("id", p.group_id).maybeSingle();
+            const group = g as { name: string; slug: string } | null;
+            const words = (p.title || p.content || "").replace(/\s+/g, " ").trim();
+            const named = words.length > 60 ? `${words.slice(0, 59)}…` : words;
+            const { createNotification } = await import("@/lib/notifications/createNotification");
+            await createNotification({
+                userId: p.author_id,
+                type: "group_post",
+                actorId: user.id,
+                content: `Your thread "${named}"${group ? ` in ${group.name}` : ""} is now marked "${THREAD_STATUS_LABEL[status].label}".`,
+                ...(group ? { linkUrl: `/community/groups/${group.slug}/thread/${postId}` } : {}),
+            });
+        } catch (err) {
+            logger.error("Barns", "Thread mark notice failed (the mark stands)", err);
+        }
+    }
+
     revalidatePath("/community/groups");
     return { success: true };
 }
