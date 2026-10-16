@@ -17,7 +17,16 @@
 
 import { useCallback, useEffect, useState, useTransition } from "react";
 
-import { searchMembers, suspendUser, unsuspendUser, type AdminMemberRow } from "@/app/actions/admin";
+import {
+    grantRegistryModerator,
+    listRegistryModerators,
+    removeRegistryModerator,
+    searchMembers,
+    suspendUser,
+    unsuspendUser,
+    type AdminMemberRow,
+    type RegistryModeratorRow,
+} from "@/app/actions/admin";
 import AdminModerationCard from "@/components/AdminModerationCard";
 import AdminDisputesCard from "@/components/AdminDisputesCard";
 import { Button } from "@/components/ui/button";
@@ -32,11 +41,147 @@ function formatDay(iso: string | null): string {
     });
 }
 
-function MemberRow({ member, onChanged }: { member: AdminMemberRow; onChanged: () => void }) {
+/**
+ * Ending a moderator seat: a private reason (it stays with the owner),
+ * then Remove. Shared by the strip and the member rows.
+ */
+function RemoveSeat({ userId, alias, onChanged }: { userId: string; alias: string; onChanged: () => void }) {
+    const [open, setOpen] = useState(false);
+    const [reason, setReason] = useState("");
+    const [error, setError] = useState<string | null>(null);
+    const [pending, startTransition] = useTransition();
+
+    if (!open) {
+        return (
+            <Button variant="destructive-outline" size="sm" onClick={() => setOpen(true)}>
+                Remove moderator
+            </Button>
+        );
+    }
+    return (
+        <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center">
+            <Input
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="Private reason (only you see it)"
+                aria-label={`Reason for ending ${alias}'s moderator seat`}
+                disabled={pending}
+            />
+            <div className="flex shrink-0 gap-2">
+                <Button
+                    variant="destructive-outline"
+                    size="sm"
+                    disabled={pending}
+                    onClick={() =>
+                        startTransition(async () => {
+                            setError(null);
+                            const result = await removeRegistryModerator(userId, reason);
+                            if (!result.success) {
+                                setError(result.error ?? "Something went wrong.");
+                                return;
+                            }
+                            setOpen(false);
+                            setReason("");
+                            onChanged();
+                        })
+                    }
+                >
+                    {pending ? "Removing…" : "Confirm remove"}
+                </Button>
+                <Button variant="outline" size="sm" disabled={pending} onClick={() => setOpen(false)}>
+                    Cancel
+                </Button>
+            </div>
+            {error && (
+                <p role="alert" className="m-0 text-sm font-medium text-destructive">
+                    {error}
+                </p>
+            )}
+        </div>
+    );
+}
+
+/** The seats, at the top of the tab: who moderates the Registry now. */
+function ModeratorsStrip({
+    ready,
+    moderators,
+    onChanged,
+}: {
+    ready: boolean;
+    moderators: RegistryModeratorRow[];
+    onChanged: () => void;
+}) {
+    const seated = moderators.filter((m) => m.status === "active" || m.status === "resting");
+    return (
+        <section aria-labelledby="registry-moderators-heading">
+            <h3 id="registry-moderators-heading" className="mt-0 mb-1 flex items-center gap-2 text-base font-bold">
+                🗂️ Registry moderators
+            </h3>
+            {!ready ? (
+                <p className="m-0 text-xs text-muted-foreground">
+                    Registry moderators open once you add update 242 (Admin › Ops lists it).
+                </p>
+            ) : seated.length === 0 ? (
+                <p className="m-0 text-xs text-muted-foreground">
+                    No moderators yet. Find a member below and choose Make moderator; they get the Registry Desk and the
+                    badge at once.
+                </p>
+            ) : (
+                <ul className="m-0 flex list-none flex-col gap-2 p-0">
+                    {seated.map((m) => (
+                        <li
+                            key={m.userId}
+                            className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-input bg-card px-4 py-2"
+                        >
+                            <div className="min-w-0">
+                                <a
+                                    href={`/profile/${encodeURIComponent(m.alias)}`}
+                                    className="font-semibold text-forest no-underline hover:underline"
+                                >
+                                    @{m.alias}
+                                </a>
+                                <span className="ml-2 text-xs text-muted-foreground">
+                                    {m.status === "resting" ? "resting · " : ""}since {formatDay(m.startedAt)} · term
+                                    ends {formatDay(m.termEndsAt)} · last action{" "}
+                                    {m.lastActionAt ? formatDay(m.lastActionAt) : "none yet"}
+                                </span>
+                            </div>
+                            <RemoveSeat userId={m.userId} alias={m.alias} onChanged={onChanged} />
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </section>
+    );
+}
+
+function MemberRow({
+    member,
+    seat,
+    moderatorsReady,
+    onChanged,
+}: {
+    member: AdminMemberRow;
+    seat: RegistryModeratorRow | undefined;
+    moderatorsReady: boolean;
+    onChanged: () => void;
+}) {
     const [reason, setReason] = useState("");
     const [showReason, setShowReason] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [pending, startTransition] = useTransition();
+    const seated = seat?.status === "active" || seat?.status === "resting";
+
+    const makeModerator = () =>
+        startTransition(async () => {
+            setError(null);
+            const result = await grantRegistryModerator(member.id);
+            if (!result.success) {
+                setError(result.error ?? "Something went wrong.");
+                return;
+            }
+            onChanged();
+        });
 
     const act = (mode: "suspend" | "unsuspend") => {
         if (mode === "suspend" && reason.trim().length < 3) {
@@ -81,6 +226,11 @@ function MemberRow({ member, onChanged }: { member: AdminMemberRow; onChanged: (
                                 Suspended
                             </span>
                         )}
+                        {seated && (
+                            <span className="rounded-full border border-input px-2 py-0.5 text-[0.65rem] font-bold tracking-wide text-muted-foreground uppercase">
+                                Registry moderator
+                            </span>
+                        )}
                     </div>
                     <div className="mt-0.5 text-xs text-muted-foreground">
                         {member.email ?? "no email on file"} · joined {formatDay(member.createdAt)} ·{" "}
@@ -95,7 +245,12 @@ function MemberRow({ member, onChanged }: { member: AdminMemberRow; onChanged: (
                     )}
                 </div>
 
-                <div className="flex shrink-0 gap-2">
+                <div className="flex shrink-0 flex-wrap gap-2">
+                    {moderatorsReady && !member.isSuspended && !seated && (
+                        <Button variant="outline" size="sm" disabled={pending} onClick={makeModerator}>
+                            Make moderator
+                        </Button>
+                    )}
                     {member.isSuspended ? (
                         <Button variant="outline" size="sm" disabled={pending} onClick={() => act("unsuspend")}>
                             {pending ? "Working…" : "Unsuspend"}
@@ -121,6 +276,12 @@ function MemberRow({ member, onChanged }: { member: AdminMemberRow; onChanged: (
                     )}
                 </div>
             </div>
+
+            {seated && (
+                <div className="mt-2">
+                    <RemoveSeat userId={member.id} alias={member.alias} onChanged={onChanged} />
+                </div>
+            )}
 
             {showReason && !member.isSuspended && (
                 <div className="mt-2 flex flex-col gap-2 sm:flex-row">
@@ -161,6 +322,24 @@ export default function AdminMembersTab({ initialQuery = "" }: { initialQuery?: 
     const [members, setMembers] = useState<AdminMemberRow[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
+    const [moderators, setModerators] = useState<RegistryModeratorRow[]>([]);
+    const [moderatorsReady, setModeratorsReady] = useState(false);
+
+    const loadModerators = useCallback(async () => {
+        const result = await listRegistryModerators();
+        if (result.success) {
+            setModerators(result.moderators);
+            setModeratorsReady(result.ready);
+        }
+    }, []);
+
+    useEffect(() => {
+        // Loads once on open; a setState after an awaited read, not a sync cascade.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        void loadModerators();
+    }, [loadModerators]);
+
+    const seatOf = (userId: string) => moderators.find((m) => m.userId === userId);
 
     const load = useCallback(async (q: string) => {
         setLoading(true);
@@ -186,6 +365,8 @@ export default function AdminMembersTab({ initialQuery = "" }: { initialQuery?: 
             {/* First, because it is the part of this tab that waits on you:
                 the dispute bell and the pulse tile both land here. */}
             <AdminDisputesCard />
+
+            <ModeratorsStrip ready={moderatorsReady} moderators={moderators} onChanged={() => void loadModerators()} />
 
             <div>
                 <h3 className="mt-0 mb-1 flex items-center gap-2 text-base font-bold">👤 Members</h3>
@@ -220,7 +401,16 @@ export default function AdminMembersTab({ initialQuery = "" }: { initialQuery?: 
             ) : (
                 <ul className="m-0 flex list-none flex-col gap-2 p-0">
                     {members.map((m) => (
-                        <MemberRow key={m.id} member={m} onChanged={() => void load(query)} />
+                        <MemberRow
+                            key={m.id}
+                            member={m}
+                            seat={seatOf(m.id)}
+                            moderatorsReady={moderatorsReady}
+                            onChanged={() => {
+                                void load(query);
+                                void loadModerators();
+                            }}
+                        />
                     ))}
                 </ul>
             )}

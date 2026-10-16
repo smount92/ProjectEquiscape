@@ -13,7 +13,13 @@
  * shared by the server action. Mirrors src/lib/catalog/filterParams.ts.
  */
 
-import { CANONICAL_SCALES, CATALOG_GENDERS, RUN_TYPES, normalizeScale } from "@/lib/catalog/taxonomy";
+import {
+    CANONICAL_SCALES,
+    CATALOG_GENDERS,
+    RUN_TYPES,
+    normalizeRunCount,
+    normalizeScale,
+} from "@/lib/catalog/taxonomy";
 import { MATERIAL_OPTIONS } from "@/lib/catalog/editableFields";
 
 // Real (top-level) columns on catalog_items. Anything else in a correction's
@@ -331,6 +337,50 @@ const IDENTITY_VALUE_CHECKS: Record<string, (to: string) => boolean> = {
     manufacturer: (v) => v.length <= 120 && !/^[a-z]/.test(v) && !hasTrailingPunctuation(v),
     scale: (v) => (CANONICAL_SCALES as readonly string[]).includes(v),
 };
+
+/** The same Silver and identity rules, as the sentence a person reads when a value is refused. */
+const VALUE_PROBLEM_WORDS: Record<string, string> = {
+    color_description: "A colour description is up to 300 characters.",
+    model_number:
+        "A model number is up to 24 letters, digits, spaces, dots, dashes or slashes, as the maker prints it.",
+    run_type: "Pick a run type from the list.",
+    run_count: "Pieces made is a whole number above 0, with no commas or words (2500, not 2,500).",
+    retail_price: "An original retail price is a plain number in dollars, like 59.99, with no $ sign.",
+    material: "Pick a material from the list.",
+    breed: "A breed is up to 100 characters.",
+    gender: "Pick a gender from the list.",
+    title: "A name starts with a capital letter, has no stray punctuation at the end, and is up to 200 characters.",
+    maker: "A maker starts with a capital letter, has no stray punctuation at the end, and is up to 120 characters.",
+    artist: "An artist's name starts with a capital letter, has no stray punctuation at the end, and is up to 120 characters.",
+    manufacturer:
+        "A manufacturer starts with a capital letter, has no stray punctuation at the end, and is up to 120 characters.",
+    scale: "Pick a scale from the list.",
+};
+
+/**
+ * Why a value would be refused, in words, or null when it is fine. The
+ * Silver value checks and the identity rules, for every writer of the
+ * Registry (src/lib/catalog/write.ts), so a moderator's edit meets the
+ * same bar as a Gold curator's. Years follow parseYearRange (1900 to
+ * next year and one more), which is wider than Silver's fast-path window.
+ * Empty values are not judged here: whether a field may be emptied is
+ * the writer's rule.
+ */
+export function fieldValueProblem(key: string, value: unknown): string | null {
+    if (value === null || value === undefined) return null;
+    const text = typeof value === "number" ? String(value) : typeof value === "string" ? value.trim() : null;
+    if (text === null) return null;
+    if (text === "") return null;
+    if (key === "release_year_start" || key === "release_year_end") {
+        if (!/^\d{4}$/.test(text)) return "A year is four digits, like 1998.";
+        const range = parseYearRange(text);
+        return range.ok ? null : range.error;
+    }
+    if (key === "run_count") return normalizeRunCount(text) ? null : VALUE_PROBLEM_WORDS.run_count;
+    const check = SILVER_VALUE_CHECKS[key] ?? IDENTITY_VALUE_CHECKS[key];
+    if (!check) return null;
+    return check(text) ? null : (VALUE_PROBLEM_WORDS[key] ?? "That value is not in a form the Registry accepts.");
+}
 
 /**
  * May a Gold curator's correction apply at once? Gold may change any
