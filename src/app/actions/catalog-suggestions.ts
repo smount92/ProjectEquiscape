@@ -4,6 +4,7 @@ import { requireAuth } from "@/lib/auth";
 import { stripGeneration } from "@/lib/linker/model";
 import { fieldLabel } from "@/lib/catalog/editableFields";
 import { readRegistryTerm, searchRegistry } from "@/lib/catalog/registrySearch";
+import { applyTitleNumberRule } from "@/lib/catalog/titleNumber";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { logger } from "@/lib/logger";
 import { createClient } from "@/lib/supabase/server";
@@ -34,6 +35,7 @@ import {
     normalizeScale,
     resolveNewEntryMaker,
     suggestionItemTypeToDb,
+    ARTIST_ATTRIBUTED_CATEGORIES,
 } from "@/lib/catalog/taxonomy";
 import { REFERENCE_PAGES_CACHE_TAG } from "@/app/actions/reference-pages";
 import {
@@ -406,6 +408,38 @@ export async function createSuggestion(input: SuggestionInput) {
 
     // Check for trusted curator auto-approve
     const admin = getAdminClient();
+
+    // A model number typed in front of a title moves to its own field, or must
+    // agree with it (STANDARDS: titles hold the name only). The forms ask the
+    // member first; this is the guard for every path that sets a title (MHH-079).
+    if (
+        (input.suggestionType === "addition" || input.suggestionType === "correction") &&
+        input.fieldChanges &&
+        "title" in input.fieldChanges
+    ) {
+        let entry: { hasModelNumber: boolean; currentModel?: string | null };
+        if (input.suggestionType === "addition") {
+            const type = suggestionItemTypeToDb(input.fieldChanges.item_type as string | undefined);
+            entry = { hasModelNumber: !!type && type !== "plastic_mold" && !ARTIST_ATTRIBUTED_CATEGORIES.has(type) };
+        } else {
+            const { data: row } = input.catalogItemId
+                ? await admin
+                      .from("catalog_items")
+                      .select("item_type, attributes")
+                      .eq("id", input.catalogItemId)
+                      .maybeSingle()
+                : { data: null };
+            const r = row as { item_type: string; attributes: Record<string, unknown> | null } | null;
+            const current = r?.attributes?.model_number;
+            entry = {
+                hasModelNumber: !!r && r.item_type !== "plastic_mold" && !ARTIST_ATTRIBUTED_CATEGORIES.has(r.item_type),
+                currentModel: typeof current === "string" ? current : current == null ? null : String(current),
+            };
+        }
+        const numbered = applyTitleNumberRule(input.fieldChanges, entry);
+        if (!numbered.ok) return { success: false, error: numbered.error };
+        input.fieldChanges = numbered.fieldChanges;
+    }
 
     // ── Duplicate guard (additions only): before creating a new-entry
     // suggestion, look for existing catalog items with a matching

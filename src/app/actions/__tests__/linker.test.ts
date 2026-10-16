@@ -75,6 +75,37 @@ describe("fileReleaseUnderMold: the years", () => {
         );
     });
 
+    it("takes a model number off the name and asks when it disagrees with the box (MHH-079)", async () => {
+        db.row = mold;
+        await fileReleaseUnderMold({
+            moldId: "sb",
+            name: "#5002 Pinto Saddlebred",
+            modelNumber: "5002",
+            look: "Pinto",
+        });
+        expect(suggestions.createSuggestion).toHaveBeenCalledWith(
+            expect.objectContaining({
+                fieldChanges: expect.objectContaining({ title: "Pinto Saddlebred", model_number: "5002" }),
+            }),
+        );
+        suggestions.createSuggestion.mockClear();
+        await fileReleaseUnderMold({ moldId: "sb", name: "5002 Pinto Saddlebred", look: "Pinto" });
+        expect(suggestions.createSuggestion).toHaveBeenCalledWith(
+            expect.objectContaining({
+                fieldChanges: expect.objectContaining({ title: "Pinto Saddlebred", model_number: "5002" }),
+            }),
+        );
+        suggestions.createSuggestion.mockClear();
+        const r = await fileReleaseUnderMold({
+            moldId: "sb",
+            name: "#5002 Pinto Saddlebred",
+            modelNumber: "5003",
+            look: "Pinto",
+        });
+        expect(r).toMatchObject({ success: false, error: expect.stringMatching(/#5002.*5003/) });
+        expect(suggestions.createSuggestion).not.toHaveBeenCalled();
+    });
+
     it("says why a year it cannot read is refused", async () => {
         db.row = mold;
         const r = await fileReleaseUnderMold({ moldId: "sb", look: "Bay", yearFrom: "late 90s" });

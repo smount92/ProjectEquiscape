@@ -117,6 +117,41 @@ describe("SuggestNewEntryForm — the mold picker behaves like a proper list", (
     });
 });
 
+describe("SuggestNewEntryForm — a model number typed into the title (MHH-079)", () => {
+    beforeEach(() => {
+        createSuggestion.mockReset();
+        createSuggestion.mockResolvedValue({ success: true });
+    });
+
+    const fill = (title: string, model: string) => {
+        render(<SuggestNewEntryForm />);
+        fireEvent.change(screen.getByLabelText(/title \/ name/i), { target: { value: title } });
+        fireEvent.change(screen.getByLabelText(/model number/i), { target: { value: model } });
+        fireEvent.change(screen.getByLabelText(/reason|why/i), { target: { value: "Missing release on this mold." } });
+        fireEvent.click(screen.getByRole("button", { name: /submit/i }));
+    };
+
+    it("takes the number off the title when the box already holds it", async () => {
+        fill("#5038 Silky Sullivan", "5038");
+        await waitFor(() => expect(createSuggestion).toHaveBeenCalled());
+        const input = createSuggestion.mock.calls[0][0] as { fieldChanges: Record<string, unknown> };
+        expect(input.fieldChanges.title).toBe("Silky Sullivan");
+        expect(input.fieldChanges.model_number).toBe("5038");
+    });
+
+    it("asks which number is right when they disagree, then sends the one picked", async () => {
+        fill("#5038 Silky Sullivan", "5039");
+        const ask = await screen.findByTestId("new-entry-number-conflict");
+        expect(ask.textContent).toMatch(/#5038.*5039/);
+        expect(createSuggestion).not.toHaveBeenCalled();
+        fireEvent.click(within(ask).getByRole("button", { name: "It's #5039" }));
+        await waitFor(() => expect(createSuggestion).toHaveBeenCalled());
+        const input = createSuggestion.mock.calls[0][0] as { fieldChanges: Record<string, unknown> };
+        expect(input.fieldChanges.title).toBe("Silky Sullivan");
+        expect(input.fieldChanges.model_number).toBe("5039");
+    });
+});
+
 describe("SuggestNewEntryForm — a release's last year (MHH-077)", () => {
     beforeEach(() => {
         createSuggestion.mockReset();

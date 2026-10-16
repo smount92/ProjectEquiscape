@@ -21,6 +21,7 @@ import { createSuggestion } from "@/app/actions/catalog-suggestions";
 import { containsEveryWord, sameWords, searchKey } from "@/lib/catalog/searchKey";
 import { rosterLast } from "@/lib/catalog/moldSearch";
 import { parseYearRange } from "@/lib/catalog/corrections";
+import { reconcileTitleNumber, titleNumberProblem } from "@/lib/catalog/titleNumber";
 import {
     collapseSetPieces,
     commonOne,
@@ -390,10 +391,14 @@ export async function fileReleaseUnderMold(input: {
         .maybeSingle();
     if (!mold) return { success: false, error: "That mold is not in the Registry any more." };
     const m = mold as Row;
-    const model = (input.modelNumber ?? "").trim().replace(/^#/, "");
     const look = (input.look ?? "").trim();
-    const name = (input.name ?? "").trim();
-    const set = (input.setName ?? "").trim();
+    // A number typed in front of the name (or of the set's name, when that is
+    // the title) moves to the number field, or must agree with it (MHH-079).
+    const named = reconcileTitleNumber((input.name ?? "").trim() || (input.setName ?? "").trim(), input.modelNumber);
+    if (!named.ok) return { success: false, error: titleNumberProblem(named.inTitle, named.inBox) };
+    const model = named.model;
+    const name = (input.name ?? "").trim() ? named.title : "";
+    const set = name ? (input.setName ?? "").trim() : named.title;
     if (!model && !look) return { success: false, error: "Give at least a model number or what it looks like." };
     const title = name || set || stripGeneration(m.title);
     // "1995-1997" files both years; parseInt kept only the first (MHH-077).

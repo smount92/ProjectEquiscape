@@ -4,7 +4,8 @@ import { useEffect, useRef, useState, useTransition, type KeyboardEvent } from "
 import { useRouter } from "next/navigation";
 import { createSuggestion } from "@/app/actions/catalog-suggestions";
 import { pickMold, type MoldChoice } from "@/app/actions/linker";
-import { releaseYearFields, splitNumberFromTitle } from "@/lib/linker/model";
+import { releaseYearFields } from "@/lib/linker/model";
+import { reconcileTitleNumber, titleNumberProblem } from "@/lib/catalog/titleNumber";
 import { ARTIST_ATTRIBUTED_CATEGORIES, CANONICAL_SCALES, KNOWN_MANUFACTURERS, RUN_TYPES } from "@/lib/catalog/taxonomy";
 import { MATERIAL_OPTIONS } from "@/lib/catalog/editableFields";
 import { GENDER_GROUPS } from "@/lib/config/genders";
@@ -159,8 +160,16 @@ export default function SuggestNewEntryForm({
         { id: string; title: string; maker: string | null; item_type: string }[] | null
     >(null);
 
-    const handleSubmit = (confirmDuplicates = false) => {
-        if (!title.trim()) {
+    // A title that starts with a different number from the Model number box:
+    // the member says which is right before anything is sent (MHH-079).
+    const [numberConflict, setNumberConflict] = useState<{ inTitle: string; inBox: string; title: string } | null>(
+        null,
+    );
+
+    const handleSubmit = (confirmDuplicates = false, chosen?: { title: string; model: string }) => {
+        const titleNow = chosen?.title ?? title;
+        const modelNow = chosen?.model ?? modelNumber;
+        if (!titleNow.trim()) {
             setError("Title is required.");
             return;
         }
@@ -186,10 +195,20 @@ export default function SuggestNewEntryForm({
         const isMold = itemType === "plastic_mold";
         const effectiveMaker = isArtistPiece ? artistName.trim() : maker === "Other" ? customMaker.trim() : maker;
 
-        // A number typed at the front of the title moves to its own field.
-        const typed = splitNumberFromTitle(title);
-        const finalTitle = typed.model && !modelNumber.trim() ? typed.title : title.trim();
-        const finalModel = (modelNumber.trim() || typed.model || "").replace(/^#/, "");
+        // A number typed at the front of the title: off the title when the box
+        // holds it, into the box when it is empty, a question when they differ.
+        // Molds and artist pieces have no number field, so their titles stay as typed.
+        const hasNumberField = !isArtistPiece && !isMold;
+        const numbered = hasNumberField
+            ? reconcileTitleNumber(titleNow, modelNow)
+            : ({ ok: true, title: titleNow.trim(), model: "" } as const);
+        if (!numbered.ok) {
+            setNumberConflict({ inTitle: numbered.inTitle, inBox: numbered.inBox, title: numbered.title });
+            return;
+        }
+        setNumberConflict(null);
+        const finalTitle = numbered.title;
+        const finalModel = numbered.model;
 
         startTransition(async () => {
             setError(null);
@@ -293,9 +312,7 @@ export default function SuggestNewEntryForm({
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder={
-                        itemType === "plastic_mold"
-                            ? "e.g. Family Arabian Stallion"
-                            : "e.g. Breyer #712 — Misty of Chincoteague"
+                        itemType === "plastic_mold" ? "e.g. Family Arabian Stallion" : "e.g. Misty of Chincoteague"
                     }
                     maxLength={200}
                 />
@@ -728,6 +745,39 @@ export default function SuggestNewEntryForm({
                 <p className="mt-2 flex items-center gap-2 rounded-md border border-destructive/30 bg-destructive/10 px-4 py-2 text-sm text-destructive">
                     {error}
                 </p>
+            )}
+
+            {numberConflict && (
+                <div
+                    className="mb-4 rounded-lg border border-input bg-muted/50 p-4"
+                    role="alert"
+                    data-testid="new-entry-number-conflict"
+                >
+                    <p className="m-0 mb-1 text-sm font-semibold">
+                        {titleNumberProblem(numberConflict.inTitle, numberConflict.inBox)}
+                    </p>
+                    <p className="m-0 mb-3 text-xs text-muted-foreground">
+                        The number goes in its own box; the name keeps just “{numberConflict.title}”.
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                        {[numberConflict.inTitle, numberConflict.inBox].map((n) => (
+                            <Button
+                                key={n}
+                                variant="outline"
+                                size="sm"
+                                disabled={isPending}
+                                onClick={() => {
+                                    const chosen = { title: numberConflict.title, model: n };
+                                    setTitle(chosen.title);
+                                    setModelNumber(chosen.model);
+                                    handleSubmit(duplicates !== null, chosen);
+                                }}
+                            >
+                                It&apos;s #{n}
+                            </Button>
+                        ))}
+                    </div>
+                </div>
             )}
 
             {/* Actions */}

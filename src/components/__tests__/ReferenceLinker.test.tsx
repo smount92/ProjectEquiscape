@@ -236,6 +236,26 @@ describe("ReferenceLinker", () => {
         expect((within(form).getByPlaceholderText("e.g. 1976 or 1995-1997") as HTMLInputElement).value).toBe("1996");
     });
 
+    it("asks which number is right when the name and the number box disagree (MHH-079)", async () => {
+        linker.fileReleaseUnderMold.mockResolvedValue({ success: true, autoApproved: false });
+        render(<ReferenceLinker selectedCatalogId={null} onCatalogSelect={vi.fn()} />);
+        fireEvent.change(screen.getByLabelText("Find the model"), { target: { value: "Silky Sullivan" } });
+        const mold = await screen.findByTestId("linker-mold", {}, { timeout: 3000 });
+        fireEvent.click(within(mold).getByTestId("linker-add-open"));
+        const form = within(mold).getByTestId("linker-add");
+        fireEvent.change(within(form).getByPlaceholderText("5022"), { target: { value: "5177" } });
+        fireEvent.change(within(form).getByPlaceholderText("Andrew"), { target: { value: "#5178 Andrew" } });
+        fireEvent.click(within(form).getByText("Add it under this mold"));
+        const ask = await within(form).findByTestId("linker-number-conflict");
+        expect(linker.fileReleaseUnderMold).not.toHaveBeenCalled();
+        fireEvent.click(within(ask).getByRole("button", { name: "It's #5178" }));
+        await waitFor(() =>
+            expect(linker.fileReleaseUnderMold).toHaveBeenCalledWith(
+                expect.objectContaining({ moldId: "sm", name: "Andrew", modelNumber: "5178" }),
+            ),
+        );
+    });
+
     it("searches a model number and lands on the release", async () => {
         linker.searchLinker.mockResolvedValue({
             term: "5022",

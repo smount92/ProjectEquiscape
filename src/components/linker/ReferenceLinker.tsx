@@ -33,6 +33,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import SuggestNewEntryForm from "@/components/SuggestNewEntryForm";
 import { useLocalPref } from "@/lib/linker/prefs";
+import { reconcileTitleNumber, titleNumberProblem } from "@/lib/catalog/titleNumber";
 
 const SCALE_KEY = "mhh:linker-scale";
 const SHOW_FIRST = 4;
@@ -336,6 +337,30 @@ function AddForm({
             />
         </label>
     );
+    // A number in front of the name that differs from the Model number box:
+    // asked before anything is filed (MHH-079).
+    const [conflict, setConflict] = useState<{ inTitle: string; inBox: string; title: string } | null>(null);
+    const send = (values: typeof v) => {
+        const typedName = values.name.trim() ? "name" : "setName";
+        const numbered = reconcileTitleNumber(values[typedName], values.modelNumber);
+        if (!numbered.ok) {
+            setConflict({ inTitle: numbered.inTitle, inBox: numbered.inBox, title: numbered.title });
+            return;
+        }
+        setConflict(null);
+        start(async () => {
+            setError(null);
+            const r = await fileReleaseUnderMold({ moldId: mold.id, ...values });
+            if (!r.success) setError(r.error);
+            else
+                onDone(
+                    r.autoApproved
+                        ? "Added to the Registry under this mold. Your horse is linked to the mold for now; pick the release once it appears."
+                        : "Filed under this mold for review. Your horse is linked to the mold for now.",
+                    mold.id,
+                );
+        });
+    };
     return (
         <form
             ref={formRef}
@@ -343,18 +368,7 @@ function AddForm({
             data-testid="linker-add"
             onSubmit={(e) => {
                 e.preventDefault();
-                start(async () => {
-                    setError(null);
-                    const r = await fileReleaseUnderMold({ moldId: mold.id, ...v });
-                    if (!r.success) setError(r.error);
-                    else
-                        onDone(
-                            r.autoApproved
-                                ? "Added to the Registry under this mold. Your horse is linked to the mold for now; pick the release once it appears."
-                                : "Filed under this mold for review. Your horse is linked to the mold for now.",
-                            mold.id,
-                        );
-                });
+                send(v);
             }}
         >
             <div className="col-span-full text-xs text-muted-foreground">
@@ -369,6 +383,32 @@ function AddForm({
             {field("yearFrom", "Years", "e.g. 1976 or 1995-1997")}
             {field("name", "Name, if it had one", "Andrew")}
             {field("setName", "Came in a set?", "leave blank if sold alone")}
+            {conflict && (
+                <div className="col-span-full rounded-md border border-input bg-card px-3 py-2" role="alert">
+                    <p className="m-0 mb-2 text-sm font-semibold text-foreground">
+                        {titleNumberProblem(conflict.inTitle, conflict.inBox)}
+                    </p>
+                    <div className="flex flex-wrap gap-2" data-testid="linker-number-conflict">
+                        {[conflict.inTitle, conflict.inBox].map((n) => (
+                            <Button
+                                key={n}
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                disabled={pending}
+                                onClick={() => {
+                                    const key = v.name.trim() ? "name" : "setName";
+                                    const next = { ...v, [key]: conflict.title, modelNumber: n };
+                                    setV(next);
+                                    send(next);
+                                }}
+                            >
+                                It&apos;s #{n}
+                            </Button>
+                        ))}
+                    </div>
+                </div>
+            )}
             <div className="col-span-full flex flex-wrap items-center gap-2">
                 <Button type="submit" size="sm" disabled={pending}>
                     {pending ? "Filing…" : "Add it under this mold"}
