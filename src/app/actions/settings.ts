@@ -3,6 +3,8 @@
 import { logger } from "@/lib/logger";
 
 import { requireAuth } from "@/lib/auth";
+import { safeError } from "@/lib/actions/result";
+import { after } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
@@ -510,11 +512,34 @@ export async function deleteAccount(): Promise<{ success: boolean; error?: strin
 
     // Call the soft delete RPC
     const adminClient = getAdminClient();
+    // The alias, read before the soft delete scrubs it, for the owner's bell.
+    const { data: before } = await adminClient.from("users").select("alias_name").eq("id", user.id).maybeSingle();
     const { error: rpcError } = await adminClient.rpc("soft_delete_account", {
         target_uid: user.id,
     });
 
-    if (rpcError) return { success: false, error: rpcError.message };
+    if (rpcError)
+        return safeError("DeleteAccount", rpcError, "Your account couldn't be deleted just now. Please try again.");
+
+    // Tell the owner (gap G9: deletions were invisible). Off the response path.
+    const alias = (before as { alias_name: string | null } | null)?.alias_name ?? null;
+    after(async () => {
+        try {
+            const { adminNotificationTargets } = await import("@/lib/notifications/adminTargets");
+            const { createNotification } = await import("@/lib/notifications/createNotification");
+            for (const id of await adminNotificationTargets(adminClient)) {
+                if (id === user.id) continue;
+                await createNotification({
+                    userId: id,
+                    type: "system",
+                    actorId: null,
+                    content: `👋 ${alias ? `@${alias}` : "A member"} deleted their account.`,
+                });
+            }
+        } catch (err) {
+            logger.warn("DeleteAccount", "Owner notice failed", err);
+        }
+    });
 
     // Disable the auth account (prevents login)
     const { error: authError } = await adminClient.auth.admin.updateUserById(

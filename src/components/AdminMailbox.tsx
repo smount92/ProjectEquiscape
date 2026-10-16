@@ -8,6 +8,8 @@ import MarkReadButton from "@/components/MarkReadButton";
 import { deleteContactMessage } from "@/app/actions/admin";
 import { listMailbox, setMailboxStatus, type MailboxFilter, type MailboxMessage } from "@/app/actions/admin-mailbox";
 import { contactCategoryOwnerLabel } from "@/lib/contact/categories";
+import CopyAsTicketButton from "@/components/admin/CopyAsTicketButton";
+import { labelForContactCategory, sourceDate } from "@/lib/admin/ticketDraft";
 
 const FILTERS: { key: MailboxFilter; label: string }[] = [
     { key: "open", label: "Open" },
@@ -235,6 +237,15 @@ export default function AdminMailbox() {
                         <Button type="button" variant="outline" onClick={() => remove(m)} disabled={busy === m.id}>
                             Delete
                         </Button>
+                        <CopyAsTicketButton
+                            draft={{
+                                title: m.subject || m.message.slice(0, 80),
+                                type: m.category === "idea" ? "feature" : "bug",
+                                labels: [labelForContactCategory(m.category), "member-reported"],
+                                why: m.message,
+                                source: `Admin › Mailbox, ${m.sender ? `@${m.sender.alias}` : "a visitor"}, ${sourceDate(m.createdAt)}${m.errorRef ? `, error ${m.errorRef}` : ""}`,
+                            }}
+                        />
                     </div>
                 </article>
             ))}

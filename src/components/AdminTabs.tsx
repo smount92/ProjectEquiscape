@@ -7,6 +7,8 @@ import FeatureHorseForm from "@/components/FeatureHorseForm";
 import AdminShowManager from "@/components/AdminShowManager";
 import AdminSuggestionsPanel from "@/components/AdminSuggestionsPanel";
 import ReportActions from "@/components/ReportActions";
+import CopyAsTicketButton from "@/components/admin/CopyAsTicketButton";
+import { sourceDate } from "@/lib/admin/ticketDraft";
 import SuggestionAdminActions from "@/components/SuggestionAdminActions";
 import ExternalShowAdminActions from "@/components/calendar/ExternalShowAdminActions";
 import AdminAnnouncementsCard from "@/components/AdminAnnouncementsCard";
@@ -450,6 +452,28 @@ export function ReportsTab({ reports, onOpenMember }: { reports: Report[]; onOpe
                                 <span className="font-semibold">Reporter says:</span> {report.details}
                             </p>
                         )}
+                        {/* A report that shows a site problem becomes a ticket. Never the
+                            words of a private message, never who reported it. */}
+                        <div className="mt-2">
+                            <CopyAsTicketButton
+                                draft={{
+                                    title: `Look into a reported ${kind.toLowerCase()}: ${report.reason}`,
+                                    type: "bug",
+                                    labels: ["moderation", "member-reported"],
+                                    why: [
+                                        report.reason,
+                                        report.details,
+                                        target && report.targetType !== "message"
+                                            ? `Reported: ${target.summary}`
+                                            : null,
+                                    ]
+                                        .filter(Boolean)
+                                        .join(". "),
+                                    source: `Admin › Reports, report ${report.id.slice(0, 8)}, ${sourceDate(report.createdAt)}`,
+                                    notes: target?.href ?? undefined,
+                                }}
+                            />
+                        </div>
                         <ReportActions
                             reportId={report.id}
                             takeDownLabel={target?.takeDownLabel ?? null}
@@ -595,6 +619,22 @@ function CatalogQueue({ suggestions }: { suggestions: CatalogSuggestionAdmin[] }
                             )}
                         </p>
                         <SuggestionAdminActions suggestionId={s.id} />
+                        {/* A suggestion that shows a Registry problem (not just a fact
+                            to fix) becomes a ticket. */}
+                        <div className="mt-2">
+                            <CopyAsTicketButton
+                                draft={{
+                                    title: changeText
+                                        ? `Registry: ${changeText}`
+                                        : `Registry: ${SUGGESTION_TYPE_LABELS[s.suggestion_type] ?? s.suggestion_type}`,
+                                    type: "bug",
+                                    labels: ["registry", "member-reported"],
+                                    why: s.reason,
+                                    source: `Registry suggestion /catalog/suggestions/${s.id}, @${s.author_alias}, ${sourceDate(s.created_at)}`,
+                                    notes: s.catalog_item_id ? `/catalog/${s.catalog_item_id}` : undefined,
+                                }}
+                            />
+                        </div>
                     </div>
                 );
             })}

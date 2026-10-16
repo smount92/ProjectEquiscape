@@ -8,6 +8,8 @@ import MentionTextarea from "@/components/feed/MentionTextarea";
 import { PostHeader, ReactionBar, UserAvatar } from "@/components/social";
 import { PinPostButton } from "@/components/groups/PinPostButton";
 import { ThreadStatusBadge, ThreadStatusControl } from "@/components/groups/ThreadStatusControl";
+import CopyAsTicketButton from "@/components/admin/CopyAsTicketButton";
+import { sourceDate } from "@/lib/admin/ticketDraft";
 import { togglePostLike, updatePost } from "@/app/actions/posts";
 import { getThread, replyToThread } from "@/app/actions/groups-forum";
 import type { ThreadPost, ThreadViewData } from "@/lib/groups/types";
@@ -29,6 +31,8 @@ interface ThreadViewProps {
     currentUserAvatar: string | null;
     /** owner/admin/moderator — may pin/unpin */
     canPin: boolean;
+    /** The site owner: may copy the thread as a ticket (MHH-028). */
+    isSiteAdmin?: boolean;
 }
 
 function ThreadPostBlock({
@@ -147,6 +151,7 @@ export default function ThreadView({
     currentUserAlias,
     currentUserAvatar,
     canPin,
+    isSiteAdmin = false,
 }: ThreadViewProps) {
     const [replies, setReplies] = useState<ThreadPost[]>(thread.replies);
     const [hasMore, setHasMore] = useState(thread.hasMoreReplies);
@@ -208,10 +213,21 @@ export default function ThreadView({
                 >
                     ← Back to the notice board
                 </BackLink>
-                {canPin && (
+                {(canPin || isSiteAdmin) && (
                     <div className="flex flex-wrap items-center gap-3">
-                        <ThreadStatusControl postId={thread.id} status={thread.status ?? null} />
-                        <PinPostButton postId={thread.id} isPinned={thread.isPinned} />
+                        {canPin && <ThreadStatusControl postId={thread.id} status={thread.status ?? null} />}
+                        {canPin && <PinPostButton postId={thread.id} isPinned={thread.isPinned} />}
+                        {isSiteAdmin && (
+                            <CopyAsTicketButton
+                                draft={{
+                                    title: thread.displayTitle,
+                                    type: "feature",
+                                    labels: ["member-reported"],
+                                    why: thread.op.content,
+                                    source: `Barn thread /community/groups/${groupSlug}/thread/${thread.id}, @${thread.op.authorAlias}, ${sourceDate(thread.op.createdAt)}`,
+                                }}
+                            />
+                        )}
                     </div>
                 )}
             </div>

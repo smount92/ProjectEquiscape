@@ -20,21 +20,12 @@ a person can follow them too.
 
 ## Gaps in how reports reach us
 
-Found 2026-10-14 by tracing every report path through the code. Each one is
-a place where a member's report can go unseen, or the member never hears
-back. In priority order:
+Found 2026-10-14 by tracing every report path through the code: twelve
+places where a member's report could go unseen, or the member never heard
+back (G1-G12). Release 2 closed all twelve. If a new one turns up, add a row:
 
 | # | Gap | Effect | Suggested fix |
 |---|---|---|---|
-| G2 | Deal Room disputes never reach the admin. | A deal can go bad with no one at the site knowing. | Bell the admin on dispute, and count open disputes in the admin pulse. |
-| G3 | No admin alert for new contact messages, content reports or external-show submissions. | Messages wait until someone happens to open the tab. | Bell the admin on each, as Registry suggestions already do. |
-| G4 | Wrong-model price flags have no admin screen. | A false flag hides a model's price forever. | A small card in Admin › Catalog listing active flags with Resolve. |
-| G5 | Stripe refunds and chargebacks are not handled; failed payments don't tell the member. | A refunded member keeps their tier; a failing card goes unnoticed. | Handle `charge.refunded`, `charge.dispute.created`, and notify on `invoice.payment_failed`. |
-| G8 | Show entrants and judges have no way to dispute a result, bar or scratch. | Disputes happen in DMs or nowhere. | "Message the host" on the entry, with the show attached. |
-| G9 | The contact form has no category, no status, no account link and no error reference; Admin shows only the last 100. Account deletions are invisible to the admin. | Hard to tell what is open; the error reference must be typed. | Category + Open/Resolved status; prefill the error reference and the signed-in account. |
-| G10 | Nothing can be turned into a ticket in one click from a contact message, report, suggestion or barn thread. | Ideas live in two places. | "Add to Roadmap" on contact messages, reports, suggestions and barn threads. |
-| G11 | No cron heartbeat; no Sentry push alerts. | A cron that stops is invisible. | Record each cron's last success; show it in Admin › Ops, red when late. |
-| G12 | The admin catalog queue loads only `pending`, not `under_review`; the review notification has no link back. | Suggestions can drop out of sight. | Load both; add the link. |
 
 When a gap is closed, delete its row and update the channel table in
 `member-report`.

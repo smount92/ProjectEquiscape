@@ -48,12 +48,20 @@ to `main`, one rebuild. How releases work: `docs/guides/releasing.md`.
   Admin › Members. Notification links now open the right admin tab, even
   when you are already on the console.
 
-- Admin › Catalog › Hidden eBay prices: prices members reported as the wrong
-  model, with "Show it again" (the member is told).
+- Admin › Catalog › Hidden eBay prices: one line per model members reported
+  as the wrong match, listing every report on it. "Show it again" clears
+  them all and tells each member who reported it; a member can report the
+  same price again later if it goes wrong again.
 - Admin › Ops › Scheduled jobs: each job shows its last success and whether
   it is on time, late or failing.
 - The review queue includes suggestions under review, and the Registry
   history records who approved each change.
+- **Copy as ticket** on every Mailbox message, report card and Registry
+  suggestion, and on barn threads when you are signed in: it copies the
+  `backlog task create` command for it (title, labels, the member's words,
+  where it came from), with emails and phone numbers removed, ready for a
+  terminal or for Claude.
+- A bell when a member deletes their account.
 
 ## Go-live checklist (owner)
 
@@ -91,11 +99,11 @@ What members will notice:
   their Market listing), show entries and Help ID requests and
   suggestions. Never on your own things. It opens a short form: pick a
   reason, add a note if you like.
-- Whoever reported something hears how it ended, naming what they
-  reported (a horse's name, or the start of a post or message): "we
-  removed it", "we've reviewed your report and closed it" or "it doesn't
-  break our Community Conduct rules". Never who, or what happened to
-  anyone.
+- Whoever reported something hears how it ended: "Thank you for
+  reporting that post. We looked into it and removed it", "we've reviewed
+  your report and closed it" or "it doesn't break our Community Conduct
+  rules". It never repeats the reported words, names or titles (Q32), and
+  never says who, or what happened to anyone.
 - A member whose post, message, horse page or entry is taken down is told
   which one, citing our Community Conduct rules (Terms, section 6), with a
   link to the contact page (report category). Nothing is deleted: posts
@@ -151,3 +159,14 @@ What the owner will notice:
   or `moderation_scratched_at`.
 - **Wording you write is now read by members**: the suspension reason, and
   the note on an approved or rejected calendar show. The fields say so.
+
+## Not in this release
+
+- **The new linker as the only Reference step (MHH-032)** is built and
+  waiting on its own branch, `linker-default`. Ruling Q7 lets it ship only
+  after two weeks with no new linker bug, counted from 2026-10-15, so the
+  earliest is 2026-10-29. It goes out with the next release after that date.
+- Stripe subscription events still don't know about PayPal or prepaid
+  access (MHH-072), and supporter-only members have no Manage billing
+  (MHH-073). Both were there before this release; this release stopped
+  refunds from making the first one worse.
