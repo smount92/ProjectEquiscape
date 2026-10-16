@@ -22,6 +22,7 @@ import AdminInsightsTab from "@/components/AdminInsightsTab";
 import AdminPulseStrip from "@/components/AdminPulseStrip";
 import type { PendingExternalShow } from "@/app/actions/external-shows";
 import type { AdminPulse, EnvFlagStatus, LegacySuggestionRow, MigrationStatusRow } from "@/app/actions/admin";
+import AdminHiddenPricesCard from "@/components/AdminHiddenPricesCard";
 import AdminMailbox from "@/components/AdminMailbox";
 
 interface Show {
@@ -373,6 +374,10 @@ function CatalogTab({ suggestions }: { suggestions: CatalogSuggestionAdmin[] }) 
             <div id="admin-catalog-merge">
                 <h3 className="mt-0 mb-3 text-base font-bold">🔗 Merge duplicate entries</h3>
                 <AdminCatalogMergeCard key={handoffCount} prefill={mergePrefill} />
+            </div>
+            <div>
+                <h3 className="mt-0 mb-3 text-base font-bold">💲 Hidden eBay prices</h3>
+                <AdminHiddenPricesCard />
             </div>
         </div>
     );

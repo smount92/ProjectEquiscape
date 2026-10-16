@@ -78,7 +78,7 @@ export async function mergeCatalogItemsCore(
     admin: MergeClient,
     dup: MergeRef,
     canonical: MergeRef,
-    actor: { userId: string; alias: string },
+    actor: { userId: string; alias: string; approvedBy?: string },
     onLogError?: (error: { message: string }) => void,
 ): Promise<MergeResult> {
     if (dup.id === canonical.id) return { success: false, error: "Those are the same entry." };
@@ -114,7 +114,8 @@ export async function mergeCatalogItemsCore(
         change_summary: `Merged duplicate "${dup.title}" (${dup.maker ?? "unknown"}) into "${canonical.title}" — references repointed.`,
         contributed_by: actor.userId,
         contributor_alias: actor.alias,
-        approved_by: actor.userId,
+        // Who decided: the approver when it came from a member's report.
+        approved_by: actor.approvedBy ?? actor.userId,
     });
     if (logError) onLogError?.(logError);
 

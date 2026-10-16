@@ -1083,7 +1083,7 @@ export async function getAdminPulse(): Promise<
         head("posts").gte("created_at", since7d) as unknown as Promise<CountResult>,
         head("user_horses").eq("trade_status", "For Sale") as unknown as Promise<CountResult>,
         head("user_reports").eq("status", "open") as unknown as Promise<CountResult>,
-        head("catalog_suggestions").eq("status", "pending") as unknown as Promise<CountResult>,
+        head("catalog_suggestions").in("status", ["pending", "under_review"]) as unknown as Promise<CountResult>,
         head("contact_messages").eq("is_read", false) as unknown as Promise<CountResult>,
         head("database_suggestions").eq("status", "pending") as unknown as Promise<CountResult>,
         head("external_shows").eq("status", "pending") as unknown as Promise<CountResult>,

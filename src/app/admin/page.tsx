@@ -77,7 +77,8 @@ export default async function AdminPage() {
             .select(
                 "id, user_id, catalog_item_id, suggestion_type, field_changes, reason, status, upvotes, downvotes, created_at",
             )
-            .eq("status", "pending")
+            // A suggestion someone has started reviewing still waits (MHH-030).
+            .in("status", ["pending", "under_review"])
             .order("created_at", { ascending: true })
             .limit(50),
     ]);

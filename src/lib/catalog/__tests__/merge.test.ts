@@ -105,6 +105,12 @@ describe("mergeCatalogItemsCore", () => {
         expect(c.wishlistDeletes).toEqual([{ catalogId: DUP.id, userIds: ["both"] }]);
     });
 
+    it("records who approved the merge, not only who reported it (MHH-070)", async () => {
+        const c = client();
+        await mergeCatalogItemsCore(c.admin, DUP, KEEP, { userId: "reporter", alias: "Pat", approvedBy: "owner" });
+        expect(c.inserted[0]).toMatchObject({ contributed_by: "reporter", approved_by: "owner" });
+    });
+
     it("stops before deleting when a repoint fails", async () => {
         const c = client({ failTable: "user_wishlists" });
         const result = await mergeCatalogItemsCore(c.admin, DUP, KEEP, { userId: "u", alias: "Admin" });

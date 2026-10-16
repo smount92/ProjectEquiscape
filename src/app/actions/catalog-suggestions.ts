@@ -1040,7 +1040,7 @@ export async function reviewSuggestion(decision: ReviewDecision) {
                 revalidateTag(REFERENCE_PAGES_CACHE_TAG, "max");
             }
         } else {
-            const applied = await applyApprovedSuggestion(decision.suggestionId, s.user_id, contributorAlias);
+            const applied = await applyApprovedSuggestion(decision.suggestionId, s.user_id, contributorAlias, user.id);
             if (!applied.ok) {
                 revalidatePath("/admin");
                 return {
@@ -1064,6 +1064,7 @@ export async function reviewSuggestion(decision: ReviewDecision) {
                 type: "system",
                 actorId: adminUserId,
                 content: `${emoji} Your catalog suggestion was ${verb}.${decision.adminNotes ? ` Note: "${decision.adminNotes}"` : ""}`,
+                linkUrl: `/catalog/suggestions/${decision.suggestionId}`,
             });
         } catch {
             /* non-blocking */
@@ -1106,6 +1107,8 @@ async function applyApprovedSuggestion(
     suggestionId: string,
     userId: string,
     alias: string,
+    /** Who approved it: the reviewer, or the contributor when their rank auto-applied it (MHH-070). */
+    approverId: string = userId,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
     const admin = getAdminClient();
 
@@ -1276,7 +1279,11 @@ async function applyApprovedSuggestion(
         if (!target || !dup || !keep) {
             changeSummary = "🔁 Duplicate report approved, but one entry was already gone — nothing merged";
         } else {
-            const merged = await mergeCatalogItemsCore(mergeClient, dup, keep, { userId, alias });
+            const merged = await mergeCatalogItemsCore(mergeClient, dup, keep, {
+                userId,
+                alias,
+                approvedBy: approverId,
+            });
             if (!merged.success) {
                 return unapply(admin, suggestionId, { message: merged.error }, `the merge failed (${merged.error})`);
             } else {
@@ -1294,7 +1301,7 @@ async function applyApprovedSuggestion(
         change_summary: changeSummary,
         contributed_by: userId,
         contributor_alias: alias,
-        approved_by: userId,
+        approved_by: approverId,
     });
 
     // Increment user's approved count atomically
