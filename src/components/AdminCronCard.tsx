@@ -24,12 +24,16 @@ export default function AdminCronCard() {
 
     useEffect(() => {
         let live = true;
-        getCronHealth().then((r) => {
-            if (!live) return;
-            if (!r.success) return setError(r.error);
-            setJobs(r.jobs);
-            setInstalled(r.installed);
-        });
+        getCronHealth()
+            .then((r) => {
+                if (!live) return;
+                if (!r.success) return setError(r.error);
+                setJobs(r.jobs);
+                setInstalled(r.installed);
+            })
+            .catch(() => {
+                if (live) setError("The job list couldn't load just now. Please refresh to try again.");
+            });
         return () => {
             live = false;
         };
@@ -47,8 +51,22 @@ export default function AdminCronCard() {
             {!installed && (
                 <p className="text-xs text-muted-foreground">Heartbeats start once migration 237 is pasted.</p>
             )}
-            {error && <p className="text-sm text-destructive">{error}</p>}
-            {jobs && (
+            {error && (
+                <p role="alert" className="text-sm text-destructive">
+                    {error}
+                </p>
+            )}
+            {!error && jobs === null && (
+                <p role="status" className="text-sm text-muted-foreground">
+                    Loading…
+                </p>
+            )}
+            {jobs?.length === 0 && (
+                <p className="rounded-lg border border-input bg-card px-4 py-6 text-center text-sm text-muted-foreground">
+                    No scheduled jobs are registered (CRON_JOBS in lib/ops/heartbeat.ts).
+                </p>
+            )}
+            {jobs && jobs.length > 0 && (
                 <div className="overflow-x-auto rounded-lg border border-input bg-card">
                     <table className="w-full border-collapse text-sm">
                         <thead>
