@@ -2,28 +2,34 @@
 
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { requireAuth, requireAdmin, AuthError } from "@/lib/auth";
+import { requireAuth, requireAdmin, AuthError, SUSPENDED_AUTH_ERROR } from "@/lib/auth";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 import { checkRateLimit } from "@/lib/utils/rateLimit";
 import { logger } from "@/lib/logger";
-import { NOT_LOGGED_IN, fail, safeError, type ActionResult } from "@/lib/actions/result";
+import { ACCOUNT_SUSPENDED, NOT_LOGGED_IN, fail, safeError, type ActionResult } from "@/lib/actions/result";
 import {
     ADMIN_REPORTS_URL,
+    REPORT_CONTACT_URL,
     REPORT_DETAILS_MAX,
     REPORT_REASONS,
     REPORT_TAKE_DOWN_LABEL,
-    REPORT_TAKE_DOWN_NOTICE,
     REPORT_TARGET_NOUN,
     REPORT_TARGET_TYPES,
     REPORT_TARGET_TYPES_BEFORE_235,
     TAKE_DOWN_APPEAL,
     isReportTargetType,
     reportOutcomeNotice,
+    takeDownNotice,
     withArticle,
     type ReportTargetType,
 } from "@/lib/moderation/reports";
-import { describeReportTargets, takeDownReportedContent, targetKey } from "@/lib/moderation/reportTargets";
+import {
+    describeReportTargets,
+    takeDownReportedContent,
+    targetKey,
+    type WithdrawnOffer,
+} from "@/lib/moderation/reportTargets";
 
 // ============================================================
 // COMMUNITY MODERATION — Server Actions
@@ -63,7 +69,9 @@ export async function submitReport(data: {
     try {
         auth = await requireAuth();
     } catch (err) {
-        if (err instanceof AuthError) return fail(NOT_LOGGED_IN);
+        if (err instanceof AuthError) {
+            return fail(err.message === SUSPENDED_AUTH_ERROR ? ACCOUNT_SUSPENDED : NOT_LOGGED_IN);
+        }
         throw err;
     }
     const { supabase, user } = auth;
@@ -198,8 +206,14 @@ const resolveReportSchema = z.object({
  * leaves the queue, so every outcome records a note and a status
  * ('dismissed' or 'actioned').
  *
- * A take-down closes every open report on the same content, since they
- * were all about the thing that is now gone.
+ * The report is claimed first (closed only if it is still open), so two
+ * admins, or two clicks, can't both act on it and send the notices twice.
+ * If the take-down then fails, the claim is undone and the report stays
+ * in the queue.
+ *
+ * A take-down, or a report dealt with another way, closes every open report
+ * on the same content, since they were all about the thing now dealt with.
+ * "Doesn't break the rules" closes just this one.
  */
 export async function resolveReport(input: z.input<typeof resolveReportSchema>): Promise<ActionResult> {
     let adminId: string;
@@ -224,45 +238,94 @@ export async function resolveReport(input: z.input<typeof resolveReportSchema>):
     if (readError) return safeError("Moderation", readError, "Could not load the report.");
     const r = report as { target_type: string; target_id: string; status: string } | null;
     if (!r) return fail("That report no longer exists.");
-    if (r.status !== "open") return fail("This report has already been dealt with.");
+    if (r.status !== "open") return fail(ALREADY_DEALT_WITH);
 
     const targetType = isReportTargetType(r.target_type) ? r.target_type : null;
-    let ownerId: string | null = null;
-    if (decision === "take_down") {
-        if (!targetType) return fail("This kind of report can't be taken down from here.");
-        const done = await takeDownReportedContent(db, targetType, r.target_id, adminId);
-        if (!done.success) return done;
-        ownerId = done.ownerId;
-    }
+    if (decision === "take_down" && !targetType) return fail("This kind of report can't be taken down from here.");
 
-    const status = decision === "dismiss" ? "dismissed" : "actioned";
-    const recorded =
-        note ??
-        (decision === "dismiss"
-            ? "Dismissed: it doesn't break the rules."
-            : `Taken down: ${targetType ? REPORT_TAKE_DOWN_LABEL[targetType] : "content"}.`);
+    // What the notices call it, read before a take-down changes it.
+    const name = targetType
+        ? ((await describeReportTargets(db, [{ targetType, targetId: r.target_id }])).get(
+              targetKey(targetType, r.target_id),
+          )?.name ?? null)
+        : null;
 
-    let close = db
+    const closing = {
+        status: decision === "dismiss" ? "dismissed" : "actioned",
+        admin_notes:
+            note ??
+            (decision === "dismiss"
+                ? "Dismissed: it doesn't break the rules."
+                : `Taken down: ${targetType ? REPORT_TAKE_DOWN_LABEL[targetType] : "content"}.`),
+        resolved_by: adminId,
+        resolved_at: new Date().toISOString(),
+    };
+
+    // 1. Claim it: only an open report can be closed, and only once.
+    const { data: claimed, error: claimError } = await db
         .from("user_reports")
-        .update({ status, admin_notes: recorded, resolved_by: adminId, resolved_at: new Date().toISOString() })
-        .eq("status", "open");
-    close =
-        decision === "take_down"
-            ? close.eq("target_type", r.target_type).eq("target_id", r.target_id)
-            : close.eq("id", reportId);
-    const { data: closed, error: closeError } = await close.select("id, reporter_id");
-    if (closeError) return safeError("Moderation", closeError, "Could not close the report.");
+        .update(closing)
+        .eq("id", reportId)
+        .eq("status", "open")
+        .select("id, reporter_id");
+    if (claimError) return safeError("Moderation", claimError, "Could not close the report.");
+    if (((claimed ?? []) as unknown[]).length === 0) return fail(ALREADY_DEALT_WITH);
 
-    if (decision === "take_down" && ownerId && targetType) {
-        await tellTheOwner(ownerId, targetType);
+    // 2. Act on it.
+    let ownerId: string | null = null;
+    let withdrawnOffers: WithdrawnOffer[] = [];
+    if (decision === "take_down" && targetType) {
+        const done = await takeDownReportedContent(db, targetType, r.target_id, adminId);
+        if (!done.success) {
+            await reopen(db, reportId, adminId);
+            return done;
+        }
+        ownerId = done.ownerId;
+        withdrawnOffers = done.withdrawnOffers;
     }
+
+    // 3. Close the other open reports on the same thing.
+    let others: unknown[] = [];
+    if (decision !== "dismiss") {
+        const { data, error } = await db
+            .from("user_reports")
+            .update(closing)
+            .eq("status", "open")
+            .eq("target_type", r.target_type)
+            .eq("target_id", r.target_id)
+            .select("id, reporter_id");
+        if (error) logger.error("Moderation", "Closing the other reports on the same thing failed", error);
+        others = (data ?? []) as unknown[];
+    }
+
+    // 4. Tell the people involved.
+    if (decision === "take_down" && ownerId && targetType) {
+        await tellTheOwner(ownerId, targetType, name, withdrawnOffers.length);
+    }
+    if (withdrawnOffers.length > 0) await tellTheBuyers(withdrawnOffers, name);
     const reporters = [
-        ...new Set(((closed ?? []) as { reporter_id: string | null }[]).map((c) => c.reporter_id).filter(Boolean)),
+        ...new Set(
+            ([...((claimed ?? []) as unknown[]), ...others] as { reporter_id: string | null }[])
+                .map((c) => c.reporter_id)
+                .filter(Boolean),
+        ),
     ] as string[];
-    await tellTheReporters(reporters, reportOutcomeNotice(decision, targetType));
+    await tellTheReporters(reporters, reportOutcomeNotice(decision, targetType, name));
 
     revalidatePath("/admin");
     return { success: true };
+}
+
+const ALREADY_DEALT_WITH = "This report has already been dealt with.";
+
+/** Put a claimed report back in the queue when its take-down didn't happen. */
+async function reopen(db: SupabaseClient, reportId: string, adminId: string): Promise<void> {
+    const { error } = await db
+        .from("user_reports")
+        .update({ status: "open", admin_notes: null, resolved_by: null, resolved_at: null })
+        .eq("id", reportId)
+        .eq("resolved_by", adminId);
+    if (error) logger.error("Moderation", `Report ${reportId} could not be reopened after a failed take-down`, error);
 }
 
 /**
@@ -281,19 +344,51 @@ async function tellTheReporters(reporterIds: string[], content: string): Promise
     }
 }
 
-/** The member whose content came down hears it from us, with a way to reply. */
-async function tellTheOwner(ownerId: string, targetType: ReportTargetType): Promise<void> {
-    const notice = REPORT_TAKE_DOWN_NOTICE[targetType];
+/** The member whose content came down hears it from us, naming it, with a way to reply. */
+async function tellTheOwner(
+    ownerId: string,
+    targetType: ReportTargetType,
+    name: string | null,
+    withdrawnOffers: number,
+): Promise<void> {
+    const notice = takeDownNotice(targetType, name);
     if (!notice) return;
+    const offers =
+        withdrawnOffers > 0
+            ? ` The ${withdrawnOffers === 1 ? "open offer on it was" : `${withdrawnOffers} open offers on it were`} withdrawn.`
+            : "";
     try {
         const { createNotification } = await import("@/lib/notifications/createNotification");
         await createNotification({
             userId: ownerId,
             type: "moderation",
-            content: `${notice} ${TAKE_DOWN_APPEAL}`,
-            linkUrl: "/contact",
+            content: `${notice}${offers} ${TAKE_DOWN_APPEAL}`,
+            linkUrl: REPORT_CONTACT_URL,
         });
     } catch (err) {
         logger.error("Moderation", "Take-down notice failed (the take-down stands)", err);
+    }
+}
+
+/**
+ * A buyer whose open offer was withdrawn by a take-down hears it plainly,
+ * linking to the conversation. Nothing about why: that is between the
+ * seller and us.
+ */
+async function tellTheBuyers(offers: WithdrawnOffer[], horseName: string | null): Promise<void> {
+    try {
+        const { createNotification } = await import("@/lib/notifications/createNotification");
+        for (const o of offers) {
+            await createNotification({
+                userId: o.buyerId,
+                type: "offer",
+                content: `Your offer on ${horseName ?? "a horse"} was withdrawn because the horse is no longer for sale.`,
+                ...(o.conversationId
+                    ? { conversationId: o.conversationId, linkUrl: `/inbox/${o.conversationId}` }
+                    : {}),
+            });
+        }
+    } catch (err) {
+        logger.error("Moderation", "Withdrawn-offer notice failed (the offer is withdrawn)", err);
     }
 }

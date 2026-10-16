@@ -25,7 +25,23 @@ export interface FakeResult {
 
 export const OK: FakeResult = { data: null, error: null };
 
-const FILTERS = ["eq", "neq", "in", "is", "or", "order", "limit", "ilike", "not", "gte", "lte", "gt", "lt", "range"];
+const FILTERS = [
+    "eq",
+    "neq",
+    "in",
+    "is",
+    "or",
+    "order",
+    "limit",
+    "like",
+    "ilike",
+    "not",
+    "gte",
+    "lte",
+    "gt",
+    "lt",
+    "range",
+];
 
 export function fakeDb() {
     const queries: FakeQuery[] = [];
