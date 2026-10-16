@@ -24,6 +24,8 @@ export const CACHE_TAGS = {
     showResults: "show-results",
     /** Show Ring facets built from public horses. */
     showRing: "show-ring",
+    /** The Registry Desk's to-do lists, computed from the whole Registry. */
+    registryTodo: "registry-todo",
 } as const;
 
 export type CacheTag = (typeof CACHE_TAGS)[keyof typeof CACHE_TAGS];

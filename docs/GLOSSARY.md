@@ -40,6 +40,9 @@ changes meaning, change it here first.
 | **Curator** | A member whose rank lets their corrections apply without review. |
 | **Linker** | The Reference step of adding or editing a horse, where the member links their horse to a catalog row. There is the old picker and the new linker. |
 | **Blue Book** | The price guide (`/market/guide`). eBay prices are *asking* prices and are never called sold. |
+| **Registry Desk** (the Desk) | The Registry moderators' workspace, `/catalog/desk`: Queue, Mold view, To-do, Rules, History. Only moderators and the owner see it; it is not part of `/admin`. Guide: `docs/guides/registry-moderation.md`. |
+| **To-do (list)** | A work list on the Desk, found by scanning the whole Registry with the same checks as `registry_health.mjs` (`src/lib/registry/checks.ts`): no colour, model number in the title, filed under the wrong scale ... "I'm on it" claims a list or one row for a day; "Done" takes a row off until the next check. |
+| **Style rule** | A house-style rule for the Registry, written by the moderators (`registry_style_rules`): one proposes, and at 3 agreements (the owner's counts, the proposer's doesn't) it takes effect unless the owner vetoes. A rule can name a **suggested fix** (`src/lib/registry/fixes.ts`) that the Mold view then offers on every row it fits. |
 
 ## Stable and the horse's record
 

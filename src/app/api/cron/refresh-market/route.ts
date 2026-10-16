@@ -70,12 +70,25 @@ async function runJob(request: NextRequest) {
             logger.error("CronMarket", "refresh_mv_trusted_sellers failed", err);
         }
 
+        // The owner's daily Registry Desk digest: in the bell only, once a
+        // day (registry_digests holds the day), listing every removal and
+        // merge. Waits quietly until updates 242 and 244 are in.
+        let registryDigest = null;
+        try {
+            const { sendRegistryDigest } = await import("@/lib/registry/digest");
+            registryDigest = await sendRegistryDigest(admin);
+        } catch (err) {
+            Sentry.captureException(err, { tags: { domain: "cron" } });
+            logger.error("CronMarket", "sendRegistryDigest failed", err);
+        }
+
         return NextResponse.json({
             success: true,
             refreshedAt: new Date().toISOString(),
             gc: gcResult,
             badgesAwarded,
             trustedRefreshed,
+            registryDigest,
         });
     } catch (error) {
         Sentry.captureException(error, { tags: { domain: "cron" }, level: "fatal" });
