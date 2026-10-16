@@ -64,3 +64,6 @@ lint_results.txt
 # Catalog audit working files (regenerate with scripts/catalog-delta/audit_catalog.mjs)
 catalog_snapshot.json
 reality_mech.json
+
+# Agent worktrees (temporary copies of the repo)
+.claude/worktrees/
