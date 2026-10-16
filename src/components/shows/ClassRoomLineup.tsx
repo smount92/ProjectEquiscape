@@ -158,15 +158,14 @@ export default function ClassRoomLineup({
                             <span className="text-xs text-muted-foreground">Leg tag {entry.entryNumber ?? "—"}</span>
                         )}
                         {entry.isOwn && !isPlaced && <span className="text-xs text-muted-foreground">Your entry</span>}
-                        {authed && (
-                            <ReportButton
-                                targetType="show_entry"
-                                targetId={entry.id}
-                                isOwn={entry.isOwn}
-                                variant="icon"
-                                className="border-transparent"
-                            />
-                        )}
+                        <ReportButton
+                            targetType="show_entry"
+                            targetId={entry.id}
+                            isOwn={entry.isOwn}
+                            signedIn={authed}
+                            variant="icon"
+                            className="border-transparent"
+                        />
                     </span>
                 </div>
 

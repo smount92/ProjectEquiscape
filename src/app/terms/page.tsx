@@ -124,8 +124,8 @@ export default function TermsPage() {
                     </p>
                 </section>
 
-                {/* Community Conduct */}
-                <section className="mb-12">
+                {/* Community Conduct — linked as /terms#community-conduct from reports and take-down notices */}
+                <section id="community-conduct" className="mb-12 scroll-mt-24">
                     <h2>6. Community Conduct</h2>
                     <p>Model Horse Hub is a hobby community. You agree to:</p>
                     <ul className="mb-4 list-none p-0">

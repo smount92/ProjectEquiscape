@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
+    MODERATION_SCRATCHED_MESSAGE,
     validateEntry,
     type ClassFacts,
     type ExistingEntry,
@@ -416,6 +417,42 @@ describe("entryRules — the same photo under two stable records (online shows)"
                 existingEntries: samePhotoElsewhere,
             }),
         );
+        expect(r).toEqual({ ok: true });
+    });
+});
+
+describe("entryRules — an entry the site team scratched (235)", () => {
+    const scratchedByUs: ExistingEntry = {
+        classId: "class-qh",
+        horseId: "horse-1",
+        ownerId: "user-1",
+        status: "scratched",
+        divisionAxis: "halter",
+        moderationScratched: true,
+    };
+
+    it("refuses re-entering the same horse in the same class, in plain words", () => {
+        const r = validateEntry(input({ existingEntries: [scratchedByUs] }));
+        expect(r).toEqual({ ok: false, errors: [MODERATION_SCRATCHED_MESSAGE] });
+        expect(MODERATION_SCRATCHED_MESSAGE).toMatch(/scratched by the site team after a report/);
+    });
+
+    it("still refuses after the horse changes hands", () => {
+        const r = validateEntry(input({ existingEntries: [{ ...scratchedByUs, ownerId: "previous-owner" }] }));
+        expect(r.ok).toBe(false);
+    });
+
+    it("leaves the horse's other classes, and other horses, alone", () => {
+        expect(validateEntry(input({ existingEntries: [{ ...scratchedByUs, classId: "class-other" }] }))).toEqual({
+            ok: true,
+        });
+        expect(validateEntry(input({ existingEntries: [{ ...scratchedByUs, horseId: "horse-2" }] }))).toEqual({
+            ok: true,
+        });
+    });
+
+    it("lets a horse its owner scratched come back, as before", () => {
+        const r = validateEntry(input({ existingEntries: [{ ...scratchedByUs, moderationScratched: false }] }));
         expect(r).toEqual({ ok: true });
     });
 });

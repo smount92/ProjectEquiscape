@@ -28,6 +28,7 @@ import type { AssetCategory } from "@/lib/types/database";
 import { colorText, isMissingPendingColumn, withoutPendingColumns } from "@/lib/passport/pendingColumns";
 import { canonicalShowbio } from "@/lib/showbio/vocab";
 import { addHorseToFolder, setHorsesFolders } from "@/lib/collections/membership";
+import { MODERATION_HOLD_MESSAGE, heldHorseIds, liftsModerationHold } from "@/lib/moderation/horseHold";
 import type { Json, TablesInsert } from "@/lib/types/database.generated";
 
 /**
@@ -500,6 +501,12 @@ export async function updateHorseAction(
         const horseUpdate = data.horseUpdate
             ? Object.fromEntries(Object.entries(data.horseUpdate).filter(([k]) => HORSE_ALLOWED.includes(k)))
             : null;
+
+        // A horse made private by a moderator (235) stays private and off
+        // the Market. Said here in plain words; the database refuses it too.
+        if (liftsModerationHold(horseUpdate) && (await heldHorseIds(supabase, [horseId])).has(horseId)) {
+            return { success: false, error: MODERATION_HOLD_MESSAGE };
+        }
 
         if (horseUpdate) {
             // Guard: condition_grade should be null if life_stage is WIP (in_progress)
@@ -1086,6 +1093,13 @@ export async function bulkUpdateHorses(
             return {
                 success: false,
                 error: "One or more of these horses is an artist's commission in progress. It can't be hidden or relisted until the commission is finished.",
+            };
+        }
+        // A horse made private by a moderator (235) can't be shown or listed in bulk either.
+        if (liftsModerationHold(updateObj) && (await heldHorseIds(supabase, horseIds)).size > 0) {
+            return {
+                success: false,
+                error: "One or more of these horses was made private by a moderator, so it can't be made public or listed. Contact us to ask about it.",
             };
         }
     }

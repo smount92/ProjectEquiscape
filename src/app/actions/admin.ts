@@ -311,12 +311,50 @@ export async function suspendUser(userId: string, reason: string): Promise<{ suc
     if (!user) return { success: false, error: "Unauthorized" };
     if (userId === user.id) return { success: false, error: "You cannot suspend yourself." };
     const trimmedReason = reason.trim();
-    if (!trimmedReason) return { success: false, error: "Give a reason — it lands on the audit trail." };
+    if (!trimmedReason) {
+        return { success: false, error: "Give a reason — the member reads it, and it lands on the audit trail." };
+    }
 
     const admin = getAdminSupabase();
 
     const { data: target, error: fetchError } = await admin.auth.admin.getUserById(userId);
     if (fetchError || !target?.user) return { success: false, error: "User not found." };
+
+    // Suspending a member who is already suspended amends the reason: the
+    // suspension keeps the day it began, and the member hears that the
+    // reason changed (or nothing, if it didn't), not a second "suspended".
+    const { data: current } = await admin
+        .from("users")
+        .select("is_suspended, suspended_reason")
+        .eq("id", userId)
+        .maybeSingle();
+    const was = current as { is_suspended: boolean | null; suspended_reason: string | null } | null;
+    if (was?.is_suspended) {
+        // Keep the sign-in stamp in step if it was ever lost.
+        if (!target.user.app_metadata?.is_suspended) {
+            const { error: authError } = await admin.auth.admin.updateUserById(userId, {
+                app_metadata: { ...target.user.app_metadata, is_suspended: true },
+            });
+            if (authError) return { success: false, error: authError.message };
+            try {
+                await admin.auth.admin.signOut(userId, "global");
+            } catch (err) {
+                logger.error("Admin", `session revocation failed for suspended user ${userId}`, err);
+            }
+        }
+        if (was.suspended_reason === trimmedReason) return { success: true };
+        const { error: amendError } = await admin
+            .from("users")
+            .update({ suspended_reason: trimmedReason })
+            .eq("id", userId);
+        if (amendError) return { success: false, error: "Could not change the reason. Please try again." };
+        await notifyMember(
+            userId,
+            `We've updated the reason your account is suspended. The reason: ${withFullStop(trimmedReason)} To talk to us about it, write to us through the contact page.`,
+            "/contact",
+        );
+        return { success: true };
+    }
 
     const { error: authError } = await admin.auth.admin.updateUserById(userId, {
         app_metadata: { ...target.user.app_metadata, is_suspended: true },
@@ -351,11 +389,16 @@ export async function suspendUser(userId: string, reason: string): Promise<{ suc
     // (MHH-024). A suspended account can still sign in and read its bell.
     await notifyMember(
         userId,
-        `Your account has been suspended. The reason: ${/[.!?]$/.test(trimmedReason) ? trimmedReason : `${trimmedReason}.`} While it is suspended you can sign in and look around, but you can't post, enter shows or trade. To talk to us about it, write to us through the contact page.`,
+        `Your account has been suspended. The reason: ${withFullStop(trimmedReason)} While it is suspended you can sign in and look around, but you can't post, enter shows or trade. To talk to us about it, write to us through the contact page.`,
         "/contact",
     );
 
     return { success: true };
+}
+
+/** A sentence that ends with a full stop (or its own ! or ?). */
+function withFullStop(text: string): string {
+    return /[.!?]$/.test(text) ? text : `${text}.`;
 }
 
 /** A moderation notice to one member. Best effort: the action it reports stands either way. */
@@ -458,6 +501,7 @@ export async function mergeCatalogItems(
 // and grant (or dismiss) the request via the service role.
 
 const SANCTIONING_REQUEST_MARKER = "[Host requested MHH sanctioning]";
+const SANCTIONING_ALREADY_DECIDED = "This request has already been dealt with.";
 
 export interface SanctioningRequestRow {
     showId: string;
@@ -666,17 +710,32 @@ export async function resolveSanctioningRequest(
     if (readError) return { success: false, error: readError.message };
     if (!show) return { success: false, error: "Show not found." };
 
-    const strippedNote =
-        ((show.sanctioning_note as string | null) ?? "").replace(SANCTIONING_REQUEST_MARKER, "").trim() || null;
+    const note = (show.sanctioning_note as string | null) ?? null;
+    // Nothing to decide: a dismissal needs a pending request, and a grant a
+    // show that isn't sanctioned yet (the owner may grant without a request).
+    if (decision === "dismiss" && !hasSanctioningRequest(note)) {
+        return { success: false, error: SANCTIONING_ALREADY_DECIDED };
+    }
+    if (decision === "grant" && show.is_mhh_qualifying) {
+        return { success: false, error: "This show is already MHH Sanctioned." };
+    }
 
-    const { error: updateError } = await admin
+    const strippedNote = (note ?? "").replace(SANCTIONING_REQUEST_MARKER, "").trim() || null;
+
+    // Only while the show is as it was read: two admins, or a double click,
+    // can't both decide it and both tell the host.
+    let decide = admin
         .from("shows")
         .update({
             sanctioning_note: strippedNote,
             ...(decision === "grant" ? { is_mhh_qualifying: true } : {}),
         })
         .eq("id", showId);
+    if (decision === "grant") decide = decide.eq("is_mhh_qualifying", false);
+    decide = note === null ? decide.is("sanctioning_note", null) : decide.eq("sanctioning_note", note);
+    const { data: decided, error: updateError } = await decide.select("id");
     if (updateError) return { success: false, error: updateError.message };
+    if ((decided ?? []).length === 0) return { success: false, error: SANCTIONING_ALREADY_DECIDED };
 
     if (decision === "grant") {
         // House pattern: dynamic import + try/catch — createNotification is
@@ -692,7 +751,7 @@ export async function resolveSanctioningRequest(
         } catch (err) {
             logger.error("Admin", "Sanctioning grant notification failed (continuing)", err);
         }
-    } else if (hasSanctioningRequest(show.sanctioning_note as string | null)) {
+    } else {
         // A dismissal used to be silent; the host now hears it (MHH-024).
         await notifyMember(
             show.host_id as string,
@@ -1401,8 +1460,8 @@ const PENDING_MIGRATIONS: MigrationSpec[] = [
         id: "235",
         title: "Report everything; hide, never delete",
         summary:
-            "The reports table accepts show entries and Help ID requests and suggestions too; posts and Help ID rows get hidden_at, and a row policy hides them from members, so a report card can take them down without deleting anything.",
-        probe: { kind: "column", table: "posts", column: "hidden_at" },
+            "The reports table accepts show entries and Help ID requests and suggestions too; posts and Help ID rows get hidden_at, and a row policy hides them from members, so a report card can take them down without deleting anything. Take-downs stick: a removed message can't be restored by either side, a horse made private and an entry scratched by a moderator are stamped so their owner can't undo it, hidden notes leave the logged-out passport, and hidden posts take no replies or likes.",
+        probe: { kind: "column", table: "show_class_entries", column: "moderation_scratched_at" },
     },
     {
         id: "234",

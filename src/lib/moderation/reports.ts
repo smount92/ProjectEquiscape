@@ -97,41 +97,78 @@ export const REPORT_TAKE_DOWN_LABEL: Record<ReportTargetType, string | null> = {
     id_suggestion: "Hide the suggestion",
 };
 
-/** What the member who made it is told when it comes down. */
-export const REPORT_TAKE_DOWN_NOTICE: Record<ReportTargetType, string> = {
-    post: "We hid one of your posts because it breaks the community rules.",
-    comment: "We hid one of your replies because it breaks the community rules.",
-    horse: "We made one of your horses private, which also takes it off the Market, because its page breaks the community rules.",
-    user: "",
-    message: "We removed a message you sent because it breaks the community rules.",
-    show_entry: "We scratched one of your show entries because it breaks the community rules.",
-    id_request: "We hid your Help ID request because it breaks the community rules.",
-    id_suggestion: "We hid one of your Help ID suggestions because it breaks the community rules.",
-};
+/** The rules a take-down points at, as the notices name them. */
+export const COMMUNITY_RULES = "our Community Conduct rules (Terms, section 6)";
+
+/** The Community Conduct section of the Terms, where a link can carry it. */
+export const COMMUNITY_RULES_URL = "/terms#community-conduct";
+
+/** Where a member writes to us about a report or a take-down. */
+export const REPORT_CONTACT_URL = "/contact?category=report";
 
 /**
- * What the member who reported it hears when the report is closed. It says
- * what happened to the content and nothing about anyone: never which
- * member, never a suspension.
+ * What the member who made it is told when it comes down, naming the thing
+ * (`name`: a horse's name, a post's title or the start of its words) so
+ * they know which one. Without a name it falls back to "one of your …".
+ */
+export function takeDownNotice(type: ReportTargetType, name: string | null): string {
+    const quoted = name ? ` "${name}"` : "";
+    const because = `because it breaks ${COMMUNITY_RULES}.`;
+    switch (type) {
+        case "post":
+            return `We hid ${name ? `your post${quoted}` : "one of your posts"} ${because}`;
+        case "comment":
+            return `We hid ${name ? `your reply${quoted}` : "one of your replies"} ${because}`;
+        case "horse":
+            return `We made ${name ? `your horse${quoted}` : "one of your horses"} private, which also takes it off the Market, because its page breaks ${COMMUNITY_RULES}.`;
+        case "message":
+            return `We removed ${name ? `your message${quoted}` : "a message you sent"} ${because}`;
+        case "show_entry":
+            return `We scratched ${name ? `your show entry${quoted}` : "one of your show entries"} ${because}`;
+        case "id_request":
+            return `We hid your Help ID request${quoted} ${because}`;
+        case "id_suggestion":
+            return `We hid ${name ? `your Help ID suggestion${quoted}` : "one of your Help ID suggestions"} ${because}`;
+        case "user":
+            return "";
+    }
+}
+
+/**
+ * What the member who reported it hears when the report is closed. It names
+ * the thing they reported (`name`, as in takeDownNotice) and says what
+ * happened to it, and nothing about anyone: never which member, never a
+ * suspension. "Dealt with another way" is said neutrally for that reason.
  */
 export function reportOutcomeNotice(
     decision: "dismiss" | "take_down" | "handled",
     targetType: ReportTargetType | null,
+    name: string | null = null,
 ): string {
-    const thing = withArticle(targetType ? REPORT_TARGET_NOUN[targetType] : "post");
+    const noun = targetType ? REPORT_TARGET_NOUN[targetType] : "post";
+    const thing = name ? `the ${noun} ${targetType === "user" ? name : `"${name}"`}` : withArticle(noun);
     const thanks = `Thank you for reporting ${thing}.`;
     if (decision === "take_down") return `${thanks} We looked into it and removed it.`;
-    if (decision === "handled") return `${thanks} We looked into it and have dealt with it.`;
-    return `${thanks} We looked, and it doesn't break the community rules, so we've left it up.`;
+    if (decision === "handled") return `${thanks} We've reviewed your report and closed it.`;
+    return `${thanks} We looked, and it doesn't break ${COMMUNITY_RULES}, so we've left it up.`;
 }
 
 /** Said after every take-down notice: the way to reach us. */
 export const TAKE_DOWN_APPEAL = "If you think we got it wrong, write to us through the contact page.";
 
+/** How long a quoted post or message may be in a notice. */
+export const NOTICE_EXCERPT = 60;
+
 /** A reported thing as the admin card shows it (built in reportTargets.ts). */
 export interface ReportTargetView {
     /** What the admin reads on the card: a name, a title, or a short excerpt. */
     summary: string;
+    /**
+     * What a notice calls it: a horse's name, a post's title or the start of
+     * its words (NOTICE_EXCERPT), "@alias" for a member. Null when there is
+     * nothing to name (it is gone, or a photo with no words).
+     */
+    name: string | null;
     /** The page it lives on, or null when there is none to open (a private message). */
     href: string | null;
     /** The member who made it (for a member report, the member). */

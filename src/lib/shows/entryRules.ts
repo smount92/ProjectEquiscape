@@ -23,6 +23,9 @@
  *  - Uniqueness ("a horse enters a class at most once") therefore
  *    applies only to LIVE rows (status <> 'scratched') — which is
  *    exactly what the `active` filter below evaluates against.
+ *  - Except a scratch by the site team after a report (235): that
+ *    horse can't re-enter that class (trg_show_class_entries_
+ *    moderation_guard refuses it in the database too).
  */
 
 import { normalizeScale } from "@/lib/catalog/taxonomy";
@@ -82,7 +85,17 @@ export interface ExistingEntry {
     /** Online shows: the judged photo. Optional so live-show callers
      *  and older fixtures need not supply it. */
     photoId?: string | null;
+    /**
+     * The site team scratched this entry after a report (migration 235,
+     * moderation_scratched_at). The same horse can't be entered in the
+     * same class again. Optional: absent before 235.
+     */
+    moderationScratched?: boolean;
 }
+
+/** Said when a horse's entry in this class was scratched by the site team. */
+export const MODERATION_SCRATCHED_MESSAGE =
+    "This horse's entry in this class was scratched by the site team after a report, so it can't be entered in this class again. Contact us to ask about it.";
 
 export interface ValidateEntryInput {
     candidate: EntryCandidate;
@@ -162,6 +175,17 @@ export function validateEntry(input: ValidateEntryInput): ValidateEntryResult {
         errors.push(
             "You can only enter horses you own. To have someone else show your horse, name them as the handler.",
         );
+    }
+
+    // ── Scratched by the site team (235): that horse stays out of that class ──
+    // The one rule that reads scratched rows: a moderator's scratch must
+    // not be undone by simply entering again.
+    if (
+        existingEntries.some(
+            (e) => e.moderationScratched && e.classId === targetClass.id && e.horseId === candidate.horseId,
+        )
+    ) {
+        errors.push(MODERATION_SCRATCHED_MESSAGE);
     }
 
     const active = existingEntries.filter((e) => e.status !== "scratched");

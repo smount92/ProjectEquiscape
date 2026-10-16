@@ -199,6 +199,9 @@ export async function createPost(data: {
     return { success: true, postId: post!.id };
 }
 
+/** Said when a post was taken down or deleted while someone was looking at it. */
+const POST_NO_LONGER_AVAILABLE = "This post is no longer available.";
+
 // ── Reply to a post (1 level deep) ──
 /**
  * Reply to an existing post (creates a threaded comment).
@@ -210,6 +213,12 @@ export async function replyToPost(parentId: string, content: string): Promise<{ 
     const { supabase, user } = await requireAuth();
     if (!content.trim()) return { success: false, error: "Reply cannot be empty." };
     if (content.trim().length > 500) return { success: false, error: "Reply is too long (500 char max)." };
+
+    // A post the site team took down (235), or one deleted meanwhile, is
+    // invisible to the replier, so it takes no replies. The RPC refuses a
+    // hidden parent too; this says so in plain words first.
+    const { data: parent } = await supabase.from("posts").select("id").eq("id", parentId).maybeSingle();
+    if (!parent) return { success: false, error: POST_NO_LONGER_AVAILABLE };
 
     const { error } = await supabase.rpc("add_post_reply", {
         p_parent_id: parentId,

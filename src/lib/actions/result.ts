@@ -16,6 +16,10 @@ export type ActionFailure = { success: false; error: string };
 /** The words a member sees when an action needs them to be logged in. */
 export const NOT_LOGGED_IN = "Please log in to do that.";
 
+/** The words a suspended member sees when an action is refused for that reason. */
+export const ACCOUNT_SUSPENDED =
+    "Your account is suspended, so you can't do that right now. To talk to us about it, write to us through the contact page.";
+
 /** The words a member sees when something failed that they can't fix. */
 export const GENERIC_FAILURE = "Something went wrong. Please try again.";
 
