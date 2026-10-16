@@ -86,3 +86,6 @@ export function withArticle(noun: string): string {
 
 /** The longest report details a member can write. */
 export const REPORT_DETAILS_MAX = 500;
+
+/** Where the admin bell sends the owner: the console, opened on Reports. */
+export const ADMIN_REPORTS_URL = "/admin?tab=reports";

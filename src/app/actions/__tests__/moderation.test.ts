@@ -18,6 +18,13 @@ vi.mock("@/lib/auth", async (importOriginal) => ({
 vi.mock("@/lib/supabase/admin", () => ({ getAdminClient: () => adminDb }));
 vi.mock("@/lib/utils/rateLimit", () => ({ checkRateLimit }));
 
+const { createNotification, adminNotificationTargets } = vi.hoisted(() => ({
+    createNotification: vi.fn(),
+    adminNotificationTargets: vi.fn(),
+}));
+vi.mock("@/lib/notifications/createNotification", () => ({ createNotification }));
+vi.mock("@/lib/notifications/adminTargets", () => ({ adminNotificationTargets }));
+
 import { AuthError } from "@/lib/auth";
 import { submitReport } from "@/app/actions/moderation";
 import { NOT_LOGGED_IN } from "@/lib/actions/result";
@@ -32,6 +39,8 @@ beforeEach(() => {
     requireAuth.mockResolvedValue({ supabase: memberDb, user: MEMBER });
     requireAdmin.mockRejectedValue(new AuthError("Admin access required."));
     checkRateLimit.mockResolvedValue(true);
+    createNotification.mockResolvedValue(undefined);
+    adminNotificationTargets.mockResolvedValue(["admin-1"]);
 });
 
 describe("submitReport", () => {
@@ -113,5 +122,32 @@ describe("submitReport", () => {
         memberDb.on("user_reports", () => OK);
         await submitReport({ targetType: "horse", targetId: TARGET, reason: "Fake listing or misrepresentation" });
         expect(memberDb.queries.map((q) => q.table)).toEqual(["user_reports"]);
+    });
+});
+
+describe("submitReport rings the admin bell (MHH-021)", () => {
+    it("tells every admin what was reported, linking to the Reports tab", async () => {
+        adminNotificationTargets.mockResolvedValueOnce(["admin-1", "admin-2"]);
+        await submitReport({ targetType: "show_entry", targetId: TARGET, reason: "Inappropriate content" });
+        expect(createNotification).toHaveBeenCalledTimes(2);
+        expect(createNotification).toHaveBeenCalledWith({
+            userId: "admin-1",
+            type: "system",
+            actorId: MEMBER.id,
+            content: '🚩 New report: a show entry — "Inappropriate content"',
+            linkUrl: "/admin?tab=reports",
+        });
+    });
+
+    it("doesn't ring when the report wasn't filed", async () => {
+        memberDb.on("user_reports", () => ({ data: null, error: { code: "23505", message: "duplicate" } }));
+        await submitReport({ targetType: "post", targetId: TARGET, reason: "Other" });
+        expect(createNotification).not.toHaveBeenCalled();
+    });
+
+    it("files the report even when the bell fails", async () => {
+        adminNotificationTargets.mockRejectedValueOnce(new Error("users table unreachable"));
+        const result = await submitReport({ targetType: "post", targetId: TARGET, reason: "Other" });
+        expect(result).toEqual({ success: true });
     });
 });

@@ -5,12 +5,16 @@ import { requireAuth, requireAdmin, AuthError } from "@/lib/auth";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 import { checkRateLimit } from "@/lib/utils/rateLimit";
+import { logger } from "@/lib/logger";
 import { NOT_LOGGED_IN, fail, safeError, type ActionResult } from "@/lib/actions/result";
 import {
+    ADMIN_REPORTS_URL,
     REPORT_DETAILS_MAX,
     REPORT_REASONS,
+    REPORT_TARGET_NOUN,
     REPORT_TARGET_TYPES,
     REPORT_TARGET_TYPES_BEFORE_235,
+    withArticle,
     type ReportTargetType,
 } from "@/lib/moderation/reports";
 
@@ -84,7 +88,33 @@ export async function submitReport(data: {
         return safeError("Moderation", error, "Your report didn't send. Please try again.");
     }
 
+    await ringAdminBell(user.id, input.targetType, input.reason);
     return { success: true };
+}
+
+/**
+ * Tell the admin a report came in (MHH-021), linking straight to the
+ * Reports tab. Best effort: the report is filed whether or not the bell
+ * rings, and a failure here never reaches the member.
+ */
+async function ringAdminBell(reporterId: string, targetType: ReportTargetType, reason: string): Promise<void> {
+    try {
+        const { createNotification } = await import("@/lib/notifications/createNotification");
+        const { adminNotificationTargets } = await import("@/lib/notifications/adminTargets");
+        const adminIds = await adminNotificationTargets(getAdminClient());
+        const content = `🚩 New report: ${withArticle(REPORT_TARGET_NOUN[targetType])} — "${reason}"`;
+        for (const userId of adminIds) {
+            await createNotification({
+                userId,
+                type: "system",
+                actorId: reporterId,
+                content,
+                linkUrl: ADMIN_REPORTS_URL,
+            });
+        }
+    } catch (err) {
+        logger.error("Moderation", "Admin report notification failed (the report stands)", err);
+    }
 }
 
 /** Admin: get open reports */
