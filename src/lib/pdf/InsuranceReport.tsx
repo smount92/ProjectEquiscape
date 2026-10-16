@@ -40,6 +40,8 @@ export interface InsuranceHorse {
         purchase_date: string | null;
         estimated_current_value: number | null;
         insurance_notes: string | null;
+        /** Provenance: where and from whom (241; absent before the paste). */
+        purchase_notes?: string | null;
     } | null;
 }
 
@@ -506,6 +508,15 @@ function DetailPage({
                     </View>
                 )}
             </View>
+
+            {/* Provenance first, beside the purchase details above: where
+                and from whom is what an insurer asks after a loss. */}
+            {vault?.purchase_notes?.trim() ? (
+                <View style={s.detailNotes}>
+                    <Text style={s.detailNotesLabel}>Purchase Notes</Text>
+                    <Text style={s.detailNotesText}>{vault.purchase_notes.trim()}</Text>
+                </View>
+            ) : null}
 
             {vault?.insurance_notes && (
                 <View style={s.detailNotes}>

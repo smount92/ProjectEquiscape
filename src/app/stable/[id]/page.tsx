@@ -46,6 +46,7 @@ import { getHorseViewStats, viewStatsLabel } from "@/lib/metrics/sellerViews";
 import { resinIdentityFrom, resinMakeupLine } from "@/lib/passport/resinIdentity";
 import { colorText, readPendingColumns } from "@/lib/passport/pendingColumns";
 import { getSetPurchase } from "@/app/actions/set-purchase";
+import { selectWithPurchaseNotes } from "@/lib/vault/purchaseNotes";
 
 // Types
 interface VaultData {
@@ -55,6 +56,8 @@ interface VaultData {
     insurance_notes: string | null;
     purchase_date_text: string | null;
     is_trade: boolean | null;
+    /** 241; absent until the migration is pasted. */
+    purchase_notes?: string | null;
 }
 
 const ANGLE_LABELS: Record<string, string> = {
@@ -178,12 +181,12 @@ export default async function HorsePassportPage({ params }: { params: Promise<{ 
     // Documentation — the horse's papers (148/209; owner sees all)
     const horseDocuments = await getHorseDocuments(supabase, horseId);
 
-    // Fetch financial vault (owner-only via RLS)
-    const { data: rawVault } = await supabase
-        .from("financial_vault")
-        .select("purchase_price, purchase_date, estimated_current_value, insurance_notes, purchase_date_text, is_trade")
-        .eq("horse_id", horseId)
-        .single<VaultData>();
+    // Fetch financial vault (owner-only via RLS). purchase_notes is 241;
+    // read without it until the paste so the rest of the vault still shows.
+    const { data: rawVault } = await selectWithPurchaseNotes(
+        (columns) => supabase.from("financial_vault").select(columns).eq("horse_id", horseId).maybeSingle<VaultData>(),
+        "purchase_price, purchase_date, estimated_current_value, insurance_notes, purchase_date_text, is_trade",
+    );
 
     const vault = rawVault ?? null;
     // The set this horse was bought in (224); null before the paste or when solo.

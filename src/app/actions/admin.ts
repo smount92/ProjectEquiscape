@@ -1436,6 +1436,13 @@ const PENDING_MIGRATIONS: MigrationSpec[] = [
         },
     },
     {
+        id: "241",
+        title: "Purchase notes in the vault",
+        summary:
+            "financial_vault.purchase_notes (owner-only, 2,000 characters) for where and from whom a horse was bought; cleared when the horse changes owner.",
+        probe: { kind: "column", table: "financial_vault", column: "purchase_notes" },
+    },
+    {
         id: "239",
         title: "Hotfix: horses and posts load their member again",
         summary:

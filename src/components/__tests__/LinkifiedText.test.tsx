@@ -61,6 +61,50 @@ describe("LinkifiedText", () => {
         expect(link).toHaveAttribute("title", long);
     });
 
+    it("links a plain http address too", () => {
+        render(<LinkifiedText text="Old listing: http://example.com/horse/12" />);
+        expect(screen.getByRole("link")).toHaveAttribute("href", "http://example.com/horse/12");
+    });
+
+    it("links a bare www. address as https", () => {
+        render(<LinkifiedText text="Bought from www.ebay.com/itm/123456 last spring" />);
+        const link = screen.getByRole("link");
+        expect(link).toHaveAttribute("href", "https://www.ebay.com/itm/123456");
+        expect(link).toHaveAttribute("target", "_blank");
+        expect(link.getAttribute("rel")!.split(" ").sort()).toEqual(["nofollow", "noopener", "noreferrer"]);
+    });
+
+    it("leaves trailing punctuation out of a www. link and keeps it as text", () => {
+        const { container } = render(<LinkifiedText text="See www.breyerhorses.com, then call." />);
+        expect(screen.getByRole("link")).toHaveAttribute("href", "https://www.breyerhorses.com");
+        expect(container.textContent).toContain("breyerhorses.com, then call.");
+    });
+
+    it("does not link a www. glued to an email or a word, or one with no domain", () => {
+        const { container } = render(
+            <LinkifiedText text="mail me at sales@www.example.com or see foo.www.bar.com; www. alone; www.example" />,
+        );
+        expect(screen.queryByRole("link")).toBeNull();
+        expect(container.textContent).toBe(
+            "mail me at sales@www.example.com or see foo.www.bar.com; www. alone; www.example",
+        );
+    });
+
+    it("never links other schemes", () => {
+        const { container } = render(
+            <LinkifiedText text="javascript:alert(1) data:text/html,<b>x</b> ftp://files.example.com" />,
+        );
+        expect(screen.queryByRole("link")).toBeNull();
+        expect(container.querySelector("b")).toBeNull();
+        expect(container.textContent).toContain("ftp://files.example.com");
+    });
+
+    it("keeps line breaks in the text for the container to show", () => {
+        const { container } = render(<LinkifiedText text={"Line one\nhttps://example.com/a\nLine three"} />);
+        expect(container.textContent).toBe("Line one\nexample.com/a\nLine three");
+        expect(screen.getByRole("link")).toHaveAttribute("href", "https://example.com/a");
+    });
+
     it("renders plain notes unchanged and handles empty text", () => {
         const { container } = render(<LinkifiedText text="No links here at all." />);
         expect(screen.queryByRole("link")).toBeNull();
