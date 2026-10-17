@@ -18,7 +18,8 @@
 --    "before roles".
 -- 4. catalog_suggestions gains a claim (who is looking at it, until when),
 --    the member's original wording when a moderator edits before
---    approving, and the role of whoever decided it.
+--    approving, and the role of whoever decided it. Only the server can
+--    set those four (a trigger refuses a member's own write to them).
 --
 -- New tables are for the server only: row security on, no policies.
 -- Nothing here changes any Registry data. Safe to paste twice. If the
@@ -62,10 +63,9 @@ ON CONFLICT (id) DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS public.registry_actions (
   id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  kind             TEXT NOT NULL
-                   CHECK (kind IN ('edit', 'add', 'refile', 'approve', 'revert', 'merge', 'remove', 'undo')),
-  status           TEXT NOT NULL DEFAULT 'applied'
-                   CHECK (status IN ('applied', 'awaiting_second_look', 'declined', 'undone', 'failed')),
+  -- kind and status are checked below, by name, so a second paste widens them.
+  kind             TEXT NOT NULL,
+  status           TEXT NOT NULL DEFAULT 'applied',
   actor_id         UUID REFERENCES public.users(id) ON DELETE SET NULL, -- embed-checked: the only link to users on this new table
   actor_role       TEXT NOT NULL CHECK (actor_role IN ('member', 'curator', 'moderator', 'owner')),
   -- No foreign key: the row may since have been merged or removed.
@@ -88,6 +88,18 @@ CREATE TABLE IF NOT EXISTS public.registry_actions (
   created_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
   applied_at       TIMESTAMPTZ
 );
+-- reject: a suggestion turned down on the Desk (it counts toward the daily
+-- limit and the speed alarm like any other decision).
+-- pending: written just before a merge or a removal runs, and turned
+-- applied by the database function that runs it, in the same
+-- transaction; an entry never reads "applied" before the change happened.
+ALTER TABLE public.registry_actions DROP CONSTRAINT IF EXISTS registry_actions_kind_check;
+ALTER TABLE public.registry_actions ADD CONSTRAINT registry_actions_kind_check
+  CHECK (kind IN ('edit', 'add', 'refile', 'approve', 'revert', 'merge', 'remove', 'undo', 'reject'));
+ALTER TABLE public.registry_actions DROP CONSTRAINT IF EXISTS registry_actions_status_check;
+ALTER TABLE public.registry_actions ADD CONSTRAINT registry_actions_status_check
+  CHECK (status IN ('applied', 'awaiting_second_look', 'declined', 'undone', 'failed', 'pending'));
+
 CREATE INDEX IF NOT EXISTS idx_registry_actions_created ON public.registry_actions (created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_registry_actions_actor ON public.registry_actions (actor_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_registry_actions_item ON public.registry_actions (catalog_item_id);
@@ -144,6 +156,43 @@ ALTER TABLE public.catalog_suggestions ADD COLUMN IF NOT EXISTS decided_role TEX
 ALTER TABLE public.catalog_suggestions DROP CONSTRAINT IF EXISTS catalog_suggestions_decided_role_check;
 ALTER TABLE public.catalog_suggestions ADD CONSTRAINT catalog_suggestions_decided_role_check
   CHECK (decided_role IS NULL OR decided_role IN ('member', 'curator', 'moderator', 'owner'));
+
+-- Only the server sets the claim, the member's original wording and the
+-- deciding role. A member may still edit their own pending suggestion
+-- (the 092 policy), but not these four columns: otherwise they could
+-- claim it in a moderator's name or rewrite "what the member sent".
+-- While a moderator holds the claim the suggestion is under_review, so
+-- the 092 policy (own AND pending) keeps the member out of it entirely.
+--
+-- How a member's write is told from the server's, as in 142, 176 and
+-- 180: this function is SECURITY INVOKER, so current_user is the role
+-- PostgREST switched to for the request: 'anon' or 'authenticated' for a
+-- browser's key, 'service_role' for the server, 'postgres' in the SQL
+-- editor. (The JWT's role claim says the same for API calls.)
+CREATE OR REPLACE FUNCTION public.catalog_suggestions_guard_review_cols()
+RETURNS TRIGGER LANGUAGE plpgsql SECURITY INVOKER SET search_path = '' AS $$
+BEGIN
+  IF current_user IN ('anon', 'authenticated') THEN
+    IF TG_OP = 'INSERT' THEN
+      IF NEW.claimed_by IS NOT NULL OR NEW.claimed_until IS NOT NULL
+         OR NEW.original_field_changes IS NOT NULL OR NEW.decided_role IS NOT NULL THEN
+        RAISE EXCEPTION 'Only the Registry team sets who is reviewing a suggestion.' USING ERRCODE = '42501';
+      END IF;
+    ELSIF NEW.claimed_by IS DISTINCT FROM OLD.claimed_by
+       OR NEW.claimed_until IS DISTINCT FROM OLD.claimed_until
+       OR NEW.original_field_changes IS DISTINCT FROM OLD.original_field_changes
+       OR NEW.decided_role IS DISTINCT FROM OLD.decided_role THEN
+      RAISE EXCEPTION 'Only the Registry team sets who is reviewing a suggestion.' USING ERRCODE = '42501';
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_catalog_suggestions_guard_review_cols ON public.catalog_suggestions;
+CREATE TRIGGER trg_catalog_suggestions_guard_review_cols
+  BEFORE INSERT OR UPDATE ON public.catalog_suggestions
+  FOR EACH ROW EXECUTE FUNCTION public.catalog_suggestions_guard_review_cols();
 
 RESET lock_timeout;
 
