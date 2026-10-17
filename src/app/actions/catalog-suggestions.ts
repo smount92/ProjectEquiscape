@@ -28,6 +28,7 @@ import {
 import { revertFields } from "@/lib/catalog/write";
 import { alertOwner, anyActiveModerator } from "@/lib/registry/alerts";
 import { actorOf } from "@/lib/registry/types";
+import { statusFilterValues } from "@/lib/catalog/suggestionStatus";
 import type { Json } from "@/lib/types/database.generated";
 
 // ── Type definitions ──
@@ -667,8 +668,10 @@ export async function getSuggestions(statusFilter?: string, page: number = 1) {
         .order("created_at", { ascending: false })
         .range(from, from + pageSize - 1);
 
-    if (statusFilter && statusFilter !== "all") {
-        query = query.eq("status", statusFilter);
+    // "pending" means every waiting one, including those a moderator is looking at.
+    const statuses = statusFilterValues(statusFilter);
+    if (statuses) {
+        query = query.in("status", statuses);
     }
 
     const { data, count, error } = await query;

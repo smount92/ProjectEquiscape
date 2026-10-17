@@ -52,6 +52,8 @@ export interface RegistryDigest {
     suggestionsWaiting: number;
     rulesProposed: number;
     rulesInEffect: number;
+    /** Moderators whose 12-month term ran out since `since` (their seat stops working then). */
+    termsEnded: { alias: string; endedAt: string }[];
 }
 
 interface ActionRow {
@@ -102,10 +104,19 @@ export async function buildRegistryDigest(admin: Admin, since: string): Promise<
         }
     }
 
-    const aliases = await aliasesFor(
-        admin,
-        actions.map((a) => a.actor_id),
-    );
+    // Terms that ran out inside the window (term_ends_at, 242). A read
+    // that fails leaves the line out; it never stops the digest.
+    const { data: ended, error: endedError } = await db
+        .from("registry_moderators")
+        .select("user_id, term_ends_at")
+        // A seat already removed or stepped down ended then, not now.
+        .in("status", ["active", "resting"])
+        .gte("term_ends_at", since)
+        .lte("term_ends_at", until)
+        .order("term_ends_at", { ascending: false });
+    const endedRows = endedError ? [] : ((ended ?? []) as { user_id: string; term_ends_at: string }[]);
+
+    const aliases = await aliasesFor(admin, [...actions.map((a) => a.actor_id), ...endedRows.map((r) => r.user_id)]);
     const line = (a: ActionRow): DigestLine => ({
         id: a.id,
         summary: a.summary,
@@ -129,8 +140,14 @@ export async function buildRegistryDigest(admin: Admin, since: string): Promise<
         suggestionsWaiting: suggestionsWaiting ?? 0,
         rulesProposed,
         rulesInEffect,
+        termsEnded: endedRows.map((r) => ({
+            alias: aliases.get(r.user_id) ?? "a moderator",
+            endedAt: r.term_ends_at,
+        })),
     };
 }
+
+const ON_DAY = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
 
 const KIND_WORDS: Record<string, [string, string]> = {
     edit: ["edit", "edits"],
@@ -174,6 +191,8 @@ export function digestText(d: RegistryDigest): string {
         parts.push(
             `Style rules: ${d.rulesProposed} proposed, ${d.rulesInEffect} took effect. You can veto any of them on the Rules tab.`,
         );
+    for (const t of d.termsEnded ?? [])
+        parts.push(`@${t.alias}'s moderator term ended on ${ON_DAY.format(new Date(t.endedAt))}.`);
     return parts.join(" ");
 }
 
@@ -228,7 +247,8 @@ export async function sendRegistryDigest(admin: Admin, now: Date = new Date()): 
         !digest.rulesProposed &&
         !digest.rulesInEffect &&
         !digest.secondLooksWaiting &&
-        !digest.suggestionsWaiting;
+        !digest.suggestionsWaiting &&
+        digest.termsEnded.length === 0;
     if (quiet) return { sent: false, reason: "quiet", day };
 
     const owners = await adminNotificationTargets(admin);

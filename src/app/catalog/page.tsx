@@ -26,6 +26,7 @@ import {
     type CatalogFilters,
 } from "@/lib/catalog/filterParams";
 import { sortScalesBySize } from "@/lib/catalog/taxonomy";
+import { OPEN_SUGGESTION_STATUSES } from "@/lib/catalog/suggestionStatus";
 
 const metadataTemplate: Metadata = {
     title: "Reference Catalog",
@@ -250,7 +251,11 @@ export default async function ReferencePage({
             .gt("approved_suggestions_count", 0)
             .order("approved_suggestions_count", { ascending: false })
             .limit(5),
-        supabase.from("catalog_suggestions").select("id", { count: "estimated", head: true }).eq("status", "pending"),
+        // Waiting ones, including those a moderator is looking at (under_review).
+        supabase
+            .from("catalog_suggestions")
+            .select("id", { count: "estimated", head: true })
+            .in("status", [...OPEN_SUGGESTION_STATUSES]),
         supabase
             .from("catalog_changelog")
             .select("id", { count: "estimated", head: true })

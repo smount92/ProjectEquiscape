@@ -15,6 +15,12 @@ const nextConfig: NextConfig = {
   // errors vitest never sees (ticketed); they must not block a deploy.
   // `npm run typecheck` in CI uses the same config.
   typescript: { tsconfigPath: "tsconfig.typecheck.json" },
+  // The Desk's guide page reads this file at request time through
+  // process.cwd(), which the build can't trace on its own: name it so
+  // Vercel ships it with that route (src/__tests__/desk-guide-bundled.test.ts).
+  outputFileTracingIncludes: {
+    "/catalog/desk/guide": ["./docs/guides/registry-moderation.md"],
+  },
   experimental: {
     // Cap static-generation workers. Vercel's Turbo build machine has
     // 30 cores → 29 workers, and every prebuilt /reference page hits
