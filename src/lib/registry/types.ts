@@ -16,12 +16,26 @@ export interface RegistryActor {
     role: ActorRole;
 }
 
-/** What a History entry did. */
-export const ACTION_KINDS = ["edit", "add", "refile", "approve", "revert", "merge", "remove", "undo"] as const;
+/** What a History entry did. `reject` is a suggestion turned down on the Desk. */
+export const ACTION_KINDS = [
+    "edit",
+    "add",
+    "refile",
+    "approve",
+    "revert",
+    "merge",
+    "remove",
+    "undo",
+    "reject",
+] as const;
 export type ActionKind = (typeof ACTION_KINDS)[number];
 
-/** Where a History entry stands. */
-export const ACTION_STATUSES = ["applied", "awaiting_second_look", "declined", "undone", "failed"] as const;
+/**
+ * Where a History entry stands. `pending` is a merge or removal written
+ * just before its database function runs; the function turns it
+ * `applied` in the same transaction, so nothing reads "applied" early.
+ */
+export const ACTION_STATUSES = ["applied", "awaiting_second_look", "declined", "undone", "failed", "pending"] as const;
 export type ActionStatus = (typeof ACTION_STATUSES)[number];
 
 /** What happened to one row inside a History entry. */
@@ -31,6 +45,19 @@ export type RowOutcome = (typeof ROW_OUTCOMES)[number];
 /** A moderator seat's state (registry_moderators.status). */
 export const MODERATOR_STATUSES = ["active", "resting", "stepped_down", "removed"] as const;
 export type ModeratorStatus = (typeof MODERATOR_STATUSES)[number];
+
+/**
+ * A seat is active while its status says so AND its 12-month term has not
+ * run out. An "active" seat past term_ends_at is treated as ended: the
+ * Desk closes to it and its rule votes stop counting until the owner
+ * renews it.
+ */
+export function seatIsActive(seat: { status: string; term_ends_at?: string | null }, now = Date.now()): boolean {
+    if (seat.status !== "active") return false;
+    if (!seat.term_ends_at) return true;
+    const ends = Date.parse(seat.term_ends_at);
+    return Number.isNaN(ends) || ends > now;
+}
 
 /** The actor for a Desk action, from what requireRegistryModerator() returned. */
 export function actorOf(seat: { user: { id: string }; role: "owner" | "moderator"; alias: string }): RegistryActor {

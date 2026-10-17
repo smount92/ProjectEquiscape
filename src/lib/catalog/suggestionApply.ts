@@ -31,22 +31,27 @@ import {
 } from "@/lib/catalog/corrections";
 import {
     deriveAttribution,
-    isCatalogGender,
-    normalizeCatalogBreed,
-    normalizeRunCount,
     normalizeScale,
     resolveNewEntryMaker,
     suggestionItemTypeToDb,
 } from "@/lib/catalog/taxonomy";
 import { DUPLICATE_SUGGESTION_TYPE, duplicateTarget } from "@/lib/catalog/duplicates";
 import {
+    closeWaitingMerge,
+    confirmMerge,
     insertItem,
     isMissingSchema,
     recordChange,
+    recordRejection,
     requestMerge,
+    sameValue,
     updateItem,
+    validateChanges,
+    waitingMergeFor,
+    type DroppedValue,
     type WriteErrorCode,
 } from "@/lib/catalog/write";
+import { checkRegistryLimit } from "@/lib/registry/limits";
 import { ACTOR_ROLE_LABELS, type RegistryActor } from "@/lib/registry/types";
 
 // Service role: suggestion bookkeeping crosses members (credit, badges,
@@ -65,8 +70,11 @@ export interface SuggestionRecord {
     status: string;
     admin_notes: string | null;
     reviewed_by: string | null;
+    reviewed_at?: string | null;
     artist_name?: string | null;
     original_field_changes?: Record<string, unknown> | null;
+    claimed_by?: string | null;
+    claimed_until?: string | null;
 }
 
 export type ApplyResult =
@@ -76,6 +84,8 @@ export type ApplyResult =
           catalogItemId: string | null;
           actionId: string | null;
           summary: string;
+          /** An addition's values the Registry did not keep, and why. */
+          dropped: DroppedValue[];
       }
     /** `requeued`: the apply failed and the suggestion is back in the queue with the reason. */
     | { ok: false; error: string; code?: WriteErrorCode; requeued?: boolean };
@@ -224,7 +234,9 @@ export async function reviewRefusal(s: SuggestionRecord, reviewer: RegistryActor
 // Bookkeeping
 // ══════════════════════════════════════════════════════════════
 
-async function readSuggestion(id: string): Promise<SuggestionRecord | null> {
+/** One suggestion as the pipeline reads it (service role). */
+export async function readSuggestion(id: string): Promise<SuggestionRecord | null> {
+    if (!UUID_RE.test(id)) return null;
     const { data } = await db().from("catalog_suggestions").select("*").eq("id", id).maybeSingle();
     return (data as SuggestionRecord | null) ?? null;
 }
@@ -234,35 +246,140 @@ async function aliasOf(userId: string): Promise<string> {
     return (data as { alias_name: string | null } | null)?.alias_name ?? "Unknown";
 }
 
+/** Update a suggestion; before 242 the claim and role columns are left out. */
+async function updateSuggestion(
+    id: string,
+    fields: Record<string, unknown>,
+    guard?: (q: SuggestionUpdate) => SuggestionUpdate,
+): Promise<{ rows: SuggestionRecord[]; error: { code?: string; message?: string } | null }> {
+    const run = async (payload: Record<string, unknown>) => {
+        let q = db().from("catalog_suggestions").update(payload).eq("id", id) as unknown as SuggestionUpdate;
+        if (guard) q = guard(q);
+        return q.select("*");
+    };
+    let { data, error } = await run(fields);
+    if (error && isMissingSchema(error)) {
+        const legacy = { ...fields };
+        for (const k of NEW_242_COLUMNS) delete legacy[k];
+        ({ data, error } = await run(legacy));
+    }
+    if (error) {
+        if (!isMissingSchema(error)) logger.error("SuggestionApply", "Suggestion update failed", error);
+        return { rows: [], error };
+    }
+    return { rows: (data ?? []) as SuggestionRecord[], error: null };
+}
+
+/** The columns 242 adds to catalog_suggestions. */
+const NEW_242_COLUMNS = ["claimed_by", "claimed_until", "original_field_changes", "decided_role"];
+
+/** The part of a Supabase update builder this file chains. */
+interface SuggestionUpdate {
+    eq(col: string, v: unknown): SuggestionUpdate;
+    in(col: string, v: unknown[]): SuggestionUpdate;
+    or(filter: string): SuggestionUpdate;
+    select(cols: string): PromiseLike<{ data: unknown; error: { code?: string; message?: string } | null }>;
+}
+
 /**
  * An approval the Registry refused goes back to the queue with the reason,
  * so it is never marked approved while nothing changed.
  */
 async function unapply(suggestionId: string, words: string): Promise<{ ok: false; error: string; requeued: true }> {
-    await db()
-        .from("catalog_suggestions")
-        .update({ status: "pending", admin_notes: `Not applied: ${words}` })
-        .eq("id", suggestionId);
+    await updateSuggestion(suggestionId, {
+        status: "pending",
+        admin_notes: `Not applied: ${words}`,
+        reviewed_by: null,
+        reviewed_at: null,
+        claimed_by: null,
+        claimed_until: null,
+    });
     return { ok: false, error: words, requeued: true };
 }
 
 /** Write the decision; before 242 (no decided_role column) it is written without the role. */
 async function stampDecision(id: string, fields: Record<string, unknown>, role: string | null): Promise<void> {
-    const { error } = await db()
-        .from("catalog_suggestions")
-        .update({ ...fields, decided_role: role })
-        .eq("id", id);
-    if (!error) return;
-    if (isMissingSchema(error)) {
-        // Before 242: no claim or role columns.
-        const { claimed_by: _claimedBy, claimed_until: _claimedUntil, ...legacy } = fields;
-        void _claimedBy;
-        void _claimedUntil;
-        const { error: retry } = await db().from("catalog_suggestions").update(legacy).eq("id", id);
-        if (retry) logger.error("SuggestionApply", "Decision stamp failed", retry);
-        return;
-    }
-    logger.error("SuggestionApply", "Decision stamp failed", error);
+    await updateSuggestion(id, { ...fields, decided_role: role });
+}
+
+/**
+ * Take the decision: ONE conditional update moves the suggestion out of
+ * the queue (to `to`), only while it is still pending or under review,
+ * and, for a moderator, not while someone else holds a live claim on it.
+ * Two approvals of the same suggestion can't both pass this point, so
+ * nothing is ever applied or credited twice. Returns the row as it was
+ * taken (what the member had sent at that moment), or why not.
+ */
+async function takeDecision(
+    s: SuggestionRecord,
+    reviewer: RegistryActor,
+    to: "approved" | "rejected",
+): Promise<{ ok: true; row: SuggestionRecord } | { ok: false; error: string; code: WriteErrorCode }> {
+    const now = new Date().toISOString();
+    const fields = {
+        status: to,
+        reviewed_by: reviewer.userId,
+        reviewed_at: now,
+        claimed_by: null,
+        claimed_until: null,
+    };
+    const open = ["pending", "under_review"];
+    let { rows, error } = await updateSuggestion(s.id, fields, (q) =>
+        reviewer.role === "owner"
+            ? q.in("status", open)
+            : q.or(
+                  `status.eq.pending,and(status.eq.under_review,or(claimed_by.is.null,claimed_by.eq.${reviewer.userId},claimed_until.lt.${now}))`,
+              ),
+    );
+    // Before 242 the claim columns don't exist, so the filter can't name them.
+    if (error && isMissingSchema(error))
+        ({ rows, error } = await updateSuggestion(s.id, fields, (q) => q.in("status", open)));
+    if (error) return { ok: false, error: "The decision could not be saved. Please try again.", code: "failed" };
+    if (rows.length > 0) return { ok: true, row: rows[0] };
+
+    const now2 = await readSuggestion(s.id);
+    if (!now2) return { ok: false, error: "Suggestion not found.", code: "not_found" };
+    if (now2.status !== "pending" && now2.status !== "under_review")
+        return { ok: false, error: "This suggestion has already been decided.", code: "invalid" };
+    if (now2.claimed_by && now2.claimed_by !== reviewer.userId)
+        return {
+            ok: false,
+            error: `@${await aliasOf(now2.claimed_by)} is looking at this one right now. Try again when their claim runs out.`,
+            code: "conflict",
+        };
+    return { ok: false, error: "Someone decided this suggestion a moment ago.", code: "conflict" };
+}
+
+/** Undo takeDecision when nothing was applied: the suggestion is back as it was. */
+async function giveBack(s: SuggestionRecord, from: "approved" | "rejected"): Promise<void> {
+    await updateSuggestion(
+        s.id,
+        {
+            status: s.status,
+            reviewed_by: s.reviewed_by ?? null,
+            reviewed_at: s.reviewed_at ?? null,
+            claimed_by: s.claimed_by ?? null,
+            claimed_until: s.claimed_until ?? null,
+        },
+        (q) => q.eq("status", from),
+    );
+}
+
+const CHANGED_WORDS = "The member changed this suggestion while you were reviewing it. Look again.";
+
+/** The member's suggestion still says what the reviewer read. */
+function stillAsRead(s: SuggestionRecord, expected: ExpectedSuggestion | undefined): boolean {
+    if (!expected) return true;
+    return (
+        sameValue(s.field_changes ?? {}, expected.fieldChanges ?? {}) &&
+        (s.catalog_item_id ?? null) === (expected.catalogItemId ?? null)
+    );
+}
+
+/** What the reviewer read, to refuse a decision on a suggestion the member changed since. */
+export interface ExpectedSuggestion {
+    fieldChanges: unknown;
+    catalogItemId: string | null;
 }
 
 /** The approval credit, the curator badges and the trusted flag (same thresholds as auto-approval). */
@@ -317,6 +434,11 @@ export function editDiff(original: Record<string, unknown>, edited: Record<strin
     return parts.join(", ");
 }
 
+/** "Retail price "$5" (no $ sign ...)", for the member's notice. */
+export function droppedWords(dropped: DroppedValue[]): string {
+    return dropped.map((d) => `${d.label} "${d.value}" (${d.error.replace(/\.$/, "")})`).join("; ");
+}
+
 async function revalidateItem(itemId: string | null): Promise<void> {
     revalidatePath("/catalog");
     if (!itemId) return;
@@ -339,8 +461,18 @@ async function revalidateItem(itemId: string | null): Promise<void> {
 // Apply
 // ══════════════════════════════════════════════════════════════
 
-/** An approved addition's row, as the suggestion form's fields map onto the Registry. */
-async function additionPayload(fc: Record<string, unknown>): Promise<Record<string, unknown>> {
+const blank = (v: unknown) => v === undefined || v === null || (typeof v === "string" && !v.trim());
+
+/**
+ * An approved addition's row, as the suggestion form's fields map onto the
+ * Registry, plus every value that will not be kept and why. Values are
+ * passed as sent: insertItem's lenient check drops the ones that fail,
+ * in words, instead of this function quietly leaving them out.
+ */
+async function additionPayload(
+    fc: Record<string, unknown>,
+): Promise<{ payload: Record<string, unknown>; dropped: DroppedValue[] }> {
+    const dropped: DroppedValue[] = [];
     const mappedType = suggestionItemTypeToDb(fc.item_type as string | undefined);
     if (!mappedType)
         logger.error("SuggestionApply", `Unknown item_type "${String(fc.item_type)}", filing as plastic_mold`);
@@ -353,8 +485,6 @@ async function additionPayload(fc: Record<string, unknown>): Promise<Record<stri
         sculptor: sculptorIn || null,
         manufacturer: (fc.manufacturer as string | undefined) ?? null,
     });
-    const runCount = normalizeRunCount(fc.run_count);
-    const breed = normalizeCatalogBreed(fc.breed);
     // The linker files a release with the id of the mold the member was
     // looking at; the release takes that mold's scale.
     const parent = await resolveParentMold(fc.parent_catalog_id, itemType, {
@@ -362,61 +492,102 @@ async function additionPayload(fc: Record<string, unknown>): Promise<Record<stri
         maker,
         scale: typeof fc.scale === "string" ? fc.scale : null,
     });
+    const askedScale = blank(fc.scale) ? null : canonicalVocabulary("scale", fc.scale);
+    if (!blank(fc.scale) && !askedScale && !parent)
+        dropped.push({
+            key: "scale",
+            label: fieldLabel("scale"),
+            value: String(fc.scale),
+            error: `"${String(fc.scale)}" is not a scale the Registry knows`,
+        });
+    if (parent?.scale && askedScale && askedScale !== parent.scale)
+        dropped.push({
+            key: "scale",
+            label: fieldLabel("scale"),
+            value: String(fc.scale),
+            error: `a release takes its mold's scale, so it was filed as ${parent.scale}`,
+        });
+
+    const years = blank(fc.year) ? {} : additionYears(fc.year, fc.year_end);
+    if (!blank(fc.year) && !blank(fc.year_end) && !("release_year_end" in years))
+        dropped.push({
+            key: "release_year_end",
+            label: fieldLabel("release_year_end"),
+            value: String(fc.year_end),
+            error: "it did not make a range with the first year, so only the first year was kept",
+        });
+
+    const attrs: Record<string, unknown> = { ...years };
+    const pass = (key: string, v: unknown) => {
+        if (!blank(v)) attrs[key] = typeof v === "string" ? v.trim() : v;
+    };
+    if (!blank(fc.color)) attrs.color_description = normalizeFactValue("color_description", fc.color);
+    pass("model_number", fc.model_number);
+    pass("material", fc.material);
+    pass("retail_price", fc.retail_price);
+    pass("run_type", fc.run_type);
+    pass("run_count", fc.run_count);
+    pass("breed", fc.breed);
+    pass("gender", fc.gender);
+    pass("sculptor", fc.sculptor);
+    if (!blank(fc.mold_name) && !blank(fc.title)) pass("mold_name", fc.mold_name);
+    pass("set_name", fc.set_name);
+
     return {
-        item_type: itemType,
-        title: normalizeFactValue("title", fc.title ?? fc.mold_name ?? "Untitled") as string,
-        maker,
-        artist: attribution.artist,
-        manufacturer: attribution.manufacturer,
-        scale: parent?.scale ?? canonicalVocabulary("scale", fc.scale),
-        ...(parent ? { parent_id: parent.id } : {}),
-        attributes: {
-            ...(fc.year ? additionYears(fc.year, fc.year_end) : {}),
-            ...(fc.color ? { color_description: normalizeFactValue("color_description", fc.color) } : {}),
-            ...(fc.model_number ? { model_number: fc.model_number } : {}),
-            ...(canonicalVocabulary("material", fc.material)
-                ? { material: canonicalVocabulary("material", fc.material) }
-                : {}),
-            ...(fc.retail_price ? { retail_price: fc.retail_price } : {}),
-            ...(canonicalVocabulary("run_type", fc.run_type)
-                ? { run_type: canonicalVocabulary("run_type", fc.run_type) }
-                : {}),
-            ...(runCount ? { run_count: runCount } : {}),
-            ...(breed ? { breed } : {}),
-            ...(isCatalogGender(fc.gender) ? { gender: fc.gender } : {}),
-            ...(fc.sculptor ? { sculptor: fc.sculptor } : {}),
-            ...(fc.mold_name && fc.title ? { mold_name: fc.mold_name } : {}),
-            ...(typeof fc.set_name === "string" && fc.set_name.trim() ? { set_name: fc.set_name.trim() } : {}),
+        payload: {
+            item_type: itemType,
+            title: normalizeFactValue("title", fc.title ?? fc.mold_name ?? "Untitled") as string,
+            maker,
+            artist: attribution.artist,
+            manufacturer: attribution.manufacturer,
+            scale: parent?.scale ?? askedScale,
+            ...(parent ? { parent_id: parent.id } : {}),
+            attributes: attrs,
         },
+        dropped,
     };
 }
 
 /**
- * Apply one suggestion to the Registry. `reviewer` is who approved it;
- * null means the contributor's curator rank applied it on its own. With
- * `edited`, the reviewer's version is applied and the member's original
- * is kept (edit-then-approve). A moderator's duplicate approval becomes a
- * merge request that waits for a second look; the owner's applies.
+ * The values a suggested addition carries that the Registry will not
+ * keep, and why, before anyone approves it: the reviewer sees exactly
+ * what the new entry will lack. Pure apart from looking up the mold.
  */
-export async function applySuggestion(
-    id: string,
+export async function additionDrops(fieldChanges: Record<string, unknown>): Promise<DroppedValue[]> {
+    const { payload, dropped } = await additionPayload(fieldChanges ?? {});
+    const { attributes, ...columns } = payload;
+    const flat: Record<string, unknown> = { ...columns, ...((attributes as Record<string, unknown>) ?? {}) };
+    const ctx = flat.parent_id
+        ? { parent: { id: String(flat.parent_id), item_type: "plastic_mold", scale: (flat.scale as string) ?? null } }
+        : {};
+    const v = validateChanges(null, flat, ctx, { lenient: true });
+    if (!v.ok) return [...dropped, { key: v.field, label: fieldLabel(v.field), value: "", error: v.error }];
+    return [...dropped, ...v.dropped];
+}
+
+/** What applying a suggestion did. */
+type Applied =
+    | {
+          ok: true;
+          status: "applied" | "awaiting_second_look";
+          catalogItemId: string | null;
+          actionId: string | null;
+          summary: string;
+          dropped: DroppedValue[];
+      }
+    /** `requeued`: the apply failed and the suggestion is back in the queue. `giveBack`: nothing happened. */
+    | { ok: false; error: string; code?: WriteErrorCode; requeued?: boolean; giveBack?: boolean };
+
+/**
+ * Apply a suggestion that is already out of the queue (taken by a
+ * reviewer, or auto-approved by the contributor's rank). `s` is the row
+ * as it was taken.
+ */
+async function applyTaken(
+    s: SuggestionRecord,
     opts: { reviewer: RegistryActor | null; edited?: Record<string, unknown>; note?: string },
-): Promise<ApplyResult> {
-    const s = await readSuggestion(id);
-    if (!s) return { ok: false, error: "that suggestion no longer exists", code: "not_found" };
-
+): Promise<Applied> {
     const reviewer = opts.reviewer;
-    if (reviewer) {
-        if (s.status !== "pending" && s.status !== "under_review")
-            return { ok: false, error: "This suggestion has already been decided.", code: "invalid" };
-        const refusal = await reviewRefusal(s, reviewer);
-        if (refusal) return { ok: false, error: refusal, code: "forbidden" };
-        if (s.status === "under_review" && s.suggestion_type === DUPLICATE_SUGGESTION_TYPE && reviewer.role !== "owner")
-            return { ok: false, error: "This merge already waits for a second look.", code: "invalid" };
-    }
-    if (!reviewer && s.suggestion_type === DUPLICATE_SUGGESTION_TYPE)
-        return { ok: false, error: "A duplicate report always waits for a person.", code: "forbidden" };
-
     const alias = await aliasOf(s.user_id);
     const contributor = { userId: s.user_id, alias };
     const actor: RegistryActor = reviewer ?? { userId: s.user_id, alias, role: "curator" };
@@ -424,19 +595,14 @@ export async function applySuggestion(
     let fc = (s.field_changes ?? {}) as Record<string, unknown>;
     if (reviewer && opts.edited && Object.keys(opts.edited).length > 0) {
         const original = s.original_field_changes ?? s.field_changes;
-        const { error } = await db()
-            .from("catalog_suggestions")
-            .update({ field_changes: opts.edited, original_field_changes: original })
-            .eq("id", s.id);
-        if (error && isMissingSchema(error)) {
-            await db().from("catalog_suggestions").update({ field_changes: opts.edited }).eq("id", s.id);
-        }
+        await updateSuggestion(s.id, { field_changes: opts.edited, original_field_changes: original });
         fc = opts.edited;
     }
 
     let catalogItemId = s.catalog_item_id;
     let actionId: string | null = null;
     let summary = "";
+    let dropped: DroppedValue[] = [];
 
     if (s.artist_name) {
         // Artist notes (200) write the artists table, not a Registry row.
@@ -451,7 +617,14 @@ export async function applySuggestion(
                 );
             if (error) return unapply(s.id, "the artist's notes could not be saved");
         }
-        return { ok: true, status: "applied", catalogItemId: null, actionId: null, summary: "Artist notes saved" };
+        return {
+            ok: true,
+            status: "applied",
+            catalogItemId: null,
+            actionId: null,
+            summary: "Artist notes saved",
+            dropped,
+        };
     }
 
     if (s.suggestion_type === "correction" && s.catalog_item_id) {
@@ -475,26 +648,60 @@ export async function applySuggestion(
             summary,
             note: opts.note,
         });
-        if (!result.success) return { ...(await unapply(s.id, result.error)), code: result.code };
+        if (!result.success) {
+            if (result.code === "limit") return { ok: false, error: result.error, code: result.code, giveBack: true };
+            return { ...(await unapply(s.id, result.error)), code: result.code };
+        }
         actionId = result.actionId;
     } else if (s.suggestion_type === "addition") {
-        const payload = await additionPayload(fc);
-        summary = `📗 New entry added: ${String(payload.title)}`;
+        const built = await additionPayload(fc);
+        summary = `📗 New entry added: ${String(built.payload.title)}`;
         const result = await insertItem(actor, {
-            payload,
+            payload: built.payload,
             suggestionId: s.id,
             lenient: true,
             contributor,
             summary,
             note: opts.note,
         });
-        if (!result.success) return { ...(await unapply(s.id, result.error)), code: result.code };
+        if (!result.success) {
+            if (result.code === "limit") return { ok: false, error: result.error, code: result.code, giveBack: true };
+            return { ...(await unapply(s.id, result.error)), code: result.code };
+        }
         catalogItemId = result.id;
         actionId = result.actionId;
+        dropped = [...built.dropped, ...result.dropped];
     } else if (s.suggestion_type === DUPLICATE_SUGGESTION_TYPE && s.catalog_item_id) {
         const target = duplicateTarget(fc);
-        if (!target) {
-            summary = "🔁 Duplicate report approved, but one entry was already gone: nothing merged";
+        const goneSummary = "🔁 Duplicate report approved, but one entry was already gone: nothing merged";
+        const waiting = reviewer ? await waitingMergeFor(s.id) : null;
+        if (waiting && reviewer) {
+            // The report's merge already waits for a second look: deciding
+            // the report IS that second look (never by the one who asked).
+            if (waiting.actorId === reviewer.userId)
+                return {
+                    ok: false,
+                    error: "You asked for this merge, so someone else gives it the second look.",
+                    code: "forbidden",
+                    giveBack: true,
+                };
+            const confirmed = await confirmMerge(reviewer, waiting.id);
+            if (!confirmed.success) {
+                if (confirmed.code === "not_found")
+                    return {
+                        ...(await unapply(
+                            s.id,
+                            "one of the two entries is no longer in the Registry, so the merge could not be made",
+                        )),
+                        code: confirmed.code,
+                    };
+                return { ok: false, error: confirmed.error, code: confirmed.code, giveBack: true };
+            }
+            actionId = waiting.id;
+            summary = `🔁 ${confirmed.summary}`;
+            catalogItemId = target?.duplicate_of ?? catalogItemId;
+        } else if (!target) {
+            summary = goneSummary;
             await recordChange(actor, {
                 itemId: s.catalog_item_id,
                 changeType: s.suggestion_type,
@@ -512,7 +719,7 @@ export async function applySuggestion(
             });
             if (!merged.success) {
                 if (merged.code === "not_found") {
-                    summary = "🔁 Duplicate report approved, but one entry was already gone: nothing merged";
+                    summary = goneSummary;
                     await recordChange(actor, {
                         itemId: s.catalog_item_id,
                         changeType: s.suggestion_type,
@@ -521,8 +728,8 @@ export async function applySuggestion(
                         contributor,
                     });
                 } else if (merged.code === "not_ready" || merged.code === "limit" || merged.code === "forbidden") {
-                    // Nothing happened; the suggestion stays where it was.
-                    return { ok: false, error: merged.error, code: merged.code };
+                    // Nothing happened; the suggestion goes back where it was.
+                    return { ok: false, error: merged.error, code: merged.code, giveBack: true };
                 } else {
                     return { ...(await unapply(s.id, `the merge failed (${merged.error})`)), code: merged.code };
                 }
@@ -530,7 +737,7 @@ export async function applySuggestion(
                 actionId = merged.actionId;
                 summary = `🔁 ${merged.summary}`;
                 if (merged.status === "awaiting_second_look") {
-                    return { ok: true, status: "awaiting_second_look", catalogItemId, actionId, summary };
+                    return { ok: true, status: "awaiting_second_look", catalogItemId, actionId, summary, dropped };
                 }
                 catalogItemId = target.duplicate_of;
             }
@@ -548,7 +755,65 @@ export async function applySuggestion(
 
     await creditContributor(s.user_id);
     await revalidateItem(catalogItemId);
-    return { ok: true, status: "applied", catalogItemId, actionId, summary };
+    return { ok: true, status: "applied", catalogItemId, actionId, summary, dropped };
+}
+
+/**
+ * Apply one suggestion to the Registry. `reviewer` is who approved it;
+ * null means the contributor's curator rank applied it on its own (the
+ * suggestion was filed auto_approved). With `edited`, the reviewer's
+ * version is applied and the member's original is kept
+ * (edit-then-approve). A moderator's duplicate approval becomes a merge
+ * request that waits for a second look; the owner's applies.
+ *
+ * With a reviewer, the suggestion is first taken out of the queue in one
+ * conditional update, so it is applied once however many people click.
+ * With `expected` (what the reviewer read), a suggestion the member has
+ * changed since is refused with code "changed".
+ *
+ * This applies only: it does not send the member a notice or stamp the
+ * deciding role. decideSuggestion does the whole decision.
+ */
+export async function applySuggestion(
+    id: string,
+    opts: {
+        reviewer: RegistryActor | null;
+        edited?: Record<string, unknown>;
+        note?: string;
+        expected?: ExpectedSuggestion;
+    },
+): Promise<ApplyResult> {
+    const s = await readSuggestion(id);
+    if (!s) return { ok: false, error: "that suggestion no longer exists", code: "not_found" };
+
+    const reviewer = opts.reviewer;
+    if (!reviewer) {
+        if (s.suggestion_type === DUPLICATE_SUGGESTION_TYPE)
+            return { ok: false, error: "A duplicate report always waits for a person.", code: "forbidden" };
+        const applied = await applyTaken(s, { reviewer: null });
+        return applied.ok
+            ? applied
+            : { ok: false, error: applied.error, code: applied.code, requeued: applied.requeued };
+    }
+
+    if (s.status !== "pending" && s.status !== "under_review")
+        return { ok: false, error: "This suggestion has already been decided.", code: "invalid" };
+    const refusal = await reviewRefusal(s, reviewer);
+    if (refusal) return { ok: false, error: refusal, code: "forbidden" };
+    if (!stillAsRead(s, opts.expected)) return { ok: false, error: CHANGED_WORDS, code: "changed" };
+
+    const taken = await takeDecision(s, reviewer, "approved");
+    if (!taken.ok) return { ok: false, error: taken.error, code: taken.code };
+    if (!stillAsRead(taken.row, opts.expected)) {
+        await giveBack(s, "approved");
+        return { ok: false, error: CHANGED_WORDS, code: "changed" };
+    }
+    const applied = await applyTaken(taken.row, { reviewer, edited: opts.edited, note: opts.note });
+    if (!applied.ok) {
+        if (applied.giveBack) await giveBack(s, "approved");
+        return { ok: false, error: applied.error, code: applied.code, requeued: applied.requeued };
+    }
+    return applied;
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -556,14 +821,24 @@ export async function applySuggestion(
 // ══════════════════════════════════════════════════════════════
 
 export type DecideResult =
-    | { success: true; status: "approved" | "rejected" | "awaiting_second_look" }
+    | {
+          success: true;
+          status: "approved" | "rejected" | "awaiting_second_look";
+          /** An addition's values the Registry did not keep, and why (also in the member's notice). */
+          dropped?: DroppedValue[];
+      }
     | { success: false; error: string; code?: WriteErrorCode; requeued?: boolean };
 
 /**
  * Approve or reject one suggestion as `reviewer`: the status, who decided
  * and in what role, and the member's notice ("approved by @Maple,
  * Registry moderator", with what was changed when the reviewer edited it
- * first). Approval applies it through applySuggestion.
+ * first, and any value of a new entry the Registry did not keep).
+ * Approval applies it through applySuggestion's path; a rejection is a
+ * History entry (kind "reject") that counts toward the daily limit. A
+ * merge still waiting for its second look is closed when its report is
+ * rejected. With `expected`, a suggestion the member changed since is
+ * refused with code "changed".
  */
 export async function decideSuggestion(
     id: string,
@@ -572,6 +847,7 @@ export async function decideSuggestion(
         verdict: "approved" | "rejected";
         note?: string;
         edited?: Record<string, unknown>;
+        expected?: ExpectedSuggestion;
     },
 ): Promise<DecideResult> {
     const { reviewer, verdict } = decision;
@@ -582,21 +858,29 @@ export async function decideSuggestion(
         return { success: false, error: "This suggestion has already been decided.", code: "invalid" };
     const refusal = await reviewRefusal(s, reviewer);
     if (refusal) return { success: false, error: refusal, code: "forbidden" };
+    if (!stillAsRead(s, decision.expected)) return { success: false, error: CHANGED_WORDS, code: "changed" };
     const link = `/catalog/suggestions/${s.id}`;
 
     if (verdict === "rejected") {
-        await stampDecision(
-            s.id,
-            {
-                status: "rejected",
-                admin_notes: note,
-                reviewed_by: reviewer.userId,
-                reviewed_at: new Date().toISOString(),
-                claimed_by: null,
-                claimed_until: null,
-            },
-            reviewer.role,
-        );
+        // The limit first: a refused rejection changes nothing.
+        const limit = await checkRegistryLimit(reviewer, "reject");
+        if (!limit.ok) return { success: false, error: limit.error, code: "limit" };
+        const taken = await takeDecision(s, reviewer, "rejected");
+        if (!taken.ok) return { success: false, error: taken.error, code: taken.code };
+        if (!stillAsRead(taken.row, decision.expected)) {
+            await giveBack(s, "rejected");
+            return { success: false, error: CHANGED_WORDS, code: "changed" };
+        }
+        await stampDecision(s.id, { admin_notes: note }, reviewer.role);
+        await closeWaitingMerge(reviewer, s.id, `The duplicate report was rejected${note ? `: ${note}` : "."}`);
+        const title = s.catalog_item_id ? await itemTitle(s.catalog_item_id) : null;
+        await recordRejection(reviewer, {
+            suggestionId: s.id,
+            itemId: s.catalog_item_id,
+            itemTitle: title,
+            summary: `Rejected a ${s.suggestion_type} suggestion${title ? ` about "${title}"` : ""}`,
+            note,
+        });
         await notify(
             s.user_id,
             reviewer.userId,
@@ -617,8 +901,16 @@ export async function decideSuggestion(
             };
     }
 
-    const applied = await applySuggestion(s.id, { reviewer, edited: decision.edited, note: note ?? undefined });
+    const taken = await takeDecision(s, reviewer, "approved");
+    if (!taken.ok) return { success: false, error: taken.error, code: taken.code };
+    if (!stillAsRead(taken.row, decision.expected)) {
+        await giveBack(s, "approved");
+        return { success: false, error: CHANGED_WORDS, code: "changed" };
+    }
+
+    const applied = await applyTaken(taken.row, { reviewer, edited: decision.edited, note: note ?? undefined });
     if (!applied.ok) {
+        if (applied.giveBack) await giveBack(s, "approved");
         revalidatePath("/catalog/suggestions");
         return { success: false, error: applied.error, code: applied.code, requeued: applied.requeued };
     }
@@ -627,50 +919,48 @@ export async function decideSuggestion(
         return { success: true, status: "awaiting_second_look" };
     }
 
-    await stampDecision(
-        s.id,
-        {
-            status: "approved",
-            admin_notes: note,
-            reviewed_by: reviewer.userId,
-            reviewed_at: new Date().toISOString(),
-            claimed_by: null,
-            claimed_until: null,
-        },
-        reviewer.role,
-    );
-    const diff = decision.edited ? editDiff(s.field_changes ?? {}, decision.edited) : "";
+    await stampDecision(s.id, { status: "approved", admin_notes: note }, reviewer.role);
+    const diff = decision.edited ? editDiff(taken.row.field_changes ?? {}, decision.edited) : "";
+    const lost = applied.dropped.length ? ` Not kept: ${droppedWords(applied.dropped)}.` : "";
     await notify(
         s.user_id,
         reviewer.userId,
-        `✅ Your catalog suggestion was approved by ${byLine(reviewer)}.${diff ? ` It was edited first: ${diff}.` : ""}${note ? ` Note: "${note}"` : ""}`,
+        `✅ Your catalog suggestion was approved by ${byLine(reviewer)}.${diff ? ` It was edited first: ${diff}.` : ""}${lost}${note ? ` Note: "${note}"` : ""}`,
         link,
     );
     revalidatePath("/catalog/suggestions");
-    return { success: true, status: "approved" };
+    return { success: true, status: "approved", ...(applied.dropped.length ? { dropped: applied.dropped } : {}) };
+}
+
+async function itemTitle(id: string): Promise<string | null> {
+    const { data } = await db().from("catalog_items").select("title").eq("id", id).maybeSingle();
+    return (data as { title: string | null } | null)?.title ?? null;
 }
 
 /**
  * A duplicate report whose merge passed its second look: approved, the
- * credit goes to the member, and they hear who approved it.
+ * credit goes to the member, and they hear who approved it. Guarded: only
+ * a report still waiting (under_review) moves, so a report decided
+ * another way meanwhile is never approved or credited twice.
  */
 export async function finishMergedSuggestion(
     suggestionId: string,
     who: { requester: { userId: string; alias: string }; confirmer: RegistryActor },
 ): Promise<void> {
-    const s = await readSuggestion(suggestionId);
-    if (!s || s.status === "approved") return;
-    await stampDecision(
-        s.id,
+    const { rows } = await updateSuggestion(
+        suggestionId,
         {
             status: "approved",
             reviewed_by: who.requester.userId,
             reviewed_at: new Date().toISOString(),
             claimed_by: null,
             claimed_until: null,
+            decided_role: "moderator",
         },
-        "moderator",
+        (q) => q.eq("status", "under_review"),
     );
+    const s = rows[0];
+    if (!s) return;
     await creditContributor(s.user_id);
     await notify(
         s.user_id,
@@ -681,10 +971,20 @@ export async function finishMergedSuggestion(
     revalidatePath("/catalog/suggestions");
 }
 
+/** What a member's suggestion was, in their words. */
+function kindWords(type: string): string {
+    if (type === "addition") return "new entry";
+    if (type === DUPLICATE_SUGGESTION_TYPE) return "duplicate report";
+    if (type === "correction") return "catalog correction";
+    return "catalog suggestion";
+}
+
 /**
- * An applied suggestion taken back (a revert, or an undone approval):
- * marked rejected with the reason, the approval credit returned, and the
- * author told who did it and why.
+ * An applied suggestion taken back (a revert, or an undone approval,
+ * addition or merge): marked rejected with the reason, the approval
+ * credit returned, and the author told who did it and why. Guarded: only
+ * an approved suggestion moves, so a second undo never takes a second
+ * credit away.
  */
 export async function withdrawApproval(
     suggestionId: string,
@@ -692,18 +992,19 @@ export async function withdrawApproval(
     reason: string,
     drifted: string[] = [],
 ): Promise<void> {
-    const s = await readSuggestion(suggestionId);
-    if (!s) return;
-    await stampDecision(
-        s.id,
+    const { rows } = await updateSuggestion(
+        suggestionId,
         {
             status: "rejected",
             admin_notes: `Reverted: ${reason}${drifted.length ? ` (kept, changed since: ${drifted.join(", ")})` : ""}`,
             reviewed_by: actor.userId,
             reviewed_at: new Date().toISOString(),
+            decided_role: actor.role,
         },
-        actor.role,
+        (q) => q.in("status", ["approved", "auto_approved"]),
     );
+    const s = rows[0];
+    if (!s) return;
     // A reverted change must not count toward the curator ladder.
     const { data: authorRow } = await db()
         .from("users")
@@ -718,9 +1019,41 @@ export async function withdrawApproval(
     await notify(
         s.user_id,
         actor.userId,
-        `↩️ ${byLine(actor)} reverted your catalog correction. Note: "${reason}"`,
+        `↩️ ${byLine(actor)} reverted your ${kindWords(s.suggestion_type)}. Note: "${reason}"`,
         `/catalog/suggestions/${s.id}`,
     );
     revalidatePath(`/catalog/suggestions/${s.id}`);
     revalidatePath("/catalog/suggestions");
+}
+
+/**
+ * A rejection undone: the suggestion goes back in the queue as pending,
+ * and the member hears it is being looked at again. Guarded: only a
+ * suggestion still rejected moves. Returns whether it moved.
+ */
+export async function reopenSuggestion(suggestionId: string, actor: RegistryActor, reason: string): Promise<boolean> {
+    const { rows } = await updateSuggestion(
+        suggestionId,
+        {
+            status: "pending",
+            admin_notes: `Back in the queue: ${reason}`,
+            reviewed_by: null,
+            reviewed_at: null,
+            decided_role: null,
+            claimed_by: null,
+            claimed_until: null,
+        },
+        (q) => q.eq("status", "rejected"),
+    );
+    const s = rows[0];
+    if (!s) return false;
+    await notify(
+        s.user_id,
+        actor.userId,
+        `↩️ ${byLine(actor)} took back the "not approved" on your ${kindWords(s.suggestion_type)}: it is back in the queue.`,
+        `/catalog/suggestions/${s.id}`,
+    );
+    revalidatePath(`/catalog/suggestions/${s.id}`);
+    revalidatePath("/catalog/suggestions");
+    return true;
 }

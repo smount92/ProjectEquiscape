@@ -3,6 +3,8 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { logger } from "@/lib/logger";
 import { getAdminClient } from "@/lib/supabase/admin";
+import type { CountableVoters } from "@/lib/registry/rules";
+import { seatIsActive } from "@/lib/registry/types";
 
 /**
  * Telling the owner about Registry work (owner answers 4 and 5,
@@ -35,10 +37,47 @@ export async function alertOwner(kind: AlertKind, text: string, link: string): P
 export async function anyActiveModerator(): Promise<boolean> {
     try {
         const db = getAdminClient() as unknown as SupabaseClient;
-        const { data, error } = await db.from("registry_moderators").select("user_id").eq("status", "active").limit(1);
+        const { data, error } = await db
+            .from("registry_moderators")
+            .select("user_id")
+            .eq("status", "active")
+            .gt("term_ends_at", new Date().toISOString())
+            .limit(1);
         if (error) return false;
         return Array.isArray(data) && data.length > 0;
     } catch {
         return false;
     }
+}
+
+/**
+ * Whose votes count toward a style rule's agreements today: moderators
+ * with an active seat whose term has not run out, plus the owner (always).
+ * On a read error the active list is empty, so only the owner's vote
+ * counts until it can be read again: a rule never takes effect on votes
+ * that may not count.
+ */
+export async function countableRuleVoters(): Promise<CountableVoters> {
+    const admin = getAdminClient();
+    const owners = new Set<string>();
+    const active = new Set<string>();
+    try {
+        const { adminNotificationTargets } = await import("@/lib/notifications/adminTargets");
+        for (const id of await adminNotificationTargets(admin)) owners.add(id);
+    } catch (err) {
+        logger.error("RegistryAlerts", "Reading the owner for rule votes failed", err);
+    }
+    try {
+        const db = admin as unknown as SupabaseClient;
+        const { data, error } = await db
+            .from("registry_moderators")
+            .select("user_id, status, term_ends_at")
+            .eq("status", "active");
+        if (!error)
+            for (const s of (data ?? []) as { user_id: string; status: string; term_ends_at: string | null }[])
+                if (seatIsActive(s)) active.add(s.user_id);
+    } catch (err) {
+        logger.error("RegistryAlerts", "Reading moderator seats for rule votes failed", err);
+    }
+    return { active, owners };
 }

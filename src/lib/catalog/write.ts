@@ -74,7 +74,19 @@ export type WriteErrorCode =
     | "limit"
     | "linked"
     | "not_ready"
-    | "failed";
+    | "failed"
+    /** The member changed the suggestion while the reviewer was looking at it. */
+    | "changed";
+
+/** A value a suggested addition carried that the Registry did not keep, and why. */
+export interface DroppedValue {
+    key: string;
+    /** The field's name, as people read it. */
+    label: string;
+    /** What was sent, as text. */
+    value: string;
+    error: string;
+}
 
 /** A refused write. `error` is a sentence a person can read; the extras help the screen. */
 export interface WriteFailure {
@@ -152,6 +164,9 @@ const RPC_CODES = new Set([
     "same",
     "missing",
     "keep_is_child",
+    "mixed",
+    "mismatch",
+    "not_waiting",
     "already_applied",
     "exists",
     "not_found",
@@ -187,7 +202,29 @@ async function mergeUndoReady(): Promise<boolean> {
     return !error || !isMissingSchema(error);
 }
 
-const same = (a: unknown, b: unknown) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
+/**
+ * Is update 243 in (the archive table that makes merges and removals
+ * undoable)? For the Desk: show Merge, Remove and Undo only when true.
+ */
+export async function undoReady(): Promise<boolean> {
+    return mergeUndoReady();
+}
+
+/** JSON with its keys sorted, so two copies of the same object compare equal. */
+function stable(v: unknown): string {
+    return JSON.stringify(v ?? null, (_k, value: unknown) =>
+        value && typeof value === "object" && !Array.isArray(value)
+            ? Object.fromEntries(Object.entries(value as Record<string, unknown>).sort(([a], [b]) => (a < b ? -1 : 1)))
+            : value,
+    );
+}
+
+const same = (a: unknown, b: unknown) => stable(a) === stable(b);
+
+/** Same as `same`, exported for the suggestion pipeline's "did the member change it?" check. */
+export function sameValue(a: unknown, b: unknown): boolean {
+    return same(a, b);
+}
 
 function quote(v: unknown): string {
     if (v === null || v === undefined || v === "") return "(empty)";
@@ -259,13 +296,36 @@ export function knownAttributeKeys(): Set<string> {
 
 const CATEGORY_VALUES = new Set<string>(CATALOG_CATEGORIES.map((c) => c.value));
 
+/**
+ * Attribute keys that hold a list of words (a diorama's components, what a
+ * piece of tack fits, the materials and working parts the asset form
+ * offers as chips), plus any field the Desk's registry marks as a list.
+ * Only these may hold an array; every other value is text.
+ */
+const BASE_LIST_KEYS = ["components", "fits_molds", "materials", "working_parts"];
+
+export function listAttributeKeys(): Set<string> {
+    const keys = new Set(BASE_LIST_KEYS);
+    const desk = (editableFields as unknown as Record<string, unknown>).DESK_FIELDS;
+    if (Array.isArray(desk)) {
+        for (const f of desk as { key?: unknown; kind?: unknown }[])
+            if (typeof f?.key === "string" && f.kind === "list") keys.add(f.key);
+    }
+    return keys;
+}
+
+/** Keys that would reach an object's prototype, never a Registry field. */
+const UNSAFE_KEYS = new Set(["__proto__", "constructor", "prototype"]);
+
+const own = (o: object, k: string) => Object.hasOwn(o, k);
+
 export interface ValidateContext {
     /**
      * The mold the row will be filed under after the change (its current
      * mold when parent_id is not changing). null = that id names no row;
      * undefined = not looked up.
      */
-    parent?: { id: string; item_type: string; scale: string | null } | null;
+    parent?: { id: string; item_type: string; scale: string | null; title?: string | null } | null;
     /** How many rows are filed under this one (needed to change a mold's type). */
     childCount?: number;
 }
@@ -282,9 +342,21 @@ export type Validation =
           after: Record<string, unknown>;
           touched: string[];
           /** Lenient mode only: attribute values dropped, with why. */
-          dropped: { key: string; error: string }[];
+          dropped: DroppedValue[];
       }
     | { ok: false; field: string; error: string };
+
+/** A value as people read it in a "dropped" list. */
+function asText(v: unknown): string {
+    if (v === null || v === undefined) return "";
+    if (typeof v === "string") return v;
+    if (typeof v === "number" || typeof v === "boolean") return String(v);
+    try {
+        return JSON.stringify(v).slice(0, 200);
+    } catch {
+        return "(a value that can't be shown)";
+    }
+}
 
 /**
  * Check and tidy a set of changes to one row (or a new row, when `row` is
@@ -310,18 +382,37 @@ export function validateChanges(
     const before: Record<string, unknown> = {};
     const after: Record<string, unknown> = {};
     const touched: string[] = [];
-    const dropped: { key: string; error: string }[] = [];
+    const dropped: DroppedValue[] = [];
     const known = knownAttributeKeys();
+    const lists = listAttributeKeys();
     let attributesChanged = false;
 
-    const isEmpty = (v: unknown) => v === null || v === undefined || (typeof v === "string" && v.trim() === "");
+    const isEmpty = (v: unknown) =>
+        v === null ||
+        v === undefined ||
+        (typeof v === "string" && v.trim() === "") ||
+        (Array.isArray(v) && v.length === 0);
+    const drop = (key: string, raw: unknown, error: string) =>
+        dropped.push({ key, label: labelOf(key), value: asText(raw), error });
 
-    for (const [key, raw] of Object.entries(changes)) {
+    for (const [key, raw] of Object.entries(changes ?? {})) {
+        if (UNSAFE_KEYS.has(key)) {
+            const error = `"${key}" is not a field the Registry keeps.`;
+            if (opts.lenient) {
+                drop(key, raw, error);
+                continue;
+            }
+            return { ok: false, field: key, error };
+        }
         if (READ_ONLY.has(key))
             return { ok: false, field: key, error: `${labelOf(key)} is kept by the Registry itself.` };
 
         if (CATALOG_REAL_COLUMNS.has(key)) {
             const current = row ? ((row as unknown as Record<string, unknown>)[key] ?? null) : null;
+            // Columns hold text (or nothing): a number is read as its text;
+            // a list or an object is never a name, a scale or a mold.
+            if (raw !== null && typeof raw === "object")
+                return { ok: false, field: key, error: `${labelOf(key)} takes plain text, not a list.` };
             const result = checkColumn(key, raw, isEmpty(raw), row, ctx);
             if (!result.ok) return { ok: false, field: key, error: result.error };
             if (row && same(current, result.value)) continue;
@@ -333,17 +424,18 @@ export function validateChanges(
             continue;
         }
 
-        // An attribute.
-        if (!(key in attrsNow) && !known.has(key)) {
+        // An attribute. Object.hasOwn, not `in`: "constructor" and
+        // "toString" are on every object's prototype, never on a row.
+        if (!own(attrsNow, key) && !known.has(key)) {
             const error = `"${key}" is not a field the Registry keeps.`;
             if (opts.lenient) {
-                dropped.push({ key, error });
+                drop(key, raw, error);
                 continue;
             }
             return { ok: false, field: key, error };
         }
         if (isEmpty(raw)) {
-            if (key in attrsNow) {
+            if (own(attrsNow, key)) {
                 delete attrsNext[key];
                 before[key] = attrsNow[key] ?? null;
                 after[key] = null;
@@ -352,17 +444,17 @@ export function validateChanges(
             }
             continue;
         }
-        const result = checkAttribute(key, raw);
+        const result = lists.has(key) ? checkList(key, raw) : checkAttribute(key, raw);
         if (!result.ok) {
             if (opts.lenient) {
-                dropped.push({ key, error: result.error });
+                drop(key, raw, result.error);
                 continue;
             }
             return { ok: false, field: key, error: result.error };
         }
-        if (key in attrsNow && same(attrsNow[key], result.value)) continue;
+        if (own(attrsNow, key) && same(attrsNow[key], result.value)) continue;
         attrsNext[key] = result.value;
-        before[key] = key in attrsNow ? (attrsNow[key] ?? null) : null;
+        before[key] = own(attrsNow, key) ? (attrsNow[key] ?? null) : null;
         after[key] = result.value;
         touched.push(key);
         attributesChanged = true;
@@ -388,12 +480,17 @@ export function validateChanges(
         const refiled = "parent_id" in columns;
         const asked = "scale" in columns ? columns.scale : undefined;
         if (asked !== undefined && asked !== moldScale) {
+            const mold = ctx.parent.title ? `"${ctx.parent.title}"` : "its mold";
+            const wanted = asked ? String(asked) : "no scale";
             return {
                 ok: false,
                 field: "scale",
                 error: refiled
-                    ? `A release takes its mold's scale (${moldScale}).`
-                    : `This release's scale follows its mold (${moldScale}). Re-file it under a mold of the scale you want, or change the mold's scale.`,
+                    ? `A release takes its mold's scale. ${mold} is ${moldScale}, so this release would be ${moldScale} too.`
+                    : `This release is filed under ${mold}, which is ${moldScale}, and a release always has its mold's scale. ` +
+                      (asked
+                          ? `If it really is ${wanted}, it belongs under the ${wanted} mold: re-file it there instead (the suggestion can be filed again under that mold).`
+                          : `To clear it, re-file it under a mold with no scale, or change the mold's own scale.`),
             };
         }
         if (refiled && asked === undefined && (row?.scale ?? null) !== moldScale) {
@@ -494,7 +591,12 @@ function checkColumn(
     }
 }
 
-function checkAttribute(key: string, raw: unknown): { ok: true; value: unknown } | { ok: false; error: string } {
+function checkAttribute(key: string, input: unknown): { ok: true; value: unknown } | { ok: false; error: string } {
+    // Every attribute below is text: a list or an object never is, and a
+    // number or a yes/no is judged as the text it reads as.
+    if (input !== null && typeof input === "object")
+        return { ok: false, error: `${labelOf(key)} takes plain text, not a list.` };
+    const raw = typeof input === "number" || typeof input === "boolean" ? String(input) : input;
     switch (key) {
         case "release_year_start":
         case "release_year_end": {
@@ -528,14 +630,8 @@ function checkAttribute(key: string, raw: unknown): { ok: true; value: unknown }
             return { ok: true, value: normalizeCatalogBreed(raw) };
         }
         default: {
-            if (typeof raw === "number" || typeof raw === "boolean") return { ok: true, value: raw };
-            if (typeof raw !== "string") {
-                const json = JSON.stringify(raw);
-                return json && json.length <= 4000
-                    ? { ok: true, value: raw }
-                    : { ok: false, error: `${labelOf(key)} is too long.` };
-            }
-            const value = normalizeFactValue(key, raw);
+            const text = String(raw);
+            const value = normalizeFactValue(key, text);
             const problem = fieldValueProblem(key, value);
             if (problem) return { ok: false, error: problem };
             const max = LONG_TEXT.has(key) ? 4000 : 500;
@@ -544,6 +640,32 @@ function checkAttribute(key: string, raw: unknown): { ok: true; value: unknown }
             return { ok: true, value };
         }
     }
+}
+
+/**
+ * A list field (components, fits_molds, materials, working parts): a
+ * list of short words, or one line of text. Each entry is tidied and
+ * checked like text; empty entries are dropped; objects never pass.
+ */
+function checkList(key: string, raw: unknown): { ok: true; value: unknown } | { ok: false; error: string } {
+    if (typeof raw === "string" || typeof raw === "number") {
+        const value = normalizeFactValue(key, String(raw));
+        if (String(value).length > 500) return { ok: false, error: `${labelOf(key)} is up to 500 characters.` };
+        return { ok: true, value };
+    }
+    if (!Array.isArray(raw)) return { ok: false, error: `${labelOf(key)} is a list of words, one per entry.` };
+    if (raw.length > 50) return { ok: false, error: `${labelOf(key)} holds up to 50 entries.` };
+    const out: string[] = [];
+    for (const entry of raw) {
+        if (entry === null || entry === undefined) continue;
+        if (typeof entry !== "string" && typeof entry !== "number")
+            return { ok: false, error: `Each entry in ${labelOf(key)} is a word or a short phrase.` };
+        const text = String(entry).trim();
+        if (!text) continue;
+        if (text.length > 200) return { ok: false, error: `Each entry in ${labelOf(key)} is up to 200 characters.` };
+        if (!out.includes(text)) out.push(text);
+    }
+    return { ok: true, value: out };
 }
 
 /** "Colour and markings: Bay → Black, Run type: (empty) → Special Run". */
@@ -573,11 +695,12 @@ interface ActionInput {
 
 /** One History entry and its rows. Null before 242 (or on a failure, which is logged). */
 async function recordAction(actor: RegistryActor, input: ActionInput): Promise<string | null> {
+    const status = input.status ?? "applied";
     const { data, error } = await db()
         .from("registry_actions")
         .insert({
             kind: input.kind,
-            status: input.status ?? "applied",
+            status,
             actor_id: actor.userId,
             actor_role: actor.role,
             catalog_item_id: input.itemId,
@@ -588,7 +711,7 @@ async function recordAction(actor: RegistryActor, input: ActionInput): Promise<s
             note: input.note ? input.note.slice(0, 2000) : null,
             row_count: Math.max(1, input.rows?.length ?? 1),
             undo_of: input.undoOf ?? null,
-            applied_at: input.applied === false ? null : new Date().toISOString(),
+            applied_at: status === "applied" && input.applied !== false ? new Date().toISOString() : null,
         })
         .select("id")
         .single();
@@ -673,7 +796,26 @@ async function markUndone(actor: RegistryActor, actionId: string): Promise<void>
     await db()
         .from("registry_actions")
         .update({ status: "undone", undone_by: actor.userId, undone_at: new Date().toISOString() })
-        .eq("id", actionId);
+        .eq("id", actionId)
+        .eq("status", "applied");
+}
+
+/**
+ * Mark a merge or removal that did not happen as failed. Guarded: only an
+ * entry still in the state this caller left it in (a pending entry, or a
+ * merge still waiting for its second look) and never one the database
+ * already applied. A second "Confirm" that finds the merge done can never
+ * mark the applied merge failed and lose its undo.
+ */
+async function markFailed(actionId: string | null, from: "pending" | "awaiting_second_look"): Promise<void> {
+    if (!actionId) return;
+    const { error } = await db()
+        .from("registry_actions")
+        .update({ status: "failed" })
+        .eq("id", actionId)
+        .eq("status", from)
+        .is("applied_at", null);
+    if (error) logger.error("RegistryWrite", "Marking a History entry failed did not save (continuing)", error);
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -682,8 +824,38 @@ async function markUndone(actor: RegistryActor, actionId: string): Promise<void>
 
 async function lookupParent(id: unknown): Promise<ValidateContext["parent"]> {
     if (typeof id !== "string" || !UUID_RE.test(id.trim())) return undefined;
-    const { data } = await db().from("catalog_items").select("id, item_type, scale").eq("id", id.trim()).maybeSingle();
-    return (data as { id: string; item_type: string; scale: string | null } | null) ?? null;
+    const { data } = await db()
+        .from("catalog_items")
+        .select("id, item_type, scale, title")
+        .eq("id", id.trim())
+        .maybeSingle();
+    return (data as { id: string; item_type: string; scale: string | null; title: string | null } | null) ?? null;
+}
+
+/**
+ * A mold's scale changed: its releases follow it (a release always has
+ * its mold's scale). Moved one group of old scales at a time, so each
+ * release's old scale is known exactly and the History can put it back.
+ */
+async function moveReleasesToScale(
+    moldId: string,
+    scale: string | null,
+): Promise<{ rows: { catalog_item_id: string; before: unknown; after: unknown }[]; error?: DbError }> {
+    const { data: kids, error } = await db().from("catalog_items").select("id, scale").eq("parent_id", moldId);
+    if (error) return { rows: [], error };
+    const olds = [...new Set(((kids ?? []) as { scale: string | null }[]).map((k) => k.scale ?? null))].filter(
+        (s) => s !== scale,
+    );
+    const rows: { catalog_item_id: string; before: unknown; after: unknown }[] = [];
+    for (const old of olds) {
+        let q = db().from("catalog_items").update({ scale }).eq("parent_id", moldId);
+        q = old === null ? q.is("scale", null) : q.eq("scale", old);
+        const { data, error: moveError } = await q.select("id");
+        if (moveError) return { rows, error: moveError };
+        for (const r of (data ?? []) as { id: string }[])
+            rows.push({ catalog_item_id: r.id, before: { scale: old }, after: { scale } });
+    }
+    return { rows };
 }
 
 export interface UpdateItemInput {
@@ -753,6 +925,18 @@ export async function updateItem(
         return fail("conflict", "Someone saved this entry since you opened it. Here it is as it is now.", { current });
     }
 
+    // A mold's scale is its releases' scale: they move with it, in the
+    // same History entry, so one undo puts all of them back.
+    let followers: { catalog_item_id: string; before: unknown; after: unknown }[] = [];
+    if (updated.item_type === "plastic_mold" && v.touched.includes("scale")) {
+        const moved = await moveReleasesToScale(row.id, (v.columns.scale as string | null) ?? null);
+        followers = moved.rows;
+        if (moved.error) logger.error("RegistryWrite", "Moving releases to the mold's new scale stopped", moved.error);
+    }
+    const followWords = followers.length
+        ? ` (and ${followers.length} release${followers.length === 1 ? "" : "s"} filed under it)`
+        : "";
+
     const kind: ActionKind = input.kind ?? (v.touched.includes("parent_id") ? "refile" : "edit");
     const described = describeChanges(v.before, v.after);
     const actionId = await recordAction(actor, {
@@ -760,14 +944,14 @@ export async function updateItem(
         itemId: row.id,
         itemTitle: updated.title,
         suggestionId: input.suggestionId ?? null,
-        summary: `${updated.title}: ${described}`,
+        summary: `${updated.title}: ${described}${followWords}`,
         note: input.note ?? null,
-        rows: [{ catalog_item_id: row.id, before: v.before, after: v.after }],
+        rows: [{ catalog_item_id: row.id, before: v.before, after: v.after }, ...followers],
     });
     await recordChange(actor, {
         itemId: row.id,
         changeType: kind === "revert" ? "revert" : "correction",
-        summary: input.summary ?? `🔧 Correction: ${described}`,
+        summary: (input.summary ?? `🔧 Correction: ${described}`) + followWords,
         suggestionId: input.suggestionId ?? null,
         actionId,
         contributor: input.contributor ?? null,
@@ -791,9 +975,7 @@ export interface InsertItemInput {
 export async function insertItem(
     actor: RegistryActor,
     input: InsertItemInput,
-): Promise<
-    WriteResult<{ id: string; item: CatalogRow; actionId: string | null; dropped: { key: string; error: string }[] }>
-> {
+): Promise<WriteResult<{ id: string; item: CatalogRow; actionId: string | null; dropped: DroppedValue[] }>> {
     const limit = await checkRegistryLimit(actor, "edit");
     if (!limit.ok) return fail("limit", limit.error);
 
@@ -1012,11 +1194,14 @@ export async function linkCounts(id: string): Promise<LinkCounts> {
     let set_siblings = 0;
     if (row.item_type === "plastic_mold") {
         // The linker's candidate query: titles with "with" and every word of the mold's name.
+        // Set rows filed under another mold, AND set rows filed under no
+        // mold at all: `neq` alone skips NULL, and an unfiled set that
+        // lists this mold is still one of its pieces.
         let q = db()
             .from("catalog_items")
             .select("id, title, scale")
             .eq("item_type", "plastic_release")
-            .neq("parent_id", row.id)
+            .or(`parent_id.is.null,parent_id.neq.${row.id}`)
             .ilike("title", "%with%");
         for (const w of rosterPrefilterWords(row.title)) q = q.ilike("title", `%${w.replace(/[%_]/g, "")}%`);
         const { data: sets } = await q.limit(400);
@@ -1119,6 +1304,13 @@ async function legacyMerge(
     const flagError = await fold("catalog_price_signal_flags", "catalog_item_id", "reporter_id");
     if (flagError && !isMissingSchema(flagError)) return dbFailure("Folding price flags failed", flagError);
 
+    // Two molds: the duplicate's releases move to the kept mold below and
+    // take its scale (a release always has its mold's scale).
+    if (keep.item_type === "plastic_mold" && keep.scale) {
+        const moved = await moveReleasesToScale(dup.id, keep.scale);
+        if (moved.error) return dbFailure("Moving releases to the kept mold's scale failed", moved.error);
+    }
+
     let moved = 0;
     for (const [table, column] of MERGE_REPOINTS) {
         const { data, error } = await client
@@ -1170,13 +1362,36 @@ async function legacyMerge(
     return { success: true, moved, summary, actionId };
 }
 
+/** Errors from registry_merge that mean the merge can never run as asked (as opposed to a deadlock or a timeout). */
+const MERGE_DEFINITIVE = new Set(["same", "missing", "keep_is_child", "mixed", "mismatch", "not_found", "not_merge"]);
+
+function mergeSummary(dup: CatalogRow, keep: CatalogRow, moved: number, rescaled: number): string {
+    const base = `Merged "${dup.title}" into "${keep.title}": ${moved} link${moved === 1 ? "" : "s"} moved.`;
+    if (!rescaled) return base;
+    return `${base} ${rescaled} release${rescaled === 1 ? " now has" : "s now have"} the kept mold's scale (${keep.scale}).`;
+}
+
+/**
+ * Run registry_merge for a recorded History entry. `from` is the state the
+ * entry is in: the owner's `pending` entry is marked failed on ANY
+ * refusal (it was never waiting for anyone); a moderator's entry waiting
+ * for its second look is marked failed only when the merge can never run
+ * (an entry gone, a wrong pair), and stays waiting after a deadlock or a
+ * timeout, so someone can try again. "Already applied" never marks
+ * anything: that merge happened, and its undo must survive.
+ */
 async function applyMerge(
     actor: RegistryActor,
     actionId: string,
     keep: CatalogRow,
     dup: CatalogRow,
-    opts: { reason: string; suggestionId?: string | null; contributor?: { userId: string; alias: string } | null },
-): Promise<WriteResult<{ moved: number; summary: string }>> {
+    opts: {
+        reason: string;
+        from: "pending" | "awaiting_second_look";
+        suggestionId?: string | null;
+        contributor?: { userId: string; alias: string } | null;
+    },
+): Promise<WriteResult<{ moved: number; rescaled: number; summary: string }>> {
     const { data, error } = await db().rpc("registry_merge", {
         p_keep: keep.id,
         p_remove: dup.id,
@@ -1185,14 +1400,17 @@ async function applyMerge(
         p_reason: opts.reason,
     });
     if (error) {
-        const failure = rpcFailure("Merge failed", error);
-        if (failure.code === "not_found" || failure.code === "invalid") {
-            await db().from("registry_actions").update({ status: "failed" }).eq("id", actionId);
-        }
-        return failure;
+        const raised = error.message ?? "";
+        if (raised === "already_applied")
+            return fail("invalid", "This merge has already been applied. Nothing more to do.");
+        if (raised === "not_waiting") return fail("invalid", "This merge is no longer waiting for a second look.");
+        if (opts.from === "pending" || MERGE_DEFINITIVE.has(raised)) await markFailed(actionId, opts.from);
+        return rpcFailure("Merge failed", error);
     }
-    const moved = Number((data as { moved?: number } | null)?.moved ?? 0);
-    const summary = `Merged "${dup.title}" into "${keep.title}": ${moved} link${moved === 1 ? "" : "s"} moved.`;
+    const d = (data ?? {}) as { moved?: number; rescaled?: number };
+    const moved = Number(d.moved ?? 0);
+    const rescaled = Number(d.rescaled ?? 0);
+    const summary = mergeSummary(dup, keep, moved, rescaled);
     await recordChange(actor, {
         itemId: keep.id,
         changeType: "merge",
@@ -1201,12 +1419,79 @@ async function applyMerge(
         actionId,
         contributor: opts.contributor ?? null,
     });
-    return { success: true, moved, summary };
+    return { success: true, moved, rescaled, summary };
+}
+
+/**
+ * Change a suggestion's status from write.ts (a merge waiting for, or
+ * finished with, its second look). Guarded on the status the caller
+ * expects, so a decision made meanwhile is never overwritten; before 242
+ * the claim columns are left out.
+ */
+async function moveSuggestion(
+    suggestionId: string,
+    fields: Record<string, unknown>,
+    fromStatuses: string[],
+): Promise<boolean> {
+    const run = (payload: Record<string, unknown>) =>
+        db().from("catalog_suggestions").update(payload).eq("id", suggestionId).in("status", fromStatuses).select("id");
+    let { data, error } = await run(fields);
+    if (error && isMissingSchema(error)) {
+        const { claimed_by: _by, claimed_until: _until, ...legacy } = fields;
+        void _by;
+        void _until;
+        ({ data, error } = await run(legacy));
+    }
+    if (error) {
+        logger.error("RegistryWrite", "Suggestion status change failed (continuing)", error);
+        return false;
+    }
+    return Array.isArray(data) && data.length > 0;
+}
+
+/** The merge waiting for a second look that came from this suggestion, if any. */
+export async function waitingMergeFor(
+    suggestionId: string,
+): Promise<{ id: string; actorId: string | null; summary: string } | null> {
+    if (!UUID_RE.test(suggestionId)) return null;
+    const { data, error } = await db()
+        .from("registry_actions")
+        .select("id, actor_id, summary")
+        .eq("suggestion_id", suggestionId)
+        .eq("kind", "merge")
+        .eq("status", "awaiting_second_look")
+        .limit(1);
+    if (error || !Array.isArray(data) || data.length === 0) return null;
+    const a = data[0] as { id: string; actor_id: string | null; summary: string };
+    return { id: a.id, actorId: a.actor_id, summary: a.summary };
+}
+
+/**
+ * The suggestion was decided some other way (rejected, or approved by the
+ * owner in Admin) while its merge waited: the waiting merge is closed, so
+ * nobody confirms a merge for a report that was already settled.
+ */
+export async function closeWaitingMerge(actor: RegistryActor, suggestionId: string, note: string): Promise<void> {
+    const waiting = await waitingMergeFor(suggestionId);
+    if (!waiting) return;
+    const { error } = await db()
+        .from("registry_actions")
+        .update({
+            status: "declined",
+            second_look_by: actor.userId,
+            second_look_at: new Date().toISOString(),
+            second_look_note: note.slice(0, 1000),
+        })
+        .eq("id", waiting.id)
+        .eq("status", "awaiting_second_look");
+    if (error) logger.error("RegistryWrite", "Closing a waiting merge failed (continuing)", error);
 }
 
 /**
  * Ask for a merge. The owner's applies at once (still undoable, answer 3);
- * a moderator's waits for a second look from someone else.
+ * a moderator's waits for a second look from someone else. Molds merge
+ * into molds: the duplicate mold's releases move to the kept mold and
+ * take its scale, and an undo puts their old scales back.
  */
 export async function requestMerge(
     actor: RegistryActor,
@@ -1238,6 +1523,40 @@ export async function requestMerge(
     const ready = await mergeUndoReady();
     if (!ready && actor.role !== "owner") return fail("not_ready", MERGE_REMOVE_NOT_READY);
 
+    if (ready) {
+        // One open merge per duplicate. The owner asking for the same merge
+        // that already waits is its second look; anyone else is pointed at it.
+        const { data: open } = await db()
+            .from("registry_actions")
+            .select("id, actor_id, related_item_id")
+            .eq("kind", "merge")
+            .eq("status", "awaiting_second_look")
+            .eq("catalog_item_id", dup.id)
+            .limit(1);
+        const waiting = (Array.isArray(open) ? open[0] : null) as {
+            id: string;
+            actor_id: string | null;
+            related_item_id: string | null;
+        } | null;
+        if (waiting) {
+            if (actor.role === "owner" && waiting.related_item_id === keep.id && waiting.actor_id !== actor.userId) {
+                const confirmed = await confirmMerge(actor, waiting.id);
+                if (!confirmed.success) return confirmed;
+                return {
+                    success: true,
+                    actionId: waiting.id,
+                    status: "applied",
+                    summary: confirmed.summary,
+                    legacy: false,
+                };
+            }
+            return fail(
+                "invalid",
+                `A merge of "${dup.title}" already waits for a second look. Confirm or decline that one first.`,
+            );
+        }
+    }
+
     const limit = await checkRegistryLimit(actor, "merge");
     if (!limit.ok) return fail("limit", limit.error);
     const note = (input.note ?? "").trim().slice(0, 1000);
@@ -1253,19 +1572,23 @@ export async function requestMerge(
     }
 
     if (actor.role === "owner") {
+        // Pending until registry_merge turns it applied in its own
+        // transaction: the History never says "applied" for a merge that
+        // did not run.
         const actionId = await recordAction(actor, {
             kind: "merge",
+            status: "pending",
             itemId: dup.id,
             itemTitle: dup.title,
             relatedItemId: keep.id,
             suggestionId: input.suggestionId ?? null,
             summary: `Merge "${dup.title}" into "${keep.title}"`,
             note: note || null,
-            applied: false,
         });
         if (!actionId) return fail("failed", GENERIC_REFUSAL);
         const merged = await applyMerge(actor, actionId, keep, dup, {
             reason: note,
+            from: "pending",
             suggestionId: input.suggestionId,
             contributor: input.contributor,
         });
@@ -1283,11 +1606,15 @@ export async function requestMerge(
         suggestionId: input.suggestionId ?? null,
         summary: `Merge "${dup.title}" into "${keep.title}"`,
         note: note || null,
-        applied: false,
     });
     if (!actionId) return fail("failed", GENERIC_REFUSAL);
     if (input.suggestionId) {
-        await db().from("catalog_suggestions").update({ status: "under_review" }).eq("id", input.suggestionId);
+        // The report waits with its merge; nobody holds a claim on it now.
+        await moveSuggestion(input.suggestionId, { status: "under_review", claimed_by: null, claimed_until: null }, [
+            "pending",
+            "under_review",
+            "approved",
+        ]);
     }
     await alertOwner(
         "merge_requested",
@@ -1317,6 +1644,8 @@ interface ActionRow {
     summary: string;
     note: string | null;
     undo_until: string;
+    created_at?: string;
+    applied_at?: string | null;
 }
 
 async function readAction(id: string): Promise<ActionRow | null> {
@@ -1331,6 +1660,32 @@ async function aliasOf(userId: string | null): Promise<string> {
     return (data as { alias_name: string | null } | null)?.alias_name ?? "a moderator";
 }
 
+/** Words for an entry that is no longer waiting, read from its status. */
+function notWaitingWords(status: ActionStatus): string {
+    if (status === "applied" || status === "undone") return "This merge has already been applied.";
+    if (status === "declined") return "This merge was declined, so there is nothing to confirm.";
+    return "This merge is no longer waiting for a second look.";
+}
+
+/**
+ * The second look's own rules, when the merge came from a member's
+ * duplicate report: the same as deciding the report (nobody decides their
+ * own; an artist doesn't decide about their own work). Returns the
+ * report's author for the changelog credit.
+ */
+async function secondLookRules(
+    actor: RegistryActor,
+    action: ActionRow,
+): Promise<{ ok: true; author: { userId: string; alias: string } | null } | { ok: false; error: string }> {
+    if (!action.suggestion_id) return { ok: true, author: null };
+    const { readSuggestion, reviewRefusal } = await import("@/lib/catalog/suggestionApply");
+    const s = await readSuggestion(action.suggestion_id);
+    if (!s) return { ok: true, author: null };
+    const refusal = await reviewRefusal(s, actor);
+    if (refusal) return { ok: false, error: refusal };
+    return { ok: true, author: { userId: s.user_id, alias: await aliasOf(s.user_id) } };
+}
+
 /** The second look: apply a moderator's merge. Never by the moderator who asked. */
 export async function confirmMerge(
     actor: RegistryActor,
@@ -1339,34 +1694,52 @@ export async function confirmMerge(
     if (!(await mergeUndoReady())) return fail("not_ready", MERGE_REMOVE_NOT_READY);
     const action = await readAction(actionId);
     if (!action || action.kind !== "merge") return fail("not_found", "That merge request is not in the history.");
-    if (action.status !== "awaiting_second_look")
-        return fail("invalid", "This merge is no longer waiting for a second look.");
+    if (action.status !== "awaiting_second_look") return fail("invalid", notWaitingWords(action.status));
     if (action.actor_id === actor.userId)
         return fail("forbidden", "You asked for this merge, so someone else gives it the second look.");
+    const rules = await secondLookRules(actor, action);
+    if (!rules.ok) return fail("forbidden", rules.error);
 
     const limit = await checkRegistryLimit(actor, "merge");
     if (!limit.ok) return fail("limit", limit.error);
+
+    const requester = { userId: action.actor_id ?? actor.userId, alias: await aliasOf(action.actor_id) };
+    // A member's duplicate report keeps its credit: the changelog names them.
+    const contributor = rules.author ?? requester;
+    const gone = async (): Promise<WriteFailure> => {
+        await markFailed(action.id, "awaiting_second_look");
+        if (action.suggestion_id) {
+            await moveSuggestion(
+                action.suggestion_id,
+                {
+                    status: "pending",
+                    claimed_by: null,
+                    claimed_until: null,
+                    admin_notes:
+                        "The merge could not be made: one of the two entries is no longer in the Registry. Look at the report again.",
+                },
+                ["under_review"],
+            );
+        }
+        return fail("not_found", "One of the two entries is no longer in the Registry, so there is nothing to merge.");
+    };
 
     const [keep, dup] = await Promise.all([
         readRow(action.related_item_id ?? ""),
         readRow(action.catalog_item_id ?? ""),
     ]);
-    if (!keep || !dup) {
-        await db().from("registry_actions").update({ status: "failed" }).eq("id", action.id);
-        return fail("not_found", "One of the two entries is no longer in the Registry, so there is nothing to merge.");
-    }
-    await db()
-        .from("registry_actions")
-        .update({ second_look_by: actor.userId, second_look_at: new Date().toISOString() })
-        .eq("id", action.id);
+    if (!keep || !dup) return gone();
 
-    const requester = { userId: action.actor_id ?? actor.userId, alias: await aliasOf(action.actor_id) };
     const merged = await applyMerge(actor, action.id, keep, dup, {
         reason: action.note ?? "",
+        from: "awaiting_second_look",
         suggestionId: action.suggestion_id,
-        contributor: requester,
+        contributor,
     });
-    if (!merged.success) return merged;
+    if (!merged.success) {
+        if (merged.code === "not_found") return gone();
+        return merged;
+    }
 
     if (action.suggestion_id) {
         const { finishMergedSuggestion } = await import("@/lib/catalog/suggestionApply");
@@ -1393,12 +1766,16 @@ export async function declineMerge(
     if (why.length < 3) return fail("invalid", "Say why in a few words; the moderator who asked reads it.");
     const action = await readAction(actionId);
     if (!action || action.kind !== "merge") return fail("not_found", "That merge request is not in the history.");
-    if (action.status !== "awaiting_second_look")
-        return fail("invalid", "This merge is no longer waiting for a second look.");
+    if (action.status !== "awaiting_second_look") return fail("invalid", notWaitingWords(action.status));
     if (action.actor_id === actor.userId)
         return fail("forbidden", "You asked for this merge, so someone else gives it the second look.");
+    const rules = await secondLookRules(actor, action);
+    if (!rules.ok) return fail("forbidden", rules.error);
 
-    const { error } = await db()
+    // Guarded and checked: if a confirm got there first (registry_merge
+    // holds the entry's lock and turns it applied), nothing is updated and
+    // the decline stops here instead of also "succeeding".
+    const { data, error } = await db()
         .from("registry_actions")
         .update({
             status: "declined",
@@ -1407,14 +1784,26 @@ export async function declineMerge(
             second_look_note: why.slice(0, 1000),
         })
         .eq("id", action.id)
-        .eq("status", "awaiting_second_look");
+        .eq("status", "awaiting_second_look")
+        .is("applied_at", null)
+        .select("id");
     if (error) return dbFailure("Decline failed", error);
+    if (!Array.isArray(data) || data.length === 0) {
+        const now = await readAction(action.id);
+        return fail("invalid", notWaitingWords(now?.status ?? "applied"));
+    }
 
     if (action.suggestion_id) {
-        await db()
-            .from("catalog_suggestions")
-            .update({ status: "pending", admin_notes: `Second look declined the merge: ${why.slice(0, 500)}` })
-            .eq("id", action.suggestion_id);
+        await moveSuggestion(
+            action.suggestion_id,
+            {
+                status: "pending",
+                claimed_by: null,
+                claimed_until: null,
+                admin_notes: `Second look declined the merge: ${why.slice(0, 500)}`,
+            },
+            ["under_review"],
+        );
     }
     if (action.actor_id) {
         try {
@@ -1459,7 +1848,7 @@ async function removeRow(
         p_reason: reason,
     });
     if (error) {
-        if (actionId) await db().from("registry_actions").update({ status: "failed" }).eq("id", actionId);
+        if (error.message !== "already_applied") await markFailed(actionId, "pending");
         if (error.message === "linked") {
             const counts = countsFromDetail(error.details);
             const total = Object.values(counts).reduce((s, n) => s + n, 0);
@@ -1506,11 +1895,11 @@ export async function removeItem(
 
     const actionId = await recordAction(actor, {
         kind: "remove",
+        status: "pending",
         itemId: row.id,
         itemTitle: row.title,
         summary: `Removed "${row.title}" (${row.maker})`,
         note: reason,
-        applied: false,
     });
     const removed = await removeRow(actor, row, reason, actionId);
     if (!removed.success) return removed;
@@ -1536,6 +1925,62 @@ export async function removeItem(
 // Undo
 // ══════════════════════════════════════════════════════════════
 
+/** A History row that only moved one release's scale (it followed its mold). */
+function isScaleFollower(
+    r: {
+        catalog_item_id: string | null;
+        before: Record<string, unknown> | null;
+        after: Record<string, unknown> | null;
+    },
+    mainId: string | null,
+): boolean {
+    if (!r.catalog_item_id || r.catalog_item_id === mainId) return false;
+    const a = Object.keys(r.after ?? {});
+    const b = Object.keys(r.before ?? {});
+    return a.length === 1 && a[0] === "scale" && b.length === 1 && b[0] === "scale";
+}
+
+/**
+ * Put back the scale of the releases that followed a mold's scale edit,
+ * a few hundred at a time and expect-guarded: a release whose scale has
+ * changed again since is left alone and counted.
+ */
+async function undoScaleFollowers(
+    rows: { catalog_item_id: string; before: Record<string, unknown>; after: Record<string, unknown> }[],
+): Promise<{
+    restored: { catalog_item_id: string; before: unknown; after: unknown; outcome: string }[];
+    left: number;
+    error?: DbError;
+}> {
+    const groups = new Map<string, { from: string | null; to: string | null; ids: string[] }>();
+    for (const r of rows) {
+        const from = (r.after.scale as string | null) ?? null;
+        const to = (r.before.scale as string | null) ?? null;
+        const key = JSON.stringify([from, to]);
+        const g = groups.get(key) ?? { from, to, ids: [] };
+        g.ids.push(r.catalog_item_id);
+        groups.set(key, g);
+    }
+    const restored: { catalog_item_id: string; before: unknown; after: unknown; outcome: string }[] = [];
+    for (const g of groups.values()) {
+        for (let i = 0; i < g.ids.length; i += 200) {
+            const chunk = g.ids.slice(i, i + 200);
+            let q = db().from("catalog_items").update({ scale: g.to }).in("id", chunk);
+            q = g.from === null ? q.is("scale", null) : q.eq("scale", g.from);
+            const { data, error } = await q.select("id");
+            if (error) return { restored, left: rows.length - restored.length, error };
+            for (const r of (data ?? []) as { id: string }[])
+                restored.push({
+                    catalog_item_id: r.id,
+                    before: { scale: g.from },
+                    after: { scale: g.to },
+                    outcome: "restored",
+                });
+        }
+    }
+    return { restored, left: rows.length - restored.length };
+}
+
 /** Restore what a field-level action changed, where the row still holds its `after`. */
 async function undoFields(
     actor: RegistryActor,
@@ -1547,11 +1992,17 @@ async function undoFields(
         .select("catalog_item_id, before, after")
         .eq("action_id", action.id);
     if (error) return dbFailure("Reading the history rows failed", error);
-    const rows = (rowsData ?? []) as {
+    const all = (rowsData ?? []) as {
         catalog_item_id: string | null;
         before: Record<string, unknown> | null;
         after: Record<string, unknown> | null;
     }[];
+    const followers = all.filter((r) => isScaleFollower(r, action.catalog_item_id)) as {
+        catalog_item_id: string;
+        before: Record<string, unknown>;
+        after: Record<string, unknown>;
+    }[];
+    const rows = all.filter((r) => !isScaleFollower(r, action.catalog_item_id));
 
     let restoredCount = 0;
     const drifted: string[] = [];
@@ -1612,6 +2063,17 @@ async function undoFields(
         undoRows.push({ catalog_item_id: item.id, before: wasNow, after: putBack, outcome: "restored" });
     }
 
+    if (followers.length) {
+        const back = await undoScaleFollowers(followers);
+        if (back.error) logger.error("RegistryWrite", "Putting releases' scales back stopped", back.error);
+        restoredCount += back.restored.length;
+        undoRows.push(...back.restored);
+        if (back.left > 0)
+            drifted.push(
+                `${back.left} release${back.left === 1 ? "" : "s"} whose scale changed again since (left as ${back.left === 1 ? "it is" : "they are"})`,
+            );
+    }
+
     if (restoredCount === 0) {
         return fail("conflict", "Nothing left to undo: every field has been changed again since.", { drifted });
     }
@@ -1642,10 +2104,32 @@ async function undoFields(
 }
 
 /**
+ * Changes other people made to a row since it was added: taking the
+ * addition back out would throw their work away with it.
+ */
+async function laterEditsByOthers(action: ActionRow, itemId: string): Promise<string[]> {
+    let q = db()
+        .from("registry_actions")
+        .select("id, actor_id")
+        .eq("catalog_item_id", itemId)
+        .eq("status", "applied")
+        .in("kind", ["edit", "refile", "approve", "revert"])
+        .neq("id", action.id);
+    if (action.actor_id) q = q.or(`actor_id.is.null,actor_id.neq.${action.actor_id}`);
+    const { data, error } = await q.limit(20);
+    if (error || !Array.isArray(data)) return [];
+    const who = [...new Set((data as { actor_id: string | null }[]).map((r) => r.actor_id))];
+    return Promise.all(who.map((id) => aliasOf(id)));
+}
+
+/**
  * Undo a History entry within 30 days. Edits, approvals, re-files and
  * reverts put back only fields that still hold what the entry wrote
  * (others are reported as drifted); an addition is removed (refused if
- * anything links to it now); a merge is unmerged; a removal is restored.
+ * anything links to it now, or if someone else has edited it since); a
+ * merge is unmerged; a removal is restored; a rejection puts the
+ * suggestion back in the queue. When the entry came from a member's
+ * suggestion, the approval is withdrawn too (status, credit, notice).
  */
 export async function undoAction(
     actor: RegistryActor,
@@ -1669,11 +2153,35 @@ export async function undoAction(
 
     if (action.kind === "edit" || action.kind === "approve" || action.kind === "refile" || action.kind === "revert") {
         result = await undoFields(actor, action, why);
+    } else if (action.kind === "reject") {
+        if (!action.suggestion_id) return fail("not_found", "That suggestion is no longer on the site.");
+        const { reopenSuggestion } = await import("@/lib/catalog/suggestionApply");
+        const reopened = await reopenSuggestion(action.suggestion_id, actor, why);
+        if (!reopened) return fail("conflict", "That suggestion has been decided again since, so it stays as it is.");
+        const undoId = await recordAction(actor, {
+            kind: "undo",
+            itemId: action.catalog_item_id,
+            itemTitle: action.item_title,
+            suggestionId: action.suggestion_id,
+            undoOf: action.id,
+            summary: `Undid: ${action.summary}`.slice(0, 2000),
+            note: why,
+        });
+        await markUndone(actor, action.id);
+        result = { success: true, restored: 1, drifted: [], actionId: undoId };
     } else {
         if (!(await mergeUndoReady())) return fail("not_ready", MERGE_REMOVE_NOT_READY);
         if (action.kind === "add") {
             const row = await readRow(action.catalog_item_id ?? "");
             if (!row) return fail("not_found", "That entry is no longer in the Registry.");
+            const others = await laterEditsByOthers(action, row.id);
+            if (others.length) {
+                const names = others.map((a) => `@${a}`).join(", ");
+                return fail(
+                    "conflict",
+                    `It can't be taken back out: ${names} ${others.length === 1 ? "has" : "have"} changed it since it was added. Undo ${others.length === 1 ? "that change" : "those changes"} first, or merge it into the right entry.`,
+                );
+            }
             const counts = await linkCounts(row.id);
             if (counts.total > 0) {
                 return fail(
@@ -1684,12 +2192,13 @@ export async function undoAction(
             }
             const undoId = await recordAction(actor, {
                 kind: "undo",
+                status: "pending",
                 itemId: row.id,
                 itemTitle: row.title,
+                suggestionId: action.suggestion_id,
                 undoOf: action.id,
                 summary: `Undid: ${action.summary}`.slice(0, 2000),
                 note: why,
-                applied: false,
             });
             const removed = await removeRow(actor, row, why, undoId);
             if (!removed.success) return removed;
@@ -1700,6 +2209,10 @@ export async function undoAction(
                 summary: `↩️ Took back the addition of "${row.title}": ${why}`,
                 actionId: undoId,
             });
+            if (action.suggestion_id) {
+                const { withdrawApproval } = await import("@/lib/catalog/suggestionApply");
+                await withdrawApproval(action.suggestion_id, actor, why);
+            }
             result = { success: true, restored: 1, drifted: [], actionId: undoId };
         } else if (action.kind === "merge") {
             const { data, error } = await db().rpc("registry_unmerge", {
@@ -1722,6 +2235,7 @@ export async function undoAction(
                 itemId: action.catalog_item_id,
                 itemTitle: action.item_title,
                 relatedItemId: action.related_item_id,
+                suggestionId: action.suggestion_id,
                 undoOf: action.id,
                 summary: `Undid: ${action.summary}`.slice(0, 2000),
                 note: why,
@@ -1732,6 +2246,10 @@ export async function undoAction(
                 summary: `↩️ Unmerged "${action.item_title ?? "an entry"}": ${why}`,
                 actionId: undoId,
             });
+            if (action.suggestion_id) {
+                const { withdrawApproval } = await import("@/lib/catalog/suggestionApply");
+                await withdrawApproval(action.suggestion_id, actor, why, drifted);
+            }
             result = { success: true, restored: Number(d.restored ?? 0), drifted, actionId: undoId };
         } else if (action.kind === "remove") {
             const { data: archived } = await db()
@@ -1781,4 +2299,151 @@ export async function undoAction(
     }
     await finishWrite(actor);
     return result;
+}
+
+// ══════════════════════════════════════════════════════════════
+// Claims on suggestions and rejections (the Desk's Queue)
+// ══════════════════════════════════════════════════════════════
+
+/** How long a moderator holds a suggestion they opened. */
+export const CLAIM_MINUTES = 30;
+
+/**
+ * Take a suggestion to review: ONE conditional update moves it from
+ * pending to under_review with this moderator's name and a 30-minute
+ * clock, only while it is pending, or under review on a claim that has
+ * run out or is already theirs (renewing it). While it is under review
+ * the member can't edit it (their policy is "own AND pending"), so the
+ * moderator decides exactly what they read.
+ *
+ * A suggestion whose merge waits for a second look is not claimed here:
+ * it is decided by confirming or declining that merge.
+ *
+ * Before 242 there are no claim columns: success with claimedUntil "".
+ */
+export async function claimSuggestion(
+    actor: RegistryActor,
+    id: string,
+): Promise<WriteResult<{ claimedUntil: string }>> {
+    if (!UUID_RE.test(id)) return fail("not_found", "That suggestion is no longer on the site.");
+    // The review rules first: a moderator who may not decide it (their own
+    // suggestion, their own work) does not hold it either.
+    const { readSuggestion, reviewRefusal } = await import("@/lib/catalog/suggestionApply");
+    const current = await readSuggestion(id);
+    if (!current) return fail("not_found", "That suggestion is no longer on the site.");
+    const refusal = await reviewRefusal(current, actor);
+    if (refusal) return fail("forbidden", refusal);
+
+    const now = new Date();
+    const until = new Date(now.getTime() + CLAIM_MINUTES * 60_000).toISOString();
+    const take = { status: "under_review", claimed_by: actor.userId, claimed_until: until };
+
+    const { data, error } = await db()
+        .from("catalog_suggestions")
+        .update(take)
+        .eq("id", id)
+        .or(
+            `status.eq.pending,and(status.eq.under_review,claimed_until.lt.${now.toISOString()}),and(status.eq.under_review,claimed_by.eq.${actor.userId})`,
+        )
+        .select("id");
+    if (error) {
+        if (isMissingSchema(error)) return { success: true, claimedUntil: "" };
+        return dbFailure("Claim failed", error);
+    }
+    if (Array.isArray(data) && data.length > 0) return { success: true, claimedUntil: until };
+
+    // Nothing taken: say why, in words.
+    const { data: row } = await db()
+        .from("catalog_suggestions")
+        .select("id, status, claimed_by, claimed_until")
+        .eq("id", id)
+        .maybeSingle();
+    const s = row as { status: string; claimed_by: string | null; claimed_until: string | null } | null;
+    if (!s) return fail("not_found", "That suggestion is no longer on the site.");
+    if (s.status !== "pending" && s.status !== "under_review")
+        return fail("invalid", "This suggestion has already been decided.");
+    if (s.claimed_by && s.claimed_until) {
+        const minutes = Math.max(1, Math.ceil((Date.parse(s.claimed_until) - now.getTime()) / 60_000));
+        return fail(
+            "conflict",
+            `@${await aliasOf(s.claimed_by)} is looking at this one for another ${minutes} minute${minutes === 1 ? "" : "s"}.`,
+        );
+    }
+    if (await waitingMergeFor(id))
+        return fail(
+            "invalid",
+            "This report's merge waits for a second look: confirm or decline it under Second looks.",
+        );
+
+    // Under review with no claim at all (set before claims existed): take it,
+    // still in one conditional update, so two moderators can't both win.
+    const { data: legacy, error: legacyError } = await db()
+        .from("catalog_suggestions")
+        .update(take)
+        .eq("id", id)
+        .eq("status", "under_review")
+        .is("claimed_until", null)
+        .select("id");
+    if (legacyError) return dbFailure("Claim failed", legacyError);
+    if (Array.isArray(legacy) && legacy.length > 0) return { success: true, claimedUntil: until };
+    return fail("conflict", "Someone else took this one a moment ago.");
+}
+
+/**
+ * Let go of a claim: the suggestion goes back to pending, so the member
+ * can edit it again and another moderator can take it. Only your own
+ * claim (the owner may let go of anyone's). A suggestion whose merge is
+ * waiting for a second look keeps its under_review status. Never touches
+ * a suggestion that has been decided.
+ */
+export async function releaseSuggestionClaim(actor: RegistryActor, id: string): Promise<WriteResult> {
+    if (!UUID_RE.test(id)) return fail("not_found", "That suggestion is no longer on the site.");
+    const waiting = await waitingMergeFor(id);
+    const fields: Record<string, unknown> = waiting
+        ? { claimed_by: null, claimed_until: null }
+        : { status: "pending", claimed_by: null, claimed_until: null };
+    let q = db().from("catalog_suggestions").update(fields).eq("id", id).eq("status", "under_review");
+    if (actor.role !== "owner") q = q.eq("claimed_by", actor.userId);
+    const { error } = await q.select("id");
+    if (error) {
+        if (isMissingSchema(error)) return { success: true };
+        return dbFailure("Letting go of the claim failed", error);
+    }
+    return { success: true };
+}
+
+/**
+ * A rejection on the Desk, in the History (kind "reject"): it feeds the
+ * speed alarm and stamps the seat, and can be undone (the suggestion goes
+ * back to the queue). decideSuggestion checks the daily limit of
+ * rejections (checkRegistryLimit "reject") before it decides anything,
+ * then calls this once the rejection is made.
+ */
+export async function recordRejection(
+    actor: RegistryActor,
+    input: {
+        suggestionId: string;
+        itemId: string | null;
+        itemTitle?: string | null;
+        summary: string;
+        note: string | null;
+    },
+): Promise<WriteResult<{ actionId: string | null }>> {
+    const actionId = await recordAction(actor, {
+        kind: "reject",
+        itemId: input.itemId,
+        itemTitle: input.itemTitle ?? null,
+        suggestionId: input.suggestionId,
+        summary: input.summary,
+        note: input.note,
+    });
+    if (actor.role === "moderator") {
+        const { error } = await db()
+            .from("registry_moderators")
+            .update({ last_action_at: new Date().toISOString() })
+            .eq("user_id", actor.userId);
+        if (error && !isMissingSchema(error)) logger.error("RegistryWrite", "Seat stamp failed (continuing)", error);
+    }
+    await noteRegistryAction(actor);
+    return { success: true, actionId };
 }

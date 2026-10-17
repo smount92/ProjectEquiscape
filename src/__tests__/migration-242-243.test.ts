@@ -96,6 +96,30 @@ describe("migration 242", () => {
         expect(flat(M242)).toContain(`CHECK (status IN (${ACTION_STATUSES.map((s) => `'${s}'`).join(", ")}))`);
     });
 
+    it("only the server sets a suggestion's claim, original wording and deciding role", () => {
+        const guard = body(M242, "catalog_suggestions_guard_review_cols");
+        // Told apart the way 142, 176 and 180 do it: the request's role.
+        expect(guard).toMatch(/IF current_user IN \('anon', 'authenticated'\) THEN/);
+        expect(guard).toMatch(/SECURITY INVOKER/);
+        for (const col of ["claimed_by", "claimed_until", "original_field_changes", "decided_role"]) {
+            expect(guard, col).toContain(`NEW.${col} IS DISTINCT FROM OLD.${col}`);
+            expect(guard, col).toContain(`NEW.${col} IS NOT NULL`);
+        }
+        expect(guard).toMatch(/RAISE EXCEPTION/);
+        const code = flat(M242);
+        expect(code).toMatch(
+            /DROP TRIGGER IF EXISTS trg_catalog_suggestions_guard_review_cols ON public\.catalog_suggestions; CREATE TRIGGER trg_catalog_suggestions_guard_review_cols BEFORE INSERT OR UPDATE ON public\.catalog_suggestions/,
+        );
+    });
+
+    it("History kinds and statuses are widened by name, so a second paste takes the new lists", () => {
+        const code = flat(M242);
+        expect(code).toContain("DROP CONSTRAINT IF EXISTS registry_actions_kind_check");
+        expect(code).toContain("DROP CONSTRAINT IF EXISTS registry_actions_status_check");
+        expect(ACTION_KINDS).toContain("reject");
+        expect(ACTION_STATUSES).toContain("pending");
+    });
+
     it("new tables have row security and no policies", () => {
         for (const t of ["registry_moderators", "registry_actions", "registry_action_rows"]) {
             expect(M242).toContain(`ALTER TABLE public.${t} ENABLE ROW LEVEL SECURITY;`);
@@ -131,6 +155,44 @@ describe("migration 243", () => {
                 (t) => referencing.has(t),
             ),
         );
+    });
+
+    it("a merge runs once: its History entry is locked first and 'already applied' comes before 'missing'", () => {
+        const merge = body(M243, "registry_merge");
+        const lock = merge.indexOf(
+            "SELECT * INTO v_action FROM public.registry_actions WHERE id = p_action_id FOR UPDATE",
+        );
+        expect(lock).toBeGreaterThan(0);
+        const applied = merge.indexOf("RAISE EXCEPTION 'already_applied'");
+        const missing = merge.indexOf("RAISE EXCEPTION 'missing'");
+        const rowsLocked = merge.indexOf(
+            "FROM public.catalog_items WHERE id IN (p_keep, p_remove) ORDER BY id FOR UPDATE",
+        );
+        expect(lock).toBeLessThan(applied);
+        expect(applied).toBeLessThan(missing);
+        expect(lock).toBeLessThan(rowsLocked);
+        // Only a merge waiting for its second look, or the owner's pending one.
+        expect(merge).toMatch(/IF v_action\.status NOT IN \('awaiting_second_look', 'pending'\) THEN/);
+        expect(merge).toMatch(/v_action\.applied_at IS NOT NULL/);
+        // The confirmer is stamped inside the merge's own transaction.
+        expect(merge).toMatch(/second_look_by = CASE WHEN v_action\.status = 'awaiting_second_look' THEN p_actor/);
+    });
+
+    it("a removal turns its pending History entry applied, once", () => {
+        const remove = body(M243, "registry_remove");
+        expect(remove).toMatch(/FROM public\.registry_actions WHERE id = p_action_id FOR UPDATE/);
+        expect(remove).toMatch(/v_action\.status <> 'pending'/);
+    });
+
+    it("merging two molds moves the releases to the kept mold's scale, and the unmerge puts the old scales back", () => {
+        const merge = body(M243, "registry_merge");
+        expect(merge).toMatch(/SET parent_id = p_keep, scale = coalesce\(v_keep\.scale, scale\)/);
+        // Each old scale is a History row, so the unmerge can read it back.
+        expect(merge).toMatch(/jsonb_build_object\('scale', e->1\), jsonb_build_object\('scale', v_keep\.scale\)/);
+        const unmerge = body(M243, "registry_unmerge");
+        expect(unmerge).toMatch(/UPDATE public\.catalog_items c SET scale = rr\.before->>'scale'/);
+        // Expect-guarded: only releases filed under the restored mold that still hold the merged scale.
+        expect(unmerge).toMatch(/c\.parent_id = v_item AND c\.scale IS NOT DISTINCT FROM rr\.after->>'scale'/);
     });
 
     it("the unmerge moves each link back only while it still points at the kept row", () => {
@@ -206,4 +268,21 @@ describe("migration 243", () => {
     it("adds no foreign key to catalog_items anywhere", () => {
         expect(M243).not.toMatch(/REFERENCES\s+(public\.)?catalog_items/i);
     });
+});
+
+describe("lock timeouts", () => {
+    // A paste that waits on a busy table stops after 5 seconds instead of
+    // queueing every member's request behind it; the header says to paste again.
+    it.each(["240_registry_search_key.sql", "242_registry_moderators.sql", "243_registry_merge_undo.sql"])(
+        "%s sets a lock timeout before its first statement and resets it after",
+        (f) => {
+            const sql = read(f);
+            const code = flat(sql);
+            expect(code.startsWith("SET lock_timeout = '5s';"), f).toBe(true);
+            expect(code).toContain("RESET lock_timeout;");
+            const header = sql.replace(/\r?\n--\s*/g, " ");
+            expect(header).toMatch(/lock timeout/i);
+            expect(header).toMatch(/paste it again a minute later/i);
+        },
+    );
 });

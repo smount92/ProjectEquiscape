@@ -77,3 +77,26 @@ describe("veto, retire, withdraw", () => {
         expect(ruleStatusLabel("in_effect", 3)).toBe("In effect");
     });
 });
+
+describe("votes from moderators who are no longer active", () => {
+    const voters = { active: new Set(["bay", "ridge"]), owners: new Set(["owner"]) };
+
+    it("don't count toward the agreements; their vote stays on the record", () => {
+        const votes = [agree("bay"), agree("ridge"), agree("fern")]; // fern's seat or term has ended
+        expect(agreementCount(proposed, votes, voters)).toBe(2);
+        expect(ruleStatusAfterVote(proposed, votes, voters)).toBe("proposed");
+        // Without the seat list every vote counts, as before seats could end.
+        expect(ruleStatusAfterVote(proposed, votes)).toBe("in_effect");
+    });
+
+    it("the owner's vote always counts, with no seat", () => {
+        const votes = [agree("bay"), agree("ridge"), agree("owner")];
+        expect(agreementCount(proposed, votes, voters)).toBe(3);
+        expect(ruleStatusAfterVote(proposed, votes, voters)).toBe("in_effect");
+    });
+
+    it("the proposer still never counts, even as the owner", () => {
+        const own = { status: "proposed" as RuleStatus, proposed_by: "owner" };
+        expect(agreementCount(own, [agree("owner"), agree("bay")], voters)).toBe(1);
+    });
+});

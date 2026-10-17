@@ -36,7 +36,13 @@ vi.mock("@/lib/supabase/admin", () => ({
     }),
 }));
 
-import { requireRegistryModerator, registryRoleOf, REGISTRY_DESK_REFUSAL, SUSPENDED_AUTH_ERROR } from "@/lib/auth";
+import {
+    requireRegistryModerator,
+    registryRoleOf,
+    REGISTRY_DESK_REFUSAL,
+    REGISTRY_TERM_ENDED,
+    SUSPENDED_AUTH_ERROR,
+} from "@/lib/auth";
 
 const ORIGINAL = process.env.ADMIN_EMAIL;
 afterAll(() => {
@@ -69,6 +75,14 @@ describe("requireRegistryModerator", () => {
     it.each(["resting", "removed", "stepped_down"])("refuses a %s moderator", async (status) => {
         state.seat = { data: { status }, error: null };
         await expect(requireRegistryModerator()).rejects.toThrow(REGISTRY_DESK_REFUSAL);
+    });
+
+    it("refuses a moderator whose term has run out, in words that say so; the seat still reads active", async () => {
+        state.seat = { data: { status: "active", term_ends_at: "2020-01-01T00:00:00Z" }, error: null };
+        await expect(requireRegistryModerator()).rejects.toThrow(REGISTRY_TERM_ENDED);
+        await expect(registryRoleOf()).resolves.toBeNull();
+        state.seat = { data: { status: "active", term_ends_at: "2099-01-01T00:00:00Z" }, error: null };
+        await expect(requireRegistryModerator()).resolves.toMatchObject({ role: "moderator" });
     });
 
     it("refuses a member with no seat", async () => {

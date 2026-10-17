@@ -15,6 +15,11 @@
 --    forwards to the kept row; the row is archived, then deleted.
 --    This also fixes a bug: the old merge deleted members' sale reports
 --    and price flags along with the duplicate. They now move.
+--    A merge runs once: its History entry is locked first, so a second
+--    "Confirm" (or a "Decline" at the same moment) waits, then is told the
+--    merge already happened. When two molds merge, the releases of the
+--    one removed move to the one kept and take its scale; the old scales
+--    are saved so an unmerge puts them back.
 -- 4. registry_unmerge(action): puts the row back with the same id and
 --    moves back only the links that still point at the kept row; a
 --    member who re-linked since is left alone.
@@ -25,7 +30,8 @@
 -- Not brought back by an undo: machine price data (price signals, history,
 -- sweep attempts) for the removed row; the next price sweep collects it
 -- again. Only the server can call these functions. Nothing here changes
--- Registry data when pasted. Safe to paste twice.
+-- Registry data when pasted. Safe to paste twice. If the site is busy
+-- the paste may stop with "lock timeout"; paste it again a minute later.
 -- ============================================================
 
 SET lock_timeout = '5s';
@@ -104,9 +110,38 @@ DECLARE
   v_slug_added   JSONB := 'null'::jsonb;
   v_reason       TEXT;
   v_moved        INT;
+  v_action       public.registry_actions%ROWTYPE;
+  v_rescaled     JSONB := '[]'::jsonb;
 BEGIN
   IF p_keep IS NULL OR p_remove IS NULL OR p_keep = p_remove THEN
     RAISE EXCEPTION 'same' USING DETAIL = 'Those are the same entry.';
+  END IF;
+
+  -- The History entry first, locked, so two people confirming the same
+  -- merge (or one confirming while another declines) queue up here and
+  -- the second sees what the first did. "Already applied" is checked
+  -- before "missing": once a merge has run, its duplicate IS missing, and
+  -- a second confirm must not mark the applied merge failed.
+  IF p_action_id IS NOT NULL THEN
+    SELECT * INTO v_action FROM public.registry_actions WHERE id = p_action_id FOR UPDATE;
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'not_found' USING DETAIL = 'That merge request is not in the history.';
+    END IF;
+    IF v_action.kind <> 'merge' THEN
+      RAISE EXCEPTION 'not_merge' USING DETAIL = 'That history entry is not a merge.';
+    END IF;
+    IF v_action.applied_at IS NOT NULL OR v_action.status IN ('applied', 'undone')
+       OR EXISTS (SELECT 1 FROM public.catalog_removed_items WHERE action_id = p_action_id) THEN
+      RAISE EXCEPTION 'already_applied' USING DETAIL = 'This merge has already been applied.';
+    END IF;
+    -- A moderator's merge waiting for its second look, or the owner's
+    -- merge recorded as pending just before it runs. Nothing else.
+    IF v_action.status NOT IN ('awaiting_second_look', 'pending') THEN
+      RAISE EXCEPTION 'not_waiting' USING DETAIL = 'This merge is no longer waiting for a second look.';
+    END IF;
+    IF v_action.catalog_item_id IS DISTINCT FROM p_remove OR v_action.related_item_id IS DISTINCT FROM p_keep THEN
+      RAISE EXCEPTION 'mismatch' USING DETAIL = 'That history entry is about two other entries.';
+    END IF;
   END IF;
 
   -- Both rows, locked in a fixed order so two merges can't deadlock.
@@ -118,10 +153,8 @@ BEGIN
   IF v_keep.parent_id = p_remove THEN
     RAISE EXCEPTION 'keep_is_child' USING DETAIL = 'The entry to keep is filed under the duplicate.';
   END IF;
-  IF p_action_id IS NOT NULL AND EXISTS (
-    SELECT 1 FROM public.catalog_removed_items WHERE action_id = p_action_id
-  ) THEN
-    RAISE EXCEPTION 'already_applied' USING DETAIL = 'This merge has already been applied.';
+  IF (v_keep.item_type = 'plastic_mold') <> (v_remove.item_type = 'plastic_mold') THEN
+    RAISE EXCEPTION 'mixed' USING DETAIL = 'A mold merges only into a mold, and a release only into a release.';
   END IF;
 
   v_reason := left(coalesce(NULLIF(btrim(p_reason), ''), 'Merged as a duplicate'), 1000);
@@ -166,8 +199,18 @@ BEGIN
     UPDATE public.catalog_changelog SET catalog_item_id = p_keep WHERE catalog_item_id = p_remove RETURNING id
   )
   SELECT coalesce(array_agg(id), '{}') INTO v_log FROM m;
+  -- Releases filed under a merged mold move to the kept mold and take its
+  -- scale (a release's scale follows its mold). Each old scale is saved,
+  -- in links and in the History rows, so an unmerge puts it back.
+  IF v_keep.scale IS NOT NULL THEN
+    SELECT coalesce(jsonb_agg(jsonb_build_array(c.id, c.scale)), '[]'::jsonb) INTO v_rescaled
+    FROM public.catalog_items c
+    WHERE c.parent_id = p_remove AND c.id <> p_keep AND c.scale IS DISTINCT FROM v_keep.scale;
+  END IF;
   WITH m AS (
-    UPDATE public.catalog_items SET parent_id = p_keep WHERE parent_id = p_remove AND id <> p_keep RETURNING id
+    UPDATE public.catalog_items
+    SET parent_id = p_keep, scale = coalesce(v_keep.scale, scale)
+    WHERE parent_id = p_remove AND id <> p_keep RETURNING id
   )
   SELECT coalesce(array_agg(id), '{}') INTO v_children FROM m;
   WITH m AS (
@@ -205,7 +248,8 @@ BEGIN
     'price_flags', to_jsonb(v_flags),
     'price_flags_folded', v_flag_folded,
     'slug_history', v_slugs,
-    'slug_added', v_slug_added
+    'slug_added', v_slug_added,
+    'children_scales', v_rescaled
   );
   v_moved := cardinality(v_horses) + cardinality(v_wishlists) + cardinality(v_id_sugs) + cardinality(v_sugs)
            + cardinality(v_log) + cardinality(v_children) + cardinality(v_sales) + cardinality(v_flags);
@@ -219,10 +263,24 @@ BEGIN
   IF p_action_id IS NOT NULL THEN
     INSERT INTO public.registry_action_rows (action_id, catalog_item_id, before, after, outcome)
     VALUES (p_action_id, p_remove, v_item, jsonb_build_object('merged_into', p_keep), 'applied');
-    UPDATE public.registry_actions SET status = 'applied', applied_at = now() WHERE id = p_action_id;
+    -- One row per release whose scale followed the kept mold.
+    INSERT INTO public.registry_action_rows (action_id, catalog_item_id, before, after, outcome)
+    SELECT p_action_id, (e->>0)::uuid, jsonb_build_object('scale', e->1), jsonb_build_object('scale', v_keep.scale), 'applied'
+    FROM jsonb_array_elements(v_rescaled) e;
+    -- The confirmer of a second look is stamped here, in the same
+    -- transaction as the merge, never by a confirm that lost the race.
+    UPDATE public.registry_actions
+    SET status = 'applied', applied_at = now(),
+        row_count = 1 + jsonb_array_length(v_rescaled),
+        second_look_by = CASE WHEN v_action.status = 'awaiting_second_look' THEN p_actor ELSE second_look_by END,
+        second_look_at = CASE WHEN v_action.status = 'awaiting_second_look' THEN now() ELSE second_look_at END
+    WHERE id = p_action_id;
   END IF;
 
-  RETURN jsonb_build_object('moved', v_moved, 'links', v_links, 'kept', p_keep, 'removed', p_remove);
+  RETURN jsonb_build_object(
+    'moved', v_moved, 'links', v_links, 'kept', p_keep, 'removed', p_remove,
+    'rescaled', jsonb_array_length(v_rescaled)
+  );
 END;
 $$;
 
@@ -363,6 +421,19 @@ BEGIN
   v_left := v_left || jsonb_build_object('children', cardinality(v_ids) - v_n);
   v_back_n := v_back_n + v_n; v_stay_n := v_stay_n + cardinality(v_ids) - v_n;
 
+  -- Releases that took the kept mold's scale get their own back: only
+  -- those now filed under the restored mold again, and only while they
+  -- still hold the scale the merge gave them.
+  WITH m AS (
+    UPDATE public.catalog_items c SET scale = rr.before->>'scale'
+    FROM public.registry_action_rows rr
+    WHERE rr.action_id = p_action_id AND rr.catalog_item_id = c.id AND rr.after ? 'scale'
+      AND c.parent_id = v_item AND c.scale IS NOT DISTINCT FROM rr.after->>'scale'
+    RETURNING 1
+  )
+  SELECT count(*) INTO v_n FROM m;
+  v_moved := v_moved || jsonb_build_object('scales', v_n);
+
   v_ids := ARRAY(SELECT jsonb_array_elements_text(coalesce(r.links->'sale_reports', '[]'::jsonb))::uuid);
   WITH m AS (
     UPDATE public.catalog_sale_reports SET catalog_item_id = v_item
@@ -438,9 +509,21 @@ DECLARE
   v_sugs   UUID[];
   v_reason TEXT := btrim(coalesce(p_reason, ''));
   v_archive UUID;
+  v_action public.registry_actions%ROWTYPE;
 BEGIN
   IF char_length(v_reason) < 3 OR char_length(v_reason) > 1000 THEN
     RAISE EXCEPTION 'reason' USING DETAIL = 'Give a reason of 3 to 1,000 characters.';
+  END IF;
+  -- The History entry is written as pending just before this runs; it
+  -- turns applied here, in the same transaction, and never twice.
+  IF p_action_id IS NOT NULL THEN
+    SELECT * INTO v_action FROM public.registry_actions WHERE id = p_action_id FOR UPDATE;
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'not_found' USING DETAIL = 'That removal is not in the history.';
+    END IF;
+    IF v_action.applied_at IS NOT NULL OR v_action.status <> 'pending' THEN
+      RAISE EXCEPTION 'already_applied' USING DETAIL = 'This removal has already been made.';
+    END IF;
   END IF;
   SELECT * INTO v_row FROM public.catalog_items WHERE id = p_item FOR UPDATE;
   IF NOT FOUND THEN RAISE EXCEPTION 'missing' USING DETAIL = 'That entry no longer exists.'; END IF;

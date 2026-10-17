@@ -137,6 +137,7 @@ const KIND_WORDS: Record<string, [string, string]> = {
     add: ["new entry", "new entries"],
     refile: ["re-filing", "re-filings"],
     approve: ["approval", "approvals"],
+    reject: ["rejection", "rejections"],
     revert: ["revert", "reverts"],
     merge: ["merge", "merges"],
     remove: ["removal", "removals"],
@@ -151,6 +152,7 @@ const STATUS_WORDS: Record<string, string> = {
     declined: "declined",
     undone: "since undone",
     failed: "failed",
+    pending: "did not finish",
 };
 
 /** The digest in the owner's bell: counts first, then every removal and every merge by name. */

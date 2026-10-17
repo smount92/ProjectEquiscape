@@ -37,6 +37,78 @@ export interface FakeDb {
     };
 }
 
+/** Ordered comparison for the fake: numbers as numbers, everything else (ISO times) as text. */
+function compare(a: unknown, b: unknown): number | null {
+    if (a === null || a === undefined || b === null || b === undefined) return null;
+    const na = Number(a);
+    const nb = Number(b);
+    if (typeof a === "number" || (typeof a === "string" && a.trim() !== "" && !Number.isNaN(na) && !Number.isNaN(nb)))
+        return na - nb;
+    return String(a) < String(b) ? -1 : String(a) > String(b) ? 1 : 0;
+}
+
+/** Split a PostgREST logic list on its top-level commas. */
+function splitTop(text: string): string[] {
+    const out: string[] = [];
+    let depth = 0;
+    let quoted = false;
+    let cur = "";
+    for (const ch of text) {
+        if (ch === '"') quoted = !quoted;
+        if (!quoted && ch === "(") depth++;
+        if (!quoted && ch === ")") depth--;
+        if (!quoted && depth === 0 && ch === ",") {
+            out.push(cur);
+            cur = "";
+            continue;
+        }
+        cur += ch;
+    }
+    if (cur) out.push(cur);
+    return out.map((s) => s.trim()).filter(Boolean);
+}
+
+/**
+ * A PostgREST `or=(...)` / `and(...)` string as a row test: col.op.value
+ * with eq, neq, is, lt, lte, gt, gte, like, ilike, and nested and()/or().
+ */
+export function logicFilter(text: string, join: "or" | "and" = "or"): (r: Row) => boolean {
+    const parts = splitTop(text).map((term): ((r: Row) => boolean) => {
+        const nested = term.match(/^(and|or)\((.*)\)$/s);
+        if (nested) return logicFilter(nested[2], nested[1] as "and" | "or");
+        const m = term.match(/^([\w]+)\.(not\.)?(\w+)\.(.*)$/s);
+        if (!m) throw new Error(`fake db: can't read filter ${term}`);
+        const [, col, not, op, rawValue] = m;
+        const value = rawValue.startsWith('"') && rawValue.endsWith('"') ? rawValue.slice(1, -1) : rawValue;
+        const test = (r: Row): boolean => {
+            const v = r[col] ?? null;
+            switch (op) {
+                case "eq":
+                    return v !== null && String(v) === value;
+                case "neq":
+                    return v !== null && String(v) !== value;
+                case "is":
+                    return value === "null" ? v === null : String(v) === value;
+                case "lt":
+                case "lte":
+                case "gt":
+                case "gte": {
+                    const c = compare(v, value);
+                    if (c === null) return false;
+                    return op === "lt" ? c < 0 : op === "lte" ? c <= 0 : op === "gt" ? c > 0 : c >= 0;
+                }
+                case "like":
+                case "ilike":
+                    return typeof v === "string" && likeToRegex(value.replace(/\*/g, "%")).test(v);
+                default:
+                    throw new Error(`fake db: no operator ${op}`);
+            }
+        };
+        return not ? (r: Row) => !test(r) : test;
+    });
+    return join === "or" ? (r) => parts.some((p) => p(r)) : (r) => parts.every((p) => p(r));
+}
+
 function likeToRegex(pattern: string): RegExp {
     const escaped = pattern
         .replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
@@ -56,6 +128,13 @@ class Query implements PromiseLike<Result> {
     private wantCount = false;
     private mode: "many" | "single" | "maybe" = "many";
     private max = Infinity;
+    private skip = 0;
+    /** A filter named a column the table does not have yet (42703). */
+    private refusedColumn: string | null = null;
+
+    private touch(col: string) {
+        if ((this.db.missingColumns[this.table] ?? []).includes(col)) this.refusedColumn = col;
+    }
 
     constructor(
         private db: FakeDb,
@@ -90,25 +169,64 @@ class Query implements PromiseLike<Result> {
         return this;
     }
     eq(col: string, val: unknown) {
+        this.touch(col);
         this.filters.push((r) => r[col] === val);
         this.filterText.push(`${col}=${String(val)}`);
         return this;
     }
     neq(col: string, val: unknown) {
+        this.touch(col);
         this.filters.push((r) => r[col] !== null && r[col] !== undefined && r[col] !== val);
         return this;
     }
     in(col: string, vals: unknown[]) {
+        this.touch(col);
         this.filters.push((r) => vals.includes(r[col]));
+        this.filterText.push(`${col} in ${vals.map(String).join("|")}`);
         return this;
     }
     is(col: string, val: unknown) {
+        this.touch(col);
         this.filters.push((r) => (r[col] ?? null) === val);
+        this.filterText.push(`${col} is ${String(val)}`);
         return this;
     }
     ilike(col: string, pattern: string) {
         const re = likeToRegex(pattern);
         this.filters.push((r) => typeof r[col] === "string" && re.test(r[col] as string));
+        return this;
+    }
+    or(text: string) {
+        const cols = [...text.matchAll(/(?:^|[,(])(\w+)\.(?:not\.)?\w+\./g)].map((m) => m[1]);
+        const missing = (this.db.missingColumns[this.table] ?? []).find((c) => cols.includes(c));
+        if (missing) this.refusedColumn = missing;
+        this.filters.push(logicFilter(text));
+        this.filterText.push(`or(${text})`);
+        return this;
+    }
+    private cmp(col: string, val: unknown, ok: (c: number) => boolean) {
+        if ((this.db.missingColumns[this.table] ?? []).includes(col)) this.refusedColumn = col;
+        this.filters.push((r) => {
+            const c = compare(r[col], val);
+            return c !== null && ok(c);
+        });
+        return this;
+    }
+    gt(col: string, val: unknown) {
+        return this.cmp(col, val, (c) => c > 0);
+    }
+    gte(col: string, val: unknown) {
+        return this.cmp(col, val, (c) => c >= 0);
+    }
+    lt(col: string, val: unknown) {
+        return this.cmp(col, val, (c) => c < 0);
+    }
+    lte(col: string, val: unknown) {
+        return this.cmp(col, val, (c) => c <= 0);
+    }
+    range(from: number, to: number) {
+        this.skip = from;
+        this.max = to - from + 1;
         return this;
     }
     order() {
@@ -147,12 +265,14 @@ class Query implements PromiseLike<Result> {
         const db = this.db;
         if (db.missing.has(this.table))
             return { data: null, error: { code: "PGRST205", message: `missing table ${this.table}` } };
+        if (this.refusedColumn)
+            return { data: null, error: { code: "42703", message: `column ${this.refusedColumn} does not exist` } };
         const rows = (db.tables[this.table] ??= []);
         const match = (r: Row) => this.filters.every((f) => f(r));
         const refused = (obj: Row) => (db.missingColumns[this.table] ?? []).find((c) => c in obj);
 
         if (this.op === "select") {
-            const found = rows.filter(match).slice(0, this.max);
+            const found = rows.filter(match).slice(this.skip, this.skip + this.max);
             if (this.head) return { data: null, error: null, count: found.length };
             const result = this.shape(found.map((r) => ({ ...r })));
             if (this.wantCount) result.count = found.length;

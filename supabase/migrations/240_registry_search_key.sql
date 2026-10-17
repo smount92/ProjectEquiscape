@@ -37,7 +37,13 @@
 --
 -- The app sends the term as typed and works the same before and after
 -- this is pasted; after it, the four cases above find their rows.
+--
+-- Adding the column locks catalog_items for that second. If the site is
+-- busy the paste may stop with "lock timeout" (nothing is changed when
+-- it does); paste it again a minute later.
 -- ============================================================
+
+SET lock_timeout = '5s';
 
 -- ── 1. The key ───────────────────────────────────────────────
 
@@ -131,6 +137,8 @@ END;
 $$ LANGUAGE plpgsql STABLE SECURITY INVOKER SET search_path = '';
 
 GRANT EXECUTE ON FUNCTION public.search_catalog_fuzzy(TEXT, INT) TO authenticated, anon;
+
+RESET lock_timeout;
 
 NOTIFY pgrst, 'reload schema';
 
