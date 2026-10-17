@@ -105,6 +105,14 @@ CREATE INDEX IF NOT EXISTS idx_registry_actions_actor ON public.registry_actions
 CREATE INDEX IF NOT EXISTS idx_registry_actions_item ON public.registry_actions (catalog_item_id);
 CREATE INDEX IF NOT EXISTS idx_registry_actions_second_look
   ON public.registry_actions (created_at) WHERE status = 'awaiting_second_look';
+-- One open merge per duplicate. A merge's catalog_item_id is the
+-- duplicate (the row that goes; related_item_id is the one kept). The
+-- site checks for an open one before asking, but two requests at the
+-- same moment could both pass that check; this makes the second one
+-- fail instead of waiting beside the first.
+CREATE UNIQUE INDEX IF NOT EXISTS idx_registry_actions_one_open_merge
+  ON public.registry_actions (catalog_item_id)
+  WHERE kind = 'merge' AND status IN ('awaiting_second_look', 'pending');
 
 ALTER TABLE public.registry_actions ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON TABLE public.registry_actions FROM anon, authenticated;

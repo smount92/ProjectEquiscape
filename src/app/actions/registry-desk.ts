@@ -176,6 +176,8 @@ export type SaveResult =
           entry: DeskRelease | null;
           /** The History entry, for Undo (null before update 242). */
           actionId: string | null;
+          /** Saved, but something that follows the save did not finish (a mold's releases not all moved to its new scale). */
+          warning?: string;
       }
     | { success: false; error: string; field?: string; conflict?: DeskSource | null };
 
@@ -628,10 +630,14 @@ async function reviewable(db: SupabaseClient, actor: RegistryActor, id: string):
     return { ok: true, row };
 }
 
-/** Lets go of a claim this moderator holds (quietly: before 242 there is nothing to let go). */
+/**
+ * After a decision, lets go of any claim left (quietly: the decision
+ * already cleared it, so "already decided" or "not yours" is expected;
+ * only a real failure is logged).
+ */
 async function dropClaim(actor: RegistryActor, id: string): Promise<void> {
     const r = await releaseSuggestionClaim(actor, id);
-    if (!r.success && r.code !== "not_ready") safeError("RegistryDesk.dropClaim", r.error);
+    if (!r.success && r.code === "failed") safeError("RegistryDesk.dropClaim", r.error);
 }
 
 function refreshQueue(): void {
@@ -688,12 +694,17 @@ export async function claimSuggestion(id: string): Promise<ActionResult<{ claime
     }
 }
 
-/** Lets go of a claim, so another moderator can pick it up. */
+/** Lets go of a claim, so another moderator can pick it up; says why when there was nothing of yours to let go. */
 export async function releaseClaim(id: string): Promise<ActionResult> {
     const gate = await deskGate();
     if (!gate.ok) return gate.failure;
-    await dropClaim(gate.actor, id);
-    return { success: true };
+    try {
+        const r = await releaseSuggestionClaim(gate.actor, id);
+        if (!r.success) return fail(r.error);
+        return { success: true };
+    } catch (e) {
+        return safeError("RegistryDesk.releaseClaim", e);
+    }
 }
 
 /**
@@ -1135,7 +1146,13 @@ export async function saveItem(input: {
             // The save is in; only the fresh flags failed. The editor keeps what it had.
             entry = null;
         }
-        return { success: true, item, entry, actionId: r.actionId ?? null };
+        return {
+            success: true,
+            item,
+            entry,
+            actionId: r.actionId ?? null,
+            ...(r.warning ? { warning: r.warning } : {}),
+        };
     } catch (e) {
         return safeError("RegistryDesk.saveItem", e, "It could not be saved. Please try again.");
     }

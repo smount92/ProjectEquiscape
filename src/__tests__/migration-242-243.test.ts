@@ -112,6 +112,35 @@ describe("migration 242", () => {
         );
     });
 
+    it("one open merge per duplicate: a unique partial index, re-runnable", () => {
+        expect(flat(M242)).toContain(
+            "CREATE UNIQUE INDEX IF NOT EXISTS idx_registry_actions_one_open_merge ON public.registry_actions (catalog_item_id) WHERE kind = 'merge' AND status IN ('awaiting_second_look', 'pending');",
+        );
+    });
+
+    it("no member's own write to a suggestion sets the columns the trigger keeps for the server", () => {
+        // The trigger refuses (42501) a member-client insert or update that
+        // sets these; a submission or an auto-approval doing so would fail.
+        // Only the engine (service role) writes them.
+        const ENGINE = new Set(["src/lib/catalog/write.ts", "src/lib/catalog/suggestionApply.ts"]);
+        const COLS = /\b(decided_role|claimed_by|claimed_until|original_field_changes)\b/;
+        const root = path.join(process.cwd(), "src");
+        const files = (readdirSync(root, { recursive: true }) as string[])
+            .map((f) => f.replace(/\\/g, "/"))
+            .filter((f) => /\.(ts|tsx)$/.test(f) && !f.includes("__tests__") && !f.includes("database.generated"));
+        const problems: string[] = [];
+        for (const f of files) {
+            const rel = `src/${f}`;
+            if (ENGINE.has(rel)) continue;
+            const text = readFileSync(path.join(root, f), "utf8");
+            for (const m of text.matchAll(/\.from\(\s*"catalog_suggestions"\s*\)/g)) {
+                const chain = text.slice(m.index, text.indexOf(";", m.index) + 1);
+                if (/\.(insert|update|upsert)\(/.test(chain) && COLS.test(chain)) problems.push(rel);
+            }
+        }
+        expect(problems).toEqual([]);
+    });
+
     it("History kinds and statuses are widened by name, so a second paste takes the new lists", () => {
         const code = flat(M242);
         expect(code).toContain("DROP CONSTRAINT IF EXISTS registry_actions_kind_check");
