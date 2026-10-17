@@ -5,8 +5,6 @@ moderators: members the site owner has asked to keep the Registry tidy.
 It says what you can do, how the Registry Desk works, and the few rules
 that keep everyone's horses safe.
 
-**Draft for the owner to approve** (Registry Desk Phase 1, Release 3).
-
 ---
 
 ## The short version
@@ -65,8 +63,7 @@ Members' suggestions, in five parts:
 **Holds.** Pressing **Edit, then approve** holds the suggestion for you for
 30 minutes, so two moderators don't answer the same one; the card says who
 has it and until when, and the hold lets go when you cancel or decide.
-After 30 minutes anyone can pick it up. (Before the owner adds update 242
-there are no holds.)
+After 30 minutes anyone can pick it up.
 
 If a member changes their suggestion while you are looking at it, nothing
 is decided: the card says so and offers **Reload the Queue**, so you

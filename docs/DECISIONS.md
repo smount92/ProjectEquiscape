@@ -46,6 +46,10 @@ kept by the AI assistant across sessions, then checked against the code.
 
 Owner rulings, newest first. Each one is also folded into the sections below.
 
+**2026-10-17**
+- **Moderator guide approved** (`docs/guides/registry-moderation.md`), with two lines removed: the "draft for the owner to approve" note and the "before update 242 there are no holds" aside.
+- **First Registry moderator granted**: the Stablemate volunteer. The owner messages her in their own words.
+
 **2026-10-16**
 - **Registry clean-up is community-driven**: the Stablemate and set clean-up is done by vetted Registry moderators with the Registry Desk, not by owner rulings plus bulk repairs. More tools, but only for vetted members.
 - **Founding moderators**: the owner hand-picks 2-3 now (the Stablemate volunteer first); applications and automatic seats come later (design doc Q1-Q4, Q15).

@@ -151,8 +151,8 @@ engine, B the Desk, C the lists) and merged on `desk-integrated`.
   words.
 - The guide, `docs/guides/registry-moderation.md`, is readable on the
   Desk at `/catalog/desk/guide` and explains all of this in plain words.
-  **It is a draft for the owner to approve** before the first moderator
-  is asked to read it.
+  **The owner approved it on 2026-10-17** and granted the first moderator
+  the same day.
 
 ### What the owner will notice
 
